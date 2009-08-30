@@ -932,6 +932,7 @@ public class LibLINEAR
 
       setField(result, "l", Integer.valueOf(vy.size()));
       setField(result, "n", Integer.valueOf(max_index));
+      setField(result, "bias", getBias());
 
       newArray(result, "x", Class.forName(CLASS_FEATURENODE), new int[]{vy.size(), 0});
       for (int i = 0; i < vy.size(); i++)
