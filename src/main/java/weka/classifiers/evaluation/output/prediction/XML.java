@@ -315,7 +315,8 @@ public class XML
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
-    double predValue = ((Classifier)classifier).classifyInstance(withMissing);
+    withMissing.setMissing(withMissing.classIndex());
+    double predValue = classifier.classifyInstance(withMissing);
 
     // opening tag
     append("  <" + TAG_PREDICTION + " " + ATT_INDEX + "=\"" + (index+1) + "\">\n");
@@ -356,7 +357,7 @@ public class XML
       append("</" + TAG_PREDICTED_LABEL + ">\n");
       // error?
       append("    <" + TAG_ERROR + ">");
-      if ((int) predValue+1 != (int) inst.classValue()+1)
+      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	append(VAL_YES);
       else
 	append(VAL_NO);
