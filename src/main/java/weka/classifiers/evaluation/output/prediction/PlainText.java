@@ -157,7 +157,8 @@ public class PlainText
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
-    double predValue = ((Classifier)classifier).classifyInstance(withMissing);
+    withMissing.setMissing(withMissing.classIndex());
+    double predValue = classifier.classifyInstance(withMissing);
 
     // index
     append(Utils.padLeft("" + (index+1), 6));
@@ -187,7 +188,7 @@ public class PlainText
       else
 	append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
       // error?
-      if ((int) predValue+1 != (int) inst.classValue()+1)
+      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	append(" " + "  +  ");
       else
 	append(" " + "     ");

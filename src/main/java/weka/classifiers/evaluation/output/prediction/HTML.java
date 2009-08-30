@@ -188,7 +188,8 @@ public class HTML
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
-    double predValue = ((Classifier)classifier).classifyInstance(withMissing);
+    withMissing.setMissing(withMissing.classIndex());
+    double predValue = classifier.classifyInstance(withMissing);
 
     // index
     append("<tr>");
@@ -219,7 +220,7 @@ public class HTML
       else
 	append("<td>" + ((int) predValue+1) + ":" + sanitize(inst.dataset().classAttribute().value((int)predValue)) + "</td>");
       // error?
-      if ((int) predValue+1 != (int) inst.classValue()+1)
+      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	append("<td>" + "+" + "</td>");
       else
 	append("<td>" + "&nbsp;" + "</td>");
