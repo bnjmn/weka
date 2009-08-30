@@ -3171,7 +3171,8 @@ public class Evaluation
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
-    double predValue = ((Classifier)classifier).classifyInstance(withMissing);
+    withMissing.setMissing(withMissing.classIndex());
+    double predValue = classifier.classifyInstance(withMissing);
 
     // index
     result.append(Utils.padLeft("" + (instNum+1), 6));
@@ -3201,7 +3202,7 @@ public class Evaluation
       else
 	result.append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
       // error?
-      if ((int) predValue+1 != (int) inst.classValue()+1)
+      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	result.append(" " + "  +  ");
       else
 	result.append(" " + "     ");
