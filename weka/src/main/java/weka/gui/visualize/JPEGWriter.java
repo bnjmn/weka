@@ -26,9 +26,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -174,7 +172,7 @@ public class JPEGWriter extends JComponentWriter {
     if (g instanceof Graphics2D)
       ((Graphics2D) g).scale(getXScale(), getYScale());
     g.fillRect(0, 0, getComponent().getWidth(), getComponent().getHeight());
-    getComponent().paint(g);
+    getComponent().printAll(g);
     
     // get jpeg writer
     writer = null;
