@@ -37,12 +37,16 @@ import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.Tag;
 import weka.core.SelectedTag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
 
 import weka.estimators.UnivariateDensityEstimator;
 import weka.estimators.UnivariateIntervalEstimator;
+import weka.estimators.UnivariateQuantileEstimator;
 import weka.estimators.UnivariateEqualFrequencyHistogramEstimator;
 import weka.estimators.UnivariateKernelEstimator;
 import weka.estimators.UnivariateNormalEstimator;
@@ -127,7 +131,7 @@ import java.util.Vector;
 public class RegressionByDiscretization 
   extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensityEstimator {
   
-  /** for serialization. */
+  /** for serialization */
   static final long serialVersionUID = 5066426153134050378L;
   
   /** The discretization filter. */
@@ -148,43 +152,73 @@ public class RegressionByDiscretization
   /** Header of discretized data. */
   protected Instances m_DiscretizedHeader = null;
 
-  /** Use equal-frequency binning. */
+  /** Use equal-frequency binning */
   protected boolean m_UseEqualFrequency = false;
 
-  /** Use histogram estimator. */
+  /** Whether to minimize absolute error, rather than squared error. */
+  protected boolean m_MinimizeAbsoluteError = false;
+
+  /** Use histogram estimator */
   public static final int ESTIMATOR_HISTOGRAM = 0;
-  /** filter: Standardize training data. */
+  /** filter: Standardize training data */
   public static final int ESTIMATOR_KERNEL = 1;
-  /** filter: No normalization/standardization. */
+  /** filter: No normalization/standardization */
   public static final int ESTIMATOR_NORMAL = 2;
-  /** The filter to apply to the training data. */
+  /** The filter to apply to the training data */
   public static final Tag [] TAGS_ESTIMATOR = {
     new Tag(ESTIMATOR_HISTOGRAM, "Histogram density estimator"),
     new Tag(ESTIMATOR_KERNEL, "Kernel density estimator"),
     new Tag(ESTIMATOR_NORMAL, "Normal density estimator"),
   };
 
-  /** Which estimator to use (default: histogram). */
+  /** Which estimator to use (default: histogram) */
   protected int m_estimatorType = ESTIMATOR_HISTOGRAM;
 
-  /** The original target values in the training data. */
+  /** The original target values in the training data */
   protected double[] m_OriginalTargetValues = null;
 
-  /** The converted target values in the training data. */
+  /** The converted target values in the training data */
   protected int[] m_NewTargetValues = null;
 
   /**
-   * Returns a string describing classifier.
+   * Returns a string describing classifier
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
 
     return "A regression scheme that employs any "
-      + "classifier on a copy of the data that has the class attribute (equal-width) "
+      + "classifier on a copy of the data that has the class attribute "
       + "discretized. The predicted value is the expected value of the "
       + "mean class value for each discretized interval (based on the "
-      + "predicted probabilities for each interval).";
+      + "predicted probabilities for each interval). This class now "
+      + "also supports conditional density estimation by building "
+      + "a univariate density estimator from the target values in "
+      + "the training data, weighted by the class probabilities. \n\n"
+      + "For more information on this process, see\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Eibe Frank and Remco R. Bouckaert");
+    result.setValue(Field.TITLE, "Conditional Density Estimation with Class Probability Estimators");
+    result.setValue(Field.BOOKTITLE, "First Asian Conference on Machine Learning");
+    result.setValue(Field.YEAR, "2009");
+    result.setValue(Field.PAGES, "65-81");
+    result.setValue(Field.PUBLISHER, "Springer Verlag");
+    result.setValue(Field.ADDRESS, "Berlin");
+    
+    return result;
   }
 
   /**
@@ -296,7 +330,7 @@ public class RegressionByDiscretization
       newTrain = newTrainTransformed;
     }
 
-    // Store target values, in case a prediction interval is required
+    // Store target values, in case a prediction interval or computation of median is required
     m_OriginalTargetValues = new double[instances.numInstances()];
     m_NewTargetValues = new int[instances.numInstances()];
     for (int i = 0; i < m_OriginalTargetValues.length; i++) {
@@ -342,8 +376,7 @@ public class RegressionByDiscretization
   /**
    * Get density estimator for given instance.
    * 
-   * @param instance the instance
-   * @param print whether to output debugging information
+   * @param inst the instance
    * @return the univariate density estimator
    * @exception Exception if the estimator can't be computed
    */
@@ -366,9 +399,6 @@ public class RegressionByDiscretization
       for (int i = 0; i < m_OriginalTargetValues.length; i++) {
         e.addValue(m_OriginalTargetValues[i], 1.0);
       }
-
-      /*e.logDensity(5);
-        System.out.println(e);*/
       
       // Construct estimator, then initialize statistics, so that only boundaries will be kept
       ((UnivariateEqualFrequencyHistogramEstimator)e).initializeStatistics();
@@ -382,34 +412,11 @@ public class RegressionByDiscretization
     newInstance.setDataset(m_DiscretizedHeader);
     double [] probs = m_Classifier.distributionForInstance(newInstance);
 
-    /*    System.err.println(m_DiscretizedHeader.classAttribute());
-
-    for (int i = 0; i < probs.length; i++) {
-      System.out.print(probs[i] + " ");
-    }
-    System.out.println();*/
-
     // Add values to estimator
-
-    if (m_Debug && print) {
-      System.err.println("@relation weighted_class_vals");
-      System.err.println("@attribute class numeric");
-      System.err.println("@data");
-    }
     for (int i = 0; i < m_OriginalTargetValues.length; i++) {
-
-      if (m_Debug && print) {
-        System.err.println(m_OriginalTargetValues[i] + ", {" +
-                           (probs[m_NewTargetValues[i]] *                                                                                                                                                                    
-                            m_OriginalTargetValues.length / m_ClassCounts[m_NewTargetValues[i]]) + "}");
-      }
-
       e.addValue(m_OriginalTargetValues[i], probs[m_NewTargetValues[i]] * 
                  m_OriginalTargetValues.length / m_ClassCounts[m_NewTargetValues[i]]);
     }
-
-    /*    e.logDensity(5);
-          System.out.println(e);*/
 
     // Return estimator
     return e;
@@ -421,7 +428,7 @@ public class RegressionByDiscretization
    * boundary of the corresponding prediction interval and the second
    * element the upper boundary.
    *
-   * @param instance the instance to make the prediction for.
+   * @param inst the instance to make the prediction for.
    * @param confidenceLevel the percentage of cases that the interval should cover.
    * @return an array of prediction intervals
    * @exception Exception if the intervals can't be computed
@@ -438,8 +445,8 @@ public class RegressionByDiscretization
   /**
    * Returns natural logarithm of density estimate for given value based on given instance.
    *
-   * @param instance the instance to make the prediction for.
-   * @param value the value to make the prediction for.
+   * @param inst the instance to make the prediction for.
+   * @param the value to make the prediction for.
    * @return the natural logarithm of the density estimate
    * @exception Exception if the intervals can't be computed
    */
@@ -466,14 +473,24 @@ public class RegressionByDiscretization
     newInstance.setDataset(m_DiscretizedHeader);
     double [] probs = m_Classifier.distributionForInstance(newInstance);
 
-    // Copmute actual prediction
-    double prediction = 0, probSum = 0;
-    for (int j = 0; j < probs.length; j++) {
-      prediction += probs[j] * m_ClassMeans[j];
-      probSum += probs[j];
-    }
+    if (!m_MinimizeAbsoluteError) {
+
+      // Compute actual prediction
+      double prediction = 0, probSum = 0;
+      for (int j = 0; j < probs.length; j++) {
+        prediction += probs[j] * m_ClassMeans[j];
+        probSum += probs[j];
+      }
+      
+      return prediction /  probSum;
+    } else {
     
-    return prediction /  probSum;
+      // Get density estimator
+      UnivariateQuantileEstimator e = (UnivariateQuantileEstimator)getDensityEstimator(instance, true);
+      
+      // Return estimate
+      return e.predictQuantile(0.5);
+    }
   }
 
   /**
@@ -483,7 +500,7 @@ public class RegressionByDiscretization
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
 	      "\tNumber of bins for equal-width discretization\n"
@@ -494,6 +511,11 @@ public class RegressionByDiscretization
 	      "\tWhether to delete empty bins after discretization\n"
 	      + "\t(default false).\n",
 	      "E", 0, "-E"));
+
+    newVector.addElement(new Option(
+	      "\tWhether to minimize absolute error, rather than squared error.\n"
+	      + "\t(default false).\n",
+	      "A", 0, "-A"));
     
     newVector.addElement(new Option(
 	     "\tUse equal-frequency instead of equal-width discretization.",
@@ -531,6 +553,7 @@ public class RegressionByDiscretization
 
     setDeleteEmptyBins(Utils.getFlag('E', options));
     setUseEqualFrequency(Utils.getFlag('F', options));
+    setMinimizeAbsoluteError(Utils.getFlag('A', options));
 
     String tmpStr = Utils.getOption('K', options);
     if (tmpStr.length() != 0)
@@ -549,7 +572,7 @@ public class RegressionByDiscretization
   public String [] getOptions() {
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 6];
+    String [] options = new String [superOptions.length + 7];
     int current = 0;
 
     options[current++] = "-B";
@@ -561,6 +584,10 @@ public class RegressionByDiscretization
     
     if (getUseEqualFrequency()) {
       options[current++] = "-F";
+    }
+
+    if (getMinimizeAbsoluteError()) {
+      options[current++] = "-A";
     }
     
     options[current++] = "-K";
@@ -578,7 +605,7 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -589,7 +616,7 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Gets the number of bins numeric attributes will be divided into.
+   * Gets the number of bins numeric attributes will be divided into
    *
    * @return the number of bins.
    */
@@ -599,7 +626,7 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Sets the number of bins to divide each selected numeric attribute into.
+   * Sets the number of bins to divide each selected numeric attribute into
    *
    * @param numBins the number of bins
    */
@@ -610,7 +637,7 @@ public class RegressionByDiscretization
 
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -640,9 +667,41 @@ public class RegressionByDiscretization
 
     m_DeleteEmptyBins = b;
   }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minimizeAbsoluteErrorTipText() {
+
+    return "Whether to minimize absolute error.";
+  }
+
+
+  /**
+   * Gets whether to min. abs. error
+   *
+   * @return true if abs. err. is to be minimized
+   */
+  public boolean getMinimizeAbsoluteError() {
+
+    return m_MinimizeAbsoluteError;
+  }
+
+  /**
+   * Sets whether to min. abs. error.
+   *
+   * @param b if true, abs. err. is minimized
+   */
+  public void setMinimizeAbsoluteError(boolean b) {
+
+    m_MinimizeAbsoluteError = b;
+  }
   
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -674,7 +733,7 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -685,7 +744,7 @@ public class RegressionByDiscretization
   }
   
   /**
-   * Get the estimator type.
+   * Get the estimator type
    *
    * @return the estimator type
    */
@@ -695,7 +754,7 @@ public class RegressionByDiscretization
   }
   
   /**
-   * Set the estimator.
+   * Set the estimator
    *
    * @param newEstimator the estimator to use
    */
