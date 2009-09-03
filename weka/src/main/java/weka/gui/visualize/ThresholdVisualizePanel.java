@@ -23,6 +23,8 @@
 package weka.gui.visualize;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.FastVector;
@@ -48,7 +50,7 @@ import javax.swing.border.TitledBorder;
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class ThresholdVisualizePanel 
   extends VisualizePanel {
@@ -250,7 +252,7 @@ public class ThresholdVisualizePanel
 	  tmpStr = weka.classifiers.functions.Logistic.class.getName();
 	  options = new String[0];
 	}
-	classifier = Classifier.forName(tmpStr, options);
+	classifier = AbstractClassifier.forName(tmpStr, options);
 	
 	tmpStr = Utils.getOption('c', args);
 	if (tmpStr.length() != 0)

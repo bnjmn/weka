@@ -22,6 +22,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.neural.LinearUnit;
 import weka.classifiers.functions.neural.NeuralConnection;
 import weka.classifiers.functions.neural.NeuralNode;
@@ -145,7 +146,7 @@ import javax.swing.JTextField;
  * @version $Revision$
  */
 public class MultilayerPerceptron 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler {
   
   /** for serialization */

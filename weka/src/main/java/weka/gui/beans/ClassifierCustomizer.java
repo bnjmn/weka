@@ -23,6 +23,7 @@
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 

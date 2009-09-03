@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -54,10 +55,10 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25.2.2 $
+ * @version $Revision$
  */
 public class DecisionStump 
-  extends Classifier 
+  extends AbstractClassifier 
   implements WeightedInstancesHandler, Sourcable {
 
   /** for serialization */
@@ -756,7 +757,7 @@ public class DecisionStump
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
  
   /**

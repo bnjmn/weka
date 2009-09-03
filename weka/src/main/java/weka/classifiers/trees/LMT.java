@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.trees.j48.C45ModelSelection;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.lmt.LMTNode;
@@ -116,10 +117,10 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.10.2.2 $
+ * @version $Revision$
  */
 public class LMT 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, AdditionalMeasureProducer, Drawable,
              TechnicalInformationHandler {
     
@@ -788,7 +789,7 @@ public class LMT
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

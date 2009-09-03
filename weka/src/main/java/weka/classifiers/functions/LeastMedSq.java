@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -88,10 +89,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.15.2.3 $
+ * @version $Revision$
  */
 public class LeastMedSq 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, TechnicalInformationHandler {
   
   /** for serialization */
@@ -717,7 +718,7 @@ public class LeastMedSq
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

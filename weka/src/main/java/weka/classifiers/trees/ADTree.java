@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.IterativeClassifier;
 import weka.classifiers.trees.adtree.PredictionNode;
 import weka.classifiers.trees.adtree.ReferenceInstances;
@@ -97,10 +98,10 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision$
  */
 public class ADTree
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, Drawable, AdditionalMeasureProducer,
              WeightedInstancesHandler, IterativeClassifier, 
              TechnicalInformationHandler {
@@ -1483,7 +1484,7 @@ public class ADTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -383,8 +383,8 @@ public class Classifier
     // set the template
     weka.classifiers.Classifier newTemplate = null;
     try {
-      String[] options = tc.getOptions();
-      newTemplate = weka.classifiers.Classifier.forName(tc.getClass().getName(), options);
+      String[] options = ((OptionHandler)tc).getOptions();
+      newTemplate = weka.classifiers.AbstractClassifier.forName(tc.getClass().getName(), options);
       setClassifierTemplate(newTemplate);
     } catch (Exception ex) {
       if (m_log != null) {
@@ -577,7 +577,7 @@ public class Classifier
 	  if (m_trainingSet == null) {
 	    // initialize the classifier if it hasn't been trained yet
 	    m_trainingSet = new Instances(dataset, 0);
-	    m_Classifier = weka.classifiers.Classifier.makeCopy(m_ClassifierTemplate);
+	    m_Classifier = weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
 	    m_Classifier.buildClassifier(m_trainingSet);
 	  }
 	}
@@ -743,7 +743,7 @@ public class Classifier
           
           // copy the classifier configuration
           weka.classifiers.Classifier classifierCopy = 
-            weka.classifiers.Classifier.makeCopy(m_ClassifierTemplate);
+            weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
           
           // build this model
           classifierCopy.buildClassifier(m_train);

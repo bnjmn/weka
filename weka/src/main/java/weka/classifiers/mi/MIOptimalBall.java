@@ -23,6 +23,7 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -85,10 +86,10 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.4.2.1 $ 
+ * @version $Revision$ 
  */
 public class MIOptimalBall 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, 
              MultiInstanceCapabilitiesHandler, TechnicalInformationHandler {  
 
@@ -537,7 +538,7 @@ public class MIOptimalBall
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

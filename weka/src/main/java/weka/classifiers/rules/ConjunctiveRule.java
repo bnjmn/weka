@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.ContingencyTables;
@@ -90,10 +91,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.15.2.1 $ 
+ * @version $Revision$ 
  */
 public class ConjunctiveRule 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler{
     
   /** for serialization */
@@ -273,7 +274,7 @@ public class ConjunctiveRule
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
     
@@ -553,7 +554,7 @@ public class ConjunctiveRule
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
     
@@ -814,7 +815,7 @@ public class ConjunctiveRule
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
     
@@ -1678,7 +1679,7 @@ public class ConjunctiveRule
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
     
   /**

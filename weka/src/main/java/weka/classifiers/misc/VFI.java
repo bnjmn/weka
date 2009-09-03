@@ -23,6 +23,7 @@
 package weka.classifiers.misc;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -126,10 +127,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14.2.1 $
+ * @version $Revision$
  */
 public class VFI 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -622,7 +623,7 @@ public class VFI
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 	
   /**

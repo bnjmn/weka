@@ -22,6 +22,7 @@
 package weka.gui.explorer;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.evaluation.NumericPrediction;

@@ -24,6 +24,7 @@ package weka.classifiers.meta;
 
 import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Instance;

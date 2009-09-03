@@ -22,6 +22,7 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -72,10 +73,10 @@ import weka.core.TechnicalInformation.Type;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.15.2.1 $ 
+ * @version $Revision$ 
  */
 public class NaiveBayesMultinomial 
-  extends Classifier 
+  extends AbstractClassifier 
   implements WeightedInstancesHandler,TechnicalInformationHandler {
   
   /** for serialization */
@@ -369,7 +370,7 @@ public class NaiveBayesMultinomial
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
     
   /**

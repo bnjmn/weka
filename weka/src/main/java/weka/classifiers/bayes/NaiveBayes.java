@@ -23,6 +23,7 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -90,9 +91,9 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.6 $
+ * @version $Revision$
  */
-public class NaiveBayes extends Classifier 
+public class NaiveBayes extends AbstractClassifier 
 implements OptionHandler, WeightedInstancesHandler, 
            TechnicalInformationHandler {
 
@@ -931,7 +932,7 @@ implements OptionHandler, WeightedInstancesHandler,
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.21.2.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

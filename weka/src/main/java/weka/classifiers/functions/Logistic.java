@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -113,9 +114,9 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.37.2.6 $
+ * @version $Revision$
  */
-public class Logistic extends Classifier 
+public class Logistic extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
   
   /** for serialization */
@@ -499,7 +500,7 @@ public class Logistic extends Classifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.37.2.6 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -897,7 +898,7 @@ public class Logistic extends Classifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.37.2.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
     
   /**

@@ -23,6 +23,7 @@
 package weka.attributeSelection;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instances;
@@ -67,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.1 $
+ * @version $Revision$
  */
 public class OneRAttributeEval
   extends ASEvaluation
@@ -418,7 +419,7 @@ public class OneRAttributeEval
     trainCopy = Filter.useFilter(trainCopy, delTransform);
     o_Evaluation = new Evaluation(trainCopy);
     String [] oneROpts = { "-B", ""+getMinimumBucketSize()};
-    Classifier oneR = Classifier.forName("weka.classifiers.rules.OneR", oneROpts);
+    Classifier oneR = AbstractClassifier.forName("weka.classifiers.rules.OneR", oneROpts);
     if (m_evalUsingTrainingData) {
       oneR.buildClassifier(trainCopy);
       o_Evaluation.evaluateModel(oneR, trainCopy);
@@ -466,7 +467,7 @@ public class OneRAttributeEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   // ============

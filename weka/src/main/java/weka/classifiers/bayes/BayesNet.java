@@ -22,6 +22,7 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.bayes.net.ADNode;
 import weka.classifiers.bayes.net.BIFReader;
 import weka.classifiers.bayes.net.ParentSet;
@@ -88,7 +89,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class BayesNet
-  extends Classifier
+  extends AbstractClassifier
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
              AdditionalMeasureProducer {
 
