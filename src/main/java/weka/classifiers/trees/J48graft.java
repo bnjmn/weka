@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
 import weka.classifiers.trees.j48.C45ModelSelection;
@@ -107,7 +108,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class J48graft 
-  extends Classifier
+  extends AbstractClassifier
   implements OptionHandler, Drawable, Matchable, Sourcable, 
              WeightedInstancesHandler, Summarizable,
              AdditionalMeasureProducer, TechnicalInformationHandler {

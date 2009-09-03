@@ -51,7 +51,7 @@ import java.lang.reflect.Method;
  * that have been trained on data (as we have for Ensemble Selection)
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class EnsembleLibraryModel 
   implements Serializable, RevisionHandler {
@@ -131,7 +131,7 @@ public class EnsembleLibraryModel
     updateDescriptionText();
     
     try {
-      testClassifier.setOptions(m_Classifier.getOptions());
+      ((OptionHandler)testClassifier).setOptions(((OptionHandler)m_Classifier).getOptions());
     } catch (Exception e) {
       
       setOptionsWereValid(false);
@@ -248,7 +248,7 @@ public class EnsembleLibraryModel
    * @return		the classifier options
    */
   public String[] getOptions() {
-    return m_Classifier.getOptions();
+    return ((OptionHandler)m_Classifier).getOptions();
   }
   
   /**
@@ -400,6 +400,6 @@ public class EnsembleLibraryModel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

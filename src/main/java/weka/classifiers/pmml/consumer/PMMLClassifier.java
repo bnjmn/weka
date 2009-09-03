@@ -29,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instances;
 import weka.core.pmml.*;
 import weka.gui.Logger;
@@ -39,7 +40,7 @@ import weka.gui.Logger;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public abstract class PMMLClassifier extends Classifier
+public abstract class PMMLClassifier extends AbstractClassifier
   implements Serializable, PMMLModel {
   
   /** For serialization */

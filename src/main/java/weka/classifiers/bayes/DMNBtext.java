@@ -23,6 +23,7 @@ package weka.classifiers.bayes;
 
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.TechnicalInformation;
@@ -78,7 +79,7 @@ import weka.core.OptionHandler;
  * @author Jiang Su (Jiang.Su@unb.ca) 2008
  * @version $Revision$
  */
-public class DMNBtext extends Classifier
+public class DMNBtext extends AbstractClassifier
     implements OptionHandler, WeightedInstancesHandler, 
                TechnicalInformationHandler, UpdateableClassifier {
 

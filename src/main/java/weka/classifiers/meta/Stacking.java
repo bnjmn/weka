@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.classifiers.RandomizableParallelMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
@@ -245,7 +246,7 @@ public class Stacking
       classifierName = classifierSpec[0];
       classifierSpec[0] = "";
     }
-    setMetaClassifier(Classifier.forName(classifierName, classifierSpec));
+    setMetaClassifier(AbstractClassifier.forName(classifierName, classifierSpec));
   }
 
   /**

@@ -24,6 +24,7 @@
 package weka.experiment;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
@@ -264,7 +265,7 @@ public class ClassifierSplitEvaluator
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // Classifier.
-    setClassifier(Classifier.forName(cName, null));
+    setClassifier(AbstractClassifier.forName(cName, null));
     if (getClassifier() instanceof OptionHandler) {
       ((OptionHandler) getClassifier())
 	.setOptions(Utils.partitionOptions(options));
@@ -709,7 +710,7 @@ public class ClassifierSplitEvaluator
     
     Object [] result = new Object[overall_length];
     Evaluation eval = new Evaluation(train);
-    m_Classifier = Classifier.makeCopy(m_Template);
+    m_Classifier = AbstractClassifier.makeCopy(m_Template);
     double [] predictions;
     long thID = Thread.currentThread().getId();
     long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,

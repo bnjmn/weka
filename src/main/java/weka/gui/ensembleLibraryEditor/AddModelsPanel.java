@@ -23,6 +23,7 @@
 package weka.gui.ensembleLibraryEditor;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.EnsembleLibraryModel;
 import weka.classifiers.trees.J48;
 import weka.gui.GenericObjectEditor;
@@ -108,7 +109,7 @@ import javax.swing.tree.DefaultTreeModel;
  * <a href="http://www.java2s.com/ExampleCode/Swing-JFC/CheckBoxNodeTreeSample.htm" target="_blank">http://www.java2s.com/ExampleCode/Swing-JFC/CheckBoxNodeTreeSample.htm</a>
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class AddModelsPanel 
   extends JPanel

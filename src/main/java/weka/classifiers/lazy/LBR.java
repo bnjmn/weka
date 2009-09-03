@@ -44,6 +44,7 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -101,7 +102,7 @@ import java.util.ArrayList;
  * @version $Revision$
  */
 public class LBR 
-  extends Classifier
+  extends AbstractClassifier
   implements TechnicalInformationHandler {
 
   /** for serialization */

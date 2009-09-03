@@ -23,6 +23,7 @@
 package weka.classifiers.misc;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -56,7 +57,7 @@ import java.io.Serializable;
  * @version $Revision$
  */ 
 public class HyperPipes 
-  extends Classifier {
+  extends AbstractClassifier {
 
   /** for serialization */
   static final long serialVersionUID = -7527596632268975274L;

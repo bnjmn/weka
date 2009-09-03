@@ -34,10 +34,10 @@ import java.util.Vector;
  * classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public abstract class RandomizableClassifier
-  extends Classifier implements Randomizable {
+  extends AbstractClassifier implements Randomizable {
 
   /** for serialization */
   private static final long serialVersionUID = -8816375798262351903L;

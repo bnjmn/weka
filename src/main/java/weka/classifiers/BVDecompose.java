@@ -108,7 +108,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision$
  */
 public class BVDecompose
   implements OptionHandler, TechnicalInformationHandler, RevisionHandler {
@@ -330,7 +330,7 @@ public class BVDecompose
     if (classifierName.length() == 0) {
       throw new Exception("A learner must be specified with the -W option.");
     }
-    setClassifier(Classifier.forName(classifierName,
+    setClassifier(AbstractClassifier.forName(classifierName,
 				     Utils.partitionOptions(options)));
   }
 
@@ -597,7 +597,7 @@ public class BVDecompose
       trainPool.randomize(random);
       Instances train = new Instances(trainPool, 0, m_TrainPoolSize / 2);
 
-      Classifier current = Classifier.makeCopy(m_Classifier);
+      Classifier current = AbstractClassifier.makeCopy(m_Classifier);
       current.buildClassifier(train);
 
       //// Evaluate the classifier on test, updating BVD stats
@@ -683,7 +683,7 @@ public class BVDecompose
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

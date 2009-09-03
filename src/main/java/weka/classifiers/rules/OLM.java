@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import java.io.*;
 import java.util.*;
@@ -76,7 +77,7 @@ import weka.core.TechnicalInformation.Type;
  * @author TriDat Tran
  * @version $Revision$ 
  */
-public class OLM extends Classifier 
+public class OLM extends AbstractClassifier 
 implements OptionHandler, TechnicalInformationHandler {
 
   /**

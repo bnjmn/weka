@@ -23,6 +23,7 @@
 package weka.classifiers.meta.nestedDichotomies;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.rules.ZeroR;
@@ -340,7 +341,7 @@ public class ND
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -501,7 +502,7 @@ public class ND
       filter.setInputFormat(data);
       FilteredClassifier classifier = new FilteredClassifier();
       if (data.numInstances() > 0) {
-	classifier.setClassifier(Classifier.makeCopies(m_Classifier, 1)[0]);
+	classifier.setClassifier(AbstractClassifier.makeCopies(m_Classifier, 1)[0]);
       } else {
 	classifier.setClassifier(new ZeroR());
       }
@@ -617,7 +618,7 @@ public class ND
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
     
   /**

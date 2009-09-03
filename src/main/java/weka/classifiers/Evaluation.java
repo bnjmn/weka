@@ -510,7 +510,7 @@ public class Evaluation
     for (int i = 0; i < numFolds; i++) {
       Instances train = data.trainCV(numFolds, i, random);
       setPriors(train);
-      Classifier copiedClassifier = Classifier.makeCopy(classifier);
+      Classifier copiedClassifier = AbstractClassifier.makeCopy(classifier);
       copiedClassifier.buildClassifier(train);
       Instances test = data.testCV(numFolds, i);
       evaluateModel(copiedClassifier, test, forPredictionsPrinting);
@@ -540,7 +540,7 @@ public class Evaluation
       String[] options, Random random) 
   throws Exception {
 
-    crossValidateModel(Classifier.forName(classifierString, options),
+    crossValidateModel(AbstractClassifier.forName(classifierString, options),
 	data, numFolds, random);
   }
 
@@ -650,7 +650,8 @@ public class Evaluation
     // Create classifier
     try {
       classifier = 
-	(Classifier)Class.forName(classifierString).newInstance();
+        //	(Classifier)Class.forName(classifierString).newInstance();
+        AbstractClassifier.forName(classifierString, null);
     } catch (Exception e) {
       throw new Exception("Can't find class with name " 
 	  + classifierString + '.');
@@ -844,7 +845,7 @@ public class Evaluation
 	if (!success) {
 	  // load options from serialized data  ('-l' is automatically erased!)
 	  XMLClassifier xmlserial = new XMLClassifier();
-	  Classifier cl = (Classifier) xmlserial.read(Utils.getOption('l', options));
+	  OptionHandler cl = (OptionHandler) xmlserial.read(Utils.getOption('l', options));
 	  
 	  // merge options
 	  optionsTmp = new String[options.length + cl.getOptions().length];
@@ -1058,6 +1059,7 @@ public class Evaluation
 	  ((OptionHandler)classifier).setOptions(options);
 	}
       }
+
       Utils.checkForRemainingOptions(options);
     } catch (Exception e) {
       throw new Exception("\nWeka exception: " + e.getMessage()
@@ -1099,7 +1101,7 @@ public class Evaluation
     }
 
     // backup of fully setup classifier for cross-validation
-    classifierBackup = Classifier.makeCopy(classifier);
+    classifierBackup = AbstractClassifier.makeCopy(classifier);
 
     // Build the classifier if no object file provided
     if ((classifier instanceof UpdateableClassifier) &&
@@ -1133,7 +1135,7 @@ public class Evaluation
 
     // backup of fully trained classifier for printing the classifications
     if (classificationOutput != null)
-      classifierClassifications = Classifier.makeCopy(classifier);
+      classifierClassifications = AbstractClassifier.makeCopy(classifier);
 
     // Save the classifier if an object output file is provided
     if (objectOutputFileName.length() != 0) {
@@ -1301,7 +1303,7 @@ public class Evaluation
 	// Testing is via cross-validation on training data
 	Random random = new Random(seed);
 	// use untrained (!) classifier for cross-validation
-	classifier = Classifier.makeCopy(classifierBackup);
+	classifier = AbstractClassifier.makeCopy(classifierBackup);
         if (classificationOutput == null) {
           testingEvaluation.crossValidateModel(classifier, 
                                                trainSource.getDataSet(actualClassIndex), 
@@ -1647,10 +1649,10 @@ public class Evaluation
     result.append("import weka.core.Instance;\n");
     result.append("import weka.core.Instances;\n");
     result.append("import weka.core.RevisionUtils;\n");
-    result.append("import weka.classifiers.Classifier;\n");
+    result.append("import weka.classifiers.Classifier;\nimport weka.classifiers.AbstractClassifier;\n");
     result.append("\n");
     result.append("public class WekaWrapper\n");
-    result.append("  extends Classifier {\n");
+    result.append("  extends AbstractClassifier {\n");
     
     // globalInfo
     result.append("\n");

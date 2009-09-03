@@ -36,6 +36,7 @@ import java.util.Vector;
 import javax.swing.JPanel;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instances;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;

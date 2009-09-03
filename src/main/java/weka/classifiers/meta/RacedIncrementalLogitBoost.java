@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.rules.ZeroR;
@@ -99,7 +100,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision$ 
  */
 public class RacedIncrementalLogitBoost 
   extends RandomizableSingleClassifierEnhancer
@@ -524,7 +525,7 @@ public class RacedIncrementalLogitBoost
      */
     protected Classifier[] boost(Instances data) throws Exception {
       
-      Classifier[] newModel = Classifier.makeCopies(m_Classifier, m_NumClasses);
+      Classifier[] newModel = AbstractClassifier.makeCopies(m_Classifier, m_NumClasses);
       
       // Create a copy of the data with the class transformed into numeric
       Instances boostData = new Instances(data);
@@ -642,7 +643,7 @@ public class RacedIncrementalLogitBoost
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -1277,7 +1278,7 @@ public class RacedIncrementalLogitBoost
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

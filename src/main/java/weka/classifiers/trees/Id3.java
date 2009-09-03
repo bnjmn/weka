@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -76,7 +77,7 @@ import java.util.Enumeration;
  * @version $Revision$ 
  */
 public class Id3 
-  extends Classifier 
+  extends AbstractClassifier 
   implements TechnicalInformationHandler, Sourcable {
 
   /** for serialization */

@@ -22,6 +22,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.rules.ZeroR;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
@@ -83,10 +84,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class ClassificationViaClustering
-  extends Classifier {
+  extends AbstractClassifier {
   
   /** for serialization */
   private static final long serialVersionUID = -5687069451420259135L;
@@ -500,7 +501,7 @@ public class ClassificationViaClustering
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

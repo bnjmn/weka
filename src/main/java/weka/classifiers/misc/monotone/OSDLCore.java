@@ -22,6 +22,7 @@
 package weka.classifiers.misc.monotone;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -131,7 +132,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public abstract class OSDLCore
-  extends Classifier 
+  extends AbstractClassifier 
   implements TechnicalInformationHandler {
 
   /** for serialization */

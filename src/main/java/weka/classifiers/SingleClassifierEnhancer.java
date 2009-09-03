@@ -39,7 +39,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class SingleClassifierEnhancer extends Classifier {
+public abstract class SingleClassifierEnhancer extends AbstractClassifier {
 
   /** for serialization */
   private static final long serialVersionUID = -3665885256363525164L;
@@ -107,15 +107,15 @@ public abstract class SingleClassifierEnhancer extends Classifier {
       
       // This is just to set the classifier in case the option 
       // parsing fails.
-      setClassifier(Classifier.forName(classifierName, null));
-      setClassifier(Classifier.forName(classifierName,
+      setClassifier(AbstractClassifier.forName(classifierName, null));
+      setClassifier(AbstractClassifier.forName(classifierName,
 				       Utils.partitionOptions(options)));
     } else {
       
       // This is just to set the classifier in case the option 
       // parsing fails.
-      setClassifier(Classifier.forName(defaultClassifierString(), null));
-      setClassifier(Classifier.forName(defaultClassifierString(),
+      setClassifier(AbstractClassifier.forName(defaultClassifierString(), null));
+      setClassifier(AbstractClassifier.forName(defaultClassifierString(),
 				       Utils.partitionOptions(options)));
     }
   }

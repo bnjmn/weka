@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -57,7 +58,7 @@ import weka.core.Capabilities.Capability;
  * @version $Revision$
  */
 public class DecisionStump 
-  extends Classifier 
+  extends AbstractClassifier 
   implements WeightedInstancesHandler, Sourcable {
 
   /** for serialization */

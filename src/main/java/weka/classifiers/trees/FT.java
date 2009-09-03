@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.trees.ft.FTInnerNode;
 import weka.classifiers.trees.ft.FTLeavesNode;
 import weka.classifiers.trees.ft.FTNode;
@@ -119,7 +120,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class FT 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, AdditionalMeasureProducer, Drawable,
              TechnicalInformationHandler {
     

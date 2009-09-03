@@ -100,7 +100,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision$
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
@@ -465,7 +465,7 @@ public class FilteredClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -474,7 +474,7 @@ public class FilteredClassifier
    * @param argv should contain the following arguments:
    * -t training file [-T test file] [-c class index]
    */
-  public static void main(String [] argv) {
+  public static void main(String [] argv)  {
     runClassifier(new FilteredClassifier(), argv);
   }
 }

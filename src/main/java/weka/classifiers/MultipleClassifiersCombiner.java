@@ -38,7 +38,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class MultipleClassifiersCombiner extends Classifier {
+public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
 
   /** for serialization */
   private static final long serialVersionUID = 2776436621129422119L;
@@ -96,7 +96,7 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
       }
       String classifierName = classifierSpec[0];
       classifierSpec[0] = "";
-      classifiers.addElement(Classifier.forName(classifierName,
+      classifiers.addElement(AbstractClassifier.forName(classifierName,
 						classifierSpec));
     }
     if (classifiers.size() == 0) {

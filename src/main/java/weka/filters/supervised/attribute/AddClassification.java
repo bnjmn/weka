@@ -22,6 +22,7 @@
 package weka.filters.supervised.attribute;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -267,7 +268,7 @@ public class AddClassification
 	throw new Exception("Invalid classifier specification string");
       tmpStr = tmpOptions[0];
       tmpOptions[0] = "";
-      setClassifier(Classifier.forName(tmpStr, tmpOptions));
+      setClassifier(AbstractClassifier.forName(tmpStr, tmpOptions));
     }
 
     super.setOptions(options);
@@ -656,7 +657,7 @@ public class AddClassification
 	      + header.equalHeadersMsg(instances));
       }
       else {
-	m_ActualClassifier = Classifier.makeCopy(m_Classifier);
+	m_ActualClassifier = AbstractClassifier.makeCopy(m_Classifier);
 	m_ActualClassifier.buildClassifier(instances);
       }
     }

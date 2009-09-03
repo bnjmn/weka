@@ -24,6 +24,7 @@
 package weka.experiment;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
 import weka.core.AdditionalMeasureProducer;
@@ -90,7 +91,7 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator {
@@ -426,7 +427,7 @@ public class CostSensitiveClassifierSplitEvaluator
     new FileReader(costFile)));
     
     Evaluation eval = new Evaluation(train, costMatrix);    
-    m_Classifier = Classifier.makeCopy(m_Template);
+    m_Classifier = AbstractClassifier.makeCopy(m_Template);
     
     trainTimeStart = System.currentTimeMillis();
     if(canMeasureCPUTime)
@@ -555,6 +556,6 @@ public class CostSensitiveClassifierSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // CostSensitiveClassifierSplitEvaluator

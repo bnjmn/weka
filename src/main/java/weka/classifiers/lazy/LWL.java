@@ -23,6 +23,7 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;

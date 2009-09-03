@@ -23,6 +23,7 @@
 package weka.gui.boundaryvisualizer;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instances;
@@ -643,7 +644,7 @@ public class BoundaryVisualizer
 			if (m_trainingInstances != null)
 				newTrainingData = new Instances(m_trainingInstances);
 			if (m_classifier != null)
-				newClassifier = Classifier.makeCopy(m_classifier);
+				newClassifier = AbstractClassifier.makeCopy(m_classifier);
 			createNewVisualizerWindow(newClassifier, newTrainingData);
 		} catch (Exception ex) {  ex.printStackTrace();}
 	}
@@ -1221,7 +1222,7 @@ public class BoundaryVisualizer
 			argsR[j-2] = args[j];
 			}
 		}
-		Classifier c = Classifier.forName(args[1], argsR);
+		Classifier c = AbstractClassifier.forName(args[1], argsR);
 		
 		System.err.println("Loading instances from : "+args[0]);
 		java.io.Reader r = new java.io.BufferedReader(

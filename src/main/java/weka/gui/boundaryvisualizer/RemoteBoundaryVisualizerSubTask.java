@@ -23,6 +23,7 @@
 package weka.gui.boundaryvisualizer;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -37,7 +38,7 @@ import java.util.Random;
  * in one row of the visualization.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @since 1.0
  * @see Task
  */
