@@ -22,6 +22,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.functions.LinearRegression;
@@ -1622,7 +1623,7 @@ public class GridSearch
     filter.setReplaceMissing(true);
     
     try {
-      m_BestClassifier = Classifier.makeCopy(m_Classifier);
+      m_BestClassifier = AbstractClassifier.makeCopy(m_Classifier);
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -2233,7 +2234,7 @@ public class GridSearch
     super.setClassifier(newClassifier);
     
     try {
-      m_BestClassifier = Classifier.makeCopy(m_Classifier);
+      m_BestClassifier = AbstractClassifier.makeCopy(m_Classifier);
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -3449,7 +3450,7 @@ public class GridSearch
       	+ "Filter: " + getFilter().getClass().getName() 
       	+ (getFilter() instanceof OptionHandler ? " " + Utils.joinOptions(((OptionHandler) getFilter()).getOptions()) : "") + "\n"
       	+ "Classifier: " + getClassifier().getClass().getName() 
-      	+ " " + Utils.joinOptions(getClassifier().getOptions()) + "\n\n"
+      	+ " " + Utils.joinOptions(((OptionHandler)getClassifier()).getOptions()) + "\n\n"
       	+ "X property: " + getXProperty() + "\n"
       	+ "Y property: " + getYProperty() + "\n\n"
       	+ "Evaluation: " + getEvaluation().getSelectedTag().getReadable() + "\n"
@@ -3482,7 +3483,7 @@ public class GridSearch
         "Best filter: " + getBestFilter().getClass().getName() 
       + (getBestFilter() instanceof OptionHandler ? " " + Utils.joinOptions(((OptionHandler) getBestFilter()).getOptions()) : "") + "\n"
       + "Best classifier: " + getBestClassifier().getClass().getName() 
-      + " " + Utils.joinOptions(getBestClassifier().getOptions());
+      + " " + Utils.joinOptions(((OptionHandler)getBestClassifier()).getOptions());
     
     return result;
   }

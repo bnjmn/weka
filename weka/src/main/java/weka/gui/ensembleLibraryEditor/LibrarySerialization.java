@@ -33,7 +33,7 @@ import weka.core.xml.XMLBasicSerialization;
  * not work for lots of different kinds of classifiers.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class LibrarySerialization 
   extends XMLBasicSerialization {

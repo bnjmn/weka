@@ -23,6 +23,7 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.Logistic;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.SMOset;
@@ -182,10 +183,10 @@ import java.util.Vector;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (code for adapting to MI data)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class MISMO 
-  extends Classifier 
+  extends AbstractClassifier 
   implements WeightedInstancesHandler, MultiInstanceCapabilitiesHandler,
              TechnicalInformationHandler {
 
@@ -968,7 +969,7 @@ public class MISMO
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.6 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -2115,7 +2116,7 @@ public class MISMO
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

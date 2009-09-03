@@ -23,6 +23,7 @@
 package weka.attributeSelection;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
@@ -209,7 +210,7 @@ public class ClassifierSubsetEval
     optionString = Utils.getOption('B', options);
     if (optionString.length() == 0)
       optionString = ZeroR.class.getName();
-    setClassifier(Classifier.forName(optionString,
+    setClassifier(AbstractClassifier.forName(optionString,
 				     Utils.partitionOptions(options)));
 
     optionString = Utils.getOption('H',options);

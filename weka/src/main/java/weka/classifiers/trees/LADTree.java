@@ -75,7 +75,7 @@ import weka.core.TechnicalInformation.Type;
 */
 
 public class LADTree
-  extends Classifier implements Drawable,
+  extends AbstractClassifier implements Drawable,
                                 AdditionalMeasureProducer,
                                 TechnicalInformationHandler {
 

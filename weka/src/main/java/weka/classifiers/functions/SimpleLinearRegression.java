@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -50,7 +51,7 @@ import weka.core.Capabilities.Capability;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class SimpleLinearRegression extends Classifier 
+public class SimpleLinearRegression extends AbstractClassifier 
   implements WeightedInstancesHandler {
 
   /** for serialization */

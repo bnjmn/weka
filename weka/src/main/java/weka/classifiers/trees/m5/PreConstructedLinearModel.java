@@ -23,6 +23,7 @@
 package weka.classifiers.trees.m5;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
@@ -38,10 +39,10 @@ import java.io.Serializable;
  * header for use in printing the model to the console.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class PreConstructedLinearModel 
-  extends Classifier 
+  extends AbstractClassifier 
   implements Serializable {
   
   /** for serialization */
@@ -173,6 +174,6 @@ public class PreConstructedLinearModel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -50,7 +50,7 @@ import javax.swing.JOptionPane;
  * and loading models from lists.  
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class EnsembleLibrary
   implements Serializable, RevisionHandler {
@@ -153,7 +153,7 @@ public class EnsembleLibrary
     
     EnsembleLibraryModel model = null;
     try {
-      model = new EnsembleLibraryModel(Classifier.forName(className,
+      model = new EnsembleLibraryModel(AbstractClassifier.forName(className,
 	  optionStrings));
     } catch (Exception e) {
       e.printStackTrace();
@@ -387,6 +387,6 @@ public class EnsembleLibrary
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

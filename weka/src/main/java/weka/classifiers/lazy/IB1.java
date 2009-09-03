@@ -23,6 +23,7 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -77,7 +78,7 @@ import java.util.Enumeration;
  * @version $Revision$
  */
 public class IB1 
-  extends Classifier 
+  extends AbstractClassifier 
   implements UpdateableClassifier, TechnicalInformationHandler {
 
   /** for serialization */

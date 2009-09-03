@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -77,7 +78,7 @@ import java.util.Enumeration;
  * @version $Revision$ 
 */
 public class Prism 
-  extends Classifier
+  extends AbstractClassifier
   implements TechnicalInformationHandler {
 
   /** for serialization */

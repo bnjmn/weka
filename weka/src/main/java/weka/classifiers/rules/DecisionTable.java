@@ -27,6 +27,7 @@ import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.SubsetEvaluator;
 import weka.attributeSelection.ASEvaluation;
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
 import weka.core.AdditionalMeasureProducer;
@@ -131,7 +132,7 @@ import java.util.Vector;
  * @version $Revision$ 
  */
 public class DecisionTable 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, 
              AdditionalMeasureProducer, TechnicalInformationHandler {
 

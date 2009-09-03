@@ -22,6 +22,7 @@
 package weka.classifiers.misc;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -60,7 +61,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class SerializedClassifier
-  extends Classifier {
+  extends AbstractClassifier {
 
   /** for serialization */
   private static final long serialVersionUID = 4599593909947628642L;
@@ -222,15 +223,13 @@ public class SerializedClassifier
   
   /**
    * loads the serialized model if necessary, throws an Exception if the
-   * derserialization fails. Always propagates the current debug flag.
+   * derserialization fails.
    * 
    * @throws Exception	if deserialization fails
    */
   protected void initModel() throws Exception {
     if (m_Model == null)
       m_Model = (Classifier) SerializationHelper.read(m_ModelFile.getAbsolutePath());
-    
-    m_Model.setDebug(getDebug());
   }
 
   /**

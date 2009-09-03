@@ -24,6 +24,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -174,7 +175,7 @@ import java.util.Vector;
  * @see     weka.core.converters.LibSVMSaver
  */
 public class LibSVM 
-  extends Classifier
+  extends AbstractClassifier
   implements TechnicalInformationHandler {
   
   /** the svm classname. */

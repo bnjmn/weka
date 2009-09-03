@@ -23,6 +23,7 @@
 package weka.classifiers.trees.lmt;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SimpleLinearRegression;
 import weka.core.Attribute;
@@ -48,10 +49,10 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author Niels Landwehr
  * @author Marc Sumner
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class LogisticBase 
-    extends Classifier 
+    extends AbstractClassifier 
     implements WeightedInstancesHandler {
 
     /** for serialization */
@@ -1033,6 +1034,6 @@ public class LogisticBase
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
 }

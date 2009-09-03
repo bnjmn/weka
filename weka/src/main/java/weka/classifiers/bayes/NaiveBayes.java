@@ -23,6 +23,7 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -92,7 +93,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class NaiveBayes extends Classifier 
+public class NaiveBayes extends AbstractClassifier 
 implements OptionHandler, WeightedInstancesHandler, 
            TechnicalInformationHandler {
 

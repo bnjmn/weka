@@ -33,7 +33,7 @@ import java.util.Comparator;
  * them alphabetically based on their String Representations
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public final class EnsembleLibraryModelComparator 
   implements Comparator, Serializable, RevisionHandler {
@@ -73,6 +73,6 @@ public final class EnsembleLibraryModelComparator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

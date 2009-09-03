@@ -23,6 +23,7 @@
 package weka.gui.boundaryvisualizer;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -65,7 +66,7 @@ import javax.swing.ToolTipManager;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.23 $
+ * @version $Revision$
  * @since 1.0
  * @see JPanel
  */
@@ -1219,7 +1220,7 @@ public class BoundaryPanel
 	  argsR[j-10] = args[j];
 	}
       }
-      Classifier c = Classifier.forName(args[9], argsR);
+      Classifier c = AbstractClassifier.forName(args[9], argsR);
       KDDataGenerator dataGen = new KDDataGenerator();
       dataGen.setKernelBandwidth(bandWidth);
       bv.setDataGenerator(dataGen);

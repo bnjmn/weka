@@ -23,6 +23,7 @@
 package weka.attributeSelection;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instances;
@@ -419,7 +420,7 @@ public class OneRAttributeEval
     trainCopy = Filter.useFilter(trainCopy, delTransform);
     o_Evaluation = new Evaluation(trainCopy);
     String [] oneROpts = { "-B", ""+getMinimumBucketSize()};
-    Classifier oneR = Classifier.forName("weka.classifiers.rules.OneR", oneROpts);
+    Classifier oneR = AbstractClassifier.forName("weka.classifiers.rules.OneR", oneROpts);
     if (m_evalUsingTrainingData) {
       oneR.buildClassifier(trainCopy);
       o_Evaluation.evaluateModel(oneR, trainCopy);

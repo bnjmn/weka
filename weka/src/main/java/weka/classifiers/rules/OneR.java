@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -78,7 +79,7 @@ import java.util.Vector;
  * @version $Revision$ 
 */
 public class OneR 
-  extends Classifier 
+  extends AbstractClassifier 
   implements TechnicalInformationHandler, Sourcable {
     
   /** for serialization */

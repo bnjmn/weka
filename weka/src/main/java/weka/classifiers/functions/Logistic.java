@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -115,7 +116,7 @@ import java.util.Vector;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class Logistic extends Classifier 
+public class Logistic extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
   
   /** for serialization */

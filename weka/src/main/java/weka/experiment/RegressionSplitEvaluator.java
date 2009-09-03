@@ -24,6 +24,7 @@
 package weka.experiment;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
@@ -190,7 +191,7 @@ public class RegressionSplitEvaluator
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // Classifier.
-    setClassifier(Classifier.forName(cName, null));
+    setClassifier(AbstractClassifier.forName(cName, null));
     if (getClassifier() instanceof OptionHandler) {
       ((OptionHandler) getClassifier())
 	.setOptions(Utils.partitionOptions(options));
@@ -500,7 +501,7 @@ public class RegressionSplitEvaluator
     long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
          trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
     Evaluation eval = new Evaluation(train);
-    m_Classifier = Classifier.makeCopy(m_Template);
+    m_Classifier = AbstractClassifier.makeCopy(m_Template);
 
     trainTimeStart = System.currentTimeMillis();
     if(canMeasureCPUTime)

@@ -22,6 +22,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -86,7 +87,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class PLSClassifier
-  extends Classifier {
+  extends AbstractClassifier {
   
   /** for serialization */
   private static final long serialVersionUID = 4819775160590973256L;

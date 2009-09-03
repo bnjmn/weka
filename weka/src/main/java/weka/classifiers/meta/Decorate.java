@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -146,7 +147,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.9 $ 
+ * @version $Revision$ 
  */
 public class Decorate 
     extends RandomizableIteratedSingleClassifierEnhancer
@@ -519,7 +520,7 @@ public class Decorate
 	    addInstances(divData, artData);//Add new artificial data
 	    
 	    //Build new classifier
-	    Classifier tmp[] = Classifier.makeCopies(m_Classifier,1);
+	    Classifier tmp[] = AbstractClassifier.makeCopies(m_Classifier,1);
 	    newClassifier = tmp[0]; 
 	    newClassifier.buildClassifier(divData);
 	    //Remove all the artificial data
@@ -773,7 +774,7 @@ public class Decorate
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
     
     /**

@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.IteratedSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
@@ -97,7 +98,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision$
  */
 public class AdditiveRegression 
   extends IteratedSingleClassifierEnhancer 
@@ -521,7 +522,7 @@ public class AdditiveRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

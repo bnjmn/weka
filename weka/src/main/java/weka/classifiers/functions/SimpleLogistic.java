@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.trees.lmt.LogisticBase;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
@@ -119,7 +120,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class SimpleLogistic 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
              TechnicalInformationHandler {
 

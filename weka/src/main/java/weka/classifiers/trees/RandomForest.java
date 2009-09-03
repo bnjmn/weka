@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.meta.Bagging;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
@@ -92,10 +93,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class RandomForest 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, Randomizable, WeightedInstancesHandler, 
              AdditionalMeasureProducer, TechnicalInformationHandler {
 
@@ -523,7 +524,7 @@ public class RandomForest
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

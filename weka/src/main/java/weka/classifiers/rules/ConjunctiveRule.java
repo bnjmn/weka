@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.ContingencyTables;
@@ -93,7 +94,7 @@ import java.util.Vector;
  * @version $Revision$ 
  */
 public class ConjunctiveRule 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler{
     
   /** for serialization */

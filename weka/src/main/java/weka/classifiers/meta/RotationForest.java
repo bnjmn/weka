@@ -702,7 +702,7 @@ public class RotationForest
     return RevisionUtils.extract("$Revision$");
   }
   
-  protected class ClassifierWrapper extends weka.classifiers.Classifier {
+  protected class ClassifierWrapper extends weka.classifiers.AbstractClassifier {
     
     /** For serialization */
     private static final long serialVersionUID = 2327175798869994435L;
