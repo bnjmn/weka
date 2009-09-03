@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.rules.part.MakeDecList;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
 import weka.classifiers.trees.j48.C45ModelSelection;
@@ -103,10 +104,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class PART 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, Summarizable, 
              AdditionalMeasureProducer, TechnicalInformationHandler {
 
@@ -703,7 +704,7 @@ public class PART
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

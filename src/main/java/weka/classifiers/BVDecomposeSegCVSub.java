@@ -153,7 +153,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Paul Conilione (paulc4321@yahoo.com.au)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class BVDecomposeSegCVSub
     implements OptionHandler, TechnicalInformationHandler, RevisionHandler {
@@ -415,7 +415,7 @@ public class BVDecomposeSegCVSub
         
         String classifierName = Utils.getOption('W', options);
         if (classifierName.length() != 0) {
-            setClassifier(Classifier.forName(classifierName, Utils.partitionOptions(options)));
+            setClassifier(AbstractClassifier.forName(classifierName, Utils.partitionOptions(options)));
         } else {
             throw new Exception("A learner must be specified with the -W option.");
         }
@@ -842,7 +842,7 @@ public class BVDecomposeSegCVSub
                     
                     Instances train = new Instances(TP, 0, m_TrainSize);
                     
-		    Classifier current = Classifier.makeCopy(m_Classifier);
+		    Classifier current = AbstractClassifier.makeCopy(m_Classifier);
                     current.buildClassifier(train); // create a clssifier using the instances in train.
                     
                     int currentTestIndex = foldIndex[ j - 1 ][ 0 ]; //start index
@@ -1062,7 +1062,7 @@ public class BVDecomposeSegCVSub
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.7 $");
+      return RevisionUtils.extract("$Revision$");
     }
     
     /**

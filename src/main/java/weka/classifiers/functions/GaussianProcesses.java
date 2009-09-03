@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
@@ -119,7 +120,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class GaussianProcesses 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, IntervalEstimator, TechnicalInformationHandler {
 
   /** for serialization */

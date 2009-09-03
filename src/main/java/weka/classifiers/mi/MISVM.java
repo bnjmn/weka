@@ -23,6 +23,7 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
@@ -131,7 +132,7 @@ import java.util.Vector;
  * @see weka.classifiers.functions.SMO
  */
 public class MISVM 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, MultiInstanceCapabilitiesHandler,
              TechnicalInformationHandler {
 

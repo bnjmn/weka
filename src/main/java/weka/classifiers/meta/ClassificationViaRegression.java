@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -97,7 +98,7 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision$ 
 */
 public class ClassificationViaRegression 
   extends SingleClassifierEnhancer
@@ -198,7 +199,7 @@ public class ClassificationViaRegression
     insts = new Instances(insts);
     insts.deleteWithMissingClass();
     
-    m_Classifiers = Classifier.makeCopies(m_Classifier, insts.numClasses());
+    m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, insts.numClasses());
     m_ClassFilters = new MakeIndicator[insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {
       m_ClassFilters[i] = new MakeIndicator();
@@ -268,7 +269,7 @@ public class ClassificationViaRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.27 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

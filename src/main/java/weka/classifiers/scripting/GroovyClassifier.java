@@ -23,12 +23,14 @@
 package weka.classifiers.scripting;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.OptionHandler;
 import weka.core.scripting.Groovy;
 
 import java.io.File;
@@ -68,7 +70,7 @@ import java.util.Vector;
  * @see Groovy
  */
 public class GroovyClassifier 
-  extends Classifier {
+  extends AbstractClassifier {
 
   /** for serialization. */
   private static final long serialVersionUID = -9078371491735496175L;
@@ -271,7 +273,7 @@ public class GroovyClassifier
 	m_GroovyObject = null;
       
       if (m_GroovyObject != null)
-	m_GroovyObject.setOptions(m_GroovyOptions.clone());
+	((OptionHandler)m_GroovyObject).setOptions(m_GroovyOptions.clone());
     }
     catch (Exception e) {
       m_GroovyObject = null;

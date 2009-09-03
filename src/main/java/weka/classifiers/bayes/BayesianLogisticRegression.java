@@ -23,6 +23,7 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.bayes.blr.GaussianPriorImpl;
 import weka.classifiers.bayes.blr.LaplacePriorImpl;
 import weka.classifiers.bayes.blr.Prior;
@@ -78,7 +79,7 @@ import java.util.Vector;
  *  @author Navendu Garg (gargnav at iit dot edu)
  *  @version $Revision$
  */
-public class BayesianLogisticRegression extends Classifier
+public class BayesianLogisticRegression extends AbstractClassifier
   implements OptionHandler, TechnicalInformationHandler {
   
   static final long serialVersionUID = -8013478897911757631L;

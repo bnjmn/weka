@@ -23,6 +23,7 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -98,7 +99,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class MIBoost 
   extends SingleClassifierEnhancer
@@ -395,7 +396,7 @@ public class MIBoost
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.6 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -466,7 +467,7 @@ public class MIBoost
     if(!(m_Classifier instanceof WeightedInstancesHandler))
       throw new Exception("Base classifier cannot handle weighted instances!");
 
-    m_Models = Classifier.makeCopies(m_Classifier, getMaxIterations());
+    m_Models = AbstractClassifier.makeCopies(m_Classifier, getMaxIterations());
     if(m_Debug)
       System.err.println("Base classifier: "+m_Classifier.getClass().getName());
 
@@ -690,7 +691,7 @@ iterations:
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

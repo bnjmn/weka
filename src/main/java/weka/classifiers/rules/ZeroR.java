@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -54,7 +55,7 @@ import java.util.Enumeration;
  * @version $Revision$
  */
 public class ZeroR 
-  extends Classifier 
+  extends AbstractClassifier 
   implements WeightedInstancesHandler, Sourcable {
 
   /** for serialization */

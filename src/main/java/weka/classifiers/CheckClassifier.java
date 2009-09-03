@@ -161,7 +161,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.33 $
+ * @version $Revision$
  * @see TestInstances
  */
 public class CheckClassifier
@@ -901,7 +901,7 @@ public class CheckClassifier
             classMissing);
       }
       
-      classifier = Classifier.makeCopies(getClassifier(), 1)[0];
+      classifier = AbstractClassifier.makeCopies(getClassifier(), 1)[0];
       evaluation1A = new Evaluation(train1);
       evaluation1B = new Evaluation(train1);
       evaluation2 = new Evaluation(train2);
@@ -1134,7 +1134,7 @@ public class CheckClassifier
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
             classMissing);
       }
-      classifiers = Classifier.makeCopies(getClassifier(), 2);
+      classifiers = AbstractClassifier.makeCopies(getClassifier(), 2);
       evaluationB = new Evaluation(train);
       evaluationI = new Evaluation(train);
       classifiers[0].buildClassifier(train);
@@ -1250,7 +1250,7 @@ public class CheckClassifier
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
             classMissing);
       }
-      classifiers = Classifier.makeCopies(getClassifier(), 2);
+      classifiers = AbstractClassifier.makeCopies(getClassifier(), 2);
       classifiers[0].buildClassifier(train);
       classifiers[1].buildClassifier(train);
     } catch (Exception ex) {
@@ -1381,7 +1381,7 @@ public class CheckClassifier
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
             classMissing);
       }
-      classifiers = Classifier.makeCopies(getClassifier(), 2);
+      classifiers = AbstractClassifier.makeCopies(getClassifier(), 2);
       evaluationB = new Evaluation(train);
       evaluationI = new Evaluation(train);
       classifiers[0].buildClassifier(train);
@@ -1519,7 +1519,7 @@ public class CheckClassifier
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
             classMissing);
       }
-      classifier = Classifier.makeCopies(getClassifier(), 1)[0];
+      classifier = AbstractClassifier.makeCopies(getClassifier(), 1)[0];
       evaluation = new Evaluation(train);
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
@@ -1683,7 +1683,7 @@ public class CheckClassifier
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
             classMissing);
       }
-      classifier = Classifier.makeCopies(getClassifier(), 1)[0];
+      classifier = AbstractClassifier.makeCopies(getClassifier(), 1)[0];
       evaluation = new Evaluation(train);
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -1957,7 +1957,7 @@ public class CheckClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.33 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

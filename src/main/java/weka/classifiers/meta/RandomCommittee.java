@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
@@ -151,7 +152,7 @@ public class RandomCommittee
       throw new IllegalArgumentException("Base learner must implement Randomizable!");
     }
 
-    m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
+    m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, m_NumIterations);
 
     Random random = m_data.getRandomNumberGenerator(m_Seed);
     for (int j = 0; j < m_Classifiers.length; j++) {

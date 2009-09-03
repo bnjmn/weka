@@ -23,6 +23,7 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.lazy.kstar.KStarCache;
 import weka.classifiers.lazy.kstar.KStarConstants;
@@ -94,7 +95,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class KStar 
-  extends Classifier
+  extends AbstractClassifier
   implements KStarConstants, UpdateableClassifier, TechnicalInformationHandler {
 
   /** for serialization */

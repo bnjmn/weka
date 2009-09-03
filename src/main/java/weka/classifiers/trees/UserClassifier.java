@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Capabilities;
 import weka.core.Drawable;
@@ -102,7 +103,7 @@ import javax.swing.JTabbedPane;
  * @version $Revision$
  */
 public class UserClassifier 
-  extends Classifier 
+  extends AbstractClassifier 
   implements Drawable, TreeDisplayListener, VisualizePanelListener,
              TechnicalInformationHandler {
   

@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.clusterers.MakeDensityBasedClusterer;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Capabilities;
@@ -69,9 +70,9 @@ import java.util.Vector;
  *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
-public class RBFNetwork extends Classifier implements OptionHandler {
+public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3669814959712675720L;
@@ -515,7 +516,7 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

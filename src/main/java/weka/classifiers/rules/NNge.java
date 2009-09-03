@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -92,7 +93,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class NNge 
-  extends Classifier 
+  extends AbstractClassifier 
   implements UpdateableClassifier, OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */

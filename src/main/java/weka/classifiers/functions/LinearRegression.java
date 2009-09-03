@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -73,7 +74,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class LinearRegression extends Classifier implements OptionHandler,
+public class LinearRegression extends AbstractClassifier implements OptionHandler,
   WeightedInstancesHandler {
   
   /** for serialization */

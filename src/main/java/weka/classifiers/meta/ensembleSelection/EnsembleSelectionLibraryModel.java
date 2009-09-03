@@ -23,11 +23,13 @@
 package weka.classifiers.meta.ensembleSelection;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.EnsembleLibraryModel;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.OptionHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,7 +68,7 @@ import java.util.zip.Adler32;
  * exception.
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.2 $ 
+ * @version $Revision$ 
  */
 public class EnsembleSelectionLibraryModel
   extends EnsembleLibraryModel
@@ -290,9 +292,9 @@ public class EnsembleSelectionLibraryModel
 	  for (int i = 0; i < m_folds; ++i) {
 	    
 	    try {
-	      m_models[i] = Classifier.forName(getModelClass()
+	      m_models[i] = AbstractClassifier.forName(getModelClass()
 		  .getName(), null);
-	      m_models[i].setOptions(getOptions());
+	      ((OptionHandler)m_models[i]).setOptions(getOptions());
 	    } catch (Exception e) {
 	      throw new Exception("Invalid Options: "
 		  + e.getMessage());
@@ -843,6 +845,6 @@ public class EnsembleSelectionLibraryModel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

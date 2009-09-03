@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
@@ -263,10 +264,10 @@ public class OrdinalClassClassifier
     numClassifiers = (numClassifiers == 0) ? 1 : numClassifiers;
 
     if (numClassifiers == 1) {
-      m_Classifiers = Classifier.makeCopies(m_Classifier, 1);
+      m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, 1);
       m_Classifiers[0].buildClassifier(insts);
     } else {
-      m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
+      m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, numClassifiers);
       m_ClassFilters = new MakeIndicator[numClassifiers];
 
       for (int i = 0; i < m_Classifiers.length; i++) {

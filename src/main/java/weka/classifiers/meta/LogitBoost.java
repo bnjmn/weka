@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
@@ -125,7 +126,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $ 
+ * @version $Revision$ 
  */
 public class LogitBoost 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -703,7 +704,7 @@ public class LogitBoost
     }
     m_Classifiers = new Classifier [m_NumClasses][];
     for (int j = 0; j < m_NumClasses; j++) {
-      m_Classifiers[j] = Classifier.makeCopies(m_Classifier,
+      m_Classifiers[j] = AbstractClassifier.makeCopies(m_Classifier,
 					       getNumIterations());
     }
 
@@ -1157,7 +1158,7 @@ public class LogitBoost
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.43 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

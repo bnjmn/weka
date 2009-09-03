@@ -23,6 +23,7 @@
 package weka.filters.unsupervised.instance;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -436,7 +437,7 @@ public class RemoveMisclassified
     }
     String classifierName = classifierSpec[0];
     classifierSpec[0] = "";
-    setClassifier(Classifier.forName(classifierName, classifierSpec));
+    setClassifier(AbstractClassifier.forName(classifierName, classifierSpec));
 
     String cString = Utils.getOption('C', options);
     if (cString.length() != 0) {

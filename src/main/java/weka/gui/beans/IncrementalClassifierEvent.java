@@ -23,6 +23,7 @@
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -32,7 +33,7 @@ import java.util.EventObject;
  * Class encapsulating an incrementally built classifier and current instance
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision$
  * @since 1.0
  * @see EventObject
  */

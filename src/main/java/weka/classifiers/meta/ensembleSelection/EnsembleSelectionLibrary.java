@@ -23,6 +23,7 @@
 package weka.classifiers.meta.ensembleSelection;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.EnsembleLibrary;
 import weka.classifiers.EnsembleLibraryModel;
 import weka.classifiers.meta.EnsembleSelection;
@@ -55,7 +56,7 @@ import java.util.zip.Adler32;
  *
  * @author  Robert Jung
  * @author  David Michael
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class EnsembleSelectionLibrary 
   extends EnsembleLibrary 
@@ -503,7 +504,7 @@ public class EnsembleSelectionLibrary
     
     EnsembleSelectionLibraryModel model = null;
     try {
-      model = new EnsembleSelectionLibraryModel(Classifier.forName(className, optionStrings));
+      model = new EnsembleSelectionLibraryModel(AbstractClassifier.forName(className, optionStrings));
       model.setDebug(m_Debug);
       
     } catch (Exception e) {
@@ -588,6 +589,6 @@ public class EnsembleSelectionLibrary
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

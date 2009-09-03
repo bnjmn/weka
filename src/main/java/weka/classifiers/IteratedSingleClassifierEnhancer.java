@@ -34,7 +34,7 @@ import java.util.Vector;
  * meta classifiers that build an ensemble from a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public abstract class IteratedSingleClassifierEnhancer 
   extends SingleClassifierEnhancer {
@@ -60,7 +60,7 @@ public abstract class IteratedSingleClassifierEnhancer
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
     }
-    m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
+    m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, m_NumIterations);
   }
 
   /**

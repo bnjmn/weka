@@ -23,6 +23,7 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -67,7 +68,7 @@ import java.util.Vector;
  * @version $Revision$ 
  */
 public class MILR
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, MultiInstanceCapabilitiesHandler {
 
   /** for serialization */

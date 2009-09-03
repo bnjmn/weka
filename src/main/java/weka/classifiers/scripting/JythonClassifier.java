@@ -23,12 +23,14 @@
 package weka.classifiers.scripting;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.OptionHandler;
 import weka.core.scripting.Jython;
 
 import java.io.File;
@@ -66,7 +68,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class JythonClassifier 
-  extends Classifier {
+  extends AbstractClassifier {
 
   /** for serialization. */
   private static final long serialVersionUID = -9078371491735496175L;
@@ -333,7 +335,7 @@ public class JythonClassifier
 	m_JythonObject = null;
       
       if (m_JythonObject != null)
-	m_JythonObject.setOptions(m_JythonOptions.clone());
+	((OptionHandler)m_JythonObject).setOptions(m_JythonOptions.clone());
     }
     catch (Exception e) {
       m_JythonObject = null;

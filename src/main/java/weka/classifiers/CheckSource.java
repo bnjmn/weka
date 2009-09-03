@@ -64,7 +64,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier (specified with -W).
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see     weka.classifiers.Sourcable
  */
 public class CheckSource
@@ -346,7 +346,7 @@ public class CheckSource
     numeric = data.classAttribute().isNumeric();
     
     // build classifier
-    cls = Classifier.makeCopy(getClassifier());
+    cls = AbstractClassifier.makeCopy(getClassifier());
     cls.buildClassifier(data);
     
     code = getSourceCode();
@@ -391,7 +391,7 @@ public class CheckSource
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
