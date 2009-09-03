@@ -23,6 +23,7 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -71,10 +72,10 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.1 $ 
+ * @version $Revision$ 
 */
 public class NaiveBayesSimple 
-  extends Classifier
+  extends AbstractClassifier
   implements TechnicalInformationHandler {
   
   /** for serialization */
@@ -415,7 +416,7 @@ public class NaiveBayesSimple
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -23,6 +23,7 @@
 package weka.classifiers.trees.m5;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
@@ -70,10 +71,10 @@ import java.util.Vector;
  * Build regression tree/rule rather than model tree/rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public abstract class M5Base 
-  extends Classifier 
+  extends AbstractClassifier 
   implements AdditionalMeasureProducer,
 	     TechnicalInformationHandler {
 

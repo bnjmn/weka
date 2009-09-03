@@ -27,6 +27,7 @@ import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.SubsetEvaluator;
 import weka.attributeSelection.ASEvaluation;
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
 import weka.core.AdditionalMeasureProducer;
@@ -128,10 +129,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.43.2.2 $ 
+ * @version $Revision$ 
  */
 public class DecisionTable 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, 
              AdditionalMeasureProducer, TechnicalInformationHandler {
 
@@ -1395,7 +1396,7 @@ public class DecisionTable
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.43.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

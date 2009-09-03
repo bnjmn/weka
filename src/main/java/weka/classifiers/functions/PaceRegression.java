@@ -21,6 +21,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.pace.ChisqMixture;
 import weka.classifiers.functions.pace.MixtureDistribution;
 import weka.classifiers.functions.pace.NormalMixture;
@@ -120,10 +121,10 @@ import java.util.Vector;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision$
  */
 public class PaceRegression 
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -773,7 +774,7 @@ public class PaceRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -23,6 +23,7 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -64,10 +65,10 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3.2.1 $ 
+ * @version $Revision$ 
  */
 public class MILR
-  extends Classifier 
+  extends AbstractClassifier 
   implements OptionHandler, MultiInstanceCapabilitiesHandler {
 
   /** for serialization */
@@ -494,7 +495,7 @@ public class MILR
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -822,7 +823,7 @@ public class MILR
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

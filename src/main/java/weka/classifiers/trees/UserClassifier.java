@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Capabilities;
 import weka.core.Drawable;
@@ -99,10 +100,10 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.28.2.3 $
+ * @version $Revision$
  */
 public class UserClassifier 
-  extends Classifier 
+  extends AbstractClassifier 
   implements Drawable, TreeDisplayListener, VisualizePanelListener,
              TechnicalInformationHandler {
   
@@ -1492,7 +1493,7 @@ public class UserClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.28.2.3 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1502,6 +1503,6 @@ public class UserClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

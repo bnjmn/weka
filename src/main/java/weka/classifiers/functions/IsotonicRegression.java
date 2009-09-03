@@ -23,6 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -51,9 +52,9 @@ import java.util.Arrays;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6.2.1 $
+ * @version $Revision$
  */
-public class IsotonicRegression extends Classifier implements WeightedInstancesHandler {
+public class IsotonicRegression extends AbstractClassifier implements WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 1679336022835454137L;
@@ -306,7 +307,7 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

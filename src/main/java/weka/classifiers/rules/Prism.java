@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -74,10 +75,10 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.22.2.1 $ 
+ * @version $Revision$ 
 */
 public class Prism 
-  extends Classifier
+  extends AbstractClassifier
   implements TechnicalInformationHandler {
 
   /** for serialization */
@@ -277,7 +278,7 @@ public class Prism
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.22.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -323,7 +324,7 @@ public class Prism
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.22.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -542,7 +543,7 @@ public class Prism
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

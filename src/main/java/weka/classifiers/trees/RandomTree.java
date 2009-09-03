@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.ContingencyTables;
@@ -81,7 +82,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class RandomTree extends Classifier implements OptionHandler,
+public class RandomTree extends AbstractClassifier implements OptionHandler,
 WeightedInstancesHandler, Randomizable, Drawable {
 
   /** for serialization */

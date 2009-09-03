@@ -23,6 +23,7 @@
 package weka.filters.unsupervised.instance;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -75,7 +76,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision$
  */
 public class RemoveMisclassified 
   extends Filter 
@@ -434,7 +435,7 @@ public class RemoveMisclassified
     }
     String classifierName = classifierSpec[0];
     classifierSpec[0] = "";
-    setClassifier(Classifier.forName(classifierName, classifierSpec));
+    setClassifier(AbstractClassifier.forName(classifierName, classifierSpec));
 
     String cString = Utils.getOption('C', options);
     if (cString.length() != 0) {
@@ -724,7 +725,7 @@ public class RemoveMisclassified
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

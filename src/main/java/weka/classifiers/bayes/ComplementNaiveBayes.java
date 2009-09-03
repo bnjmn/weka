@@ -22,6 +22,7 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -79,9 +80,9 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $ 
+ * @version $Revision$ 
  */
-public class ComplementNaiveBayes extends Classifier
+public class ComplementNaiveBayes extends AbstractClassifier
     implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
     
     /** for serialization */
@@ -481,7 +482,7 @@ public class ComplementNaiveBayes extends Classifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
     
     /**

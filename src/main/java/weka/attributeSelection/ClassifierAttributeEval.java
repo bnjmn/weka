@@ -23,6 +23,7 @@
 package weka.attributeSelection;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.OneR;
 import weka.core.Capabilities;
@@ -213,7 +214,7 @@ public class ClassifierAttributeEval
     result.add(
 	new String(
 	    m_Classifier.getClass().getName() + " " 
-	    + Utils.joinOptions(m_Classifier.getOptions())).trim());
+	    + Utils.joinOptions(((OptionHandler)m_Classifier).getOptions())).trim());
 
     return result.toArray(new String[result.size()]);
   }
@@ -409,7 +410,7 @@ public class ClassifierAttributeEval
     
     // evaluate classifier
     eval = new Evaluation(train);
-    cls  = Classifier.makeCopy(m_Classifier);
+    cls  = AbstractClassifier.makeCopy(m_Classifier);
     if (m_evalUsingTrainingData) {
       cls.buildClassifier(train);
       eval.evaluateModel(cls, train);
@@ -440,7 +441,7 @@ public class ClassifierAttributeEval
         text.append("training data for evaluation of attributes.\n");
       else
         text.append(getFolds()+ " fold cross validation for evaluating attributes.\n");
-      text.append("\tClassifier in use: " + m_Classifier.getClass().getName() + " " + Utils.joinOptions(m_Classifier.getOptions()));
+      text.append("\tClassifier in use: " + m_Classifier.getClass().getName() + " " + Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()));
     }
     text.append("\n");
     

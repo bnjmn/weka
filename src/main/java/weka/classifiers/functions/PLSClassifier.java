@@ -22,6 +22,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -83,10 +84,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision$
  */
 public class PLSClassifier
-  extends Classifier {
+  extends AbstractClassifier {
   
   /** for serialization */
   private static final long serialVersionUID = 4819775160590973256L;
@@ -350,7 +351,7 @@ public class PLSClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

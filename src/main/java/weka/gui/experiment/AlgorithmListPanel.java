@@ -23,6 +23,7 @@
 package weka.gui.experiment;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.xml.XMLClassifier;
 import weka.core.OptionHandler;
 import weka.core.SerializedObject;

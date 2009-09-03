@@ -23,6 +23,7 @@
 package weka.core.pmml;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.pmml.consumer.GeneralRegression;
 import weka.classifiers.pmml.consumer.NeuralNetwork;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
@@ -523,7 +524,7 @@ public class PMMLFactory {
     return buff.toString();
   }
   
-  private static class PMMLClassifierRunner extends Classifier {
+  private static class PMMLClassifierRunner extends AbstractClassifier {
     public double[] distributionForInstance(Instance test) throws Exception {
       throw new Exception("Don't call this method!!");
     }

@@ -23,6 +23,7 @@
 package weka.gui.explorer;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
@@ -936,7 +937,7 @@ public class ClassifierPanel
 	  Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
 	  Classifier template = null;
 	  try {
-	    template = Classifier.makeCopy(classifier);
+	    template = AbstractClassifier.makeCopy(classifier);
 	  } catch (Exception ex) {
 	    m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
 	  }
@@ -1146,7 +1147,7 @@ public class ClassifierPanel
 				    + (fold + 1) + "...");
 		Classifier current = null;
 		try {
-		  current = Classifier.makeCopy(template);
+		  current = AbstractClassifier.makeCopy(template);
 		} catch (Exception ex) {
 		  m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
 		}
@@ -1191,7 +1192,7 @@ public class ClassifierPanel
 	      m_Log.statusMessage("Building model on training split ("+trainSize+" instances)...");
 	      Classifier current = null;
 	      try {
-		current = Classifier.makeCopy(template);
+		current = AbstractClassifier.makeCopy(template);
 	      } catch (Exception ex) {
 		m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
 	      }
