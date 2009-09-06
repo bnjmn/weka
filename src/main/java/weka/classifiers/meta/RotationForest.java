@@ -24,7 +24,6 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -35,11 +34,11 @@ import weka.core.OptionHandler;
 import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.PrincipalComponents;
@@ -47,7 +46,6 @@ import weka.filters.unsupervised.attribute.RemoveUseless;
 import weka.filters.unsupervised.instance.RemovePercentage;
 
 import java.util.Enumeration;
-import java.util.LinkedList;
 import java.util.Random;
 import java.util.Vector;
 
@@ -705,7 +703,7 @@ public class RotationForest
   protected class ClassifierWrapper extends weka.classifiers.AbstractClassifier {
     
     /** For serialization */
-    private static final long serialVersionUID = 2715539073033265380L;
+    private static final long serialVersionUID = 2327175798869994435L;
     
     protected weka.classifiers.Classifier m_wrappedClassifier;
     protected int m_classifierNumber;
@@ -717,10 +715,7 @@ public class RotationForest
       m_classifierNumber = classifierNumber;
     }
     
-    @Override
     public void buildClassifier(Instances data) throws Exception {
-      // TODO Auto-generated method stub
-      
       m_ReducedHeaders[m_classifierNumber] = new Instances[ m_Groups[m_classifierNumber].length ];
       FastVector transformedAttributes = new FastVector( m_data.numAttributes() );
       
@@ -818,10 +813,6 @@ public class RotationForest
     
     public String toString() {
       return m_wrappedClassifier.toString();
-    }
-
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
     }
   }
   
