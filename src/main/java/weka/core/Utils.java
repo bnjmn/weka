@@ -1042,7 +1042,7 @@ public final class Utils
     if (obj != null) {
       result.append(obj.getClass().getName());
       if (obj instanceof OptionHandler)
-	result.append(joinOptions(((OptionHandler) obj).getOptions()));
+	result.append(" " + joinOptions(((OptionHandler) obj).getOptions()));
     }
     
     return result.toString().trim();
