@@ -22,9 +22,11 @@
 
 package wekaexamples.classifiers;
 
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
+import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -110,7 +112,7 @@ public class CrossValidationAddPrediction {
       // Instances train = randData.trainCV(folds, n, rand);
 
       // build and evaluate classifier
-      Classifier clsCopy = Classifier.makeCopy(cls);
+      Classifier clsCopy = AbstractClassifier.makeCopy(cls);
       clsCopy.buildClassifier(train);
       eval.evaluateModel(clsCopy, test);
 
@@ -132,7 +134,10 @@ public class CrossValidationAddPrediction {
     // output evaluation
     System.out.println();
     System.out.println("=== Setup ===");
-    System.out.println("Classifier: " + cls.getClass().getName() + " " + Utils.joinOptions(cls.getOptions()));
+    if (cls instanceof OptionHandler)
+      System.out.println("Classifier: " + cls.getClass().getName() + " " + Utils.joinOptions(((OptionHandler) cls).getOptions()));
+    else
+      System.out.println("Classifier: " + cls.getClass().getName());
     System.out.println("Dataset: " + data.relationName());
     System.out.println("Folds: " + folds);
     System.out.println("Seed: " + seed);

@@ -22,6 +22,7 @@
 
 package wekaexamples.classifiers;
 
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -70,7 +71,7 @@ public class WekaDemo {
    * @param options     the options for the classifier
    */
   public void setClassifier(String name, String[] options) throws Exception {
-    m_Classifier = Classifier.forName(name, options);
+    m_Classifier = AbstractClassifier.forName(name, options);
   }
 
   /**
@@ -121,8 +122,7 @@ public class WekaDemo {
     result.append("Weka - Demo\n===========\n\n");
 
     result.append("Classifier...: " 
-        + m_Classifier.getClass().getName() + " " 
-        + Utils.joinOptions(m_Classifier.getOptions()) + "\n");
+        + Utils.toCommandLine(m_Classifier) + "\n");
     if (m_Filter instanceof OptionHandler)
       result.append("Filter.......: " 
           + m_Filter.getClass().getName() + " " 
