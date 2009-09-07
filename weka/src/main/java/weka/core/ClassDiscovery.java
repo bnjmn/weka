@@ -24,7 +24,9 @@ package weka.core;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -337,12 +339,27 @@ public class ClassDiscovery
 
       // check all parts of the classpath, to include additional classes from
       // "parallel" directories/jars, not just the first occurence
-      tok = new StringTokenizer(
+      /*tok = new StringTokenizer(
 	  System.getProperty("java.class.path"), 
-	  System.getProperty("path.separator"));
+	  System.getProperty("path.separator")); */
+      
+      ClassloaderUtil clu = new ClassloaderUtil();
+      URLClassLoader sysLoader = (URLClassLoader)clu.getClass().getClassLoader();
+      URL[] cl_urls = sysLoader.getURLs();
 
-      while (tok.hasMoreTokens()) {
-	part = tok.nextToken();
+      //while (tok.hasMoreTokens()) {
+      for (i = 0; i < cl_urls.length; i++) {
+	//part = tok.nextToken();
+        part = cl_urls[i].toString();
+        if (part.startsWith("file:")) {
+          part.replace(" ", "%20");
+          try {
+            File temp = new File(new java.net.URI(part));
+            part = temp.getAbsolutePath();
+          } catch (URISyntaxException e) {            
+            e.printStackTrace();
+          }
+        }
 	if (VERBOSE)
 	  System.out.println("Classpath-part: " + part);
 
