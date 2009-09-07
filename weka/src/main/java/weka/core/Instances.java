@@ -104,12 +104,6 @@ public class Instances
    * @see #readInstance(Reader) */
   protected int m_Lines = 0;
   
-  /** used in randomizeAttribute and undoRandomizeAttribute to store/restore
-   * the index of attribute that was last shuffled, and it's original values 
-   */
-  private int attIdx4Randomization = -1;
-  private double[] attIdxOrigValues;
-  
   /**
    * Reads an ARFF file from a reader, and assigns a weight of
    * one to each instance. Lets the index of the class 
@@ -895,69 +889,6 @@ public class Instances
 
     for (int j = numInstances() - 1; j > 0; j--)
       swap(j, random.nextInt(j+1));
-  }
-
-  /**
-   * Does an undo of a previous call to randomizeAttribute, so that the
-   * original values of the attribute are restored. Only the original values
-   * before the last call to randomizeAttribute can be restored. Note, the
-   * original Instances object is modified. 
-   * 
-   * @throws Exception if there was no call to randomizeAttribute or if
-   * attributes were added or removed since the last call to
-   * <code>randomizeAttribute</code>
-   * @see #randomizeAttribute(int, Random, int)
-   */
-  public void undoRandomizeAttribute() throws Exception {
-    
-    if ( attIdx4Randomization < 0 )
-      throw new Exception("no randomization to undo!");
-
-    if ( attIdxOrigValues.length !=  this.numInstances() )
-      throw new Exception(
-	  "meanwhile number of attributes has changed, can't undo!");
-
-    for ( int i=0; i<attIdxOrigValues.length; i++ ) {
-      Instance instance = (Instance)(m_Instances.elementAt(i));
-      instance.modifyValue(attIdx4Randomization, attIdxOrigValues[i]);
-    }
-  
-    return;
-  }
-  
-  /**
-   * Shuffles the values of a given attribute in all instances. Note,
-   * the original Instances object is modified (i.e. no copying), and the
-   * method is not thread save. To avoid undefined behavior of an Instances
-   * object you should not perform other Instances modifying operations between
-   * a call to <code>randomizeAttribute</code> and
-   * <code>undoRandomizeAttribute</code>.
-   * 
-   * @param attIdx the index of the attribute to shuffle
-   * @param random a random number generator
-   * @param rounds how many rounds of shuffling, minimum must be 1. As more
-   * rounds of shuffling the more random your attribute value distribution
-   * (e.g. choose 3, but note that the time needed for shuffling is proportional
-   * to the number of rounds).
-   * @see #undoRandomizeAttribute()
-   */
-  public void randomizeAttribute(int attIdx, Random random, int rounds) {
-    
-    attIdx4Randomization = attIdx;
-    attIdxOrigValues = this.attributeToDoubleArray(attIdx);
-    int n = numInstances();
-    for ( int j=0; j<rounds; j++ ) {
-      for ( int i=0; i<n; i++ ) {
-	int r = random.nextInt(n);
-	Instance iOne = (Instance)(m_Instances.elementAt(i));
-	Instance iTwo = (Instance)(m_Instances.elementAt(r));
-	double helper = iOne.value(attIdx);
-	iOne.modifyValue(attIdx, iTwo.value(attIdx));
-	iTwo.modifyValue(attIdx, helper);
-      }
-    }
-    
-    return;
   }
   
   /**
