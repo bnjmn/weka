@@ -636,11 +636,11 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    */
   public Enumeration listOptions() {
 
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
 
     Enumeration enm = super.listOptions();
     while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
+      result.addElement((Option)enm.nextElement());
 
     result.addElement(new Option("\tLevel of Gaussian Noise wrt transformed target." + " (default 1)", "L", 1, "-L <double>"));
 
@@ -656,7 +656,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
 
     enm = ((OptionHandler) getKernel()).listOptions();
     while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
+      result.addElement((Option)enm.nextElement());
 
     return result.elements();
   }
@@ -763,22 +763,22 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    */
   public String[] getOptions() {
     int i;
-    Vector result;
+    Vector<String> result;
     String[] options;
 
-    result = new Vector();
+    result = new Vector<String>();
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+      result.addElement(options[i]);
 
-    result.add("-M");
-    result.add("" + getNoise());
+    result.addElement("-M");
+    result.addElement("" + getNoise());
 
-    result.add("-N");
-    result.add("" + m_filterType);
+    result.addElement("-N");
+    result.addElement("" + m_filterType);
 
-    result.add("-K");
-    result.add("" + m_kernel.getClass().getName() + " " + Utils.joinOptions(m_kernel.getOptions()));
+    result.addElement("-K");
+    result.addElement("" + m_kernel.getClass().getName() + " " + Utils.joinOptions(m_kernel.getOptions()));
 
     return (String[]) result.toArray(new String[result.size()]);
   }
