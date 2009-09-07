@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.60 $
+ * @version $Revision$
  */
 public final class Utils
   implements RevisionHandler {
@@ -1027,6 +1027,28 @@ public final class Utils
   }
 
   /**
+   * Generates a commandline of the given object. If the object is not 
+   * implementing OptionHandler, then it will only return the classname,
+   * otherwise also the options.
+   * 
+   * @param obj		the object to turn into a commandline
+   * @return		the commandline
+   */
+  public static String toCommandLine(Object obj) {
+    StringBuffer	result;
+    
+    result = new StringBuffer();
+    
+    if (obj != null) {
+      result.append(obj.getClass().getName());
+      if (obj instanceof OptionHandler)
+	result.append(joinOptions(((OptionHandler) obj).getOptions()));
+    }
+    
+    return result.toString().trim();
+  }
+  
+  /**
    * Computes entropy for an array of integers.
    *
    * @param counts array of counts
@@ -1875,7 +1897,7 @@ public final class Utils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.60 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
