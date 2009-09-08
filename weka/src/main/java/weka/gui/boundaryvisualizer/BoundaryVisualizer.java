@@ -266,6 +266,7 @@ public class BoundaryVisualizer
 
   // plot area dimensions
   protected int m_plotAreaWidth = 384;
+  //protected int m_plotAreaHeight = 384;
   protected int m_plotAreaHeight = 384;
 
   /** the plotting panel */

@@ -130,7 +130,7 @@ public class ClassifierSplitEvaluator
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 28;
+  private static final int RESULT_SIZE = 30;
 
   /** The number of IR statistics */
   private static final int NUM_IR_STATISTICS = 14;
@@ -538,6 +538,10 @@ public class ClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
+    // Prediction interval statistics
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+
     // ID/Targets/Predictions
     if (getAttributeID() >= 0) resultTypes[current++] = "";
     if (getPredTargetColumn()){
@@ -647,6 +651,10 @@ public class ClassifierSplitEvaluator
     resultNames[current++] = "Serialized_Model_Size";
     resultNames[current++] = "Serialized_Train_Set_Size";
     resultNames[current++] = "Serialized_Test_Set_Size";
+
+    // Prediction interval statistics
+    resultNames[current++] = "Coverage_of_Test_Cases_By_Regions";
+    resultNames[current++] = "Size_of_Predicted_Regions";
     
     // ID/Targets/Predictions
     if (getAttributeID() >= 0) resultNames[current++] = "Instance_ID";
@@ -812,6 +820,10 @@ public class ClassifierSplitEvaluator
     oostream.writeObject(test);
     result[current++] = new Double(bastream.size());
     
+    // Prediction interval statistics
+    result[current++] = new Double(eval.coverageOfTestCasesByPredictedRegions());
+    result[current++] = new Double(eval.sizeOfPredictedRegions());
+
     // IDs
     if (getAttributeID() >= 0){
       String idsString = "";

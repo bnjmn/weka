@@ -22,12 +22,9 @@
 
 package weka.classifiers.meta;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.classifiers.RandomizableParallelMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
@@ -43,6 +40,10 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

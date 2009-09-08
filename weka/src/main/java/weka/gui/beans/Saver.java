@@ -327,7 +327,7 @@ public class Saver
   }
   
   /**
-   * Method reacts to a threshold data event and starts the writing process
+   * Method reacts to a threshold data event ans starts the writing process
    * in batch mode.
    * 
    * @param e threshold data event.
