@@ -22,7 +22,7 @@
 
 package wekaexamples.classifiers;
 
-import weka.classifiers.Classifier
+import weka.classifiers.AbstractClassifier
 import weka.classifiers.Evaluation
 import weka.core.converters.ConverterUtils.DataSource
 import weka.core.Utils
@@ -89,7 +89,7 @@ else aindex = Integer.parseInt(tmp) - 1
 // 4. classifier
 tmp = Utils.getOption('W', args)
 if (tmp == '') throw new Exception('No classifier provided!')
-classifier = Classifier.forName(tmp, Utils.partitionOptions(args))
+classifier = AbstractClassifier.forName(tmp, Utils.partitionOptions(args))
 
 ////////////////////////
 // perform evaluation //
@@ -120,7 +120,7 @@ for (i = 0; i < folds; i++) {
   test  = Filter.useFilter(dataset, filterTest)
 
   // train + evaluate classifier
-  cls = Classifier.makeCopy(classifier)
+  cls = AbstractClassifier.makeCopy(classifier)
   cls.buildClassifier(train)
   eval.evaluateModel(cls, test)
 }

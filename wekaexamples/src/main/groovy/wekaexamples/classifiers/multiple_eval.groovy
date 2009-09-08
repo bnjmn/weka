@@ -28,7 +28,7 @@ package wekaexamples.classifiers;
 // Version: $Revision$
 
 import weka.classifiers.Evaluation
-import weka.classifiers.Classifier
+import weka.classifiers.AbstractClassifier
 import weka.core.converters.ConverterUtils.DataSource
 import weka.core.Utils
 
@@ -60,7 +60,7 @@ for (i in 0..(training_sets.size()-1)) {
     options    = Utils.splitOptions(c)
     classname  = options[0]
     options[0] = ""
-    cls        = Classifier.forName(classname, options)
+    cls        = AbstractClassifier.forName(classname, options)
 
     // build and evaluate classifier
     cls.buildClassifier(train)
