@@ -160,7 +160,6 @@ public class ClassAssigner
     Instances testSet = e.getTestSet();
     assignClass(testSet);
     notifyTestListeners(e);
-    
     if (e.isStructureOnly()) {
       m_connectedFormat = e.getTestSet();
       // tell any listening customizers (or other

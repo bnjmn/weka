@@ -34,6 +34,7 @@ import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.WekaException;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;

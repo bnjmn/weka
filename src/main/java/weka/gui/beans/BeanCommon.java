@@ -75,6 +75,16 @@ public interface BeanCommon {
    */
   void setLog(weka.gui.Logger logger);
 
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the named event
+   *
+   * @param esd the EventSetDescriptor for the event in question
+   * @return true if the object will accept a connection
+   */
+  boolean connectionAllowed(EventSetDescriptor esd);
+
   /**
    * Returns true if, at this time, 
    * the object will accept a connection via the named event

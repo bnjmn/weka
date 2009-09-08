@@ -103,7 +103,7 @@ public class Instances
    * we have to keep track of the number of lines read so far. 
    * @see #readInstance(Reader) */
   protected int m_Lines = 0;
-    
+  
   /**
    * Reads an ARFF file from a reader, and assigns a weight of
    * one to each instance. Lets the index of the class 
@@ -890,7 +890,7 @@ public class Instances
     for (int j = numInstances() - 1; j > 0; j--)
       swap(j, random.nextInt(j+1));
   }
-
+  
   /**
    * Reads a single instance from the reader and appends it
    * to the dataset.  Automatically expands the dataset if it

@@ -264,8 +264,9 @@ public class LearningRateResultProducer
     // Randomize on a copy of the original dataset
     Instances runInstances = new Instances(m_Instances);
     runInstances.randomize(new Random(run));
-    /*if (runInstances.classAttribute().isNominal()) {
-      runInstances.stratify(m_StepSize);
+    
+    /*if (runInstances.classAttribute().isNominal() && (m_Instances.numInstances() / m_StepSize >= 1)) {
+//      runInstances.stratify(m_Instances.numInstances() / m_StepSize);
     }*/
 
     // Tell the resultproducer to send results to us
