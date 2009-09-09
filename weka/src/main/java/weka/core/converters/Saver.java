@@ -37,7 +37,7 @@ import java.io.Serializable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public interface Saver
   extends Serializable, RevisionHandler {

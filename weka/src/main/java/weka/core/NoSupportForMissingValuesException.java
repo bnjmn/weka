@@ -27,7 +27,7 @@ package weka.core;
  * data with missing values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class NoSupportForMissingValuesException
   extends WekaException {

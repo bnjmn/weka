@@ -30,7 +30,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 
 /**
@@ -258,7 +257,7 @@ public class Discretize extends Expression {
       categorical = true;
     }
     tempAtt = (categorical) 
-    ? new Attribute("temp", (FastVector)null) 
+    ? new Attribute("temp", (ArrayList<String>)null) 
     : new Attribute(m_fieldName + "_discretized(optype=continuous)");
       
     if (categorical) {
@@ -279,9 +278,9 @@ public class Discretize extends Expression {
       }
 
       // now make this into a nominal attribute
-      FastVector values = new FastVector();
+      ArrayList<String> values = new ArrayList<String>();
       for (int i = 0; i < tempAtt.numValues(); i++) {
-        values.addElement(tempAtt.value(i)); 
+        values.add(tempAtt.value(i)); 
       }
 
       m_outputDef = new Attribute(m_fieldName + "_discretized", values);
@@ -304,7 +303,7 @@ public class Discretize extends Expression {
       // for all expressions after all derived fields are collected
       return (m_opType == FieldMetaInfo.Optype.CATEGORICAL || 
           m_opType == FieldMetaInfo.Optype.ORDINAL)
-      ? new Attribute(m_fieldName + "_discretized", new FastVector())
+      ? new Attribute(m_fieldName + "_discretized", new ArrayList<String>())
       : new Attribute(m_fieldName + "_discretized(optype=continuous)");
     }
     return m_outputDef;

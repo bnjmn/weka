@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
  * @see XMLSerialization
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision$ 
  */
 public class XMLSerializationMethodHandler
    implements RevisionHandler {
@@ -271,6 +271,6 @@ public class XMLSerializationMethodHandler
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.5 $");
+     return RevisionUtils.extract("$Revision$");
    }
 }

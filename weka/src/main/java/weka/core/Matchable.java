@@ -27,7 +27,7 @@ package weka.core;
  * algorithms.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public interface Matchable {
 

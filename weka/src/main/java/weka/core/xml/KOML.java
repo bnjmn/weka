@@ -104,7 +104,7 @@ public class KOML
     * @throws Exception if something goes wrong while reading from the stream
     */
    public static Object read(InputStream stream) throws Exception {
-      Class                            komlClass;
+      Class<?>                            komlClass;
       Class[]                          komlClassArgs;
       Object[]                         komlArgs;
       java.lang.reflect.Constructor    constructor;
@@ -180,7 +180,7 @@ public class KOML
     * @throws Exception if something goes wrong while writing to the stream
     */
    public static boolean write(OutputStream stream, Object o) throws Exception {
-      Class                            komlClass;
+      Class<?>                            komlClass;
       Class[]                          komlClassArgs;
       Object[]                         komlArgs;
       java.lang.reflect.Constructor    constructor;
@@ -235,6 +235,6 @@ public class KOML
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.4 $");
+     return RevisionUtils.extract("$Revision$");
    }
 }

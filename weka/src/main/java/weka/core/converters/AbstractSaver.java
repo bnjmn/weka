@@ -36,7 +36,7 @@ import java.io.OutputStream;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public abstract class AbstractSaver
   implements Saver, CapabilitiesHandler {

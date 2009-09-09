@@ -33,7 +33,7 @@ import java.util.Hashtable;
  * that are allowed for a certain class.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision$ 
  */
 public class PropertyHandler
    implements RevisionHandler {
@@ -47,7 +47,7 @@ public class PropertyHandler
     * @see #removeIgnored(String)
     * @see #isIgnored(String)
     */
-   protected Hashtable m_Ignored = null;
+  protected Hashtable<Object,HashSet<String>> m_Ignored = null;
    
    /**
     * lists for a class the properties allowed to use for setting and getting.
@@ -59,7 +59,7 @@ public class PropertyHandler
     * @see #removeAllowed(Class,String)
     * @see #isAllowed(Class,String)
     */
-   protected Hashtable m_Allowed = null;
+  protected Hashtable<Object,HashSet<String>> m_Allowed = null;
 
    /**
     * initializes the handling 
@@ -67,8 +67,8 @@ public class PropertyHandler
    public PropertyHandler() {
       super();
 
-      m_Ignored = new Hashtable();
-      m_Allowed = new Hashtable();
+      m_Ignored = new Hashtable<Object,HashSet<String>>();
+      m_Allowed = new Hashtable<Object,HashSet<String>>();
    }
    
    /**
@@ -94,9 +94,9 @@ public class PropertyHandler
     * @see #m_Ignored 
     */
    public void addIgnored(String displayName) {
-      HashSet        list;
+      HashSet<String>        list;
       
-      list = new HashSet();
+      list = new HashSet<String>();
       list.add(displayName);
       
       m_Ignored.put(displayName, list);
@@ -111,14 +111,14 @@ public class PropertyHandler
     * @see #m_Ignored 
     */
    public void addIgnored(Class c, String displayName) {
-      HashSet        list;
+      HashSet<String>        list;
       
       // retrieve list
       if (m_Ignored.contains(c)) {
-         list = (HashSet) m_Ignored.get(c);
+         list = (HashSet<String>) m_Ignored.get(c);
       }
       else {
-         list = new HashSet();
+         list = new HashSet<String>();
          m_Ignored.put(c, list);
       }
       
@@ -254,12 +254,12 @@ public class PropertyHandler
     * @see #m_Allowed
     */
    public void addAllowed(Class c, String displayName) {
-      HashSet        list;
+      HashSet<String>        list;
       
       // retrieve list
-      list = (HashSet) m_Allowed.get(c);
+      list = (HashSet<String>) m_Allowed.get(c);
       if (list == null) {
-         list = new HashSet();
+         list = new HashSet<String>();
          m_Allowed.put(c, list);
       }
       
@@ -359,6 +359,6 @@ public class PropertyHandler
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.4 $");
+     return RevisionUtils.extract("$Revision$");
    }
 }

@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision$
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation
@@ -262,10 +262,10 @@ public class TechnicalInformation
   protected String m_ID = "";
   
   /** stores all the values associated with the fields (FIELD - String) */
-  protected Hashtable m_Values = new Hashtable();
+  protected Hashtable<Field,String> m_Values = new Hashtable<Field,String>();
 
   /** additional technical informations */
-  protected Vector m_Additional = new Vector();
+  protected Vector<TechnicalInformation> m_Additional = new Vector<TechnicalInformation>();
   
   /**
    * Initializes the information with the given type
@@ -399,7 +399,7 @@ public class TechnicalInformation
    * 
    * @return		all currently stored fields
    */
-  public Enumeration fields() {
+  public Enumeration<Field> fields() {
     return m_Values.keys();
   }
   
@@ -418,7 +418,7 @@ public class TechnicalInformation
    * 
    * @return an enumeration over all additional technical informations
    */
-  public Enumeration additional() {
+  public Enumeration<TechnicalInformation> additional() {
     return m_Additional.elements();
   }
   
@@ -460,7 +460,7 @@ public class TechnicalInformation
     String	result;
     String[]	authors;
     int		i;
-    Enumeration	enm;
+    Enumeration<TechnicalInformation>	enm;
     
     result  = "";
     authors = getAuthors();
@@ -594,17 +594,16 @@ public class TechnicalInformation
    */
   public String toBibTex() {
     String		result;
-    Enumeration		enm;
     Field		field;
-    Vector		list;
+    Vector<Field>		list;
     int			i;
     String		value;
     
     result = "@" + getType() + "{" + getID() + "";
     
     // sort the fields
-    list = new Vector();
-    enm  = fields();
+    list = new Vector<Field>();
+    Enumeration<Field> enm  = fields();
     while (enm.hasMoreElements())
       list.add(enm.nextElement());
     Collections.sort(list);
@@ -622,9 +621,9 @@ public class TechnicalInformation
     result += "\n}";
     
     // additional informations?
-    enm = additional();
-    while (enm.hasMoreElements()) {
-      result += "\n\n" + ((TechnicalInformation) enm.nextElement()).toBibTex();
+    Enumeration<TechnicalInformation> enm2 = additional();
+    while (enm2.hasMoreElements()) {
+      result += "\n\n" + ((TechnicalInformation) enm2.nextElement()).toBibTex();
     }
     
     return result;
@@ -636,7 +635,7 @@ public class TechnicalInformation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

@@ -24,6 +24,7 @@ package weka.core;
 
 import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.ArrayList;
 
 /**
  * Class for handling an instance. All values (numeric, date, nominal, string
@@ -1110,19 +1111,19 @@ public class Instance
       Attribute weight = new Attribute("weight");
       
       // Create vector to hold nominal values "first", "second", "third" 
-      FastVector my_nominal_values = new FastVector(3); 
-      my_nominal_values.addElement("first"); 
-      my_nominal_values.addElement("second"); 
-      my_nominal_values.addElement("third"); 
+      ArrayList<String> my_nominal_values = new ArrayList<String>(3); 
+      my_nominal_values.add("first"); 
+      my_nominal_values.add("second"); 
+      my_nominal_values.add("third"); 
       
       // Create nominal attribute "position" 
       Attribute position = new Attribute("position", my_nominal_values);
       
       // Create vector of the above attributes 
-      FastVector attributes = new FastVector(3);
-      attributes.addElement(length);
-      attributes.addElement(weight);
-      attributes.addElement(position);
+      ArrayList<Attribute> attributes = new ArrayList<Attribute>(3);
+      attributes.add(length);
+      attributes.add(weight);
+      attributes.add(position);
       
       // Create the empty dataset "race" with above attributes
       Instances race = new Instances("race", attributes, 0);

@@ -32,7 +32,7 @@ import weka.core.RevisionUtils;
  * make reweighting of instances easy to manage.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class ReferenceInstances
   extends Instances {
@@ -61,7 +61,7 @@ public class ReferenceInstances
    */
   public final void addReference(Instance instance) {
 
-    m_Instances.addElement(instance);
+    m_Instances.add(instance);
   }
   
   /**
@@ -70,6 +70,6 @@ public class ReferenceInstances
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

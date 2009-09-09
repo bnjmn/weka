@@ -90,7 +90,7 @@ import org.w3c.dom.Element;
  * @see #writeToXML(Element, Object, String)
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision$ 
  */
 public class XMLSerialization
    implements RevisionHandler {
@@ -173,7 +173,7 @@ public class XMLSerialization
 
    /** for overriding class names (Class &lt;-&gt; Classname (String)) 
     * @see #overrideClassname(Object) */
-   protected Hashtable m_ClassnameOverride = null;
+   protected Hashtable<Class,String> m_ClassnameOverride = null;
    
    /**
     * initializes the serialization
@@ -212,7 +212,7 @@ public class XMLSerialization
       m_Properties        = new PropertyHandler();
       m_CustomMethods     = new XMLSerializationMethodHandler(this);
 
-      m_ClassnameOverride = new Hashtable();
+      m_ClassnameOverride = new Hashtable<Class,String>();
       // java.io.File is sometimes represented as another class:
       // - Win32: sun.awt.shell.Win32ShellFolder2 
       // - Linux: sun.awt.shell.DefaultShellFolder
@@ -283,9 +283,9 @@ public class XMLSerialization
       BeanInfo                   info;
       PropertyDescriptor[]       desc;
       int                        i;
-      Hashtable                  result;
+      Hashtable<String,PropertyDescriptor>                  result;
       
-      result = new Hashtable();
+      result = new Hashtable<String,PropertyDescriptor>();
 
       info = Introspector.getBeanInfo(o.getClass());
       desc = info.getPropertyDescriptors();
@@ -1325,8 +1325,8 @@ public class XMLSerialization
     * @return the dimensions of the array
     */
    protected int[] getArrayDimensions(Element node) {
-     Vector         children;
-     Vector         tmpVector;      
+     Vector<Element>         children;
+     Vector<Integer>         tmpVector;      
      int[]          tmp;
      int[]          result;
      int            i;
@@ -1338,7 +1338,7 @@ public class XMLSerialization
        children = null;
      
      if (children != null) {
-       tmpVector = new Vector();
+       tmpVector = new Vector<Integer>();
 
        if (children.size() > 0) {
          // are children also arrays?
@@ -1383,8 +1383,8 @@ public class XMLSerialization
       boolean              primitive;
       boolean              array;
       boolean              isnull;
-      Class                cls;
-      Vector               children;
+      Class<?>                cls;
+      Vector<Element>               children;
       Object               result;
       int                  i;
       Constructor          constructor;
@@ -1699,6 +1699,6 @@ public class XMLSerialization
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.16 $");
+     return RevisionUtils.extract("$Revision$");
    }
 }

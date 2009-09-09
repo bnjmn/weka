@@ -56,13 +56,13 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class Stopwords
   implements RevisionHandler {
   
   /** The hash set containing the list of stopwords */
-  protected HashSet m_Words = null;
+  protected HashSet<String> m_Words = null;
 
   /** The default stopwords object (stoplist based on Rainbow) */
   protected static Stopwords m_Stopwords;
@@ -77,7 +77,7 @@ public class Stopwords
    * initializes the stopwords (based on <a href="http://www.cs.cmu.edu/~mccallum/bow/rainbow/" target="_blank">Rainbow</a>).
    */
   public Stopwords() {
-    m_Words = new HashSet();
+    m_Words = new HashSet<String>();
 
     //Stopwords list from Rainbow
     add("a");
@@ -652,11 +652,11 @@ public class Stopwords
    * @return the enumeration over all stopwords
    */
   public Enumeration elements() {
-    Iterator    iter;
-    Vector      list;
+    Iterator<String>    iter;
+    Vector<String>      list;
 
     iter = m_Words.iterator();
-    list = new Vector();
+    list = new Vector<String>();
 
     while (iter.hasNext())
       list.add(iter.next());
@@ -791,7 +791,7 @@ public class Stopwords
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
@@ -817,7 +817,7 @@ public class Stopwords
     boolean print = Utils.getFlag('p', args);
 
     // words to process?
-    Vector words = new Vector();
+    Vector<String> words = new Vector<String>();
     for (int i = 0; i < args.length; i++) {
       if (args[i].trim().length() > 0)
         words.add(args[i].trim());

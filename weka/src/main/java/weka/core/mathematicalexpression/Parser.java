@@ -437,7 +437,7 @@ public class Parser extends java_cup.runtime.lr_parser {
    */
   public static void main(String args[]) throws Exception {
     // read symbols, if present
-    HashMap symbols = new HashMap();
+    HashMap<String,Double> symbols = new HashMap<String,Double>();
     if (args.length > 0) {
       if (args[0].equals("-symbols")) {
         // parse symbols

@@ -32,7 +32,7 @@ import java.util.Vector;
  * Abstract superclass for tokenizers that take characters as delimiters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public abstract class CharacterDelimitedTokenizer
   extends Tokenizer {
@@ -46,9 +46,9 @@ public abstract class CharacterDelimitedTokenizer
    * @return 		an enumeration of all available options.
    */
   public Enumeration listOptions() {
-    Vector	result;
+    Vector<Option>	result;
     
-    result = new Vector();
+    result = new Vector<Option>();
     
     result.addElement(new Option(
         "\tThe delimiters to use\n"

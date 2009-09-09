@@ -106,7 +106,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Malcolm Ware (mfw4[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class KDTree
   extends NearestNeighbourSearch
@@ -712,13 +712,13 @@ public class KDTree
    * @return 		an enumeration of the measure names
    */
   public Enumeration enumerateMeasures() {
-    Vector newVector = new Vector();
+    Vector<String> newVector = new Vector<String>();
     newVector.addElement("measureTreeSize");
     newVector.addElement("measureNumLeaves");
     newVector.addElement("measureMaxDepth");
     if (m_Stats != null) {
       for (Enumeration e = m_Stats.enumerateMeasures(); e.hasMoreElements();) {
-        newVector.addElement(e.nextElement());
+        newVector.addElement((String)e.nextElement());
       }
     }
     return newVector.elements();
@@ -1203,7 +1203,7 @@ public class KDTree
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector();
+    Vector<Option> newVector = new Vector<Option>();
     
     newVector.add(new Option(
 	"\tNode splitting method to use.\n"
@@ -1328,6 +1328,6 @@ public class KDTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

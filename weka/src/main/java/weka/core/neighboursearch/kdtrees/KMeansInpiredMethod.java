@@ -57,7 +57,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class KMeansInpiredMethod
   extends KDTreeNodeSplitter
@@ -376,6 +376,6 @@ public class KMeansInpiredMethod
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

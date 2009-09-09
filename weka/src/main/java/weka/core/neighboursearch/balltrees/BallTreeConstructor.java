@@ -39,7 +39,7 @@ import java.util.Vector;
  * Abstract class for constructing a BallTree .
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public abstract class BallTreeConstructor 
   implements OptionHandler, Serializable, RevisionHandler {
@@ -263,7 +263,7 @@ public abstract class BallTreeConstructor
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector();
+    Vector<Option> newVector = new Vector<Option>();
     
     newVector.addElement(new Option(
 	"\tSet maximum number of instances in a leaf node\n"
@@ -324,6 +324,6 @@ public abstract class BallTreeConstructor
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

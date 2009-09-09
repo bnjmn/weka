@@ -35,7 +35,7 @@ import java.util.Vector;
  * Abstract class for splitting a ball tree's BallNode.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public abstract class BallSplitter
   implements Serializable, OptionHandler, RevisionHandler {
@@ -168,6 +168,6 @@ public abstract class BallSplitter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

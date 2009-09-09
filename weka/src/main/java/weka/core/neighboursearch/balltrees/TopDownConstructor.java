@@ -69,7 +69,7 @@ import java.util.Vector;
  <!-- options-end --> 
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class TopDownConstructor
   extends BallTreeConstructor 
@@ -308,7 +308,7 @@ public class TopDownConstructor
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector();
+    Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
 	"\tBall splitting algorithm to use.",
@@ -382,6 +382,6 @@ public class TopDownConstructor
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -65,7 +65,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end --> 
  *
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class ManhattanDistance
   extends NormalizableDistance
@@ -149,6 +149,6 @@ public class ManhattanDistance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

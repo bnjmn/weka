@@ -22,7 +22,6 @@
 package weka.core.xml;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.ProtectedProperties;
@@ -41,6 +40,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
+import java.util.ArrayList;
 
 import org.w3c.dom.Element;
 
@@ -48,7 +48,7 @@ import org.w3c.dom.Element;
  * XML representation of the Instances class.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class XMLInstances
   extends XMLDocument
@@ -511,20 +511,20 @@ public class XMLInstances
 
   /**
    * returns the labels listed underneath this (nominal) attribute in a 
-   * FastVector
+   * ArrayList
    * 
    * @param parent	the (nominal) attribute node
    * @return		the label vector
    * @throws Exception	if generation fails
    */
-  protected FastVector createLabels(Element parent) throws Exception {
-    FastVector		result;
+  protected ArrayList<String> createLabels(Element parent) throws Exception {
+    ArrayList<String>		result;
     Vector		list;
     Element		node;
     Element		labelsnode;
     int			i;
     
-    result = new FastVector();
+    result = new ArrayList<String>();
     
     // find labels node directly underneath this attribute, but not in
     // deeper nested attributes (e.g., within relational attributes)
@@ -538,7 +538,7 @@ public class XMLInstances
       list  = getChildTags(labelsnode, TAG_LABEL);
       for (i = 0; i < list.size(); i++) {
 	node = (Element) list.get(i);
-	result.addElement(getContent(node));
+	result.add(getContent(node));
       }
     }
     
@@ -557,10 +557,10 @@ public class XMLInstances
     String		name;
     int			type;
     Attribute		result;
-    FastVector		values;
+    ArrayList<String>		values;
     ProtectedProperties	metadata;
     Vector		list;
-    FastVector		atts;
+    ArrayList<Attribute>		atts;
     
     result = null;
     
@@ -611,9 +611,9 @@ public class XMLInstances
 	
       case Attribute.STRING:
 	if (metadata == null)
-	  result = new Attribute(name, (FastVector) null);
+	  result = new Attribute(name, (ArrayList<String>) null);
 	else
-	  result = new Attribute(name, (FastVector) null, metadata);
+	  result = new Attribute(name, (ArrayList<String>) null, metadata);
 	break;
 	
       case Attribute.RELATIONAL:
@@ -638,14 +638,14 @@ public class XMLInstances
    * @return		the vector with the generated attributes
    * @throws Exception	if generation fails, e.g., due to unknown attribute type
    */
-  protected FastVector createAttributes(Element parent, int[] classIndex) throws Exception {
+  protected ArrayList<Attribute> createAttributes(Element parent, int[] classIndex) throws Exception {
     Vector	list;
-    FastVector	result;
+    ArrayList<Attribute>	result;
     int		i;
     Element	node;
     Attribute	att;
 
-    result        = new FastVector();
+    result        = new ArrayList<Attribute>();
     classIndex[0] = -1;
     
     list = getChildTags(parent, TAG_ATTRIBUTE);
@@ -654,7 +654,7 @@ public class XMLInstances
       att = createAttribute(node);
       if (node.getAttribute(ATT_CLASS).equals(VAL_YES))
 	classIndex[0] = i;
-      result.addElement(att);
+      result.add(att);
     }
     
     return result;
@@ -784,7 +784,7 @@ public class XMLInstances
     Element	root;
     Element	node;
     Vector	list;
-    FastVector	atts;
+    ArrayList<Attribute>	atts;
     Version	version;
     int[]	classIndex;
 
@@ -852,7 +852,7 @@ public class XMLInstances
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

@@ -79,7 +79,7 @@ public class SnowballStemmer
   protected static boolean m_Present = false;
 
   /** contains the all the found stemmers (language names). */
-  protected static Vector m_Stemmers;
+  protected static Vector<String> m_Stemmers;
 
   /** the current stemmer. */
   protected Object m_Stemmer;
@@ -159,9 +159,9 @@ public class SnowballStemmer
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector        result;
+    Vector<Option>        result;
     
-    result = new Vector();
+    result = new Vector<Option>();
     
     result.addElement(new Option(
         "\tThe name of the snowball stemmer (default 'porter').\n"
@@ -206,9 +206,9 @@ public class SnowballStemmer
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
+    Vector<String>        result;
     
-    result  = new Vector();
+    result  = new Vector<String>();
     
     if (getStemmer() != null) {
       result.add("-S");
@@ -249,7 +249,7 @@ public class SnowballStemmer
     if (m_Stemmers != null)
       return;
     
-    m_Stemmers = new Vector();
+    m_Stemmers = new Vector<String>();
     
     if (!m_Present)
       return;
@@ -338,7 +338,7 @@ public class SnowballStemmer
    * @param name        the name of the stemmer, e.g., "porter"
    */
   public void setStemmer(String name) {
-    Class       snowballClass;
+    Class<?>       snowballClass;
     Class[]     argClasses;
     
     initStemmers();
