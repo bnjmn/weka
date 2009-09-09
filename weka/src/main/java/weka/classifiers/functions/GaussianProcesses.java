@@ -771,7 +771,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     for (i = 0; i < options.length; i++)
       result.addElement(options[i]);
 
-    result.addElement("-M");
+    result.addElement("-L");
     result.addElement("" + getNoise());
 
     result.addElement("-N");
