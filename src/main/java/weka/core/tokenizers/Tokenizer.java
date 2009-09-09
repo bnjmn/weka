@@ -34,7 +34,7 @@ import java.util.Vector;
  * A superclass for all tokenizer algorithms.
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public abstract class Tokenizer
   implements Enumeration, OptionHandler, Serializable, RevisionHandler {

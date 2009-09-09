@@ -30,7 +30,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 
 /**
@@ -316,12 +315,12 @@ public class TargetMetaInfo extends FieldMetaInfo implements Serializable {
     }
     if (m_values.size() == 0) {
       // return a String attribute
-      return new Attribute(m_fieldName, (FastVector)null);
+      return new Attribute(m_fieldName, (ArrayList<String>)null);
     }
     
-    FastVector values = new FastVector();
+    ArrayList<String> values = new ArrayList<String>();
     for (String val : m_values) {
-      values.addElement(val);
+      values.add(val);
     }
     return new Attribute(m_fieldName, values);
   }

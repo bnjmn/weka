@@ -38,7 +38,7 @@ import java.io.Serializable;
  * set or get numbers not in string format should use 0-based numbers).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class SingleIndex
   implements Serializable, RevisionHandler {
@@ -209,7 +209,7 @@ public class SingleIndex
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -253,7 +253,7 @@ public class Jython
    * @return			the deserialized object
    */
   public static Object deserialize(InputStream in) {
-    Class 		cls;
+    Class<?> 		cls;
     Class[] 		paramTypes;
     Constructor 	constr;
     Object[] 		arglist;

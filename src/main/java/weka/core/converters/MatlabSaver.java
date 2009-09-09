@@ -112,13 +112,13 @@ public class MatlabSaver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector      result;
+    Vector<Option>      result;
     
-    result = new Vector();
+    result = new Vector<Option>();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+      result.addElement((Option)en.nextElement());
     
     result.addElement(
         new Option(

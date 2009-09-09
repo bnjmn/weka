@@ -103,11 +103,11 @@ public abstract class CheckScheme
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+      result.addElement((Option)en.nextElement());
     
     result.addElement(new Option(
         "\tThe number of instances in the datasets (default 20).",
@@ -226,11 +226,11 @@ public abstract class CheckScheme
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
+    Vector<String>        result;
     String[]      options;
     int           i;
     
-    result = new Vector();
+    result = new Vector<String>();
     
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -431,9 +431,9 @@ public abstract class CheckScheme
    */
   protected static String[] listToArray(String value) {
     StringTokenizer	tok;
-    Vector		list;
+    Vector<String>		list;
     
-    list = new Vector();
+    list = new Vector<String>();
     tok = new StringTokenizer(value, ",");
     while (tok.hasMoreTokens())
       list.add(tok.nextToken());

@@ -52,7 +52,7 @@ import java.util.Vector;
  *
  * @author  Sebastian Germesin (sebastian.germesin@dfki.de)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class NGramTokenizer
   extends CharacterDelimitedTokenizer {
@@ -94,14 +94,14 @@ public class NGramTokenizer
    * @return 		an enumeration of all available options.
    */
   public Enumeration listOptions() {
-    Vector	result;
+    Vector<Option>	result;
     Enumeration enm;
     
-    result = new Vector();
+    result = new Vector<Option>();
     
     enm = super.listOptions();
     while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
+      result.addElement((Option)enm.nextElement());
 
     result.addElement(new Option(
 	"\tThe max size of the Ngram (default = 3).",
@@ -316,7 +316,7 @@ public class NGramTokenizer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

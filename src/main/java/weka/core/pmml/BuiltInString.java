@@ -3,7 +3,6 @@ package weka.core.pmml;
 import java.util.ArrayList;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 
 /**
  * Built-in function for uppercase, substring and trimblanks.
@@ -103,14 +102,14 @@ public class BuiltInString extends Function {
       if (m_func == StringFunc.SUBSTRING) {
         // there is no way we can compute the legal values for this attribute
         // in advance of the application of this function. So return a string attribute
-        m_outputDef = new Attribute("BuiltInStringResult:substring", (weka.core.FastVector)null);
+        m_outputDef = new Attribute("BuiltInStringResult:substring", (ArrayList<String>)null);
       }
       // for the other functions we can compute the resulting set of values
       Attribute inputVals = m_parameterDefs.get(0);
-      FastVector newVals = new FastVector();
+      ArrayList<String> newVals = new ArrayList<String>();
       for (int i = 0; i < inputVals.numValues(); i++) {
         String inVal = inputVals.value(i);
-        newVals.addElement(m_func.eval(new Object[] {inVal}));
+        newVals.add(m_func.eval(new Object[] {inVal}));
       }
       m_outputDef = new Attribute("BuiltInStringResult:" + m_func.toString(), newVals); 
     }

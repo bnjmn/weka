@@ -30,7 +30,7 @@ import java.util.Random;
  * of floating-point values.
  *
  * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class AlgVector 
   implements Cloneable, Serializable, RevisionHandler {
@@ -402,7 +402,7 @@ public class AlgVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

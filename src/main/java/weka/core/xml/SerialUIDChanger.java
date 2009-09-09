@@ -41,7 +41,7 @@ import java.io.ObjectOutputStream;
  * not losing the data stored in the binary format.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision$ 
  */
 public class SerialUIDChanger
    implements RevisionHandler {
@@ -222,7 +222,7 @@ public class SerialUIDChanger
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.3 $");
+     return RevisionUtils.extract("$Revision$");
    }
    
    /**

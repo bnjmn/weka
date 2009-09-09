@@ -33,7 +33,7 @@ import java.util.NoSuchElementException;
  * 
  * @author  Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class AlphabeticTokenizer
   extends Tokenizer {
@@ -133,7 +133,7 @@ public class AlphabeticTokenizer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

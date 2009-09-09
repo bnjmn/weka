@@ -46,7 +46,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class LinearNNSearch
   extends NearestNeighbourSearch {
@@ -99,7 +99,7 @@ public class LinearNNSearch
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
     
     result.add(new Option(
 	"\tSkip identical instances (distances equal to zero).\n",
@@ -350,6 +350,6 @@ public class LinearNNSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

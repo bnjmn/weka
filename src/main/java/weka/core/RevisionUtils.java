@@ -25,7 +25,7 @@ package weka.core;
  * Contains utility functions for handling revisions.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class RevisionUtils {
   
@@ -33,7 +33,7 @@ public class RevisionUtils {
    * Enumeration of source control types.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision$
    */
   public enum Type {
     /** unknown source control revision. */

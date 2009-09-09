@@ -55,7 +55,7 @@ import org.xml.sax.InputSource;
  * 
  * @see #PI 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class XMLDocument
   implements RevisionHandler {
@@ -427,7 +427,7 @@ public class XMLDocument
    * @param parent 	the node to get the children from
    * @return 		a vector containing all the non-text children
    */
-  public static Vector getChildTags(Node parent) {
+  public static Vector<Element> getChildTags(Node parent) {
     return getChildTags(parent, "");
   }
   
@@ -438,12 +438,12 @@ public class XMLDocument
    * @param name 	the name of the tags to return, "" for all
    * @return 		a vector containing all the non-text children
    */
-  public static Vector getChildTags(Node parent, String name) {
-    Vector         result;
+  public static Vector<Element> getChildTags(Node parent, String name) {
+    Vector<Element>         result;
     int            i;
     NodeList       list;
     
-    result = new Vector();
+    result = new Vector<Element>();
     
     list = parent.getChildNodes();
     for (i = 0; i < list.getLength(); i++) {
@@ -454,7 +454,7 @@ public class XMLDocument
 	if (!((Element) list.item(i)).getTagName().equals(name))
 	  continue;
       }
-      result.add(list.item(i));
+      result.add((Element)list.item(i));
     }
     
     return result;
@@ -653,7 +653,7 @@ public class XMLDocument
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

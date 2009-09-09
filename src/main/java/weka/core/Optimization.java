@@ -141,7 +141,7 @@ import weka.core.TechnicalInformation.Type;
  * No.126, pp 505-535. <p/>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision$ 
  * @see #getTechnicalInformation()
  */
 public abstract class Optimization
@@ -1388,7 +1388,7 @@ public abstract class Optimization
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 }

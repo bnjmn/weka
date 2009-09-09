@@ -27,7 +27,7 @@ package weka.core;
  * reference to a dataset, when one is required.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class UnassignedDatasetException
   extends RuntimeException {

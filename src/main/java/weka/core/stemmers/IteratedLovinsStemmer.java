@@ -50,7 +50,7 @@ import weka.core.RevisionUtils;
  <!-- technical-bibtex-end -->
  *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  * @see     LovinsStemmer
  */
 public class IteratedLovinsStemmer 
@@ -98,7 +98,7 @@ public class IteratedLovinsStemmer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

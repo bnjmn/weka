@@ -35,7 +35,7 @@ import java.io.LineNumberReader;
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision$ 
  */
 public class Version
   implements Comparable, RevisionHandler {
@@ -236,7 +236,7 @@ public class Version
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

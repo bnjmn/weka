@@ -44,26 +44,26 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class AllJavadoc
   extends Javadoc {
 
   /** contains all the  */
-  protected static Vector m_Javadocs;
+  protected static Vector<Javadoc> m_Javadocs;
   
   /** determine all classes derived from Javadoc and instantiate them */
   static {
     // get all classnames, besides this one
-    Vector list = ClassDiscovery.find(Javadoc.class, Javadoc.class.getPackage().getName());
+    Vector<String> list = ClassDiscovery.find(Javadoc.class, Javadoc.class.getPackage().getName());
     list.remove(AllJavadoc.class.getName());
     
     // instantiate them
-    m_Javadocs = new Vector();
+    m_Javadocs = new Vector<Javadoc>();
     for (int i = 0; i < list.size(); i++) {
       try {
 	Class cls = Class.forName((String) list.get(i));
-	m_Javadocs.add(cls.newInstance());
+	m_Javadocs.add((Javadoc)cls.newInstance());
       }
       catch (Exception e) {
 	e.printStackTrace();
@@ -142,7 +142,7 @@ public class AllJavadoc
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

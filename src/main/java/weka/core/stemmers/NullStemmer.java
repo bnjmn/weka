@@ -31,7 +31,7 @@ import weka.core.RevisionUtils;
  <!-- globalinfo-end -->
  * 
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.5 $
+ * @version   $Revision$
  */
 public class NullStemmer 
   implements Stemmer {
@@ -74,7 +74,7 @@ public class NullStemmer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

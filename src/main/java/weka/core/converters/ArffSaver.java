@@ -46,7 +46,7 @@ import java.io.PrintWriter;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  * @see Saver
  */
 public class ArffSaver 
@@ -220,7 +220,7 @@ public class ArffSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

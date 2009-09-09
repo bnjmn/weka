@@ -88,7 +88,7 @@ import java.util.Vector;
  <!-- options-end --> 
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class BallTree
   extends NearestNeighbourSearch 
@@ -496,13 +496,13 @@ public class BallTree
    * @return 		an enumeration of the measure names
    */
   public Enumeration enumerateMeasures() {
-    Vector newVector = new Vector();
+    Vector<String> newVector = new Vector<String>();
     newVector.addElement("measureTreeSize");
     newVector.addElement("measureNumLeaves");
     newVector.addElement("measureMaxDepth");
     if (m_Stats != null) {
       for (Enumeration e = m_Stats.enumerateMeasures(); e.hasMoreElements();) {
-        newVector.addElement(e.nextElement());
+        newVector.addElement((String)e.nextElement());
       }
     }
     return newVector.elements();
@@ -551,7 +551,7 @@ public class BallTree
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector();
+    Vector<Option> newVector = new Vector<Option>();
     
     newVector.addElement(new Option(
 	"\tThe construction method to employ. Either TopDown or BottomUp\n"
@@ -629,6 +629,6 @@ public class BallTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

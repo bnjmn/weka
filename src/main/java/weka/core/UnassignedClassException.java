@@ -27,7 +27,7 @@ package weka.core;
  * class assigned to it, but a class is needed to perform the operation.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class UnassignedClassException
   extends RuntimeException {

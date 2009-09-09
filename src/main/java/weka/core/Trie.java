@@ -37,7 +37,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * on WikiPedia.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class Trie
   implements Serializable, Cloneable, Collection<String>, RevisionHandler {
@@ -49,7 +49,7 @@ public class Trie
    * Represents a node in the trie.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision$
    */
   public static class TrieNode
     extends DefaultMutableTreeNode
@@ -419,7 +419,7 @@ public class Trie
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -427,7 +427,7 @@ public class Trie
    * Represents an iterator over a trie
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision$
    */
   public static class TrieIterator 
     implements Iterator<String>, RevisionHandler {
@@ -493,7 +493,7 @@ public class Trie
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -534,11 +534,11 @@ public class Trie
    */
   public boolean addAll(Collection<? extends String> c) {
     boolean		result;
-    Iterator<String>	iter;
+    Iterator<? extends String>	iter;
     
     result = false;
     
-    iter = (Iterator<String>) c.iterator();
+    iter = c.iterator();
     while (iter.hasNext())
       result = add(iter.next()) || result;
     
@@ -785,25 +785,25 @@ public class Trie
    * @return		an array containing the elements of this collection
    */
   public <T> T[] toArray(T[] a) {
-    Object[]	result;
-    Iterator	iter;
-    Vector	list;
+    T[]	result;
+    Iterator<T>	iter;
+    Vector<T>	list;
     int		i;
     
-    list = new Vector();
-    iter = iterator();
+    list = new Vector<T>();
+    iter = Utils.<Iterator<T>>cast(iterator());
     while (iter.hasNext())
       list.add(iter.next());
     
     if (Array.getLength(a) != list.size())
-      result = (Object[]) Array.newInstance(a.getClass().getComponentType(), list.size());
+      result = Utils.<T[]>cast(Array.newInstance(a.getClass().getComponentType(), list.size()));
     else
       result = a;
     
     for (i = 0; i < list.size(); i++)
       result[i] = list.get(i);
     
-    return (T[]) result;
+    return result;
   }
 
   /**
@@ -856,7 +856,7 @@ public class Trie
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

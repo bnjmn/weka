@@ -38,7 +38,7 @@ import java.io.ObjectInputStream;
  <!-- globalinfo-end -->
  * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.15 $
+ * @version $Revision$
  * @see Loader
  */
 public class SerializedInstancesLoader 
@@ -190,7 +190,7 @@ public class SerializedInstancesLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -1064,7 +1064,7 @@ public class RDG1
         attribute = new Attribute("a" + i, nominalValues); 
       attributes.addElement(attribute);
     }
-    for (int i = 0; i < classValues.capacity(); i++)
+    for (int i = 0; i < getNumClasses(); i++)
       classValues.addElement("c" + i);
     attribute = new Attribute ("class", classValues); 
     attributes.addElement(attribute);

@@ -38,7 +38,7 @@ import java.util.List;
  * @author Sham Kakade (original C++ code)
  * @author John Langford (original C++ code)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz) (Java port)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class Stack<T>
   implements Serializable, RevisionHandler {
@@ -119,7 +119,7 @@ public class Stack<T>
    * @param c The collection of elements to add
    * in the stack.
    */ 
-  public void addAll(Collection c) {
+  public void addAll(Collection<? extends T> c) {
     elements.addAll(c);
     length = c.size();
   }
@@ -176,6 +176,6 @@ public class Stack<T>
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

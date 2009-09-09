@@ -35,7 +35,7 @@ import java.util.Vector;
  * Class that splits up a KDTreeNode.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public abstract class KDTreeNodeSplitter
   implements Serializable, OptionHandler, RevisionHandler {
@@ -248,6 +248,6 @@ public abstract class KDTreeNodeSplitter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

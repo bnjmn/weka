@@ -32,7 +32,7 @@ import javax.swing.JOptionPane;
  * method.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.7 $
+ * @version   $Revision$
  * @see       #setEnabled(boolean)
  */
 public class Memory
@@ -225,7 +225,7 @@ public class Memory
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -28,7 +28,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 
 /**
  * Class encapsulating a Constant Expression.
@@ -89,8 +88,8 @@ public class Constant extends Expression {
       return new Attribute("Constant: " + m_continuousConst);
     }
     
-    FastVector nom = new FastVector();
-    nom.addElement(m_categoricalConst);
+    ArrayList<String> nom = new ArrayList<String>();
+    nom.add(m_categoricalConst);
     return new Attribute("Constant: " + m_categoricalConst, nom);
   }
   

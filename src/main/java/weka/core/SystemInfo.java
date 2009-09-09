@@ -34,19 +34,19 @@ import java.util.Vector;
  * version, JVM settings etc. Useful for Bug-Reports.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class SystemInfo
   implements RevisionHandler {
   
   /** for storing the information */
-  private Hashtable m_Info = null;
+  private Hashtable<String,String> m_Info = null;
   
   /**
    * initializes the object and reads the system information
    */
   public SystemInfo() {
-    m_Info = new Hashtable();
+    m_Info = new Hashtable<String,String>();
     readProperties();
   }
 
@@ -56,7 +56,7 @@ public class SystemInfo
   private void readProperties() {
     Properties          props;
     Enumeration         enm;
-    Object              name;
+    String              name;
     String[]            laf;
     String              tmpStr;
     int                 i;
@@ -68,8 +68,8 @@ public class SystemInfo
     props = System.getProperties();
     enm   = props.propertyNames();
     while (enm.hasMoreElements()) {
-      name = enm.nextElement();
-      m_Info.put(name, props.get(name));
+      name = (String)enm.nextElement();
+      m_Info.put(name, (String)props.get(name));
     }
 
     // additional WEKA info
@@ -110,15 +110,15 @@ public class SystemInfo
    * returns a string representation of all the system properties
    */
   public String toString() {
-    Enumeration     enm;
+    Enumeration<String>     enm;
     String          result;
     String          key;
-    Vector          keys;
+    Vector<String>          keys;
     int             i;
     String          value;
 
     result = "";
-    keys   = new Vector();
+    keys   = new Vector<String>();
     
     // get names and sort them
     enm = m_Info.keys();
@@ -144,7 +144,7 @@ public class SystemInfo
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

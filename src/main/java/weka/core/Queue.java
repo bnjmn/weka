@@ -33,7 +33,7 @@ import java.io.Serializable;
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class Queue
   extends Object
@@ -112,7 +112,7 @@ public class Queue
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.10 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -274,7 +274,7 @@ public class Queue
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -23,7 +23,6 @@
 package weka.core.converters;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -42,6 +41,7 @@ import java.io.StreamTokenizer;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
@@ -87,12 +87,12 @@ public class CSVLoader
   /**
    * A list of hash tables for accumulating nominal values during parsing.
    */
-  protected FastVector m_cumulativeStructure;
+  protected ArrayList<Hashtable<Object,Integer>> m_cumulativeStructure;
 
   /**
    * Holds instances accumulated so far.
    */
-  protected FastVector m_cumulativeInstances;
+  protected ArrayList<ArrayList<Object>> m_cumulativeInstances;
   
   /** The reader for the data. */         
   protected transient BufferedReader m_sourceReader;
@@ -165,23 +165,23 @@ public class CSVLoader
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
     
-    result.addElement(new Option(
+    result.add(new Option(
         "\tThe range of attributes to force type to be NOMINAL.\n"
         + "\t'first' and 'last' are accepted as well.\n"
         + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
         + "\t(default: -none-)",
         "N", 1, "-N <range>"));
     
-    result.addElement(new Option(
+    result.add(new Option(
         "\tThe range of attribute to force type to be STRING.\n"
         + "\t'first' and 'last' are accepted as well.\n"
         + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
         + "\t(default: -none-)",
         "S", 1, "-S <range>"));
     
-    result.addElement(new Option(
+    result.add(new Option(
         "\tThe string representing a missing value.\n"
         + "\t(default: ?)",
         "M", 1, "-M <str>"));
@@ -437,32 +437,32 @@ public class CSVLoader
     m_st.ordinaryChar(',');
     m_st.ordinaryChar('\t');
     
-    m_cumulativeStructure = new FastVector(m_structure.numAttributes());
+    m_cumulativeStructure = new ArrayList<Hashtable<Object,Integer>>(m_structure.numAttributes());
     for (int i = 0; i < m_structure.numAttributes(); i++) {
-      m_cumulativeStructure.addElement(new Hashtable());
+      m_cumulativeStructure.add(new Hashtable<Object,Integer>());
     }
     
-    m_cumulativeInstances = new FastVector();
-    FastVector current;
+    m_cumulativeInstances = new ArrayList<ArrayList<Object>>();
+    ArrayList<Object> current;
     while ((current = getInstance(m_st)) != null) {
-      m_cumulativeInstances.addElement(current);
+      m_cumulativeInstances.add(current);
     }
 
-    FastVector atts = new FastVector(m_structure.numAttributes());
+    ArrayList<Attribute> atts = new ArrayList<Attribute>(m_structure.numAttributes());
     for (int i = 0; i < m_structure.numAttributes(); i++) {
       String attname = m_structure.attribute(i).name();
-      Hashtable tempHash = ((Hashtable)m_cumulativeStructure.elementAt(i));
+      Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
       if (tempHash.size() == 0) {
-	atts.addElement(new Attribute(attname));
+	atts.add(new Attribute(attname));
       } else {
 	if (m_StringAttributes.isInRange(i)) {
-	  atts.addElement(new Attribute(attname, (FastVector) null));
+	  atts.add(new Attribute(attname, (ArrayList<String>) null));
 	}
 	else {
-	  FastVector values = new FastVector(tempHash.size());
-	  // add dummy objects in order to make the FastVector's size == capacity
+	  ArrayList<String> values = new ArrayList<String>(tempHash.size());
+	  // add dummy objects in order to make the ArrayList's size == capacity
 	  for (int z = 0; z < tempHash.size(); z++) {
-	    values.addElement("dummy");
+	    values.add("dummy");
 	  }
 	  Enumeration e = tempHash.keys();
 	  while (e.hasMoreElements()) {
@@ -472,10 +472,10 @@ public class CSVLoader
 	    String s = ob.toString();
 	    if (s.startsWith("'") || s.startsWith("\""))
 	      s = s.substring(1, s.length() - 1);
-	    values.setElementAt(new String(s), index);
+	    values.set(index, new String(s));
 	    //	  }
 	  }
-	  atts.addElement(new Attribute(attname, values));
+	  atts.add(new Attribute(attname, values));
 	}
       }
     }
@@ -491,10 +491,10 @@ public class CSVLoader
 				      m_cumulativeInstances.size());
 
     for (int i = 0; i < m_cumulativeInstances.size(); i++) {
-      current = ((FastVector)m_cumulativeInstances.elementAt(i));
+      current = m_cumulativeInstances.get(i);
       double [] vals = new double[dataSet.numAttributes()];
       for (int j = 0; j < current.size(); j++) {
-	Object cval = current.elementAt(j);
+	Object cval = current.get(j);
 	if (cval instanceof String) {
 	  if (((String)cval).compareTo(m_MissingValue) == 0) {
 	    vals[j] = Instance.missingValue();
@@ -504,7 +504,7 @@ public class CSVLoader
 	    }
 	    else if (dataSet.attribute(j).isNominal()) {
 	      // find correct index
-	      Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
+	      Hashtable<Object,Integer> lookup = m_cumulativeStructure.get(j);
 	      int index = ((Integer)lookup.get(cval)).intValue();
 	      vals[j] = index;
 	    }
@@ -514,7 +514,7 @@ public class CSVLoader
 	  }
 	} else if (dataSet.attribute(j).isNominal()) {
 	  // find correct index
-	  Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
+	  Hashtable<Object,Integer> lookup = m_cumulativeStructure.get(j);
 	  int index = ((Integer)lookup.get(cval)).intValue();
 	  vals[j] = index;
 	} else if (dataSet.attribute(j).isString()) {
@@ -552,7 +552,7 @@ public class CSVLoader
    * Attempts to parse a line of the data set.
    *
    * @param tokenizer the tokenizer
-   * @return a FastVector containg String and Double objects representing
+   * @return a ArrayList containg String and Double objects representing
    * the values of the instance.
    * @exception IOException if an error occurs
    *
@@ -567,10 +567,10 @@ public class CSVLoader
    *      signals: (IOException);
    * </jml></pre>
    */
-  private FastVector getInstance(StreamTokenizer tokenizer) 
+  private ArrayList<Object> getInstance(StreamTokenizer tokenizer) 
     throws IOException {
 
-    FastVector current = new FastVector();
+    ArrayList<Object> current = new ArrayList<Object>();
 
     // Check if end of file reached.
     ConverterUtils.getFirstToken(tokenizer);
@@ -590,21 +590,21 @@ public class CSVLoader
 
       if (tokenizer.ttype == ',' || tokenizer.ttype == '\t' || 
 	  tokenizer.ttype == StreamTokenizer.TT_EOL) {
-	current.addElement(m_MissingValue);
+	current.add(m_MissingValue);
 	wasSep = true;
       } else {
 	wasSep = false;
 	if (tokenizer.sval.equals(m_MissingValue)) {
-	  current.addElement(new String(m_MissingValue));
+	  current.add(new String(m_MissingValue));
 	}
 	else {
 	  // try to parse as a number
 	  try {
 	    double val = Double.valueOf(tokenizer.sval).doubleValue();
-	    current.addElement(new Double(val));
+	    current.add(new Double(val));
 	  } catch (NumberFormatException e) {
 	    // otherwise assume its an enumerated value
-	    current.addElement(new String(tokenizer.sval));
+	    current.add(new String(tokenizer.sval));
 	  }
 	}
       }
@@ -638,7 +638,7 @@ public class CSVLoader
    * that was beleived to be numeric then all previously seen values for this
    * attribute are stored in a Hashtable.
    *
-   * @param current a <code>FastVector</code> value
+   * @param current a <code>ArrayList</code> value
    * @exception Exception if an error occurs
    *
    * <pre><jml>
@@ -651,7 +651,7 @@ public class CSVLoader
    *      signals: (Exception);
    * </jml></pre>
    */
-  private void checkStructure(FastVector current) throws Exception {
+  private void checkStructure(ArrayList<Object> current) throws Exception {
     if (current == null) {
       throw new Exception("current shouldn't be null in checkStructure");
     }
@@ -664,20 +664,20 @@ public class CSVLoader
     }
     
     for (int i = 0; i < current.size(); i++) {
-      Object ob = current.elementAt(i);
+      Object ob = current.get(i);
       if ((ob instanceof String) || (m_NominalAttributes.isInRange(i)) || (m_StringAttributes.isInRange(i))) {
 	if (ob.toString().compareTo(m_MissingValue) == 0) {
 	  // do nothing
 	} else {
-	  Hashtable tempHash = (Hashtable)m_cumulativeStructure.elementAt(i);
+	  Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
 	  if (!tempHash.containsKey(ob)) {
 	    // may have found a nominal value in what was previously thought to
 	    // be a numeric variable.
 	    if (tempHash.size() == 0) {
 	      for (int j = 0; j < m_cumulativeInstances.size(); j++) {
-		FastVector tempUpdate = 
-		  ((FastVector)m_cumulativeInstances.elementAt(j));
-		Object tempO = tempUpdate.elementAt(i);
+		ArrayList tempUpdate = 
+		  ((ArrayList)m_cumulativeInstances.get(j));
+		Object tempO = tempUpdate.get(i);
 		if (tempO instanceof String) {
 		  // must have been a missing value
 		} else {
@@ -693,7 +693,7 @@ public class CSVLoader
 	  }
 	}
       } else if (ob instanceof Double) {
-	Hashtable tempHash = (Hashtable)m_cumulativeStructure.elementAt(i);
+	Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
 	if (tempHash.size() != 0) {
 	  if (!tempHash.containsKey(ob)) {
 	    int newIndex = tempHash.size();
@@ -729,14 +729,14 @@ public class CSVLoader
    */
   private void readHeader(StreamTokenizer tokenizer) throws IOException {
    
-    FastVector attribNames = new FastVector();
+    ArrayList<Attribute> attribNames = new ArrayList<Attribute>();
     ConverterUtils.getFirstToken(tokenizer);
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       ConverterUtils.errms(tokenizer,"premature end of file");
     }
 
     while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
-      attribNames.addElement(new Attribute(tokenizer.sval));
+      attribNames.add(new Attribute(tokenizer.sval));
       ConverterUtils.getToken(tokenizer);
     }
     String relationName;
