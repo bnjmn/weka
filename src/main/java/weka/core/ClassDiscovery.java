@@ -378,15 +378,15 @@ public class ClassDiscovery
 	dir = new File(part + "/" + pkgpath);
 	if (dir.exists()) {
 	  files = dir.listFiles();
-	  for (i = 0; i < files.length; i++) {
+	  for (int j = 0; j < files.length; j++) {
 	    // only class files
-	    if (    (!files[i].isFile()) 
-		|| (!files[i].getName().endsWith(".class")) )
+	    if (    (!files[j].isFile()) 
+		|| (!files[j].getName().endsWith(".class")) )
 	      continue;
 
 	    try {
 	      classname =   pkgname + "." 
-	      + files[i].getName().replaceAll(".*/", "")
+	      + files[j].getName().replaceAll(".*/", "")
 	      .replaceAll("\\.class", "");
 	      result.add(classname);
 	    }
