@@ -51,7 +51,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  * @see #OPTIONS_STARTTAG
  * @see #OPTIONS_ENDTAG
  */
@@ -85,14 +85,14 @@ public class OptionHandlerJavadoc
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector        result;
+    Vector<Option>        result;
     Enumeration   en;
     
-    result = new Vector();
+    result = new Vector<Option>();
     
     en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+      result.addElement((Option)en.nextElement());
 
     result.addElement(new Option(
         "\tSuppresses the 'Valid options are...' prolog in the Javadoc.",
@@ -119,11 +119,11 @@ public class OptionHandlerJavadoc
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
+    Vector<String>        result;
     String[]      options;
     int           i;
     
-    result  = new Vector();
+    result  = new Vector<String>();
     
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -208,7 +208,7 @@ public class OptionHandlerJavadoc
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

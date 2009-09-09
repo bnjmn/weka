@@ -29,7 +29,7 @@ import weka.core.neighboursearch.PerformanceStats;
  * EditDistance.
  *
  * @author Bruno Woltzenlogel Paleo
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public abstract class AbstractStringDistanceFunction
     extends NormalizableDistance {

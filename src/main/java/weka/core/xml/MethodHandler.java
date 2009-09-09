@@ -33,7 +33,7 @@ import java.util.Hashtable;
  * (or classes) and Methods that are associated with them. 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision$ 
  */
 public class MethodHandler
    implements RevisionHandler {
@@ -51,14 +51,14 @@ public class MethodHandler
     * @see #contains(Class)
     * @see #contains(String)  
     */
-   protected Hashtable m_Methods = null;
+  protected Hashtable<Object,Method> m_Methods = null;
    
    /**
     * initializes the handler
     */
    public MethodHandler() {
       super();
-      m_Methods  = new Hashtable();
+      m_Methods  = new Hashtable<Object,Method>();
    }
    
    /**
@@ -200,6 +200,6 @@ public class MethodHandler
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.3 $");
+     return RevisionUtils.extract("$Revision$");
    }
 }

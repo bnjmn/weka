@@ -33,7 +33,7 @@ import java.io.Serializable;
  * Class representing a node of a BallTree.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class BallNode
   implements Serializable, RevisionHandler {
@@ -365,6 +365,6 @@ public class BallNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

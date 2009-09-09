@@ -23,6 +23,7 @@
 package weka.core.xml;
 
 import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -66,7 +67,7 @@ import org.w3c.dom.Element;
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class XMLBasicSerialization
    extends XMLSerialization {
@@ -243,9 +244,9 @@ public class XMLBasicSerialization
     * @see java.util.Collection
     */
    public Object readCollection(Element node) throws Exception {
-      Collection           coll;
-      Vector               v;
-      Vector               children;
+      Collection<Object>           coll;
+      Vector<Object>               v;
+      Vector<Element>               children;
       Element              child;
       int                  i;
       int                  index;
@@ -258,7 +259,7 @@ public class XMLBasicSerialization
       m_CurrentNode = node;
       
       children = XMLDocument.getChildTags(node); 
-      v        = new Vector();
+      v        = new Vector<Object>();
 
       // determine highest index for size
       index    = children.size() - 1;
@@ -280,8 +281,8 @@ public class XMLBasicSerialization
       }
       
       // populate collection
-      coll = (Collection) Class.forName(
-                  node.getAttribute(ATT_CLASS)).newInstance();
+      coll = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).
+                        newInstance());
       coll.addAll(v);
       
       return coll;
@@ -337,7 +338,7 @@ public class XMLBasicSerialization
     * @see java.util.Map
     */
    public Object readMap(Element node) throws Exception {
-      Map                  map;
+     Map<Object,Object>                  map;
       Object               key;
       Object               value;
       Vector               children;
@@ -354,8 +355,8 @@ public class XMLBasicSerialization
 
       m_CurrentNode = node;
       
-      map      = (Map) Class.forName(
-                     node.getAttribute(ATT_CLASS)).newInstance();
+      map      = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).
+                            newInstance());
       children = XMLDocument.getChildTags(node); 
 
       for (i = 0; i < children.size(); i++) {
@@ -567,6 +568,6 @@ public class XMLBasicSerialization
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.6 $");
+     return RevisionUtils.extract("$Revision$");
    }
 }

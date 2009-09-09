@@ -38,7 +38,7 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class EigenvalueDecomposition 
   implements Serializable, RevisionHandler {
@@ -982,6 +982,6 @@ public class EigenvalueDecomposition
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

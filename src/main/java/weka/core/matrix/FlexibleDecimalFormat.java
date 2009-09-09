@@ -29,7 +29,7 @@ import java.text.FieldPosition;
 
 /**
  * @author Yong Wang
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class FlexibleDecimalFormat
   extends DecimalFormat
@@ -222,7 +222,7 @@ public class FlexibleDecimalFormat
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
 

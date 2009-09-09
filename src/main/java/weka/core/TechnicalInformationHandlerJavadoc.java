@@ -50,7 +50,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  * @see #PLAINTEXT_STARTTAG
  * @see #PLAINTEXT_ENDTAG
  * @see #BIBTEX_STARTTAG
@@ -94,14 +94,14 @@ public class TechnicalInformationHandlerJavadoc
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector        result;
+    Vector<Option>        result;
     Enumeration   en;
     
-    result = new Vector();
+    result = new Vector<Option>();
     
     en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+      result.addElement((Option)en.nextElement());
 
     result.addElement(new Option(
         "\tSuppresses the 'BibTex:' prolog in the Javadoc.",
@@ -128,11 +128,11 @@ public class TechnicalInformationHandlerJavadoc
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
+    Vector<String>        result;
     String[]      options;
     int           i;
     
-    result  = new Vector();
+    result  = new Vector<String>();
     
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -211,7 +211,7 @@ public class TechnicalInformationHandlerJavadoc
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

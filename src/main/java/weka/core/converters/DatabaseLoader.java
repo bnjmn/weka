@@ -24,7 +24,6 @@ package weka.core.converters;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.FastVector;
 import weka.core.Attribute;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
@@ -37,6 +36,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision$
  * @see Loader
  */
 public class DatabaseLoader 
@@ -140,13 +140,13 @@ public class DatabaseLoader
   private boolean m_inc;
   
   /** Contains the name of the columns that uniquely define a row in the ResultSet. Ensures a unique ordering of instances for indremental loading.*/
-  private FastVector m_orderBy;
+  private ArrayList<String> m_orderBy;
   
   /** Stores the index of a nominal value */
-  private Hashtable [] m_nominalIndexes;
+  private Hashtable<String,Double> [] m_nominalIndexes;
   
   /**  Stores the nominal value*/
-  private FastVector [] m_nominalStrings;
+  private ArrayList<String> [] m_nominalStrings;
   
   /** Name of the primary key column that will allow unique ordering necessary for incremental loading. The name is specified in the DatabaseUtils file.*/
   private String m_idColumn;
@@ -241,7 +241,7 @@ public class DatabaseLoader
     if (m_Password != null)
       m_DataBaseConnection.setPassword(m_Password);
 
-    m_orderBy = new FastVector();
+    m_orderBy = new ArrayList<String>();
     // don't lose previously set key columns!
     if (m_Keys != null)
       setKeys(m_Keys);
@@ -306,12 +306,12 @@ public class DatabaseLoader
   public void setKeys(String keys){
   
     m_Keys = keys;
-    m_orderBy.removeAllElements();
+    m_orderBy.clear();
     StringTokenizer st = new StringTokenizer(keys, ",");
     while (st.hasMoreTokens()) {
         String column = st.nextToken();
         column = column.replaceAll(" ","");
-        m_orderBy.addElement(column);
+        m_orderBy.add(column);
     }
   }
   
@@ -324,7 +324,7 @@ public class DatabaseLoader
   
       StringBuffer key = new StringBuffer();
       for(int i = 0;i < m_orderBy.size(); i++){
-        key.append((String)m_orderBy.elementAt(i));
+        key.append((String)m_orderBy.get(i));
         if(i != m_orderBy.size()-1)
           key.append(", ");
       }
@@ -544,7 +544,7 @@ public class DatabaseLoader
       //query has to use all columns
       if(!query.startsWith("SELECT *"))
           return false;
-      m_orderBy.removeAllElements();
+      m_orderBy.clear();
       if(!m_DataBaseConnection.isConnected())
             m_DataBaseConnection.connectToDatabase();
       DatabaseMetaData dmd = m_DataBaseConnection.getMetaData();
@@ -553,7 +553,7 @@ public class DatabaseLoader
       //check for primary keys
       ResultSet rs = dmd.getPrimaryKeys(null,null,table);
       while(rs.next()){
-          m_orderBy.addElement(rs.getString(4));
+          m_orderBy.add(rs.getString(4));
       }
       rs.close();
       if(m_orderBy.size() != 0)
@@ -563,12 +563,12 @@ public class DatabaseLoader
       ResultSetMetaData rmd = rs.getMetaData();
       int help = 0;
       while(rs.next()){
-          m_orderBy.addElement(rs.getString(2));
+          m_orderBy.add(rs.getString(2));
           help++;
       }
       rs.close();
       if(help == rmd.getColumnCount()){
-          m_orderBy.removeAllElements();
+          m_orderBy.clear();
       }
       if(m_orderBy.size() != 0)
           return true;
@@ -593,7 +593,7 @@ public class DatabaseLoader
             if (index == null) {
                 index = new Double(m_nominalStrings[i - 1].size());
                 m_nominalIndexes[i - 1].put(str, index);
-                m_nominalStrings[i - 1].addElement(str);
+                m_nominalStrings[i - 1].add(str);
             }
         }
       }
@@ -619,15 +619,15 @@ public class DatabaseLoader
         order.append(" ORDER BY ");
         for(int i = 0; i < m_orderBy.size()-1; i++){
             if(m_DataBaseConnection.getUpperCase())
-                order.append(((String)m_orderBy.elementAt(i)).toUpperCase());
+                order.append(((String)m_orderBy.get(i)).toUpperCase());
             else
-                order.append((String)m_orderBy.elementAt(i));
+                order.append((String)m_orderBy.get(i));
             order.append(", ");
         }
         if(m_DataBaseConnection.getUpperCase())
-            order.append(((String)m_orderBy.elementAt(m_orderBy.size()-1)).toUpperCase());
+            order.append(((String)m_orderBy.get(m_orderBy.size()-1)).toUpperCase());
         else
-            order.append((String)m_orderBy.elementAt(m_orderBy.size()-1));
+            order.append((String)m_orderBy.get(m_orderBy.size()-1));
         orderByString = order.toString();
       }
       if(choice == 0){
@@ -723,8 +723,8 @@ public class DatabaseLoader
         rs.close();
         int numAttributes = md.getColumnCount();
         int [] attributeTypes = new int [numAttributes];
-        m_nominalIndexes = new Hashtable [numAttributes];
-        m_nominalStrings = new FastVector [numAttributes];
+        m_nominalIndexes = Utils.cast(new Hashtable [numAttributes]);
+        m_nominalStrings = Utils.cast(new ArrayList [numAttributes]);
         for (int i = 1; i <= numAttributes; i++) {
             switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
                 case DatabaseConnection.STRING :
@@ -733,8 +733,8 @@ public class DatabaseLoader
                     String columnName = md.getColumnName(i);
                     if(m_DataBaseConnection.getUpperCase())
                         columnName = columnName.toUpperCase();
-                    m_nominalIndexes[i - 1] = new Hashtable();
-                    m_nominalStrings[i - 1] = new FastVector();
+                    m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+                    m_nominalStrings[i - 1] = new ArrayList<String>();
                     String query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
                     if (m_DataBaseConnection.execute(query) == true){
                         rs1 = m_DataBaseConnection.getResultSet();
@@ -768,8 +768,8 @@ public class DatabaseLoader
                     columnName = md.getColumnName(i);
                     if(m_DataBaseConnection.getUpperCase())
                       columnName = columnName.toUpperCase();
-                    m_nominalIndexes[i - 1] = new Hashtable();
-                    m_nominalStrings[i - 1] = new FastVector();
+                    m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+                    m_nominalStrings[i - 1] = new ArrayList<String>();
                     query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
                     if (m_DataBaseConnection.execute(query) == true){
                       rs1 = m_DataBaseConnection.getResultSet();
@@ -781,12 +781,12 @@ public class DatabaseLoader
                 case DatabaseConnection.BOOL:
                     //System.err.println("boolean --> nominal");
                     attributeTypes[i - 1] = Attribute.NOMINAL;
-                    m_nominalIndexes[i - 1] = new Hashtable();
+                    m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
                     m_nominalIndexes[i - 1].put("false", new Double(0));
                     m_nominalIndexes[i - 1].put("true", new Double(1));
-                    m_nominalStrings[i - 1] = new FastVector();
-                    m_nominalStrings[i - 1].addElement("false");
-                    m_nominalStrings[i - 1].addElement("true");
+                    m_nominalStrings[i - 1] = new ArrayList<String>();
+                    m_nominalStrings[i - 1].add("false");
+                    m_nominalStrings[i - 1].add("true");
                     break;
                 case DatabaseConnection.DOUBLE:
                     //System.err.println("BigDecimal --> numeric");
@@ -823,27 +823,27 @@ public class DatabaseLoader
                     attributeTypes[i - 1] = Attribute.STRING;
             }
         }
-        FastVector attribInfo = new FastVector();
+        ArrayList<Attribute> attribInfo = new ArrayList<Attribute>();
         for (int i = 0; i < numAttributes; i++) {
             /* Fix for databases that uppercase column names */
             //String attribName = attributeCaseFix(md.getColumnName(i + 1));
             String attribName = md.getColumnName(i + 1);
             switch (attributeTypes[i]) {
                 case Attribute.NOMINAL:
-                    attribInfo.addElement(new Attribute(attribName, m_nominalStrings[i]));
+                    attribInfo.add(new Attribute(attribName, m_nominalStrings[i]));
                     break;
                 case Attribute.NUMERIC:
-                    attribInfo.addElement(new Attribute(attribName));
+                    attribInfo.add(new Attribute(attribName));
                     break;
                 case Attribute.STRING:
-                    Attribute att = new Attribute(attribName, (FastVector)null);
+                    Attribute att = new Attribute(attribName, (ArrayList<String>)null);
                     for (int n = 0; n < m_nominalStrings[i].size(); n++) {
-                      att.addStringValue((String) m_nominalStrings[i].elementAt(n));
+                      att.addStringValue((String) m_nominalStrings[i].get(n));
                     }
-                    attribInfo.addElement(att);
+                    attribInfo.add(att);
                     break;
                 case Attribute.DATE:
-                    attribInfo.addElement(new Attribute(attribName, (String)null));
+                    attribInfo.add(new Attribute(attribName, (String)null));
                     break;
                 default:
                     throw new IOException("Unknown attribute type");
@@ -905,8 +905,8 @@ public class DatabaseLoader
     // Determine structure of the instances
     int numAttributes = md.getColumnCount();
     int [] attributeTypes = new int [numAttributes];
-    m_nominalIndexes = new Hashtable [numAttributes];
-    m_nominalStrings = new FastVector [numAttributes];
+    m_nominalIndexes = Utils.cast(new Hashtable [numAttributes]);
+    m_nominalStrings = Utils.cast(new ArrayList [numAttributes]);
     for (int i = 1; i <= numAttributes; i++) {
       switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
 	
@@ -916,8 +916,8 @@ public class DatabaseLoader
         if(m_DataBaseConnection.getUpperCase())
             columnName = columnName.toUpperCase();
         String end = endOfQuery(false);
-        m_nominalIndexes[i - 1] = new Hashtable();
-        m_nominalStrings[i - 1] = new FastVector();
+        m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+        m_nominalStrings[i - 1] = new ArrayList<String>();
         if(m_DataBaseConnection.execute("SELECT DISTINCT ( "
                                         + columnName+" ) FROM "
                                         + end
@@ -935,8 +935,8 @@ public class DatabaseLoader
         if(m_DataBaseConnection.getUpperCase())
             columnName = columnName.toUpperCase();
         end = endOfQuery(false);
-        m_nominalIndexes[i - 1] = new Hashtable();
-        m_nominalStrings[i - 1] = new FastVector();
+        m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+        m_nominalStrings[i - 1] = new ArrayList<String>();
         if(m_DataBaseConnection.execute("SELECT DISTINCT ( "+columnName+" ) FROM "+ end) == false){
             throw new Exception("Nominal values cannot be retrieved");
         }
@@ -948,12 +948,12 @@ public class DatabaseLoader
       case DatabaseConnection.BOOL:
 	//System.err.println("boolean --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
-	m_nominalIndexes[i - 1] = new Hashtable();
+	m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
 	m_nominalIndexes[i - 1].put("false", new Double(0));
 	m_nominalIndexes[i - 1].put("true", new Double(1));
-	m_nominalStrings[i - 1] = new FastVector();
-	m_nominalStrings[i - 1].addElement("false");
-	m_nominalStrings[i - 1].addElement("true");
+	m_nominalStrings[i - 1] = new ArrayList<String>();
+	m_nominalStrings[i - 1].add("false");
+	m_nominalStrings[i - 1].add("true");
 	break;
       case DatabaseConnection.DOUBLE:
 	//System.err.println("BigDecimal --> numeric");
@@ -993,7 +993,7 @@ public class DatabaseLoader
 
     // Step through the tuples
     //System.err.println("Creating instances...");
-    FastVector instances = new FastVector();
+    ArrayList<Instance> instances = new ArrayList<Instance>();
     while(rs.next()) {
       double[] vals = new double[numAttributes];
       for(int i = 1; i <= numAttributes; i++) {
@@ -1105,32 +1105,32 @@ public class DatabaseLoader
       }
       Instance newInst;
       newInst = new Instance(1.0, vals);
-      instances.addElement(newInst);
+      instances.add(newInst);
     }   
     
     // Create the header and add the instances to the dataset
     //System.err.println("Creating header...");
-    FastVector attribInfo = new FastVector();
+    ArrayList<Attribute> attribInfo = new ArrayList<Attribute>();
     for (int i = 0; i < numAttributes; i++) {
       /* Fix for databases that uppercase column names */
       //String attribName = attributeCaseFix(md.getColumnName(i + 1));
       String attribName = md.getColumnName(i + 1);
       switch (attributeTypes[i]) {
       case Attribute.NOMINAL:
-	attribInfo.addElement(new Attribute(attribName, m_nominalStrings[i]));
+	attribInfo.add(new Attribute(attribName, m_nominalStrings[i]));
 	break;
       case Attribute.NUMERIC:
-	attribInfo.addElement(new Attribute(attribName));
+	attribInfo.add(new Attribute(attribName));
 	break;
       case Attribute.STRING:
-	Attribute att = new Attribute(attribName, (FastVector) null);
-	attribInfo.addElement(att);
+	Attribute att = new Attribute(attribName, (ArrayList<String>) null);
+	attribInfo.add(att);
 	for (int n = 0; n < m_nominalStrings[i].size(); n++) {
-	  att.addStringValue((String) m_nominalStrings[i].elementAt(n));
+	  att.addStringValue((String) m_nominalStrings[i].get(n));
 	}
 	break;
       case Attribute.DATE:
-	attribInfo.addElement(new Attribute(attribName, (String)null));
+	attribInfo.add(new Attribute(attribName, (String)null));
 	break;
       default:
 	throw new IOException("Unknown attribute type");
@@ -1139,7 +1139,7 @@ public class DatabaseLoader
     result = new Instances(endOfQuery(true), attribInfo, 
 				     instances.size());
     for (int i = 0; i < instances.size(); i++) {
-      result.add((Instance)instances.elementAt(i));
+      result.add((Instance)instances.get(i));
     }
     rs.close();
     m_DataBaseConnection.disconnectFromDatabase();
@@ -1391,7 +1391,7 @@ public class DatabaseLoader
    */  
   public String[] getOptions() {
       
-    Vector options = new Vector();
+    Vector<String> options = new Vector<String>();
 
     if ( (getUrl() != null) && (getUrl().length() != 0) ) {
       options.add("-url");
@@ -1415,7 +1415,7 @@ public class DatabaseLoader
     for (int i = 0; i < m_orderBy.size(); i++) {
       if (i > 0)
         text.append(", ");
-      text.append((String) m_orderBy.elementAt(i));
+      text.append((String) m_orderBy.get(i));
     }
     options.add("-P"); 
     options.add(text.toString());
@@ -1433,31 +1433,31 @@ public class DatabaseLoader
    */  
   public java.util.Enumeration listOptions() {
       
-     FastVector newVector = new FastVector();
+     Vector<Option> newVector = new Vector<Option>();
 
-     newVector.addElement(new Option(
+     newVector.add(new Option(
            "\tThe JDBC URL to connect to.\n"
            + "\t(default: from DatabaseUtils.props file)",
            "url", 1, "-url <JDBC URL>"));
      
-     newVector.addElement(new Option(
+     newVector.add(new Option(
            "\tThe user to connect with to the database.\n"
            + "\t(default: none)",
            "user", 1, "-user <name>"));
      
-     newVector.addElement(new Option(
+     newVector.add(new Option(
            "\tThe password to connect with to the database.\n"
            + "\t(default: none)",
            "password", 1, "-password <password>"));
      
-     newVector.addElement(new Option(
+     newVector.add(new Option(
 	 "\tSQL query of the form\n"
 	 + "\t\tSELECT <list of columns>|* FROM <table> [WHERE]\n"
 	 + "\tto execute.\n"
          + "\t(default: Select * From Results0)",
 	 "Q",1,"-Q <query>"));
      
-     newVector.addElement(new Option(
+     newVector.add(new Option(
 	 "\tList of column names uniquely defining a DB row\n"
 	 + "\t(separated by ', ').\n"
          + "\tUsed for incremental loading.\n"
@@ -1466,7 +1466,7 @@ public class DatabaseLoader
 	 + "\tThe auto ID column created by the DatabaseSaver won't be loaded.",
 	 "P",1,"-P <list of column names>"));
 
-     newVector.addElement(new Option(
+     newVector.add(new Option(
 	 "\tSets incremental loading", 
 	 "I", 0, "-I"));
      
@@ -1538,7 +1538,7 @@ public class DatabaseLoader
     if (optionString.length() != 0)
       setQuery(optionString);
     
-    m_orderBy.removeAllElements();
+    m_orderBy.clear();
     
     m_inc = Utils.getFlag('I', options);
     
@@ -1547,7 +1547,7 @@ public class DatabaseLoader
         while (st.hasMoreTokens()) {
             String column = st.nextToken();
             column = column.replaceAll(" ","");
-            m_orderBy.addElement(column);
+            m_orderBy.add(column);
         }
     }
   }
@@ -1582,7 +1582,7 @@ public class DatabaseLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /** Main method.

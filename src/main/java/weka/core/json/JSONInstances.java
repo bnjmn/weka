@@ -22,12 +22,13 @@
 package weka.core.json;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
+
+import java.util.ArrayList;
 
 /**
  * Class for transforming Instances objects into <a href="http://www.json.org/" target="_blank">JSON</a>
@@ -90,7 +91,7 @@ public class JSONInstances {
     String	type;
     String	dateformat;
     JSONNode	labels;
-    FastVector	values;
+    ArrayList<String>	values;
     int		i;
     double	weight;
     
@@ -102,9 +103,9 @@ public class JSONInstances {
     }
     else if (type.equals(Attribute.typeToString(Attribute.NOMINAL))) {
       labels = att.getChild(LABELS);
-      values = new FastVector();
+      values = new ArrayList<String>();
       for (i = 0; i < labels.getChildCount(); i++)
-	values.addElement(((JSONNode) labels.getChildAt(i)).getValue());
+	values.add((String)((JSONNode) labels.getChildAt(i)).getValue());
       result = new Attribute(name, values);
     }
     else if (type.equals(Attribute.typeToString(Attribute.DATE))) {
@@ -112,7 +113,7 @@ public class JSONInstances {
       result     = new Attribute(name, dateformat);
     }
     else if (type.equals(Attribute.typeToString(Attribute.STRING))) {
-      result = new Attribute(name, (FastVector) null);
+      result = new Attribute(name, (ArrayList<String>) null);
     }
     else {
       System.err.println("Unhandled attribute type '" + type + "'!");
@@ -205,7 +206,7 @@ public class JSONInstances {
     JSONNode	header;
     JSONNode	attributes;
     JSONNode	data;
-    FastVector	atts;
+    ArrayList<Attribute>	atts;
     Attribute	att;
     Instance	inst;
     int		i;
@@ -229,7 +230,7 @@ public class JSONInstances {
       System.err.println("No '" + ATTRIBUTES + "' array!");
       return null;
     }
-    atts       = new FastVector();
+    atts       = new ArrayList<Attribute>();
     classAtt   = new boolean[1];
     classIndex = -1;
     for (i = 0; i < attributes.getChildCount(); i++) {
@@ -240,7 +241,7 @@ public class JSONInstances {
       }
       if (classAtt[0])
 	classIndex = i;
-      atts.addElement(att);
+      atts.add(att);
     }
     result = new Instances(
 	header.getChild(RELATION).getValue("unknown").toString(), 

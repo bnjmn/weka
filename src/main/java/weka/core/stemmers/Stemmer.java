@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Interface for all stemming algorithms.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.3 $
+ * @version   $Revision$
  */
 public interface Stemmer 
   extends Serializable, RevisionHandler {

@@ -54,7 +54,7 @@ import java.util.HashMap;
  <!-- technical-bibtex-end -->
  *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class LovinsStemmer 
   implements Stemmer, TechnicalInformationHandler {
@@ -68,30 +68,30 @@ public class LovinsStemmer
   private static boolean m_CompMode = false;
 
   /** The hash tables containing the list of endings. */
-  private static HashMap m_l11 = null;
-  private static HashMap m_l10 = null;
-  private static HashMap m_l9 = null;
-  private static HashMap m_l8 = null;
-  private static HashMap m_l7 = null;
-  private static HashMap m_l6 = null;
-  private static HashMap m_l5 = null;
-  private static HashMap m_l4 = null;
-  private static HashMap m_l3 = null;
-  private static HashMap m_l2 = null;
-  private static HashMap m_l1 = null;
+  private static HashMap<String,String> m_l11 = null;
+  private static HashMap<String,String> m_l10 = null;
+  private static HashMap<String,String> m_l9 = null;
+  private static HashMap<String,String> m_l8 = null;
+  private static HashMap<String,String> m_l7 = null;
+  private static HashMap<String,String> m_l6 = null;
+  private static HashMap<String,String> m_l5 = null;
+  private static HashMap<String,String> m_l4 = null;
+  private static HashMap<String,String> m_l3 = null;
+  private static HashMap<String,String> m_l2 = null;
+  private static HashMap<String,String> m_l1 = null;
 
   static {
 
-    m_l11 = new HashMap();
+    m_l11 = new HashMap<String,String>();
     m_l11.put("alistically", "B");
     m_l11.put("arizability", "A");
     m_l11.put("izationally", "B");
-    m_l10 = new HashMap();
+    m_l10 = new HashMap<String,String>();
     m_l10.put("antialness", "A");
     m_l10.put("arisations", "A");
     m_l10.put("arizations", "A");
     m_l10.put("entialness", "A");
-    m_l9 = new HashMap();
+    m_l9 = new HashMap<String,String>();
     m_l9.put("allically", "C");
     m_l9.put("antaneous", "A");
     m_l9.put("antiality", "A");
@@ -109,7 +109,7 @@ public class LovinsStemmer
     m_l9.put("itousness", "A");
     m_l9.put("izability", "A");
     m_l9.put("izational", "A");
-    m_l8 = new HashMap();
+    m_l8 = new HashMap<String,String>();
     m_l8.put("ableness", "A");
     m_l8.put("arizable", "A");
     m_l8.put("entation", "A");
@@ -123,7 +123,7 @@ public class LovinsStemmer
     m_l8.put("iousness", "A");
     m_l8.put("izations", "A");
     m_l8.put("lessness", "A");
-    m_l7 = new HashMap();
+    m_l7 = new HashMap<String,String>();
     m_l7.put("ability", "A");
     m_l7.put("aically", "A");
     m_l7.put("alistic", "B");
@@ -164,7 +164,7 @@ public class LovinsStemmer
     m_l7.put("izement", "A");
     m_l7.put("oidally", "A");
     m_l7.put("ousness", "A");
-    m_l6 = new HashMap();
+    m_l6 = new HashMap<String,String>();
     m_l6.put("aceous", "A");
     m_l6.put("acious", "B");
     m_l6.put("action", "G");
@@ -204,7 +204,7 @@ public class LovinsStemmer
     m_l6.put("lessly", "A");
     m_l6.put("nesses", "A");
     m_l6.put("oidism", "A");
-    m_l5 = new HashMap();
+    m_l5 = new HashMap<String,String>();
     m_l5.put("acies", "A");
     m_l5.put("acity", "A");
     m_l5.put("aging", "B");
@@ -278,7 +278,7 @@ public class LovinsStemmer
     m_l5.put("oides", "A");
     m_l5.put("otide", "A");
     m_l5.put("ously", "A");
-    m_l4 = new HashMap();
+    m_l4 = new HashMap<String,String>();
     m_l4.put("able", "A");
     m_l4.put("ably", "A");
     m_l4.put("ages", "B");
@@ -327,7 +327,7 @@ public class LovinsStemmer
     m_l4.put("wise", "A");
     m_l4.put("ying", "B");
     m_l4.put("yish", "A");
-    m_l3 = new HashMap();
+    m_l3 = new HashMap<String,String>();
     m_l3.put("acy", "A");
     m_l3.put("age", "B");
     m_l3.put("aic", "A");
@@ -367,7 +367,7 @@ public class LovinsStemmer
     m_l3.put("oid", "A");
     m_l3.put("one", "R");
     m_l3.put("ous", "A");
-    m_l2 = new HashMap();
+    m_l2 = new HashMap<String,String>();
     m_l2.put("ae", "A"); 
     m_l2.put("al", "b");
     m_l2.put("ar", "X");
@@ -386,7 +386,7 @@ public class LovinsStemmer
     m_l2.put("yl", "R");
     m_l2.put("s\'", "A");
     m_l2.put("\'s", "A");
-    m_l1 = new HashMap();
+    m_l1 = new HashMap<String,String>();
     m_l1.put("a", "A");
     m_l1.put("e", "A");
     m_l1.put("i", "A");
@@ -982,7 +982,7 @@ public class LovinsStemmer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

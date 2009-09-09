@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.List;
+import java.util.ArrayList;
 
 /** 
  * Class for handling an attribute. Once an attribute has been created,
@@ -74,11 +76,11 @@ import java.util.Properties;
  * Attribute length = new Attribute("length"); <br>
  * Attribute weight = new Attribute("weight"); <br><br>
  * 
- * // Create vector to hold nominal values "first", "second", "third" <br>
- * FastVector my_nominal_values = new FastVector(3); <br>
- * my_nominal_values.addElement("first"); <br>
- * my_nominal_values.addElement("second"); <br>
- * my_nominal_values.addElement("third"); <br><br>
+ * // Create list to hold nominal values "first", "second", "third" <br>
+ * List<String> my_nominal_values = new ArrayList<String>(3); <br>
+ * my_nominal_values.add("first"); <br>
+ * my_nominal_values.add("second"); <br>
+ * my_nominal_values.add("third"); <br><br>
  *
  * // Create nominal attribute "position" <br>
  * Attribute position = new Attribute("position", my_nominal_values);<br>
@@ -159,10 +161,10 @@ public class Attribute
   */
 
   /** The attribute's values (if nominal or string). */
-  private /*@ spec_public @*/ FastVector m_Values;
+  private /*@ spec_public @*/ ArrayList<Object> m_Values;
 
   /** Mapping of values to indices (if nominal or string). */
-  private Hashtable m_Hashtable;
+  private Hashtable<Object,Integer> m_Hashtable;
 
   /** The header information for a relation-valued attribute. */
   private Instances m_Header;
@@ -293,7 +295,7 @@ public class Attribute
   //@ requires attributeName != null;
   //@ ensures  m_Name == attributeName;
   public Attribute(String attributeName, 
-		   FastVector attributeValues) {
+		   List<String> attributeValues) {
 
     this(attributeName, attributeValues,
 	 new ProtectedProperties(new Properties()));
@@ -320,25 +322,25 @@ public class Attribute
                  (* if duplicate strings in attributeValues *);
   */
   public Attribute(String attributeName, 
-		   FastVector attributeValues,
+		   List<String> attributeValues,
 		   ProtectedProperties metadata) {
 
     m_Name = attributeName;
     m_Index = -1;
     if (attributeValues == null) {
-      m_Values = new FastVector();
-      m_Hashtable = new Hashtable();
+      m_Values = new ArrayList<Object>();
+      m_Hashtable = new Hashtable<Object,Integer>();
       m_Header = null;
       m_Type = STRING;
     } else {
-      m_Values = new FastVector(attributeValues.size());
-      m_Hashtable = new Hashtable(attributeValues.size());
+      m_Values = new ArrayList<Object>(attributeValues.size());
+      m_Hashtable = new Hashtable<Object,Integer>(attributeValues.size());
       m_Header = null;
       for (int i = 0; i < attributeValues.size(); i++) {
-	Object store = attributeValues.elementAt(i);
+	Object store = attributeValues.get(i);
 	if (((String)store).length() > STRING_COMPRESS_THRESHOLD) {
 	  try {
-	    store = new SerializedObject(attributeValues.elementAt(i), true);
+	    store = new SerializedObject(attributeValues.get(i), true);
 	  } catch (Exception ex) {
 	    System.err.println("Couldn't compress nominal attribute value -"
 			       + " storing uncompressed.");
@@ -349,7 +351,7 @@ public class Attribute
 					     attributeName + ") cannot"
 					     + " have duplicate labels (" + store + ").");
 	}
-	m_Values.addElement(store);
+	m_Values.add(store);
 	m_Hashtable.put(store, new Integer(i));
       }
       m_Type = NOMINAL;
@@ -387,8 +389,8 @@ public class Attribute
     }
     m_Name = attributeName;
     m_Index = -1;
-    m_Values = new FastVector();
-    m_Hashtable = new Hashtable();
+    m_Values = new ArrayList<Object>();
+    m_Hashtable = new Hashtable<Object,Integer>();
     m_Header = header;
     m_Type = RELATIONAL;
     setMetadata(metadata);
@@ -424,7 +426,7 @@ public class Attribute
   public final /*@ pure @*/ Enumeration enumerateValues() {
 
     if (isNominal() || isString()) {
-      final Enumeration ee = m_Values.elements();
+      final Enumeration ee = new WekaEnumeration(m_Values);
       return new Enumeration () {
           public boolean hasMoreElements() {
             return ee.hasMoreElements();
@@ -476,8 +478,8 @@ public class Attribute
         return "Different number of labels: " + m_Values.size() + " != " + att.m_Values.size();
       
       for (int i = 0; i < m_Values.size(); i++) {
-        if (!m_Values.elementAt(i).equals(att.m_Values.elementAt(i)))
-          return "Labels differ at position " + (i+1) + ": " + m_Values.elementAt(i) + " != " + att.m_Values.elementAt(i);
+        if (!m_Values.get(i).equals(att.m_Values.get(i)))
+          return "Labels differ at position " + (i+1) + ": " + m_Values.get(i) + " != " + att.m_Values.get(i);
       }
       
       return null;
@@ -744,7 +746,7 @@ public class Attribute
     if (!isNominal() && !isString()) {
       return "";
     } else {
-      Object val = m_Values.elementAt(valIndex);
+      Object val = m_Values.get(valIndex);
       
       // If we're storing strings compressed, uncompress it.
       if (val instanceof SerializedObject) {
@@ -781,7 +783,7 @@ public class Attribute
     if (!isRelationValued()) {
       return null;
     } else {
-      return (Instances) m_Values.elementAt(valIndex);
+      return (Instances) m_Values.get(valIndex);
     }
   }
 
@@ -836,7 +838,7 @@ public class Attribute
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  public Attribute(String attributeName, FastVector attributeValues, 
+  public Attribute(String attributeName, List<String> attributeValues, 
 	    int index) {
 
     this(attributeName, attributeValues);
@@ -893,7 +895,7 @@ public class Attribute
       return index.intValue();
     } else {
       int intIndex = m_Values.size();
-      m_Values.addElement(store);
+      m_Values.add(store);
       m_Hashtable.put(store, new Integer(intIndex));
       return intIndex;
     }
@@ -919,13 +921,13 @@ public class Attribute
     if (!isString()) {
       return -1;
     }
-    Object store = src.m_Values.elementAt(index);
+    Object store = src.m_Values.get(index);
     Integer oldIndex = (Integer)m_Hashtable.get(store);
     if (oldIndex != null) {
       return oldIndex.intValue();
     } else {
       int intIndex = m_Values.size();
-      m_Values.addElement(store);
+      m_Values.add(store);
       m_Hashtable.put(store, new Integer(intIndex));
       return intIndex;
     }
@@ -953,7 +955,7 @@ public class Attribute
       return index.intValue();
     } else {
       int intIndex = m_Values.size();
-      m_Values.addElement(value);
+      m_Values.add(value);
       m_Hashtable.put(value, new Integer(intIndex));
       return intIndex;
     }
@@ -967,8 +969,8 @@ public class Attribute
    */
   final void addValue(String value) {
 
-    m_Values = (FastVector)m_Values.copy();
-    m_Hashtable = (Hashtable)m_Hashtable.clone();
+    m_Values = Utils.cast(m_Values.clone());
+    m_Hashtable = Utils.cast(m_Hashtable.clone());
     forceAddValue(value);
   }
 
@@ -1015,10 +1017,10 @@ public class Attribute
                                          "nominal, string or relation-" +
                                          " valued attribute!");
     else {
-      m_Values = (FastVector)m_Values.copy();
-      m_Values.removeElementAt(index);
+      m_Values = Utils.cast(m_Values.clone());
+      m_Values.remove(index);
       if (!isRelationValued()) {
-        Hashtable hash = new Hashtable(m_Hashtable.size());
+        Hashtable<Object,Integer> hash = new Hashtable<Object,Integer>(m_Hashtable.size());
         Enumeration enu = m_Hashtable.keys();
         while (enu.hasMoreElements()) {
           Object string = enu.nextElement();
@@ -1053,7 +1055,7 @@ public class Attribute
                            + " storing uncompressed.");
       }
     }
-    m_Values.addElement(store);
+    m_Values.add(store);
     m_Hashtable.put(store, new Integer(m_Values.size() - 1));
   }
 
@@ -1087,8 +1089,8 @@ public class Attribute
     switch (m_Type) {
     case NOMINAL:
     case STRING:
-      m_Values = (FastVector)m_Values.copy();
-      m_Hashtable = (Hashtable)m_Hashtable.clone();
+      m_Values = Utils.cast(m_Values.clone());
+      m_Hashtable = Utils.cast(m_Hashtable.clone());
       Object store = string;
       if (string.length() > STRING_COMPRESS_THRESHOLD) {
         try {
@@ -1098,8 +1100,8 @@ public class Attribute
                              + " storing uncompressed.");
         }
       }
-      m_Hashtable.remove(m_Values.elementAt(index));
-      m_Values.setElementAt(store, index);
+      m_Hashtable.remove(m_Values.get(index));
+      m_Values.set(index, store);
       m_Hashtable.put(store, new Integer(index));
       break;
     default:
@@ -1125,8 +1127,8 @@ public class Attribute
                                            "Headers not compatible.\n" +
                                            data.equalHeadersMsg(m_Header));
       }
-      m_Values = (FastVector)m_Values.copy();
-      m_Values.setElementAt(data, index);
+      m_Values = Utils.cast(m_Values.clone());
+      m_Values.set(index, data);
     } else {
       throw new IllegalArgumentException("Can only set value for"
                                          + " relation-valued attributes!");
@@ -1580,10 +1582,10 @@ public class Attribute
       System.out.println(date.formatDate(dd));
       
       // Create vector to hold nominal values "first", "second", "third" 
-      FastVector my_nominal_values = new FastVector(3); 
-      my_nominal_values.addElement("first"); 
-      my_nominal_values.addElement("second"); 
-      my_nominal_values.addElement("third"); 
+      List<String> my_nominal_values = new ArrayList<String>(3); 
+      my_nominal_values.add("first"); 
+      my_nominal_values.add("second"); 
+      my_nominal_values.add("third"); 
       
       // Create nominal attribute "position" 
       Attribute position = new Attribute("position", my_nominal_values);
@@ -1652,8 +1654,8 @@ public class Attribute
 	System.out.println("\"position\" has unknown type");
       }
 
-      FastVector atts = new FastVector(1);
-      atts.addElement(position);
+      ArrayList<Attribute> atts = new ArrayList<Attribute>(1);
+      atts.add(position);
       Instances relation = new Instances("Test", atts, 0);
       Attribute relationValuedAtt = new Attribute("test", relation);
       System.out.println(relationValuedAtt);

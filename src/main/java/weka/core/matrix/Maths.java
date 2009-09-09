@@ -27,7 +27,7 @@ import java.util.Random;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class Maths
   implements RevisionHandler {
@@ -361,6 +361,6 @@ public class Maths
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

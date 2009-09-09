@@ -47,7 +47,7 @@ import java.lang.reflect.Method;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  * @see #GLOBALINFO_METHOD
  * @see #GLOBALINFO_STARTTAG
  * @see #GLOBALINFO_ENDTAG
@@ -119,7 +119,7 @@ public class GlobalInfoJavadoc
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

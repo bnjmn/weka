@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A vector specialized on doubles.
  * 
  * @author Yong Wang
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class  DoubleVector
   implements Cloneable, RevisionHandler {
@@ -648,7 +648,7 @@ public class  DoubleVector
    */
   public DoubleVector map( String className, String method ) {
     try {
-      Class c = Class.forName( className );
+      Class<?> c = Class.forName( className );
       Class [] cs = new Class[1]; 
       cs[ 0 ] = Double.TYPE;
       Method m = c.getMethod( method, cs );
@@ -731,7 +731,7 @@ public class  DoubleVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   public static void  main( String args[] ) {

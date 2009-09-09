@@ -21,7 +21,6 @@
 
 package weka.core.neighboursearch.balltrees;
 
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -37,6 +36,10 @@ import weka.core.TechnicalInformation.Type;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import java.io.Serializable;
 
 /**
  <!-- globalinfo-start -->
@@ -201,7 +204,7 @@ public class MiddleOutConstructor
 	
     Instance pivot;
     double radius;
-    Vector anchors;
+    Vector<TempNode> anchors;
     int numInsts = endIdx - startIdx + 1;
     int numAnchors = (int) Math.round(Math.sqrt(numInsts));
     
@@ -215,7 +218,7 @@ public class MiddleOutConstructor
 		BallNode node = new BallNode(startIdx, endIdx, m_NumNodes,pivot, radius);
 		return node;
 	  }
-      anchors = new Vector(numAnchors);
+      anchors = new Vector<TempNode>(numAnchors);
       createAnchorsHierarchy(anchors, numAnchors, startIdx, endIdx);
 
       BallNode node = mergeNodes(anchors, startIdx, endIdx);
@@ -250,7 +253,7 @@ public class MiddleOutConstructor
    * @throws Exception If there is some problem in creating 
    * the hierarchy.
    */
-  protected void createAnchorsHierarchy(Vector anchors, final int numAnchors, 
+  protected void createAnchorsHierarchy(Vector<TempNode> anchors, final int numAnchors, 
       final int startIdx, final int endIdx) 
     throws Exception {
     
@@ -260,7 +263,7 @@ public class MiddleOutConstructor
 	              
     TempNode amax = anchr1; //double maxradius = anchr1.radius;
     TempNode newAnchor;
-    Vector anchorDistances = new Vector(numAnchors-1);
+    Vector<double[]> anchorDistances = new Vector<double[]>(numAnchors-1);
     anchors.add(anchr1);
 
     //creating anchors
@@ -341,7 +344,7 @@ public class MiddleOutConstructor
    * @throws Exception IF there is some problem in
    * merging.
    */
-  protected BallNode mergeNodes(Vector list, int startIdx, int endIdx)
+  protected BallNode mergeNodes(Vector<TempNode> list, int startIdx, int endIdx)
     throws Exception {
     
     for(int i=0; i<list.size(); i++) {
@@ -531,8 +534,8 @@ public class MiddleOutConstructor
    * @throws Exception If there is some 
    * problem in calculating the distances.
    */
-  public void setInterAnchorDistances(Vector anchors, TempNode newAnchor,
-                                      Vector anchorDistances) throws Exception {
+  public void setInterAnchorDistances(Vector<TempNode> anchors, TempNode newAnchor,
+                                      Vector<double[]> anchorDistances) throws Exception {
     double[] distArray = new double[anchors.size()];
     
     for(int i=0; i<anchors.size(); i++) {
@@ -833,7 +836,7 @@ public class MiddleOutConstructor
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector();
+    Vector<Option> newVector = new Vector<Option>();
     
     newVector.addElement(new Option(
 	"\tThe seed for the random number generator used\n"
@@ -926,7 +929,7 @@ public class MiddleOutConstructor
     boolean found;
     ListNode node;
     for(int i=0; i<list.size(); i++) {
-      node = (ListNode)list.elementAt(i);
+      node = (ListNode)list.get(i);
       found=false;
       for(int j=startidx; j<=endidx; j++) {
         if(node.idx==m_InstList[j]) {
@@ -981,7 +984,7 @@ public class MiddleOutConstructor
     try {
       ListNode temp;
       for(int i=0; i<points.size(); i++) {
-        temp = (ListNode) points.elementAt(i);
+        temp = (ListNode) points.get(i);
         if(i==0)
           bf.append(""+temp.idx);
         else
@@ -1043,7 +1046,7 @@ public class MiddleOutConstructor
         bf.append(idx+" p: ");
         ListNode temp; 
         for(int i=0; i<points.size(); i++) {
-          temp = (ListNode) points.elementAt(i);
+          temp = (ListNode) points.get(i);
           if(i==0)
             bf.append(""+temp.idx);
           else
@@ -1109,31 +1112,34 @@ public class MiddleOutConstructor
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
    * @version $Revision$
    */
-  protected class MyIdxList
-    extends FastVector {
-    
+  protected class MyIdxList implements Serializable, RevisionHandler {
+
     /** for serialization. */
     private static final long serialVersionUID = -2283869109722934927L;    
     
-    /** Constructor. */
-    public MyIdxList() {
-      super();
-    }
+    /** The array list backing this list */
+    protected ArrayList<ListNode> m_List;
     
     /**
-     * Constructor.  
-     * @param size The initial capacity of the list. 
+     * Constructor.
      */
-    public MyIdxList(int size) {
-      super(size);
+    public MyIdxList() {
+      m_List = new ArrayList<ListNode>();
     }
-    
+
+    /**
+     * Constructor for given capacity.
+     */
+    public MyIdxList(int capacity) {
+      m_List = new ArrayList<ListNode>(capacity);
+    }
+
     /**
      * Returns the first element in the list.
      * @return The list's first element.
      */
     public ListNode getFirst() {
-      return (ListNode) this.elementAt(0);
+      return m_List.get(0);
     }
     
     /**
@@ -1145,15 +1151,14 @@ public class MiddleOutConstructor
      * determine the sort order).
      */
     public void insertReverseSorted(final int idx, final double distance) {
-      java.util.Enumeration en = this.elements();
-      ListNode temp; int i=0;
-      while(en.hasMoreElements()) {
-        temp = (ListNode) en.nextElement();
+
+      int i=0;
+      for (ListNode temp : m_List) {
         if(temp.distance < distance)
           break;
         i++;
       }
-      this.insertElementAt(new ListNode(idx, distance), i);
+      m_List.add(i, new ListNode(idx, distance));
     }
     
     /**
@@ -1164,7 +1169,7 @@ public class MiddleOutConstructor
      * @return The element at the given index.
      */
     public ListNode get(int index) {
-      return (ListNode) this.elementAt(index);
+      return m_List.get(index);
     }
     
     /** 
@@ -1174,7 +1179,7 @@ public class MiddleOutConstructor
      * in the list to remove.
      */
     public void remove(int index) {
-      this.removeElementAt(index);
+      m_List.remove(index);
     }
     
     /**
@@ -1182,7 +1187,15 @@ public class MiddleOutConstructor
      * @return The size of the list.
      */
     public int length() {
-      return super.size();
+      return m_List.size();
+    }
+    
+    /**
+     * Returns the size of the list.
+     * @return The size of the list.
+     */
+    public int size() {
+      return m_List.size();
     }
     
     /**
@@ -1196,8 +1209,8 @@ public class MiddleOutConstructor
      */
     public MyIdxList append(MyIdxList list1, MyIdxList list2) {
       MyIdxList temp = new MyIdxList(list1.size()+list2.size());
-      temp.appendElements(list1);
-      temp.appendElements(list2);
+      temp.m_List.addAll(list1.m_List);
+      temp.m_List.addAll(list2.m_List);
       return temp;
     }
     
@@ -1209,13 +1222,13 @@ public class MiddleOutConstructor
      * in (reverse) sorted order.
      */
     public void checkSorting(MyIdxList list) throws Exception {
-      java.util.Enumeration en = list.elements();
+      Iterator<ListNode> en = m_List.iterator();
       ListNode first=null, second=null;
-      while(en.hasMoreElements()) {
+      while(en.hasNext()) {
         if(first==null)
-          first = (ListNode) en.nextElement();
+          first = (ListNode) en.next();
         else {
-          second = (ListNode)en.nextElement();
+          second = (ListNode)en.next();
           if(first.distance < second.distance)
             throw new Exception("List not sorted correctly." +
                                 " first.distance: " + first.distance +

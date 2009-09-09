@@ -35,12 +35,12 @@ import java.util.Comparator;
  *
  * @see     Instance
  * @author  FracPete (fracpete at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see     java.util.Arrays
  * @see     java.util.Collections
  */
 public class InstanceComparator
-  implements Comparator, Serializable, RevisionHandler {
+  implements Comparator<Instance>, Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6589278678230949683L;
@@ -89,7 +89,7 @@ public class InstanceComparator
    * @return          returns -1 if o1 is smaller than o2, 0 if equal and +1 
    *                  if greater
    */
-  public int compare(Object o1, Object o2) {
+  public int compare(Instance o1, Instance o2) {
     int         result;
     Instance    inst1;
     Instance    inst2;
@@ -149,7 +149,7 @@ public class InstanceComparator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
@@ -158,7 +158,7 @@ public class InstanceComparator
    */
   public static void main(String[] args) throws Exception {
     Instances       inst;
-    Comparator      comp;
+    Comparator<Instance>      comp;
     
     if (args.length == 0)
       return;

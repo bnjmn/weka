@@ -213,10 +213,10 @@ public class Capabilities
   protected CapabilitiesHandler m_Owner;
   
   /** the hashset for storing the active capabilities */
-  protected HashSet m_Capabilities;
+  protected HashSet<Capability> m_Capabilities;
   
   /** the hashset for storing dependent capabilities, eg for meta-classifiers */
-  protected HashSet m_Dependencies;
+  protected HashSet<Capability> m_Dependencies;
   
   /** the reason why the test failed, used to throw an exception */
   protected Exception m_FailReason = null;
@@ -251,8 +251,8 @@ public class Capabilities
     super();
 
     setOwner(owner);
-    m_Capabilities = new HashSet();
-    m_Dependencies = new HashSet();
+    m_Capabilities = new HashSet<Capability>();
+    m_Dependencies = new HashSet<Capability>();
 
     // load properties
     if (PROPERTIES == null) {
@@ -1297,18 +1297,18 @@ public class Capabilities
    * @return 	a string representation of this object
    */
   public String toString() {
-    Vector		sorted;
+    Vector<Capability>		sorted;
     StringBuffer	result;
     
     result = new StringBuffer();
 
     // capabilities
-    sorted = new Vector(m_Capabilities);
+    sorted = new Vector<Capability>(m_Capabilities);
     Collections.sort(sorted);
     result.append("Capabilities: " + sorted.toString() + "\n");
 
     // dependencies
-    sorted = new Vector(m_Dependencies);
+    sorted = new Vector<Capability>(m_Dependencies);
     Collections.sort(sorted);
     result.append("Dependencies: " + sorted.toString() + "\n");
     

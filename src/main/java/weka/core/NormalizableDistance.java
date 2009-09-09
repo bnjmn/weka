@@ -35,7 +35,7 @@ import java.util.Vector;
  * @author Fracpete (fracpete at waikato dot ac dot nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz) -- original code from weka.core.EuclideanDistance
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) -- original code from weka.core.EuclideanDistance
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public abstract class NormalizableDistance
   implements DistanceFunction, OptionHandler, Serializable, RevisionHandler {
@@ -99,7 +99,7 @@ public abstract class NormalizableDistance
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
     
     result.add(new Option(
 	"\tTurns off the normalization of attribute \n"

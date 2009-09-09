@@ -29,7 +29,7 @@ import java.text.FieldPosition;
 
 /**
  * @author Yong Wang
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class ExponentialFormat
   extends DecimalFormat
@@ -107,6 +107,6 @@ public class ExponentialFormat
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

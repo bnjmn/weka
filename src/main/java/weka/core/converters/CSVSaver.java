@@ -102,7 +102,7 @@ public class CSVSaver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
     
     result.addElement(new Option(
         "\tThe field separator to be used.\n"
@@ -117,7 +117,7 @@ public class CSVSaver
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+      result.addElement((Option)en.nextElement());
       
     return result.elements();
   }

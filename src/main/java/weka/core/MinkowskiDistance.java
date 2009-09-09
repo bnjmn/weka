@@ -149,7 +149,7 @@ public class MinkowskiDistance
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
     
     result.addElement(new Option(
         "\tThe order 'p'. With '1' being the Manhattan distance and '2'\n"
@@ -159,7 +159,7 @@ public class MinkowskiDistance
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+      result.addElement((Option)en.nextElement());
       
     return result.elements();
   }
