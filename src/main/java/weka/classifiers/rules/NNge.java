@@ -598,7 +598,7 @@ public class NNge
      *
      * @return true if the Exemplar is empty, false otherwise
      */
-    private boolean isEmpty(){
+    public boolean isEmpty(){
       return (numInstances() == 0);
     }
 
