@@ -22,7 +22,7 @@
 package weka.core;
 
 import java.util.Enumeration;
-import java.util.ArrayList;
+import java.util.List;
 import weka.core.RevisionHandler;
 
 /**
@@ -39,7 +39,7 @@ public class WekaEnumeration
   //@ private invariant 0 <= m_Counter && m_Counter <= m_Vector.size();
   
   /** The vector. */
-  private /*@non_null@*/ ArrayList m_Vector;
+  private /*@non_null@*/ List m_Vector;
   
   /** Special element. Skipped during enumeration. */
   private int m_SpecialElement;
@@ -52,7 +52,7 @@ public class WekaEnumeration
    *
    * @param vector the vector which is to be enumerated
    */
-  public WekaEnumeration(/*@non_null@*/ArrayList vector) {
+  public WekaEnumeration(/*@non_null@*/List vector) {
     
     m_Counter = 0;
     m_Vector = vector;
@@ -67,7 +67,7 @@ public class WekaEnumeration
    * @param special the index of the special element
    */
   //@ requires 0 <= special && special < vector.size();
-  public WekaEnumeration(/*@non_null@*/ArrayList vector, int special){
+  public WekaEnumeration(/*@non_null@*/List vector, int special){
     
     m_Vector = vector;
     m_SpecialElement = special;

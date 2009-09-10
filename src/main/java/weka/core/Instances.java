@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.List;
+import java.util.AbstractList;
 import java.util.ArrayList;
 
 /**
@@ -66,7 +67,7 @@ import java.util.ArrayList;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$ 
  */
-public class Instances 
+public class Instances extends AbstractList<Instance>
   implements Serializable, RevisionHandler {
   
   /** for serialization */
@@ -281,12 +282,34 @@ public class Instances
    *
    * @param instance the instance to be added
    */
-  public void add(/*@non_null@*/ Instance instance) {
+  public boolean add(/*@non_null@*/ Instance instance) {
 
     Instance newInstance = (Instance)instance.copy();
 
     newInstance.setDataset(this);
     m_Instances.add(newInstance);
+
+    return true;
+  }
+
+  /**
+   * Adds one instance to the end of the set. 
+   * Shallow copies instance before it is added. Increases the
+   * size of the dataset if it is not large enough. Does not
+   * check if the instance is compatible with the dataset.
+   * Note: String or relational values are not transferred.
+   *
+   * @param index position where instance is to be inserted
+   * @param instance the instance to be added
+   */
+  //@ requires 0 <= index;
+  //@ requires index < m_Instances.size();
+  public void add(int index, /*@non_null@*/ Instance instance) {
+
+    Instance newInstance = (Instance)instance.copy();
+
+    newInstance.setDataset(this);
+    m_Instances.add(index, newInstance);
   }
 
   /**
@@ -672,7 +695,20 @@ public class Instances
   //@ requires index < numInstances();
   public /*@non_null pure@*/ Instance instance(int index) {
 
-    return (Instance)m_Instances.get(index);
+    return m_Instances.get(index);
+  }
+
+  /**
+   * Returns the instance at the given position.
+   *
+   * @param index the instance's index (index starts with 0)
+   * @return the instance at the given position
+   */
+  //@ requires 0 <= index;
+  //@ requires index < numInstances();
+  public /*@non_null pure@*/ Instance get(int index) {
+
+    return m_Instances.get(index);
   }
 
   /**
@@ -879,6 +915,17 @@ public class Instances
 
     return m_Instances.size();
   }
+  
+  /**
+   * Returns the number of instances in the dataset.
+   *
+   * @return the number of instances in the dataset as an integer
+   */
+  //@ ensures \result == m_Instances.size();
+  public /*@pure@*/ int size() {
+
+    return m_Instances.size();
+  }
 
   /**
    * Shuffles the instances in the set so that they are ordered 
@@ -931,6 +978,19 @@ public class Instances
   public /*@pure@*/ String relationName() {
 
     return m_RelationName;
+  }
+
+  /**
+   * Removes the instance at the given position.
+   *
+   * @param index the instance's index (index starts with 0)
+   * @return the instance at the given position
+   */
+  //@ requires 0 <= index;
+  //@ requires index < numInstances();
+  public Instance remove(int index) {
+
+    return m_Instances.remove(index);
   }
 
   /**
@@ -1091,6 +1151,29 @@ public class Instances
       l++;
     }
     return newData;
+  }
+
+  /**
+   * Replaces the instance at the given position.
+   * Shallow copies instance before it is added. Does not
+   * check if the instance is compatible with the dataset.
+   * Note: String or relational values are not transferred.
+   *
+   * @param index position where instance is to be inserted
+   * @param instance the instance to be inserted
+   * @return the instance previously at that position
+   */
+  //@ requires 0 <= index;
+  //@ requires index < m_Instances.size();
+  public Instance set(int index, /*@non_null@*/ Instance instance) {
+
+    Instance newInstance = (Instance)instance.copy();
+    Instance oldInstance = m_Instances.get(index);
+
+    newInstance.setDataset(this);
+    m_Instances.set(index, newInstance);
+
+    return oldInstance;
   }
 
   /** 
