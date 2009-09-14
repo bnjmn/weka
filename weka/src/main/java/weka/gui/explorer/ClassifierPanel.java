@@ -1647,12 +1647,14 @@ public class ClassifierPanel
                   cp[n] = true;
                 tempd.setConnectPoints(cp);
                 
-                String windowTitle = null;
-                String cname = classifier.getClass().getName();
-                if (cname.startsWith("weka.classifiers.")) {
-                  windowTitle = "" + cname.substring("weka.classifiers.".length());
-                  windowTitle += " (" + classAttToUse.value(0) + ")";
+                String windowTitle = "";
+                if (classifier != null) {
+                  String cname = classifier.getClass().getName();
+                  if (cname.startsWith("weka.classifiers.")) {
+                    windowTitle = "" + cname.substring("weka.classifiers.".length()) + " ";
+                  }
                 }
+                windowTitle += " (class = " + classAttToUse.value(0) + ")";                
                 
                 // add plot
                 cbAnalysis.setCurveData(tempd, classAttToUse);
