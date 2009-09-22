@@ -63,6 +63,9 @@
       <antcall target="parser">
          <param name="parserpkg" value="weka/filters/unsupervised/instance/subsetbyexpression"/>
       </antcall>
+      <antcall target="parser">
+         <param name="parserpkg" value="weka/core/json"/>
+      </antcall>
       <!-- add calls for more parsers here -->
    </target>
 
