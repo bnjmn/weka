@@ -16,7 +16,7 @@
 
 /*
  *    FURIA.java
- *    Copyright (C) 2008,2009 Jens Christian HŸhn
+ *    Copyright (C) 2008,2009 Jens Christian Huehn
  *    
  *    (based upon) JRip.java
  *    Copyright (C) 2001 Xin Xu, Eibe Frank
@@ -55,7 +55,7 @@ import weka.core.TechnicalInformation.Type;
  * <br/>
  * Details please see:<br/>
  * <br/>
- * Jens Christian HŸhn, Eyke HŸllermeier (2009). FURIA: An Algorithm for Unordered Fuzzy Rule Induction. Data Mining and Knowledge Discovery..<br/>
+ * Jens Christian Huehn, Eyke Huellermeier (2009). FURIA: An Algorithm for Unordered Fuzzy Rule Induction. Data Mining and Knowledge Discovery..<br/>
  * <br/>
  * <p/>
  <!-- globalinfo-end -->
@@ -63,8 +63,8 @@ import weka.core.TechnicalInformation.Type;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;article{HŸhn2009,
- *    author = {Jens Christian HŸhn and Eyke HŸllermeier},
+ * &#64;article{Huehn2009,
+ *    author = {Jens Christian Huehn and Eyke Huellermeier},
  *    journal = {Data Mining and Knowledge Discovery},
  *    title = {FURIA: An Algorithm for Unordered Fuzzy Rule Induction},
  *    year = {2009}
@@ -118,11 +118,9 @@ import weka.core.TechnicalInformation.Type;
  * @version $Revision$
  */
 public class FURIA 
-extends AbstractClassifier 
-implements OptionHandler, 
-AdditionalMeasureProducer, 
-WeightedInstancesHandler,
-TechnicalInformationHandler {    
+  extends AbstractClassifier 
+  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
+             TechnicalInformationHandler {    
 
   /** for serialization */
   static final long serialVersionUID = -6589312996832147161L;
@@ -229,7 +227,7 @@ TechnicalInformationHandler {
     TechnicalInformation 	result;
 
     result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Jens Christian HŸhn and Eyke HŸllermeier");
+    result.setValue(Field.AUTHOR, "Jens Christian Huehn and Eyke Huellermeier");
     result.setValue(Field.TITLE, "FURIA: An Algorithm for Unordered Fuzzy Rule Induction");
     result.setValue(Field.YEAR, "2009");
     result.setValue(Field.JOURNAL, "Data Mining and Knowledge Discovery");
@@ -2444,4 +2442,3 @@ TechnicalInformationHandler {
     return "$Revision$";
   }
 }
-
