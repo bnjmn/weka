@@ -111,6 +111,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
+import weka.gui.hierarchyvisualizer.HierarchyVisualizer;
+
 /** 
  * This panel allows the user to select and configure a clusterer, and evaluate
  * the clusterer using a number of testing modes (test on the training data,
@@ -1003,26 +1005,37 @@ public class ClustererPanel
   /**
    * Pops up a TreeVisualizer for the clusterer from the currently
    * selected item in the results list
-   * @param dottyString the description of the tree in dotty format
+   * @param graphString the description of the tree in dotty format
    * @param treeName the title to assign to the display
    */
-  protected void visualizeTree(String dottyString, String treeName) {
+  protected void visualizeTree(String graphString, String treeName) {
     final javax.swing.JFrame jf = 
       new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+treeName);
     jf.setSize(500,400);
     jf.getContentPane().setLayout(new BorderLayout());
-    TreeVisualizer tv = new TreeVisualizer(null,
-					   dottyString,
-					   new PlaceNode2());
-    jf.getContentPane().add(tv, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	public void windowClosing(java.awt.event.WindowEvent e) {
-	  jf.dispose();
-	}
-      });
-    
-    jf.setVisible(true);
-    tv.fitToScreen();
+    if (graphString.contains("digraph")) {
+	    TreeVisualizer tv = new TreeVisualizer(null,
+						   graphString,
+						   new PlaceNode2());
+	    jf.getContentPane().add(tv, BorderLayout.CENTER);
+	    jf.addWindowListener(new java.awt.event.WindowAdapter() {
+		public void windowClosing(java.awt.event.WindowEvent e) {
+		  jf.dispose();
+		}
+	      });
+	    jf.setVisible(true);
+	    tv.fitToScreen();
+    } else if (graphString.startsWith("Newick:")) {
+	    HierarchyVisualizer tv = new HierarchyVisualizer(graphString.substring(7));
+	    jf.getContentPane().add(tv, BorderLayout.CENTER);
+	    jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	    	public void windowClosing(java.awt.event.WindowEvent e) {
+	    		jf.dispose();
+	    	}
+	    });
+	    jf.setVisible(true);
+	    tv.fitToScreen();
+    }
   }
 
   /**

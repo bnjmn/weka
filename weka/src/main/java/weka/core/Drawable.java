@@ -30,7 +30,7 @@ package weka.core;
  */
 public interface Drawable {
 
-  int NOT_DRAWABLE = 0, TREE = 1, BayesNet = 2;
+  int NOT_DRAWABLE = 0, TREE = 1, BayesNet = 2, Newick = 3;
 
   /**
    * Returns the type of graph representing
