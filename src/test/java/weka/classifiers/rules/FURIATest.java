@@ -27,8 +27,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests JRip. Run from the command line with:<p>
- * java weka.classifiers.rules.JRipTest
+ * Tests FURIA. Run from the command line with:<p>
+ * java weka.classifiers.rules.JFuriaTest
  *
  * @author Mark Hall
  * @version $Revision$
@@ -49,5 +49,4 @@ public class FURIATest extends AbstractClassifierTest {
   public static void main(String[] args){
     junit.textui.TestRunner.run(suite());
   }
-
 }
