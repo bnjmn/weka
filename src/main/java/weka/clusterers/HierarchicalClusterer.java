@@ -191,6 +191,10 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	@Override
 	public void buildClusterer(Instances data) throws Exception {
 		m_instances = data;
+		int nInstances = m_instances.numInstances();
+		if (nInstances == 0) {
+			return;
+		}
 		m_DistanceFunction.setInstances(m_instances);
 		// use array of integer vectors to store cluster indices,
 		// starting with one cluster per instance
@@ -212,7 +216,6 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			}
 		}
 
-		int nInstances = m_instances.numInstances();
 		
 		// used for keeping track of hierarchy
 		Node [] clusterNodes = new Node[nInstances];
@@ -600,6 +603,9 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	 * the training data point is taken as the cluster index.
 	 */
 	public int clusterInstance(Instance instance) throws Exception {
+		if (m_instances.numInstances() == 0) {
+			return 0;
+		}
 		double fBestDist = Double.MAX_VALUE;
 		int iBestInstance = -1;
 		for (int i = 0; i < m_instances.numInstances(); i++) {
@@ -617,6 +623,11 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	 * cluster the instance is assigned to.
 	 */
 	public double[] distributionForInstance(Instance instance) throws Exception {
+		if (numberOfClusters() == 0) {
+			double [] p = new double[1];
+			p[0] = 1;
+			return p;
+		}
 		double [] p = new double[numberOfClusters()];
 		p[clusterInstance(instance)] = 1.0;
 		return p;
@@ -775,15 +786,19 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 				  attIndex++;
 			  }
 		  }
-		  if (m_bPrintNewick) {
-			  for (int i = 0; i < m_clusters.length; i++) {
-				  if (m_clusters[i] != null) {
-					  buf.append("Cluster " + i + "\n");
-					  buf.append(m_clusters[i].toString(attIndex));
-					  buf.append("\n\n");
+		  try {
+			if (m_bPrintNewick && (numberOfClusters() > 0)) {
+				  for (int i = 0; i < m_clusters.length; i++) {
+					  if (m_clusters[i] != null) {
+						  buf.append("Cluster " + i + "\n");
+						  buf.append(m_clusters[i].toString(attIndex));
+						  buf.append("\n\n");
+					  }
 				  }
 			  }
-		  }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		  return buf.toString();
 	  }
 
@@ -855,6 +870,9 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		  }
 	@Override
 	public String graph() throws Exception {
+		if (numberOfClusters() == 0) {
+			  return "Newick:(no,clusters)";
+		}
 		  int attIndex = m_instances.classIndex();
 		  if (attIndex < 0) {
 			  // try find a string, or last attribute otherwise
