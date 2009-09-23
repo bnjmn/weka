@@ -319,14 +319,14 @@ public class GenericPropertiesCreator {
     // check our classloader against the system one - if different then
     // return false (as dynamic classloading only works for classes discoverable
     // in the system classpath
-    if (!ClassLoader.getSystemClassLoader().equals(this.getClass().getClassLoader())) {
+    /*if (!ClassLoader.getSystemClassLoader().equals(this.getClass().getClassLoader())) {
       if (Boolean.parseBoolean(getInputProperties().getProperty(USE_DYNAMIC, "true")) == true) {
         System.out.println("[GenericPropertiesCreator] classloader in use is not the system "
             + "classloader: using static entries in weka/gui/GenericObjectEditor.props rather "
             + "than dynamic class discovery.");
       }
       return false;
-    }
+    }*/
     
     return Boolean.parseBoolean(
 	getInputProperties().getProperty(USE_DYNAMIC, "true"));
