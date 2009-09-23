@@ -766,21 +766,6 @@ public class Instance
   }
 
   /**
-   * Modifies the instances value for an attribute (floating point
-   * representation). Unlike in <code>setValue</code> no deep copy is
-   * produced, i.e. the actual value is modified.
-   *
-   * @param attIndex the attribute's index 
-   * @param value the new attribute value (If the corresponding
-   * attribute is nominal (or a string) then this is the new value's
-   * index as a double).
-   */
-  public void modifyValue(int attIndex, double value) {
-    
-    m_AttValues[attIndex] = value;
-  }
-  
-  /**
    * Sets the weight of an instance.
    *
    * @param weight the weight
