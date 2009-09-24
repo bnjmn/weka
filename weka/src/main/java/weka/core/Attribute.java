@@ -80,7 +80,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32.2.3 $
+ * @version $Revision$
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -995,7 +995,7 @@ public class Attribute implements Copyable, Serializable {
   public final /*@ pure @*/ boolean isInRange(double value) {
 
     // dates and missing values are a special case 
-    if (m_Type == DATE || value == Instance.missingValue()) return true;
+    if (m_Type == DATE || Instance.isMissingValue(value)) return true;
     if (m_Type != NUMERIC) {
       // do label range check
       int intVal = (int) value;
