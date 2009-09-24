@@ -58,7 +58,7 @@ import weka.core.Attribute;
  * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class AddExpression extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -375,7 +375,7 @@ public class AddExpression extends Filter
 	operands.push(new Double(((NumericOperand)nextob).m_numericConst));
       } else if (nextob instanceof AttributeOperand) {
 	double value = vals[((AttributeOperand)nextob).m_attributeIndex];
-	if (value == Instance.missingValue()) {
+	if (Instance.isMissingValue(value)) {
 	  vals[vals.length-1] = Instance.missingValue();
 	  break;
 	}
