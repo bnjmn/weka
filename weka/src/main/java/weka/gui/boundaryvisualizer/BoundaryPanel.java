@@ -65,7 +65,7 @@ import javax.swing.ToolTipManager;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.23 $
+ * @version $Revision$
  * @since 1.0
  * @see JPanel
  */
@@ -320,7 +320,7 @@ public class BoundaryPanel
 		Instance inst = m_trainingData.instance(i);
 		double x = inst.value(m_xAttribute);
 		double y = inst.value(m_yAttribute);
-		if (x != Instance.missingValue() && y != Instance.missingValue()) {
+		if (!Instance.isMissingValue(x) && !Instance.isMissingValue(y)) {
 			if (x < m_minX) {
 			m_minX = x;
 			}
