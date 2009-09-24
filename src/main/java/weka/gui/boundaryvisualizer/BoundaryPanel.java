@@ -321,7 +321,7 @@ public class BoundaryPanel
 		Instance inst = m_trainingData.instance(i);
 		double x = inst.value(m_xAttribute);
 		double y = inst.value(m_yAttribute);
-		if (x != Instance.missingValue() && y != Instance.missingValue()) {
+		if (!Instance.isMissingValue(x) && !Instance.isMissingValue(y)) {
 			if (x < m_minX) {
 			m_minX = x;
 			}
