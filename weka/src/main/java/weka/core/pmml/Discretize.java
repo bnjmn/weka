@@ -31,6 +31,7 @@ import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.Utils;
 
 /**
  * Class encapsulating a Discretize Expression.
@@ -61,7 +62,7 @@ public class Discretize extends Expression {
      * If the optype is continuous or ordinal, we will attempt to parse
      * the bin value as a number and store it here.
      */
-    private double m_numericBinValue = Instance.missingValue();
+    private double m_numericBinValue = Utils.missingValue();
     
     protected DiscretizeBin(Element bin, 
         FieldMetaInfo.Optype opType) throws Exception {
@@ -248,7 +249,7 @@ public class Discretize extends Expression {
         m_opType == FieldMetaInfo.Optype.ORDINAL) {
       // check to see if all bin values could be parsed as numbers
       for (DiscretizeBin d : m_bins) {
-        if (Instance.isMissingValue(d.getBinValueNumeric())) {
+        if (Utils.isMissingValue(d.getBinValueNumeric())) {
           categorical = true;
           break;
         }
@@ -323,11 +324,11 @@ public class Discretize extends Expression {
     
     // default of a missing value for the result if none of the following
     // logic applies
-    double result = Instance.missingValue();
+    double result = Utils.missingValue();
     
     double value = incoming[m_fieldIndex];
     
-    if (Instance.isMissingValue(value)) {
+    if (Utils.isMissingValue(value)) {
       if (m_mapMissingDefined) {
         if (m_outputDef.isNominal()) {
           result = m_outputDef.indexOfValue(m_mapMissingTo);
@@ -385,7 +386,7 @@ public class Discretize extends Expression {
    */
   public String getResultCategorical(double[] incoming) throws Exception {
     double index = getResult(incoming);
-    if (Instance.isMissingValue(index)) {
+    if (Utils.isMissingValue(index)) {
       return "**Missing Value**";
     }
     

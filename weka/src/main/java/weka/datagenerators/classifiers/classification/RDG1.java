@@ -24,7 +24,8 @@ package weka.datagenerators.classifiers.classification;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionHandler;
@@ -963,7 +964,7 @@ public class RDG1
 	  throw new Exception ("Attribute type is not supported.");
       }
     }
-    example = new Instance(1.0, attributes);
+    example = new DenseInstance(1.0, attributes);
     example.setDataset(format);
     example.setClassMissing();
 

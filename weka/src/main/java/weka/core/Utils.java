@@ -49,6 +49,29 @@ public final class Utils
   public static double SMALL = 1e-6;
 
   /**
+   * Tests if the given value codes "missing".
+   *
+   * @param val the value to be tested
+   * @return true if val codes "missing"
+   */
+  public static boolean isMissingValue(double val) {
+
+    return Double.isNaN(val);
+  }
+
+  /**
+   * Returns the value used to code a missing value.  Note that
+   * equality tests on this value will always return false, so use
+   * isMissingValue(double val) for testing..
+   *
+   * @return the value used as missing value.
+   */
+  public static double missingValue() {
+    
+    return Double.NaN;
+  }
+
+  /**
    * Casting an object without "unchecked" compile-time warnings.
    * Use only when absolutely necessary (e.g. when using clone()).
    */

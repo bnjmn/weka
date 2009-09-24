@@ -25,6 +25,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.SelectedTag;
@@ -823,7 +824,7 @@ public abstract class OSDLCore
     // fill in the smallest and biggest element (for use in the
     // quasi monotone version of the algorithm)
     double[] tmpAttValues = new double[instances.numAttributes()];
-    Instance instance = new Instance(1, tmpAttValues);
+    Instance instance = new DenseInstance(1, tmpAttValues);
     instance.setDataset(instances);
     smallestElement = new Coordinates(instance);
     if (m_Debug) {
@@ -834,7 +835,7 @@ public abstract class OSDLCore
       tmpAttValues[i] = instances.attribute(i).numValues() - 1; 
     }
 
-    instance = new Instance(1, tmpAttValues);
+    instance = new DenseInstance(1, tmpAttValues);
     instance.setDataset(instances);
     biggestElement = new Coordinates(instance);
     if (m_Debug) {

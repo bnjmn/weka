@@ -24,6 +24,7 @@ package weka.classifiers.misc.monotone;
 
 import weka.classifiers.Classifier;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
@@ -783,7 +784,7 @@ public class InstancesUtil
 	attValues[i] = random.nextInt( (int) info[i]); 
       }
     }
-    return new Instance(1, attValues);
+    return new DenseInstance(1, attValues);
   }
 
 

@@ -24,7 +24,8 @@ package weka.datagenerators.classifiers.classification;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -77,7 +78,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 
 public class RandomRBF
@@ -499,7 +500,7 @@ public class RandomRBF
     for (i = 0; i < getNumAttributes(); i++) {
       atts[i] *= scale;
       atts[i] += m_centroids[centroid][i];
-      result   = new Instance(1.0, atts);
+      result   = new DenseInstance(1.0, atts);
     }
 
     // dataset reference
@@ -581,7 +582,7 @@ public class RandomRBF
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

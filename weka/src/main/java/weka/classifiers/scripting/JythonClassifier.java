@@ -374,7 +374,7 @@ public class JythonClassifier
     if (m_JythonObject != null)
       return m_JythonObject.classifyInstance(instance);
     else
-      return Instance.missingValue();
+      return Utils.missingValue();
   }
 
   /**

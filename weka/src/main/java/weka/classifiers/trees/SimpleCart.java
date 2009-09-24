@@ -373,7 +373,7 @@ public class SimpleCart
     // if no instances have reached this node (normally won't happen)
     if (totalWeight == 0){
       m_Attribute = null;
-      m_ClassValue = Instance.missingValue();
+      m_ClassValue = Utils.missingValue();
       m_Distribution = new double[data.numClasses()];
       return;
     }
@@ -1529,7 +1529,7 @@ public class SimpleCart
     StringBuffer text = new StringBuffer();
     // if leaf nodes
     if (m_Attribute == null) {
-      if (Instance.isMissingValue(m_ClassValue)) {
+      if (Utils.isMissingValue(m_ClassValue)) {
 	text.append(": null");
       } else {
 	double correctNum = (int)(m_Distribution[Utils.maxIndex(m_Distribution)]*100)/

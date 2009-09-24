@@ -24,7 +24,8 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
@@ -404,7 +405,7 @@ public class MultiInstanceToPropositional
     Instances outputFormat = getOutputFormat().stringFreeStructure();
 
     for (int i = 0; i < bagSize; i++) {
-      newInst = new Instance (outputFormat.numAttributes());
+      newInst = new DenseInstance(outputFormat.numAttributes());
       newInst.setDataset(outputFormat);
       newInst.setValue(0,bagIndex);
       if (!bag.classIsMissing())

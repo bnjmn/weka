@@ -28,6 +28,7 @@ import org.w3c.dom.Element;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.Utils;
 
 /**
  * Class encapsulating a NormDiscrete Expression. Creates an
@@ -176,7 +177,7 @@ public class NormDiscrete extends Expression {
   public double getResult(double[] incoming) throws Exception {
     
     double result = 0.0;
-    if (Instance.isMissingValue(incoming[m_fieldIndex])) {
+    if (Utils.isMissingValue(incoming[m_fieldIndex])) {
       if (m_mapMissingDefined) {
         result = m_mapMissingTo; // return the replacement
       } else {

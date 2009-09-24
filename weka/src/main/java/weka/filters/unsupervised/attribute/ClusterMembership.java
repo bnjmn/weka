@@ -27,7 +27,8 @@ import weka.clusterers.AbstractDensityBasedClusterer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -65,7 +66,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.16 $
+ * @version $Revision$
  */
 public class ClusterMembership 
   extends Filter 
@@ -353,7 +354,7 @@ public class ClusterMembership
       instanceVals[instanceVals.length - 1] = instance.classValue();
     }
     
-    push(new Instance(instance.weight(), instanceVals));
+    push(new DenseInstance(instance.weight(), instanceVals));
   }
 
   /**
@@ -545,7 +546,7 @@ public class ClusterMembership
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -26,6 +26,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -739,7 +740,7 @@ public class PLSFilter
 	}
       }
       
-      result.add(new Instance(1.0, values));
+      result.add(new DenseInstance(1.0, values));
     }
     
     return result;

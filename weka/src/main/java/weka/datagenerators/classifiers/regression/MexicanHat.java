@@ -25,6 +25,7 @@ package weka.datagenerators.classifiers.regression;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -80,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 
 public class MexicanHat
@@ -575,7 +576,7 @@ public class MexicanHat
 
     atts[0] = x;
     atts[1] = y;
-    result = new Instance(1.0, atts);
+    result = new DenseInstance(1.0, atts);
 
     // dataset reference
     result.setDataset(m_DatasetFormat);
@@ -635,7 +636,7 @@ public class MexicanHat
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

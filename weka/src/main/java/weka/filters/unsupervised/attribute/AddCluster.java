@@ -27,7 +27,8 @@ import weka.clusterers.Clusterer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -311,14 +312,14 @@ public class AddCluster
     }
     catch (Exception e) {
       // clusterer couldn't cluster instance -> missing
-      instanceVals[instance.numAttributes()] = Instance.missingValue();
+      instanceVals[instance.numAttributes()] = Utils.missingValue();
     }
 
     // create new instance
     if (original instanceof SparseInstance) {
       processed = new SparseInstance(original.weight(), instanceVals);
     } else {
-      processed = new Instance(original.weight(), instanceVals);
+      processed = new DenseInstance(original.weight(), instanceVals);
     }
 
     processed.setDataset(instance.dataset());

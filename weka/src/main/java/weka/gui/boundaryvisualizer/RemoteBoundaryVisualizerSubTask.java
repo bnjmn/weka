@@ -25,6 +25,7 @@ package weka.gui.boundaryvisualizer;
 import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.experiment.Task;
@@ -262,7 +263,7 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
       // generate samples
       m_weightingAttsValues = new double [m_attsToWeightOn.length];
       m_vals = new double[m_trainingData.numAttributes()];
-      m_predInst = new Instance(1.0, m_vals);
+      m_predInst = new DenseInstance(1.0, m_vals);
       m_predInst.setDataset(m_trainingData);
 
       System.err.println("Executing row number "+m_rowNumber);

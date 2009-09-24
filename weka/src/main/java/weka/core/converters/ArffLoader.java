@@ -24,10 +24,12 @@ package weka.core.converters;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
+import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -463,7 +465,7 @@ public class ArffLoader
 
         // Check if value is missing.
         if  (m_Tokenizer.ttype == '?') {
-  	m_ValueBuffer[numValues] = Instance.missingValue();
+          m_ValueBuffer[numValues] = Utils.missingValue();
         } else {
 
   	// Check if token is valid.
@@ -562,7 +564,7 @@ public class ArffLoader
               
         // Check if value is missing.
         if  (m_Tokenizer.ttype == '?') {
-  	instance[i] = Instance.missingValue();
+  	instance[i] = Utils.missingValue();
         } else {
 
   	// Check if token is valid.
@@ -625,7 +627,7 @@ public class ArffLoader
       }
         
       // Add instance to dataset
-      Instance inst = new Instance(weight, instance);
+      Instance inst = new DenseInstance(weight, instance);
       inst.setDataset(m_Data);
       
       return inst;

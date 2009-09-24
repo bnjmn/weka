@@ -405,7 +405,7 @@ public class Evaluation
   /**
    * Returns the area under ROC for those predictions that have been collected
    * in the evaluateClassifier(Classifier, Instances) method. Returns 
-   * Instance.missingValue() if the area is not available.
+   * Utils.missingValue() if the area is not available.
    *
    * @param classIndex the index of the class to consider as "positive"
    * @return the area under the ROC curve or not a number
@@ -414,7 +414,7 @@ public class Evaluation
 
     // Check if any predictions have been collected
     if (m_Predictions == null) {
-      return Instance.missingValue();
+      return Utils.missingValue();
     } else {
       ThresholdCurve tc = new ThresholdCurve();
       Instances result = tc.getCurve(m_Predictions, classIndex);
@@ -441,7 +441,7 @@ public class Evaluation
     double aucTotal = 0;
     for(int i = 0; i < m_NumClasses; i++) {
       double temp = areaUnderROC(i);
-      if (!Instance.isMissingValue(temp)) {
+      if (!Utils.isMissingValue(temp)) {
         aucTotal += (temp * classCounts[i]);
       }
     }
@@ -1470,7 +1470,7 @@ public class Evaluation
     if (m_ClassIsNominal) {
       pred = Utils.maxIndex(dist);
       if (dist[(int)pred] <= 0) {
-	pred = Instance.missingValue();
+	pred = Utils.missingValue();
       }
       updateStatsForClassifier(dist, instance);
       if (storePredictions) {
@@ -1517,7 +1517,7 @@ public class Evaluation
     // We don't need to do the following if the class is nominal because in that case
     // entropy and coverage statistics are always computed.
     if (!m_ClassIsNominal) {
-      if (!instance.classIsMissing() && !Instance.isMissingValue(pred)) { 
+      if (!instance.classIsMissing() && !Utils.isMissingValue(pred)) { 
         if (classifier instanceof IntervalEstimator) {
           updateStatsForIntervalEstimator((IntervalEstimator)classifier, classMissing, 
                                           instance.classValue());
@@ -2521,7 +2521,7 @@ public class Evaluation
       .append("    ");
 
       double rocVal = areaUnderROC(i);
-      if (Instance.isMissingValue(rocVal)) {
+      if (Utils.isMissingValue(rocVal)) {
 	text.append("  ?    ")
 	.append("    ");
       } else {
@@ -3344,7 +3344,7 @@ public class Evaluation
   protected double [] makeDistribution(double predictedClass) {
 
     double [] result = new double [m_NumClasses];
-    if (Instance.isMissingValue(predictedClass)) {
+    if (Utils.isMissingValue(predictedClass)) {
       return result;
     }
     if (m_ClassIsNominal) {
@@ -3512,7 +3512,7 @@ public class Evaluation
 
       // Update stats
       m_WithClass += instance.weight();
-      if (Instance.isMissingValue(predictedValue)) {
+      if (Utils.isMissingValue(predictedValue)) {
 	m_Unclassified += instance.weight();
 	return;
       }

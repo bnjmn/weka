@@ -153,13 +153,14 @@ public class LADTree
 
   /** helper classes ********************************************************************/
 
-  protected class LADInstance extends Instance {
+  protected class LADInstance extends DenseInstance {
     public double[] fVector;
     public double[] wVector;
     public double[] pVector;
     public double[] zVector;
     public LADInstance(Instance instance) {
-      super(instance); // copy the instance
+    
+      super(instance);
       
       setDataset(instance.dataset()); // preserve dataset
 

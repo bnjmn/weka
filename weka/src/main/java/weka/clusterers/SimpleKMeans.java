@@ -27,6 +27,7 @@ import weka.core.Capabilities;
 import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.ManhattanDistance;
 import weka.core.Option;
@@ -375,10 +376,10 @@ public class SimpleKMeans
           if (instances.attribute(j).isNumeric()) {
             vals2[j] = Math.sqrt(tempI[i].variance(j));
           } else {
-            vals2[j] = Instance.missingValue();
+            vals2[j] = Utils.missingValue();
           }	
         }    
-        m_ClusterStdDevs.add(new Instance(1.0, vals2));
+        m_ClusterStdDevs.add(new DenseInstance(1.0, vals2));
       }
       m_ClusterSizes[i] = tempI[i].numInstances();
     }
@@ -441,17 +442,17 @@ public class SimpleKMeans
           if (m_ClusterMissingCounts[centroidIndex][j] >  
               m_ClusterNominalCounts[centroidIndex][j][Utils.maxIndex(m_ClusterNominalCounts[centroidIndex][j])]) 
             {
-              vals[j] = Instance.missingValue(); // mark mode as missing
+              vals[j] = Utils.missingValue(); // mark mode as missing
             }
         } else {
           if (m_ClusterMissingCounts[centroidIndex][j] == members.numInstances()) {
-            vals[j] = Instance.missingValue(); // mark mean as missing
+            vals[j] = Utils.missingValue(); // mark mean as missing
           }
         }
       }
     }
     if(updateClusterInfo)
-      m_ClusterCentroids.add(new Instance(1.0, vals));
+      m_ClusterCentroids.add(new DenseInstance(1.0, vals));
     return vals;
   }
 	

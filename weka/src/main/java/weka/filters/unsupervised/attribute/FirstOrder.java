@@ -26,7 +26,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -272,13 +273,13 @@ public class FirstOrder
     Instances outputFormat = outputFormatPeek();
     double[] vals = new double[outputFormat.numAttributes()];
     boolean inRange = false;
-    double lastVal = Instance.missingValue();
+    double lastVal = Utils.missingValue();
     int i, j;
     for(i = 0, j = 0; j < outputFormat.numAttributes(); i++) {
       if (m_DeltaCols.isInRange(i) && (i != instance.classIndex())) {
 	if (inRange) {
-	  if (Instance.isMissingValue(lastVal) || instance.isMissing(i)) {
-	    vals[j++] = Instance.missingValue();
+	  if (Utils.isMissingValue(lastVal) || instance.isMissing(i)) {
+	    vals[j++] = Utils.missingValue();
 	  } else {
 	    vals[j++] = instance.value(i) - lastVal;
 	  }
@@ -295,7 +296,7 @@ public class FirstOrder
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new Instance(instance.weight(), vals);
+      inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(getOutputFormat());
     copyValues(inst, false, instance.dataset(), getOutputFormat());

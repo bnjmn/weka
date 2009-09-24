@@ -25,6 +25,7 @@ package weka.datagenerators.clusterers;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionHandler;
@@ -146,7 +147,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision$ 
  */
 public class BIRCHCluster 
   extends ClusterGenerator
@@ -340,7 +341,7 @@ public class BIRCHCluster
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
+      return RevisionUtils.extract("$Revision$");
     }
   } // end class Cluster
 
@@ -429,7 +430,7 @@ public class BIRCHCluster
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
+      return RevisionUtils.extract("$Revision$");
     }
   } // end class GridVector
   
@@ -1347,7 +1348,7 @@ public class BIRCHCluster
     if (getClassFlag()) 
       numAtts++;
 
-    example = new Instance(numAtts);
+    example = new DenseInstance(numAtts);
     example.setDataset(format);
         
     for (int i = 0; i < getNumAttributes(); i++)
@@ -1512,7 +1513,7 @@ public class BIRCHCluster
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

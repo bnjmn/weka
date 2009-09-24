@@ -25,6 +25,7 @@ package weka.core.neighboursearch;
 import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -843,7 +844,7 @@ public class KDTree
         ownerIndex = i;
       }
     }
-    owner = new Instance(centers.instance(candidates[ownerIndex]));
+    owner = (Instance)centers.instance(candidates[ownerIndex]).copy();
 
     // are there other owners
     // loop also goes over already found owner, keeps order
@@ -860,7 +861,7 @@ public class KDTree
         owners[index++] = candidates[i];
       } else {
 
-        Instance competitor = new Instance(centers.instance(candidates[i]));
+        Instance competitor = (Instance)centers.instance(candidates[i]).copy();
         if
 
         // 3. point has larger distance to rectangle but still can compete
@@ -892,7 +893,7 @@ public class KDTree
   protected double distanceToHrect(KDTreeNode node, Instance x) throws Exception {
     double distance = 0.0;
 
-    Instance closestPoint = new Instance(x);
+    Instance closestPoint = (Instance)x.copy();
     boolean inside;
     inside = clipToInsideHrect(node, closestPoint);
     if (!inside)
@@ -956,7 +957,7 @@ public class KDTree
   protected boolean candidateIsFullOwner(KDTreeNode node, Instance candidate,
       Instance competitor) throws Exception {
     // get extreme point
-    Instance extreme = new Instance(candidate);
+    Instance extreme = (Instance)candidate.copy();
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       if ((competitor.value(i) - candidate.value(i)) > 0) {
         extreme.setValue(i, node.m_NodeRanges[i][MAX]);

@@ -27,6 +27,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -603,7 +604,7 @@ public class Decorate
 		    att[j] = (m_Random.nextGaussian()*stats[1])+stats[0];
 		}else System.err.println("Decorate can only handle numeric and nominal values.");
 	    }
-	    artInstance = new Instance(1.0, att);
+	    artInstance = new DenseInstance(1.0, att);
 	    artData.add(artInstance);
 	}
 	return artData;

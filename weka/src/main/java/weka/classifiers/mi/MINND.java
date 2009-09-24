@@ -26,6 +26,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
@@ -367,8 +368,8 @@ public class MINND
     Instances noises_relationInsts =before.attribute(1).relation().stringFreeStructure();
 
     Instances newData = m_Attributes;
-    Instance after = new Instance(before.numAttributes());
-    Instance noises =  new Instance(before.numAttributes());
+    Instance after = new DenseInstance(before.numAttributes());
+    Instance noises =  new DenseInstance(before.numAttributes());
     after.setDataset(newData);
     noises.setDataset(newData);
 
@@ -505,7 +506,7 @@ public class MINND
   private Instance scale(Instance before) throws Exception{
 
     Instances afterInsts = before.relationalValue(1).stringFreeStructure();
-    Instance after = new Instance(before.numAttributes());
+    Instance after = new DenseInstance(before.numAttributes());
     after.setDataset(m_Attributes);
 
     for(int i=0; i < before.relationalValue(1).numInstances(); i++){
@@ -733,7 +734,7 @@ search:
   public Instance cleanse(Instance before) throws Exception{
 
     Instances insts = before.relationalValue(1).stringFreeStructure();
-    Instance after = new Instance (before.numAttributes());
+    Instance after = new DenseInstance(before.numAttributes());
     after.setDataset(m_Attributes);
 
     for(int g=0; g < before.relationalValue(1).numInstances(); g++){
