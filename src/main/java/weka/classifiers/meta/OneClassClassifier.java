@@ -33,6 +33,7 @@ import weka.classifiers.meta.generators.Ranged;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.TechnicalInformation;
@@ -1344,7 +1345,7 @@ public class OneClassClassifier
 
     for (int j = 0; j < numInstances; j++) {
       //add to the targetData the instances that we generate...
-      Instance anInst = new Instance(targetData.numAttributes());
+      Instance anInst = new DenseInstance(targetData.numAttributes());
       anInst.setDataset(targetData);
       int position = 0;
       for (int i = 0; i < targetData.numAttributes(); i++) {
@@ -1374,7 +1375,7 @@ public class OneClassClassifier
    * @return The probability for each class.
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
-    Instance filtered = new Instance(instance);
+    Instance filtered = (Instance)instance.copy();
 
     m_AddOutlierFilter.input(instance);
     filtered = m_AddOutlierFilter.output();

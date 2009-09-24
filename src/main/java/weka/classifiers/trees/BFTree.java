@@ -2044,7 +2044,7 @@ public class BFTree
     StringBuffer text = new StringBuffer();
     // if leaf nodes
     if (m_Attribute == null) {
-      if (Instance.isMissingValue(m_ClassValue)) {
+      if (Utils.isMissingValue(m_ClassValue)) {
 	text.append(": null");
       } else {
 	double correctNum = Math.rint(m_Distribution[Utils.maxIndex(m_Distribution)]*100)/

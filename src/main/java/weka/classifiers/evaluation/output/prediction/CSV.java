@@ -273,12 +273,12 @@ public class CSV
       else
 	append(m_Delimiter + Utils.doubleToString(inst.classValue(), prec));
       // predicted
-      if (Instance.isMissingValue(predValue))
+      if (Utils.isMissingValue(predValue))
 	append(m_Delimiter + "?");
       else
 	append(m_Delimiter + Utils.doubleToString(predValue, prec));
       // error
-      if (Instance.isMissingValue(predValue) || inst.classIsMissing())
+      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
 	append(m_Delimiter + "?");
       else
 	append(m_Delimiter + Utils.doubleToString(predValue - inst.classValue(), prec));
@@ -286,18 +286,18 @@ public class CSV
       // actual
       append(m_Delimiter + ((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()));
       // predicted
-      if (Instance.isMissingValue(predValue))
+      if (Utils.isMissingValue(predValue))
 	append(m_Delimiter + "?");
       else
 	append(m_Delimiter + ((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue));
       // error?
-      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
+      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	append(m_Delimiter + "+");
       else
 	append(m_Delimiter + "");
       // prediction/distribution
       if (m_OutputDistribution) {
-	if (Instance.isMissingValue(predValue)) {
+	if (Utils.isMissingValue(predValue)) {
 	  append(m_Delimiter + "?");
 	}
 	else {
@@ -313,7 +313,7 @@ public class CSV
 	}
       }
       else {
-	if (Instance.isMissingValue(predValue))
+	if (Utils.isMissingValue(predValue))
 	  append(m_Delimiter + "?");
 	else
 	  append(m_Delimiter + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));

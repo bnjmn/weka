@@ -400,7 +400,7 @@ public class AttributeExpression
     double [] vals = new double [instance.numAttributes()+1];
     for(int i = 0; i < instance.numAttributes(); i++) {
       if (instance.isMissing(i)) {
-	vals[i] = Instance.missingValue();
+	vals[i] = Utils.missingValue();
       } else {
 	vals[i] = instance.value(i);
       }
@@ -427,8 +427,8 @@ public class AttributeExpression
 	operands.push(new Double(((NumericOperand)nextob).m_numericConst));
       } else if (nextob instanceof AttributeOperand) {
 	double value = vals[((AttributeOperand)nextob).m_attributeIndex];
-	if (Instance.isMissingValue(value)) {
-	  vals[vals.length-1] = Instance.missingValue();
+	if (Utils.isMissingValue(value)) {
+	  vals[vals.length-1] = Utils.missingValue();
 	  break;
 	}
 	if (((AttributeOperand)nextob).m_negative) {
@@ -458,7 +458,7 @@ public class AttributeExpression
 
     Double result = ((Double)operands.pop());
     if (result.isNaN() || result.isInfinite()) {
-      vals[vals.length-1] = Instance.missingValue();
+      vals[vals.length-1] = Utils.missingValue();
     } else {
       vals[vals.length-1] = result.doubleValue();
     }

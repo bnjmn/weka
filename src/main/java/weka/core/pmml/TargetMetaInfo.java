@@ -31,6 +31,7 @@ import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.Utils;
 
 /**
  * Class to encapsulate information about a Target.
@@ -278,10 +279,10 @@ public class TargetMetaInfo extends FieldMetaInfo implements Serializable {
       throw new Exception("[TargetMetaInfo] target must be continuous!");
     }
 
-    if (!Instance.isMissingValue(m_min) && prediction < m_min) {
+    if (!Utils.isMissingValue(m_min) && prediction < m_min) {
       prediction = m_min;
     }
-    if (!Instance.isMissingValue(m_max) && prediction > m_max) {
+    if (!Utils.isMissingValue(m_max) && prediction > m_max) {
       prediction = m_max;
     }
 

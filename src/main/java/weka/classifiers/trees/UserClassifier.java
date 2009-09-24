@@ -999,14 +999,14 @@ public class UserClassifier
 	tmp = (FastVector)m_ranges.elementAt(noa);
 	
 	if (((Double)tmp.elementAt(0)).intValue() 
-	    == VLINE && !Instance.isMissingValue(x)) {
+	    == VLINE && !Utils.isMissingValue(x)) {
 	  
 	}
 	else if (((Double)tmp.elementAt(0)).intValue() 
-		 == HLINE && !Instance.isMissingValue(y)) {
+		 == HLINE && !Utils.isMissingValue(y)) {
 	  
 	}
-	else if (Instance.isMissingValue(x) || Instance.isMissingValue(y)) {
+	else if (Utils.isMissingValue(x) || Utils.isMissingValue(y)) {
 	  //System.out.println("miss");
 	  //then go down both branches using their weights
 	  rt = m_set1.calcClassType(i);

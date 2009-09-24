@@ -28,6 +28,7 @@ import weka.core.Check;
 import weka.core.CheckOptionHandler;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.matrix.Matrix;
 import weka.core.Option;
@@ -632,7 +633,7 @@ implements AttributeTransformer, OptionHandler {
       if (currentInstance instanceof SparseInstance) {
         newInstance = new SparseInstance(currentInstance.weight(), newValues);
       } else {
-        newInstance = new Instance(currentInstance.weight(), newValues);
+        newInstance = new DenseInstance(currentInstance.weight(), newValues);
       }
       output.add(newInstance);
     }
@@ -716,7 +717,7 @@ implements AttributeTransformer, OptionHandler {
     if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newValues);
     } else {
-      return new Instance(instance.weight(), newValues);
+      return new DenseInstance(instance.weight(), newValues);
     }
   }
   

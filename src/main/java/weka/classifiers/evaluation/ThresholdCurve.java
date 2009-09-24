@@ -27,6 +27,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
@@ -417,13 +418,13 @@ public class ThresholdCurve
     vals[count++] = ss;
     double expectedByChance = (ss * (tc.getTruePositive() + tc.getFalseNegative()));
     if (expectedByChance < 1) {
-      vals[count++] = Instance.missingValue();
+      vals[count++] = Utils.missingValue();
     } else {
     vals[count++] = tc.getTruePositive() / expectedByChance; 
      
     }
     vals[count++] = prob;
-    return new Instance(1.0, vals);
+    return new DenseInstance(1.0, vals);
   }
   
   /**

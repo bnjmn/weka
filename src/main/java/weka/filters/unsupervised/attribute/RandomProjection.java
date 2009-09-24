@@ -25,7 +25,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -812,7 +813,7 @@ public class RandomProjection
         vals[m_k] = currentInstance.value(classIndex);
       }
 
-      newInstance = new Instance(currentInstance.weight(), vals);
+      newInstance = new DenseInstance(currentInstance.weight(), vals);
       newInstance.setDataset(getOutputFormat());
 
       return newInstance;
@@ -835,7 +836,7 @@ public class RandomProjection
       int index = instance.index(i);
       if (index != classIndex) {
         double value = instance.valueSparse(i);
-        if (!Instance.isMissingValue(value)) {
+        if (!Utils.isMissingValue(value)) {
           sum += m_rmatrix[rpIndex][index] * value;
         }
       }

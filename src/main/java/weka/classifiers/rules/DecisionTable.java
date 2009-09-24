@@ -619,7 +619,7 @@ public class DecisionTable
       double weightedAUC = 0;
       for (i = 0; i < m_theInstances.classAttribute().numValues(); i++) {
 	double tempAUC = m_evaluation.areaUnderROC(i);
-	if (!Instance.isMissingValue(tempAUC)) {
+	if (!Utils.isMissingValue(tempAUC)) {
 	  weightedAUC += (classPriors[i] * tempAUC);
 	} else {
 	  System.err.println("Undefined AUC!!");

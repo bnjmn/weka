@@ -1209,7 +1209,7 @@ public class GeneralRegression extends PMMLClassifier
    *                                                                                                              
    * @param inst the instance to be classified                                                                
    * @return the predicted most likely class for the instance or                                                  
-   * Instance.missingValue() if no prediction is made                                                             
+   * Utils.missingValue() if no prediction is made                                                             
    * @exception Exception if an error occurred during the prediction                                              
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
@@ -1258,7 +1258,7 @@ public class GeneralRegression extends PMMLClassifier
         }
         
         if (m_miningSchema.getFieldsAsInstances().classAttribute().isNumeric()) {
-          preds[0] = Instance.missingValue();
+          preds[0] = Utils.missingValue();
         }
         return preds;
       } else {

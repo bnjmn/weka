@@ -24,6 +24,7 @@ package weka.classifiers.meta.generators;
 import weka.clusterers.EM;
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Capabilities.Capability;
 
@@ -154,7 +155,7 @@ public class EMGenerator
    */
   public double getProbabilityOf(double valuex) {
     //find the cluster closest to the value of x
-    Instance inst = new Instance(1);
+    Instance inst = new DenseInstance(1);
     inst.setValue(0, valuex);
     try{			
       return Math.exp(m_EMModel.logDensityForInstance(inst));			

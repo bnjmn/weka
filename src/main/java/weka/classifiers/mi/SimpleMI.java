@@ -25,6 +25,7 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
@@ -80,7 +81,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class SimpleMI 
   extends SingleClassifierEnhancer
@@ -280,9 +281,9 @@ public class SimpleMI
     Instances mini_data = newData.stringFreeStructure();
     Instances max_data = newData.stringFreeStructure();
 
-    Instance newInst = new Instance (newData.numAttributes()); 
-    Instance mini_Inst = new Instance (mini_data.numAttributes());
-    Instance max_Inst = new Instance (max_data.numAttributes());
+    Instance newInst = new DenseInstance(newData.numAttributes()); 
+    Instance mini_Inst = new DenseInstance(mini_data.numAttributes());
+    Instance max_Inst = new DenseInstance(max_data.numAttributes());
     newInst.setDataset(newData);
     mini_Inst.setDataset(mini_data);
     max_Inst.setDataset(max_data);
@@ -489,7 +490,7 @@ public class SimpleMI
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

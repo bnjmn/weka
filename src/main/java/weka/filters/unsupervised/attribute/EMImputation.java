@@ -29,7 +29,8 @@ import java.util.Vector;
 import weka.core.Attribute;
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -548,7 +549,7 @@ implements UnsupervisedFilter {
       for (int j = 0; j < numAttributes; j++) {
         attributes[j + 1] = data.instance(newPatternIndex).value(j);
       }
-      Instance newInstance = new Instance(data.instance(newPatternIndex).weight(), attributes);
+      Instance newInstance = new DenseInstance(data.instance(newPatternIndex).weight(), attributes);
       preprocessed.add(newInstance);
         
       // go through all remaining instances to find those with same pattern
@@ -572,7 +573,7 @@ implements UnsupervisedFilter {
           for (int l = 0; l < numAttributes; l++) {
             attributes[l + 1] = data.instance(i).value(l);
           }
-          newInstance = new Instance(data.instance(i).weight(), attributes);
+          newInstance = new DenseInstance(data.instance(i).weight(), attributes);
           preprocessed.add(newInstance);
           
           // mark current instance added

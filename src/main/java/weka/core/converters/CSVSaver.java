@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -444,7 +445,7 @@ public class CSVSaver
     result = new StringBuffer();
     
     if (inst instanceof SparseInstance) {
-      outInst = new Instance(inst.weight(), inst.toDoubleArray());
+      outInst = new DenseInstance(inst.weight(), inst.toDoubleArray());
       outInst.setDataset(inst.dataset());
     }
     else {

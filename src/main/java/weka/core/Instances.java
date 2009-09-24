@@ -488,7 +488,9 @@ public class Instances extends AbstractList<Instance>
       current.setIndex(current.index() - 1);
     }
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).forceDeleteAttributeAt(position); 
+      instance(i).setDataset(null);
+      instance(i).deleteAttributeAt(position); 
+      instance(i).setDataset(this);
     }
   }
 
@@ -678,7 +680,9 @@ public class Instances extends AbstractList<Instance>
       current.setIndex(current.index() + 1);
     }
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).forceInsertAttributeAt(position);
+      instance(i).setDataset(null);
+      instance(i).insertAttributeAt(position);
+      instance(i).setDataset(this);
     }
     if (m_ClassIndex >= position) {
       m_ClassIndex++;
@@ -1522,7 +1526,7 @@ public class Instances extends AbstractList<Instance>
     int [] sorted = Utils.sort(attVals);
     int currentCount = 0;
     double currentWeight = 0;
-    double prev = Instance.missingValue();
+    double prev = Double.NaN;
     for (int j = 0; j < numInstances(); j++) {
       Instance current = instance(sorted[j]);
       if (current.isMissing(index)) {
@@ -1888,9 +1892,9 @@ public class Instances extends AbstractList<Instance>
       testAtts.add(new Attribute("nominal_attribute", testVals));
       testAtts.add(new Attribute("numeric_attribute"));
       instances = new Instances("test_set", testAtts, 10);
-      instances.add(new Instance(instances.numAttributes()));
-      instances.add(new Instance(instances.numAttributes()));
-      instances.add(new Instance(instances.numAttributes()));
+      instances.add(new DenseInstance(instances.numAttributes()));
+      instances.add(new DenseInstance(instances.numAttributes()));
+      instances.add(new DenseInstance(instances.numAttributes()));
       instances.setClassIndex(0);
       System.out.println("\nSet of instances created from scratch:\n");
       System.out.println(instances);

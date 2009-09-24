@@ -674,7 +674,7 @@ public class Regression extends PMMLClassifier
    *                                                                                                              
    * @param inst the instance to be classified                                                                
    * @return the predicted most likely class for the instance or                                                  
-   * Instance.missingValue() if no prediction is made                                                             
+   * Utils.missingValue() if no prediction is made                                                             
    * @exception Exception if an error occurred during the prediction                                              
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
@@ -711,7 +711,7 @@ public class Regression extends PMMLClassifier
     boolean hasMissing = false;
     for (int i = 0; i < incoming.length; i++) {
       if (i != m_miningSchema.getFieldsAsInstances().classIndex() && 
-          Instance.isMissingValue(incoming[i])) {
+          Utils.isMissingValue(incoming[i])) {
         hasMissing = true;
         break;
       }
@@ -733,7 +733,7 @@ public class Regression extends PMMLClassifier
           m_log.logMessage(message);
         }
         if (m_miningSchema.getFieldsAsInstances().classAttribute().isNumeric()) {
-          preds[0] = Instance.missingValue();
+          preds[0] = Utils.missingValue();
         }
         return preds;
       } else {

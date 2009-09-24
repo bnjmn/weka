@@ -232,7 +232,7 @@ public class AlgVector
     Instance newInst = null;
 
     if (m_Elements != null) {
-      newInst = new Instance(model.numAttributes());
+      newInst = new DenseInstance(model.numAttributes());
       newInst.setDataset(model);
       
       for (int i = 0, j = 0; i < model.numAttributes(); i++) {

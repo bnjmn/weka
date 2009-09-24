@@ -30,6 +30,8 @@ import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.Utils;
+
 
 /**
  * Class encapsulating a NormContinuous Expression.
@@ -193,7 +195,7 @@ public class NormContinuous extends Expression {
   private double computeNorm(double[] a, double[] b, double[] incoming) {
     double result = 0.0;
     
-    if (Instance.isMissingValue(incoming[m_fieldIndex])) {
+    if (Utils.isMissingValue(incoming[m_fieldIndex])) {
       if (m_mapMissingDefined) {
         result = m_mapMissingTo;
       } else {

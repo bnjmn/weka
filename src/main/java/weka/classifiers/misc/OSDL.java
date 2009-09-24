@@ -26,6 +26,7 @@ import weka.classifiers.misc.monotone.OSDLCore;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->
@@ -167,7 +168,7 @@ public class OSDL
 	  System.out.println(e.getMessage());
 	  e.printStackTrace();
 	}
-	if (Instance.isMissingValue(classification)) {
+	if (Utils.isMissingValue(classification)) {
 	  return dist;
 	} 
 	dist[classification] = 1.0;

@@ -24,6 +24,7 @@ package weka.core.json;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.DenseInstance;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -188,7 +189,7 @@ public class JSONInstances {
       }
     }
 
-    result = new Instance(weight, vals);
+    result = new DenseInstance(weight, vals);
     result.setDataset(data);
       
     return result;

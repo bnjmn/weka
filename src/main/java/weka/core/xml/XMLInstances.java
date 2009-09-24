@@ -26,6 +26,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.ProtectedProperties;
 import weka.core.RevisionUtils;
+import weka.core.DenseInstance;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Version;
@@ -706,7 +707,7 @@ public class XMLInstances
 
       // set value
       if (node.getAttribute(ATT_MISSING).equals(VAL_YES)) {
-	values[index] = Instance.missingValue();
+	values[index] = Utils.missingValue();
       }
       else {
 	content = getContent(node);
@@ -746,7 +747,7 @@ public class XMLInstances
     if (sparse)
       result = new SparseInstance(weight, values);
     else
-      result = new Instance(weight, values);
+      result = new DenseInstance(weight, values);
     
     return result;
   }

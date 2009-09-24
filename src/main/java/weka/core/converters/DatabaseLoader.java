@@ -23,6 +23,7 @@
 package weka.core.converters;
 
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Attribute;
 import weka.core.OptionHandler;
@@ -1002,7 +1003,7 @@ public class DatabaseLoader
 	  String str = rs.getString(i);
 	  
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
             } else {
                 Double index = (Double)m_nominalIndexes[i - 1].get(str);
                 if (index == null) {
@@ -1015,7 +1016,7 @@ public class DatabaseLoader
 	  str = rs.getString(i);
 
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  }
 	  else {
 	    Double index = (Double)m_nominalIndexes[i - 1].get(str);
@@ -1028,7 +1029,7 @@ public class DatabaseLoader
 	case DatabaseConnection.BOOL:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
@@ -1036,7 +1037,7 @@ public class DatabaseLoader
 	case DatabaseConnection.DOUBLE:
 	  double dd = rs.getDouble(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] =  dd;
 	  }
@@ -1044,7 +1045,7 @@ public class DatabaseLoader
 	case DatabaseConnection.BYTE:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)by;
 	  }
@@ -1052,7 +1053,7 @@ public class DatabaseLoader
 	case DatabaseConnection.SHORT:
 	  short sh = rs.getShort(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)sh;
 	  }
@@ -1060,7 +1061,7 @@ public class DatabaseLoader
 	case DatabaseConnection.INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)in;
 	  }
@@ -1068,7 +1069,7 @@ public class DatabaseLoader
 	case DatabaseConnection.LONG:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)lo;
 	  }
@@ -1076,7 +1077,7 @@ public class DatabaseLoader
 	case DatabaseConnection.FLOAT:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)fl;
 	  }
@@ -1084,7 +1085,7 @@ public class DatabaseLoader
 	case DatabaseConnection.DATE:
           Date date = rs.getDate(i);
           if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
             // TODO: Do a value check here.
             vals[i - 1] = (double)date.getTime();
@@ -1093,18 +1094,18 @@ public class DatabaseLoader
 	case DatabaseConnection.TIME:
           Time time = rs.getTime(i);
           if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
             // TODO: Do a value check here.
             vals[i - 1] = (double) time.getTime();
           }
           break;
 	default:
-	  vals[i - 1] = Instance.missingValue();
+	  vals[i - 1] = Utils.missingValue();
 	}
       }
       Instance newInst;
-      newInst = new Instance(1.0, vals);
+      newInst = new DenseInstance(1.0, vals);
       instances.add(newInst);
     }   
     
@@ -1187,7 +1188,7 @@ public class DatabaseLoader
 	case DatabaseConnection.STRING :
 	  String str = rs.getString(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    Double index = (Double)m_nominalIndexes[i - 1].get(str);
 	    if (index == null) {
@@ -1199,7 +1200,7 @@ public class DatabaseLoader
 	case DatabaseConnection.TEXT:
 	  str = rs.getString(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  }
 	  else {
 	    Double index = (Double)m_nominalIndexes[i - 1].get(str);
@@ -1212,7 +1213,7 @@ public class DatabaseLoader
 	case DatabaseConnection.BOOL:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
@@ -1222,7 +1223,7 @@ public class DatabaseLoader
 	  double dd = rs.getDouble(i);
 	  // Use the column precision instead of 4?
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    //	    newInst.setValue(i - 1, bd.doubleValue());
 	    vals[i - 1] =  dd;
@@ -1231,7 +1232,7 @@ public class DatabaseLoader
 	case DatabaseConnection.BYTE:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)by;
 	  }
@@ -1239,7 +1240,7 @@ public class DatabaseLoader
 	case DatabaseConnection.SHORT:
 	  short sh = rs.getShort(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)sh;
 	  }
@@ -1247,7 +1248,7 @@ public class DatabaseLoader
 	case DatabaseConnection.INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)in;
 	  }
@@ -1255,7 +1256,7 @@ public class DatabaseLoader
 	case DatabaseConnection.LONG:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)lo;
 	  }
@@ -1263,7 +1264,7 @@ public class DatabaseLoader
 	case DatabaseConnection.FLOAT:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)fl;
 	  }
@@ -1271,7 +1272,7 @@ public class DatabaseLoader
 	case DatabaseConnection.DATE:
           Date date = rs.getDate(i);
           if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
             // TODO: Do a value check here.
             vals[i - 1] = (double)date.getTime();
@@ -1280,17 +1281,17 @@ public class DatabaseLoader
 	case DatabaseConnection.TIME:
           Time time = rs.getTime(i);
           if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
             // TODO: Do a value check here.
             vals[i - 1] = (double) time.getTime();
           }
           break;
 	default:
-	  vals[i - 1] = Instance.missingValue();
+	  vals[i - 1] = Utils.missingValue();
 	}
       }
-       Instance inst = new Instance(1.0, vals);
+       Instance inst = new DenseInstance(1.0, vals);
        //get rid of m_idColumn
        if(m_DataBaseConnection.getUpperCase())
               m_idColumn = m_idColumn.toUpperCase();

@@ -30,6 +30,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -260,7 +261,7 @@ public class NonSparseToSparse
     }
     
     if (m_encodeMissingAsZero && !m_insertDummyNominalFirstValue) {
-      Instance tempInst = new Instance(instance);
+      Instance tempInst = (Instance)instance.copy();
       tempInst.setDataset(getInputFormat());
       
       for (int i = 0; i < tempInst.numAttributes(); i++) {
@@ -275,11 +276,11 @@ public class NonSparseToSparse
       double[] values = instance.toDoubleArray();      
       for (int i = 0; i < instance.numAttributes(); i++) {
         if (instance.attribute(i).isNominal()) {
-          if (!Instance.isMissingValue(values[i])) {
+          if (!Utils.isMissingValue(values[i])) {
             values[i]++;
           }
         }
-        if (m_encodeMissingAsZero && Instance.isMissingValue(values[i])) {
+        if (m_encodeMissingAsZero && Utils.isMissingValue(values[i])) {
           values[i] = 0;
         }
       }

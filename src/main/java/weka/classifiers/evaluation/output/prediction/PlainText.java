@@ -170,12 +170,12 @@ public class PlainText
       else
 	append(" " + Utils.doubleToString(inst.classValue(), width, prec));
       // predicted
-      if (Instance.isMissingValue(predValue))
+      if (Utils.isMissingValue(predValue))
 	append(" " + Utils.padLeft("?", width));
       else
 	append(" " + Utils.doubleToString(predValue, width, prec));
       // error
-      if (Instance.isMissingValue(predValue) || inst.classIsMissing())
+      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
 	append(" " + Utils.padLeft("?", width));
       else
 	append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
@@ -183,18 +183,18 @@ public class PlainText
       // actual
       append(" " + Utils.padLeft(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
       // predicted
-      if (Instance.isMissingValue(predValue))
+      if (Utils.isMissingValue(predValue))
 	append(" " + Utils.padLeft("?", width));
       else
 	append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
       // error?
-      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
+      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	append(" " + "  +  ");
       else
 	append(" " + "     ");
       // prediction/distribution
       if (m_OutputDistribution) {
-	if (Instance.isMissingValue(predValue)) {
+	if (Utils.isMissingValue(predValue)) {
 	  append(" " + "?");
 	}
 	else {
@@ -210,7 +210,7 @@ public class PlainText
 	}
       }
       else {
-	if (Instance.isMissingValue(predValue))
+	if (Utils.isMissingValue(predValue))
 	  append(" " + "?");
 	else
 	  append(" " + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));

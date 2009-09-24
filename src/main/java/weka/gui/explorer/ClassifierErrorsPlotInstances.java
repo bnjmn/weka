@@ -29,7 +29,9 @@ import weka.classifiers.evaluation.NumericPrediction;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 
@@ -278,10 +280,10 @@ public class ClassifierErrorsPlotInstances
           }
         }
 
-        m_PlotInstances.add(new Instance(1.0, values));
+        m_PlotInstances.add(new DenseInstance(1.0, values));
         
         if (toPredict.classAttribute().isNominal()) {
-          if (toPredict.isMissing(toPredict.classIndex()) || Instance.isMissingValue(pred)) {
+          if (toPredict.isMissing(toPredict.classIndex()) || Utils.isMissingValue(pred)) {
             m_PlotShapes.addElement(new Integer(Plot2D.MISSING_SHAPE));
           }
           else if (pred != toPredict.classValue()) {
@@ -297,7 +299,7 @@ public class ClassifierErrorsPlotInstances
         else {
           // store the error (to be converted to a point size later)
           Double errd = null;
-          if (!toPredict.isMissing(toPredict.classIndex()) && !Instance.isMissingValue(pred)) {
+          if (!toPredict.isMissing(toPredict.classIndex()) && !Utils.isMissingValue(pred)) {
             errd = new Double(pred - toPredict.classValue());
             m_PlotShapes.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
           }
@@ -416,13 +418,13 @@ public class ClassifierErrorsPlotInstances
 	  values[m_PlotInstances.numAttributes() + n*3 + 2] = predInt[n][1] - predInt[n][0];
 	}
 	else {
-	  values[m_PlotInstances.numAttributes() + n*3 + 0] = Instance.missingValue();
-	  values[m_PlotInstances.numAttributes() + n*3 + 1] = Instance.missingValue();
-	  values[m_PlotInstances.numAttributes() + n*3 + 2] = Instance.missingValue();
+	  values[m_PlotInstances.numAttributes() + n*3 + 0] = Utils.missingValue();
+	  values[m_PlotInstances.numAttributes() + n*3 + 1] = Utils.missingValue();
+	  values[m_PlotInstances.numAttributes() + n*3 + 2] = Utils.missingValue();
 	}
       }
       // create new Instance
-      newInst = new Instance(inst.weight(), values);
+      newInst = new DenseInstance(inst.weight(), values);
       data.add(newInst);
     }
     

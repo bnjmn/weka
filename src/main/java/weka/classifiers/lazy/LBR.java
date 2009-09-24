@@ -1088,7 +1088,7 @@ public class LBR
       if (max > 0) {
         tempClassValue = maxIndex;
       } else {
-        tempClassValue = (int)Instance.missingValue();
+        tempClassValue = (int)Utils.missingValue();
       }
       // ###### END LOCAL CLASSIFY INSTANCE ###########
       
