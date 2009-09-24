@@ -422,10 +422,10 @@ public class AttributeExpression
 	operands.push(new Double(((NumericOperand)nextob).m_numericConst));
       } else if (nextob instanceof AttributeOperand) {
 	double value = vals[((AttributeOperand)nextob).m_attributeIndex];
-	if (Instance.isMissingValue(value)) {
+	/*if (Instance.isMissingValue(value)) {
 	  vals[vals.length-1] = Instance.missingValue();
 	  break;
-	}
+	}*/
 	if (((AttributeOperand)nextob).m_negative) {
 	  value = -value;
 	}
