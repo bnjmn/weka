@@ -55,7 +55,7 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.19.2.1 $
+ * @version $Revision$
  * @since 1.0
  * @see JPanel
  */
@@ -281,7 +281,7 @@ public class BoundaryPanel extends JPanel {
       Instance inst = m_trainingData.instance(i);
       double x = inst.value(m_xAttribute);
       double y = inst.value(m_yAttribute);
-      if (x != Instance.missingValue()) {
+      if (!Instance.isMissingValue(x)) {
 	if (x < m_minX) {
 	  m_minX = x;
 	}
@@ -289,7 +289,7 @@ public class BoundaryPanel extends JPanel {
 	  m_maxX = x;
 	}
       }
-      if (y != Instance.missingValue()) {
+      if (!Instance.isMissingValue(y)) {
 	if (y < m_minY) {
 	  m_minY = y;
 	}
