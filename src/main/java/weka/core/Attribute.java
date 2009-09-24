@@ -87,7 +87,7 @@ import java.util.Properties;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.45 $
+ * @version $Revision$
  */
 public class Attribute
   implements Copyable, Serializable, RevisionHandler {
@@ -1248,7 +1248,7 @@ public class Attribute
   public final /*@ pure @*/ boolean isInRange(double value) {
 
     // dates and missing values are a special case 
-    if (m_Type == DATE || value == Instance.missingValue()) return true;
+    if (m_Type == DATE || Instance.isMissingValue(value)) return true;
     if (m_Type != NUMERIC) {
       // do label range check
       int intVal = (int) value;
@@ -1485,7 +1485,7 @@ public class Attribute
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.45 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
