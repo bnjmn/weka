@@ -39,7 +39,7 @@ import java.util.Vector;
  * floor, ceil, rint, tan, sin, (, ).
  *
  * @author Mark Hall
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision$
  */
 public class AttributeExpression
   implements Serializable, RevisionHandler {
@@ -93,7 +93,7 @@ public class AttributeExpression
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -137,7 +137,7 @@ public class AttributeExpression
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -232,7 +232,7 @@ public class AttributeExpression
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -422,7 +422,7 @@ public class AttributeExpression
 	operands.push(new Double(((NumericOperand)nextob).m_numericConst));
       } else if (nextob instanceof AttributeOperand) {
 	double value = vals[((AttributeOperand)nextob).m_attributeIndex];
-	if (value == Instance.missingValue()) {
+	if (Instance.isMissingValue(value)) {
 	  vals[vals.length-1] = Instance.missingValue();
 	  break;
 	}
@@ -578,6 +578,6 @@ public class AttributeExpression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
