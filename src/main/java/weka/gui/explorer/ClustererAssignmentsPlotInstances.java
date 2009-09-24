@@ -26,6 +26,7 @@ import weka.clusterers.Clusterer;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
@@ -188,7 +189,7 @@ public class ClustererAssignmentsPlotInstances
       for (j = 0; j < m_Instances.numAttributes(); j++)
 	values[j] = m_Instances.instance(i).value(j);
       values[j] = clusterAssignments[i];
-      m_PlotInstances.add(new Instance(1.0, values));
+      m_PlotInstances.add(new DenseInstance(1.0, values));
       if (m_PlotShapes != null) {
 	if ((int) m_Instances.instance(i).classValue() != classAssignments[(int) clusterAssignments[i]])
 	  m_PlotShapes[i] = Plot2D.ERROR_SHAPE;

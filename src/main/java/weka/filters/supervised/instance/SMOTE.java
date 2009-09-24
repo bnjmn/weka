@@ -26,6 +26,7 @@ package weka.filters.supervised.instance;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -688,7 +689,7 @@ public class SMOTE
 	  }
 	}
 	values[sample.classIndex()] = minIndex;
-	Instance synthetic = new Instance(1.0, values);
+	Instance synthetic = new DenseInstance(1.0, values);
 	push(synthetic);
 	n--;
       }

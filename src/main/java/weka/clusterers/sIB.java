@@ -24,6 +24,7 @@ package weka.clusterers;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionHandler;
@@ -791,7 +792,7 @@ public class sIB
     for(int i = 0; i < vals.length; i++) {
       vals[i] /= sum;
     }
-    return new Instance(inst.weight(), vals);
+    return new DenseInstance(inst.weight(), vals);
   }
   
   private Matrix getTransposedNormedMatrix(Instances data) {

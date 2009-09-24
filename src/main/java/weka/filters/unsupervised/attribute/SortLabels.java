@@ -24,7 +24,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
@@ -510,7 +511,7 @@ public class SortLabels
     }
 
     // create new instance
-    result = new Instance(instance.weight(), values);
+    result = new DenseInstance(instance.weight(), values);
     
     return result;
   }

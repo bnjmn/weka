@@ -25,16 +25,17 @@
 package weka.associations.tertius;
 
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class IndividualInstance
-  extends Instance {
+  extends DenseInstance {
 
   /** for serialization */
   private static final long serialVersionUID = -7903938733476585114L;
@@ -42,7 +43,7 @@ public class IndividualInstance
   private Instances m_parts;
 
   public IndividualInstance(Instance individual, Instances parts) {
-	
+
     super(individual);
     m_parts = parts;
   }
@@ -71,6 +72,6 @@ public class IndividualInstance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

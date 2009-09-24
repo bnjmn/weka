@@ -25,6 +25,7 @@ package weka.classifiers.evaluation;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
@@ -38,7 +39,7 @@ import weka.core.Utils;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $
+ * @version $Revision$
  */
 public class MarginCurve
   implements RevisionHandler {
@@ -131,7 +132,7 @@ public class MarginCurve
     vals[count++] = margin;
     vals[count++] = current;
     vals[count++] = cumulative;
-    return new Instance(1.0, vals);
+    return new DenseInstance(1.0, vals);
   }
   
   /**
@@ -140,7 +141,7 @@ public class MarginCurve
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

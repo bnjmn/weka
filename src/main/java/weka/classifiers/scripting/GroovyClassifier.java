@@ -312,7 +312,7 @@ public class GroovyClassifier
     if (m_GroovyObject != null)
       return m_GroovyObject.classifyInstance(instance);
     else
-      return Instance.missingValue();
+      return Utils.missingValue();
   }
 
   /**

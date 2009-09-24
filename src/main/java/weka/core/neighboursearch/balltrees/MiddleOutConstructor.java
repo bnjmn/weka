@@ -22,6 +22,7 @@
 package weka.core.neighboursearch.balltrees;
 
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Randomizable;
@@ -631,7 +632,7 @@ public class MiddleOutConstructor
         continue;
       attrVals[k] += node2.anchor.valueSparse(k)*anchr2Ratio;
     }
-    temp = new Instance(1.0, attrVals);
+    temp = new DenseInstance(1.0, attrVals);
     return temp;
   }
   
@@ -671,7 +672,7 @@ public class MiddleOutConstructor
         j < attrVals.length; j++) {
       attrVals[j] /= numInsts;
     }
-    temp = new Instance(1.0, attrVals);
+    temp = new DenseInstance(1.0, attrVals);
     return temp;
   }
   

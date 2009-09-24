@@ -338,7 +338,7 @@ public class XML
       append("</" + TAG_PREDICTED_VALUE + ">\n");
       // error
       append("    <" + TAG_ERROR + ">");
-      if (Instance.isMissingValue(predValue) || inst.classIsMissing())
+      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
 	append("?");
       else
 	append(Utils.doubleToString(predValue - inst.classValue(), prec));
@@ -350,14 +350,14 @@ public class XML
       append("</" + TAG_ACTUAL_LABEL + ">\n");
       // predicted
       append("    <" + TAG_PREDICTED_LABEL + " " + ATT_INDEX + "=\"" + ((int) predValue+1) + "\"" + ">");
-      if (Instance.isMissingValue(predValue))
+      if (Utils.isMissingValue(predValue))
 	append("?");
       else
 	append(sanitize(inst.dataset().classAttribute().value((int)predValue)));
       append("</" + TAG_PREDICTED_LABEL + ">\n");
       // error?
       append("    <" + TAG_ERROR + ">");
-      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
+      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	append(VAL_YES);
       else
 	append(VAL_NO);
@@ -368,7 +368,7 @@ public class XML
 	double[] dist = classifier.distributionForInstance(withMissing);
 	for (int n = 0; n < dist.length; n++) {
 	  append("      <" + TAG_CLASS_LABEL + " " + ATT_INDEX + "=\"" + (n+1) + "\"");
-	  if (!Instance.isMissingValue(predValue) && (n == (int) predValue))
+	  if (!Utils.isMissingValue(predValue) && (n == (int) predValue))
 	    append(" " + ATT_PREDICTED + "=\"" + VAL_YES + "\"");
 	  append(">");
 	  append(Utils.doubleToString(dist[n], prec));
@@ -378,7 +378,7 @@ public class XML
       }
       else {
 	append("    <" + TAG_PREDICTION + ">");
-	if (Instance.isMissingValue(predValue))
+	if (Utils.isMissingValue(predValue))
 	  append("?");
 	else
 	  append(Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));

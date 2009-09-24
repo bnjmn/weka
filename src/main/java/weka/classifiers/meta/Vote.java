@@ -102,7 +102,7 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.19 $
+ * @version $Revision$
  */
 public class Vote
   extends RandomizableMultipleClassifiersCombiner
@@ -322,7 +322,7 @@ public class Vote
    *
    * @param instance the instance to be classified
    * @return the predicted most likely class for the instance or 
-   * Instance.missingValue() if no prediction is made
+   * Utils.missingValue() if no prediction is made
    * @throws Exception if an error occurred during the prediction
    */
   public double classifyInstance(Instance instance) throws Exception {
@@ -340,7 +340,7 @@ public class Vote
 	if (instance.classAttribute().isNominal()) {
 	  index = Utils.maxIndex(dist);
 	  if (dist[index] == 0)
-	    result = Instance.missingValue();
+	    result = Utils.missingValue();
 	  else
 	    result = index;
 	}
@@ -348,7 +348,7 @@ public class Vote
 	  result = dist[0];
 	}
 	else {
-	  result = Instance.missingValue();
+	  result = Utils.missingValue();
 	}
 	break;
       case MEDIAN_RULE:
@@ -367,7 +367,7 @@ public class Vote
    *
    * @param instance the instance to be classified
    * @return the predicted most likely class for the instance or 
-   * Instance.missingValue() if no prediction is made
+   * Utils.missingValue() if no prediction is made
    * @throws Exception if an error occurred during the prediction
    */
   protected double classifyInstanceMedian(Instance instance) throws Exception {
@@ -655,7 +655,7 @@ public class Vote
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

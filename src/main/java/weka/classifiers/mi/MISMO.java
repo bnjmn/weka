@@ -32,6 +32,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
@@ -345,7 +346,7 @@ public class MISMO
           if (inst.classValue() == cl2) {
             vals[1] = 1;
           }
-          data.add(new Instance(inst.weight(), vals));
+          data.add(new DenseInstance(inst.weight(), vals));
         }
       } else {
 
@@ -373,7 +374,7 @@ public class MISMO
             if (test.instance(j).classValue() == cl2) {
               vals[1] = 1;
             }
-            data.add(new Instance(test.instance(j).weight(), vals));
+            data.add(new DenseInstance(test.instance(j).weight(), vals));
           }
         }
       }
@@ -1320,9 +1321,9 @@ public class MISMO
       if (inst.numClasses() == 2) {
         double[] newInst = new double[2];
         newInst[0] = m_classifiers[0][1].SVMOutput(-1, inst);
-        newInst[1] = Instance.missingValue();
+        newInst[1] = Utils.missingValue();
         return m_classifiers[0][1].m_logistic.
-          distributionForInstance(new Instance(1, newInst));
+          distributionForInstance(new DenseInstance(1, newInst));
       }
       double[][] r = new double[inst.numClasses()][inst.numClasses()];
       double[][] n = new double[inst.numClasses()][inst.numClasses()];
@@ -1332,9 +1333,9 @@ public class MISMO
               (m_classifiers[i][j].m_sparseWeights != null)) {
             double[] newInst = new double[2];
             newInst[0] = m_classifiers[i][j].SVMOutput(-1, inst);
-            newInst[1] = Instance.missingValue();
+            newInst[1] = Utils.missingValue();
             r[i][j] = m_classifiers[i][j].m_logistic.
-              distributionForInstance(new Instance(1, newInst))[0];
+              distributionForInstance(new DenseInstance(1, newInst))[0];
             n[i][j] = m_classifiers[i][j].m_sumOfWeights;
               }
         }

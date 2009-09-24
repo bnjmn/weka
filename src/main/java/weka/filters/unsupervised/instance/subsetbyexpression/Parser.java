@@ -489,7 +489,7 @@ public class Parser extends java_cup.runtime.lr_parser {
    */
   public static Object getValue(Instance instance, int index) {
     if (instance.isMissing(index))
-      return new Double(Instance.missingValue());
+      return new Double(Utils.missingValue());
     else if (instance.attribute(index).isNominal())
       return new String(instance.stringValue(index));
     else if (instance.attribute(index).isNumeric())
@@ -878,7 +878,7 @@ class CUP$Parser$actions {
 		int aright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		String a = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		 if (parser.getSymbols().containsKey(a)) 
-                     RESULT = (parser.getSymbols().get(a) instanceof Double) && Instance.isMissingValue((Double) parser.getSymbols().get(a));
+                     RESULT = (parser.getSymbols().get(a) instanceof Double) && Utils.isMissingValue((Double) parser.getSymbols().get(a));
                    else 
                      throw new IllegalStateException("Unknown symbol '" + a + "'!"); 
                 

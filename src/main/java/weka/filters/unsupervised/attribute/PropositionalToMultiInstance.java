@@ -25,7 +25,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -331,7 +332,7 @@ public class PropositionalToMultiInstance
     }
     
     int value = output.attribute(1).addRelation(bagInsts);
-    Instance newBag = new Instance(output.numAttributes());        
+    Instance newBag = new DenseInstance(output.numAttributes());        
     newBag.setValue(0, bagIndex);
     newBag.setValue(2, classValue);
     newBag.setValue(1, value);
@@ -371,7 +372,7 @@ public class PropositionalToMultiInstance
     input.sort(0);   // make sure that bagID is sorted
     Instances output = getOutputFormat();
     Instances bagInsts = output.attribute(1).relation();
-    Instance inst = new Instance(bagInsts.numAttributes());
+    Instance inst = new DenseInstance(bagInsts.numAttributes());
     inst.setDataset(bagInsts);
 
     double bagIndex   = input.instance(0).value(0);

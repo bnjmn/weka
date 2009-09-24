@@ -21,6 +21,7 @@ import weka.classifiers.bayes.net.search.local.K2;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -50,7 +51,7 @@ import java.util.Vector;
  * 
  <!-- options-end -->
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision$
  * @author Remco Bouckaert (rrb@xm.co.nz)
  */
 public class MultiNomialBMAEstimator 
@@ -107,7 +108,7 @@ public class MultiNomialBMAEstimator
         
         for (int iInstance = 0; iInstance < bayesNet.m_Instances.numInstances(); iInstance++) {
             Instance instanceOrig = bayesNet.m_Instances.instance(iInstance);
-            Instance instance = new Instance(instances.numAttributes());
+            Instance instance = new DenseInstance(instances.numAttributes());
             for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
                 if (iAttribute != instances.classIndex()) {
                     if (instanceOrig.value(iAttribute) > 0) {
@@ -388,6 +389,6 @@ public class MultiNomialBMAEstimator
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
+      return RevisionUtils.extract("$Revision$");
     }
 } // class MultiNomialBMAEstimator

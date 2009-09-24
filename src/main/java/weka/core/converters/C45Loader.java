@@ -24,8 +24,10 @@ package weka.core.converters;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -329,7 +331,7 @@ public class C45Loader
       if (!m_ignore[i]) {
 	// Check if value is missing.
 	if  (tokenizer.ttype == '?') {
-	  instance[counter++] = Instance.missingValue();
+	  instance[counter++] = Utils.missingValue();
 	} else {
 	  String val = tokenizer.sval;
 
@@ -360,7 +362,7 @@ public class C45Loader
       }
     }
 
-    return new Instance(1.0, instance);
+    return new DenseInstance(1.0, instance);
   }
 
   /**

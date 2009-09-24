@@ -24,7 +24,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
@@ -889,7 +890,7 @@ public class InterquartileRange
       System.arraycopy(instOld.toDoubleArray(), 0, values, 0, numAttOld);
       
       // generate new instance
-      instNew = new Instance(1.0, values);
+      instNew = new DenseInstance(1.0, values);
       instNew.setDataset(result);
 
       // per attribute?

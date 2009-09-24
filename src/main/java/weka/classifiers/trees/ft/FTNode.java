@@ -28,6 +28,7 @@ import weka.classifiers.trees.j48.C45Split;
 import weka.classifiers.trees.j48.NoSplit;
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
@@ -38,7 +39,7 @@ import weka.core.Utils;
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class FTNode 
   extends FTtree {   
@@ -268,7 +269,7 @@ public class FTNode
                
         probs = modelDistributionForInstance(instance);
         //Built auxiliary split instance    
-        Instance instanceSplit=new Instance(instance.numAttributes()+instance.numClasses());
+        Instance instanceSplit=new DenseInstance(instance.numAttributes()+instance.numClasses());
         instanceSplit.setDataset(instance.dataset());
            
         // Inserts attribute and their value
@@ -300,6 +301,6 @@ public class FTNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

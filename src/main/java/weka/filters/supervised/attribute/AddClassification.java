@@ -27,6 +27,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -711,7 +712,7 @@ public class AddClassification
       if (oldInstance instanceof SparseInstance)
 	newInstance = new SparseInstance(oldInstance.weight(), newValues);
       else
-	newInstance = new Instance(oldInstance.weight(), newValues);
+	newInstance = new DenseInstance(oldInstance.weight(), newValues);
 
       // copy string/relational values from input to output
       copyValues(newInstance, false, oldInstance.dataset(), getOutputFormat());

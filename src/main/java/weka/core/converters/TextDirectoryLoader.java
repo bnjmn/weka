@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -394,7 +395,7 @@ public class TextDirectoryLoader
 	  if (m_OutputFilename)
 	    newInst[1] = (double) data.attribute(1).addStringValue(subdirPath + File.separator + files[j]);
 	  newInst[data.classIndex()] = (double) k;
-	  data.add(new Instance(1.0, newInst));
+	  data.add(new DenseInstance(1.0, newInst));
           is.close();
 	}
 	catch (Exception e) {

@@ -69,7 +69,7 @@ public interface Classifier {
    *
    * @param instance the instance to be classified
    * @return the predicted most likely class for the instance or 
-   * Instance.missingValue() if no prediction is made
+   * Utils.missingValue() if no prediction is made
    * @exception Exception if an error occurred during the prediction
    */
   public double classifyInstance(Instance instance) throws Exception;

@@ -25,7 +25,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -557,7 +558,7 @@ public class Wavelet
     result = new Instances(data.relationName(), atts, data.numInstances());
     result.setClassIndex(data.classIndex());
     for (i = 0; i < data.numInstances(); i++)
-      result.add(new Instance(1.0, data.instance(i).toDoubleArray()));
+      result.add(new DenseInstance(1.0, data.instance(i).toDoubleArray()));
     
     return result;
   }
@@ -630,7 +631,7 @@ public class Wavelet
       }
       
       // add new transformed instance
-      result.add(new Instance(1, newVal));
+      result.add(new DenseInstance(1, newVal));
     }
 
     // add class again

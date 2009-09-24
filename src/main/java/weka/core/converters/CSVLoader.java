@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -497,7 +498,7 @@ public class CSVLoader
 	Object cval = current.get(j);
 	if (cval instanceof String) {
 	  if (((String)cval).compareTo(m_MissingValue) == 0) {
-	    vals[j] = Instance.missingValue();
+	    vals[j] = Utils.missingValue();
 	  } else {
 	    if (dataSet.attribute(j).isString()) {
 	      vals[j] = dataSet.attribute(j).addStringValue((String) cval);
@@ -523,7 +524,7 @@ public class CSVLoader
 	  vals[j] = ((Double)cval).doubleValue();
 	}
       }
-      dataSet.add(new Instance(1.0, vals));
+      dataSet.add(new DenseInstance(1.0, vals));
     }
     m_structure = new Instances(dataSet, 0);
     setRetrieval(BATCH);

@@ -24,6 +24,7 @@ package weka.gui.beans;
 
 import weka.clusterers.DensityBasedClusterer;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 
 import java.awt.BorderLayout;
@@ -353,7 +354,7 @@ public class PredictionAppender
       ex.printStackTrace();
       return;
     } finally {
-      newInst = new Instance(currentI.weight(), instanceVals);
+      newInst = new DenseInstance(currentI.weight(), instanceVals);
       newInst.setDataset(m_format);
       m_instanceEvent.setInstance(newInst);
       m_instanceEvent.setStatus(status);
@@ -443,7 +444,7 @@ public class PredictionAppender
               // case we have no information on the legal class values
               // in the test data)
               if (tempInst.isMissing(tempInst.classIndex())) {
-                tempInst = new Instance(testSet.instance(i));
+                tempInst = (Instance)testSet.instance(i).copy();
                 tempInst.setDataset(trainSet);
               }
               double predClass = 
@@ -521,7 +522,7 @@ public class PredictionAppender
               // case we have no information on the legal class values
               // in the test data)
               if (tempInst.isMissing(tempInst.classIndex())) {
-                tempInst = new Instance(testSet.instance(i));
+                tempInst = (Instance)testSet.instance(i).copy();
                 tempInst.setDataset(trainSet);
               }
               

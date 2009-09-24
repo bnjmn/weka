@@ -55,7 +55,7 @@ public class BinarySparseInstance
    */
   public BinarySparseInstance(Instance instance) {
     
-    m_Weight = instance.m_Weight;
+    m_Weight = instance.weight();
     m_Dataset = null;
     m_NumAttributes = instance.numAttributes();
     if (instance instanceof SparseInstance) {
@@ -356,7 +356,7 @@ public class BinarySparseInstance
    *
    * @param position the attribute's position
    */
-  void forceDeleteAttributeAt(int position) {
+  protected void forceDeleteAttributeAt(int position) {
 
     int index = locateIndex(position);
 
@@ -384,7 +384,7 @@ public class BinarySparseInstance
    *
    * @param position the attribute's position
    */
-  void forceInsertAttributeAt(int position)  {
+  protected void forceInsertAttributeAt(int position)  {
 
     int index = locateIndex(position);
 
@@ -551,8 +551,7 @@ public class BinarySparseInstance
       System.out.println("Length of copy missing: " + copy.isMissing(length));
       System.out.println("Weight of copy missing: " + copy.isMissing(weight.index()));
       System.out.println("Length of copy missing: " + 
-			 Instance.isMissingValue(copy.value(length)));
-      System.out.println("Missing value coded as: " + Instance.missingValue());
+			 Utils.isMissingValue(copy.value(length)));
 
       // Prints number of attributes and classes
       System.out.println("Number of attributes: " + copy.numAttributes());

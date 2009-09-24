@@ -44,7 +44,7 @@ import java.io.Serializable;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class EuclidianDataObject
     implements DataObject, Serializable, RevisionHandler {
@@ -165,15 +165,15 @@ public class EuclidianDataObject
     private double computeDistance(int index, double v, double v1) {
         switch (getInstance().attribute(index).type()) {
             case Attribute.NOMINAL:
-                return (Instance.isMissingValue(v) || Instance.isMissingValue(v1)
+                return (Utils.isMissingValue(v) || Utils.isMissingValue(v1)
                         || ((int) v != (int) v1)) ? 1 : 0;
 
             case Attribute.NUMERIC:
-                if (Instance.isMissingValue(v) || Instance.isMissingValue(v1)) {
-                    if (Instance.isMissingValue(v) && Instance.isMissingValue(v1))
+                if (Utils.isMissingValue(v) || Utils.isMissingValue(v1)) {
+                    if (Utils.isMissingValue(v) && Utils.isMissingValue(v1))
                         return 1;
                     else {
-                        return (Instance.isMissingValue(v)) ? norm(v1, index)
+                        return (Utils.isMissingValue(v)) ? norm(v1, index)
                                 : norm(v, index);
                     }
                 } else
@@ -296,6 +296,6 @@ public class EuclidianDataObject
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision$");
     }
 }

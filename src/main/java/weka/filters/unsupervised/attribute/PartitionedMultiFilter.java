@@ -25,7 +25,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -681,7 +682,7 @@ public class PartitionedMultiFilter
       if (inst instanceof SparseInstance)
 	newInst = new SparseInstance(instances.instance(i).weight(), values);
       else
-	newInst = new Instance(instances.instance(i).weight(), values);
+	newInst = new DenseInstance(instances.instance(i).weight(), values);
       result.add(newInst);
     }
     

@@ -23,6 +23,7 @@
 package weka.core.converters;
 
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.xml.XMLInstances;

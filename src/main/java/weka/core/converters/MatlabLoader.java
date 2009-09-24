@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 
@@ -306,7 +307,7 @@ public class MatlabLoader
       for (n = 0; n < row.size(); n++)
 	data[n] = row.get(n);
       
-      result.add(new Instance(1.0, data));
+      result.add(new DenseInstance(1.0, data));
     }
 
     // close the stream

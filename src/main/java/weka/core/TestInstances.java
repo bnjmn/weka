@@ -1495,7 +1495,7 @@ public class TestInstances
       case Attribute.RELATIONAL:
         Instances rel = new Instances(data.attribute(index).relation(), 0);
         for (int n = 0; n < getNumInstancesRelational(); n++) {
-          Instance inst = new Instance(rel.numAttributes());
+          Instance inst = new DenseInstance(rel.numAttributes());
           inst.setDataset(data);
           for (int i = 0; i < rel.numAttributes(); i++) {
             inst.setValue(i, generateAttributeValue(rel, i, 0));
@@ -1585,7 +1585,7 @@ public class TestInstances
 
       // generate instances
       for (int i = 0; i < getNumInstances(); i++) {
-        Instance current = new Instance(getNumAttributes());
+        Instance current = new DenseInstance(getNumAttributes());
         current.setDataset(m_Data);
 
         // class

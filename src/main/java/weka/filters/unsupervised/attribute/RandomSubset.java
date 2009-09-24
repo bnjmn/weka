@@ -23,7 +23,8 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -351,7 +352,7 @@ public class RandomSubset
     for (i = 0; i < m_Indices.length; i++)
       values[i] = instance.value(m_Indices[i]);
 
-    result = new Instance(instance.weight(), values);
+    result = new DenseInstance(instance.weight(), values);
     result.setDataset(getOutputFormat());
     
     copyValues(result, false, instance.dataset(), getOutputFormat());

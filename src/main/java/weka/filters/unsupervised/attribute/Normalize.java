@@ -23,7 +23,8 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -284,7 +285,7 @@ public class Normalize
 	for (int i = 0; i < input.numAttributes(); i++) {
 	  if (input.attribute(i).isNumeric() &&
 	      (input.classIndex() != i)) {
-	    if (!Instance.isMissingValue(value[i])) {
+	    if (!Utils.isMissingValue(value[i])) {
 	      if (Double.isNaN(m_MinArray[i])) {
 		m_MinArray[i] = m_MaxArray[i] = value[i];
 	      }
@@ -327,7 +328,7 @@ public class Normalize
       for (int j = 0; j < instance.numAttributes(); j++) {
 	double value;
 	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j])) &&
+	    (!Utils.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
 	  if (Double.isNaN(m_MinArray[j]) ||
 	      (m_MaxArray[j] == m_MinArray[j])) {
@@ -368,7 +369,7 @@ public class Normalize
       double[] vals = instance.toDoubleArray();
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j])) &&
+	    (!Utils.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
 	  if (Double.isNaN(m_MinArray[j]) ||
 	      (m_MaxArray[j] == m_MinArray[j])) {
@@ -385,7 +386,7 @@ public class Normalize
 	  }
 	}
       }	
-      inst = new Instance(instance.weight(), vals);
+      inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst);

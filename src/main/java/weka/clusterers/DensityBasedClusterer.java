@@ -30,7 +30,7 @@ import weka.core.Instance;
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 1.9 $
+ * @version  $Revision$
  */
 public interface DensityBasedClusterer extends Clusterer {
 

@@ -402,7 +402,7 @@ public class RacedIncrementalLogitBoost
       if (max > 0) {
 	return maxIndex;
       } else {
-	return Instance.missingValue();
+	return Utils.missingValue();
       }
     }
 
@@ -430,12 +430,12 @@ public class RacedIncrementalLogitBoost
 	if (max > 0) {
 	  return maxIndex;
 	} else {
-	  return Instance.missingValue();
+	  return Utils.missingValue();
 	}
       case Attribute.NUMERIC:
 	return dist[0];
       default:
-	return Instance.missingValue();
+	return Utils.missingValue();
       }
     }
 
