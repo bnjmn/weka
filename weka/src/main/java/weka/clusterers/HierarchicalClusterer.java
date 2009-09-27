@@ -4,12 +4,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -23,20 +23,20 @@
  * Hierarchical clustering class.
  * Implements a number of classic hierarchical clustering methods.
  <!-- globalinfo-end -->
- * 
+ *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -N
  *  number of clusters
  * </pre>
- * 
- * 
+ *
+ *
  * <pre> -L
  *  Link type (Single, Complete, Average, Mean, Centroid, Ward, Adjusted complete)
  *  [SINGLE|COMPLETE|AVERAGE|MEAN|CENTROID|WARD|ADJCOMLPETE]
  * </pre>
- * 
+ *
  * <pre> -A
  * Distance function to use. (default: weka.core.EuclideanDistance)
  * </pre>
@@ -44,10 +44,10 @@
  * <pre> -P
  * Print hierarchy in Newick format, which can be used for display in other programs.
  * </pre>
- *  
+ *
  *<!-- options-end -->
  *
- * 
+ *
  * @author Remco Bouckaert (rrb@xm.co.nz, remco@cs.waikato.ac.nz)
  * @version $Revision$
  */
@@ -84,7 +84,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	int m_nNumClusters = 2;
 	public void setNumClusters(int nClusters) {m_nNumClusters = Math.max(1,nClusters);}
 	public int getNumClusters() {return m_nNumClusters;}
-	
+
 	/** distance function used for comparing members of a cluster **/
 	protected DistanceFunction m_DistanceFunction = new EuclideanDistance();
 	public DistanceFunction getDistanceFunction() {return m_DistanceFunction;}
@@ -135,11 +135,11 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	 * Holds the Link type used calculate distance between clusters
 	 */
 	int m_nLinkType = SINGLE;
-	
+
 	boolean m_bPrintNewick = true;;
 	public boolean getPrintNewick() {return m_bPrintNewick;}
 	public void setPrintNewick(boolean bPrintNewick) {m_bPrintNewick = bPrintNewick;}
-	
+
 	public void setLinkType(SelectedTag newLinkType) {
 		if (newLinkType.getTags() == TAGS_LINK_TYPE) {
 			m_nLinkType = newLinkType.getSelectedTag().getID();
@@ -161,24 +161,24 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		public String toString(int attIndex) {
 			if (m_left == null) {
 				if (m_right == null) {
-					double m_fLength = m_height;  
+					double m_fLength = m_height;
 					return "(" + m_instances.instance(m_iLeftInstance).stringValue(attIndex) + ":" + m_fLength + "," +
 					             m_instances.instance(m_iRightInstance).stringValue(attIndex) +":" + m_fLength + ")";// + ":" + m_height;
 				} else {
-					double m_fLeftLength = m_height;  
-					double m_fRightLength = m_height- m_right.m_height;  
+					double m_fLeftLength = m_height;
+					double m_fRightLength = m_height- m_right.m_height;
 					return "(" + m_instances.instance(m_iLeftInstance).stringValue(attIndex) + ":" + m_fLeftLength + "," +
 						m_right.toString(attIndex) + ":" + m_fRightLength + ")";// + ":" + m_height;
 				}
 			} else {
 				if (m_right == null) {
-					double m_fLeftLength = m_height- m_left.m_height;  
-					double m_fRightLength = m_height;  
+					double m_fLeftLength = m_height- m_left.m_height;
+					double m_fRightLength = m_height;
 					return "(" + m_left.toString(attIndex) + ":" + m_fLeftLength + "," +
 					             m_instances.instance(m_iRightInstance).stringValue(attIndex) + ":" + m_fRightLength + ")";// + ":" + m_height;
 				} else {
-					double m_fLeftLength = m_height- m_left.m_height;  
-					double m_fRightLength = m_height- m_right.m_height;  
+					double m_fLeftLength = m_height- m_left.m_height;
+					double m_fRightLength = m_height- m_right.m_height;
 					return "(" + m_left.toString(attIndex) + ":" + m_fLeftLength + "," +m_right.toString(attIndex) + ":" + m_fRightLength + ")";// + ":" + m_height;
 				}
 			}
@@ -186,8 +186,8 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	} // class Node
 	Node [] m_clusters;
 	int [] m_nClusterNr;
-	
-	
+
+
 	@Override
 	public void buildClusterer(Instances data) throws Exception {
 		m_instances = data;
@@ -216,10 +216,10 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			}
 		}
 
-		
+
 		// used for keeping track of hierarchy
 		Node [] clusterNodes = new Node[nInstances];
-		
+
 		while (nClusters > m_nNumClusters) {
 			// find closest two clusters
 			/* simple but inefficient implementation
@@ -248,7 +248,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			} while (t!=null && (nClusterID[t.m_iCluster1] == null || nClusterID[t.m_iCluster2] == null));
 			int iMin1 = t.m_iCluster1;
 			int iMin2 = t.m_iCluster2;
-			
+
 			// merge  clusters
 			nClusterID[iMin1].addAll(nClusterID[iMin2]);
 			nClusterID[iMin2] = null;
@@ -260,30 +260,30 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 					queue.add(new Tuple(fDistance, i1, i2));
 				}
 			}
-			
+
 			// track hierarchy
 			Node node = new Node();
 			if (clusterNodes[iMin1] == null) {
 				node.m_iLeftInstance = iMin1;
-				node.m_height = 1; 
+				node.m_height = 1;
 			} else {
 				node.m_left = clusterNodes[iMin1];
 				clusterNodes[iMin1].m_parent = node;
-				node.m_height = clusterNodes[iMin1].m_height + 1; 
+				node.m_height = clusterNodes[iMin1].m_height + 1;
 			}
 			if (clusterNodes[iMin2] == null) {
 				node.m_iRightInstance = iMin2;
-				node.m_height = Math.max(1,node.m_height); 
+				node.m_height = Math.max(1,node.m_height);
 			} else {
 				node.m_right = clusterNodes[iMin2];
 				clusterNodes[iMin2].m_parent = node;
-				node.m_height = Math.max(clusterNodes[iMin2].m_height + 1, node.m_height); 
+				node.m_height = Math.max(clusterNodes[iMin2].m_height + 1, node.m_height);
 			}
 			clusterNodes[iMin1] = node;
-			
+
 			nClusters--;
 		}
-		
+
 		// move all clusters in m_nClusterID array
 		// & collect hierarchy
 		int iCurrent = 0;
@@ -298,7 +298,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 				iCurrent++;
 			}
 		}
-		
+
 	} // buildClusterer
 
 	double getDistance0(Vector<Integer> cluster1, Vector<Integer> cluster2) {
@@ -373,7 +373,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			}
 			fBestDist /= (cluster1.size() * cluster2.size());
 			break;
-		case MEAN: 
+		case MEAN:
 			{
 				// calculates the mean distance of a merged cluster (akak Group-average agglomerative clustering)
 				Vector<Integer> merged = new Vector<Integer>();
@@ -434,7 +434,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		return fBestDist;
 	} // getDistance
 
-	/** calculate the distance between two clusters 
+	/** calculate the distance between two clusters
 	 * @param cluster1 list of indices of instances in the first cluster
 	 * @param cluster2 dito for second cluster
 	 * @return distance between clusters based on link type
@@ -511,7 +511,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			}
 			fBestDist /= (cluster1.size() * cluster2.size());
 			break;
-		case MEAN: 
+		case MEAN:
 			{
 				// calculates the mean distance of a merged cluster (akak Group-average agglomerative clustering)
 				Vector<Integer> merged = new Vector<Integer>();
@@ -594,11 +594,11 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			Instance instance = m_instances.instance(cluster.elementAt(i));
 			fESS += m_DistanceFunction.distance(centroid, instance);
 		}
-		return fESS / cluster.size(); 
+		return fESS / cluster.size();
 	} // calcESS
-	
+
 	@Override
-	/** instances are assigned a cluster by finding the instance in the training data 
+	/** instances are assigned a cluster by finding the instance in the training data
 	 * with the closest distance to the instance to be clustered. The cluster index of
 	 * the training data point is taken as the cluster index.
 	 */
@@ -687,7 +687,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	   *
 	   <!-- options-start -->
 	   * Valid options are: <p/>
-	   * 
+	   *
 	   <!-- options-end -->
 	   *
 	   * @param options the list of options as an array of strings
@@ -696,7 +696,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	  public void setOptions(String[] options) throws Exception {
 		    m_bPrintNewick = Utils.getFlag('P', options);
 
-		    String optionString = Utils.getOption('N', options); 
+		    String optionString = Utils.getOption('N', options);
 		    if (optionString.length() != 0) {
 		      Integer temp = new Integer(optionString);
 		      setNumClusters(temp);
@@ -704,7 +704,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		    else {
 		      setNumClusters(2);
 		    }
-	    
+
 
 	  String sLinkType = Utils.getOption('L', options);
 
@@ -716,24 +716,24 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		if (sLinkType.compareTo("CENTROID") == 0) {setLinkType(new SelectedTag(CENTROID, TAGS_LINK_TYPE));}
 		if (sLinkType.compareTo("WARD") == 0) {setLinkType(new SelectedTag(WARD, TAGS_LINK_TYPE));}
 		if (sLinkType.compareTo("ADJCOMLPETE") == 0) {setLinkType(new SelectedTag(ADJCOMLPETE, TAGS_LINK_TYPE));}
-		
+
 	    String nnSearchClass = Utils.getOption('A', options);
 	    if(nnSearchClass.length() != 0) {
 	      String nnSearchClassSpec[] = Utils.splitOptions(nnSearchClass);
-	      if(nnSearchClassSpec.length == 0) { 
-	        throw new Exception("Invalid DistanceFunction specification string."); 
+	      if(nnSearchClassSpec.length == 0) {
+	        throw new Exception("Invalid DistanceFunction specification string.");
 	      }
 	      String className = nnSearchClassSpec[0];
 	      nnSearchClassSpec[0] = "";
 
 	      setDistanceFunction( (DistanceFunction)
-	                            Utils.forName( DistanceFunction.class, 
+	                            Utils.forName( DistanceFunction.class,
 	                                           className, nnSearchClassSpec) );
 	    }
 	    else {
 	      setDistanceFunction(new EuclideanDistance());
 	    }
-	    
+
 	    Utils.checkForRemainingOptions(options);
 	  }
 
@@ -749,7 +749,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 
 	    options[current++] = "-N";
 	    options[current++] = "" + getNumClusters();
-	    
+
 	    options[current++] = "-L";
 		switch (m_nLinkType) {
 			case (SINGLE) :options[current++] = "SINGLE";break;
@@ -766,11 +766,11 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		options[current++] = "-A";
 		options[current++] = (m_DistanceFunction.getClass().getName() + " " +
 	                   Utils.joinOptions(m_DistanceFunction.getOptions())).trim();
-	    
+
 	    while (current < options.length) {
 	      options[current++] = "";
 	    }
-	    
+
 	    return options;
 	  }
 	  public String toString() {
@@ -859,16 +859,15 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	   * @return The string.
 	   */
 	  public String globalInfo() {
-	    return 
+	    return
 	    "Hierarchical clustering class.\n" +
 	    "Implements a number of classic agglomorative (i.e. bottom up) hierarchical clustering methods" +
 	    "based on .";
 	  }
-	  
+
 	  public static void main(String [] argv) {
 		    runClusterer(new HierarchicalClusterer(), argv);
 		  }
-	@Override
 	public String graph() throws Exception {
 		if (numberOfClusters() == 0) {
 			  return "Newick:(no,clusters)";
@@ -887,7 +886,6 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		  String sNewick = m_clusters[0].toString(attIndex);
 		  return "Newick:" + sNewick;
 	}
-	@Override
 	public int graphType() {
 		return Drawable.Newick;
 	}
