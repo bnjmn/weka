@@ -25,6 +25,7 @@ package wekaexamples.classifiers;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
@@ -33,8 +34,8 @@ import weka.experiment.InstanceQuery;
 import java.util.Vector;
 
 /**
- * 
- * 
+ *
+ *
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
@@ -46,7 +47,7 @@ public class M5PExample {
   public final static String USER = "the_user";
 
   public final static String PASSWORD = "the_password";
-  
+
   public void train() throws Exception {
     System.out.println("Training...");
 
@@ -98,7 +99,7 @@ public class M5PExample {
       // Instances object returned here might differ slightly from the one
       // used during training the classifier, e.g., different order of
       // nominal values, different number of attributes.
-      Instance inst = new Instance(header.numAttributes());
+      Instance inst = new DenseInstance(header.numAttributes());
       inst.setDataset(header);
       for (int n = 0; n < header.numAttributes(); n++) {
         Attribute att = data.attribute(header.attribute(n).name());
@@ -107,7 +108,7 @@ public class M5PExample {
           if (att.isNominal()) {
             // is this label also in the original data?
             // Note:
-            // "numValues() > 0" is only used to avoid problems with nominal 
+            // "numValues() > 0" is only used to avoid problems with nominal
             // attributes that have 0 labels, which can easily happen with
             // data loaded from a database
             if ((header.attribute(n).numValues() > 0) && (att.numValues() > 0)) {

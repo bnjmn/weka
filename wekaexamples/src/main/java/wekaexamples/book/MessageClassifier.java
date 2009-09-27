@@ -25,6 +25,7 @@ package wekaexamples.book;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -42,7 +43,7 @@ import java.io.Serializable;
  * and 'hit'.
  * <p/>
  * See also wiki article <a href="http://weka.wiki.sourceforge.net/MessageClassifier">MessageClassifier</a>.
- * 
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
@@ -89,7 +90,7 @@ public class MessageClassifier
 
   /**
    * Updates model using the given training message.
-   * 
+   *
    * @param message	the message content
    * @param classValue	the class label
    */
@@ -102,13 +103,13 @@ public class MessageClassifier
 
     // Add instance to training data.
     m_Data.add(instance);
-    
+
     m_UpToDate = false;
   }
 
   /**
    * Classifies a given message.
-   * 
+   *
    * @param message	the message content
    * @throws Exception 	if classification fails
    */
@@ -127,7 +128,7 @@ public class MessageClassifier
 
       // Rebuild classifier.
       m_Classifier.buildClassifier(filteredData);
-      
+
       m_UpToDate = true;
     }
 
@@ -152,14 +153,14 @@ public class MessageClassifier
 
   /**
    * Method that converts a text message into an instance.
-   * 
+   *
    * @param text	the message content to convert
    * @param data	the header information
    * @return		the generated Instance
    */
   private Instance makeInstance(String text, Instances data) {
     // Create instance of length two.
-    Instance instance = new Instance(2);
+    Instance instance = new DenseInstance(2);
 
     // Set value for message attribute
     Attribute messageAtt = data.attribute("Message");
@@ -167,7 +168,7 @@ public class MessageClassifier
 
     // Give instance access to attribute information from the dataset.
     instance.setDataset(data);
-    
+
     return instance;
   }
 
@@ -190,7 +191,7 @@ public class MessageClassifier
    *      created automatically.
    *   </li>
    * </ul>
-   * 
+   *
    * @param args	the commandline options
    */
   public static void main(String[] args) {
@@ -205,10 +206,10 @@ public class MessageClassifier
       while ((l = m.read()) != -1)
 	message.append((char) l);
       m.close();
-      
+
       // Check if class value is given.
       String classValue = Utils.getOption('c', args);
-      
+
       // If model file exists, read it, otherwise create new one.
       String modelName = Utils.getOption('t', args);
       if (modelName.length() == 0)
@@ -220,16 +221,16 @@ public class MessageClassifier
       catch (FileNotFoundException e) {
 	messageCl = new MessageClassifier();
       }
-      
+
       // Check if there are any options left
       Utils.checkForRemainingOptions(args);
-      
+
       // Process message.
       if (classValue.length() != 0)
         messageCl.updateData(message.toString(), classValue);
       else
         messageCl.classifyMessage(message.toString());
-      
+
       // Save message classifier object only if it was updated.
       if (classValue.length() != 0)
 	SerializationHelper.write(modelName, messageCl);

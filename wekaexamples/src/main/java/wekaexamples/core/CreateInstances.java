@@ -23,6 +23,7 @@
 package wekaexamples.core;
 
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -33,10 +34,10 @@ import weka.core.Instances;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  */
 public class CreateInstances {
-  
+
   /**
    * Generates the Instances object and outputs it in ARFF format to stdout.
-   * 
+   *
    * @param args	ignored
    * @throws Exception	if generation of instances fails
    */
@@ -96,15 +97,15 @@ public class CreateInstances {
     valsRel = new double[2];
     valsRel[0] = Math.PI + 1;
     valsRel[1] = attValsRel.indexOf("val5.3");
-    dataRel.add(new Instance(1.0, valsRel));
+    dataRel.add(new DenseInstance(1.0, valsRel));
     // -- second instance
     valsRel = new double[2];
     valsRel[0] = Math.PI + 2;
     valsRel[1] = attValsRel.indexOf("val5.2");
-    dataRel.add(new Instance(1.0, valsRel));
+    dataRel.add(new DenseInstance(1.0, valsRel));
     vals[4] = data.attribute(4).addRelation(dataRel);
     // add
-    data.add(new Instance(1.0, vals));
+    data.add(new DenseInstance(1.0, vals));
 
     // second instance
     vals = new double[data.numAttributes()];  // important: needs NEW array!
@@ -122,15 +123,15 @@ public class CreateInstances {
     valsRel = new double[2];
     valsRel[0] = Math.E + 1;
     valsRel[1] = attValsRel.indexOf("val5.4");
-    dataRel.add(new Instance(1.0, valsRel));
+    dataRel.add(new DenseInstance(1.0, valsRel));
     // -- second instance
     valsRel = new double[2];
     valsRel[0] = Math.E + 2;
     valsRel[1] = attValsRel.indexOf("val5.1");
-    dataRel.add(new Instance(1.0, valsRel));
+    dataRel.add(new DenseInstance(1.0, valsRel));
     vals[4] = data.attribute(4).addRelation(dataRel);
     // add
-    data.add(new Instance(1.0, vals));
+    data.add(new DenseInstance(1.0, vals));
 
     // 4. output data
     System.out.println(data);

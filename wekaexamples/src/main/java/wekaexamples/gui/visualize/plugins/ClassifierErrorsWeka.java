@@ -22,8 +22,8 @@
 package wekaexamples.gui.visualize.plugins;
 
 import weka.core.FastVector;
-import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
@@ -40,7 +40,7 @@ import javax.swing.JMenuItem;
 
 /**
  * Example class for displaying the classifier errors using Weka panels.
- * 
+ *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
@@ -50,7 +50,7 @@ public class ClassifierErrorsWeka
   /**
    * Post processes numeric class errors into shape sizes for plotting
    * in the visualize panel.
-   * 
+   *
    * @param plotSize 	a FastVector of numeric class errors
    */
   protected void postProcessPlotInfo(FastVector plotSize) {
@@ -58,7 +58,7 @@ public class ClassifierErrorsWeka
     double maxErr = Double.NEGATIVE_INFINITY;
     double minErr = Double.POSITIVE_INFINITY;
     double err;
-    
+
     for (int i = 0; i < plotSize.size(); i++) {
       Double errd = (Double)plotSize.elementAt(i);
       if (errd != null) {
@@ -71,13 +71,13 @@ public class ClassifierErrorsWeka
 	}
       }
     }
-    
+
     for (int i = 0; i < plotSize.size(); i++) {
       Double errd = (Double)plotSize.elementAt(i);
       if (errd != null) {
 	err = Math.abs(errd.doubleValue());
 	if (maxErr - minErr > 0) {
-	  double temp = (((err - minErr) / (maxErr - minErr)) 
+	  double temp = (((err - minErr) / (maxErr - minErr))
 			 * maxpSize);
 	  plotSize.setElementAt(new Integer((int)temp), i);
 	} else {
@@ -91,15 +91,15 @@ public class ClassifierErrorsWeka
 
   /**
    * Get a JMenu or JMenuItem which contain action listeners
-   * that perform the visualization of the classifier errors.  
+   * that perform the visualization of the classifier errors.
    * <p/>
    * The actual class is the attribute declared as class attribute, the
    * predicted class values is found in the attribute prior to the class
    * attribute's position. In other words, if the <code>classIndex()</code>
-   * method returns 10, then the attribute position for the predicted class 
+   * method returns 10, then the attribute position for the predicted class
    * values is 9.
    * <p/>
-   * Exceptions thrown because of changes in Weka since compilation need to 
+   * Exceptions thrown because of changes in Weka since compilation need to
    * be caught by the implementer.
    *
    * @see NoClassDefFoundError
@@ -124,7 +124,7 @@ public class ClassifierErrorsWeka
 	  double actual = predInstF.instance(i).value(predInstF.classIndex());
 	  double predicted = predInstF.instance(i).value(predInstF.classIndex() - 1);
 	  if (predInstF.classAttribute().isNominal()) {
-	    if (Instance.isMissingValue(actual) || Instance.isMissingValue(predicted)) {
+	    if (Utils.isMissingValue(actual) || Utils.isMissingValue(predicted)) {
 	      plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
 	    }
 	    else if (actual != predicted) {
@@ -140,7 +140,7 @@ public class ClassifierErrorsWeka
 	  else {
 	    // store the error (to be converted to a point size later)
 	    Double errd = null;
-	    if (Instance.isMissingValue(actual) || Instance.isMissingValue(predicted)) {
+	    if (Utils.isMissingValue(actual) || Utils.isMissingValue(predicted)) {
 	      // missing shape if actual class not present or prediction is missing
 	      plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
 	    }
@@ -188,14 +188,14 @@ public class ClassifierErrorsWeka
 	jf.setVisible(true);
       }
     });
-    
+
     return result;
   }
 
   /**
    * Get the minimum version of Weka, inclusive, the class
    * is designed to work with.  eg: <code>3.5.0</code>
-   * 
+   *
    * @return		the minimum version
    */
   public String getMinVersion() {
@@ -205,7 +205,7 @@ public class ClassifierErrorsWeka
   /**
    * Get the maximum version of Weka, exclusive, the class
    * is designed to work with.  eg: <code>3.6.0</code>
-   * 
+   *
    * @return		the maximum version
    */
   public String getMaxVersion() {
@@ -215,7 +215,7 @@ public class ClassifierErrorsWeka
   /**
    * Get the specific version of Weka the class is designed for.
    * eg: <code>3.5.1</code>
-   * 
+   *
    * @return		the version the plugin was designed for
    */
   public String getDesignVersion() {
