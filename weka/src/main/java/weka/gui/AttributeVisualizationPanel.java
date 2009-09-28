@@ -565,6 +565,8 @@ public class AttributeVisualizationPanel extends PrintablePanel {
           }
           m_threadRun=false;
           m_histBarCounts = histCounts;
+          m_displayCurrentAttribute = true;
+          m_doneCurrentAttribute = true;
           //Image tmpImg = new BufferedImage(getWidth(), getHeight(),
           //                                 BufferedImage.TYPE_INT_RGB);
           //drawGraph( tmpImg.getGraphics() );
