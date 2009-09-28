@@ -571,6 +571,8 @@ public class AttributeVisualizationPanel
           }
           m_threadRun=false;
           m_histBarCounts = histCounts;
+          m_doneCurrentAttribute = true;
+          m_displayCurrentAttribute = true;
           //Image tmpImg = new BufferedImage(getWidth(), getHeight(),
           //                                 BufferedImage.TYPE_INT_RGB);
           //drawGraph( tmpImg.getGraphics() );
