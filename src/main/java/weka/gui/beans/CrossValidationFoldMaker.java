@@ -49,7 +49,7 @@ public class CrossValidationFoldMaker
   
   private boolean m_preserveOrder = false;
 
-  private Thread m_foldThread = null;
+  private transient Thread m_foldThread = null;
 
   public CrossValidationFoldMaker() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -194,6 +194,8 @@ public class CrossValidationFoldMaker
 	      ex.printStackTrace();
 	      CrossValidationFoldMaker.this.stop();
 	    } finally {
+	      m_foldThread = null;
+	      
 	      if (errorOccurred) {
 	        if (m_logger != null) {
 	          m_logger.statusMessage(getCustomName() 
