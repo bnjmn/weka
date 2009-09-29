@@ -47,7 +47,7 @@ public class CrossValidationFoldMaker
   private int m_numFolds = 10;
   private int m_randomSeed = 1;
 
-  private Thread m_foldThread = null;
+  private transient Thread m_foldThread = null;
 
   public CrossValidationFoldMaker() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -187,6 +187,7 @@ public class CrossValidationFoldMaker
 	      }
 	      ex.printStackTrace();
 	    } finally {
+	      m_foldThread = null;
 	      if (errorOccurred) {
 	        if (m_logger != null) {
 	          m_logger.statusMessage(getCustomName() 
