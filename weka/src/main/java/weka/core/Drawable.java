@@ -26,11 +26,11 @@ package weka.core;
  * Interface to something that can be drawn as a graph.
  *
  * @author Ashraf M. Kibriya(amk14@cs.waikato.ac.nz), Eibe Frank(eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public interface Drawable {
 
-  int NOT_DRAWABLE = 0, TREE = 1, BayesNet = 2;
+  int NOT_DRAWABLE = 0, TREE = 1, BayesNet = 2, Newick = 3;
 
   /**
    * Returns the type of graph representing
