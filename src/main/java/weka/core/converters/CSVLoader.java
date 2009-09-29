@@ -99,7 +99,7 @@ public class CSVLoader
   protected transient BufferedReader m_sourceReader;
   
   /** Tokenizer for the data. */
-  protected StreamTokenizer m_st;
+  protected transient StreamTokenizer m_st;
   
   /** The range of attributes to force to type nominal. */
   protected Range m_NominalAttributes = new Range();
@@ -433,6 +433,11 @@ public class CSVLoader
     
     if (m_structure == null) {
       getStructure();
+    }
+    
+    if (m_st == null) {
+      m_st = new StreamTokenizer(m_sourceReader);
+      initTokenizer(m_st);      
     }
         
     m_st.ordinaryChar(',');
