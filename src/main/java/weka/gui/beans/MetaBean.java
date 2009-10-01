@@ -336,6 +336,7 @@ public class MetaBean
     for (int i = 0; i < targets.size(); i++) {
       BeanInstance input = (BeanInstance)targets.elementAt(i);
       if (input.getBean() instanceof BeanCommon) {
+        //if (((BeanCommon)input.getBean()).connectionAllowed(esd.getName())) {
         if (((BeanCommon)input.getBean()).connectionAllowed(esd)) {
           return true;
         }
@@ -459,13 +460,17 @@ public class MetaBean
           prefix = temp.getBean().getClass().getName();
           prefix = prefix.substring(prefix.lastIndexOf('.')+1, prefix.length());
         }
-        
         prefix = ""+(i+1)+": ("+prefix+")";
         Enumeration en = ((UserRequestAcceptor)temp.getBean()).enumerateRequests();
         while (en.hasMoreElements()) {
           String req = (String)en.nextElement();
           if (req.charAt(0) == '$') {
             prefix = '$'+prefix;
+            req = req.substring(1, req.length());
+          }
+          
+          if (req.charAt(0) == '?') {
+            prefix = '?' + prefix;
             req = req.substring(1, req.length());
           }
           newVector.add(prefix+" "+req);
