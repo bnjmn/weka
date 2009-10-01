@@ -468,6 +468,11 @@ public class MetaBean
             prefix = '$'+prefix;
             req = req.substring(1, req.length());
           }
+          
+          if (req.charAt(0) == '?') {
+            prefix = '?' + prefix;
+            req = req.substring(1, req.length());
+          }
           newVector.add(prefix+" "+req);
         }          
       }
