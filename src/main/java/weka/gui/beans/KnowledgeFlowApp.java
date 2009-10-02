@@ -2052,6 +2052,8 @@ public class KnowledgeFlowApp
     Vector allConnections = BeanConnection.getConnections();
     Vector inputs = bean.getInputs();
     Vector outputs = bean.getOutputs();
+    Vector allComps = bean.getSubFlow();
+        
     for (int i = 0; i < inputs.size(); i++) {
       BeanInstance temp = (BeanInstance)inputs.elementAt(i);
       // is this input a target for some event?
@@ -2060,8 +2062,15 @@ public class KnowledgeFlowApp
         if (tempC.getTarget() == temp) {
           tempRemovedConnections.add(tempC);
         }
+        
+        // also check to see if this input is a source for
+        // some target that is *not* in the subFlow
+        if (tempC.getSource() == temp && !bean.subFlowContains(tempC.getTarget())) {
+          tempRemovedConnections.add(tempC);
+        }
       }
     }
+
     for (int i = 0; i < outputs.size(); i++) {
       BeanInstance temp = (BeanInstance)outputs.elementAt(i);
       // is this output a source for some target?
