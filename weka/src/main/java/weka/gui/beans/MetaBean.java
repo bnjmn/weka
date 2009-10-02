@@ -157,6 +157,31 @@ public class MetaBean
     }
     return comps;
   }
+  
+  private boolean beanSetContains(Vector set, BeanInstance toCheck) {
+    boolean ok = false;
+    
+    for (int i = 0; i < set.size(); i++) {
+      BeanInstance temp = (BeanInstance)set.elementAt(i);
+      if (toCheck == temp) {
+        ok = true;
+        break;
+      }
+    }
+    return ok;
+  }
+  
+  public boolean subFlowContains(BeanInstance toCheck) {
+    return beanSetContains(m_subFlow, toCheck);
+  }
+  
+  public boolean inputsContains(BeanInstance toCheck) {
+    return beanSetContains(m_inputs, toCheck);
+  }
+  
+  public boolean outputsContains(BeanInstance toCheck) {
+    return beanSetContains(m_outputs, toCheck);
+  }
 
   /**
    * Return all the beans in the sub flow
