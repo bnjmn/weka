@@ -1783,9 +1783,11 @@ public class KnowledgeFlowApp
 
         Vector esdV = new Vector();
 
-        for (int i = 0; i < compInfoOutputs.size(); i++) {
+        //for (int i = 0; i < compInfoOutputs.size(); i++) {
+        for (int i = 0; i < compInfo.size(); i++) {
           EventSetDescriptor[] temp = 
-            ((BeanInfo) compInfoOutputs.elementAt(i)).getEventSetDescriptors();
+          //  ((BeanInfo) compInfoOutputs.elementAt(i)).getEventSetDescriptors();
+          ((BeanInfo) compInfo.elementAt(i)).getEventSetDescriptors();
 
           if ((temp != null) && (temp.length > 0)) {
             esdV.add(temp);
@@ -1804,14 +1806,16 @@ public class KnowledgeFlowApp
           menuItemCount++;
         }
 
-        final Vector finalOutputs = outputBeans;
+        //final Vector finalOutputs = outputBeans;
+        final Vector finalOutputs = associatedBeans;
 
         for (int j = 0; j < esdV.size(); j++) {
           final int fj = j;
           String sourceBeanName = "";
 
           if (bc instanceof MetaBean) {
-            Object sourceBean = ((BeanInstance) outputBeans.elementAt(j)).getBean();
+            //Object sourceBean = ((BeanInstance) outputBeans.elementAt(j)).getBean();
+            Object sourceBean = ((BeanInstance) associatedBeans.elementAt(j)).getBean();
             if (sourceBean instanceof BeanCommon) {
               sourceBeanName = ((BeanCommon)sourceBean).getCustomName();
             } else {
