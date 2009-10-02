@@ -157,6 +157,31 @@ public class MetaBean
     }
     return comps;
   }
+  
+  private boolean beanSetContains(Vector set, BeanInstance toCheck) {
+    boolean ok = false;
+    
+    for (int i = 0; i < set.size(); i++) {
+      BeanInstance temp = (BeanInstance)set.elementAt(i);
+      if (toCheck == temp) {
+        ok = true;
+        break;
+      }
+    }
+    return ok;
+  }
+  
+  public boolean subFlowContains(BeanInstance toCheck) {
+    return beanSetContains(m_subFlow, toCheck);
+  }
+  
+  public boolean inputsContains(BeanInstance toCheck) {
+    return beanSetContains(m_inputs, toCheck);
+  }
+  
+  public boolean outputsContains(BeanInstance toCheck) {
+    return beanSetContains(m_outputs, toCheck);
+  }
 
   /**
    * Return all the beans in the sub flow
@@ -312,8 +337,8 @@ public class MetaBean
    * time
    */
   public boolean eventGeneratable(String eventName) {
-    for (int i = 0; i < m_outputs.size(); i++) {
-      BeanInstance output = (BeanInstance)m_outputs.elementAt(i);
+    for (int i = 0; i < m_subFlow.size(); i++) {
+      BeanInstance output = (BeanInstance)m_subFlow.elementAt(i);
       if (output.getBean() instanceof EventConstraints) {
         if (((EventConstraints)output.getBean()).eventGeneratable(eventName)) {
           return true;
@@ -475,6 +500,21 @@ public class MetaBean
           }
           newVector.add(prefix+" "+req);
         }          
+      } else if (temp.getBean() instanceof Startable) {
+        String prefix = "";
+        if ((temp.getBean() instanceof BeanCommon)) {
+          prefix = ((BeanCommon)temp.getBean()).getCustomName();
+        } else {
+          prefix = temp.getBean().getClass().getName();
+          prefix = prefix.substring(prefix.lastIndexOf('.')+1, prefix.length());
+        }
+        prefix = ""+(i+1)+": ("+prefix+")";
+        String startMessage = ((Startable)temp.getBean()).getStartMessage();
+        if (startMessage.charAt(0) == '$') {
+          prefix = '$'+prefix;
+          startMessage = startMessage.substring(1, startMessage.length());
+        }
+        newVector.add(prefix + " " + startMessage);
       }
     }
     
@@ -546,10 +586,20 @@ public class MetaBean
     index--;
     String req = request.substring(request.indexOf(')')+1, 
                                    request.length()).trim();
-    UserRequestAcceptor target = 
-      (UserRequestAcceptor)(((BeanInstance)m_subFlow.elementAt(index)).getBean());
-    target.performRequest(req);
-                                   
+    
+    Object target = (((BeanInstance)m_subFlow.elementAt(index)).getBean());
+    if (target instanceof Startable && req.equals(((Startable)target).getStartMessage())) {
+      try {
+        ((Startable)target).start();
+      } catch (Exception ex) {
+        if (m_log != null) {
+          String compName = (target instanceof BeanCommon) ? ((BeanCommon)target).getCustomName() : "";
+          m_log.logMessage("Problem starting subcomponent " + compName);
+        }
+      }
+    } else {    
+      ((UserRequestAcceptor)target).performRequest(req);
+    }                                   
   }
 
   /**

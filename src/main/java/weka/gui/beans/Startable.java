@@ -38,4 +38,15 @@ public interface Startable {
    * @exception Exception if something goes wrong
    */
   void start() throws Exception;
+  
+  /**
+   * Gets a string that describes the start action. The
+   * KnowledgeFlow uses this in the popup contextual menu
+   * for the component. The string can be proceeded by
+   * a '$' character to indicate that the component can't
+   * be started at present.
+   * 
+   * @return a string describing the start action.
+   */
+  String getStartMessage();
 }

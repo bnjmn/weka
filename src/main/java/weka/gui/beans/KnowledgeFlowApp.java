@@ -539,7 +539,7 @@ public class KnowledgeFlowApp
   protected boolean m_UserComponentsInXML = false;
   
   /** Environment variables for the current flow */
-  protected Environment m_flowEnvironment;
+  protected Environment m_flowEnvironment = new Environment();
   
   /**
    * Set the environment variables to use. NOTE: loading a new layout
@@ -753,6 +753,7 @@ public class KnowledgeFlowApp
 		// Give the target bean a chance to veto the proposed
 		// connection
 		if (((BeanCommon)bi.getBean()).
+		    //connectionAllowed(m_sourceEventSetDescriptor.getName())) {
 		    connectionAllowed(m_sourceEventSetDescriptor)) {
 		  doConnection = true;
 		}
@@ -1748,8 +1749,8 @@ public class KnowledgeFlowApp
                   custName = custName.substring(0, custName.indexOf("Customizer"));
                 }
 
-                custName = custName.substring(custName.lastIndexOf('.') + 1,
-                    custName.length());
+                custName = custName.substring(custName.lastIndexOf('.') + 1,              
+                                            custName.length());
               }
               //custItem = new JMenuItem("Configure: "+ custName);
               custItem = new MenuItem("Configure: " + custName);
@@ -1782,9 +1783,11 @@ public class KnowledgeFlowApp
 
         Vector esdV = new Vector();
 
-        for (int i = 0; i < compInfoOutputs.size(); i++) {
+        //for (int i = 0; i < compInfoOutputs.size(); i++) {
+        for (int i = 0; i < compInfo.size(); i++) {
           EventSetDescriptor[] temp = 
-            ((BeanInfo) compInfoOutputs.elementAt(i)).getEventSetDescriptors();
+          //  ((BeanInfo) compInfoOutputs.elementAt(i)).getEventSetDescriptors();
+          ((BeanInfo) compInfo.elementAt(i)).getEventSetDescriptors();
 
           if ((temp != null) && (temp.length > 0)) {
             esdV.add(temp);
@@ -1803,14 +1806,16 @@ public class KnowledgeFlowApp
           menuItemCount++;
         }
 
-        final Vector finalOutputs = outputBeans;
+        //final Vector finalOutputs = outputBeans;
+        final Vector finalOutputs = associatedBeans;
 
         for (int j = 0; j < esdV.size(); j++) {
           final int fj = j;
           String sourceBeanName = "";
 
           if (bc instanceof MetaBean) {
-            Object sourceBean = ((BeanInstance) outputBeans.elementAt(j)).getBean();
+            //Object sourceBean = ((BeanInstance) outputBeans.elementAt(j)).getBean();
+            Object sourceBean = ((BeanInstance) associatedBeans.elementAt(j)).getBean();
             if (sourceBean instanceof BeanCommon) {
               sourceBeanName = ((BeanCommon)sourceBean).getCustomName();
             } else {
@@ -1870,10 +1875,14 @@ public class KnowledgeFlowApp
 
     //    System.err.println("Just before look for other options");
     // now look for other options for this bean
-    if (bc instanceof UserRequestAcceptor) {
-      Enumeration req = ((UserRequestAcceptor) bc).enumerateRequests();
+    if (bc instanceof UserRequestAcceptor || bc instanceof Startable) {
+      Enumeration req = null;
+      
+      if (bc instanceof UserRequestAcceptor) {
+        req = ((UserRequestAcceptor) bc).enumerateRequests();
+      }
 
-      if (req.hasMoreElements()) {
+      if ((bc instanceof Startable) || (req !=null && req.hasMoreElements())) {
         //	beanContextMenu.insert(new JLabel("Actions", 
         //					  SwingConstants.CENTER), 
         //			       menuItemCount);
@@ -1883,55 +1892,14 @@ public class KnowledgeFlowApp
         menuItemCount++;
       }
 
-      while (req.hasMoreElements()) {
+      if (bc instanceof Startable) {
+        String tempS = ((Startable)bc).getStartMessage();
+        insertUserOrStartableMenuItem(bc, true, tempS, beanContextMenu);
+      }
+      
+      while (req != null && req.hasMoreElements()) {
         String tempS = (String) req.nextElement();
-        boolean disabled = false;
-        boolean confirmRequest = false;
-
-        // check to see if this item is currently disabled
-        if (tempS.charAt(0) == '$') {
-          tempS = tempS.substring(1, tempS.length());
-          disabled = true;
-        }
-        
-        // check to see if this item requires confirmation
-        if (tempS.charAt(0) == '?') {
-          tempS = tempS.substring(1, tempS.length());
-          confirmRequest = true;
-        }
-
-        final String tempS2 = tempS;
-
-        //	JMenuItem custItem = new JMenuItem(tempS2);
-        MenuItem custItem = new MenuItem(tempS2);
-        if (confirmRequest) {
-          custItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              // 
-              int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
-                  tempS2,
-                  "Confirm action",
-                  JOptionPane.YES_NO_OPTION);
-              if (result == JOptionPane.YES_OPTION) {
-                ((UserRequestAcceptor) bc).performRequest(tempS2);
-                notifyIsDirty();
-              }
-            }
-          });
-        } else {
-        custItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {              
-              ((UserRequestAcceptor) bc).performRequest(tempS2);
-              notifyIsDirty();
-            }
-          });
-        }
-
-        if (disabled) {
-          custItem.setEnabled(false);
-        }
-
-        beanContextMenu.add(custItem);
+        insertUserOrStartableMenuItem(bc, false, tempS, beanContextMenu);
         menuItemCount++;
       }
     }
@@ -1944,6 +1912,86 @@ public class KnowledgeFlowApp
       beanContextMenu.show(m_beanLayout, x, y);
     }
   }
+  
+  private void insertUserOrStartableMenuItem(final JComponent bc, 
+      final boolean startable, String tempS, PopupMenu beanContextMenu) {
+
+    boolean disabled = false;
+    boolean confirmRequest = false;
+
+    // check to see if this item is currently disabled
+    if (tempS.charAt(0) == '$') {
+      tempS = tempS.substring(1, tempS.length());
+      disabled = true;
+    }
+    
+    // check to see if this item requires confirmation
+    if (tempS.charAt(0) == '?') {
+      tempS = tempS.substring(1, tempS.length());
+      confirmRequest = true;
+    }
+
+    final String tempS2 = tempS;
+
+    //      JMenuItem custItem = new JMenuItem(tempS2);
+    MenuItem custItem = new MenuItem(tempS2);
+    if (confirmRequest) {
+      custItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          // 
+          int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
+              tempS2,
+              "Confirm action",
+              JOptionPane.YES_NO_OPTION);
+          if (result == JOptionPane.YES_OPTION) {
+            Thread startPointThread = new Thread() {
+              public void run() {
+                try {
+                  if (startable) {
+                    ((Startable)bc).start();                    
+                  } else if (bc instanceof UserRequestAcceptor) {
+                    ((UserRequestAcceptor) bc).performRequest(tempS2);
+                  }
+                  notifyIsDirty();
+                } catch (Exception ex) {
+                  ex.printStackTrace();
+                }
+              }
+            };
+            startPointThread.setPriority(Thread.MIN_PRIORITY);
+            startPointThread.start();
+          }
+        }
+      });
+    } else {
+      custItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          Thread startPointThread = new Thread() {
+            public void run() {
+              try {
+                if (startable) {
+                  ((Startable)bc).start();                  
+                } else if (bc instanceof UserRequestAcceptor) {
+                  ((UserRequestAcceptor) bc).performRequest(tempS2);
+                }
+                notifyIsDirty();
+              } catch (Exception ex) {
+                ex.printStackTrace();
+              }
+            }
+          };
+          startPointThread.setPriority(Thread.MIN_PRIORITY);
+          startPointThread.start();
+        }
+      });
+    }
+
+    if (disabled) {
+      custItem.setEnabled(false);
+    }
+
+    beanContextMenu.add(custItem); 
+  }
 
   /**
    * Popup the customizer for this bean
@@ -1955,6 +2003,10 @@ public class KnowledgeFlowApp
     try {
       // instantiate
       final Object customizer = custClass.newInstance();
+      // set environment **before** setting object!!
+      if (customizer instanceof EnvironmentHandler) {
+        ((EnvironmentHandler)customizer).setEnvironment(m_flowEnvironment);
+      }
       ((Customizer)customizer).setObject(bc);
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new BorderLayout());
@@ -2000,6 +2052,8 @@ public class KnowledgeFlowApp
     Vector allConnections = BeanConnection.getConnections();
     Vector inputs = bean.getInputs();
     Vector outputs = bean.getOutputs();
+    Vector allComps = bean.getSubFlow();
+        
     for (int i = 0; i < inputs.size(); i++) {
       BeanInstance temp = (BeanInstance)inputs.elementAt(i);
       // is this input a target for some event?
@@ -2008,8 +2062,15 @@ public class KnowledgeFlowApp
         if (tempC.getTarget() == temp) {
           tempRemovedConnections.add(tempC);
         }
+        
+        // also check to see if this input is a source for
+        // some target that is *not* in the subFlow
+        if (tempC.getSource() == temp && !bean.subFlowContains(tempC.getTarget())) {
+          tempRemovedConnections.add(tempC);
+        }
       }
     }
+
     for (int i = 0; i < outputs.size(); i++) {
       BeanInstance temp = (BeanInstance)outputs.elementAt(i);
       // is this output a source for some target?
@@ -2084,7 +2145,7 @@ public class KnowledgeFlowApp
         if (bc.getTarget().getBean() instanceof BeanCommon) {
           targetName = ((BeanCommon)bc.getTarget().getBean()).getCustomName();
         } else {
-          targetName =  bc.getTarget().getBean().getClass().getName();
+          targetName = bc.getTarget().getBean().getClass().getName();
           targetName = targetName.substring(targetName.lastIndexOf('.')+1, targetName.length());
         }
         MenuItem deleteItem = new MenuItem(connName + "-->" + targetName);
@@ -2148,6 +2209,7 @@ public class KnowledgeFlowApp
 	  // give this bean a chance to veto any proposed connection via
 	  // the listener interface
 	  if (((BeanCommon)bean).
+	      //connectionAllowed(esd.getName())) {
 	      connectionAllowed(esd)) {
 	    connectable = true;
 	  }
@@ -2661,6 +2723,10 @@ public class KnowledgeFlowApp
           oos.close();
         }
         m_logPanel.statusMessage("[KnowledgeFlow]|Flow saved.");
+        
+        // set the internal knowledgeflow directory environment var for this flow
+        m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
+        setEnvironment();
       } catch (Exception ex) {
         m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
         m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
