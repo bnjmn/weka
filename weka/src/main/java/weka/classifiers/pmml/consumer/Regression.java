@@ -507,6 +507,8 @@ public class Regression extends PMMLClassifier
     public void predict(double[] preds, double[] input) {
       if (m_targetCategory == -1) {
         preds[0] = m_intercept;
+      } else {
+        preds[m_targetCategory] = m_intercept;
       }
       
       // add the predictors
