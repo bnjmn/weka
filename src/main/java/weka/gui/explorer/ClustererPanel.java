@@ -676,13 +676,21 @@ public class ClustererPanel
       for (j = 0; j < testInstances.numAttributes(); j++) {
 	values[j] = testInstances.instance(i).value(j);
       }
-      values[j] = clusterAssignments[i];
+      if (clusterAssignments[i] < 0) {
+        values[j] = Instance.missingValue();
+      } else {
+        values[j] = clusterAssignments[i];
+      }
       newInsts.add(new Instance(1.0, values));
       if (pointShapes != null) {
-	if ((int)testInstances.instance(i).classValue() != 
-	    classAssignments[(int)clusterAssignments[i]]) {
-	  pointShapes[i] = Plot2D.ERROR_SHAPE;
-	}
+        if (clusterAssignments[i] >= 0) {
+          if ((int)testInstances.instance(i).classValue() != 
+            classAssignments[(int)clusterAssignments[i]]) {
+            pointShapes[i] = Plot2D.ERROR_SHAPE;
+          }
+        } else {
+          pointShapes[i] = Plot2D.MISSING_SHAPE;
+        }
       }
     }
     PlotData2D plotData = new PlotData2D(newInsts);
