@@ -28,6 +28,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.DenseInstance;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 
@@ -176,6 +177,7 @@ public class ClustererAssignmentsPlotInstances
     int[] 	classAssignments;
     
     clusterAssignments = m_Evaluation.getClusterAssignments();
+    
     classAssignments   = null;
     if (m_Instances.classIndex() >= 0) {
       classAssignments = m_Evaluation.getClassesToClusters();
@@ -188,11 +190,19 @@ public class ClustererAssignmentsPlotInstances
       values = new double[m_PlotInstances.numAttributes()];
       for (j = 0; j < m_Instances.numAttributes(); j++)
 	values[j] = m_Instances.instance(i).value(j);
-      values[j] = clusterAssignments[i];
+      if (clusterAssignments[i] < 0) {
+        values[j] = Utils.missingValue();
+      } else {
+        values[j] = clusterAssignments[i];
+      }
       m_PlotInstances.add(new DenseInstance(1.0, values));
       if (m_PlotShapes != null) {
-	if ((int) m_Instances.instance(i).classValue() != classAssignments[(int) clusterAssignments[i]])
-	  m_PlotShapes[i] = Plot2D.ERROR_SHAPE;
+        if (clusterAssignments[i] >= 0) {
+          if ((int) m_Instances.instance(i).classValue() != classAssignments[(int) clusterAssignments[i]])
+            m_PlotShapes[i] = Plot2D.ERROR_SHAPE;
+        } else {
+          m_PlotShapes[i] = Plot2D.MISSING_SHAPE;
+        }
       }
     }
   }
