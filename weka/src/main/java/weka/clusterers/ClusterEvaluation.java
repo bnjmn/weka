@@ -262,7 +262,7 @@ public class ClusterEvaluation
 	}
       }
       catch (Exception e) {
-	clusterAssignments.add(0.0);
+	clusterAssignments.add(-1.0);
 	unclusteredInstances++;
       }
       
@@ -344,8 +344,10 @@ public class ClusterEvaluation
     i = 0;
     while (source.hasMoreElements(instances)) {
       instance = source.nextElement(instances);
-      counts[(int)m_clusterAssignments[i]][(int)instance.classValue()]++;
-      clusterTotals[(int)m_clusterAssignments[i]]++;
+      if (m_clusterAssignments[i] >= 0) {
+        counts[(int)m_clusterAssignments[i]][(int)instance.classValue()]++;
+        clusterTotals[(int)m_clusterAssignments[i]]++;
+      }
       i++;
     }
     numInstances = i;
