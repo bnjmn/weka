@@ -69,7 +69,7 @@ import java.util.Vector;
  * <br/>
  * For more information on the SMO algorithm, see<br/>
  * <br/>
- * J. Platt: Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, 1998.<br/>
+ * J. Platt: Fast Training of Support Vector Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, 1998.<br/>
  * <br/>
  * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. 13(3):637-649.<br/>
  * <br/>
@@ -85,7 +85,7 @@ import java.util.Vector;
  *    booktitle = {Advances in Kernel Methods - Support Vector Learning},
  *    editor = {B. Schoelkopf and C. Burges and A. Smola},
  *    publisher = {MIT Press},
- *    title = {Machines using Sequential Minimal Optimization},
+ *    title = {Fast Training of Support Vector Machines using Sequential Minimal Optimization},
  *    year = {1998},
  *    URL = {http://research.microsoft.com/\~jplatt/smo.html},
  *    PS = {http://research.microsoft.com/\~jplatt/smo-book.ps.gz},
@@ -189,7 +189,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.70 $
+ * @version $Revision$
  */
 public class SMO 
   extends Classifier 
@@ -240,7 +240,7 @@ public class SMO
     result = new TechnicalInformation(Type.INCOLLECTION);
     result.setValue(Field.AUTHOR, "J. Platt");
     result.setValue(Field.YEAR, "1998");
-    result.setValue(Field.TITLE, "Machines using Sequential Minimal Optimization");
+    result.setValue(Field.TITLE, "Fast Training of Support Vector Machines using Sequential Minimal Optimization");
     result.setValue(Field.BOOKTITLE, "Advances in Kernel Methods - Support Vector Learning");
     result.setValue(Field.EDITOR, "B. Schoelkopf and C. Burges and A. Smola");
     result.setValue(Field.PUBLISHER, "MIT Press");
@@ -1123,7 +1123,7 @@ public class SMO
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.70 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -2128,7 +2128,7 @@ public class SMO
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.70 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
@@ -2138,3 +2138,4 @@ public class SMO
     runClassifier(new SMO(), argv);
   }
 }
+
