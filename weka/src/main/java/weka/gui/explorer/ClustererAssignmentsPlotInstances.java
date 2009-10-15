@@ -190,7 +190,7 @@ public class ClustererAssignmentsPlotInstances
       for (j = 0; j < m_Instances.numAttributes(); j++)
 	values[j] = m_Instances.instance(i).value(j);
       if (clusterAssignments[i] < 0) {
-        values[j] = Utils.missingValue();
+        values[j] = Instance.missingValue();
       } else {
         values[j] = clusterAssignments[i];
       }
