@@ -30,7 +30,7 @@ import java.util.Random;
  * of floating-point values.
  *
  * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.1 $
+ * @version $Revision$
  */
 public class AlgVector 
   implements Cloneable, Serializable, RevisionHandler {
@@ -232,7 +232,7 @@ public class AlgVector
     Instance newInst = null;
 
     if (m_Elements != null) {
-      newInst = new Instance(model.numAttributes());
+      newInst = new DenseInstance(model.numAttributes());
       newInst.setDataset(model);
       
       for (int i = 0, j = 0; i < model.numAttributes(); i++) {
@@ -402,7 +402,7 @@ public class AlgVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -24,7 +24,8 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
@@ -67,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.6.2.1 $
+ * @version $Revision$
  * @see PropositionalToMultiInstance
  */
 public class MultiInstanceToPropositional 
@@ -403,7 +404,7 @@ public class MultiInstanceToPropositional
     Instances outputFormat = getOutputFormat().stringFreeStructure();
 
     for (int i = 0; i < bagSize; i++) {
-      newInst = new Instance (outputFormat.numAttributes());
+      newInst = new DenseInstance(outputFormat.numAttributes());
       newInst.setDataset(outputFormat);
       newInst.setValue(0,bagIndex);
       if (!bag.classIsMissing())
@@ -436,7 +437,7 @@ public class MultiInstanceToPropositional
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

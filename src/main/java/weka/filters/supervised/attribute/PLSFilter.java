@@ -26,6 +26,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -132,7 +133,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision$
  */
 public class PLSFilter
   extends SimpleBatchFilter 
@@ -739,7 +740,7 @@ public class PLSFilter
 	}
       }
       
-      result.add(new Instance(1.0, values));
+      result.add(new DenseInstance(1.0, values));
     }
     
     return result;
@@ -1146,7 +1147,7 @@ public class PLSFilter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

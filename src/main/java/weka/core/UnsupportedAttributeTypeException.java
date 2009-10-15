@@ -27,7 +27,7 @@ package weka.core;
  * attribute types it has been passed.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class UnsupportedAttributeTypeException
   extends WekaException {

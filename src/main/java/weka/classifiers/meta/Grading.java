@@ -27,6 +27,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
@@ -364,7 +365,7 @@ public class Grading
     }
     
     values[idx]=predConf;
-    metaInstance = new Instance(1, values);
+    metaInstance = new DenseInstance(1, values);
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
   }

@@ -23,7 +23,8 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -60,7 +61,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 public class RandomSubset
   extends SimpleStreamFilter {
@@ -350,7 +351,7 @@ public class RandomSubset
     for (i = 0; i < m_Indices.length; i++)
       values[i] = instance.value(m_Indices[i]);
 
-    result = new Instance(instance.weight(), values);
+    result = new DenseInstance(instance.weight(), values);
     result.setDataset(getOutputFormat());
     
     copyValues(result, false, instance.dataset(), getOutputFormat());
@@ -365,7 +366,7 @@ public class RandomSubset
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

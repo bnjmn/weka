@@ -24,12 +24,14 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Capabilities.Capability;
+import weka.core.Utils;
 
 /** 
  <!-- globalinfo-start -->
@@ -60,7 +62,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision$
  */
 public class TimeSeriesTranslate 
   extends AbstractTimeSeries {
@@ -160,7 +162,7 @@ public class TimeSeriesTranslate
         if (source != null) {
           vals[i] = source.value(i);
         } else {
-          vals[i] = Instance.missingValue();
+          vals[i] = Utils.missingValue();
         }
       } else {
         vals[i] = dest.value(i);
@@ -170,7 +172,7 @@ public class TimeSeriesTranslate
     if (dest instanceof SparseInstance) {
       inst = new SparseInstance(dest.weight(), vals);
     } else {
-      inst = new Instance(dest.weight(), vals);
+      inst = new DenseInstance(dest.weight(), vals);
     }
     inst.setDataset(dest.dataset());
     return inst;
@@ -182,7 +184,7 @@ public class TimeSeriesTranslate
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

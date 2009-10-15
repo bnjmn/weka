@@ -31,6 +31,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -518,7 +519,7 @@ public class Stacking
       }
     }
     values[i] = instance.classValue();
-    metaInstance = new Instance(1, values);
+    metaInstance = new DenseInstance(1, values);
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
   }

@@ -30,8 +30,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.Utils;
 
 /**
  * Class to encapsulate information about a Target.
@@ -279,10 +279,10 @@ public class TargetMetaInfo extends FieldMetaInfo implements Serializable {
       throw new Exception("[TargetMetaInfo] target must be continuous!");
     }
 
-    if (!Instance.isMissingValue(m_min) && prediction < m_min) {
+    if (!Utils.isMissingValue(m_min) && prediction < m_min) {
       prediction = m_min;
     }
-    if (!Instance.isMissingValue(m_max) && prediction > m_max) {
+    if (!Utils.isMissingValue(m_max) && prediction > m_max) {
       prediction = m_max;
     }
 
@@ -316,12 +316,12 @@ public class TargetMetaInfo extends FieldMetaInfo implements Serializable {
     }
     if (m_values.size() == 0) {
       // return a String attribute
-      return new Attribute(m_fieldName, (FastVector)null);
+      return new Attribute(m_fieldName, (ArrayList<String>)null);
     }
     
-    FastVector values = new FastVector();
+    ArrayList<String> values = new ArrayList<String>();
     for (String val : m_values) {
-      values.addElement(val);
+      values.add(val);
     }
     return new Attribute(m_fieldName, values);
   }

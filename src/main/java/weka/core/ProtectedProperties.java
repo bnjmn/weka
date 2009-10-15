@@ -32,7 +32,7 @@ import java.util.Properties;
  * unable to be modified.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision$
  */
 public class ProtectedProperties
   extends Properties
@@ -142,7 +142,7 @@ public class ProtectedProperties
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
 

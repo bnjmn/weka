@@ -94,7 +94,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision$
  * @see RandomizableClusterer
  */
 public class FarthestFirst 
@@ -408,8 +408,8 @@ public class FarthestFirst
     case Attribute.NOMINAL:
       
       // If attribute is nominal
-      if (Instance.isMissingValue(val1) || 
-	  Instance.isMissingValue(val2) ||
+      if (Utils.isMissingValue(val1) || 
+	  Utils.isMissingValue(val2) ||
 	  ((int)val1 != (int)val2)) {
 	return 1;
       } else {
@@ -418,14 +418,14 @@ public class FarthestFirst
     case Attribute.NUMERIC:
 
       // If attribute is numeric
-      if (Instance.isMissingValue(val1) || 
-	  Instance.isMissingValue(val2)) {
-	if (Instance.isMissingValue(val1) && 
-	    Instance.isMissingValue(val2)) {
+      if (Utils.isMissingValue(val1) || 
+	  Utils.isMissingValue(val2)) {
+	if (Utils.isMissingValue(val1) && 
+	    Utils.isMissingValue(val2)) {
 	  return 1;
 	} else {
 	  double diff;
-	  if (Instance.isMissingValue(val2)) {
+	  if (Utils.isMissingValue(val2)) {
 	    diff = norm(val1, index);
 	  } else {
 	    diff = norm(val2, index);
@@ -604,7 +604,7 @@ public class FarthestFirst
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

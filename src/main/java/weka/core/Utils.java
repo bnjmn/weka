@@ -28,6 +28,7 @@ import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class implementing some simple utility methods.
@@ -47,6 +48,37 @@ public final class Utils
   /** The small deviation allowed in double comparisons. */
   public static double SMALL = 1e-6;
 
+  /**
+   * Tests if the given value codes "missing".
+   *
+   * @param val the value to be tested
+   * @return true if val codes "missing"
+   */
+  public static boolean isMissingValue(double val) {
+
+    return Double.isNaN(val);
+  }
+
+  /**
+   * Returns the value used to code a missing value.  Note that
+   * equality tests on this value will always return false, so use
+   * isMissingValue(double val) for testing..
+   *
+   * @return the value used as missing value.
+   */
+  public static double missingValue() {
+    
+    return Double.NaN;
+  }
+
+  /**
+   * Casting an object without "unchecked" compile-time warnings.
+   * Use only when absolutely necessary (e.g. when using clone()).
+   */
+  @SuppressWarnings("unchecked")
+    public static <T> T cast(Object x) {
+    return (T) x;
+  }
   
   /**
    * Reads properties that inherit from three locations. Properties
@@ -892,7 +924,7 @@ public final class Utils
    */
   public static String[] splitOptions(String quotedOptionString) throws Exception{
 
-    FastVector optionsVec = new FastVector();
+    Vector<String> optionsVec = new Vector<String>();
     String str = new String(quotedOptionString);
     int i;
     
@@ -1003,11 +1035,11 @@ public final class Utils
    * class is not assignable to the desired class type, or the options
    * supplied are not acceptable to the object
    */
-  public static Object forName(Class classType,
+  public static Object forName(Class<?> classType,
 			       String className,
 			       String[] options) throws Exception {
 
-    Class c = null;
+    Class<?> c = null;
     try {
       c = Class.forName(className);
     } catch (Exception ex) {

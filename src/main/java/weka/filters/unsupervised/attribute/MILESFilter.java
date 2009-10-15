@@ -22,7 +22,8 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Version;
 import weka.core.Capabilities.Capability;
@@ -284,7 +285,7 @@ public class MILESFilter
         outputInstance[outputInstance.length - 1] = label;
       
         // Add instance to result
-        result.add(new Instance(inst.instance(i).weight(), outputInstance));
+        result.add(new DenseInstance(inst.instance(i).weight(), outputInstance));
       }
     
     return result;

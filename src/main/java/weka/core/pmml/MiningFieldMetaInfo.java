@@ -216,7 +216,7 @@ public class MiningFieldMetaInfo extends FieldMetaInfo implements Serializable {
   public double applyMissingValueTreatment(double value) throws Exception {
     double newVal = value;
     if (m_missingValueTreatmentMethod != Missing.ASIS && 
-        Instance.isMissingValue(value)) {
+        Utils.isMissingValue(value)) {
       if (m_missingValueReplacementNominal != null) {
         Attribute att = m_miningSchemaI.attribute(m_index);
         int valIndex = att.indexOfValue(m_missingValueReplacementNominal);

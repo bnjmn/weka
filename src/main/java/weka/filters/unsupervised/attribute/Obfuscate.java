@@ -26,7 +26,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Capabilities.Capability;
@@ -41,7 +42,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.6.2.1 $
+ * @version $Revision$
  */
 public class Obfuscate 
   extends Filter 
@@ -158,7 +159,7 @@ public class Obfuscate
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -28,6 +28,7 @@ import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -740,7 +741,7 @@ public class RotationForest
           Enumeration enu = m_instancesOfClasses[c].enumerateInstances();
           while( enu.hasMoreElements() ) {
             Instance instance = (Instance)enu.nextElement();
-            Instance newInstance = new Instance(dataSubSet.numAttributes());
+            Instance newInstance = new DenseInstance(dataSubSet.numAttributes());
             newInstance.setDataset( dataSubSet );
             for( int k = 0; k < m_Groups[m_classifierNumber][j].length; k++ ) {
               newInstance.setValue( k, instance.value( m_Groups[m_classifierNumber][j][k] ) );
@@ -945,7 +946,7 @@ public class RotationForest
 	  v[ j ] = random.nextInt( att.numValues() );
 	}
       }
-      dataset.add( new Instance( 1, v ) );
+      dataset.add( new DenseInstance( 1, v ) );
     }
   }
 
@@ -1146,13 +1147,13 @@ public class RotationForest
    */
   protected Instance convertInstance( Instance instance, int i ) 
   throws Exception {
-    Instance newInstance = new Instance( m_Headers[ i ].numAttributes( ) );
+    Instance newInstance = new DenseInstance( m_Headers[ i ].numAttributes( ) );
     newInstance.setDataset( m_Headers[ i ] );
     int currentAttribute = 0;
 
     // Project the data for each group
     for( int j = 0; j < m_Groups[i].length; j++ ) {
-      Instance auxInstance = new Instance( m_Groups[i][j].length + 1 );
+      Instance auxInstance = new DenseInstance( m_Groups[i][j].length + 1 );
       int k;
       for( k = 0; k < m_Groups[i][j].length; k++ ) {
         auxInstance.setValue( k, instance.value( m_Groups[i][j][k] ) );

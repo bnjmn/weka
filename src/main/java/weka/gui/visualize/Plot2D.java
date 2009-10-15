@@ -518,7 +518,7 @@ public class Plot2D
 	    if ((x >= px-size) && (x <= px+size) &&
 		(y >= py-size) && (y <= py+size)) {
 	      {
-		data.get(jj).add(new Instance(temp_plot.m_plotInstances.instance(i)));
+		data.get(jj).add((Instance)temp_plot.m_plotInstances.instance(i).copy());
 		insts.append("\nPlot : "+temp_plot.m_plotName
 			     + "\nInstance: " + (i + 1 ) + "\n");
 		for (int j=0;j<temp_plot.m_plotInstances.numAttributes();j++) {

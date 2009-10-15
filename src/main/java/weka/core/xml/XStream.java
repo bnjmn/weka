@@ -90,7 +90,7 @@ public class XStream
    * @throws Exception if something goes wrong
    */
   public static String serialize(Object toSerialize) throws Exception {
-    Class xstreamClass;
+    Class<?> xstreamClass;
     java.lang.reflect.Constructor constructor;
     Object xstream;
     Class [] serializeArgsClasses = new Class[1];
@@ -147,7 +147,7 @@ public class XStream
    */
   public static boolean write(OutputStream stream, Object o) throws Exception {
 
-    Class xstreamClass;
+    Class<?> xstreamClass;
     java.lang.reflect.Constructor constructor;
     Object xstream;
     Class [] serializeArgsClasses = new Class[2];
@@ -184,7 +184,7 @@ public class XStream
    * @return true if everything goes ok
    */
   public static boolean write(Writer writer, Object toSerialize) throws Exception {
-    Class xstreamClass;
+    Class<?> xstreamClass;
     java.lang.reflect.Constructor constructor;
     Object xstream;
     Class [] serializeArgsClasses = new Class[2];
@@ -241,7 +241,7 @@ public class XStream
    * @throws Exception if something goes wrong while reading from stream
    */
   public static Object read(InputStream stream) throws Exception {
-    Class xstreamClass;
+    Class<?> xstreamClass;
     java.lang.reflect.Constructor constructor;
     Object xstream;
     Class [] deSerializeArgsClasses = new Class[1];
@@ -276,7 +276,7 @@ public class XStream
    * @throws Exception if something goes wrong while reading from stream
    */
   public static Object read(Reader r) throws Exception {
-    Class xstreamClass;
+    Class<?> xstreamClass;
     java.lang.reflect.Constructor constructor;
     Object xstream;
     Class [] deSerializeArgsClasses = new Class[1];
@@ -311,7 +311,7 @@ public class XStream
    * @throws Exception if something goes wrong
    */
   public static Object deSerialize(String xmlString) throws Exception {
-    Class xstreamClass;
+    Class<?> xstreamClass;
     java.lang.reflect.Constructor constructor;
     Object xstream;
     Class [] deSerializeArgsClasses = new Class[1];

@@ -25,7 +25,8 @@ import weka.core.Attribute;
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
@@ -90,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision$
  */
 public class RELAGGS
   extends SimpleBatchFilter
@@ -529,7 +530,7 @@ public class RELAGGS
     // convert data
     for (k = 0; k < instances.numInstances(); k++) {
       inst    = instances.instance(k);
-      newInst = new Instance(result.numAttributes());
+      newInst = new DenseInstance(result.numAttributes());
       newInst.setWeight(inst.weight());
 
       l = 0;
@@ -577,7 +578,7 @@ public class RELAGGS
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

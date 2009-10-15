@@ -22,7 +22,8 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -53,7 +54,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision$
  */
 public class ClassAssigner
   extends SimpleStreamFilter {
@@ -274,7 +275,7 @@ public class ClassAssigner
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

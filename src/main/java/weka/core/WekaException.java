@@ -26,7 +26,7 @@ package weka.core;
  * Class for Weka-specific exceptions.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class WekaException
   extends Exception {

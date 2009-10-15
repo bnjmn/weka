@@ -35,7 +35,7 @@ import java.util.Vector;
  * @author Fracpete (fracpete at waikato dot ac dot nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz) -- original code from weka.core.EuclideanDistance
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) -- original code from weka.core.EuclideanDistance
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 public abstract class NormalizableDistance
   implements DistanceFunction, OptionHandler, Serializable, RevisionHandler {
@@ -99,7 +99,7 @@ public abstract class NormalizableDistance
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
     
     result.add(new Option(
 	"\tTurns off the normalization of attribute \n"
@@ -501,8 +501,8 @@ public abstract class NormalizableDistance
   protected double difference(int index, double val1, double val2) {
     switch (m_Data.attribute(index).type()) {
       case Attribute.NOMINAL:
-        if (Instance.isMissingValue(val1) ||
-           Instance.isMissingValue(val2) ||
+        if (Utils.isMissingValue(val1) ||
+           Utils.isMissingValue(val2) ||
            ((int) val1 != (int) val2)) {
           return 1;
         }
@@ -511,10 +511,10 @@ public abstract class NormalizableDistance
         }
         
       case Attribute.NUMERIC:
-        if (Instance.isMissingValue(val1) ||
-           Instance.isMissingValue(val2)) {
-          if (Instance.isMissingValue(val1) &&
-             Instance.isMissingValue(val2)) {
+        if (Utils.isMissingValue(val1) ||
+           Utils.isMissingValue(val2)) {
+          if (Utils.isMissingValue(val1) &&
+             Utils.isMissingValue(val2)) {
             if (!m_DontNormalize)  //We are doing normalization
               return 1;
             else
@@ -522,7 +522,7 @@ public abstract class NormalizableDistance
           }
           else {
             double diff;
-            if (Instance.isMissingValue(val2)) {
+            if (Utils.isMissingValue(val2)) {
               diff = (!m_DontNormalize) ? norm(val1, index) : val1;
             }
             else {

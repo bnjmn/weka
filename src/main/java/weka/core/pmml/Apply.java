@@ -187,7 +187,7 @@ class Apply extends Expression {
       // for all expressions after all derived fields are collected
       return (m_opType == FieldMetaInfo.Optype.CATEGORICAL ||
           m_opType == FieldMetaInfo.Optype.ORDINAL)
-      ? new Attribute("Placeholder", new weka.core.FastVector())
+      ? new Attribute("Placeholder", new ArrayList<String>())
       : new Attribute("Placeholder");
     }
     return m_outputStructure;//.copy(attName);

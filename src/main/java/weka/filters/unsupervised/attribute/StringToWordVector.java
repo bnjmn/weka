@@ -25,7 +25,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -131,7 +132,7 @@ import java.util.Vector;
  * @author Stuart Inglis (stuart@reeltwo.com)
  * @author Gordon Paynter (gordon.paynter@ucr.edu)
  * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.4 $ 
+ * @version $Revision$ 
  * @see Stopwords
  */
 public class StringToWordVector 
@@ -615,7 +616,7 @@ public class StringToWordVector
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.19.2.4 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -1585,7 +1586,7 @@ public class StringToWordVector
 	} else {
 	  if (instance.isMissing(i)) {
 	    contained.put(new Integer(firstCopy),
-		new Double(Instance.missingValue()));
+		new Double(Utils.missingValue()));
 	  } else {
 
 	    // If this is a string attribute, we have to first add
@@ -1727,7 +1728,7 @@ public class StringToWordVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19.2.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

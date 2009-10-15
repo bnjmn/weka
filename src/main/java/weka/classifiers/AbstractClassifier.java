@@ -64,7 +64,7 @@ public abstract class AbstractClassifier
    *
    * @param instance the instance to be classified
    * @return the predicted most likely class for the instance or 
-   * Instance.missingValue() if no prediction is made
+   * Utils.missingValue() if no prediction is made
    * @exception Exception if an error occurred during the prediction
    */
   public double classifyInstance(Instance instance) throws Exception {
@@ -87,12 +87,12 @@ public abstract class AbstractClassifier
       if (max > 0) {
 	return maxIndex;
       } else {
-	return Instance.missingValue();
+	return Utils.missingValue();
       }
     case Attribute.NUMERIC:
       return dist[0];
     default:
-      return Instance.missingValue();
+      return Utils.missingValue();
     }
   }
 
@@ -117,7 +117,7 @@ public abstract class AbstractClassifier
     switch (instance.classAttribute().type()) {
     case Attribute.NOMINAL:
       double classification = classifyInstance(instance);
-      if (Instance.isMissingValue(classification)) {
+      if (Utils.isMissingValue(classification)) {
 	return dist;
       } else {
 	dist[(int)classification] = 1.0;

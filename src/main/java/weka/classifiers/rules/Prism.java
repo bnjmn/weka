@@ -35,6 +35,7 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.Utils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -341,7 +342,7 @@ public class Prism
 
     int result = m_rules.resultRules(inst);
     if (result == -1) {
-      return Instance.missingValue();
+      return Utils.missingValue();
     } else {
       return (double)result;
     }

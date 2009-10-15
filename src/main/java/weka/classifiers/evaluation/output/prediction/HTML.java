@@ -202,12 +202,12 @@ public class HTML
       else
 	append("<td align=\"right\">" + Utils.doubleToString(inst.classValue(), prec) + "</td>");
       // predicted
-      if (Instance.isMissingValue(predValue))
+      if (Utils.isMissingValue(predValue))
 	append("<td align=\"right\">" + "?" + "</td>");
       else
 	append("<td align=\"right\">" + Utils.doubleToString(predValue, prec) + "</td>");
       // error
-      if (Instance.isMissingValue(predValue) || inst.classIsMissing())
+      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
 	append("<td align=\"right\">" + "?" + "</td>");
       else
 	append("<td align=\"right\">" + Utils.doubleToString(predValue - inst.classValue(), prec) + "</td>");
@@ -215,18 +215,18 @@ public class HTML
       // actual
       append("<td>" + ((int) inst.classValue()+1) + ":" + sanitize(inst.toString(inst.classIndex())) + "</td>");
       // predicted
-      if (Instance.isMissingValue(predValue))
+      if (Utils.isMissingValue(predValue))
 	append("<td>" + "?" + "</td>");
       else
 	append("<td>" + ((int) predValue+1) + ":" + sanitize(inst.dataset().classAttribute().value((int)predValue)) + "</td>");
       // error?
-      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
+      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	append("<td>" + "+" + "</td>");
       else
 	append("<td>" + "&nbsp;" + "</td>");
       // prediction/distribution
       if (m_OutputDistribution) {
-	if (Instance.isMissingValue(predValue)) {
+	if (Utils.isMissingValue(predValue)) {
 	  append("<td>" + "?" + "</td>");
 	}
 	else {
@@ -243,7 +243,7 @@ public class HTML
 	}
       }
       else {
-	if (Instance.isMissingValue(predValue))
+	if (Utils.isMissingValue(predValue))
 	  append("<td align=\"right\">" + "?" + "</td>");
 	else
 	  append("<td align=\"right\">" + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec) + "</td>");

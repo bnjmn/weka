@@ -797,11 +797,11 @@ public class ConverterUtils
    * @return		hashtable with ExtensionFileFilters
    */
   protected static Hashtable<String,String> getFileConverters(String classnames, String[] intf) {
-    Vector	list;
+    Vector<String>	list;
     String[]	names;
     int		i;
     
-    list  = new Vector();
+    list  = new Vector<String>();
     names = classnames.split(",");
     for (i = 0; i < names.length; i++)
       list.add(names[i]);

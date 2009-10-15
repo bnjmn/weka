@@ -24,7 +24,6 @@ package weka.core.converters;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
-import weka.core.FastVector;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -36,6 +35,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract class for Savers that save to a file
@@ -226,7 +226,7 @@ public abstract class AbstractFileSaver
    */
   public Enumeration listOptions() {
 
-    FastVector newVector = new FastVector();
+    Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
 	"\tThe input file", 

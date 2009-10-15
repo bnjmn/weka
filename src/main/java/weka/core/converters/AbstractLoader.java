@@ -31,7 +31,7 @@ import java.io.*;
  * methods. All other methods must be overridden.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public abstract class AbstractLoader implements Loader {
   

@@ -24,7 +24,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
@@ -58,7 +59,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision$
  */
 public class NumericToNominal
   extends SimpleBatchFilter {
@@ -397,7 +398,7 @@ public class NumericToNominal
       if (inst instanceof SparseInstance)
 	newInst = new SparseInstance(inst.weight(), values);
       else
-	newInst = new Instance(inst.weight(), values);
+	newInst = new DenseInstance(inst.weight(), values);
       
       // copy possible string, relational values
       newInst.setDataset(getOutputFormat());
@@ -415,7 +416,7 @@ public class NumericToNominal
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
