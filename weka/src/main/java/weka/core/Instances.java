@@ -31,6 +31,9 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
+import java.util.List;
+import java.util.AbstractList;
+import java.util.ArrayList;
 
 /**
  * Class for handling an ordered set of weighted instances. <p>
@@ -64,7 +67,7 @@ import java.util.Random;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$ 
  */
-public class Instances 
+public class Instances extends AbstractList<Instance>
   implements Serializable, RevisionHandler {
   
   /** for serialization */
@@ -86,13 +89,13 @@ public class Instances
   protected /*@spec_public non_null@*/ String m_RelationName;         
 
   /** The attribute information. */
-  protected /*@spec_public non_null@*/ FastVector m_Attributes;
+  protected /*@spec_public non_null@*/ ArrayList<Attribute> m_Attributes;
   /*  public invariant (\forall int i; 0 <= i && i < m_Attributes.size(); 
-                    m_Attributes.elementAt(i) != null);
+                    m_Attributes.get(i) != null);
   */
 
   /** The instances. */
-  protected /*@spec_public non_null@*/ FastVector m_Instances;
+  protected /*@spec_public non_null@*/ ArrayList<Instance> m_Instances;
 
   /** The class attribute's index */
   protected int m_ClassIndex;
@@ -190,7 +193,7 @@ public class Instances
     m_ClassIndex   = dataset.m_ClassIndex;
     m_RelationName = dataset.m_RelationName;
     m_Attributes   = dataset.m_Attributes;
-    m_Instances    = new FastVector(capacity);
+    m_Instances    = new ArrayList<Instance>(capacity);
   }
   
   /**
@@ -228,7 +231,7 @@ public class Instances
    * @param capacity the capacity of the set
    */
   public Instances(/*@non_null@*/String name, 
-		   /*@non_null@*/FastVector attInfo, int capacity) {
+		   /*@non_null@*/ArrayList<Attribute> attInfo, int capacity) {
 
     m_RelationName = name;
     m_ClassIndex = -1;
@@ -236,9 +239,8 @@ public class Instances
     for (int i = 0; i < numAttributes(); i++) {
       attribute(i).setIndex(i);
     }
-    m_Instances = new FastVector(capacity);
+    m_Instances = new ArrayList<Instance>(capacity);
   }
- 
 
   /**
    * Create a copy of the structure if the data has string or
@@ -250,21 +252,21 @@ public class Instances
    */
   public Instances stringFreeStructure() {
 
-    FastVector newAtts = new FastVector();
+    ArrayList<Attribute> newAtts = new ArrayList<Attribute>();
     for (int i = 0 ; i < m_Attributes.size(); i++) {
-      Attribute att = (Attribute)m_Attributes.elementAt(i);
+      Attribute att = (Attribute)m_Attributes.get(i);
       if (att.type() == Attribute.STRING) {
-        newAtts.addElement(new Attribute(att.name(), (FastVector)null, i));
+        newAtts.add(new Attribute(att.name(), (List<String>)null, i));
       } else if (att.type() == Attribute.RELATIONAL) {
-        newAtts.addElement(new Attribute(att.name(), new Instances(att.relation(), 0), i));
+        newAtts.add(new Attribute(att.name(), new Instances(att.relation(), 0), i));
       }
     }
     if (newAtts.size() == 0) {
       return new Instances(this, 0);
     }
-    FastVector atts = (FastVector)m_Attributes.copy();
+    ArrayList<Attribute> atts = Utils.cast(m_Attributes.clone());
     for (int i = 0; i < newAtts.size(); i++) {
-      atts.setElementAt(newAtts.elementAt(i), ((Attribute)newAtts.elementAt(i)).index());
+      atts.set(((Attribute)newAtts.get(i)).index(), newAtts.get(i));
     }
     Instances result = new Instances(this, 0);
     result.m_Attributes = atts;
@@ -280,12 +282,34 @@ public class Instances
    *
    * @param instance the instance to be added
    */
-  public void add(/*@non_null@*/ Instance instance) {
+  public boolean add(/*@non_null@*/ Instance instance) {
 
     Instance newInstance = (Instance)instance.copy();
 
     newInstance.setDataset(this);
-    m_Instances.addElement(newInstance);
+    m_Instances.add(newInstance);
+
+    return true;
+  }
+
+  /**
+   * Adds one instance to the end of the set. 
+   * Shallow copies instance before it is added. Increases the
+   * size of the dataset if it is not large enough. Does not
+   * check if the instance is compatible with the dataset.
+   * Note: String or relational values are not transferred.
+   *
+   * @param index position where instance is to be inserted
+   * @param instance the instance to be added
+   */
+  //@ requires 0 <= index;
+  //@ requires index < m_Instances.size();
+  public void add(int index, /*@non_null@*/ Instance instance) {
+
+    Instance newInstance = (Instance)instance.copy();
+
+    newInstance.setDataset(this);
+    m_Instances.add(index, newInstance);
   }
 
   /**
@@ -299,7 +323,7 @@ public class Instances
   //@ ensures \result != null;
   public /*@pure@*/ Attribute attribute(int index) {
     
-    return (Attribute) m_Attributes.elementAt(index);
+    return (Attribute) m_Attributes.get(index);
   }
 
   /**
@@ -421,7 +445,7 @@ public class Instances
    */
   public void delete() {
     
-    m_Instances = new FastVector();
+    m_Instances = new ArrayList<Instance>();
   }
 
   /**
@@ -432,7 +456,7 @@ public class Instances
   //@ requires 0 <= index && index < numInstances();
   public void delete(int index) {
     
-    m_Instances.removeElementAt(index);
+    m_Instances.remove(index);
   }
 
   /**
@@ -458,13 +482,15 @@ public class Instances
     if (m_ClassIndex > position) {
       m_ClassIndex--;
     }
-    m_Attributes.removeElementAt(position);
+    m_Attributes.remove(position);
     for (int i = position; i < m_Attributes.size(); i++) {
-      Attribute current = (Attribute)m_Attributes.elementAt(i);
+      Attribute current = (Attribute)m_Attributes.get(i);
       current.setIndex(current.index() - 1);
     }
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).forceDeleteAttributeAt(position); 
+      instance(i).setDataset(null);
+      instance(i).deleteAttributeAt(position); 
+      instance(i).setDataset(this);
     }
   }
 
@@ -508,11 +534,11 @@ public class Instances
   //@ requires 0 <= attIndex && attIndex < numAttributes();
   public void deleteWithMissing(int attIndex) {
 
-    FastVector newInstances = new FastVector(numInstances());
+    ArrayList<Instance> newInstances = new ArrayList<Instance>(numInstances());
 
     for (int i = 0; i < numInstances(); i++) {
       if (!instance(i).isMissing(attIndex)) {
-	newInstances.addElement(instance(i));
+	newInstances.add(instance(i));
       }
     }
     m_Instances = newInstances;
@@ -550,7 +576,7 @@ public class Instances
    */
   public /*@non_null pure@*/ Enumeration enumerateAttributes() {
 
-    return m_Attributes.elements(m_ClassIndex);
+    return new WekaEnumeration(m_Attributes, m_ClassIndex);
   }
 
   /**
@@ -560,7 +586,7 @@ public class Instances
    */
   public /*@non_null pure@*/ Enumeration enumerateInstances() {
 
-    return m_Instances.elements();
+    return new WekaEnumeration(m_Instances);
   }
 
   /**
@@ -608,7 +634,7 @@ public class Instances
   //@ requires numInstances() > 0;
   public /*@non_null pure@*/ Instance firstInstance() {
     
-    return (Instance)m_Instances.firstElement();
+    return (Instance)m_Instances.get(0);
   }
 
   /**
@@ -648,13 +674,15 @@ public class Instances
     att = (Attribute)att.copy();
     freshAttributeInfo();
     att.setIndex(position);
-    m_Attributes.insertElementAt(att, position);
+    m_Attributes.add(position, att);
     for (int i = position + 1; i < m_Attributes.size(); i++) {
-      Attribute current = (Attribute)m_Attributes.elementAt(i);
+      Attribute current = (Attribute)m_Attributes.get(i);
       current.setIndex(current.index() + 1);
     }
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).forceInsertAttributeAt(position);
+      instance(i).setDataset(null);
+      instance(i).insertAttributeAt(position);
+      instance(i).setDataset(this);
     }
     if (m_ClassIndex >= position) {
       m_ClassIndex++;
@@ -671,7 +699,20 @@ public class Instances
   //@ requires index < numInstances();
   public /*@non_null pure@*/ Instance instance(int index) {
 
-    return (Instance)m_Instances.elementAt(index);
+    return m_Instances.get(index);
+  }
+
+  /**
+   * Returns the instance at the given position.
+   *
+   * @param index the instance's index (index starts with 0)
+   * @return the instance at the given position
+   */
+  //@ requires 0 <= index;
+  //@ requires index < numInstances();
+  public /*@non_null pure@*/ Instance get(int index) {
+
+    return m_Instances.get(index);
   }
 
   /**
@@ -735,7 +776,7 @@ public class Instances
   //@ requires numInstances() > 0;
   public /*@non_null pure@*/ Instance lastInstance() {
     
-    return (Instance)m_Instances.lastElement();
+    return (Instance)m_Instances.get(m_Instances.size() - 1);
   }
 
   /**
@@ -878,6 +919,17 @@ public class Instances
 
     return m_Instances.size();
   }
+  
+  /**
+   * Returns the number of instances in the dataset.
+   *
+   * @return the number of instances in the dataset as an integer
+   */
+  //@ ensures \result == m_Instances.size();
+  public /*@pure@*/ int size() {
+
+    return m_Instances.size();
+  }
 
   /**
    * Shuffles the instances in the set so that they are ordered 
@@ -933,6 +985,19 @@ public class Instances
   }
 
   /**
+   * Removes the instance at the given position.
+   *
+   * @param index the instance's index (index starts with 0)
+   * @return the instance at the given position
+   */
+  //@ requires 0 <= index;
+  //@ requires index < numInstances();
+  public Instance remove(int index) {
+
+    return m_Instances.remove(index);
+  }
+
+  /**
    * Renames an attribute. This change only affects this
    * dataset.
    *
@@ -942,13 +1007,13 @@ public class Instances
   public void renameAttribute(int att, String name) {
 
     Attribute newAtt = attribute(att).copy(name);
-    FastVector newVec = new FastVector(numAttributes());
+    ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
 
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
-	newVec.addElement(newAtt);
+	newVec.add(newAtt);
       } else {
-	newVec.addElement(attribute(i));
+	newVec.add(attribute(i));
       }
     }
     m_Attributes = newVec;
@@ -977,14 +1042,14 @@ public class Instances
   public void renameAttributeValue(int att, int val, String name) {
 
     Attribute newAtt = (Attribute)attribute(att).copy();
-    FastVector newVec = new FastVector(numAttributes());
+    ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
 
     newAtt.setValue(val, name);
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
-	newVec.addElement(newAtt);
+	newVec.add(newAtt);
       } else {
-	newVec.addElement(attribute(i));
+	newVec.add(attribute(i));
       }
     }
     m_Attributes = newVec;
@@ -1090,6 +1155,29 @@ public class Instances
       l++;
     }
     return newData;
+  }
+
+  /**
+   * Replaces the instance at the given position.
+   * Shallow copies instance before it is added. Does not
+   * check if the instance is compatible with the dataset.
+   * Note: String or relational values are not transferred.
+   *
+   * @param index position where instance is to be inserted
+   * @param instance the instance to be inserted
+   * @return the instance previously at that position
+   */
+  //@ requires 0 <= index;
+  //@ requires index < m_Instances.size();
+  public Instance set(int index, /*@non_null@*/ Instance instance) {
+
+    Instance newInstance = (Instance)instance.copy();
+    Instance oldInstance = m_Instances.get(index);
+
+    newInstance.setDataset(this);
+    m_Instances.set(index, newInstance);
+
+    return oldInstance;
   }
 
   /** 
@@ -1438,7 +1526,7 @@ public class Instances
     int [] sorted = Utils.sort(attVals);
     int currentCount = 0;
     double currentWeight = 0;
-    double prev = Instance.missingValue();
+    double prev = Double.NaN;
     for (int j = 0; j < numInstances(); j++) {
       Instance current = instance(sorted[j]);
       if (current.isMissing(index)) {
@@ -1591,7 +1679,11 @@ public class Instances
    */
   protected void freshAttributeInfo() {
 
-    m_Attributes = (FastVector) m_Attributes.copyElements();
+    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size());
+    for (Attribute att : m_Attributes) {
+      newList.add((Attribute)att.copy());
+    }
+    m_Attributes = newList;
   }
  
   /**
@@ -1702,14 +1794,14 @@ public class Instances
    */
   protected void stratStep (int numFolds){
     
-    FastVector newVec = new FastVector(m_Instances.capacity());
+    ArrayList<Instance> newVec = new ArrayList<Instance>(m_Instances.size());
     int start = 0, j;
 
     // create stratified batch
     while (newVec.size() < numInstances()) {
       j = start;
       while (j < numInstances()) {
-	newVec.addElement(instance(j));
+	newVec.add(instance(j));
 	j = j + numFolds;
       }
       start++;
@@ -1727,7 +1819,9 @@ public class Instances
   //@ requires 0 <= j && j < numInstances();
   public void swap(int i, int j){
     
-    m_Instances.swap(i, j);
+    Instance in = m_Instances.get(i);
+    m_Instances.set(i, m_Instances.get(j));
+    m_Instances.set(j, in);
   }
 
   /**
@@ -1747,12 +1841,12 @@ public class Instances
     }
 
     // Create the vector of merged attributes
-    FastVector newAttributes = new FastVector();
+    ArrayList<Attribute> newAttributes = new ArrayList<Attribute>();
     for (int i = 0; i < first.numAttributes(); i++) {
-      newAttributes.addElement(first.attribute(i));
+      newAttributes.add(first.attribute(i));
     }
     for (int i = 0; i < second.numAttributes(); i++) {
-      newAttributes.addElement(second.attribute(i));
+      newAttributes.add(second.attribute(i));
     }
     
     // Create the set of Instances
@@ -1781,7 +1875,8 @@ public class Instances
     Random random = new Random(2);
     Reader reader;
     int start, num;
-    FastVector testAtts, testVals;
+    ArrayList<Attribute> testAtts;
+    ArrayList<String> testVals;
     int i,j;
     
     try{
@@ -1790,16 +1885,16 @@ public class Instances
       }
       
       // Creating set of instances from scratch
-      testVals = new FastVector(2);
-      testVals.addElement("first_value");
-      testVals.addElement("second_value");
-      testAtts = new FastVector(2);
-      testAtts.addElement(new Attribute("nominal_attribute", testVals));
-      testAtts.addElement(new Attribute("numeric_attribute"));
+      testVals = new ArrayList<String>(2);
+      testVals.add("first_value");
+      testVals.add("second_value");
+      testAtts = new ArrayList<Attribute>(2);
+      testAtts.add(new Attribute("nominal_attribute", testVals));
+      testAtts.add(new Attribute("numeric_attribute"));
       instances = new Instances("test_set", testAtts, 10);
-      instances.add(new Instance(instances.numAttributes()));
-      instances.add(new Instance(instances.numAttributes()));
-      instances.add(new Instance(instances.numAttributes()));
+      instances.add(new DenseInstance(instances.numAttributes()));
+      instances.add(new DenseInstance(instances.numAttributes()));
+      instances.add(new DenseInstance(instances.numAttributes()));
       instances.setClassIndex(0);
       System.out.println("\nSet of instances created from scratch:\n");
       System.out.println(instances);

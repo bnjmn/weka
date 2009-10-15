@@ -24,7 +24,9 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
@@ -50,7 +52,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.10.2.2 $
+ * @version $Revision$
  */
 public class ReplaceMissingValues 
   extends PotentialClassIgnorer
@@ -199,7 +201,7 @@ public class ReplaceMissingValues
       for (int i = 0; i < getInputFormat().numAttributes(); i++) {
 	if (getInputFormat().attribute(i).isNominal()) {
           if (counts[i].length == 0)
-            m_ModesAndMeans[i] = Instance.missingValue();
+            m_ModesAndMeans[i] = Utils.missingValue();
           else
 	    m_ModesAndMeans[i] = (double)Utils.maxIndex(counts[i]);
 	} else if (getInputFormat().attribute(i).isNumeric()) {
@@ -273,7 +275,7 @@ public class ReplaceMissingValues
 	  vals[j] = instance.value(j);
 	}
       } 
-      inst = new Instance(instance.weight(), vals);
+      inst = new DenseInstance(instance.weight(), vals);
     } 
     inst.setDataset(instance.dataset());
     push(inst);
@@ -406,7 +408,7 @@ public class ReplaceMissingValues
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

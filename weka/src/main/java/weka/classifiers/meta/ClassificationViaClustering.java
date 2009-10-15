@@ -30,6 +30,7 @@ import weka.clusterers.AbstractClusterer;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -301,7 +302,7 @@ public class ClassificationViaClustering
    *
    * @param instance 	the instance to be classified
    * @return 		the predicted most likely class for the instance or 
-   * 			Instance.missingValue() if no prediction is made
+   * 			Utils.missingValue() if no prediction is made
    * @throws Exception 	if an error occurred during the prediction
    */
   public double classifyInstance(Instance instance) throws Exception {
@@ -325,16 +326,16 @@ public class ClassificationViaClustering
 	  values[n] = instance.value(i);
 	  n++;
 	}
-	newInst = new Instance(instance.weight(), values);
+	newInst = new DenseInstance(instance.weight(), values);
 	newInst.setDataset(m_ClusteringHeader);
 
 	// determine cluster/class
 	result = m_ClustersToClasses[m_ActualClusterer.clusterInstance(newInst)];
 	if (result == -1)
-	  result = Instance.missingValue();
+	  result = Utils.missingValue();
       }
       else {
-	result = Instance.missingValue();
+	result = Utils.missingValue();
       }
     }
     

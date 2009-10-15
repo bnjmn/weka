@@ -25,7 +25,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -103,7 +104,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.10.2.1 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
+ * @version $Revision$ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
  */
 public class RandomProjection 
   extends Filter 
@@ -811,7 +812,7 @@ public class RandomProjection
         vals[m_k] = currentInstance.value(classIndex);
       }
 
-      newInstance = new Instance(currentInstance.weight(), vals);
+      newInstance = new DenseInstance(currentInstance.weight(), vals);
       newInstance.setDataset(getOutputFormat());
 
       return newInstance;
@@ -834,7 +835,7 @@ public class RandomProjection
       int index = instance.index(i);
       if (index != classIndex) {
         double value = instance.valueSparse(i);
-        if (!Instance.isMissingValue(value)) {
+        if (!Utils.isMissingValue(value)) {
           sum += m_rmatrix[rpIndex][index] * value;
         }
       }
@@ -890,7 +891,7 @@ public class RandomProjection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

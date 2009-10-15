@@ -27,6 +27,7 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.DenseInstance;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
@@ -82,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.12.2.1 $
+ * @version $Revision$
  */
 public class BayesNetGenerator extends EditableBayesNet {
     /** the seed value */
@@ -335,7 +336,7 @@ public class BayesNetGenerator extends EditableBayesNet {
 	    int [] order = getOrder();
 		for (int iInstance = 0; iInstance < m_nNrOfInstances; iInstance++) {
 		    int nNrOfAtts = m_Instances.numAttributes();
-			Instance instance = new Instance(nNrOfAtts);
+			Instance instance = new DenseInstance(nNrOfAtts);
 			instance.setDataset(m_Instances);
 			for (int iAtt2 = 0; iAtt2 < nNrOfAtts; iAtt2++) {
 			    int iAtt = order[iAtt2];
@@ -582,7 +583,7 @@ public class BayesNetGenerator extends EditableBayesNet {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
 
     /**

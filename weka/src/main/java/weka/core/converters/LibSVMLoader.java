@@ -23,7 +23,6 @@
 package weka.core.converters;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
@@ -38,6 +37,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
@@ -70,7 +70,7 @@ public class LibSVMLoader
   protected transient Reader m_sourceReader = null;
 
   /** the buffer of the rows read so far. */
-  protected Vector m_Buffer = null;
+  protected Vector<double[]> m_Buffer = null;
   
   /**
    * Returns a string describing this Loader.
@@ -262,7 +262,7 @@ public class LibSVMLoader
     int			cInt;
     char		c;
     int			numAtt;
-    FastVector		atts;
+    ArrayList<Attribute>		atts;
     int			i;
     String		relName;
     
@@ -270,7 +270,7 @@ public class LibSVMLoader
       throw new IOException("No source has been specified");
 
     if (m_structure == null) {
-      m_Buffer = new Vector();
+      m_Buffer = new Vector<double[]>();
       try {
 	// determine number of attributes
 	numAtt = 0;
@@ -296,10 +296,10 @@ public class LibSVMLoader
 	}
 	
 	// generate header
-	atts = new FastVector(numAtt);
+	atts = new ArrayList<Attribute>(numAtt);
 	for (i = 0; i < numAtt - 1; i++)
-	  atts.addElement(new Attribute("att_" + (i+1)));
-	atts.addElement(new Attribute("class"));
+	  atts.add(new Attribute("att_" + (i+1)));
+	atts.add(new Attribute("class"));
 	
 	if (!m_URL.equals("http://"))
 	  relName = m_URL;

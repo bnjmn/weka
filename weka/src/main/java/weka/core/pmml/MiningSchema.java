@@ -30,7 +30,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instances;
 
 /**
@@ -124,7 +123,7 @@ public class MiningSchema implements Serializable {
           + "are not supported yet.");
     }*/
 
-    FastVector attInfo = new FastVector();
+    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
     NodeList fieldList = model.getElementsByTagName("MiningField");
     int classIndex = -1;
     int addedCount = 0;
@@ -142,7 +141,7 @@ public class MiningSchema implements Serializable {
           Attribute miningAtt = dataDictionary.attribute(mfi.getName());
           if (miningAtt != null) {
             mfi.setIndex(addedCount);
-            attInfo.addElement(miningAtt);
+            attInfo.add(miningAtt);
             addedCount++;
 
             if (mfi.getUsageType() == MiningFieldMetaInfo.Usage.PREDICTED) {
@@ -180,13 +179,13 @@ public class MiningSchema implements Serializable {
     
     // Set up the full instances structure: combo of mining schema fields and
     // all derived fields
-    FastVector newStructure = new FastVector();
+    ArrayList<Attribute> newStructure = new ArrayList<Attribute>();
     for (MiningFieldMetaInfo m : m_miningMeta) {
-      newStructure.addElement(m.getFieldAsAttribute());
+      newStructure.add(m.getFieldAsAttribute());
     }
     
     for (DerivedFieldMetaInfo d : m_derivedMeta) {
-      newStructure.addElement(d.getFieldAsAttribute());
+      newStructure.add(d.getFieldAsAttribute());
     }
     m_fieldInstancesStructure = new Instances("FieldStructure", newStructure, 0);
     
@@ -340,18 +339,18 @@ public class MiningSchema implements Serializable {
   public void convertStringAttsToNominal() {
     Instances miningSchemaI = getFieldsAsInstances();
     if (miningSchemaI.checkForStringAttributes()) {
-      FastVector attInfo = new FastVector();
+      ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
       for (int i = 0; i < miningSchemaI.numAttributes(); i++) {
         Attribute tempA = miningSchemaI.attribute(i);
         if (tempA.isString()) {
-          FastVector valueVector = new FastVector();
+          ArrayList<String> valueVector = new ArrayList<String>();
           for (int j = 0; j < tempA.numValues(); j++) {
-            valueVector.addElement(tempA.value(j));
+            valueVector.add(tempA.value(j));
           }
           Attribute newAtt = new Attribute(tempA.name(), valueVector);
-          attInfo.addElement(newAtt);
+          attInfo.add(newAtt);
         } else {
-          attInfo.addElement(tempA);
+          attInfo.add(tempA);
         }
       }
       Instances newI = new Instances("miningSchema", attInfo, 0);
@@ -381,19 +380,19 @@ public class MiningSchema implements Serializable {
                                          + "already nominal!");
     }
 
-    FastVector newValues = new FastVector();
+    ArrayList<String> newValues = new ArrayList<String>();
     for (int i = 0; i < newVals.size(); i++) {
-      newValues.addElement(newVals.get(i));
+      newValues.add(newVals.get(i));
     }
 
-    FastVector attInfo = new FastVector();
+    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
     for (int i = 0; i < miningSchemaI.numAttributes(); i++) {
       Attribute tempA = miningSchemaI.attribute(i);
       if (i == index) {
         Attribute newAtt = new Attribute(tempA.name(), newValues);
-        attInfo.addElement(newAtt);
+        attInfo.add(newAtt);
       } else {
-        attInfo.addElement(tempA);
+        attInfo.add(tempA);
       }
     }
 

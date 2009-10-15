@@ -26,6 +26,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Matrix;
 import weka.core.Option;
@@ -763,7 +764,7 @@ public class PrincipalComponents
     if (inst instanceof SparseInstance) {
       return new SparseInstance(inst.weight(), newVals);
     } else {
-      return new Instance(inst.weight(), newVals);
+      return new DenseInstance(inst.weight(), newVals);
     }      
   }
 
@@ -831,14 +832,14 @@ public class PrincipalComponents
       if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newVals);
       } else {
-        return new Instance(instance.weight(), newVals);
+        return new DenseInstance(instance.weight(), newVals);
       }      
     } else {
       if (instance instanceof SparseInstance) {
         return convertInstanceToOriginal(new SparseInstance(instance.weight(), 
                                                             newVals));
       } else {
-        return convertInstanceToOriginal(new Instance(instance.weight(),
+        return convertInstanceToOriginal(new DenseInstance(instance.weight(),
                                                       newVals));
       }
     }

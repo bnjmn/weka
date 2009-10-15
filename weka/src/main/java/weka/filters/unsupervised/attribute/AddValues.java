@@ -25,7 +25,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -67,7 +68,7 @@ import java.util.Vector;
  * Based on code from AddValues.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision$
  * @see     AddValues
  */
 public class AddValues 
@@ -312,7 +313,7 @@ public class AddValues
     // generate new Instance
     values = instance.toDoubleArray();
     values[m_AttIndex.getIndex()] = m_SortedIndices[(int) values[m_AttIndex.getIndex()]];
-    newInstance = new Instance(instance.weight(), values);
+    newInstance = new DenseInstance(instance.weight(), values);
 
     // copy string values etc. from input to output
     copyValues(instance, false, instance.dataset(), getOutputFormat());
@@ -459,7 +460,7 @@ public class AddValues
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

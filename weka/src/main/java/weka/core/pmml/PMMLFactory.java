@@ -31,11 +31,12 @@ import weka.classifiers.pmml.consumer.Regression;
 import weka.classifiers.pmml.consumer.RuleSetModel;
 import weka.classifiers.pmml.consumer.TreeModel;
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.gui.Logger;
+
+import java.util.ArrayList;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -389,7 +390,7 @@ public class PMMLFactory {
   protected static Instances getMiningSchemaAsInstances(Element model,
                                                         Instances dataDictionary) 
     throws Exception {
-    FastVector attInfo = new FastVector();
+    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
     NodeList fieldList = model.getElementsByTagName("MiningField");
     int classIndex = -1;
     int addedCount = 0;
@@ -405,7 +406,7 @@ public class PMMLFactory {
         Attribute miningAtt = dataDictionary.attribute(name);
         if (miningAtt != null) {
           if (usage.length() == 0 || usage.equals("active") || usage.equals("predicted")) {
-            attInfo.addElement(miningAtt);
+            attInfo.add(miningAtt);
             addedCount++;
           }
           if (usage.equals("predicted")) {
@@ -441,7 +442,7 @@ public class PMMLFactory {
 
     // TO-DO: definition of missing values (see below)
 
-    FastVector attInfo = new FastVector();
+    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
     NodeList dataDictionary = doc.getElementsByTagName("DataField");
     for (int i = 0; i < dataDictionary.getLength(); i++) {
       Node dataField = dataDictionary.item(i);
@@ -458,11 +459,11 @@ public class PMMLFactory {
             if (valueList == null || valueList.getLength() == 0) {
               // assume that categorical values will be revealed in the actual model.
               // Create a string attribute for now
-              FastVector nullV = null;
-              tempAtt = new Attribute(name, nullV);
+              ArrayList<String> nullV = null;
+              tempAtt = new Attribute(name, (ArrayList<String>)nullV);
             } else {
               // add the values (if defined as "valid")
-              FastVector valueVector = new FastVector();
+              ArrayList<String> valueVector = new ArrayList<String>();
               for (int j = 0; j < valueList.getLength(); j++) {
                 Node val = valueList.item(j);
                 if (val.getNodeType() == Node.ELEMENT_NODE) {
@@ -470,7 +471,7 @@ public class PMMLFactory {
                   String property = ((Element)val).getAttribute("property");
                   if (property == null || property.length() == 0 || property.equals("valid")) {
                     String value = ((Element)val).getAttribute("value");
-                    valueVector.addElement(value);
+                    valueVector.add(value);
                   } else {
                     // Just ignore invalid or missing value definitions for now...
                     // TO-DO: implement Value meta data with missing/invalid value defs.
@@ -482,7 +483,7 @@ public class PMMLFactory {
           } else {
             throw new Exception("[PMMLFactory] can't handle " + type + "attributes.");
           }
-          attInfo.addElement(tempAtt);
+          attInfo.add(tempAtt);
         }
       }
     }

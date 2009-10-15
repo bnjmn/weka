@@ -25,6 +25,7 @@ package weka.filters.unsupervised.instance;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
@@ -40,7 +41,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.5.2.1 $ 
+ * @version $Revision$ 
  */
 public class SparseToNonSparse 
   extends Filter 
@@ -119,7 +120,7 @@ public class SparseToNonSparse
     }
     Instance inst = null;
     if (instance instanceof SparseInstance) {
-      inst = new Instance(instance.weight(), instance.toDoubleArray());
+      inst = new DenseInstance(instance.weight(), instance.toDoubleArray());
       inst.setDataset(instance.dataset());
     } else {
       inst = instance;
@@ -134,7 +135,7 @@ public class SparseToNonSparse
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

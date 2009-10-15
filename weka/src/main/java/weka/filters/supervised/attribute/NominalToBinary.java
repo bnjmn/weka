@@ -27,6 +27,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -82,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7.2.1 $ 
+ * @version $Revision$ 
  */
 public class NominalToBinary 
   extends Filter 
@@ -600,7 +601,7 @@ public class NominalToBinary
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new Instance(instance.weight(), vals);
+      inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(getOutputFormat());
     copyValues(inst, false, instance.dataset(), getOutputFormat());
@@ -647,7 +648,7 @@ public class NominalToBinary
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new Instance(instance.weight(), vals);
+      inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(getOutputFormat());
     copyValues(inst, false, instance.dataset(), getOutputFormat());
@@ -661,7 +662,7 @@ public class NominalToBinary
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

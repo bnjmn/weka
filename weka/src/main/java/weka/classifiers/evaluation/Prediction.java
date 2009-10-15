@@ -27,7 +27,7 @@ package weka.classifiers.evaluation;
  * actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public interface Prediction {
 
@@ -36,7 +36,7 @@ public interface Prediction {
    * as weka.core.Instance.MISSING_VALUE 
    */
   double MISSING_VALUE 
-    = weka.core.Instance.missingValue();
+    = weka.core.Utils.missingValue();
 
   /** 
    * Gets the weight assigned to this prediction. This is typically the weight

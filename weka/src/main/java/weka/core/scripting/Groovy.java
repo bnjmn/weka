@@ -117,7 +117,7 @@ public class Groovy
    */
   public static Object newClassLoader() {
     Object	result;
-    Class	cls;
+    Class<?>	cls;
     Constructor	constr;
     
     result = null;

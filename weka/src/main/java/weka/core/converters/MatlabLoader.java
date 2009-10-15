@@ -23,8 +23,8 @@
 package weka.core.converters;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 
@@ -36,6 +36,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
@@ -184,7 +185,7 @@ public class MatlabLoader
    */
   public Instances getStructure() throws IOException {
     int			numAtt;
-    FastVector		atts;
+    ArrayList<Attribute>		atts;
     int			i;
     String		relName;
     Vector<Double>	row;
@@ -248,9 +249,9 @@ public class MatlabLoader
 	  row.add(new Double(str.toString()));
 	
 	// generate header
-	atts = new FastVector(numAtt);
+	atts = new ArrayList<Attribute>(numAtt);
 	for (i = 0; i < numAtt; i++)
-	  atts.addElement(new Attribute("att_" + (i+1)));
+	  atts.add(new Attribute("att_" + (i+1)));
 	
 	if (!m_URL.equals("http://"))
 	  relName = m_URL;
@@ -306,7 +307,7 @@ public class MatlabLoader
       for (n = 0; n < row.size(); n++)
 	data[n] = row.get(n);
       
-      result.add(new Instance(1.0, data));
+      result.add(new DenseInstance(1.0, data));
     }
 
     // close the stream

@@ -34,6 +34,7 @@ import weka.attributeSelection.UnsupervisedSubsetEvaluator;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -540,7 +541,7 @@ public class AttributeSelection
     if (instance instanceof SparseInstance) {
       push(new SparseInstance(instance.weight(), newVals));
     } else {
-      push(new Instance(instance.weight(), newVals));
+      push(new DenseInstance(instance.weight(), newVals));
     }
   }
 

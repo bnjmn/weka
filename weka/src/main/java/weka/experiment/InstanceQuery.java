@@ -25,6 +25,7 @@ package weka.experiment;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -412,7 +413,7 @@ public class InstanceQuery
 	  String str = rs.getString(i);
 	  
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    Double index = (Double)nominalIndexes[i - 1].get(str);
 	    if (index == null) {
@@ -427,7 +428,7 @@ public class InstanceQuery
 	  String txt = rs.getString(i);
 	  
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    Double index = (Double)nominalIndexes[i - 1].get(txt);
 	    if (index == null) {
@@ -441,7 +442,7 @@ public class InstanceQuery
 	case BOOL:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
@@ -451,7 +452,7 @@ public class InstanceQuery
 	  double dd = rs.getDouble(i);
 	  // Use the column precision instead of 4?
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    //	    newInst.setValue(i - 1, bd.doubleValue());
 	    vals[i - 1] =  dd;
@@ -460,7 +461,7 @@ public class InstanceQuery
 	case BYTE:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)by;
 	  }
@@ -468,7 +469,7 @@ public class InstanceQuery
 	case SHORT:
 	  short sh = rs.getShort(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)sh;
 	  }
@@ -476,7 +477,7 @@ public class InstanceQuery
 	case INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)in;
 	  }
@@ -484,7 +485,7 @@ public class InstanceQuery
 	case LONG:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)lo;
 	  }
@@ -492,7 +493,7 @@ public class InstanceQuery
 	case FLOAT:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
 	    vals[i - 1] = (double)fl;
 	  }
@@ -500,7 +501,7 @@ public class InstanceQuery
 	case DATE:
           Date date = rs.getDate(i);
           if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
             // TODO: Do a value check here.
             vals[i - 1] = (double)date.getTime();
@@ -509,21 +510,21 @@ public class InstanceQuery
 	case TIME:
           Time time = rs.getTime(i);
           if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
+	    vals[i - 1] = Utils.missingValue();
 	  } else {
             // TODO: Do a value check here.
             vals[i - 1] = (double) time.getTime();
           }
           break;
 	default:
-	  vals[i - 1] = Instance.missingValue();
+	  vals[i - 1] = Utils.missingValue();
 	}
       }
       Instance newInst;
       if (m_CreateSparseData) {
 	newInst = new SparseInstance(1.0, vals);
       } else {
-	newInst = new Instance(1.0, vals);
+	newInst = new DenseInstance(1.0, vals);
       }
       instances.addElement(newInst);
       rowCount++;

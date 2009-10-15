@@ -486,8 +486,8 @@ public class CostSensitiveClassifierSplitEvaluator
       result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
     }
     else {
-      result[current++] = new Double(Instance.missingValue());
-      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Utils.missingValue());
+      result[current++] = new Double(Utils.missingValue());
     }
     
     // sizes
@@ -515,7 +515,7 @@ public class CostSensitiveClassifierSplitEvaluator
         try {
           double dv = ((AdditionalMeasureProducer)m_Classifier).
           getMeasure(m_AdditionalMeasures[i]);
-          if (!Instance.isMissingValue(dv)) {
+          if (!Utils.isMissingValue(dv)) {
             Double value = new Double(dv);
             result[current++] = value;
           } else {

@@ -23,7 +23,8 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
@@ -49,7 +50,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.10.2.2 $
+ * @version $Revision$
  */
 public class Standardize 
   extends PotentialClassIgnorer 
@@ -199,7 +200,7 @@ public class Standardize
       for (int j = 0; j < instance.numAttributes(); j++) {
 	double value;
 	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j])) &&
+	    (!Utils.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
 	  
 	  // Just subtract the mean if the standard deviation is zero
@@ -237,7 +238,7 @@ public class Standardize
       double[] vals = instance.toDoubleArray();
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j])) &&
+	    (!Utils.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
 	  
 	  // Just subtract the mean if the standard deviation is zero
@@ -253,7 +254,7 @@ public class Standardize
           }
 	}
       }	
-      inst = new Instance(instance.weight(), vals);
+      inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst);
@@ -355,7 +356,7 @@ public class Standardize
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

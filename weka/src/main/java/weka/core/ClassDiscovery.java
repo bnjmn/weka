@@ -52,7 +52,7 @@ public class ClassDiscovery
   public final static boolean VERBOSE = false;
   
   /** for caching queries (classname+packagename &lt;-&gt; Vector with classnames). */
-  protected static Hashtable<String,Vector> m_Cache;
+  protected static Hashtable<String,Vector<String>> m_Cache;
   
   /** notify if VERBOSE is still on */
   static {
@@ -232,11 +232,11 @@ public class ClassDiscovery
    * @param pkgnames        the packages to search in
    * @return                a list with all the found classnames
    */
-  public static Vector find(String classname, String[] pkgnames) {
-    Vector      result;
+  public static Vector<String> find(String classname, String[] pkgnames) {
+    Vector<String>      result;
     Class       cls;
 
-    result = new Vector();
+    result = new Vector<String>();
 
     try {
       cls    = Class.forName(classname);
@@ -257,11 +257,11 @@ public class ClassDiscovery
    * @param pkgname         the package to search in
    * @return                a list with all the found classnames
    */
-  public static Vector find(String classname, String pkgname) {
-    Vector      result;
+  public static Vector<String> find(String classname, String pkgname) {
+    Vector<String>      result;
     Class       cls;
 
-    result = new Vector();
+    result = new Vector<String>();
 
     try {
       cls    = Class.forName(classname);
@@ -282,14 +282,14 @@ public class ClassDiscovery
    * @param pkgnames        the packages to search in
    * @return                a list with all the found classnames
    */
-  public static Vector find(Class cls, String[] pkgnames) {
-    Vector	result;
+  public static Vector<String> find(Class cls, String[] pkgnames) {
+    Vector<String>	result;
     int		i;
-    HashSet	names;
+    HashSet<String>	names;
 
-    result = new Vector();
+    result = new Vector<String>();
 
-    names = new HashSet();
+    names = new HashSet<String>();
     for (i = 0; i < pkgnames.length; i++)
       names.addAll(find(cls, pkgnames[i]));
 
@@ -308,8 +308,8 @@ public class ClassDiscovery
    * @param pkgname         the package to search in
    * @return                a list with all the found classnames
    */
-  public static Vector find(Class cls, String pkgname) {
-    Vector                result;
+  public static Vector<String> find(Class cls, String pkgname) {
+    Vector<String>                result;
     StringTokenizer       tok;
     String                part;
     String                pkgpath;
@@ -328,7 +328,7 @@ public class ClassDiscovery
     result = getCache(cls, pkgname);
     
     if (result == null) {
-      result = new Vector();
+      result = new Vector<String>();
 
       if (VERBOSE)
 	System.out.println(
@@ -469,7 +469,7 @@ public class ClassDiscovery
    * @param list	the current list of sub-dirs
    * @return		the new list of sub-dirs
    */
-  protected static HashSet getSubDirectories(String prefix, File dir, HashSet list) {
+  protected static HashSet<String> getSubDirectories(String prefix, File dir, HashSet<String> list) {
     File[]	files;
     int		i;
     String 	newPrefix;
@@ -502,18 +502,18 @@ public class ClassDiscovery
    *
    * @return                a list with all the found packages
    */
-  public static Vector findPackages() {
-    Vector		result;
+  public static Vector<String> findPackages() {
+    Vector<String>		result;
     StringTokenizer	tok;
     String		part;
     File		file;
     JarFile		jar;
     JarEntry		entry;
-    Enumeration		enm;
-    HashSet		set;
+    Enumeration<JarEntry>		enm;
+    HashSet<String>		set;
 
-    result = new Vector();
-    set    = new HashSet();
+    result = new Vector<String>();
+    set    = new HashSet<String>();
     
     // check all parts of the classpath, to include additional classes from
     // "parallel" directories/jars, not just the first occurence
@@ -562,7 +562,7 @@ public class ClassDiscovery
    */
   protected static void initCache() {
     if (m_Cache == null)
-      m_Cache = new Hashtable<String,Vector>();
+      m_Cache = new Hashtable<String,Vector<String>>();
   }
   
   /**
@@ -572,7 +572,7 @@ public class ClassDiscovery
    * @param pkgname	the package name the classes were found in
    * @param classnames	the list of classnames to cache
    */
-  protected static void addCache(Class cls, String pkgname, Vector classnames) {
+  protected static void addCache(Class cls, String pkgname, Vector<String> classnames) {
     initCache();
     m_Cache.put(cls.getName() + "-" + pkgname, classnames);
   }
@@ -585,7 +585,7 @@ public class ClassDiscovery
    * @param pkgname	the package name for the classes 
    * @return		the classnames if found, otherwise null
    */
-  protected static Vector getCache(Class cls, String pkgname) {
+  protected static Vector<String> getCache(Class cls, String pkgname) {
     initCache();
     return m_Cache.get(cls.getName() + "-" + pkgname);
   }
@@ -623,8 +623,8 @@ public class ClassDiscovery
    * @param args	the commandline arguments
    */
   public static void main(String[] args) {
-    Vector      	list;
-    Vector 		packages;
+    Vector<String>      	list;
+    Vector<String> 		packages;
     int         	i;
     StringTokenizer	tok;
     
@@ -635,7 +635,7 @@ public class ClassDiscovery
     }
     else if (args.length == 2) {
       // packages
-      packages = new Vector();
+      packages = new Vector<String>();
       tok = new StringTokenizer(args[1], ",");
       while (tok.hasMoreTokens())
         packages.add(tok.nextToken());
@@ -676,7 +676,7 @@ public class ClassDiscovery
    * </ul>
    */
   public static class StringCompare 
-    implements Comparator, RevisionHandler {
+    implements Comparator<String>, RevisionHandler {
 
     /**
      * appends blanks to the string if its shorter than <code>len</code>.
@@ -717,7 +717,7 @@ public class ClassDiscovery
      * @param o2	the second object
      * @return		-1 if o1&lt;o2, 0 if o1=o2 and 1 if o1&;gt;o2
      */    
-    public int compare(Object o1, Object o2) {
+    public int compare(String o1, String o2) {
       String        s1;
       String        s2;
       int           i;

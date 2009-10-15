@@ -23,7 +23,8 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -58,7 +59,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision$
  */
 public class AddID
   extends Filter
@@ -372,7 +373,7 @@ public class AddID
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -102,7 +103,7 @@ public class CSVSaver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
     
     result.addElement(new Option(
         "\tThe field separator to be used.\n"
@@ -117,7 +118,7 @@ public class CSVSaver
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+      result.addElement((Option)en.nextElement());
       
     return result.elements();
   }
@@ -444,7 +445,7 @@ public class CSVSaver
     result = new StringBuffer();
     
     if (inst instanceof SparseInstance) {
-      outInst = new Instance(inst.weight(), inst.toDoubleArray());
+      outInst = new DenseInstance(inst.weight(), inst.toDoubleArray());
       outInst.setDataset(inst.dataset());
     }
     else {

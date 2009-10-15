@@ -26,7 +26,8 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -63,7 +64,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision$
  */
 public class Reorder 
   extends Filter 
@@ -312,7 +313,7 @@ public class Reorder
     if (instance instanceof SparseInstance)
       inst = new SparseInstance(instance.weight(), vals);
     else
-      inst = new Instance(instance.weight(), vals);
+      inst = new DenseInstance(instance.weight(), vals);
 
     inst.setDataset(getOutputFormat());
     copyValues(inst, false, instance.dataset(), getOutputFormat());
@@ -409,7 +410,7 @@ public class Reorder
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

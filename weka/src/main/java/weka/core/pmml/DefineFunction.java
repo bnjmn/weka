@@ -61,7 +61,7 @@ public class DefineFunction extends Function {
         return new Attribute(m_fieldName);
       }
       // return a string attribute for categorical/ordinal optypes
-      return new Attribute(m_fieldName, (weka.core.FastVector)null);
+      return new Attribute(m_fieldName, (ArrayList<String>)null);
     }
   }
   

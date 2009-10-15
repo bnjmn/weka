@@ -1654,7 +1654,7 @@ public class ClassifierPanel
                     windowTitle = "" + cname.substring("weka.classifiers.".length()) + " ";
                   }
                 }
-                windowTitle += " (class = " + classAttToUse.value(0) + ")";
+                windowTitle += " (class = " + classAttToUse.value(0) + ")";                
                 
                 // add plot
                 cbAnalysis.setCurveData(tempd, classAttToUse);

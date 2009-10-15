@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.gui.Logger;
 
 /**
@@ -252,7 +253,7 @@ public class MappingInfo implements Serializable {
           miningSchemaI.attribute(i).isString()) {
         // If not missing, look up the index of this incoming categorical value in
         // the mining schema
-        if (!Instance.isMissingValue(inst.value(m_fieldsMap[i]))) {
+        if (!Utils.isMissingValue(inst.value(m_fieldsMap[i]))) {
           int[] valueMap = m_nominalValueMaps[i];
           int index = valueMap[(int)inst.value(m_fieldsMap[i])];
           String incomingAttValue = 
