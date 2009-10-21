@@ -34,7 +34,7 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 
-/*
+/**
  <!-- globalinfo-start -->
  * Class for generating a multi-class alternating decision tree using the LogitBoost strategy. For more info, see<br/>
  * <br/>
