@@ -70,6 +70,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
@@ -77,6 +78,9 @@ import weka.core.Capabilities.Capability;
 
 public class HierarchicalClusterer extends AbstractClusterer implements OptionHandler, CapabilitiesHandler, Drawable {
 	private static final long serialVersionUID = 1L;
+
+	/** Whether the classifier is run in debug mode. */
+	protected boolean m_Debug = false;
 
 	/** training data **/
 	Instances m_instances;
@@ -93,14 +97,18 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 
 	/** used for priority queue for efficient retrieval of pair of clusters to merge**/
 	class Tuple {
-		public Tuple(double d, int i, int j) {
+		public Tuple(double d, int i, int j, int nSize1, int nSize2) {
 			m_fDist = d;
 			m_iCluster1 = i;
 			m_iCluster2 = j;
+			m_nClusterSize1 = nSize1;
+			m_nClusterSize2 = nSize2;
 		}
 		double m_fDist;
 		int m_iCluster1;
 		int m_iCluster2;
+		int m_nClusterSize1;
+		int m_nClusterSize2;
 	}
 	/** comparator used by priority queue**/
 	class TupleComparator implements Comparator<Tuple> {
@@ -160,30 +168,24 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		Node m_parent;
 		int m_iLeftInstance;
 		int m_iRightInstance;
-		double m_height = 0;
+		double m_fLeftLength = 0;
+		double m_fRightLength = 0;
 		public String toString(int attIndex) {
 			DecimalFormat myFormatter = new DecimalFormat("#.#####");
 
 			if (m_left == null) {
 				if (m_right == null) {
-					double m_fLength = m_height;  
-					return "(" + m_instances.instance(m_iLeftInstance).stringValue(attIndex) + ":" + myFormatter.format(m_fLength) + "," +
-					             m_instances.instance(m_iRightInstance).stringValue(attIndex) +":" + myFormatter.format(m_fLength) + ")";
+					return "(" + m_instances.instance(m_iLeftInstance).stringValue(attIndex) + ":" + myFormatter.format(m_fLeftLength) + "," +
+					             m_instances.instance(m_iRightInstance).stringValue(attIndex) +":" + myFormatter.format(m_fRightLength) + ")";
 				} else {
-					double m_fLeftLength = m_height;  
-					double m_fRightLength = m_height- m_right.m_height;  
 					return "(" + m_instances.instance(m_iLeftInstance).stringValue(attIndex) + ":" + myFormatter.format(m_fLeftLength) + "," +
 						m_right.toString(attIndex) + ":" + myFormatter.format(m_fRightLength) + ")";
 				}
 			} else {
 				if (m_right == null) {
-					double m_fLeftLength = m_height- m_left.m_height;  
-					double m_fRightLength = m_height;  
 					return "(" + m_left.toString(attIndex) + ":" + myFormatter.format(m_fLeftLength) + "," +
 					             m_instances.instance(m_iRightInstance).stringValue(attIndex) + ":" + myFormatter.format(m_fRightLength) + ")";
 				} else {
-					double m_fLeftLength = m_height- m_left.m_height;  
-					double m_fRightLength = m_height- m_right.m_height;  
 					return "(" + m_left.toString(attIndex) + ":" + myFormatter.format(m_fLeftLength) + "," +m_right.toString(attIndex) + ":" + myFormatter.format(m_fRightLength) + ")";
 				}
 			}
@@ -225,7 +227,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		m_clusters = new Node[m_nNumClusters];
 		m_nClusterNr = new int[nInstances];
 		for (int i = 0; i < nInstances; i++) {
-			if (nClusterID[i] != null) {
+			if (nClusterID[i].size() > 0) {
 				for (int j = 0; j < nClusterID[i].size(); j++) {
 					m_nClusterNr[nClusterID[i].elementAt(j)] = iCurrent;
 				}
@@ -235,8 +237,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		}
 		
 	} // buildClusterer
-	
-	
+
 	/** use neighbor joining algorithm for clustering
 	 * This is roughly based on the RapidNJ simple implementation and runs at O(n^3)
 	 * More efficient implementations exist, see RapidNJ (or my GPU implementation :-))
@@ -258,6 +259,8 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		
 		double [] fSeparationSums = new double [n];
 		double [] fSeparations = new double [n];
+	    int [] nNextActive = new int[n];
+
 		//calculate initial separation rows
 		for(int i = 0; i < n; i++){
 		    double fSum = 0;
@@ -266,6 +269,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		    }
 		    fSeparationSums[i] = fSum;
 		    fSeparations[i] = fSum / (nClusters - 2);
+		    nNextActive[i] = i +1;
 		}
 
 		while (nClusters > 2) {
@@ -273,28 +277,53 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			int iMin1 = -1;
 			int iMin2 = -1;
 			double fMin = Double.MAX_VALUE;
-			for (int i = 0; i < n; i++) {
-				if(nClusterID[i] != null){
-					double [] fRow = fDist[i];
-					double fSep1 = fSeparations[i];
-					for(int j = 0; j < n; j++){
-			            if(nClusterID[j] != null && i != j){
-			            	double fSep2 = fSeparations[j];
-			            	double fVal = fRow[j] - fSep1 - fSep2;
-
-							if(fVal < fMin){
-								// new minimum
-								iMin1 = i;
-								iMin2 = j;
-								fMin = fVal;
-							}
-			            }
+			if (m_Debug) {
+				for (int i = 0; i < n; i++) {
+					if(nClusterID[i].size() > 0){
+						double [] fRow = fDist[i];
+						double fSep1 = fSeparations[i];
+						for(int j = 0; j < n; j++){
+				            if(nClusterID[j].size() > 0 && i != j){
+				            	double fSep2 = fSeparations[j];
+				            	double fVal = fRow[j] - fSep1 - fSep2;
+	
+								if(fVal < fMin){
+									// new minimum
+									iMin1 = i;
+									iMin2 = j;
+									fMin = fVal;
+								}
+				            }
+						}
 					}
 				}
+			} else {
+				int i = 0;
+				while (i < n) {
+					double fSep1 = fSeparations[i];
+					double [] fRow = fDist[i];
+					int j = nNextActive[i];
+					while (j < n) {
+		            	double fSep2 = fSeparations[j];
+		            	double fVal = fRow[j] - fSep1 - fSep2;
+						if(fVal < fMin){
+							// new minimum
+							iMin1 = i;
+							iMin2 = j;
+							fMin = fVal;
+						}
+						j = nNextActive[j];
+					}
+					i = nNextActive[i];
+				}		
 			}
 			// record distance
 			double fMinDistance = fDist[iMin1][iMin2];
 			nClusters--;
+			double fSep1 = fSeparations[iMin1];
+			double fSep2 = fSeparations[iMin2];
+			double fDist1 = (0.5 * fMinDistance) + (0.5 * (fSep1 - fSep2));
+			double fDist2 = (0.5 * fMinDistance) + (0.5 * (fSep2 - fSep1));
 			if (nClusters > 2) {
 				// update separations  & distance
 				double fNewSeparationSum = 0;
@@ -302,7 +331,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 				double[] fRow1 = fDist[iMin1];
 				double[] fRow2 = fDist[iMin2];
 				for(int i = 0; i < n; i++) {
-				    if(i == iMin1 || i == iMin2 || nClusterID[i] == null) {
+				    if(i == iMin1 || i == iMin2 || nClusterID[i].size() == 0) {
 				        fRow1[i] = 0;
 				    } else {
 				        double fVal1 = fRow1[i];
@@ -319,18 +348,31 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 				fSeparationSums[iMin1] = fNewSeparationSum;
 				fSeparations[iMin1] = fNewSeparationSum / (nClusters - 2);
 				fSeparationSums[iMin2] = 0;
-				merge(iMin1, iMin2, fMinDistance, nClusterID, clusterNodes);
+				merge(iMin1, iMin2, fDist1, fDist2, nClusterID, clusterNodes);
+				int iPrev = iMin2;
+				// since iMin1 < iMin2 we havenActiveRows[0] >= 0, so the next loop should be save
+				while (nClusterID[iPrev].size() == 0) {
+					iPrev--;
+				}
+				nNextActive[iPrev] = nNextActive[iMin2];
 			} else {
-				merge(iMin1, iMin2, fMinDistance, nClusterID, clusterNodes);
+				merge(iMin1, iMin2, fDist1, fDist2, nClusterID, clusterNodes);
 				break;
 			}
 		}
 
 		for (int i = 0; i < n; i++) {
-			if (nClusterID[i] != null) {
+			if (nClusterID[i].size() > 0) {
 				for (int j = i+1; j < n; j++) {
-					if (nClusterID[j] != null) {
-						merge(i,j,0, nClusterID, clusterNodes);
+					if (nClusterID[j].size() > 0) {
+						double fDist1 = fDist[i][j];
+						if(nClusterID[i].size() == 1) {
+							merge(i,j,fDist1,0,nClusterID, clusterNodes);
+						} else if (nClusterID[j].size() == 1) {
+							merge(i,j,0,fDist1,nClusterID, clusterNodes);
+						} else {
+							merge(i,j,fDist1/2.0,fDist1/2.0,nClusterID, clusterNodes);
+						}
 						break;
 					}
 				}
@@ -353,48 +395,52 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			for (int j = i+1; j < nClusters; j++) {
 				fDistance0[i][j] = getDistance0(nClusterID[i], nClusterID[j]);
 				fDistance0[j][i] = fDistance0[i][j];
-				queue.add(new Tuple(fDistance0[i][j], i, j));
+				queue.add(new Tuple(fDistance0[i][j], i, j, 1, 1));
 			}
 		}
 		while (nClusters > m_nNumClusters) {
-			// find closest two clusters
-			/* simple but inefficient implementation
-			double fMinDistance = Double.MAX_VALUE;
 			int iMin1 = -1;
 			int iMin2 = -1;
-			for (int i = 0; i < nInstances; i++) {
-				if (nClusterID[i] != null) {
-					for (int j = i+1; j < nInstances; j++) {
-						if (nClusterID[j] != null) {
-							double fDist = fDistance[i][j];
-							if (fDist < fMinDistance) {
-								fMinDistance = fDist;
-								iMin1 = i;
-								iMin2 = j;
+			// find closest two clusters
+			if (m_Debug) {
+				/* simple but inefficient implementation */
+				double fMinDistance = Double.MAX_VALUE;
+				for (int i = 0; i < nInstances; i++) {
+					if (nClusterID[i].size()>0) {
+						for (int j = i+1; j < nInstances; j++) {
+							if (nClusterID[j].size()>0) {
+								double fDist = fDistance0[i][j];
+								if (fDist < fMinDistance) {
+									fMinDistance = fDist;
+									iMin1 = i;
+									iMin2 = j;
+								}
 							}
 						}
 					}
 				}
+				merge(iMin1, iMin2, fMinDistance, fMinDistance, nClusterID, clusterNodes);
+			} else {
+				// use priority queue to find next best pair to cluster
+				Tuple t;
+				do {
+					t = queue.poll();
+				} while (t!=null && (nClusterID[t.m_iCluster1].size() != t.m_nClusterSize1 || nClusterID[t.m_iCluster2].size() != t.m_nClusterSize2));
+				iMin1 = t.m_iCluster1;
+				iMin2 = t.m_iCluster2;
+				merge(iMin1, iMin2, t.m_fDist, t.m_fDist, nClusterID, clusterNodes);
 			}
-			*/
-			// use priority queue to find next best pair to cluster
-			Tuple t;
-			do {
-				t = queue.poll();
-			} while (t!=null && (nClusterID[t.m_iCluster1] == null || nClusterID[t.m_iCluster2] == null));
-			int iMin1 = t.m_iCluster1;
-			int iMin2 = t.m_iCluster2;
-			
 			// merge  clusters
-			merge(iMin1, iMin2, t.m_fDist, nClusterID, clusterNodes);
 			
 			// update distances & queue
 			for (int i = 0; i < nInstances; i++) {
-				if (i != iMin1 && nClusterID[i] != null) {
+				if (i != iMin1 && nClusterID[i].size()!=0) {
 					int i1 = Math.min(iMin1,i);
 					int i2 = Math.max(iMin1,i);
 					double fDistance = getDistance(fDistance0, nClusterID[i1], nClusterID[i2]);
-					queue.add(new Tuple(fDistance, i1, i2));
+					fDistance0[i1][i2] = fDistance;
+					fDistance0[i2][i1] = fDistance;
+					queue.add(new Tuple(fDistance, i1, i2, nClusterID[i1].size(), nClusterID[i2].size()));
 				}
 			}
 			
@@ -402,36 +448,27 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		}
 	} // doLinkClustering
 	
-	void merge(int iMin1, int iMin2, double fDist, Vector<Integer>[] nClusterID, Node [] clusterNodes) {
+	void merge(int iMin1, int iMin2, double fDist1, double fDist2, Vector<Integer>[] nClusterID, Node [] clusterNodes) {
+		System.err.println("Merging " + iMin1 + " " + iMin2 + " " + fDist1 + " " + fDist2);
 		nClusterID[iMin1].addAll(nClusterID[iMin2]);
-		nClusterID[iMin2] = null;
+		nClusterID[iMin2].removeAllElements();
 		
 		// track hierarchy
 		Node node = new Node();
-		double hLeft = 0;
-		double hRight = 0;
 		if (clusterNodes[iMin1] == null) {
 			node.m_iLeftInstance = iMin1;
-			hLeft = 0;
 		} else {
 			node.m_left = clusterNodes[iMin1];
 			clusterNodes[iMin1].m_parent = node;
-			hLeft = clusterNodes[iMin1].m_height; 
 		}
 		if (clusterNodes[iMin2] == null) {
 			node.m_iRightInstance = iMin2;
-			hRight = 0;
 		} else {
 			node.m_right = clusterNodes[iMin2];
 			clusterNodes[iMin2].m_parent = node;
-			hRight = clusterNodes[iMin2].m_height; 
 		}
-		double fMinDistance = fDist;//t.m_fDist;
-		if (Math.abs(hLeft - hRight) < fMinDistance / 2.0) {
-			node.m_height = (hLeft + hRight + fMinDistance) / 2.0;
-		} else {
-			node.m_height = Math.max(hLeft, hRight) + 0.0001;
-		}
+		node.m_fLeftLength = fDist1;
+		node.m_fRightLength = fDist2;
 		clusterNodes[iMin1] = node;
 	} // merge
 	
@@ -799,6 +836,10 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	  public Enumeration listOptions() {
 
 	    Vector newVector = new Vector(8);
+	    newVector.addElement(new Option(
+	  	      "\tIf set, classifier is run in debug mode and\n"
+	  	      + "\tmay output additional info to the console",
+	  	      "D", 0, "-D"));
 
 	    newVector.addElement(new Option(
 	            "\tnumber of clusters",
@@ -840,8 +881,9 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		      setNumClusters(2);
 		    }
 	    
+        setDebug(Utils.getFlag('D', options));
 
-	  String sLinkType = Utils.getOption('L', options);
+	    String sLinkType = Utils.getOption('L', options);
 
 
 		if (sLinkType.compareTo("SINGLE") == 0) {setLinkType(new SelectedTag(SINGLE, TAGS_LINK_TYPE));}
@@ -880,7 +922,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	   */
 	  public String [] getOptions() {
 
-	    String [] options = new String [12];
+	    String [] options = new String [13];
 	    int current = 0;
 
 	    options[current++] = "-N";
@@ -900,6 +942,9 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		if (m_bPrintNewick) {
 			options[current++] = "-P";
 		}
+	    if (getDebug()) {
+	        options[current++] = "-D";
+	    }
 		options[current++] = "-A";
 		options[current++] = (m_DistanceFunction.getClass().getName() + " " +
 	                   Utils.joinOptions(m_DistanceFunction.getOptions())).trim();
@@ -938,7 +983,34 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		}
 		  return buf.toString();
 	  }
+	  /**
+	   * Set debugging mode.
+	   *
+	   * @param debug true if debug output should be printed
+	   */
+	  public void setDebug(boolean debug) {
 
+	    m_Debug = debug;
+	  }
+
+	  /**
+	   * Get whether debugging is turned on.
+	   *
+	   * @return true if debugging output is on
+	   */
+	  public boolean getDebug() {
+
+	    return m_Debug;
+	  }
+	  /**
+	   * Returns the tip text for this property
+	   * @return tip text for this property suitable for
+	   * displaying in the explorer/experimenter gui
+	   */
+	  public String debugTipText() {
+	    return "If set to true, classifier may output additional info to " +
+	      "the console.";
+	  }
 	  /**
 	   * @return a string to describe the NumClusters
 	   */
@@ -1031,14 +1103,12 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	public int graphType() {
 		return Drawable.Newick;
 	}
-
-    /**
-     * Returns the revision string.
-     * 
-     * @returnthe revision
-     */
-    public String getRevision() {
-	return RevisionUtils.extract("$Revision$");
-    }
-
+	  /**
+	   * Returns the revision string.
+	   * 
+	   * @return		the revision
+	   */
+	  public String getRevision() {
+	    return RevisionUtils.extract("$Revision$");
+	  }
 } // class HierarchicalClusterer
