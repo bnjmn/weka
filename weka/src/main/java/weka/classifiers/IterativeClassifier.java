@@ -30,7 +30,7 @@ import weka.core.*;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 
 public interface IterativeClassifier {
@@ -45,17 +45,17 @@ public interface IterativeClassifier {
 
   /**
    * Performs one iteration.
-   * 
+   *
    * @param iteration the index of the current iteration (0-based)
-   * @exception Exception if this iteration fails 
-   */  
+   * @exception Exception if this iteration fails
+   */
   void next(int iteration) throws Exception;
 
   /**
    * Signal end of iterating, useful for any house-keeping/cleanup
-   * 
-   * @exception Exception if cleanup fails 
-   */  
+   *
+   * @exception Exception if cleanup fails
+   */
   void done() throws Exception;
 
   /**
