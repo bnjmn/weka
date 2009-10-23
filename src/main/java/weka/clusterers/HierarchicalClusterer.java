@@ -1,5 +1,4 @@
 /*
-
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -45,10 +44,19 @@
  * Print hierarchy in Newick format, which can be used for display in other programs.
  * </pre>
  *  
+ * <pre> -D
+ * If set, classifier is run in debug mode and may output additional info to the console.
+ * </pre>
+ * 
+ * <pre> -B
+ * \If set, distance is interpreted as branch length, otherwise it is node height.
+ * </pre>
+ * 
  *<!-- options-end -->
  *
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz, remco@cs.waikato.ac.nz)
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
 
@@ -80,7 +88,10 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	private static final long serialVersionUID = 1L;
 
 	/** Whether the classifier is run in debug mode. */
-	protected boolean m_Debug = false;
+	protected boolean m_bDebug = false;
+
+	/** Whether the distance represent node height (if false) or branch length (if true). */
+	protected boolean m_bDistanceIsBranchLength = false;
 
 	/** training data **/
 	Instances m_instances;
@@ -170,6 +181,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		int m_iRightInstance;
 		double m_fLeftLength = 0;
 		double m_fRightLength = 0;
+		double m_fHeight = 0;
 		public String toString(int attIndex) {
 			DecimalFormat myFormatter = new DecimalFormat("#.#####");
 
@@ -190,13 +202,55 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 				}
 			}
 		}
-	} // class Node
+		public String toString2(int attIndex) {
+			DecimalFormat myFormatter = new DecimalFormat("#.#####");
+
+			if (m_left == null) {
+				if (m_right == null) {
+					return "(" + m_instances.instance(m_iLeftInstance).value(attIndex) + ":" + myFormatter.format(m_fLeftLength) + "," +
+					             m_instances.instance(m_iRightInstance).value(attIndex) +":" + myFormatter.format(m_fRightLength) + ")";
+				} else {
+					return "(" + m_instances.instance(m_iLeftInstance).value(attIndex) + ":" + myFormatter.format(m_fLeftLength) + "," +
+						m_right.toString2(attIndex) + ":" + myFormatter.format(m_fRightLength) + ")";
+				}
+			} else {
+				if (m_right == null) {
+					return "(" + m_left.toString2(attIndex) + ":" + myFormatter.format(m_fLeftLength) + "," +
+					             m_instances.instance(m_iRightInstance).value(attIndex) + ":" + myFormatter.format(m_fRightLength) + ")";
+				} else {
+					return "(" + m_left.toString2(attIndex) + ":" + myFormatter.format(m_fLeftLength) + "," +m_right.toString2(attIndex) + ":" + myFormatter.format(m_fRightLength) + ")";
+				}
+			}
+		}
+		void setHeight(double fHeight1, double fHeight2) {
+			m_fHeight = fHeight1;
+			if (m_left == null) {
+				m_fLeftLength = fHeight1;
+			} else {
+				m_fLeftLength = fHeight1 - m_left.m_fHeight;
+			}
+			if (m_right == null) {
+				m_fRightLength = fHeight2;
+			} else {
+				m_fRightLength = fHeight2 - m_right.m_fHeight;
+			}
+		}
+		void setLength(double fLength1, double fLength2) {
+			m_fLeftLength = fLength1;
+			m_fRightLength = fLength2;
+			m_fHeight = fLength1;
+			if (m_left != null) {
+				m_fHeight += m_left.m_fHeight;
+			}
+		}
+	}
 	Node [] m_clusters;
 	int [] m_nClusterNr;
 	
 	
 	@Override
 	public void buildClusterer(Instances data) throws Exception {
+//		/System.err.println("Method " + m_nLinkType);
 		m_instances = data;
 		int nInstances = m_instances.numInstances();
 		if (nInstances == 0) {
@@ -277,7 +331,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			int iMin1 = -1;
 			int iMin2 = -1;
 			double fMin = Double.MAX_VALUE;
-			if (m_Debug) {
+			if (m_bDebug) {
 				for (int i = 0; i < n; i++) {
 					if(nClusterID[i].size() > 0){
 						double [] fRow = fDist[i];
@@ -390,26 +444,34 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		int nInstances = m_instances.numInstances();
 		PriorityQueue<Tuple> queue = new PriorityQueue<Tuple>(nClusters*nClusters/2, new TupleComparator());
 		double [][] fDistance0 = new double[nClusters][nClusters];
+		double [][] fClusterDistance = null;
+		if (m_bDebug) {
+			fClusterDistance = new double[nClusters][nClusters];
+		}
 		for (int i = 0; i < nClusters; i++) {
 			fDistance0[i][i] = 0;
 			for (int j = i+1; j < nClusters; j++) {
 				fDistance0[i][j] = getDistance0(nClusterID[i], nClusterID[j]);
 				fDistance0[j][i] = fDistance0[i][j];
 				queue.add(new Tuple(fDistance0[i][j], i, j, 1, 1));
+				if (m_bDebug) {
+					fClusterDistance[i][j] = fDistance0[i][j];
+					fClusterDistance[j][i] = fDistance0[i][j];
+				}
 			}
 		}
 		while (nClusters > m_nNumClusters) {
 			int iMin1 = -1;
 			int iMin2 = -1;
 			// find closest two clusters
-			if (m_Debug) {
+			if (m_bDebug) {
 				/* simple but inefficient implementation */
 				double fMinDistance = Double.MAX_VALUE;
 				for (int i = 0; i < nInstances; i++) {
 					if (nClusterID[i].size()>0) {
 						for (int j = i+1; j < nInstances; j++) {
 							if (nClusterID[j].size()>0) {
-								double fDist = fDistance0[i][j];
+								double fDist = fClusterDistance[i][j];
 								if (fDist < fMinDistance) {
 									fMinDistance = fDist;
 									iMin1 = i;
@@ -438,8 +500,10 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 					int i1 = Math.min(iMin1,i);
 					int i2 = Math.max(iMin1,i);
 					double fDistance = getDistance(fDistance0, nClusterID[i1], nClusterID[i2]);
-					fDistance0[i1][i2] = fDistance;
-					fDistance0[i2][i1] = fDistance;
+					if (m_bDebug) {
+						fClusterDistance[i1][i2] = fDistance;
+						fClusterDistance[i2][i1] = fDistance;
+					}
 					queue.add(new Tuple(fDistance, i1, i2, nClusterID[i1].size(), nClusterID[i2].size()));
 				}
 			}
@@ -449,7 +513,13 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	} // doLinkClustering
 	
 	void merge(int iMin1, int iMin2, double fDist1, double fDist2, Vector<Integer>[] nClusterID, Node [] clusterNodes) {
-		System.err.println("Merging " + iMin1 + " " + iMin2 + " " + fDist1 + " " + fDist2);
+		if (m_bDebug) {
+			System.err.println("Merging " + iMin1 + " " + iMin2 + " " + fDist1 + " " + fDist2);
+		}
+		if (iMin1 > iMin2) {
+			int h = iMin1; iMin1 = iMin2; iMin2 = h;
+			double f = fDist1; fDist1 = fDist2; fDist2 = f;
+		}
 		nClusterID[iMin1].addAll(nClusterID[iMin2]);
 		nClusterID[iMin2].removeAllElements();
 		
@@ -467,125 +537,28 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			node.m_right = clusterNodes[iMin2];
 			clusterNodes[iMin2].m_parent = node;
 		}
-		node.m_fLeftLength = fDist1;
-		node.m_fRightLength = fDist2;
+		if (m_bDistanceIsBranchLength) {
+			node.setLength(fDist1, fDist2);
+		} else {
+			node.setHeight(fDist1, fDist2);
+		}
 		clusterNodes[iMin1] = node;
 	} // merge
 	
+	/** calculate distance the first time when setting up the distance matrix **/
 	double getDistance0(Vector<Integer> cluster1, Vector<Integer> cluster2) {
 		double fBestDist = Double.MAX_VALUE;
 		switch (m_nLinkType) {
 		case SINGLE:
 		case NEIGHBOR_JOINING:
-			// find single link distance aka minimum link, which is the closest distance between
-			// any item in cluster1 and any item in cluster2
-			fBestDist = Double.MAX_VALUE;
-			for (int i = 0; i < cluster1.size(); i++) {
-				Instance instance1 = m_instances.instance(cluster1.elementAt(i));
-				for (int j = 0; j < cluster2.size(); j++) {
-					Instance instance2 = m_instances.instance(cluster2.elementAt(j));
-					double fDist = m_DistanceFunction.distance(instance1, instance2);
-					if (fBestDist > fDist) {
-						fBestDist = fDist;
-					}
-				}
-			}
-			break;
+		case CENTROID:
 		case COMPLETE:
 		case ADJCOMLPETE:
-			// find complete link distance aka maximum link, which is the largest distance between
-			// any item in cluster1 and any item in cluster2
-			fBestDist = 0;
-			for (int i = 0; i < cluster1.size(); i++) {
-				Instance instance1 = m_instances.instance(cluster1.elementAt(i));
-				for (int j = 0; j < cluster2.size(); j++) {
-					Instance instance2 = m_instances.instance(cluster2.elementAt(j));
-					double fDist = m_DistanceFunction.distance(instance1, instance2);
-					if (fBestDist < fDist) {
-						fBestDist = fDist;
-					}
-				}
-			}
-			if (m_nLinkType == COMPLETE) {
-				break;
-			}
-			// calculate adjustment, which is the largest within cluster distance
-			double fMaxDist = 0;
-			for (int i = 0; i < cluster1.size(); i++) {
-				Instance instance1 = m_instances.instance(cluster1.elementAt(i));
-				for (int j = i+1; j < cluster1.size(); j++) {
-					Instance instance2 = m_instances.instance(cluster1.elementAt(j));
-					double fDist = m_DistanceFunction.distance(instance1, instance2);
-					if (fMaxDist < fDist) {
-						fMaxDist = fDist;
-					}
-				}
-			}
-			for (int i = 0; i < cluster2.size(); i++) {
-				Instance instance1 = m_instances.instance(cluster2.elementAt(i));
-				for (int j = i+1; j < cluster2.size(); j++) {
-					Instance instance2 = m_instances.instance(cluster2.elementAt(j));
-					double fDist = m_DistanceFunction.distance(instance1, instance2);
-					if (fMaxDist < fDist) {
-						fMaxDist = fDist;
-					}
-				}
-			}
-			fBestDist -= fMaxDist;
-			break;
 		case AVERAGE:
-			// finds average distance between the elements of the two clusters
-			fBestDist = 0;
-			for (int i = 0; i < cluster1.size(); i++) {
-				Instance instance1 = m_instances.instance(cluster1.elementAt(i));
-				for (int j = 0; j < cluster2.size(); j++) {
-					Instance instance2 = m_instances.instance(cluster2.elementAt(j));
-					fBestDist += m_DistanceFunction.distance(instance1, instance2);
-				}
-			}
-			fBestDist /= (cluster1.size() * cluster2.size());
-			break;
-		case MEAN: 
-			{
-				// calculates the mean distance of a merged cluster (akak Group-average agglomerative clustering)
-				Vector<Integer> merged = new Vector<Integer>();
-				merged.addAll(cluster1);
-				merged.addAll(cluster2);
-				fBestDist = 0;
-				for (int i = 0; i < merged.size(); i++) {
-					Instance instance1 = m_instances.instance(merged.elementAt(i));
-					for (int j = i+1; j < merged.size(); j++) {
-						Instance instance2 = m_instances.instance(merged.elementAt(j));
-						fBestDist += m_DistanceFunction.distance(instance1, instance2);
-					}
-				}
-				int n = merged.size();
-				fBestDist /= (n*(n-1.0)/2.0);
-			}
-			break;
-		case CENTROID:
-			// finds the distance of the centroids of the clusters
-			double [] fValues1 = new double[m_instances.numAttributes()];
-			double [] fValues2 = new double[m_instances.numAttributes()];
-			for (int i = 0; i < cluster1.size(); i++) {
-				Instance instance1 = m_instances.instance(cluster1.elementAt(i));
-				Instance instance2 = m_instances.instance(cluster1.elementAt(i));
-				for (int j = 0; j < m_instances.numAttributes(); j++) {
-					fValues1[j] += instance1.value(j);
-					fValues2[j] += instance2.value(j);
-				}
-			}
-			for (int j = 0; j < m_instances.numAttributes(); j++) {
-				fValues1[j] /= cluster1.size();
-				fValues2[j] += cluster2.size();
-			}
+		case MEAN:
 			// set up two instances for distance function
 			Instance instance1 = (Instance) m_instances.instance(cluster1.elementAt(0)).copy();
-			Instance instance2 = (Instance) m_instances.instance(cluster1.elementAt(0)).copy();
-			for (int j = 0; j < m_instances.numAttributes(); j++) {
-				instance1.setValue(j, fValues1[j]);
-				instance2.setValue(j, fValues1[j]);
-			}
+			Instance instance2 = (Instance) m_instances.instance(cluster2.elementAt(0)).copy();
 			fBestDist = m_DistanceFunction.distance(instance1, instance2);
 			break;
 		case WARD:
@@ -604,7 +577,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 			break;
 		}
 		return fBestDist;
-	} // getDistance
+	} // getDistance0
 
 	/** calculate the distance between two clusters 
 	 * @param cluster1 list of indices of instances in the first cluster
@@ -704,25 +677,29 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		case CENTROID:
 			// finds the distance of the centroids of the clusters
 			double [] fValues1 = new double[m_instances.numAttributes()];
-			double [] fValues2 = new double[m_instances.numAttributes()];
 			for (int i = 0; i < cluster1.size(); i++) {
-				Instance instance1 = m_instances.instance(cluster1.elementAt(i));
-				Instance instance2 = m_instances.instance(cluster1.elementAt(i));
+				Instance instance = m_instances.instance(cluster1.elementAt(i));
 				for (int j = 0; j < m_instances.numAttributes(); j++) {
-					fValues1[j] += instance1.value(j);
-					fValues2[j] += instance2.value(j);
+					fValues1[j] += instance.value(j);
+				}
+			}
+			double [] fValues2 = new double[m_instances.numAttributes()];
+			for (int i = 0; i < cluster2.size(); i++) {
+				Instance instance = m_instances.instance(cluster2.elementAt(i));
+				for (int j = 0; j < m_instances.numAttributes(); j++) {
+					fValues2[j] += instance.value(j);
 				}
 			}
 			for (int j = 0; j < m_instances.numAttributes(); j++) {
 				fValues1[j] /= cluster1.size();
-				fValues2[j] += cluster2.size();
+				fValues2[j] /= cluster2.size();
 			}
 			// set up two instances for distance function
-			Instance instance1 = (Instance) m_instances.instance(cluster1.elementAt(0)).copy();
-			Instance instance2 = (Instance) m_instances.instance(cluster1.elementAt(0)).copy();
+			Instance instance1 = (Instance) m_instances.instance(0).copy();
+			Instance instance2 = (Instance) m_instances.instance(0).copy();
 			for (int j = 0; j < m_instances.numAttributes(); j++) {
 				instance1.setValue(j, fValues1[j]);
-				instance2.setValue(j, fValues1[j]);
+				instance2.setValue(j, fValues2[j]);
 			}
 			fBestDist = m_DistanceFunction.distance(instance1, instance2);
 			break;
@@ -840,6 +817,10 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	  	      "\tIf set, classifier is run in debug mode and\n"
 	  	      + "\tmay output additional info to the console",
 	  	      "D", 0, "-D"));
+	    newVector.addElement(new Option(
+		  	      "\tIf set, distance is interpreted as branch length\n"
+		  	      + "\totherwise it is node height.",
+		  	      "B", 0, "-B"));
 
 	    newVector.addElement(new Option(
 	            "\tnumber of clusters",
@@ -882,6 +863,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 		    }
 	    
         setDebug(Utils.getFlag('D', options));
+        setDistanceIsBranchLength(Utils.getFlag('B', options));
 
 	    String sLinkType = Utils.getOption('L', options);
 
@@ -922,7 +904,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	   */
 	  public String [] getOptions() {
 
-	    String [] options = new String [13];
+	    String [] options = new String [14];
 	    int current = 0;
 
 	    options[current++] = "-N";
@@ -945,6 +927,10 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	    if (getDebug()) {
 	        options[current++] = "-D";
 	    }
+        if (getDistanceIsBranchLength()) {
+	        options[current++] = "-B";
+        }
+	    
 		options[current++] = "-A";
 		options[current++] = (m_DistanceFunction.getClass().getName() + " " +
 	                   Utils.joinOptions(m_DistanceFunction.getOptions())).trim();
@@ -973,7 +959,11 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 				  for (int i = 0; i < m_clusters.length; i++) {
 					  if (m_clusters[i] != null) {
 						  buf.append("Cluster " + i + "\n");
-						  buf.append(m_clusters[i].toString(attIndex));
+						  if (m_instances.attribute(attIndex).isString()) {
+							  buf.append(m_clusters[i].toString(attIndex));
+						  } else {
+							  buf.append(m_clusters[i].toString2(attIndex));
+						  }
 						  buf.append("\n\n");
 					  }
 				  }
@@ -990,7 +980,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	   */
 	  public void setDebug(boolean debug) {
 
-	    m_Debug = debug;
+	    m_bDebug = debug;
 	  }
 
 	  /**
@@ -1000,7 +990,19 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	   */
 	  public boolean getDebug() {
 
-	    return m_Debug;
+	    return m_bDebug;
+	  }
+
+	  public boolean getDistanceIsBranchLength() {return m_bDistanceIsBranchLength;}
+
+	  public void setDistanceIsBranchLength(boolean bDistanceIsHeight) {m_bDistanceIsBranchLength = bDistanceIsHeight;}
+
+	  public String distanceIsHeightTipText() {
+		  return "If set to false, the distance between clusters is interpreted " +
+		  "as the height of the node linking the clusters. This is appropriate for " +
+		  "example for single link clustering. However, for neighbor joining, the " +
+		  "distance is better interpreted as branch length. Set this flag to " +
+		  "get the latter interpretation.";
 	  }
 	  /**
 	   * Returns the tip text for this property
@@ -1062,7 +1064,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 	    " The information of a cluster is calculated as the error sum of squares of the" +
 	    " centroids of the cluster and its members.\n" +
 	    "NEIGHBOR_JOINING\n" +
-	    " use neighbor joining algorithm"
+	    " use neighbor joining algorithm."
 	    ;
 	  }
 
@@ -1096,7 +1098,12 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 				  attIndex++;
 			  }
 		  }
-		  String sNewick = m_clusters[0].toString(attIndex);
+		  String sNewick = null;
+		  if (m_instances.attribute(attIndex).isString()) {
+			  sNewick = m_clusters[0].toString(attIndex);
+		  } else {
+			  sNewick = m_clusters[0].toString2(attIndex);
+		  }
 		  return "Newick:" + sNewick;
 	}
 	@Override
