@@ -49,7 +49,7 @@ import java.util.Vector;
  * Ron Kohavi, David H. Wolpert: Bias Plus Variance Decomposition for Zero-One Loss Functions. In: Machine Learning: Proceedings of the Thirteenth International Conference, 275-283, 1996.
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
@@ -69,40 +69,40 @@ import java.util.Vector;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -c &lt;class index&gt;
  *  The index of the class attribute.
  *  (default last)</pre>
- * 
+ *
  * <pre> -t &lt;name of arff file&gt;
  *  The name of the arff file used for the decomposition.</pre>
- * 
+ *
  * <pre> -T &lt;training pool size&gt;
  *  The number of instances placed in the training pool.
  *  The remainder will be used for testing. (default 100)</pre>
- * 
+ *
  * <pre> -s &lt;seed&gt;
  *  The random number seed used.</pre>
- * 
+ *
  * <pre> -x &lt;num&gt;
  *  The number of training repetitions used.
  *  (default 50)</pre>
- * 
+ *
  * <pre> -D
  *  Turn on debugging output.</pre>
- * 
+ *
  * <pre> -W &lt;classifier class name&gt;
  *  Full class name of the learner used in the decomposition.
  *  eg: weka.classifiers.bayes.NaiveBayes</pre>
- * 
- * <pre> 
+ *
+ * <pre>
  * Options specific to learner weka.classifiers.rules.ZeroR:
  * </pre>
- * 
+ *
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
- * 
+ *
  <!-- options-end -->
  *
  * Options after -- are passed to the designated sub-learner. <p>
@@ -148,7 +148,7 @@ public class BVDecompose
 
   /** The number of instances used in the training pool */
   protected int m_TrainPoolSize = 100;
-  
+
   /**
    * Returns a string describing this object
    * @return a description of the classifier suitable for
@@ -156,22 +156,22 @@ public class BVDecompose
    */
   public String globalInfo() {
 
-    return 
+    return
         "Class for performing a Bias-Variance decomposition on any classifier "
       + "using the method specified in:\n\n"
       + getTechnicalInformation().toString();
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
+   * Returns an instance of a TechnicalInformation object, containing
    * detailed information about the technical background of this class,
    * e.g., paper reference or book this class is based on.
-   * 
+   *
    * @return the technical information about this class
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
-    
+
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "Ron Kohavi and David H. Wolpert");
     result.setValue(Field.YEAR, "1996");
@@ -195,41 +195,41 @@ public class BVDecompose
     Vector newVector = new Vector(7);
 
     newVector.addElement(new Option(
-	      "\tThe index of the class attribute.\n"+
-	      "\t(default last)",
-	      "c", 1, "-c <class index>"));
+          "\tThe index of the class attribute.\n"+
+          "\t(default last)",
+          "c", 1, "-c <class index>"));
     newVector.addElement(new Option(
-	      "\tThe name of the arff file used for the decomposition.",
-	      "t", 1, "-t <name of arff file>"));
+          "\tThe name of the arff file used for the decomposition.",
+          "t", 1, "-t <name of arff file>"));
     newVector.addElement(new Option(
-	      "\tThe number of instances placed in the training pool.\n"
-	      + "\tThe remainder will be used for testing. (default 100)",
-	      "T", 1, "-T <training pool size>"));
+          "\tThe number of instances placed in the training pool.\n"
+          + "\tThe remainder will be used for testing. (default 100)",
+          "T", 1, "-T <training pool size>"));
     newVector.addElement(new Option(
-	      "\tThe random number seed used.",
-	      "s", 1, "-s <seed>"));
+          "\tThe random number seed used.",
+          "s", 1, "-s <seed>"));
     newVector.addElement(new Option(
-	      "\tThe number of training repetitions used.\n"
-	      +"\t(default 50)",
-	      "x", 1, "-x <num>"));
+          "\tThe number of training repetitions used.\n"
+          +"\t(default 50)",
+          "x", 1, "-x <num>"));
     newVector.addElement(new Option(
-	      "\tTurn on debugging output.",
-	      "D", 0, "-D"));
+          "\tTurn on debugging output.",
+          "D", 0, "-D"));
     newVector.addElement(new Option(
-	      "\tFull class name of the learner used in the decomposition.\n"
-	      +"\teg: weka.classifiers.bayes.NaiveBayes",
-	      "W", 1, "-W <classifier class name>"));
+          "\tFull class name of the learner used in the decomposition.\n"
+          +"\teg: weka.classifiers.bayes.NaiveBayes",
+          "W", 1, "-W <classifier class name>"));
 
     if ((m_Classifier != null) &&
-	(m_Classifier instanceof OptionHandler)) {
+        (m_Classifier instanceof OptionHandler)) {
       newVector.addElement(new Option(
-				      "",
-				      "", 0, "\nOptions specific to learner "
-				      + m_Classifier.getClass().getName()
-				      + ":"));
+            "",
+            "", 0, "\nOptions specific to learner "
+            + m_Classifier.getClass().getName()
+            + ":"));
       Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
       while (enu.hasMoreElements()) {
-	newVector.addElement(enu.nextElement());
+        newVector.addElement(enu.nextElement());
       }
     }
     return newVector.elements();
@@ -240,40 +240,40 @@ public class BVDecompose
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -c &lt;class index&gt;
    *  The index of the class attribute.
    *  (default last)</pre>
-   * 
+   *
    * <pre> -t &lt;name of arff file&gt;
    *  The name of the arff file used for the decomposition.</pre>
-   * 
+   *
    * <pre> -T &lt;training pool size&gt;
    *  The number of instances placed in the training pool.
    *  The remainder will be used for testing. (default 100)</pre>
-   * 
+   *
    * <pre> -s &lt;seed&gt;
    *  The random number seed used.</pre>
-   * 
+   *
    * <pre> -x &lt;num&gt;
    *  The number of training repetitions used.
    *  (default 50)</pre>
-   * 
+   *
    * <pre> -D
    *  Turn on debugging output.</pre>
-   * 
+   *
    * <pre> -W &lt;classifier class name&gt;
    *  Full class name of the learner used in the decomposition.
    *  eg: weka.classifiers.bayes.NaiveBayes</pre>
-   * 
-   * <pre> 
+   *
+   * <pre>
    * Options specific to learner weka.classifiers.rules.ZeroR:
    * </pre>
-   * 
+   *
    * <pre> -D
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * Options after -- are passed to the designated sub-learner. <p>
@@ -284,15 +284,15 @@ public class BVDecompose
   public void setOptions(String[] options) throws Exception {
 
     setDebug(Utils.getFlag('D', options));
-        
+
     String classIndex = Utils.getOption('c', options);
     if (classIndex.length() != 0) {
       if (classIndex.toLowerCase().equals("last")) {
-	setClassIndex(0);
+        setClassIndex(0);
       } else if (classIndex.toLowerCase().equals("first")) {
-	setClassIndex(1);
+        setClassIndex(1);
       } else {
-	setClassIndex(Integer.parseInt(classIndex));
+        setClassIndex(Integer.parseInt(classIndex));
       }
     } else {
       setClassIndex(0);
@@ -322,7 +322,7 @@ public class BVDecompose
     String dataFile = Utils.getOption('t', options);
     if (dataFile.length() == 0) {
       throw new Exception("An arff file must be specified"
-			  + " with the -t option.");
+          + " with the -t option.");
     }
     setDataFileName(dataFile);
 
@@ -331,7 +331,7 @@ public class BVDecompose
       throw new Exception("A learner must be specified with the -W option.");
     }
     setClassifier(AbstractClassifier.forName(classifierName,
-				     Utils.partitionOptions(options)));
+          Utils.partitionOptions(options)));
   }
 
   /**
@@ -342,10 +342,10 @@ public class BVDecompose
   public String [] getOptions() {
 
     String [] classifierOptions = new String [0];
-    if ((m_Classifier != null) && 
-	(m_Classifier instanceof OptionHandler)) {
+    if ((m_Classifier != null) &&
+        (m_Classifier instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    }
+        }
     String [] options = new String [classifierOptions.length + 14];
     int current = 0;
     if (getDebug()) {
@@ -363,35 +363,35 @@ public class BVDecompose
       options[current++] = getClassifier().getClass().getName();
     }
     options[current++] = "--";
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
+    System.arraycopy(classifierOptions, 0, options, current,
+        classifierOptions.length);
     current += classifierOptions.length;
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
   }
-  
+
   /**
    * Get the number of instances in the training pool.
    *
    * @return number of instances in the training pool.
    */
   public int getTrainPoolSize() {
-    
+
     return m_TrainPoolSize;
   }
-  
+
   /**
    * Set the number of instances in the training pool.
    *
    * @param numTrain number of instances in the training pool.
    */
   public void setTrainPoolSize(int numTrain) {
-    
+
     m_TrainPoolSize = numTrain;
   }
-  
+
   /**
    * Set the classifiers being analysed
    *
@@ -434,7 +434,7 @@ public class BVDecompose
 
   /**
    * Sets the random number seed
-   * 
+   *
    * @param seed the random number seed
    */
   public void setSeed(int seed) {
@@ -454,7 +454,7 @@ public class BVDecompose
 
   /**
    * Sets the maximum number of boost iterations
-   * 
+   *
    * @param trainIterations the number of boost iterations
    */
   public void setTrainIterations(int trainIterations) {
@@ -474,7 +474,7 @@ public class BVDecompose
 
   /**
    * Sets the name of the data file used for the decomposition
-   * 
+   *
    * @param dataFileName the data file to use
    */
   public void setDataFileName(String dataFileName) {
@@ -520,7 +520,7 @@ public class BVDecompose
   public double getBias() {
 
     return m_Bias;
-  } 
+  }
 
   /**
    * Get the calculated variance
@@ -579,20 +579,20 @@ public class BVDecompose
 
     if (data.numInstances() < 2 * m_TrainPoolSize) {
       throw new Exception("The dataset must contain at least "
-			  + (2 * m_TrainPoolSize) + " instances");
+          + (2 * m_TrainPoolSize) + " instances");
     }
     Random random = new Random(m_Seed);
     data.randomize(random);
     Instances trainPool = new Instances(data, 0, m_TrainPoolSize);
-    Instances test = new Instances(data, m_TrainPoolSize, 
-				   data.numInstances() - m_TrainPoolSize);
+    Instances test = new Instances(data, m_TrainPoolSize,
+        data.numInstances() - m_TrainPoolSize);
     int numTest = test.numInstances();
     double [][] instanceProbs = new double [numTest][numClasses];
 
     m_Error = 0;
     for (int i = 0; i < m_TrainIterations; i++) {
       if (m_Debug) {
-	System.err.println("Iteration " + (i + 1));
+        System.err.println("Iteration " + (i + 1));
       }
       trainPool.randomize(random);
       Instances train = new Instances(trainPool, 0, m_TrainPoolSize / 2);
@@ -602,11 +602,11 @@ public class BVDecompose
 
       //// Evaluate the classifier on test, updating BVD stats
       for (int j = 0; j < numTest; j++) {
-	int pred = (int)current.classifyInstance(test.instance(j));
-	if (pred != test.instance(j).classValue()) {
-	  m_Error++;
-	}
-	instanceProbs[j][pred]++;
+        int pred = (int)current.classifyInstance(test.instance(j));
+        if (pred != test.instance(j).classValue()) {
+          m_Error++;
+        }
+        instanceProbs[j][pred]++;
       }
     }
     m_Error /= (m_TrainIterations * numTest);
@@ -621,12 +621,12 @@ public class BVDecompose
       double pActual, pPred;
       double bsum = 0, vsum = 0, ssum = 0;
       for (int j = 0; j < numClasses; j++) {
-	pActual = (current.classValue() == j) ? 1 : 0; // Or via 1NN from test data?
-	pPred = predProbs[j] / m_TrainIterations;
-	bsum += (pActual - pPred) * (pActual - pPred) 
-	- pPred * (1 - pPred) / (m_TrainIterations - 1);
-	vsum += pPred * pPred;
-	ssum += pActual * pActual;
+        pActual = (current.classValue() == j) ? 1 : 0; // Or via 1NN from test data?
+        pPred = predProbs[j] / m_TrainIterations;
+        bsum += (pActual - pPred) * (pActual - pPred)
+          - pPred * (1 - pPred) / (m_TrainIterations - 1);
+        vsum += pPred * pPred;
+        ssum += pActual * pActual;
       }
       m_Bias += bsum;
       m_Variance += (1 - vsum);
@@ -676,10 +676,10 @@ public class BVDecompose
 
     return result + "\n";
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
@@ -697,16 +697,16 @@ public class BVDecompose
       BVDecompose bvd = new BVDecompose();
 
       try {
-	bvd.setOptions(args);
-	Utils.checkForRemainingOptions(args);
+        bvd.setOptions(args);
+        Utils.checkForRemainingOptions(args);
       } catch (Exception ex) {
-	String result = ex.getMessage() + "\nBVDecompose Options:\n\n";
-	Enumeration enu = bvd.listOptions();
-	while (enu.hasMoreElements()) {
-	  Option option = (Option) enu.nextElement();
-	  result += option.synopsis() + "\n" + option.description() + "\n";
-	}
-	throw new Exception(result);
+        String result = ex.getMessage() + "\nBVDecompose Options:\n\n";
+        Enumeration enu = bvd.listOptions();
+        while (enu.hasMoreElements()) {
+          Option option = (Option) enu.nextElement();
+          result += option.synopsis() + "\n" + option.description() + "\n";
+        }
+        throw new Exception(result);
       }
 
       bvd.decompose();

@@ -24,7 +24,7 @@ package weka.classifiers;
 
 import weka.core.Instance;
 
-/** 
+/**
  * Interface for numeric prediction schemes that can output prediction
  * intervals.
  *

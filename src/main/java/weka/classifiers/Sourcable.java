@@ -22,11 +22,11 @@
 
 package weka.classifiers;
 
-/** 
+/**
  * Interface for classifiers that can be converted to Java source.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public interface Sourcable {
 

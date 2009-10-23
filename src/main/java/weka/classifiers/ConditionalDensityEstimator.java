@@ -24,7 +24,7 @@ package weka.classifiers;
 
 import weka.core.Instance;
 
-/** 
+/**
  * Interface for numeric prediction schemes that can output conditional
  * density estimates.
  *
@@ -35,7 +35,7 @@ public interface ConditionalDensityEstimator {
 
   /**
    * Returns natural logarithm of density estimate for given value based on given instance.
-   *   
+   *
    * @param instance the instance to make the prediction for.
    * @param value the value to make the prediction for.
    * @return the natural logarithm of the density estimate

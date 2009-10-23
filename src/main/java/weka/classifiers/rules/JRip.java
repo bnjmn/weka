@@ -1186,106 +1186,106 @@ public class JRip
      * @param data the growing data used to build the rule
      * @throws Exception if the consequent is not set yet
      */    
-      public void grow(Instances data) throws Exception {
+    public void grow(Instances data) throws Exception {
       if(m_Consequent == -1)
-	throw new Exception(" Consequent not set yet.");
-	    
+        throw new Exception(" Consequent not set yet.");
+
       Instances growData = data;	         
       double sumOfWeights = growData.sumOfWeights();
       if(!Utils.gr(sumOfWeights, 0.0))
-	return;
-	    
+        return;
+
       /* Compute the default accurate rate of the growing data */
       double defAccu = computeDefAccu(growData);
       double defAcRt = (defAccu+1.0)/(sumOfWeights+1.0); 
-	    
+
       /* Keep the record of which attributes have already been used*/    
       boolean[] used=new boolean [growData.numAttributes()];
       for (int k=0; k<used.length; k++)
-	used[k]=false;
+        used[k]=false;
       int numUnused=used.length;
-	    
+
       // If there are already antecedents existing
       for(int j=0; j < m_Antds.size(); j++){
-	Antd antdj = (Antd)m_Antds.elementAt(j);
-	if(!antdj.getAttr().isNumeric()){ 
-	  used[antdj.getAttr().index()]=true;
-	  numUnused--;
-	} 
+        Antd antdj = (Antd)m_Antds.elementAt(j);
+        if(!antdj.getAttr().isNumeric()){ 
+          used[antdj.getAttr().index()]=true;
+          numUnused--;
+        } 
       }	    
-	    
+
       double maxInfoGain;	    
       while (Utils.gr(growData.numInstances(), 0.0) && 
-	     (numUnused > 0) 
-	     && Utils.sm(defAcRt, 1.0)
-	     ){   
-		
-	// We require that infoGain be positive
-	/*if(numAntds == originalSize)
-	  maxInfoGain = 0.0; // At least one condition allowed
-	  else
-	  maxInfoGain = Utils.eq(defAcRt, 1.0) ? 
-	  defAccu/(double)numAntds : 0.0; */
-	maxInfoGain = 0.0; 
-		
-	/* Build a list of antecedents */
-	Antd oneAntd=null;
-	Instances coverData = null;
-	Enumeration enumAttr=growData.enumerateAttributes();	      
-		
-	/* Build one condition based on all attributes not used yet*/
-	while (enumAttr.hasMoreElements()){
-	  Attribute att= (Attribute)(enumAttr.nextElement());
-	  
-	  if(m_Debug)
-	    System.err.println("\nOne condition: size = " 
-			       + growData.sumOfWeights());
-		   
-	  Antd antd =null;	
-	  if(att.isNumeric())
-	    antd = new NumericAntd(att);
-	  else
-	    antd = new NominalAntd(att);
-		    
-	  if(!used[att.index()]){
-	    /* Compute the best information gain for each attribute,
-	       it's stored in the antecedent formed by this attribute.
-	       This procedure returns the data covered by the antecedent*/
-	    Instances coveredData = computeInfoGain(growData, defAcRt,
-						    antd);
-	    if(coveredData != null){
-	      double infoGain = antd.getMaxInfoGain();      
-	      if(m_Debug)
-		System.err.println("Test of \'"+antd.toString()+
-				   "\': infoGain = "+
-				   infoGain + " | Accuracy = " +
-				   antd.getAccuRate()+
-				   "="+antd.getAccu()
-				   +"/"+antd.getCover()+
-				   " def. accuracy: "+defAcRt);
-			    
-	      if(infoGain > maxInfoGain){         
-		oneAntd=antd;
-		coverData = coveredData;  
-		maxInfoGain = infoGain;
-	      }		    
-	    }
-	  }
-	}
-		
-	if(oneAntd == null) break; // Cannot find antds		
-	if(Utils.sm(oneAntd.getAccu(), m_MinNo)) break;// Too low coverage
-		
-	//Numeric attributes can be used more than once
-	if(!oneAntd.getAttr().isNumeric()){ 
-	  used[oneAntd.getAttr().index()]=true;
-	  numUnused--;
-	}
-		
-	m_Antds.addElement(oneAntd);
-	growData = coverData;// Grow data size is shrinking 	
-	defAcRt = oneAntd.getAccuRate();
-      }
+          (numUnused > 0) 
+          && Utils.sm(defAcRt, 1.0)
+          ){   
+
+        // We require that infoGain be positive
+        /*if(numAntds == originalSize)
+          maxInfoGain = 0.0; // At least one condition allowed
+          else
+          maxInfoGain = Utils.eq(defAcRt, 1.0) ? 
+          defAccu/(double)numAntds : 0.0; */
+        maxInfoGain = 0.0; 
+
+        /* Build a list of antecedents */
+        Antd oneAntd=null;
+        Instances coverData = null;
+        Enumeration enumAttr=growData.enumerateAttributes();	      
+
+        /* Build one condition based on all attributes not used yet*/
+        while (enumAttr.hasMoreElements()){
+          Attribute att= (Attribute)(enumAttr.nextElement());
+
+          if(m_Debug)
+            System.err.println("\nOne condition: size = " 
+                + growData.sumOfWeights());
+
+          Antd antd =null;	
+          if(att.isNumeric())
+            antd = new NumericAntd(att);
+          else
+            antd = new NominalAntd(att);
+
+          if(!used[att.index()]){
+            /* Compute the best information gain for each attribute,
+               it's stored in the antecedent formed by this attribute.
+               This procedure returns the data covered by the antecedent*/
+            Instances coveredData = computeInfoGain(growData, defAcRt,
+                antd);
+            if(coveredData != null){
+              double infoGain = antd.getMaxInfoGain();      
+              if(m_Debug)
+                System.err.println("Test of \'"+antd.toString()+
+                    "\': infoGain = "+
+                    infoGain + " | Accuracy = " +
+                    antd.getAccuRate()+
+                    "="+antd.getAccu()
+                    +"/"+antd.getCover()+
+                    " def. accuracy: "+defAcRt);
+
+              if(infoGain > maxInfoGain){         
+                oneAntd=antd;
+                coverData = coveredData;  
+                maxInfoGain = infoGain;
+              }		    
+            }
+          }
+        }
+
+        if(oneAntd == null) break; // Cannot find antds		
+        if(Utils.sm(oneAntd.getAccu(), m_MinNo)) break;// Too low coverage
+
+        //Numeric attributes can be used more than once
+        if(!oneAntd.getAttr().isNumeric()){ 
+          used[oneAntd.getAttr().index()]=true;
+          numUnused--;
+        }
+
+        m_Antds.addElement(oneAntd);
+        growData = coverData;// Grow data size is shrinking 	
+        defAcRt = oneAntd.getAccuRate();
+          }
     }
 	
 	

@@ -29,7 +29,7 @@ import weka.core.*;
  * one instance at a time.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public interface UpdateableClassifier {
 
@@ -43,4 +43,3 @@ public interface UpdateableClassifier {
   void updateClassifier(Instance instance) throws Exception;
 
 }
- 
