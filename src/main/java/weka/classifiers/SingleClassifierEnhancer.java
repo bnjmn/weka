@@ -34,7 +34,7 @@ import java.util.Vector;
 
 /**
  * Abstract utility class for handling settings common to meta
- * classifiers that use a single base learner.  
+ * classifiers that use a single base learner.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
@@ -51,7 +51,7 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
    * String describing default classifier.
    */
   protected String defaultClassifierString() {
-    
+
     return "weka.classifiers.rules.ZeroR";
   }
 
@@ -70,14 +70,14 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
     }
 
     newVector.addElement(new Option(
-	      "\tFull name of base classifier.\n"
-	      + "\t(default: " + defaultClassifierString() +")",
-	      "W", 1, "-W"));
+          "\tFull name of base classifier.\n"
+          + "\t(default: " + defaultClassifierString() +")",
+          "W", 1, "-W"));
 
     newVector.addElement(new Option(
-	     "",
-	     "", 0, "\nOptions specific to classifier "
-	     + m_Classifier.getClass().getName() + ":"));
+          "",
+          "", 0, "\nOptions specific to classifier "
+          + m_Classifier.getClass().getName() + ":"));
     enu = ((OptionHandler)m_Classifier).listOptions();
     while (enu.hasMoreElements()) {
       newVector.addElement(enu.nextElement());
@@ -103,20 +103,20 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
 
     String classifierName = Utils.getOption('W', options);
 
-    if (classifierName.length() > 0) { 
-      
-      // This is just to set the classifier in case the option 
+    if (classifierName.length() > 0) {
+
+      // This is just to set the classifier in case the option
       // parsing fails.
       setClassifier(AbstractClassifier.forName(classifierName, null));
       setClassifier(AbstractClassifier.forName(classifierName,
-				       Utils.partitionOptions(options)));
+            Utils.partitionOptions(options)));
     } else {
-      
-      // This is just to set the classifier in case the option 
+
+      // This is just to set the classifier in case the option
       // parsing fails.
       setClassifier(AbstractClassifier.forName(defaultClassifierString(), null));
       setClassifier(AbstractClassifier.forName(defaultClassifierString(),
-				       Utils.partitionOptions(options)));
+            Utils.partitionOptions(options)));
     }
   }
 
@@ -134,26 +134,26 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
     }
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 
-				   extraOptionsLength + 2];
+    String [] options = new String [superOptions.length +
+      extraOptionsLength + 2];
 
     int current = 0;
     options[current++] = "-W";
     options[current++] = getClassifier().getClass().getName();
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
+    System.arraycopy(superOptions, 0, options, current,
+        superOptions.length);
     current += superOptions.length;
 
     if (classifierOptions.length > 0) {
       options[current++] = "--";
-      System.arraycopy(classifierOptions, 0, options, current, 
-		       classifierOptions.length);
+      System.arraycopy(classifierOptions, 0, options, current,
+          classifierOptions.length);
     }
 
     return options;
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -177,13 +177,13 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
       result = new Capabilities(this);
       result.disableAll();
     }
-    
+
     // set dependencies
     for (Capability cap: Capability.values())
       result.enableDependency(cap);
-    
+
     result.setOwner(this);
-    
+
     return result;
   }
 
@@ -206,7 +206,7 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
 
     return m_Classifier;
   }
-  
+
   /**
    * Gets the classifier specification string, which contains the class name of
    * the classifier and any options to the classifier

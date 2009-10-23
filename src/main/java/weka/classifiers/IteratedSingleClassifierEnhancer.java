@@ -31,24 +31,24 @@ import java.util.Vector;
 
 /**
  * Abstract utility class for handling settings common to
- * meta classifiers that build an ensemble from a single base learner.  
+ * meta classifiers that build an ensemble from a single base learner.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class IteratedSingleClassifierEnhancer 
+public abstract class IteratedSingleClassifierEnhancer
   extends SingleClassifierEnhancer {
 
   /** for serialization */
   private static final long serialVersionUID = -6217979135443319724L;
-  
+
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers;
-  
+
   /** The number of iterations. */
   protected int m_NumIterations = 10;
 
-  /** 
+  /**
    * Stump method for building the classifiers.
    *
    * @param data the training data to be used for generating the
@@ -73,9 +73,9 @@ public abstract class IteratedSingleClassifierEnhancer
     Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
-	      "\tNumber of iterations.\n"
-	      + "\t(default 10)",
-	      "I", 1, "-I <num>"));
+          "\tNumber of iterations.\n"
+          + "\t(default 10)",
+          "I", 1, "-I <num>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -99,7 +99,7 @@ public abstract class IteratedSingleClassifierEnhancer
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
+
     String iterations = Utils.getOption('I', options);
     if (iterations.length() != 0) {
       setNumIterations(Integer.parseInt(iterations));
@@ -121,15 +121,15 @@ public abstract class IteratedSingleClassifierEnhancer
     String [] options = new String [superOptions.length + 2];
 
     int current = 0;
-    options[current++] = "-I"; 
+    options[current++] = "-I";
     options[current++] = "" + getNumIterations();
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
+    System.arraycopy(superOptions, 0, options, current,
+        superOptions.length);
 
     return options;
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -138,7 +138,7 @@ public abstract class IteratedSingleClassifierEnhancer
   public String numIterationsTipText() {
     return "The number of iterations to be performed.";
   }
-  
+
   /**
    * Sets the number of bagging iterations
    */
@@ -153,7 +153,7 @@ public abstract class IteratedSingleClassifierEnhancer
    * @return the maximum number of bagging iterations
    */
   public int getNumIterations() {
-    
+
     return m_NumIterations;
   }
 }

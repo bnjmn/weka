@@ -42,19 +42,19 @@ import java.util.StringTokenizer;
  * Class for storing and manipulating a misclassification cost matrix.
  * The element at position i,j in the matrix is the penalty for classifying
  * an instance of class j as class i. Cost values can be fixed or
- * computed on a per-instance basis (cost sensitive evaluation only) 
- * from the value of an attribute or an expression involving 
+ * computed on a per-instance basis (cost sensitive evaluation only)
+ * from the value of an attribute or an expression involving
  * attribute(s).
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision$
  */
 public class CostMatrix implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1973792250544554965L;
-  
+
   private int m_size;
 
   /** [rows][columns] */
@@ -64,11 +64,11 @@ public class CostMatrix implements Serializable, RevisionHandler {
   public static String FILE_EXTENSION = ".cost";
 
   /**
-   * Creates a default cost matrix of a particular size. 
+   * Creates a default cost matrix of a particular size.
    * All diagonal values will be 0 and all non-diagonal values 1.
    *
    * @param numOfClasses the number of classes that the cost matrix holds.
-   */  
+   */
   public CostMatrix(int numOfClasses) {
     m_size = numOfClasses;
     initialize();
@@ -96,7 +96,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
     m_matrix = new Object[m_size][m_size];
     for (int i = 0; i < m_size; i++) {
       for (int j = 0; j < m_size; j++) {
-	setCell(i, j, i == j ? new Double(0.0) : new Double(1.0));
+        setCell(i, j, i == j ? new Double(0.0) : new Double(1.0));
       }
     }
   }
@@ -140,13 +140,13 @@ public class CostMatrix implements Serializable, RevisionHandler {
         }
       }
     }
-    
+
     return nonDouble;
   }
 
   /**
-   * Applies the cost matrix to a set of instances. If a random number generator is 
-   * supplied the instances will be resampled, otherwise they will be rewighted. 
+   * Applies the cost matrix to a set of instances. If a random number generator is
+   * supplied the instances will be resampled, otherwise they will be rewighted.
    * Adapted from code once sitting in Instances.java
    *
    * @param data the instances to reweight.
@@ -157,7 +157,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
    */
   public Instances applyCostMatrix(Instances data, Random random)
     throws Exception {
-    
+
     double sumOfWeightFactors = 0, sumOfMissClassWeights,
       sumOfWeights;
     double [] weightOfInstancesInClass, weightFactor, weightOfInstances;
@@ -166,10 +166,9 @@ public class CostMatrix implements Serializable, RevisionHandler {
     if (data.classIndex() < 0) {
       throw new Exception("Class index is not set!");
     }
- 
-    if (size() != data.numClasses()) { 
-      throw new Exception("Misclassification cost matrix has "+
-			  "wrong format!");
+
+    if (size() != data.numClasses()) {
+      throw new Exception("Misclassification cost matrix has wrong format!");
     }
 
     // are there any non-fixed, per-instance costs defined in the matrix?
@@ -202,7 +201,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
         // Change instances weight or do resampling
         if (random != null) {
           return data.resampleWithWeights(random, weightOfInstances);
-        } else { 
+        } else {
           Instances instances = new Instances(data);
           for (int i = 0; i < data.numInstances(); i++) {
             instances.instance(i).setWeight(weightOfInstances[i]);
@@ -211,41 +210,41 @@ public class CostMatrix implements Serializable, RevisionHandler {
         }
       }
     }
-     
+
     weightFactor = new double[data.numClasses()];
     weightOfInstancesInClass = new double[data.numClasses()];
     for (int j = 0; j < data.numInstances(); j++) {
-      weightOfInstancesInClass[(int)data.instance(j).classValue()] += 
-	data.instance(j).weight();
+      weightOfInstancesInClass[(int)data.instance(j).classValue()] +=
+        data.instance(j).weight();
     }
     sumOfWeights = Utils.sum(weightOfInstancesInClass);
 
     // normalize the matrix if not already
     for (int i=0; i< m_size; i++) {
       if (!Utils.eq(((Double)getCell(i, i)).doubleValue(), 0)) {
-	CostMatrix normMatrix = new CostMatrix(this);
-	normMatrix.normalize();
-	return normMatrix.applyCostMatrix(data, random);
+        CostMatrix normMatrix = new CostMatrix(this);
+        normMatrix.normalize();
+        return normMatrix.applyCostMatrix(data, random);
       }
     }
 
-    for (int i = 0; i < data.numClasses(); i++) {      
-      // Using Kai Ming Ting's formula for deriving weights for 
-      // the classes and Breiman's heuristic for multiclass 
+    for (int i = 0; i < data.numClasses(); i++) {
+      // Using Kai Ming Ting's formula for deriving weights for
+      // the classes and Breiman's heuristic for multiclass
       // problems.
 
       sumOfMissClassWeights = 0;
       for (int j = 0; j < data.numClasses(); j++) {
-	if (Utils.sm(((Double)getCell(i,j)).doubleValue(),0)) {
-	  throw new Exception("Neg. weights in misclassification "+
-			      "cost matrix!"); 
-	}
-	sumOfMissClassWeights 
+        if (Utils.sm(((Double)getCell(i,j)).doubleValue(),0)) {
+          throw new Exception("Neg. weights in misclassification "+
+              "cost matrix!");
+        }
+        sumOfMissClassWeights
           += ((Double)getCell(i,j)).doubleValue();
       }
       weightFactor[i] = sumOfMissClassWeights * sumOfWeights;
-      sumOfWeightFactors += sumOfMissClassWeights * 
-	weightOfInstancesInClass[i];
+      sumOfWeightFactors += sumOfMissClassWeights *
+        weightOfInstancesInClass[i];
     }
     for (int i = 0; i < data.numClasses(); i++) {
       weightFactor[i] /= sumOfWeightFactors;
@@ -255,16 +254,16 @@ public class CostMatrix implements Serializable, RevisionHandler {
     weightOfInstances = new double[data.numInstances()];
     for (int i = 0; i < data.numInstances(); i++) {
       weightOfInstances[i] = data.instance(i).weight()*
-	weightFactor[(int)data.instance(i).classValue()];
+        weightFactor[(int)data.instance(i).classValue()];
     }
 
     // Change instances weight or do resampling
     if (random != null) {
       return data.resampleWithWeights(random, weightOfInstances);
-    } else { 
+    } else {
       Instances instances = new Instances(data);
       for (int i = 0; i < data.numInstances(); i++) {
-	instances.instance(i).setWeight(weightOfInstances[i]);
+        instances.instance(i).setWeight(weightOfInstances[i]);
       }
       return instances;
     }
@@ -272,7 +271,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
 
   /**
    * Calculates the expected misclassification cost for each possible class value,
-   * given class probability estimates. 
+   * given class probability estimates.
    *
    * @param classProbs the class probability estimates.
    * @return the expected costs.
@@ -280,7 +279,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
    */
   public double[] expectedCosts(double[] classProbs) throws Exception {
 
-    if (classProbs.length != m_size) { 
+    if (classProbs.length != m_size) {
       throw new Exception("Length of probability estimates don't "
                           +"match cost matrix");
     }
@@ -294,7 +293,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
           throw new Exception("Can't use non-fixed costs in "
                               +"computing expected costs.");
         }
-	costs[x] += classProbs[y] * ((Double)element).doubleValue();
+        costs[x] += classProbs[y] * ((Double)element).doubleValue();
       }
     }
 
@@ -303,7 +302,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
 
   /**
    * Calculates the expected misclassification cost for each possible class value,
-   * given class probability estimates. 
+   * given class probability estimates.
    *
    * @param classProbs the class probability estimates.
    * @param inst the current instance for which the class probabilites
@@ -311,10 +310,10 @@ public class CostMatrix implements Serializable, RevisionHandler {
    * @return the expected costs.
    * @exception Exception if something goes wrong
    */
-  public double[] expectedCosts(double [] classProbs, 
+  public double[] expectedCosts(double [] classProbs,
                                 Instance inst) throws Exception {
 
-    if (classProbs.length != m_size) { 
+    if (classProbs.length != m_size) {
       throw new Exception("Length of probability estimates don't "
                           +"match cost matrix");
     }
@@ -322,7 +321,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
     if (!replaceStrings()) {
       return expectedCosts(classProbs);
     }
-    
+
     double[] costs = new double[m_size];
 
     for (int x = 0; x < m_size; x++) {
@@ -330,12 +329,12 @@ public class CostMatrix implements Serializable, RevisionHandler {
         Object element = getCell(y, x);
         double costVal;
         if (!(element instanceof Double)) {
-          costVal = 
+          costVal =
             ((AttributeExpression)element).evaluateExpression(inst);
         } else {
           costVal = ((Double)element).doubleValue();
         }
-	costs[x] += classProbs[y] * costVal;
+        costs[x] += classProbs[y] * costVal;
       }
     }
 
@@ -375,7 +374,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
    * @exception Exception if cost matrix contains non-fixed
    * costs
    */
-  public double getMaxCost(int classVal, Instance inst) 
+  public double getMaxCost(int classVal, Instance inst)
     throws Exception {
 
     if (!replaceStrings()) {
@@ -387,7 +386,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
     for (int i = 0; i < m_size; i++) {
       Object element = getCell(classVal, i);
       if (!(element instanceof Double)) {
-        cost = 
+        cost =
           ((AttributeExpression)element).evaluateExpression(inst);
       } else {
         cost = ((Double)element).doubleValue();
@@ -415,12 +414,12 @@ public class CostMatrix implements Serializable, RevisionHandler {
   }
 
   /**
-   * Loads a cost matrix in the old format from a reader. Adapted from code once sitting 
+   * Loads a cost matrix in the old format from a reader. Adapted from code once sitting
    * in Instances.java
    *
    * @param reader the reader to get the values from.
    * @exception Exception if the matrix cannot be read correctly.
-   */  
+   */
   public void readOldFormat(Reader reader) throws Exception {
 
     StreamTokenizer tokenizer;
@@ -433,77 +432,74 @@ public class CostMatrix implements Serializable, RevisionHandler {
 
     tokenizer.commentChar('%');
     tokenizer.eolIsSignificant(true);
-    while (StreamTokenizer.TT_EOF != 
-	   (currentToken = tokenizer.nextToken())) {
+    while (StreamTokenizer.TT_EOF != (currentToken = tokenizer.nextToken())) {
 
-      // Skip empty lines 
+      // Skip empty lines
       if (currentToken == StreamTokenizer.TT_EOL) {
-	continue;
+        continue;
       }
 
       // Get index of first class.
       if (currentToken != StreamTokenizer.TT_NUMBER) {
-	throw new Exception("Only numbers and comments allowed "+
-			    "in cost file!");
+        throw new Exception("Only numbers and comments allowed "+
+            "in cost file!");
       }
       firstIndex = tokenizer.nval;
       if (!Utils.eq((double)(int)firstIndex,firstIndex)) {
-	throw new Exception("First number in line has to be "+
-			    "index of a class!");
+        throw new Exception("First number in line has to be "+
+            "index of a class!");
       }
       if ((int)firstIndex >= size()) {
-	throw new Exception("Class index out of range!");
+        throw new Exception("Class index out of range!");
       }
 
       // Get index of second class.
-      if (StreamTokenizer.TT_EOF == 
-	  (currentToken = tokenizer.nextToken())) {
-	throw new Exception("Premature end of file!");
+      if (StreamTokenizer.TT_EOF == (currentToken = tokenizer.nextToken())) {
+        throw new Exception("Premature end of file!");
       }
       if (currentToken == StreamTokenizer.TT_EOL) {
-	throw new Exception("Premature end of line!");
+        throw new Exception("Premature end of line!");
       }
       if (currentToken != StreamTokenizer.TT_NUMBER) {
-	throw new Exception("Only numbers and comments allowed "+
-			    "in cost file!");
+        throw new Exception("Only numbers and comments allowed "+
+            "in cost file!");
       }
       secondIndex = tokenizer.nval;
       if (!Utils.eq((double)(int)secondIndex,secondIndex)) {
-	throw new Exception("Second number in line has to be "+
-			    "index of a class!");
+        throw new Exception("Second number in line has to be "+
+            "index of a class!");
       }
       if ((int)secondIndex >= size()) {
-	throw new Exception("Class index out of range!");
+        throw new Exception("Class index out of range!");
       }
       if ((int)secondIndex == (int)firstIndex) {
-	throw new Exception("Diagonal of cost matrix non-zero!");
+        throw new Exception("Diagonal of cost matrix non-zero!");
       }
 
       // Get cost factor.
-      if (StreamTokenizer.TT_EOF == 
-	  (currentToken = tokenizer.nextToken())) {
-	throw new Exception("Premature end of file!");
+      if (StreamTokenizer.TT_EOF == (currentToken = tokenizer.nextToken())) {
+        throw new Exception("Premature end of file!");
       }
       if (currentToken == StreamTokenizer.TT_EOL) {
-	throw new Exception("Premature end of line!");
+        throw new Exception("Premature end of line!");
       }
       if (currentToken != StreamTokenizer.TT_NUMBER) {
-	throw new Exception("Only numbers and comments allowed "+
-			    "in cost file!");
+        throw new Exception("Only numbers and comments allowed "+
+            "in cost file!");
       }
       weight = tokenizer.nval;
       if (!Utils.gr(weight,0)) {
-	throw new Exception("Only positive weights allowed!");
+        throw new Exception("Only positive weights allowed!");
       }
-      setCell((int)firstIndex, (int)secondIndex, 
-                 new Double(weight));
+      setCell((int)firstIndex, (int)secondIndex,
+          new Double(weight));
     }
   }
 
   /**
    * Reads a matrix from a reader. The first line in the file should
    * contain the number of rows and columns. Subsequent lines
-   * contain elements of the matrix. 
+   * contain elements of the matrix.
    * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     reader the reader containing the matrix
@@ -518,10 +514,10 @@ public class CostMatrix implements Serializable, RevisionHandler {
     while ((line = lnr.readLine()) != null) {
 
       // Comments
-      if (line.startsWith("%")) {  
+      if (line.startsWith("%")) {
         continue;
       }
-      
+
       StringTokenizer st = new StringTokenizer(line);
       // Ignore blank lines
       if (!st.hasMoreTokens()) {
@@ -531,7 +527,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
       if (currentRow < 0) {
         int rows = Integer.parseInt(st.nextToken());
         if (!st.hasMoreTokens()) {
-          throw new Exception("Line " + lnr.getLineNumber() 
+          throw new Exception("Line " + lnr.getLineNumber()
               + ": expected number of columns");
         }
 
@@ -548,13 +544,13 @@ public class CostMatrix implements Serializable, RevisionHandler {
 
       } else {
         if (currentRow == m_size) {
-          throw new Exception("Line " + lnr.getLineNumber() 
+          throw new Exception("Line " + lnr.getLineNumber()
               + ": too many rows provided");
         }
 
         for (int i = 0; i < m_size; i++) {
           if (!st.hasMoreTokens()) {
-            throw new Exception("Line " + lnr.getLineNumber() 
+            throw new Exception("Line " + lnr.getLineNumber()
                 + ": too few matrix elements provided");
           }
 
@@ -576,18 +572,18 @@ public class CostMatrix implements Serializable, RevisionHandler {
         currentRow++;
       }
     }
-    
+
     if (currentRow == -1) {
-      throw new Exception("Line " + lnr.getLineNumber() 
+      throw new Exception("Line " + lnr.getLineNumber()
                           + ": expected number of rows");
     } else if (currentRow != m_size) {
-      throw new Exception("Line " + lnr.getLineNumber() 
+      throw new Exception("Line " + lnr.getLineNumber()
                           + ": too few rows provided");
     }
   }
 
   /**
-   * Writes out a matrix. The format can be read via the 
+   * Writes out a matrix. The format can be read via the
    * CostMatrix(Reader) constructor.
    * (FracPete: taken from old weka.core.Matrix class)
    *
@@ -608,7 +604,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
   }
 
   /**
-   * converts the Matrix into a single line Matlab string: matrix is enclosed 
+   * converts the Matrix into a single line Matlab string: matrix is enclosed
    * by parentheses, rows are separated by semicolon and single cells by
    * blanks, e.g., [1 2; 3 4].
    * @return      the matrix in Matlab single line format
@@ -626,7 +622,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
       if (i > 0) {
         result.append("; ");
       }
-      
+
       for (n = 0; n < m_size; n++) {
         if (n > 0) {
           result.append(" ");
@@ -634,7 +630,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
         result.append(getCell(i, n));
       }
     }
-    
+
     result.append("]");
 
     return result.toString();
@@ -655,7 +651,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
   /**
    * Return the contents of a particular cell. Note: this
    * method returns the Object stored at a particular cell.
-   * 
+   *
    * @param rowIndex the row
    * @param columnIndex the column
    * @return the value at the cell
@@ -723,7 +719,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
     return Matrix.parseMatlab(matlab);
   }
 
-  /** 
+  /**
    * Converts a matrix to a string.
    * (FracPete: taken from old weka.core.Matrix class)
    *
@@ -742,7 +738,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
         element = getCell(i, j);
         if (element instanceof Double) {
           double current = ((Double)element).doubleValue();
-       
+
           if (current < 0)
             current *= -11;
           if (current > maxval)
@@ -760,7 +756,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
       }
     }
     if (maxval > 0) {
-      widthNumber = (int)(Math.log(maxval) / Math.log(10) 
+      widthNumber = (int)(Math.log(maxval) / Math.log(10)
                           + (fractional ? 4 : 1));
     }
 
@@ -768,7 +764,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
       ? widthNumber
       : widthExpression;
 
-    StringBuffer text = new StringBuffer();   
+    StringBuffer text = new StringBuffer();
     for (int i = 0; i < size(); i++) {
       for (int j = 0; j < size(); j++) {
         element = getCell(i, j);
@@ -796,14 +792,14 @@ public class CostMatrix implements Serializable, RevisionHandler {
     }
 
     return text.toString();
-  } 
-  
+  }
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -41,24 +41,24 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for examining the capabilities and finding problems with 
+ * Class for examining the capabilities and finding problems with
  * classifiers. If you implement a classifier using the WEKA.libraries,
  * you should run the checks on it to ensure robustness and correct
  * operation. Passing all the tests of this object does not mean
  * bugs in the classifier don't exist, but this will help find some
  * common ones. <p/>
- * 
+ *
  * Typical usage: <p/>
- * <code>java weka.classifiers.CheckClassifier -W classifier_name 
+ * <code>java weka.classifiers.CheckClassifier -W classifier_name
  * classifier_options </code><p/>
- * 
+ *
  * CheckClassifier reports on the following:
  * <ul>
- *    <li> Classifier abilities 
+ *    <li> Classifier abilities
  *      <ul>
  *         <li> Possible command line options to the classifier </li>
- *         <li> Whether the classifier can predict nominal, numeric, string, 
- *              date or relational class attributes. Warnings will be displayed if 
+ *         <li> Whether the classifier can predict nominal, numeric, string,
+ *              date or relational class attributes. Warnings will be displayed if
  *              performance is worse than ZeroR </li>
  *         <li> Whether the classifier can be trained incrementally </li>
  *         <li> Whether the classifier can handle numeric predictor attributes </li>
@@ -73,20 +73,20 @@ import java.util.Vector;
  *         <li> Whether the classifier can handle instance weights </li>
  *      </ul>
  *    </li>
- *    <li> Correct functioning 
+ *    <li> Correct functioning
  *      <ul>
  *         <li> Correct initialisation during buildClassifier (i.e. no result
  *              changes when buildClassifier called repeatedly) </li>
  *         <li> Whether incremental training produces the same results
- *              as during non-incremental training (which may or may not 
+ *              as during non-incremental training (which may or may not
  *              be OK) </li>
- *         <li> Whether the classifier alters the data pased to it 
+ *         <li> Whether the classifier alters the data pased to it
  *              (number of instances, instance order, instance weights, etc) </li>
- *         <li> Whether the toString() method works correctly before the 
+ *         <li> Whether the toString() method works correctly before the
  *              classifier has been built. </li>
  *      </ul>
  *    </li>
- *    <li> Degenerate cases 
+ *    <li> Degenerate cases
  *      <ul>
  *         <li> building classifier with zero training instances </li>
  *         <li> all but one predictor attribute values missing </li>
@@ -96,65 +96,65 @@ import java.util.Vector;
  *      </ul>
  *    </li>
  * </ul>
- * Running CheckClassifier with the debug option set will output the 
+ * Running CheckClassifier with the debug option set will output the
  * training and test datasets for any failed tests.<p/>
  *
  * The <code>weka.classifiers.AbstractClassifierTest</code> uses this
- * class to test all the classifiers. Any changes here, have to be 
+ * class to test all the classifiers. Any changes here, have to be
  * checked in that abstract test class, too. <p/>
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -D
  *  Turn on debugging output.</pre>
- * 
+ *
  * <pre> -S
  *  Silent mode - prints nothing to stdout.</pre>
- * 
+ *
  * <pre> -N &lt;num&gt;
  *  The number of instances in the datasets (default 20).</pre>
- * 
+ *
  * <pre> -nominal &lt;num&gt;
  *  The number of nominal attributes (default 2).</pre>
- * 
+ *
  * <pre> -nominal-values &lt;num&gt;
  *  The number of values for nominal attributes (default 1).</pre>
- * 
+ *
  * <pre> -numeric &lt;num&gt;
  *  The number of numeric attributes (default 1).</pre>
- * 
+ *
  * <pre> -string &lt;num&gt;
  *  The number of string attributes (default 1).</pre>
- * 
+ *
  * <pre> -date &lt;num&gt;
  *  The number of date attributes (default 1).</pre>
- * 
+ *
  * <pre> -relational &lt;num&gt;
  *  The number of relational attributes (default 1).</pre>
- * 
+ *
  * <pre> -num-instances-relational &lt;num&gt;
  *  The number of instances in relational/bag attributes (default 10).</pre>
- * 
+ *
  * <pre> -words &lt;comma-separated-list&gt;
  *  The words to use in string attributes.</pre>
- * 
+ *
  * <pre> -word-separators &lt;chars&gt;
  *  The word separators to use in string attributes.</pre>
- * 
+ *
  * <pre> -W
  *  Full name of the classifier analysed.
  *  eg: weka.classifiers.bayes.NaiveBayes
  *  (default weka.classifiers.rules.ZeroR)</pre>
- * 
- * <pre> 
+ *
+ * <pre>
  * Options specific to classifier weka.classifiers.rules.ZeroR:
  * </pre>
- * 
+ *
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
- * 
+ *
  <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p/>
@@ -176,10 +176,10 @@ public class CheckClassifier
    *
    * FracPete (fracpete at waikato dot ac dot nz)
    */
-  
+
   /*** The classifier to be examined */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
-  
+
   /**
    * Returns an enumeration describing the available options.
    *
@@ -187,20 +187,20 @@ public class CheckClassifier
    */
   public Enumeration listOptions() {
     Vector result = new Vector();
-    
+
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
       result.addElement(en.nextElement());
-    
+
     result.addElement(new Option(
         "\tFull name of the classifier analysed.\n"
         +"\teg: weka.classifiers.bayes.NaiveBayes\n"
         + "\t(default weka.classifiers.rules.ZeroR)",
         "W", 1, "-W"));
-    
-    if ((m_Classifier != null) 
+
+    if ((m_Classifier != null)
         && (m_Classifier instanceof OptionHandler)) {
-      result.addElement(new Option("", "", 0, 
+      result.addElement(new Option("", "", 0,
           "\nOptions specific to classifier "
           + m_Classifier.getClass().getName()
           + ":"));
@@ -208,65 +208,65 @@ public class CheckClassifier
       while (enu.hasMoreElements())
         result.addElement(enu.nextElement());
     }
-    
+
     return result.elements();
   }
-  
+
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options.
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -D
    *  Turn on debugging output.</pre>
-   * 
+   *
    * <pre> -S
    *  Silent mode - prints nothing to stdout.</pre>
-   * 
+   *
    * <pre> -N &lt;num&gt;
    *  The number of instances in the datasets (default 20).</pre>
-   * 
+   *
    * <pre> -nominal &lt;num&gt;
    *  The number of nominal attributes (default 2).</pre>
-   * 
+   *
    * <pre> -nominal-values &lt;num&gt;
    *  The number of values for nominal attributes (default 1).</pre>
-   * 
+   *
    * <pre> -numeric &lt;num&gt;
    *  The number of numeric attributes (default 1).</pre>
-   * 
+   *
    * <pre> -string &lt;num&gt;
    *  The number of string attributes (default 1).</pre>
-   * 
+   *
    * <pre> -date &lt;num&gt;
    *  The number of date attributes (default 1).</pre>
-   * 
+   *
    * <pre> -relational &lt;num&gt;
    *  The number of relational attributes (default 1).</pre>
-   * 
+   *
    * <pre> -num-instances-relational &lt;num&gt;
    *  The number of instances in relational/bag attributes (default 10).</pre>
-   * 
+   *
    * <pre> -words &lt;comma-separated-list&gt;
    *  The words to use in string attributes.</pre>
-   * 
+   *
    * <pre> -word-separators &lt;chars&gt;
    *  The word separators to use in string attributes.</pre>
-   * 
+   *
    * <pre> -W
    *  Full name of the classifier analysed.
    *  eg: weka.classifiers.bayes.NaiveBayes
    *  (default weka.classifiers.rules.ZeroR)</pre>
-   * 
-   * <pre> 
+   *
+   * <pre>
    * Options specific to classifier weka.classifiers.rules.ZeroR:
    * </pre>
-   * 
+   *
    * <pre> -D
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -274,20 +274,20 @@ public class CheckClassifier
    */
   public void setOptions(String[] options) throws Exception {
     String      tmpStr;
-    
+
     super.setOptions(options);
-    
+
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
       tmpStr = weka.classifiers.rules.ZeroR.class.getName();
     setClassifier(
-	(Classifier) forName(
-	    "weka.classifiers", 
-	    Classifier.class, 
-	    tmpStr, 
-	    Utils.partitionOptions(options)));
+        (Classifier) forName(
+          "weka.classifiers",
+          Classifier.class,
+          tmpStr,
+          Utils.partitionOptions(options)));
   }
-  
+
   /**
    * Gets the current settings of the CheckClassifier.
    *
@@ -297,37 +297,37 @@ public class CheckClassifier
     Vector        result;
     String[]      options;
     int           i;
-    
+
     result = new Vector();
-    
+
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
       result.add(options[i]);
-    
+
     if (getClassifier() != null) {
       result.add("-W");
       result.add(getClassifier().getClass().getName());
     }
-    
+
     if ((m_Classifier != null) && (m_Classifier instanceof OptionHandler))
       options = ((OptionHandler) m_Classifier).getOptions();
     else
       options = new String[0];
-    
+
     if (options.length > 0) {
       result.add("--");
       for (i = 0; i < options.length; i++)
         result.add(options[i]);
     }
-    
+
     return (String[]) result.toArray(new String[result.size()]);
   }
-  
+
   /**
    * Begin the tests, reporting results to System.out
    */
   public void doTests() {
-    
+
     if (getClassifier() == null) {
       println("\n=== No classifier set ===");
       return;
@@ -335,7 +335,7 @@ public class CheckClassifier
     println("\n=== Check on Classifier: "
         + getClassifier().getClass().getName()
         + " ===\n");
-    
+
     // Start tests
     m_ClasspathProblems = false;
     println("--> Checking for interfaces");
@@ -352,16 +352,16 @@ public class CheckClassifier
     testsPerClassType(Attribute.STRING,     updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.RELATIONAL, updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
   }
-  
+
   /**
-   * Set the classifier for boosting. 
+   * Set the classifier for boosting.
    *
    * @param newClassifier the Classifier to use.
    */
   public void setClassifier(Classifier newClassifier) {
     m_Classifier = newClassifier;
   }
-  
+
   /**
    * Get the classifier used as the classifier
    *
@@ -370,7 +370,7 @@ public class CheckClassifier
   public Classifier getClassifier() {
     return m_Classifier;
   }
-  
+
   /**
    * Run a battery of tests for a given class attribute type
    *
@@ -379,11 +379,11 @@ public class CheckClassifier
    * @param weighted true if the classifier says it handles weights
    * @param multiInstance true if the classifier is a multi-instance classifier
    */
-  protected void testsPerClassType(int classType, 
+  protected void testsPerClassType(int classType,
                                    boolean updateable,
                                    boolean weighted,
                                    boolean multiInstance) {
-    
+
     boolean PNom = canPredict(true,  false, false, false, false, multiInstance, classType)[0];
     boolean PNum = canPredict(false, true,  false, false, false, multiInstance, classType)[0];
     boolean PStr = canPredict(false, false, true,  false, false, multiInstance, classType)[0];
@@ -397,30 +397,30 @@ public class CheckClassifier
     if (PNom || PNum || PStr || PDat || PRel) {
       if (weighted)
         instanceWeights(PNom, PNum, PStr, PDat, PRel, multiInstance, classType);
-      
+
       canHandleOnlyClass(PNom, PNum, PStr, PDat, PRel, classType);
-      
+
       if (classType == Attribute.NOMINAL)
         canHandleNClasses(PNom, PNum, PStr, PDat, PRel, multiInstance, 4);
 
       if (!multiInstance) {
-	canHandleClassAsNthAttribute(PNom, PNum, PStr, PDat, PRel, multiInstance, classType, 0);
-	canHandleClassAsNthAttribute(PNom, PNum, PStr, PDat, PRel, multiInstance, classType, 1);
+        canHandleClassAsNthAttribute(PNom, PNum, PStr, PDat, PRel, multiInstance, classType, 0);
+        canHandleClassAsNthAttribute(PNom, PNum, PStr, PDat, PRel, multiInstance, classType, 1);
       }
-      
+
       canHandleZeroTraining(PNom, PNum, PStr, PDat, PRel, multiInstance, classType);
-      boolean handleMissingPredictors = canHandleMissing(PNom, PNum, PStr, PDat, PRel, 
-          multiInstance, classType, 
+      boolean handleMissingPredictors = canHandleMissing(PNom, PNum, PStr, PDat, PRel,
+          multiInstance, classType,
           true, false, 20)[0];
       if (handleMissingPredictors)
         canHandleMissing(PNom, PNum, PStr, PDat, PRel, multiInstance, classType, true, false, 100);
-      
-      boolean handleMissingClass = canHandleMissing(PNom, PNum, PStr, PDat, PRel, 
-          multiInstance, classType, 
+
+      boolean handleMissingClass = canHandleMissing(PNom, PNum, PStr, PDat, PRel,
+          multiInstance, classType,
           false, true, 20)[0];
       if (handleMissingClass)
         canHandleMissing(PNom, PNum, PStr, PDat, PRel, multiInstance, classType, false, true, 100);
-      
+
       correctBuildInitialisation(PNom, PNum, PStr, PDat, PRel, multiInstance, classType);
       datasetIntegrity(PNom, PNum, PStr, PDat, PRel, multiInstance, classType,
           handleMissingPredictors, handleMissingClass);
@@ -431,16 +431,16 @@ public class CheckClassifier
   }
 
   /**
-   * Checks whether the scheme's toString() method works even though the 
+   * Checks whether the scheme's toString() method works even though the
    * classifies hasn't been built yet.
    *
    * @return index 0 is true if the toString() method works fine
    */
   protected boolean[] testToString() {
     boolean[] result = new boolean[2];
-    
+
     print("toString...");
-    
+
     try {
       Classifier copy = (Classifier) m_Classifier.getClass().newInstance();
       copy.toString();
@@ -456,10 +456,10 @@ public class CheckClassifier
         println("\n");
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * tests for a serialVersionUID. Fails in case the scheme doesn't declare
    * a UID.
@@ -468,28 +468,28 @@ public class CheckClassifier
    */
   protected boolean[] declaresSerialVersionUID() {
     boolean[] result = new boolean[2];
-    
+
     print("serialVersionUID...");
-    
+
     result[0] = !SerializationHelper.needsUID(m_Classifier.getClass());
-    
+
     if (result[0])
       println("yes");
     else
       println("no");
-    
+
     return result;
   }
-  
+
   /**
    * Checks whether the scheme can take command line options.
    *
    * @return index 0 is true if the classifier can take options
    */
   protected boolean[] canTakeOptions() {
-    
+
     boolean[] result = new boolean[2];
-    
+
     print("options...");
     if (m_Classifier instanceof OptionHandler) {
       println("yes");
@@ -498,7 +498,7 @@ public class CheckClassifier
         Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
         while (enu.hasMoreElements()) {
           Option option = (Option) enu.nextElement();
-          print(option.synopsis() + "\n" 
+          print(option.synopsis() + "\n"
               + option.description() + "\n");
         }
         println("\n");
@@ -509,19 +509,19 @@ public class CheckClassifier
       println("no");
       result[0] = false;
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks whether the scheme can build models incrementally.
    *
    * @return index 0 is true if the classifier can train incrementally
    */
   protected boolean[] updateableClassifier() {
-    
+
     boolean[] result = new boolean[2];
-    
+
     print("updateable classifier...");
     if (m_Classifier instanceof UpdateableClassifier) {
       println("yes");
@@ -531,19 +531,19 @@ public class CheckClassifier
       println("no");
       result[0] = false;
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks whether the scheme says it can handle instance weights.
    *
    * @return true if the classifier handles instance weights
    */
   protected boolean[] weightedInstancesHandler() {
-    
+
     boolean[] result = new boolean[2];
-    
+
     print("weighted instances classifier...");
     if (m_Classifier instanceof WeightedInstancesHandler) {
       println("yes");
@@ -553,18 +553,18 @@ public class CheckClassifier
       println("no");
       result[0] = false;
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks whether the scheme handles multi-instance data.
-   * 
+   *
    * @return true if the classifier handles multi-instance data
    */
   protected boolean[] multiInstanceHandler() {
     boolean[] result = new boolean[2];
-    
+
     print("multi-instance classifier...");
     if (m_Classifier instanceof MultiInstanceCapabilitiesHandler) {
       println("yes");
@@ -574,10 +574,10 @@ public class CheckClassifier
       println("no");
       result[0] = false;
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks basic prediction of the scheme, for simple non-troublesome
    * datasets.
@@ -589,18 +589,18 @@ public class CheckClassifier
    * @param relationalPredictor if true use relational predictor attributes
    * @param multiInstance whether multi-instance is needed
    * @param classType the class type (NOMINAL, NUMERIC, etc.)
-   * @return index 0 is true if the test was passed, index 1 is true if test 
+   * @return index 0 is true if the test was passed, index 1 is true if test
    *         was acceptable
    */
   protected boolean[] canPredict(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int classType) {
-    
+
     print("basic predict");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
@@ -615,19 +615,19 @@ public class CheckClassifier
     accepts.addElement("relational");
     accepts.addElement("multi-instance");
     accepts.addElement("not in classpath");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = getNumInstances(), numTest = getNumInstances(),
     numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
-    return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
-        datePredictor, relationalPredictor, 
+
+    return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
+        datePredictor, relationalPredictor,
         multiInstance,
-        classType, 
+        classType,
         missingLevel, predictorMissing, classMissing,
-        numTrain, numTest, numClasses, 
+        numTrain, numTest, numClasses,
         accepts);
   }
-  
+
   /**
    * Checks whether the scheme can handle data that contains only the class
    * attribute. If a scheme cannot build a proper model with that data, it
@@ -639,17 +639,17 @@ public class CheckClassifier
    * @param datePredictor if true use date predictor attributes
    * @param relationalPredictor if true use relational predictor attributes
    * @param classType the class type (NOMINAL, NUMERIC, etc.)
-   * @return index 0 is true if the test was passed, index 1 is true if test 
+   * @return index 0 is true if the test was passed, index 1 is true if test
    *         was acceptable
    */
   protected boolean[] canHandleOnlyClass(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       int classType) {
-    
+
     print("only class in data");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, false, classType);
@@ -657,18 +657,18 @@ public class CheckClassifier
     FastVector accepts = new FastVector();
     accepts.addElement("class");
     accepts.addElement("zeror");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = getNumInstances(), numTest = getNumInstances(),
     missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
-    return runBasicTest(false, false, false, false, false, 
+
+    return runBasicTest(false, false, false, false, false,
                         false,
                         classType,
                         missingLevel, predictorMissing, classMissing,
-                        numTrain, numTest, 2, 
+                        numTrain, numTest, 2,
                         accepts);
   }
-  
+
   /**
    * Checks whether nominal schemes can handle more than two classes.
    * If a scheme is only designed for two-class problems it should
@@ -681,18 +681,18 @@ public class CheckClassifier
    * @param relationalPredictor if true use relational predictor attributes
    * @param multiInstance whether multi-instance is needed
    * @param numClasses the number of classes to test
-   * @return index 0 is true if the test was passed, index 1 is true if test 
+   * @return index 0 is true if the test was passed, index 1 is true if test
    *         was acceptable
    */
   protected boolean[] canHandleNClasses(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int numClasses) {
-    
+
     print("more than two class problems");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, Attribute.NOMINAL);
@@ -700,19 +700,19 @@ public class CheckClassifier
     FastVector accepts = new FastVector();
     accepts.addElement("number");
     accepts.addElement("class");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = getNumInstances(), numTest = getNumInstances(),
     missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
-    return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
-                        datePredictor, relationalPredictor, 
+
+    return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
+                        datePredictor, relationalPredictor,
                         multiInstance,
                         Attribute.NOMINAL,
                         missingLevel, predictorMissing, classMissing,
-                        numTrain, numTest, numClasses, 
+                        numTrain, numTest, numClasses,
                         accepts);
   }
-  
+
   /**
    * Checks whether the scheme can handle class attributes as Nth attribute.
    *
@@ -724,20 +724,20 @@ public class CheckClassifier
    * @param multiInstance whether multi-instance is needed
    * @param classType the class type (NUMERIC, NOMINAL, etc.)
    * @param classIndex the index of the class attribute (0-based, -1 means last attribute)
-   * @return index 0 is true if the test was passed, index 1 is true if test 
+   * @return index 0 is true if the test was passed, index 1 is true if test
    *         was acceptable
    * @see TestInstances#CLASS_IS_LAST
    */
   protected boolean[] canHandleClassAsNthAttribute(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int classType,
       int classIndex) {
-    
+
     if (classIndex == TestInstances.CLASS_IS_LAST)
       print("class attribute as last attribute");
     else
@@ -746,20 +746,20 @@ public class CheckClassifier
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
     FastVector accepts = new FastVector();
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2, 
+    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2,
     missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
-    return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
-                        datePredictor, relationalPredictor, 
+
+    return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
+                        datePredictor, relationalPredictor,
                         multiInstance,
                         classType,
                         classIndex,
                         missingLevel, predictorMissing, classMissing,
-                        numTrain, numTest, numClasses, 
+                        numTrain, numTest, numClasses,
                         accepts);
   }
-  
+
   /**
    * Checks whether the scheme can handle zero training instances.
    *
@@ -770,18 +770,18 @@ public class CheckClassifier
    * @param relationalPredictor if true use relational predictor attributes
    * @param multiInstance whether multi-instance is needed
    * @param classType the class type (NUMERIC, NOMINAL, etc.)
-   * @return index 0 is true if the test was passed, index 1 is true if test 
+   * @return index 0 is true if the test was passed, index 1 is true if test
    *         was acceptable
    */
   protected boolean[] canHandleZeroTraining(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int classType) {
-    
+
     print("handle zero training instances");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
@@ -789,24 +789,24 @@ public class CheckClassifier
     FastVector accepts = new FastVector();
     accepts.addElement("train");
     accepts.addElement("value");
-    int numTrain = 0, numTest = getNumInstances(), numClasses = 2, 
+    int numTrain = 0, numTest = getNumInstances(), numClasses = 2,
     missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
+
     return runBasicTest(
-              nominalPredictor, numericPredictor, stringPredictor, 
-              datePredictor, relationalPredictor, 
+              nominalPredictor, numericPredictor, stringPredictor,
+              datePredictor, relationalPredictor,
               multiInstance,
-              classType, 
+              classType,
               missingLevel, predictorMissing, classMissing,
-              numTrain, numTest, numClasses, 
+              numTrain, numTest, numClasses,
               accepts);
   }
-  
+
   /**
-   * Checks whether the scheme correctly initialises models when 
+   * Checks whether the scheme correctly initialises models when
    * buildClassifier is called. This test calls buildClassifier with
-   * one training dataset and records performance on a test set. 
+   * one training dataset and records performance on a test set.
    * buildClassifier is then called on a training set with different
    * structure, and then again with the original training set. The
    * performance on the test set is compared with the original results
@@ -825,23 +825,23 @@ public class CheckClassifier
    */
   protected boolean[] correctBuildInitialisation(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int classType) {
 
     boolean[] result = new boolean[2];
-    
+
     print("correct initialisation during buildClassifier");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = getNumInstances(), numTest = getNumInstances(),
     numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
+
     Instances train1 = null;
     Instances test1 = null;
     Instances train2 = null;
@@ -853,54 +853,54 @@ public class CheckClassifier
     boolean built = false;
     int stage = 0;
     try {
-      
-      // Make two sets of train/test splits with different 
+
+      // Make two sets of train/test splits with different
       // numbers of attributes
-      train1 = makeTestDataset(42, numTrain, 
+      train1 = makeTestDataset(42, numTrain,
                                nominalPredictor    ? getNumNominal()    : 0,
-                               numericPredictor    ? getNumNumeric()    : 0, 
-                               stringPredictor     ? getNumString()     : 0, 
-                               datePredictor       ? getNumDate()       : 0, 
-                               relationalPredictor ? getNumRelational() : 0, 
-                               numClasses, 
+                               numericPredictor    ? getNumNumeric()    : 0,
+                               stringPredictor     ? getNumString()     : 0,
+                               datePredictor       ? getNumDate()       : 0,
+                               relationalPredictor ? getNumRelational() : 0,
+                               numClasses,
                                classType,
                                multiInstance);
-      train2 = makeTestDataset(84, numTrain, 
+      train2 = makeTestDataset(84, numTrain,
                                nominalPredictor    ? getNumNominal() + 1 : 0,
-                               numericPredictor    ? getNumNumeric() + 1 : 0, 
-                               stringPredictor     ? getNumString()      : 0, 
-                               datePredictor       ? getNumDate()        : 0, 
-                               relationalPredictor ? getNumRelational()  : 0, 
-                               numClasses, 
+                               numericPredictor    ? getNumNumeric() + 1 : 0,
+                               stringPredictor     ? getNumString()      : 0,
+                               datePredictor       ? getNumDate()        : 0,
+                               relationalPredictor ? getNumRelational()  : 0,
+                               numClasses,
                                classType,
                                multiInstance);
       test1 = makeTestDataset(24, numTest,
                               nominalPredictor     ? getNumNominal()    : 0,
-                              numericPredictor     ? getNumNumeric()    : 0, 
-                              stringPredictor      ? getNumString()     : 0, 
-                              datePredictor        ? getNumDate()       : 0, 
-                              relationalPredictor  ? getNumRelational() : 0, 
-                              numClasses, 
+                              numericPredictor     ? getNumNumeric()    : 0,
+                              stringPredictor      ? getNumString()     : 0,
+                              datePredictor        ? getNumDate()       : 0,
+                              relationalPredictor  ? getNumRelational() : 0,
+                              numClasses,
                               classType,
                               multiInstance);
       test2 = makeTestDataset(48, numTest,
                               nominalPredictor    ? getNumNominal() + 1 : 0,
-                              numericPredictor    ? getNumNumeric() + 1 : 0, 
-                              stringPredictor     ? getNumString()      : 0, 
-                              datePredictor       ? getNumDate()        : 0, 
-                              relationalPredictor ? getNumRelational()  : 0, 
-                              numClasses, 
+                              numericPredictor    ? getNumNumeric() + 1 : 0,
+                              stringPredictor     ? getNumString()      : 0,
+                              datePredictor       ? getNumDate()        : 0,
+                              relationalPredictor ? getNumRelational()  : 0,
+                              numClasses,
                               classType,
                               multiInstance);
       if (missingLevel > 0) {
         addMissing(train1, missingLevel, predictorMissing, classMissing);
-        addMissing(test1, Math.min(missingLevel,50), predictorMissing, 
+        addMissing(test1, Math.min(missingLevel,50), predictorMissing,
             classMissing);
         addMissing(train2, missingLevel, predictorMissing, classMissing);
-        addMissing(test2, Math.min(missingLevel,50), predictorMissing, 
+        addMissing(test2, Math.min(missingLevel,50), predictorMissing,
             classMissing);
       }
-      
+
       classifier = AbstractClassifier.makeCopies(getClassifier(), 1)[0];
       evaluation1A = new Evaluation(train1);
       evaluation1B = new Evaluation(train1);
@@ -915,7 +915,7 @@ public class CheckClassifier
       if (!testWRTZeroR(classifier, evaluation1A, train1, test1)[0]) {
         throw new Exception("Scheme performs worse than ZeroR");
       }
-      
+
       stage = 1;
       built = false;
       classifier.buildClassifier(train2);
@@ -923,7 +923,7 @@ public class CheckClassifier
       if (!testWRTZeroR(classifier, evaluation2, train2, test2)[0]) {
         throw new Exception("Scheme performs worse than ZeroR");
       }
-      
+
       stage = 2;
       built = false;
       classifier.buildClassifier(train1);
@@ -931,7 +931,7 @@ public class CheckClassifier
       if (!testWRTZeroR(classifier, evaluation1B, train1, test1)[0]) {
         throw new Exception("Scheme performs worse than ZeroR");
       }
-      
+
       stage = 3;
       if (!evaluation1A.equals(evaluation1B)) {
         if (m_Debug) {
@@ -948,7 +948,7 @@ public class CheckClassifier
       }
       println("yes");
       result[0] = true;
-      
+
       if (false && m_Debug) {
         println("\n=== Full report ===\n"
             + evaluation1A.toSummaryString("\nFirst buildClassifier()",
@@ -959,7 +959,7 @@ public class CheckClassifier
                 true)
                 + "\n\n");
       }
-    } 
+    }
     catch (Exception ex) {
       String msg = ex.getMessage().toLowerCase();
       if (msg.indexOf("worse than zeror") >= 0) {
@@ -990,7 +990,7 @@ public class CheckClassifier
             break;
           case 3:
             print(", comparing results from builds of dataset 1");
-            break;	  
+            break;
         }
         println(": " + ex.getMessage() + "\n");
         println("here are the datasets:\n");
@@ -1004,10 +1004,10 @@ public class CheckClassifier
             + test2.toString() + "\n\n");
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks basic missing value handling of the scheme. If the missing
    * values cause an exception to be thrown by the scheme, this will be
@@ -1020,17 +1020,17 @@ public class CheckClassifier
    * @param relationalPredictor if true use relational predictor attributes
    * @param multiInstance whether multi-instance is needed
    * @param classType the class type (NUMERIC, NOMINAL, etc.)
-   * @param predictorMissing true if the missing values may be in 
+   * @param predictorMissing true if the missing values may be in
    * the predictors
    * @param classMissing true if the missing values may be in the class
    * @param missingLevel the percentage of missing values
-   * @return index 0 is true if the test was passed, index 1 is true if test 
+   * @return index 0 is true if the test was passed, index 1 is true if test
    *         was acceptable
    */
   protected boolean[] canHandleMissing(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
@@ -1038,7 +1038,7 @@ public class CheckClassifier
       boolean predictorMissing,
       boolean classMissing,
       int missingLevel) {
-    
+
     if (missingLevel == 100)
       print("100% ");
     print("missing");
@@ -1057,18 +1057,18 @@ public class CheckClassifier
     accepts.addElement("missing");
     accepts.addElement("value");
     accepts.addElement("train");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = getNumInstances(), numTest = getNumInstances(),
     numClasses = 2;
-    
-    return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
-        datePredictor, relationalPredictor, 
+
+    return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
+        datePredictor, relationalPredictor,
         multiInstance,
-        classType, 
+        classType,
         missingLevel, predictorMissing, classMissing,
-        numTrain, numTest, numClasses, 
+        numTrain, numTest, numClasses,
         accepts);
   }
-  
+
   /**
    * Checks whether an updateable scheme produces the same model when
    * trained incrementally as when batch trained. The model itself
@@ -1087,22 +1087,22 @@ public class CheckClassifier
    */
   protected boolean[] updatingEquality(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int classType) {
-    
+
     print("incremental training produces the same results"
         + " as batch training");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = getNumInstances(), numTest = getNumInstances(),
     numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
+
     boolean[] result = new boolean[2];
     Instances train = null;
     Instances test = null;
@@ -1111,27 +1111,27 @@ public class CheckClassifier
     Evaluation evaluationI = null;
     boolean built = false;
     try {
-      train = makeTestDataset(42, numTrain, 
+      train = makeTestDataset(42, numTrain,
                               nominalPredictor    ? getNumNominal()    : 0,
-                              numericPredictor    ? getNumNumeric()    : 0, 
-                              stringPredictor     ? getNumString()     : 0, 
-                              datePredictor       ? getNumDate()       : 0, 
-                              relationalPredictor ? getNumRelational() : 0, 
-                              numClasses, 
+                              numericPredictor    ? getNumNumeric()    : 0,
+                              stringPredictor     ? getNumString()     : 0,
+                              datePredictor       ? getNumDate()       : 0,
+                              relationalPredictor ? getNumRelational() : 0,
+                              numClasses,
                               classType,
                               multiInstance);
       test = makeTestDataset(24, numTest,
                              nominalPredictor    ? getNumNominal()    : 0,
-                             numericPredictor    ? getNumNumeric()    : 0, 
-                             stringPredictor     ? getNumString()     : 0, 
-                             datePredictor       ? getNumDate()       : 0, 
-                             relationalPredictor ? getNumRelational() : 0, 
-                             numClasses, 
+                             numericPredictor    ? getNumNumeric()    : 0,
+                             stringPredictor     ? getNumString()     : 0,
+                             datePredictor       ? getNumDate()       : 0,
+                             relationalPredictor ? getNumRelational() : 0,
+                             numClasses,
                              classType,
                              multiInstance);
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
+        addMissing(test, Math.min(missingLevel, 50), predictorMissing,
             classMissing);
       }
       classifiers = AbstractClassifier.makeCopies(getClassifier(), 2);
@@ -1153,7 +1153,7 @@ public class CheckClassifier
       if (!evaluationB.equals(evaluationI)) {
         println("no");
         result[0] = false;
-        
+
         if (m_Debug) {
           println("\n=== Full Report ===");
           println("Results differ between batch and "
@@ -1177,7 +1177,7 @@ public class CheckClassifier
       }
     } catch (Exception ex) {
       result[0] = false;
-      
+
       print("Problem during");
       if (built)
         print(" testing");
@@ -1185,10 +1185,10 @@ public class CheckClassifier
         print(" training");
       println(": " + ex.getMessage() + "\n");
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks whether the classifier erroneously uses the class
    * value of test instances (if provided). Runs the classifier with
@@ -1206,48 +1206,48 @@ public class CheckClassifier
    */
   protected boolean[] doesntUseTestClassVal(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int classType) {
-    
+
     print("classifier ignores test instance class vals");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = 2*getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = 2*getNumInstances(), numTest = getNumInstances(),
     numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
+
     boolean[] result = new boolean[2];
     Instances train = null;
     Instances test = null;
     Classifier [] classifiers = null;
     boolean evalFail = false;
     try {
-      train = makeTestDataset(42, numTrain, 
+      train = makeTestDataset(42, numTrain,
                               nominalPredictor    ? getNumNominal() + 1 : 0,
-                              numericPredictor    ? getNumNumeric() + 1 : 0, 
-                              stringPredictor     ? getNumString()      : 0, 
-                              datePredictor       ? getNumDate()        : 0, 
-                              relationalPredictor ? getNumRelational()  : 0, 
-                              numClasses, 
+                              numericPredictor    ? getNumNumeric() + 1 : 0,
+                              stringPredictor     ? getNumString()      : 0,
+                              datePredictor       ? getNumDate()        : 0,
+                              relationalPredictor ? getNumRelational()  : 0,
+                              numClasses,
                               classType,
                               multiInstance);
       test = makeTestDataset(24, numTest,
                              nominalPredictor    ? getNumNominal() + 1 : 0,
-                             numericPredictor    ? getNumNumeric() + 1 : 0, 
-                             stringPredictor     ? getNumString()      : 0, 
-                             datePredictor       ? getNumDate()        : 0, 
-                             relationalPredictor ? getNumRelational()  : 0, 
-                             numClasses, 
+                             numericPredictor    ? getNumNumeric() + 1 : 0,
+                             stringPredictor     ? getNumString()      : 0,
+                             datePredictor       ? getNumDate()        : 0,
+                             relationalPredictor ? getNumRelational()  : 0,
+                             numClasses,
                              classType,
                              multiInstance);
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
+        addMissing(test, Math.min(missingLevel, 50), predictorMissing,
             classMissing);
       }
       classifiers = AbstractClassifier.makeCopies(getClassifier(), 2);
@@ -1257,7 +1257,7 @@ public class CheckClassifier
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
-      
+
       // Now set test values to missing when predicting
       for (int i = 0; i < test.numInstances(); i++) {
         Instance testInst = test.instance(i);
@@ -1279,16 +1279,16 @@ public class CheckClassifier
           }
         }
       }
-      
+
       println("yes");
       result[0] = true;
     } catch (Exception ex) {
       println("no");
       result[0] = false;
-      
+
       if (m_Debug) {
         println("\n=== Full Report ===");
-        
+
         if (evalFail) {
           println("Results differ between non-missing and "
               + "missing test class values.");
@@ -1301,24 +1301,24 @@ public class CheckClassifier
             + train.toString() + "\n");
         println("=== Train Weights ===\n");
         for (int i = 0; i < train.numInstances(); i++) {
-          println(" " + (i + 1) 
+          println(" " + (i + 1)
               + "    " + train.instance(i).weight());
         }
         println("=== Test Dataset ===\n"
-            + test.toString() + "\n\n");	
+            + test.toString() + "\n\n");
         println("(test weights all 1.0\n");
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks whether the classifier can handle instance weights.
    * This test compares the classifier performance on two datasets
-   * that are identical except for the training weights. If the 
+   * that are identical except for the training weights. If the
    * results change, then the classifier must be using the weights. It
-   * may be possible to get a false positive from this test if the 
+   * may be possible to get a false positive from this test if the
    * weight changes aren't significant enough to induce a change
    * in classifier performance (but the weights are chosen to minimize
    * the likelihood of this).
@@ -1334,21 +1334,21 @@ public class CheckClassifier
    */
   protected boolean[] instanceWeights(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int classType) {
-    
+
     print("classifier uses instance weights");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = 2*getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = 2*getNumInstances(), numTest = getNumInstances(),
     numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
-    
+
     boolean[] result = new boolean[2];
     Instances train = null;
     Instances test = null;
@@ -1358,27 +1358,27 @@ public class CheckClassifier
     boolean built = false;
     boolean evalFail = false;
     try {
-      train = makeTestDataset(42, numTrain, 
+      train = makeTestDataset(42, numTrain,
                               nominalPredictor    ? getNumNominal() + 1 : 0,
-                              numericPredictor    ? getNumNumeric() + 1 : 0, 
-                              stringPredictor     ? getNumString()      : 0, 
-                              datePredictor       ? getNumDate()        : 0, 
-                              relationalPredictor ? getNumRelational()  : 0, 
-                              numClasses, 
+                              numericPredictor    ? getNumNumeric() + 1 : 0,
+                              stringPredictor     ? getNumString()      : 0,
+                              datePredictor       ? getNumDate()        : 0,
+                              relationalPredictor ? getNumRelational()  : 0,
+                              numClasses,
                               classType,
                               multiInstance);
       test = makeTestDataset(24, numTest,
                              nominalPredictor    ? getNumNominal() + 1 : 0,
-                             numericPredictor    ? getNumNumeric() + 1 : 0, 
-                             stringPredictor     ? getNumString()      : 0, 
-                             datePredictor       ? getNumDate()        : 0, 
-                             relationalPredictor ? getNumRelational()  : 0, 
-                             numClasses, 
+                             numericPredictor    ? getNumNumeric() + 1 : 0,
+                             stringPredictor     ? getNumString()      : 0,
+                             datePredictor       ? getNumDate()        : 0,
+                             relationalPredictor ? getNumRelational()  : 0,
+                             numClasses,
                              classType,
                              multiInstance);
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
+        addMissing(test, Math.min(missingLevel, 50), predictorMissing,
             classMissing);
       }
       classifiers = AbstractClassifier.makeCopies(getClassifier(), 2);
@@ -1390,7 +1390,7 @@ public class CheckClassifier
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
-      
+
       // Now modify instance weights and re-built/test
       for (int i = 0; i < train.numInstances(); i++) {
         train.instance(i).setWeight(0);
@@ -1405,20 +1405,20 @@ public class CheckClassifier
       built = true;
       testWRTZeroR(classifiers[1], evaluationI, train, test);
       if (evaluationB.equals(evaluationI)) {
-        //	println("no");
+        // println("no");
         evalFail = true;
         throw new Exception("evalFail");
       }
-      
+
       println("yes");
       result[0] = true;
     } catch (Exception ex) {
       println("no");
       result[0] = false;
-      
+
       if (m_Debug) {
         println("\n=== Full Report ===");
-        
+
         if (evalFail) {
           println("Results don't differ between non-weighted and "
               + "weighted instance models.");
@@ -1439,18 +1439,18 @@ public class CheckClassifier
             + train.toString() + "\n");
         println("=== Train Weights ===\n");
         for (int i = 0; i < train.numInstances(); i++) {
-          println(" " + (i + 1) 
+          println(" " + (i + 1)
               + "    " + train.instance(i).weight());
         }
         println("=== Test Dataset ===\n"
-            + test.toString() + "\n\n");	
+            + test.toString() + "\n\n");
         println("(test weights all 1.0\n");
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Checks whether the scheme alters the training dataset during
    * training. If the scheme needs to modify the training
@@ -1473,22 +1473,22 @@ public class CheckClassifier
    */
   protected boolean[] datasetIntegrity(
       boolean nominalPredictor,
-      boolean numericPredictor, 
-      boolean stringPredictor, 
+      boolean numericPredictor,
+      boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
       boolean multiInstance,
       int classType,
       boolean predictorMissing,
       boolean classMissing) {
-    
+
     print("classifier doesn't alter original datasets");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    int numTrain = getNumInstances(), numTest = getNumInstances(),
     numClasses = 2, missingLevel = 20;
-    
+
     boolean[] result = new boolean[2];
     Instances train = null;
     Instances test = null;
@@ -1496,27 +1496,27 @@ public class CheckClassifier
     Evaluation evaluation = null;
     boolean built = false;
     try {
-      train = makeTestDataset(42, numTrain, 
+      train = makeTestDataset(42, numTrain,
                               nominalPredictor    ? getNumNominal()    : 0,
-                              numericPredictor    ? getNumNumeric()    : 0, 
-                              stringPredictor     ? getNumString()     : 0, 
-                              datePredictor       ? getNumDate()       : 0, 
-                              relationalPredictor ? getNumRelational() : 0, 
-                              numClasses, 
+                              numericPredictor    ? getNumNumeric()    : 0,
+                              stringPredictor     ? getNumString()     : 0,
+                              datePredictor       ? getNumDate()       : 0,
+                              relationalPredictor ? getNumRelational() : 0,
+                              numClasses,
                               classType,
                               multiInstance);
       test = makeTestDataset(24, numTest,
                              nominalPredictor     ? getNumNominal()    : 0,
-                             numericPredictor     ? getNumNumeric()    : 0, 
-                             stringPredictor      ? getNumString()     : 0, 
-                             datePredictor        ? getNumDate()       : 0, 
-                             relationalPredictor  ? getNumRelational() : 0, 
-                             numClasses, 
+                             numericPredictor     ? getNumNumeric()    : 0,
+                             stringPredictor      ? getNumString()     : 0,
+                             datePredictor        ? getNumDate()       : 0,
+                             relationalPredictor  ? getNumRelational() : 0,
+                             numClasses,
                              classType,
                              multiInstance);
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
+        addMissing(test, Math.min(missingLevel, 50), predictorMissing,
             classMissing);
       }
       classifier = AbstractClassifier.makeCopies(getClassifier(), 1)[0];
@@ -1532,13 +1532,13 @@ public class CheckClassifier
       built = true;
       testWRTZeroR(classifier, evaluation, trainCopy, testCopy);
       compareDatasets(test, testCopy);
-      
+
       println("yes");
       result[0] = true;
     } catch (Exception ex) {
       println("no");
       result[0] = false;
-      
+
       if (m_Debug) {
         println("\n=== Full Report ===");
         print("Problem during");
@@ -1555,13 +1555,13 @@ public class CheckClassifier
             + test.toString() + "\n\n");
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Runs a text on the datasets with the given characteristics.
-   * 
+   *
    * @param nominalPredictor if true use nominal predictor attributes
    * @param numericPredictor if true use numeric predictor attributes
    * @param stringPredictor if true use string predictor attributes
@@ -1570,18 +1570,18 @@ public class CheckClassifier
    * @param multiInstance whether multi-instance is needed
    * @param classType the class type (NUMERIC, NOMINAL, etc.)
    * @param missingLevel the percentage of missing values
-   * @param predictorMissing true if the missing values may be in 
+   * @param predictorMissing true if the missing values may be in
    * the predictors
    * @param classMissing true if the missing values may be in the class
    * @param numTrain the number of instances in the training set
    * @param numTest the number of instaces in the test set
    * @param numClasses the number of classes
    * @param accepts the acceptable string in an exception
-   * @return index 0 is true if the test was passed, index 1 is true if test 
+   * @return index 0 is true if the test was passed, index 1 is true if test
    *         was acceptable
    */
   protected boolean[] runBasicTest(boolean nominalPredictor,
-      boolean numericPredictor, 
+      boolean numericPredictor,
       boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
@@ -1594,28 +1594,28 @@ public class CheckClassifier
       int numTest,
       int numClasses,
       FastVector accepts) {
-    
+
     return runBasicTest(
-		nominalPredictor, 
-		numericPredictor,
-		stringPredictor,
-		datePredictor,
-		relationalPredictor,
-		multiInstance,
-		classType, 
-		TestInstances.CLASS_IS_LAST,
-		missingLevel,
-		predictorMissing,
-		classMissing,
-		numTrain,
-		numTest,
-		numClasses,
-		accepts);
+        nominalPredictor,
+        numericPredictor,
+        stringPredictor,
+        datePredictor,
+        relationalPredictor,
+        multiInstance,
+        classType,
+        TestInstances.CLASS_IS_LAST,
+        missingLevel,
+        predictorMissing,
+        classMissing,
+        numTrain,
+        numTest,
+        numClasses,
+        accepts);
   }
-  
+
   /**
    * Runs a text on the datasets with the given characteristics.
-   * 
+   *
    * @param nominalPredictor if true use nominal predictor attributes
    * @param numericPredictor if true use numeric predictor attributes
    * @param stringPredictor if true use string predictor attributes
@@ -1625,18 +1625,18 @@ public class CheckClassifier
    * @param classType the class type (NUMERIC, NOMINAL, etc.)
    * @param classIndex the attribute index of the class
    * @param missingLevel the percentage of missing values
-   * @param predictorMissing true if the missing values may be in 
+   * @param predictorMissing true if the missing values may be in
    * the predictors
    * @param classMissing true if the missing values may be in the class
    * @param numTrain the number of instances in the training set
    * @param numTest the number of instaces in the test set
    * @param numClasses the number of classes
    * @param accepts the acceptable string in an exception
-   * @return index 0 is true if the test was passed, index 1 is true if test 
+   * @return index 0 is true if the test was passed, index 1 is true if test
    *         was acceptable
    */
   protected boolean[] runBasicTest(boolean nominalPredictor,
-      boolean numericPredictor, 
+      boolean numericPredictor,
       boolean stringPredictor,
       boolean datePredictor,
       boolean relationalPredictor,
@@ -1650,7 +1650,7 @@ public class CheckClassifier
       int numTest,
       int numClasses,
       FastVector accepts) {
-    
+
     boolean[] result = new boolean[2];
     Instances train = null;
     Instances test = null;
@@ -1658,29 +1658,29 @@ public class CheckClassifier
     Evaluation evaluation = null;
     boolean built = false;
     try {
-      train = makeTestDataset(42, numTrain, 
+      train = makeTestDataset(42, numTrain,
                               nominalPredictor     ? getNumNominal()    : 0,
-                              numericPredictor     ? getNumNumeric()    : 0, 
+                              numericPredictor     ? getNumNumeric()    : 0,
                               stringPredictor      ? getNumString()     : 0,
                               datePredictor        ? getNumDate()       : 0,
                               relationalPredictor  ? getNumRelational() : 0,
-                              numClasses, 
+                              numClasses,
                               classType,
                               classIndex,
                               multiInstance);
       test = makeTestDataset(24, numTest,
                              nominalPredictor     ? getNumNominal()    : 0,
-                             numericPredictor     ? getNumNumeric()    : 0, 
+                             numericPredictor     ? getNumNumeric()    : 0,
                              stringPredictor      ? getNumString()     : 0,
                              datePredictor        ? getNumDate()       : 0,
                              relationalPredictor  ? getNumRelational() : 0,
-                             numClasses, 
+                             numClasses,
                              classType,
                              classIndex,
                              multiInstance);
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
+        addMissing(test, Math.min(missingLevel, 50), predictorMissing,
             classMissing);
       }
       classifier = AbstractClassifier.makeCopies(getClassifier(), 1)[0];
@@ -1697,19 +1697,19 @@ public class CheckClassifier
         result[1] = true;
         throw new Exception("Scheme performs worse than ZeroR");
       }
-      
+
       println("yes");
       result[0] = true;
-    } 
+    }
     catch (Exception ex) {
       boolean acceptable = false;
       String msg;
       if (ex.getMessage() == null)
-	msg = "";
+        msg = "";
       else
         msg = ex.getMessage().toLowerCase();
       if (msg.indexOf("not in classpath") > -1)
-	m_ClasspathProblems = true;
+        m_ClasspathProblems = true;
       if (msg.indexOf("worse than zeror") >= 0) {
         println("warning: performs worse than ZeroR");
         result[0] = true;
@@ -1720,11 +1720,11 @@ public class CheckClassifier
             acceptable = true;
           }
         }
-        
+
         println("no" + (acceptable ? " (OK error message)" : ""));
         result[1] = acceptable;
       }
-      
+
       if (m_Debug) {
         println("\n=== Full Report ===");
         print("Problem during");
@@ -1752,10 +1752,10 @@ public class CheckClassifier
         }
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Determine whether the scheme performs worse than ZeroR during testing
    *
@@ -1768,29 +1768,29 @@ public class CheckClassifier
    */
   protected boolean[] testWRTZeroR(Classifier classifier,
                                    Evaluation evaluation,
-                                   Instances train, Instances test) 
+                                   Instances train, Instances test)
   throws Exception {
-    
+
     boolean[] result = new boolean[2];
-    
+
     evaluation.evaluateModel(classifier, test);
     try {
-      
+
       // Tested OK, compare with ZeroR
       Classifier zeroR = new weka.classifiers.rules.ZeroR();
       zeroR.buildClassifier(train);
       Evaluation zeroREval = new Evaluation(train);
       zeroREval.evaluateModel(zeroR, test);
       result[0] = Utils.grOrEq(zeroREval.errorRate(), evaluation.errorRate());
-    } 
+    }
     catch (Exception ex) {
       throw new Error("Problem determining ZeroR performance: "
           + ex.getMessage());
     }
-    
+
     return result;
   }
-  
+
   /**
    * Make a simple set of instances, which can later be modified
    * for use in specific tests.
@@ -1809,30 +1809,30 @@ public class CheckClassifier
    * @throws Exception if the dataset couldn't be generated
    * @see #process(Instances)
    */
-  protected Instances makeTestDataset(int seed, int numInstances, 
-                                      int numNominal, int numNumeric, 
+  protected Instances makeTestDataset(int seed, int numInstances,
+                                      int numNominal, int numNumeric,
                                       int numString, int numDate,
                                       int numRelational,
                                       int numClasses, int classType,
                                       boolean multiInstance)
     throws Exception {
-    
+
     return makeTestDataset(
-		seed, 
-		numInstances,
-		numNominal,
-		numNumeric,
-		numString,
-		numDate, 
-		numRelational,
-		numClasses, 
-		classType,
-		TestInstances.CLASS_IS_LAST,
-		multiInstance);
+        seed,
+        numInstances,
+        numNominal,
+        numNumeric,
+        numString,
+        numDate,
+        numRelational,
+        numClasses,
+        classType,
+        TestInstances.CLASS_IS_LAST,
+        multiInstance);
   }
-  
+
   /**
-   * Make a simple set of instances with variable position of the class 
+   * Make a simple set of instances with variable position of the class
    * attribute, which can later be modified for use in specific tests.
    *
    * @param seed the random number seed
@@ -1851,17 +1851,17 @@ public class CheckClassifier
    * @see TestInstances#CLASS_IS_LAST
    * @see #process(Instances)
    */
-  protected Instances makeTestDataset(int seed, int numInstances, 
-                                      int numNominal, int numNumeric, 
+  protected Instances makeTestDataset(int seed, int numInstances,
+                                      int numNominal, int numNumeric,
                                       int numString, int numDate,
                                       int numRelational,
                                       int numClasses, int classType,
                                       int classIndex,
                                       boolean multiInstance)
   throws Exception {
-    
+
     TestInstances dataset = new TestInstances();
-    
+
     dataset.setSeed(seed);
     dataset.setNumInstances(numInstances);
     dataset.setNumNominal(numNominal);
@@ -1876,10 +1876,10 @@ public class CheckClassifier
     dataset.setMultiInstance(multiInstance);
     dataset.setWords(getWords());
     dataset.setWordSeparators(getWordSeparators());
-    
+
     return process(dataset.generate());
   }
-  
+
   /**
    * Print out a short summary string for the dataset characteristics
    *
@@ -1891,45 +1891,45 @@ public class CheckClassifier
    * @param multiInstance whether multi-instance is needed
    * @param classType the class type (NUMERIC, NOMINAL, etc.)
    */
-  protected void printAttributeSummary(boolean nominalPredictor, 
-                                       boolean numericPredictor, 
-                                       boolean stringPredictor, 
-                                       boolean datePredictor, 
-                                       boolean relationalPredictor, 
+  protected void printAttributeSummary(boolean nominalPredictor,
+                                       boolean numericPredictor,
+                                       boolean stringPredictor,
+                                       boolean datePredictor,
+                                       boolean relationalPredictor,
                                        boolean multiInstance,
                                        int classType) {
-    
+
     String str = "";
 
     if (numericPredictor)
       str += " numeric";
-    
+
     if (nominalPredictor) {
       if (str.length() > 0)
         str += " &";
       str += " nominal";
     }
-    
+
     if (stringPredictor) {
       if (str.length() > 0)
         str += " &";
       str += " string";
     }
-    
+
     if (datePredictor) {
       if (str.length() > 0)
         str += " &";
       str += " date";
     }
-    
+
     if (relationalPredictor) {
       if (str.length() > 0)
         str += " &";
       str += " relational";
     }
-    
+
     str += " predictors)";
-    
+
     switch (classType) {
       case Attribute.NUMERIC:
         str = " (numeric class," + str;
@@ -1947,22 +1947,22 @@ public class CheckClassifier
         str = " (relational class," + str;
         break;
     }
-    
+
     print(str);
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-  
+
   /**
    * Test method for this class
-   * 
+   *
    * @param args the commandline parameters
    */
   public static void main(String [] args) {
