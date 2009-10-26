@@ -3,6 +3,11 @@ README
 
 Information about the libraries:
 
+- FigTree
+  Version 1.2.3
+  Homepage: http://tree.bio.ed.ac.uk/software/figtree/
+  Download: http://tree.bio.ed.ac.uk/download.html?name=figtree&version=v1.2.3&id=78&num=3
+
 - Jython
   Version: 2.2.1
   Homepage: http://www.jython.org/
@@ -18,7 +23,7 @@ Information about the libraries:
   Version: 2008-10-31
   Homepage: http://jmathtools.berlios.de/
   Download: http://prdownload.berlios.de/jmathtools/jmathplot.jar
-  
+
 - Prefuse
   Version: prefuse-beta, 2007.10.21
   Homepage: http://prefuse.org/
