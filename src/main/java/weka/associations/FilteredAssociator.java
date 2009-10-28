@@ -105,7 +105,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision$
  */
 public class FilteredAssociator 
   extends SingleAssociatorEnhancer {
@@ -126,7 +126,7 @@ public class FilteredAssociator
    * Default constructor.
    */
   public FilteredAssociator() {
-    m_Associator = new Apriori();
+    m_Associator = new FPGrowth();
     m_Filter     = new MultiFilter();
     ((MultiFilter) m_Filter).setFilters(new Filter[]{
 	new weka.filters.unsupervised.attribute.ReplaceMissingValues()});
@@ -153,7 +153,7 @@ public class FilteredAssociator
    * @return 		the default associator classname
    */
   protected String defaultAssociatorString() {
-    return Apriori.class.getName();
+    return FPGrowth.class.getName();
   }
 
   /**
@@ -467,7 +467,7 @@ public class FilteredAssociator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
