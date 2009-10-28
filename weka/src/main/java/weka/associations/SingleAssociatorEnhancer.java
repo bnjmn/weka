@@ -37,7 +37,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision$
  */
 public abstract class SingleAssociatorEnhancer
   extends AbstractAssociator
@@ -47,7 +47,7 @@ public abstract class SingleAssociatorEnhancer
   private static final long serialVersionUID = -3665885256363525164L;
 
   /** The base associator to use */
-  protected Associator m_Associator = new Apriori();
+  protected Associator m_Associator = new FPGrowth();
 
   /**
    * String describing default Associator.
@@ -55,7 +55,7 @@ public abstract class SingleAssociatorEnhancer
    * @return		default classname
    */
   protected String defaultAssociatorString() {
-    return Apriori.class.getName();
+    return FPGrowth.class.getName();
   }
 
   /**

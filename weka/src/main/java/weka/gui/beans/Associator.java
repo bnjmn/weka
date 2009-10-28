@@ -22,7 +22,7 @@
 
 package weka.gui.beans;
 
-import weka.associations.Apriori;
+import weka.associations.FPGrowth;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -95,7 +95,7 @@ public class Associator
    */
   private Vector m_graphListeners = new Vector();
 
-  private weka.associations.Associator m_Associator = new Apriori();
+  private weka.associations.Associator m_Associator = new FPGrowth();
 
   private transient Logger m_log = null;
 

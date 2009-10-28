@@ -150,7 +150,7 @@ ClustererAssignmentsPlotInstances=weka.gui.explorer.ClustererAssignmentsPlotInst
 
 # the default associator, including options
 # (default is Apriori)
-Associator=weka.associations.Apriori
+Associator=weka.associations.FPGrowth
 
 # the default attribute evaluator, including options
 # (default is CfsSubsetEval)
