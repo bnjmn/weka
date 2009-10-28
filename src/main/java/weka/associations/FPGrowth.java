@@ -880,7 +880,7 @@ public class FPGrowth extends AbstractAssociator
      * (projection) level.
      * 
      * @param pad the string to use as a prefix for indenting nodes.
-     * @param the recursion level (projection) to use.
+     * @param recursionLevel the recursion level (projection) to use.
      * @return the textual description of the tree.
      */
     public String toString(String pad, int recursionLevel) {
@@ -2004,7 +2004,7 @@ public class FPGrowth extends AbstractAssociator
    * these all association rules with a minimum metric (i.e. confidence, 
    * lift etc.).
    *
-   * @param instances the instances to be used for generating the associations
+   * @param data the instances to be used for generating the associations
    * @throws Exception if rules can't be built successfully
    */
   public void buildAssociations(Instances data) throws Exception {
