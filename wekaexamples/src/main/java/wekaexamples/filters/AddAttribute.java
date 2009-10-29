@@ -22,27 +22,27 @@
 package wekaexamples.filters;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
  * Adds a nominal and a numeric attribute to the dataset provided as first
  * parameter (and fills it with random values) and outputs the result to
- * stdout. It's either done via the Add filter (second option "filter") 
+ * stdout. It's either done via the Add filter (second option "filter")
  * or manual with Java (second option "java").<p/>
  *
- * Usage: AddAttribute &lt;file.arff&gt; &lt;filter|java&gt; 
+ * Usage: AddAttribute &lt;file.arff&gt; &lt;filter|java&gt;
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
 public class AddAttribute {
-  
+
   /**
    * Adds the attributes.
    *
@@ -81,11 +81,11 @@ public class AddAttribute {
       newData = new Instances(data);
       // add new attributes
       // 1. nominal
-      FastVector values = new FastVector();
-      values.addElement("A");
-      values.addElement("B");
-      values.addElement("C");
-      values.addElement("D");
+      ArrayList<String> values = new ArrayList<String>();
+      values.add("A");
+      values.add("B");
+      values.add("C");
+      values.add("D");
       newData.insertAttributeAt(new Attribute("NewNominal", values), newData.numAttributes());
       // 2. numeric
       newData.insertAttributeAt(new Attribute("NewNumeric"), newData.numAttributes());

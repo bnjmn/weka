@@ -27,7 +27,6 @@ import weka.core.converters.ConverterUtils.DataSource;
 import weka.gui.graphvisualizer.GraphVisualizer;
 
 import java.awt.BorderLayout;
-import java.io.ByteArrayInputStream;
 
 import javax.swing.JFrame;
 
@@ -39,11 +38,11 @@ import javax.swing.JFrame;
  * @version $Revision$
  */
 public class VisualizeBayesNet {
-  
+
   /**
-   * Expects an ARFF file as first parameter (class attribute is assumed to 
+   * Expects an ARFF file as first parameter (class attribute is assumed to
    * be the last attribute).
-   * 
+   *
    * @param args	the commandline arguments
    * @throws Exception	if something goes wrong
    */
@@ -53,7 +52,7 @@ public class VisualizeBayesNet {
     Instances data = DataSource.read(args[0]);
     data.setClassIndex(data.numAttributes() - 1);
     cls.buildClassifier(data);
-    
+
     // display graph
     GraphVisualizer gv = new GraphVisualizer();
     gv.readBIF(cls.graph());

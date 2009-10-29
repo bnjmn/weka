@@ -26,7 +26,6 @@ import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
@@ -37,6 +36,7 @@ import weka.filters.unsupervised.attribute.StringToWordVector;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Java program for classifying short text messages into two classes 'miss'
@@ -72,16 +72,16 @@ public class MessageClassifier
     String nameOfDataset = "MessageClassificationProblem";
 
     // Create vector of attributes.
-    FastVector attributes = new FastVector(2);
+    ArrayList<Attribute> attributes = new ArrayList<Attribute>(2);
 
     // Add attribute for holding messages.
-    attributes.addElement(new Attribute("Message", (FastVector) null));
+    attributes.add(new Attribute("Message", (ArrayList<String>) null));
 
     // Add class attribute.
-    FastVector classValues = new FastVector(2);
-    classValues.addElement("miss");
-    classValues.addElement("hit");
-    attributes.addElement(new Attribute("Class", classValues));
+    ArrayList<String> classValues = new ArrayList<String>(2);
+    classValues.add("miss");
+    classValues.add("hit");
+    attributes.add(new Attribute("Class", classValues));
 
     // Create dataset with initial capacity of 100, and set index of class.
     m_Data = new Instances(nameOfDataset, attributes, 100);
