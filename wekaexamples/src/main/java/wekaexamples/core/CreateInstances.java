@@ -31,12 +31,13 @@ import weka.core.Instances;
  * Generates an weka.core.Instances object with different attribute types.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision$
  */
 public class CreateInstances {
-  
+
   /**
    * Generates the Instances object and outputs it in ARFF format to stdout.
-   * 
+   *
    * @param args	ignored
    * @throws Exception	if generation of instances fails
    */
