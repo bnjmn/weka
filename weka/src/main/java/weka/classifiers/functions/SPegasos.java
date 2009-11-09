@@ -47,12 +47,41 @@ import weka.filters.unsupervised.attribute.Normalize;
 
 /**
  <!-- globalinfo-start -->
+ * Implements the stochastic variant of the Pegasos (Primal Estimated sub-GrAdient SOlver for SVM) method of Shalev-Shwartz et al. (2007). This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes, so the coefficients in the output are based on the normalized data. For more information, see<br/>
+ * <br/>
+ * S. Shalev-Shwartz, Y. Singer, N. Srebro: Pegasos: Primal Estimated sub-GrAdient SOlver for SVM. In: 24th International Conference on MachineLearning, 807-814, 2007.
+ * <p/>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inproceedings{Shalev-Shwartz2007,
+ *    author = {S. Shalev-Shwartz and Y. Singer and N. Srebro},
+ *    booktitle = {24th International Conference on MachineLearning},
+ *    pages = {807-814},
+ *    title = {Pegasos: Primal Estimated sub-GrAdient SOlver for SVM},
+ *    year = {2007}
+ * }
+ * </pre>
+ * <p/>
  <!-- technical-bibtex-end -->
  *
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -L &lt;double&gt;
+ *  The lambda regularization constant (default = 0.0001)</pre>
+ * 
+ * <pre> -E &lt;integer&gt;
+ *  The number of epochs to perform (batch learning only, default = 500)</pre>
+ * 
+ * <pre> -N
+ *  Don't normalize the data</pre>
+ * 
+ * <pre> -M
+ *  Don't replace missing values</pre>
+ * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
@@ -273,6 +302,20 @@ public class SPegasos extends AbstractClassifier
    * Parses a given list of options. <p/>
    * 
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -L &lt;double&gt;
+   *  The lambda regularization constant (default = 0.0001)</pre>
+   * 
+   * <pre> -E &lt;integer&gt;
+   *  The number of epochs to perform (batch learning only, default = 500)</pre>
+   * 
+   * <pre> -N
+   *  Don't normalize the data</pre>
+   * 
+   * <pre> -M
+   *  Don't replace missing values</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -648,3 +691,4 @@ public class SPegasos extends AbstractClassifier
     runClassifier(new SPegasos(), args);
   }
 }
+
