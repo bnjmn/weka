@@ -181,6 +181,7 @@ public class HotSpot
     result.enable(Capability.MISSING_VALUES);
 
     // class
+    result.enable(Capability.NO_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
 
