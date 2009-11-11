@@ -23,8 +23,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -34,7 +33,7 @@ import weka.filters.SimpleStreamFilter;
 import java.util.Enumeration;
 import java.util.Vector;
 
-/** 
+/**
  <!-- globalinfo-start -->
  * Removes attributes based on a regular expression matched against their names.
  * <p/>
@@ -42,19 +41,19 @@ import java.util.Vector;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -D
  *  Turns on output of debugging information.</pre>
- * 
+ *
  * <pre> -E &lt;regular expression&gt;
  *  The regular expression to match the attribute names against.
  *  (default: ^.*id$)</pre>
- * 
+ *
  * <pre> -V
  *  Flag for inverting the matching sense. If set, attributes are kept
  *  instead of deleted.
  *  (default: off)</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
@@ -68,16 +67,16 @@ public class RemoveByName
 
   /** the default expression. */
   public final static String DEFAULT_EXPRESSION = "^.*id$";
-  
+
   /** the regular expression for selecting the attributes by name. */
-  protected String m_Expression;
-  
+  protected String m_Expression = DEFAULT_EXPRESSION;
+
   /** whether to invert the matching sense. */
   protected boolean m_InvertSelection;
 
   /** the Remove filter used internally for removing the attributes. */
   protected Remove m_Remove;
-  
+
   /**
    * Returns a string describing this classifier.
    *
@@ -85,7 +84,7 @@ public class RemoveByName
    *              displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
+    return
         "Removes attributes based on a regular expression matched against "
       + "their names.";
   }
@@ -140,7 +139,7 @@ public class RemoveByName
     if (getInvertSelection())
       result.add("-V");
 
-    return (String[]) result.toArray(new String[result.size()]);	  
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
@@ -148,19 +147,19 @@ public class RemoveByName
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -D
    *  Turns on output of debugging information.</pre>
-   * 
+   *
    * <pre> -E &lt;regular expression&gt;
    *  The regular expression to match the attribute names against.
    *  (default: ^.*id$)</pre>
-   * 
+   *
    * <pre> -V
    *  Flag for inverting the matching sense. If set, attributes are kept
    *  instead of deleted.
    *  (default: off)</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options	the options to use
@@ -209,7 +208,7 @@ public class RemoveByName
   }
 
   /**
-   * Set whether selected columns should be removed or kept. If true the 
+   * Set whether selected columns should be removed or kept. If true the
    * selected columns are kept and unselected columns are deleted. If false
    * selected columns are deleted and unselected columns are kept.
    *
@@ -239,9 +238,9 @@ public class RemoveByName
       + " If set to true, only the specified attributes will be kept;"
       + " If set to false, specified attributes will be deleted.";
   }
-  
+
   /**
-   * Determines the output format based on the input format and returns 
+   * Determines the output format based on the input format and returns
    * this. In case the output format cannot be returned immediately, i.e.,
    * immediateOutputFormat() returns false, then this method will be called
    * from batchFinished().
@@ -254,7 +253,7 @@ public class RemoveByName
     Vector<Integer>	indices;
     int[]		attributes;
     int			i;
-    
+
     // determine indices
     indices = new Vector<Integer>();
     for (i = 0; i < inputFormat.numAttributes(); i++) {
@@ -267,16 +266,16 @@ public class RemoveByName
     attributes = new int[indices.size()];
     for (i = 0; i < indices.size(); i++)
       attributes[i] = indices.get(i);
-    
+
     m_Remove = new Remove();
     m_Remove.setAttributeIndicesArray(attributes);
     m_Remove.setInvertSelection(getInvertSelection());
     m_Remove.setInputFormat(inputFormat);
-    
+
     return m_Remove.getOutputFormat();
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -284,13 +283,13 @@ public class RemoveByName
    */
   public Capabilities getCapabilities() {
     Capabilities result;
-    
+
     result = new Remove().getCapabilities();
     result.setOwner(this);
-    
+
     return result;
   }
-  
+
   /**
    * processes the given instance (may change the provided instance) and
    * returns the modified version.
@@ -303,10 +302,10 @@ public class RemoveByName
     m_Remove.input(instance);
     return m_Remove.output();
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
