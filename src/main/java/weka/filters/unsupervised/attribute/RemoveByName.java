@@ -22,17 +22,16 @@
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -70,7 +69,7 @@ public class RemoveByName
   public final static String DEFAULT_EXPRESSION = "^.*id$";
   
   /** the regular expression for selecting the attributes by name. */
-  protected String m_Expression;
+  protected String m_Expression = DEFAULT_EXPRESSION;
   
   /** whether to invert the matching sense. */
   protected boolean m_InvertSelection;
