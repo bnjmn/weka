@@ -130,11 +130,17 @@ public class J48
   /** Unpruned tree? */
   private boolean m_unpruned = false;
 
+  /** Collapse tree? */
+  private boolean m_collapseTree = true;
+
   /** Confidence level */
   private float m_CF = 0.25f;
 
   /** Minimum number of instances */
   private int m_minNumObj = 2;
+
+  /** Use MDL correction? */
+  private boolean m_useMDLcorrection = true;         
 
   /** Determines whether probabilities are smoothed using
       Laplace correction when predictions are generated */
@@ -200,7 +206,7 @@ public class J48
     
     try {
       if (!m_reducedErrorPruning)
-        result = new C45PruneableClassifierTree(null, !m_unpruned, m_CF, m_subtreeRaising, !m_noCleanup).getCapabilities();
+        result = new C45PruneableClassifierTree(null, !m_unpruned, m_CF, m_subtreeRaising, !m_noCleanup, m_collapseTree).getCapabilities();
       else
         result = new PruneableClassifierTree(null, !m_unpruned, m_numFolds, !m_noCleanup, m_Seed).getCapabilities();
     }
@@ -226,12 +232,12 @@ public class J48
     ModelSelection modSelection;	 
 
     if (m_binarySplits)
-      modSelection = new BinC45ModelSelection(m_minNumObj, instances);
+      modSelection = new BinC45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
     else
-      modSelection = new C45ModelSelection(m_minNumObj, instances);
+      modSelection = new C45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
     if (!m_reducedErrorPruning)
       m_root = new C45PruneableClassifierTree(modSelection, !m_unpruned, m_CF,
-					    m_subtreeRaising, !m_noCleanup);
+                                              m_subtreeRaising, !m_noCleanup, m_collapseTree);
     else
       m_root = new PruneableClassifierTree(modSelection, !m_unpruned, m_numFolds,
 					   !m_noCleanup, m_Seed);
@@ -362,11 +368,14 @@ public class J48
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(9);
+    Vector newVector = new Vector(12);
 
     newVector.
 	addElement(new Option("\tUse unpruned tree.",
 			      "U", 0, "-U"));
+    newVector.
+	addElement(new Option("\tDo not collapse tree.",
+			      "O", 0, "-O"));
     newVector.
 	addElement(new Option("\tSet confidence threshold for pruning.\n" +
 			      "\t(default 0.25)",
@@ -392,9 +401,12 @@ public class J48
     newVector.
         addElement(new Option("\tDo not clean up after the tree has been built.",
 			      "L", 0, "-L"));
-   newVector.
-        addElement(new Option("\tLaplace smoothing for predicted probabilities.",
-			      "A", 0, "-A"));
+    newVector.
+      addElement(new Option("\tLaplace smoothing for predicted probabilities.",
+                            "A", 0, "-A"));
+    newVector.
+      addElement(new Option("\tDo not use MDL correction for info gain on numeric attributes.",
+                            "J", 0, "-J"));
     newVector.
       addElement(new Option("\tSeed for random data shuffling (default 1).",
 			    "Q", 1, "-Q <seed>"));
@@ -458,9 +470,11 @@ public class J48
     }
     m_binarySplits = Utils.getFlag('B', options);
     m_useLaplace = Utils.getFlag('A', options);
+    m_useMDLcorrection = !Utils.getFlag('J', options);
 
     // Pruning options
     m_unpruned = Utils.getFlag('U', options);
+    m_collapseTree = !Utils.getFlag('O', options);
     m_subtreeRaising = !Utils.getFlag('S', options);
     m_noCleanup = Utils.getFlag('L', options);
     if ((m_unpruned) && (!m_subtreeRaising)) {
@@ -516,11 +530,14 @@ public class J48
    */
   public String [] getOptions() {
 
-    String [] options = new String [14];
+    String [] options = new String [16];
     int current = 0;
 
     if (m_noCleanup) {
       options[current++] = "-L";
+    }
+    if (!m_collapseTree) {
+      options[current++] = "-O";
     }
     if (m_unpruned) {
       options[current++] = "-U";
@@ -542,6 +559,9 @@ public class J48
     options[current++] = "-M"; options[current++] = "" + m_minNumObj;
     if (m_useLaplace) {
       options[current++] = "-A";
+    }
+    if (!m_useMDLcorrection) {
+      options[current++] = "-J";
     }
 
     while (current < options.length) {
@@ -607,6 +627,35 @@ public class J48
   public void setUseLaplace(boolean newuseLaplace) {
     
     m_useLaplace = newuseLaplace;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useMDLcorrectionTipText() {
+    return "Whether MDL correction is used when finding splits on numeric attributes.";
+  }
+
+  /**
+   * Get the value of useMDLcorrection.
+   *
+   * @return Value of useMDLcorrection.
+   */
+  public boolean getUseMDLcorrection() {
+    
+    return m_useMDLcorrection;
+  }
+  
+  /**
+   * Set the value of useMDLcorrection.
+   *
+   * @param newuseMDLcorrection Value to assign to useMDLcorrection.
+   */
+  public void setUseMDLcorrection(boolean newuseMDLcorrection) {
+    
+    m_useMDLcorrection = newuseMDLcorrection;
   }
   
   /**
@@ -721,6 +770,34 @@ public class J48
       m_reducedErrorPruning = false;
     }
     m_unpruned = v;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String collapseTreeTipText() {
+    return "Whether parts are removed that do not reduce training error.";
+  }
+
+  /**
+   * Get the value of collapseTree.
+   *
+   * @return Value of collapseTree.
+   */
+  public boolean getCollapseTree() {
+    
+    return m_collapseTree;
+  }
+  
+  /**
+   * Set the value of collapseTree.
+   * @param v  Value to assign to collapseTree.
+   */
+  public void setCollapseTree(boolean v) {
+
+    m_collapseTree = v;
   }
 
   /**
