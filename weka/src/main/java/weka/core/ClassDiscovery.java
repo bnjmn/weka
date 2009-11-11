@@ -676,7 +676,7 @@ public class ClassDiscovery
    * </ul>
    */
   public static class StringCompare 
-    implements Comparator<String>, RevisionHandler {
+    implements Comparator, RevisionHandler {
 
     /**
      * appends blanks to the string if its shorter than <code>len</code>.
@@ -717,7 +717,7 @@ public class ClassDiscovery
      * @param o2	the second object
      * @return		-1 if o1&lt;o2, 0 if o1=o2 and 1 if o1&;gt;o2
      */    
-    public int compare(String o1, String o2) {
+    public int compare(Object o1, Object o2) {
       String        s1;
       String        s2;
       int           i;
