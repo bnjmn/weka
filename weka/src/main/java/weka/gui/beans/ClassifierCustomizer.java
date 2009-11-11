@@ -31,6 +31,8 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -109,6 +111,18 @@ public class ClassifierCustomizer
     m_executionSlotsText.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if (m_dsClassifier != null &&
+            m_executionSlotsText.getText().length() > 0) {
+          int newSlots = Integer.parseInt(m_executionSlotsText.getText());
+          m_dsClassifier.setExecutionSlots(newSlots);
+        }
+      }
+    });
+    
+    m_executionSlotsText.addFocusListener(new FocusListener() {
+      public void focusGained(FocusEvent e) {}
+      
+      public void focusLost(FocusEvent e) {
+        if (m_dsClassifier != null && 
             m_executionSlotsText.getText().length() > 0) {
           int newSlots = Integer.parseInt(m_executionSlotsText.getText());
           m_dsClassifier.setExecutionSlots(newSlots);
