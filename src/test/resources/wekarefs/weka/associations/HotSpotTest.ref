@@ -2,33 +2,6 @@
 Hot Spot
 ========
 Total population: 20 instances
-Target attribute: Class
-Minimum segment size: 7 instances (33% of total population)
-Maximum branching factor: 2
-Minimum improvement in target: 1%
-
-Class (0.7324)
-  Numeric1 > 4.3231 (1.1663 [7])
-  Nominal1 = att1val2 (1.1393 [12])
-  |   Numeric1 > 4.3231 (1.1663 [7])
-
-
-Hot Spot
-========
-Total population: 20 instances
-Target attribute: Class
-Target value: class1 [value count in total population: 7 instances (35%)]
-Minimum value count for segments: 7 instances (33% of total population)
-Maximum branching factor: 2
-Minimum improvement in target: 1%
-
-Class=class1 (35% [7/20])
-  Numeric1 <= 0.3735 (100% [7/7])
-
-
-Hot Spot
-========
-Total population: 20 instances
 Target attribute: Numeric1
 Minimum segment size: 7 instances (33% of total population)
 Maximum branching factor: 2
