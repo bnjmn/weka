@@ -195,8 +195,8 @@ public class HotSpot
 
     // class
     result.enable(Capability.NO_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.NOMINAL_CLASS);
+    //result.enable(Capability.NUMERIC_CLASS);
+    //result.enable(Capability.NOMINAL_CLASS);
 
     
     return result;
@@ -263,15 +263,15 @@ public class HotSpot
    */
   public void buildAssociations(Instances instances) throws Exception {
 
+    // can associator handle the data?
+    getCapabilities().testWithFail(instances);
+    
     m_errorMessage = null;
     m_targetSI.setUpper(instances.numAttributes() - 1);
     m_target = m_targetSI.getIndex();
     Instances inst = new Instances(instances);
     inst.setClassIndex(m_target);
     inst.deleteWithMissingClass();
-
-    // can associator handle the data?
-    getCapabilities().testWithFail(inst);
 
     if (inst.attribute(m_target).isNominal()) {
       m_targetIndexSI.setUpper(inst.attribute(m_target).numValues() - 1);
