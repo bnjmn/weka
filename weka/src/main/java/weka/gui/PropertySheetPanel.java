@@ -23,56 +23,50 @@
 
 package weka.gui;
 
-import java.util.Hashtable;
-import java.util.Vector;
-import java.awt.Component;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Font;
-import java.awt.Dimension;
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyDescriptor;
-import java.beans.MethodDescriptor;
-import java.beans.PropertyEditor;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyChangeListener;
-import java.beans.IntrospectionException;
 import java.beans.BeanInfo;
+import java.beans.Beans;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyDescriptor;
+import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyVetoException;
-import java.beans.Beans;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
+import java.lang.reflect.Method;
+
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import java.awt.FlowLayout;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 
 
-/** 
+/**
  * Displays a property sheet where (supported) properties of the target
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision$
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -137,7 +131,7 @@ public class PropertySheetPanel extends JPanel
     return m_aboutPanel;
   }
 
-  /** A support object for handling property change listeners */ 
+  /** A support object for handling property change listeners */
   private PropertyChangeSupport support = new PropertyChangeSupport(this);
 
   /**
@@ -182,10 +176,16 @@ public class PropertySheetPanel extends JPanel
 
     // Close any child windows at this point
     removeAll();
-    
+
+    setLayout(new BorderLayout());
+    JPanel scrollablePanel = new JPanel();
+    JScrollPane scrollPane = new JScrollPane(scrollablePanel);
+    scrollPane.setBorder(BorderFactory.createEmptyBorder());
+    add(scrollPane, BorderLayout.CENTER);
+
     GridBagLayout gbLayout = new GridBagLayout();
 
-    setLayout(gbLayout);
+    scrollablePanel.setLayout(gbLayout);
     setVisible(false);
     m_NumEditable = 0;
     m_Target = targ;
@@ -224,7 +224,7 @@ public class PropertySheetPanel extends JPanel
             m_HelpBut = new JButton("More");
 	    m_HelpBut.setToolTipText("More information about "
                                      + className);
-	    
+
 	    m_HelpBut.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent a) {
                 openHelpFrame();
@@ -259,11 +259,11 @@ public class PropertySheetPanel extends JPanel
 	    gbConstraints.insets = new Insets(0,5,0,5);
 	    gbLayout.setConstraints(jp, gbConstraints);
 	    m_aboutPanel = jp;
-	    add(m_aboutPanel);
+	    scrollablePanel.add(m_aboutPanel);
 	    componentOffset = 1;
 	    break;
 	  } catch (Exception ex) {
-	    
+
 	  }
 	}
       }
@@ -291,7 +291,7 @@ public class PropertySheetPanel extends JPanel
       if (getter == null || setter == null) {
 	continue;
       }
-	
+
       JComponent view = null;
 
       try {
@@ -338,7 +338,7 @@ public class PropertySheetPanel extends JPanel
 	    .getDeclaringClass().getName();
 	  /*
 	  if (getterClass.indexOf("java.") != 0) {
-	    System.err.println("Warning: Property \"" + name 
+	    System.err.println("Warning: Property \"" + name
 			       + "\" has null initial value.  Skipping.");
 	  }
 	  */
@@ -377,9 +377,9 @@ public class PropertySheetPanel extends JPanel
 	      break;
 	    }
 	  }
-	}	  
+	}
 
-	
+
 	// Now figure out how to display it...
 	if (editor.isPaintable() && editor.supportsCustomEditor()) {
 	  view = new PropertyPanel(editor);
@@ -389,7 +389,7 @@ public class PropertySheetPanel extends JPanel
 	  //String init = editor.getAsText();
 	  view = new PropertyText(editor);
 	} else {
-	  System.err.println("Warning: Property \"" + name 
+	  System.err.println("Warning: Property \"" + name
 			     + "\" has non-displayabale editor.  Skipping.");
 	  continue;
 	}
@@ -417,7 +417,7 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = i+componentOffset;     gbConstraints.gridx = 0;
       gbLayout.setConstraints(m_Labels[i], gbConstraints);
-      add(m_Labels[i]);
+      scrollablePanel.add(m_Labels[i]);
       JPanel newPanel = new JPanel();
       if (m_TipTexts[i] != null) {
 	m_Views[i].setToolTipText(m_TipTexts[i]);
@@ -431,11 +431,11 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.gridy = i+componentOffset;     gbConstraints.gridx = 1;
       gbConstraints.weightx = 100;
       gbLayout.setConstraints(newPanel, gbConstraints);
-      add(newPanel);
+      scrollablePanel.add(newPanel);
       m_NumEditable ++;
     }
     if (m_NumEditable == 0) {
-      JLabel empty = new JLabel("No editable properties", 
+      JLabel empty = new JLabel("No editable properties",
                                 SwingConstants.CENTER);
       Dimension d = empty.getPreferredSize();
       empty.setPreferredSize(new Dimension(d.width * 2, d.height * 2));
@@ -445,11 +445,11 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = componentOffset;     gbConstraints.gridx = 0;
       gbLayout.setConstraints(empty, gbConstraints);
-      add(empty);
+      scrollablePanel.add(empty);
     }
 
     validate();
-    setVisible(true);	
+    setVisible(true);
   }
 
   protected void openHelpFrame() {
@@ -475,7 +475,7 @@ public class PropertySheetPanel extends JPanel
     jf.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
     jf.pack();
     jf.setSize(400, 350);
-    jf.setLocation(m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().x 
+    jf.setLocation(m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().x
                    + m_aboutPanel.getTopLevelAncestor().getSize().width,
                    m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().y);
     jf.setVisible(true);
@@ -492,7 +492,7 @@ public class PropertySheetPanel extends JPanel
 
     return m_NumEditable;
   }
-  
+
   /**
    * Updates the propertysheet when a value has been changed (from outside
    * the propertysheet?).
@@ -517,23 +517,23 @@ public class PropertySheetPanel extends JPanel
 	  } catch (InvocationTargetException ex) {
 	    if (ex.getTargetException()
 		instanceof PropertyVetoException) {
-              String message = "WARNING: Vetoed; reason is: " 
+              String message = "WARNING: Vetoed; reason is: "
                                + ex.getTargetException().getMessage();
 	      System.err.println(message);
-              
+
               Component jf;
               if(evt.getSource() instanceof JPanel)
                   jf = ((JPanel)evt.getSource()).getParent();
               else
                   jf = new JFrame();
-              JOptionPane.showMessageDialog(jf, message, 
-                                            "error", 
+              JOptionPane.showMessageDialog(jf, message,
+                                            "error",
                                             JOptionPane.WARNING_MESSAGE);
               if(jf instanceof JFrame)
                   ((JFrame)jf).dispose();
 
             } else {
-	      System.err.println(ex.getTargetException().getClass().getName()+ 
+	      System.err.println(ex.getTargetException().getClass().getName()+
 				 " while updating "+ property.getName() +": "+
 				 ex.getTargetException().getMessage());
               Component jf;
@@ -542,18 +542,18 @@ public class PropertySheetPanel extends JPanel
               else
                   jf = new JFrame();
               JOptionPane.showMessageDialog(jf,
-                                            ex.getTargetException().getClass().getName()+ 
+                                            ex.getTargetException().getClass().getName()+
                                             " while updating "+ property.getName()+
                                             ":\n"+
-                                            ex.getTargetException().getMessage(), 
-                                            "error", 
+                                            ex.getTargetException().getMessage(),
+                                            "error",
                                             JOptionPane.WARNING_MESSAGE);
               if(jf instanceof JFrame)
                   ((JFrame)jf).dispose();
 
             }
 	  } catch (Exception ex) {
-	    System.err.println("Unexpected exception while updating " 
+	    System.err.println("Unexpected exception while updating "
 		  + property.getName());
 	  }
 	  if (m_Views[i] != null && m_Views[i] instanceof PropertyPanel) {
@@ -573,7 +573,7 @@ public class PropertySheetPanel extends JPanel
       try {
 	Method getter = m_Properties[i].getReadMethod();
 	Method setter = m_Properties[i].getWriteMethod();
-	
+
 	if (getter == null || setter == null) {
 	  // ignore set/get only properties
 	  continue;
