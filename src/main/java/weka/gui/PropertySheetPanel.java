@@ -74,7 +74,7 @@ import javax.swing.SwingConstants;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
@@ -357,10 +357,16 @@ public class PropertySheetPanel extends JPanel
 
     // Close any child windows at this point
     removeAll();
+
+    setLayout(new BorderLayout());
+    JPanel scrollablePanel = new JPanel();
+    JScrollPane scrollPane = new JScrollPane(scrollablePanel);
+    scrollPane.setBorder(BorderFactory.createEmptyBorder());
+    add(scrollPane, BorderLayout.CENTER);
     
     GridBagLayout gbLayout = new GridBagLayout();
 
-    setLayout(gbLayout);
+    scrollablePanel.setLayout(gbLayout);
     setVisible(false);
     m_NumEditable = 0;
     m_Target = targ;
@@ -453,7 +459,7 @@ public class PropertySheetPanel extends JPanel
 	    gbConstraints.insets = new Insets(0,5,0,5);
 	    gbLayout.setConstraints(jp, gbConstraints);
 	    m_aboutPanel = jp;
-	    add(m_aboutPanel);
+	    scrollablePanel.add(m_aboutPanel);
 	    componentOffset = 1;
 	    break;
 	  } catch (Exception ex) {
@@ -611,7 +617,7 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = i+componentOffset;     gbConstraints.gridx = 0;
       gbLayout.setConstraints(m_Labels[i], gbConstraints);
-      add(m_Labels[i]);
+      scrollablePanel.add(m_Labels[i]);
       JPanel newPanel = new JPanel();
       if (m_TipTexts[i] != null) {
 	m_Views[i].setToolTipText(m_TipTexts[i]);
@@ -625,7 +631,7 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.gridy = i+componentOffset;     gbConstraints.gridx = 1;
       gbConstraints.weightx = 100;
       gbLayout.setConstraints(newPanel, gbConstraints);
-      add(newPanel);
+      scrollablePanel.add(newPanel);
       m_NumEditable ++;
     }
 
@@ -640,7 +646,7 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = componentOffset;     gbConstraints.gridx = 0;
       gbLayout.setConstraints(empty, gbConstraints);
-      add(empty);
+      scrollablePanel.add(empty);
     }
 
     validate();
