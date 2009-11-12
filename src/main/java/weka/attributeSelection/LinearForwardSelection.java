@@ -194,7 +194,7 @@ public class LinearForwardSelection
     TechnicalInformation        additional;
     
     result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Martin Guetlein and Eibe Frank and Mark Hall");
+    result.setValue(Field.AUTHOR, "Martin Guetlein and Eibe Frank and Mark Hall and Andreas Karwath");
     result.setValue(Field.YEAR, "2009");
     result.setValue(Field.TITLE, "Large Scale Attribute Selection Using Wrappers");
     result.setValue(Field.BOOKTITLE, "Proc IEEE Symposium on Computational Intelligence and Data Mining");
