@@ -79,6 +79,9 @@ import java.util.Vector;
  * <pre> -U
  *  Use unpruned tree.</pre>
  * 
+ * <pre> -O
+ *  Do not collapse tree.</pre>
+ * 
  * <pre> -C &lt;pruning confidence&gt;
  *  Set confidence threshold for pruning.
  *  (default 0.25)</pre>
@@ -106,6 +109,9 @@ import java.util.Vector;
  * 
  * <pre> -A
  *  Laplace smoothing for predicted probabilities.</pre>
+ * 
+ * <pre> -J
+ *  Do not use MDL correction for info gain on numeric attributes.</pre>
  * 
  * <pre> -Q &lt;seed&gt;
  *  Seed for random data shuffling (default 1).</pre>
@@ -423,6 +429,9 @@ public class J48
    * <pre> -U
    *  Use unpruned tree.</pre>
    * 
+   * <pre> -O
+   *  Do not collapse tree.</pre>
+   * 
    * <pre> -C &lt;pruning confidence&gt;
    *  Set confidence threshold for pruning.
    *  (default 0.25)</pre>
@@ -450,6 +459,9 @@ public class J48
    * 
    * <pre> -A
    *  Laplace smoothing for predicted probabilities.</pre>
+   * 
+   * <pre> -J
+   *  Do not use MDL correction for info gain on numeric attributes.</pre>
    * 
    * <pre> -Q &lt;seed&gt;
    *  Seed for random data shuffling (default 1).</pre>
@@ -1027,3 +1039,4 @@ public class J48
     runClassifier(new J48(), argv);
   }
 }
+
