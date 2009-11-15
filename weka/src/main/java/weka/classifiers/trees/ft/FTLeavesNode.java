@@ -36,7 +36,7 @@ import weka.core.Utils;
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class FTLeavesNode 
   extends FTtree {   
@@ -146,7 +146,7 @@ public class FTLeavesNode
       }
         
     //to choose split point on the node data
-    m_modelSelection=new  C45ModelSelection(m_minNumInstances, data);
+    m_modelSelection=new  C45ModelSelection(m_minNumInstances, data, true);
     m_localModel = m_modelSelection.selectModel(data);
        
     //split node if more than minNumInstances...
@@ -266,6 +266,6 @@ public class FTLeavesNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

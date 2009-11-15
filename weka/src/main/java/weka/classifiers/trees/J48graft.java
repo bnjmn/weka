@@ -211,9 +211,9 @@ public class J48graft
     ModelSelection modSelection;
 
     if (m_binarySplits)
-      modSelection = new BinC45ModelSelection(m_minNumObj, instances);
+      modSelection = new BinC45ModelSelection(m_minNumObj, instances, true);
     else
-      modSelection = new C45ModelSelection(m_minNumObj, instances);
+      modSelection = new C45ModelSelection(m_minNumObj, instances, true);
       m_root = new C45PruneableClassifierTreeG(modSelection, 
                               !m_unpruned, m_CF, m_subtreeRaising, 
                                m_relabel, !m_noCleanup);

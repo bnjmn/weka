@@ -229,7 +229,7 @@ public class LMT
     if (m_splitOnResiduals) {
       modSelection = new ResidualModelSelection(minNumInstances);
     } else {
-      modSelection = new C45ModelSelection(minNumInstances, filteredData);
+      modSelection = new C45ModelSelection(minNumInstances, filteredData, true);
     }
 	
     //create tree root
