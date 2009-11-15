@@ -35,7 +35,7 @@ import java.util.Random;
  * Class implementing a NBTree split on an attribute.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class NBTreeSplit
   extends ClassifierSplitModel{
@@ -128,7 +128,7 @@ public class NBTreeSplit
   private void handleEnumeratedAttribute(Instances trainInstances)
        throws Exception {
 
-    m_c45S = new C45Split(m_attIndex, 2, m_sumOfWeights);
+    m_c45S = new C45Split(m_attIndex, 2, m_sumOfWeights, true);
     m_c45S.buildClassifier(trainInstances);
     if (m_c45S.numSubsets() == 0) {
       return;
@@ -230,7 +230,7 @@ public class NBTreeSplit
   private void handleNumericAttribute(Instances trainInstances)
        throws Exception {
 
-    m_c45S = new C45Split(m_attIndex, 2, m_sumOfWeights);
+    m_c45S = new C45Split(m_attIndex, 2, m_sumOfWeights, true);
     m_c45S.buildClassifier(trainInstances);
     if (m_c45S.numSubsets() == 0) {
       return;
@@ -407,6 +407,6 @@ public class NBTreeSplit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
