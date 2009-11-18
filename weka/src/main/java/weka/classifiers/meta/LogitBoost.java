@@ -80,7 +80,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33.2.1 $ 
+ * @version $Revision$ 
  */
 public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   implements Sourcable, WeightedInstancesHandler {
@@ -907,7 +907,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     for (int i = 0; i < m_NumGenerated; i++) {
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	pred[j] = m_Classifiers[j][i].classifyInstance(instance);
+	pred[j] = m_Shrinkage * m_Classifiers[j][i].classifyInstance(instance);
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;
