@@ -125,7 +125,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $ 
+ * @version $Revision$ 
  */
 public class LogitBoost 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -1027,7 +1027,7 @@ public class LogitBoost
     for (int i = 0; i < m_NumGenerated; i++) {
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	pred[j] = m_Classifiers[j][i].classifyInstance(instance);
+	pred[j] = m_Shrinkage * m_Classifiers[j][i].classifyInstance(instance);
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;
@@ -1157,7 +1157,7 @@ public class LogitBoost
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.43 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
