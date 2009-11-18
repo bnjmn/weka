@@ -1028,7 +1028,7 @@ public class LogitBoost
     for (int i = 0; i < m_NumGenerated; i++) {
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	pred[j] = m_Classifiers[j][i].classifyInstance(instance);
+	pred[j] = m_Shrinkage * m_Classifiers[j][i].classifyInstance(instance);
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;
