@@ -579,14 +579,14 @@ public class PropertySheetPanel extends JPanel
 	  }
 	}	  
 
-	
 	// Now figure out how to display it...
 	if (editor.isPaintable() && editor.supportsCustomEditor()) {
 	  view = new PropertyPanel(editor);
+	} else if (editor.supportsCustomEditor() && (editor.getCustomEditor() instanceof JComponent)) {
+	  view = (JComponent) editor.getCustomEditor();
 	} else if (editor.getTags() != null) {
 	  view = new PropertyValueSelector(editor);
 	} else if (editor.getAsText() != null) {
-	  //String init = editor.getAsText();
 	  view = new PropertyText(editor);
 	} else {
 	  System.err.println("Warning: Property \"" + name 
@@ -650,6 +650,16 @@ public class PropertySheetPanel extends JPanel
     }
 
     validate();
+
+    // sometimes, the calculated dimensions seem to be too small and the
+    // scrollbars show up, though there is still plenty of space on the
+    // screen. hence we increase the dimensions a bit to fix this.
+    Dimension dim = scrollablePanel.getPreferredSize();
+    dim.height += 20;
+    dim.width  += 20;
+    scrollPane.setPreferredSize(dim);
+    validate();
+
     setVisible(true);	
   }
 
