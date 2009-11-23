@@ -39,14 +39,14 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Writes to a destination that is in csv format.
+ * Writes to a destination that is in CSV (comma-separated values) format. The column separator can be chosen (default is ',') as well as the value representing missing values (default is '?').
  * <p/>
  <!-- globalinfo-end -->
  *
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -S &lt;separator&gt;
+ * <pre> -F &lt;separator&gt;
  *  The field separator to be used.
  *  '\t' can be used as well.
  *  (default: ',')</pre>
@@ -94,7 +94,10 @@ public class CSVSaver
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Writes to a destination that is in csv format.";
+    return 
+        "Writes to a destination that is in CSV (comma-separated values) format. "
+      + "The column separator can be chosen (default is ',') as well as the value "
+      + "representing missing values (default is '?').";
   }
 
   /**
@@ -109,7 +112,7 @@ public class CSVSaver
         "\tThe field separator to be used.\n"
         + "\t'\\t' can be used as well.\n"
         + "\t(default: ',')",
-        "S", 1, "-S <separator>"));
+        "F", 1, "-F <separator>"));
     
     result.addElement(new Option(
         "\tThe string representing a missing value.\n"
@@ -129,7 +132,7 @@ public class CSVSaver
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -S &lt;separator&gt;
+   * <pre> -F &lt;separator&gt;
    *  The field separator to be used.
    *  '\t' can be used as well.
    *  (default: ',')</pre>
@@ -152,7 +155,11 @@ public class CSVSaver
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
     
-    setUseTab(Utils.getFlag('T', options));
+    tmpStr = Utils.getOption('F', options);
+    if (tmpStr.length() != 0)
+      setFieldSeparator(tmpStr);
+    else
+      setFieldSeparator(",");
 
     tmpStr = Utils.getOption('M', options);
     if (tmpStr.length() != 0)
@@ -175,8 +182,8 @@ public class CSVSaver
     
     result  = new Vector<String>();
 
-    if (getUseTab())
-      result.add("-T");
+    result.add("-F");
+    result.add(getFieldSeparator());
 
     result.add("-M");
     result.add(getMissingValue());
@@ -189,24 +196,27 @@ public class CSVSaver
   }
   
   /**
-   * Sets whether tab instead of comma is used as field separator.
+   * Sets the character used as column separator.
    * 
-   * @param value	if true then tab is used
+   * @param value	the character to use
    */
-  public void setUseTab(boolean value) {
-    if (value)
-      m_FieldSeparator = "\t";
-    else
+  public void setFieldSeparator(String value) {
+    m_FieldSeparator = Utils.unbackQuoteChars(value);
+    if (m_FieldSeparator.length() != 1) {
       m_FieldSeparator = ",";
+      System.err.println(
+	  "Field separator can only be a single character (exception being '\t'), "
+	  + "defaulting back to '" + m_FieldSeparator + "'!");
+    }
   }
   
   /**
-   * Returns whether tab instead of comma is used as field separator.
+   * Returns the character used as column separator.
    * 
-   * @return		true if tab is used
+   * @return		the character to use
    */
-  public boolean getUseTab() {
-    return (m_FieldSeparator.equals("\t"));
+  public String getFieldSeparator() {
+    return Utils.backQuoteChars(m_FieldSeparator);
   }
 
   /**
@@ -215,8 +225,8 @@ public class CSVSaver
    * @return 		tip text for this property suitable for
    *         		displaying in the explorer/experimenter gui
    */
-  public String useTabTipText() {
-    return "Whether to use TAB instead of COMMA as field separator.";
+  public String fieldSeparatorTipText() {
+    return "The character to use as separator for the columns/fields (use '\\t' for TAB).";
   }
   
   /**
@@ -441,6 +451,7 @@ public class CSVSaver
     StringBuffer	result;
     Instance 		outInst;
     int			i;
+    String		field;
 
     result = new StringBuffer();
     
@@ -455,10 +466,18 @@ public class CSVSaver
     for (i = 0; i < outInst.numAttributes(); i++) {
       if (i > 0)
 	result.append(m_FieldSeparator);
+      
       if (outInst.isMissing(i))
-	result.append(m_MissingValue);
+	field = m_MissingValue;
       else
-	result.append(outInst.toString(i));
+	field = outInst.toString(i);
+      
+      // make sure that custom field separators, like ";" get quoted correctly
+      // as well
+      if ((field.indexOf(m_FieldSeparator) > -1) && !field.startsWith("'") && !field.endsWith("'"))
+	field = "'" + field + "'";
+      
+      result.append(field);
     }
 
     return result.toString();
