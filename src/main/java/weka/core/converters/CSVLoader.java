@@ -46,7 +46,7 @@ import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
- * Reads a source that is in comma separated or tab separated format. Assumes that the first row in the file determines the number of and names of the attributes.
+ * Reads a source that is in comma separated format (the default). One can also change the column separator from comma to tab or another character. Assumes that the first row in the file determines the number of and names of the attributes.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -68,6 +68,11 @@ import java.util.ArrayList;
  * <pre> -M &lt;str&gt;
  *  The string representing a missing value.
  *  (default: ?)</pre>
+ * 
+ * <pre> -F &lt;separator&gt;
+ *  The field separator to be used.
+ *  '\t' can be used as well.
+ *  (default: ',')</pre>
  * 
  <!-- options-end -->
  *
@@ -109,6 +114,9 @@ public class CSVLoader
   
   /** The placeholder for missing values. */
   protected String m_MissingValue = "?";
+  
+  /** the field separator. */
+  protected String m_FieldSeparator = ",";
   
   /** whether the first row has been read. */
   protected boolean m_FirstCheck;
@@ -155,9 +163,12 @@ public class CSVLoader
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Reads a source that is in comma separated or tab separated format. "
-      +"Assumes that the first row in the file determines the number of "
-      +"and names of the attributes.";
+    return 
+        "Reads a source that is in comma separated format (the default). "
+      + "One can also change the column separator from comma to tab or " 
+      + "another character. "
+      + "Assumes that the first row in the file determines the number of "
+      + "and names of the attributes.";
   }
 
   /**
@@ -186,6 +197,12 @@ public class CSVLoader
         "\tThe string representing a missing value.\n"
         + "\t(default: ?)",
         "M", 1, "-M <str>"));
+    
+    result.addElement(new Option(
+        "\tThe field separator to be used.\n"
+        + "\t'\\t' can be used as well.\n"
+        + "\t(default: ',')",
+        "F", 1, "-F <separator>"));
       
     return result.elements();
   }
@@ -212,6 +229,11 @@ public class CSVLoader
    *  The string representing a missing value.
    *  (default: ?)</pre>
    * 
+   * <pre> -F &lt;separator&gt;
+   *  The field separator to be used.
+   *  '\t' can be used as well.
+   *  (default: ',')</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -237,6 +259,12 @@ public class CSVLoader
       setMissingValue(tmpStr);
     else
       setMissingValue("?");
+    
+    tmpStr = Utils.getOption('F', options);
+    if (tmpStr.length() != 0)
+      setFieldSeparator(tmpStr);
+    else
+      setFieldSeparator(",");
   }
 
   /**
@@ -354,6 +382,40 @@ public class CSVLoader
   }
   
   /**
+   * Sets the character used as column separator.
+   * 
+   * @param value	the character to use
+   */
+  public void setFieldSeparator(String value) {
+    m_FieldSeparator = Utils.unbackQuoteChars(value);
+    if (m_FieldSeparator.length() != 1) {
+      m_FieldSeparator = ",";
+      System.err.println(
+	  "Field separator can only be a single character (exception being '\t'), "
+	  + "defaulting back to '" + m_FieldSeparator + "'!");
+    }
+  }
+  
+  /**
+   * Returns the character used as column separator.
+   * 
+   * @return		the character to use
+   */
+  public String getFieldSeparator() {
+    return Utils.backQuoteChars(m_FieldSeparator);
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return 		tip text for this property suitable for
+   *         		displaying in the explorer/experimenter gui
+   */
+  public String fieldSeparatorTipText() {
+    return "The character to use as separator for the columns/fields (use '\\t' for TAB).";
+  }
+  
+  /**
    * Resets the Loader object and sets the source of the data set to be 
    * the supplied Stream object.
    *
@@ -440,8 +502,7 @@ public class CSVLoader
       initTokenizer(m_st);      
     }
         
-    m_st.ordinaryChar(',');
-    m_st.ordinaryChar('\t');
+    m_st.ordinaryChar(m_FieldSeparator.charAt(0));
     
     m_cumulativeStructure = new ArrayList<Hashtable<Object,Integer>>(m_structure.numAttributes());
     for (int i = 0; i < m_structure.numAttributes(); i++) {
@@ -594,7 +655,7 @@ public class CSVLoader
 	ConverterUtils.getToken(tokenizer);
       }
 
-      if (tokenizer.ttype == ',' || tokenizer.ttype == '\t' || 
+      if (tokenizer.ttype == m_FieldSeparator.charAt(0) || 
 	  tokenizer.ttype == StreamTokenizer.TT_EOL) {
 	current.add(m_MissingValue);
 	wasSep = true;
@@ -762,8 +823,7 @@ public class CSVLoader
     tokenizer.resetSyntax();         
     tokenizer.whitespaceChars(0, (' '-1));    
     tokenizer.wordChars(' ','\u00FF');
-    tokenizer.whitespaceChars(',',',');
-    tokenizer.whitespaceChars('\t','\t');
+    tokenizer.whitespaceChars(m_FieldSeparator.charAt(0),m_FieldSeparator.charAt(0));
     tokenizer.commentChar('%');
     tokenizer.quoteChar('"');
     tokenizer.quoteChar('\'');
