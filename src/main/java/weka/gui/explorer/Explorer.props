@@ -127,6 +127,12 @@ ClassifierSourceCodeClass=WekaClassifier
 # into plotable instances for displaying the classifier errors.
 ClassifierErrorsPlotInstances=weka.gui.explorer.ClassifierErrorsPlotInstances
 
+# The minimum plot size for numeric attributes (when visualizing classifier errors)
+ClassifierErrorsMinimumPlotSizeNumeric=1
+
+# The maximum plot size for numeric attributes (when visualizing classifier errors)
+ClassifierErrorsMaximumPlotSizeNumeric=20
+
 # the default clusterer, including options
 # (default is EM)
 Clusterer=weka.clusterers.EM
