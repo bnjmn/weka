@@ -22,14 +22,13 @@
 package weka.gui.explorer;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.evaluation.NumericPrediction;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.gui.visualize.Plot2D;
@@ -71,6 +70,12 @@ public class ClassifierErrorsPlotInstances
   /** for serialization. */
   private static final long serialVersionUID = -3941976365792013279L;
 
+  /** the minimum plot size for numeric errors. */
+  protected int m_MinimumPlotSizeNumeric;
+
+  /** the maximum plot size for numeric errors. */
+  protected int m_MaximumPlotSizeNumeric;
+  
   /** whether to save the instances for visualization or just evaluate the 
    * instance. */
   protected boolean m_SaveForVisualization;
@@ -96,12 +101,14 @@ public class ClassifierErrorsPlotInstances
   protected void initialize() {
     super.initialize();
     
-    m_PlotShapes           = new FastVector();
-    m_PlotSizes            = new FastVector();
-    m_Classifier           = null;
-    m_ClassIndex           = -1;
-    m_Evaluation           = null;
-    m_SaveForVisualization = true;
+    m_PlotShapes             = new FastVector();
+    m_PlotSizes              = new FastVector();
+    m_Classifier             = null;
+    m_ClassIndex             = -1;
+    m_Evaluation             = null;
+    m_SaveForVisualization   = true;
+    m_MinimumPlotSizeNumeric = ExplorerDefaults.getClassifierErrorsMinimumPlotSizeNumeric();
+    m_MaximumPlotSizeNumeric = ExplorerDefaults.getClassifierErrorsMaximumPlotSizeNumeric();
   }
   
   /**
@@ -321,7 +328,6 @@ public class ClassifierErrorsPlotInstances
    * in the visualize panel.
    */
   protected void scaleNumericPredictions() {
-    int 	maxpSize;
     double 	maxErr;
     double 	minErr;
     double 	err;
@@ -329,9 +335,8 @@ public class ClassifierErrorsPlotInstances
     Double 	errd;
     double 	temp;
     
-    maxpSize = 20;
-    maxErr   = Double.NEGATIVE_INFINITY;
-    minErr   = Double.POSITIVE_INFINITY;
+    maxErr = Double.NEGATIVE_INFINITY;
+    minErr = Double.POSITIVE_INFINITY;
 
     // find min/max errors
     for (i = 0; i < m_PlotSizes.size(); i++) {
@@ -351,15 +356,15 @@ public class ClassifierErrorsPlotInstances
       if (errd != null) {
 	err = Math.abs(errd.doubleValue());
 	if (maxErr - minErr > 0) {
-	  temp = (((err - minErr) / (maxErr - minErr)) * maxpSize);
-	  m_PlotSizes.setElementAt(new Integer((int) temp), i);
+	  temp = (((err - minErr) / (maxErr - minErr)) * (m_MaximumPlotSizeNumeric - m_MinimumPlotSizeNumeric + 1));
+	  m_PlotSizes.setElementAt(new Integer((int) temp) + m_MinimumPlotSizeNumeric, i);
 	}
 	else {
-	  m_PlotSizes.setElementAt(new Integer(1), i);
+	  m_PlotSizes.setElementAt(new Integer(m_MinimumPlotSizeNumeric), i);
 	}
       }
       else {
-	m_PlotSizes.setElementAt(new Integer(1), i);
+	m_PlotSizes.setElementAt(new Integer(m_MinimumPlotSizeNumeric), i);
       }
     }
   }

@@ -374,6 +374,26 @@ public class ExplorerDefaults
   }
   
   /**
+   * Returns the minimum size in pixels for plots of plotting classifier errors 
+   * of numeric attributes.
+   * 
+   * @return		the size
+   */
+  public static int getClassifierErrorsMinimumPlotSizeNumeric() {
+    return Integer.parseInt(get("ClassifierErrorsMinimumPlotSizeNumeric", "1"));
+  }
+  
+  /**
+   * Returns the maximum size in pixels for plots of plotting classifier errors 
+   * of numeric attributes.
+   * 
+   * @return		the size
+   */
+  public static int getClassifierErrorsMaximumPlotSizeNumeric() {
+    return Integer.parseInt(get("ClassifierErrorsMaximumPlotSizeNumeric", "20"));
+  }
+  
+  /**
    * returns the default clusterer (fully configured) for the clusterer panel.
    * 
    * @return		the default clusterer, EM by default
