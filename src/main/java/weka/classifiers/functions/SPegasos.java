@@ -49,7 +49,7 @@ import weka.filters.unsupervised.attribute.Normalize;
 
 /**
  <!-- globalinfo-start -->
- * Implements the stochastic variant of the Pegasos (Primal Estimated sub-GrAdient SOlver for SVM) method of Shalev-Shwartz et al. (2007). This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes, so the coefficients in the output are based on the normalized data. For more information, see<br/>
+ * Implements the stochastic variant of the Pegasos (Primal Estimated sub-GrAdient SOlver for SVM) method of Shalev-Shwartz et al. (2007). This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes, so the coefficients in the output are based on the normalized data. Can either minimize the hinge loss (SVM) or log loss (logistic regression). For more information, see<br/>
  * <br/>
  * S. Shalev-Shwartz, Y. Singer, N. Srebro: Pegasos: Primal Estimated sub-GrAdient SOlver for SVM. In: 24th International Conference on MachineLearning, 807-814, 2007.
  * <p/>
@@ -71,6 +71,10 @@ import weka.filters.unsupervised.attribute.Normalize;
  *
  <!-- options-start -->
  * Valid options are: <p/>
+ * 
+ * <pre> -F
+ *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression).
+ *  (default = 0)</pre>
  * 
  * <pre> -L &lt;double&gt;
  *  The lambda regularization constant (default = 0.0001)</pre>
@@ -339,6 +343,10 @@ public class SPegasos extends AbstractClassifier
    * 
    <!-- options-start -->
    * Valid options are: <p/>
+   * 
+   * <pre> -F
+   *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression).
+   *  (default = 0)</pre>
    * 
    * <pre> -L &lt;double&gt;
    *  The lambda regularization constant (default = 0.0001)</pre>
