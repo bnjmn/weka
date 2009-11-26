@@ -456,6 +456,9 @@ public class SPegasos extends AbstractClassifier
   public void reset() {
     m_t = 1;
     m_weights = null;
+    m_normalize = null;
+    m_replaceMissing = null;
+    m_nominalToBinary = null;
   }
 
   /**
