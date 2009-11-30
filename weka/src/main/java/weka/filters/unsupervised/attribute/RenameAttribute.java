@@ -52,11 +52,11 @@ import weka.filters.SimpleStreamFilter;
  * 
  * <pre> -find &lt;regexp&gt;
  *  The regular expression that the attribute names must match.
- *  (default: \([\s\S+]\))</pre>
+ *  (default: ([\s\S]+))</pre>
  * 
  * <pre> -replace &lt;regexp&gt;
  *  The regular expression to replace matching attributes with.
- *  (default: \0)</pre>
+ *  (default: $0)</pre>
  * 
  * <pre> -all
  *  Replaces all occurrences instead of just the first.
@@ -85,10 +85,10 @@ public class RenameAttribute
   private static final long serialVersionUID = 4216491776378279596L;
 
   /** the regular expression that the attribute names have to match. */
-  protected String m_Find = "\\([\\s\\S+]\\)";
+  protected String m_Find = "([\\s\\S]+)";
   
   /** the regular expression to replace the attribute name with. */
-  protected String m_Replace = "\\0";
+  protected String m_Replace = "$0";
   
   /** the attribute range to work on. */
   protected Range m_AttributeIndices = new Range("first-last");
@@ -122,12 +122,12 @@ public class RenameAttribute
 
     result.addElement(new Option(
 	"\tThe regular expression that the attribute names must match.\n"
-	+ "\t(default: \\([\\s\\S+]\\))",
+	+ "\t(default: ([\\s\\S]+))",
 	"find", 1, "-find <regexp>"));
 
     result.addElement(new Option(
 	"\tThe regular expression to replace matching attributes with.\n"
-	+ "\t(default: \\0)",
+	+ "\t(default: $0)",
 	"replace", 1, "-replace <regexp>"));
 
     result.addElement(new Option(
@@ -160,11 +160,11 @@ public class RenameAttribute
    * 
    * <pre> -find &lt;regexp&gt;
    *  The regular expression that the attribute names must match.
-   *  (default: \([\s\S+]\))</pre>
+   *  (default: ([\s\S]+))</pre>
    * 
    * <pre> -replace &lt;regexp&gt;
    *  The regular expression to replace matching attributes with.
-   *  (default: \0)</pre>
+   *  (default: $0)</pre>
    * 
    * <pre> -all
    *  Replaces all occurrences instead of just the first.
@@ -193,13 +193,13 @@ public class RenameAttribute
     if (tmpStr.length() != 0)
       setFind(tmpStr);
     else
-      setFind("\\([\\s\\S+]\\)");
+      setFind("([\\s\\S]+)");
     
     tmpStr = Utils.getOption("replace", options);
     if (tmpStr.length() != 0)
       setReplace(tmpStr);
     else
-      setReplace("\\0");
+      setReplace("$0");
 
     setReplaceAll(Utils.getFlag("all", options));
     
