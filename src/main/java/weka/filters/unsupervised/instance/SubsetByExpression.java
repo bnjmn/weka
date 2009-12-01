@@ -351,7 +351,10 @@ public class SubsetByExpression
    * @see               #batchFinished()
    */
   protected Instances process(Instances instances) throws Exception {
-    return Parser.filter(m_Expression, instances);
+    if (!isFirstBatchDone())
+      return Parser.filter(m_Expression, instances);
+    else
+      return instances;
   }
 
   /**
