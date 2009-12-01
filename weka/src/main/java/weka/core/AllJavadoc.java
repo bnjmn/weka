@@ -21,6 +21,7 @@
 
 package weka.core;
 
+import java.util.HashSet;
 import java.util.Vector;
 
 /**
@@ -28,52 +29,53 @@ import java.util.Vector;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -W &lt;classname&gt;
  *  The class to load.</pre>
- * 
+ *
  * <pre> -nostars
  *  Suppresses the '*' in the Javadoc.</pre>
- * 
+ *
  * <pre> -dir &lt;dir&gt;
  *  The directory above the package hierarchy of the class.</pre>
- * 
+ *
  * <pre> -silent
  *  Suppresses printing in the console.</pre>
- * 
+ *
  <!-- options-end -->
- * 
+ *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class AllJavadoc
   extends Javadoc {
 
   /** contains all the  */
   protected static Vector m_Javadocs;
-  
+
   /** determine all classes derived from Javadoc and instantiate them */
   static {
     // get all classnames, besides this one
-    Vector list = ClassDiscovery.find(Javadoc.class, Javadoc.class.getPackage().getName());
-    list.remove(AllJavadoc.class.getName());
-    
+    HashSet<String> set = new HashSet<String>(ClassDiscovery.find(Javadoc.class, Javadoc.class.getPackage().getName()));
+    if (set.contains(AllJavadoc.class.getName()))
+      set.remove(AllJavadoc.class.getName());
+
     // instantiate them
-    m_Javadocs = new Vector();
-    for (int i = 0; i < list.size(); i++) {
+    m_Javadocs = new Vector<Javadoc>();
+    for (String classname: set) {
       try {
-	Class cls = Class.forName((String) list.get(i));
-	m_Javadocs.add(cls.newInstance());
+	Class cls = Class.forName(classname);
+	m_Javadocs.add((Javadoc)cls.newInstance());
       }
       catch (Exception e) {
 	e.printStackTrace();
       }
     }
   }
-  
+
   /**
    * sets the classname of the class to generate the Javadoc for
-   * 
+   *
    * @param value	the new classname
    */
   public void setClassname(String value) {
@@ -81,10 +83,10 @@ public class AllJavadoc
     for (int i = 0; i < m_Javadocs.size(); i++)
       ((Javadoc) m_Javadocs.get(i)).setClassname(value);
   }
-  
+
   /**
    * sets whether to prefix the Javadoc with "*"
-   * 
+   *
    * @param value	true if stars are to be used
    */
   public void setUseStars(boolean value) {
@@ -92,10 +94,10 @@ public class AllJavadoc
     for (int i = 0; i < m_Javadocs.size(); i++)
       ((Javadoc) m_Javadocs.get(i)).setUseStars(value);
   }
-  
+
   /**
    * sets whether to suppress output in the console
-   * 
+   *
    * @param value	true if output is to be suppressed
    */
   public void setSilent(boolean value) {
@@ -106,7 +108,7 @@ public class AllJavadoc
 
   /**
    * generates and returns the Javadoc for the specified start/end tag pair.
-   * 
+   *
    * @param index	the index in the start/end tag array
    * @return		the generated Javadoc
    * @throws Exception 	in case the generation fails
@@ -114,11 +116,11 @@ public class AllJavadoc
   protected String generateJavadoc(int index) throws Exception {
     throw new Exception("Not used!");
   }
-  
+
   /**
    * updates the Javadoc in the given source code, using all the found
    * Javadoc updaters.
-   * 
+   *
    * @param content	the source code
    * @return		the updated source code
    * @throws Exception 	in case the generation fails
@@ -126,28 +128,28 @@ public class AllJavadoc
   protected String updateJavadoc(String content) throws Exception {
     String	result;
     int		i;
-    
+
     result = content;
-    
+
     for (i = 0; i < m_Javadocs.size(); i++) {
       result = ((Javadoc) m_Javadocs.get(i)).updateJavadoc(result);
     }
-    
+
     return result;
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * Parses the given commandline parameters and generates the Javadoc.
-   * 
+   *
    * @param args	the commandline parameters for the object
    */
   public static void main(String[] args) {
