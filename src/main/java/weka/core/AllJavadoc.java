@@ -21,6 +21,7 @@
 
 package weka.core;
 
+import java.util.HashSet;
 import java.util.Vector;
 
 /**
@@ -55,14 +56,15 @@ public class AllJavadoc
   /** determine all classes derived from Javadoc and instantiate them */
   static {
     // get all classnames, besides this one
-    Vector<String> list = ClassDiscovery.find(Javadoc.class, Javadoc.class.getPackage().getName());
-    list.remove(AllJavadoc.class.getName());
+    HashSet<String> set = new HashSet<String>(ClassDiscovery.find(Javadoc.class, Javadoc.class.getPackage().getName()));
+    if (set.contains(AllJavadoc.class.getName()))
+      set.remove(AllJavadoc.class.getName());
     
     // instantiate them
     m_Javadocs = new Vector<Javadoc>();
-    for (int i = 0; i < list.size(); i++) {
+    for (String classname: set) {
       try {
-	Class cls = Class.forName((String) list.get(i));
+	Class cls = Class.forName(classname);
 	m_Javadocs.add((Javadoc)cls.newInstance());
       }
       catch (Exception e) {
