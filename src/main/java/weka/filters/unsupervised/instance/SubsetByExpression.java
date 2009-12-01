@@ -108,14 +108,14 @@ import java.util.Vector;
  *   not ismissing(ATT3)<br/>
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -E &lt;expr&gt;
  *  The expression to use for filtering
  *  (default: true).</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
@@ -126,10 +126,10 @@ public class SubsetByExpression
 
   /** for serialization. */
   private static final long serialVersionUID = 5628686110979589602L;
-  
+
   /** the expresion to use for filtering. */
   protected String m_Expression = "true";
-  
+
   /**
    * Returns a string describing this filter.
    *
@@ -137,7 +137,7 @@ public class SubsetByExpression
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
+    return
         "Filters instances according to a user-specified expression.\n\n"
       + "Grammar:\n\n"
       + "boolexpr_list ::= boolexpr_list boolexpr_part | boolexpr_part;\n"
@@ -217,7 +217,7 @@ public class SubsetByExpression
    */
   public Enumeration listOptions() {
     Vector	result;
-    
+
     result = new Vector();
 
     result.addElement(new Option(
@@ -231,14 +231,14 @@ public class SubsetByExpression
 
   /**
    * Parses a given list of options. <p/>
-   * 
+   *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -E &lt;expr&gt;
    *  The expression to use for filtering
    *  (default: true).</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -246,13 +246,13 @@ public class SubsetByExpression
    */
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
-    
+
     tmpStr = Utils.getOption('E', options);
     if (tmpStr.length() != 0)
       setExpression(tmpStr);
     else
       setExpression("true");
-   
+
     if (getInputFormat() != null)
       setInputFormat(getInputFormat());
   }
@@ -264,7 +264,7 @@ public class SubsetByExpression
    */
   public String[] getOptions() {
     Vector<String>	result;
-    
+
     result = new Vector();
 
     result.add("-E");
@@ -273,7 +273,7 @@ public class SubsetByExpression
     return result.toArray(new String[result.size()]);
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -288,14 +288,14 @@ public class SubsetByExpression
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
@@ -319,7 +319,7 @@ public class SubsetByExpression
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
@@ -328,7 +328,7 @@ public class SubsetByExpression
   }
 
   /**
-   * Determines the output format based on the input format and returns 
+   * Determines the output format based on the input format and returns
    * this.
    *
    * @param inputFormat     the input format to base the output format on
@@ -337,7 +337,7 @@ public class SubsetByExpression
    */
   protected Instances determineOutputFormat(Instances inputFormat)
       throws Exception {
-    
+
     return new Instances(inputFormat, 0);
   }
 
@@ -351,12 +351,15 @@ public class SubsetByExpression
    * @see               #batchFinished()
    */
   protected Instances process(Instances instances) throws Exception {
-    return Parser.filter(m_Expression, instances);
+    if (!isFirstBatchDone())
+      return Parser.filter(m_Expression, instances);
+    else
+      return instances;
   }
 
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
