@@ -8,7 +8,7 @@
    <!ATTLIST object primitive CDATA "no">
    <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
    <!ATTLIST object null      CDATA "no">
-   <!ATTLIST object version   CDATA "3.5.3">
+   <!ATTLIST object version   CDATA "3.7.0">
 ]
 >
 
@@ -5536,7 +5536,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5552,7 +5552,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5566,7 +5566,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5596,7 +5596,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5612,7 +5612,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5626,7 +5626,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5642,7 +5642,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5656,7 +5656,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5672,7 +5672,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5686,7 +5686,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5702,7 +5702,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5716,7 +5716,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5732,7 +5732,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5746,7 +5746,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5762,7 +5762,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5776,7 +5776,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5792,7 +5792,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5806,7 +5806,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5822,7 +5822,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5836,7 +5836,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5852,7 +5852,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5866,7 +5866,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5882,7 +5882,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5896,7 +5896,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5912,7 +5912,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5926,7 +5926,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5942,7 +5942,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5956,7 +5956,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -5972,7 +5972,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
@@ -5986,7 +5986,7 @@
          <object class="java.lang.String" name="2">-W</object>
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-A</object>
-         <object class="java.lang.String" name="5">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="5">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="6"/>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
@@ -6002,7 +6002,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
