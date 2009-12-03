@@ -354,7 +354,7 @@ public class GenericArrayEditor
         //when we do getAsText() in the constructor of
         //PropertyValueSelector()
 	if(Array.getLength(o) > 0) {
-	  editor.setValue(Array.get(o,0));
+	  editor.setValue(makeCopy(Array.get(o,0)));
 	} else {
 	  if (editor instanceof GenericObjectEditor) {
 	    ((GenericObjectEditor)editor).setDefaultValue();
@@ -578,6 +578,25 @@ public class GenericArrayEditor
    */
   public void removePropertyChangeListener(PropertyChangeListener l) {
     m_Support.removePropertyChangeListener(l);
+  }
+
+  /**
+   * Makes a copy of an object using serialization.
+   * 
+   * @param source the object to copy
+   * @return a copy of the source object, null if copying fails
+   */
+  public static Object makeCopy(Object source) {
+    Object	result;
+    
+    try {
+      result = GenericObjectEditor.makeCopy(source);
+    }
+    catch (Exception e) {
+      result = null;
+    }
+    
+    return result;
   }
 
   /**
