@@ -352,9 +352,9 @@ and a 2-digit day, separated by hyphens:
 
 	\item \textbf{nominal} -- Since nominal attributes contain predefined
 labels, one needs to supply these, stored in form of a
-\texttt{weka.core.FastVector} object:
+\texttt{java.util.ArrayList<String>} object:
 	\begin{verbatim}
-		FastVector labels = new FastVector();
+		ArrayList<String> labels = new ArrayList<String>();
 		labels.addElement("label_a");
 		labels.addElement("label_b");
 		labels.addElement("label_c");
@@ -366,9 +366,10 @@ labels, one needs to supply these, stored in form of a
 not store a predefined list of labels. Normally used to store textual data,
 i.e., content of documents for text categorization. The same constructor as for
 the nominal attribute is used, but a \texttt{null} value is provided instead of
-an instance of \texttt{FastVector}:
+an instance of \texttt{java.util.ArrayList<String>}:
 	\begin{verbatim}
-		Attribute string = new Attribute("name_of_attr", (FastVector) null);
+		Attribute string = new Attribute("name_of_attr", (ArrayList<String>)
+null);
 	\end{verbatim}
 
 	\newpage
@@ -378,9 +379,9 @@ an instance of \texttt{FastVector}:
 the constructor. The following code snippet generates a relational attribute
 that contains a relation with two attributes, a numeric and a nominal attribute:
 	\begin{verbatim}
-		FastVector atts = new FastVector();
+		ArrayList<Attribute> atts = new ArrayList<Attribute>();
 		atts.addElement(new Attribute("rel.num"));
-		FastVector values = new FastVector();
+		ArrayList<String> values = new ArrayList<String>();
 		values.addElement("val_A");
 		values.addElement("val_B");
 		values.addElement("val_C");
@@ -390,17 +391,18 @@ that contains a relation with two attributes, a numeric and a nominal attribute:
 	\end{verbatim}
 \end{tight_itemize}
 A \texttt{weka.core.Instances} object is then created by supplying a
-\texttt{FastVector} object containing all the attribute objects. The following
+\texttt{java.util.ArrayList<Attribute>} object containing all the attribute
+objects. The following
 example creates a dataset with two numeric attributes and a nominal class
 attribute with two labels ``no'' and ``yes'':
 \begin{verbatim}
    Attribute num1 = new Attribute("num1");
    Attribute num2 = new Attribute("num2");
-   FastVector labels = new FastVector();
+   ArrayList<String> labels = new ArrayList<String>();
    labels.addElement("no");
    labels.addElement("yes");
    Attribute cls = new Attribute("class", labels);
-   FastVector attributes = new FastVector();
+   ArrayList<Attribute> attributes = new ArrayList<Attribute>();
    attributes.addElement(num1);
    attributes.addElement(num2);
    attributes.addElement(cls);
@@ -416,30 +418,38 @@ method.
 
 \subsection{Adding data}
 After the structure of the dataset has been defined, one can add the actual
-data to it, row by row. There are basically two constructors of the
-\texttt{weka.core.Instance} class that one can use for this purpose:
-\begin{tight_itemize}
-	\item \texttt{Instance(double weight, double[] attValues)} -- generates an
-\texttt{Instance} object with the specified weight and the given double values.
-WEKA's internal format is using doubles for all attribute types. For nominal,
-string and relational attributes this is just an index of the stored values.
-	\item \texttt{Instance(int numAttributes)} -- generates a new
-\texttt{Instance} object with weight 1.0 and all missing values.
-\end{tight_itemize}
-The second constructor may be easier to use, but setting values via the
-\texttt{Instance} class' methods is a bit costly, especially if one is
-adding a lot of rows. Therefore, the following code examples cover the first
-constructor. For simplicity, an \texttt{Instances} object ``\texttt{data}''
-based on the code snippets for the different attribute introduced used above is
-used, as it contains all possible attribute types.
+data to it, row by row. \texttt{weka.core.Instance} was turned into an
+interface to provide greater flexibility. \texttt{weka.core.AbstractInstance}
+implements this interface and provides basic functionality that is common to
+\texttt{weka.core.DenseInstance} (formerly
+\texttt{weka.core.Instance}) and \texttt{weka.core.SparseInstance} (which stores
+only non-zero values). In the following examples, only the
+\texttt{DenseInstance} class is used; the \texttt{SparseInstance} class is very
+similar in handling.
 
-\newpage
+There are basically two constructors of the \texttt{DenseInstance} class that
+one can use for instantiating a data row:
+\begin{tight_itemize}
+	\item \texttt{DenseInstance(double weight, double[] attValues)} --
+this constructor generates a \texttt{DenseInstance} object with the specified
+weight and the given double values. WEKA's internal format is using doubles for
+all attribute types. For nominal, string and relational attributes this is just
+an index of the stored values.
+	\item \texttt{DenseInstance(int numAttributes)} -- generates a new
+\texttt{DenseInstance} object with weight 1.0 and all missing values.
+\end{tight_itemize}
+The second constructor may be easier to use, but setting values using the
+methods of the \texttt{DenseInstance} is a bit costly, especially
+if one is adding a lot of rows. Therefore, the following code examples cover the
+first constructor. For simplicity, an \texttt{Instances} object
+``\texttt{data}'' based on the code snippets for the different attribute
+introduced used above is used, as it contains all possible attribute types.
 
 For each instance, the first step is to create a new double array to hold the
 attribute values. It is important not to reuse this array, but always create a
 new one, since WEKA only references it and does not create a copy of it, when
-instantiating the \texttt{Instance} object. Reusing means changing the
-previously generated \texttt{Instance} object:
+instantiating the \texttt{DenseInstance} object. Reusing means changing the
+previously generated \texttt{DenseInstance} object:
 \begin{verbatim}
    double[] values = new double[data.numAttributes()];
 \end{verbatim}
@@ -475,14 +485,14 @@ of it can be determined, using the \texttt{addRelation} method:
 	valuesRel = new double[dataRel.numAttributes()];
 	valuesRel[0] = 2.34;
 	valuesRel[1] = dataRel.attribute(1).indexOf("val_C");
-	dataRel.add(new Instance(1.0, valuesRel));
+	dataRel.add(new DenseInstance(1.0, valuesRel));
 	values[4] = data.attribute(4).addRelation(dataRel);
 	\end{verbatim}
 \end{tight_itemize}
 Finally, an \texttt{Instance} object is generated with the initialized double
 array and added to the dataset:
 \begin{verbatim}
-   Instance inst = new Instance(1.0, values);
+   Instance inst = new DenseInstance(1.0, values);
    data.add(inst);
 \end{verbatim}
 
