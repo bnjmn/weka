@@ -38,13 +38,13 @@ import  weka.filters.Filter;
  * Valid options are:
  *
  * -M <br>
- * Treat missing values as a seperate value. <p>
+ * Treat missing values as a separate value. <p>
  * 
  * -L <br>
  * Don't include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.1 $
+ * @version $Revision$
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -63,9 +63,9 @@ public class CfsSubsetEval
   private int m_numAttribs;
   /** Number of instances in the training data */
   private int m_numInstances;
-  /** Treat missing values as seperate values */
-  private boolean m_missingSeperate;
-  /** Include locally predicitive attributes */
+  /** Treat missing values as separate values */
+  private boolean m_missingSeparate;
+  /** Include locally predictive attributes */
   private boolean m_locallyPredictive;
   /** Holds the matrix of attribute correlations */
   //  private Matrix m_corr_matrix;
@@ -103,7 +103,7 @@ public class CfsSubsetEval
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(3);
-    newVector.addElement(new Option("\tTreat missing values as a seperate" 
+    newVector.addElement(new Option("\tTreat missing values as a separate" 
 				    + "\n\tvalue.", "M", 0, "-M"));
     newVector.addElement(new Option("\tDon't include locally predictive attributes" 
 				    + ".", "L", 0, "-L"));
@@ -117,7 +117,7 @@ public class CfsSubsetEval
    * Valid options are:
    *
    * -M <br>
-   * Treat missing values as a seperate value. <p>
+   * Treat missing values as a separate value. <p>
    * 
    * -L <br>
    * Don't include locally predictive attributes. <p>
@@ -130,7 +130,7 @@ public class CfsSubsetEval
     throws Exception {
     String optionString;
     resetOptions();
-    setMissingSeperate(Utils.getFlag('M', options));
+    setMissingSeparate(Utils.getFlag('M', options));
     setLocallyPredictive(!Utils.getFlag('L', options));
   }
 
@@ -170,29 +170,29 @@ public class CfsSubsetEval
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String missingSeperateTipText() {
+  public String missingSeparateTipText() {
     return "Treat missing as a separate value. Otherwise, counts for missing "
       +"values are distributed across other values in proportion to their "
       +"frequency.";
   }
 
   /**
-   * Treat missing as a seperate value
+   * Treat missing as a separate value
    *
    * @param b true or false
    */
-  public void setMissingSeperate (boolean b) {
-    m_missingSeperate = b;
+  public void setMissingSeparate (boolean b) {
+    m_missingSeparate = b;
   }
 
 
   /**
-   * Return true is missing is treated as a seperate value
+   * Return true is missing is treated as a separate value
    *
-   * @return true if missing is to be treated as a seperate value
+   * @return true if missing is to be treated as a separate value
    */
-  public boolean getMissingSeperate () {
-    return  m_missingSeperate;
+  public boolean getMissingSeparate () {
+    return  m_missingSeparate;
   }
 
 
@@ -205,7 +205,7 @@ public class CfsSubsetEval
     String[] options = new String[2];
     int current = 0;
 
-    if (getMissingSeperate()) {
+    if (getMissingSeparate()) {
       options[current++] = "-M";
     }
 
@@ -442,7 +442,7 @@ public class CfsSubsetEval
     }
 
     // distribute missing counts
-    if (!m_missingSeperate && 
+    if (!m_missingSeparate && 
 	(sumi[ni-1] < m_numInstances) && 
 	(sumj[nj-1] < m_numInstances)) {
       double[] i_copy = new double[sumi.length];
@@ -579,7 +579,7 @@ public class CfsSubsetEval
     double stdv_num = 0.0;
     double diff1, diff2;
     double r = 0.0, rr, max_corr = 0.0;
-    int nx = (!m_missingSeperate) 
+    int nx = (!m_missingSeparate) 
       ? m_trainInstances.attribute(att1).numValues() 
       : m_trainInstances.attribute(att1).numValues() + 1;
 
@@ -597,7 +597,7 @@ public class CfsSubsetEval
       inst = m_trainInstances.instance(i);
 
       if (inst.isMissing(att1)) {
-	if (!m_missingSeperate) {
+	if (!m_missingSeparate) {
 	  ii = mx;
 	}
 	else {
@@ -621,7 +621,7 @@ public class CfsSubsetEval
       // 
       for (i = 0; i < nx; i++) {
 	if (inst.isMissing(att1)) {
-	  if (!m_missingSeperate) {
+	  if (!m_missingSeparate) {
 	    temp = (i == mx)? 1.0 : 0.0;
 	  }
 	  else {
@@ -697,11 +697,11 @@ public class CfsSubsetEval
       meanOrMode(m_trainInstances.attribute(att2));
     double diff1, diff2;
     double r = 0.0, rr, max_corr = 0.0;
-    int nx = (!m_missingSeperate) 
+    int nx = (!m_missingSeparate) 
       ? m_trainInstances.attribute(att1).numValues() 
       : m_trainInstances.attribute(att1).numValues() + 1;
 
-    int ny = (!m_missingSeperate)
+    int ny = (!m_missingSeparate)
       ? m_trainInstances.attribute(att2).numValues() 
       : m_trainInstances.attribute(att2).numValues() + 1;
 
@@ -732,7 +732,7 @@ public class CfsSubsetEval
       inst = m_trainInstances.instance(i);
 
       if (inst.isMissing(att1)) {
-	if (!m_missingSeperate) {
+	if (!m_missingSeparate) {
 	  ii = mx;
 	}
 	else {
@@ -744,7 +744,7 @@ public class CfsSubsetEval
       }
 
       if (inst.isMissing(att2)) {
-	if (!m_missingSeperate) {
+	if (!m_missingSeparate) {
 	  jj = my;
 	}
 	else {
@@ -766,7 +766,7 @@ public class CfsSubsetEval
 
       for (j = 0; j < ny; j++) {
 	if (inst.isMissing(att2)) {
-	  if (!m_missingSeperate) {
+	  if (!m_missingSeparate) {
 	    temp2 = (j == my)? 1.0 : 0.0;
 	  }
 	  else {
@@ -784,7 +784,7 @@ public class CfsSubsetEval
       // 
       for (i = 0; i < nx; i++) {
 	if (inst.isMissing(att1)) {
-	  if (!m_missingSeperate) {
+	  if (!m_missingSeparate) {
 	    temp1 = (i == mx)? 1.0 : 0.0;
 	  }
 	  else {
@@ -800,7 +800,7 @@ public class CfsSubsetEval
 
 	for (j = 0; j < ny; j++) {
 	  if (inst.isMissing(att2)) {
-	    if (!m_missingSeperate) {
+	    if (!m_missingSeparate) {
 	      temp2 = (j == my)? 1.0 : 0.0;
 	    }
 	    else {
@@ -887,8 +887,8 @@ public class CfsSubsetEval
     else {
       text.append("\tCFS Subset Evaluator\n");
 
-      if (m_missingSeperate) {
-	text.append("\tTreating missing values as a seperate value\n");
+      if (m_missingSeparate) {
+	text.append("\tTreating missing values as a separate value\n");
       }
 
       if (m_locallyPredictive) {
@@ -1022,7 +1022,7 @@ public class CfsSubsetEval
 
   protected void resetOptions () {
     m_trainInstances = null;
-    m_missingSeperate = false;
+    m_missingSeparate = false;
     m_locallyPredictive = true;
     m_c_Threshold = 0.0;
   }
