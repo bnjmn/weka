@@ -44,7 +44,7 @@ import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * An instance filter that removes a range of attributes from the dataset.
+ * A filter that removes a range of attributes from the dataset.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -268,7 +268,7 @@ public class Remove
    */
   public String globalInfo() {
 
-    return "An instance filter that removes a range of"
+    return "A filter that removes a range of"
       + " attributes from the dataset.";
   }
 
