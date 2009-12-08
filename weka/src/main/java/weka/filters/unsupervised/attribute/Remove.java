@@ -40,7 +40,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * An instance filter that deletes a range of attributes from the dataset.<p>
+ * A filter that deletes a range of attributes from the dataset.<p>
  *
  * Valid filter-specific options are:<p>
  *
@@ -52,7 +52,7 @@ import java.util.Vector;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision$
  */
 public class Remove extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -241,7 +241,7 @@ public class Remove extends Filter
    */
   public String globalInfo() {
 
-    return "An instance filter that removes a range of"
+    return "An filter that removes a range of"
       + " attributes from the dataset.";
   }
 
