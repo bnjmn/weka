@@ -170,10 +170,10 @@ public class CostBenefitAnalysis extends JPanel
     protected JLabel m_cost_predictedB = new JLabel("Predicted (b)", SwingConstants.RIGHT);
     protected JLabel m_cost_actualA = new JLabel(" Actual (a)");
     protected JLabel m_cost_actualB = new JLabel(" Actual (b)");
-    protected JTextField m_cost_aa = new JTextField(5);
+    protected JTextField m_cost_aa = new JTextField("0.0", 5);
     protected JTextField m_cost_ab = new JTextField("1.0", 5);
     protected JTextField m_cost_ba = new JTextField("1.0", 5);
-    protected JTextField m_cost_bb = new JTextField(5);
+    protected JTextField m_cost_bb = new JTextField("0.0" ,5);
     protected JButton m_maximizeCB = new JButton("Maximize Cost/Benefit");
     protected JButton m_minimizeCB = new JButton("Minimize Cost/Benefit");
     protected JRadioButton m_costR = new JRadioButton("Cost");
@@ -613,7 +613,7 @@ public class CostBenefitAnalysis extends JPanel
       try {
         tpCost = Double.parseDouble(m_cost_aa.getText());
       } catch (NumberFormatException n) {}
-      double fpCost = 1.0;
+      double fpCost = 0.0;
       try {
         fpCost = Double.parseDouble(m_cost_ba.getText());
       } catch (NumberFormatException n) {}
@@ -621,11 +621,11 @@ public class CostBenefitAnalysis extends JPanel
       try {
         tnCost = Double.parseDouble(m_cost_bb.getText());
       } catch (NumberFormatException n) {}
-      double fnCost = 1.0;
+      double fnCost = 0.0;
       try {
         fnCost = Double.parseDouble(m_cost_ab.getText());
       } catch (NumberFormatException n) {}
-      
+            
       totalRandomCB += posInSample * tpCost;
       totalRandomCB += negInSample * fpCost;
       totalRandomCB += posOutSample * fnCost;
@@ -872,7 +872,7 @@ public class CostBenefitAnalysis extends JPanel
       try {
         tpCost = Double.parseDouble(m_cost_aa.getText());
       } catch (NumberFormatException n) {}
-      double fpCost = 1.0;
+      double fpCost = 0.0;
       try {
         fpCost = Double.parseDouble(m_cost_ba.getText());
       } catch (NumberFormatException n) {}
@@ -880,7 +880,7 @@ public class CostBenefitAnalysis extends JPanel
       try {
         tnCost = Double.parseDouble(m_cost_bb.getText());
       } catch (NumberFormatException n) {}
-      double fnCost = 1.0;
+      double fnCost = 0.0;
       try {
         fnCost = Double.parseDouble(m_cost_ab.getText());
       } catch (NumberFormatException n) {}
