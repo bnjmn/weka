@@ -489,19 +489,6 @@ public class RealAdaBoost
     data = new Instances(data);
     data.deleteWithMissingClass();
     
-    // only class? -> build ZeroR model
-    if (data.numAttributes() == 1) {
-      System.err.println(
-	  "Cannot build model (only class attribute present in data!), "
-	  + "using ZeroR model instead!");
-      m_ZeroR = new weka.classifiers.rules.ZeroR();
-      m_ZeroR.buildClassifier(data);
-      return;
-    }
-    else {
-      m_ZeroR = null;
-    }
-    
     m_SumOfWeights = data.sumOfWeights();
 
     if ((!m_UseResampling) && 
@@ -522,29 +509,25 @@ public class RealAdaBoost
   protected void buildClassifierUsingResampling(Instances data) 
     throws Exception {
 
-    Instances trainData, sample, training;
+    Instances trainData, sample, training, trainingWeightsNotNormalized;
     double sumProbs;
     int numInstances = data.numInstances();
     Random randomInstance = new Random(m_Seed);
-
-    // Initialize data
-    m_NumIterationsPerformed = 0;
+    double minLoss = Double.MAX_VALUE;
 
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
-    training = new Instances(data, 0, numInstances);
-    sumProbs = training.sumOfWeights();
-    for (int i = 0; i < training.numInstances(); i++) {
-      training.instance(i).setWeight(training.instance(i).
-				      weight() / sumProbs);
-    }
+    trainingWeightsNotNormalized = new Instances(data, 0, numInstances);
     
     // Do boostrap iterations
-    for (m_NumIterationsPerformed = 0; m_NumIterationsPerformed < m_Classifiers.length; 
+    for (m_NumIterationsPerformed = -1; m_NumIterationsPerformed < m_Classifiers.length; 
 	 m_NumIterationsPerformed++) {
       if (m_Debug) {
 	System.err.println("Training classifier " + (m_NumIterationsPerformed + 1));
       }
+
+      training = new Instances(trainingWeightsNotNormalized);
+      normalizeWeights(training, 1.0);
 
       // Select instances to train the classifier on
       if (m_WeightThreshold < 100) {
@@ -562,11 +545,32 @@ public class RealAdaBoost
 
       sample = trainData.resampleWithWeights(randomInstance, weights);
       
-      // Build and evaluate classifier
-      m_Classifiers[m_NumIterationsPerformed].buildClassifier(sample);
+      // Build classifier
+      if (m_NumIterationsPerformed == -1) {
+        m_ZeroR = new weka.classifiers.rules.ZeroR();
+        m_ZeroR.buildClassifier(data);
+      } else {
+        m_Classifiers[m_NumIterationsPerformed].buildClassifier(sample);
+      }
  
       // Update instance weights
-      setWeights(training);
+      setWeights(trainingWeightsNotNormalized, m_NumIterationsPerformed);
+
+      // Has progress been made?
+      double loss = 0;
+      for (Instance inst : trainingWeightsNotNormalized) {
+        loss += Math.log(inst.weight());
+      }
+      if (m_Debug) {
+        System.err.println("Current loss on log scale: " + loss);
+      }
+      if ((m_NumIterationsPerformed > -1) && (loss > minLoss)) {
+        if (m_Debug) {
+          System.err.println("Loss has increased: bailing out.");
+        }
+        break;
+      }
+      minLoss = loss;
     }
   }
 
@@ -576,29 +580,43 @@ public class RealAdaBoost
    * @param training the training instances
    * @throws Exception if something goes wrong
    */
-  protected void setWeights(Instances training) 
+  protected void setWeights(Instances training, int iteration) 
     throws Exception {
 
-    double oldSumOfWeights, newSumOfWeights;
-
-    oldSumOfWeights = training.sumOfWeights();
     for (Instance instance: training) {
       double reweight = 1;
-      double prob = m_Classifiers[m_NumIterationsPerformed].distributionForInstance(instance)[0]; 
+      double prob = 1, shrinkage = m_Shrinkage;
 
-      // Make sure that probabilities are never 0 or 1 using ad-hoc smoothing
-      prob = (m_SumOfWeights * prob + 1) / (m_SumOfWeights + 2);
+      if (iteration == -1) {
+        prob = m_ZeroR.distributionForInstance(instance)[0]; 
+        shrinkage = 1.0;
+      } else {
+        prob = m_Classifiers[iteration].distributionForInstance(instance)[0]; 
+
+        // Make sure that probabilities are never 0 or 1 using ad-hoc smoothing
+        prob = (m_SumOfWeights * prob + 1) / (m_SumOfWeights + 2);
+      }
 
       if (instance.classValue() == 1) {
-        reweight = m_Shrinkage * 0.5 * (Math.log(prob) - Math.log(1 - prob));
+        reweight = shrinkage * 0.5 * (Math.log(prob) - Math.log(1 - prob));
       } else {
-        reweight = m_Shrinkage * 0.5 * (Math.log(1 - prob) - Math.log(prob));
+        reweight = shrinkage * 0.5 * (Math.log(1 - prob) - Math.log(prob));
       }
       instance.setWeight(instance.weight() * Math.exp(reweight));
     }
-    
+  }
+
+  /**
+   * Normalize the weights for the next iteration.
+   * 
+   * @param training the training instances
+   * @throws Exception if something goes wrong
+   */
+  protected void normalizeWeights(Instances training, double oldSumOfWeights) 
+    throws Exception {
+
     // Renormalize weights
-    newSumOfWeights = training.sumOfWeights();
+    double newSumOfWeights = training.sumOfWeights();
     for (Instance instance: training) {
       instance.setWeight(instance.weight() * oldSumOfWeights / newSumOfWeights);
     }
@@ -615,23 +633,25 @@ public class RealAdaBoost
   protected void buildClassifierWithWeights(Instances data) 
     throws Exception {
 
-    Instances trainData, training;
+    Instances trainData, training, trainingWeightsNotNormalized;
     int numInstances = data.numInstances();
     Random randomInstance = new Random(m_Seed);
-
-    // Initialize data
-    m_NumIterationsPerformed = 0;
+    double minLoss = Double.MAX_VALUE;
 
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
-    training = new Instances(data, 0, numInstances);
+    trainingWeightsNotNormalized = new Instances(data, 0, numInstances);
     
     // Do boostrap iterations
-    for (m_NumIterationsPerformed = 0; m_NumIterationsPerformed < m_Classifiers.length; 
+    for (m_NumIterationsPerformed = -1; m_NumIterationsPerformed < m_Classifiers.length; 
 	 m_NumIterationsPerformed++) {
       if (m_Debug) {
 	System.err.println("Training classifier " + (m_NumIterationsPerformed + 1));
       }
+
+      training = new Instances(trainingWeightsNotNormalized);
+      normalizeWeights(training, m_SumOfWeights);
+
       // Select instances to train the classifier on
       if (m_WeightThreshold < 100) {
 	trainData = selectWeightQuantile(training, 
@@ -640,13 +660,35 @@ public class RealAdaBoost
 	trainData = new Instances(training, 0, numInstances);
       }
 
-      // Build the classifier
-      if (m_Classifiers[m_NumIterationsPerformed] instanceof Randomizable)
-	((Randomizable) m_Classifiers[m_NumIterationsPerformed]).setSeed(randomInstance.nextInt());
-      m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
+      // Build classifier
+      if (m_NumIterationsPerformed == -1) {
+        m_ZeroR = new weka.classifiers.rules.ZeroR();
+        m_ZeroR.buildClassifier(data);
+      } else {
+        if (m_Classifiers[m_NumIterationsPerformed] instanceof Randomizable)
+          ((Randomizable) m_Classifiers[m_NumIterationsPerformed]).setSeed(randomInstance.nextInt());
+        m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
+      }
+
  
       // Update instance weights
-      setWeights(training);
+      setWeights(trainingWeightsNotNormalized, m_NumIterationsPerformed);
+
+      // Has progress been made?
+      double loss = 0;
+      for (Instance inst : trainingWeightsNotNormalized) {
+        loss += Math.log(inst.weight());
+      }
+      if (m_Debug) {
+        System.err.println("Current loss on log scale: " + loss);
+      }
+      if ((m_NumIterationsPerformed > -1) && (loss > minLoss)) {
+        if (m_Debug) {
+          System.err.println("Loss has increased: bailing out.");
+        }
+        break;
+      }
+      minLoss = loss;
     }
   }
   
@@ -660,31 +702,23 @@ public class RealAdaBoost
    */
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
-      
-    // default model?
-    if (m_ZeroR != null) {
-      return m_ZeroR.distributionForInstance(instance);
-    }
-    
-    if (m_NumIterationsPerformed == 0) {
-      throw new Exception("No model built");
-    }
-    
-    if (m_NumIterationsPerformed == 1) {
-      return m_Classifiers[0].distributionForInstance(instance);
-    } else {
-      double [] sums = new double [instance.numClasses()]; 
-      for (int i = 0; i < m_NumIterationsPerformed; i++) {
-        double prob = m_Classifiers[i].distributionForInstance(instance)[0];
 
+    double [] sums = new double [instance.numClasses()]; 
+    for (int i = -1; i < m_NumIterationsPerformed; i++) {
+      double prob = 1, shrinkage = m_Shrinkage;
+      if (i == -1) {
+        prob = m_ZeroR.distributionForInstance(instance)[0]; 
+        shrinkage = 1.0;
+      } else {
+        prob = m_Classifiers[i].distributionForInstance(instance)[0]; 
+        
         // Make sure that probabilities are never 0 or 1 using ad-hoc smoothing
         prob = (m_SumOfWeights * prob + 1) / (m_SumOfWeights + 2);
-
-	sums[0] += m_Shrinkage * 0.5 * (Math.log(prob) - Math.log(1 - prob));
       }
-      sums[1] = -sums[0];
-      return Utils.logs2probs(sums);
+      sums[0] += shrinkage * 0.5 * (Math.log(prob) - Math.log(1 - prob));
     }
+    sums[1] = -sums[0];
+    return Utils.logs2probs(sums);
   }
 
   /**
@@ -694,32 +728,20 @@ public class RealAdaBoost
    */
   public String toString() {
     
-    // only ZeroR model?
-    if (m_ZeroR != null) {
-      StringBuffer buf = new StringBuffer();
-      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
-      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
-      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
-      buf.append(m_ZeroR.toString());
-      return buf.toString();
-    }
-    
     StringBuffer text = new StringBuffer();
-    
-    if (m_NumIterationsPerformed == 0) {
-      text.append("RealAdaBoost: No model built yet.\n");
-    } else if (m_NumIterationsPerformed == 1) {
-      text.append("RealAdaBoost: No boosting possible, one classifier used!\n");
-      text.append(m_Classifiers[0].toString() + "\n");
+
+    if (m_ZeroR == null) {
+      text.append("No model built yet.\n\n");
     } else {
       text.append("RealAdaBoost: Base classifiers: \n\n");
+      text.append(m_ZeroR.toString() + "\n\n");    
       for (int i = 0; i < m_NumIterationsPerformed ; i++) {
-	text.append(m_Classifiers[i].toString() + "\n\n");
+        text.append(m_Classifiers[i].toString() + "\n\n");
       }
       text.append("Number of performed Iterations: " 
-		  + m_NumIterationsPerformed + "\n");
+                  + m_NumIterationsPerformed + "\n");
     }
-    
+
     return text.toString();
   }
   
