@@ -2857,6 +2857,11 @@ public class KnowledgeFlowApp
               if (!sFile.mkdir()) {
                 System.err.println("[KnowledgeFlow] Unable to create .knowledgeFlow "
                                    +"directory in your HOME.");
+              } else {
+                // make the plugins subdirectory for the user
+                sFile = new File(sFile.toString() + File.separator 
+                    + "plugins");
+                sFile.mkdir();
               }
             }
             try {
