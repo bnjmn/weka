@@ -78,6 +78,14 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -P &lt;attribute index of positive value&gt;
+ *  Set the index of the attribute value to consider as 'positive'
+ *  for binary attributes in normal dense instances. Index 2 is always
+ *  used for sparse instances. (default = 2)</pre>
+ * 
+ * <pre> -I &lt;max items&gt;
+ *  The maximum number of items to include in large items sets (and rules). (default = -1, i.e. no limit.)</pre>
+ * 
  * <pre> -N &lt;require number of rules&gt;
  *  The required number of rules. (default = 10)</pre>
  * 
@@ -1318,8 +1326,8 @@ public class FPGrowth extends AbstractAssociator
   
   //protected double m_lowerBoundMinSupport = 0.0;
   
-  /** The index of binary attributes to treat as the positive value */
-  protected int m_positiveIndex = 1;
+  /** The index (1 based) of binary attributes to treat as the positive value */
+  protected int m_positiveIndex = 2;
   
   protected AssociationRule.METRIC_TYPE m_metric = 
     AssociationRule.METRIC_TYPE.CONFIDENCE;
@@ -1333,7 +1341,7 @@ public class FPGrowth extends AbstractAssociator
   protected List<AssociationRule> m_rules;
   
   // maximum number of items in a large item set (zero means no limit)
-  protected int m_maxItems = 0; // TODO Test this!!
+  protected int m_maxItems = -1;
   
   /**
    * Returns default capabilities of the classifier.
@@ -1404,7 +1412,7 @@ public class FPGrowth extends AbstractAssociator
     ArrayList<BinaryItem> singletons = new ArrayList<BinaryItem>();
     
     for (int i = 0; i < data.numAttributes(); i++) {
-      singletons.add(new BinaryItem(data.attribute(i), m_positiveIndex));
+      singletons.add(new BinaryItem(data.attribute(i), m_positiveIndex - 1));
     }
     
     for (int i = 0; i < data.numInstances(); i++) {
@@ -1418,7 +1426,7 @@ public class FPGrowth extends AbstractAssociator
         for (int j = 0; j < data.numAttributes(); j++) {
           if (!current.isMissing(j)) {
             if (current.attribute(j).numValues() == 1 
-                || current.value(j) == m_positiveIndex) {
+                || current.value(j) == m_positiveIndex - 1) {
               singletons.get(j).increaseFrequency();
             }
           }
@@ -1473,7 +1481,7 @@ public class FPGrowth extends AbstractAssociator
         for (int j = 0; j < data.numAttributes(); j++) {
           if (!current.isMissing(j)) {
             if (current.attribute(j).numValues() == 1 
-                || current.value(j) == m_positiveIndex) {
+                || current.value(j) == m_positiveIndex - 1) {
               if (singletons.get(j).getFrequency() >= minSupport) {
                 transaction.add(singletons.get(j));
               }
@@ -1503,13 +1511,14 @@ public class FPGrowth extends AbstractAssociator
       int recursionLevel, FrequentBinaryItemSet conditionalItems, int minSupport) {
     
     if (!tree.isEmpty(recursionLevel)) {
-      if (m_maxItems > 0 && recursionLevel > m_maxItems) {
+      if (m_maxItems > 0 && recursionLevel >= m_maxItems) {
         // don't mine any further
         return;
       }
       
       Map<BinaryItem, FPTreeRoot.Header> headerTable = tree.getHeaderTable();
       Set<BinaryItem> keys = headerTable.keySet();
+//      System.err.println("Number of freq item sets collected " + largeItemSets.size());
       Iterator<BinaryItem> i = keys.iterator();
       while (i.hasNext()) {
         BinaryItem item = i.next();
@@ -1587,7 +1596,7 @@ public class FPGrowth extends AbstractAssociator
     m_lowerBoundMinSupport = 0.1;
     m_upperBoundMinSupport = 1.0;
 //    m_minSupport = -1;
-    m_positiveIndex = 1;
+    m_positiveIndex = 2;
   }
   
   /**
@@ -1669,6 +1678,35 @@ public class FPGrowth extends AbstractAssociator
         break;
       }
     }
+  }
+  
+  /**
+   * Set the maximum number of items to include in large items sets.
+   * 
+   * @param max the maxim number of items to include in large item sets.
+   */
+  public void setMaxNumberOfItems(int max) {
+    m_maxItems = max;
+  }
+  
+  /**
+   * Gets the maximum number of items to be included in large item sets.
+   * 
+   * @return the maximum number of items to be included in large items sets.
+   */
+  public int getMaxNumberOfItems() {
+    return m_maxItems;
+  }
+  
+  /**
+   * Tip text for this property suitable for displaying
+   * in the GUI.
+   * 
+   * @return the tip text for this property.
+   */
+  public String maxNumberOfItemsTipText() {
+    return "The maximum number of items to include in frequent item sets. -1 " +
+    		"means no limit.";
   }
   
   /**
@@ -1874,6 +1912,13 @@ public class FPGrowth extends AbstractAssociator
   public Enumeration<Option> listOptions() {
     Vector<Option> newVector = new Vector<Option>();
     
+    String string00 = "\tSet the index of the attribute value to consider as 'positive'\n\t"
+   + "for binary attributes in normal dense instances. Index 2 is always\n\t"
+   + "used for sparse instances. (default = 2)";    
+    String string0 = "\tThe maximum number of items to include " +
+    		"in large items sets (and rules). (default " +
+    		"= -1, i.e. no limit.)"; 
+      
     String string1 = "\tThe required number of rules. (default = " 
       + m_numRulesToFind + ")";
     String string2 = "\tThe minimum metric score of a rule. (default" +
@@ -1891,6 +1936,8 @@ public class FPGrowth extends AbstractAssociator
     		"Turning this mode on will disable the iterative support reduction\n\t" +
     		"procedure to find the specified number of rules.";
     
+    newVector.add(new Option(string00, "P", 1, "-P <attribute index of positive value>"));
+    newVector.add(new Option(string0, "I", 1, "-I <max items>"));
     newVector.add(new Option(string1, "N", 1, "-N <require number of rules>"));
     newVector.add(new Option(string3, "T", 1, "-T <0=confidence | 1=lift | "
                                     + "2=leverage | 3=Conviction>"));
@@ -1909,6 +1956,14 @@ public class FPGrowth extends AbstractAssociator
    * 
    <!-- options-start -->
    * Valid options are: <p/>
+   * 
+   * <pre> -P &lt;attribute index of positive value&gt;
+   *  Set the index of the attribute value to consider as 'positive'
+   *  for binary attributes in normal dense instances. Index 2 is always
+   *  used for sparse instances. (default = 2)</pre>
+   * 
+   * <pre> -I &lt;max items&gt;
+   *  The maximum number of items to include in large items sets (and rules). (default = -1, i.e. no limit.)</pre>
    * 
    * <pre> -N &lt;require number of rules&gt;
    *  The required number of rules. (default = 10)</pre>
@@ -1942,6 +1997,8 @@ public class FPGrowth extends AbstractAssociator
    */
   public void setOptions(String[] options) throws Exception {
     resetOptions();
+    String positiveIndexString = Utils.getOption('P', options);
+    String maxItemsString = Utils.getOption('I', options);
     String numRulesString = Utils.getOption('N', options);
     String minMetricString = Utils.getOption('C', options);
     String metricTypeString = Utils.getOption("T", options);
@@ -1949,6 +2006,13 @@ public class FPGrowth extends AbstractAssociator
     String upperBoundSupportString = Utils.getOption("U", options);
     String deltaString = Utils.getOption("D", options);
 
+    if (positiveIndexString.length() != 0) {
+      setPositiveIndex(Integer.parseInt(positiveIndexString));
+    }
+    
+    if (maxItemsString.length() != 0) {
+      setMaxNumberOfItems(Integer.parseInt(maxItemsString));
+    }
     
     if (metricTypeString.length() != 0) {
       setMetricType(new SelectedTag(Integer.parseInt(metricTypeString),
@@ -1986,6 +2050,8 @@ public class FPGrowth extends AbstractAssociator
   public String[] getOptions() {
     ArrayList<String> options = new ArrayList<String>();
     
+    options.add("-P"); options.add("" + getPositiveIndex());
+    options.add("-I"); options.add("" + getMaxNumberOfItems());
     options.add("-N"); options.add("" + getNumRulesToFind());
     options.add("-T"); options.add("" + getMetricType().getSelectedTag().getID());
     options.add("-C"); options.add("" + getMinMetric());
@@ -2025,6 +2091,7 @@ public class FPGrowth extends AbstractAssociator
       System.out.println(singletonsCopy.get(i).toString(true));
     }
     System.out.println("---------"); */
+//    System.out.println("Finished finding singletons...");
     
     // while not enough rules
     do {
@@ -2037,6 +2104,7 @@ public class FPGrowth extends AbstractAssociator
 
       // build the FPTree
       FPTreeRoot tree = buildFPTree(singletons, data, currentSupportAsInstances);
+//      System.out.println("Finished building tree...");
 //      System.out.println(tree.toString(0));
     /*System.out.println(tree.printHeaderTable(0)); */
 
@@ -2052,6 +2120,11 @@ public class FPGrowth extends AbstractAssociator
   //    System.err.println(m_largeItemSets.toString(100));
 
       //    m_largeItemSets.sort(compF);
+//      System.err.println("Finished mining tree...");
+      
+      // save memory
+      tree = null;
+      
       m_rules = 
         AssociationRule.generateRulesBruteForce(m_largeItemSets, m_metric, 
             m_metricThreshold, data.numInstances());
