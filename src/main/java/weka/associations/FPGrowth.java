@@ -1905,6 +1905,16 @@ public class FPGrowth extends AbstractAssociator
   } */    
   
   /**
+   * Gets the list of mined association rules.
+   * 
+   * @return the list of association rules discovered during mining.
+   * Returns null if mining hasn't been performed yet.
+   */
+  public List<AssociationRule> getAssociationRules() {
+    return m_rules;
+  }
+  
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
