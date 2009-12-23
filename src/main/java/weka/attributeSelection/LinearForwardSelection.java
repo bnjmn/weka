@@ -637,8 +637,8 @@ public class LinearForwardSelection
     options[current++] = "-T";
     options[current++] = "" + m_linearSelectionType;
 
-    options[current++] = "-Z";
-    options[current++] = "" + m_verbose;
+    if (m_verbose)
+      options[current++] = "-Z";
 
     while (current < options.length) {
       options[current++] = "";
