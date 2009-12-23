@@ -125,7 +125,7 @@ public class FPGrowth extends AbstractAssociator
   /**
    * Inner class that handles a single binary item
    */
-  protected static class BinaryItem implements Serializable, Comparable<BinaryItem> {
+  public static class BinaryItem implements Serializable, Comparable<BinaryItem> {
     
     /** For serialization */
     private static final long serialVersionUID = -3372941834914147669L;
