@@ -1,0 +1,59 @@
+% Version: $Revision$
+
+\begin{verbatim}
+import weka.core.*;
+import weka.core.Capabilities.*;
+import java.util.Random;
+
+public class StreamFilter extends Filter {
+
+  protected Random m_Random;
+
+  public String globalInfo() {
+    return   "A stream filter that adds an attribute 'bla' at the end "
+           + "containing a random number. The output format can be collected "
+           + "immediately.";
+  }
+
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    result.enableAllAttributes();
+    result.enableAllClasses();
+    result.enable(Capability.NO_CLASS);  // filter doesn't need class to be set
+    return result;
+  }
+
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
+    super.setInputFormat(instanceInfo);
+    Instances outFormat = new Instances(instanceInfo, 0);
+    outFormat.insertAttributeAt(new Attribute("bla"),
+	  outFormat.numAttributes());
+    setOutputFormat(outFormat);
+    m_Random = new Random(1);
+    return true;  // output format is immediately available
+  }
+
+  public boolean input(Instance instance) throws Exception {
+    if (getInputFormat() = null)
+      throw new NullPointerException("No input instance format defined");
+    if (isNewBatch()) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+    convertInstance(instance);
+    return true;  // can be immediately collected via output()
+  }
+
+  protected void convertInstance(Instance instance) {
+    double[] newValues = new double[instance.numAttributes() + 1];
+    double[] oldValues = instance.toDoubleArray();
+    newValues[newValues.length - 1] = m_Random.nextInt();
+    System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
+    push(new Instance(1.0, newValues));
+  }
+
+  public static void main(String[] args) {
+    runFilter(new StreamFilter(), args);
+  }
+}
+\end{verbatim}
