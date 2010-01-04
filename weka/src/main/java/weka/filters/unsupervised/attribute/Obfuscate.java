@@ -108,6 +108,10 @@ public class Obfuscate
 	case Attribute.NUMERIC:
 	  newAtt = new Attribute("A" + (i + 1));
 	  break;
+	case Attribute.DATE:
+	  String format = oldAtt.getDateFormat();
+	  newAtt = new Attribute("A" + (i + 1), format);
+	  break;
 	case Attribute.NOMINAL:
 	  FastVector vals = new FastVector();
 	  for (int j = 0; j < oldAtt.numValues(); j++) {
