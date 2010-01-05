@@ -145,11 +145,12 @@ This section explains what methods need to be implemented in general and more
 specialized ones in case of meta-classifiers (either with single or multiple
 base-classifiers).
 
-\subsubsection*{General}
+\heading{General}
 Here is an overview of methods that your new classifier needs to implement in
 order to integrate nicely into the Weka framework:
 
-\paragraph{globalInfo()} returns a short description, that is displayed in the
+\heading{globalInfo()}
+returns a short description, that is displayed in the
 GUI, like the Explorer or Experimenter. How long this description will be is
 really up to you, but it should be sufficient to understand the classifier's
 underlying algorithm. If the classifier implements the
@@ -157,12 +158,12 @@ underlying algorithm. If the classifier implements the
 to the publication(s) by extending the returned string by
 \texttt{getTechnicalInformation().toString()}.
 
-\paragraph{listOptions()} returns an \texttt{java.util.Enumeration} of
+\heading{listOptions()} returns an \texttt{java.util.Enumeration} of
 \texttt{weka.core.Option} objects. This enumeration is used to display the help
 on the command-line, hence it needs to return the \texttt{Option} objects of
 the superclass as well.
 
-\paragraph{setOptions(String[])} parses the options that the classifier
+\heading{setOptions(String[])} parses the options that the classifier
 would receive from a command-line invocation. A parameter and argument are
 always two elements in the string array (a common mistake is to use a single
 cell in the string array for both of them). You can use the methods
@@ -174,7 +175,7 @@ argument from the string array (``destructive''). The last call in the
 \texttt{super.setOptions(String[])} one, in order to pass on any other arguments
 still present in the array to the superclass. The following code snippet just
 parses the only option ``alpha'' that the classifier defines:
-\begin{verbatim}
+{\small \begin{verbatim}
   import weka.core.Utils;
   ...
   public void setOptions(String[] options) throws Exception {
@@ -187,11 +188,11 @@ parses the only option ``alpha'' that the classifier defines:
     }
     super.setOptions(options);
   }
-\end{verbatim}
+\end{verbatim}}
 
 \clearpage
 
-\paragraph{getOptions()} returns a string array of command-line options that
+\heading{getOptions()} returns a string array of command-line options that
 resemble the current classifier setup. Supplying this array to the
 \texttt{setOptions(String[])} method must result in the same configuration.
 This method will get called in the GUI when copying a classifier setup to the
@@ -216,12 +217,12 @@ Note, that the \texttt{getOptions()} method requires you to add the preceding
 dash for an option, opposed to the \texttt{getOption}/\texttt{getFlag} calls in
 the \texttt{setOptions} method.
 
-\paragraph{getCapabilities()} returns meta-information on what type of data the
+\heading{getCapabilities()} returns meta-information on what type of data the
 classifier can handle, in regards to attributes and class attributes. See
 section ``Capabilities'' on page \pageref{classifier_capabilities} for more
 information.
 
-\paragraph{buildClassifier(Instances)} builds the model from scratch with the
+\heading{buildClassifier(Instances)} builds the model from scratch with the
 provided dataset. Each subsequent call of this method \textbf{must} result in
 the same model being built. The \texttt{buildClassifier} method also tests
 whether the supplied data can be handled at all by the classifier, utilizing
@@ -239,19 +240,17 @@ the capabilities returned by the \texttt{getCapabilities()} method:
   }
 \end{verbatim}
 
-\paragraph{toString()} is used for outputting the built model. This is not
+\heading{toString()} is used for outputting the built model. This is not
 required, but it is useful for the user to see properties of the model. Decision
 trees normally ouput the tree, support vector machines the support vectors and
 rule-based classifiers the generated rules.
 
-\paragraph{distributionForInstance(Instance)} returns the class probabilities
+\heading{distributionForInstance(Instance)} returns the class probabilities
 array of the prediction for the given \texttt{weka.core.Instance} object. If
 your classifier handles nominal class attributes, then you need to override
 this method.
 
-\clearpage
-
-\paragraph{classifyInstance(Instance)} returns the classification or regression
+\heading{classifyInstance(Instance)} returns the classification or regression
 for the given \texttt{weka.core.Instance} object. In case of a \textit{nominal}
 class attribute, this method returns the index of the class label that got
 predicted. You do not need to override this method in this case as the
@@ -262,7 +261,7 @@ in the array with the highest probability; in case of ties the first one). For
 \textit{numeric} class attributes, you need to override this method, as it
 has to return the regression value predicted by the model.
 
-\paragraph{main(String[])} executes the classifier from command-line. If your
+\heading{main(String[])} executes the classifier from command-line. If your
 new algorithm is called \texttt{FunkyClassifier}, then use the following code
 as your \texttt{main} method:
 \begin{verbatim}
@@ -286,37 +285,37 @@ override. Normally, this should not be the case. But if your classifier requires
 the base-classifier(s) to be of a certain type, you can override the specific
 set-method and add additional checks.
 
-\subsubsection*{SingleClassifierEnhancer}
+\heading{SingleClassifierEnhancer}
 The following methods are used for handling the single base-classifier of this
 meta-classifier.
 
-\paragraph{defaultClassifierString()} returns the class name of the classifier
+\heading{defaultClassifierString()} returns the class name of the classifier
 that is used as the default one for this meta-classifier.
 
-\paragraph{setClassifier(Classifier)} sets the classifier object. Override this
+\heading{setClassifier(Classifier)} sets the classifier object. Override this
 method if you require further checks, like that the classifiers needs to be of
 a certain class. This is necessary, if you still want to allow the user to
 parametrize the base-classifier, but not choose another classifier with the
 GenericObjectEditor. Be aware that this method does not create a copy of the
 provided classifier.
 
-\paragraph{getClassifier()} returns the currently set classifier object. Note,
+\heading{getClassifier()} returns the currently set classifier object. Note,
 this method returns the internal object and not a copy.
 
-\subsubsection*{MultipleClassifiersCombiner}
+\heading{MultipleClassifiersCombiner}
 This meta-classifier handles its multiple base-classifiers with the following
 methods:
 
-\paragraph{setClassifiers(Classifier[])} sets the array of classifiers to use
+\heading{setClassifiers(Classifier[])} sets the array of classifiers to use
 as base-classifiers. If you require the base-classifiers to implement a certain
 interface or be of a certain class, then override this method and add the
 necessary checks. Note, this method does not create a copy of the array, but
 just uses this reference internally.
 
-\paragraph{getClassifiers()} returns the array of classifiers that is in use.
+\heading{getClassifiers()} returns the array of classifiers that is in use.
 Careful, this method returns the internal array and not a copy of it.
 
-\paragraph{getClassifier(int)} returns the classifier from the internal
+\heading{getClassifier(int)} returns the classifier from the internal
 classifier array specified by the given index. Once again, this method does not
 return a copy of the classifier, but the actual object used by this classifier.
 
@@ -325,7 +324,7 @@ return a copy of the classifier, but the actual object used by this classifier.
 Weka's code base requires you to follow a few rules. The following sections can
 be used as guidelines in writing your code.
 
-\subsubsection*{Parameters}
+\heading{Parameters}
 Weka has two different ways of setting/obtaining parameters of an algorithm
 (both of them are unfortunately completely separated, which makes option
 handling so prone to errors):
@@ -362,7 +361,7 @@ These get- and set-methods should be used in the \texttt{getOptions} and
 \texttt{setOptions} methods as well, to impose the same checks when
 getting/setting parameters.
 
-\subsubsection*{Randomization}
+\heading{Randomization}
 In order to get repeatable experiments, one is not allowed to use unseeded
 random number generators like \texttt{Math.random()}. Instead, one has to
 instantiate a \texttt{java.util.Random} object in the
@@ -371,7 +370,7 @@ value can be user supplied, of course, which all the \texttt{Randomizable...}
 abstract classifiers already implement.
 
 \newpage
-\subsubsection*{Capabilities}
+\heading{Capabilities}
 \label{classifier_capabilities}
 By default, the \texttt{weka.classifiers.Classifier} superclass returns an
 object that denotes that the classifier can handle \textbf{any} type of data.
@@ -420,7 +419,7 @@ class attributes}. These operations automatically enable/disable the
 The following sections list a few examples of how to configure the capabilities.
 
 \newpage
-\subsubsection*{Simple classifier}
+\heading{Simple classifier}
 A classifier that handles only numeric classes and numeric and nominal
 attributes, but no missing values at all, would configure the
 \texttt{Capabilities} object like this:
@@ -452,7 +451,7 @@ method as follows:
   }
 \end{verbatim}
 
-\subsubsection*{Meta-classifier}
+\heading{Meta-classifier}
 Meta-classifiers, by default, just return the capabilities of their base
 classifiers - in case of descendants of the
 \texttt{weka.classifier.MultipleClassifiersCombiner}, an \textbf{AND} over all
@@ -475,7 +474,7 @@ classes. For that reason it disables the \textit{Dependencies} for the class:
 \end{verbatim}}
 
 \newpage
-\subsubsection*{Javadoc}
+\heading{Javadoc}
 \label{classifier_javadoc}
 In order to keep code-quality high and maintenance low, source code needs to
 be well documented. This includes the following Javadoc requirements:
@@ -583,7 +582,7 @@ is as follows:
 Running the \texttt{weka.core.AllJavadoc} tool over this code will output code
 with the comments filled out accordingly.
 
-\subsubsection*{Revisions}
+\heading{Revisions}
 \label{classifier_revisions}
 Classifiers implement the \texttt{weka.core.RevisionHandler} interface. This
 provides the functionality of obtaining the Subversion revision from within
@@ -605,11 +604,11 @@ obtain the revision of this particular source file:
 Note, a commit into Subversion will replace the revision number above with the
 actual revision number.
 
-\subsubsection*{Testing}
+\heading{Testing}
 Weka provides already a test framework to ensure correct basic functionality of
 a classifier. It is essential for the classifier to pass these tests.
 
-\subsubsection*{Option handling}
+\heading{Option handling}
 You can check the option handling of your classifier with the following tool
 from command-line:
 \begin{verbatim}
@@ -617,7 +616,7 @@ from command-line:
 \end{verbatim}
 All tests need to return \textit{yes}.
 
-\subsubsection*{GenericObjectEditor}
+\heading{GenericObjectEditor}
 The \texttt{CheckGOE} class checks whether all the properties available in the
 GUI have a tooltip accompanying them and whether the \texttt{globalInfo()}
 method is declared:
@@ -626,7 +625,7 @@ method is declared:
 \end{verbatim}
 All tests, once again, need to return \textit{yes}.
 
-\subsubsection*{Source code}
+\heading{Source code}
 Classifiers that implement the \texttt{weka.classifiers.Sourcable} interface can
 output Java code of the built model. In order to check the generated  code, one
 should not only compile the code, but also test it with the following test
@@ -651,7 +650,7 @@ code in a pseudo-classifier):
 \end{verbatim}
 It needs to return \textit{Tests OK!}.
 
-\subsubsection*{Unit tests}
+\heading{Unit tests}
 In order to make sure that your classifier applies to the Weka criteria, you
 should add your classifier to the junit unit test framework, i.e., by creating a
 Test class. The superclass for classifier unit tests is
@@ -713,7 +712,7 @@ implement the \texttt{weka.core.OptionHandler} interface. See section ``Option
 handling'' on page \pageref{filter_optionhandling}.
 
 \newpage
-\paragraph{setInputFormat(Instances)}
+\heading{setInputFormat(Instances)}
 With this call, the user tells the filter what structure, i.e., attributes, the
 input data has. This method also tests, whether the filter can actually process
 this data, according to the capabilities specified in the
@@ -724,11 +723,11 @@ be determined based alone on this information, then the method should set the
 output format via \texttt{setOutputFormat(Instances)} and return \texttt{true},
 otherwise it has to return \texttt{false}.
 
-\paragraph{getInputFormat()}
+\heading{getInputFormat()}
 This method returns an \texttt{Instances} object containing all currently
 buffered \texttt{Instance} objects from the input queue.
 
-\paragraph{setOutputFormat(Instances)}
+\heading{setOutputFormat(Instances)}
 \texttt{setOutputFormat(Instances)} defines the new \texttt{Instances} header
 for the output data. For filters that work on a row-basis, there should not be
 any changes between the input and output format. But filters that work on
@@ -737,12 +736,12 @@ method must be called with the appropriate \texttt{Instances} object as
 parameter, since all \texttt{Instance} objects being processed will rely on the
 output format (they use it as dataset that they belong to).
 
-\paragraph{getOutputFormat()}
+\heading{getOutputFormat()}
 This method returns the currently set \texttt{Instances} object that defines the
 output format. In case \texttt{setOutputFormat(Instances)} has not been called
 yet, this method will return \texttt{null}.
 
-\paragraph{input(Instance)} returns \texttt{true} if the given
+\heading{input(Instance)} returns \texttt{true} if the given
 \texttt{Instance} can be processed straight away and can be collected
 immediately via the \texttt{output()} method (after adding it to the output
 queue via \texttt{push(Instance)}, of course). This is also the case if the
@@ -755,21 +754,21 @@ to collect all the data first before doing some calculations, then it needs to
 be buffered with \texttt{bufferInput(Instance)} until \texttt{batchFinished()}
 is called. In this case, the method needs to return \texttt{false}.
 
-\paragraph{bufferInput(Instance)}
+\heading{bufferInput(Instance)}
 In case an \texttt{Instance} cannot be processed immediately, one can use this
 method to buffer them in the input queue. All buffered \texttt{Instance} objects
 are available via the \texttt{getInputFormat()} method.
 
-\paragraph{push(Instance)}
+\heading{push(Instance)}
 adds the given \texttt{Instance} to the output queue.
 
-\paragraph{output()}
+\heading{output()}
 Returns the next \texttt{Instance} object from the output queue and removes it
 from there. In case there is no \texttt{Instance} available this method returns
 \texttt{null}.
 
 \newpage
-\paragraph{batchFinished()} signals the end of a dataset being pushed
+\heading{batchFinished()} signals the end of a dataset being pushed
 through the filter. In case of a filter that could not process the data of the
 first batch immediately, this is the place to determine what the output format
 will be (and set if via \texttt{setOutputFormat(Instances)}) and finally process
@@ -777,7 +776,7 @@ the input data. The currently available data can be retrieved with the
 \texttt{getInputFormat()} method. After processing the data, one needs to call
 \texttt{flushInput()} to remove all the pending input data.
 
-\paragraph{flushInput()}
+\heading{flushInput()}
 \texttt{flushInput()} removes all buffered \texttt{Instance} objects from the
 input queue. This method must be called after all the \texttt{Instance} objects
 have been processed in the \texttt{batchFinished()} method.
