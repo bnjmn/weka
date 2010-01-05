@@ -20,10 +20,9 @@ For most users, the existing Weka framework will be sufficient to perform the
 task at hand, offering a wide range of filters, classifiers, clusterers, etc.
 Researchers, on the other hand, might want to add new algorithms and compare
 them against existing ones. The framework with its existing algorithms is not
-set in stone, but basically one big plugin framework. Furthermore, Weka supports
-an automatic discovery of classes in your classpath, managed by the
-\texttt{GenericPropertiesCreator}. This allows you to quickly add new
-classifiers, filters, etc. to the existing framework.
+set in stone, but basically one big plugin framework. With Weka's automatic
+discovery of classes on the classpath, adding new classifiers, filters, etc. to
+the existing framework is very easy.
 
 Though algorithms like clusterers, associators, data generators, estimators and
 attribute selection are not covered in this chapter, their implemention is very
@@ -34,23 +33,23 @@ implemented.
 
 The section covering the GenericObjectEditor (see chapter
 \ref{genericobjecteditor}) shows you how to tell Weka where to find your
-class(es) and therefore making them available in the GUI
+class(es) and therefore making it/them available in the GUI
 (Explorer/Experimenter) via the GenericObjectEditor.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Writing a new Classifier %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newpage
+\clearpage
 \section{Writing a new Classifier}
 \subsection{Choosing the base class}
 The ancestor of all classifiers in Weka is \texttt{weka.classifiers.Classifier},
 an abstract class. Your new classifier must be derived from this class at
 least to be visible through the GenericObjectEditor. But in order to
-make implementation of new classifiers even easier, Weka comes already with a
+make implementations of new classifiers even easier, Weka comes already with a
 range of other abstract classes derived from
-\texttt{weka.classifiers.Classifier}. In the following an overview that will
-help you decide what base class to use for your classifier. For better
+\texttt{weka.classifiers.Classifier}. In the following you will find an overview
+that will help you decide what base class to use for your classifier. For better
 readability, the \texttt{weka.classifiers} prefix was dropped from the class
 names:
 \begin{tight_itemize}
@@ -79,8 +78,9 @@ randomizable, iterated
 		\end{tight_itemize}
 	\end{tight_itemize}
 \end{tight_itemize}
-If you check out the Javadoc of those superclasses, you will see all the
-classifiers that are derived from them.
+If you are still unsure about what superclass to choose, then check out the
+Javadoc of those superclasses, you will see all the classifiers that are derived
+from them. That should give you even an better idea.
 
 \subsection{Additional interfaces}
 The abstract classes listed above basically just implement various combinations
@@ -91,9 +91,7 @@ taking place
   \item \texttt{weka.classifiers.IterativeClassifier} -- to make the classifier
 an iterated one
 \end{tight_itemize}
-
-\newpage
-\noindent But these interfaces are not the only ones that can be implemented by
+But these interfaces are not the only ones that can be implemented by
 a classifier. Here is a list for further interfaces:
 \begin{tight_itemize}
   \item \texttt{weka.core.AdditionalMeasureProducer} -- the classifier returns
@@ -103,7 +101,7 @@ method.
 classifier can handle datasets with weighted \texttt{Instance} objects (the
 default weight is 1.0).
   \item \texttt{weka.core.TechnicalInformationHandler} -- for returning paper
-references, publications this classifier is based on.
+references, and publications this classifier is based on.
   \item \texttt{weka.classifiers.Sourcable} -- classifiers implementing this
 interface can return Java code of a built model, which can be used elsewhere.
   \item \texttt{weka.classifiers.UpdateableClassifier} -- for classifiers that
@@ -111,9 +109,11 @@ can be trained incrementally, i.e., row by row like
 \texttt{NaiveBayesUpdateable}.
 \end{tight_itemize}
 
+\pagebreak
 \subsection{Packages}
 A few comments about the different sub-packages in the \texttt{weka.classifiers}
 package:
+
 \begin{tight_itemize}
   \item \texttt{bayes} -- contains bayesian classifiers, e.g.,
 \texttt{NaiveBayes}
@@ -129,8 +129,11 @@ e.g., boosting or bagging
   \item \texttt{misc} -- various classifiers that don't fit in any another
 category
   \item \texttt{rules} -- rule-based classifiers, e.g., ZeroR
-  \item \texttt{trees} -- tree classifiers, like decision trees
+  \item \texttt{trees} -- tree classifiers, like decision trees with
+\texttt{J48} a very common one
 \end{tight_itemize}
+
+\newpage
 
 \subsection{Implementation}
 In the following you will find information on what methods need to be
@@ -143,35 +146,34 @@ specialized ones in case of meta-classifiers (either with single or multiple
 base-classifiers).
 
 \subsubsection*{General}
-Here is an overview of methods that your new classifier needs to implemented in
+Here is an overview of methods that your new classifier needs to implement in
 order to integrate nicely into the Weka framework:
 
-\paragraph{globalInfo()} displays a short description, that is displayed in the
+\paragraph{globalInfo()} returns a short description, that is displayed in the
 GUI, like the Explorer or Experimenter. How long this description will be is
 really up to you, but it should be sufficient to understand the classifier's
 underlying algorithm. If the classifier implements the
 \texttt{weka.core.TechnicalInformationHandler} interface then you could refer
-to the publication(s) by extending the returned the returned string by
+to the publication(s) by extending the returned string by
 \texttt{getTechnicalInformation().toString()}.
 
-\newpage
 \paragraph{listOptions()} returns an \texttt{java.util.Enumeration} of
 \texttt{weka.core.Option} objects. This enumeration is used to display the help
-on the command-line, hence it needs to returns the \texttt{Option} objects of
+on the command-line, hence it needs to return the \texttt{Option} objects of
 the superclass as well.
 
 \paragraph{setOptions(String[])} parses the options that the classifier
 would receive from a command-line invocation. A parameter and argument are
 always two elements in the string array (a common mistake is to use a single
-string cell for both of them). You can use the methods \texttt{getOption} and
-\texttt{getFlag} of the \texttt{weka.core.Utils} class to retrieve the values
-of an option or to ascertain whether a flag is present. But note, that these
-calls \textbf{remove} the option and, if applicable, the argument from the
-string array (``destructive''). The last call in the \texttt{setOptions}
-methods should always be the \texttt{super.setOptions(String[])} one, in order
-to pass on any other arguments still present in the array to the superclass.
-The following code snippet just parses the only option ``alpha'' that the
-classifier defines:
+cell in the string array for both of them). You can use the methods
+\texttt{getOption} and \texttt{getFlag} of the \texttt{weka.core.Utils} class to
+retrieve the values of an option or to ascertain whether a flag is present. But
+note, that these calls \textbf{remove} the option and, if applicable, the
+argument from the string array (``destructive''). The last call in the
+\texttt{setOptions} methods should always be the
+\texttt{super.setOptions(String[])} one, in order to pass on any other arguments
+still present in the array to the superclass. The following code snippet just
+parses the only option ``alpha'' that the classifier defines:
 \begin{verbatim}
   import weka.core.Utils;
   ...
@@ -183,19 +185,21 @@ classifier defines:
     else {
       setAlpha(Double.parseDouble(tmpStr));
     }
-     super.setOptions(options);
+    super.setOptions(options);
   }
 \end{verbatim}
+
+\clearpage
 
 \paragraph{getOptions()} returns a string array of command-line options that
 resemble the current classifier setup. Supplying this array to the
 \texttt{setOptions(String[])} method must result in the same configuration.
 This method will get called in the GUI when copying a classifier setup to the
 clipboard. Since handling of arrays is a bit cumbersome in Java (due to fixed
-size), using an instance of \texttt{java.util.Vector} is a lot easier for
+length), using an instance of \texttt{java.util.Vector} is a lot easier for
 creating the array that needs to be returned. The following code snippet just
 adds the only option ``alpha'' that the classifier defines to the array that is
-being returned:
+being returned, including the options of the superclass:
 \begin{verbatim}
   import java.util.Arrays;
   import java.util.Vector;
@@ -204,7 +208,7 @@ being returned:
     Vector<String> result = new Vector<String>();
     result.add("-alpha");
     result.add("" + getAlpha());
-    result.addAll(Arrays.asList(super.getOptions()));
+    result.addAll(Arrays.asList(super.getOptions())); // superclass
     return result.toArray(new String[result.size()]);
   }
 \end{verbatim}
@@ -212,7 +216,6 @@ Note, that the \texttt{getOptions()} method requires you to add the preceding
 dash for an option, opposed to the \texttt{getOption}/\texttt{getFlag} calls in
 the \texttt{setOptions} method.
 
-\newpage
 \paragraph{getCapabilities()} returns meta-information on what type of data the
 classifier can handle, in regards to attributes and class attributes. See
 section ``Capabilities'' on page \pageref{classifier_capabilities} for more
@@ -245,6 +248,8 @@ rule-based classifiers the generated rules.
 array of the prediction for the given \texttt{weka.core.Instance} object. If
 your classifier handles nominal class attributes, then you need to override
 this method.
+
+\clearpage
 
 \paragraph{classifyInstance(Instance)} returns the classification or regression
 for the given \texttt{weka.core.Instance} object. In case of a \textit{nominal}
@@ -285,14 +290,14 @@ set-method and add additional checks.
 The following methods are used for handling the single base-classifier of this
 meta-classifier.
 
-\paragraph{defaultClassifierString} returns the class name of the classifier
+\paragraph{defaultClassifierString()} returns the class name of the classifier
 that is used as the default one for this meta-classifier.
 
 \paragraph{setClassifier(Classifier)} sets the classifier object. Override this
-method if you required further checks, like that the classifiers needs to be of
+method if you require further checks, like that the classifiers needs to be of
 a certain class. This is necessary, if you still want to allow the user to
 parametrize the base-classifier, but not choose another classifier with the
-GenericObjectEditor. By aware that this method does not create a copy of the
+GenericObjectEditor. Be aware that this method does not create a copy of the
 provided classifier.
 
 \paragraph{getClassifier()} returns the currently set classifier object. Note,
@@ -306,7 +311,7 @@ methods:
 as base-classifiers. If you require the base-classifiers to implement a certain
 interface or be of a certain class, then override this method and add the
 necessary checks. Note, this method does not create a copy of the array, but
-just uses this reference.
+just uses this reference internally.
 
 \paragraph{getClassifiers()} returns the array of classifiers that is in use.
 Careful, this method returns the internal array and not a copy of it.
@@ -327,7 +332,7 @@ handling so prone to errors):
 \begin{tight_enumerate}
   \item command-line options, using the \texttt{setOptions}/\texttt{getOptions}
 methods
-  \item using the properties through the GenericObjectEditor
+  \item using the properties through the GenericObjectEditor in the GUI
 \end{tight_enumerate}
 In the latter case, the get- and set-method for a property must comply with 
 Java Beans style in order to show up in the GUI. You need to supply three
@@ -335,7 +340,7 @@ methods for each property:
 \begin{tight_itemize}
   \item \texttt{public void set\textit{<PropertyName>}(\textit{<Type>})} --
 checks whether the supplied value is valid and only then updates the
-corresponding member variable, in any other case it should ignore the value
+corresponding member variable. In any other case it should ignore the value
 and output a warning in the console or throw an
 \texttt{IllegalArgumentException}.
   \item \texttt{public \textit{<Type>} get\textit{<PropertyName>}()} --
@@ -343,7 +348,8 @@ performs any necessary conversions of the internal value and returns it.
   \item \texttt{public String \textit{<propertyName>}TipText()} -- returns the
 help text that is available through the GUI. Should be the same as on the
 command-line. Note: everything after the first period ``.'' gets truncated from
-the tool tip that pops up in the GUI.
+the tool tip that pops up in the GUI when hovering with the mouse cursor over
+the field in the GenericObjectEditor.
 \end{tight_itemize}
 With a property called ``alpha'' of type ``double'', we get the following
 method signatures:
@@ -369,7 +375,7 @@ abstract classifiers already implement.
 \label{classifier_capabilities}
 By default, the \texttt{weka.classifiers.Classifier} superclass returns an
 object that denotes that the classifier can handle \textbf{any} type of data.
-This is useful for rapid implementation of new algorithms, but also very
+This is useful for rapid prototyping of new algorithms, but also very
 dangerous. If you do not specifically define what type of data can be handled by
 your classifier, you can end up with meaningless models. This can happen if you
 devise a new classifier which is supposed to handle only numeric attributes. By
@@ -411,6 +417,7 @@ attribute is \texttt{Capability.NO\_CLASS}
 And a note on enabling/disabling \textit{nominal attributes} or \textit{nominal
 class attributes}. These operations automatically enable/disable the
 \textit{binary}, \textit{unary} and \textit{empty nominal} capabilities as well.
+The following sections list a few examples of how to configure the capabilities.
 
 \newpage
 \subsubsection*{Simple classifier}
@@ -470,7 +477,7 @@ classes. For that reason it disables the \textit{Dependencies} for the class:
 \newpage
 \subsubsection*{Javadoc}
 \label{classifier_javadoc}
-In order to keep a high code-quality and maintenance easy, the code needs to
+In order to keep code-quality high and maintenance low, source code needs to
 be well documented. This includes the following Javadoc requirements:
 \begin{tight_itemize}
   \item \textbf{class}
@@ -497,9 +504,10 @@ already available through the source code:
   \item listing of command-line parameters -- \texttt{listOptions()}
   \item publication(s), if applicable -- \texttt{getTechnicalInformation()}
 \end{tight_itemize}
-In order to avoid manual syncing, Weka comes with some tools for updating the
-Javadoc automatically. The following tools take a concrete class and update its
-source code (the source code directory needs to be supplied as well, of course):
+In order to avoid manual syncing between Javadoc and source code, Weka comes
+with some tools for updating the Javadoc automatically. The following tools take
+a concrete class and update its source code (the source code directory needs to
+be supplied as well, of course):
 \begin{tight_itemize}
   \item \texttt{weka.core.AllJavadoc} -- executes all Javadoc-producing
 classes (this is the tool, you would normally use)
@@ -594,10 +602,56 @@ obtain the revision of this particular source file:
     return RevisionUtils.extract("$Revision$");
   }
 \end{verbatim}
-Note, a commit into Subversion will replace the ``1'' with the actual revision
-number.
+Note, a commit into Subversion will replace the revision number above with the
+actual revision number.
 
 \subsubsection*{Testing}
+Weka provides already a test framework to ensure correct basic functionality of
+a classifier. It is essential for the classifier to pass these tests.
+
+\subsubsection*{Option handling}
+You can check the option handling of your classifier with the following tool
+from command-line:
+\begin{verbatim}
+ weka.core.CheckOptionHandler -W classname [-- additional parameters]
+\end{verbatim}
+All tests need to return \textit{yes}.
+
+\subsubsection*{GenericObjectEditor}
+The \texttt{CheckGOE} class checks whether all the properties available in the
+GUI have a tooltip accompanying them and whether the \texttt{globalInfo()}
+method is declared:
+\begin{verbatim}
+ weka.core.CheckGOE -W classname [-- additional parameters]
+\end{verbatim}
+All tests, once again, need to return \textit{yes}.
+
+\subsubsection*{Source code}
+Classifiers that implement the \texttt{weka.classifiers.Sourcable} interface can
+output Java code of the built model. In order to check the generated  code, one
+should not only compile the code, but also test it with the following test
+class:
+\begin{verbatim}
+ weka.classifiers.CheckSource
+\end{verbatim}
+This class takes the original Weka classifier, the generated code and the
+dataset used for generating the model (and an optional class index) as
+parameters. It builds the Weka classifier on the dataset and compares the
+output, the one from the Weka classifier and the one from the generated source
+code, whether they are the same.
+
+Here is an example call for \texttt{weka.filters.trees.J48} and the
+generated class \texttt{weka.filters.WekaWrapper} (it wraps the actual generated
+code in a pseudo-classifier):
+\begin{verbatim}
+ java weka.classifiers.CheckSource \
+    -W weka.classifiers.trees.J48 \
+    -S weka.classifiers.WekaWrapper \
+    -t data.arff
+\end{verbatim}
+It needs to return \textit{Tests OK!}.
+
+\subsubsection*{Unit tests}
 In order to make sure that your classifier applies to the Weka criteria, you
 should add your classifier to the junit unit test framework, i.e., by creating a
 Test class. The superclass for classifier unit tests is
@@ -611,22 +665,26 @@ Test class. The superclass for classifier unit tests is
 \section{Writing a new Filter}
 The ``work horses'' of preprocessing in WEKA are \textit{filters}. They perform
 many tasks, from resampling data, to deleting and standardizing attributes. In
-the following are two different approaches covered:
+the following are two different approaches covered that explain in detail how
+to implement a new filter:
 \begin{tight_itemize}
   \item \textbf{default} -- this is how filters had to be implemented in the
 past.
   \item \textbf{simple }-- since there are mainly two types of filters, batch or
-stream, additional abstract classes were introduced to speed up implementation.
+stream, additional abstract classes were introduced to speed up
+the implementation process.
 \end{tight_itemize}
 
 \subsection{Default approach}
-The \textit{default} is the most flexible, but also most complicated approach
-of writing a new filter. This approach has to be taken, if the filter cannot be
+The \textit{default} appraoch is the most flexible, but also most the
+complicated one for writing a new filter. This approach has to be taken, if the
+filter cannot be
 written using the \textit{simple} approach described further below.
 
 \subsubsection{Implementation}
 The following methods are of importance for the implementation of a filter and
-explained in detail further down:
+explained in detail further down. It is also a good idea studying the Javadoc
+of these methods as declared in the \texttt{weka.filters.Filter} class:
 \begin{tight_itemize}
   \item \texttt{getCapabilities()}
   \item \texttt{setInputFormat(Instances)}
@@ -650,10 +708,13 @@ But only the following ones need normally be modified:
   \item \texttt{getRevision()}
 \end{tight_itemize}
 For more information on ``Capabilities'' see section \ref{filter_capabilities}.
+Please note, that the \texttt{weka.filters.Filter} superclass does not
+implement the \texttt{weka.core.OptionHandler} interface. See section ``Option
+handling'' on page \pageref{filter_optionhandling}.
 
 \newpage
 \paragraph{setInputFormat(Instances)}
-With this format, the user tells the filter what format, i.e., attributes, the
+With this call, the user tells the filter what structure, i.e., attributes, the
 input data has. This method also tests, whether the filter can actually process
 this data, according to the capabilities specified in the
 \texttt{getCapabilities()} method.
@@ -674,26 +735,25 @@ any changes between the input and output format. But filters that work on
 attributes, e.g., removing, adding, modifying, will affect this format. This
 method must be called with the appropriate \texttt{Instances} object as
 parameter, since all \texttt{Instance} objects being processed will rely on the
-output format.
+output format (they use it as dataset that they belong to).
 
 \paragraph{getOutputFormat()}
 This method returns the currently set \texttt{Instances} object that defines the
 output format. In case \texttt{setOutputFormat(Instances)} has not been called
 yet, this method will return \texttt{null}.
 
-\paragraph{input(Instance)}
-The \texttt{input(Instance)} method returns \texttt{true} if the given
+\paragraph{input(Instance)} returns \texttt{true} if the given
 \texttt{Instance} can be processed straight away and can be collected
 immediately via the \texttt{output()} method (after adding it to the output
 queue via \texttt{push(Instance)}, of course). This is also the case if the
-first batch of data has been processed and the instance belongs to the second
-batch. Via \texttt{isFirstBatchDone()} one can query whether this instance is
-still part of the first batch or of the second.
+first batch of data has been processed and the \texttt{Instance }belongs to the
+second batch. Via \texttt{isFirstBatchDone()} one can query whether this
+\texttt{Instance} is still part of the first batch or of the second.
 
 If the \texttt{Instance} cannot be processed immediately, e.g., the filter needs
 to collect all the data first before doing some calculations, then it needs to
 be buffered with \texttt{bufferInput(Instance)} until \texttt{batchFinished()}
-is called.
+is called. In this case, the method needs to return \texttt{false}.
 
 \paragraph{bufferInput(Instance)}
 In case an \texttt{Instance} cannot be processed immediately, one can use this
@@ -709,12 +769,11 @@ from there. In case there is no \texttt{Instance} available this method returns
 \texttt{null}.
 
 \newpage
-\paragraph{batchFinished()}
-The \texttt{batchFinished()} method signals the end of a dataset being pushed
+\paragraph{batchFinished()} signals the end of a dataset being pushed
 through the filter. In case of a filter that could not process the data of the
 first batch immediately, this is the place to determine what the output format
-will be (and set if via \texttt{setOutputFormat(Instances)}) and process the
-actual data. The currently available data can be retrieved with the
+will be (and set if via \texttt{setOutputFormat(Instances)}) and finally process
+the input data. The currently available data can be retrieved with the
 \texttt{getInputFormat()} method. After processing the data, one needs to call
 \texttt{flushInput()} to remove all the pending input data.
 
@@ -724,7 +783,8 @@ input queue. This method must be called after all the \texttt{Instance} objects
 have been processed in the \texttt{batchFinished()} method.
 
 \subsubsection*{Option handling}
-If the filter should be able to handle commandline options, then the interface
+\label{filter_optionhandling}
+If the filter should be able to handle command-line options, then the interface
 \texttt{weka.core.OptionHandler} needs to be implemented. In addition
 to that, the following code should be added at the end of the
 \texttt{setOptions(String[])} method:
@@ -745,11 +805,11 @@ Unseeded random number generators like \texttt{Math.random()} should
 repeatable experiments are essential in machine learning.
 
 \subsubsection*{BatchFilter}
-This simple batch filter adds a new attribute called \textit{bla} at the end of
+This simple batch filter adds a new attribute called \textit{blah} at the end of
 the dataset. The rows of this attribute contain only the row's index in the
-data. Since the batch-filter need not see all the data before creating the
-output format, the \texttt{setInputFormat(Instances)} sets the output format and
-returns \texttt{true} (indicating that the output format can be queried
+data. Since the batch-filter does not have to see all the data before creating
+the output format, the \texttt{setInputFormat(Instances)} sets the output format
+and returns \texttt{true} (indicating that the output format can be queried
 immediately). The \texttt{batchFinished()} method performs the processing of all
 the data.
 
@@ -775,13 +835,13 @@ batch.
 
 \newpage
 \subsubsection*{StreamFilter}
-This stream filter adds a random number at the end of each \texttt{Instance} of
-the input data. Since this does not rely on having access to the full data of
-the first batch, the output format is accessible immediately after using
-\texttt{setInputFormat(Instances)}. All the \texttt{Instance} objects are
-immediately processed in \texttt{input(Instance)} via the
-\texttt{convertInstance(Instance)} method, which pushes them immediately to the
-output queue.
+This stream filter adds a random number (the seed value is hard-coded) at the
+end of each \texttt{Instance} of the input data. Since this does not rely on
+having access to the full data of the first batch, the output format is
+accessible immediately after using \texttt{setInputFormat(Instances)}. All the
+\texttt{Instance} objects are immediately processed in \texttt{input(Instance)}
+via the \texttt{convertInstance(Instance)} method, which pushes them immediately
+to the output queue.
 
 {\scriptsize \input{includes/StreamFilter}}
 
@@ -819,14 +879,14 @@ format, based on the input data
   \item \texttt{process(Instances)} -- processes the whole dataset in one
 go
   \item \texttt{getRevision()} -- returns the Subversion revision information,
-see section Revisions
+see section ``Revisions'' on page \pageref{filter_revisions}
 \end{tight_itemize}
 If more options are necessary, then the following methods need to be overridden:
 \begin{tight_itemize}
   \item \texttt{listOptions()} -- returns an enumeration of the available
 options; these are printed if one calls the filter with the -h option
   \item \texttt{setOptions(String[])} -- parses the given option array,
-that were passed from commandline
+that were passed from command-line
   \item \texttt{getOptions()} -- returns an array of options, resembling
 the current setup of the filter
 \end{tight_itemize}
@@ -848,7 +908,7 @@ format, based on the input data
   \item \texttt{process(Instance)} -- processes a single instance and turns it
 from the old format into the new one
   \item \texttt{getRevision()} -- returns the Subversion revision
-information, see section Revisions
+information, see section ``Revisions'' on page \pageref{filter_revisions}
 \end{tight_itemize}
 The \texttt{reset()} method is only used, since the random number generator
 needs to be re-initialized in order to obtain repeatable results.
@@ -858,7 +918,7 @@ If more options are necessary, then the following methods need to be overridden:
   \item \texttt{listOptions()} -- returns an enumeration of the available
 options; these are printed if one calls the filter with the -h option
   \item \texttt{setOptions(String[])} -- parses the given option array,
-that were passed from commandline
+that were passed from command-line
   \item \texttt{getOptions()} -- returns an array of options, resembling the
 current setup of the filter
 \end{tight_itemize}
@@ -872,7 +932,7 @@ attribute at the end, which is filled with random numbers:
 \noindent A real-world implementation of a stream filter is the
 \texttt{MultiFilter} class (package \texttt{weka.filters}), which passes the
 data through all the filters it contains. Depending on whether all the used
-filters are streamable or not, it acts either as a \textit{stream} filter or as
+filters are streamable or not, it acts either as \textit{stream} filter or as
 \textit{batch} filter.
 
 \newpage
@@ -880,7 +940,7 @@ filters are streamable or not, it acts either as a \textit{stream} filter or as
 Some useful methods of the filter classes:
 \begin{tight_itemize}
   \item \texttt{isNewBatch()} -- returns \texttt{true} if an instance of the
-filter was just instantiated via new or a new batch was started via the
+filter was just instantiated or a new batch was started via the
 \texttt{batchFinished()} method.
   \item \texttt{isFirstBatchDone()} -- returns \texttt{true} as soon as the
 first batch was finished via the \texttt{batchFinished()} method. Useful for
@@ -893,8 +953,8 @@ first batch of instances.
 Filters implement the \texttt{weka.core.CapabilitiesHandler} interface like the
 classifiers. This method returns what kind of data the filter is able to
 process. Needs to be adapted for each individual filter, since the default
-implementation allows the processing of all kinds of attributes and classes,
-otherwise correct functioning of the filter cannot be guaranteed. See section
+implementation allows the processing of all kinds of attributes and classes.
+Otherwise correct functioning of the filter cannot be guaranteed. See section
 ``Capabilities'' on page \pageref{classifier_capabilities} for more information.
 
 \subsection{Packages}
@@ -921,6 +981,7 @@ The Javadoc generation works the same as with classifiers. See section
 ``Javadoc'' on page \pageref{classifier_javadoc} for more information.
 
 \subsection{Revisions}
+\label{filter_revisions}
 Filters, like classifiers, implement the \texttt{weka.core.RevisionHandler}
 interface. This provides the functionality of obtaining the Subversion revision
 from within Java. Filters that are not part of the official Weka distribution
@@ -932,31 +993,31 @@ on page \pageref{classifier_revisions}.
 
 \newpage
 \subsection{Testing}
-Weka provides already a test framework to ensure the basic functionality of a
-filter. It is essential for the filter to pass these tests.
+Weka provides already a test framework to ensure correct basic functionality of
+a filter. It is essential for the filter to pass these tests.
 
 \subsubsection{Option handling}
 You can check the option handling of your filter with the following tool from
-commandline:
+command-line:
 \begin{verbatim}
  weka.core.CheckOptionHandler -W classname [-- additional parameters]
 \end{verbatim}
 All tests need to return \textit{yes}.
 
 \subsubsection{GenericObjectEditor}
-The CheckGOE class checks whether all the properties available in the GUI have a
-tooltip accompanying them and whether the \texttt{globalInfo()} method is
-declared:
+The \texttt{CheckGOE} class checks whether all the properties available in the
+GUI have a tooltip accompanying them and whether the \texttt{globalInfo()}
+method is declared:
 \begin{verbatim}
  weka.core.CheckGOE -W classname [-- additional parameters]
 \end{verbatim}
 All tests, once again, need to return \textit{yes}.
 
 \subsubsection{Source code}
-Filters that implement the weka.filters.Sourcable interface can output Java code
-of their internal representation. In order to check the generated code, one
-should not only compile the code, but also test it with the following test
-class:
+Filters that implement the \texttt{weka.filters.Sourcable} interface can output
+Java code of their internal representation. In order to check the generated
+code, one should not only compile the code, but also test it with the following
+test class:
 \begin{verbatim}
  weka.filters.CheckSource
 \end{verbatim}
@@ -966,7 +1027,7 @@ It builds the Weka filter on the dataset and compares the output, the one from
 the Weka filter and the one from the generated source code, whether they are the
 same.
 
-Here's an example call for
+Here is an example call for
 \texttt{weka.filters.unsupervised.attribute.ReplaceMissingValues} and the
 generated class \texttt{weka.filters.WekaWrapper} (it wraps the actual generated
 code in a pseudo-filter):
@@ -997,7 +1058,7 @@ following you will find information on how to add new tabs, like the
 
 \subsection{Adding tabs}
 The Explorer is a handy tool for initial exploration of your data -- for
-proper statistcal evaluation, the Experimenter should be used instead. But if
+proper statistical evaluation, the Experimenter should be used instead. But if
 the available functionality is not enough, you can always add your own
 custom-made tabs to the Explorer.
 
@@ -1021,18 +1082,17 @@ Capabilities, e.g., if new data is loaded into the Explorer
 \end{tight_itemize}
 
 \subsubsection{Examples}
-The following examples demonstrate the new plugin architecture. Only the
-necessary details are discussed, as the full source code is available for
-download as well from the Weka Examples \cite{wekaexamples} (package
-\texttt{wekaexamples.gui.explorer}).
+The following examples demonstrate the plugin architecture. Only the
+necessary details are discussed, as the full source code is available from the
+Weka Examples \cite{wekaexamples} (package \texttt{wekaexamples.gui.explorer}).
 
 \subsubsection*{SQL worksheet}
 \subsubsection*{Purpose}
 Displaying the SqlViewer as a tab in the Explorer instead of using it either via
 the Open DB... button or as standalone application. Uses the existing components
-already available in Weka and just assembles them in a JPanel. Since this tab
-does not rely on a dataset being loaded into the Explorer, it will be used as a
-standalone one.
+already available in Weka and just assembles them in a \texttt{JPanel}. Since
+this tab does not rely on a dataset being loaded into the Explorer, it will be
+used as a \textit{standalone} one.
 
 Useful for people who are working a lot with databases and would like to have an
 SQL worksheet available all the time instead of clicking on a button every time
@@ -1081,7 +1141,7 @@ additional functionality):
     return "Retrieving data from databases";  // the tooltip of the tab
   }
 
-  /** ignored, since we //"generate"// data and not receive it */
+  /** ignored, since we "generate" data and not receive it */
   public void setInstances(Instances inst) {
   }
 
@@ -1112,8 +1172,8 @@ additional functionality):
   protected JLabel m_LabelQuery = new JLabel("");
   \end{verbatim}
 
-  \item loading the data into the Explorer by clicking on the Load button
-will fire a property change:
+  \item loading the data into the Explorer by clicking on the \textit{Load}
+button will fire a property change:
   \begin{verbatim}
     m_ButtonLoad.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent evt){
@@ -1122,8 +1182,8 @@ will fire a property change:
     });
   \end{verbatim}
 
-  \item the propertyChange event will perform the actual loading of the data,
-hence we add an anonymous property change listener to our panel:
+  \item the \textit{propertyChange} event will perform the actual loading of the
+data, hence we add an anonymous property change listener to our panel:
   \begin{verbatim}
   addPropertyChangeListener(new PropertyChangeListener() {
     public void propertyChange(PropertyChangeEvent e) {
@@ -1169,7 +1229,7 @@ property must look like this:
 \subsubsection*{Artificial data generation}
 \subsubsection*{Purpose}
 Instead of only having a \textit{Generate...} button in the PreprocessPanel or
-using it from commandline, this example creates a new panel to be displayed as
+using it from command-line, this example creates a new panel to be displayed as
 extra tab in the Explorer. This tab will be available regardless whether a
 dataset is already loaded or not (= standalone).
 
@@ -1243,9 +1303,9 @@ identical to \texttt{SqlPanel}):
   protected JButton m_ButtonUse = new JButton("Use");
   \end{verbatim}
 
-  \item the Generate button does not load the generated data directly into the
-Explorer, but only outputs in the \texttt{JTextArea} (this is done with the
-\textit{Use} button - see further down):
+  \item the \textit{Generate} button does not load the generated data directly
+into the Explorer, but only outputs in the \texttt{JTextArea} (the \textit{Use}
+button loads the data - see further down):
   \begin{verbatim}
   m_ButtonGenerate.addActionListener(new ActionListener(){
     public void actionPerformed(ActionEvent evt){
@@ -1287,8 +1347,8 @@ load the data into the Explorer:
   \end{verbatim}
 
   \newpage
-  \item the propertyChange event will perform the actual loading of the data,
-hence we add an anonymous property change listener to our panel:
+  \item the \textit{propertyChange} event will perform the actual loading of the
+data, hence we add an anonymous property change listener to our panel:
   \begin{verbatim}
   addPropertyChangeListener(new PropertyChangeListener() {
     public void propertyChange(PropertyChangeEvent e) {
@@ -1346,8 +1406,8 @@ without having to setup a whole experiment in the Experimenter.
 but the following can be said:
   \begin{tight_itemize}
 	\item based on the \texttt{weka.gui.explorer.ClassifierPanel}
-	\item the actual code doing the work follows the example in \textit{Using
-the Experiment API} wiki article \cite{wekawiki}
+	\item the actual code doing the work follows the example in the
+\textit{Using the Experiment API} wiki article \cite{wekawiki}
   \end{tight_itemize}
   \item In order to add our \texttt{ExperimentPanel} to the list of tabs
 displayed in the Explorer, we need to modify the \texttt{Explorer.props} file
@@ -1390,7 +1450,7 @@ classes are automatically discovered during run-time)
   weka.gui.visualize.plugins
   \end{verbatim}
   
-  \item or the class' package must be listed in the
+  \item or you must list the package this class belongs to in the
 \texttt{weka.gui.visualize.plugins.VisualizePlugin} key of the
 \texttt{weka/gui/GenericPropertiesCreator.props} file (or the equivalent in
 your home directory).
