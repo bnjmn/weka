@@ -11,7 +11,7 @@ public class BatchFilter3 extends Filter {
   protected Random m_Random;
 
   public String globalInfo() {
-    return   "A batch filter that adds an attribute 'bla' at the end "
+    return   "A batch filter that adds an attribute 'blah' at the end "
            + "containing a random number. The output format cannot be collected "
            + "immediately.";
   }
@@ -47,7 +47,7 @@ public class BatchFilter3 extends Filter {
       m_Seed = getInputFormat().numInstances();
       Instances outFormat = new Instances(getInputFormat(), 0);
       outFormat.insertAttributeAt(new Attribute(
-          "bla-" + getInputFormat().numInstances()), outFormat.numAttributes());
+          "blah-" + getInputFormat().numInstances()), outFormat.numAttributes());
       setOutputFormat(outFormat);
     }
     Instances inst = getInputFormat();
