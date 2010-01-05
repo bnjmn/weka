@@ -50,7 +50,6 @@ function get_value()
 ROOT=`expr "$0" : '\(.*\)/'`
 CONF=`echo $0 | sed s/"\.sh"/".conf"/g`
 QUIET="no"
-#CVS=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs"
 SVN="https://svn.scms.waikato.ac.nz/svn/weka"
 OUTPUT_DIR="$ROOT/output"
 TEMP_DIR="$ROOT/temp"

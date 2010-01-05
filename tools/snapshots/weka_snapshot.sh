@@ -44,7 +44,7 @@ QUIET="no"
 SVN="https://svn.scms.waikato.ac.nz/svn/weka"
 OUTPUT_DIR="$ROOT/output"
 TEMP_DIR="$ROOT/temp"
-JAVA="/home/ml/jdk/jdk1.5.0_18"
+JAVA="/home/ml/jdk/jdk1.5.0_22"
 
 # interprete parameters
 while getopts ":hb:d:t:o:j:c:q" flag
