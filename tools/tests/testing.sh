@@ -97,7 +97,6 @@ do
    TMP="build";      get_property; BUILD=$TMP
    TMP="target";     get_property; TARGET=$TMP
    TMP="lib";        get_property; LIB=$TMP
-   TMP="references"; get_property; REFERENCES=$TMP
    TMP="jdk"; get_property; JDK=$TMP
 
    # is the project active?
@@ -112,8 +111,7 @@ do
    mkdir $TMP_DIR
 
    # copy files
-#   cp -R $REFERENCES $TMP_DIR/wekarefs
-    cp $BUILD $TMP_DIR/build.xml
+   cp $BUILD $TMP_DIR/build.xml
 
    # run tests
    CURRENT=`pwd`
