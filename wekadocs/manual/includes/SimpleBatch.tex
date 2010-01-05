@@ -8,7 +8,7 @@ import weka.filters.*;
 public class SimpleBatch extends SimpleBatchFilter {
 
   public String globalInfo() {
-    return   "A simple batch filter that adds an additional attribute 'bla' at the end "
+    return   "A simple batch filter that adds an additional attribute 'blah' at the end "
            + "containing the index of the processed instance.";
   }
 
@@ -22,7 +22,7 @@ public class SimpleBatch extends SimpleBatchFilter {
 
   protected Instances determineOutputFormat(Instances inputFormat) {
     Instances result = new Instances(inputFormat, 0);
-    result.insertAttributeAt(new Attribute("bla"), result.numAttributes());
+    result.insertAttributeAt(new Attribute("blah"), result.numAttributes());
     return result;
   }
 

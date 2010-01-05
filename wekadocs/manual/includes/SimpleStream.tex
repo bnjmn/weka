@@ -11,7 +11,7 @@ public class SimpleStream extends SimpleStreamFilter {
   protected Random m_Random;
 
   public String globalInfo() {
-    return   "A simple stream filter that adds an attribute 'bla' at the end "
+    return   "A simple stream filter that adds an attribute 'blah' at the end "
            + "containing a random number.";
   }
 
@@ -30,7 +30,7 @@ public class SimpleStream extends SimpleStreamFilter {
 
   protected Instances determineOutputFormat(Instances inputFormat) {
     Instances result = new Instances(inputFormat, 0);
-    result.insertAttributeAt(new Attribute("bla"), result.numAttributes());
+    result.insertAttributeAt(new Attribute("blah"), result.numAttributes());
     return result;
   }
 

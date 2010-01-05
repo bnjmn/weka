@@ -7,7 +7,7 @@ import weka.core.Capabilities.*;
 public class BatchFilter extends Filter {
 
   public String globalInfo() {
-    return   "A batch filter that adds an additional attribute 'bla' at the end "
+    return   "A batch filter that adds an additional attribute 'blah' at the end "
            + "containing the index of the processed instance. The output format "
            + "can be collected immediately.";
   }
@@ -23,7 +23,7 @@ public class BatchFilter extends Filter {
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     super.setInputFormat(instanceInfo);
     Instances outFormat = new Instances(instanceInfo, 0);
-    outFormat.insertAttributeAt(new Attribute("bla"),
+    outFormat.insertAttributeAt(new Attribute("blah"),
 	  outFormat.numAttributes());
     setOutputFormat(outFormat);
     return true;  // output format is immediately available
