@@ -121,11 +121,17 @@ TMP=`tac $CSV | grep -v "Year" | cut -f1,2 -d"," | sed s/"\(,\)\([a-zA-Z][a-z][a
 TMP=`echo $TMP | sed s/",$"//g | sed s/"[0-9]*-xx"//g`
 XTICS=`echo "set xtics ($TMP)"`
 
+# - calculate dimensions
+X_COUNT=`cat $CSV | wc -l`
+X_STEP="0.02"
+X_SIZE=`echo "($X_COUNT-1)*$X_STEP" | bc`
+Y_MAX=`cat $CSV | grep -v "Year" | cut -f3 -d, | sort -g | tail -n1`
+Y_STEP="0.0006"
+Y_SIZE=`echo "$Y_MAX*$Y_STEP" | bc`
+
 # - output script
 echo "# generated: `date`" > $GP_SCRIPT
-# the following line sets the mulitpliers for the x and y axis
-# increase them as time progresses
-echo "set size 2,0.6" >> $GP_SCRIPT
+echo "set size $X_SIZE,$Y_SIZE" >> $GP_SCRIPT
 echo "set terminal png" >> $GP_SCRIPT
 echo "set output \"$OUTPUT/$PREFIX.png\"" >> $GP_SCRIPT
 echo "$XTICS" >> $GP_SCRIPT
