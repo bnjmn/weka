@@ -754,7 +754,7 @@ public class Classifier
             m_trainingSet = m_train;
           }
                               
-          if (m_batchClassifierListeners.size() > 0) {
+          //if (m_batchClassifierListeners.size() > 0) {
             // notify anyone who might be interested in just the model
             // and training set.
             BatchClassifierEvent ce = 
@@ -773,7 +773,7 @@ public class Classifier
                   m_setNum, m_maxSetNum);
             ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
             classifierTrainingComplete(ce);
-          }
+          //}
 
           if (classifierCopy instanceof weka.core.Drawable && 
               m_graphListeners.size() > 0) {
