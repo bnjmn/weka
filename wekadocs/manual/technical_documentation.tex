@@ -56,7 +56,7 @@ What is ANT? This is how the ANT homepage (\url{http://ant.apache.org/}{}) defin
   \end{itemize}
 \end{itemize}
 
-% $http://weka.sourceforge.net/wekadoc/index.php/en:ANT_(3.5.6)$
+\newpage
 
 \section{CLASSPATH}
 \label{CLASSPATH}
@@ -261,7 +261,7 @@ Subversion.
 \newpage
 
 \section{GenericObjectEditor}
-
+\label{genericobjecteditor}
 \subsection{Introduction}
 As of version 3.4.4 it is possible for WEKA to dynamically discover
 classes at runtime (rather than using only those specified in the
@@ -304,6 +304,8 @@ class discovery off again. It is assumed that you already placed the GPC file in
 your home directory (see steps above) and that the \texttt{weka.jar} jar
 archive with the WEKA classes is in your CLASSPATH (otherwise you have to add it
 to the \texttt{java} call using the \texttt{-classpath} option). \\
+
+\newpage
 
 \noindent For generating the GOE file, execute the following steps:
 \begin{tight_itemize}
@@ -370,6 +372,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.rules
 \end{verbatim}
 
+\newpage
+
 \subsection{Exclusion}
 It may not always be desired to list all the classes that can be found
 along the \verb=CLASSPATH=. Sometimes, classes cannot be declared \verb=abstract=
@@ -377,38 +381,34 @@ but still shouldn't be listed in the GOE. For that reason one can list
 classes, interfaces, superclasses for certain packages to be excluded
 from display. This exclusion is done with the following file:\\
 
-\verb=weka/gui/GenericPropertiesCreator.excludes=\\
+{\small \verb=weka/gui/GenericPropertiesCreator.excludes=\\}
 
 \noindent The format of this properties file is fairly simple:\\
 
-\verb^<key>=<prefix>:<class>[,<prefix>:<class>]^\\
+{\small \verb^<key>=<prefix>:<class>[,<prefix>:<class>]^\\}
 
 \noindent Where the \verb=<key>= corresponds to a key in the
 \verb=GenericPropertiesCreator.props= file and the \verb=<prefix>= can
 be one of the following:
-
-\begin{itemize}
-\item \textbf{S} -- \textit{Superclass}\\
+\begin{tight_itemize}
+\item \textbf{S} = \textit{Superclass}\\
   any class derived from this will be excluded
-\item \textbf{I} -- \textit{Interface}\\
+\item \textbf{I} = \textit{Interface}\\
   any class implementing this interface will be excluded
-\item \textbf{C} -- \textit{Class}\\
+\item \textbf{C} = \textit{Class}\\
   exactly this class will be excluded
-\end{itemize}
-
-\noindent Here are a few examples:
-
-\begin{verbatim}
+\end{tight_itemize}
+Here are a few examples:
+{\small \begin{verbatim}
 # exclude all ResultListeners that also implement the ResultProducer interface
 # (all ResultProducers do that!)
 weka.experiment.ResultListener=\
   I:weka.experiment.ResultProducer
-
 # exclude J48 and all SingleClassifierEnhancers
 weka.classifiers.Classifier=\
   C:weka.classifiers.trees.J48,\
   S:weka.classifiers.SingleClassifierEnhancer
-\end{verbatim}
+\end{verbatim}}
 
 \subsection{Class Discovery}
 Unlike the \verb=Class.forName(String)= method that grabs the first class it
@@ -423,11 +423,12 @@ the GUI. In case of a name conflict, i.e., two directories contain the
 same class, the first one that can be found is used. In a nutshell,
 your \texttt{java} call of the GUIChooser can look like this:\\
 
-\verb=java -classpath "/development:/distribution/weka.jar" weka.gui.GUIChooser=\\
+{\small \verb=java -classpath "/development:/distribution/weka.jar" weka.gui.GUIChooser=\\}
 
 \noindent \textit{Note:} Windows users have to replace the ``:'' with ``;''
 and the forward slashes with backslashes.
 
+\newpage
 \subsection{Multiple Class Hierarchies}
 In case you are developing your own framework, but still want to use
 your classifiers within WEKA that was not possible with WEKA prior to 3.4.4.
@@ -436,8 +437,7 @@ hierarchies being displayed in the GUI. If you have developed a modified version
 of NaiveBayes, let us call it \textit{DummyBayes} and it is located in the
 package \verb=dummy.classifiers= then you will have to add this package to the
 classifiers list in the GPC file like this:
-
-\begin{verbatim}
+{\small \begin{verbatim}
 weka.classifiers.Classifier=\
  weka.classifiers.bayes,\
  weka.classifiers.functions,\
@@ -446,7 +446,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees,\
  weka.classifiers.rules,\
  dummy.classifiers
-\end{verbatim}
+\end{verbatim}}
 Your java call for the GUIChooser might look like this:
 
 \verb=java -classpath "weka.jar:dummy.jar" weka.gui.GUIChooser=\\
@@ -459,6 +459,7 @@ the \textit{dummy} package hierarchy as you can see here:
 \epsfig{file=images/technical/En-goe-353.eps,height=7cm}
 \end{center}
 
+\newpage
 \subsection{Capabilities}
 Version \textbf{3.5.3} of Weka introduced the notion of
 \textit{Capabilities}. Capabilities basically list what kind of data a
@@ -483,6 +484,7 @@ that can handle all the selected Capabilities black, the ones that
 cannot grey and the ones that might be able to handle them blue (e.g.,
 meta classifiers which depend on their base classifier(s)).
 
+\newpage
 \section{Properties}
 A properties file is a simple text file with this structure:\\
 
@@ -528,7 +530,7 @@ one for Windows.
 \item weka/gui/beans/Beans.props
 \end{itemize}
 
-
+\newpage
 \section{XML}
 Weka now supports XML (\url{http://www.w3c.org/XML/}{}) (eXtensible
 Markup Language) in several places.
@@ -612,10 +614,11 @@ anymore about the level of quotes one is using and therefore doesn't
 have to care about the correct escaping (i.e. \verb=`` ... \" ... \" ...''=)
 since this is done automatically.
 
+\newpage
 And if we now put all together we can transform this more complicated
 command line (\verb=java= and the \verb=CLASSPATH= omitted):
 
-\begin{verbatim}
+{\small \begin{verbatim}
 <options type="class" value="weka.classifiers.meta.Stacking">
    <option name="B" type="quotes">
       <options type="classifier" value="weka.classifiers.meta.AdaBoostM1">
@@ -649,7 +652,7 @@ command line (\verb=java= and the \verb=CLASSPATH= omitted):
 
    <option name="t">test/datasets/hepatitis.arff</option>
 </options>
-\end{verbatim}
+\end{verbatim}}
 \end{itemize}
 
 \noindent \textbf{Note}: The \verb=type= and \verb=value= attribute of the outermost
@@ -663,6 +666,7 @@ started from the command line.\\
 weka.core.xml.XMLOptions
 \end{verbatim}
 
+\newpage
 \subsection{Serialization of Experiments}
 It is now possible to serialize the Experiments from the WEKA
 Experimenter not only in the proprietary binary format Java offers
@@ -720,6 +724,7 @@ weka.core.xml.XMLSerialization
 weka.core.xml.XMLBasicSerialization 
 \end{verbatim}
 
+\newpage
 \item \textbf{KOML} (\url{http://old.koalateam.com/xml/serialization/}{})\\
 The Koala Object Markup Language (KOML) is published under the LGPL
 (\url{http://www.gnu.org/copyleft/lgpl.html}{}) and is an alternative way of
