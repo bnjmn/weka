@@ -16,24 +16,55 @@
 
 % Version: $Revision$
 
+For most users, the existing WEKA framework will be sufficient to perform the
+task at hand, offering a wide range of filters, classifiers, clusterers, etc.
+Researchers, on the other hand, might want to add new algorithms and compare
+them against existing ones. The framework with its existing algorithms is not
+set in stone, but basically one big plugin framework. With WEKA's automatic
+discovery of classes on the classpath, adding new classifiers, filters, etc. to
+the existing framework is very easy.
+
+Though algorithms like clusterers, associators, data generators and
+attribute selection are not covered in this chapter, their implemention is very
+similar to the one of implementing a classifier. You basically choose a
+superclass to derive your new algorithm from and then implement additional
+interfaces, if necessary. Just check out the other algorithms that are already
+implemented.
+
+The section covering the GenericObjectEditor (see chapter
+\ref{genericobjecteditor}) shows you how to tell WEKA where to find your
+class(es) and therefore making it/them available in the GUI
+(Explorer/Experimenter) via the GenericObjectEditor.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Writing a new Classifier %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
 \section{Writing a new Classifier}
+\input{extending_classifier}
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Writing a new Filter %
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
 \section{Writing a new Filter}
+\input{extending_filter}
 
-\subsection{Default approach}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Writing other algorithms %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Simple approach}
+\newpage
+\section{Writing other algorithms}
+\input{extending_other_algorithms}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Extending the Explorer %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
 \section{Extending the Explorer}
+\input{extending_explorer}
 
-\subsection{Adding tabs}
-
-\subsection{Adding visualization plugins}
-
-\subsubsection*{Predictions}
-
-\subsubsection*{Errors}
-
-\subsubsection*{Graphs}
-
-\subsubsection*{Trees}
