@@ -100,7 +100,7 @@ public class Explorer extends JPanel {
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
     m_LogPanel.logMessage("Weka Explorer");
-    m_LogPanel.logMessage("(c) 1999-2009 The University of Waikato, Hamilton,"
+    m_LogPanel.logMessage("(c) 1999-2010 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/weka");
     m_LogPanel.logMessage("Started on " + date);
