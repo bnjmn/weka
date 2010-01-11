@@ -128,7 +128,7 @@ public class GUIChooser extends JFrame {
     titlePan.add(new JLabel("Version " + Version.VERSION,
                             SwingConstants.CENTER));
     titlePan.add(new JLabel(""));
-    titlePan.add(new JLabel("(c) 1999 - 2009",
+    titlePan.add(new JLabel("(c) 1999 - 2010",
     SwingConstants.CENTER));
     titlePan.add(new JLabel("University of Waikato",
     SwingConstants.CENTER));
