@@ -1,0 +1,3626 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-5-8 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-5-8 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://ant.apache.org/">Apache Ant</a>.</p>
+<hr>
+<table border="0" width="100%" cellspacing="1">
+<tr>
+<td class="dateAndAuthor">2008-07-14 22:30 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Non-dynamic is a lot faster.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericPropertiesCreator.props?rev=1.19&content-type=text/x-cvsweb-markup">gui/GenericPropertiesCreator.props (1.19)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-14 02:29 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Small changes to support environment variables</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/AbstractFileLoader.html?rev=1.5&content-type=text/x-cvsweb-markup">core/converters/AbstractFileLoader.html (1.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-14 02:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Small changes to support environment variables</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/xml/XMLBeans.html?rev=1.11&content-type=text/x-cvsweb-markup">gui/beans/xml/XMLBeans.html (1.11)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-14 02:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Small changes to support environment variables</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/KnowledgeFlowApp.html?rev=1.32&content-type=text/x-cvsweb-markup">gui/beans/KnowledgeFlowApp.html (1.32)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/SerializedModelSaver.html?rev=1.6&content-type=text/x-cvsweb-markup">gui/beans/SerializedModelSaver.html (1.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-13 23:22 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added LatentSemanticAnalysis</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericObjectEditor.props?rev=1.121&content-type=text/x-cvsweb-markup">gui/GenericObjectEditor.props (1.121)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-07 23:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Environment.html?rev=1.1&content-type=text/x-cvsweb-markup">core/Environment.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-07 22:37 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Peter's changes to allow export of EPS images and setting of background and legend border text</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Beans.props?rev=1.15&content-type=text/x-cvsweb-markup">gui/beans/Beans.props (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/StripChart.html?rev=1.17&content-type=text/x-cvsweb-markup">gui/beans/StripChart.html (1.17)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-06 02:18 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Initial import. Amri Napolitano's GSoC contribution: latent semantic analysis</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/LatentSemanticAnalysis.html?rev=1.1&content-type=text/x-cvsweb-markup">attributeSelection/LatentSemanticAnalysis.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-01 02:17 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>No longer uses serialization to create copies of BinarySMO. Apparantly speeds things up when the option for cross-validation is turned on.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/functions/SMO.html?rev=1.69&content-type=text/x-cvsweb-markup">classifiers/functions/SMO.html (1.69)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-25 03:17 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated for changes to clusterers</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddCluster.html?rev=1.13&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddCluster.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/ClusterMembership.html?rev=1.16&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/ClusterMembership.html (1.16)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-25 03:16 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated for changes to clusterers</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DensityBasedClustererSplitEvaluator.html?rev=1.3&content-type=text/x-cvsweb-markup">experiment/DensityBasedClustererSplitEvaluator.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-25 03:15 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated for changes to clusterers</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/ClassificationViaClustering.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/meta/ClassificationViaClustering.html (1.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-25 03:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+Clusterer and DensityBasedClusterer renamed to AbstractClusterer and AbstractDensityBasedClusterer respectively; Clusterer and DensityBasedClusterer now interfaces</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/AbstractClusterer.html?rev=1.1&content-type=text/x-cvsweb-markup">clusterers/AbstractClusterer.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/AbstractDensityBasedClusterer.html?rev=1.1&content-type=text/x-cvsweb-markup">clusterers/AbstractDensityBasedClusterer.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-25 03:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Clusterer and DensityBasedClusterer renamed to AbstractClusterer and AbstractDensityBasedClusterer respectively; Clusterer and DensityBasedClusterer now interfaces</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/CLOPE.html?rev=1.5&content-type=text/x-cvsweb-markup">clusterers/CLOPE.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/CheckClusterer.html?rev=1.11&content-type=text/x-cvsweb-markup">clusterers/CheckClusterer.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/ClusterEvaluation.html?rev=1.44&content-type=text/x-cvsweb-markup">clusterers/ClusterEvaluation.html (1.44)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/Clusterer.html?rev=1.18&content-type=text/x-cvsweb-markup">clusterers/Clusterer.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/DBScan.html?rev=1.9&content-type=text/x-cvsweb-markup">clusterers/DBScan.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/DensityBasedClusterer.html?rev=1.9&content-type=text/x-cvsweb-markup">clusterers/DensityBasedClusterer.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/MakeDensityBasedClusterer.html?rev=1.18&content-type=text/x-cvsweb-markup">clusterers/MakeDensityBasedClusterer.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/OPTICS.html?rev=1.8&content-type=text/x-cvsweb-markup">clusterers/OPTICS.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/RandomizableClusterer.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/RandomizableClusterer.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/RandomizableDensityBasedClusterer.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/RandomizableDensityBasedClusterer.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/RandomizableSingleClustererEnhancer.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/RandomizableSingleClustererEnhancer.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/SingleClustererEnhancer.html?rev=1.4&content-type=text/x-cvsweb-markup">clusterers/SingleClustererEnhancer.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-23 09:43 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/FilteredSubsetEval.html?rev=1.1&content-type=text/x-cvsweb-markup">attributeSelection/FilteredSubsetEval.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-23 09:21 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Wrong default filter in setOptions</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/FilteredAttributeEval.html?rev=1.2&content-type=text/x-cvsweb-markup">attributeSelection/FilteredAttributeEval.html (1.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-22 22:16 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Doc update</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/CostSensitiveASEvaluation.html?rev=1.3&content-type=text/x-cvsweb-markup">attributeSelection/CostSensitiveASEvaluation.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-19 21:18 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Doc fix</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/DecisionStump.html?rev=1.27&content-type=text/x-cvsweb-markup">classifiers/trees/DecisionStump.html (1.27)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-19 04:17 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Javadoc update</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/FilteredAssociator.html?rev=1.4&content-type=text/x-cvsweb-markup">associations/FilteredAssociator.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/HotSpot.html?rev=1.6&content-type=text/x-cvsweb-markup">associations/HotSpot.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/CheckAttributeSelection.html?rev=1.7&content-type=text/x-cvsweb-markup">attributeSelection/CheckAttributeSelection.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/LinearForwardSelection.html?rev=1.4&content-type=text/x-cvsweb-markup">attributeSelection/LinearForwardSelection.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/SubsetSizeForwardSelection.html?rev=1.4&content-type=text/x-cvsweb-markup">attributeSelection/SubsetSizeForwardSelection.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/AODEsr.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/bayes/AODEsr.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/DMNBtext.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/bayes/DMNBtext.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayesUpdateable.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayesUpdateable.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/BIFReader.html?rev=1.15&content-type=text/x-cvsweb-markup">classifiers/bayes/net/BIFReader.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/EditableBayesNet.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/bayes/net/EditableBayesNet.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/NormalizedPolyKernel.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/NormalizedPolyKernel.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/PolyKernel.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/PolyKernel.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/RBFKernel.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/RBFKernel.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/StringKernel.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/StringKernel.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiClassClassifier.html?rev=1.48&content-type=text/x-cvsweb-markup">classifiers/meta/MultiClassClassifier.html (1.48)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/RandomCommittee.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/meta/RandomCommittee.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/ThresholdSelector.html?rev=1.43&content-type=text/x-cvsweb-markup">classifiers/meta/ThresholdSelector.html (1.43)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/supportVector/MIPolyKernel.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/mi/supportVector/MIPolyKernel.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/supportVector/MIRBFKernel.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/mi/supportVector/MIRBFKernel.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-19 04:17 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Javadoc update</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/rules/DTNB.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/rules/DTNB.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/FT.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/trees/FT.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/J48graft.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/trees/J48graft.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/EM.html?rev=1.44&content-type=text/x-cvsweb-markup">clusterers/EM.html (1.44)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/FilteredClusterer.html?rev=1.4&content-type=text/x-cvsweb-markup">clusterers/FilteredClusterer.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/SimpleKMeans.html?rev=1.39&content-type=text/x-cvsweb-markup">clusterers/SimpleKMeans.html (1.39)</a>
+</li>
+<li>
+<a href="../doc/weka/core/stemmers/SnowballStemmer.html?rev=1.10&content-type=text/x-cvsweb-markup">core/stemmers/SnowballStemmer.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/core/tokenizers/NGramTokenizer.html?rev=1.4&content-type=text/x-cvsweb-markup">core/tokenizers/NGramTokenizer.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/tokenizers/WordTokenizer.html?rev=1.4&content-type=text/x-cvsweb-markup">core/tokenizers/WordTokenizer.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/CheckEstimator.html?rev=1.5&content-type=text/x-cvsweb-markup">estimators/CheckEstimator.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/attribute/AttributeSelection.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/supervised/attribute/AttributeSelection.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/NominalToString.html?rev=1.6&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/NominalToString.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/StringToWordVector.html?rev=1.25&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/StringToWordVector.html (1.25)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/ReservoirSample.html?rev=1.4&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/ReservoirSample.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-19 01:19 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added unicode support
+fixed parsing of strings (crapped out when encountering numbers within strings) using a different state in the lexer</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/subsetbyexpression/Parser.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/subsetbyexpression/Parser.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/subsetbyexpression/Scanner.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/subsetbyexpression/Scanner.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/subsetbyexpression/Scanner.jflex?rev=1.2&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/subsetbyexpression/Scanner.jflex (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/subsetbyexpression/sym.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/subsetbyexpression/sym.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-18 02:10 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Doc update</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/Evaluation.html?rev=1.88&content-type=text/x-cvsweb-markup">classifiers/Evaluation.html (1.88)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-16 22:45 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Doc fix</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/xml/XStream.html?rev=1.4&content-type=text/x-cvsweb-markup">core/xml/XStream.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-16 01:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Changed so that failures on nominal attribute/class now report failure due to multi-valued nominal attribute/class</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Capabilities.html?rev=1.27&content-type=text/x-cvsweb-markup">core/Capabilities.html (1.27)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-13 02:25 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Made safe for execution in a headless environment.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/AttributeSummarizer.html?rev=1.10&content-type=text/x-cvsweb-markup">gui/beans/AttributeSummarizer.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/DataVisualizer.html?rev=1.13&content-type=text/x-cvsweb-markup">gui/beans/DataVisualizer.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/GraphViewer.html?rev=1.9&content-type=text/x-cvsweb-markup">gui/beans/GraphViewer.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/ModelPerformanceChart.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/beans/ModelPerformanceChart.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/ScatterPlotMatrix.html?rev=1.9&content-type=text/x-cvsweb-markup">gui/beans/ScatterPlotMatrix.html (1.9)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-12 23:07 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fix for partitionOptions by Ingo Mierswa - allows additional options to the search to be given after the -- without having to explicitly specify the estimator with -E</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/BayesNet.html?rev=1.33&content-type=text/x-cvsweb-markup">classifiers/bayes/BayesNet.html (1.33)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-11 04:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed null ptr exception in incremental loading. Added some progress output for incremental loading.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Loader.html?rev=1.23&content-type=text/x-cvsweb-markup">gui/beans/Loader.html (1.23)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-09 03:22 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Improved stopping.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/CrossValidationFoldMaker.html?rev=1.13&content-type=text/x-cvsweb-markup">gui/beans/CrossValidationFoldMaker.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/PredictionAppender.html?rev=1.19&content-type=text/x-cvsweb-markup">gui/beans/PredictionAppender.html (1.19)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/Saver.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/beans/Saver.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/TestSetMaker.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/beans/TestSetMaker.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/TrainTestSplitMaker.html?rev=1.14&content-type=text/x-cvsweb-markup">gui/beans/TrainTestSplitMaker.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/TrainingSetMaker.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/beans/TrainingSetMaker.html (1.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-09 02:44 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added a method for stopping all flows. If the thread that the FlowRunner is running in gets interrupted, then all flows get stopped</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/FlowRunner.html?rev=1.9&content-type=text/x-cvsweb-markup">gui/beans/FlowRunner.html (1.9)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-09 02:44 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Removed some debugging output</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Associator.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/beans/Associator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/Classifier.html?rev=1.33&content-type=text/x-cvsweb-markup">gui/beans/Classifier.html (1.33)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/Clusterer.html?rev=1.10&content-type=text/x-cvsweb-markup">gui/beans/Clusterer.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/Filter.html?rev=1.20&content-type=text/x-cvsweb-markup">gui/beans/Filter.html (1.20)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-05 23:51 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed formating of coefficients/odds ratio column</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/functions/Logistic.html?rev=1.42&content-type=text/x-cvsweb-markup">classifiers/functions/Logistic.html (1.42)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-05 23:48 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed formatting of priors in toString()</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayes.html?rev=1.27&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayes.html (1.27)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-29 02:23 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added support for GraphListeners</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/AssociatorBeanInfo.html?rev=1.3&content-type=text/x-cvsweb-markup">gui/beans/AssociatorBeanInfo.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-20 22:36 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in the handling of nominal values with the 'is' operator when missing values are present</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/subsetbyexpression/Parser.cup?rev=1.2&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/subsetbyexpression/Parser.cup (1.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-19 04:21 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed parameter rounding (now uses Math.rint() so that, for example, -1 is not rounded to 0.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/CVParameterSelection.html?rev=1.37&content-type=text/x-cvsweb-markup">classifiers/meta/CVParameterSelection.html (1.37)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-15 04:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug where class-distribution-spreads &lt; 1 caused the minority class to be undersampled as well as the other classes.</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/supervised/instance/SpreadSubsample.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/supervised/instance/SpreadSubsample.html (1.9)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-15 02:16 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added filter for selecting subsets of a dataset, based on CUP and JFlex
+fixed "=" in MathematicalExpression parser
+simplified parser/lexer generation in parsers.xml ANT build file</pre>
+<ul>
+<li>
+<a href="../doc/weka/parsers.xml?rev=1.2&content-type=text/x-cvsweb-markup">parsers.xml (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/MathematicalExpression.html?rev=1.8&content-type=text/x-cvsweb-markup">core/MathematicalExpression.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/mathematicalexpression/Parser.cup?rev=1.2&content-type=text/x-cvsweb-markup">core/mathematicalexpression/Parser.cup (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/mathematicalexpression/Parser.html?rev=1.2&content-type=text/x-cvsweb-markup">core/mathematicalexpression/Parser.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/mathematicalexpression/Scanner.html?rev=1.2&content-type=text/x-cvsweb-markup">core/mathematicalexpression/Scanner.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/mathematicalexpression/Scanner.jflex?rev=1.2&content-type=text/x-cvsweb-markup">core/mathematicalexpression/Scanner.jflex (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/mathematicalexpression/sym.html?rev=1.2&content-type=text/x-cvsweb-markup">core/mathematicalexpression/sym.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/SubsetByExpression.html?rev=1.1&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/SubsetByExpression.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-13 04:10 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now uses the current class loader rather than the system class loader to load icons</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Version.html?rev=1.8&content-type=text/x-cvsweb-markup">core/Version.html (1.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-13 04:01 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now uses the current class loader rather than the system class loader to load icons</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/BeanVisual.html?rev=1.10&content-type=text/x-cvsweb-markup">gui/beans/BeanVisual.html (1.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-13 03:58 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated year to 2008</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Copyright.props?rev=1.2&content-type=text/x-cvsweb-markup">core/Copyright.props (1.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-13 03:57 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now uses the current class loader rather than the system class loader</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Copyright.html?rev=1.2&content-type=text/x-cvsweb-markup">core/Copyright.html (1.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-12 01:01 cvs_rrb</td>
+</tr>
+<tr>
+<td>
+<pre>Enable datagenerator properly</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/GUI.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/bayes/net/GUI.html (1.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-09 09:14 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>rewrite of weka.core.MathematicalExpression using JFlex and CUP parser generators:
+http://jflex.de/
+http://www2.cs.tum.edu/projects/cup/</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?rev=1.44&content-type=text/x-cvsweb-markup">build.xml (1.44)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Action.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Action.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/CharClassException.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/CharClassException.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/CharClassInterval.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/CharClassInterval.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/CharClasses.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/CharClasses.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/CharSet.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/CharSet.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/CharSetEnumerator.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/CharSetEnumerator.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/DFA.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/DFA.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/EOFActions.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/EOFActions.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Emitter.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Emitter.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/ErrorMessages.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/ErrorMessages.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/IntCharSet.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/IntCharSet.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/IntPair.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/IntPair.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Interval.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Interval.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/LexParse.cup?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/LexParse.cup (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/LexScan.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/LexScan.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/LexicalStates.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/LexicalStates.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Macros.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Macros.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Main.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Main.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Messages.properties?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Messages.properties (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/NFA.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/NFA.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/RegExp2.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/RegExp2.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/ScannerException.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/ScannerException.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/SemCheck.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/SemCheck.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Skeleton.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Skeleton.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/StatePairList.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/StatePairList.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/StateSetEnumerator.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/StateSetEnumerator.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/StdOutWriter.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/StdOutWriter.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Timer.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Timer.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/sym.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/sym.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/runtime/ComplexSymbolFactory.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/runtime/ComplexSymbolFactory.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/runtime/DefaultSymbolFactory.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/runtime/DefaultSymbolFactory.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/runtime/Scanner.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/runtime/Scanner.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/runtime/Symbol.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/runtime/Symbol.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/runtime/SymbolFactory.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/runtime/SymbolFactory.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/runtime/lr_parser.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/runtime/lr_parser.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/runtime/virtual_parse_stack.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/runtime/virtual_parse_stack.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/MathExpression.html?rev=1.10&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/MathExpression.html (1.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-09 09:14 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>rewrite of weka.core.MathematicalExpression using JFlex and CUP parser generators:
+http://jflex.de/
+http://www2.cs.tum.edu/projects/cup/</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/parser/JFlex/CountEmitter.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/CountEmitter.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/GeneratorException.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/GeneratorException.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/HiLowEmitter.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/HiLowEmitter.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/LexParse.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/LexParse.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/LexScan.flex?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/LexScan.flex (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/MacroException.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/MacroException.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Options.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Options.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/Out.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/Out.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/PackEmitter.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/PackEmitter.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/RegExp.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/RegExp.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/RegExp1.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/RegExp1.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/RegExps.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/RegExps.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/SilentExit.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/SilentExit.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/StateSet.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/StateSet.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/JFlex/skeleton.default?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/JFlex/skeleton.default (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/ErrorManager.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/ErrorManager.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/Lexer.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/Lexer.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/Lexer.jflex?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/Lexer.jflex (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/Main.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/Main.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/action_part.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/action_part.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/action_production.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/action_production.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/assoc.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/assoc.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/emit.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/emit.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/internal_error.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/internal_error.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/lalr_item.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/lalr_item.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/lalr_item_set.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/lalr_item_set.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/lalr_state.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/lalr_state.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/lalr_transition.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/lalr_transition.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/lr_item_core.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/lr_item_core.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/non_terminal.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/non_terminal.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/nonassoc_action.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/nonassoc_action.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/parse_action.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/parse_action.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/parse_action_row.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/parse_action_row.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/parse_action_table.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/parse_action_table.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/parse_reduce_row.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/parse_reduce_row.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/parse_reduce_table.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/parse_reduce_table.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/parser.cup?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/parser.cup (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/parser.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/parser.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/production.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/production.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/production_part.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/production_part.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/reduce_action.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/reduce_action.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/shift_action.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/shift_action.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/sym.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/sym.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/symbol.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/symbol.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/symbol_part.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/symbol_part.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/symbol_set.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/symbol_set.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/terminal.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/terminal.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/terminal_set.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/terminal_set.html (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/parser/java_cup/version.html?rev=1.1&content-type=text/x-cvsweb-markup">core/parser/java_cup/version.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-05 04:10 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Associator renamed to AbstractAssociator; Associator has turned into an interface</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/Apriori.html?rev=1.31&content-type=text/x-cvsweb-markup">associations/Apriori.html (1.31)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/Associator.html?rev=1.11&content-type=text/x-cvsweb-markup">associations/Associator.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/AssociatorEvaluation.html?rev=1.5&content-type=text/x-cvsweb-markup">associations/AssociatorEvaluation.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/CheckAssociator.html?rev=1.7&content-type=text/x-cvsweb-markup">associations/CheckAssociator.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/GeneralizedSequentialPatterns.html?rev=1.3&content-type=text/x-cvsweb-markup">associations/GeneralizedSequentialPatterns.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/PredictiveApriori.html?rev=1.14&content-type=text/x-cvsweb-markup">associations/PredictiveApriori.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/SingleAssociatorEnhancer.html?rev=1.2&content-type=text/x-cvsweb-markup">associations/SingleAssociatorEnhancer.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/Tertius.html?rev=1.10&content-type=text/x-cvsweb-markup">associations/Tertius.html (1.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-05 04:10 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+Associator renamed to AbstractAssociator; Associator has turned into an interface</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/AbstractAssociator.html?rev=1.1&content-type=text/x-cvsweb-markup">associations/AbstractAssociator.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-29 03:07 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added another constructor</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/TestSetEvent.html?rev=1.5&content-type=text/x-cvsweb-markup">gui/beans/TestSetEvent.html (1.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-29 03:04 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added another constructor</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/TrainingSetEvent.html?rev=1.5&content-type=text/x-cvsweb-markup">gui/beans/TrainingSetEvent.html (1.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-23 04:53 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added Arne Muller's methods to shuffle attribute values</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Instance.html?rev=1.28&content-type=text/x-cvsweb-markup">core/Instance.html (1.28)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Instances.html?rev=1.76&content-type=text/x-cvsweb-markup">core/Instances.html (1.76)</a>
+</li>
+<li>
+<a href="../doc/weka/core/SparseInstance.html?rev=1.23&content-type=text/x-cvsweb-markup">core/SparseInstance.html (1.23)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-21 23:39 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Removed a couple of infinite recursive loops.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/CheckBoxList.html?rev=1.3&content-type=text/x-cvsweb-markup">gui/CheckBoxList.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-21 04:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Changed a &amp; to &amp;&amp;</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/ArffLoader.html?rev=1.23&content-type=text/x-cvsweb-markup">core/converters/ArffLoader.html (1.23)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-20 02:47 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/PrecomputedKernelMatrixKernel.html?rev=1.1&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/PrecomputedKernelMatrixKernel.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-17 05:55 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.2.2;
+Updated javadocs.</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/CostSensitiveAttributeEval.html?rev=1.2&content-type=text/x-cvsweb-markup">attributeSelection/CostSensitiveAttributeEval.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/CostSensitiveSubsetEval.html?rev=1.2&content-type=text/x-cvsweb-markup">attributeSelection/CostSensitiveSubsetEval.html (1.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.2.2;
+introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/MarginCalculator.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/bayes/net/MarginCalculator.html (1.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/tertius/AttributeValueLiteral.html?rev=1.6&content-type=text/x-cvsweb-markup">associations/tertius/AttributeValueLiteral.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/Body.html?rev=1.6&content-type=text/x-cvsweb-markup">associations/tertius/Body.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/Head.html?rev=1.6&content-type=text/x-cvsweb-markup">associations/tertius/Head.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/IndividualInstance.html?rev=1.5&content-type=text/x-cvsweb-markup">associations/tertius/IndividualInstance.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/IndividualInstances.html?rev=1.6&content-type=text/x-cvsweb-markup">associations/tertius/IndividualInstances.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/IndividualLiteral.html?rev=1.5&content-type=text/x-cvsweb-markup">associations/tertius/IndividualLiteral.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/Literal.html?rev=1.5&content-type=text/x-cvsweb-markup">associations/tertius/Literal.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/LiteralSet.html?rev=1.7&content-type=text/x-cvsweb-markup">associations/tertius/LiteralSet.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/Predicate.html?rev=1.5&content-type=text/x-cvsweb-markup">associations/tertius/Predicate.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/Rule.html?rev=1.7&content-type=text/x-cvsweb-markup">associations/tertius/Rule.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/tertius/SimpleLinkedList.html?rev=1.6&content-type=text/x-cvsweb-markup">associations/tertius/SimpleLinkedList.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/ci/CISearchAlgorithm.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/ci/CISearchAlgorithm.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/ci/ICSSearchAlgorithm.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/ci/ICSSearchAlgorithm.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/neural/LinearUnit.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/functions/neural/LinearUnit.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/neural/NeuralConnection.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/functions/neural/NeuralConnection.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/pace/ChisqMixture.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/functions/pace/ChisqMixture.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/pace/DiscreteFunction.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/functions/pace/DiscreteFunction.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/pace/MixtureDistribution.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/functions/pace/MixtureDistribution.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/pace/NormalMixture.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/functions/pace/NormalMixture.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/pace/PaceMatrix.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/functions/pace/PaceMatrix.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/adtree/PredictionNode.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/trees/adtree/PredictionNode.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/adtree/ReferenceInstances.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/trees/adtree/ReferenceInstances.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/adtree/Splitter.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/trees/adtree/Splitter.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/adtree/TwoWayNominalSplit.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/trees/adtree/TwoWayNominalSplit.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/adtree/TwoWayNumericSplit.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/trees/adtree/TwoWayNumericSplit.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/BallTree.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/BallTree.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/CoverTree.html?rev=1.4&content-type=text/x-cvsweb-markup">core/neighboursearch/CoverTree.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/KDTree.html?rev=1.3&content-type=text/x-cvsweb-markup">core/neighboursearch/KDTree.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/LinearNNSearch.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/LinearNNSearch.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/NearestNeighbourSearch.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/NearestNeighbourSearch.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/PerformanceStats.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/PerformanceStats.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/TreePerformanceStats.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/TreePerformanceStats.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/covertrees/Stack.html?rev=1.3&content-type=text/x-cvsweb-markup">core/neighboursearch/covertrees/Stack.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/attribute/AddClassification.html?rev=1.4&content-type=text/x-cvsweb-markup">filters/supervised/attribute/AddClassification.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/attribute/ClassOrder.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/supervised/attribute/ClassOrder.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/attribute/Discretize.html?rev=1.8&content-type=text/x-cvsweb-markup">filters/supervised/attribute/Discretize.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/instance/Resample.html?rev=1.13&content-type=text/x-cvsweb-markup">filters/supervised/instance/Resample.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/instance/StratifiedRemoveFolds.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/supervised/instance/StratifiedRemoveFolds.html (1.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/ASEvaluation.html?rev=1.15&content-type=text/x-cvsweb-markup">attributeSelection/ASEvaluation.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/ASSearch.html?rev=1.12&content-type=text/x-cvsweb-markup">attributeSelection/ASSearch.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/AttributeSelection.html?rev=1.47&content-type=text/x-cvsweb-markup">attributeSelection/AttributeSelection.html (1.47)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/AttributeTransformer.html?rev=1.9&content-type=text/x-cvsweb-markup">attributeSelection/AttributeTransformer.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/BestFirst.html?rev=1.29&content-type=text/x-cvsweb-markup">attributeSelection/BestFirst.html (1.29)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/CfsSubsetEval.html?rev=1.28&content-type=text/x-cvsweb-markup">attributeSelection/CfsSubsetEval.html (1.28)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/ChiSquaredAttributeEval.html?rev=1.16&content-type=text/x-cvsweb-markup">attributeSelection/ChiSquaredAttributeEval.html (1.16)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/ConsistencySubsetEval.html?rev=1.17&content-type=text/x-cvsweb-markup">attributeSelection/ConsistencySubsetEval.html (1.17)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/ExhaustiveSearch.html?rev=1.15&content-type=text/x-cvsweb-markup">attributeSelection/ExhaustiveSearch.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/FCBFSearch.html?rev=1.7&content-type=text/x-cvsweb-markup">attributeSelection/FCBFSearch.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/GainRatioAttributeEval.html?rev=1.23&content-type=text/x-cvsweb-markup">attributeSelection/GainRatioAttributeEval.html (1.23)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/GeneticSearch.html?rev=1.19&content-type=text/x-cvsweb-markup">attributeSelection/GeneticSearch.html (1.19)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/GreedyStepwise.html?rev=1.10&content-type=text/x-cvsweb-markup">attributeSelection/GreedyStepwise.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/InfoGainAttributeEval.html?rev=1.22&content-type=text/x-cvsweb-markup">attributeSelection/InfoGainAttributeEval.html (1.22)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/LFSMethods.html?rev=1.3&content-type=text/x-cvsweb-markup">attributeSelection/LFSMethods.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/OneRAttributeEval.html?rev=1.21&content-type=text/x-cvsweb-markup">attributeSelection/OneRAttributeEval.html (1.21)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/PrincipalComponents.html?rev=1.36&content-type=text/x-cvsweb-markup">attributeSelection/PrincipalComponents.html (1.36)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/RaceSearch.html?rev=1.26&content-type=text/x-cvsweb-markup">attributeSelection/RaceSearch.html (1.26)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/Ranker.html?rev=1.26&content-type=text/x-cvsweb-markup">attributeSelection/Ranker.html (1.26)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/ReliefFAttributeEval.html?rev=1.23&content-type=text/x-cvsweb-markup">attributeSelection/ReliefFAttributeEval.html (1.23)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/SymmetricalUncertAttributeSetEval.html?rev=1.7&content-type=text/x-cvsweb-markup">attributeSelection/SymmetricalUncertAttributeSetEval.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/blr/GaussianPriorImpl.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/bayes/blr/GaussianPriorImpl.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/blr/LaplacePriorImpl.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/bayes/blr/LaplacePriorImpl.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/blr/Prior.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/bayes/blr/Prior.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/Utils/EpsilonRange_ListElement.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/Utils/EpsilonRange_ListElement.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/Utils/PriorityQueue.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/Utils/PriorityQueue.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/Utils/PriorityQueueElement.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/Utils/PriorityQueueElement.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/Utils/UpdateQueue.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/Utils/UpdateQueue.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/Utils/UpdateQueueElement.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/Utils/UpdateQueueElement.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/BMAEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/BMAEstimator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/BayesNetEstimator.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/BayesNetEstimator.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/DiscreteEstimatorBayes.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/DiscreteEstimatorBayes.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/DiscreteEstimatorFullBayes.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/DiscreteEstimatorFullBayes.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/MultiNomialBMAEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/MultiNomialBMAEstimator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/SimpleEstimator.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/SimpleEstimator.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/kstar/KStarCache.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/lazy/kstar/KStarCache.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/kstar/KStarNominalAttribute.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/lazy/kstar/KStarNominalAttribute.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/kstar/KStarNumericAttribute.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/lazy/kstar/KStarNumericAttribute.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/kstar/KStarWrapper.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/lazy/kstar/KStarWrapper.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/FLR.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/misc/FLR.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/HyperPipes.html?rev=1.21&content-type=text/x-cvsweb-markup">classifiers/misc/HyperPipes.html (1.21)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/MinMaxExtension.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/MinMaxExtension.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/OLM.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/OLM.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/OSDL.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/OSDL.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/SerializedClassifier.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/misc/SerializedClassifier.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/VFI.html?rev=1.15&content-type=text/x-cvsweb-markup">classifiers/misc/VFI.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/AbsoluteLossFunction.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/AbsoluteLossFunction.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/BooleanBitMatrix.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/BooleanBitMatrix.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/Coordinates.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/Coordinates.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/CumulativeDiscreteDistribution.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/CumulativeDiscreteDistribution.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/DiscreteDistribution.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/DiscreteDistribution.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/DistributionUtils.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/DistributionUtils.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/EnumerationIterator.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/EnumerationIterator.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/InstancesComparator.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/InstancesComparator.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/InstancesUtil.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/InstancesUtil.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/MultiDimensionalSort.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/MultiDimensionalSort.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/monotone/ZeroOneLossFunction.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/misc/monotone/ZeroOneLossFunction.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/ft/FTInnerNode.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/ft/FTInnerNode.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/ft/FTLeavesNode.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/ft/FTLeavesNode.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/ft/FTNode.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/ft/FTNode.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/ft/FTtree.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/ft/FTtree.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/lmt/LMTNode.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/trees/lmt/LMTNode.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/lmt/LogisticBase.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/trees/lmt/LogisticBase.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/lmt/ResidualModelSelection.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/lmt/ResidualModelSelection.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/lmt/ResidualSplit.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/lmt/ResidualSplit.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/ClusterDefinition.html?rev=1.5&content-type=text/x-cvsweb-markup">datagenerators/ClusterDefinition.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/DataGenerator.html?rev=1.7&content-type=text/x-cvsweb-markup">datagenerators/DataGenerator.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/Test.html?rev=1.5&content-type=text/x-cvsweb-markup">datagenerators/Test.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/attribute/NominalToBinary.html?rev=1.8&content-type=text/x-cvsweb-markup">filters/supervised/attribute/NominalToBinary.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/attribute/PLSFilter.html?rev=1.4&content-type=text/x-cvsweb-markup">filters/supervised/attribute/PLSFilter.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/rules/ConjunctiveRule.html?rev=1.16&content-type=text/x-cvsweb-markup">classifiers/rules/ConjunctiveRule.html (1.16)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/DecisionTable.html?rev=1.46&content-type=text/x-cvsweb-markup">classifiers/rules/DecisionTable.html (1.46)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/DecisionTableHashKey.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/rules/DecisionTableHashKey.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/JRip.html?rev=1.22&content-type=text/x-cvsweb-markup">classifiers/rules/JRip.html (1.22)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/M5Rules.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/rules/M5Rules.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/NNge.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/rules/NNge.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/OneR.html?rev=1.26&content-type=text/x-cvsweb-markup">classifiers/rules/OneR.html (1.26)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/Prism.html?rev=1.23&content-type=text/x-cvsweb-markup">classifiers/rules/Prism.html (1.23)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/Ridor.html?rev=1.21&content-type=text/x-cvsweb-markup">classifiers/rules/Ridor.html (1.21)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/Rule.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/rules/Rule.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/RuleStats.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/rules/RuleStats.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/ZeroR.html?rev=1.19&content-type=text/x-cvsweb-markup">classifiers/rules/ZeroR.html (1.19)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/classifiers/classification/Agrawal.html?rev=1.6&content-type=text/x-cvsweb-markup">datagenerators/classifiers/classification/Agrawal.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/classifiers/classification/BayesNet.html?rev=1.4&content-type=text/x-cvsweb-markup">datagenerators/classifiers/classification/BayesNet.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/classifiers/classification/LED24.html?rev=1.6&content-type=text/x-cvsweb-markup">datagenerators/classifiers/classification/LED24.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/classifiers/classification/RDG1.html?rev=1.5&content-type=text/x-cvsweb-markup">datagenerators/classifiers/classification/RDG1.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/NonSparseToSparse.html?rev=1.5&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/NonSparseToSparse.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/Normalize.html?rev=1.6&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/Normalize.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/Randomize.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/Randomize.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemoveFolds.html?rev=1.6&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemoveFolds.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemoveFrequentValues.html?rev=1.6&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemoveFrequentValues.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemoveMisclassified.html?rev=1.8&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemoveMisclassified.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemovePercentage.html?rev=1.8&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemovePercentage.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemoveRange.html?rev=1.8&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemoveRange.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemoveWithValues.html?rev=1.13&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemoveWithValues.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/Resample.html?rev=1.10&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/Resample.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/SparseToNonSparse.html?rev=1.6&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/SparseToNonSparse.html (1.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/ADNode.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/bayes/net/ADNode.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/BayesNetGenerator.html?rev=1.14&content-type=text/x-cvsweb-markup">classifiers/bayes/net/BayesNetGenerator.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/ParentSet.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/bayes/net/ParentSet.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/VaryNode.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/bayes/net/VaryNode.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/GeneticSearch.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/GeneticSearch.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/HillClimber.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/HillClimber.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/K2.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/K2.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/LAGDHillClimber.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/LAGDHillClimber.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/RepeatedHillClimber.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/RepeatedHillClimber.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/SimulatedAnnealing.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/SimulatedAnnealing.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/TAN.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/TAN.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/TabuSearch.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/TabuSearch.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/CheckKernel.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/CheckKernel.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/Kernel.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/Kernel.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/KernelEvaluation.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/KernelEvaluation.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/Puk.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/Puk.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/RegOptimizer.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/RegOptimizer.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/RegSMO.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/RegSMO.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/RegSMOImproved.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/RegSMOImproved.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/SMOset.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/SMOset.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/stemmers/IteratedLovinsStemmer.html?rev=1.7&content-type=text/x-cvsweb-markup">core/stemmers/IteratedLovinsStemmer.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/core/stemmers/NullStemmer.html?rev=1.5&content-type=text/x-cvsweb-markup">core/stemmers/NullStemmer.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/stemmers/Stemmer.html?rev=1.3&content-type=text/x-cvsweb-markup">core/stemmers/Stemmer.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/stemmers/Stemming.html?rev=1.3&content-type=text/x-cvsweb-markup">core/stemmers/Stemming.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/evaluation/ConfusionMatrix.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/evaluation/ConfusionMatrix.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/evaluation/CostCurve.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/evaluation/CostCurve.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/evaluation/MarginCurve.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/evaluation/MarginCurve.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/evaluation/NominalPrediction.html?rev=1.12&content-type=text/x-cvsweb-markup">classifiers/evaluation/NominalPrediction.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/evaluation/NumericPrediction.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/evaluation/NumericPrediction.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/evaluation/TwoClassStats.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/evaluation/TwoClassStats.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/AdaBoostM1.html?rev=1.40&content-type=text/x-cvsweb-markup">classifiers/meta/AdaBoostM1.html (1.40)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/AttributeSelectedClassifier.html?rev=1.26&content-type=text/x-cvsweb-markup">classifiers/meta/AttributeSelectedClassifier.html (1.26)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/Bagging.html?rev=1.41&content-type=text/x-cvsweb-markup">classifiers/meta/Bagging.html (1.41)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/Dagging.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/meta/Dagging.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/Decorate.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/meta/Decorate.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/FilteredClassifier.html?rev=1.28&content-type=text/x-cvsweb-markup">classifiers/meta/FilteredClassifier.html (1.28)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/LogitBoost.html?rev=1.43&content-type=text/x-cvsweb-markup">classifiers/meta/LogitBoost.html (1.43)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/MetaCost.html?rev=1.24&content-type=text/x-cvsweb-markup">classifiers/meta/MetaCost.html (1.24)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiBoostAB.html?rev=1.16&content-type=text/x-cvsweb-markup">classifiers/meta/MultiBoostAB.html (1.16)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiScheme.html?rev=1.25&content-type=text/x-cvsweb-markup">classifiers/meta/MultiScheme.html (1.25)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/RandomSubSpace.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/meta/RandomSubSpace.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/BinC45ModelSelection.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/trees/j48/BinC45ModelSelection.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/BinC45Split.html?rev=1.14&content-type=text/x-cvsweb-markup">classifiers/trees/j48/BinC45Split.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/C45ModelSelection.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/trees/j48/C45ModelSelection.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/C45PruneableClassifierTree.html?rev=1.15&content-type=text/x-cvsweb-markup">classifiers/trees/j48/C45PruneableClassifierTree.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/C45PruneableClassifierTreeG.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/trees/j48/C45PruneableClassifierTreeG.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/C45Split.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/trees/j48/C45Split.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/ClassifierSplitModel.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/trees/j48/ClassifierSplitModel.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/ClassifierTree.html?rev=1.22&content-type=text/x-cvsweb-markup">classifiers/trees/j48/ClassifierTree.html (1.22)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/Distribution.html?rev=1.12&content-type=text/x-cvsweb-markup">classifiers/trees/j48/Distribution.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/EntropyBasedSplitCrit.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/trees/j48/EntropyBasedSplitCrit.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/EntropySplitCrit.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/trees/j48/EntropySplitCrit.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/GainRatioSplitCrit.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/trees/j48/GainRatioSplitCrit.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/GraftSplit.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/trees/j48/GraftSplit.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/InfoGainSplitCrit.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/trees/j48/InfoGainSplitCrit.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/ModelSelection.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/trees/j48/ModelSelection.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/NBTreeClassifierTree.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/trees/j48/NBTreeClassifierTree.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/NBTreeModelSelection.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/trees/j48/NBTreeModelSelection.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/NBTreeNoSplit.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/j48/NBTreeNoSplit.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/NBTreeSplit.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/trees/j48/NBTreeSplit.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/NoSplit.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/trees/j48/NoSplit.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/PruneableClassifierTree.html?rev=1.12&content-type=text/x-cvsweb-markup">classifiers/trees/j48/PruneableClassifierTree.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/SplitCriterion.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/trees/j48/SplitCriterion.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/Stats.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/trees/j48/Stats.html (1.9)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/ClassifierSubsetEval.html?rev=1.18&content-type=text/x-cvsweb-markup">attributeSelection/ClassifierSubsetEval.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/RandomSearch.html?rev=1.18&content-type=text/x-cvsweb-markup">attributeSelection/RandomSearch.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/RankSearch.html?rev=1.19&content-type=text/x-cvsweb-markup">attributeSelection/RankSearch.html (1.19)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/SVMAttributeEval.html?rev=1.28&content-type=text/x-cvsweb-markup">attributeSelection/SVMAttributeEval.html (1.28)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/SymmetricalUncertAttributeEval.html?rev=1.22&content-type=text/x-cvsweb-markup">attributeSelection/SymmetricalUncertAttributeEval.html (1.22)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/WrapperSubsetEval.html?rev=1.31&content-type=text/x-cvsweb-markup">attributeSelection/WrapperSubsetEval.html (1.31)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/nestedDichotomies/ClassBalancedND.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/meta/nestedDichotomies/ClassBalancedND.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/nestedDichotomies/DataNearBalancedND.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/meta/nestedDichotomies/DataNearBalancedND.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/nestedDichotomies/ND.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/meta/nestedDichotomies/ND.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/Cobweb.html?rev=1.25&content-type=text/x-cvsweb-markup">clusterers/Cobweb.html (1.25)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/FarthestFirst.html?rev=1.9&content-type=text/x-cvsweb-markup">clusterers/FarthestFirst.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/XMeans.html?rev=1.24&content-type=text/x-cvsweb-markup">clusterers/XMeans.html (1.24)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/sIB.html?rev=1.2&content-type=text/x-cvsweb-markup">clusterers/sIB.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/Databases/SequentialDatabase.html?rev=1.4&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/Databases/SequentialDatabase.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/BVDecompose.html?rev=1.15&content-type=text/x-cvsweb-markup">classifiers/BVDecompose.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/BVDecomposeSegCVSub.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/BVDecomposeSegCVSub.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/CheckClassifier.html?rev=1.33&content-type=text/x-cvsweb-markup">classifiers/CheckClassifier.html (1.33)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/CheckSource.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/CheckSource.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/Classifier.html?rev=1.18&content-type=text/x-cvsweb-markup">classifiers/Classifier.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/CostMatrix.html?rev=1.17&content-type=text/x-cvsweb-markup">classifiers/CostMatrix.html (1.17)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/EnsembleLibrary.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/EnsembleLibrary.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/EnsembleLibraryModel.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/EnsembleLibraryModel.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/EnsembleLibraryModelComparator.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/EnsembleLibraryModelComparator.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/JythonClassifier.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/JythonClassifier.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/PART.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/rules/PART.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/CholeskyDecomposition.html?rev=1.5&content-type=text/x-cvsweb-markup">core/matrix/CholeskyDecomposition.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/DoubleVector.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/DoubleVector.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/EigenvalueDecomposition.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/EigenvalueDecomposition.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/ExponentialFormat.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/ExponentialFormat.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/FlexibleDecimalFormat.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/FlexibleDecimalFormat.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/FloatingPointFormat.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/FloatingPointFormat.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/IntVector.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/IntVector.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/LUDecomposition.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/LUDecomposition.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/LinearRegression.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/LinearRegression.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/Maths.html?rev=1.3&content-type=text/x-cvsweb-markup">core/matrix/Maths.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/Matrix.html?rev=1.8&content-type=text/x-cvsweb-markup">core/matrix/Matrix.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/QRDecomposition.html?rev=1.4&content-type=text/x-cvsweb-markup">core/matrix/QRDecomposition.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/SingularValueDecomposition.html?rev=1.5&content-type=text/x-cvsweb-markup">core/matrix/SingularValueDecomposition.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/ConditionalEstimator.html?rev=1.7&content-type=text/x-cvsweb-markup">estimators/ConditionalEstimator.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/DNConditionalEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">estimators/DNConditionalEstimator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/Estimator.html?rev=1.10&content-type=text/x-cvsweb-markup">estimators/Estimator.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/EstimatorUtils.html?rev=1.4&content-type=text/x-cvsweb-markup">estimators/EstimatorUtils.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/KKConditionalEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">estimators/KKConditionalEstimator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/KernelEstimator.html?rev=1.9&content-type=text/x-cvsweb-markup">estimators/KernelEstimator.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/MahalanobisEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">estimators/MahalanobisEstimator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/NormalEstimator.html?rev=1.10&content-type=text/x-cvsweb-markup">estimators/NormalEstimator.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/PoissonEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">estimators/PoissonEstimator.html (1.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/AODE.html?rev=1.19&content-type=text/x-cvsweb-markup">classifiers/bayes/AODE.html (1.19)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/BayesianLogisticRegression.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/bayes/BayesianLogisticRegression.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/ComplementNaiveBayes.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/bayes/ComplementNaiveBayes.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/HNB.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/bayes/HNB.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayesMultinomial.html?rev=1.16&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayesMultinomial.html (1.16)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayesMultinomialUpdateable.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayesMultinomialUpdateable.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayesSimple.html?rev=1.20&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayesSimple.html (1.20)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/WAODE.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/bayes/WAODE.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/GraphPanel.html?rev=1.4&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/OPTICS_GUI/GraphPanel.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/OPTICS_Visualizer.html?rev=1.4&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/OPTICS_GUI/OPTICS_Visualizer.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/ResultVectorTableModel.html?rev=1.4&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/OPTICS_GUI/ResultVectorTableModel.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/SERFileFilter.html?rev=1.3&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/OPTICS_GUI/SERFileFilter.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/SERObject.html?rev=1.4&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/OPTICS_GUI/SERObject.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/kdtrees/KDTreeNode.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/kdtrees/KDTreeNode.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/kdtrees/KDTreeNodeSplitter.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/kdtrees/KDTreeNodeSplitter.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/kdtrees/KMeansInpiredMethod.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/kdtrees/KMeansInpiredMethod.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/kdtrees/MedianOfWidestDimension.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/kdtrees/MedianOfWidestDimension.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/kdtrees/MidPointOfWidestDimension.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/kdtrees/MidPointOfWidestDimension.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/kdtrees/SlidingMidPointOfWidestSide.html?rev=1.3&content-type=text/x-cvsweb-markup">core/neighboursearch/kdtrees/SlidingMidPointOfWidestSide.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/stemmers/LovinsStemmer.html?rev=1.7&content-type=text/x-cvsweb-markup">core/stemmers/LovinsStemmer.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/KOML.html?rev=1.4&content-type=text/x-cvsweb-markup">core/xml/KOML.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/MethodHandler.html?rev=1.3&content-type=text/x-cvsweb-markup">core/xml/MethodHandler.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/PropertyHandler.html?rev=1.4&content-type=text/x-cvsweb-markup">core/xml/PropertyHandler.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/SerialUIDChanger.html?rev=1.3&content-type=text/x-cvsweb-markup">core/xml/SerialUIDChanger.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLBasicSerialization.html?rev=1.6&content-type=text/x-cvsweb-markup">core/xml/XMLBasicSerialization.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLDocument.html?rev=1.9&content-type=text/x-cvsweb-markup">core/xml/XMLDocument.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLInstances.html?rev=1.4&content-type=text/x-cvsweb-markup">core/xml/XMLInstances.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLOptions.html?rev=1.4&content-type=text/x-cvsweb-markup">core/xml/XMLOptions.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLSerialization.html?rev=1.16&content-type=text/x-cvsweb-markup">core/xml/XMLSerialization.html (1.16)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLSerializationMethodHandler.html?rev=1.5&content-type=text/x-cvsweb-markup">core/xml/XMLSerializationMethodHandler.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/classifiers/classification/RandomRBF.html?rev=1.4&content-type=text/x-cvsweb-markup">datagenerators/classifiers/classification/RandomRBF.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/GeneticSearch.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/GeneticSearch.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/GlobalScoreSearchAlgorithm.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/GlobalScoreSearchAlgorithm.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/HillClimber.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/HillClimber.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/K2.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/K2.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/RepeatedHillClimber.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/RepeatedHillClimber.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/SimulatedAnnealing.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/SimulatedAnnealing.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/TAN.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/TAN.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/TabuSearch.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/TabuSearch.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/AdditiveRegression.html?rev=1.25&content-type=text/x-cvsweb-markup">classifiers/meta/AdditiveRegression.html (1.25)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/ClassificationViaRegression.html?rev=1.27&content-type=text/x-cvsweb-markup">classifiers/meta/ClassificationViaRegression.html (1.27)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/CostSensitiveClassifier.html?rev=1.29&content-type=text/x-cvsweb-markup">classifiers/meta/CostSensitiveClassifier.html (1.29)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/END.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/meta/END.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/EnsembleSelection.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/meta/EnsembleSelection.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/Grading.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/meta/Grading.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/GridSearch.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/meta/GridSearch.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/OrdinalClassClassifier.html?rev=1.18&content-type=text/x-cvsweb-markup">classifiers/meta/OrdinalClassClassifier.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/RacedIncrementalLogitBoost.html?rev=1.12&content-type=text/x-cvsweb-markup">classifiers/meta/RacedIncrementalLogitBoost.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/RegressionByDiscretization.html?rev=1.37&content-type=text/x-cvsweb-markup">classifiers/meta/RegressionByDiscretization.html (1.37)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/Stacking.html?rev=1.32&content-type=text/x-cvsweb-markup">classifiers/meta/Stacking.html (1.32)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/StackingC.html?rev=1.15&content-type=text/x-cvsweb-markup">classifiers/meta/StackingC.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/Vote.html?rev=1.19&content-type=text/x-cvsweb-markup">classifiers/meta/Vote.html (1.19)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/DDConditionalEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">estimators/DDConditionalEstimator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/DKConditionalEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">estimators/DKConditionalEstimator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/DiscreteEstimator.html?rev=1.10&content-type=text/x-cvsweb-markup">estimators/DiscreteEstimator.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/KDConditionalEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">estimators/KDConditionalEstimator.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/NDConditionalEstimator.html?rev=1.7&content-type=text/x-cvsweb-markup">estimators/NDConditionalEstimator.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/estimators/NNConditionalEstimator.html?rev=1.8&content-type=text/x-cvsweb-markup">estimators/NNConditionalEstimator.html (1.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/RevisionUtils.html?rev=1.1&content-type=text/x-cvsweb-markup">core/RevisionUtils.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/AlgVector.html?rev=1.10&content-type=text/x-cvsweb-markup">core/AlgVector.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/core/CheckGOE.html?rev=1.4&content-type=text/x-cvsweb-markup">core/CheckGOE.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/ClassloaderUtil.html?rev=1.2&content-type=text/x-cvsweb-markup">core/ClassloaderUtil.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/GlobalInfoJavadoc.html?rev=1.7&content-type=text/x-cvsweb-markup">core/GlobalInfoJavadoc.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/core/NormalizableDistance.html?rev=1.2&content-type=text/x-cvsweb-markup">core/NormalizableDistance.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Optimization.html?rev=1.9&content-type=text/x-cvsweb-markup">core/Optimization.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/core/RelationalLocator.html?rev=1.3&content-type=text/x-cvsweb-markup">core/RelationalLocator.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Statistics.html?rev=1.10&content-type=text/x-cvsweb-markup">core/Statistics.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Add.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Add.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddExpression.html?rev=1.8&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddExpression.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddID.html?rev=1.6&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddID.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddNoise.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddNoise.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Center.html?rev=1.5&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Center.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/ChangeDateFormat.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/ChangeDateFormat.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/ClassAssigner.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/ClassAssigner.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Discretize.html?rev=1.13&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Discretize.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/FirstOrder.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/FirstOrder.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/KernelFilter.html?rev=1.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/KernelFilter.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/MakeIndicator.html?rev=1.6&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/MakeIndicator.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/MultiInstanceToPropositional.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/MultiInstanceToPropositional.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/NominalToBinary.html?rev=1.12&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/NominalToBinary.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/NumericToBinary.html?rev=1.8&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/NumericToBinary.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/NumericToNominal.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/NumericToNominal.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/PKIDiscretize.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/PKIDiscretize.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/PrincipalComponents.html?rev=1.4&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/PrincipalComponents.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/PropositionalToMultiInstance.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/PropositionalToMultiInstance.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/RandomSubset.html?rev=1.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/RandomSubset.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Remove.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Remove.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/RemoveType.html?rev=1.8&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/RemoveType.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Reorder.html?rev=1.5&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Reorder.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/ReplaceMissingValues.html?rev=1.11&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/ReplaceMissingValues.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Standardize.html?rev=1.12&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Standardize.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Wavelet.html?rev=1.4&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Wavelet.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/evaluation/EvaluationUtils.html?rev=1.11&content-type=text/x-cvsweb-markup">classifiers/evaluation/EvaluationUtils.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/evaluation/ThresholdCurve.html?rev=1.23&content-type=text/x-cvsweb-markup">classifiers/evaluation/ThresholdCurve.html (1.23)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/CitationKNN.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/mi/CitationKNN.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MDD.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/mi/MDD.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MIBoost.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/mi/MIBoost.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MIDD.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/mi/MIDD.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MIEMDD.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/mi/MIEMDD.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MILR.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/mi/MILR.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MINND.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/mi/MINND.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MIOptimalBall.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/mi/MIOptimalBall.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MISMO.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/mi/MISMO.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MISVM.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/mi/MISVM.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/MIWrapper.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/mi/MIWrapper.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/SimpleMI.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/mi/SimpleMI.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/TLD.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/mi/TLD.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/mi/TLDSimple.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/mi/TLDSimple.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Attribute.html?rev=1.45&content-type=text/x-cvsweb-markup">core/Attribute.html (1.45)</a>
+</li>
+<li>
+<a href="../doc/weka/core/AttributeLocator.html?rev=1.4&content-type=text/x-cvsweb-markup">core/AttributeLocator.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/CheckOptionHandler.html?rev=1.13&content-type=text/x-cvsweb-markup">core/CheckOptionHandler.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/core/ContingencyTables.html?rev=1.8&content-type=text/x-cvsweb-markup">core/ContingencyTables.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/EditDistance.html?rev=1.2&content-type=text/x-cvsweb-markup">core/EditDistance.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/ListOptions.html?rev=1.2&content-type=text/x-cvsweb-markup">core/ListOptions.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Memory.html?rev=1.7&content-type=text/x-cvsweb-markup">core/Memory.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/core/OptionHandlerJavadoc.html?rev=1.8&content-type=text/x-cvsweb-markup">core/OptionHandlerJavadoc.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Queue.html?rev=1.10&content-type=text/x-cvsweb-markup">core/Queue.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Range.html?rev=1.18&content-type=text/x-cvsweb-markup">core/Range.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/core/SerializationHelper.html?rev=1.2&content-type=text/x-cvsweb-markup">core/SerializationHelper.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Tag.html?rev=1.13&content-type=text/x-cvsweb-markup">core/Tag.html (1.13)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/AprioriItemSet.html?rev=1.6&content-type=text/x-cvsweb-markup">associations/AprioriItemSet.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/CaRuleGeneration.html?rev=1.4&content-type=text/x-cvsweb-markup">associations/CaRuleGeneration.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/ItemSet.html?rev=1.13&content-type=text/x-cvsweb-markup">associations/ItemSet.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/LabeledItemSet.html?rev=1.5&content-type=text/x-cvsweb-markup">associations/LabeledItemSet.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/PriorEstimation.html?rev=1.7&content-type=text/x-cvsweb-markup">associations/PriorEstimation.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/RuleGeneration.html?rev=1.4&content-type=text/x-cvsweb-markup">associations/RuleGeneration.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/RuleItem.html?rev=1.5&content-type=text/x-cvsweb-markup">associations/RuleItem.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/SearchAlgorithm.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/SearchAlgorithm.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/VotedPerceptron.html?rev=1.23&content-type=text/x-cvsweb-markup">classifiers/functions/VotedPerceptron.html (1.23)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/IB1.html?rev=1.20&content-type=text/x-cvsweb-markup">classifiers/lazy/IB1.html (1.20)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/IBk.html?rev=1.42&content-type=text/x-cvsweb-markup">classifiers/lazy/IBk.html (1.42)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/KStar.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/lazy/KStar.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/LBR.html?rev=1.12&content-type=text/x-cvsweb-markup">classifiers/lazy/LBR.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/LWL.html?rev=1.22&content-type=text/x-cvsweb-markup">classifiers/lazy/LWL.html (1.22)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/part/C45PruneableDecList.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/rules/part/C45PruneableDecList.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/part/ClassifierDecList.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/rules/part/ClassifierDecList.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/part/MakeDecList.html?rev=1.17&content-type=text/x-cvsweb-markup">classifiers/rules/part/MakeDecList.html (1.17)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/part/PruneableDecList.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/rules/part/PruneableDecList.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/LearningRateResultProducer.html?rev=1.9&content-type=text/x-cvsweb-markup">experiment/LearningRateResultProducer.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/PairedCorrectedTTester.html?rev=1.13&content-type=text/x-cvsweb-markup">experiment/PairedCorrectedTTester.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/PairedTTester.html?rev=1.35&content-type=text/x-cvsweb-markup">experiment/PairedTTester.html (1.35)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RemoteExperimentEvent.html?rev=1.7&content-type=text/x-cvsweb-markup">experiment/RemoteExperimentEvent.html (1.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/CrossValidationResultProducer.html?rev=1.17&content-type=text/x-cvsweb-markup">experiment/CrossValidationResultProducer.html (1.17)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/DatabaseResultProducer.html?rev=1.18&content-type=text/x-cvsweb-markup">experiment/DatabaseResultProducer.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/Experiment.html?rev=1.27&content-type=text/x-cvsweb-markup">experiment/Experiment.html (1.27)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/InstanceQuery.html?rev=1.22&content-type=text/x-cvsweb-markup">experiment/InstanceQuery.html (1.22)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/OutputZipper.html?rev=1.8&content-type=text/x-cvsweb-markup">experiment/OutputZipper.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/PairedStats.html?rev=1.10&content-type=text/x-cvsweb-markup">experiment/PairedStats.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RegressionSplitEvaluator.html?rev=1.25&content-type=text/x-cvsweb-markup">experiment/RegressionSplitEvaluator.html (1.25)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RemoteExperimentSubTask.html?rev=1.9&content-type=text/x-cvsweb-markup">experiment/RemoteExperimentSubTask.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ResultMatrix.html?rev=1.9&content-type=text/x-cvsweb-markup">experiment/ResultMatrix.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ResultMatrixGnuPlot.html?rev=1.5&content-type=text/x-cvsweb-markup">experiment/ResultMatrixGnuPlot.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ResultMatrixHTML.html?rev=1.4&content-type=text/x-cvsweb-markup">experiment/ResultMatrixHTML.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ResultMatrixPlainText.html?rev=1.8&content-type=text/x-cvsweb-markup">experiment/ResultMatrixPlainText.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ResultMatrixSignificance.html?rev=1.5&content-type=text/x-cvsweb-markup">experiment/ResultMatrixSignificance.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/TaskStatusInfo.html?rev=1.5&content-type=text/x-cvsweb-markup">experiment/TaskStatusInfo.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/Tester.html?rev=1.4&content-type=text/x-cvsweb-markup">experiment/Tester.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddValues.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddValues.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Copy.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Copy.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/InterquartileRange.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/InterquartileRange.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/MergeTwoValues.html?rev=1.10&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/MergeTwoValues.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Normalize.html?rev=1.13&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Normalize.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/NumericCleaner.html?rev=1.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/NumericCleaner.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/NumericTransform.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/NumericTransform.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Obfuscate.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Obfuscate.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/PartitionedMultiFilter.html?rev=1.5&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/PartitionedMultiFilter.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/RELAGGS.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/RELAGGS.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/RandomProjection.html?rev=1.11&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/RandomProjection.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/RemoveUseless.html?rev=1.10&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/RemoveUseless.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/StringToNominal.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/StringToNominal.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/SwapValues.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/SwapValues.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/TimeSeriesDelta.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/TimeSeriesDelta.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/TimeSeriesTranslate.html?rev=1.9&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/TimeSeriesTranslate.html (1.9)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/AllJavadoc.html?rev=1.5&content-type=text/x-cvsweb-markup">core/AllJavadoc.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/AttributeExpression.html?rev=1.5&content-type=text/x-cvsweb-markup">core/AttributeExpression.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/AttributeStats.html?rev=1.10&content-type=text/x-cvsweb-markup">core/AttributeStats.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/core/BinarySparseInstance.html?rev=1.13&content-type=text/x-cvsweb-markup">core/BinarySparseInstance.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/core/ChebyshevDistance.html?rev=1.2&content-type=text/x-cvsweb-markup">core/ChebyshevDistance.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Check.html?rev=1.2&content-type=text/x-cvsweb-markup">core/Check.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/CheckScheme.html?rev=1.4&content-type=text/x-cvsweb-markup">core/CheckScheme.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/ClassDiscovery.html?rev=1.7&content-type=text/x-cvsweb-markup">core/ClassDiscovery.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Debug.html?rev=1.8&content-type=text/x-cvsweb-markup">core/Debug.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/EuclideanDistance.html?rev=1.13&content-type=text/x-cvsweb-markup">core/EuclideanDistance.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/core/FastVector.html?rev=1.16&content-type=text/x-cvsweb-markup">core/FastVector.html (1.16)</a>
+</li>
+<li>
+<a href="../doc/weka/core/FindWithCapabilities.html?rev=1.5&content-type=text/x-cvsweb-markup">core/FindWithCapabilities.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/InstanceComparator.html?rev=1.4&content-type=text/x-cvsweb-markup">core/InstanceComparator.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Javadoc.html?rev=1.6&content-type=text/x-cvsweb-markup">core/Javadoc.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Jython.html?rev=1.2&content-type=text/x-cvsweb-markup">core/Jython.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/ManhattanDistance.html?rev=1.2&content-type=text/x-cvsweb-markup">core/ManhattanDistance.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Matrix.html?rev=1.25&content-type=text/x-cvsweb-markup">core/Matrix.html (1.25)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Option.html?rev=1.7&content-type=text/x-cvsweb-markup">core/Option.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/core/PropertyPath.html?rev=1.2&content-type=text/x-cvsweb-markup">core/PropertyPath.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/ProtectedProperties.html?rev=1.6&content-type=text/x-cvsweb-markup">core/ProtectedProperties.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/core/RandomVariates.html?rev=1.5&content-type=text/x-cvsweb-markup">core/RandomVariates.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/SelectedTag.html?rev=1.11&content-type=text/x-cvsweb-markup">core/SelectedTag.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/core/SerializedObject.html?rev=1.12&content-type=text/x-cvsweb-markup">core/SerializedObject.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/core/SingleIndex.html?rev=1.8&content-type=text/x-cvsweb-markup">core/SingleIndex.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/SpecialFunctions.html?rev=1.8&content-type=text/x-cvsweb-markup">core/SpecialFunctions.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Stopwords.html?rev=1.6&content-type=text/x-cvsweb-markup">core/Stopwords.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/core/StringLocator.html?rev=1.4&content-type=text/x-cvsweb-markup">core/StringLocator.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/SystemInfo.html?rev=1.5&content-type=text/x-cvsweb-markup">core/SystemInfo.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/TechnicalInformation.html?rev=1.10&content-type=text/x-cvsweb-markup">core/TechnicalInformation.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/core/TechnicalInformationHandlerJavadoc.html?rev=1.6&content-type=text/x-cvsweb-markup">core/TechnicalInformationHandlerJavadoc.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Tee.html?rev=1.4&content-type=text/x-cvsweb-markup">core/Tee.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/TestInstances.html?rev=1.10&content-type=text/x-cvsweb-markup">core/TestInstances.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Trie.html?rev=1.2&content-type=text/x-cvsweb-markup">core/Trie.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Utils.html?rev=1.60&content-type=text/x-cvsweb-markup">core/Utils.html (1.60)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/functions/GaussianProcesses.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/functions/GaussianProcesses.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/IsotonicRegression.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/functions/IsotonicRegression.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/LeastMedSq.html?rev=1.17&content-type=text/x-cvsweb-markup">classifiers/functions/LeastMedSq.html (1.17)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/LibSVM.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/functions/LibSVM.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/LinearRegression.html?rev=1.24&content-type=text/x-cvsweb-markup">classifiers/functions/LinearRegression.html (1.24)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/MultilayerPerceptron.html?rev=1.12&content-type=text/x-cvsweb-markup">classifiers/functions/MultilayerPerceptron.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/PLSClassifier.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/functions/PLSClassifier.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/PaceRegression.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/functions/PaceRegression.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/RBFNetwork.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/functions/RBFNetwork.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/SMOreg.html?rev=1.14&content-type=text/x-cvsweb-markup">classifiers/functions/SMOreg.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/SVMreg.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/functions/SVMreg.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/SimpleLinearRegression.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/functions/SimpleLinearRegression.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/SimpleLogistic.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/functions/SimpleLogistic.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/Winnow.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/functions/Winnow.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/BFTree.html?rev=1.5&content-type=text/x-cvsweb-markup">classifiers/trees/BFTree.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/LMT.html?rev=1.12&content-type=text/x-cvsweb-markup">classifiers/trees/LMT.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/RandomForest.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/trees/RandomForest.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/UserClassifier.html?rev=1.30&content-type=text/x-cvsweb-markup">classifiers/trees/UserClassifier.html (1.30)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/AveragingResultProducer.html?rev=1.18&content-type=text/x-cvsweb-markup">experiment/AveragingResultProducer.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/CSVResultListener.html?rev=1.13&content-type=text/x-cvsweb-markup">experiment/CSVResultListener.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ClassifierSplitEvaluator.html?rev=1.29&content-type=text/x-cvsweb-markup">experiment/ClassifierSplitEvaluator.html (1.29)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/CostSensitiveClassifierSplitEvaluator.html?rev=1.18&content-type=text/x-cvsweb-markup">experiment/CostSensitiveClassifierSplitEvaluator.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/DatabaseResultListener.html?rev=1.14&content-type=text/x-cvsweb-markup">experiment/DatabaseResultListener.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.html?rev=1.34&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.html (1.34)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/InstancesResultListener.html?rev=1.11&content-type=text/x-cvsweb-markup">experiment/InstancesResultListener.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/PairedStatsCorrected.html?rev=1.5&content-type=text/x-cvsweb-markup">experiment/PairedStatsCorrected.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/PropertyNode.html?rev=1.7&content-type=text/x-cvsweb-markup">experiment/PropertyNode.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RandomSplitResultProducer.html?rev=1.20&content-type=text/x-cvsweb-markup">experiment/RandomSplitResultProducer.html (1.20)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RemoteEngine.html?rev=1.10&content-type=text/x-cvsweb-markup">experiment/RemoteEngine.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RemoteExperiment.html?rev=1.16&content-type=text/x-cvsweb-markup">experiment/RemoteExperiment.html (1.16)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ResultMatrixCSV.html?rev=1.4&content-type=text/x-cvsweb-markup">experiment/ResultMatrixCSV.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ResultMatrixLatex.html?rev=1.6&content-type=text/x-cvsweb-markup">experiment/ResultMatrixLatex.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/Stats.html?rev=1.12&content-type=text/x-cvsweb-markup">experiment/Stats.html (1.12)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/RevisionHandler.html?rev=1.1&content-type=text/x-cvsweb-markup">core/RevisionHandler.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/ADTree.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/trees/ADTree.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/Id3.html?rev=1.23&content-type=text/x-cvsweb-markup">classifiers/trees/Id3.html (1.23)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/J48.html?rev=1.9&content-type=text/x-cvsweb-markup">classifiers/trees/J48.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/M5P.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/trees/M5P.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/NBTree.html?rev=1.10&content-type=text/x-cvsweb-markup">classifiers/trees/NBTree.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/REPTree.html?rev=1.26&content-type=text/x-cvsweb-markup">classifiers/trees/REPTree.html (1.26)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/RandomTree.html?rev=1.20&content-type=text/x-cvsweb-markup">classifiers/trees/RandomTree.html (1.20)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/SimpleCart.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/SimpleCart.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/ArffSaver.html?rev=1.8&content-type=text/x-cvsweb-markup">core/converters/ArffSaver.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/C45Loader.html?rev=1.15&content-type=text/x-cvsweb-markup">core/converters/C45Loader.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/C45Saver.html?rev=1.7&content-type=text/x-cvsweb-markup">core/converters/C45Saver.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/CSVLoader.html?rev=1.19&content-type=text/x-cvsweb-markup">core/converters/CSVLoader.html (1.19)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/CSVSaver.html?rev=1.9&content-type=text/x-cvsweb-markup">core/converters/CSVSaver.html (1.9)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/ConverterUtils.html?rev=1.15&content-type=text/x-cvsweb-markup">core/converters/ConverterUtils.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/DatabaseConnection.html?rev=1.8&content-type=text/x-cvsweb-markup">core/converters/DatabaseConnection.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/DatabaseLoader.html?rev=1.14&content-type=text/x-cvsweb-markup">core/converters/DatabaseLoader.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/DatabaseSaver.html?rev=1.12&content-type=text/x-cvsweb-markup">core/converters/DatabaseSaver.html (1.12)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/LibSVMLoader.html?rev=1.4&content-type=text/x-cvsweb-markup">core/converters/LibSVMLoader.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/LibSVMSaver.html?rev=1.4&content-type=text/x-cvsweb-markup">core/converters/LibSVMSaver.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/Loader.html?rev=1.11&content-type=text/x-cvsweb-markup">core/converters/Loader.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/Saver.html?rev=1.4&content-type=text/x-cvsweb-markup">core/converters/Saver.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/SerializedInstancesLoader.html?rev=1.14&content-type=text/x-cvsweb-markup">core/converters/SerializedInstancesLoader.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/SerializedInstancesSaver.html?rev=1.7&content-type=text/x-cvsweb-markup">core/converters/SerializedInstancesSaver.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/TextDirectoryLoader.html?rev=1.4&content-type=text/x-cvsweb-markup">core/converters/TextDirectoryLoader.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/XRFFLoader.html?rev=1.4&content-type=text/x-cvsweb-markup">core/converters/XRFFLoader.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/XRFFSaver.html?rev=1.5&content-type=text/x-cvsweb-markup">core/converters/XRFFSaver.html (1.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/CorrelationSplitInfo.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/m5/CorrelationSplitInfo.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/RuleNode.html?rev=1.13&content-type=text/x-cvsweb-markup">classifiers/trees/m5/RuleNode.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/SplitEvaluate.html?rev=1.3&content-type=text/x-cvsweb-markup">classifiers/trees/m5/SplitEvaluate.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/YongSplitInfo.html?rev=1.4&content-type=text/x-cvsweb-markup">classifiers/trees/m5/YongSplitInfo.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclidianDataObject.html?rev=1.5&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/DataObjects/EuclidianDataObject.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/clusterers/forOPTICSAndDBScan/DataObjects/ManhattanDataObject.html?rev=1.5&content-type=text/x-cvsweb-markup">clusterers/forOPTICSAndDBScan/DataObjects/ManhattanDataObject.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/classifiers/regression/Expression.html?rev=1.5&content-type=text/x-cvsweb-markup">datagenerators/classifiers/regression/Expression.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/classifiers/regression/MexicanHat.html?rev=1.4&content-type=text/x-cvsweb-markup">datagenerators/classifiers/regression/MexicanHat.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/xml/XMLExperiment.html?rev=1.6&content-type=text/x-cvsweb-markup">experiment/xml/XMLExperiment.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/sql/DbUtils.html?rev=1.4&content-type=text/x-cvsweb-markup">gui/sql/DbUtils.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>introduction of interface RevisionHandler which enables classes to return their CVS/Subversion revision string</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/gsp/Element.html?rev=1.2&content-type=text/x-cvsweb-markup">associations/gsp/Element.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/gsp/Sequence.html?rev=1.2&content-type=text/x-cvsweb-markup">associations/gsp/Sequence.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/fixed/FromFile.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/fixed/FromFile.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/fixed/NaiveBayes.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/fixed/NaiveBayes.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/neural/NeuralNode.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/functions/neural/NeuralNode.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/neural/SigmoidUnit.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/functions/neural/SigmoidUnit.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/ensembleSelection/EnsembleMetricHelper.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/meta/ensembleSelection/EnsembleMetricHelper.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/ensembleSelection/EnsembleSelectionLibrary.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/meta/ensembleSelection/EnsembleSelectionLibrary.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/ensembleSelection/EnsembleSelectionLibraryModel.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/meta/ensembleSelection/EnsembleSelectionLibraryModel.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/ensembleSelection/ModelBag.html?rev=1.2&content-type=text/x-cvsweb-markup">classifiers/meta/ensembleSelection/ModelBag.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/Impurity.html?rev=1.8&content-type=text/x-cvsweb-markup">classifiers/trees/m5/Impurity.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/PreConstructedLinearModel.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/trees/m5/PreConstructedLinearModel.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/Rule.html?rev=1.15&content-type=text/x-cvsweb-markup">classifiers/trees/m5/Rule.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/Values.html?rev=1.7&content-type=text/x-cvsweb-markup">classifiers/trees/m5/Values.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/xml/XMLClassifier.html?rev=1.6&content-type=text/x-cvsweb-markup">classifiers/xml/XMLClassifier.html (1.6)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/BallNode.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/BallNode.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/BallSplitter.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/BallSplitter.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/BallTreeConstructor.html?rev=1.3&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/BallTreeConstructor.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/BottomUpConstructor.html?rev=1.3&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/BottomUpConstructor.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/MedianDistanceFromArbitraryPoint.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/MedianDistanceFromArbitraryPoint.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/MedianOfWidestDimension.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/MedianOfWidestDimension.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/MiddleOutConstructor.html?rev=1.3&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/MiddleOutConstructor.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/PointsClosestToFurthestChildren.html?rev=1.2&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/PointsClosestToFurthestChildren.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/neighboursearch/balltrees/TopDownConstructor.html?rev=1.3&content-type=text/x-cvsweb-markup">core/neighboursearch/balltrees/TopDownConstructor.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/tokenizers/AlphabeticTokenizer.html?rev=1.2&content-type=text/x-cvsweb-markup">core/tokenizers/AlphabeticTokenizer.html (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/tokenizers/CharacterDelimitedTokenizer.html?rev=1.3&content-type=text/x-cvsweb-markup">core/tokenizers/CharacterDelimitedTokenizer.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/tokenizers/Tokenizer.html?rev=1.3&content-type=text/x-cvsweb-markup">core/tokenizers/Tokenizer.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/clusterers/BIRCHCluster.html?rev=1.8&content-type=text/x-cvsweb-markup">datagenerators/clusterers/BIRCHCluster.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/clusterers/SubspaceCluster.html?rev=1.5&content-type=text/x-cvsweb-markup">datagenerators/clusterers/SubspaceCluster.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/clusterers/SubspaceClusterDefinition.html?rev=1.5&content-type=text/x-cvsweb-markup">datagenerators/clusterers/SubspaceClusterDefinition.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/AllFilter.html?rev=1.13&content-type=text/x-cvsweb-markup">filters/AllFilter.html (1.13)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/CheckSource.html?rev=1.3&content-type=text/x-cvsweb-markup">filters/CheckSource.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/Filter.html?rev=1.42&content-type=text/x-cvsweb-markup">filters/Filter.html (1.42)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/MultiFilter.html?rev=1.7&content-type=text/x-cvsweb-markup">filters/MultiFilter.html (1.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-16 02:08 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Refactored to convert SubsetEvaluator and AttributeEvaluator from abstract classes to interfaces</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/AttributeEvaluator.html?rev=1.11&content-type=text/x-cvsweb-markup">attributeSelection/AttributeEvaluator.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/HoldOutSubsetEvaluator.html?rev=1.7&content-type=text/x-cvsweb-markup">attributeSelection/HoldOutSubsetEvaluator.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/SubsetEvaluator.html?rev=1.11&content-type=text/x-cvsweb-markup">attributeSelection/SubsetEvaluator.html (1.11)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/UnsupervisedAttributeEvaluator.html?rev=1.10&content-type=text/x-cvsweb-markup">attributeSelection/UnsupervisedAttributeEvaluator.html (1.10)</a>
+</li>
+<li>
+<a href="../doc/weka/attributeSelection/UnsupervisedSubsetEvaluator.html?rev=1.10&content-type=text/x-cvsweb-markup">attributeSelection/UnsupervisedSubsetEvaluator.html (1.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-15 02:56 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now safe for a headless environment</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/DataVisualizerBeanInfo.html?rev=1.3&content-type=text/x-cvsweb-markup">gui/beans/DataVisualizerBeanInfo.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-14 23:08 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now safe for a headless environment</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/TextViewer.html?rev=1.13&content-type=text/x-cvsweb-markup">gui/beans/TextViewer.html (1.13)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-08 03:36 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated some informational messages</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/BeanConnection.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/beans/BeanConnection.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/ClassifierPerformanceEvaluator.html?rev=1.19&content-type=text/x-cvsweb-markup">gui/beans/ClassifierPerformanceEvaluator.html (1.19)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/TextViewerBeanInfo.html?rev=1.3&content-type=text/x-cvsweb-markup">gui/beans/TextViewerBeanInfo.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-07 04:23 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added support for custom component names</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/ClustererPerformanceEvaluator.html?rev=1.5&content-type=text/x-cvsweb-markup">gui/beans/ClustererPerformanceEvaluator.html (1.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-07 04:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added support for custom component names</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/ClassAssigner.html?rev=1.14&content-type=text/x-cvsweb-markup">gui/beans/ClassAssigner.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/ClassValuePicker.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/beans/ClassValuePicker.html (1.8)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/IncrementalClassifierEvaluator.html?rev=1.15&content-type=text/x-cvsweb-markup">gui/beans/IncrementalClassifierEvaluator.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/MetaBean.html?rev=1.10&content-type=text/x-cvsweb-markup">gui/beans/MetaBean.html (1.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-07 04:17 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added a couple of methods for getting/setting a custom name for a component</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/BeanCommon.html?rev=1.4&content-type=text/x-cvsweb-markup">gui/beans/BeanCommon.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-04 01:52 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added relative path support</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/SerializedModelSaverCustomizer.html?rev=1.3&content-type=text/x-cvsweb-markup">gui/beans/SerializedModelSaverCustomizer.html (1.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-03 23:30 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Moved relative path stuff to Utils.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/DatasetListPanel.html?rev=1.27&content-type=text/x-cvsweb-markup">gui/experiment/DatasetListPanel.html (1.27)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-03 22:29 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added support for relative paths for files/directories</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/LoaderCustomizer.html?rev=1.15&content-type=text/x-cvsweb-markup">gui/beans/LoaderCustomizer.html (1.15)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/SaverCustomizer.html?rev=1.10&content-type=text/x-cvsweb-markup">gui/beans/SaverCustomizer.html (1.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-03 22:22 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added ability to use relative file/directory paths</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/AbstractFileSaver.html?rev=1.5&content-type=text/x-cvsweb-markup">core/converters/AbstractFileSaver.html (1.5)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/FileSourcedConverter.html?rev=1.5&content-type=text/x-cvsweb-markup">core/converters/FileSourcedConverter.html (1.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-31 22:12 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed null ptr bug introduced by David Zerbetto's changes</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/KnowledgeFlow.html?rev=1.30&content-type=text/x-cvsweb-markup">gui/beans/KnowledgeFlow.html (1.30)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-18 03:33 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Initial import of Bruno Woltzenlogel Paleo's classes for string-based distance functions.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/AbstractStringDistanceFunction.html?rev=1.1&content-type=text/x-cvsweb-markup">core/AbstractStringDistanceFunction.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-15 08:30 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>DatabaseUtils now returns ResultSets that are scrollable, if the JDBC driver allows that
+SqlViewer works now also with databases that do not return a scrollable ResultSet (like sqlite 3.x or older HSQLDB versions)
+corrected key shortcuts of buttons in SqlViewer GUI
+fixed Javadoc</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.sqlite3?rev=1.2&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.sqlite3 (1.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/sql/ConnectionPanel.html?rev=1.3&content-type=text/x-cvsweb-markup">gui/sql/ConnectionPanel.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/sql/QueryPanel.html?rev=1.4&content-type=text/x-cvsweb-markup">gui/sql/QueryPanel.html (1.4)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/sql/ResultSetHelper.html?rev=1.3&content-type=text/x-cvsweb-markup">gui/sql/ResultSetHelper.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/sql/ResultSetTableModel.html?rev=1.3&content-type=text/x-cvsweb-markup">gui/sql/ResultSetTableModel.html (1.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/sql/SqlViewer.html?rev=1.7&content-type=text/x-cvsweb-markup">gui/sql/SqlViewer.html (1.7)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/sql/event/QueryExecuteListener.html?rev=1.2&content-type=text/x-cvsweb-markup">gui/sql/event/QueryExecuteListener.html (1.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-05 03:23 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/SerializedModelSaverBeanInfo.html?rev=1.1&content-type=text/x-cvsweb-markup">gui/beans/SerializedModelSaverBeanInfo.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-05 03:20 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SerializedModelSaver.gif?rev=1.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SerializedModelSaver.gif (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SerializedModelSaver_animated.gif?rev=1.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SerializedModelSaver_animated.gif (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-05 02:55 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Changed the train/test constants to have public rather than private access.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/BatchClustererEvent.html?rev=1.4&content-type=text/x-cvsweb-markup">gui/beans/BatchClustererEvent.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-29 01:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added ability to output progress info to the status bar and the option to output per-class info retrieval stats.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/IncrementalClassifierEvaluatorBeanInfo.html?rev=1.4&content-type=text/x-cvsweb-markup">gui/beans/IncrementalClassifierEvaluatorBeanInfo.html (1.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-29 01:25 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/IncrementalClassifierEvaluatorCustomizer.html?rev=1.1&content-type=text/x-cvsweb-markup">gui/beans/IncrementalClassifierEvaluatorCustomizer.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-20 03:09 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Made improvements to code for stopping these components when the stop button is pressed in the KnowledgeFlow.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/AbstractTrainingSetProducer.html?rev=1.7&content-type=text/x-cvsweb-markup">gui/beans/AbstractTrainingSetProducer.html (1.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-20 02:35 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Made some methods synchronized</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/LogPanel.html?rev=1.18&content-type=text/x-cvsweb-markup">gui/LogPanel.html (1.18)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/WekaTaskMonitor.html?rev=1.9&content-type=text/x-cvsweb-markup">gui/WekaTaskMonitor.html (1.9)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-20 00:38 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Made serializable</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/ExtensionFileFilter.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/ExtensionFileFilter.html (1.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-18 02:20 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug where if the window was closed (rather than ok or cancel being pressed) the connection would be made. Closing the window is now the same as canceling.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/DatabaseConnectionDialog.html?rev=1.8&content-type=text/x-cvsweb-markup">gui/DatabaseConnectionDialog.html (1.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-18 02:17 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed a couple of bugs where database connection was not being closed if close/cancel was pressed. Thanks to Miryam Gomez and Raquel Porras for the bug fix</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/ResultsPanel.html?rev=1.44&content-type=text/x-cvsweb-markup">gui/experiment/ResultsPanel.html (1.44)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-31 01:59 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Small addition about double-click support.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/README_KnowledgeFlow?rev=1.6&content-type=text/x-cvsweb-markup">gui/beans/README_KnowledgeFlow (1.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-29 21:00 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Changed so that percentage split now uses double rather than int for expressing the percentage.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/ClassifierPanel.html?rev=1.111&content-type=text/x-cvsweb-markup">gui/explorer/ClassifierPanel.html (1.111)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-18 04:21 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed proprietary com.sun.image.codec.jpeg.JPEGCodec etc classes and replaced them with javax.imageio ones</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/boundaryvisualizer/BoundaryPanel.html?rev=1.23&content-type=text/x-cvsweb-markup">gui/boundaryvisualizer/BoundaryPanel.html (1.23)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/JPEGWriter.html?rev=1.6&content-type=text/x-cvsweb-markup">gui/visualize/JPEGWriter.html (1.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-11 02:33 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added memory usage frame for keeping an eye on Weka and where the memory gets eaten up
+can be configured via the "weka/gui/MemoryUsage.props" props file</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GUIChooser.html?rev=1.34&content-type=text/x-cvsweb-markup">gui/GUIChooser.html (1.34)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/Main.html?rev=1.14&content-type=text/x-cvsweb-markup">gui/Main.html (1.14)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/VisualizeUtils.html?rev=1.9&content-type=text/x-cvsweb-markup">gui/visualize/VisualizeUtils.html (1.9)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-11 02:33 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+added memory usage frame for keeping an eye on Weka and where the memory gets eaten up
+can be configured via the "weka/gui/MemoryUsage.props" props file</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/MemoryUsage.props?rev=1.1&content-type=text/x-cvsweb-markup">gui/MemoryUsage.props (1.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/MemoryUsagePanel.html?rev=1.1&content-type=text/x-cvsweb-markup">gui/MemoryUsagePanel.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-08 03:00 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>branches:  1.1.2;
+Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Startable.html?rev=1.1&content-type=text/x-cvsweb-markup">gui/beans/Startable.html (1.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-12-19 00:01 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated to 3-5-7</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/version.txt?rev=1.6&content-type=text/x-cvsweb-markup">core/version.txt (1.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>

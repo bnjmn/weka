@@ -1,0 +1,9 @@
+The GenericPropertiesCreator.props must contain the following lines in order
+to display the Main extensions:
+
+# List of extensions for the main GUI, package "weka.gui" is not allowed
+weka.gui.MainMenuExtension=\
+  wekaexamples.gui.extensions
+
+See also wiki article "Extensions for Weka's main GUI":
+  http://weka.wiki.sourceforge.net/Extensions+for+Weka%27s+main+GUI
