@@ -4,12 +4,12 @@
                               README                                   
                               ======                                   
                                                                        
-                             WEKA 3.7.0
-                            5 June 2009
+                             WEKA 3.7.1
+                           12 January 2010
                                                                        
                  Java Programs for Machine Learning 
 
-           Copyright (C) 1998-2009  University of Waikato
+           Copyright (C) 1998-2010  University of Waikato
 
               web: http://www.cs.waikato.ac.nz/~ml/weka            
                                                                        
@@ -31,21 +31,17 @@ Contents:
 
 4. Database access
 
-5. The Experiment package (and tutorial)
+5. The Experiment package
 
-6. Explorer guide
+6. Weka manual
 
-7. KnowlodegeFlow tutorial
+7. Source code
 
-8. Bayesian Network Classifiers
+8. Credits
 
-9. Source code
+9. Submission of code and bug reports
 
-10. Credits
-
-11. Submission of code and bug reports
-
-12. Copyright
+10. Copyright
 
 
 ----------------------------------------------------------------------
@@ -281,7 +277,7 @@ databases available (also in weka/experiment):
 
 ----------------------------------------------------------------------
 
-5. The Experiment package (and tutorial):
+5. The Experiment package:
 -----------------------------------------
 
 There is support for running experiments that involve evaluating
@@ -343,36 +339,18 @@ t-tests using weka.experiment.PairedTTester (use the -h option to find
 out what options it needs).
 
 However, all this is much easier if you use the Experimenter GUI.
-Check out the tutorial at: $WEKAHOME/ExperimenterTutorial.pdf
 
 ----------------------------------------------------------------------
 
-6. Explorer guide:
+6. Weka Manual:
 ------------------
 
-A guide on how to use the WEKA Explorer is in
-$WEKAHOME/ExplorerGuide.pdf.  For an explanation on how to use the
-other user interfaces in WEKA you might want to take a look at the
-book "Data Mining" by Witten and Frank (2005) (see our web page).
+A comprehensive manual covering Weka's graphical and command-line
+user interfaces. $WEKAHOME/WekaManual.pdf
 
 ----------------------------------------------------------------------
 
-7. KnowledgeFlow Tutorial:
---------------------------
-
-A tutorial on how to use the KnowledgeFlow is in
-$WEKAHOME/KnowledgeFlowTutorial.pdf.
-
-----------------------------------------------------------------------
-
-8. Bayesian Network Classifiers:
---------------------------------
-
-Information about the Bayesian Network classifiers in Weka, background
-theory as well as useage, can be found in the 
-$WEKAHOME/BayesianNetClassifiers.pdf.
-
-9. Source code:
+7. Source code:
 ---------------
 
 The source code for WEKA is in $WEKAHOME/weka-src.jar. To expand it, 
@@ -381,7 +359,7 @@ archiver that can handle ZIP files).
 
 ----------------------------------------------------------------------
 
-10. Credits:
+8. Credits:
 ------------
 
 Refer to the web page for a list of contributors:
@@ -390,7 +368,7 @@ http://www.cs.waikato.ac.nz/~ml/weka/
 
 ----------------------------------------------------------------------
 
-11. Call for code and bug reports:
+9. Call for code and bug reports:
 ---------------------------------
 
 If you have implemented a learning scheme, filter, application,
@@ -408,7 +386,7 @@ If you find any bugs, send a bug report to the wekalist mailing list.
 
 -----------------------------------------------------------------------
 
-12. Copyright:
+10. Copyright:
 --------------
 
 WEKA is distributed under the GNU public license. Please read
@@ -418,4 +396,3 @@ the file COPYING.
 
 
 $Revision: 1.13 $
-
