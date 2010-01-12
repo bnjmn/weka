@@ -85,7 +85,9 @@ public class RelationalLocator
     if (inst.dataset() == null) {
       throw new IllegalArgumentException("Instance has no dataset assigned!!");
     } else if (inst.dataset().numAttributes() != destDataset.numAttributes()) {
-      throw new IllegalArgumentException("Src and Dest differ in # of attributes!!");
+      throw new IllegalArgumentException(
+	  "Src and Dest differ in # of attributes: " 
+	  + inst.dataset().numAttributes() + " != " + destDataset.numAttributes());
     } 
     copyRelationalValues(inst, true, inst.dataset(), strAtts,
                      destDataset, strAtts);
@@ -127,10 +129,14 @@ public class RelationalLocator
       return;
     
     if (srcLoc.getAttributeIndices().length != destLoc.getAttributeIndices().length)
-      throw new IllegalArgumentException("Src and Dest relational indices differ in length!!");
+      throw new IllegalArgumentException(
+	  "Src and Dest relational indices differ in length: "
+	  + srcLoc.getAttributeIndices().length + " != " + destLoc.getAttributeIndices().length);
 
     if (srcLoc.getLocatorIndices().length != destLoc.getLocatorIndices().length)
-      throw new IllegalArgumentException("Src and Dest locator indices differ in length!!");
+      throw new IllegalArgumentException(
+	  "Src and Dest locator indices differ in length: "
+	  + srcLoc.getLocatorIndices().length + " != " + destLoc.getLocatorIndices().length);
 
     for (int i = 0; i < srcLoc.getAttributeIndices().length; i++) {
       int instIndex  = instSrcCompat 
