@@ -21,6 +21,8 @@
 
 package weka.core;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -216,6 +218,9 @@ public class SerializationHelper
   public static void write(OutputStream stream, Object o) throws Exception {
     ObjectOutputStream	oos;
     
+    if (!(stream instanceof BufferedOutputStream))
+      stream = new BufferedOutputStream(stream);
+    
     oos = new ObjectOutputStream(stream);
     oos.writeObject(o);
     oos.flush();
@@ -243,6 +248,9 @@ public class SerializationHelper
   public static void writeAll(OutputStream stream, Object[] o) throws Exception {
     ObjectOutputStream	oos;
     int			i;
+    
+    if (!(stream instanceof BufferedOutputStream))
+      stream = new BufferedOutputStream(stream);
     
     oos = new ObjectOutputStream(stream);
     for (i = 0; i < o.length; i++)
@@ -273,7 +281,10 @@ public class SerializationHelper
     ObjectInputStream 	ois;
     Object		result;
     
-    ois = new ObjectInputStream(stream);
+    if (!(stream instanceof BufferedInputStream))
+      stream = new BufferedInputStream(stream);
+    
+    ois    = new ObjectInputStream(stream);
     result = ois.readObject();
     ois.close();
     
@@ -300,7 +311,10 @@ public class SerializationHelper
    */
   public static Object[] readAll(InputStream stream) throws Exception {
     ObjectInputStream 	ois;
-    Vector<Object>		result;
+    Vector<Object>	result;
+    
+    if (!(stream instanceof BufferedInputStream))
+      stream = new BufferedInputStream(stream);
     
     ois    = new ObjectInputStream(stream);
     result = new Vector<Object>();
