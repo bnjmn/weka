@@ -119,7 +119,7 @@ public class TAN
 		super.buildStructure(bayesNet, instances);
 		int      nNrOfAtts = instances.numAttributes();
 		
-	        if (nNrOfAtts <= 1) {
+	        if (nNrOfAtts <= 2) {
 	            return;
 	        }
 
