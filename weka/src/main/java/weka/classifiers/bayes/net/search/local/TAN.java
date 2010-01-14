@@ -50,7 +50,7 @@ public class TAN extends LocalScoreSearchAlgorithm {
 		super.buildStructure(bayesNet, instances);
 		int      nNrOfAtts = instances.numAttributes();
 
-                if (nNrOfAtts <= 1) {
+                if (nNrOfAtts <= 2) {
                   return;
                 }
 
