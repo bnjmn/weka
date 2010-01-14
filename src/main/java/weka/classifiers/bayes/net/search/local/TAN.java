@@ -73,7 +73,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.6.2.1 $
+ * @version $Revision$
  */
 public class TAN 
 	extends LocalScoreSearchAlgorithm
@@ -113,11 +113,15 @@ public class TAN
 	 * @throws Exception if something goes wrong
 	 */
 	public void buildStructure(BayesNet bayesNet, Instances instances) throws Exception {
-
+	  
 		m_bInitAsNaiveBayes = true;
 		m_nMaxNrOfParents = 2;
 		super.buildStructure(bayesNet, instances);
 		int      nNrOfAtts = instances.numAttributes();
+		
+	        if (nNrOfAtts <= 2) {
+	            return;
+	        }
 
 		// determine base scores
 		double[] fBaseScores = new double[instances.numAttributes()];
@@ -277,7 +281,7 @@ public class TAN
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+	  return RevisionUtils.extract("$Revision$");
 	}
 
 } // TAN
