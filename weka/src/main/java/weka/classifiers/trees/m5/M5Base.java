@@ -470,6 +470,7 @@ public abstract class M5Base
 	m_ruleSet.addElement(tempRule);
 	//	System.err.println("Built rule : "+tempRule.toString());
 	tempInst = tempRule.notCoveredInstances();
+	tempRule.freeNotCoveredInstances();
       } while (tempInst.numInstances() > 0);
     } else {
       // just build a single tree
@@ -491,10 +492,11 @@ public abstract class M5Base
 
       m_ruleSet.addElement(tempRule);      
 
-      // save space
-      m_instances = new Instances(m_instances, 0);
       //      System.err.print(tempRule.m_topOfTree.treeToString(0));
-    } 
+    }
+    
+    // save space
+    m_instances = new Instances(m_instances, 0);
   } 
 
   /**
