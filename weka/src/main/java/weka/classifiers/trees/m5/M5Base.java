@@ -51,7 +51,7 @@ import weka.filters.Filter;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.10.2.1 $
+ * @version $Revision$
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -371,6 +371,7 @@ public abstract class M5Base extends Classifier
 	m_ruleSet.addElement(tempRule);
 	//	System.err.println("Built rule : "+tempRule.toString());
 	tempInst = tempRule.notCoveredInstances();
+	tempRule.freeNotCoveredInstances();
       } while (tempInst.numInstances() > 0);
     } else {
       // just build a single tree
@@ -391,11 +392,11 @@ public abstract class M5Base extends Classifier
       tempRule.buildClassifier(temp_train);
 
       m_ruleSet.addElement(tempRule);      
-
-      // save space
-      m_instances = new Instances(m_instances, 0);
       //      System.err.print(tempRule.m_topOfTree.treeToString(0));
     } 
+    
+    // save space
+    m_instances = new Instances(m_instances, 0);
   } 
 
   /**

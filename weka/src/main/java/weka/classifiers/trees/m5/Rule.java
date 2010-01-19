@@ -28,7 +28,7 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.10.2.1 $
+ * @version $Revision$
  */
 public class Rule implements Serializable {
 
@@ -298,10 +298,10 @@ public class Rule implements Serializable {
 
       if (temp.parentNode().leftNode() == temp) {
 	m_relOps[i] = LEFT;
-	//	temp.parentNode().m_right = null;
+	temp.parentNode().m_right = null;
       } else {
 	m_relOps[i] = RIGHT;
-	//	temp.parentNode().m_left = null;
+	temp.parentNode().m_left = null;
       }
 
       if (m_smoothPredictions) {
@@ -500,6 +500,14 @@ public class Rule implements Serializable {
   public Instances notCoveredInstances() {
     return m_notCovered;
   } 
+  
+  /**
+   * Free up memory consumed by the set of instances
+   * not covered by this rule.
+   */
+  public void freeNotCoveredInstances() {
+    m_notCovered = null;
+  }
 
 //    /**
 //     * Get the instances covered by this rule
