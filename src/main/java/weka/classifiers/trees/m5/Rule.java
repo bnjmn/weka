@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.15 $
+ * @version $Revision$
  */
 public class Rule
   implements Serializable, RevisionHandler {
@@ -308,10 +308,10 @@ public class Rule
 
       if (temp.parentNode().leftNode() == temp) {
 	m_relOps[i] = LEFT;
-	//	temp.parentNode().m_right = null;
+	temp.parentNode().m_right = null;
       } else {
 	m_relOps[i] = RIGHT;
-	//	temp.parentNode().m_left = null;
+	temp.parentNode().m_left = null;
       }
 
       if (m_smoothPredictions) {
@@ -509,7 +509,15 @@ public class Rule
    */
   public Instances notCoveredInstances() {
     return m_notCovered;
-  } 
+  }
+  
+  /**
+   * Free up memory consumed by the set of instances
+   * not covered by this rule.
+   */
+  public void freeNotCoveredInstances() {
+    m_notCovered = null;
+  }
 
 //    /**
 //     * Get the instances covered by this rule
@@ -634,6 +642,6 @@ public class Rule
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
