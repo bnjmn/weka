@@ -239,7 +239,7 @@ public class PreprocessPanel
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
 
-    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     m_OpenURLBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setInstancesFromURLQ();
