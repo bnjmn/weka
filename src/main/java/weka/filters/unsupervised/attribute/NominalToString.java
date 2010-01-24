@@ -76,7 +76,7 @@ public class NominalToString
    */
   public String globalInfo() {
     return 
-        "Converts a nominal attribute (i.e. set number of values) to string "
+        "Converts a nominal attribute (that is, one with a set number of values) to string "
       + "(i.e. unspecified number of values).";
   }
 
