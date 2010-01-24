@@ -904,6 +904,9 @@ public class ArffLoader
     setSource(url.openStream());
 
     m_URL = url.toString();
+    // make sure that the file is null so that any calls to
+    // reset() work properly
+    m_File = null;
   }
   
 
