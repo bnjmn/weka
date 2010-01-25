@@ -46,7 +46,7 @@ import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * An instance filter that generates output with a new order of the attributes. Useful if one wants to move an attribute to the end to use it as class attribute (e.g. with using "-R 2-last,1").<br/>
+ * A filter that generates output with a new order of the attributes. Useful if one wants to move an attribute to the end to use it as class attribute (e.g. with using "-R 2-last,1").<br/>
  * But it's not only possible to change the order of all the attributes, but also to leave out attributes. E.g. if you have 10 attributes, you can generate the following output order: 1,3,5,7,9,10 or 10,1-5.<br/>
  * You can also duplicate attributes, e.g. for further processing later on: e.g. 1,1,1,4,4,4,2,2,2 where the second and the third column of each attribute are processed differently and the first one, i.e. the original one is kept.<br/>
  * One can simply inverse the order of the attributes via 'last-first'.<br/>
@@ -333,7 +333,7 @@ public class Reorder
    */
   public String globalInfo() {
     return 
-        "An instance filter that generates output with a new order of the "
+        "A filter that generates output with a new order of the "
       + "attributes. Useful if one wants to move an attribute to the end to "
       + "use it as class attribute (e.g. with using \"-R 2-last,1\").\n"
       + "But it's not only possible to change the order of all the attributes, "
