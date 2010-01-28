@@ -26,7 +26,11 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.BitSet;
 import java.util.Enumeration;
@@ -36,7 +40,9 @@ import java.util.Vector;
  <!-- globalinfo-start -->
  * RankSearch : <br/>
  * <br/>
- * Uses an attribute/subset evaluator to rank all attributes. If a subset evaluator is specified, then a forward selection search is used to generate a ranked list. From the ranked list of attributes, subsets of increasing size are evaluated, ie. The best attribute, the best attribute plus the next best attribute, etc.... The best attribute set is reported. RankSearch is linear in the number of attributes if a simple attribute evaluator is used such as GainRatioAttributeEval.<br/>
+ * Uses an attribute/subset evaluator to rank all attributes. If a subset evaluator is specified, then a forward selection search is used to generate a ranked list. From the ranked list of attributes, subsets of increasing size are evaluated, ie. The best attribute, the best attribute plus the next best attribute, etc.... The best attribute set is reported. RankSearch is linear in the number of attributes if a simple attribute evaluator is used such as GainRatioAttributeEval. For more information see:<br/>
+ * <br/>
+ * Mark Hall, Geoffrey Holmes (2003). Benchmarking attribute selection techniques for discrete class data mining. IEEE Transactions on Knowledge and Data Engineering. 15(6):1437-1447.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -72,7 +78,7 @@ import java.util.Vector;
  */
 public class RankSearch 
   extends ASSearch 
-  implements OptionHandler {
+  implements OptionHandler, TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = -7992268736874353755L;
@@ -124,7 +130,32 @@ public class RankSearch
       +"The best attribute, the best attribute plus the next best attribute, "
       +"etc.... The best attribute set is reported. RankSearch is linear in "
       +"the number of attributes if a simple attribute evaluator is used "
-      +"such as GainRatioAttributeEval.\n";
+      +"such as GainRatioAttributeEval. For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+  
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation        result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Mark Hall and Geoffrey Holmes");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.TITLE, "Benchmarking attribute selection techniques for " +
+    		"discrete class data mining");
+    result.setValue(Field.JOURNAL, "IEEE Transactions on Knowledge and Data Engineering");
+    result.setValue(Field.VOLUME, "15");
+    result.setValue(Field.NUMBER, "6");
+    result.setValue(Field.PAGES, "1437-1447");
+    result.setValue(Field.PUBLISHER, "IEEE Computer Society");
+    
+    return result;
   }
 
   /**
@@ -520,3 +551,4 @@ public class RankSearch
     return RevisionUtils.extract("$Revision$");
   }
 }
+
