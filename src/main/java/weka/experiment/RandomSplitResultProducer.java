@@ -105,7 +105,7 @@ import java.util.Vector;
  * All options after -- will be passed to the split evaluator.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision$
  */
 public class RandomSplitResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer, 
@@ -583,7 +583,7 @@ public class RandomSplitResultProducer
    */
   public String randomizeDataTipText() {
     return "Do not randomize dataset and do not perform probabilistic rounding " +
-      "if true";
+      "if false";
   }
 
   /**
@@ -909,6 +909,6 @@ public class RandomSplitResultProducer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.20 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // RandomSplitResultProducer
