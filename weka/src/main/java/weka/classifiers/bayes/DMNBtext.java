@@ -25,6 +25,7 @@ package weka.classifiers.bayes;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -69,9 +70,12 @@ import weka.core.OptionHandler;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ * <pre> -I &lt;iterations&gt;
+ *  The number of iterations that the classifier 
+ *  will scan the training data (default = 1)</pre>
+ * 
+ * <pre> -M
+ *  Use the frequency information in data</pre>
  * 
  <!-- options-end -->
  * 
@@ -86,7 +90,7 @@ public class DMNBtext extends Classifier
   static final long serialVersionUID = 5932177450183457085L;
   /** The number of iterations. */
   protected int m_NumIterations = 1;
-  protected boolean m_BinaryWord = true;
+  protected boolean m_MultinomialWord = false;
   int m_numClasses=-1;
   protected Instances m_headerInfo;
   DNBBinary[] m_binaryClassifiers = null;
@@ -253,6 +257,24 @@ public class DMNBtext extends Classifier
       }
     return result.toString();
   }
+  
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>();
+    
+    newVector.add(new Option("\tThe number of iterations that the classifier " +
+    		"\n\twill scan the training data (default = 1)", 
+    		"I", 1, "-I <iterations>"));
+    
+    newVector.add(new Option("\tUse the frequency information in data"
+        , "M", 0, "-M"));
+    
+    return newVector.elements();
+  }
 
   /*
    * Options after -- are passed to the designated classifier.<p>
@@ -265,16 +287,9 @@ public class DMNBtext extends Classifier
     String iterations = Utils.getOption('I', options);
     if (iterations.length() != 0) {
       setNumIterations(Integer.parseInt(iterations));
-    } else {
-      setNumIterations(m_NumIterations);
     }
-    iterations = Utils.getOption('B', options);
-    if (iterations.length() != 0) {
-      setBinaryWord(Boolean.parseBoolean(iterations));
-    } else {
-      setBinaryWord(m_BinaryWord);
-    }
-
+    
+    setMultinomialWord(Utils.getFlag('M', options));    
   }
 
   /**
@@ -283,17 +298,17 @@ public class DMNBtext extends Classifier
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
+    
+    ArrayList<String> options = new ArrayList<String>();
 
-    String[] options = new String[4];
+    options.add("-I");
+    options.add("" + getNumIterations());
 
-    int current = 0;
-    options[current++] = "-I";
-    options[current++] = "" + getNumIterations();
+    if (getMultinomialWord()) {
+      options.add("-M");
+    }
 
-    options[current++] = "-B";
-    options[current++] = "" + getBinaryWord();
-
-    return options;
+    return options.toArray(new String[1]);
   }
 
   /**
@@ -322,20 +337,22 @@ public class DMNBtext extends Classifier
 
     return m_NumIterations;
   }
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String binaryWordTipText() {
-    return " whether ingore the frequency information in data";
+  public String multinomialWordTipText() {
+    return "Make use of frequency information in data";
   }
+  
   /**
    * Sets whether use binary text representation
    */
-  public void setBinaryWord(boolean val) {
+  public void setMultinomialWord(boolean val) {
 
-    m_BinaryWord = val;
+    m_MultinomialWord = val;
   }
 
   /**
@@ -343,9 +360,9 @@ public class DMNBtext extends Classifier
    *
    * @return whether use binary text representation
    */
-  public boolean getBinaryWord() {
+  public boolean getMultinomialWord() {
 
-    return m_BinaryWord;
+    return m_MultinomialWord;
   }
 
   /**
@@ -409,7 +426,7 @@ public class DMNBtext extends Classifier
         if (ins.index(a) != m_classIndex )
           {
 
-            if (m_BinaryWord) {
+            if (!m_MultinomialWord) {
               if (ins.valueSparse(a) > 0) {
                 m_wordsPerClass[classIndex] +=
                   weight;
@@ -450,7 +467,7 @@ public class DMNBtext extends Classifier
         if (ins.index(a) != m_classIndex )
           {
 
-            if (m_BinaryWord) {
+            if (!m_MultinomialWord) {
               if (ins.valueSparse(a) > 0) {
                 probLog += m_coefficient[ins.index(a)] -
                   m_wordRatio;
