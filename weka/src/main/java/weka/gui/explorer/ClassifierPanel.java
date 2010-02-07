@@ -2193,6 +2193,7 @@ public class ClassifierPanel
         	plotInstances.setInstances(userTestStructure);
         	plotInstances.setClassifier(classifier);
         	plotInstances.setClassIndex(userTestStructure.classIndex());
+        	plotInstances.setEvaluation(eval);
         	plotInstances.setUp();
               }
       
@@ -2267,7 +2268,7 @@ public class ClassifierPanel
               ex.printStackTrace();
               m_Log.logMessage(ex.getMessage());
               JOptionPane.showMessageDialog(ClassifierPanel.this,
-                                            "Problem evaluationg classifier:\n"
+                                            "Problem evaluating classifier:\n"
                                             + ex.getMessage(),
                                             "Evaluate classifier",
                                             JOptionPane.ERROR_MESSAGE);
