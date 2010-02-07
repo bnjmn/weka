@@ -252,13 +252,14 @@ public abstract class ParallelMultipleClassifiersCombiner extends
    */
   protected synchronized void completedClassifier(int iteration,
       boolean success) {
-    m_completed++;
 
     if (!success) {
       m_failed++;
       if (m_Debug) {
         System.err.println("Iteration " + iteration + " failed!");
       }
+    } else {
+      m_completed++;
     }
 
     if (m_completed + m_failed == m_Classifiers.length) {
