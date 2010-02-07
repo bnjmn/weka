@@ -16,13 +16,28 @@
 
 /*
  * GridSearch.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2010 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.Vector;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.functions.LinearRegression;
@@ -42,24 +57,14 @@ import weka.core.SerializedObject;
 import weka.core.Summarizable;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.WekaException;
 import weka.core.Capabilities.Capability;
+import weka.filters.AllFilter;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.PLSFilter;
 import weka.filters.unsupervised.attribute.MathExpression;
 import weka.filters.unsupervised.attribute.NumericCleaner;
 import weka.filters.unsupervised.instance.Resample;
-
-import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -71,7 +76,9 @@ import java.util.Vector;
  * GridSearch can handle doubles, integers (values are just cast to int) and booleans (0 is false, otherwise true). float, char and long are supported as well.<br/>
  * <br/>
  * The best filter/classifier setup can be accessed after the buildClassifier call via the getBestFilter/getBestClassifier methods.<br/>
- * Note on the implementation: after the data has been passed through the filter, a default NumericCleaner filter is applied to the data in order to avoid numbers that are getting too small and might produce NaNs in other schemes.
+ * Note on the implementation: after the data has been passed through the filter, a default NumericCleaner filter is applied to the data in order to avoid numbers that are getting too small and might produce NaNs in other schemes.<br/>
+ * <br/>
+ * Note: with -num-slots/numExecutionSlots you can specify how many setups are evaluated in parallel, taking advantage of multi-cpu/core architectures.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -176,6 +183,10 @@ import java.util.Vector;
  * <pre> -log-file &lt;filename&gt;
  *  The log file to log the messages to.
  *  (default: none)</pre>
+ * 
+ * <pre> -num-slots &lt;num&gt;
+ *  Number of execution slots.
+ *  (default 1 - i.e. no parallelism)</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
@@ -303,19 +314,19 @@ public class GridSearch
   implements AdditionalMeasureProducer, Summarizable {
 
   /**
-   * a serializable version of Point2D.Double
+   * a serializable version of Point2D.Double.
    * 
    * @see java.awt.geom.Point2D.Double
    */
-  protected class PointDouble
+  protected static class PointDouble
     extends java.awt.geom.Point2D.Double
     implements Serializable, RevisionHandler {
 
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = 7151661776161898119L;
     
     /**
-     * the default constructor
+     * the default constructor.
      * 
      * @param x		the x value of the point
      * @param y		the y value of the point
@@ -340,7 +351,7 @@ public class GridSearch
     }
     
     /**
-     * returns a string representation of the Point
+     * returns a string representation of the Point.
      * 
      * @return the point as string
      */
@@ -359,19 +370,19 @@ public class GridSearch
   }
 
   /**
-   * a serializable version of Point
+   * a serializable version of Point.
    * 
    * @see java.awt.Point
    */
-  protected class PointInt
+  protected static class PointInt
     extends java.awt.Point
     implements Serializable, RevisionHandler {
 
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = -5900415163698021618L;
 
     /**
-     * the default constructor
+     * the default constructor.
      * 
      * @param x		the x value of the point
      * @param y		the y value of the point
@@ -381,7 +392,7 @@ public class GridSearch
     }
     
     /**
-     * returns a string representation of the Point
+     * returns a string representation of the Point.
      * 
      * @return the point as string
      */
@@ -400,46 +411,46 @@ public class GridSearch
   }
   
   /**
-   * for generating the parameter pairs in a grid
+   * for generating the parameter pairs in a grid.
    */
-  protected class Grid
+  protected static class Grid
     implements Serializable, RevisionHandler {
 
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = 7290732613611243139L;
     
-    /** the minimum on the X axis */
+    /** the minimum on the X axis. */
     protected double m_MinX;
     
-    /** the maximum on the X axis */
+    /** the maximum on the X axis. */
     protected double m_MaxX;
     
-    /** the step size for the X axis */
+    /** the step size for the X axis. */
     protected double m_StepX;
 
-    /** the label for the X axis */
+    /** the label for the X axis. */
     protected String m_LabelX;
     
-    /** the minimum on the Y axis */
+    /** the minimum on the Y axis. */
     protected double m_MinY;
     
-    /** the maximum on the Y axis */
+    /** the maximum on the Y axis. */
     protected double m_MaxY;
     
-    /** the step size for the Y axis */
+    /** the step size for the Y axis. */
     protected double m_StepY;
 
-    /** the label for the Y axis */
+    /** the label for the Y axis. */
     protected String m_LabelY;
     
-    /** the number of points on the X axis */
+    /** the number of points on the X axis. */
     protected int m_Width;
     
-    /** the number of points on the Y axis */
+    /** the number of points on the Y axis. */
     protected int m_Height;
     
     /**
-     * initializes the grid
+     * initializes the grid.
      * 
      * @param minX 	the minimum on the X axis
      * @param maxX 	the maximum on the X axis
@@ -455,7 +466,7 @@ public class GridSearch
 
     
     /**
-     * initializes the grid
+     * initializes the grid.
      * 
      * @param minX 	the minimum on the X axis
      * @param maxX 	the maximum on the X axis
@@ -508,7 +519,7 @@ public class GridSearch
     }
 
     /**
-     * Tests itself against the provided grid object
+     * Tests itself against the provided grid object.
      * 
      * @param o		the grid object to compare against
      * @return		if the two grids have the same setup
@@ -532,7 +543,7 @@ public class GridSearch
     }
     
     /**
-     * returns the left border
+     * returns the left border.
      * 
      * @return 		the left border
      */
@@ -541,7 +552,7 @@ public class GridSearch
     }
     
     /**
-     * returns the right border
+     * returns the right border.
      * 
      * @return 		the right border
      */
@@ -550,7 +561,7 @@ public class GridSearch
     }
     
     /**
-     * returns the step size on the X axis
+     * returns the step size on the X axis.
      * 
      * @return 		the step size
      */
@@ -559,7 +570,7 @@ public class GridSearch
     }
     
     /**
-     * returns the label for the X axis
+     * returns the label for the X axis.
      * 
      * @return		the label
      */
@@ -568,7 +579,7 @@ public class GridSearch
     }
     
     /**
-     * returns the bottom border
+     * returns the bottom border.
      * 
      * @return 		the bottom border
      */
@@ -577,7 +588,7 @@ public class GridSearch
     }
     
     /**
-     * returns the top border
+     * returns the top border.
      * 
      * @return 		the top border
      */
@@ -586,7 +597,7 @@ public class GridSearch
     }
     
     /**
-     * returns the step size on the Y axis
+     * returns the step size on the Y axis.
      * 
      * @return 		the step size
      */
@@ -595,7 +606,7 @@ public class GridSearch
     }
     
     /**
-     * returns the label for the Y axis
+     * returns the label for the Y axis.
      * 
      * @return		the label
      */
@@ -622,7 +633,7 @@ public class GridSearch
     }
 
     /**
-     * returns the values at the given point in the grid
+     * returns the values at the given point in the grid.
      * 
      * @param x		the x-th point on the X axis
      * @param y		the y-th point on the Y axis
@@ -678,7 +689,7 @@ public class GridSearch
     }
 
     /**
-     * checks whether the given values are on the border of the grid
+     * checks whether the given values are on the border of the grid.
      * 
      * @param values		the values to check
      * @return			true if the the values are on the border
@@ -688,7 +699,7 @@ public class GridSearch
     }
 
     /**
-     * checks whether the given location is on the border of the grid
+     * checks whether the given location is on the border of the grid.
      * 
      * @param location 		the location to check
      * @return			true if the the location is on the border
@@ -707,7 +718,7 @@ public class GridSearch
     }
     
     /**
-     * returns a subgrid with the same step sizes, but different borders
+     * returns a subgrid with the same step sizes, but different borders.
      * 
      * @param top	the top index
      * @param left	the left index
@@ -798,7 +809,7 @@ public class GridSearch
     }
     
     /**
-     * returns an Enumeration over all pairs in the given row
+     * returns an Enumeration over all pairs in the given row.
      * 
      * @param y		the row to retrieve
      * @return		an Enumeration over all pairs
@@ -817,7 +828,7 @@ public class GridSearch
     }
     
     /**
-     * returns an Enumeration over all pairs in the given column
+     * returns an Enumeration over all pairs in the given column.
      * 
      * @param x		the column to retrieve
      * @return		an Enumeration over all pairs
@@ -836,7 +847,7 @@ public class GridSearch
     }
     
     /**
-     * returns a string representation of the grid
+     * returns a string representation of the grid.
      * 
      * @return a string representation
      */
@@ -875,38 +886,38 @@ public class GridSearch
    * 
    * @see PerformanceComparator
    */
-  protected class Performance
+  protected static class Performance
     implements Serializable, RevisionHandler {
 
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = -4374706475277588755L;
     
-    /** the value pair the classifier was built with */
+    /** the value pair the classifier was built with. */
     protected PointDouble m_Values;
     
-    /** the Correlation coefficient */
+    /** the Correlation coefficient. */
     protected double m_CC;
     
-    /** the Root mean squared error */
+    /** the Root mean squared error. */
     protected double m_RMSE;
     
-    /** the Root relative squared error */
+    /** the Root relative squared error. */
     protected double m_RRSE;
     
-    /** the Mean absolute error */
+    /** the Mean absolute error. */
     protected double m_MAE;
     
-    /** the Relative absolute error */
+    /** the Relative absolute error. */
     protected double m_RAE;
     
-    /** the Accuracy */
+    /** the Accuracy. */
     protected double m_ACC;
     
-    /** the kappa value */
+    /** the kappa value. */
     protected double m_Kappa;
     
     /**
-     * initializes the performance container
+     * initializes the performance container.
      * 
      * @param values		the values-pair
      * @param evaluation	the evaluation to extract the performance
@@ -944,7 +955,7 @@ public class GridSearch
     }
     
     /**
-     * returns the performance measure
+     * returns the performance measure.
      * 
      * @param evaluation	the type of measure to return
      * @return 			the performance measure
@@ -987,7 +998,7 @@ public class GridSearch
     }
     
     /**
-     * returns the values-pair for this performance
+     * returns the values-pair for this performance.
      * 
      * @return the values-pair
      */
@@ -996,7 +1007,7 @@ public class GridSearch
     }
     
     /**
-     * returns a string representation of this performance object
+     * returns a string representation of this performance object.
      * 
      * @param evaluation	the type of performance to return
      * @return 			a string representation
@@ -1012,7 +1023,7 @@ public class GridSearch
     }
     
     /**
-     * returns a Gnuplot string of this performance object
+     * returns a Gnuplot string of this performance object.
      * 
      * @param evaluation	the type of performance to return
      * @return 			the gnuplot string (x, y, z)
@@ -1028,7 +1039,7 @@ public class GridSearch
     }
     
     /**
-     * returns a string representation of this performance object
+     * returns a string representation of this performance object.
      * 
      * @return a string representation
      */
@@ -1063,18 +1074,18 @@ public class GridSearch
    * 
    * @see Performance
    */
-  protected class PerformanceComparator
+  protected static class PerformanceComparator
     implements Comparator<Performance>, Serializable, RevisionHandler {
     
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = 6507592831825393847L;
     
-    /** the performance measure to use for comparison 
+    /** the performance measure to use for comparison. 
      * @see GridSearch#TAGS_EVALUATION */
     protected int m_Evaluation;
     
     /**
-     * initializes the comparator with the given performance measure
+     * initializes the comparator with the given performance measure.
      * 
      * @param evaluation	the performance measure to use
      * @see GridSearch#TAGS_EVALUATION
@@ -1086,7 +1097,7 @@ public class GridSearch
     }
     
     /**
-     * returns the performance measure that's used to compare the objects
+     * returns the performance measure that's used to compare the objects.
      * 
      * @return the performance measure
      * @see GridSearch#TAGS_EVALUATION
@@ -1166,40 +1177,45 @@ public class GridSearch
    *                - y-min
    * </pre>
    */
-  protected class PerformanceTable 
+  protected static class PerformanceTable 
     implements Serializable, RevisionHandler {
     
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = 5486491313460338379L;
 
-    /** the corresponding grid */
+    /** the owning classifier. */
+    protected GridSearch m_Owner;
+    
+    /** the corresponding grid. */
     protected Grid m_Grid;
     
-    /** the performances */
+    /** the performances. */
     protected Vector<Performance> m_Performances;
     
-    /** the type of performance the table was generated for */
+    /** the type of performance the table was generated for. */
     protected int m_Type;
     
-    /** the table with the values */
+    /** the table with the values. */
     protected double[][] m_Table;
     
-    /** the minimum performance */
+    /** the minimum performance. */
     protected double m_Min;
     
-    /** the maximum performance */
+    /** the maximum performance. */
     protected double m_Max;
     
     /**
-     * initializes the table
+     * initializes the table.
      * 
+     * @param owner		the owning GridSearch
      * @param grid		the underlying grid
      * @param performances	the performances
      * @param type		the type of performance
      */
-    public PerformanceTable(Grid grid, Vector<Performance> performances, int type) {
+    public PerformanceTable(GridSearch owner, Grid grid, Vector<Performance> performances, int type) {
       super();
       
+      m_Owner        = owner;
       m_Grid         = grid;
       m_Type         = type;
       m_Performances = performances;
@@ -1208,7 +1224,7 @@ public class GridSearch
     }
     
     /**
-     * generates the table
+     * generates the table.
      */
     protected void generate() {
       Performance 	perf;
@@ -1239,7 +1255,7 @@ public class GridSearch
     }
     
     /**
-     * returns the corresponding grid
+     * returns the corresponding grid.
      * 
      * @return		the underlying grid
      */
@@ -1248,7 +1264,7 @@ public class GridSearch
     }
 
     /**
-     * returns the underlying performances
+     * returns the underlying performances.
      * 
      * @return		the underlying performances
      */
@@ -1257,7 +1273,7 @@ public class GridSearch
     }
     
     /**
-     * returns the type of performance
+     * returns the type of performance.
      * 
      * @return		the type of performance
      */
@@ -1266,7 +1282,7 @@ public class GridSearch
     }
     
     /**
-     * returns the generated table
+     * returns the generated table.
      * 
      * @return 		the performance table
      * @see		#m_Table
@@ -1277,7 +1293,7 @@ public class GridSearch
     }
     
     /**
-     * the minimum performance
+     * the minimum performance.
      * 
      * @return		the performance
      */
@@ -1286,7 +1302,7 @@ public class GridSearch
     }
     
     /**
-     * the maximum performance
+     * the maximum performance.
      * 
      * @return		the performance
      */
@@ -1295,7 +1311,7 @@ public class GridSearch
     }
     
     /**
-     * returns the table as string
+     * returns the table as string.
      * 
      * @return		the table as string
      */
@@ -1325,7 +1341,7 @@ public class GridSearch
     }
     
     /**
-     * returns a string containing a gnuplot script+data file
+     * returns a string containing a gnuplot script+data file.
      * 
      * @return		the data in gnuplot format
      */
@@ -1349,11 +1365,11 @@ public class GridSearch
       result.append("set data style lines\n");
       result.append("set contour base\n");
       result.append("set surface\n");
-      result.append("set title '" + m_Data.relationName() + "'\n");
+      result.append("set title '" + m_Owner.getData().relationName() + "'\n");
       result.append("set xrange [" + getGrid().getMinX() + ":" + getGrid().getMaxX() + "]\n");
-      result.append("set xlabel 'x (" + getFilter().getClass().getName() + ": " + getXProperty() + ")'\n");
+      result.append("set xlabel 'x (" + m_Owner.getFilter().getClass().getName() + ": " + m_Owner.getXProperty() + ")'\n");
       result.append("set yrange [" + getGrid().getMinY() + ":" + getGrid().getMaxY() + "]\n");
-      result.append("set ylabel 'y - (" + getClassifier().getClass().getName() + ": " + getYProperty() + ")'\n");
+      result.append("set ylabel 'y - (" + m_Owner.getClassifier().getClass().getName() + ": " + m_Owner.getYProperty() + ")'\n");
       result.append("set zrange [" + (getMin() - (getMax() - getMin())*0.1) + ":" + (getMax() + (getMax() - getMin())*0.1) + "]\n");
       result.append("set zlabel 'z - " + type.getReadable() + "'\n");
       result.append("set dgrid3d " + getGrid().height() + "," + getGrid().width() + ",1\n");
@@ -1378,17 +1394,17 @@ public class GridSearch
   /**
    * Represents a simple cache for performance objects.
    */
-  protected class PerformanceCache
+  protected static class PerformanceCache
     implements Serializable, RevisionHandler {
 
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = 5838863230451530252L;
     
-    /** the cache for points in the grid that got calculated */
+    /** the cache for points in the grid that got calculated. */
     protected Hashtable m_Cache = new Hashtable();
     
     /**
-     * returns the ID string for a cache item
+     * returns the ID string for a cache item.
      * 
      * @param cv		the number of folds in the cross-validation
      * @param values	the point in the grid
@@ -1399,7 +1415,7 @@ public class GridSearch
     }
     
     /**
-     * checks whether the point was already calculated ones
+     * checks whether the point was already calculated ones.
      * 
      * @param cv	the number of folds in the cross-validation
      * @param values	the point in the grid
@@ -1410,7 +1426,7 @@ public class GridSearch
     }
     
     /**
-     * returns a cached performance object, null if not yet in the cache
+     * returns a cached performance object, null if not yet in the cache.
      * 
      * @param cv	the number of folds in the cross-validation
      * @param values	the point in the grid
@@ -1421,7 +1437,7 @@ public class GridSearch
     }
     
     /**
-     * adds the performance to the cache
+     * adds the performance to the cache.
      * 
      * @param cv	the number of folds in the cross-validation
      * @param p		the performance object to store
@@ -1431,7 +1447,7 @@ public class GridSearch
     }
     
     /**
-     * returns a string representation of the cache
+     * returns a string representation of the cache.
      * 
      * @return		the string representation of the cache
      */
@@ -1449,26 +1465,377 @@ public class GridSearch
     }
   }
   
-  /** for serialization */
+  /**
+   * Helper class for generating the setups.
+   */
+  protected static class SetupGenerator
+    implements Serializable, RevisionHandler {
+    
+    /** for serialization. */
+    private static final long serialVersionUID = -2517395033342543417L;
+    
+    /** the owner. */
+    protected GridSearch m_Owner;
+
+    /** the Y option to work on. */
+    protected String m_Y_Property;
+    
+    /** the minimum of Y. */
+    protected double m_Y_Min;
+    
+    /** the maximum of Y. */
+    protected double m_Y_Max;
+    
+    /** the step size of Y. */
+    protected double m_Y_Step;
+    
+    /** the base for Y. */
+    protected double m_Y_Base;
+    
+    /** The expression for the Y property. */
+    protected String m_Y_Expression;
+
+    /** the X option to work on. */
+    protected String m_X_Property;
+    
+    /** the minimum of X. */
+    protected double m_X_Min;
+    
+    /** the maximum of X. */
+    protected double m_X_Max;
+    
+    /** the step size of X. */
+    protected double m_X_Step;
+    
+    /** the base for X.  */
+    protected double m_X_Base;
+    
+    /** The expression for the X property. */
+    protected String m_X_Expression;
+    
+    /**
+     * Initializes the setup generator.
+     * 
+     * @param owner		the owning classifier
+     */
+    public SetupGenerator(GridSearch owner) {
+      super();
+      
+      m_Owner        = owner;
+
+      m_Y_Expression = m_Owner.getYExpression();
+      m_Y_Property   = m_Owner.getYProperty();
+      m_Y_Min        = m_Owner.getYMin();
+      m_Y_Max        = m_Owner.getYMax();
+      m_Y_Step       = m_Owner.getYStep();
+      m_Y_Base       = m_Owner.getYBase();
+
+      m_X_Expression = m_Owner.getXExpression();
+      m_X_Property   = m_Owner.getXProperty();
+      m_X_Min        = m_Owner.getXMin();
+      m_X_Max        = m_Owner.getXMax();
+      m_X_Step       = m_Owner.getXStep();
+      m_X_Base       = m_Owner.getXBase();
+    }
+    
+    /**
+     * evalutes the expression for the current iteration.
+     * 
+     * @param value	the current iteration value (from 'min' to 'max' with  
+     * 			stepsize 'step')
+     * @param isX		true if X is to be evaluated otherwise Y
+     * @return		the generated value, NaN if the evaluation fails
+     */
+    public double evaluate(double value, boolean isX) {
+      double	result;
+      HashMap	symbols;
+      String	expr;
+      double	base;
+      double	min;
+      double	max;
+      double	step;
+
+      if (isX) {
+        expr = m_X_Expression;
+        base = m_X_Base;
+        min  = m_X_Min;
+        max  = m_X_Max;
+        step = m_X_Step;
+      }
+      else {
+        expr = m_Y_Expression;
+        base = m_Y_Base;
+        min  = m_Y_Min;
+        max  = m_Y_Max;
+        step = m_Y_Step;
+      }
+
+      try {
+        symbols = new HashMap();
+        symbols.put("BASE", new Double(base));
+        symbols.put("FROM", new Double(min));
+        symbols.put("TO",   new Double(max));
+        symbols.put("STEP", new Double(step));
+        symbols.put("I",    new Double(value));
+        result = MathematicalExpression.evaluate(expr, symbols);
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+        result = Double.NaN;
+      }
+      
+      return result;
+    }
+
+    /**
+     * tries to set the value as double, integer (just casts it to int!) or
+     * boolean (false if 0, otherwise true) in the object according to the 
+     * specified path. float, char and long are also supported.
+     * 
+     * @param o		the object to modify
+     * @param path	the property path
+     * @param value	the value to set
+     * @return		the modified object
+     * @throws Exception	if neither double nor int could be set
+     */
+    public Object setValue(Object o, String path, double value) throws Exception {
+      PropertyDescriptor	desc;
+      Class		c;
+      
+      desc = PropertyPath.getPropertyDescriptor(o, path);
+      c    = desc.getPropertyType();
+
+      // float
+      if ((c == Float.class) || (c == Float.TYPE))
+        PropertyPath.setValue(o, path, new Float((float) value));
+      // double
+      else if ((c == Double.class) || (c == Double.TYPE))
+        PropertyPath.setValue(o, path, new Double(value));
+      // char
+      else if ((c == Character.class) || (c == Character.TYPE))
+        PropertyPath.setValue(o, path, new Integer((char) value));
+      // int
+      else if ((c == Integer.class) || (c == Integer.TYPE))
+        PropertyPath.setValue(o, path, new Integer((int) value));
+      // long
+      else if ((c == Long.class) || (c == Long.TYPE))
+        PropertyPath.setValue(o, path, new Long((long) value));
+      // boolean
+      else if ((c == Boolean.class) || (c == Boolean.TYPE))
+        PropertyPath.setValue(o, path, (value == 0 ? new Boolean(false) : new Boolean(true)));
+      else throw new Exception(
+  	"Could neither set double nor integer nor boolean value for '" + path + "'!");
+      
+      return o;
+    }
+    
+    /**
+     * returns a fully configures object (a copy of the provided one).
+     * 
+     * @param original	the object to create a copy from and set the parameters
+     * @param valueX	the current iteration value for X 
+     * @param valueY	the current iteration value for Y
+     * @return		the configured classifier
+     * @throws Exception	if setup fails
+     */
+    public Object setup(Object original, double valueX, double valueY) throws Exception {
+      Object	result;
+
+      result = new SerializedObject(original).getObject();
+
+      if (original instanceof Classifier) {
+	if (m_X_Property.startsWith(PREFIX_CLASSIFIER))
+	  setValue(
+	      result,
+	      m_X_Property.substring(PREFIX_CLASSIFIER.length()),
+	      valueX);
+
+	if (m_Y_Property.startsWith(PREFIX_CLASSIFIER))
+	  setValue(
+	      result,
+	      m_Y_Property.substring(PREFIX_CLASSIFIER.length()), 
+	      valueY);
+      }
+      else if (original instanceof Filter) {
+	if (m_X_Property.startsWith(PREFIX_FILTER))
+	  setValue(
+	      result,
+	      m_X_Property.substring(PREFIX_FILTER.length()), 
+	      valueX);
+
+	if (m_Y_Property.startsWith(PREFIX_FILTER))
+	  setValue(
+	      result,
+	      m_Y_Property.substring(PREFIX_FILTER.length()), 
+	      valueY);
+      }
+      else {
+	throw new IllegalArgumentException("Object must be either classifier or filter!");
+      }
+
+      return result;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision$");
+    }
+  }
+
+  /**
+   * Helper class for evaluating a setup.
+   */
+  protected static class EvaluationTask
+    implements Runnable, RevisionHandler {
+
+    /** the owner. */
+    protected GridSearch m_Owner;
+
+    /** for generating the setups. */
+    protected SetupGenerator m_Generator;
+    
+    /** the classifier to use. */
+    protected Classifier m_Classifier;
+    
+    /** the filter to use. */
+    protected Filter m_Filter;
+    
+    /** the data to use for training. */
+    protected Instances m_Data;
+
+    /** the values to use. */
+    protected PointDouble m_Values;
+
+    /** the number of folds for cross-validation. */
+    protected int m_Folds;
+
+    /** the type of evaluation. */
+    protected int m_Evaluation;
+
+    /**
+     * Initializes the task.
+     *
+     * @param owner		the owning GridSearch classifier
+     * @param generator		the generator for the setips
+     * @param inst		the data
+     * @param values		the values in the grid
+     * @param folds		the number of cross-validation folds
+     * @param eval		the type of evaluation
+     */
+    public EvaluationTask(GridSearch owner, SetupGenerator generator, 
+	Instances inst, PointDouble values, int folds, int eval) {
+
+      super();
+
+      m_Owner      = owner;
+      m_Generator  = generator;
+      m_Classifier = m_Owner.getClassifier();
+      m_Filter     = m_Owner.getFilter();
+      m_Data       = inst;
+      m_Values     = values;
+      m_Folds      = folds;
+      m_Evaluation = eval;
+    }
+
+    /**
+     * Performs the evaluation.
+     */
+    public void run() {
+      Evaluation	eval;
+      Classifier	classifier;
+      Filter		filter;
+      Performance	performance;
+      double		x;
+      double		y;
+      Instances		data;
+
+      classifier = null;
+      filter     = null;
+      x          = m_Generator.evaluate(m_Values.getX(), true);
+      y          = m_Generator.evaluate(m_Values.getY(), false);
+      try {
+
+	// data pass through filter
+	if (!m_Filter.getClass().equals(AllFilter.class)) {
+	  filter = (Filter) m_Generator.setup(m_Filter, x, y);
+	  filter.setInputFormat(m_Data);
+	  data = Filter.useFilter(m_Data, filter);
+	  // make sure that the numbers don't get too small - otherwise NaNs!
+	  Filter cleaner = new NumericCleaner();
+	  cleaner.setInputFormat(data);
+	  data = Filter.useFilter(data, cleaner);
+	}
+	else {
+	  data = m_Data;
+	}
+
+	// setup classifier
+	classifier = (Classifier) m_Generator.setup(m_Classifier, x, y);
+
+	// evaluate
+	eval = new Evaluation(data);
+	eval.crossValidateModel(classifier, data, m_Folds, new Random(m_Owner.getSeed()));
+
+	// store performance
+	performance = new Performance(m_Values, eval);
+	m_Owner.addPerformance(performance, m_Folds);
+
+	// log
+	m_Owner.log(performance + ": cached=false");
+
+	// release slot
+	m_Owner.completedEvaluation(classifier, null);
+      }
+      catch (Exception e) {
+	if (m_Owner.getDebug()) {
+	  System.err.println("Encountered exception while evaluating classifier, skipping!");
+	  System.err.println("- Values....: " + m_Values);
+	  System.err.println("- Filter....: " + ((filter != null) ? Utils.toCommandLine(filter) : "-no setup-"));
+	  System.err.println("- Classifier: " + ((classifier != null) ? Utils.toCommandLine(classifier) : "-no setup-"));
+	  e.printStackTrace();
+	}
+	m_Owner.completedEvaluation(m_Values, e);
+      }
+
+      // clean up
+      m_Owner = null;
+      m_Data  = null;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision$");
+    }
+  }
+  
+  /** for serialization. */
   private static final long serialVersionUID = -3034773968581595348L;
 
-  /** evaluation via: Correlation coefficient */
+  /** evaluation via: Correlation coefficient. */
   public static final int EVALUATION_CC = 0;
-  /** evaluation via: Root mean squared error */
+  /** evaluation via: Root mean squared error. */
   public static final int EVALUATION_RMSE = 1;
-  /** evaluation via: Root relative squared error */
+  /** evaluation via: Root relative squared error. */
   public static final int EVALUATION_RRSE = 2;
-  /** evaluation via: Mean absolute error */
+  /** evaluation via: Mean absolute error. */
   public static final int EVALUATION_MAE = 3;
-  /** evaluation via: Relative absolute error */
+  /** evaluation via: Relative absolute error. */
   public static final int EVALUATION_RAE = 4;
-  /** evaluation via: Combined = (1-CC) + RRSE + RAE */
+  /** evaluation via: Combined = (1-CC) + RRSE + RAE. */
   public static final int EVALUATION_COMBINED = 5;
-  /** evaluation via: Accuracy */
+  /** evaluation via: Accuracy. */
   public static final int EVALUATION_ACC = 6;
-  /** evaluation via: kappa statistic */
+  /** evaluation via: kappa statistic. */
   public static final int EVALUATION_KAPPA = 7;
-  /** evaluation */
+  /** evaluation. */
   public static final Tag[] TAGS_EVALUATION = {
     new Tag(EVALUATION_CC, "CC", "Correlation coefficient"),
     new Tag(EVALUATION_RMSE, "RMSE", "Root mean squared error"),
@@ -1480,51 +1847,51 @@ public class GridSearch
     new Tag(EVALUATION_KAPPA, "KAP", "Kappa")
   };
   
-  /** row-wise grid traversal */
+  /** row-wise grid traversal. */
   public static final int TRAVERSAL_BY_ROW = 0;
-  /** column-wise grid traversal */
+  /** column-wise grid traversal. */
   public static final int TRAVERSAL_BY_COLUMN = 1;
-  /** traversal */
+  /** traversal. */
   public static final Tag[] TAGS_TRAVERSAL = {
     new Tag(TRAVERSAL_BY_ROW, "row-wise", "row-wise"),
     new Tag(TRAVERSAL_BY_COLUMN, "column-wise", "column-wise")
   };
 
-  /** the prefix to indicate that the option is for the classifier */
+  /** the prefix to indicate that the option is for the classifier. */
   public final static String PREFIX_CLASSIFIER = "classifier.";
 
-  /** the prefix to indicate that the option is for the filter */
+  /** the prefix to indicate that the option is for the filter. */
   public final static String PREFIX_FILTER = "filter.";
   
-  /** the Filter */
+  /** the Filter. */
   protected Filter m_Filter;
   
-  /** the Filter with the best setup */
+  /** the Filter with the best setup. */
   protected Filter m_BestFilter;
   
-  /** the Classifier with the best setup */
+  /** the Classifier with the best setup. */
   protected Classifier m_BestClassifier;
 
-  /** the best values */
+  /** the best values. */
   protected PointDouble m_Values = null;
   
-  /** the type of evaluation */
+  /** the type of evaluation. */
   protected int m_Evaluation = EVALUATION_CC;
 
   /** the Y option to work on (without leading dash, preceding 'classifier.' 
-   * means to set the option for the classifier 'filter.' for the filter) */
+   * means to set the option for the classifier 'filter.' for the filter). */
   protected String m_Y_Property = PREFIX_CLASSIFIER + "ridge";
   
-  /** the minimum of Y */
+  /** the minimum of Y. */
   protected double m_Y_Min = -10;
   
-  /** the maximum of Y */
+  /** the maximum of Y. */
   protected double m_Y_Max = +5;
   
-  /** the step size of Y */
+  /** the step size of Y. */
   protected double m_Y_Step = 1;
   
-  /** the base for Y */
+  /** the base for Y. */
   protected double m_Y_Base = 10;
   
   /** 
@@ -1544,19 +1911,19 @@ public class GridSearch
   protected String m_Y_Expression = "pow(BASE,I)";
 
   /** the X option to work on (without leading dash, preceding 'classifier.' 
-   * means to set the option for the classifier 'filter.' for the filter) */
+   * means to set the option for the classifier 'filter.' for the filter). */
   protected String m_X_Property = PREFIX_FILTER + "numComponents";
   
-  /** the minimum of X */
+  /** the minimum of X. */
   protected double m_X_Min = +5;
   
-  /** the maximum of X */
+  /** the maximum of X. */
   protected double m_X_Max = +20;
   
-  /** the step size of  */
+  /** the step size of X. */
   protected double m_X_Step = 1;
   
-  /** the base for  */
+  /** the base for X.  */
   protected double m_X_Base = 10;
   
   /** 
@@ -1575,38 +1942,63 @@ public class GridSearch
    */
   protected String m_X_Expression = "I";
 
-  /** whether the grid can be extended */
+  /** whether the grid can be extended. */
   protected boolean m_GridIsExtendable = false;
   
-  /** maximum number of grid extensions (-1 means unlimited) */
+  /** maximum number of grid extensions (-1 means unlimited). */
   protected int m_MaxGridExtensions = 3;
   
-  /** the number of extensions performed */
+  /** the number of extensions performed. */
   protected int m_GridExtensionsPerformed = 0;
 
-  /** the sample size to search the initial grid with */
+  /** the sample size to search the initial grid with. */
   protected double m_SampleSize = 100;
   
-  /** the traversal */
+  /** the traversal. */
   protected int m_Traversal = TRAVERSAL_BY_COLUMN;
 
-  /** the log file to use */
+  /** the log file to use. */
   protected File m_LogFile = new File(System.getProperty("user.dir"));
   
-  /** the value-pairs grid */
+  /** the value-pairs grid. */
   protected Grid m_Grid;
 
-  /** the training data */
+  /** the training data. */
   protected Instances m_Data;
 
-  /** the cache for points in the grid that got calculated */
+  /** the cache for points in the grid that got calculated. */
   protected PerformanceCache m_Cache;
 
-  /** whether all performances in the grid are the same */
+  /** for storing the performances. */
+  protected Vector<Performance> m_Performances;
+
+  /** whether all performances in the grid are the same. */
   protected boolean m_UniformPerformance = false;
+
+  /** The number of threads to have executing at any one time. */
+  protected int m_NumExecutionSlots = 1;
+
+  /** Pool of threads to train models with. */
+  protected transient ThreadPoolExecutor m_ExecutorPool;
+
+  /** The number of setups completed so far. */
+  protected int m_Completed;
+
+  /** The number of setups that experienced a failure of some sort
+   * during construction. */
+  protected int m_Failed;
+
+  /** the number of setups to evaluate. */
+  protected int m_NumSetups;
+  
+  /** the generator for generating the setups. */
+  protected SetupGenerator m_Generator;
+  
+  /** for storing an exception that happened in one of the worker threads. */
+  protected transient Exception m_Exception;
   
   /**
-   * the default constructor
+   * the default constructor.
    */
   public GridSearch() {
     super();
@@ -1637,7 +2029,7 @@ public class GridSearch
   }
   
   /**
-   * Returns a string describing classifier
+   * Returns a string describing classifier.
    * 
    * @return a description suitable for displaying in the
    *         explorer/experimenter gui
@@ -1667,7 +2059,10 @@ public class GridSearch
       + "Note on the implementation: after the data has been passed through "
       + "the filter, a default NumericCleaner filter is applied to the data in "
       + "order to avoid numbers that are getting too small and might produce "
-      + "NaNs in other schemes.";
+      + "NaNs in other schemes.\n\n"
+      + "Note: with -num-slots/numExecutionSlots you can specify how many "
+      + "setups are evaluated in parallel, taking advantage of multi-cpu/core "
+      + "architectures.";
   }
 
   /**
@@ -1811,6 +2206,11 @@ public class GridSearch
 	+ "\t(default: none)",
 	"log-file", 1, "-log-file <filename>"));
 
+    result.addElement(new Option(
+        "\tNumber of execution slots.\n"
+        + "\t(default 1 - i.e. no parallelism)",
+        "num-slots", 1, "-num-slots <num>"));
+
     en = super.listOptions();
     while (en.hasMoreElements())
       result.addElement(en.nextElement());
@@ -1831,7 +2231,7 @@ public class GridSearch
   }
   
   /**
-   * returns the options of the current setup
+   * returns the options of the current setup.
    *
    * @return		the current options
    */
@@ -1864,14 +2264,7 @@ public class GridSearch
     result.add("" + getYExpression());
 
     result.add("-filter");
-    if (getFilter() instanceof OptionHandler)
-      result.add(
-  	    getFilter().getClass().getName() 
-	  + " " 
-	  + Utils.joinOptions(((OptionHandler) getFilter()).getOptions()));
-    else
-      result.add(
-	  getFilter().getClass().getName());
+    result.add(Utils.toCommandLine(getFilter()));
 
     result.add("-x-property");
     result.add("" + getXProperty());
@@ -1905,6 +2298,9 @@ public class GridSearch
 
     result.add("-log-file");
     result.add("" + getLogFile());
+
+    result.add("-num-slots");
+    result.add("" + getNumExecutionSlots());
 
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -2017,6 +2413,10 @@ public class GridSearch
    * <pre> -log-file &lt;filename&gt;
    *  The log file to log the messages to.
    *  (default: none)</pre>
+   * 
+   * <pre> -num-slots &lt;num&gt;
+   *  Number of execution slots.
+   *  (default 1 - i.e. no parallelism)</pre>
    * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
@@ -2198,6 +2598,12 @@ public class GridSearch
       setLogFile(new File(tmpStr));
     else
       setLogFile(new File(System.getProperty("user.dir")));
+
+    tmpStr = Utils.getOption("num-slots", options);
+    if (tmpStr.length() != 0)
+      setNumExecutionSlots(Integer.parseInt(tmpStr));
+    else
+      setNumExecutionSlots(1);
     
     super.setOptions(options);
   }
@@ -2242,7 +2648,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2277,7 +2683,7 @@ public class GridSearch
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2291,7 +2697,7 @@ public class GridSearch
   /**
    * Sets the criterion to use for evaluating the classifier performance. 
    *
-   * @param value 	.the evaluation criterion
+   * @param value 	the evaluation criterion
    */
   public void setEvaluation(SelectedTag value) {
     if (value.getTags() == TAGS_EVALUATION) {
@@ -2309,7 +2715,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2337,7 +2743,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2365,7 +2771,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2393,7 +2799,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2421,7 +2827,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2449,7 +2855,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2477,7 +2883,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2505,7 +2911,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2533,7 +2939,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2561,7 +2967,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2589,7 +2995,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2617,7 +3023,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2645,7 +3051,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2673,7 +3079,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2701,7 +3107,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2729,7 +3135,7 @@ public class GridSearch
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2759,7 +3165,7 @@ public class GridSearch
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -2787,7 +3193,64 @@ public class GridSearch
   }
 
   /**
-   * returns the best filter setup
+   * Returns the tip text for this property.
+   *
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String numExecutionSlotsTipText() {
+    return "The number of execution slots (threads) to use for " +
+      "constructing the ensemble.";
+  }
+
+  /**
+   * Set the number of execution slots (threads) to use for building the
+   * members of the ensemble.
+   *
+   * @param value 	the number of slots to use.
+   */
+  public void setNumExecutionSlots(int value) {
+    if (value >= 1)
+      m_NumExecutionSlots = value;
+  }
+
+  /**
+   * Get the number of execution slots (threads) to use for building
+   * the members of the ensemble.
+   *
+   * @return 		the number of slots to use
+   */
+  public int getNumExecutionSlots() {
+    return m_NumExecutionSlots;
+  }
+
+  /**
+   * Adds the performance to the cache and the current list of performances.
+   * Does nothing if at least one setup failed.
+   *
+   * @param performance	the performance to add
+   * @param folds	the number of folds
+   * @see		#m_Failed
+   */
+  protected void addPerformance(Performance performance, int folds) {
+    if (m_Failed > 0)
+      return;
+
+    m_Performances.add(performance);
+    m_Cache.add(folds, performance);
+  }
+  
+  /**
+   * Returns the data currently in use.
+   * 
+   * @return		the data
+   */
+  protected Instances getData() {
+    return m_Data;
+  }
+  
+  /**
+   * returns the best filter setup.
    * 
    * @return		the best filter setup
    */
@@ -2796,7 +3259,7 @@ public class GridSearch
   }
 
   /**
-   * returns the best Classifier setup
+   * returns the best Classifier setup.
    * 
    * @return		the best Classifier setup
    */
@@ -2822,16 +3285,16 @@ public class GridSearch
   }
 
   /**
-   * Returns the value of the named measure
+   * Returns the value of the named measure.
    * 
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
    */
   public double getMeasure(String measureName) {
     if (measureName.equalsIgnoreCase("measureX"))
-      return evaluate(getValues().getX(), true);
+      return m_Generator.evaluate(getValues().getX(), true);
     else if (measureName.equalsIgnoreCase("measureY"))
-      return evaluate(getValues().getY(), false);
+      return m_Generator.evaluate(getValues().getY(), false);
     else if (measureName.equalsIgnoreCase("measureGridExtensionsPerformed"))
       return getGridExtensionsPerformed();
     else
@@ -2839,7 +3302,7 @@ public class GridSearch
   }
   
   /**
-   * returns the parameter pair that was found to work best
+   * returns the parameter pair that was found to work best.
    * 
    * @return		the best parameter combination
    */
@@ -2902,7 +3365,7 @@ public class GridSearch
 
   /**
    * prints the specified message to stdout if debug is on and can also dump
-   * the message to a log file
+   * the message to a log file.
    * 
    * @param message	the message to print or store in a log file
    */
@@ -2912,7 +3375,7 @@ public class GridSearch
 
   /**
    * prints the specified message to stdout if debug is on and can also dump
-   * the message to a log file
+   * the message to a log file.
    * 
    * @param message	the message to print or store in a log file
    * @param onlyLog	if true the message will only be put into the log file
@@ -2929,178 +3392,6 @@ public class GridSearch
   }
   
   /**
-   * replaces the current option in the options array with a new value
-   * 
-   * @param options	the current options
-   * @param option	the option to set a new value for
-   * @param value	the value to set
-   * @return		the updated array
-   * @throws Exception	if something goes wrong
-   */
-  protected String[] updateOption(String[] options, String option, String value) 
-    throws Exception {
-    
-    String[]		result;
-    Vector		tmpOptions;
-    int			i;
-
-    // remove old option
-    Utils.getOption(option, options);
-    
-    // add option with new value at the beginning (to avoid clashes with "--")
-    tmpOptions = new Vector();
-    tmpOptions.add("-" + option);
-    tmpOptions.add("" + value);
-
-    // move options into vector
-    for (i = 0; i < options.length; i++) {
-      if (options[i].length() != 0)
-	tmpOptions.add(options[i]);
-    }
-    
-    result = (String[]) tmpOptions.toArray(new String[tmpOptions.size()]);
-    
-    return result;
-  }
-  
-  /**
-   * evalutes the expression for the current iteration
-   * 
-   * @param value	the current iteration value (from 'min' to 'max' with  
-   * 			stepsize 'step')
-   * @param isX		true if X is to be evaluated otherwise Y
-   * @return		the generated value, NaN if the evaluation fails
-   */
-  protected double evaluate(double value, boolean isX) {
-    double	result;
-    HashMap	symbols;
-    String	expr;
-    double	base;
-    double	min;
-    double	max;
-    double	step;
-
-    if (isX) {
-      expr = getXExpression();
-      base = getXBase();
-      min  = getXMin();
-      max  = getXMax();
-      step = getXStep();
-    }
-    else {
-      expr = getYExpression();
-      base = getYBase();
-      min  = getYMin();
-      max  = getYMax();
-      step = getYStep();
-    }
-
-    try {
-      symbols = new HashMap();
-      symbols.put("BASE", new Double(base));
-      symbols.put("FROM", new Double(min));
-      symbols.put("TO",   new Double(max));
-      symbols.put("STEP", new Double(step));
-      symbols.put("I",    new Double(value));
-      result = MathematicalExpression.evaluate(expr, symbols);
-    }
-    catch (Exception e) {
-      result = Double.NaN;
-    }
-    
-    return result;
-  }
-
-  /**
-   * tries to set the value as double, integer (just casts it to int!) or
-   * boolean (false if 0, otherwise true) in the object according to the 
-   * specified path. float, char and long are also supported.
-   * 
-   * @param o		the object to modify
-   * @param path	the property path
-   * @param value	the value to set
-   * @return		the modified object
-   * @throws Exception	if neither double nor int could be set
-   */
-  protected Object setValue(Object o, String path, double value) throws Exception {
-    PropertyDescriptor	desc;
-    Class		c;
-    
-    desc = PropertyPath.getPropertyDescriptor(o, path);
-    c    = desc.getPropertyType();
-
-    // float
-    if ((c == Float.class) || (c == Float.TYPE))
-      PropertyPath.setValue(o, path, new Float((float) value));
-    // double
-    else if ((c == Double.class) || (c == Double.TYPE))
-      PropertyPath.setValue(o, path, new Double(value));
-    // char
-    else if ((c == Character.class) || (c == Character.TYPE))
-      PropertyPath.setValue(o, path, new Integer((char) value));
-    // int
-    else if ((c == Integer.class) || (c == Integer.TYPE))
-      PropertyPath.setValue(o, path, new Integer((int) value));
-    // long
-    else if ((c == Long.class) || (c == Long.TYPE))
-      PropertyPath.setValue(o, path, new Long((long) value));
-    // boolean
-    else if ((c == Boolean.class) || (c == Boolean.TYPE))
-      PropertyPath.setValue(o, path, (value == 0 ? new Boolean(false) : new Boolean(true)));
-    else throw new Exception(
-	"Could neither set double nor integer nor boolean value for '" + path + "'!");
-    
-    return o;
-  }
-  
-  /**
-   * returns a fully configures object (a copy of the provided one)
-   * 
-   * @param original	the object to create a copy from and set the parameters
-   * @param valueX	the current iteration value for X 
-   * @param valueY	the current iteration value for Y
-   * @return		the configured classifier
-   * @throws Exception	if setup fails
-   */
-  protected Object setup(Object original, double valueX, double valueY) throws Exception {
-    Object	result;
-    
-    result = new SerializedObject(original).getObject();
-    
-    if (original instanceof Classifier) {
-      if (getXProperty().startsWith(PREFIX_CLASSIFIER))
-	setValue(
-	    result,
-	    getXProperty().substring(PREFIX_CLASSIFIER.length()),
-	    valueX);
-      
-      if (getYProperty().startsWith(PREFIX_CLASSIFIER))
-	setValue(
-	    result,
-	    getYProperty().substring(PREFIX_CLASSIFIER.length()), 
-	    valueY);
-    }
-    else if (original instanceof Filter) {
-      if (getXProperty().startsWith(PREFIX_FILTER))
-	setValue(
-	    result,
-	    getXProperty().substring(PREFIX_FILTER.length()), 
-	    valueX);
-      
-      if (getYProperty().startsWith(PREFIX_FILTER))
-	setValue(
-	    result,
-	    getYProperty().substring(PREFIX_FILTER.length()), 
-	    valueY);
-    }
-    else {
-      throw new IllegalArgumentException("Object must be either classifier or filter!");
-    }
-    
-    return result;
-  }
-  
-  /**
    * generates a table string for all the performances in the grid and returns
    * that.
    * 
@@ -3114,7 +3405,7 @@ public class GridSearch
     PerformanceTable	table;
     
     result = new StringBuffer(type.getReadable() + ":\n");
-    table  = new PerformanceTable(grid, performances, type.getID());
+    table  = new PerformanceTable(this, grid, performances, type.getID());
     
     result.append(table.toString() + "\n");
     result.append("\n");
@@ -3137,6 +3428,86 @@ public class GridSearch
     for (i = 0; i < TAGS_EVALUATION.length; i++)
       log("\n" + logPerformances(grid, performances, TAGS_EVALUATION[i]), true);
   }
+
+  /**
+   * Start the pool of execution threads.
+   */
+  protected void startExecutorPool() {
+    stopExecutorPool();
+
+    log("Starting thread pool with " + m_NumExecutionSlots + " slots...");
+
+    m_ExecutorPool = new ThreadPoolExecutor(
+	m_NumExecutionSlots, m_NumExecutionSlots,
+        120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+  }
+
+  /**
+   * Stops the ppol of execution threads.
+   */
+  protected void stopExecutorPool() {
+    log("Shutting down thread pool...");
+
+    if (m_ExecutorPool != null)
+      m_ExecutorPool.shutdownNow();
+
+    m_ExecutorPool = null;
+  }
+
+  /**
+   * Helper method used for blocking.
+   *
+   * @param doBlock	whether to block or not
+   */
+  protected synchronized void block(boolean doBlock) {
+    if (doBlock) {
+      try {
+        wait();
+      }
+      catch (InterruptedException ex) {
+	// ignored
+      }
+    }
+    else {
+      notifyAll();
+    }
+  }
+
+  /**
+   * Records the completion of the training of a single classifier. Unblocks if
+   * all classifiers have been trained.
+   *
+   * @param obj		the classifier or setup values that was attempted to train
+   * @param exception	an optional exception. evaluation was successful if this
+   * 			is null
+   */
+  protected synchronized void completedEvaluation(Object obj, Exception exception) {
+    if (exception != null) {
+      m_Failed++;
+      if (m_Debug)
+	System.err.println("Training failed: " + Utils.toCommandLine(obj));
+    }
+    else {
+      m_Completed++;
+    }
+
+    if (m_Debug)
+      System.err.println(
+	  "Progress: completed=" + m_Completed 
+	  + ", failed=" + m_Failed 
+	  + ", overall=" + m_NumSetups);
+    
+    if ((m_Completed == m_NumSetups) || (m_Failed > 0)) {
+      if (m_Failed > 0) {
+        if (m_Debug)
+          System.err.println("Problem building classifiers - some failed to be trained.");
+      }
+      stopExecutorPool();
+      block(false);
+    }
+    
+    m_Exception = exception;
+  }
   
   /**
    * determines the best values-pair for the given grid, using CV with 
@@ -3151,23 +3522,17 @@ public class GridSearch
   protected PointDouble determineBestInGrid(Grid grid, Instances inst, int cv) throws Exception {
     int				i;
     Enumeration<PointDouble>	enm;
-    Vector<Performance>		performances;
     PointDouble			values;
-    Instances			data;
-    Evaluation			eval;
     PointDouble			result;
-    Classifier			classifier;
-    Filter			filter;
     int				size;
-    boolean			cached;
     boolean			allCached;
     Performance			p1;
     Performance			p2;
-    double			x;
-    double			y;
+    EvaluationTask		newTask;
     
-    performances = new Vector();
-    
+    startExecutorPool();
+    m_Performances.clear();
+
     log("Determining best pair with " + cv + "-fold CV in Grid:\n" + grid + "\n");
     
     if (m_Traversal == TRAVERSAL_BY_COLUMN)
@@ -3175,7 +3540,10 @@ public class GridSearch
     else
       size = grid.height();
     
-    allCached = true;
+    allCached   = true;
+    m_Failed    = 0;
+    m_Completed = 0;
+    m_NumSetups = grid.width() * grid.height();
 
     for (i = 0; i < size; i++) {
       if (m_Traversal == TRAVERSAL_BY_COLUMN)
@@ -3183,65 +3551,54 @@ public class GridSearch
       else
 	enm = grid.row(i);
       
-      filter = null;
-      data   = null;
-      
       while (enm.hasMoreElements()) {
 	values = enm.nextElement();
 	
 	// already calculated?
-	cached = m_Cache.isCached(cv, values);
-	if (cached) {
-	  performances.add(m_Cache.get(cv, values));
+	if (m_Cache.isCached(cv, values)) {
+	  m_Performances.add(m_Cache.get(cv, values));
+	  m_Completed++;
+	  log("" + m_Performances.get(m_Performances.size() - 1) + ": cached=true");
 	}
 	else {
 	  allCached = false;
-	  
-	  x = evaluate(values.getX(), true);
-	  y = evaluate(values.getY(), false);
-	  
-	  // data pass through filter
-	  if (filter == null) {
-	    filter = (Filter) setup(getFilter(), x, y);
-	    filter.setInputFormat(inst);
-	    data = Filter.useFilter(inst, filter);
-	    // make sure that the numbers don't get too small - otherwise NaNs!
-	    Filter cleaner = new NumericCleaner();
-	    cleaner.setInputFormat(data);
-	    data = Filter.useFilter(data, cleaner);
-	  }
-
-	  // setup classifier
-	  classifier = (Classifier) setup(getClassifier(), x, y);
-
-	  // evaluate
-	  eval = new Evaluation(data);
-	  eval.crossValidateModel(classifier, data, cv, new Random(getSeed()));
-	  performances.add(new Performance(values, eval));
-	  
-	  // add to cache
-	  m_Cache.add(cv, new Performance(values, eval));
+	  newTask   = new EvaluationTask(
+	      this, m_Generator, inst, values, cv, m_Evaluation);
+	  m_ExecutorPool.execute(newTask);
 	}
-
-	log("" + performances.get(performances.size() - 1) + ": cached=" + cached);
+	
+	// error encountered?
+	if (m_Failed > 0)
+	  break;
       }
     }
+
+    // wait for execution to finish
+    if (m_Completed + m_Failed < m_NumSetups)
+      block(true);
 
     if (allCached) {
       log("All points were already cached - abnormal state!");
       throw new IllegalStateException("All points were already cached - abnormal state!");
     }
-    
-    // sort list
-    Collections.sort(performances, new PerformanceComparator(m_Evaluation));
 
-    result = performances.get(performances.size() - 1).getValues();
+    if (m_Failed > 0) {
+      if (m_Exception != null)
+	throw m_Exception;
+      else
+	throw new WekaException("Searched stopped due to failed setup!");
+    }
+
+    // sort list
+    Collections.sort(m_Performances, new PerformanceComparator(m_Evaluation));
+
+    result = m_Performances.get(m_Performances.size() - 1).getValues();
 
     // check whether all performances are the same
     m_UniformPerformance = true;
-    p1 = performances.get(0);
-    for (i = 1; i < performances.size(); i++) {
-      p2 = performances.get(i);
+    p1 = m_Performances.get(0);
+    for (i = 1; i < m_Performances.size(); i++) {
+      p2 = m_Performances.get(i);
       if (p2.getPerformance(m_Evaluation) != p1.getPerformance(m_Evaluation)) {
 	m_UniformPerformance = false;
 	break;
@@ -3250,14 +3607,16 @@ public class GridSearch
     if (m_UniformPerformance)
       log("All performances are the same!");
     
-    logPerformances(grid, performances);
-    log("\nBest performance:\n" + performances.get(performances.size() - 1));
+    logPerformances(grid, m_Performances);
+    log("\nBest performance:\n" + m_Performances.get(m_Performances.size() - 1));
+
+    m_Performances.clear();
     
     return result;
   }
   
   /**
-   * returns the best values-pair in the grid
+   * returns the best values-pair in the grid.
    * 
    * @return 		the best values pair
    * @throws Exception 	if something goes wrong
@@ -3355,7 +3714,7 @@ public class GridSearch
   }
   
   /**
-   * builds the classifier
+   * builds the classifier.
    * 
    * @param data        the training instances
    * @throws Exception  if something goes wrong
@@ -3373,7 +3732,10 @@ public class GridSearch
     m_Data = new Instances(data);
     m_Data.deleteWithMissingClass();
     
-    m_Cache = new PerformanceCache();
+    m_Cache        = new PerformanceCache();
+    m_Performances = new Vector<Performance>();
+    m_Generator    = new SetupGenerator(this);
+    m_Exception    = null;
     
     if (getXProperty().startsWith(PREFIX_FILTER))
       strX = m_Filter.getClass().getName();
@@ -3399,18 +3761,18 @@ public class GridSearch
     m_Values = findBest();
 
     // setup best configurations
-    x                = evaluate(m_Values.getX(), true);
-    y                = evaluate(m_Values.getY(), false);
-    m_BestFilter     = (Filter) setup(getFilter(), x, y);
-    m_BestClassifier = (Classifier) setup(getClassifier(), x, y);
+    x                = m_Generator.evaluate(m_Values.getX(), true);
+    y                = m_Generator.evaluate(m_Values.getY(), false);
+    m_BestFilter     = (Filter) m_Generator.setup(getFilter(), x, y);
+    m_BestClassifier = (Classifier) m_Generator.setup(getClassifier(), x, y);
     
     // process data
-    m_Filter = (Filter) setup(getFilter(), x, y);
+    m_Filter = (Filter) m_Generator.setup(getFilter(), x, y);
     m_Filter.setInputFormat(m_Data);
     Instances transformed = Filter.useFilter(m_Data, m_Filter);
     
     // train classifier
-    m_Classifier = (Classifier) setup(getClassifier(), x, y);
+    m_Classifier = (Classifier) m_Generator.setup(getClassifier(), x, y);
     m_Classifier.buildClassifier(transformed);
   }
 
@@ -3432,7 +3794,7 @@ public class GridSearch
   }
 
   /**
-   * returns a string representation of the classifier
+   * returns a string representation of the classifier.
    * 
    * @return a string representation of the classifier
    */
@@ -3447,10 +3809,8 @@ public class GridSearch
     else {
       result = 
       	  this.getClass().getName() + ":\n"
-      	+ "Filter: " + getFilter().getClass().getName() 
-      	+ (getFilter() instanceof OptionHandler ? " " + Utils.joinOptions(((OptionHandler) getFilter()).getOptions()) : "") + "\n"
-      	+ "Classifier: " + getClassifier().getClass().getName() 
-      	+ " " + Utils.joinOptions(((OptionHandler)getClassifier()).getOptions()) + "\n\n"
+      	+ "Filter: " + Utils.toCommandLine(getFilter()) + "\n"
+      	+ "Classifier: " + Utils.toCommandLine(getClassifier()) + "\n\n"
       	+ "X property: " + getXProperty() + "\n"
       	+ "Y property: " + getYProperty() + "\n\n"
       	+ "Evaluation: " + getEvaluation().getSelectedTag().getReadable() + "\n"
@@ -3461,9 +3821,9 @@ public class GridSearch
       
       result += 
 	"Values: "
-	+ evaluate(getValues().getX(), true) + " (X coordinate)" 
+	+ m_Generator.evaluate(getValues().getX(), true) + " (X coordinate)" 
 	+ ", "
-	+ evaluate(getValues().getY(), false) + " (Y coordinate)"
+	+ m_Generator.evaluate(getValues().getY(), false) + " (Y coordinate)"
 	+ "\n\n"
 	+ m_Classifier.toString();
     }
@@ -3480,10 +3840,8 @@ public class GridSearch
     String	result;
     
     result = 
-        "Best filter: " + getBestFilter().getClass().getName() 
-      + (getBestFilter() instanceof OptionHandler ? " " + Utils.joinOptions(((OptionHandler) getBestFilter()).getOptions()) : "") + "\n"
-      + "Best classifier: " + getBestClassifier().getClass().getName() 
-      + " " + Utils.joinOptions(((OptionHandler)getBestClassifier()).getOptions());
+        "Best filter: " + Utils.toCommandLine(getBestFilter()) + "\n"
+      + "Best classifier: " + Utils.toCommandLine(getBestClassifier());
     
     return result;
   }
