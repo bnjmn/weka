@@ -66,7 +66,7 @@ import java.util.Vector;
  * &#64;inproceedings{Hall2008,
  *    author = {Mark Hall and Eibe Frank},
  *    booktitle = {Proceedings of the 21st Florida Artificial Intelligence Society Conference (FLAIRS)},
- *    pages = {???-???},
+ *    pages = {318-319},
  *    publisher = {AAAI press},
  *    title = {Combining Naive Bayes and Decision Tables},
  *    year = {2008}
@@ -101,7 +101,7 @@ import java.util.Vector;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
  * @author Eibe Frank (eibe{[at]}cs{[dot]}waikato{[dot]}ac{[dot]}nz)
  *
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  *
  */
 public class DTNB extends DecisionTable {
@@ -162,7 +162,7 @@ public class DTNB extends DecisionTable {
     result.setValue(Field.BOOKTITLE, "Proceedings of the 21st Florida Artificial Intelligence "
                     + "Society Conference (FLAIRS)");
     result.setValue(Field.YEAR, "2008");
-    result.setValue(Field.PAGES, "???-???");
+    result.setValue(Field.PAGES, "318-319");
     result.setValue(Field.PUBLISHER, "AAAI press");
 
     return result;
@@ -464,7 +464,7 @@ public class DTNB extends DecisionTable {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.1.2.3 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -623,7 +623,7 @@ public class DTNB extends DecisionTable {
        * @return		the revision
        */
       public String getRevision() {
-        return RevisionUtils.extract("$Revision: 1.1.2.3 $");
+        return RevisionUtils.extract("$Revision$");
       }
   }
 
@@ -973,7 +973,7 @@ public class DTNB extends DecisionTable {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
