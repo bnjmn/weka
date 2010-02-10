@@ -16,32 +16,33 @@
 
 /*
  * SortedTableModel.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2010 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
 
-import weka.core.ClassDiscovery;
-
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import javax.swing.table.AbstractTableModel;
+
+import weka.core.ClassDiscovery;
 
 /**
  * Represents a TableModel with sorting functionality.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 
 public class SortedTableModel
@@ -50,6 +51,98 @@ public class SortedTableModel
 
   /** for serialization */
   static final long serialVersionUID = 4030907921461127548L;
+
+  /**
+   * Helper class for sorting the columns.
+   */
+  public static class SortContainer
+    implements Comparable<SortContainer> {
+
+    /** the value to sort. */
+    protected Comparable m_Value;
+
+    /** the index of the value. */
+    protected int m_Index;
+
+    /**
+     * Initializes the container.
+     *
+     * @param value	the value to sort on
+     * @param index	the original index
+     */
+    public SortContainer(Comparable value, int index) {
+      super();
+
+      m_Value = value;
+      m_Index = index;
+    }
+
+    /**
+     * Returns the value to sort on.
+     *
+     * @return		the value
+     */
+    public Comparable getValue() {
+      return m_Value;
+    }
+
+    /**
+     * Returns the original index of the item.
+     *
+     * @return		the index
+     */
+    public int getIndex() {
+      return m_Index;
+    }
+
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object. Null is considered
+     * smallest. If both values are null, then 0 is returned.
+     *
+     * @param o 	the object to be compared.
+     * @return  	a negative integer, zero, or a positive integer as this object
+     *			is less than, equal to, or greater than the specified object.
+     * @throws ClassCastException 	if the specified object's type prevents it
+     *         				from being compared to this object.
+     */
+    public int compareTo(SortContainer o) {
+      if ((m_Value == null) || (o.getValue() == null)) {
+	if (m_Value == o.getValue())
+	  return 0;
+	if (m_Value == null)
+	  return -1;
+	else
+	  return +1;
+      }
+      else {
+	return m_Value.compareTo(o.getValue());
+      }
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     *
+     * @param obj	the reference object with which to compare.
+     * @return		true if this object is the same as the obj argument;
+     * 			false otherwise.
+     * @throws ClassCastException 	if the specified object's type prevents it
+     *         				from being compared to this object.
+     */
+    public boolean equals(Object obj) {
+      return (compareTo((SortContainer) obj) == 0);
+    }
+
+    /**
+     * Returns a string representation of the sort container.
+     *
+     * @return		the string representation (value + index)
+     */
+    public String toString() {
+      return "value=" + m_Value + ", index=" + m_Index;
+    }
+  }
   
   /** the actual table model */
   protected TableModel mModel;
@@ -259,11 +352,11 @@ public class SortedTableModel
    * @param ascending       ascending if true, otherwise descending
    */
   public void sort(int columnIndex, boolean ascending) {
-    int       columnType;
-    int       i;
-    int       n;
-    int       index;
-    int       backup;
+    int       			columnType;
+    int       			i;
+    ArrayList<SortContainer>	sorted;
+    SortContainer		cont;
+    Object			value;
 
     // can we sort?
     if (    (!isInitialized())
@@ -280,93 +373,33 @@ public class SortedTableModel
     mAscending  = ascending;
     initializeIndices();
     
-    // determine the column type: 0=string/other, 1=number, 2=date
-    if (ClassDiscovery.isSubclass(Number.class, getColumnClass(mSortColumn)))
+    // determine the column type: 0=string/other, 1=comparable
+    if (ClassDiscovery.isSubclass(Comparable.class, getColumnClass(mSortColumn)))
       columnType = 1;
-    else if (ClassDiscovery.isSubclass(Date.class, getColumnClass(mSortColumn)))
-      columnType = 2;
     else
       columnType = 0;
 
-    // sort ascending (descending is done below)
-    for (i = 0; i < getRowCount() - 1; i++) {
-      index = i;
-      for (n = i + 1; n < getRowCount(); n++) {
-        if (compare(mIndices[index], mIndices[n], mSortColumn, columnType) > 0)
-          index = n;
-      }
+    // create list for sorting
+    sorted = new ArrayList<SortContainer>();
+    for (i = 0; i < getRowCount(); i++) {
+      value = mModel.getValueAt(mIndices[i], mSortColumn);
+      if (columnType == 0)
+	cont = new SortContainer((value == null) ? null : value.toString(), mIndices[i]);
+      else
+	cont = new SortContainer((Comparable) value, mIndices[i]);
+      sorted.add(cont);
+    }
+    Collections.sort(sorted);
 
-      // found smaller one?
-      if (index != i) {
-        backup          = mIndices[i];
-        mIndices[i]     = mIndices[index];
-        mIndices[index] = backup;
-      }
+    for (i = 0; i < sorted.size(); i++) {
+      if (mAscending)
+	mIndices[i] = sorted.get(i).getIndex();
+      else
+	mIndices[i] = sorted.get(sorted.size() - 1 - i).getIndex();
     }
 
-    // reverse sorting?
-    if (!mAscending) {
-      for (i = 0; i < getRowCount() / 2; i++) {
-        backup                          = mIndices[i];
-        mIndices[i]                     = mIndices[getRowCount() - i - 1];
-        mIndices[getRowCount() - i - 1] = backup;
-      }
-    }
-  }
-
-  /**
-   * compares two cells, returns -1 if cell1 is less than cell2, 0 if equal
-   * and +1 if greater.
-   *
-   * @param row1        row index of cell1
-   * @param row2        row index of cell2
-   * @param col         colunm index
-   * @param type        the class type: 0=string/other, 1=number, 2=date
-   * @return            -1 if cell1&lt;cell2, 0 if cell1=cell2, +1 if 
-   *                    cell1&gt;cell2
-   */
-  protected int compare(int row1, int row2, int col, int type) {
-    int           result;
-    Object        o1;
-    Object        o2;
-    Double        d1;
-    Double        d2;
-
-    o1 = getModel().getValueAt(row1, col);
-    o2 = getModel().getValueAt(row2, col);
-
-    // null is always smaller than non-null values
-    if ( (o1 == null) &&  (o2 == null) ) {
-      result = 0;
-    }
-    else if (o1 == null) {
-      result = -1;
-    }
-    else if (o2 == null) {
-      result = 1;
-    }
-    else {
-      switch (type) {
-        // number
-        case 1:
-          d1 = new Double(((Number) o1).doubleValue());
-          d2 = new Double(((Number) o2).doubleValue());
-          result = d1.compareTo(d2);
-          break;
-          
-        // date
-        case 2:
-          result = ((Date) o1).compareTo((Date) o2);
-          break;
-          
-        // string
-        default:
-          result = o1.toString().compareTo(o2.toString());
-          break;
-      }
-    }
-
-    return result;
+    sorted.clear();
+    sorted = null;
   }
 
   /**
@@ -384,7 +417,8 @@ public class SortedTableModel
   }
   
   /**
-   * adds a mouselistener to the header
+   * Adds a mouselistener to the header: left-click on the header sorts in
+   * ascending manner, using shift-left-click in descending manner.
    *
    * @param table       the table to add the listener to
    */
