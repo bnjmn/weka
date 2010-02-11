@@ -374,7 +374,7 @@ public class SortedTableModel
     initializeIndices();
     
     // determine the column type: 0=string/other, 1=comparable
-    if (ClassDiscovery.isSubclass(Comparable.class, getColumnClass(mSortColumn)))
+    if (ClassDiscovery.hasInterface(Comparable.class, getColumnClass(mSortColumn)))
       columnType = 1;
     else
       columnType = 0;
