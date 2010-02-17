@@ -470,18 +470,26 @@ public class PartitionedMultiFilter
    * @throws Exception	if creation fails
    */
   protected Instances generateSubset(Instances data, Range range) throws Exception {
-    Remove	filter;
-    String	atts;
-    Instances	result;
+    Remove		filter;
+    StringBuilder	atts;
+    Instances		result;
+    int[]		indices;
+    int			i;
  
     // determine attributes
-    atts = range.getRanges();
+    indices = range.getSelection();
+    atts    = new StringBuilder();
+    for (i = 0; i < indices.length; i++) {
+      if (i > 0)
+	atts.append(",");
+      atts.append("" + (indices[i] + 1));
+    }
     if ((data.classIndex() > -1) && (!range.isInRange(data.classIndex())))
-      atts += "," + (data.classIndex() + 1);
+      atts.append("," + (data.classIndex() + 1));
     
     // setup filter
     filter = new Remove();
-    filter.setAttributeIndices(atts);
+    filter.setAttributeIndices(atts.toString());
     filter.setInvertSelection(true);
     filter.setInputFormat(data);
     
