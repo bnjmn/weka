@@ -16,7 +16,7 @@
 
 /*
  * PartitionedMultiFilter.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2010 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,9 +24,8 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance; 
 import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -39,6 +38,7 @@ import weka.filters.AllFilter;
 import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -60,7 +60,8 @@ import java.util.Vector;
  * <pre> -R &lt;range&gt;
  *  An attribute range (can be specified multiple times).
  *  For each filter a range must be supplied. 'first' and 'last'
- *  are valid indices.</pre>
+ *  are valid indices. 'inv(...)' around the range denotes an
+ *  inverted range.</pre>
  * 
  * <pre> -U
  *  Flag for leaving unused attributes out of the output, by default
@@ -75,23 +76,23 @@ import java.util.Vector;
 public class PartitionedMultiFilter
   extends SimpleBatchFilter {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -6293720886005713120L;
 
-  /** The filters */
+  /** The filters. */
   protected Filter m_Filters[] = {new AllFilter()};
   
-  /** The attribute ranges */
+  /** The attribute ranges. */
   protected Range m_Ranges[] = {new Range("first-last")};
   
-  /** Whether unused attributes are left out of the output */
+  /** Whether unused attributes are left out of the output. */
   protected boolean m_RemoveUnused = false;
   
-  /** the indices of the unused attributes */
+  /** the indices of the unused attributes. */
   protected int[] m_IndicesUnused = new int[0];
   
   /**
-   * Returns a string describing this filter
+   * Returns a string describing this filter.
    * @return 		a description of the filter suitable for
    * 			displaying in the explorer/experimenter gui
    */
@@ -121,7 +122,8 @@ public class PartitionedMultiFilter
     result.addElement(new Option(
         "\tAn attribute range (can be specified multiple times).\n"
 	+ "\tFor each filter a range must be supplied. 'first' and 'last'\n"
-	+ "\tare valid indices.",
+	+ "\tare valid indices. 'inv(...)' around the range denotes an\n"
+	+ "\tinverted range.",
         "R", 1, "-R <range>"));
 
     result.addElement(new Option(
@@ -147,7 +149,8 @@ public class PartitionedMultiFilter
    * <pre> -R &lt;range&gt;
    *  An attribute range (can be specified multiple times).
    *  For each filter a range must be supplied. 'first' and 'last'
-   *  are valid indices.</pre>
+   *  are valid indices. 'inv(...)' around the range denotes an
+   *  inverted range.</pre>
    * 
    * <pre> -U
    *  Flag for leaving unused attributes out of the output, by default
@@ -159,10 +162,11 @@ public class PartitionedMultiFilter
    * @throws Exception 	if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    String        tmpStr;
-    String        classname;
-    String[]      options2;
-    Vector        objects;
+    String	tmpStr;
+    String	classname;
+    String[]	options2;
+    Vector	objects;
+    Range	range;
 
     super.setOptions(options);
     
@@ -184,7 +188,14 @@ public class PartitionedMultiFilter
     
     objects = new Vector();
     while ((tmpStr = Utils.getOption("R", options)).length() != 0) {
-      objects.add(new Range(tmpStr));
+      if (tmpStr.startsWith("inv(") && tmpStr.endsWith(")")) {
+	range = new Range(tmpStr.substring(4, tmpStr.length() - 1));
+	range.setInvert(true);
+      }
+      else {
+	range = new Range(tmpStr);
+      }
+      objects.add(range);
     }
 
     // at least one Range
@@ -206,6 +217,7 @@ public class PartitionedMultiFilter
     Vector	result;
     String[]	options;
     int		i;
+    String	tmpStr;
 
     result = new Vector();
 
@@ -222,15 +234,18 @@ public class PartitionedMultiFilter
     }
 
     for (i = 0; i < getRanges().length; i++) {
+      tmpStr = getRange(i).getRanges();
+      if (getRange(i).getInvert())
+	tmpStr = "inv(" + tmpStr + ")";
       result.add("-R");
-      result.add("" + getRange(i).getRanges());
+      result.add(tmpStr);
     }
 
     return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
-   * checks whether the dimensions of filters and ranges fit together
+   * checks whether the dimensions of filters and ranges fit together.
    * 
    * @throws Exception	if dimensions differ
    */
@@ -287,7 +302,7 @@ public class PartitionedMultiFilter
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return    	tip text for this property suitable for
    *            	displaying in the explorer/experimenter gui
@@ -321,7 +336,7 @@ public class PartitionedMultiFilter
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return    	tip text for this property suitable for
    *            	displaying in the explorer/experimenter gui
@@ -341,7 +356,7 @@ public class PartitionedMultiFilter
   }
 
   /**
-   * returns the filter classname and the options as one string
+   * returns the filter classname and the options as one string.
    * 
    * @param filter	the filter to get the specs for
    * @return		the classname plus options
@@ -385,13 +400,13 @@ public class PartitionedMultiFilter
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return    	tip text for this property suitable for
    *            	displaying in the explorer/experimenter gui
    */
   public String rangesTipText() {
-    return "The attribute ranges to be used.";
+    return "The attribute ranges to be used; 'inv(...)' denotes an inverted range.";
   }
   
   /**
@@ -406,7 +421,7 @@ public class PartitionedMultiFilter
   
   /**
    * determines the indices of unused attributes (ones that are not covered
-   * by any of the range)
+   * by any of the range).
    * 
    * @param data	the data to base the determination on
    * @see 		#m_IndicesUnused
@@ -447,7 +462,7 @@ public class PartitionedMultiFilter
   
   /**
    * generates a subset of the dataset with only the attributes from the range
-   * (class is always added if present)
+   * (class is always added if present).
    * 
    * @param data	the data to work on
    * @param range	the range of attribute to use
@@ -486,17 +501,17 @@ public class PartitionedMultiFilter
    * @throws Exception	if renaming fails
    */
   protected Instances renameAttributes(Instances data, String prefix) throws Exception {
-    Instances	result;
-    int		i;
-    FastVector	atts;
+    Instances			result;
+    int				i;
+    ArrayList<Attribute>	atts;
     
     // rename attributes
-    atts = new FastVector();
+    atts = new ArrayList<Attribute>();
     for (i = 0; i < data.numAttributes(); i++) {
       if (i == data.classIndex())
-	atts.addElement(data.attribute(i).copy());
+	atts.add((Attribute) data.attribute(i).copy());
       else
-	atts.addElement(data.attribute(i).copy(prefix + data.attribute(i).name()));
+	atts.add(data.attribute(i).copy(prefix + data.attribute(i).name()));
     }
     
     // create new dataset
@@ -525,12 +540,12 @@ public class PartitionedMultiFilter
    * @see                   #batchFinished()
    */
   protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
-    Instances   result;
-    Instances	processed;
-    int         i;
-    int		n;
-    FastVector	atts;
-    Attribute	att;
+    Instances   		result;
+    Instances			processed;
+    int         		i;
+    int				n;
+    ArrayList<Attribute>	atts;
+    Attribute			att;
     
     if (!isFirstBatchDone()) {
       // we need the full dataset here, see process(Instances)
@@ -542,7 +557,7 @@ public class PartitionedMultiFilter
       // determine unused indices
       determineUnusedIndices(inputFormat);
 
-      atts = new FastVector();
+      atts = new ArrayList<Attribute>();
       for (i = 0; i < getFilters().length; i++) {
 	if (!isFirstBatchDone()) {
 	  // generate subset
@@ -562,7 +577,7 @@ public class PartitionedMultiFilter
 	for (n = 0; n < processed.numAttributes(); n++) {
 	  if (n == processed.classIndex())
 	    continue;
-	  atts.addElement(processed.attribute(n).copy());
+	  atts.add((Attribute) processed.attribute(n).copy());
 	}
       }
 
@@ -570,13 +585,13 @@ public class PartitionedMultiFilter
       if (!getRemoveUnused()) {
 	for (i = 0; i < m_IndicesUnused.length; i++) {
 	  att = inputFormat.attribute(m_IndicesUnused[i]);
-	  atts.addElement(att.copy("unfiltered-" + att.name()));
+	  atts.add(att.copy("unfiltered-" + att.name()));
 	}
       }
 
       // add class if present
       if (inputFormat.classIndex() > -1)
-	atts.addElement(inputFormat.classAttribute().copy());
+	atts.add((Attribute) inputFormat.classAttribute().copy());
 
       // generate new dataset
       result = new Instances(inputFormat.relationName(), atts, 0);
