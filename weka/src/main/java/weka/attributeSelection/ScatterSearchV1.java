@@ -238,7 +238,7 @@ public class ScatterSearchV1 extends ASSearch
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String tresholdTipText() {
+  public String thresholdTipText() {
     return "Set the treshold that subsets most overcome to be considered as significants";
   }
 
@@ -247,8 +247,8 @@ public class ScatterSearchV1 extends ASSearch
    *
    * @param treshold for identifyng significant subsets
    */
-  public void setTreshold (double treshold) {
-    m_initialThreshold = treshold;
+  public void setThreshold (double threshold) {
+    m_initialThreshold = threshold;
   }
 
   /**
@@ -256,7 +256,7 @@ public class ScatterSearchV1 extends ASSearch
    *
    * @return the treshold that subsets most overcome to be considered as significants
    */
-  public double getTreshold () {
+  public double getThreshold () {
     return m_initialThreshold;
   }
 
@@ -434,7 +434,7 @@ public class ScatterSearchV1 extends ASSearch
 
     optionString = Utils.getOption('T', options);
     if (optionString.length() != 0) {
-      setTreshold(Double.parseDouble(optionString));
+      setThreshold(Double.parseDouble(optionString));
     }
 
     optionString = Utils.getOption('R', options);
@@ -463,7 +463,7 @@ public class ScatterSearchV1 extends ASSearch
     int current = 0;
 
     options[current++] = "-T";
-    options[current++] = "" + getTreshold ();
+    options[current++] = "" + getThreshold ();
 
     options[current++] = "-Z";
     options[current++] = ""+getPopulationSize ();
@@ -500,7 +500,7 @@ public class ScatterSearchV1 extends ASSearch
 		FString.append("\n\tDebug: "+m_debug);
 
     FString.append("\n\tTreshold: "
-		   +Utils.doubleToString(Math.abs(getTreshold ()),8,3)+"\n");
+		   +Utils.doubleToString(Math.abs(getThreshold ()),8,3)+"\n");
 
     FString.append("\tTotal number of subsets evaluated: "
 		    + m_totalEvals + "\n");
