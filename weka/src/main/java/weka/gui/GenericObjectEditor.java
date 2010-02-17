@@ -16,20 +16,11 @@
 
 /*
  *    GenericObjectEditor.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2010 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.ClassDiscovery;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.gui.CheckBoxList.CheckBoxListModel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -77,6 +68,16 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.ClassDiscovery;
+import weka.core.CustomDisplayStringProvider;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.gui.CheckBoxList.CheckBoxListModel;
 
 /**
  * A PropertyEditor for objects. It can be used either in a static or a dynamic
@@ -1351,20 +1352,19 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     if (m_Enabled) {
       String rep;
       if (m_Object != null) {
-	rep = m_Object.getClass().getName();
+	if (m_Object instanceof CustomDisplayStringProvider) {
+	  rep = ((CustomDisplayStringProvider) m_Object).toDisplay();
+	}
+	else {
+	  rep = m_Object.getClass().getName();
+	  int dotPos = rep.lastIndexOf('.');
+	  if (dotPos != -1) {
+	    rep = rep.substring(dotPos + 1);
+	  }
+	}
       } else {
 	rep = "None";
       }
-      int dotPos = rep.lastIndexOf('.');
-      if (dotPos != -1) {
-	rep = rep.substring(dotPos + 1);
-      }
-      /*
-      if (m_Object instanceof OptionHandler) {
-	rep += " " + Utils.joinOptions(((OptionHandler)m_Object)
-				       .getOptions());
-      }
-      */
       java.awt.Font originalFont = gfx.getFont();
       gfx.setFont(originalFont.deriveFont(java.awt.Font.BOLD));
 
@@ -1374,7 +1374,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       int repwidth = fm.stringWidth(rep);
 
       gfx.setFont(originalFont);
-      if (m_Object instanceof OptionHandler) {
+      if ((m_Object instanceof OptionHandler) && !(m_Object instanceof CustomDisplayStringProvider)) {
 	gfx.drawString(" " + Utils.joinOptions(((OptionHandler)m_Object).getOptions()),
 					       repwidth + 2, fm.getAscent() + vpad);
       }
@@ -1561,12 +1561,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    return;
 	  
 	  if (node.isLeaf()) {
-	    /*if (node.m_Capabilities != null && m_CapabilitiesFilter != null) {
-	      if (!node.m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && 
-	          !node.m_Capabilities.supports(m_CapabilitiesFilter)) {
-	        return;
-	      }
-	    } */
 	    classSelected(getClassnameFromPath(tree.getSelectionPath()));
 	    popup.setVisible(false);
 	  }
