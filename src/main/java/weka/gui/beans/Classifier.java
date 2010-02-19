@@ -1906,7 +1906,7 @@ public class Classifier
     }
     if (eventName.compareTo("graph") == 0) {
       // can't generate a GraphEvent if classifier is not drawable
-      if (!(m_Classifier instanceof weka.core.Drawable)) {
+      if (!(m_ClassifierTemplate instanceof weka.core.Drawable)) {
 	return false;
       }
       // need to have a training set before the classifier
