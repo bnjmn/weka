@@ -71,7 +71,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30.2.3 $
+ * @version $Revision$
  */
 public class EM
   extends DensityBasedClusterer
@@ -569,6 +569,7 @@ public class EM
     int i, j, l;
 
     new_estimators();
+    estimate_priors(inst);
 
     for (i = 0; i < m_num_clusters; i++) {
       for (j = 0; j < m_num_attribs; j++) {
@@ -665,9 +666,9 @@ public class EM
     }
     
     // reestimate priors
-    if (change_weights) {
+    /*if (change_weights) {
       estimate_priors(inst);
-    }
+    } */
     return  loglk / sOW;
   }
   
