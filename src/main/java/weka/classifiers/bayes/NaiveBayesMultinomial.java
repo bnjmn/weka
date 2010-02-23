@@ -355,12 +355,14 @@ public class NaiveBayesMultinomial
     result.append("\n");
 
     for(int w = 0; w<m_numAttributes; w++)
-      {
-	result.append(m_headerInfo.attribute(w).name()).append("\t");
-	for(int c = 0; c<m_numClasses; c++)
-	  result.append(Double.toString(Math.exp(m_probOfWordGivenClass[c][w]))).append("\t");
-	result.append("\n");
+    {
+      if (w != m_headerInfo.classIndex()) {
+        result.append(m_headerInfo.attribute(w).name()).append("\t");
+        for(int c = 0; c<m_numClasses; c++)
+          result.append(Double.toString(Math.exp(m_probOfWordGivenClass[c][w]))).append("\t");
+        result.append("\n");
       }
+    }
 
     return result.toString();
   }
