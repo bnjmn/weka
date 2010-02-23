@@ -1425,7 +1425,7 @@ public class Classifier
   public synchronized void connectionNotification(String eventName,
 						  Object source) {
     if (eventName.compareTo("instance") == 0) {
-      if (!(m_Classifier instanceof weka.classifiers.UpdateableClassifier)) {
+      if (!(m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier)) {
 	if (m_log != null) {
 	  String msg = statusMessagePrefix() + "WARNING: "
 	  + m_ClassifierTemplate.getClass().getName()
