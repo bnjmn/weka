@@ -23,7 +23,6 @@ package weka.gui;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
@@ -46,7 +45,7 @@ public class BrowserHelper {
 
   /** Linux/Unix binaries to look for */
   public final static String[] LINUX_BROWSERS = 
-    {"firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
+    {"firefox", "google-chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
   
   /**
    * opens the URL in a browser.
