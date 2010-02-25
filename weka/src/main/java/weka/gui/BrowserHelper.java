@@ -29,23 +29,23 @@ import javax.swing.JOptionPane;
 
 /**
  * A little helper class for browser related stuff. <p/>
- * 
- * The <code>openURL</code> method is based on 
+ *
+ * The <code>openURL</code> method is based on
  * <a href="http://www.centerkey.com/java/browser/" target="_blank">Bare Bones Browser Launch</a>,
  * which is placed in the public domain.
- * 
+ *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class BrowserHelper {
 
   /** Linux/Unix binaries to look for */
-  public final static String[] LINUX_BROWSERS = 
-    {"firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
-  
+  public final static String[] LINUX_BROWSERS =
+    {"firefox", "google-chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
+
   /**
    * opens the URL in a browser.
-   * 
+   *
    * @param url		the URL to open
    */
   public static void openURL(String url) {
@@ -54,7 +54,7 @@ public class BrowserHelper {
 
   /**
    * opens the URL in a browser.
-   * 
+   *
    * @param parent	the parent component
    * @param url		the URL to open
    */
@@ -64,28 +64,28 @@ public class BrowserHelper {
 
   /**
    * opens the URL in a browser.
-   * 
+   *
    * @param parent	the parent component
    * @param url		the URL to open
    * @param showDialog	whether to display a dialog in case of an error or
    * 			just print the error to the console
    */
   public static void openURL(Component parent, String url, boolean showDialog) {
-    String osName = System.getProperty("os.name"); 
-    try { 
+    String osName = System.getProperty("os.name");
+    try {
       // Mac OS
-      if (osName.startsWith("Mac OS")) { 
-	Class fileMgr = Class.forName("com.apple.eio.FileManager"); 
-	Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] {String.class}); 
-	openURL.invoke(null, new Object[] {url}); 
-      } 
+      if (osName.startsWith("Mac OS")) {
+	Class fileMgr = Class.forName("com.apple.eio.FileManager");
+	Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] {String.class});
+	openURL.invoke(null, new Object[] {url});
+      }
       // Windows
       else if (osName.startsWith("Windows")) {
-	Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url); 
+	Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
       }
       // assume Unix or Linux
-      else {  
-	String browser = null; 
+      else {
+	String browser = null;
 	for (int count = 0; count < LINUX_BROWSERS.length && browser == null; count++) {
 	  // look for binaries and take first that's available
 	  if (Runtime.getRuntime().exec(new String[] {"which", LINUX_BROWSERS[count]}).waitFor() == 0) {
@@ -93,7 +93,7 @@ public class BrowserHelper {
 	    break;
 	  }
 	}
-	if (browser == null) 
+	if (browser == null)
 	  throw new Exception("Could not find web browser");
 	else
 	  Runtime.getRuntime().exec(new String[] {browser, url});
@@ -101,12 +101,12 @@ public class BrowserHelper {
     }
     catch (Exception e) {
       String errMsg = "Error attempting to launch web browser:\n" + e.getMessage();
-      
+
       if (showDialog)
 	JOptionPane.showMessageDialog(
 	    parent, errMsg);
       else
 	System.err.println(errMsg);
     }
-  } 
+  }
 }
