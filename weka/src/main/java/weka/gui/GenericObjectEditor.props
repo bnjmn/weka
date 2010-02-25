@@ -84,7 +84,6 @@ weka.attributeSelection.ASEvaluation=\
  weka.attributeSelection.ReliefFAttributeEval,\
  weka.attributeSelection.SVMAttributeEval,\
  weka.attributeSelection.SymmetricalUncertAttributeEval,\
- weka.attributeSelection.SymmetricalUncertAttributeSetEval,\
  weka.attributeSelection.WrapperSubsetEval
  
 # Lists the VisualizePlugins I want to choose from
@@ -157,7 +156,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.Dagging,\
  weka.classifiers.meta.Decorate,\
  weka.classifiers.meta.END,\
- weka.classifiers.meta.EnsembleSelection,\
  weka.classifiers.meta.FilteredClassifier,\
  weka.classifiers.meta.Grading,\
  weka.classifiers.meta.GridSearch,\
@@ -193,7 +191,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.mi.SimpleMI,\
  weka.classifiers.mi.TLD,\
  weka.classifiers.mi.TLDSimple,\
- weka.classifiers.misc.FLR,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.SerializedClassifier,\
  weka.classifiers.misc.VFI,\
@@ -340,7 +337,6 @@ weka.experiment.Tester=\
 weka.attributeSelection.ASSearch=\
  weka.attributeSelection.BestFirst,\
  weka.attributeSelection.ExhaustiveSearch,\
- weka.attributeSelection.FCBFSearch,\
  weka.attributeSelection.GeneticSearch,\
  weka.attributeSelection.GreedyStepwise,\
  weka.attributeSelection.LinearForwardSelection,\
@@ -411,7 +407,6 @@ weka.associations.Associator=\
  weka.associations.Apriori,\
  weka.associations.FilteredAssociator,\
  weka.associations.GeneralizedSequentialPatterns,\
- weka.associations.HotSpot,\
  weka.associations.PredictiveApriori,\
  weka.associations.Tertius
  
