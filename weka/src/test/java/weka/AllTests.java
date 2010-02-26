@@ -1,16 +1,16 @@
 package weka;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;         
+import junit.framework.TestSuite;
+import junit.textui.TestRunner;
 
 /**
- * Test class for all tests in this directory. Run from the command line 
+ * Test class for all tests in this directory. Run from the command line
  * with:<p>
  * java weka.AllTests
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class AllTests extends TestSuite {
 
@@ -18,17 +18,15 @@ public class AllTests extends TestSuite {
     TestSuite suite = new TestSuite();
 
     // Core components
-//      suite.addTest(weka.core.AllTests.suite());
+    suite.addTest(weka.core.AllTests.suite());
 //      suite.addTest(weka.estimators.AllTests.suite());
     suite.addTest(weka.filters.AllTests.suite());
-
 
     // The main ML components
 //      suite.addTest(weka.associations.AllTests.suite());
 //      suite.addTest(weka.attributeSelection.AllTests.suite());
     suite.addTest(weka.classifiers.AllTests.suite());
 //      suite.addTest(weka.clusterers.AllTests.suite());
-
 
     // High level applications
 //      suite.addTest(weka.experiment.AllTests.suite());
@@ -38,6 +36,6 @@ public class AllTests extends TestSuite {
   }
 
   public static void main(String []args) {
-    junit.textui.TestRunner.run(suite());
+    TestRunner.run(suite());
   }
 }
