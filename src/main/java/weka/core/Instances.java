@@ -22,18 +22,19 @@
 
 package weka.core;
 
-import weka.core.converters.ArffLoader.ArffReader;
-import weka.core.converters.ConverterUtils.DataSource;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.List;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+
+import weka.core.converters.ArffLoader.ArffReader;
+import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * Class for handling an ordered set of weighted instances. <p>
@@ -229,10 +230,19 @@ public class Instances extends AbstractList<Instance>
    * @param name the name of the relation
    * @param attInfo the attribute information
    * @param capacity the capacity of the set
+   * @throws IllegalArgumentException if attribute names are not unique
    */
   public Instances(/*@non_null@*/String name, 
 		   /*@non_null@*/ArrayList<Attribute> attInfo, int capacity) {
 
+    // check whether the attribute names are unique
+    HashSet<String> names = new HashSet<String>();
+    for (Attribute att: attInfo)
+      names.add(att.name());
+    if (names.size() != attInfo.size())
+      throw new IllegalArgumentException("Attribute names are not unique!");
+    names.clear();
+    
     m_RelationName = name;
     m_ClassIndex = -1;
     m_Attributes = attInfo;
