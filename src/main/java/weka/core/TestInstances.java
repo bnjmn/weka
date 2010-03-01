@@ -1510,13 +1510,20 @@ public class TestInstances
     return result;
   }
   
+  /**
+   * Generates a new dataset
+   * 
+   * @return the generated data
+   * @throws Exception if something goes wrong
+   */
   public Instances generate() throws Exception {
     return generate("");
   }
   
   /**
    * generates a new dataset.
-   * 
+   *
+   * @param namePrefix the prefix to add to the name of an attribute
    * @return 		the generated data
    * @throws Exception	if something goes wrong
    */
