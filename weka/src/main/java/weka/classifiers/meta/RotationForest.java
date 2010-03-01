@@ -719,12 +719,13 @@ public class RotationForest
     public void buildClassifier(Instances data) throws Exception {
       m_ReducedHeaders[m_classifierNumber] = new Instances[ m_Groups[m_classifierNumber].length ];
       FastVector transformedAttributes = new FastVector( m_data.numAttributes() );
-      
       // Construction of the dataset for each group of attributes
       for( int j = 0; j < m_Groups[ m_classifierNumber ].length; j++ ) {
         FastVector fv = new FastVector( m_Groups[m_classifierNumber][j].length + 1 );
-        for( int k = 0; k < m_Groups[m_classifierNumber][j].length; k++ ) {
-          fv.addElement( m_data.attribute( m_Groups[m_classifierNumber][j][k] ).copy() );
+        for( int k = 0; k < m_Groups[m_classifierNumber][j].length; k++ ) {          
+          String newName = m_data.attribute( m_Groups[m_classifierNumber][j][k] ).name()
+            + "_" + k;
+          fv.addElement( m_data.attribute( m_Groups[m_classifierNumber][j][k] ).copy(newName) );
         }
         fv.addElement( m_data.classAttribute( ).copy() );
         Instances dataSubSet = new Instances( "rotated-" + m_classifierNumber + "-" + j + "-", 
