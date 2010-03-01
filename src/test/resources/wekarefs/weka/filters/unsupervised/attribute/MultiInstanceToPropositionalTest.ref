@@ -1,7 +1,7 @@
 @relation Testdata-weka.filters.unsupervised.attribute.MultiInstanceToPropositional-A3
 
 @attribute Nominal1 {att1val1,att1val2}
-@attribute Nominal1 {att1val1,att1val2}
+@attribute bagAtt_Nominal1 {att1val1,att1val2}
 @attribute Class {class1,class2}
 
 @data
