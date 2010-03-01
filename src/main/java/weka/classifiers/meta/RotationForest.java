@@ -724,7 +724,9 @@ public class RotationForest
       for( int j = 0; j < m_Groups[ m_classifierNumber ].length; j++ ) {
         FastVector fv = new FastVector( m_Groups[m_classifierNumber][j].length + 1 );
         for( int k = 0; k < m_Groups[m_classifierNumber][j].length; k++ ) {
-          fv.addElement( m_data.attribute( m_Groups[m_classifierNumber][j][k] ).copy() );
+          String newName = m_data.attribute( m_Groups[m_classifierNumber][j][k] ).name()
+            + "_" + k;
+          fv.addElement( m_data.attribute( m_Groups[m_classifierNumber][j][k] ).copy(newName) );
         }
         fv.addElement( m_data.classAttribute( ).copy() );
         Instances dataSubSet = new Instances( "rotated-" + m_classifierNumber + "-" + j + "-", 
