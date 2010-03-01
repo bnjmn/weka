@@ -1287,7 +1287,8 @@ public class TestInstances
    * @see #CLASS_IS_LAST
    * @see #NO_CLASS
    */
-  protected Attribute generateAttribute(int index, int attType) throws Exception {
+  protected Attribute generateAttribute(int index, int attType, 
+      String namePrefix) throws Exception {
     Attribute     result;
     String        name;
     int           valIndex;
@@ -1339,19 +1340,19 @@ public class TestInstances
         ArrayList<String> nomStrings = new ArrayList<String>(valIndex + 1);
         for (int j = 0; j < nomCount; j++)
           nomStrings.add(prefix + (j + 1));
-        result = new Attribute(name, nomStrings);
+        result = new Attribute(namePrefix + name, nomStrings);
         break;
         
       case Attribute.NUMERIC:
-        result = new Attribute(name);
+        result = new Attribute(namePrefix + name);
         break;
         
       case Attribute.STRING:
-        result = new Attribute(name, (ArrayList<String>) null);
+        result = new Attribute(namePrefix + name, (ArrayList<String>) null);
         break;
         
       case Attribute.DATE:
-        result = new Attribute(name, "yyyy-mm-dd");
+        result = new Attribute(namePrefix + name, "yyyy-mm-dd");
         break;
         
       case Attribute.RELATIONAL:
@@ -1377,7 +1378,7 @@ public class TestInstances
             rel.deleteAttributeAt(clsIndex);
           }
         }
-        result = new Attribute(name, rel);
+        result = new Attribute(namePrefix + name, rel);
         break;
         
       default:
@@ -1509,19 +1510,23 @@ public class TestInstances
     return result;
   }
   
+  public Instances generate() throws Exception {
+    return generate("");
+  }
+  
   /**
    * generates a new dataset.
    * 
    * @return 		the generated data
    * @throws Exception	if something goes wrong
    */
-  public Instances generate() throws Exception {
+  public Instances generate(String namePrefix) throws Exception {
     if (getMultiInstance()) {
       TestInstances bag = (TestInstances) this.clone();
       bag.setMultiInstance(false);
       bag.setNumInstances(0);
       bag.setSeed(m_Random.nextInt());
-      Instances bagFormat = bag.generate();
+      Instances bagFormat = bag.generate("bagAtt_");
       bagFormat.setClassIndex(-1);
       bagFormat.deleteAttributeAt(bagFormat.numAttributes() - 1);
 
@@ -1541,7 +1546,7 @@ public class TestInstances
       bag.setNumInstances(getNumInstancesRelational());
       for (int i = 0; i < getNumInstances(); i++) {
         bag.setSeed(m_Random.nextInt());
-        Instances bagData = new Instances(bag.generate());
+        Instances bagData = new Instances(bag.generate("bagAtt_"));
         bagData.setClassIndex(-1);
         bagData.deleteAttributeAt(bagData.numAttributes() - 1);
         double val = m_Data.attribute(1).addRelation(bagData);
@@ -1558,27 +1563,27 @@ public class TestInstances
       ArrayList<Attribute> attributes = new ArrayList<Attribute>(getNumAttributes());
       // Add Nominal attributes
       for (int i = 0; i < getNumNominal(); i++)
-        attributes.add(generateAttribute(i, Attribute.NOMINAL));
+        attributes.add(generateAttribute(i, Attribute.NOMINAL, namePrefix));
       
       // Add m_Numeric attributes
       for (int i = 0; i < getNumNumeric(); i++)
-        attributes.add(generateAttribute(i, Attribute.NUMERIC));
+        attributes.add(generateAttribute(i, Attribute.NUMERIC, namePrefix));
       
       // Add some String attributes...
       for (int i = 0; i < getNumString(); i++)
-        attributes.add(generateAttribute(i, Attribute.STRING));
+        attributes.add(generateAttribute(i, Attribute.STRING, namePrefix));
       
       // Add some Date attributes...
       for (int i = 0; i < getNumDate(); i++)
-        attributes.add(generateAttribute(i, Attribute.DATE));
+        attributes.add(generateAttribute(i, Attribute.DATE, namePrefix));
       
       // Add some Relational attributes...
       for (int i = 0; i < getNumRelational(); i++)
-        attributes.add(generateAttribute(i, Attribute.RELATIONAL));
+        attributes.add(generateAttribute(i, Attribute.RELATIONAL, namePrefix));
       
       // Add class attribute
       if (clsIndex != NO_CLASS)
-	attributes.add(clsIndex, generateAttribute(CLASS_IS_LAST, getClassType()));
+	attributes.add(clsIndex, generateAttribute(CLASS_IS_LAST, getClassType(), namePrefix));
       
       m_Data = new Instances(getRelation(), attributes, getNumInstances());
       m_Data.setClassIndex(clsIndex);
