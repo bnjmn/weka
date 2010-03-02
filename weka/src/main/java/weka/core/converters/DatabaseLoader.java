@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision$
  * @see Loader
  */
 public class DatabaseLoader 
@@ -672,7 +672,6 @@ public class DatabaseLoader
    * @throws IOException if an error occurs
    */
   public Instances getStructure() throws IOException {
-
     if (m_DataBaseConnection == null) {
       throw new IOException("No source database has been specified");
     }
@@ -720,7 +719,7 @@ public class DatabaseLoader
         String end = endOfQuery(false);
         ResultSet rs = m_DataBaseConnection.getResultSet();
         ResultSetMetaData md = rs.getMetaData();
-        rs.close();
+
         int numAttributes = md.getColumnCount();
         int [] attributeTypes = new int [numAttributes];
         m_nominalIndexes = new Hashtable [numAttributes];
@@ -861,6 +860,10 @@ public class DatabaseLoader
         }
         else
             m_oldStructure = new Instances(m_structure,0);
+        
+
+        rs.close();
+
     }
     else{
         if(m_oldStructure == null)
@@ -871,7 +874,8 @@ public class DatabaseLoader
     catch(Exception ex) {
         ex.printStackTrace();
 	printException(ex);
-    } 
+    }
+    
     return m_oldStructure;
     
   }
@@ -902,6 +906,7 @@ public class DatabaseLoader
       throw new Exception("Query didn't produce results");
     ResultSet rs = m_DataBaseConnection.getResultSet();
     ResultSetMetaData md = rs.getMetaData();
+
     // Determine structure of the instances
     int numAttributes = md.getColumnCount();
     int [] attributeTypes = new int [numAttributes];
@@ -928,7 +933,7 @@ public class DatabaseLoader
         rs1 = m_DataBaseConnection.getResultSet();
         attributeTypes[i - 1] = Attribute.NOMINAL;
         stringToNominal(rs1,i);
-        rs1.close();  
+
 	break;
       case DatabaseConnection.TEXT:
         columnName = md.getColumnName(i);
@@ -943,7 +948,7 @@ public class DatabaseLoader
         rs1 = m_DataBaseConnection.getResultSet();
         attributeTypes[i - 1] = Attribute.STRING;
         stringToNominal(rs1,i);
-        rs1.close();  
+//        rs1.close();  
 	break;
       case DatabaseConnection.BOOL:
 	//System.err.println("boolean --> nominal");
@@ -989,6 +994,14 @@ public class DatabaseLoader
 	//System.err.println("Unknown column type");
 	attributeTypes[i - 1] = Attribute.STRING;
       }
+    }
+    
+    // For sqlite
+    // cache column names because the last while(rs.next()) { iteration for
+    // the tuples below will close the md object:  
+    Vector<String> columnNames = new Vector<String>(); 
+    for (int i = 0; i < numAttributes; i++) {
+      columnNames.add(md.getColumnName(i + 1));
     }
 
     // Step through the tuples
@@ -1106,7 +1119,7 @@ public class DatabaseLoader
       Instance newInst;
       newInst = new Instance(1.0, vals);
       instances.addElement(newInst);
-    }   
+    }
     
     // Create the header and add the instances to the dataset
     //System.err.println("Creating header...");
@@ -1114,7 +1127,8 @@ public class DatabaseLoader
     for (int i = 0; i < numAttributes; i++) {
       /* Fix for databases that uppercase column names */
       //String attribName = attributeCaseFix(md.getColumnName(i + 1));
-      String attribName = md.getColumnName(i + 1);
+      //String attribName = md.getColumnName(i + 1);
+      String attribName = columnNames.get(i);
       switch (attributeTypes[i]) {
       case Attribute.NOMINAL:
 	attribInfo.addElement(new Attribute(attribName, m_nominalStrings[i]));
@@ -1141,7 +1155,9 @@ public class DatabaseLoader
     for (int i = 0; i < instances.size(); i++) {
       result.add((Instance)instances.elementAt(i));
     }
+
     rs.close();
+
     m_DataBaseConnection.disconnectFromDatabase();
     //get rid of m_idColumn
     if(m_DataBaseConnection.getUpperCase())
@@ -1582,7 +1598,7 @@ public class DatabaseLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /** Main method.
