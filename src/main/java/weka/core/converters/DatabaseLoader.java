@@ -721,7 +721,7 @@ public class DatabaseLoader
         String end = endOfQuery(false);
         ResultSet rs = m_DataBaseConnection.getResultSet();
         ResultSetMetaData md = rs.getMetaData();
-        rs.close();
+//        rs.close();
         int numAttributes = md.getColumnCount();
         int [] attributeTypes = new int [numAttributes];
         m_nominalIndexes = Utils.cast(new Hashtable [numAttributes]);
@@ -862,6 +862,10 @@ public class DatabaseLoader
         }
         else
             m_oldStructure = new Instances(m_structure,0);
+        
+        if (m_DataBaseConnection.getResultSet() != null) {
+          rs.close();
+        }
     }
     else{
         if(m_oldStructure == null)
@@ -929,7 +933,7 @@ public class DatabaseLoader
         rs1 = m_DataBaseConnection.getResultSet();
         attributeTypes[i - 1] = Attribute.NOMINAL;
         stringToNominal(rs1,i);
-        rs1.close();  
+//        rs1.close();  
 	break;
       case DatabaseConnection.TEXT:
         columnName = md.getColumnName(i);
@@ -990,6 +994,14 @@ public class DatabaseLoader
 	//System.err.println("Unknown column type");
 	attributeTypes[i - 1] = Attribute.STRING;
       }
+    }
+    
+    // For sqlite
+    // cache column names because the last while(rs.next()) { iteration for
+    // the tuples below will close the md object:  
+    Vector<String> columnNames = new Vector<String>(); 
+    for (int i = 0; i < numAttributes; i++) {
+      columnNames.add(md.getColumnName(i + 1));
     }
 
     // Step through the tuples
@@ -1115,7 +1127,8 @@ public class DatabaseLoader
     for (int i = 0; i < numAttributes; i++) {
       /* Fix for databases that uppercase column names */
       //String attribName = attributeCaseFix(md.getColumnName(i + 1));
-      String attribName = md.getColumnName(i + 1);
+//      String attribName = md.getColumnName(i + 1);
+      String attribName = columnNames.get(i);
       switch (attributeTypes[i]) {
       case Attribute.NOMINAL:
 	attribInfo.add(new Attribute(attribName, m_nominalStrings[i]));
@@ -1142,7 +1155,9 @@ public class DatabaseLoader
     for (int i = 0; i < instances.size(); i++) {
       result.add((Instance)instances.get(i));
     }
+    
     rs.close();
+    
     m_DataBaseConnection.disconnectFromDatabase();
     //get rid of m_idColumn
     if(m_DataBaseConnection.getUpperCase())
