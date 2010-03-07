@@ -880,7 +880,7 @@ public class ArffLoader
     m_structure = null;
     setRetrieval(NONE);
     
-    if (m_File != null) {
+    if (m_File != null && !(new File(m_File).isDirectory())) {
       setFile(new File(m_File));
     } else if (m_URL != null && !m_URL.equals("http://")) {
       setURL(m_URL);
