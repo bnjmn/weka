@@ -306,7 +306,7 @@ public class ConverterUtils
       else if (m_URL != null)
 	((URLSourcedLoader) m_Loader).setURL(m_URL.toString());
       else if (m_Loader != null)
-	// m_Loader.reset(); we can't really reset the loader if the source has been set as an input stream
+	m_Loader.reset();
       
       m_BatchCounter      = 0;
       m_IncrementalBuffer = null;
