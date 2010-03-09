@@ -94,7 +94,9 @@ public class Array implements Serializable {
     NUM("NUM-ARRAY"),
     INT("INT-ARRAY"),
     REAL("REAL-ARRAY"),
-    STRING("STRING-ARRAY");
+    STRING("STRING-ARRAY"),
+    REAL_SPARSE("REAL-SparseArray"),
+    INT_SPARSE("INT-SparseArray");
     
     private final String m_stringVal;
     
@@ -113,7 +115,7 @@ public class Array implements Serializable {
   /** The type of the array */
   protected ArrayType m_type = ArrayType.NUM;
   
-  protected Array(Element arrayE) throws Exception {
+  protected void initialize(Element arrayE) throws Exception {
     String arrayS = arrayE.getTagName();
     
     // get the type of the array
@@ -152,6 +154,10 @@ public class Array implements Serializable {
       m_values.add(st.sval);
       st.nextToken();
     }
+  }
+  
+  protected Array(Element arrayE) throws Exception {
+    initialize(arrayE);
   }
   
   /**
@@ -288,7 +294,7 @@ public class Array implements Serializable {
    * @throws Exception if index is out of bounds.
    */
   public int valueInt(int index) throws Exception {
-    if (m_type == ArrayType.INT) {
+    if (m_type != ArrayType.INT) {
       throw new Exception("[Array] Array does not contain integers!");
     }
     return Integer.parseInt(value(index));
