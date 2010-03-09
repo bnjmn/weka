@@ -288,7 +288,7 @@ public class Array implements Serializable {
    * @throws Exception if index is out of bounds.
    */
   public int valueInt(int index) throws Exception {
-    if (m_type == ArrayType.INT) {
+    if (m_type != ArrayType.INT) {
       throw new Exception("[Array] Array does not contain integers!");
     }
     return Integer.parseInt(value(index));
