@@ -94,7 +94,9 @@ public class Array implements Serializable {
     NUM("NUM-ARRAY"),
     INT("INT-ARRAY"),
     REAL("REAL-ARRAY"),
-    STRING("STRING-ARRAY");
+    STRING("STRING-ARRAY"),
+    REAL_SPARSE("REAL-SparseArray"),
+    INT_SPARSE("INT-SparseArray");
     
     private final String m_stringVal;
     
@@ -288,7 +290,7 @@ public class Array implements Serializable {
    * @throws Exception if index is out of bounds.
    */
   public int valueInt(int index) throws Exception {
-    if (m_type != ArrayType.INT) {
+    if (m_type != ArrayType.INT && m_type != ArrayType.INT_SPARSE) {
       throw new Exception("[Array] Array does not contain integers!");
     }
     return Integer.parseInt(value(index));
