@@ -796,7 +796,7 @@ public class Evaluation
     Classifier classifierClassifications = null;
     int actualClassIndex = -1;  // 0-based class index
     String splitPercentageString = "";
-    int splitPercentage = -1;
+    double splitPercentage = -1;
     boolean preserveOrder = false;
     boolean trainSetPresent = false;
     boolean testSetPresent = false;
@@ -943,7 +943,7 @@ public class Evaluation
             throw new Exception(
                 "Percentage split cannot be used in conjunction with "
                 + "cross-validation ('-x').");
-          splitPercentage = Integer.parseInt(splitPercentageString);
+          splitPercentage = Double.parseDouble(splitPercentageString);
           if ((splitPercentage <= 0) || (splitPercentage >= 100))
             throw new Exception("Percentage split value needs be >0 and <100.");
         }
@@ -961,7 +961,8 @@ public class Evaluation
           Instances tmpInst = trainSource.getDataSet(actualClassIndex);
           if (!preserveOrder)
             tmpInst.randomize(new Random(seed));
-          int trainSize = tmpInst.numInstances() * splitPercentage / 100;
+          int trainSize = 
+            (int) Math.round(tmpInst.numInstances() * splitPercentage / 100);
           int testSize  = tmpInst.numInstances() - trainSize;
           Instances trainInst = new Instances(tmpInst, 0, trainSize);
           Instances testInst  = new Instances(tmpInst, trainSize, testSize);
