@@ -237,10 +237,16 @@ public class Instances extends AbstractList<Instance>
 
     // check whether the attribute names are unique
     HashSet<String> names = new HashSet<String>();
-    for (Attribute att: attInfo)
+    StringBuffer nonUniqueNames = new StringBuffer();
+    for (Attribute att: attInfo) {
+      if (names.contains(att.name())) {
+        nonUniqueNames.append("'" + att.name() +"' ");
+      }
       names.add(att.name());
+    }
     if (names.size() != attInfo.size())
-      throw new IllegalArgumentException("Attribute names are not unique!");
+      throw new IllegalArgumentException("Attribute names are not unique!" +
+      		" Causes: " + nonUniqueNames.toString());
     names.clear();
     
     m_RelationName = name;
