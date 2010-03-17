@@ -239,10 +239,16 @@ public class Instances
 
     // check whether the attribute names are unique
     HashSet<String> names = new HashSet<String>();
-    for (int i = 0; i < attInfo.size(); i++)
+    StringBuffer nonUniqueNames = new StringBuffer();
+    for (int i = 0; i < attInfo.size(); i++) {
+      if (names.contains(((Attribute) attInfo.elementAt(i)).name())) {
+        nonUniqueNames.append("'" + ((Attribute) attInfo.elementAt(i)).name() +"' ");
+      }
       names.add(((Attribute) attInfo.elementAt(i)).name());
+    }
     if (names.size() != attInfo.size())
-      throw new IllegalArgumentException("Attribute names are not unique!");
+      throw new IllegalArgumentException("Attribute names are not unique!" +
+          " Causes: " + nonUniqueNames.toString());
     names.clear();
 
     m_RelationName = name;
