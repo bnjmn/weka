@@ -111,6 +111,16 @@ import weka.core.TechnicalInformation.Type;
  *  Turning this mode on will disable the iterative support reduction
  *  procedure to find the specified number of rules.</pre>
  * 
+ * <pre> -transactions &lt;comma separated list of attribute names&gt;
+ *  Only consider transactions that contain these items (default = no restriction)</pre>
+ * 
+ * <pre> -rules &lt;comma separated list of attribute names&gt;
+ *  Only print rules that contain these items. (default = no restriction)</pre>
+ * 
+ * <pre> -use-or
+ *  Use OR instead of AND for must contain list(s). Use in conjunction
+ *  with -transactions and/or -rules</pre>
+ * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
@@ -403,7 +413,7 @@ public class FPGrowth extends AbstractAssociator
     public FrequentItemSets(int numTransactions) {
       m_numberOfTransactions = numTransactions;
     }
-    
+        
     /**
      * Get an item set.
      * 
@@ -1173,6 +1183,39 @@ public class FPGrowth extends AbstractAssociator
       return result;
     }
     
+    public boolean containsItems(ArrayList<Attribute> items, boolean useOr) {
+      int numItems = items.size();
+      int count = 0;
+      
+      for (BinaryItem i : m_premise) {
+        if (items.contains(i.getAttribute())) {
+          if (useOr) {
+            return true; // can stop here
+          } else {
+            count++;
+          }
+        }
+      }
+      
+      for (BinaryItem i : m_consequence) {
+        if (items.contains(i.getAttribute())) {
+          if (useOr) {
+            return true; // can stop here
+          } else {
+            count++;
+          }
+        }
+      }
+      
+      if (!useOr) {
+        if (count == numItems) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+    
     /**
      * Get a textual description of this rule.
      * 
@@ -1298,8 +1341,20 @@ public class FPGrowth extends AbstractAssociator
           }
         }
       }
-      
       return rules;
+    }
+    
+    public static List<AssociationRule> pruneRules(List<AssociationRule> rulesToPrune,
+        ArrayList<Attribute> itemsToConsider, boolean useOr) {
+      ArrayList<AssociationRule> result = new ArrayList<AssociationRule>();
+      
+      for (AssociationRule r : rulesToPrune) {
+        if (r.containsItems(itemsToConsider, useOr)) {
+          result.add(r);
+        }
+      }
+      
+      return result;
     }
   }
   
@@ -1342,6 +1397,18 @@ public class FPGrowth extends AbstractAssociator
   
   // maximum number of items in a large item set (zero means no limit)
   protected int m_maxItems = -1;
+  
+  /**
+   *  If set, limit the transactions (instances) input to the
+   *  algorithm to those that contain these items
+   */
+  protected String m_transactionsMustContain = "";
+  
+  /** Use OR rather than AND when considering must contain lists */
+  protected boolean m_mustContainOR = false;
+  
+  /** If set, then only output rules containing these itmes */
+  protected String m_rulesMustContain = "";
   
   /**
    * Returns default capabilities of the classifier.
@@ -1396,6 +1463,62 @@ public class FPGrowth extends AbstractAssociator
     		" Conference on Management of Data");
     result.setValue(Field.YEAR, "2000");
     result.setValue(Field.PAGES, "1-12");
+    
+    return result;
+  }
+  
+  private boolean passesMustContain(Instance inst, 
+      boolean[] transactionsMustContainIndexes, 
+      int numInTransactionsMustContainList) {
+    
+    boolean result = false;
+    
+    if (inst instanceof SparseInstance) {
+      int containsCount = 0;
+      for (int i = 0; i < inst.numValues(); i++) {
+        int attIndex = inst.index(i);
+        
+        if (m_mustContainOR) {
+          if (transactionsMustContainIndexes[attIndex]) {
+            // break here since the operator is OR and this
+            // instance contains at least one of the items
+            return true;
+          }
+        } else {
+          if (transactionsMustContainIndexes[attIndex]) {
+            containsCount++;
+          }
+        }
+      }
+      
+      if (!m_mustContainOR) {
+        if (containsCount == numInTransactionsMustContainList) {
+          return true;
+        }
+      }
+    } else {
+      int containsCount = 0;
+      for (int i = 0; i < transactionsMustContainIndexes.length; i++) {
+        if (transactionsMustContainIndexes[i]) {
+          if ((int)inst.value(i) == m_positiveIndex - 1) {
+            if (m_mustContainOR) {
+              // break here since the operator is OR and
+              // this instance contains at least one of the
+              // requested items
+              return true;
+            } else {
+              containsCount++;
+            }
+          }
+        }
+      }
+      
+      if (!m_mustContainOR) {
+        if (containsCount == numInTransactionsMustContainList) {
+          return true;
+        }
+      }
+    }
     
     return result;
   }
@@ -1597,6 +1720,9 @@ public class FPGrowth extends AbstractAssociator
     m_upperBoundMinSupport = 1.0;
 //    m_minSupport = -1;
     m_positiveIndex = 2;
+    m_transactionsMustContain = "";
+    m_rulesMustContain = "";
+    m_mustContainOR = false;
   }
   
   /**
@@ -1771,8 +1897,108 @@ public class FPGrowth extends AbstractAssociator
   
   /**
    * Returns the tip text for this property
+   * 
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
+   */
+  public String transactionsMustContainTipText() {
+    return "Limit input to FPGrowth to those transactions (instances)" +
+    		" that contain these items. Provide a comma separated" +
+    		" list of attribute names.";
+  }
+  
+  /**
+   * Set the comma separated list of items that transactions
+   * must contain in order to be considered for large
+   * item sets and rules.
+   * 
+   * @param list a comma separated list of items (empty
+   * string indicates no restriction on the transactions).
+   */
+  public void setTransactionsMustContain(String list) {
+    m_transactionsMustContain = list;
+  }
+  
+  /**
+   * Gets the comma separated list of items that
+   * transactions must contain in order to be considered
+   * for large item sets and rules.
+   * 
+   * @return return the comma separated list of
+   * items that transactions must contain.
+   */
+  public String getTransactionsMustContain() {
+    return m_transactionsMustContain;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String rulesMustContainTipText() {
+    return "Only print rules that contain these items. Provide " +
+    		"a comma separated list of attribute names.";
+  }
+  
+  /**
+   * Set the comma separated list of items that rules
+   * must contain in order to be output. 
+   * 
+   * @param list a comma separated list of items (empty
+   * string indicates no restriction on the rules).
+   */
+  public void setRulesMustContain(String list) {
+    m_rulesMustContain = list;
+  }
+  
+  /**
+   * Get the comma separated list of items that
+   * rules must contain in order to be output.
+   * 
+   * @return the comma separated list of items
+   * that rules must contain in order to be output.
+   */
+  public String getRulesMustContain() {
+    return m_rulesMustContain;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useORForMustContainListTipText() {
+    return "Use OR instead of AND for transactions/rules must contain lists.";
+  }
+  
+  /**
+   * Set whether to use OR rather than AND when considering
+   * must contain lists.
+   * 
+   * @param b true if OR should be used instead of AND when
+   * considering transaction and rules must contain lists.
+   */
+  public void setUseORForMustContainList(boolean b) {
+    m_mustContainOR = b;
+  }
+  
+  /**
+   * Gets whether OR is to be used rather than AND when
+   * considering must contain lists.
+   * 
+   * @return true if OR is used instead of AND.
+   */
+  public boolean getUseORForMustContainList() {
+    return m_mustContainOR;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying, in the explorer/experimenter gui
    */
   public String deltaTipText() {
     return "Iteratively decrease support by this factor. Reduces support "
@@ -1945,6 +2171,10 @@ public class FPGrowth extends AbstractAssociator
     		"minimum support and the minimum metric constraint.\n\t" +
     		"Turning this mode on will disable the iterative support reduction\n\t" +
     		"procedure to find the specified number of rules.";
+    String string8 = "\tOnly consider transactions that contain these items (default = no restriction)";
+    String string9 = "\tOnly print rules that contain these items. (default = no restriction)";
+    String string10 = "\tUse OR instead of AND for must contain list(s). Use in conjunction" +
+    		"\n\twith -transactions and/or -rules";
     
     newVector.add(new Option(string00, "P", 1, "-P <attribute index of positive value>"));
     newVector.add(new Option(string0, "I", 1, "-I <max items>"));
@@ -1956,6 +2186,11 @@ public class FPGrowth extends AbstractAssociator
     newVector.add(new Option(string4, "M", 1, "-M <lower bound for minimum support>"));
     newVector.add(new Option(string6, "D", 1, "-D <delta for minimum support>"));
     newVector.add(new Option(string7, "S", 0, "-S"));
+    newVector.add(new Option(string8, "transactions", 1, "-transactions <comma separated " +
+    		"list of attribute names>"));
+    newVector.add(new Option(string9, "rules", 1, "-rules <comma separated list " +
+    		"of attribute names>"));
+    newVector.add(new Option(string10, "use-or", 0, "-use-or"));
     
     return newVector.elements();
   }
@@ -2000,6 +2235,16 @@ public class FPGrowth extends AbstractAssociator
    *  Turning this mode on will disable the iterative support reduction
    *  procedure to find the specified number of rules.</pre>
    * 
+   * <pre> -transactions &lt;comma separated list of attribute names&gt;
+   *  Only consider transactions that contain these items (default = no restriction)</pre>
+   * 
+   * <pre> -rules &lt;comma separated list of attribute names&gt;
+   *  Only print rules that contain these items. (default = no restriction)</pre>
+   * 
+   * <pre> -use-or
+   *  Use OR instead of AND for must contain list(s). Use in conjunction
+   *  with -transactions and/or -rules</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -2015,6 +2260,8 @@ public class FPGrowth extends AbstractAssociator
     String lowerBoundSupportString = Utils.getOption("M", options);
     String upperBoundSupportString = Utils.getOption("U", options);
     String deltaString = Utils.getOption("D", options);
+    String transactionsString = Utils.getOption("transactions", options);
+    String rulesString = Utils.getOption("rules", options);
 
     if (positiveIndexString.length() != 0) {
       setPositiveIndex(Integer.parseInt(positiveIndexString));
@@ -2049,6 +2296,16 @@ public class FPGrowth extends AbstractAssociator
       setUpperBoundMinSupport(Double.parseDouble(upperBoundSupportString));
     }
     
+    if (transactionsString.length() != 0) {
+      setTransactionsMustContain(transactionsString);
+    }
+    
+    if (rulesString.length() > 0) {
+      setRulesMustContain(rulesString);
+    }
+    
+    setUseORForMustContainList(Utils.getFlag("use-or", options));
+    
     setFindAllRulesForSupportLevel(Utils.getFlag('S', options));
   }
   
@@ -2072,7 +2329,70 @@ public class FPGrowth extends AbstractAssociator
       options.add("-S");
     }
     
+    if (getTransactionsMustContain().length() > 0) {
+      options.add("-transactions"); options.add(getTransactionsMustContain());
+    }
+    
+    if (getRulesMustContain().length() > 0) {
+      options.add("-rules"); options.add(getRulesMustContain());
+    }
+    
+    if (getUseORForMustContainList()) {
+      options.add("-use-or");
+    }
+    
     return options.toArray(new String[1]);
+  }
+  
+  private Instances parseTransactionsMustContain(Instances data) {
+    String[] split = m_transactionsMustContain.trim().split(",");
+    boolean[] transactionsMustContainIndexes = new boolean[data.numAttributes()];
+    int numInTransactionsMustContainList = split.length;
+    
+    for (int i = 0; i < split.length; i++) {
+      String attName = split[i].trim();
+      Attribute att = data.attribute(attName);
+      if (att == null) {
+        System.err.println("[FPGrowth] : WARNING - can't find attribute " 
+            + attName + " in the data.");
+        numInTransactionsMustContainList--;
+      } else {
+        transactionsMustContainIndexes[att.index()] = true;
+      }
+    }
+    
+    if (numInTransactionsMustContainList == 0) {
+      return data;
+    } else {
+      Instances newInsts = new Instances(data, 0);
+      for (int i = 0; i < data.numInstances(); i++) {
+        if (passesMustContain(data.instance(i), 
+            transactionsMustContainIndexes, numInTransactionsMustContainList)) {
+          newInsts.add(data.instance(i));
+        }
+      }
+      newInsts.compactify();
+      return newInsts;
+    }
+  }
+  
+  private ArrayList<Attribute> parseRulesMustContain(Instances data) {
+    ArrayList<Attribute> result = new ArrayList<Attribute>();
+    
+    String[] split = m_rulesMustContain.trim().split(",");
+    
+    for (int i = 0; i < split.length; i++) {
+      String attName = split[i].trim();
+      Attribute att = data.attribute(attName);
+      if (att == null) {
+        System.err.println("[FPGrowth] : WARNING - can't find attribute " 
+            + attName + " in the data.");
+      } else {
+        result.add(att);
+      }
+    }
+    
+    return result;
   }
 
   /**
@@ -2087,6 +2407,18 @@ public class FPGrowth extends AbstractAssociator
     
     // can we handle the data?
     getCapabilities().testWithFail(data);
+    
+    // prune any instances that don't contain the requested items (if any)
+    if (m_transactionsMustContain.length() > 0) {
+      data = parseTransactionsMustContain(data);
+      getCapabilities().testWithFail(data);
+    }
+    
+    ArrayList<Attribute> rulesMustContain = null;
+    if (m_rulesMustContain.length() > 0) {
+      rulesMustContain = parseRulesMustContain(data);
+    }
+    
     
     double currentSupport = m_upperBoundMinSupport;
     
@@ -2123,10 +2455,10 @@ public class FPGrowth extends AbstractAssociator
       // mine the tree
       FrequentBinaryItemSet conditionalItems = 
         new FrequentBinaryItemSet(new ArrayList<BinaryItem>(), 0);
-      mineTree(tree, largeItemSets, 0, conditionalItems, currentSupportAsInstances);
+      mineTree(tree, largeItemSets, 0, conditionalItems, currentSupportAsInstances);      
 
       m_largeItemSets = largeItemSets;
-//         System.err.println("Number of large item sets: " + m_largeItemSets.size());
+//      System.err.println("Number of large item sets: " + m_largeItemSets.size());
   //    System.err.println(m_largeItemSets.toString(100));
 
       //    m_largeItemSets.sort(compF);
@@ -2134,10 +2466,16 @@ public class FPGrowth extends AbstractAssociator
       
       // save memory
       tree = null;
-      
+
       m_rules = 
         AssociationRule.generateRulesBruteForce(m_largeItemSets, m_metric, 
             m_metricThreshold, data.numInstances());
+      
+      if (rulesMustContain != null && rulesMustContain.size() > 0) {
+        m_rules = AssociationRule.pruneRules(m_rules, rulesMustContain, 
+            m_mustContainOR);
+      }
+      
       
       if (!m_findAllRulesForSupportLevel) {
         currentSupport -= m_delta;
@@ -2185,6 +2523,20 @@ public class FPGrowth extends AbstractAssociator
       if (!m_findAllRulesForSupportLevel) {
         result.append(" (displaying top " + numRules + ")");
       }
+      
+      if (m_transactionsMustContain.length() > 0 || 
+          m_rulesMustContain.length() > 0) {
+        result.append("\n");
+        if (m_transactionsMustContain.length() > 0) {
+          result.append("\nUsing only transactions that contain: " 
+              + m_transactionsMustContain);
+        }
+        if (m_rulesMustContain.length() > 0) {
+          result.append("\nShowing only rules that contain: " 
+              + m_rulesMustContain);
+        }
+      }
+      
       result.append("\n\n");
     }
 
