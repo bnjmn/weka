@@ -44,55 +44,41 @@ import weka.core.RevisionUtils;
 
 /**
  <!-- globalinfo-start -->
- * HotSpot learns a set of rules (displayed in a tree-like structure) <br>
- * that maximize/minimize a target variable/value of interest. <br>
- * With a nominal target, one might want to look for segments of the <br>
- * data where there is a high probability of a minority value occuring (<br>
- * given the constraint of a minimum support). For a numeric target, <br>
- * one might be interested in finding segments where this is higher <br>
- * on average than in the whole data set. For example, in a health <br>
- * insurance scenario, find which health insurance groups are at <br>
- * the highest risk (have the highest claim ratio), or, which groups <br>
- * have the highest average insurance payout. <br>
+ * HotSpot learns a set of rules (displayed in a tree-like structure) that maximize/minimize a target variable/value of interest. With a nominal target, one might want to look for segments of the data where there is a high probability of a minority value occuring (given the constraint of a minimum support). For a numeric target, one might be interested in finding segments where this is higher on average than in the whole data set. For example, in a health insurance scenario, find which health insurance groups are at the highest risk (have the highest claim ratio), or, which groups have the highest average insurance payout.
+ * <p/>
  <!-- globalinfo-end -->
  *
  <!-- options-start -->
  * Valid options are: <p/>
  * 
  * <pre> -c &lt;num | first | last&gt;
- * The target index. (default = last)
- * </pre>
+ *  The target index. (default = last)</pre>
  * 
  * <pre> -V &lt;num | first | last&gt;
- *  The target value (nominal target only, default = first)
- * </pre>
- *
+ *  The target value (nominal target only, default = first)</pre>
+ * 
  * <pre> -L
- * Minimize rather than maximize
- * </pre>
- *
+ *  Minimize rather than maximize.</pre>
+ * 
  * <pre> -S &lt;num&gt;
- *  Minimum value count (nominal target)/segment size (numeric target). 
- *  Values between 0 and 1 are interpreted
- *  as a percentage of the total population; values > 1 are
- *  interpreted as an absolute number of instances
- *  (default = 0.3)
- * </pre>
- *
+ *  Minimum value count (nominal target)/segment size (numeric target).
+ *  Values between 0 and 1 are 
+ *  interpreted as a percentage of 
+ *  the total population; values &gt; 1 are 
+ *  interpreted as an absolute number of 
+ *  instances (default = 0.3)</pre>
+ * 
  * <pre> -M &lt;num&gt;
- * Maximum branching factor. The maximum number of children
- * to consider extending each node with. (default = 2)
- * </pre>
- *
+ *  Maximum branching factor (default = 2)</pre>
+ * 
  * <pre> -I &lt;num&gt;
- * Minimum improvement in target value in order to
- * consider adding a new branch/test (default = 0.01 (1%))
- * </pre>
- *
+ *  Minimum improvement in target value in order 
+ *  to add a new branch/test (default = 0.01 (1%))</pre>
+ * 
  * <pre> -D
- * Output debugging info (duplicate rule lookup hash table stats)
- * </pre>
- *
+ *  Output debugging info (duplicate rule lookup 
+ *  hash table stats)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
@@ -187,6 +173,7 @@ public class HotSpot
    */
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -196,7 +183,7 @@ public class HotSpot
     // class
     result.enable(Capability.NO_CLASS);
     //result.enable(Capability.NUMERIC_CLASS);
-    //result.enable(Capability.NOMINAL_CLASS);
+   // result.enable(Capability.NOMINAL_CLASS);
 
     
     return result;
@@ -262,7 +249,7 @@ public class HotSpot
    * @throws Exception if something goes wrong
    */
   public void buildAssociations(Instances instances) throws Exception {
-
+    
     // can associator handle the data?
     getCapabilities().testWithFail(instances);
     
@@ -271,7 +258,7 @@ public class HotSpot
     m_target = m_targetSI.getIndex();
     Instances inst = new Instances(instances);
     inst.setClassIndex(m_target);
-    inst.deleteWithMissingClass();
+//    inst.deleteWithMissingClass();
 
     if (inst.attribute(m_target).isNominal()) {
       m_targetIndexSI.setUpper(inst.attribute(m_target).numValues() - 1);
@@ -317,7 +304,10 @@ public class HotSpot
           + m_globalSupport + ".";
       }
 
-      Utils.normalize(probs);
+      // Utils.normalize(probs);
+      for (int i = 0; i < probs.length; i++) {
+        probs[i] /= (double)inst.numInstances();
+      }
       m_globalTarget = probs[m_targetIndex];
       /*      System.err.println("Global target " + m_globalTarget); 
               System.err.println("Min support count " + m_supportCount);  */
@@ -632,11 +622,13 @@ public class HotSpot
       // count missing values and sum/counts for the initial right subset
       for (int i = tempInsts.numInstances() - 1; i >= 0; i--) {
         if (!tempInsts.instance(i).isMissing(attIndex)) {
-          targetRight += (tempInsts.attribute(m_target).isNumeric())
+          if (!tempInsts.instance(i).isMissing(m_target)) {
+            targetRight += (tempInsts.attribute(m_target).isNumeric())
             ? (tempInsts.instance(i).value(m_target))
-            : ((tempInsts.instance(i).value(m_target) == m_targetIndex)
-               ? 1
-               : 0);
+                : ((tempInsts.instance(i).value(m_target) == m_targetIndex)
+                    ? 1
+                    : 0);
+          }
         } else {
           numMissing++;
         }
@@ -666,22 +658,24 @@ public class HotSpot
       for (int i = 0; i < tempInsts.numInstances() - numMissing; i++) {
         Instance inst = tempInsts.instance(i);
 
-        if (tempInsts.attribute(m_target).isNumeric()) {
-          targetLeft += inst.value(m_target);
-          targetRight -= inst.value(m_target);
-        } else {
-          if ((int)inst.value(m_target) == m_targetIndex) {
-            targetLeft++;
-            targetRight--;
-          }          
-        }
-        leftCount++;
-        rightCount--;
-        
-        // move to the end of any ties
-        if (i < tempInsts.numInstances() - 1 &&
-            inst.value(attIndex) == tempInsts.instance(i + 1).value(attIndex)) {
-          continue;
+        if (!inst.isMissing(m_target)) {
+          if (tempInsts.attribute(m_target).isNumeric()) {
+            targetLeft += inst.value(m_target);
+            targetRight -= inst.value(m_target);
+          } else {
+            if ((int)inst.value(m_target) == m_targetIndex) {
+              targetLeft++;
+              targetRight--;
+            }          
+          }
+          leftCount++;
+          rightCount--;
+
+          // move to the end of any ties
+          if (i < tempInsts.numInstances() - 1 &&
+              inst.value(attIndex) == tempInsts.instance(i + 1).value(attIndex)) {
+            continue;
+          }
         }
 
         // evaluate split
@@ -825,7 +819,7 @@ public class HotSpot
 
         for (int i = 0; i < m_insts.numInstances(); i++) {
           Instance temp = m_insts.instance(i);
-          if (!temp.isMissing(attIndex)) {
+          if (!temp.isMissing(attIndex) && !temp.isMissing(m_target)) {
             int attVal = (int)temp.value(attIndex);
             if (m_insts.attribute(m_target).isNumeric()) {
               subsetMerit[attVal] += temp.value(m_target);
@@ -1189,39 +1183,33 @@ public class HotSpot
    * Valid options are: <p/>
    * 
    * <pre> -c &lt;num | first | last&gt;
-   * The target index. (default = last)
-   * </pre>
+   *  The target index. (default = last)</pre>
    * 
    * <pre> -V &lt;num | first | last&gt;
-   *  The target value (nominal target only, default = first)
-   * </pre>
-   *
+   *  The target value (nominal target only, default = first)</pre>
+   * 
    * <pre> -L
-   * Minimize rather than maximize
-   * </pre>
-   *
+   *  Minimize rather than maximize.</pre>
+   * 
    * <pre> -S &lt;num&gt;
-   *  Minimum value count (nominal target)/segment size (numeric target). 
-   *  Values between 0 and 1 are interpreted
-   *  as a percentage of the total population; values > 1 are
-   *  interpreted as an absolute number of instances
-   *  (default = 0.3)
-   * </pre>
-   *
+   *  Minimum value count (nominal target)/segment size (numeric target).
+   *  Values between 0 and 1 are 
+   *  interpreted as a percentage of 
+   *  the total population; values &gt; 1 are 
+   *  interpreted as an absolute number of 
+   *  instances (default = 0.3)</pre>
+   * 
    * <pre> -M &lt;num&gt;
-   * Maximum branching factor. The maximum number of children
-   * to consider extending each node with. (default = 2)
-   * </pre>
-   *
+   *  Maximum branching factor (default = 2)</pre>
+   * 
    * <pre> -I &lt;num&gt;
-   * Minimum improvement in target value in order to
-   * consider adding a new branch/test (default = 0.01 (1%))
-   * </pre>
-   *
+   *  Minimum improvement in target value in order 
+   *  to add a new branch/test (default = 0.01 (1%))</pre>
+   * 
    * <pre> -D
-   * Output debugging info (duplicate rule lookup hash table stats)
-   * </pre>
-   *
+   *  Output debugging info (duplicate rule lookup 
+   *  hash table stats)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -1320,3 +1308,4 @@ public class HotSpot
     }
   }
 }
+
