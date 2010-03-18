@@ -258,7 +258,7 @@ public class HotSpot
     m_target = m_targetSI.getIndex();
     Instances inst = new Instances(instances);
     inst.setClassIndex(m_target);
-    inst.deleteWithMissingClass();
+//    inst.deleteWithMissingClass();
 
     if (inst.attribute(m_target).isNominal()) {
       m_targetIndexSI.setUpper(inst.attribute(m_target).numValues() - 1);
@@ -304,7 +304,10 @@ public class HotSpot
           + m_globalSupport + ".";
       }
 
-      Utils.normalize(probs);
+      // Utils.normalize(probs);
+      for (int i = 0; i < probs.length; i++) {
+        probs[i] /= (double)inst.numInstances();
+      }
       m_globalTarget = probs[m_targetIndex];
       /*      System.err.println("Global target " + m_globalTarget); 
               System.err.println("Min support count " + m_supportCount);  */
@@ -619,11 +622,13 @@ public class HotSpot
       // count missing values and sum/counts for the initial right subset
       for (int i = tempInsts.numInstances() - 1; i >= 0; i--) {
         if (!tempInsts.instance(i).isMissing(attIndex)) {
-          targetRight += (tempInsts.attribute(m_target).isNumeric())
+          if (!tempInsts.instance(i).isMissing(m_target)) {
+            targetRight += (tempInsts.attribute(m_target).isNumeric())
             ? (tempInsts.instance(i).value(m_target))
-            : ((tempInsts.instance(i).value(m_target) == m_targetIndex)
-               ? 1
-               : 0);
+                : ((tempInsts.instance(i).value(m_target) == m_targetIndex)
+                    ? 1
+                    : 0);
+          }
         } else {
           numMissing++;
         }
@@ -653,22 +658,24 @@ public class HotSpot
       for (int i = 0; i < tempInsts.numInstances() - numMissing; i++) {
         Instance inst = tempInsts.instance(i);
 
-        if (tempInsts.attribute(m_target).isNumeric()) {
-          targetLeft += inst.value(m_target);
-          targetRight -= inst.value(m_target);
-        } else {
-          if ((int)inst.value(m_target) == m_targetIndex) {
-            targetLeft++;
-            targetRight--;
-          }          
-        }
-        leftCount++;
-        rightCount--;
-        
-        // move to the end of any ties
-        if (i < tempInsts.numInstances() - 1 &&
-            inst.value(attIndex) == tempInsts.instance(i + 1).value(attIndex)) {
-          continue;
+        if (!inst.isMissing(m_target)) {
+          if (tempInsts.attribute(m_target).isNumeric()) {
+            targetLeft += inst.value(m_target);
+            targetRight -= inst.value(m_target);
+          } else {
+            if ((int)inst.value(m_target) == m_targetIndex) {
+              targetLeft++;
+              targetRight--;
+            }          
+          }
+          leftCount++;
+          rightCount--;
+
+          // move to the end of any ties
+          if (i < tempInsts.numInstances() - 1 &&
+              inst.value(attIndex) == tempInsts.instance(i + 1).value(attIndex)) {
+            continue;
+          }
         }
 
         // evaluate split
@@ -812,7 +819,7 @@ public class HotSpot
 
         for (int i = 0; i < m_insts.numInstances(); i++) {
           Instance temp = m_insts.instance(i);
-          if (!temp.isMissing(attIndex)) {
+          if (!temp.isMissing(attIndex) && !temp.isMissing(m_target)) {
             int attVal = (int)temp.value(attIndex);
             if (m_insts.attribute(m_target).isNumeric()) {
               subsetMerit[attVal] += temp.value(m_target);
