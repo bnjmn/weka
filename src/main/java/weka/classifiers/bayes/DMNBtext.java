@@ -144,6 +144,9 @@ public class DMNBtext extends AbstractClassifier
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    // instances
+    result.setMinimumNumberInstances(0);
 
     return result;
   }
