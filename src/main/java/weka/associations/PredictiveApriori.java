@@ -230,6 +230,7 @@ public class PredictiveApriori
     result.enable(Capability.MISSING_VALUES);
 
     // class
+    result.enable(Capability.NO_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     
