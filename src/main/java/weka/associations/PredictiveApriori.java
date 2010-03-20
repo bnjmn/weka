@@ -84,7 +84,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.11.2.3 $ */
+ * @version $Revision$ */
 
 public class PredictiveApriori 
   extends AbstractAssociator 
@@ -229,6 +229,7 @@ public class PredictiveApriori
     result.enable(Capability.MISSING_VALUES);
 
     // class
+    result.enable(Capability.NO_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     
@@ -779,7 +780,7 @@ public class PredictiveApriori
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
