@@ -38,7 +38,7 @@ import java.io.FileWriter;
  * Class for evaluating Associaters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class AssociatorEvaluation
   implements RevisionHandler {
@@ -72,6 +72,8 @@ public class AssociatorEvaluation
     text.append("\tThe name of the training file.\n");
     text.append("-g <name of graph file>\n");
     text.append("\tOutputs the graph representation (if supported) of the associator to a file.\n");
+    text.append("-xml <name of rules file>\n");
+    text.append("\tOutputs the xml representation (if supported) of the rules to a file.\n");
     
     // associator specific options, if any
     if (associator instanceof OptionHandler) {
@@ -126,6 +128,7 @@ public class AssociatorEvaluation
 
     String trainFileString = "";
     String graphFileName = "";
+    String xmlRulesFileName = "";
     AssociatorEvaluation eval;
     DataSource loader;
 
@@ -141,6 +144,7 @@ public class AssociatorEvaluation
       loader = new DataSource(trainFileString);
 
       graphFileName = Utils.getOption('g', options);
+      xmlRulesFileName = Utils.getOption("xml", options);
 
       // associator specific options
       if (associator instanceof OptionHandler) {
@@ -165,6 +169,14 @@ public class AssociatorEvaluation
     if ((associator instanceof Drawable) && (graphFileName.length() != 0)) {
       BufferedWriter writer = new BufferedWriter(new FileWriter(graphFileName));
       writer.write(((Drawable) associator).graph());
+      writer.newLine();
+      writer.flush();
+      writer.close();
+    }
+    
+    if ((associator instanceof XMLRulesProducer) && xmlRulesFileName.length() > 0) {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(xmlRulesFileName));
+      writer.write(((XMLRulesProducer)associator).xmlRules());
       writer.newLine();
       writer.flush();
       writer.close();
@@ -265,7 +277,7 @@ public class AssociatorEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
