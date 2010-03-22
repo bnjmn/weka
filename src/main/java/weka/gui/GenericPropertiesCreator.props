@@ -157,6 +157,10 @@ weka.gui.visualize.plugins.GraphVisualizePlugin=\
 # List of Explorer error visualization plugins (classification panel)
 weka.gui.visualize.plugins.ErrorVisualizePlugin=\
  weka.gui.visualize.plugins
+ 
+#List of Explorer association rule visualization plugins (associations panel)
+weka.gui.visualize.plugins.AssociationRuleVisualizePlugin=\
+ weka.gui.visualize.plugins
 
 # List of writers for outputting graphics
 weka.gui.visualize.JComponentWriter=\
