@@ -189,8 +189,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.mi.MISVM,\
  weka.classifiers.mi.MIWrapper,\
  weka.classifiers.mi.SimpleMI,\
- weka.classifiers.mi.TLD,\
- weka.classifiers.mi.TLDSimple,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.SerializedClassifier,\
  weka.classifiers.misc.VFI,\
