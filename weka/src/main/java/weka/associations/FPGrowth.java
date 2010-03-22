@@ -127,7 +127,7 @@ import weka.core.TechnicalInformation.Type;
  * @version $Revision$
  */
 public class FPGrowth extends AbstractAssociator 
-  implements OptionHandler, TechnicalInformationHandler {
+  implements OptionHandler, TechnicalInformationHandler, XMLRulesProducer {
   
   /** For serialization */
   private static final long serialVersionUID = 3620717108603442911L;
@@ -241,6 +241,13 @@ public class FPGrowth extends AbstractAssociator
       if (freq) {
         result += ":" + m_frequency;
       }
+      return result;
+    }
+    
+    public String toXML() {
+      String result = "<ITEM name=\"" +  m_attribute.name() + "\" value=\"=" 
+      + m_attribute.value(m_valueIndex) + "\"/>";
+      
       return result;
     }
     
@@ -1027,6 +1034,15 @@ public class FPGrowth extends AbstractAssociator
         return m_stringVal + ":(" + Utils.doubleToString(compute(premiseSupport, consequenceSupport,
             totalSupport, totalTransactions), 2) + ")";
       }
+      
+      public String toXML(int premiseSupport, int consequenceSupport,
+          int totalSupport, int totalTransactions) {
+        String result = "<CRITERE name=\"" + m_stringVal + "\" value=\" " +
+          Utils.doubleToString(compute(premiseSupport, consequenceSupport,
+            totalSupport, totalTransactions), 2) + "\"/>";
+        
+        return result;
+      }
     }
     
     /** Tags for display in the GUI */
@@ -1238,6 +1254,36 @@ public class FPGrowth extends AbstractAssociator
                   m_totalSupport, m_totalTransactions) + " ");
         }
       }
+      return result.toString();
+    }
+    
+    public String toXML() {
+      StringBuffer result = new StringBuffer();
+      result.append("  <RULE>\n    <LHS>");
+      
+      for (BinaryItem b : m_premise) {
+        result.append("\n      ");
+        result.append(b.toXML());
+      }
+      result.append("\n    </LHS>\n    <RHS>");
+      
+      for (BinaryItem b : m_consequence) {
+        result.append("\n      ");
+        result.append(b.toXML());
+      }
+      result.append("\n    </RHS>");
+      
+      // metrics
+      // do support first
+      result.append("\n    <CRITERE name=\"support\" value=\"" 
+          + m_totalSupport + "\"/>");
+      for (METRIC_TYPE m : METRIC_TYPE.values()) {
+        result.append("\n    ");
+        result.append(m.toXML(m_premiseSupport, m_consequenceSupport,
+            m_totalSupport, m_totalTransactions));
+      }
+      result.append("\n  </RULE>\n");
+      
       return result.toString();
     }
     
@@ -2572,6 +2618,24 @@ public class FPGrowth extends AbstractAssociator
     text.append("}\n");
     
     return text.toString();
+  }
+  
+  public String xmlRules() {
+    StringBuffer rulesBuff = new StringBuffer();
+    
+    rulesBuff.append("<?xml version=\"1.0\" encoding=\"iso-8859-15\"?>\n");
+    rulesBuff.append("<RULES>\n");
+    int count = 0;
+    for (AssociationRule r : m_rules) {
+      rulesBuff.append(r.toXML());
+      count++;
+      if (!m_findAllRulesForSupportLevel && count == m_numRulesToFind) {
+        break;
+      } 
+    }
+    rulesBuff.append("</RULES>\n");
+    
+    return rulesBuff.toString();
   }
   
   /**
