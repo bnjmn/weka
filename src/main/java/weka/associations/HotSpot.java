@@ -380,7 +380,6 @@ public class HotSpot
   }
 
   public String graph() throws Exception {
-    System.err.println("Here");
     m_head.assignIDs(-1);
 
     StringBuffer text = new StringBuffer();
