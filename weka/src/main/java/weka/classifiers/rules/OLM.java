@@ -405,6 +405,19 @@ implements OptionHandler, TechnicalInformationHandler {
         System.out.println(inst.toString());
       }
     }
+    
+    public String toString() {
+      StringBuffer temp = new StringBuffer();
+      temp.append("OLM:\n\nInstances in rule set:\n\n");
+      for(int i=0; i < rules.size(); i++)
+      {
+        Instance inst = (Instance)rules.elementAt(i);
+        temp.append(i+": ");
+        temp.append(inst.toString() + "\n");
+      }
+      return temp.toString();
+    }
+    
     /**
      * Checks if the input (non-class) attributes in inst1 is greater
      * than in inst2.
@@ -827,8 +840,11 @@ implements OptionHandler, TechnicalInformationHandler {
    *
    * @return a description of the classifier as a string
    */
-  public String toString() {   
-    return "OLM";
+  public String toString() {
+    if (olmrules == null) {
+      return "OLM: No model built yet.";
+    }
+    return olmrules.toString();
   }
 
   /**
