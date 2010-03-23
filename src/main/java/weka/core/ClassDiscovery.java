@@ -352,7 +352,7 @@ public class ClassDiscovery
 	//part = tok.nextToken();
         part = cl_urls[i].toString();
         if (part.startsWith("file:")) {
-          part.replace(" ", "%20");
+          part = part.replace(" ", "%20");
           try {
             File temp = new File(new java.net.URI(part));
             part = temp.getAbsolutePath();
