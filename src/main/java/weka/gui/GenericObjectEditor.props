@@ -404,6 +404,7 @@ weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter=\
 weka.associations.Associator=\
  weka.associations.Apriori,\
  weka.associations.FilteredAssociator,\
+ weka.associations.FPGrowth,\
  weka.associations.GeneralizedSequentialPatterns,\
  weka.associations.PredictiveApriori,\
  weka.associations.Tertius
