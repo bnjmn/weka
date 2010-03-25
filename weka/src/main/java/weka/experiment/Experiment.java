@@ -589,13 +589,34 @@ public class Experiment
     }
   }
 
-  /**
-   * Runs all iterations of the experiment, continuing past errors.
-   */
-  public void runExperiment() {
+  
+  public void runExperiment(boolean verbose) {
 
     while (hasMoreIterations()) {
       try {
+        if (verbose) {
+          String current = "Iteration:";
+          if (getUsePropertyIterator()) {
+            int cnum = getCurrentPropertyNumber();
+            String ctype = getPropertyArray().getClass().getComponentType().getName();
+            int lastDot = ctype.lastIndexOf('.');
+            if (lastDot != -1) {
+              ctype = ctype.substring(lastDot + 1);
+            }
+            String cname = " " + ctype + "="
+              + (cnum + 1) + ":"
+              + getPropertyArrayValue(cnum).getClass().getName();
+            current += cname;
+          }
+          String dname = ((File) getDatasets()
+              .elementAt(getCurrentDatasetNumber()))
+              .getName();
+          current += " Dataset=" + dname
+          + " Run=" + (getCurrentRunNumber());
+          
+          System.out.println(current);
+        }
+        
 	nextIteration();
       } catch (Exception ex) {
 	ex.printStackTrace();
@@ -603,6 +624,13 @@ public class Experiment
 	advanceCounters(); // Try to keep plowing through
       }
     }
+  }
+
+  /**
+   * Runs all iterations of the experiment, continuing past errors.
+   */
+  public void runExperiment() {
+    runExperiment(false);
   }
 
   /**
@@ -1133,6 +1161,7 @@ public class Experiment
       String expFile = Utils.getOption('l', args);
       String saveFile = Utils.getOption('s', args);
       boolean runExp = Utils.getFlag('r', args);
+      boolean verbose = Utils.getFlag("verbose", args);
       if (expFile.length() == 0) {
 	exp = new Experiment();
 	try {
@@ -1153,7 +1182,9 @@ public class Experiment
 	    + "-r\n"
 	    + "\tRun experiment (default don't run)\n"
 	    + "-xml <filename | xml-string>\n"
-	    + "\tget options from XML-Data instead from parameters\n"
+	    + "\tget options from XML-Data instead from parameters.\n"
+	    + "-verbose\n"
+	    + "\toutput progress information to std out."
             + "\n";
 	  Enumeration enm = ((OptionHandler)exp).listOptions();
 	  while (enm.hasMoreElements()) {
@@ -1186,7 +1217,7 @@ public class Experiment
 	System.err.println("Initializing...");
 	exp.initialize();
 	System.err.println("Iterating...");
-	exp.runExperiment();
+	exp.runExperiment(verbose);
 	System.err.println("Postprocessing...");
 	exp.postProcess();
       }
