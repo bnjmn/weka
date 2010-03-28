@@ -1097,6 +1097,7 @@ public class RotationForest
   protected Instance convertInstance( Instance instance, int i ) 
   throws Exception {
     Instance newInstance = new Instance( m_Headers[ i ].numAttributes( ) );
+    newInstance.setWeight(instance.weight());
     newInstance.setDataset( m_Headers[ i ] );
     int currentAttribute = 0;
 
