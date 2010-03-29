@@ -108,10 +108,10 @@ public class XMLBeans
   public final static String VAL_OPTIONS = "options";
   
   /** the value of the saver property */
-  public final static String VAL_SAVER = "saver";
+  public final static String VAL_SAVER = "wrappedAlgorithm";
   
   /** the value of the loader property */
-  public final static String VAL_LOADER = "loader";
+  public final static String VAL_LOADER = "wrappedAlgorithm";
   
   /** the value of the text property */
   public final static String VAL_TEXT = "text";
@@ -338,8 +338,8 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "x");
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "y");
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "bean");
-    m_Properties.addAllowed(weka.gui.beans.Saver.class, "saver");
-    m_Properties.addAllowed(weka.gui.beans.Loader.class, "loader");
+    m_Properties.addAllowed(weka.gui.beans.Saver.class, "wrappedAlgorithm");
+    m_Properties.addAllowed(weka.gui.beans.Loader.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Saver.class, "relationNameForFilename");
     if (getDataType() == DATATYPE_LAYOUT)
       m_Properties.addAllowed(weka.gui.beans.Loader.class, "beanContext");
@@ -1538,7 +1538,7 @@ public class XMLBeans
     node   = addElement(parent, name, saver.getClass().getName(), false);
     invokeWriteToXML(node, saver.getRelationNameForFilename(), VAL_RELATIONNAMEFORFILENAME);
 
-    invokeWriteToXML(node, saver.getSaver(), VAL_SAVER);
+    invokeWriteToXML(node, saver.getSaverTemplate(), VAL_SAVER);
     
     return node;
   }
