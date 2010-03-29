@@ -29,6 +29,7 @@ import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.DatabaseConverter;
@@ -72,6 +73,7 @@ public class Saver
    * Saver
    */
   private weka.core.converters.Saver m_Saver= new ArffSaver();
+  private weka.core.converters.Saver m_SaverTemplate = m_Saver;
 
   /**
    * The relation name that becomes part of the file name
@@ -98,6 +100,10 @@ public class Saver
    * The environment variables.
    */
   protected transient Environment m_env;
+  
+  private weka.core.converters.Saver makeCopy() throws Exception {
+    return (weka.core.converters.Saver)new SerializedObject(m_SaverTemplate).getObject();
+  }
   
   private class SaveBatchThread extends Thread {
     private DataSink m_DS;
@@ -190,7 +196,7 @@ public class Saver
   /** Contsructor */  
   public Saver() {
     super();
-    setSaver(m_Saver);
+    setSaverTemplate(m_Saver);
     m_fileName = "";
     m_dataSet = null;
     m_count = 0;
@@ -230,7 +236,7 @@ public class Saver
    */
   private void passEnvOnToSaver() {
     // set environment variables
-    if (m_Saver instanceof EnvironmentHandler && m_env != null) {
+    if (m_SaverTemplate instanceof EnvironmentHandler && m_env != null) {
       ((EnvironmentHandler)m_Saver).setEnvironment(m_env);
     }
   }
@@ -238,13 +244,13 @@ public class Saver
   /** Set the loader to use
    * @param saver a Saver
    */
-  public void setSaver(weka.core.converters.Saver saver) {
+  public void setSaverTemplate(weka.core.converters.Saver saver) {
     boolean loadImages = true;
     if (saver.getClass().getName().
-	compareTo(m_Saver.getClass().getName()) == 0) {
+	compareTo(m_SaverTemplate.getClass().getName()) == 0) {
       loadImages = false;
     }
-    m_Saver = saver;
+    m_SaverTemplate = saver;
     String saverName = saver.getClass().toString();
     saverName = saverName.substring(saverName.
 				      lastIndexOf('.')+1, 
@@ -260,8 +266,8 @@ public class Saver
 
     
     // get global info
-    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Saver);
-    if(m_Saver instanceof DatabaseConverter)
+    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_SaverTemplate);
+    if(m_SaverTemplate instanceof DatabaseConverter)
         m_isDBSaver = true;
     else
         m_isDBSaver = false;
@@ -307,10 +313,21 @@ public class Saver
    */  
   public synchronized void acceptDataSet(DataSetEvent e) {
   
+      try {
+        m_Saver = makeCopy();
+      } catch (Exception ex) {
+        if (m_logger != null) {
+          m_logger.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details)");
+          m_logger.logMessage("[Saver] " + statusMessagePrefix()
+              + " unable to copy saver. " 
+              + ex.getMessage());
+        }
+      }
       passEnvOnToSaver();
       m_fileName = sanitizeFilename(e.getDataSet().relationName());
       m_dataSet = e.getDataSet();
-      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){//
+      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_SaverTemplate).getRelationForTableName()){//
           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
       }
       if(!e.isStructureOnly()){
@@ -333,12 +350,25 @@ public class Saver
    * @param e threshold data event.
    */
   public synchronized void acceptDataSet(ThresholdDataEvent e) {
+    try {
+      m_Saver = makeCopy();
+    } catch (Exception ex) {
+      if (m_logger != null) {
+        m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
+        m_logger.logMessage("[Saver] " + statusMessagePrefix()
+            + " unable to copy saver. " 
+            + ex.getMessage());
+      }
+    }
+    
     passEnvOnToSaver();
     m_fileName = sanitizeFilename(e.getDataSet().getPlotInstances().relationName());
     m_dataSet = e.getDataSet().getPlotInstances();
     
-    if(m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){//
+    if(m_isDBSaver && ((DatabaseSaver)m_SaverTemplate).getRelationForTableName()){//
       ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+      ((DatabaseSaver)m_Saver).setRelationForTableName(false);
     }
 
     if(!m_isDBSaver){
@@ -356,11 +386,23 @@ public class Saver
    * @param e test set event
    */  
   public synchronized void acceptTestSet(TestSetEvent e) {
-  
+      if (e.isStructureOnly()) {
+        try {
+          m_Saver = makeCopy();
+        } catch (Exception ex) {
+          if (m_logger != null) {
+            m_logger.statusMessage(statusMessagePrefix()
+                + "ERROR (See log for details)");
+            m_logger.logMessage("[Saver] " + statusMessagePrefix()
+                + " unable to copy saver. " 
+                + ex.getMessage());
+          }
+        }
+      }
       passEnvOnToSaver();
       m_fileName = sanitizeFilename(e.getTestSet().relationName());
       m_dataSet = e.getTestSet();
-      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
+      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_SaverTemplate).getRelationForTableName()){
           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
       }
       if(!e.isStructureOnly()){
@@ -372,6 +414,7 @@ public class Saver
             }
           }
           else{
+              ((DatabaseSaver)m_Saver).setRelationForTableName(false);
               String setName = ((DatabaseSaver)m_Saver).getTableName();
               setName = setName.replaceFirst("_[tT][eE][sS][tT]_[0-9]+_[oO][fF]_[0-9]+","");
               ((DatabaseSaver)m_Saver).setTableName(setName+"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
@@ -386,11 +429,24 @@ public class Saver
    * @param e a training set event
    */  
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
+    if (e.isStructureOnly()) {
+      try {
+        m_Saver = makeCopy();
+      } catch (Exception ex) {
+        if (m_logger != null) {
+          m_logger.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details)");
+          m_logger.logMessage("[Saver] " + statusMessagePrefix()
+              + " unable to copy saver. " 
+              + ex.getMessage());
+        }
+      }
+    }
   
       passEnvOnToSaver();
       m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
       m_dataSet = e.getTrainingSet();
-      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
+      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_SaverTemplate).getRelationForTableName()){
            ((DatabaseSaver)m_Saver).setTableName(m_fileName);
       }
       if(!e.isStructureOnly()){
@@ -402,6 +458,7 @@ public class Saver
             }
           }
           else{
+            ((DatabaseSaver)m_Saver).setRelationForTableName(false);
               String setName = ((DatabaseSaver)m_Saver).getTableName();
               setName = setName.replaceFirst("_[tT][rR][aA][iI][nN][iI][nN][gG]_[0-9]+_[oO][fF]_[0-9]+","");
               ((DatabaseSaver)m_Saver).setTableName(setName+"_training_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
@@ -436,13 +493,27 @@ public class Saver
       
       
       if(e.getStatus() == e.FORMAT_AVAILABLE){
+        // start of a new stream
+        try {
+          m_Saver = makeCopy();
+        } catch (Exception ex) {
+          if (m_logger != null) {
+            m_logger.statusMessage(statusMessagePrefix()
+                + "ERROR (See log for details)");
+            m_logger.logMessage("[Saver] " + statusMessagePrefix()
+                + " unable to copy saver. " 
+                + ex.getMessage());
+          }
+        }
         m_Saver.setRetrieval(m_Saver.INCREMENTAL);
         m_structure = e.getStructure();
         m_fileName = sanitizeFilename(m_structure.relationName());
         m_Saver.setInstances(m_structure);
         if(m_isDBSaver)
-            if(((DatabaseSaver)m_Saver).getRelationForTableName())
+            if(((DatabaseSaver)m_SaverTemplate).getRelationForTableName()) {
                 ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+                ((DatabaseSaver)m_Saver).setRelationForTableName(false);
+            }
       }
       if(e.getStatus() == e.INSTANCE_AVAILABLE){
         m_visual.setAnimated();
@@ -495,8 +566,8 @@ public class Saver
    *
    * @return a <code>weka.core.converters.Saver</code> value
    */
-  public weka.core.converters.Saver getSaver() {
-    return m_Saver;
+  public weka.core.converters.Saver getSaverTemplate() {
+    return m_SaverTemplate;
   }
 
   /**
@@ -506,12 +577,11 @@ public class Saver
    */
   public void setWrappedAlgorithm(Object algorithm) 
     {
-
     if (!(algorithm instanceof weka.core.converters.Saver)) { 
       throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
 					 +"type of algorithm (Loader)");
     }
-    setSaver((weka.core.converters.Saver)algorithm);
+    setSaverTemplate((weka.core.converters.Saver)algorithm);
   }
 
   /**
@@ -520,7 +590,7 @@ public class Saver
    * @return a Saver
    */
   public Object getWrappedAlgorithm() {
-    return getSaver();
+    return getSaverTemplate();
   }
   
   /**
@@ -560,8 +630,8 @@ public class Saver
   
   private String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|"
-    + ((m_Saver instanceof OptionHandler) 
-        ? Utils.joinOptions(((OptionHandler)m_Saver).getOptions()) + "|"
+    + ((m_SaverTemplate instanceof OptionHandler) 
+        ? Utils.joinOptions(((OptionHandler)m_SaverTemplate).getOptions()) + "|"
             : "");
   }
   
