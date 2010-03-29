@@ -115,7 +115,7 @@ public class SaverCustomizer
 		repaint();
 		if (m_dsSaver != null) {
 		  System.err.println("Property change!!");
-		  m_dsSaver.setSaver(m_dsSaver.getSaver());
+		  m_dsSaver.setSaverTemplate(m_dsSaver.getSaverTemplate());
 		}
 	      }
 	    });
@@ -131,8 +131,8 @@ public class SaverCustomizer
 	public void actionPerformed(ActionEvent e) {
 	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
 	    try {
-                (m_dsSaver.getSaver()).setFilePrefix(m_prefixText.getText());
-                (m_dsSaver.getSaver()).setDir(m_fileChooser.getSelectedFile().getPath());
+                (m_dsSaver.getSaverTemplate()).setFilePrefix(m_prefixText.getText());
+                (m_dsSaver.getSaverTemplate()).setDir(m_fileChooser.getSelectedFile().getPath());
                 m_dsSaver.
                   setRelationNameForFilename(m_relationNameForFilename.isSelected());
                
@@ -169,11 +169,11 @@ public class SaverCustomizer
       removeAll();
       JPanel db = new JPanel();
       db.setLayout(new GridLayout(7, 1));
-      m_dbaseURLText = new JTextField(((DatabaseConverter)m_dsSaver.getSaver()).getUrl(),50); 
+      m_dbaseURLText = new JTextField(((DatabaseConverter)m_dsSaver.getSaverTemplate()).getUrl(),50); 
       JLabel dbaseURLLab = new JLabel(" Database URL:          ", SwingConstants.LEFT);
       dbaseURLLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-      m_userNameText = new JTextField(((DatabaseConverter)m_dsSaver.getSaver()).getUser(),50); 
+      m_userNameText = new JTextField(((DatabaseConverter)m_dsSaver.getSaverTemplate()).getUser(),50); 
       JLabel userNameLab = new JLabel(" Username:              ", SwingConstants.LEFT);
       userNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
@@ -181,15 +181,15 @@ public class SaverCustomizer
       JLabel passwordLab = new JLabel(" Password:              ", SwingConstants.LEFT);
       passwordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
       
-      m_tableText = new JTextField(((DatabaseSaver)m_dsSaver.getSaver()).getTableName(),50); 
-      m_tableText.setEditable(!((DatabaseSaver)m_dsSaver.getSaver()).getRelationForTableName());
+      m_tableText = new JTextField(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getTableName(),50); 
+      m_tableText.setEditable(!((DatabaseSaver)m_dsSaver.getSaverTemplate()).getRelationForTableName());
       JLabel tableLab = new JLabel(" Table Name:            ", SwingConstants.LEFT);
       tableLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
       
       m_tabBox = new JComboBox();
       m_tabBox.addItem(new Boolean(true));
       m_tabBox.addItem(new Boolean(false));
-      if(((DatabaseSaver)m_dsSaver.getSaver()).getRelationForTableName() == false)
+      if(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getRelationForTableName() == false)
           m_tabBox.setSelectedIndex(1);
       else
           m_tabBox.setSelectedIndex(0); 
@@ -205,7 +205,7 @@ public class SaverCustomizer
       m_idBox = new JComboBox();
       m_idBox.addItem(new Boolean(true));
       m_idBox.addItem(new Boolean(false));
-      if(((DatabaseSaver)m_dsSaver.getSaver()).getAutoKeyGeneration() == false)
+      if(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getAutoKeyGeneration() == false)
           m_idBox.setSelectedIndex(1);
       else
           m_idBox.setSelectedIndex(0); 
@@ -259,14 +259,14 @@ public class SaverCustomizer
       buttonsP.add(cancel=new JButton("Cancel"));
       ok.addActionListener(new ActionListener(){
 	public void actionPerformed(ActionEvent evt){
-          ((DatabaseSaver)m_dsSaver.getSaver()).resetStructure();  
-	  ((DatabaseConverter)m_dsSaver.getSaver()).setUrl(m_dbaseURLText.getText());
-          ((DatabaseConverter)m_dsSaver.getSaver()).setUser(m_userNameText.getText());
-          ((DatabaseConverter)m_dsSaver.getSaver()).setPassword(new String(m_passwordText.getPassword()));
+          ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetStructure();  
+	  ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setUrl(m_dbaseURLText.getText());
+          ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setUser(m_userNameText.getText());
+          ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setPassword(new String(m_passwordText.getPassword()));
           if(!((Boolean)m_tabBox.getSelectedItem()).booleanValue())
-                ((DatabaseSaver)m_dsSaver.getSaver()).setTableName(m_tableText.getText());
-          ((DatabaseSaver)m_dsSaver.getSaver()).setAutoKeyGeneration(((Boolean)m_idBox.getSelectedItem()).booleanValue());
-          ((DatabaseSaver)m_dsSaver.getSaver()).setRelationForTableName(((Boolean)m_tabBox.getSelectedItem()).booleanValue());
+                ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setTableName(m_tableText.getText());
+          ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setAutoKeyGeneration(((Boolean)m_idBox.getSelectedItem()).booleanValue());
+          ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setRelationForTableName(((Boolean)m_tabBox.getSelectedItem()).booleanValue());
           if (m_parentFrame != null) {
 	    m_parentFrame.dispose();
 	  }
@@ -299,8 +299,8 @@ public class SaverCustomizer
       });
     m_fileChooser.setAcceptAllFileFilterUsed(false);
     try{
-      if(!(((m_dsSaver.getSaver()).retrieveDir()).equals(""))) {
-        File tmp = new File(m_dsSaver.getSaver().retrieveDir());
+      if(!(((m_dsSaver.getSaverTemplate()).retrieveDir()).equals(""))) {
+        File tmp = new File(m_dsSaver.getSaverTemplate().retrieveDir());
         tmp = new File(tmp.getAbsolutePath());
         m_fileChooser.setCurrentDirectory(tmp);
       }
@@ -310,7 +310,7 @@ public class SaverCustomizer
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
     try{
-      m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25);
+      m_prefixText = new JTextField(m_dsSaver.getSaverTemplate().filePrefix(),25);
       m_prefixText.setToolTipText("Prefix for file name "
           + "(or filename itself if relation name is not used)");
       final JLabel prefixLab = 
@@ -350,11 +350,11 @@ public class SaverCustomizer
 
     m_relativeFilePath = new JCheckBox("Use relative file paths");
     m_relativeFilePath.
-      setSelected(((FileSourcedConverter)m_dsSaver.getSaver()).getUseRelativePath());
+      setSelected(((FileSourcedConverter)m_dsSaver.getSaverTemplate()).getUseRelativePath());
 
     m_relativeFilePath.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          ((FileSourcedConverter)m_dsSaver.getSaver()).
+          ((FileSourcedConverter)m_dsSaver.getSaverTemplate()).
             setUseRelativePath(m_relativeFilePath.isSelected());
         }
       });
@@ -371,12 +371,12 @@ public class SaverCustomizer
    */
   public void setObject(Object object) {
     m_dsSaver = (weka.gui.beans.Saver)object;
-    m_SaverEditor.setTarget(m_dsSaver.getSaver());
-    if(m_dsSaver.getSaver() instanceof DatabaseConverter){
+    m_SaverEditor.setTarget(m_dsSaver.getSaverTemplate());
+    if(m_dsSaver.getSaverTemplate() instanceof DatabaseConverter){
             setUpDatabase();
     }
     else{
-        if (m_dsSaver.getSaver() instanceof FileSourcedConverter) {
+        if (m_dsSaver.getSaverTemplate() instanceof FileSourcedConverter) {
             setUpFile();
         } else {
             setUpOther();
