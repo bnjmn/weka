@@ -22,8 +22,8 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -399,35 +399,40 @@ public class Id3
     // leaf?
     if (m_Attribute == null) {
       result = id;
-      if (Double.isNaN(m_ClassValue))
+      if (Double.isNaN(m_ClassValue)) {
         buffer.append("    return Double.NaN;");
-      else
+      } else {
         buffer.append("    return " + m_ClassValue + ";");
-      if (m_ClassAttribute != null)
+      }
+      if (m_ClassAttribute != null) {
         buffer.append(" // " + m_ClassAttribute.value((int) m_ClassValue));
+      }
       buffer.append("\n");
       buffer.append("  }\n");
-    }
-    else {
+    } else {
+      buffer.append("    checkMissing(i, " + m_Attribute.index() + ");\n\n");
       buffer.append("    // " + m_Attribute.name() + "\n");
       
       // subtree calls
       subBuffers = new StringBuffer[m_Attribute.numValues()];
-      newID      = id;
+      newID = id;
       for (i = 0; i < m_Attribute.numValues(); i++) {
         newID++;
 
         buffer.append("    ");
-        if (i > 0)
+        if (i > 0) {
           buffer.append("else ");
-        buffer.append("if (((String) i[" + m_Attribute.index() + "]).equals(\"" + m_Attribute.value(i) + "\"))\n");
+        }
+        buffer.append("if (((String) i[" + m_Attribute.index() 
+            + "]).equals(\"" + m_Attribute.value(i) + "\"))\n");
         buffer.append("      return node" + newID + "(i);\n");
 
         subBuffers[i] = new StringBuffer();
-        newID         = m_Successors[i].toSource(newID, subBuffers[i]);
+        newID = m_Successors[i].toSource(newID, subBuffers[i]);
       }
       buffer.append("    else\n");
-      buffer.append("      throw new IllegalArgumentException(\"Value '\" + i[" + m_Attribute.index() + "] + \"' is not allowed!\");\n");
+      buffer.append("      throw new IllegalArgumentException(\"Value '\" + i["
+          + m_Attribute.index() + "] + \"' is not allowed!\");\n");
       buffer.append("  }\n");
 
       // output subtree code
@@ -457,7 +462,7 @@ public class Id3
    *
    * @param className the name that should be given to the source class.
    * @return the object source described by a string
-   * @throws Exception if the souce can't be computed
+   * @throws Exception if the source can't be computed
    */
   public String toSource(String className) throws Exception {
     StringBuffer        result;
@@ -466,6 +471,11 @@ public class Id3
     result = new StringBuffer();
 
     result.append("class " + className + " {\n");
+    result.append("  private static void checkMissing(Object[] i, int index) {\n");
+    result.append("    if (i[index] == null)\n");
+    result.append("      throw new IllegalArgumentException(\"Null values "
+        + "are not allowed!\");\n");
+    result.append("  }\n\n");
     result.append("  public static double classify(Object[] i) {\n");
     id = 0;
     result.append("    return node" + id + "(i);\n");
