@@ -719,6 +719,7 @@ public class Capabilities
     disableAllClassDependencies();
     disable(Capability.MISSING_VALUES);
     disable(Capability.MISSING_CLASS_VALUES);
+    disable(Capability.NO_CLASS);
   }
   
   /**
