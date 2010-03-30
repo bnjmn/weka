@@ -20,8 +20,12 @@
 
 package weka.associations;
 
+import java.io.Serializable;
+
 import weka.associations.AbstractAssociatorTest;
 import weka.associations.Associator;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -31,10 +35,31 @@ import junit.framework.TestSuite;
  * java weka.associations.PredictiveAprioriTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class PredictiveAprioriTest 
   extends AbstractAssociatorTest {
+  
+  public static class PredictiveAprioriT extends PredictiveApriori 
+  implements Serializable {
+      
+  private static final long serialVersionUID = 7236786154698908772L;
+
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+}
 
   public PredictiveAprioriTest(String name) { 
     super(name);  
@@ -42,7 +67,7 @@ public class PredictiveAprioriTest
 
   /** Creates a default PredictiveApriori */
   public Associator getAssociator() {
-    return new PredictiveApriori();
+    return new PredictiveAprioriT();
   }
 
   public static Test suite() {
