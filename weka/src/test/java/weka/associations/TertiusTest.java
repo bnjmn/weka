@@ -20,8 +20,12 @@
 
 package weka.associations;
 
+import java.io.Serializable;
+
 import weka.associations.AbstractAssociatorTest;
 import weka.associations.Associator;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -31,10 +35,30 @@ import junit.framework.TestSuite;
  * java weka.associations.TertiusTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class TertiusTest 
   extends AbstractAssociatorTest {
+  
+  public static class TertiusT extends Tertius implements Serializable {
+    
+    private static final long serialVersionUID = -5252868975496746622L;
+
+    public Capabilities getCapabilities() {
+      Capabilities result = super.getCapabilities();
+      result.disableAll();
+
+      // attributes
+      result.enable(Capability.NOMINAL_ATTRIBUTES);
+      result.enable(Capability.MISSING_VALUES);
+
+      // class
+      result.enable(Capability.NOMINAL_CLASS);
+      result.enable(Capability.MISSING_CLASS_VALUES);
+
+      return result;
+    }
+  }
 
   public TertiusTest(String name) { 
     super(name);  
@@ -42,7 +66,7 @@ public class TertiusTest
 
   /** Creates a default Tertius */
   public Associator getAssociator() {
-    return new Tertius();
+    return new TertiusT();
   }
 
   public static Test suite() {
