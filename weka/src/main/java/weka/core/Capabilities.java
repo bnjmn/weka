@@ -581,6 +581,8 @@ public class Capabilities
     enableAllAttributeDependencies();
     enableAllClasses();
     enableAllClassDependencies();
+    enable(Capability.MISSING_VALUES);
+    enable(Capability.MISSING_CLASS_VALUES);
   }
 
   /**
@@ -715,6 +717,8 @@ public class Capabilities
     disableAllAttributeDependencies();
     disableAllClasses();
     disableAllClassDependencies();
+    disable(Capability.MISSING_VALUES);
+    disable(Capability.MISSING_CLASS_VALUES);
   }
   
   /**
