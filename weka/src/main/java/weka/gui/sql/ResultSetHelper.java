@@ -337,6 +337,7 @@ public class ResultSetHelper {
         break;
       case Types.BINARY:
         result = String.class;
+        break;
       case Types.BIT:
         result = Boolean.class;
         break;
