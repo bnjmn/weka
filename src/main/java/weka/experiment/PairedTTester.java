@@ -1217,17 +1217,17 @@ public class PairedTTester
     if (getShowStdDevs()) {
       options[current++] = "-V";
     }
-
-    if (getResultMatrix().equals(ResultMatrixLatex.class))
+    
+    if (getResultMatrix() instanceof ResultMatrixLatex)
       options[current++] = "-L";
 
-    if (getResultMatrix().equals(ResultMatrixCSV.class))
+    if (getResultMatrix() instanceof ResultMatrixCSV)
       options[current++] = "-csv";
    
-    if (getResultMatrix().equals(ResultMatrixHTML.class))
+    if (getResultMatrix() instanceof ResultMatrixHTML)
       options[current++] = "-html";
    
-    if (getResultMatrix().equals(ResultMatrixSignificance.class))
+    if (getResultMatrix() instanceof ResultMatrixSignificance)
       options[current++] = "-significance";
    
     while (current < options.length) {
