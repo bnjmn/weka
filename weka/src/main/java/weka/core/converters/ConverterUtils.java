@@ -420,7 +420,9 @@ public class ConverterUtils
 	}
       }
 
-      result.setDataset(dataset);
+      if (result != null) {
+        result.setDataset(dataset);
+      }
       
       return result;
     }
