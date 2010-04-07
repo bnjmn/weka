@@ -480,8 +480,9 @@ public class LearningRateResultProducer
       result += "<null ResultProducer>";
     } else {
       result += "-W " + m_ResultProducer.getClass().getName();
+      result  += " -- " + m_ResultProducer.getCompatibilityState();
     }
-    result  += " -- " + m_ResultProducer.getCompatibilityState();
+    
     return result.trim();
   }
 
