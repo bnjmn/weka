@@ -118,7 +118,7 @@ import java.util.Vector;
  * All options after -- will be passed to the result producer.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,
@@ -738,8 +738,9 @@ public class AveragingResultProducer
       result += "<null ResultProducer>";
     } else {
       result += "-W " + m_ResultProducer.getClass().getName();
+      result  += " -- " + m_ResultProducer.getCompatibilityState();
     }
-    result  += " -- " + m_ResultProducer.getCompatibilityState();
+    
     return result.trim();
   }
 
@@ -1164,6 +1165,6 @@ public class AveragingResultProducer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // AveragingResultProducer
