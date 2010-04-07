@@ -978,10 +978,10 @@ public class GeneticSearch
       if (parent1 == parent2) {
         int r;
         if (m_hasClass) {
-          while ((r = (Math.abs(m_random.nextInt()) % m_numAttribs)) == m_classIndex);
+          while ((r = m_random.nextInt(m_numAttribs)) == m_classIndex);
         }
         else {
-          r = m_random.nextInt() % m_numAttribs;
+          r = m_random.nextInt(m_numAttribs);
         }
         
         if (newPop[j].get(r)) {
