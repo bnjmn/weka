@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision$
  */
 public class PairedTTester 
   implements OptionHandler, Tester, RevisionHandler {
@@ -221,7 +221,7 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -310,7 +310,7 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
  
@@ -427,7 +427,7 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision$");
     }
   } // Resultset
 
@@ -1208,16 +1208,16 @@ public class PairedTTester
       options[current++] = "-V";
     }
 
-    if (getResultMatrix().equals(ResultMatrixLatex.class))
+    if (getResultMatrix() instanceof ResultMatrixLatex)
       options[current++] = "-L";
 
-    if (getResultMatrix().equals(ResultMatrixCSV.class))
+    if (getResultMatrix() instanceof ResultMatrixCSV)
       options[current++] = "-csv";
    
-    if (getResultMatrix().equals(ResultMatrixHTML.class))
+    if (getResultMatrix() instanceof ResultMatrixHTML)
       options[current++] = "-html";
    
-    if (getResultMatrix().equals(ResultMatrixSignificance.class))
+    if (getResultMatrix() instanceof ResultMatrixSignificance)
       options[current++] = "-significance";
    
     while (current < options.length) {
@@ -1445,7 +1445,7 @@ public class PairedTTester
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.35 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
