@@ -105,7 +105,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class DatabaseResultProducer 
   extends DatabaseResultListener
@@ -411,8 +411,9 @@ public class DatabaseResultProducer
       result += "<null ResultProducer>";
     } else {
       result += "-W " + m_ResultProducer.getClass().getName();
+      result  += " -- " + m_ResultProducer.getCompatibilityState();
     }
-    result  += " -- " + m_ResultProducer.getCompatibilityState();
+    
     return result.trim();
   }
 
@@ -710,6 +711,6 @@ public class DatabaseResultProducer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // DatabaseResultProducer
