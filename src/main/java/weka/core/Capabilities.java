@@ -24,9 +24,11 @@ package weka.core;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -1363,18 +1365,53 @@ public class Capabilities
     // object name
     result.append(indentStr + capsName + " " + objectname + " = new " + capsName + "(this);\n");
     
+    List<Capability> capsList = new ArrayList<Capability>();
+    boolean hasNominalAtt = false;
+    boolean hasBinaryAtt = false;
+    boolean hasUnaryAtt = false;
+    boolean hasEmptyNomAtt = false;
+    boolean hasNominalClass = false;
     // capabilities
     result.append("\n");
     for (Capability cap: Capability.values()) {
       // capability
-      if (handles(cap))
-        result.append(
-            indentStr + objectname + ".enable(" + capName + "." + cap.name() + ");\n");
+      if (handles(cap)) {
+        if (cap == Capability.NOMINAL_ATTRIBUTES) {
+          hasNominalAtt = true;
+        }
+        if (cap == Capability.NOMINAL_CLASS) {
+          hasNominalClass = true;
+        }
+        if (cap == Capability.BINARY_ATTRIBUTES) {
+          hasBinaryAtt = true;
+        }
+        if (cap == Capability.UNARY_ATTRIBUTES) {
+          hasUnaryAtt = true;
+        }
+        if (cap == Capability.EMPTY_NOMINAL_ATTRIBUTES) {
+          hasEmptyNomAtt = true;
+        }
+        capsList.add(cap);              
+      }
+    }
+    
+    for (Capability cap : capsList) {
+      if ((cap == Capability.BINARY_ATTRIBUTES && hasNominalAtt) ||
+          (cap == Capability.UNARY_ATTRIBUTES && hasBinaryAtt) ||
+          (cap == Capability.EMPTY_NOMINAL_ATTRIBUTES && hasUnaryAtt) ||
+          (cap == Capability.BINARY_CLASS && hasNominalClass)) {
+        continue;
+      }
+      result.append(
+          indentStr + objectname + ".enable(" + capName + "." + cap.name() + ");\n");
       // dependency
       if (hasDependency(cap))
         result.append(
             indentStr + objectname + ".enableDependency(" + capName + "." + cap.name() + ");\n");
     }
+    
+    // capabilities
+    result.append("\n");
 
     // other
     result.append("\n");
