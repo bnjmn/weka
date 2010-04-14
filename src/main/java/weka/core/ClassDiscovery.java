@@ -386,7 +386,7 @@ public class ClassDiscovery
 
 	    try {
 	      classname =   pkgname + "." 
-	      + files[i].getName().replaceAll(".*/", "")
+	      + files[j].getName().replaceAll(".*/", "")
 	      .replaceAll("\\.class", "");
 	      result.add(classname);
 	    }
