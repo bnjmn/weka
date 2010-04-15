@@ -570,10 +570,13 @@ public class ArffPanel
     
     createTitle();
     
-    if (filename.equals(""))   
+    if (filename.equals("")) {
       model = null;
-    else
+    }
+    else {
       model = new ArffSortedTableModel(filename);
+      model.setShowAttributeIndex(getShowAttributeIndex());
+    }
     
     m_TableArff.setModel(model);
     setChanged(false);
