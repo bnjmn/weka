@@ -34,7 +34,7 @@ import javax.swing.event.TableModelListener;
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision$ 
  */
 
 public class ArffSortedTableModel 
@@ -360,5 +360,25 @@ public class ArffSortedTableModel
    */
   public void addUndoPoint() {
     ((ArffTableModel) getModel()).addUndoPoint();
+  }
+
+  /**
+   * Sets whether to display the attribute index in the header.
+   * 
+   * @param value	if true then the attribute indices are displayed in the
+   * 			table header
+   */
+  public void setShowAttributeIndex(boolean value) {
+    ((ArffTableModel) getModel()).setShowAttributeIndex(value);
+  }
+  
+  /**
+   * Returns whether to display the attribute index in the header.
+   * 
+   * @return		true if the attribute indices are displayed in the
+   * 			table header
+   */
+  public boolean getShowAttributeIndex() {
+    return ((ArffTableModel) getModel()).getShowAttributeIndex();
   }
 }

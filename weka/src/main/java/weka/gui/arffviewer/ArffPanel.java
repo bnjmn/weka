@@ -81,7 +81,9 @@ public class ArffPanel
   private JPopupMenu m_PopupRows;
   /** displays the relation name */
   private JLabel m_LabelName;
-  
+  /** whether to display the attribute index in the table header. */
+  private boolean m_ShowAttributeIndex;
+
   // menu items
   private JMenuItem             menuItemMean;
   private JMenuItem             menuItemSetAllValues;
@@ -154,13 +156,14 @@ public class ArffPanel
    * any member variables are initialized here
    */
   protected void initialize() {
-    m_Filename        = "";
-    m_Title           = "";
-    m_CurrentCol      = -1;
-    m_LastSearch      = "";
-    m_LastReplace     = "";
-    m_Changed         = false;
-    m_ChangeListeners = new HashSet();
+    m_Filename           = "";
+    m_Title              = "";
+    m_CurrentCol         = -1;
+    m_LastSearch         = "";
+    m_LastReplace        = "";
+    m_ShowAttributeIndex = true;
+    m_Changed            = false;
+    m_ChangeListeners    = new HashSet();
   }
   
   /**
@@ -370,6 +373,7 @@ public class ArffPanel
     
     createTitle();
     model = new ArffSortedTableModel(data);
+    model.setShowAttributeIndex(m_ShowAttributeIndex);
     
     m_TableArff.setModel(model);
     clearUndo();
@@ -437,6 +441,28 @@ public class ArffPanel
       ((ArffSortedTableModel) m_TableArff.getModel()).setReadOnly(value);
   }
 
+  /**
+   * Sets whether to display the attribute index in the header.
+   * 
+   * @param value	if true then the attribute indices are displayed in the
+   * 			table header
+   */
+  public void setShowAttributeIndex(boolean value) {
+    m_ShowAttributeIndex = value;
+    if (m_TableArff != null)
+      ((ArffSortedTableModel) m_TableArff.getModel()).setShowAttributeIndex(value);
+  }
+  
+  /**
+   * Returns whether to display the attribute index in the header.
+   * 
+   * @return		true if the attribute indices are displayed in the
+   * 			table header
+   */
+  public boolean getShowAttributeIndex() {
+    return m_ShowAttributeIndex;
+  }
+  
   /**
    * returns whether undo support is enabled
    * 
