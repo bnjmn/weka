@@ -47,14 +47,6 @@ import javax.swing.JPanel;
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
  * @version $Revision$
  */
-/**
- * @author mhall
- *
- */
-/**
- * @author mhall
- *
- */
 public class Filter
   extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -530,7 +522,6 @@ public class Filter
 		    notifyDataOrTrainingListeners(ne);
 		  }
 		} catch (Exception ex) {
-		  Filter.this.stop(); // stop all processing
 		  ex.printStackTrace();
                   if (m_log != null) {
                     m_log.logMessage("[Filter] " + statusMessagePrefix() 
@@ -539,6 +530,7 @@ public class Filter
                         + "ERROR (See log for details).");
 //                    m_log.statusMessage("Problem filtering: see log for details.");
                   }
+                  Filter.this.stop(); // stop all processing
 		} finally {
 //		  m_visual.setText(oldText);
 		  m_visual.setStatic();
@@ -612,7 +604,6 @@ public class Filter
 		  notifyTestListeners(ne);
 		}
 	      } catch (Exception ex) {
-	        Filter.this.stop();
 		ex.printStackTrace();
                 if (m_log != null) {
                   m_log.logMessage("[Filter] " + statusMessagePrefix() 
@@ -620,6 +611,7 @@ public class Filter
                   m_log.statusMessage(statusMessagePrefix() 
                       + "ERROR (See log for details).");
                 }
+                Filter.this.stop();
 	      } finally {
                 //		m_visual.setText(oldText);
 		m_visual.setStatic();
