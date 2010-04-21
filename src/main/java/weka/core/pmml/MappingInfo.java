@@ -91,10 +91,17 @@ public class MappingInfo implements Serializable {
           Attribute incomingAtt = dataSet.attribute(j);
           // check type match
           if (miningSchemaAtt.type() != incomingAtt.type()) {
-            throw new Exception("[MappingInfo] type mismatch for field " +
-                schemaAttName + ". Mining schema type " + 
-                miningSchemaAtt.toString() + ". Incoming type " +
-                incomingAtt.toString() + ".");
+            if (miningSchemaAtt.isString() && incomingAtt.isNominal()) {
+              // don't worry about String attributes in the mining schema
+              // (as long as the corresponding incoming is a String or nominal),
+              // since values for the String attributes are more than likely revealed
+              // by FieldRef elements in the actual model itself
+            } else {
+              throw new Exception("[MappingInfo] type mismatch for field " +
+                  schemaAttName + ". Mining schema type " + 
+                  miningSchemaAtt.toString() + ". Incoming type " +
+                  incomingAtt.toString() + ".");
+            }
           }
 
           // check nominal values (number, names...)
