@@ -37,9 +37,13 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -48,9 +52,28 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Classifier for incremental learning of large datasets by way of racing logit-boosted committees.
+ * Classifier for incremental learning of large datasets by way of racing logit-boosted committees.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Eibe Frank, Geoffrey Holmes, Richard Kirkby, Mark Hall:  Racing committees for large datasets. In: Proceedings of the 5th International Conferenceon Discovery Science, 153-164, 2002.
  * <p/>
  <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inproceedings{Frank2002,
+ *    author = {Eibe Frank and Geoffrey Holmes and Richard Kirkby and Mark Hall},
+ *    booktitle = {Proceedings of the 5th International Conferenceon Discovery Science},
+ *    pages = {153-164},
+ *    publisher = {Springer},
+ *    title = { Racing committees for large datasets},
+ *    year = {2002}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
  <!-- options-start -->
  * Valid options are: <p/>
@@ -104,7 +127,7 @@ import java.util.Vector;
  */
 public class RacedIncrementalLogitBoost 
   extends RandomizableSingleClassifierEnhancer
-  implements UpdateableClassifier {
+  implements UpdateableClassifier, TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = 908598343772170052L;
@@ -1011,6 +1034,29 @@ public class RacedIncrementalLogitBoost
     }
     return options;
   }
+  
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Eibe Frank and Geoffrey Holmes and Richard " +
+    		"Kirkby and Mark Hall");
+    result.setValue(Field.TITLE, " Racing committees for large datasets");
+    result.setValue(Field.BOOKTITLE, "Proceedings of the 5th International Conference" +
+    		"on Discovery Science");
+    result.setValue(Field.YEAR, "2002");
+    result.setValue(Field.PAGES, "153-164");
+    result.setValue(Field.PUBLISHER, "Springer");
+    
+    return result;
+  }
 
   /**
    * @return a description of the classifier suitable for
@@ -1018,7 +1064,9 @@ public class RacedIncrementalLogitBoost
    */
   public String globalInfo() {
 
-    return "Classifier for incremental learning of large datasets by way of racing logit-boosted committees.";
+    return "Classifier for incremental learning of large datasets by way of " +
+    		"racing logit-boosted committees.\n\nFor more information see:\n\n" +
+    		getTechnicalInformation().toString();
   }
 
   /**
@@ -1290,3 +1338,4 @@ public class RacedIncrementalLogitBoost
     runClassifier(new RacedIncrementalLogitBoost(), argv);
   }
 }
+
