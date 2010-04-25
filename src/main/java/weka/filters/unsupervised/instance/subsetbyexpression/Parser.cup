@@ -122,7 +122,7 @@ parser code {:
    */
   public static Object getValue(Instance instance, int index) {
     if (instance.isMissing(index))
-      return new Double(Instance.missingValue());
+      return new Double(Utils.missingValue());
     else if (instance.attribute(index).isNominal())
       return new String(instance.stringValue(index));
     else if (instance.attribute(index).isNumeric())
