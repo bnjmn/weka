@@ -84,7 +84,7 @@ import java.io.*;
 // numbers and variables
 [0-9][0-9]*\.?[0-9]* { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
 -[0-9][0-9]*\.?[0-9]* { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
-[A-Z]+ { return sf.newSymbol("Variable", sym.VARIABLE, new String(yytext())); }
+[A-Z]+[0-9]* { return sf.newSymbol("Variable", sym.VARIABLE, new String(yytext())); }
 
 // whitespaces
 [ \r\n\t\f] { /* ignore white space. */ }
