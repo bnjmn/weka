@@ -1050,7 +1050,13 @@ public class BoundaryVisualizer
 	setInstances(i);
 	
 	//dataFileLabel.setText(selected.getName());
-	dataFileLabel.setText(i.relationName());
+	String relationName = i.relationName();
+	String truncatedN = relationName;
+	if (relationName.length() > 25) {
+	  truncatedN = relationName.substring(0, 25) + "...";
+	}
+	dataFileLabel.setText(truncatedN);
+	dataFileLabel.setToolTipText(relationName);
 	} catch (Exception e)
 	{
 		JOptionPane.showMessageDialog(this,"Can't load at this time,\n"
