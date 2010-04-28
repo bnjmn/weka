@@ -45,7 +45,6 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.SparseInstance;
-import weka.core.Tag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -127,165 +126,11 @@ import weka.core.TechnicalInformation.Type;
  * @version $Revision$
  */
 public class FPGrowth extends AbstractAssociator 
-  implements OptionHandler, TechnicalInformationHandler, XMLRulesProducer {
+  implements AssociationRulesProducer, OptionHandler, 
+    TechnicalInformationHandler, XMLRulesProducer {
   
   /** For serialization */
   private static final long serialVersionUID = 3620717108603442911L;
-
-  /**
-   * Inner class that handles a single binary item
-   */
-  public static class BinaryItem implements Serializable, Comparable<BinaryItem> {
-    
-    /** For serialization */
-    private static final long serialVersionUID = -3372941834914147669L;
-    
-    /** The frequency of the item */
-    protected int m_frequency;
-    
-    /** The attribute that the item corresponds to */
-    protected Attribute m_attribute;
-    
-    /** The index of the value considered to be positive */
-    protected int m_valueIndex;
-    
-    public BinaryItem(Attribute att, int valueIndex) throws Exception {
-      if (att.isNumeric() || (att.isNominal() && att.numValues() > 2)) {
-        throw new Exception("BinaryItem must be constructed using a nominal attribute" +
-        		" with at most 2 values!");
-      }
-      m_attribute = att;
-      if (m_attribute.numValues() == 1) {
-        m_valueIndex = 0; // unary attribute (? used to indicate absence from a basket)
-      } else {
-        m_valueIndex = valueIndex;
-      }
-    }
-    
-    /**
-     * Increase the frequency of this item.
-     * 
-     * @param f the amount to increase the frequency by.
-     */
-    public void increaseFrequency(int f) {
-      m_frequency += f;
-    }
-    
-    /**
-     * Decrease the frequency of this item.
-     * 
-     * @param f the amount by which to decrease the frequency.
-     */
-    public void decreaseFrequency(int f) {
-      m_frequency -= f;
-    }
-    
-    /**
-     * Increment the frequency of this item.
-     */
-    public void increaseFrequency() {
-      m_frequency++;
-    }
-    
-    /**
-     * Decrement the frequency of this item.
-     */
-    public void decreaseFrequency() {
-      m_frequency--;
-    }
-    
-    /**
-     * Get the frequency of this item.
-     * 
-     * @return the frequency.
-     */
-    public int getFrequency() {
-      return m_frequency;
-    }
-    
-    /**
-     * Get the attribute that this item corresponds to.
-     * 
-     * @return the corresponding attribute.
-     */
-    public Attribute getAttribute() {
-      return m_attribute;
-    }
-    
-    /**
-     * Get the value index for this item.
-     * 
-     * @return the value index.
-     */
-    public int getValueIndex() {
-      return m_valueIndex;
-    }
-    
-    /**
-     * A string representation of this item.
-     * 
-     * @return a string representation of this item.
-     */
-    public String toString() {
-      return toString(false);
-    }
-    
-    /**
-     * A string representation of this item.
-     * 
-     * @param freq true if the frequency should be included.
-     * @return a string representation of this item. 
-     */
-    public String toString(boolean freq) {
-      String result = m_attribute.name() + "=" + m_attribute.value(m_valueIndex);
-      if (freq) {
-        result += ":" + m_frequency;
-      }
-      return result;
-    }
-    
-    public String toXML() {
-      String result = "<ITEM name=\"" +  m_attribute.name() + "\" value=\"=" 
-      + m_attribute.value(m_valueIndex) + "\"/>";
-      
-      return result;
-    }
-    
-    /**
-     * Ensures that items will be sorted in descending order of frequency.
-     * Ties are ordered by attribute name.
-     * 
-     * @param comp the BinaryItem to compare against.
-     */
-    public int compareTo(BinaryItem comp) {
-      if (m_frequency == comp.getFrequency()) {
-        // sort by name
-        return -1 * m_attribute.name().compareTo(comp.getAttribute().name());
-      }
-      if (comp.getFrequency() < m_frequency) {
-        return -1;
-      }
-      return 1;
-    }
-    
-    public boolean equals(Object compareTo) {
-      if (!(compareTo instanceof BinaryItem)) {
-        return false;
-      }
-      
-      BinaryItem b = (BinaryItem)compareTo;
-      if (m_attribute.equals(b.getAttribute()) && m_frequency == b.getFrequency()) {
-        return true;
-      }
-      
-      return false;
-    }
-    
-    public int hashCode() {
-      return (m_attribute.name().hashCode() ^ 
-          m_attribute.numValues()) * m_frequency;
-    }
-  }
   
   /**
    * Class for maintaining a frequent item set.
@@ -957,453 +802,123 @@ public class FPGrowth extends AbstractAssociator
     }
   }
   
-  /**
-   * Class for storing and manipulating an association rule. Also has a utility
-   * routine for generating (by brute force) all the association rules that meet
-   * a given metric threshold from a list of large item sets.
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com).
-   */
-  /**
-   * @author mhall
-   *
-   */
-  public static class AssociationRule implements Serializable, Comparable<AssociationRule> {
-    
-    /** For serialization */
-    private static final long serialVersionUID = -661269018702294489L;
-
-    /** Enum for holding different metric types */
-    public static enum METRIC_TYPE {
-      CONFIDENCE("conf") {
-        double compute(int premiseSupport, int consequenceSupport, 
-            int totalSupport, int totalTransactions) {
-          
-          return (double)totalSupport / (double)premiseSupport;
-        }
-      },
-      LIFT("lift") {
-        double compute(int premiseSupport, int consequenceSupport, 
-            int totalSupport, int totalTransactions) {
-          
-          double confidence = 
-            METRIC_TYPE.CONFIDENCE.compute(premiseSupport, consequenceSupport, 
-                totalSupport, totalTransactions);
-          return confidence / ((double)consequenceSupport /
-              (double)totalTransactions);
-        }
-      },
-      LEVERAGE("lev") {
-        double compute(int premiseSupport, int consequenceSupport, 
-            int totalSupport, int totalTransactions) {
-          
-          double coverageForItemSet = (double)totalSupport /
-            (double)totalTransactions;
-          double expectedCoverageIfIndependent = 
-            ((double)premiseSupport / (double)totalTransactions) *
-            ((double)consequenceSupport / (double)totalTransactions);
-          return coverageForItemSet - expectedCoverageIfIndependent;
-        }
-      },
-      CONVICTION("conv") {
-        double compute(int premiseSupport, int consequenceSupport, 
-            int totalSupport, int totalTransactions) {
-          
-          double num = 
-            (double)premiseSupport * (double)(totalTransactions - consequenceSupport) /
-            (double)totalTransactions;
-          double denom = premiseSupport - totalSupport + 1;
-          return num / denom;
-        }
-      };
-      
-      private final String m_stringVal;
-      METRIC_TYPE(String name) {
-        m_stringVal = name;
+  private static void nextSubset(boolean[] subset) {
+    for (int i = 0; i < subset.length; i++) {
+      if (!subset[i]) {
+        subset[i] = true;
+        break;
+      } else {
+        subset[i] = false;
       }
-      
-      abstract double compute(int premiseSupport, int consequenceSupport, 
-          int totalSupport, int totalTransactions);
-      
-      public String toString() {
-        return m_stringVal;
-      }
-      
-      public String toStringMetric(int premiseSupport, int consequenceSupport,
-          int totalSupport, int totalTransactions) {
-        return m_stringVal + ":(" + Utils.doubleToString(compute(premiseSupport, consequenceSupport,
-            totalSupport, totalTransactions), 2) + ")";
-      }
-      
-      public String toXML(int premiseSupport, int consequenceSupport,
-          int totalSupport, int totalTransactions) {
-        String result = "<CRITERE name=\"" + m_stringVal + "\" value=\" " +
-          Utils.doubleToString(compute(premiseSupport, consequenceSupport,
-            totalSupport, totalTransactions), 2) + "\"/>";
-        
-        return result;
-      }
-    }
-    
-    /** Tags for display in the GUI */
-    public static final Tag[] TAGS_SELECTION = {
-      new Tag(METRIC_TYPE.CONFIDENCE.ordinal(), "Confidence"),
-      new Tag(METRIC_TYPE.LIFT.ordinal(), "Lift"),
-      new Tag(METRIC_TYPE.LEVERAGE.ordinal(), "Leverage"),
-      new Tag(METRIC_TYPE.CONVICTION.ordinal(), "Conviction")
-    };
-    
-    /** The metric type for this rule */
-    protected METRIC_TYPE m_metricType = METRIC_TYPE.CONFIDENCE;
-    
-    /** The premise of the rule */
-    protected Collection<BinaryItem> m_premise;
-    
-    /** The consequence of the rule */
-    protected Collection<BinaryItem> m_consequence;
-    
-    /** The support for the premise */
-    protected int m_premiseSupport;
-    
-    /** The support for the consequence */
-    protected int m_consequenceSupport;
-    
-    /** The total support for the item set (premise + consequence) */
-    protected int m_totalSupport;
-    
-    /** The total number of transactions in the data */
-    protected int m_totalTransactions;
-    
-    /**
-     * Construct a new association rule.
-     * 
-     * @param premise the premise of the rule
-     * @param consequence the consequence of the rule
-     * @param metric the metric for the rule
-     * @param premiseSupport the support of the premise
-     * @param consequenceSupport the support of the consequence
-     * @param totalSupport the total support of the rule
-     * @param totalTransactions the number of transactions in the data
-     */
-    public AssociationRule(Collection<BinaryItem> premise, 
-        Collection<BinaryItem> consequence, METRIC_TYPE metric,
-        int premiseSupport, int consequenceSupport,
-        int totalSupport, int totalTransactions) {
-      m_premise = premise;
-      m_consequence = consequence;
-      m_metricType = metric;
-      m_premiseSupport = premiseSupport;
-      m_consequenceSupport = consequenceSupport;
-      m_totalSupport = totalSupport;
-      m_totalTransactions = totalTransactions;
-    }
-    
-    /**
-     * Get the premise of this rule.
-     * 
-     * @return the premise of this rule.
-     */
-    public Collection<BinaryItem> getPremise() {
-      return m_premise;
-    }
-    
-    /**
-     * Get the consequence of this rule.
-     * 
-     * @return the consequence of this rule.
-     */
-    public Collection<BinaryItem> getConsequence() {
-      return m_consequence;
-    }
-    
-    /**
-     * Get the metric type of this rule (e.g. confidence).
-     * 
-     * @return the metric type of this rule.
-     */
-    public METRIC_TYPE getMetricType() {
-      return m_metricType;
-    }
-    
-    /**
-     * Get the value of the metric for this rule. 
-     * 
-     * @return the value of the metric for this rule.
-     */
-    public double getMetricValue() {
-      return m_metricType.compute(m_premiseSupport, m_consequenceSupport, 
-          m_totalSupport, m_totalTransactions);
-    }
-    
-    /**
-     * Get the support for the premise.
-     * 
-     * @return the support for the premise.
-     */
-    public int getPremiseSupport() {
-      return m_premiseSupport;
-    }
-    
-    /**
-     * Get the support for the consequence.
-     * 
-     * @return the support for the consequence.
-     */
-    public int getConsequenceSupport() {
-      return m_consequenceSupport;
-    }
-    
-    /**
-     * Get the total support for this rule (premise + consequence).
-     * 
-     * @return the total support for this rule.
-     */
-    public int getTotalSupport() {
-      return m_totalSupport;
-    }
-    
-    /**
-     * Get the total number of transactions in the data.
-     * 
-     * @return the total number of transactions in the data.
-     */
-    public int getTotalTransactions() {
-      return m_totalTransactions;
-    }
-    
-    /**
-     * Compare this rule to the supplied rule.
-     * 
-     * @param other the rule to compare to.
-     * @return the result of the comparison.
-     */
-    public int compareTo(AssociationRule other) {
-      return -Double.compare(getMetricValue(), other.getMetricValue());
-    }
-    
-    /**
-     * Return true if this rule is equal to the supplied one.
-     * 
-     * @return true if this rule is the same as the supplied rule.
-     */
-    public boolean equals(Object other) {
-      if (!(other instanceof AssociationRule)) {
-        return false;
-      }
-      
-      AssociationRule otherRule = (AssociationRule)other;
-      boolean result = m_premise.equals(otherRule.getPremise()) &&
-        m_consequence.equals(otherRule.getConsequence()) && 
-        (getMetricValue() == otherRule.getMetricValue());
-      
-      return result;
-    }
-    
-    public boolean containsItems(ArrayList<Attribute> items, boolean useOr) {
-      int numItems = items.size();
-      int count = 0;
-      
-      for (BinaryItem i : m_premise) {
-        if (items.contains(i.getAttribute())) {
-          if (useOr) {
-            return true; // can stop here
-          } else {
-            count++;
-          }
-        }
-      }
-      
-      for (BinaryItem i : m_consequence) {
-        if (items.contains(i.getAttribute())) {
-          if (useOr) {
-            return true; // can stop here
-          } else {
-            count++;
-          }
-        }
-      }
-      
-      if (!useOr) {
-        if (count == numItems) {
-          return true;
-        }
-      }
-      
-      return false;
-    }
-    
-    /**
-     * Get a textual description of this rule.
-     * 
-     * @return a textual description of this rule.
-     */
-    public String toString() {
-      StringBuffer result = new StringBuffer();
-      
-      result.append(m_premise.toString() + ": " + m_premiseSupport 
-          + " ==> " + m_consequence.toString() + ": " + m_totalSupport 
-          + "   ");
-      for (METRIC_TYPE m : METRIC_TYPE.values()) {
-        if (m.equals(m_metricType)) {
-          result.append("<" + 
-              m.toStringMetric(m_premiseSupport, m_consequenceSupport, 
-                  m_totalSupport, m_totalTransactions) + "> ");
-        } else {
-          result.append("" + 
-              m.toStringMetric(m_premiseSupport, m_consequenceSupport, 
-                  m_totalSupport, m_totalTransactions) + " ");
-        }
-      }
-      return result.toString();
-    }
-    
-    public String toXML() {
-      StringBuffer result = new StringBuffer();
-      result.append("  <RULE>\n    <LHS>");
-      
-      for (BinaryItem b : m_premise) {
-        result.append("\n      ");
-        result.append(b.toXML());
-      }
-      result.append("\n    </LHS>\n    <RHS>");
-      
-      for (BinaryItem b : m_consequence) {
-        result.append("\n      ");
-        result.append(b.toXML());
-      }
-      result.append("\n    </RHS>");
-      
-      // metrics
-      // do support first
-      result.append("\n    <CRITERE name=\"support\" value=\"" 
-          + m_totalSupport + "\"/>");
-      for (METRIC_TYPE m : METRIC_TYPE.values()) {
-        result.append("\n    ");
-        result.append(m.toXML(m_premiseSupport, m_consequenceSupport,
-            m_totalSupport, m_totalTransactions));
-      }
-      result.append("\n  </RULE>\n");
-      
-      return result.toString();
-    }
-    
-    private static void nextSubset(boolean[] subset) {
-      for (int i = 0; i < subset.length; i++) {
-        if (!subset[i]) {
-          subset[i] = true;
-          break;
-        } else {
-          subset[i] = false;
-        }
-      }
-    }
-    
-    private static Collection<BinaryItem> getPremise(FrequentBinaryItemSet fis, 
-        boolean[] subset) {
-      boolean ok = false;
-      for (int i = 0; i < subset.length; i++){
-        if (!subset[i]) {
-          ok = true;
-          break;
-        }
-      }      
-      
-      if (!ok) {
-        return null;
-      }
-      
-      List<BinaryItem> premise = new ArrayList<BinaryItem>();
-      ArrayList<BinaryItem> items = new ArrayList<BinaryItem>(fis.getItems());
-
-      
-      for (int i = 0; i < subset.length; i++) {
-        if (subset[i]) {
-          premise.add(items.get(i));
-        }
-      }
-      return premise;
-    }
-    
-    private static Collection<BinaryItem> getConsequence(FrequentBinaryItemSet fis,
-        boolean[] subset) {
-      List<BinaryItem> consequence = new ArrayList<BinaryItem>();
-      ArrayList<BinaryItem> items = new ArrayList<BinaryItem>(fis.getItems());
-      
-      for (int i = 0; i < subset.length; i++) {
-        if (!subset[i]) {
-          consequence.add(items.get(i));
-        }
-      }
-      return consequence;
-    }
-    
-    
-    /**
-     * Generate all association rules, from the supplied frequet item sets,
-     * that meet a given minimum metric threshold. Uses a brute force approach.
-     * 
-     * @param largeItemSets the set of frequent item sets
-     * @param metricToUse the metric to use
-     * @param metricThreshold the threshold value that a rule must meet
-     * @param totalTransactions the total number of transactions in the data
-     * @return a list of association rules
-     */
-    public static List<AssociationRule> 
-      generateRulesBruteForce(FrequentItemSets largeItemSets, METRIC_TYPE metricToUse, 
-          double metricThreshold, int totalTransactions) {
-      
-      List<AssociationRule> rules = new ArrayList<AssociationRule>();
-      largeItemSets.sort();
-      Map<Collection<BinaryItem>, Integer> frequencyLookup =
-        new HashMap<Collection<BinaryItem>, Integer>();
-      
-      Iterator<FrequentBinaryItemSet> setI = largeItemSets.iterator();
-      // process each large item set
-      while (setI.hasNext()) {
-        FrequentBinaryItemSet fis = setI.next();
-        frequencyLookup.put(fis.getItems(), fis.getSupport());
-        if (fis.getItems().size() > 1) {
-          // generate all the possible subsets for the premise
-          boolean[] subset = new boolean[fis.getItems().size()];
-          Collection<BinaryItem> premise = null;
-          Collection<BinaryItem> consequence = null;
-          while ((premise = getPremise(fis, subset)) != null) {
-            if (premise.size() > 0 && premise.size() < fis.getItems().size()) {
-              consequence = getConsequence(fis, subset);
-              int totalSupport = fis.getSupport();
-              int supportPremise = frequencyLookup.get(premise).intValue();
-              int supportConsequence = frequencyLookup.get(consequence).intValue();
-              
-              // a candidate rule
-              AssociationRule candidate = 
-                new AssociationRule(premise, consequence, metricToUse, supportPremise,
-                    supportConsequence, totalSupport, totalTransactions);
-              if (candidate.getMetricValue() > metricThreshold) {
-                // accept this rule
-                rules.add(candidate);
-              }              
-            }
-            nextSubset(subset);
-          }
-        }
-      }
-      return rules;
-    }
-    
-    public static List<AssociationRule> pruneRules(List<AssociationRule> rulesToPrune,
-        ArrayList<Attribute> itemsToConsider, boolean useOr) {
-      ArrayList<AssociationRule> result = new ArrayList<AssociationRule>();
-      
-      for (AssociationRule r : rulesToPrune) {
-        if (r.containsItems(itemsToConsider, useOr)) {
-          result.add(r);
-        }
-      }
-      
-      return result;
     }
   }
   
+  private static Collection<Item> getPremise(FrequentBinaryItemSet fis, 
+      boolean[] subset) {
+    boolean ok = false;
+    for (int i = 0; i < subset.length; i++){
+      if (!subset[i]) {
+        ok = true;
+        break;
+      }
+    }      
+    
+    if (!ok) {
+      return null;
+    }
+    
+    List<Item> premise = new ArrayList<Item>();
+    ArrayList<Item> items = new ArrayList<Item>(fis.getItems());
+
+    
+    for (int i = 0; i < subset.length; i++) {
+      if (subset[i]) {
+        premise.add(items.get(i));
+      }
+    }
+    return premise;
+  }
+  
+  private static Collection<Item> getConsequence(FrequentBinaryItemSet fis,
+      boolean[] subset) {
+    List<Item> consequence = new ArrayList<Item>();
+    ArrayList<Item> items = new ArrayList<Item>(fis.getItems());
+    
+    for (int i = 0; i < subset.length; i++) {
+      if (!subset[i]) {
+        consequence.add(items.get(i));
+      }
+    }
+    return consequence;
+  }
+  
+  
+  /**
+   * Generate all association rules, from the supplied frequet item sets,
+   * that meet a given minimum metric threshold. Uses a brute force approach.
+   * 
+   * @param largeItemSets the set of frequent item sets
+   * @param metricToUse the metric to use
+   * @param metricThreshold the threshold value that a rule must meet
+   * @param totalTransactions the total number of transactions in the data
+   * @return a list of association rules
+   */
+  public static List<AssociationRule> 
+    generateRulesBruteForce(FrequentItemSets largeItemSets, DefaultAssociationRule.METRIC_TYPE metricToUse, 
+        double metricThreshold, int totalTransactions) {
+    
+    List<AssociationRule> rules = new ArrayList<AssociationRule>();
+    largeItemSets.sort();
+    Map<Collection<BinaryItem>, Integer> frequencyLookup =
+      new HashMap<Collection<BinaryItem>, Integer>();
+    
+    Iterator<FrequentBinaryItemSet> setI = largeItemSets.iterator();
+    // process each large item set
+    while (setI.hasNext()) {
+      FrequentBinaryItemSet fis = setI.next();
+      frequencyLookup.put(fis.getItems(), fis.getSupport());
+      if (fis.getItems().size() > 1) {
+        // generate all the possible subsets for the premise
+        boolean[] subset = new boolean[fis.getItems().size()];
+        Collection<Item> premise = null;
+        Collection<Item> consequence = null;
+        while ((premise = getPremise(fis, subset)) != null) {
+          if (premise.size() > 0 && premise.size() < fis.getItems().size()) {
+            consequence = getConsequence(fis, subset);
+            int totalSupport = fis.getSupport();
+            int supportPremise = frequencyLookup.get(premise).intValue();
+            int supportConsequence = frequencyLookup.get(consequence).intValue();
+            
+            // a candidate rule
+            DefaultAssociationRule candidate = 
+              new DefaultAssociationRule(premise, consequence, metricToUse, supportPremise,
+                  supportConsequence, totalSupport, totalTransactions);
+            if (candidate.getPrimaryMetricValue() > metricThreshold) {
+              // accept this rule
+              rules.add(candidate);
+            }              
+          }
+          nextSubset(subset);
+        }
+      }
+    }
+    return rules;
+  }
+  
+  public static List<AssociationRule> pruneRules(List<AssociationRule> rulesToPrune,
+      ArrayList<Item> itemsToConsider, boolean useOr) {
+    ArrayList<AssociationRule> result = new ArrayList<AssociationRule>();
+    
+    for (AssociationRule r : rulesToPrune) {
+      if (r.containsItems(itemsToConsider, useOr)) {
+        result.add(r);
+      }
+    }
+    
+    return result;
+  }
+  
+
   /** The number of rules to find */
   protected int m_numRulesToFind = 10;
   //protected double m_upperBoundMinSupport = 0.36;
@@ -1430,8 +945,8 @@ public class FPGrowth extends AbstractAssociator
   /** The index (1 based) of binary attributes to treat as the positive value */
   protected int m_positiveIndex = 2;
   
-  protected AssociationRule.METRIC_TYPE m_metric = 
-    AssociationRule.METRIC_TYPE.CONFIDENCE;
+  protected DefaultAssociationRule.METRIC_TYPE m_metric = 
+    DefaultAssociationRule.METRIC_TYPE.CONFIDENCE;
   
   protected double m_metricThreshold = 0.9;
   
@@ -1844,7 +1359,7 @@ public class FPGrowth extends AbstractAssociator
    */
   public void setMetricType(SelectedTag d) {
     int ordinal =  d.getSelectedTag().getID();
-    for (AssociationRule.METRIC_TYPE m : AssociationRule.METRIC_TYPE.values()) {
+    for (DefaultAssociationRule.METRIC_TYPE m : DefaultAssociationRule.METRIC_TYPE.values()) {
       if (m.ordinal() == ordinal) {
         m_metric = m;
         break;
@@ -1887,7 +1402,7 @@ public class FPGrowth extends AbstractAssociator
    * @return the metric type to use.
    */
   public SelectedTag getMetricType() {
-    return new SelectedTag(m_metric.ordinal(), AssociationRule.TAGS_SELECTION);
+    return new SelectedTag(m_metric.ordinal(), DefaultAssociationRule.TAGS_SELECTION);
   }
   
   /**
@@ -2319,7 +1834,7 @@ public class FPGrowth extends AbstractAssociator
     
     if (metricTypeString.length() != 0) {
       setMetricType(new SelectedTag(Integer.parseInt(metricTypeString),
-          AssociationRule.TAGS_SELECTION));
+          DefaultAssociationRule.TAGS_SELECTION));
     }
     
     if (numRulesString.length() != 0) {
@@ -2422,8 +1937,8 @@ public class FPGrowth extends AbstractAssociator
     }
   }
   
-  private ArrayList<Attribute> parseRulesMustContain(Instances data) {
-    ArrayList<Attribute> result = new ArrayList<Attribute>();
+  private ArrayList<Item> parseRulesMustContain(Instances data) {
+    ArrayList<Item> result = new ArrayList<Item>();
     
     String[] split = m_rulesMustContain.trim().split(",");
     
@@ -2434,7 +1949,14 @@ public class FPGrowth extends AbstractAssociator
         System.err.println("[FPGrowth] : WARNING - can't find attribute " 
             + attName + " in the data.");
       } else {
-        result.add(att);
+        BinaryItem tempI = null;
+        try {
+          tempI = new BinaryItem(att, m_positiveIndex - 1);
+        } catch (Exception e) {
+          // this should never happen
+          e.printStackTrace();
+        }
+        result.add(tempI);
       }
     }
     
@@ -2460,7 +1982,7 @@ public class FPGrowth extends AbstractAssociator
       getCapabilities().testWithFail(data);
     }
     
-    ArrayList<Attribute> rulesMustContain = null;
+    ArrayList<Item> rulesMustContain = null;
     if (m_rulesMustContain.length() > 0) {
       rulesMustContain = parseRulesMustContain(data);
     }
@@ -2514,11 +2036,11 @@ public class FPGrowth extends AbstractAssociator
       tree = null;
 
       m_rules = 
-        AssociationRule.generateRulesBruteForce(m_largeItemSets, m_metric, 
+        generateRulesBruteForce(m_largeItemSets, m_metric, 
             m_metricThreshold, data.numInstances());
       
       if (rulesMustContain != null && rulesMustContain.size() > 0) {
-        m_rules = AssociationRule.pruneRules(m_rules, rulesMustContain, 
+        m_rules = pruneRules(m_rules, rulesMustContain, 
             m_mustContainOR);
       }
       
@@ -2627,7 +2149,7 @@ public class FPGrowth extends AbstractAssociator
     rulesBuff.append("<RULES>\n");
     int count = 0;
     for (AssociationRule r : m_rules) {
-      rulesBuff.append(r.toXML());
+      rulesBuff.append(((DefaultAssociationRule)r).toXML());
       count++;
       if (!m_findAllRulesForSupportLevel && count == m_numRulesToFind) {
         break;
