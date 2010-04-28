@@ -1698,7 +1698,17 @@ public class FPGrowth extends AbstractAssociator
    * Returns null if mining hasn't been performed yet.
    */
   public List<AssociationRule> getAssociationRules() {
-    return m_rules;
+    List<AssociationRule> rulesToReturn = new ArrayList<AssociationRule>();
+    
+    int count = 0;
+    for (AssociationRule r : m_rules) {
+      rulesToReturn.add(r);
+      count++;
+      if (!m_findAllRulesForSupportLevel && count == m_numRulesToFind) {
+        break;
+      }
+    }
+    return rulesToReturn;
   }
   
   /**
