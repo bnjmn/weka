@@ -22,7 +22,11 @@
 
 package weka.gui.visualize.plugins;
 
+import java.util.List;
+
 import javax.swing.JMenuItem;
+
+import weka.associations.AssociationRule;
 
 /**
  * Interface implemented by classes loaded dynamically to
@@ -35,17 +39,16 @@ public interface AssociationRuleVisualizePlugin {
 
   /**
    * Get a JMenu or JMenuItem which contain action listeners
-   * that perform the visualization of the tree in XML format 
-   * (see weka.associations.XMLRulesProducer).  
+   * that perform the visualization of the association rules.
    *
    * @see NoClassDefFoundError
    * @see IncompatibleClassChangeError
    *
-   * @param xmlRules    the rules in XML format
+   * @param rules       a List of AssociationRules
    * @param name        the name of the item (in the Explorer's history list)
    * @return menuitem   for opening visualization(s), or null
    *                    to indicate no visualization is applicable for the input
    */
-  public JMenuItem getVisualizeMenuItem(String xmlRules, String name);
+  public JMenuItem getVisualizeMenuItem(List<AssociationRule> rules, String name);
   
 }
