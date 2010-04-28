@@ -182,7 +182,7 @@ public class DefaultAssociationRule extends AssociationRule
    * @see weka.associations.AssociationRule#getPrimaryMetricName()
    */
   public String getPrimaryMetricName() {
-    return TAGS_SELECTION[m_metricType.ordinal()].getIDStr();
+    return TAGS_SELECTION[m_metricType.ordinal()].getReadable();
   }
   
   /* (non-Javadoc)
@@ -201,7 +201,7 @@ public class DefaultAssociationRule extends AssociationRule
     DefaultAssociationRule.METRIC_TYPE requested = null;
     
     for (DefaultAssociationRule.METRIC_TYPE m : METRIC_TYPE.values()) {
-      if (TAGS_SELECTION[m.ordinal()].getIDStr().equals(metricName)) {
+      if (TAGS_SELECTION[m.ordinal()].getReadable().equals(metricName)) {
         requested = m;
       }
     }
@@ -228,7 +228,7 @@ public class DefaultAssociationRule extends AssociationRule
     String[] metricNames = new String[TAGS_SELECTION.length];
     
     for (int i = 0; i < TAGS_SELECTION.length; i++) {
-      metricNames[i] = TAGS_SELECTION[i].getIDStr();
+      metricNames[i] = TAGS_SELECTION[i].getReadable();
     }
     
     return metricNames;
@@ -241,7 +241,7 @@ public class DefaultAssociationRule extends AssociationRule
     double[] values = new double[TAGS_SELECTION.length];
     
     for (int i = 0; i < TAGS_SELECTION.length; i++) {
-      values[i] = getNamedMetricValue(TAGS_SELECTION[i].getIDStr());
+      values[i] = getNamedMetricValue(TAGS_SELECTION[i].getReadable());
     }
     
     return values;
