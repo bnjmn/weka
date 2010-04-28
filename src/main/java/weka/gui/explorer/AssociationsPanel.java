@@ -22,6 +22,7 @@
 
 package weka.gui.explorer;
 
+import weka.associations.AssociationRule;
 import weka.associations.Associator;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -62,6 +63,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -213,7 +215,7 @@ public class AssociationsPanel
     });
     
     // check for any visualization plugins so that we
-    // can add a checkbox for storing graphs or xml rules
+    // can add a checkbox for storing graphs or rules
     boolean showStoreOutput = 
       (GenericObjectEditor.
         getClassnames(AssociationRuleVisualizePlugin.class.getName()).size() > 0 ||
@@ -355,7 +357,8 @@ public class AssociationsPanel
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);
 	  String grph = null;
-	  String xmlRules = null;
+	  //String xmlRules = null;
+	  List<AssociationRule> rulesList = null;
 	  Associator associator = (Associator) m_AssociatorEditor.getValue();
 	  StringBuffer outBuff = new StringBuffer();
 	  String name = (new SimpleDateFormat("HH:mm:ss - "))
@@ -413,10 +416,13 @@ public class AssociationsPanel
 	        }
 	      }
 
-	      if (associator instanceof weka.associations.XMLRulesProducer) {
-	        xmlRules = null;
+	      if (associator instanceof weka.associations.AssociationRulesProducer) {
+	        // xmlRules = null;
+	        rulesList = null;
 	        try {
-	          xmlRules = ((weka.associations.XMLRulesProducer)associator).xmlRules();
+	          // xmlRules = ((weka.associations.XMLRulesProducer)associator).xmlRules();
+	          rulesList = 
+	            ((weka.associations.AssociationRulesProducer)associator).getAssociationRules();
 	        } catch (Exception ex) {}
 	      }
 	    }
@@ -426,15 +432,15 @@ public class AssociationsPanel
 	    m_Log.logMessage(ex.getMessage());
 	    m_Log.statusMessage("See error log");
 	  } finally {
-	    if (grph != null || xmlRules != null) {
-	      Vector<String> visVect = new Vector<String>();
+	    if (grph != null || rulesList != null) {
+	      Vector<Object> visVect = new Vector<Object>();
 
 	      if (grph != null) {
 	        visVect.add(grph);
 	      }
 
-	      if (xmlRules != null) {
-	        visVect.add(xmlRules);
+	      if (rulesList != null) {
+	        visVect.add(rulesList);
 	      }
 	      m_History.addObject(name, visVect);
 	    }
@@ -568,7 +574,7 @@ public class AssociationsPanel
     resultListMenu.add(deleteOutput);
     
 //    String grph = null;
-    Vector<String> visVect = null;
+    Vector<Object> visVect = null;
     if (selectedName != null) {
       //grph = (String)m_History.getNamedObject(selectedName);
       visVect = (Vector)m_History.getNamedObject(selectedName);      
@@ -592,8 +598,8 @@ public class AssociationsPanel
     
     // tree plugins
     if (visVect != null) {
-      for (String grph : visVect) {
-        if (grph.startsWith("<?xml")) {
+      for (Object o : visVect) {
+        if (o instanceof List) {
           Vector pluginsVector = 
             GenericObjectEditor.getClassnames(AssociationRuleVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
@@ -605,7 +611,7 @@ public class AssociationsPanel
                 continue;
               }
               availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
+              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((List<AssociationRule>)o, selectedName);
               if (pluginMenuItem != null) {
                 visPlugins.add(pluginMenuItem);
               }
@@ -613,7 +619,7 @@ public class AssociationsPanel
 
             }
           }
-        } else {
+        } else if (o instanceof String) {
           Vector pluginsVector = 
             GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
@@ -623,7 +629,7 @@ public class AssociationsPanel
               if (plugin == null)
                 continue;
               availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
+              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((String)o, selectedName);
               // Version version = new Version();
               if (pluginMenuItem != null) {
                 /*  if (version.compareTo(plugin.getMinVersion()) < 0)
