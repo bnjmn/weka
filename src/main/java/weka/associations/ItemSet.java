@@ -321,6 +321,14 @@ public class ItemSet
     FastVector newPremises = new FastVector(rules[0].size()),
       newConsequences = new FastVector(rules[1].size()),
       newConf = new FastVector(rules[2].size());
+    
+    //TODO
+    FastVector newLift = null, newLev = null, newConv = null;
+    if (rules.length > 3) {
+      newLift = new FastVector(rules[3].size());
+      newLev = new FastVector(rules[4].size());
+      newConv = new FastVector(rules[5].size());
+    }
 
     for (int i = 0; i < rules[0].size(); i++) 
       if (!(((Double)rules[2].elementAt(i)).doubleValue() <
@@ -328,10 +336,23 @@ public class ItemSet
 	newPremises.addElement(rules[0].elementAt(i));
 	newConsequences.addElement(rules[1].elementAt(i));
 	newConf.addElement(rules[2].elementAt(i));
+	
+	//TODO
+	if (rules.length > 3) {
+	  newLift.addElement(rules[3].elementAt(i));
+	  newLev.addElement(rules[4].elementAt(i));
+	  newConv.addElement(rules[5].elementAt(i));
+	}
       }
     rules[0] = newPremises;
     rules[1] = newConsequences;
     rules[2] = newConf;
+    
+    if (rules.length > 3) {
+      rules[3] = newLift;
+      rules[4] = newLev;
+      rules[5] = newConv;
+    }
   }
 
   /**
