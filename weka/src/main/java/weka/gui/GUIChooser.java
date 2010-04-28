@@ -197,7 +197,7 @@ public class GUIChooser
 
   /** The weka image */
   Image m_weka = Toolkit.getDefaultToolkit().
-    getImage(ClassLoader.getSystemResource("weka/gui/images/weka_background.gif"));
+    getImage(GUIChooser.class.getClassLoader().getResource("weka/gui/images/weka_background.gif"));
 
   /** filechooser for the TreeVisualizer */
   protected JFileChooser m_FileChooserTreeVisualizer = new JFileChooser(new File(System.getProperty("user.dir")));
