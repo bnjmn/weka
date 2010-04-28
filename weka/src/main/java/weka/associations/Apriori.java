@@ -40,8 +40,10 @@ import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 
 /**
  <!-- globalinfo-start -->
@@ -130,7 +132,8 @@ import java.util.Hashtable;
  */
 public class Apriori 
   extends AbstractAssociator 
-  implements OptionHandler, CARuleMiner, TechnicalInformationHandler {
+  implements OptionHandler, AssociationRulesProducer, 
+    CARuleMiner, TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = 3277498842319212687L;
@@ -445,20 +448,21 @@ public class Apriori
       m_allTheRules[0] = new FastVector();
       m_allTheRules[1] = new FastVector();
       m_allTheRules[2] = new FastVector();
-      if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+      // TODO
+      //if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	m_allTheRules[3] = new FastVector();
 	m_allTheRules[4] = new FastVector();
 	m_allTheRules[5] = new FastVector();
-      }
+     // }
       sortedRuleSet = new FastVector[6];
       sortedRuleSet[0] = new FastVector();
       sortedRuleSet[1] = new FastVector();
       sortedRuleSet[2] = new FastVector();
-      if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+      //if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	sortedRuleSet[3] = new FastVector();
 	sortedRuleSet[4] = new FastVector();
 	sortedRuleSet[5] = new FastVector();
-      }
+      //}
       if(!m_car){
         // Find large itemsets and rules
         findLargeItemSets();
@@ -496,22 +500,22 @@ public class Apriori
 	sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[j-i]));
 	sortedRuleSet[1].addElement(m_allTheRules[1].elementAt(indices[j-i]));
 	sortedRuleSet[2].addElement(m_allTheRules[2].elementAt(indices[j-i]));
-	if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+	//if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	  sortedRuleSet[3].addElement(m_allTheRules[3].elementAt(indices[j-i]));
 	  sortedRuleSet[4].addElement(m_allTheRules[4].elementAt(indices[j-i]));
 	  sortedRuleSet[5].addElement(m_allTheRules[5].elementAt(indices[j-i]));
-	}
+	//}
       }
 
       // Sort rules according to their confidence
       m_allTheRules[0].removeAllElements();
       m_allTheRules[1].removeAllElements();
       m_allTheRules[2].removeAllElements();
-      if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+      //if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	m_allTheRules[3].removeAllElements();
 	m_allTheRules[4].removeAllElements();
 	m_allTheRules[5].removeAllElements();
-      }
+      //}
       confidences = new double[sortedRuleSet[2].size()];
       int sortType = 2 + m_metricType;
 
@@ -524,11 +528,11 @@ public class Apriori
 	m_allTheRules[0].addElement(sortedRuleSet[0].elementAt(indices[i]));
 	m_allTheRules[1].addElement(sortedRuleSet[1].elementAt(indices[i]));
 	m_allTheRules[2].addElement(sortedRuleSet[2].elementAt(indices[i]));
-	if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+	//if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	  m_allTheRules[3].addElement(sortedRuleSet[3].elementAt(indices[i]));
 	  m_allTheRules[4].addElement(sortedRuleSet[4].elementAt(indices[i]));
 	  m_allTheRules[5].addElement(sortedRuleSet[5].elementAt(indices[i]));
-	}
+	//}
       }
 
       if (m_verbose) {
@@ -852,10 +856,13 @@ public class Apriori
 		  ". " + ((AprioriItemSet)m_allTheRules[0].elementAt(i)).
 		  toString(m_instances) 
 		  + " ==> " + ((AprioriItemSet)m_allTheRules[1].elementAt(i)).
-		  toString(m_instances) +"    conf:("+  
-		  Utils.doubleToString(((Double)m_allTheRules[2].
-					elementAt(i)).doubleValue(),2)+")");
-            if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+		  toString(m_instances));
+                  text.append("    " + ((m_metricType == CONFIDENCE) ? "<" : "") 
+                      + "conf:(" + Utils.doubleToString(((Double)m_allTheRules[2].
+                          elementAt(i)).doubleValue(),2)+")" 
+                          + ((m_metricType == CONFIDENCE) ? ">" : ""));   
+		  
+            //if (/*m_metricType != CONFIDENCE ||*/ m_significanceLevel != -1) {
                 text.append((m_metricType == LIFT ? " <" : "")+" lift:("+  
 		    Utils.doubleToString(((Double)m_allTheRules[3].
 					  elementAt(i)).doubleValue(),2)
@@ -872,7 +879,7 @@ public class Apriori
 		    Utils.doubleToString(((Double)m_allTheRules[5].
 					  elementAt(i)).doubleValue(),2)
 		    +")"+(m_metricType == CONVICTION ? ">" : ""));
-            }
+            //}
             text.append('\n');
         }
     }
@@ -904,6 +911,7 @@ public class Apriori
             text.append('\n');
         }
     }
+        
     return text.toString();
   }
   
@@ -1396,7 +1404,6 @@ public class Apriori
   private void findRulesQuickly() throws Exception {
 
     FastVector[] rules;
-
     // Build rules
     for (int j = 1; j < m_Ls.size(); j++) {
       FastVector currentItemSets = (FastVector)m_Ls.elementAt(j);
@@ -1409,6 +1416,12 @@ public class Apriori
 	  m_allTheRules[0].addElement(rules[0].elementAt(k));
 	  m_allTheRules[1].addElement(rules[1].elementAt(k));
 	  m_allTheRules[2].addElement(rules[2].elementAt(k));
+	  
+	  if (rules.length > 3) {
+	    m_allTheRules[3].addElement(rules[3].elementAt(k));
+	    m_allTheRules[4].addElement(rules[4].elementAt(k));
+	    m_allTheRules[5].addElement(rules[5].elementAt(k));
+	  }
 	}
       }
     }
@@ -1498,6 +1511,74 @@ public class Apriori
    */
   public FastVector[] getAllTheRules() {
     return m_allTheRules;
+  }
+  
+  public List<AssociationRule> getAssociationRules() {
+    List<AssociationRule> rules = new ArrayList<AssociationRule>();
+    
+    if (m_allTheRules != null && m_allTheRules.length > 3) {
+      for (int i = 0 ; i < m_allTheRules[0].size(); i++) {
+        // Construct the Lists for the premise and consequence
+        List<Item> premise = new ArrayList<Item>();
+        List<Item> consequence = new ArrayList<Item>();
+        
+        AprioriItemSet premiseSet = (AprioriItemSet)m_allTheRules[0].get(i);
+        AprioriItemSet consequenceSet = (AprioriItemSet)m_allTheRules[1].get(i);
+        for (int j = 0; j < m_instances.numAttributes(); j++) {
+          if (premiseSet.m_items[j] != -1) {
+            try {
+              Item newItem = new Item(m_instances.attribute(j), premiseSet.m_items[j]);
+              premise.add(newItem);
+            } catch (Exception ex) {
+              ex.printStackTrace();
+            }
+          }
+          
+          if (consequenceSet.m_items[j] != -1) {
+            try {
+              Item newItem = new Item(m_instances.attribute(j), consequenceSet.m_items[j]);
+              consequence.add(newItem);
+            } catch (Exception ex) {
+              ex.printStackTrace();
+            }
+          }
+        }
+        
+        // get the constituents of the metrics
+        int totalTrans = premiseSet.m_totalTransactions;
+        int totalSupport = consequenceSet.m_counter;
+        int premiseSupport = premiseSet.m_counter;
+        // reconstruct consequenceSupport using Lift:
+        double lift = ((Double)m_allTheRules[3].get(i)).doubleValue();
+        double conf = ((Double)m_allTheRules[2].get(i)).doubleValue();
+        int consequenceSupport = (int)((totalTrans * conf) / lift);
+        
+        // map the primary metric
+        DefaultAssociationRule.METRIC_TYPE metric = null;
+        switch(m_metricType) {
+        case CONFIDENCE:
+          metric = DefaultAssociationRule.METRIC_TYPE.CONFIDENCE;
+          break;
+        case LIFT:
+          metric = DefaultAssociationRule.METRIC_TYPE.LIFT;
+          break;
+        case LEVERAGE:
+          metric = DefaultAssociationRule.METRIC_TYPE.LEVERAGE;
+          break;
+        case CONVICTION:
+          metric = DefaultAssociationRule.METRIC_TYPE.CONVICTION;
+          break;
+        }
+        
+        DefaultAssociationRule newRule = 
+          new DefaultAssociationRule(premise, consequence, metric, 
+              premiseSupport, consequenceSupport, totalSupport, totalTrans);
+        
+        rules.add(newRule);
+      }
+    }
+    
+    return rules;
   }
   
   /**
