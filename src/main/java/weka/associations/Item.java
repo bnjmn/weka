@@ -184,12 +184,5 @@ public class Item implements Serializable, Comparable<Item> {
   public int hashCode() {
     return (m_attribute.name().hashCode() ^ 
         m_attribute.numValues()) * m_frequency;
-  }
-  
-  public String toXML() {
-    String result = "<ITEM name=\"" +  m_attribute.name() + "\" value=\"=" 
-    + m_attribute.value(m_valueIndex) + "\"/>";
-    
-    return result;
-  }
+  }  
 }

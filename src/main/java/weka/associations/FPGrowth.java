@@ -127,7 +127,7 @@ import weka.core.TechnicalInformation.Type;
  */
 public class FPGrowth extends AbstractAssociator 
   implements AssociationRulesProducer, OptionHandler, 
-    TechnicalInformationHandler, XMLRulesProducer {
+    TechnicalInformationHandler {
   
   /** For serialization */
   private static final long serialVersionUID = 3620717108603442911L;
@@ -2151,25 +2151,7 @@ public class FPGrowth extends AbstractAssociator
     
     return text.toString();
   }
-  
-  public String xmlRules() {
-    StringBuffer rulesBuff = new StringBuffer();
     
-    rulesBuff.append("<?xml version=\"1.0\" encoding=\"iso-8859-15\"?>\n");
-    rulesBuff.append("<RULES>\n");
-    int count = 0;
-    for (AssociationRule r : m_rules) {
-      rulesBuff.append(((DefaultAssociationRule)r).toXML());
-      count++;
-      if (!m_findAllRulesForSupportLevel && count == m_numRulesToFind) {
-        break;
-      } 
-    }
-    rulesBuff.append("</RULES>\n");
-    
-    return rulesBuff.toString();
-  }
-  
   /**
    * Returns the revision string.
    * 
