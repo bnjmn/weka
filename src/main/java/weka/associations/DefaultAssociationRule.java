@@ -299,34 +299,4 @@ public class DefaultAssociationRule extends AssociationRule
     }
     return result.toString();
   }
-  
-  public String toXML() {
-    StringBuffer result = new StringBuffer();
-    result.append("  <RULE>\n    <LHS>");
-    
-    for (Item b : m_premise) {
-      result.append("\n      ");
-      result.append(b.toXML());
-    }
-    result.append("\n    </LHS>\n    <RHS>");
-    
-    for (Item b : m_consequence) {
-      result.append("\n      ");
-      result.append(b.toXML());
-    }
-    result.append("\n    </RHS>");
-    
-    // metrics
-    // do support first
-    result.append("\n    <CRITERE name=\"support\" value=\"" 
-        + m_totalSupport + "\"/>");
-    for (DefaultAssociationRule.METRIC_TYPE m : METRIC_TYPE.values()) {
-      result.append("\n    ");
-      result.append(m.toXML(m_premiseSupport, m_consequenceSupport,
-          m_totalSupport, m_totalTransactions));
-    }
-    result.append("\n  </RULE>\n");
-    
-    return result.toString();
-  }
 }
