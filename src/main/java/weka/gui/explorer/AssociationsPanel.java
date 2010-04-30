@@ -23,6 +23,7 @@
 package weka.gui.explorer;
 
 import weka.associations.AssociationRule;
+import weka.associations.AssociationRules;
 import weka.associations.Associator;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -358,7 +359,7 @@ public class AssociationsPanel
 	  Instances inst = new Instances(m_Instances);
 	  String grph = null;
 	  //String xmlRules = null;
-	  List<AssociationRule> rulesList = null;
+	  AssociationRules rulesList = null;
 	  Associator associator = (Associator) m_AssociatorEditor.getValue();
 	  StringBuffer outBuff = new StringBuffer();
 	  String name = (new SimpleDateFormat("HH:mm:ss - "))
@@ -599,7 +600,7 @@ public class AssociationsPanel
     // tree plugins
     if (visVect != null) {
       for (Object o : visVect) {
-        if (o instanceof List) {
+        if (o instanceof AssociationRules) {
           Vector pluginsVector = 
             GenericObjectEditor.getClassnames(AssociationRuleVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
@@ -611,12 +612,12 @@ public class AssociationsPanel
                 continue;
               }
               availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((List<AssociationRule>)o, selectedName);
+              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((AssociationRules)o, selectedName);
               if (pluginMenuItem != null) {
                 visPlugins.add(pluginMenuItem);
               }
             } catch (Exception ex) {
-
+              //ex.printStackTrace();
             }
           }
         } else if (o instanceof String) {

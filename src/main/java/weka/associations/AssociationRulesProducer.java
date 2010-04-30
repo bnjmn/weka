@@ -39,5 +39,16 @@ public interface AssociationRulesProducer {
    * @return the list of association rules discovered during mining.
    * Returns null if mining hasn't been performed yet.
    */
-  List<AssociationRule> getAssociationRules();
+  AssociationRules getAssociationRules();
+  
+  /**
+   * Gets a list of the names of the metrics output for
+   * each rule. This list should be the same (in terms of
+   * the names and order thereof) as that produced by
+   * AssociationRule.getMetricNamesForRule().
+   * 
+   * @return an array of the names of the metrics available
+   * for each rule learned by this producer.
+   */
+  String[] getRuleMetricNames();
 }
