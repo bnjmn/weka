@@ -67,7 +67,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.31.2.4 $
+ * @version $Revision$
  */
 public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer {
@@ -421,11 +421,18 @@ public class Bagging extends RandomizableIteratedSingleClassifierEnhancer
 	    continue;
 	  
 	  voteCount++;
-	  double pred = m_Classifiers[j].classifyInstance(data.instance(i));
-	  if (numeric)
-	    votes[0] += pred;
-	  else
-	    votes[(int) pred]++;
+	//  double pred = m_Classifiers[j].classifyInstance(data.instance(i));
+	  if (numeric) {
+	    // votes[0] += pred;
+	    votes[0] = m_Classifiers[j].classifyInstance(data.instance(i));
+	  } else {
+	    // votes[(int) pred]++;
+	    double[] newProbs = m_Classifiers[j].distributionForInstance(data.instance(i));
+            // average the probability estimates
+            for (int k = 0; k < newProbs.length; k++) {
+              votes[k] += newProbs[k];
+            }
+	  }
 	}
 	
 	// "vote"
@@ -435,7 +442,11 @@ public class Bagging extends RandomizableIteratedSingleClassifierEnhancer
             vote  /= voteCount;    // average
           }
         } else {
-	  vote = Utils.maxIndex(votes);   // majority vote
+          if (Utils.eq(Utils.sum(votes), 0)) {            
+          } else {
+            Utils.normalize(votes);
+          }
+	  vote = Utils.maxIndex(votes);   // predicted class
         }
 	
 	// error for instance
