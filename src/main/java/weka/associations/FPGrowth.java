@@ -1697,7 +1697,7 @@ public class FPGrowth extends AbstractAssociator
    * @return the list of association rules discovered during mining.
    * Returns null if mining hasn't been performed yet.
    */
-  public List<AssociationRule> getAssociationRules() {
+  public AssociationRules getAssociationRules() {
     List<AssociationRule> rulesToReturn = new ArrayList<AssociationRule>();
     
     int count = 0;
@@ -1708,7 +1708,27 @@ public class FPGrowth extends AbstractAssociator
         break;
       }
     }
-    return rulesToReturn;
+    
+    return new AssociationRules(rulesToReturn);
+  }
+  
+  /**
+   * Gets a list of the names of the metrics output for
+   * each rule. This list should be the same (in terms of
+   * the names and order thereof) as that produced by
+   * AssociationRule.getMetricNamesForRule().
+   * 
+   * @return an array of the names of the metrics available
+   * for each rule learned by this producer.
+   */
+  public String[] getRuleMetricNames() {
+    String[] metricNames = new String[DefaultAssociationRule.TAGS_SELECTION.length];
+    
+    for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
+      metricNames[i] = DefaultAssociationRule.TAGS_SELECTION[i].getReadable();
+    }
+    
+    return metricNames;
   }
   
   /**

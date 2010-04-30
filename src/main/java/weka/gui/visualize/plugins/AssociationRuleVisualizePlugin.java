@@ -26,7 +26,7 @@ import java.util.List;
 
 import javax.swing.JMenuItem;
 
-import weka.associations.AssociationRule;
+import weka.associations.AssociationRules;
 
 /**
  * Interface implemented by classes loaded dynamically to
@@ -44,11 +44,11 @@ public interface AssociationRuleVisualizePlugin {
    * @see NoClassDefFoundError
    * @see IncompatibleClassChangeError
    *
-   * @param rules       a List of AssociationRules
+   * @param rules       the association rules
    * @param name        the name of the item (in the Explorer's history list)
    * @return menuitem   for opening visualization(s), or null
    *                    to indicate no visualization is applicable for the input
    */
-  public JMenuItem getVisualizeMenuItem(List<AssociationRule> rules, String name);
+  public JMenuItem getVisualizeMenuItem(AssociationRules rules, String name);
   
 }

@@ -1513,7 +1513,7 @@ public class Apriori
     return m_allTheRules;
   }
   
-  public List<AssociationRule> getAssociationRules() {
+  public AssociationRules getAssociationRules() {
     List<AssociationRule> rules = new ArrayList<AssociationRule>();
     
     if (m_allTheRules != null && m_allTheRules.length > 3) {
@@ -1578,7 +1578,26 @@ public class Apriori
       }
     }
     
-    return rules;
+    return new AssociationRules(rules);
+  }
+  
+  /**
+   * Gets a list of the names of the metrics output for
+   * each rule. This list should be the same (in terms of
+   * the names and order thereof) as that produced by
+   * AssociationRule.getMetricNamesForRule().
+   * 
+   * @return an array of the names of the metrics available
+   * for each rule learned by this producer.
+   */
+  public String[] getRuleMetricNames() {
+    String[] metricNames = new String[DefaultAssociationRule.TAGS_SELECTION.length];
+    
+    for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
+      metricNames[i] = DefaultAssociationRule.TAGS_SELECTION[i].getReadable();
+    }
+    
+    return metricNames;
   }
   
   /**
