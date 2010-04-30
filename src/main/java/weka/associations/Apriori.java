@@ -1578,7 +1578,7 @@ public class Apriori
       }
     }
     
-    return new AssociationRules(rules);
+    return new AssociationRules(rules, this);
   }
   
   /**

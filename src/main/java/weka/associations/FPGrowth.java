@@ -1709,7 +1709,7 @@ public class FPGrowth extends AbstractAssociator
       }
     }
     
-    return new AssociationRules(rulesToReturn);
+    return new AssociationRules(rulesToReturn, this);
   }
   
   /**

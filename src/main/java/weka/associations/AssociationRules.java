@@ -24,6 +24,9 @@ package weka.associations;
 import java.io.Serializable;
 import java.util.List;
 
+import weka.core.OptionHandler;
+import weka.core.Utils;
+
 /**
  * Class encapsulating a list of association rules.
  * 
@@ -35,6 +38,9 @@ public class AssociationRules implements Serializable {
   /** For serialization */
   private static final long serialVersionUID = 8889198755948056749L;
   
+  /** The scheme that produced these rules */
+  protected String m_producer = "Unknown";
+  
   /** The list of rules */
   protected List<AssociationRule> m_rules;
   
@@ -42,9 +48,41 @@ public class AssociationRules implements Serializable {
    * Constructs a new AssociationRules.
    * 
    * @param rules the list of rules.
+   * @param producer a string describing the scheme that produced these rules.
+   */
+  public AssociationRules(List<AssociationRule> rules, String producer) {
+    setRules(rules);
+    setProducer(producer);
+  }
+  
+  /**
+   * Constructs a new AssociationRules.
+   * 
+   * @param rules the list of rules.
+   * @param producer the scheme that produced the rules.
+   */
+  public AssociationRules(List<AssociationRule> rules, Object producer) {
+    String producerString = producer.getClass().getName();
+    if (producerString.startsWith("weka.associations.")) {
+      producerString += producerString.substring("weka.associations.".length());
+    }
+    
+    if (producer instanceof OptionHandler) {
+      String [] o = ((OptionHandler) producer).getOptions();
+      producerString += " " + Utils.joinOptions(o);
+    }
+    
+    setRules(rules);
+    setProducer(producerString);
+  }
+  
+  /**
+   * Constructs a new AssociationRules.
+   * 
+   * @param rules the list of rules.
    */
   public AssociationRules(List<AssociationRule> rules) {
-    setRules(rules);
+    this(rules, "Unknown");
   }
   
   /**
@@ -63,5 +101,26 @@ public class AssociationRules implements Serializable {
    */
   public List<AssociationRule> getRules() {
     return m_rules;
+  }
+  
+  
+  /**
+   * Set a textual description of the scheme that produced
+   * these rules.
+   * 
+   * @param producer a textual description of the scheme that produced
+   * these rules.
+   */
+  public void setProducer(String producer) {
+    m_producer = producer;
+  }
+  
+  /**
+   * Get a string describing the scheme that produced these rules.
+   * 
+   * @return producer
+   */
+  public String getProducer() {
+    return m_producer;
   }
 }
