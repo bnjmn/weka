@@ -74,7 +74,7 @@ A set of data items, the dataset, is a very basic concept of machine learning. A
 	\begin{minipage}{7cm}
 		{\scriptsize
 		\begin{verbatim}
-		@attribute outlook {sunny, overcast rainy}
+		@attribute outlook {sunny, overcast, rainy}
 		@attribute windy {TRUE, FALSE}
 		\end{verbatim}}
 	\end{minipage}
@@ -184,9 +184,9 @@ A more elaborate method is cross-validation. Here, a number of folds \textit{n} 
 \newpage
 \subsection{weka.filters}
 
-The \texttt{weka.filters} package is concerned with classes that transforms datasets -- by removing or adding attributes, resampling the dataset, removing examples and so on. This package offers useful support for data preprocessing, which is an important step in machine learning.
+The \texttt{weka.filters} package is concerned with classes that transform datasets -- by removing or adding attributes, resampling the dataset, removing examples and so on. This package offers useful support for data preprocessing, which is an important step in machine learning.
 
-All filters offer the options \texttt{-i} for specifying the input dataset, and \texttt{-o} for specifying the output dataset. If any of these parameters is not given, this specifies standard input resp. output for use within pipes. Other parameters are specific to each filter and can be found out via \textit{-h}, as with any other class. The \texttt{weka.filters} package is organized into \texttt{supervised} and \texttt{unsupervised} filtering, both of which are again subdivided into instance and attribute filtering. We will discuss each of the four subsection separately.
+All filters offer the options \texttt{-i} for specifying the input dataset, and \texttt{-o} for specifying the output dataset. If any of these parameters is not given, standard input and/or standard output will be read from/written to. Other parameters are specific to each filter and can be found out via \textit{-h}, as with any other class. The \texttt{weka.filters} package is organized into \texttt{supervised} and \texttt{unsupervised} filtering, both of which are again subdivided into instance and attribute filtering. We will discuss each of the four subsections separately.
 
 \subsubsection*{weka.filters.supervised}
 
@@ -226,7 +226,7 @@ Classes below \texttt{weka.filters.supervised} in the class hierarchy are for su
     -o soybean-uniform-5%.arff -c last -Z 5 -B 1
 \end{verbatim}}
 
-\noindent \texttt{StratifiedRemoveFolds} creates stratified cross-validation folds of the given dataset. This means that per default the class distributions are approximately retained within each fold. The following example splits soybean.arff into stratified training and test datasets, the latter consisting of 25\% (= 1/4) of the data.
+\noindent \texttt{StratifiedRemoveFolds} creates stratified cross-validation folds of the given dataset. This means that by default the class distributions are approximately retained within each fold. The following example splits soybean.arff into stratified training and test datasets, the latter consisting of 25\% (= 1/4) of the data.
 
 {\scriptsize
 \begin{verbatim}
@@ -240,11 +240,11 @@ Classes below \texttt{weka.filters.supervised} in the class hierarchy are for su
 
 \subsubsection*{weka.filters.unsupervised}
 
-Classes below \texttt{weka.filters.unsupervised} in the class hierarchy are for unsupervised filtering, e.g. the non-stratified version of Resample. A class should not be assigned here.
+Classes below \texttt{weka.filters.unsupervised} in the class hierarchy are for unsupervised filtering, e.g. the non-stratified version of Resample. A class attribute should not be assigned here.
 
 \subsubsection*{weka.filters.unsupervised.attribute}
 
-\texttt{StringToWordVector} transforms string attributes into a word vectors, i.e. creating one attribute for each word which either encodes presence or word count (= \texttt{-C}) within the string. \texttt{-W} can be used to set an approximate limit on the number of words. When a class is assigned, the limit applies to each class separately. This filter is useful for text mining.
+\texttt{StringToWordVector} transforms string attributes into word vectors, i.e. creating one attribute for each word which either encodes presence or word count (= \texttt{-C}) within the string. \texttt{-W} can be used to set an approximate limit on the number of words. When a class is assigned, the limit applies to each class separately. This filter is useful for text mining.
 
 \noindent \texttt{Obfuscate} renames the dataset name, all attribute names and nominal attribute values. This is intended for exchanging sensitive datasets without giving away restricted information.
 
