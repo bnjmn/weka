@@ -244,8 +244,8 @@ public class GUIChooser
 	      "ARFF Files (*" + Instances.FILE_EXTENSION + ")"));
 
     // general layout
-    m_Icon = Toolkit.getDefaultToolkit().getImage(
-	ClassLoader.getSystemResource("weka/gui/weka_icon.gif"));
+    m_Icon = Toolkit.getDefaultToolkit().
+      getImage(GUIChooser.class.getClassLoader().getResource("weka/gui/weka_icon.gif"));
     setIconImage(m_Icon);
     this.getContentPane().setLayout(new BorderLayout());
     
