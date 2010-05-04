@@ -46,7 +46,11 @@ public class AssociatorBeanInfo extends SimpleBeanInfo {
 	new EventSetDescriptor(Associator.class,
 	                       "configuration",
 	                       ConfigurationListener.class,
-	                       "acceptConfiguration")
+	                       "acceptConfiguration"),
+	new EventSetDescriptor(Associator.class,
+	                       "batchAssociationRules",
+	                        BatchAssociationRulesListener.class,
+	                        "acceptAssociationRules")	                       
       };
       return esds;
     } catch (Exception ex) {
