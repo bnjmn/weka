@@ -22,6 +22,8 @@
 
 package weka.gui.explorer;
 
+import weka.associations.AssociationRule;
+import weka.associations.AssociationRules;
 import weka.associations.Associator;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -45,6 +47,7 @@ import weka.gui.explorer.Explorer.LogHandler;
 import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
+import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -61,10 +64,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -116,6 +121,13 @@ public class AssociationsPanel
 
   /** Click to stop a running associator */
   protected JButton m_StopBut = new JButton("Stop");
+  
+  /** 
+   * Whether to store any graph or xml rules output in
+   * the history list
+   */
+  protected JCheckBox m_storeOutput = 
+    new JCheckBox("Store output for visualization");
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -202,6 +214,14 @@ public class AssociationsPanel
 	stopAssociator();
       }
     });
+    
+    // check for any visualization plugins so that we
+    // can add a checkbox for storing graphs or rules
+    boolean showStoreOutput = 
+      (GenericObjectEditor.
+        getClassnames(AssociationRuleVisualizePlugin.class.getName()).size() > 0 ||
+       GenericObjectEditor.
+        getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -213,13 +233,20 @@ public class AssociationsPanel
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(1,2));
+    buttons.setLayout(new BorderLayout());
+    JPanel buttonsP = new JPanel();
+    buttonsP.setLayout(new GridLayout(1,2));
+    
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
-    buttons.add(ssButs);
+    buttonsP.add(ssButs);
+    buttons.add(buttonsP, BorderLayout.SOUTH);
+    if (showStoreOutput) {
+      buttons.add(m_storeOutput, BorderLayout.NORTH);
+    }
 
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Associator output"));
@@ -331,6 +358,8 @@ public class AssociationsPanel
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);
 	  String grph = null;
+	  //String xmlRules = null;
+	  AssociationRules rulesList = null;
 	  Associator associator = (Associator) m_AssociatorEditor.getValue();
 	  StringBuffer outBuff = new StringBuffer();
 	  String name = (new SimpleDateFormat("HH:mm:ss - "))
@@ -379,11 +408,23 @@ public class AssociationsPanel
 	    outBuff.append("=== Associator model (full training set) ===\n\n");
 	    outBuff.append(associator.toString() + '\n');
 	    m_History.updateResult(name);
-	    if (associator instanceof Drawable) {
-	      grph = null;
-	      try {
-	        grph = ((Drawable)associator).graph();
-	      } catch (Exception ex) {	        
+	    if (m_storeOutput.isSelected()) {
+	      if (associator instanceof Drawable) {
+	        grph = null;
+	        try {
+	          grph = ((Drawable)associator).graph();
+	        } catch (Exception ex) {	        
+	        }
+	      }
+
+	      if (associator instanceof weka.associations.AssociationRulesProducer) {
+	        // xmlRules = null;
+	        rulesList = null;
+	        try {
+	          // xmlRules = ((weka.associations.XMLRulesProducer)associator).xmlRules();
+	          rulesList = 
+	            ((weka.associations.AssociationRulesProducer)associator).getAssociationRules();
+	        } catch (Exception ex) {}
 	      }
 	    }
 	    m_Log.logMessage("Finished " + cname);
@@ -392,8 +433,17 @@ public class AssociationsPanel
 	    m_Log.logMessage(ex.getMessage());
 	    m_Log.statusMessage("See error log");
 	  } finally {
-	    if (grph != null) {
-	      m_History.addObject(name, grph);
+	    if (grph != null || rulesList != null) {
+	      Vector<Object> visVect = new Vector<Object>();
+
+	      if (grph != null) {
+	        visVect.add(grph);
+	      }
+
+	      if (rulesList != null) {
+	        visVect.add(rulesList);
+	      }
+	      m_History.addObject(name, visVect);
 	    }
 	    if (isInterrupted()) {
 	      m_Log.logMessage("Interrupted " + cname);
@@ -524,12 +574,14 @@ public class AssociationsPanel
     }
     resultListMenu.add(deleteOutput);
     
-    String grph = null;
+//    String grph = null;
+    Vector<Object> visVect = null;
     if (selectedName != null) {
-      grph = (String)m_History.getNamedObject(selectedName);
+      //grph = (String)m_History.getNamedObject(selectedName);
+      visVect = (Vector)m_History.getNamedObject(selectedName);      
     }
     
-    final String fgrph = grph;
+/*    final String fgrph = grph;
     JMenuItem visTree = new JMenuItem("Visualize tree");
     if (grph != null) {
       visTree.addActionListener(new ActionListener() {
@@ -539,35 +591,59 @@ public class AssociationsPanel
         }
       });
       resultListMenu.add(visTree);
-    }
+    } */
     
     // plugins
     JMenu visPlugins = new JMenu("Plugins");
     boolean availablePlugins = false;
     
     // tree plugins
-    if (grph != null) {
-      Vector pluginsVector = 
-        GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
-      for (int i = 0; i < pluginsVector.size(); i++) {
-        String className = (String) (pluginsVector.elementAt(i));
-        try {
-          TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(className).newInstance();
-          if (plugin == null)
-            continue;
-          availablePlugins = true;
-          JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
-          // Version version = new Version();
-          if (pluginMenuItem != null) {
-          /*  if (version.compareTo(plugin.getMinVersion()) < 0)
+    if (visVect != null) {
+      for (Object o : visVect) {
+        if (o instanceof AssociationRules) {
+          Vector pluginsVector = 
+            GenericObjectEditor.getClassnames(AssociationRuleVisualizePlugin.class.getName());
+          for (int i = 0; i < pluginsVector.size(); i++) {
+            String className = (String) (pluginsVector.elementAt(i));
+            try {
+              AssociationRuleVisualizePlugin plugin = 
+                (AssociationRuleVisualizePlugin)Class.forName(className).newInstance();
+              if (plugin == null) {
+                continue;
+              }
+              availablePlugins = true;
+              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((AssociationRules)o, selectedName);
+              if (pluginMenuItem != null) {
+                visPlugins.add(pluginMenuItem);
+              }
+            } catch (Exception ex) {
+              //ex.printStackTrace();
+            }
+          }
+        } else if (o instanceof String) {
+          Vector pluginsVector = 
+            GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
+          for (int i = 0; i < pluginsVector.size(); i++) {
+            String className = (String) (pluginsVector.elementAt(i));
+            try {
+              TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(className).newInstance();
+              if (plugin == null)
+                continue;
+              availablePlugins = true;
+              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((String)o, selectedName);
+              // Version version = new Version();
+              if (pluginMenuItem != null) {
+                /*  if (version.compareTo(plugin.getMinVersion()) < 0)
               pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
             if (version.compareTo(plugin.getMaxVersion()) >= 0)
               pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");*/
-            visPlugins.add(pluginMenuItem);
+                visPlugins.add(pluginMenuItem);
+              }
+            }
+            catch (Exception e) {
+              //e.printStackTrace();
+            }
           }
-        }
-        catch (Exception e) {
-          //e.printStackTrace();
         }
       }
     }
