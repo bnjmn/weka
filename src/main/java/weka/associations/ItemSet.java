@@ -322,7 +322,6 @@ public class ItemSet
       newConsequences = new FastVector(rules[1].size()),
       newConf = new FastVector(rules[2].size());
     
-    //TODO
     FastVector newLift = null, newLev = null, newConv = null;
     if (rules.length > 3) {
       newLift = new FastVector(rules[3].size());
@@ -337,7 +336,6 @@ public class ItemSet
 	newConsequences.addElement(rules[1].elementAt(i));
 	newConf.addElement(rules[2].elementAt(i));
 	
-	//TODO
 	if (rules.length > 3) {
 	  newLift.addElement(rules[3].elementAt(i));
 	  newLev.addElement(rules[4].elementAt(i));
