@@ -1732,6 +1732,21 @@ public class FPGrowth extends AbstractAssociator
   }
   
   /**
+   * Returns true if this AssociationRulesProducer can actually
+   * produce rules. Most implementing classes will always return
+   * true from this method (obviously :-)). However, an implementing
+   * class that actually acts as a wrapper around things that may
+   * or may not implement AssociationRulesProducer will want to
+   * return false if the thing they wrap can't produce rules.
+   * 
+   * @return true if this producer can produce rules in its current
+   * configuration
+   */
+  public boolean canProduceRules() {
+    return true;
+  }
+  
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
