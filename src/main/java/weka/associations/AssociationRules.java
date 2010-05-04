@@ -103,6 +103,15 @@ public class AssociationRules implements Serializable {
     return m_rules;
   }
   
+  /**
+   * Get the number of rules.
+   * 
+   * @return the number of rules.
+   */
+  public int getNumRules() {
+    return m_rules.size();
+  }
+  
   
   /**
    * Set a textual description of the scheme that produced
