@@ -22,7 +22,7 @@
 
 package weka.gui.beans;
 
-import weka.associations.FPGrowth;
+import weka.associations.Apriori;
 import weka.associations.AssociationRules;
 import weka.associations.AssociationRulesProducer;
 import weka.core.Attribute;
@@ -104,7 +104,7 @@ public class Associator
   private Vector<BatchAssociationRulesListener> m_rulesListeners 
     = new Vector<BatchAssociationRulesListener>();
 
-  private weka.associations.Associator m_Associator = new FPGrowth();
+  private weka.associations.Associator m_Associator = new Apriori();
 
   private transient Logger m_log = null;
 
@@ -287,7 +287,8 @@ public class Associator
                     if ((m_Associator instanceof AssociationRulesProducer) &&
                         m_rulesListeners.size() > 0) {
                       AssociationRules rules = 
-                        ((AssociationRulesProducer)m_Associator).getAssociationRules();
+                        ((AssociationRulesProducer)m_Associator).getAssociationRules();                      
+
                       BatchAssociationRulesEvent bre = 
                         new BatchAssociationRulesEvent(Associator.this, rules);
                       notifyRulesListeners(bre);
@@ -691,6 +692,7 @@ public class Associator
         ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
         attInfo.add(new Attribute("LHS", (ArrayList<String>)null));
         attInfo.add(new Attribute("RHS", (ArrayList<String>)null));
+        attInfo.add(new Attribute("Support"));
         for (int i = 0; i < metricNames.length; i++) {
           attInfo.add(new Attribute(metricNames[i]));
         }
