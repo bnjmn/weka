@@ -57,28 +57,24 @@ import java.util.Vector;
  * 
  * <pre> -W
  *  Full name of base associator.
- *  (default: weka.associations.FPGrowth)</pre>
+ *  (default: weka.associations.Apriori)</pre>
  * 
  * <pre> 
- * Options specific to associator weka.associations.FPGrowth:
+ * Options specific to associator weka.associations.Apriori:
  * </pre>
  * 
- * <pre> -P &lt;attribute index of positive value&gt;
- *  Set the index of the attribute value to consider as 'positive'
- *  for binary attributes in normal dense instances. Index 2 is always
- *  used for sparse instances. (default = 2)</pre>
- * 
- * <pre> -I &lt;max items&gt;
- *  The maximum number of items to include in large items sets (and rules). (default = -1, i.e. no limit.)</pre>
- * 
- * <pre> -N &lt;require number of rules&gt;
+ * <pre> -N &lt;required number of rules output&gt;
  *  The required number of rules. (default = 10)</pre>
  * 
  * <pre> -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
- *  The metric by which to rank rules. (default = confidence)</pre>
+ *  The metric type by which to rank rules. (default = confidence)</pre>
  * 
  * <pre> -C &lt;minimum metric score of a rule&gt;
- *  The minimum metric score of a rule. (default = 0.9)</pre>
+ *  The minimum confidence of a rule. (default = 0.9)</pre>
+ * 
+ * <pre> -D &lt;delta for minimum support&gt;
+ *  The delta by which the minimum support is decreased in
+ *  each iteration. (default = 0.05)</pre>
  * 
  * <pre> -U &lt;upper bound for minimum support&gt;
  *  Upper bound for minimum support. (default = 1.0)</pre>
@@ -86,25 +82,24 @@ import java.util.Vector;
  * <pre> -M &lt;lower bound for minimum support&gt;
  *  The lower bound for the minimum support. (default = 0.1)</pre>
  * 
- * <pre> -D &lt;delta for minimum support&gt;
- *  The delta by which the minimum support is decreased in
- *  each iteration. (default = 0.05)</pre>
+ * <pre> -S &lt;significance level&gt;
+ *  If used, rules are tested for significance at
+ *  the given level. Slower. (default = no significance testing)</pre>
  * 
- * <pre> -S
- *  Find all rules that meet the lower bound on
- *  minimum support and the minimum metric constraint.
- *  Turning this mode on will disable the iterative support reduction
- *  procedure to find the specified number of rules.</pre>
+ * <pre> -I
+ *  If set the itemsets found are also output. (default = no)</pre>
  * 
- * <pre> -transactions &lt;comma separated list of attribute names&gt;
- *  Only consider transactions that contain these items (default = no restriction)</pre>
+ * <pre> -R
+ *  Remove columns that contain all missing values (default = no)</pre>
  * 
- * <pre> -rules &lt;comma separated list of attribute names&gt;
- *  Only print rules that contain these items. (default = no restriction)</pre>
+ * <pre> -V
+ *  Report progress iteratively. (default = no)</pre>
  * 
- * <pre> -use-or
- *  Use OR instead of AND for must contain list(s). Use in conjunction
- *  with -transactions and/or -rules</pre>
+ * <pre> -A
+ *  If set class association rules are mined. (default = no)</pre>
+ * 
+ * <pre> -c &lt;the class index&gt;
+ *  The class index. (default = last)</pre>
  * 
  <!-- options-end -->
  *
@@ -131,7 +126,7 @@ public class FilteredAssociator
    * Default constructor.
    */
   public FilteredAssociator() {
-    m_Associator = new FPGrowth();
+    m_Associator = new Apriori();
     m_Filter     = new MultiFilter();
     ((MultiFilter) m_Filter).setFilters(new Filter[]{
 	new weka.filters.unsupervised.attribute.ReplaceMissingValues()});
@@ -158,7 +153,7 @@ public class FilteredAssociator
    * @return 		the default associator classname
    */
   protected String defaultAssociatorString() {
-    return FPGrowth.class.getName();
+    return Apriori.class.getName();
   }
 
   /**
@@ -208,28 +203,24 @@ public class FilteredAssociator
    * 
    * <pre> -W
    *  Full name of base associator.
-   *  (default: weka.associations.FPGrowth)</pre>
+   *  (default: weka.associations.Apriori)</pre>
    * 
    * <pre> 
-   * Options specific to associator weka.associations.FPGrowth:
+   * Options specific to associator weka.associations.Apriori:
    * </pre>
    * 
-   * <pre> -P &lt;attribute index of positive value&gt;
-   *  Set the index of the attribute value to consider as 'positive'
-   *  for binary attributes in normal dense instances. Index 2 is always
-   *  used for sparse instances. (default = 2)</pre>
-   * 
-   * <pre> -I &lt;max items&gt;
-   *  The maximum number of items to include in large items sets (and rules). (default = -1, i.e. no limit.)</pre>
-   * 
-   * <pre> -N &lt;require number of rules&gt;
+   * <pre> -N &lt;required number of rules output&gt;
    *  The required number of rules. (default = 10)</pre>
    * 
    * <pre> -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
-   *  The metric by which to rank rules. (default = confidence)</pre>
+   *  The metric type by which to rank rules. (default = confidence)</pre>
    * 
    * <pre> -C &lt;minimum metric score of a rule&gt;
-   *  The minimum metric score of a rule. (default = 0.9)</pre>
+   *  The minimum confidence of a rule. (default = 0.9)</pre>
+   * 
+   * <pre> -D &lt;delta for minimum support&gt;
+   *  The delta by which the minimum support is decreased in
+   *  each iteration. (default = 0.05)</pre>
    * 
    * <pre> -U &lt;upper bound for minimum support&gt;
    *  Upper bound for minimum support. (default = 1.0)</pre>
@@ -237,25 +228,24 @@ public class FilteredAssociator
    * <pre> -M &lt;lower bound for minimum support&gt;
    *  The lower bound for the minimum support. (default = 0.1)</pre>
    * 
-   * <pre> -D &lt;delta for minimum support&gt;
-   *  The delta by which the minimum support is decreased in
-   *  each iteration. (default = 0.05)</pre>
+   * <pre> -S &lt;significance level&gt;
+   *  If used, rules are tested for significance at
+   *  the given level. Slower. (default = no significance testing)</pre>
    * 
-   * <pre> -S
-   *  Find all rules that meet the lower bound on
-   *  minimum support and the minimum metric constraint.
-   *  Turning this mode on will disable the iterative support reduction
-   *  procedure to find the specified number of rules.</pre>
+   * <pre> -I
+   *  If set the itemsets found are also output. (default = no)</pre>
    * 
-   * <pre> -transactions &lt;comma separated list of attribute names&gt;
-   *  Only consider transactions that contain these items (default = no restriction)</pre>
+   * <pre> -R
+   *  Remove columns that contain all missing values (default = no)</pre>
    * 
-   * <pre> -rules &lt;comma separated list of attribute names&gt;
-   *  Only print rules that contain these items. (default = no restriction)</pre>
+   * <pre> -V
+   *  Report progress iteratively. (default = no)</pre>
    * 
-   * <pre> -use-or
-   *  Use OR instead of AND for must contain list(s). Use in conjunction
-   *  with -transactions and/or -rules</pre>
+   * <pre> -A
+   *  If set class association rules are mined. (default = no)</pre>
+   * 
+   * <pre> -c &lt;the class index&gt;
+   *  The class index. (default = last)</pre>
    * 
    <!-- options-end -->
    *
@@ -458,10 +448,10 @@ public class FilteredAssociator
     if (m_Associator instanceof AssociationRulesProducer) {
       AssociationRules rules = 
         ((AssociationRulesProducer)m_Associator).getAssociationRules();
-      
+
       // construct a new FilteredAssociationRules
       FilteredAssociationRules fRules = 
-        new FilteredAssociationRules(this, m_Filter, rules);
+        new FilteredAssociationRules(FilteredAssociator.this, m_Filter, rules);
       
       return fRules;
     }
