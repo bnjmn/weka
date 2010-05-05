@@ -51,8 +51,8 @@ public class AssociationRules implements Serializable {
    * @param producer a string describing the scheme that produced these rules.
    */
   public AssociationRules(List<AssociationRule> rules, String producer) {
-    setRules(rules);
-    setProducer(producer);
+    m_rules = rules;
+    m_producer = producer;
   }
   
   /**
@@ -64,16 +64,16 @@ public class AssociationRules implements Serializable {
   public AssociationRules(List<AssociationRule> rules, Object producer) {
     String producerString = producer.getClass().getName();
     if (producerString.startsWith("weka.associations.")) {
-      producerString += producerString.substring("weka.associations.".length());
-    }
+      producerString = producerString.substring("weka.associations.".length());
+    }    
     
     if (producer instanceof OptionHandler) {
       String [] o = ((OptionHandler) producer).getOptions();
       producerString += " " + Utils.joinOptions(o);
     }
     
-    setRules(rules);
-    setProducer(producerString);
+    m_rules = rules;
+    m_producer = producerString;
   }
   
   /**
