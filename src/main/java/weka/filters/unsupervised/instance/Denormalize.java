@@ -365,6 +365,12 @@ public class Denormalize extends Filter
             String newName = instance.attribute(i).name() + "_"
             + instance.attribute(i).value((int)instance.value(i));
             Integer nn = m_newFormatIndexes.get(newName);
+            
+            if (nn == null) {
+              // we haven't seen this nominal att name/value combo before - ignore
+              continue;
+            }
+            
             int newIndex = nn.intValue();
 
             if (m_nonSparseMarketBasketFormat) {
@@ -376,7 +382,16 @@ public class Denormalize extends Filter
           } else if (instance.attribute(i).isNumeric()) {
             String newName = m_numericAggregation.toString() + "_"
             + instance.attribute(i).name();
-            int newIndex = m_newFormatIndexes.get(newName);
+            
+            Integer nn = m_newFormatIndexes.get(newName);
+            
+            if (nn == null) {
+              // we haven't seen this numeric attribute before - ignore
+              continue;
+            }
+            
+            int newIndex = nn.intValue();
+            
             m_counts[newIndex]++;
             switch (m_numericAggregation) {
             
