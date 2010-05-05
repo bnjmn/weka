@@ -107,6 +107,17 @@ public class FilteredAssociationRules extends AssociationRules {
   }
   
   /**
+   * Get the number of rules.
+   * 
+   * @return the number of rules.
+   */
+  public int getNumRules() {
+    
+    // delegate to our wrapped association rules
+    return m_wrappedRules.getNumRules();
+  }
+  
+  /**
    * Set the wrapped <code>AssociationRules</code> object to use.
    * 
    * @param rules the <code>AssociationRules</code> object to wrap.
