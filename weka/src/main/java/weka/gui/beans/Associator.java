@@ -22,7 +22,7 @@
 
 package weka.gui.beans;
 
-import weka.associations.Apriori;
+import weka.associations.FPGrowth;
 import weka.associations.AssociationRules;
 import weka.associations.AssociationRulesProducer;
 import weka.core.Attribute;
@@ -104,7 +104,7 @@ public class Associator
   private Vector<BatchAssociationRulesListener> m_rulesListeners 
     = new Vector<BatchAssociationRulesListener>();
 
-  private weka.associations.Associator m_Associator = new Apriori();
+  private weka.associations.Associator m_Associator = new FPGrowth();
 
   private transient Logger m_log = null;
 
