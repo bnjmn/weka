@@ -448,10 +448,10 @@ public class FilteredAssociator
     if (m_Associator instanceof AssociationRulesProducer) {
       AssociationRules rules = 
         ((AssociationRulesProducer)m_Associator).getAssociationRules();
-      
+
       // construct a new FilteredAssociationRules
       FilteredAssociationRules fRules = 
-        new FilteredAssociationRules(this, m_Filter, rules);
+        new FilteredAssociationRules(FilteredAssociator.this, m_Filter, rules);
       
       return fRules;
     }
