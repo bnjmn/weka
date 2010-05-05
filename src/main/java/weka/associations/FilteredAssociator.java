@@ -57,10 +57,10 @@ import java.util.Vector;
  * 
  * <pre> -W
  *  Full name of base associator.
- *  (default: weka.associations.Apriori)</pre>
+ *  (default: weka.associations.FPGrowth)</pre>
  * 
  * <pre> 
- * Options specific to associator weka.associations.Apriori:
+ * Options specific to associator weka.associations.FPGrowth:
  * </pre>
  * 
  * <pre> -N &lt;required number of rules output&gt;
@@ -126,7 +126,7 @@ public class FilteredAssociator
    * Default constructor.
    */
   public FilteredAssociator() {
-    m_Associator = new Apriori();
+    m_Associator = new FPGrowth();
     m_Filter     = new MultiFilter();
     ((MultiFilter) m_Filter).setFilters(new Filter[]{
 	new weka.filters.unsupervised.attribute.ReplaceMissingValues()});
@@ -153,7 +153,7 @@ public class FilteredAssociator
    * @return 		the default associator classname
    */
   protected String defaultAssociatorString() {
-    return Apriori.class.getName();
+    return FPGrowth.class.getName();
   }
 
   /**
@@ -203,10 +203,10 @@ public class FilteredAssociator
    * 
    * <pre> -W
    *  Full name of base associator.
-   *  (default: weka.associations.Apriori)</pre>
+   *  (default: weka.associations.FPGrowth)</pre>
    * 
    * <pre> 
-   * Options specific to associator weka.associations.Apriori:
+   * Options specific to associator weka.associations.FPGrowth:
    * </pre>
    * 
    * <pre> -N &lt;required number of rules output&gt;
