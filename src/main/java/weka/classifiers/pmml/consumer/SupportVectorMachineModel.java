@@ -468,9 +468,18 @@ public class SupportVectorMachineModel extends PMMLClassifier
     /** The target label for classification problems */
     protected String m_targetCategory;
     
+    /** The index of the global alternate target label for classification */
+    protected int m_globalAlternateTargetCategoryIndex = -1;
+    
     /** The index of the target label for classification problems */
     protected int m_targetCategoryIndex = -1;
+        
+    /** PMML 4.0 - index of the alternate category for one-vs-one */
+    protected int m_localAlternateTargetCategoryIndex = -1;
     
+    /** PMML 4.0 - local threshold (overrides the global one, if set) */
+    protected double m_localThreshold = Double.MAX_VALUE; // default - not set
+        
     /** The mining schema */
     protected MiningSchema m_miningSchema;
     
@@ -506,10 +515,15 @@ public class SupportVectorMachineModel extends PMMLClassifier
      * @param vecDict the vector dictionary (null if the machine is linear and expressed
      * in terms of attribute weights)
      * @param preds the prediction array to fill in
+     * @param cMethod the classification method to use (for classification problems)
+     * @param globalThreshold the global threshold (used if there is no local threshold
+     * for this machine)
      * @throws Exception if something goes wrong
      */
     public void distributionForInstance(double[] input, Kernel kernel, 
-        VectorDictionary vecDict, double[] preds) throws Exception {
+        VectorDictionary vecDict, double[] preds, classificationMethod cMethod,
+        double globalThreshold) 
+      throws Exception {
       int targetIndex = 0;
       
       if (!m_coeffsOnly) {
@@ -554,26 +568,59 @@ public class SupportVectorMachineModel extends PMMLClassifier
       // the Zementis model (the only easily available SVM model out there
       // at this time).
       
-      // ----------------------------------------------------------------------
-      // The PMML 3.2 spec states that the output of the machine should lie
-      // between 0 and 1 for a binary classification case with 1 corresponding
-      // to the machine's targetCategory and 0 corresponding to the
-      // alternateBinaryTargetCategory (implying a threshold of 0.5). This seems kind of
-      // non standard, and indeed, in the 4.0 spec, it has changed to output < threshold
-      // corresponding to the machine's targetCategory and >= threshold corresponding
-      // to the alternateBinaryTargetCategory. What has been implemented here is
-      // the later with a default threshold of 0 (since the 3.2 spec doesn't have
-      // a way to specify a threshold). The example SVM PMML model from Zementis,
-      // which is PMML version 3.2, produces output between -1 and 1 (give or take).
-      // Implementing the 3.2 scoring mechanism as described in the spec (and truncating 
-      // output at 0 and 1) results in all the predicted labels getting flipped on the data
-      // used to construct the Zementis model!
-      // ----------------------------------------------------------------------
-      
-      if (result < 0) {
-        preds[targetIndex] = 1;
+      if (cMethod == classificationMethod.NONE || 
+          m_miningSchema.getFieldsAsInstances().classAttribute().isNumeric()) {
+        // ----------------------------------------------------------------------
+        // The PMML 3.2 spec states that the output of the machine should lie
+        // between 0 and 1 for a binary classification case with 1 corresponding
+        // to the machine's targetCategory and 0 corresponding to the
+        // alternateBinaryTargetCategory (implying a threshold of 0.5). This seems kind of
+        // non standard, and indeed, in the 4.0 spec, it has changed to output < threshold
+        // corresponding to the machine's targetCategory and >= threshold corresponding
+        // to the alternateBinaryTargetCategory. What has been implemented here is
+        // the later with a default threshold of 0 (since the 3.2 spec doesn't have
+        // a way to specify a threshold). The example SVM PMML model from Zementis,
+        // which is PMML version 3.2, produces output between -1 and 1 (give or take).
+        // Implementing the 3.2 scoring mechanism as described in the spec (and truncating 
+        // output at 0 and 1) results in all the predicted labels getting flipped on the data
+        // used to construct the Zementis model!
+        //
+        // April 2010 - the Zementis guys have emailed me to say that their model
+        // has been prepared for PMML 4.0, even though it states it is 3.2 in the
+        // XML.
+        // ----------------------------------------------------------------------
+
+        if (m_miningSchema.getFieldsAsInstances().classAttribute().isNominal()) {
+          if (result < 0) {
+            preds[targetIndex] = 1;
+          } else {
+            preds[targetIndex] = 0;
+          }
+        } else {
+          preds[targetIndex] = result;
+        }
       } else {
-        preds[targetIndex] = 0;
+        // PMML 4.0
+        if (cMethod == classificationMethod.ONE_AGAINST_ALL) {
+          // smallest value output by a machine is the predicted class
+          preds[targetIndex] = result;
+        } else {
+          // one-vs-one
+          double threshold = (m_localThreshold < Double.MAX_VALUE)
+            ? m_localThreshold
+            : globalThreshold;
+          
+          // vote
+          if (result < threshold) {
+            preds[targetIndex]++;
+          } else {
+            int altCat = (m_localAlternateTargetCategoryIndex != -1)
+              ? m_localAlternateTargetCategoryIndex
+              : m_globalAlternateTargetCategoryIndex;
+            
+            preds[altCat]++;
+          }
+        }
       }
 //      preds[targetIndex] = result;
     }
@@ -588,7 +635,7 @@ public class SupportVectorMachineModel extends PMMLClassifier
      * expressed in terms of attribute weights)
      * @param svmRep the representation of this SVM (uses support vectors or is linear
      * an uses attribute weights)
-     * @param altCategoryInd the index of the alternateBinaryTarget (if classification)
+     * @param altCategoryInd the index of the global alternateBinaryTarget (if classification)
      * @param log the log object to use
      * @throws Exception if something goes wrong
      */
@@ -612,6 +659,21 @@ public class SupportVectorMachineModel extends PMMLClassifier
           }
           
           m_targetCategoryIndex = index;
+          
+          // now check for the PMML 4.0 alternateTargetCategory
+          String altTargetCat = machineElement.getAttribute("alternateTargetCategory");
+          if (altTargetCat != null && altTargetCat.length() > 0) {
+            index = classAtt.indexOfValue(altTargetCat);
+            if (index < 0) {
+              throw new Exception("[SupportVectorMachine] : can't find alternate target category: "
+                  + altTargetCat + " in the class attribute!");
+            }            
+            m_localAlternateTargetCategoryIndex = index;
+          } else {
+            // set the global one
+            m_globalAlternateTargetCategoryIndex = altCategoryInd;
+          }
+          
         } else {
           throw new Exception("[SupportVectorMachine] : target category supplied " +
           		"but class attribute is numeric!");
@@ -621,6 +683,8 @@ public class SupportVectorMachineModel extends PMMLClassifier
           m_targetCategoryIndex = (altCategoryInd == 0)
             ? 1
             : 0;
+          
+          m_globalAlternateTargetCategoryIndex = altCategoryInd;
           System.err.println("Setting target index for machine to " + m_targetCategoryIndex);
         }
       }
@@ -688,8 +752,13 @@ public class SupportVectorMachineModel extends PMMLClassifier
       temp.append("Binary SVM");
       if (m_miningSchema.getFieldsAsInstances().classAttribute().isNominal()) {
         temp.append(" (target category = " + m_targetCategory + ")");
+        if (m_localAlternateTargetCategoryIndex != -1) {
+          temp.append("\n (alternate category = " 
+              + m_miningSchema.getFieldsAsInstances().classAttribute().
+                value(m_localAlternateTargetCategoryIndex) + ")");
+        }
       }
-      temp.append("\n");
+      temp.append("\n\n");
       
       for (int i = 0; i < m_supportVectors.size(); i++) {
         temp.append("\n" + m_coefficients[i] + " * [" 
@@ -710,8 +779,18 @@ public class SupportVectorMachineModel extends PMMLClassifier
     COEFFICIENTS; // for the inputs if machine is linear and expressed in terms of the attributes
   }
   
+  static enum classificationMethod {
+    NONE, // PMML 3.x
+    ONE_AGAINST_ALL, // PMML 4.0 default
+    ONE_AGAINST_ONE;
+  }
+  
   /** The mining function **/
   protected MiningFunction m_functionType = MiningFunction.CLASSIFICATION;
+  
+  /** The classification method (PMML 4.0) */
+  protected classificationMethod m_classificationMethod = 
+    classificationMethod.NONE; // PMML 3.x (only handles binary problems)
   
   /** The model name (if defined) */
   protected String m_modelName;
@@ -729,11 +808,14 @@ public class SupportVectorMachineModel extends PMMLClassifier
   protected List<SupportVectorMachine> m_machines = 
     new ArrayList<SupportVectorMachine>();
   
-  /** The other class index (in the case of a single binary SVM) */
+  /** The other class index (in the case of a single binary SVM - PMML 3.2). */
   protected int m_alternateBinaryTargetCategory = -1;
   
   /** Do we have support vectors, or just attribute coefficients for a linear machine? */
   protected SVM_representation m_svmRepresentation = SVM_representation.SUPPORT_VECTORS;
+  
+  /** PMML 4.0 threshold value */
+  protected double m_threshold = 0;
   
   /**
    * Construct a new SupportVectorMachineModel encapsulating the information provided
@@ -785,6 +867,24 @@ public class SupportVectorMachineModel extends PMMLClassifier
         		"target value " + altTargetCat);
       }
       m_alternateBinaryTargetCategory = altTargetInd;
+    }
+    
+    // PMML 4.0
+    String thresholdS = model.getAttribute("threshold");
+    if (thresholdS != null && thresholdS.length() > 0) {
+      m_threshold = Double.parseDouble(thresholdS);
+    }
+    
+    // PMML 4.0
+    if (getPMMLVersion().startsWith("4.")) {
+      m_classificationMethod = classificationMethod.ONE_AGAINST_ALL; // default for PMML 4.0
+    }
+    
+    String classificationMethodS = model.getAttribute("classificationMethod");
+    if (classificationMethodS != null && classificationMethodS.length()> 0) {
+      if (classificationMethodS.equals("OneAgainstOne")) {
+        m_classificationMethod = classificationMethod.ONE_AGAINST_ONE;
+      }
     }
     
     if (m_svmRepresentation == SVM_representation.SUPPORT_VECTORS) {
@@ -885,7 +985,22 @@ public class SupportVectorMachineModel extends PMMLClassifier
       }
     } else {
       for (SupportVectorMachine m : m_machines) {
-        m.distributionForInstance(incoming, m_kernel, m_vectorDictionary, preds);
+        m.distributionForInstance(incoming, m_kernel, m_vectorDictionary, 
+            preds, m_classificationMethod, m_threshold);
+      }
+    }
+    
+    if (m_classificationMethod != classificationMethod.NONE &&
+        m_miningSchema.getFieldsAsInstances().classAttribute().isNominal()) {
+      // PMML 4.0
+      if (m_classificationMethod == classificationMethod.ONE_AGAINST_ALL) {
+        // find the minimum value
+        int minI = Utils.minIndex(preds);
+        preds = new double[preds.length];
+        preds[minI] = 1.0;
+      } else {
+        // nothing to do for one-against-one - just normalize the
+        // votes
       }
     }
     
@@ -939,6 +1054,16 @@ public class SupportVectorMachineModel extends PMMLClassifier
     temp.append("Kernel: \n\t");
     temp.append(m_kernel);
     temp.append("\n");
+    
+    if (m_classificationMethod != classificationMethod.NONE) {
+      temp.append("Multi-class classifcation using ");
+      if (m_classificationMethod == classificationMethod.ONE_AGAINST_ALL) {
+        temp.append("one-against-all");
+      } else {
+        temp.append("one-against-one");
+      }
+      temp.append("\n\n");
+    }
     
     for (SupportVectorMachine v : m_machines) {
       temp.append("\n" + v);
