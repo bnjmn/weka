@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-/** 
+/**
  <!-- globalinfo-start -->
  * A filter that applies filters on subsets of attributes and assembles the output into a new dataset. Attributes that are not covered by any of the ranges can be either retained or removed from the output.
  * <p/>
@@ -50,23 +50,23 @@ import java.util.Vector;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -D
  *  Turns on output of debugging information.</pre>
- * 
+ *
  * <pre> -F &lt;classname [options]&gt;
  *  A filter to apply (can be specified multiple times).</pre>
- * 
+ *
  * <pre> -R &lt;range&gt;
  *  An attribute range (can be specified multiple times).
  *  For each filter a range must be supplied. 'first' and 'last'
  *  are valid indices. 'inv(...)' around the range denotes an
  *  inverted range.</pre>
- * 
+ *
  * <pre> -U
  *  Flag for leaving unused attributes out of the output, by default
  *  these are included in the filter output.</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
@@ -81,23 +81,23 @@ public class PartitionedMultiFilter
 
   /** The filters. */
   protected Filter m_Filters[] = {new AllFilter()};
-  
+
   /** The attribute ranges. */
   protected Range m_Ranges[] = {new Range("first-last")};
-  
+
   /** Whether unused attributes are left out of the output. */
   protected boolean m_RemoveUnused = false;
-  
+
   /** the indices of the unused attributes. */
   protected int[] m_IndicesUnused = new int[0];
-  
+
   /**
    * Returns a string describing this filter.
    * @return 		a description of the filter suitable for
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
+    return
         "A filter that applies filters on subsets of attributes and "
       + "assembles the output into a new dataset. Attributes that are "
       + "not covered by any of the ranges can be either retained or removed "
@@ -114,7 +114,7 @@ public class PartitionedMultiFilter
     Enumeration enm = super.listOptions();
     while (enm.hasMoreElements())
       result.add(enm.nextElement());
-      
+
     result.addElement(new Option(
         "\tA filter to apply (can be specified multiple times).",
         "F", 1, "-F <classname [options]>"));
@@ -139,23 +139,23 @@ public class PartitionedMultiFilter
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -D
    *  Turns on output of debugging information.</pre>
-   * 
+   *
    * <pre> -F &lt;classname [options]&gt;
    *  A filter to apply (can be specified multiple times).</pre>
-   * 
+   *
    * <pre> -R &lt;range&gt;
    *  An attribute range (can be specified multiple times).
    *  For each filter a range must be supplied. 'first' and 'last'
    *  are valid indices. 'inv(...)' around the range denotes an
    *  inverted range.</pre>
-   * 
+   *
    * <pre> -U
    *  Flag for leaving unused attributes out of the output, by default
    *  these are included in the filter output.</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options 	the list of options as an array of strings
@@ -169,9 +169,9 @@ public class PartitionedMultiFilter
     Range	range;
 
     super.setOptions(options);
-    
+
     setRemoveUnused(Utils.getFlag("U", options));
-    
+
     objects = new Vector();
     while ((tmpStr = Utils.getOption("F", options)).length() != 0) {
       options2    = Utils.splitOptions(tmpStr);
@@ -185,7 +185,7 @@ public class PartitionedMultiFilter
       objects.add(new AllFilter());
 
     setFilters((Filter[]) objects.toArray(new Filter[objects.size()]));
-    
+
     objects = new Vector();
     while ((tmpStr = Utils.getOption("R", options)).length() != 0) {
       if (tmpStr.startsWith("inv(") && tmpStr.endsWith(")")) {
@@ -203,7 +203,7 @@ public class PartitionedMultiFilter
       objects.add(new Range("first-last"));
 
     setRanges((Range[]) objects.toArray(new Range[objects.size()]));
-    
+
     // is number of filters the same as ranges?
     checkDimensions();
   }
@@ -224,10 +224,10 @@ public class PartitionedMultiFilter
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
       result.add(options[i]);
-    
+
     if (getRemoveUnused())
       result.add("-U");
-    
+
     for (i = 0; i < getFilters().length; i++) {
       result.add("-F");
       result.add(getFilterSpec(getFilter(i)));
@@ -246,7 +246,7 @@ public class PartitionedMultiFilter
 
   /**
    * checks whether the dimensions of filters and ranges fit together.
-   * 
+   *
    * @throws Exception	if dimensions differ
    */
   protected void checkDimensions() throws Exception {
@@ -255,8 +255,27 @@ public class PartitionedMultiFilter
 	  "Number of filters (= " + getFilters().length + ") "
 	  + "and ranges (= " + getRanges().length + ") don't match!");
   }
-  
-  /** 
+
+  /**
+   * tests the data whether the filter can actually handle it.
+   *
+   * @param instanceInfo	the data to test
+   * @throws Exception		if the test fails
+   */
+  protected void testInputFormat(Instances instanceInfo) throws Exception {
+    for (int i = 0; i < getRanges().length; i++) {
+      Instances newi = new Instances(instanceInfo, 0);
+      if (instanceInfo.size() > 0){
+	newi.add((Instance)instanceInfo.get(0).copy());
+      }
+      Range range = getRanges()[i];
+      range.setUpper(instanceInfo.numAttributes() - 1);
+      Instances subset = generateSubset(newi, range);
+      getFilters()[i].setInputFormat(subset);
+    }
+  }
+
+  /**
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -264,58 +283,58 @@ public class PartitionedMultiFilter
    */
   public Capabilities getCapabilities() {
     Capabilities	result;
-    
+
     if (getFilters().length == 0) {
       result = super.getCapabilities();
       result.disableAll();
     } else {
       result = getFilters()[0].getCapabilities();
     }
-    
+
     // disable attributes
     result.disable(Capability.STRING_ATTRIBUTES);
     result.disableDependency(Capability.STRING_ATTRIBUTES);
     result.disable(Capability.RELATIONAL_ATTRIBUTES);
     result.disableDependency(Capability.RELATIONAL_ATTRIBUTES);
-    
+
     return result;
   }
 
   /**
    * Sets whether unused attributes (ones that are not covered by any of the
    * ranges) are removed from the output.
-   * 
+   *
    * @param value	if true then the unused attributes get removed
    */
   public void setRemoveUnused(boolean value) {
     m_RemoveUnused = value;
   }
-  
+
   /**
    * Gets whether unused attributes (ones that are not covered by any of the
    * ranges) are removed from the output.
-   * 
+   *
    * @return		true if unused attributes are removed
    */
   public boolean getRemoveUnused() {
     return m_RemoveUnused;
   }
-  
+
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return    	tip text for this property suitable for
    *            	displaying in the explorer/experimenter gui
    */
   public String removeUnusedTipText() {
-    return 
+    return
         "If true then unused attributes (ones that are not covered by any "
       + "of the ranges) will be removed from the output.";
   }
-  
+
   /**
    * Sets the list of possible filters to choose from.
-   * Also resets the state of the filter (this reset doesn't affect the 
+   * Also resets the state of the filter (this reset doesn't affect the
    * options).
    *
    * @param filters	an array of filters with all options set.
@@ -334,17 +353,17 @@ public class PartitionedMultiFilter
   public Filter[] getFilters() {
     return m_Filters;
   }
-  
+
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return    	tip text for this property suitable for
    *            	displaying in the explorer/experimenter gui
    */
   public String filtersTipText() {
     return "The base filters to be used.";
   }
-  
+
   /**
    * Gets a single filter from the set of available filters.
    *
@@ -357,7 +376,7 @@ public class PartitionedMultiFilter
 
   /**
    * returns the filter classname and the options as one string.
-   * 
+   *
    * @param filter	the filter to get the specs for
    * @return		the classname plus options
    */
@@ -370,7 +389,7 @@ public class PartitionedMultiFilter
     else {
       result  = filter.getClass().getName();
       if (filter instanceof OptionHandler)
-        result += " " 
+        result += " "
           + Utils.joinOptions(((OptionHandler) filter).getOptions());
     }
 
@@ -379,7 +398,7 @@ public class PartitionedMultiFilter
 
   /**
    * Sets the list of possible Ranges to choose from.
-   * Also resets the state of the Range (this reset doesn't affect the 
+   * Also resets the state of the Range (this reset doesn't affect the
    * options).
    *
    * @param Ranges	an array of Ranges with all options set.
@@ -398,17 +417,17 @@ public class PartitionedMultiFilter
   public Range[] getRanges() {
     return m_Ranges;
   }
-  
+
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return    	tip text for this property suitable for
    *            	displaying in the explorer/experimenter gui
    */
   public String rangesTipText() {
     return "The attribute ranges to be used; 'inv(...)' denotes an inverted range.";
   }
-  
+
   /**
    * Gets a single Range from the set of available Ranges.
    *
@@ -418,11 +437,11 @@ public class PartitionedMultiFilter
   public Range getRange(int index) {
     return m_Ranges[index];
   }
-  
+
   /**
    * determines the indices of unused attributes (ones that are not covered
    * by any of the range).
-   * 
+   *
    * @param data	the data to base the determination on
    * @see 		#m_IndicesUnused
    */
@@ -431,13 +450,13 @@ public class PartitionedMultiFilter
     int			i;
     int			n;
     boolean		covered;
-    
+
     // traverse all ranges
     indices = new Vector<Integer>();
     for (i = 0; i < data.numAttributes(); i++) {
       if (i == data.classIndex())
 	continue;
-      
+
       covered = false;
       for (n = 0; n < getRanges().length; n++) {
 	if (getRanges()[n].isInRange(i)) {
@@ -445,25 +464,25 @@ public class PartitionedMultiFilter
 	  break;
 	}
       }
-      
+
       if (!covered)
 	indices.add(new Integer(i));
     }
-    
+
     // create array
     m_IndicesUnused = new int[indices.size()];
     for (i = 0; i < indices.size(); i++)
       m_IndicesUnused[i] = indices.get(i).intValue();
-    
+
     if (getDebug())
       System.out.println(
 	  "Unused indices: " + Utils.arrayToString(m_IndicesUnused));
   }
-  
+
   /**
    * generates a subset of the dataset with only the attributes from the range
    * (class is always added if present).
-   * 
+   *
    * @param data	the data to work on
    * @param range	the range of attribute to use
    * @return		the generated subset
@@ -475,7 +494,7 @@ public class PartitionedMultiFilter
     Instances		result;
     int[]		indices;
     int			i;
- 
+
     // determine attributes
     indices = range.getSelection();
     atts    = new StringBuilder();
@@ -486,23 +505,23 @@ public class PartitionedMultiFilter
     }
     if ((data.classIndex() > -1) && (!range.isInRange(data.classIndex())))
       atts.append("," + (data.classIndex() + 1));
-    
+
     // setup filter
     filter = new Remove();
     filter.setAttributeIndices(atts.toString());
     filter.setInvertSelection(true);
     filter.setInputFormat(data);
-    
+
     // generate output
     result = Filter.useFilter(data, filter);
-    
+
     return result;
   }
-  
+
   /**
    * renames all the attributes in the dataset (excluding the class if present)
    * by adding the prefix to the name.
-   * 
+   *
    * @param data	the data to work on
    * @param prefix	the prefix for the attributes
    * @return		a copy of the data with the attributes renamed
@@ -512,7 +531,7 @@ public class PartitionedMultiFilter
     Instances			result;
     int				i;
     ArrayList<Attribute>	atts;
-    
+
     // rename attributes
     atts = new ArrayList<Attribute>();
     for (i = 0; i < data.numAttributes(); i++) {
@@ -521,24 +540,24 @@ public class PartitionedMultiFilter
       else
 	atts.add(data.attribute(i).copy(prefix + data.attribute(i).name()));
     }
-    
+
     // create new dataset
     result = new Instances(data.relationName(), atts, data.numInstances());
     for (i = 0; i < data.numInstances(); i++) {
       result.add((Instance) data.instance(i).copy());
     }
-    
+
     // set class if present
     if (data.classIndex() > -1)
       result.setClassIndex(data.classIndex());
-    
+
     return result;
   }
-  
+
   /**
-   * Determines the output format based only on the full input dataset and 
-   * returns this otherwise null is returned. In case the output format cannot 
-   * be returned immediately, i.e., immediateOutputFormat() returns false, 
+   * Determines the output format based only on the full input dataset and
+   * returns this otherwise null is returned. In case the output format cannot
+   * be returned immediately, i.e., immediateOutputFormat() returns false,
    * then this method will be called from batchFinished().
    *
    * @param inputFormat     the input format to base the output format on
@@ -554,7 +573,7 @@ public class PartitionedMultiFilter
     int				n;
     ArrayList<Attribute>	atts;
     Attribute			att;
-    
+
     if (!isFirstBatchDone()) {
       // we need the full dataset here, see process(Instances)
       if (inputFormat.numInstances() == 0)
@@ -609,7 +628,7 @@ public class PartitionedMultiFilter
     else {
       result = getOutputFormat();
     }
-    
+
     return result;
   }
 
@@ -662,7 +681,7 @@ public class PartitionedMultiFilter
     else {
       result = getOutputFormat();
     }
-    
+
     // check whether all filters didn't change the number of instances
     errors = new Vector();
     for (i = 0; i < processed.length; i++) {
@@ -672,7 +691,7 @@ public class PartitionedMultiFilter
     if (errors.size() > 0)
       throw new IllegalStateException(
 	  "The following filter(s) changed the number of instances: " + errors);
-    
+
     // assemble data
     for (i = 0; i < instances.numInstances(); i++) {
       inst   = instances.instance(i);
@@ -688,7 +707,7 @@ public class PartitionedMultiFilter
 	  index++;
 	}
       }
-      
+
       // unused attributes
       if (!getRemoveUnused()) {
 	for (n = 0; n < m_IndicesUnused.length; n++) {
@@ -696,7 +715,7 @@ public class PartitionedMultiFilter
 	  index++;
 	}
       }
-      
+
       // class
       if (instances.classIndex() > -1)
 	values[values.length - 1] = inst.value(instances.classIndex());
@@ -708,13 +727,13 @@ public class PartitionedMultiFilter
 	newInst = new DenseInstance(instances.instance(i).weight(), values);
       result.add(newInst);
     }
-    
+
     return result;
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
