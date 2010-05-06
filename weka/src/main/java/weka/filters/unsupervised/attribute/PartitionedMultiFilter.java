@@ -256,6 +256,25 @@ public class PartitionedMultiFilter
   }
 
   /**
+   * tests the data whether the filter can actually handle it.
+   *
+   * @param instanceInfo	the data to test
+   * @throws Exception		if the test fails
+   */
+  protected void testInputFormat(Instances instanceInfo) throws Exception {
+    for (int i = 0; i < getRanges().length; i++) {
+      Instances newi = new Instances(instanceInfo, 0);
+      if (instanceInfo.numInstances() > 0){
+	newi.add((Instance)instanceInfo.instance(0).copy());
+      }
+      Range range = getRanges()[i];
+      range.setUpper(instanceInfo.numAttributes() - 1);
+      Instances subset = generateSubset(newi, range);
+      getFilters()[i].setInputFormat(subset);
+    }
+  }
+
+  /**
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
