@@ -26,6 +26,7 @@ import weka.associations.FPGrowth;
 import weka.associations.AssociationRules;
 import weka.associations.AssociationRulesProducer;
 import weka.core.Attribute;
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -340,12 +341,35 @@ public class Associator
       }
     }
   }
-
-
+   
   private void buildAssociations(Instances data) 
-    throws Exception {
-    m_Associator.buildAssociations(data);
+  throws Exception {
+  
+  // see if there is an environment variable with
+  // options for the associator
+  if (m_Associator instanceof OptionHandler) {
+    Environment env = new Environment();
+    String opts = env.getVariableValue("weka.gui.beans.associator.schemeOptions");
+    if (opts != null && opts.length() > 0) {
+      String[] options = Utils.splitOptions(opts);
+      if (options.length > 0) {
+        try {
+          ((OptionHandler)m_Associator).setOptions(options);
+        } catch (Exception ex) {
+          String warningMessage = "[Associator] WARNING: unable to set options \""
+            + opts + "\"for " + m_Associator.getClass().getName();
+          if (m_log != null) {
+            m_log.logMessage(warningMessage);
+          } else {
+            System.err.print(warningMessage);
+          }
+        }
+      }
+    }
   }
+  
+  m_Associator.buildAssociations(data);
+}
 
   /**
    * Sets the visual appearance of this wrapper bean
