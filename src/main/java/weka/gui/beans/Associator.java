@@ -26,6 +26,7 @@ import weka.associations.Apriori;
 import weka.associations.AssociationRules;
 import weka.associations.AssociationRulesProducer;
 import weka.core.Attribute;
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -42,7 +43,10 @@ import java.util.Vector;
 import javax.swing.JPanel;
 
 /**
- * Bean that wraps around weka.associations
+ * Bean that wraps around weka.associations. If used in a non-graphical environment,
+ * options for the wrapped associator can be provided by setting an environment
+ * variable: weka.gui.beans.associator.schemeOptions. The value of this environment
+ * variable needs to be a string containing command-line option settings.
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
  * @version $Revision$
@@ -344,6 +348,30 @@ public class Associator
 
   private void buildAssociations(Instances data) 
     throws Exception {
+    
+    // see if there is an environment variable with
+    // options for the associator
+    if (m_Associator instanceof OptionHandler) {
+      Environment env = new Environment();
+      String opts = env.getVariableValue("weka.gui.beans.associator.schemeOptions");
+      if (opts != null && opts.length() > 0) {
+        String[] options = Utils.splitOptions(opts);
+        if (options.length > 0) {
+          try {
+            ((OptionHandler)m_Associator).setOptions(options);
+          } catch (Exception ex) {
+            String warningMessage = "[Associator] WARNING: unable to set options \""
+              + opts + "\"for " + m_Associator.getClass().getName();
+            if (m_log != null) {
+              m_log.logMessage(warningMessage);
+            } else {
+              System.err.print(warningMessage);
+            }
+          }
+        }
+      }
+    }
+    
     m_Associator.buildAssociations(data);
   }
 
