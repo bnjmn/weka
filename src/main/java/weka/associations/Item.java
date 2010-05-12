@@ -32,37 +32,21 @@ import weka.core.Attribute;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com).
  * @version $Revision$
  */
-public class Item implements Serializable, Comparable<Item> {
+public abstract class Item implements Serializable, Comparable<Item> {
   
   /** For serialization */
   private static final long serialVersionUID = -430198211081183575L;
 
+  /** The frequency of this item */
   protected int m_frequency;
   
+  /** The attribute that backs this item */
   protected Attribute m_attribute;
-  
-  /** The index of the value considered to be positive */
-  protected int m_valueIndex;
-  
-  /**
-   * Constructs a new Item.
-   * 
-   * @param att the attribute that backs the item.
-   * @param valueIndex the index of the value for this item.
-   * @throws Exception if the Item can't be constructed.
-   */
-  public Item(Attribute att, int valueIndex) throws Exception {
-    if (att.isNumeric()) {
-      throw new Exception("Item must be constructed using a nominal attribute");
-    }
+    
+  public Item(Attribute att) {
     m_attribute = att;
-    if (m_attribute.numValues() == 1) {
-      m_valueIndex = 0; // unary attribute (? used to indicate absence from a basket)
-    } else {
-      m_valueIndex = valueIndex;
-    }
   }
-  
+    
   /**
    * Increase the frequency of this item.
    * 
@@ -114,15 +98,6 @@ public class Item implements Serializable, Comparable<Item> {
   }
   
   /**
-   * Get the value index for this item.
-   * 
-   * @return the value index.
-   */
-  public int getValueIndex() {
-    return m_valueIndex;
-  }
-  
-  /**
    * A string representation of this item.
    * 
    * @return a string representation of this item.
@@ -138,13 +113,13 @@ public class Item implements Serializable, Comparable<Item> {
    * @return a string representation of this item. 
    */
   public String toString(boolean freq) {
-    String result = m_attribute.name() + "=" + m_attribute.value(m_valueIndex);
+    String result = m_attribute.name();
     if (freq) {
       result += ":" + m_frequency;
     }
     return result;
   }
-  
+    
   /**
    * Ensures that items will be sorted in descending order of frequency.
    * Ties are ordered by attribute name.
@@ -163,7 +138,7 @@ public class Item implements Serializable, Comparable<Item> {
   }
   
   /**
-   * Equals. Just compares attribute and valueIndex.
+   * Equals. Just compares attribute.
    * @return true if this Item is equal to the argument.
    */
   public boolean equals(Object compareTo) {
@@ -172,9 +147,7 @@ public class Item implements Serializable, Comparable<Item> {
     }
     
     Item b = (Item)compareTo;
-    if (m_attribute.equals(b.getAttribute()) && 
-//        m_frequency == b.getFrequency() && 
-        m_valueIndex == b.getValueIndex()) {
+    if (m_attribute.equals(b.getAttribute())) {
       return true;
     }
     
