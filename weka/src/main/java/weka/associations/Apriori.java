@@ -1527,7 +1527,7 @@ public class Apriori
         for (int j = 0; j < m_instances.numAttributes(); j++) {
           if (premiseSet.m_items[j] != -1) {
             try {
-              Item newItem = new Item(m_instances.attribute(j), premiseSet.m_items[j]);
+              Item newItem = new NominalItem(m_instances.attribute(j), premiseSet.m_items[j]);
               premise.add(newItem);
             } catch (Exception ex) {
               ex.printStackTrace();
@@ -1536,7 +1536,7 @@ public class Apriori
           
           if (consequenceSet.m_items[j] != -1) {
             try {
-              Item newItem = new Item(m_instances.attribute(j), consequenceSet.m_items[j]);
+              Item newItem = new NominalItem(m_instances.attribute(j), consequenceSet.m_items[j]);
               consequence.add(newItem);
             } catch (Exception ex) {
               ex.printStackTrace();
