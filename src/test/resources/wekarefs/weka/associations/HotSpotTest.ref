@@ -3,6 +3,7 @@ Hot Spot
 ========
 Total population: 20 instances
 Target attribute: Numeric1
+Target average in total population: 2.008
 Minimum segment size: 7 instances (33% of total population)
 Maximum branching factor: 2
 Minimum improvement in target: 1%
