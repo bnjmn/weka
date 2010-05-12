@@ -27,6 +27,7 @@ import weka.associations.AssociationRules;
 import weka.associations.AssociationRulesProducer;
 import weka.core.Attribute;
 import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -64,7 +65,7 @@ public class Associator
 	     Serializable, UserRequestAcceptor,
              DataSourceListener,
 	     TrainingSetListener, ConfigurationProducer,
-	     StructureProducer {
+	     StructureProducer, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -7843500322130210057L;
@@ -108,6 +109,9 @@ public class Associator
   private weka.associations.Associator m_Associator = new FPGrowth();
 
   private transient Logger m_log = null;
+  
+  /** The environment variables */
+  private transient Environment m_env = null;
 
   /**
    * Global info (if it exists) for the wrapped classifier
@@ -125,6 +129,16 @@ public class Associator
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     setAssociator(m_Associator);
+  }
+  
+  /**
+   * Set environment variables to use.
+   * 
+   * @param env the environment variables to
+   * use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
   }
 
   /**
@@ -345,11 +359,9 @@ public class Associator
   private void buildAssociations(Instances data) 
   throws Exception {
   
-  // see if there is an environment variable with
-  // options for the associator
-  if (m_Associator instanceof OptionHandler) {
-    Environment env = new Environment();
-    String opts = env.getVariableValue("weka.gui.beans.associator.schemeOptions");
+  // Deal with environment variables
+  if (m_env != null && m_Associator instanceof OptionHandler) {
+    String opts = m_env.getVariableValue("weka.gui.beans.associator.schemeOptions");
     if (opts != null && opts.length() > 0) {
       String[] options = Utils.splitOptions(opts);
       if (options.length > 0) {
