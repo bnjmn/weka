@@ -22,6 +22,9 @@
 
 package weka.associations;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -86,7 +89,8 @@ import weka.core.RevisionUtils;
  */
 public class HotSpot
   implements Associator, OptionHandler, RevisionHandler, 
-             CapabilitiesHandler, Drawable, Serializable {
+             CapabilitiesHandler, Drawable, AssociationRulesProducer, 
+             Serializable {
 
   static final long serialVersionUID = 42972325096347677L;
 
@@ -118,6 +122,9 @@ public class HotSpot
 
   /** Number of instances in the full data */
   protected int m_numInstances;
+  
+  /** Number of instances with non-missing target values in the full data */
+  protected int m_numNonMissingTarget;
 
   /** The head of the tree */
   protected HotNode m_head;
@@ -140,6 +147,9 @@ public class HotSpot
 
   /** Rule lookup table */
   protected HashMap<HotSpotHashKey, String> m_ruleLookup;
+  
+  /** True if a set of rules is to be output instead of a tree structure */
+  protected boolean m_outputRules = false;
 
   /**
    * Constructor
@@ -290,6 +300,7 @@ public class HotSpot
         return;
       }
       m_globalTarget = inst.meanOrMode(m_target);
+      m_numNonMissingTarget = inst.numInstances() - inst.attributeStats(m_target).missingCount;
     } else {
       double[] probs = new double[inst.attributeStats(m_target).nominalCounts.length];
       for (int i = 0; i < probs.length; i++) {
@@ -347,6 +358,8 @@ public class HotSpot
 
       buff.append("\nMinimum value count for segments: ");
     } else {
+      buff.append("\nTarget average in total population: "
+          + Utils.doubleToString(m_globalTarget, 3));
       buff.append("\nMinimum segment size: ");
     }
     buff.append("" + m_supportCount + " instances (" 
@@ -367,8 +380,22 @@ public class HotSpot
                   + "/" + m_numInstances + "])");
     }
     
-    m_head.dumpTree(0, buff);
+    if (!m_outputRules) {
+      m_head.dumpTree(0, buff);
+    } else {
+      List<AssociationRule> rules = new ArrayList<AssociationRule>();
+      try {
+        m_head.getRules(rules, new ArrayList<Item>());
+        Collections.sort(rules);
+        for (AssociationRule r : rules) {
+          buff.append(r.toString() + "\n");
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
     buff.append("\n");
+      
     if (m_debug) {
       buff.append("\n=== Duplicate rule lookup hashtable stats ===\n");
       buff.append("Insertions: "+ m_insertions);
@@ -376,6 +403,7 @@ public class HotSpot
       buff.append("\nHits: "+ m_hits);
       buff.append("\n");
     }
+        
     return buff.toString();
   }
 
@@ -931,6 +959,229 @@ public class HotSpot
         }
       }
     }
+    
+    private void addTestToRule(List<Item> currentPremise, int i) throws Exception {
+      if (m_header.attribute(m_testDetails[i].m_splitAttIndex).isNumeric()) {
+        NumericItem.Comparison comp = (m_testDetails[i].m_lessThan) 
+          ? NumericItem.Comparison.LESS_THAN_OR_EQUAL_TO
+          : NumericItem.Comparison.GREATER_THAN;
+        
+        NumericItem newItem = 
+          new NumericItem(m_header.attribute(m_testDetails[i].m_splitAttIndex),
+              m_testDetails[i].m_splitValue, comp);
+        
+        currentPremise.add(newItem);
+      } else {
+        NominalItem newItem = 
+          new NominalItem(m_header.attribute(m_testDetails[i].m_splitAttIndex), 
+              (int)m_testDetails[i].m_splitValue);
+        currentPremise.add(newItem);
+      }
+    }
+    
+    private class HotSpotNumericTargetRule extends AssociationRule implements Serializable {
+      
+      private static final long serialVersionUID = -1028053590504776204L;
+      
+      Collection<Item> m_premise;
+      Collection<Item> m_consequence;
+      boolean m_numericTarget = true;
+      int m_totalSupport;
+      int m_consequenceSupport;      
+      int m_totalTransactions;
+      
+      double m_averageTarget;
+      
+      DefaultAssociationRule m_delegateForDiscreteTarget;
+      
+      public HotSpotNumericTargetRule(Collection<Item> premise, 
+          Collection<Item> consequence, int totalSupport, 
+          int consequenceSupport, int totalTransactions, double averageTarget) {
+        m_premise = premise; m_consequence = consequence;
+        m_totalSupport = totalSupport; m_consequenceSupport = consequenceSupport;
+        m_totalTransactions = totalTransactions; m_averageTarget = averageTarget;
+      }
+      
+      public HotSpotNumericTargetRule(Collection<Item> premise,
+          Collection<Item> consequence, 
+          int premiseSupport, int consequenceSupport, int totalSupport,
+          int totalTransactions, double averageTarget) {
+        
+        m_numericTarget = false;
+        m_premise = premise;
+        m_consequence = consequence;
+        if (m_numericTarget) {
+          m_totalSupport = totalSupport;
+          m_consequenceSupport = consequenceSupport;
+          m_totalTransactions = totalTransactions;
+          m_averageTarget = averageTarget;
+        } else {
+          m_delegateForDiscreteTarget = 
+            new DefaultAssociationRule(premise, consequence,
+                DefaultAssociationRule.METRIC_TYPE.CONFIDENCE,
+                premiseSupport, consequenceSupport, totalSupport,
+                totalTransactions);
+        }
+      }
+            
+      public Collection<Item> getPremise() { return m_premise; }
+      
+      public Collection<Item> getConsequence() { return m_consequence; }
+      
+      public String getPrimaryMetricName() { 
+        return (m_numericTarget) 
+        ? "AverageTarget"
+            : m_delegateForDiscreteTarget.getPrimaryMetricName();
+      }
+
+      public double getPrimaryMetricValue() { 
+        return (m_numericTarget) 
+        ? m_averageTarget
+            : m_delegateForDiscreteTarget.getPrimaryMetricValue();
+      }
+      
+      public double getNamedMetricValue(String metricName) throws Exception {
+        if (m_numericTarget) {
+          if (metricName.equals("AverageTarget")) {
+            return getPrimaryMetricValue();
+          }
+          return Utils.missingValue();
+        } else {
+          if (metricName.equals("AverageTarget")) {
+            return Utils.missingValue();
+          }
+          return m_delegateForDiscreteTarget.getNamedMetricValue(metricName);
+        }
+      }
+      
+      public int getNumberOfMetricsForRule() { 
+        return DefaultAssociationRule.METRIC_TYPE.values().length + 1; 
+      }
+      
+      public String[] getMetricNamesForRule() {
+        String[] result = new String[getNumberOfMetricsForRule()];
+        result[0] = "AverageTarget";
+        for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
+          result[i + 1] = DefaultAssociationRule.TAGS_SELECTION[i].getReadable();
+        }
+        return result;
+      }
+      
+      public double[] getMetricValuesForRule() throws Exception {
+        double[] result = new double[getNumberOfMetricsForRule()];
+        result[0] = (m_numericTarget) 
+        ? getPrimaryMetricValue() 
+        : Utils.missingValue();
+        
+        for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
+          if (m_numericTarget) {
+            result[i + 1] = Utils.missingValue();
+          } else {
+            result[i + 1] = 
+              m_delegateForDiscreteTarget.
+                getNamedMetricValue(DefaultAssociationRule.
+                    TAGS_SELECTION[i].getReadable());
+          }
+        }
+        
+        return result;
+      }
+      
+      public int getPremiseSupport() { 
+        return (m_numericTarget)
+        ? m_totalSupport
+        : m_delegateForDiscreteTarget.getPremiseSupport();
+      }
+      
+      public int getConsequenceSupport() { 
+        return (m_numericTarget)
+        ? m_consequenceSupport
+        : m_delegateForDiscreteTarget.getConsequenceSupport();
+      }
+      
+      public int getTotalSupport() { 
+        return (m_numericTarget) 
+        ? m_totalSupport
+        : m_delegateForDiscreteTarget.getTotalSupport();
+      }
+      
+      public int getTotalTransactions() { 
+        return (m_numericTarget) 
+        ? m_totalTransactions
+        : m_delegateForDiscreteTarget.getTotalTransactions();
+      }
+      
+      public String toString() {
+        StringBuffer result = new StringBuffer();
+        
+        if (m_numericTarget) {
+        result.append(m_premise.toString()
+            + " ==> " + m_consequence.toString() + ": " + m_totalSupport 
+            + "   ");
+        } else {
+          result.append(m_delegateForDiscreteTarget.toString());
+        }
+        return result.toString();
+      }
+      
+      public int compareTo(AssociationRule other) {
+        int result = super.compareTo(other);
+        if (m_minimize) {
+          result = -result;
+        }
+        return result;
+      }
+    }
+    
+    protected void getRules(List<AssociationRule> rules, ArrayList<Item> currentPremise) 
+      throws Exception {
+      if (m_children == null) {
+
+      } else {
+        for (int i = 0; i < m_children.length; i++) {
+
+          // first clone the current rule
+          ArrayList<Item> newPremise = (ArrayList<Item>) currentPremise.clone();
+
+          // add the child details
+          addTestToRule(newPremise, i);
+
+          if (m_header.attribute(m_target).isNominal()) {
+            NominalItem consequenceItem = 
+              new NominalItem(m_header.attribute(m_target), m_targetIndex);
+            List<Item> consequence = new ArrayList<Item>();
+            consequence.add(consequenceItem);
+
+            HotSpotNumericTargetRule newRule = 
+              new HotSpotNumericTargetRule(newPremise, consequence, 
+                  m_testDetails[i].m_subsetSize,
+                  m_globalSupport,
+                  m_testDetails[i].m_support,
+                  m_numInstances, Utils.missingValue());
+            
+            // add the rule to the list
+            rules.add(newRule);
+
+          } else {
+            NumericItem consequenceItem = 
+              new NumericItem(m_header.attribute(m_target), 
+                  m_testDetails[i].m_merit, NumericItem.Comparison.NONE);
+            List<Item> consequence = new ArrayList<Item>();
+            consequence.add(consequenceItem);
+            
+            HotSpotNumericTargetRule newRule = 
+              new HotSpotNumericTargetRule(newPremise, consequence,
+                  m_testDetails[i].m_support, m_numNonMissingTarget, m_numInstances, 
+                  m_testDetails[i].m_merit);
+            
+            rules.add(newRule);
+          }
+
+          // recurse
+          m_children[i].getRules(rules, newPremise);
+        }
+      }
+    }
   }
 
   /**
@@ -1125,6 +1376,23 @@ public class HotSpot
   public boolean getDebug() {
     return m_debug;
   }
+  
+  public void setOutputRules(boolean r) {
+    m_outputRules = r;
+  }
+  
+  public boolean getOutputRules() {
+    return m_outputRules;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String outputRulesTipText() {
+    return "Output a rule set instead of a tree";
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -1156,6 +1424,8 @@ public class HotSpot
                                     + "\n\tto add a new branch/test (default = 0.01 (1%))",
                                     "-I", 1,
                                     "-I <num>"));
+    newVector.addElement(new Option("\tOutput a set of rules instead of a tree structure",
+        "-R", 0, "-R"));
     newVector.addElement(new Option("\tOutput debugging info (duplicate rule lookup "
                                     + "\n\thash table stats)", "-D", 0, "-D"));
     return newVector.elements();
@@ -1170,6 +1440,7 @@ public class HotSpot
     m_maxBranchingFactor = 2;
     m_minimize = false;
     m_debug = false;
+    m_outputRules = false;
     setTarget("last");
     setTargetIndex("first");
     m_errorMessage = null;
@@ -1245,6 +1516,7 @@ public class HotSpot
     }
 
     setDebug(Utils.getFlag('D', options));
+    setOutputRules(Utils.getFlag('R', options));
   }
 
   /**
@@ -1253,7 +1525,7 @@ public class HotSpot
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    String[] options = new String[12];
+    String[] options = new String[13];
     int current = 0;
     
     options[current++] = "-c"; options[current++] = getTarget();
@@ -1266,6 +1538,10 @@ public class HotSpot
     options[current++] = "-I"; options[current++] = "" + getMinImprovement();
     if (getDebug()) {
       options[current++] = "-D";
+    }
+    
+    if (getOutputRules()) {
+      options[current++] = "-R";
     }
 
     while (current < options.length) {
@@ -1291,6 +1567,59 @@ public class HotSpot
    */   
   public int graphType() {
     return Drawable.TREE;
+  }
+  
+  /**
+   * Gets the list of mined association rules.
+   * 
+   * @return the list of association rules discovered during mining.
+   * Returns null if mining hasn't been performed yet.
+   */
+  public AssociationRules getAssociationRules() {
+    List<AssociationRule> rulesToReturn = new ArrayList<AssociationRule>();
+    try {
+      m_head.getRules(rulesToReturn, new ArrayList<Item>());
+      Collections.sort(rulesToReturn);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+        
+    return new AssociationRules(rulesToReturn, this);
+  }
+  
+  /**
+   * Returns true if this AssociationRulesProducer can actually
+   * produce rules. Most implementing classes will always return
+   * true from this method (obviously :-)). However, an implementing
+   * class that actually acts as a wrapper around things that may
+   * or may not implement AssociationRulesProducer will want to
+   * return false if the thing they wrap can't produce rules.
+   * 
+   * @return true if this producer can produce rules in its current
+   * configuration
+   */
+  public boolean canProduceRules() {
+    return true;
+  }
+  
+  /**
+   * Gets a list of the names of the metrics output for
+   * each rule. This list should be the same (in terms of
+   * the names and order thereof) as that produced by
+   * AssociationRule.getMetricNamesForRule().
+   * 
+   * @return an array of the names of the metrics available
+   * for each rule learned by this producer.
+   */
+  public String[] getRuleMetricNames() {
+    String[] metricNames = new String[DefaultAssociationRule.TAGS_SELECTION.length + 1];
+    metricNames[0] = "AverageTarget";
+
+    for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
+      metricNames[i + 1] = DefaultAssociationRule.TAGS_SELECTION[i].getReadable();
+    }
+
+    return metricNames;
   }
 
   /**

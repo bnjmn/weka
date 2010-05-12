@@ -34,7 +34,7 @@ import weka.core.Attribute;
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    * @version $Revision; $
    */
-  public class BinaryItem extends Item 
+  public class BinaryItem extends NominalItem 
     implements Serializable {
     
     /** For serialization */
