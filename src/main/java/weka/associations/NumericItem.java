@@ -90,10 +90,45 @@ public class NumericItem extends Item implements Serializable {
   }
   
   /**
-   * Returns a textual description of this item.
+   * Get this item's value as a String.
    * 
-   * @param freq true if the item's frequency information
-   * should be included as well.
+   * @return this item's value as a String.
+   */
+  public String getItemValueAsString() {
+    return Utils.doubleToString(m_splitPoint, 3);
+  }
+  
+  /**
+   * Get this item's comparison operator as a String.
+   * 
+   * @return this item's comparison operator as a String.
+   */
+  public String getComparisonAsString() {
+    String result = null;
+    
+    switch (m_comparison) {
+    case EQUAL:
+      result = "=";
+      break;
+    case LESS_THAN_OR_EQUAL_TO:
+      result = "<=";
+      break;
+    case GREATER_THAN:
+      result = ">";
+      break;
+    }
+    
+    return result;
+  }
+  
+  /**
+   * A string representation of this item, (i.e.
+   * <attribute name> <comparison operator> <item value>).
+   * This default implementation just prints the attribute
+   * name and (optionally) frequency information.
+   * 
+   * @param freq true if the frequency should be included.
+   * @return a string representation of this item. 
    */
   public String toString(boolean freq) {
     StringBuffer result = new StringBuffer();

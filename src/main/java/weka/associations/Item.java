@@ -98,7 +98,22 @@ public abstract class Item implements Serializable, Comparable<Item> {
   }
   
   /**
-   * A string representation of this item.
+   * Get this item's value as a String.
+   * 
+   * @return this item's value as a String.
+   */
+  public abstract String getItemValueAsString();
+  
+  /**
+   * Get this item's comparison operator as a String.
+   * 
+   * @return this item's comparison operator as a String.
+   */
+  public abstract String getComparisonAsString();
+    
+  /**
+   * A string representation of this item. (i.e. 
+   * <attribute name> <comparison operator> <item value>).
    * 
    * @return a string representation of this item.
    */
@@ -107,7 +122,10 @@ public abstract class Item implements Serializable, Comparable<Item> {
   }
   
   /**
-   * A string representation of this item.
+   * A string representation of this item, (i.e.
+   * <attribute name> <comparison operator> <item value>).
+   * This default implementation just prints the attribute
+   * name and (optionally) frequency information.
    * 
    * @param freq true if the frequency should be included.
    * @return a string representation of this item. 
