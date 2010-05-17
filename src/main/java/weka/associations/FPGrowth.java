@@ -2084,7 +2084,7 @@ public class FPGrowth extends AbstractAssociator
    * displaying in the explorer/experimenter gui
    */
   public String lowerBoundMinSupportTipText() {
-    return "Lower bound for minimum support.";
+    return "Lower bound for minimum support as a fraction or number of instances.";
   }
 
   /**
@@ -2113,7 +2113,8 @@ public class FPGrowth extends AbstractAssociator
    * displaying in the explorer/experimenter gui
    */
   public String upperBoundMinSupportTipText() {
-    return "Upper bound for minimum support. Start iteratively decreasing "
+    return "Upper bound for minimum support as a fraction or" +
+    		"number of instances. Start iteratively decreasing "
       +"minimum support from this value.";
   }
 
@@ -2213,12 +2214,13 @@ public class FPGrowth extends AbstractAssociator
     		" = " + m_metricThreshold + ")";
     String string3 = "\tThe metric by which to rank rules. (default"
       + " = confidence)";
-    String string4 = "\tThe lower bound for the minimum support. (default = "
+    String string4 = "\tThe lower bound for the minimum support as a " +
+    		"fraction or number of instances. (default = "
       + m_lowerBoundMinSupport + ")";
-    String string5 = "\tUpper bound for minimum support. "
+    String string5 = "\tUpper bound for minimum support as a fraction or number of instances. "
       + "(default = 1.0)";
     String string6 = "\tThe delta by which the minimum support is decreased in\n"
-     + "\teach iteration. (default = " + m_delta + ")";
+     + "\teach iteration as a fraction or number of instances. (default = " + m_delta + ")";
     String string7 = "\tFind all rules that meet the lower bound on\n\t" +
     		"minimum support and the minimum metric constraint.\n\t" +
     		"Turning this mode on will disable the iterative support reduction\n\t" +
@@ -2470,20 +2472,33 @@ public class FPGrowth extends AbstractAssociator
     if (m_rulesMustContain.length() > 0) {
       rulesMustContain = parseRulesMustContain(data);
     }
-    
-    
-    double currentSupport = m_upperBoundMinSupport;
+        
     
     int upperBoundMinSuppAsInstances = (m_upperBoundMinSupport > 1) 
     ? (int) m_upperBoundMinSupport
     : (int)Math.ceil(m_upperBoundMinSupport * data.numInstances());
     
-  int lowerBoundMinSuppAsInstances = (m_lowerBoundMinSupport > 1)
+    int lowerBoundMinSuppAsInstances = (m_lowerBoundMinSupport > 1)
     ? (int)m_lowerBoundMinSupport
-    : (int)Math.ceil(m_lowerBoundMinSupport * data.numInstances());
-    
+        : (int)Math.ceil(m_lowerBoundMinSupport * data.numInstances());
+
+
+    double upperBoundMinSuppAsFraction = (m_upperBoundMinSupport > 1)
+    ? m_upperBoundMinSupport / data.numInstances()
+        : m_upperBoundMinSupport;
+
+    double lowerBoundMinSuppAsFraction = (m_lowerBoundMinSupport > 1)
+    ? m_lowerBoundMinSupport / data.numInstances()
+        : m_lowerBoundMinSupport;
+
+    double deltaAsFraction = (m_delta > 1)
+    ? m_delta / data.numInstances()
+        : m_delta;
+
+    double currentSupport = upperBoundMinSuppAsFraction;      
+
     if (m_findAllRulesForSupportLevel) {
-      currentSupport = m_lowerBoundMinSupport;
+      currentSupport = lowerBoundMinSuppAsFraction;
     }
     // first compute singletons
     ArrayList<BinaryItem> singletons = getSingletons(data);
@@ -2539,11 +2554,11 @@ public class FPGrowth extends AbstractAssociator
       
       
       if (!m_findAllRulesForSupportLevel) {
-        currentSupport -= m_delta;
-        if (currentSupport < m_lowerBoundMinSupport) {
-          if (currentSupport + m_delta > m_lowerBoundMinSupport) {
+        currentSupport -= deltaAsFraction;
+        if (currentSupport < lowerBoundMinSuppAsFraction) {
+          if (currentSupport + deltaAsFraction > lowerBoundMinSuppAsFraction) {
             // ensure that the lower bound does get evaluated
-            currentSupport = m_lowerBoundMinSupport;
+            currentSupport = lowerBoundMinSuppAsFraction;
           } else {
             break;
           }
