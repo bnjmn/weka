@@ -264,8 +264,27 @@ public class HotSpot
     getCapabilities().testWithFail(instances);
     
     m_errorMessage = null;
-    m_targetSI.setUpper(instances.numAttributes() - 1);
-    m_target = m_targetSI.getIndex();
+    try {
+      m_targetSI.setUpper(instances.numAttributes() - 1);
+      m_target = m_targetSI.getIndex();
+    } catch (Exception ex) {
+      // try to match the string against an attribute name
+      String value = m_targetSI.getSingleIndex();
+      int index = -1;
+      for (int i = 0; i < instances.numAttributes(); i++) {
+        if (instances.attribute(i).name().indexOf(value) > -1) {
+          index = i;
+          break;
+        }
+      }
+      
+      if (index == -1) {
+        throw new Exception("Can't find an attribute containing the string " + value);
+      }
+      
+      m_target = index;
+    }
+    
     Instances inst = new Instances(instances);
     inst.setClassIndex(m_target);
 //    inst.deleteWithMissingClass();
@@ -1190,7 +1209,8 @@ public class HotSpot
    * displaying in the explorer/experimenter gui
    */
   public String targetTipText() {
-    return "The target attribute of interest.";
+    return "The target attribute of interest (\"first\", \"last\"," +
+    		"<index> or <attribute name> are valid values).";
   }
 
   /**
@@ -1403,7 +1423,7 @@ public class HotSpot
     Vector newVector = new Vector();
     newVector.addElement(new Option("\tThe target index. (default = last)",
                                     "c", 1,
-                                    "-c <num | first | last>"));
+                                    "-c <num | first | last | attribute name>"));
     newVector.addElement(new Option("\tThe target value (nominal target only, default = first)",
                                     "V", 1,
                                     "-V <num | first | last>"));
