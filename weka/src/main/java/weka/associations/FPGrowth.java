@@ -860,12 +860,18 @@ public class FPGrowth extends AbstractAssociator
    * @param largeItemSets the set of frequent item sets
    * @param metricToUse the metric to use
    * @param metricThreshold the threshold value that a rule must meet
+   * @param upperBoundMinSuppAsInstances the upper bound on the support
+   * in order to accept the rule
+   * @param lowerBoundMinSuppAsInstances the lower bound on the support
+   * in order to accept the rule
    * @param totalTransactions the total number of transactions in the data
    * @return a list of association rules
    */
   public static List<AssociationRule> 
-    generateRulesBruteForce(FrequentItemSets largeItemSets, DefaultAssociationRule.METRIC_TYPE metricToUse, 
-        double metricThreshold, int totalTransactions) {
+    generateRulesBruteForce(FrequentItemSets largeItemSets, 
+        DefaultAssociationRule.METRIC_TYPE metricToUse, 
+        double metricThreshold, int upperBoundMinSuppAsInstances,
+        int lowerBoundMinSuppAsInstances, int totalTransactions) {
     
     List<AssociationRule> rules = new ArrayList<AssociationRule>();
     largeItemSets.sort();
@@ -893,7 +899,9 @@ public class FPGrowth extends AbstractAssociator
             DefaultAssociationRule candidate = 
               new DefaultAssociationRule(premise, consequence, metricToUse, supportPremise,
                   supportConsequence, totalSupport, totalTransactions);
-            if (candidate.getPrimaryMetricValue() > metricThreshold) {
+            if (candidate.getPrimaryMetricValue() > metricThreshold &&
+                candidate.getTotalSupport() >= lowerBoundMinSuppAsInstances &&
+                candidate.getTotalSupport() <= upperBoundMinSuppAsInstances) {
               // accept this rule
               rules.add(candidate);
             }              
@@ -2031,10 +2039,17 @@ public class FPGrowth extends AbstractAssociator
     if (m_rulesMustContain.length() > 0) {
       rulesMustContain = parseRulesMustContain(data);
     }
-    
-    
+        
     double currentSupport = m_upperBoundMinSupport;
     
+    int upperBoundMinSuppAsInstances = (m_upperBoundMinSupport > 1) 
+      ? (int) m_upperBoundMinSupport
+      : (int)Math.ceil(m_upperBoundMinSupport * data.numInstances());
+      
+    int lowerBoundMinSuppAsInstances = (m_lowerBoundMinSupport > 1)
+      ? (int)m_lowerBoundMinSupport
+      : (int)Math.ceil(m_lowerBoundMinSupport * data.numInstances());
+             
     if (m_findAllRulesForSupportLevel) {
       currentSupport = m_lowerBoundMinSupport;
     }
@@ -2082,7 +2097,8 @@ public class FPGrowth extends AbstractAssociator
 
       m_rules = 
         generateRulesBruteForce(m_largeItemSets, m_metric, 
-            m_metricThreshold, data.numInstances());
+            m_metricThreshold, upperBoundMinSuppAsInstances, 
+            lowerBoundMinSuppAsInstances, data.numInstances());
       
       if (rulesMustContain != null && rulesMustContain.size() > 0) {
         m_rules = pruneRules(m_rules, rulesMustContain, 
