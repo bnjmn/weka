@@ -433,9 +433,9 @@ public class AprioriItemSet
     Hashtable hashtable;
     
     FastVector newLift = null, newLev = null, newConv = null;
-    if (rules.length > 3) {
+//    if (rules.length > 3) {
       newLift = new FastVector(); newLev = new FastVector(); newConv = new FastVector();
-    }
+//    }
 
     if (numItemsInSet > numItemsInConsequence + 1) {
       hashtable =
@@ -463,7 +463,7 @@ public class AprioriItemSet
 	newPremises.addElement(newPremise);
 	newConf.addElement(new Double(confidenceForRule(newPremise, current)));
 	
-	if (rules.length > 3) {
+//	if (rules.length > 3) {
 	  int consequenceUnconditionedCounter =
 	    ((Integer)hashtableForConsequence.get(current)).intValue();
 
@@ -479,16 +479,16 @@ public class AprioriItemSet
 	  newLift.addElement(new Double(tempLift));
 	  newLev.addElement(new Double(tempLev));
 	  newConv.addElement(new Double(tempConv));
-	}
+//	}
       }
       result = new FastVector[rules.length];
       result[0] = newPremises;
       result[1] = newConsequences;
       result[2] = newConf;
       
-      if (rules.length > 3) {
+  //    if (rules.length > 3) {
         result[3] = newLift; result[4] = newLev; result[5] = newConv;
-      }
+//      }
       pruneRules(result, minConfidence);
       moreResults = moreComplexRules(result,numItemsInSet,numItemsInConsequence+1,
 				     minConfidence, hashtables);
@@ -497,6 +497,10 @@ public class AprioriItemSet
 	  result[0].addElement(moreResults[0].elementAt(i));
 	  result[1].addElement(moreResults[1].elementAt(i));
 	  result[2].addElement(moreResults[2].elementAt(i));
+	  //
+	  result[3].addElement(moreResults[3].elementAt(i));
+	  result[4].addElement(moreResults[4].elementAt(i));
+	  result[5].addElement(moreResults[5].elementAt(i));
 	}
       return result;
     } else
