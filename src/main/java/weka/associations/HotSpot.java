@@ -389,14 +389,16 @@ public class HotSpot
                 + Utils.doubleToString((m_minImprovement * 100.0), 2) + "%");
     
     buff.append("\n\n");
-    buff.append(m_header.attribute(m_target).name());
-    if (m_header.attribute(m_target).isNumeric()) {
-      buff.append(" (" + Utils.doubleToString(m_globalTarget, 4) + ")");
-    } else {
-      buff.append("=" + m_header.attribute(m_target).value(m_targetIndex) + " (");
-      buff.append("" + Utils.doubleToString((m_globalTarget * 100.0), 2) + "% [");
-      buff.append("" + m_globalSupport 
-                  + "/" + m_numInstances + "])");
+    if (!m_outputRules) {
+      buff.append(m_header.attribute(m_target).name());
+      if (m_header.attribute(m_target).isNumeric()) {
+        buff.append(" (" + Utils.doubleToString(m_globalTarget, 4) + ")");
+      } else {
+        buff.append("=" + m_header.attribute(m_target).value(m_targetIndex) + " (");
+        buff.append("" + Utils.doubleToString((m_globalTarget * 100.0), 2) + "% [");
+        buff.append("" + m_globalSupport 
+            + "/" + m_numInstances + "])");
+      }
     }
     
     if (!m_outputRules) {
