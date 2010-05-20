@@ -754,8 +754,12 @@ public class MultilayerPerceptron extends Classifier
     }
   }
   
-  /** a ZeroR model in case no model can be built from the data */
+  /** a ZeroR model in case no model can be built from the data 
+   * or the network predicts all zeros for the classes */
   private Classifier m_ZeroR;
+
+  /** Whether to use the default ZeroR model */
+  private boolean m_useDefaultModel = false;  
     
   /** The training instances. */
   private Instances m_instances;
@@ -1594,17 +1598,18 @@ public class MultilayerPerceptron extends Classifier
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
 
-    // only class? -> build ZeroR model
+    m_ZeroR = new weka.classifiers.rules.ZeroR();
+    m_ZeroR.buildClassifier(i);
+    // only class? -> use ZeroR model
     if (i.numAttributes() == 1) {
       System.err.println(
 	  "Cannot build model (only class attribute present in data!), "
           + "using ZeroR model instead!");
-      m_ZeroR = new weka.classifiers.rules.ZeroR();
-      m_ZeroR.buildClassifier(i);
+      m_useDefaultModel = true;
       return;
     }
     else {
-      m_ZeroR = null;
+      m_useDefaultModel = false;
     }
     
     if (i.numInstances() == 0) {
@@ -1972,7 +1977,7 @@ public class MultilayerPerceptron extends Classifier
       count += theArray[noa];
     }
     if (count <= 0) {
-      return null;
+      return m_ZeroR.distributionForInstance(i);
     }
     for (int noa = 0; noa < m_numClasses; noa++) {
       theArray[noa] /= count;
