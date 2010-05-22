@@ -2426,7 +2426,7 @@ public class MultilayerPerceptron
    */
   public String toString() {
     // only ZeroR model?
-    if (m_ZeroR != null) {
+    if (m_useDefaultModel) {
       StringBuffer buf = new StringBuffer();
       buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
       buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
