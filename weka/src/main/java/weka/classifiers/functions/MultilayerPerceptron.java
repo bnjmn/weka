@@ -2089,7 +2089,7 @@ public class MultilayerPerceptron
   public double[] distributionForInstance(Instance i) throws Exception {
 
     // default model?
-    if (m_ZeroR != null) {
+    if (m_useDefaultModel) {
       return m_ZeroR.distributionForInstance(i);
     }
     
