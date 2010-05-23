@@ -319,6 +319,7 @@ public class Discretize
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -977,7 +978,7 @@ public class Discretize
 	      attribValues.addElement("'("
 		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "-inf)'");
 	      attributes.addElement(new Attribute(getInputFormat().
-						  attribute(i).name(),
+						  attribute(i).name() + "_" + (j+1),
 						  attribValues));
 	    }
 	  }
