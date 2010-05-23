@@ -25,6 +25,7 @@ package weka.classifiers.lazy;
 import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -163,6 +164,9 @@ public class IBk
    * error when cross-validating on numeric prediction tasks.
    */
   protected boolean m_MeanSquared;
+  
+  /** Default ZeroR model to use when there are no training instances */
+  protected ZeroR m_defaultModel;
 
   /** no weighting. */
   public static final int WEIGHT_NONE = 1;
@@ -511,6 +515,9 @@ public class IBk
 
     // Invalidate any currently cross-validation selected k
     m_kNNValid = false;
+    
+    m_defaultModel = new ZeroR();
+    m_defaultModel.buildClassifier(instances);
   }
 
   /**
@@ -554,7 +561,8 @@ public class IBk
   public double [] distributionForInstance(Instance instance) throws Exception {
 
     if (m_Train.numInstances() == 0) {
-      throw new Exception("No training instances!");
+      //throw new Exception("No training instances!");
+      return m_defaultModel.distributionForInstance(instance);
     }
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
       m_kNNValid = false;
@@ -790,11 +798,15 @@ public class IBk
     if (m_Train == null) {
       return "IBk: No model built yet.";
     }
+    
+    if (m_Train.numInstances() == 0) {
+      return "Warning: no training instances - ZeroR model used.";
+    }
 
     if (!m_kNNValid && m_CrossValidate) {
       crossValidate();
     }
-
+    
     String result = "IB1 instance-based classifier\n" +
       "using " + m_kNN;
 
