@@ -25,6 +25,8 @@ package weka.classifiers.lazy;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.rules.ZeroR;
+
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -70,7 +72,7 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision$
  */
 public class IBk extends Classifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -335,6 +337,9 @@ public class IBk extends Classifier implements
 
   /** The number of attributes the contribute to a prediction */
   protected double m_NumAttributesUsed;
+  
+  /** The default ZeroR model to use when there are no training instances */
+  protected ZeroR m_defaultModel;
 								   
   /**
    * IBk classifier. Simple instance-based learner that uses the class
@@ -646,6 +651,9 @@ public class IBk extends Classifier implements
 
     // Invalidate any currently cross-validation selected k
     m_kNNValid = false;
+    
+    m_defaultModel = new ZeroR();
+    m_defaultModel.buildClassifier(instances);
   }
 
   /**
@@ -686,7 +694,8 @@ public class IBk extends Classifier implements
   public double [] distributionForInstance(Instance instance) throws Exception{
 
     if (m_Train.numInstances() == 0) {
-      throw new Exception("No training instances!");
+      //throw new Exception("No training instances!");
+      return m_defaultModel.distributionForInstance(instance);
     }
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
       m_kNNValid = false;
@@ -848,6 +857,10 @@ public class IBk extends Classifier implements
 
     if (m_Train == null) {
       return "IBk: No model built yet.";
+    }
+    
+    if (m_Train.numInstances() == 0) {
+      return "Warning: no training instances - ZeroR model used.";
     }
 
     if (!m_kNNValid && m_CrossValidate) {
