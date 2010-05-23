@@ -25,6 +25,7 @@ package weka.classifiers.lazy;
 import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -182,6 +183,9 @@ public class IBk
 
   /** The number of attributes the contribute to a prediction. */
   protected double m_NumAttributesUsed;
+  
+  /** The default ZeroR model to use if there are no training instances */
+  protected ZeroR m_defaultModel;
   
   /**
    * IBk classifier. Simple instance-based learner that uses the class
@@ -510,6 +514,9 @@ public class IBk
 
     // Invalidate any currently cross-validation selected k
     m_kNNValid = false;
+    
+    m_defaultModel = new ZeroR();
+    m_defaultModel.buildClassifier(instances);
   }
 
   /**
@@ -553,7 +560,8 @@ public class IBk
   public double [] distributionForInstance(Instance instance) throws Exception {
 
     if (m_Train.numInstances() == 0) {
-      throw new Exception("No training instances!");
+      //throw new Exception("No training instances!");
+      return m_defaultModel.distributionForInstance(instance);
     }
     if ((m_WindowSize > 0) && (m_Train.numInstances() > m_WindowSize)) {
       m_kNNValid = false;
@@ -788,6 +796,10 @@ public class IBk
 
     if (m_Train == null) {
       return "IBk: No model built yet.";
+    }
+    
+    if (m_Train.numInstances() == 0) {
+      return "Warning: no training instances - ZeroR model used.";
     }
 
     if (!m_kNNValid && m_CrossValidate) {
