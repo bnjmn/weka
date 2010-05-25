@@ -49,7 +49,7 @@ import weka.filters.unsupervised.attribute.Normalize;
 
 /**
  <!-- globalinfo-start -->
- * Implements the stochastic variant of the Pegasos (Primal Estimated sub-GrAdient SOlver for SVM) method of Shalev-Shwartz et al. (2007). This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes, so the coefficients in the output are based on the normalized data. Can either minimize the hinge loss (SVM) or log loss (logistic regression). For more information, see<br/>
+ * Implements the stochastic variant of the Pegasos (Primal Estimated sub-GrAdient SOlver for SVM) method of Shalev-Shwartz et al. (2007). This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes, so the coefficients in the output are based on the normalized data. For more information, see<br/>
  * <br/>
  * S. Shalev-Shwartz, Y. Singer, N. Srebro: Pegasos: Primal Estimated sub-GrAdient SOlver for SVM. In: 24th International Conference on MachineLearning, 807-814, 2007.
  * <p/>
@@ -71,10 +71,6 @@ import weka.filters.unsupervised.attribute.Normalize;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
- * <pre> -F
- *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression).
- *  (default = 0)</pre>
  * 
  * <pre> -L &lt;double&gt;
  *  The lambda regularization constant (default = 0.0001)</pre>
@@ -311,7 +307,7 @@ public class SPegasos extends AbstractClassifier
    */
   public String lossFunctionTipText() {
     return "The loss function to use. Hinge loss (SVM) " +
-    		"or log loss (logistic regression).";
+                "or log loss (logistic regression).";
   }
   
   /**
@@ -322,10 +318,9 @@ public class SPegasos extends AbstractClassifier
   public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>();
-    
     newVector.add(new Option("\tSet the loss function to minimize. 0 = " +
-    		"hinge loss (SVM), 1 = log loss (logistic regression).\n" +
-    		"\t(default = 0)", "F", 1, "-F"));
+        "hinge loss (SVM), 1 = log loss (logistic regression).\n" +
+        "\t(default = 0)", "F", 1, "-F"));
     newVector.add(new Option("\tThe lambda regularization constant " +
     		"(default = 0.0001)",
     		"L", 1, "-L <double>"));
@@ -339,14 +334,11 @@ public class SPegasos extends AbstractClassifier
   }
   
   /**
+   * 
    * Parses a given list of options. <p/>
    * 
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
-   * <pre> -F
-   *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression).
-   *  (default = 0)</pre>
    * 
    * <pre> -L &lt;double&gt;
    *  The lambda regularization constant (default = 0.0001)</pre>
@@ -423,8 +415,7 @@ public class SPegasos extends AbstractClassifier
     		" globally replaces all missing values and transforms nominal" +
     		" attributes into binary ones. It also normalizes all attributes," +
     		" so the coefficients in the output are based on the normalized" +
-    		" data. Can either minimize the hinge loss (SVM) or log loss (" +
-    		"logistic regression). For more information, see\n\n" +
+    		" data. For more information, see\n\n" +
     		getTechnicalInformation().toString();
   }
   
@@ -454,11 +445,8 @@ public class SPegasos extends AbstractClassifier
    * Reset the classifier.
    */
   public void reset() {
-    m_t = 1;
+    m_t = 2;
     m_weights = null;
-    m_normalize = null;
-    m_replaceMissing = null;
-    m_nominalToBinary = null;
   }
 
   /**
@@ -514,87 +502,10 @@ public class SPegasos extends AbstractClassifier
     }
   }
   
-  protected static final int HINGE = 0;
-  protected static final int LOGLOSS = 1;
-  
-  /** The current loss function to minimize */
-  protected int m_loss = HINGE;
-  
-  /** Loss functions to choose from */
-  public static final Tag [] TAGS_SELECTION = {
-    new Tag(HINGE, "Hinge loss (SVM)"),
-    new Tag(LOGLOSS, "Log loss (logistic regression)")
-  };
-  
-  protected double dloss(double z) {
-    if (m_loss == HINGE) {
-      return (z < 1) ? 1 : 0;
-    }
-    
-    // log loss
-    if (z < 0) {
-      return 1.0 / (Math.exp(z) + 1.0);  
-    } else {
-      double t = Math.exp(-z);
-      return t / (t + 1);
-    }
-  }
-  
-  private void train(Instances data) {
+  private void train(Instances data) throws Exception {
     for (int e = 0; e < m_epochs; e++) {
       for (int i = 0; i < data.numInstances(); i++) {
-        Instance instance = data.instance(i);
-
-        double learningRate = 1.0 / (m_lambda * m_t);
-        //double scale = 1.0 - learningRate * m_lambda;
-        double scale = 1.0 - 1.0 / m_t;
-        double y = (instance.classValue() == 0) ? -1 : 1;
-        double wx = dotProd(instance, m_weights, instance.classIndex());
-        double z = y * (wx + m_weights[m_weights.length - 1]);
-        
-
-        if (/*m_loss == LOGLOSS || (z < 1)*/ true) {
-          double delta = learningRate * dloss(z);
-          int n1 = instance.numValues();
-          int n2 = data.numAttributes();
-          for (int p1 = 0, p2 = 0; p2 < n2;) {
-            int indS = -1;
-            indS = (p1 < n1) ? instance.index(p1) : indS;
-            int indP = p2;
-            if (indP != data.classIndex()) {
-              m_weights[indP] *= scale;
-            }
-            if (indS == indP) {
-              if (indS != data.classIndex() && 
-                  !instance.isMissingSparse(p1)) {
-                //double m = learningRate * (instance.valueSparse(p1) * y);
-                double m = delta * (instance.valueSparse(p1) * y);
-                m_weights[indS] += m;
-              }
-              p1++;             
-            }
-            p2++;
-          }
-
-          // update the bias
-          m_weights[m_weights.length - 1] += delta * y;
-          
-          double norm = 0;
-          for (int k = 0; k < m_weights.length; k++) {
-            if (k != data.classIndex()) {
-              norm += (m_weights[k] * m_weights[k]);
-            }
-          }
-          norm = Math.sqrt(norm);
-          
-          double scale2 = Math.min(1.0, (1.0 / (Math.sqrt(m_lambda) * norm)));
-          if (scale2 < 1.0) {
-            for (int j = 0; j < m_weights.length; j++) {
-              m_weights[j] *= scale2;
-            }
-          }
-        }
-        m_t++;
+        updateClassifier(data.instance(i));
       }
     }
   }
@@ -622,6 +533,32 @@ public class SPegasos extends AbstractClassifier
     }
     return (result);
   }
+  
+  protected static final int HINGE = 0;
+  protected static final int LOGLOSS = 1;
+  
+  /** The current loss function to minimize */
+  protected int m_loss = HINGE;
+  
+  /** Loss functions to choose from */
+  public static final Tag [] TAGS_SELECTION = {
+    new Tag(HINGE, "Hinge loss (SVM)"),
+    new Tag(LOGLOSS, "Log loss (logistic regression)")
+  };
+  
+  protected double dloss(double z) {
+    if (m_loss == HINGE) {
+      return (z < 1) ? 1 : 0;
+    }
+    
+    // log loss
+    if (z < 0) {
+      return 1.0 / (Math.exp(z) + 1.0);  
+    } else {
+      double t = Math.exp(-z);
+      return t / (t + 1);
+    }
+  }
         
   /**
    * Updates the classifier with the given instance.
@@ -632,54 +569,51 @@ public class SPegasos extends AbstractClassifier
    */
   public void updateClassifier(Instance instance) throws Exception {
     if (!instance.classIsMissing()) {
+      
       double learningRate = 1.0 / (m_lambda * m_t);
       //double scale = 1.0 - learningRate * m_lambda;
       double scale = 1.0 - 1.0 / m_t;
       double y = (instance.classValue() == 0) ? -1 : 1;
       double wx = dotProd(instance, m_weights, instance.classIndex());
-      double z = y * (wx + m_weights[m_weights.length - 1]);
-            
-      if (/*m_loss == LOGLOSS || (z < 1)*/ true) {
-        double delta = learningRate * dloss(z);
+      double z = y * (wx + m_weights[m_weights.length - 1]);        
+      
+      for (int j = 0; j < m_weights.length - 1; j++) {
+        if (j != instance.classIndex()) {
+          m_weights[j] *= scale;
+        }
+      }
+      
+      if (m_loss == LOGLOSS || (z < 1)) {
+        double loss = dloss(z);
         int n1 = instance.numValues();
-        int n2 = instance.numAttributes();
-        for (int p1 = 0, p2 = 0; p2 < n2;) {
-          int indS = -1;
-          indS = (p1 < n1) ? instance.index(p1) : indS;
-          int indP = p2;
-          if (indP != instance.classIndex()) {
-            m_weights[indP] *= scale;
-          }
-          if (indS == indP) {
-            if (indS != instance.classIndex() && 
-                !instance.isMissingSparse(p1)) {
-              double m = delta * (instance.valueSparse(p1) * y);
-              m_weights[indS] += m;
-            }
-            p1++;             
-          }
-          p2++;
-        }                        
-        
-        // update the bias
-        m_weights[m_weights.length - 1] += delta * y;
-        
-        double norm = 0;
-        for (int k = 0; k < m_weights.length; k++) {
-          if (k != instance.classIndex()) {
-            norm += (m_weights[k] * m_weights[k]);
+        for (int p1 = 0; p1 < n1; p1++) {
+          int indS = instance.index(p1);
+          if (indS != instance.classIndex() &&  !instance.isMissingSparse(p1)) {
+            double m = learningRate * loss * (instance.valueSparse(p1) * y);
+            m_weights[indS] += m;
           }
         }
-        norm = Math.sqrt(norm);
         
-        double scale2 = Math.min(1.0, (1.0 / (Math.sqrt(m_lambda) * norm)));
-        if (scale2 < 1.0) {
-          for (int j = 0; j < m_weights.length; j++) {
+        // update the bias
+        m_weights[m_weights.length - 1] += learningRate * loss * y;
+      }
+      
+      double norm = 0;
+      for (int k = 0; k < m_weights.length - 1; k++) {
+        if (k != instance.classIndex()) {
+          norm += (m_weights[k] * m_weights[k]);
+        }
+      }
+      
+      double scale2 = Math.min(1.0, (1.0 / (m_lambda * norm)));
+      if (scale2 < 1.0) {
+        scale2 = Math.sqrt(scale2);
+        for (int j = 0; j < m_weights.length - 1; j++) {
+          if (j != instance.classIndex()) {
             m_weights[j] *= scale2;
           }
         }
-      }            
-      
+      }
       m_t++;
     }
   }
@@ -731,8 +665,7 @@ public class SPegasos extends AbstractClassifier
     }
     return result;
   }
-  
-  
+    
   /**
    * Prints out the classifier.
    *
@@ -775,7 +708,7 @@ public class SPegasos extends AbstractClassifier
     
     return buff.toString();
   }
-
+  
   /**
    * Returns the revision string.
    * 
