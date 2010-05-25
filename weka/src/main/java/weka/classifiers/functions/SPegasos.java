@@ -553,12 +553,12 @@ public class SPegasos extends AbstractClassifier
         double z = y * (wx + m_weights[m_weights.length - 1]);
         
 
-        if (m_loss == LOGLOSS || (z < 1)) {
+        if (/*m_loss == LOGLOSS || (z < 1)*/ true) {
           double delta = learningRate * dloss(z);
           int n1 = instance.numValues();
           int n2 = data.numAttributes();
           for (int p1 = 0, p2 = 0; p2 < n2;) {
-            int indS = 0;
+            int indS = -1;
             indS = (p1 < n1) ? instance.index(p1) : indS;
             int indP = p2;
             if (indP != data.classIndex()) {
@@ -638,17 +638,13 @@ public class SPegasos extends AbstractClassifier
       double y = (instance.classValue() == 0) ? -1 : 1;
       double wx = dotProd(instance, m_weights, instance.classIndex());
       double z = y * (wx + m_weights[m_weights.length - 1]);
-      
-      for (int j = 0; j < m_weights.length; j++) {
-        m_weights[j] *= scale;
-      }
-      
-      if (m_loss == LOGLOSS || (z < 1)) {
+            
+      if (/*m_loss == LOGLOSS || (z < 1)*/ true) {
         double delta = learningRate * dloss(z);
         int n1 = instance.numValues();
         int n2 = instance.numAttributes();
         for (int p1 = 0, p2 = 0; p2 < n2;) {
-          int indS = 0;
+          int indS = -1;
           indS = (p1 < n1) ? instance.index(p1) : indS;
           int indP = p2;
           if (indP != instance.classIndex()) {
