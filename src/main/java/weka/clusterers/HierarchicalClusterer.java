@@ -998,7 +998,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
 
   public void setDistanceIsBranchLength(boolean bDistanceIsHeight) {m_bDistanceIsBranchLength = bDistanceIsHeight;}
 
-  public String distanceIsHeightTipText() {
+  public String distanceIsBranchLengthTipText() {
     return "If set to false, the distance between clusters is interpreted " +
     "as the height of the node linking the clusters. This is appropriate for " +
     "example for single link clustering. However, for neighbor joining, the " +
