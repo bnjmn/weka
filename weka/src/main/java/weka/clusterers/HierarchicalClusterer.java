@@ -1083,7 +1083,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
   public static void main(String [] argv) {
     runClusterer(new HierarchicalClusterer(), argv);
   }
-  @Override
+
   public String graph() throws Exception {
     if (numberOfClusters() == 0) {
       return "Newick:(no,clusters)";
@@ -1107,7 +1107,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
     }
     return "Newick:" + sNewick;
   }
-  @Override
+
   public int graphType() {
     return Drawable.Newick;
   }
