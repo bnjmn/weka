@@ -142,10 +142,24 @@ public class PropertyDialog
 
     pack();
     
-    if ((x == -1) && (y == -1))
+    int screenWidth = getGraphicsConfiguration().getBounds().width;
+    int screenHeight = getGraphicsConfiguration().getBounds().height;
+
+    // adjust height to a maximum of 95% of screen height
+    if (getHeight() > (double) screenHeight * 0.95)
+      setSize(getWidth(), (int) ((double) screenHeight * 0.95));
+    
+    if ((x == -1) && (y == -1)) {
       setLocationRelativeTo(null);
-    else
+    }
+    else {
+      // adjust position if necessary
+      if (x + getWidth() > screenWidth)
+	x = screenWidth - getWidth();
+      if (y + getHeight() > screenHeight)
+	y = screenHeight - getHeight();
       setLocation(x, y);
+    }
   }
 
   /**
