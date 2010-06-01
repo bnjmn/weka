@@ -33,12 +33,12 @@ import java.beans.PropertyEditor;
 import javax.swing.JFrame;
 import javax.swing.JButton;
 
-/** 
+/**
  * Support for PropertyEditors with custom editors: puts the editor into
  * a separate frame.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class PropertyDialog extends JFrame {
 
@@ -47,7 +47,7 @@ public class PropertyDialog extends JFrame {
 
   /** The custom editor component */
   private Component m_EditorComponent;
-  
+
   /**
    * Creates the editor frame.
    *
@@ -70,7 +70,26 @@ public class PropertyDialog extends JFrame {
     getContentPane().add(m_EditorComponent, BorderLayout.CENTER);
 
     pack();
-    setLocation(x, y);
+
+    int screenWidth = getGraphicsConfiguration().getBounds().width;
+    int screenHeight = getGraphicsConfiguration().getBounds().height;
+
+    // adjust height to a maximum of 95% of screen height
+    if (getHeight() > (double) screenHeight * 0.95)
+      setSize(getWidth(), (int) ((double) screenHeight * 0.95));
+
+    if ((x == -1) && (y == -1)) {
+      setLocationRelativeTo(null);
+    }
+    else {
+      // adjust position if necessary
+      if (x + getWidth() > screenWidth)
+	x = screenWidth - getWidth();
+      if (y + getHeight() > screenHeight)
+	y = screenHeight - getHeight();
+      setLocation(x, y);
+    }
+
     setVisible(true);
   }
 
