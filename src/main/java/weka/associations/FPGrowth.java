@@ -940,6 +940,15 @@ public class FPGrowth extends AbstractAssociator
   /** The amount by which to decrease the support in each iteration */
   protected double m_delta = 0.05;
   
+  /** The number of instances in the data */
+  protected int m_numInstances;
+  
+  /** 
+   * When processing data off of disk report progress
+   * this frequently (number of instances).
+   */
+  protected int m_offDiskReportingFrequency = 10000;
+  
   /** 
    * If true, just all rules meeting the lower bound on the minimum
    * support will be found. The number of rules to find will be
@@ -1092,6 +1101,77 @@ public class FPGrowth extends AbstractAssociator
     return result;
   }
   
+  private void processSingleton(Instance current, 
+      ArrayList<BinaryItem> singletons) throws Exception {
+    
+    if (current instanceof SparseInstance) {
+      for (int j = 0; j < current.numValues(); j++) {
+        int attIndex = current.index(j);
+        singletons.get(attIndex).increaseFrequency();
+      }
+    } else {
+      for (int j = 0; j < current.numAttributes(); j++) {
+        if (!current.isMissing(j)) {
+          if (current.attribute(j).numValues() == 1 
+              || current.value(j) == m_positiveIndex - 1) {
+            singletons.get(j).increaseFrequency();
+          }
+        }
+      }
+    }
+  }
+  
+  /**
+   * Get the singleton items in the data
+   * 
+   * @param source the source of the data (either Instances or
+   * an ArffLoader).
+   * @return a list of singleton item sets
+   * @throws Exception if the singletons can't be found for some reason
+   */
+  protected ArrayList<BinaryItem> getSingletons(Object source) 
+    throws Exception {
+    ArrayList<BinaryItem> singletons = new ArrayList<BinaryItem>();
+    Instances data = null;
+    
+    if (source instanceof Instances) {
+      data = (Instances)source;
+    } else if (source instanceof weka.core.converters.ArffLoader) {
+      data = ((weka.core.converters.ArffLoader)source).getStructure();
+    }
+    
+    for (int i = 0; i < data.numAttributes(); i++) {
+      singletons.add(new BinaryItem(data.attribute(i), m_positiveIndex - 1));
+    }
+    
+    if (source instanceof Instances) {
+      // set the number of instances
+      m_numInstances = data.numInstances();
+      
+      for (int i = 0; i < data.numInstances(); i++) {
+        Instance current = data.instance(i);
+        processSingleton(current, singletons);
+      }
+    } else if (source instanceof weka.core.converters.ArffLoader) {
+      weka.core.converters.ArffLoader loader = (weka.core.converters.ArffLoader)source;
+      Instance current = null;
+      int count = 0;
+      while ((current = loader.getNextInstance(data)) != null) {
+        processSingleton(current, singletons);
+        count++;
+        if (count % m_offDiskReportingFrequency == 0) {
+          System.err.println("Singletons: done " + count);
+        }
+      }
+      
+      // set the number of instances
+      m_numInstances = count;
+      
+      loader.reset();
+    }
+    
+    return singletons;
+  }
   
   /**
    * Get the singleton items in the data
@@ -1101,7 +1181,8 @@ public class FPGrowth extends AbstractAssociator
    * @throws Exception if the singletons can't be found for some reason
    */
   protected ArrayList<BinaryItem> getSingletons(Instances data) throws Exception {
-    ArrayList<BinaryItem> singletons = new ArrayList<BinaryItem>();
+    return getSingletons((Object)data);
+    /*ArrayList<BinaryItem> singletons = new ArrayList<BinaryItem>();
     
     for (int i = 0; i < data.numAttributes(); i++) {
       singletons.add(new BinaryItem(data.attribute(i), m_positiveIndex - 1));
@@ -1126,7 +1207,7 @@ public class FPGrowth extends AbstractAssociator
       }
     }
     
-    return singletons;
+    return singletons;*/
   }
   
   /*protected ArrayList<BinaryItem> getFrequent(ArrayList<BinaryItem> items, int minSupport) {
@@ -1141,6 +1222,42 @@ public class FPGrowth extends AbstractAssociator
     Collections.sort(frequent);
     return frequent;
   } */
+
+  /**
+   * Inserts a single instance into the FPTree.
+   * 
+   * @param current the instance to insert
+   * @param singletons the singleton item sets
+   * @param tree the tree to insert into
+   * @param minSupport the minimum support threshold
+   */
+  private void insertInstance(Instance current, ArrayList<BinaryItem> singletons, 
+      FPTreeRoot tree, int minSupport) {
+    ArrayList<BinaryItem> transaction = new ArrayList<BinaryItem>();
+    if (current instanceof SparseInstance) {
+      for (int j = 0; j < current.numValues(); j++) {
+        int attIndex = current.index(j);
+        if (singletons.get(attIndex).getFrequency() >= minSupport) {
+          transaction.add(singletons.get(attIndex));
+        }
+      }
+      Collections.sort(transaction);
+      tree.addItemSet(transaction, 1);
+    } else {
+      for (int j = 0; j < current.numAttributes(); j++) {
+        if (!current.isMissing(j)) {
+          if (current.attribute(j).numValues() == 1 
+              || current.value(j) == m_positiveIndex - 1) {
+            if (singletons.get(j).getFrequency() >= minSupport) {
+              transaction.add(singletons.get(j));
+            }
+          }
+        }
+      }
+      Collections.sort(transaction);
+      tree.addItemSet(transaction, 1);
+    }
+  }
   
   /**
    * Construct the frequent pattern tree by inserting each transaction
@@ -1152,7 +1269,49 @@ public class FPGrowth extends AbstractAssociator
    * @param minSupport the minimum support
    * @return the root of the tree
    */
-  protected FPTreeRoot buildFPTree(ArrayList<BinaryItem> singletons, 
+  protected FPTreeRoot buildFPTree(ArrayList<BinaryItem> singletons,
+      Object dataSource, int minSupport) throws Exception {
+    
+    FPTreeRoot tree = new FPTreeRoot();    
+    Instances data = null;
+    if (dataSource instanceof Instances) {
+      data = (Instances)dataSource;
+    } else if (dataSource instanceof weka.core.converters.ArffLoader) {
+      data = ((weka.core.converters.ArffLoader)dataSource).getStructure();
+    }
+    
+    if (dataSource instanceof Instances) {
+      for (int i = 0; i < data.numInstances(); i++) {
+        insertInstance(data.instance(i), singletons, tree, minSupport);
+      }
+    } else if (dataSource instanceof weka.core.converters.ArffLoader) {
+      weka.core.converters.ArffLoader loader = 
+        (weka.core.converters.ArffLoader)dataSource;
+      Instance current = null;
+      int count = 0;
+      while ((current = loader.getNextInstance(data)) != null) {
+        insertInstance(current, singletons, tree, minSupport);
+        count++;
+        if (count % m_offDiskReportingFrequency == 0) {
+          System.err.println("build tree done: " + count);
+        }
+      }
+    }
+    
+    return tree;
+  }
+  
+  /**
+   * Construct the frequent pattern tree by inserting each transaction
+   * in the data into the tree. Only those items from each transaction that
+   * meet the minimum support threshold are inserted.
+   * 
+   * @param singletons the singleton item sets
+   * @param data the Instances containing the transactions
+   * @param minSupport the minimum support
+   * @return the root of the tree
+   */
+  /*protected FPTreeRoot buildFPTree(ArrayList<BinaryItem> singletons, 
       Instances data, int minSupport) {
     
     FPTreeRoot tree = new FPTreeRoot();
@@ -1186,7 +1345,7 @@ public class FPGrowth extends AbstractAssociator
     }
     
     return tree;
-  }
+  }*/
   
   /**
    * Find large item sets in the FP-tree.
@@ -1692,6 +1851,17 @@ public class FPGrowth extends AbstractAssociator
     return m_findAllRulesForSupportLevel;
   }
   
+  /**
+   * Set how often to report some progress when the data is
+   * being read incrementally off of the disk rather than
+   * loaded into memory.
+   * 
+   * @param freq the frequency to print progress.
+   */
+  public void setOffDiskReportingFrequency(int freq) {
+    m_offDiskReportingFrequency = freq;
+  }
+  
   /* public void setMinimumSupport(double minSupp) {
     m_minSupport = minSupp;
   }
@@ -2017,22 +2187,37 @@ public class FPGrowth extends AbstractAssociator
     
     return result;
   }
-
+  
   /**
    * Method that generates all large item sets with a minimum support, and from
    * these all association rules with a minimum metric (i.e. confidence, 
    * lift etc.).
    *
-   * @param data the instances to be used for generating the associations
+   * @param source the source of the data. May be an Instances object or
+   * an ArffLoader. In the case of the latter, the two passes over the 
+   * data that FPGrowth requires will be done off of disk (i.e. only one
+   * instance will be in memory at any one time).
    * @throws Exception if rules can't be built successfully
    */
-  public void buildAssociations(Instances data) throws Exception {
+  private void buildAssociations(Object source) throws Exception {
+    Instances data = null;
+    Capabilities capabilities = getCapabilities();
+    boolean arffLoader = false;
     
+    if (source instanceof weka.core.converters.ArffLoader) {
+      data = ((weka.core.converters.ArffLoader)source).getStructure();
+      capabilities.setMinimumNumberInstances(0);
+      arffLoader = true;
+    } else {
+      data = (Instances)source;
+    }
+
     // can we handle the data?
-    getCapabilities().testWithFail(data);
+    capabilities.testWithFail(data);
     
     // prune any instances that don't contain the requested items (if any)
-    if (m_transactionsMustContain.length() > 0) {
+    // can only do this if we are not reading the data incrementally
+    if (m_transactionsMustContain.length() > 0 && (source instanceof Instances)) {
       data = parseTransactionsMustContain(data);
       getCapabilities().testWithFail(data);
     }
@@ -2040,26 +2225,28 @@ public class FPGrowth extends AbstractAssociator
     ArrayList<Item> rulesMustContain = null;
     if (m_rulesMustContain.length() > 0) {
       rulesMustContain = parseRulesMustContain(data);
-    }        
+    }
+    
+    ArrayList<BinaryItem> singletons = getSingletons(source);
     
     int upperBoundMinSuppAsInstances = (m_upperBoundMinSupport > 1) 
       ? (int) m_upperBoundMinSupport
-      : (int)Math.ceil(m_upperBoundMinSupport * data.numInstances());
+      : (int)Math.ceil(m_upperBoundMinSupport * m_numInstances);
       
     int lowerBoundMinSuppAsInstances = (m_lowerBoundMinSupport > 1)
       ? (int)m_lowerBoundMinSupport
-      : (int)Math.ceil(m_lowerBoundMinSupport * data.numInstances());
+      : (int)Math.ceil(m_lowerBoundMinSupport * m_numInstances);
       
     double upperBoundMinSuppAsFraction = (m_upperBoundMinSupport > 1)
-      ? m_upperBoundMinSupport / data.numInstances()
+      ? m_upperBoundMinSupport / m_numInstances
       : m_upperBoundMinSupport;
       
     double lowerBoundMinSuppAsFraction = (m_lowerBoundMinSupport > 1)
-      ? m_lowerBoundMinSupport / data.numInstances()
+      ? m_lowerBoundMinSupport / m_numInstances
       : m_lowerBoundMinSupport;
       
     double deltaAsFraction = (m_delta > 1)
-      ? m_delta / data.numInstances()
+      ? m_delta / m_numInstances
       : m_delta;
       
     double currentSupport = upperBoundMinSuppAsFraction;      
@@ -2067,32 +2254,27 @@ public class FPGrowth extends AbstractAssociator
     if (m_findAllRulesForSupportLevel) {
       currentSupport = lowerBoundMinSuppAsFraction;
     }
-    // first compute singletons
-    ArrayList<BinaryItem> singletons = getSingletons(data);
-    //ArrayList<BinaryItem> singletonsCopy = new ArrayList<BinaryItem>(singletons);
-/*    Collections.sort(singletonsCopy);
-    for (int i = 0; i < singletonsCopy.size(); i++) {
-      System.out.println(singletonsCopy.get(i).toString(true));
-    }
-    System.out.println("---------"); */
-//    System.out.println("Finished finding singletons...");
-    
-    // while not enough rules
+        
     do {
+      if (arffLoader) {
+        ((weka.core.converters.ArffLoader)source).reset();
+      }
+      
       int currentSupportAsInstances = (currentSupport > 1)
       ? (int)currentSupport
-      : (int)Math.ceil(currentSupport * data.numInstances());
+      : (int)Math.ceil(currentSupport * m_numInstances);
       
-      //System.err.println("Current support " + currentSupportAsInstances);
-      //ArrayList<BinaryItem> prunedSingletons = removeNonFrequent(singletons);
-
       // build the FPTree
-      FPTreeRoot tree = buildFPTree(singletons, data, currentSupportAsInstances);
-//      System.out.println("Finished building tree...");
-//      System.out.println(tree.toString(0));
-    /*System.out.println(tree.printHeaderTable(0)); */
-
-      FrequentItemSets largeItemSets = new FrequentItemSets(data.numInstances());
+      if (arffLoader) {
+        System.err.println("Building FP-tree...");
+      }
+      FPTreeRoot tree = buildFPTree(singletons, source, currentSupportAsInstances);
+      
+      FrequentItemSets largeItemSets = new FrequentItemSets(m_numInstances);
+      
+      if (arffLoader) {
+        System.err.println("Mining tree for min supp " + currentSupport);
+      }
 
       // mine the tree
       FrequentBinaryItemSet conditionalItems = 
@@ -2100,11 +2282,10 @@ public class FPGrowth extends AbstractAssociator
       mineTree(tree, largeItemSets, 0, conditionalItems, currentSupportAsInstances);      
 
       m_largeItemSets = largeItemSets;
-//      System.err.println("Number of large item sets: " + m_largeItemSets.size());
-  //    System.err.println(m_largeItemSets.toString(100));
-
-      //    m_largeItemSets.sort(compF);
-//      System.err.println("Finished mining tree...");
+      
+      if (arffLoader) {
+        System.err.println("Number of large item sets: " + m_largeItemSets.size());
+      }
       
       // save memory
       tree = null;
@@ -2112,13 +2293,16 @@ public class FPGrowth extends AbstractAssociator
       m_rules = 
         generateRulesBruteForce(m_largeItemSets, m_metric, 
             m_metricThreshold, upperBoundMinSuppAsInstances, 
-            lowerBoundMinSuppAsInstances, data.numInstances());
+            lowerBoundMinSuppAsInstances, m_numInstances);
+      
+      if (arffLoader) {
+        System.err.println("Number of rules found " + m_rules.size());
+      }
       
       if (rulesMustContain != null && rulesMustContain.size() > 0) {
         m_rules = pruneRules(m_rules, rulesMustContain, 
             m_mustContainOR);
       }
-      
       
       if (!m_findAllRulesForSupportLevel) {
         currentSupport -= deltaAsFraction;
@@ -2134,15 +2318,26 @@ public class FPGrowth extends AbstractAssociator
         // just break out of the loop as we are just finding all rules
         // with a minimum support + metric
         break;
-      }
+      }      
     } while (m_rules.size() < m_numRulesToFind);
     
     Collections.sort(m_rules);
-//    for (AssociationRule)
-    
-//    System.out.println(graph(tree));
   }
+
+  /**
+   * Method that generates all large item sets with a minimum support, and from
+   * these all association rules with a minimum metric (i.e. confidence, 
+   * lift etc.).
+   *
+   * @param data the instances to be used for generating the associations
+   * @throws Exception if rules can't be built successfully
+   */
+  public void buildAssociations(Instances data) throws Exception {
     
+    buildAssociations((Object)data);
+    return;
+  }
+      
   /**
    * Output the association rules.
    * 
@@ -2232,7 +2427,36 @@ public class FPGrowth extends AbstractAssociator
    * @param args the commandline options
    */
   public static void main(String[] args) {
-    runAssociator(new FPGrowth(), args);
+    try {
+      String[] argsCopy = args.clone();
+      if (Utils.getFlag('h', argsCopy) || Utils.getFlag("help", argsCopy)) {
+        runAssociator(new FPGrowth(), args);
+        System.out.println("-disk\n\tProcess data off of disk instead of loading\n\t" +
+        		"into main memory. This is a command line only option.");
+        return;
+      }
+        
+      if (!Utils.getFlag("disk", args)) {
+        runAssociator(new FPGrowth(), args);
+      } else {
+        String filename;
+        filename = Utils.getOption('t', args);
+        weka.core.converters.ArffLoader loader = null;
+        if (filename.length() != 0) {
+          loader = new weka.core.converters.ArffLoader();
+          loader.setFile(new java.io.File(filename));
+        } else {
+          throw new Exception("No training file specified!");
+        }
+        FPGrowth fpGrowth = new FPGrowth();
+        fpGrowth.setOptions(args);
+        Utils.checkForRemainingOptions(args);
+        fpGrowth.buildAssociations(loader);
+        System.out.print(fpGrowth.toString());
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 }
 
