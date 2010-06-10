@@ -103,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.24.2.1 $
+ * @version $Revision$
  * @see RandomizableClusterer
  * @see Drawable
  */
@@ -762,7 +762,7 @@ public class Cobweb
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.24.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -944,9 +944,9 @@ public class Cobweb
 	break;
       }
 
-      host.updateStats(instance, false);
+//      host.updateStats(instance, false);
       temp = host.findHost(instance, true);
-      host.updateStats(instance, true);
+//      host.updateStats(instance, true);
       
       if (temp != null) {
 	host = temp;
@@ -1242,7 +1242,7 @@ public class Cobweb
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.24.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /** 
