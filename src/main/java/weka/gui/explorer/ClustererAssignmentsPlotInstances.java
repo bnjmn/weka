@@ -152,7 +152,7 @@ public class ClustererAssignmentsPlotInstances
     clustVals   = new FastVector();
 
     for (i = 0; i < numClusters; i++)
-      clustVals.addElement("cluster" + (i+1));
+      clustVals.addElement("cluster" + /*(i+1)*/ i);
     predictedCluster = new Attribute("Cluster", clustVals);
     for (i = 0; i < m_Instances.numAttributes(); i++)
       hv.addElement(m_Instances.attribute(i).copy());
