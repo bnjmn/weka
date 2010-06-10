@@ -946,9 +946,9 @@ public class Cobweb
 	break;
       }
 
-      host.updateStats(instance, false);
+      //host.updateStats(instance, false);
       temp = host.findHost(instance, true);
-      host.updateStats(instance, true);
+      //host.updateStats(instance, true);
       
       if (temp != null) {
 	host = temp;
