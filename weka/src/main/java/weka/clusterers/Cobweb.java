@@ -47,7 +47,7 @@ import weka.experiment.Stats;
  * Cutoff. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision$
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
@@ -773,9 +773,9 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 	break;
       }
 
-      host.updateStats(instance, false);
+      //host.updateStats(instance, false);
       temp = host.findHost(instance, true);
-      host.updateStats(instance, true);
+      //host.updateStats(instance, true);
       
       if (temp != null) {
 	host = temp;
