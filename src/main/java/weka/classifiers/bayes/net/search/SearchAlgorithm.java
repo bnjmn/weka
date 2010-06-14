@@ -22,6 +22,7 @@
 package weka.classifiers.bayes.net.search;
 
 import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.net.BIFReader;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -41,7 +42,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class SearchAlgorithm 
     implements OptionHandler, Serializable, RevisionHandler {
@@ -64,6 +65,12 @@ public class SearchAlgorithm
      * If this is true, m_bInitAsNaiveBayes is overridden and interpreted as false.
      */
     protected boolean m_bMarkovBlanketClassifier = false;
+
+    /**
+     * File name containing initial network structure. This can be used as starting point for structure search
+     * It will be ignored if not speficied. When specified, it overrides the InitAsNaivBayes flag.
+     */
+    protected String m_sInitalBIFFile;
 
     /** c'tor **/
     public SearchAlgorithm() {
@@ -264,6 +271,7 @@ public class SearchAlgorithm
         return "SearchAlgorithm\n";
     } // toString
 
+    
     /**
      * buildStructure determines the network structure/graph of the network.
      * The default behavior is creating a network where all nodes have the first
@@ -276,7 +284,24 @@ public class SearchAlgorithm
      * @throws Exception if something goes wrong
      */
     public void buildStructure(BayesNet bayesNet, Instances instances) throws Exception {
-        if (m_bInitAsNaiveBayes) {
+    	if (m_sInitalBIFFile != null && !m_sInitalBIFFile.equals("")) {
+    		BIFReader initialNet = new BIFReader().processFile(m_sInitalBIFFile);
+            for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
+            	int iNode = initialNet.getNode(bayesNet.getNodeName(iAttribute));
+            	for (int iParent = 0; iParent < initialNet.getNrOfParents(iAttribute);iParent++) {
+            		String sParent = initialNet.getNodeName(initialNet.getParent(iNode, iParent));
+            		int nParent = 0;
+            		while (nParent < bayesNet.getNrOfNodes() && !bayesNet.getNodeName(nParent).equals(sParent)) {
+            			nParent++;
+            		}
+            		if (nParent< bayesNet.getNrOfNodes()) {
+            			bayesNet.getParentSet(iAttribute).addParent(nParent, instances);
+            		} else {
+            			System.err.println("Warning: Node " + sParent + " is ignored. It is found in initial network but not in data set.");
+            		}
+            	}
+            }
+    	} else if (m_bInitAsNaiveBayes) {
             int iClass = instances.classIndex();
             // initialize parent sets to have arrow from classifier node to
             // each of the other nodes
@@ -407,6 +432,6 @@ public class SearchAlgorithm
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
 } // class SearchAlgorithm
