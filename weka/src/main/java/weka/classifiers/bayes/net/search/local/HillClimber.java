@@ -65,7 +65,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class HillClimber 
     extends LocalScoreSearchAlgorithm {
@@ -135,7 +135,7 @@ public class HillClimber
          * @return		the revision
          */
         public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.9 $");
+          return RevisionUtils.extract("$Revision$");
         }
     } // class Operation
 
@@ -191,7 +191,7 @@ public class HillClimber
 		 * @return		the revision
 		 */
 		public String getRevision() {
-		  return RevisionUtils.extract("$Revision: 1.9 $");
+		  return RevisionUtils.extract("$Revision$");
 		}
 	} // class Cache
 
@@ -511,6 +511,7 @@ public class HillClimber
 		newVector.addElement(new Option("\tMaximum number of parents", "P", 1, "-P <nr of parents>"));
 		newVector.addElement(new Option("\tUse arc reversal operation.\n\t(default false)", "R", 0, "-R"));
 		newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)", "N", 0, "-N"));
+		newVector.addElement(new Option("\tInitial structure specified in XML BIF file", "X", 1, "-X"));
 
 		Enumeration enu = super.listOptions();
 		while (enu.hasMoreElements()) {
@@ -554,6 +555,8 @@ public class HillClimber
 
 		setInitAsNaiveBayes (!(Utils.getFlag('N', options)));
 		
+		m_sInitalBIFFile = Utils.getOption('X', options);
+
 		String sMaxNrOfParents = Utils.getOption('P', options);
 		if (sMaxNrOfParents.length() != 0) {
 		  setMaxNrOfParents(Integer.parseInt(sMaxNrOfParents));
@@ -571,7 +574,7 @@ public class HillClimber
 	 */
 	public String[] getOptions() {
 		String[] superOptions = super.getOptions();
-		String[] options = new String[7 + superOptions.length];
+		String[] options = new String[9 + superOptions.length];
 		int current = 0;
 		if (getUseArcReversal()) {
 		  options[current++] = "-R";
@@ -580,6 +583,10 @@ public class HillClimber
 		if (!getInitAsNaiveBayes()) {
 		  options[current++] = "-N";
 		} 
+		if (m_sInitalBIFFile!=null && !m_sInitalBIFFile.equals("")) {
+			  options[current++] = "-X";
+			  options[current++] = m_sInitalBIFFile;
+		}
 
 		options[current++] = "-P";
 		options[current++] = "" + m_nMaxNrOfParents;
@@ -652,7 +659,7 @@ public class HillClimber
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.9 $");
+	  return RevisionUtils.extract("$Revision$");
 	}
 
 } // HillClimber
