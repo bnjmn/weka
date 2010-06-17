@@ -33,6 +33,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,6 +51,7 @@ import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -75,7 +77,7 @@ import javax.swing.event.ChangeListener;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class MatrixPanel
   extends JPanel{
@@ -115,7 +117,7 @@ public class MatrixPanel
   protected JComboBox m_classAttrib = new JComboBox();
 
   /** The slider to adjust the size of the cells in the matrix  */  
-  protected JSlider m_plotSize = new JSlider(50, 500, 100);
+  protected JSlider m_plotSize = new JSlider(50, 200, 100);
 
   /** The slider to adjust the size of the datapoints  */  
   protected JSlider m_pointSize = new JSlider(1, 10, 1);
@@ -202,7 +204,14 @@ public class MatrixPanel
   /** font used in column and row names */
   private final java.awt.Font f = new java.awt.Font("Dialog", java.awt.Font.BOLD, 11);
 
-
+  protected transient Image m_osi = null;
+  protected boolean[][] m_plottedCells;
+  protected boolean m_regenerateOSI = true;
+  protected boolean m_clearOSIPlottedCells;
+  protected double m_previousPercent = -1;
+  
+  protected JCheckBox m_fastScroll = 
+    new JCheckBox("Fast scrolling (uses more memory)");
 
   /** 
    * Constructor
@@ -271,21 +280,39 @@ public class MatrixPanel
 	  a.setPreferredSize(d);
 	  a.setSize( a.getPreferredSize() );
 	  a.setJitter( m_jitter.getValue() );
-					
+	  
+	  if (m_fastScroll.isSelected() && m_clearOSIPlottedCells) {
+	    m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
+	    m_clearOSIPlottedCells = false;
+	  }
+	  
+	  if (m_regenerateOSI) {
+	    m_osi = null;
+	  }
 	  m_js.revalidate();
 	  m_cp.setColours(m_colorList);
 	  m_cp.setCindex(m_classIndex);
+	  m_regenerateOSI = false;
 					
 	  repaint();
 	}
       });
     m_updateBt.setPreferredSize( m_selAttrib.getPreferredSize() );
+    
+    m_jitter.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent ce) {
+        if (m_fastScroll.isSelected()) {
+          m_clearOSIPlottedCells = true;
+        }
+      }
+    });
       
     m_plotSize.addChangeListener( new ChangeListener() {
 	public void stateChanged(ChangeEvent ce) {
 	  m_plotSizeLb.setText("PlotSize: ["+m_plotSize.getValue()+"]");
 	  m_plotSizeLb.setPreferredSize( m_plotLBSizeD );
 	  m_jitter.setMaximum( m_plotSize.getValue()/5 ); //20% of cell Size
+	  m_regenerateOSI = true;
 	}
       });
  
@@ -294,11 +321,14 @@ public class MatrixPanel
 	  m_pointSizeLb.setText("PointSize: ["+m_pointSize.getValue()+"]");
 	  m_pointSizeLb.setPreferredSize( m_pointLBSizeD );
 	  datapointSize = m_pointSize.getValue();
+	  if (m_fastScroll.isSelected()) {
+	    m_clearOSIPlottedCells = true;
+	  }
 	}
       });
  
     m_resampleBt.addActionListener( new ActionListener() { 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) {	  	  
 	  JLabel rseedLb = new JLabel("Random Seed: ");
 	  JTextField rseedTxt = m_rseed;
 	  JLabel percentLb = new JLabel("Subsample as");
@@ -354,7 +384,7 @@ public class MatrixPanel
 	  jd.setLocation( m_resampleBt.getLocationOnScreen().x,
 			  m_resampleBt.getLocationOnScreen().y-jd.getHeight() );
 	  jd.setVisible(true);
-	}
+	}		
       });
 
     optionsPanel = new JPanel( new GridBagLayout() ); //all the rest of the panels are in here.
@@ -388,6 +418,7 @@ public class MatrixPanel
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weightx=1;
     gbc.fill = GridBagConstraints.NONE;
+    p3.add(m_fastScroll, gbc);
     p3.add(m_updateBt, gbc);
     p3.add(m_selAttrib, gbc);
     gbc.gridwidth = GridBagConstraints.RELATIVE;
@@ -408,6 +439,19 @@ public class MatrixPanel
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     optionsPanel.add(p3, gbc);
     optionsPanel.add(p2, gbc);
+    
+    m_fastScroll.setSelected(false);
+    m_fastScroll.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (!m_fastScroll.isSelected()) {
+          m_osi = null;
+        } else {
+          m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
+        }
+        MatrixPanel.this.invalidate();
+        MatrixPanel.this.repaint();
+      }
+    });
 
     this.addComponentListener( new ComponentAdapter() {
 	public void componentResized(ComponentEvent cv) {
@@ -459,7 +503,11 @@ public class MatrixPanel
     double minC=0, maxC=0;
 
     /** Resampling  **/
-    if(Double.parseDouble(m_resamplePercent.getText())<100) {
+    double currentPercent = Double.parseDouble(m_resamplePercent.getText());
+    if(currentPercent <= 100) {
+      if (currentPercent != m_previousPercent) {
+        m_clearOSIPlottedCells = true;
+      }
         inst = new Instances(m_data, 0, m_data.numInstances());
         inst.randomize( new Random(Integer.parseInt(m_rseed.getText())) );
         
@@ -472,11 +520,11 @@ public class MatrixPanel
         
         inst = new Instances(inst, 
                  0,
-                 (int)Math.round(Double.parseDouble(m_resamplePercent.getText())
+                 (int)Math.round(currentPercent
                  / 100D*inst.numInstances())
                             );
+        m_previousPercent = currentPercent;
     }
-    
     m_points = new int[inst.numInstances()][m_selectedAttribs.length]; //changed
     m_pointColors = new int[inst.numInstances()];
     m_missing = new boolean[inst.numInstances()][m_selectedAttribs.length+1]; //changed
@@ -675,6 +723,8 @@ public class MatrixPanel
   */
   public void setInstances(Instances newInst) {
 
+    m_osi = null;
+    m_fastScroll.setSelected(false);
     m_data = newInst;
     setPercent();
     setupAttribLists();
@@ -966,6 +1016,7 @@ public class MatrixPanel
       }
       return ("Matrix Panel");
     }
+        
 
     /**  Paints a single Plot at xpos, ypos. and xattrib and yattrib on X and
 	 Y axes
@@ -1018,11 +1069,37 @@ public class MatrixPanel
       g.setColor( fontColor );
     }
     
+    private void createOSI() {
+      int iwidth = this.getWidth();
+      int iheight = this.getHeight();
+      m_osi = this.createImage(iwidth, iheight);
+      clearOSI();
+    }
+    
+    private void clearOSI() {
+      if (m_osi == null) {
+        return;
+      }
+      
+      int iwidth = this.getWidth();
+      int iheight = this.getHeight();
+      Graphics m = m_osi.getGraphics();
+      m.setColor(this.getBackground().darker().darker());
+      m.fillRect(0, 0, iwidth, iheight);
+    }
+    
 
     /**
        Paints the matrix of plots in the current visible region
     */
     public void paintME(Graphics g) {
+      Graphics g2 = g;
+      if (m_osi == null && m_fastScroll.isSelected()) {
+        createOSI();
+      }
+      if (m_osi != null && m_fastScroll.isSelected()) {
+        g2 = m_osi.getGraphics();
+      }
       r = g.getClipBounds();
       
       g.setColor( this.getBackground() );
@@ -1046,8 +1123,14 @@ public class MatrixPanel
               xpos += cellSize+extpad; continue; }
             else if(xpos > r.x+r.width)
               break;
-            else
-              paintGraph(g, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
+            else if (m_fastScroll.isSelected()) {
+              if (!m_plottedCells[i][j]) {
+                paintGraph(g2, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
+                m_plottedCells[i][j] = true;
+              }
+            } else {
+              paintGraph(g2, i, j, xpos, ypos);
+            }
             xpos += cellSize+extpad;
           }
         }
@@ -1060,6 +1143,9 @@ public class MatrixPanel
      */
     public void paintComponent(Graphics g) {
       paintME(g);
+      if (m_osi != null && m_fastScroll.isSelected()) {
+        g.drawImage(m_osi, 0, 0, this);
+      }
     }
   }
 }
