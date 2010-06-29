@@ -194,7 +194,7 @@ public class DatabaseUtils
         if (m_Debug || (!result && !DRIVERS_ERRORS.contains(driver))) 
           System.err.println(
               "Trying to add database driver (JDBC): " + driver 
-              + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
+              + " - " + (result ? "Success!" : "Warning, not in CLASSPATH?"));
         if (!result)
           DRIVERS_ERRORS.add(driver);
       }
