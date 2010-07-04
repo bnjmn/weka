@@ -437,7 +437,7 @@ public class RegOptimizer
     // Is the machine linear?
     if (m_weights != null) {
       // Is weight vector stored in sparse format?
-      for (int i = 0; i < m_weights.length; i++) {
+      for (int i = 0; i < inst.numValues(); i++) {
 	if (inst.index(i) != m_classIndex) {
 	  result += m_weights[inst.index(i)] * inst.valueSparse(i);
 	}
