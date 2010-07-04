@@ -117,8 +117,7 @@ public class WekaPackageManager {
     try {
       String repURL = System.getProperty("weka.core.wekaPackageRepositoryURL");
       if (repURL == null || repURL.length() == 0) {
-        repURL = "http://60.234.159.233/~mhall/wekaLite";
-        // repURL = "http://www.cs.waikato.ac.nz/ml/weka/wekaLite";
+        repURL = "http://www.cs.waikato.ac.nz/ml/weka/wekaLite";
       }
       REP_URL = new URL(repURL);
       PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
