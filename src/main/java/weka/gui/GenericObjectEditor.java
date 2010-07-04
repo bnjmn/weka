@@ -22,6 +22,16 @@
 
 package weka.gui;
 
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.ClassDiscovery;
+import weka.core.OptionHandler;
+import weka.core.WekaPackageManager;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.gui.CheckBoxList.CheckBoxListModel;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -157,6 +167,65 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /** for filtering the tree based on the Capabilities of the leaves. */
   protected Capabilities m_CapabilitiesFilter = null;
   
+  public static void determineClasses() {
+    try {
+      // make sure we load all packages first!!!
+      WekaPackageManager.loadPackages(false);
+
+      GenericPropertiesCreator creator = new GenericPropertiesCreator();
+
+      // dynamic approach?
+      if (creator.useDynamic()) {
+        try {
+          creator.execute(false);
+          EDITOR_PROPERTIES = creator.getOutputProperties();
+        }
+        catch (Exception e) {
+          JOptionPane.showMessageDialog(
+              null,
+              "Could not determine the properties for the generic object\n"
+              + "editor. This exception was produced:\n"
+              + e.toString(),
+              "GenericObjectEditor",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      }
+      else {
+        // Allow a properties file in the current directory to override
+        try {
+          EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+          java.util.Enumeration keys = 
+            (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
+          if (!keys.hasMoreElements()) {
+            throw new Exception("Failed to read a property file for the "
+                +"generic object editor");
+          }
+        }
+        catch (Exception ex) {
+          JOptionPane.showMessageDialog(
+              null,
+              "Could not read a configuration file for the generic object\n"
+              +"editor. An example file is included with the Weka distribution.\n"
+              +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
+              +"should be placed either in your user home (which is set\n"
+              + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+              + "or the directory that java was started from\n",
+              "GenericObjectEditor",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    }
+    catch (Exception e) {
+      JOptionPane.showMessageDialog(
+          null,
+          "Could not initialize the GenericPropertiesCreator. "
+          + "This exception was produced:\n"
+          + e.toString(),
+          "GenericObjectEditor",
+          JOptionPane.ERROR_MESSAGE);
+    }
+  }
+  
   /** 
    * Loads the configuration property file (USE_DYNAMIC is FALSE) or determines
    * the classes dynamically (USE_DYNAMIC is TRUE)
@@ -164,60 +233,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @see GenericPropertiesCreator
    */
   static {
-
-    try {
-      GenericPropertiesCreator creator = new GenericPropertiesCreator();
-
-      // dynamic approach?
-      if (creator.useDynamic()) {
-	try {
-	  creator.execute(false);
-	  EDITOR_PROPERTIES = creator.getOutputProperties();
-	}
-	catch (Exception e) {
-	  JOptionPane.showMessageDialog(
-	      null,
-	      "Could not determine the properties for the generic object\n"
-	      + "editor. This exception was produced:\n"
-	      + e.toString(),
-	      "GenericObjectEditor",
-	      JOptionPane.ERROR_MESSAGE);
-	}
-      }
-      else {
-	// Allow a properties file in the current directory to override
-	try {
-	  EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-	  java.util.Enumeration keys = 
-	    (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
-	  if (!keys.hasMoreElements()) {
-	    throw new Exception("Failed to read a property file for the "
-		+"generic object editor");
-	  }
-	}
-	catch (Exception ex) {
-	  JOptionPane.showMessageDialog(
-	      null,
-	      "Could not read a configuration file for the generic object\n"
-	      +"editor. An example file is included with the Weka distribution.\n"
-	      +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-	      +"should be placed either in your user home (which is set\n"
-	      + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-	      + "or the directory that java was started from\n",
-	      "GenericObjectEditor",
-	      JOptionPane.ERROR_MESSAGE);
-	}
-      }
-    }
-    catch (Exception e) {
-      JOptionPane.showMessageDialog(
-	  null,
-	  "Could not initialize the GenericPropertiesCreator. "
-	  + "This exception was produced:\n"
-	  + e.toString(),
-	  "GenericObjectEditor",
-	  JOptionPane.ERROR_MESSAGE);
-    }
+    determineClasses();
   }
 
   /**
@@ -1005,21 +1021,29 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     while (enm.hasMoreElements()) {
       name  = enm.nextElement().toString();
       value = props.getProperty(name, "");
-      try {
-	// array class?
-	if (name.endsWith("[]")) {
-	  baseCls = Class.forName(name.substring(0, name.indexOf("[]")));
-	  cls = Array.newInstance(baseCls, 1).getClass();
-	}
-	else {
-	  cls = Class.forName(name);
-	}
-	// register
-	PropertyEditorManager.registerEditor(cls, Class.forName(value));
+      
+      registerEditor(name, value);
+    }
+  }
+  
+  public static void registerEditor(String name, String value) {
+    Class              baseCls;
+    Class               cls;
+    
+    try {
+      // array class?
+      if (name.endsWith("[]")) {
+        baseCls = Class.forName(name.substring(0, name.indexOf("[]")));
+        cls = Array.newInstance(baseCls, 1).getClass();
       }
-      catch (Exception e) {
-	System.err.println("Problem registering " + name + "/" + value + ": " + e);
+      else {
+        cls = Class.forName(name);
       }
+      // register
+      PropertyEditorManager.registerEditor(cls, Class.forName(value));
+    }
+    catch (Exception e) {
+      System.err.println("Problem registering " + name + "/" + value + ": " + e);
     }
   }
 

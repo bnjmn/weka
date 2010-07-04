@@ -27,6 +27,7 @@ import java.lang.reflect.Array;
 import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
 
@@ -47,7 +48,7 @@ public final class Utils
 
   /** The small deviation allowed in double comparisons. */
   public static double SMALL = 1e-6;
-
+  
   /**
    * Tests if the given value codes "missing".
    *
@@ -83,9 +84,9 @@ public final class Utils
   /**
    * Reads properties that inherit from three locations. Properties
    * are first defined in the system resource location (i.e. in the
-   * CLASSPATH).  These default properties must exist. Properties
-   * defined in the users home directory (optional) override default
-   * settings. Properties defined in the current directory (optional)
+   * CLASSPATH).  These default properties must exist. Properties optionally
+   * defined in the user properties location (WekaPackageManager.PROPERTIES_DIR) 
+   * override default settings. Properties defined in the current directory (optional)
    * override all these settings.
    *
    * @param resourceName the location of the resource that should be
@@ -121,9 +122,12 @@ public final class Utils
       resourceName = resourceName.substring(slInd + 1);
     }
 
-    // Allow a properties file in the home directory to override
-    Properties userProps = new Properties(defaultProps);    
-    File propFile = new File(System.getProperties().getProperty("user.home")
+    // Allow a properties file in the WekaPackageManager.PROPERTIES_DIR to override
+    Properties userProps = new Properties(defaultProps);
+    if (!WekaPackageManager.PROPERTIES_DIR.exists()) {
+      WekaPackageManager.PROPERTIES_DIR.mkdir();
+    }
+    File propFile = new File(WekaPackageManager.PROPERTIES_DIR.toString() + 
                              + File.separatorChar
                              + resourceName);
     if (propFile.exists()) {
@@ -1921,6 +1925,59 @@ public final class Utils
         return select(array, index, middle + 1, right, k - (middle - left + 1));
       }
     }
+  }
+  
+  /**
+   * For a named dialog, returns true if the user has opted not to view
+   * it again in the future.
+   * 
+   * @param dialogName the name of the dialog to check (e.g.
+   * weka.gui.GUICHooser.HowToFindPackageManager).
+   * @return true if the user has opted not to view the named dialog
+   * in the future.
+   */
+  public static boolean getDontShowDialog(String dialogName) {
+    File wekaHome = WekaPackageManager.WEKA_HOME;
+    
+    if (!wekaHome.exists()) {
+      return false;
+    }
+    
+    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
+    if (!dialogSubDir.exists()) {
+      return false;
+    }
+    
+    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
+    
+    return dialogFile.exists();
+  }
+  
+  /**
+   * Specify that the named dialog is not to be displayed in the future.
+   * 
+   * @param dialogName the name of the dialog not to show again (e.g.
+   * weka.gui.GUIChooser.HowToFindPackageManager).
+   * @throws Exception if the marker file that is used to indicate that
+   * a named dialog is not to be shown can't be created. This file lives
+   * in $WEKA_HOME/systemDialogs
+   */
+  public static void setDontShowDialog(String dialogName) throws Exception {
+    File wekaHome = WekaPackageManager.WEKA_HOME;
+    
+    if (!wekaHome.exists()) {
+      return;
+    }
+    
+    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
+    if (!dialogSubDir.exists()) {
+      if (!dialogSubDir.mkdir()) {
+        return;
+      }
+    }
+    
+    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
+    dialogFile.createNewFile();
   }
   
   /**

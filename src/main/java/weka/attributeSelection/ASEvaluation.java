@@ -146,7 +146,7 @@ public abstract class ASEvaluation
    * @param evaluator	the evaluator to run
    * @param options	the commandline options
    */
-  protected static void runEvaluator(ASEvaluation evaluator, String[] options) {
+  public static void runEvaluator(ASEvaluation evaluator, String[] options) {
     try {
       System.out.println(
 	  AttributeSelection.SelectAttributes(evaluator, options));

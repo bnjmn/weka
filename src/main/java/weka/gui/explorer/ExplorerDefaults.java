@@ -70,7 +70,11 @@ public class ExplorerDefaults
   public static String get(String property, String defaultValue) {
     return PROPERTIES.getProperty(property, defaultValue);
   }
-
+  
+  public static void set(String property, String value) {
+    PROPERTIES.setProperty(property, value);
+  }
+  
   /**
    * returns the associated properties file.
    * 

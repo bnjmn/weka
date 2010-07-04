@@ -200,7 +200,7 @@ public abstract class AbstractClusterer
    * @param clusterer		the clusterer to run
    * @param options	the commandline options
    */
-  protected static void runClusterer(Clusterer clusterer, String[] options) {
+  public static void runClusterer(Clusterer clusterer, String[] options) {
     try {
       System.out.println(ClusterEvaluation.evaluateClusterer(clusterer, options));
     } 

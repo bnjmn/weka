@@ -13,6 +13,8 @@
   ===========================================================================
 -->
 
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+
   <!-- set global properties for this build -->
   <property name="src" value="src/main/java"/>
   <property name="src-test" value="src/test/java"/>
@@ -27,6 +29,25 @@
   <property name="headless" value="false"/>
   <property name="macdistrib" value="osx-distrib"/>
   <property name="debug" value="on" />
+  <property name="packages" value="packages"/>
+  <property name="packages_external" value="../packagesExternal"/>
+  <property name="packages_internal" value="../packagesInternal"/>
+  <property name="associations" value="weka/associations"/>
+  <property name="classifiers" value="weka/classifiers"/>
+  <property name="clusterers" value="weka/clusterers"/>
+  <property name="filters_unsup" value="weka/filters/unsupervised"/>
+  <property name="filters_sup" value="weka/filters/supervised"/>
+  <property name="attributeSelection" value="weka/attributeSelection"/>
+  <property name="gui" value="weka/gui"/>
+  <property name="core" value="weka/core"/>
+
+  <!-- properties used when compiling/making packages -->
+  <property name="wekaexejar" value="../../weka/dist/weka.jar"/>
+  <property name="junitjar" value="../../weka/lib/junit.jar"/>
+  <property name="wekaclasses" value="../../weka/build/classes"/>
+  <property name="wekatestclasses" value="../../weka/build/testcases"/>
+  <!-- valid values for the following: make, compile, compile_tests -->
+  <property name="packageCommand" value="make"/>
 
   <target name="init_all">
     <!-- Create the time stamp -->
@@ -45,11 +66,1939 @@
     <pathelement path="${java.class.path}" />
   </path>
 
+  <property name="proj.cp" refid="project.class.path"/>
+  <path id="package.class.path">
+    <pathelement path="${proj.cp}"/>
+    <dirset dir="${packages_internal}">
+        <include name="**/${build}/classes"/>
+        <include name="**/${build}/testcases"/>
+   </dirset>
+   <dirset dir="${packages_external}">
+     <include name="**/${build}/classes"/>
+     <include name="**/${build}/testcases"/>
+   </dirset>
+   <fileset dir="${packages_external}">
+     <include name="**/lib/*.jar"/>
+     <include name="**/lib/*.zip"/>
+   </fileset>
+  </path>
+  <property name="pack.cp" refid="package.class.path"/>
+
 <!-- 
  ============================================================================
  Compilation and documentation making stuff
  ============================================================================
 -->
+
+  <target name="extract_internal" depends="init_all" description="Extract non-core internal packages">
+    <!-- ======= Associations ======== -->
+
+    <!-- hotSpot -->
+    <mkdir dir="${packages_internal}/hotSpot"/>
+    <mkdir dir="${packages_internal}/hotSpot/${lib}"/>
+    <mkdir dir="${packages_internal}/hotSpot/${src}/${associations}"/>
+    <mkdir dir="${packages_internal}/hotSpot/${src-test}/${associations}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/hotSpot"/>
+    <copy file="descriptions/hotSpotDescription.props"
+          tofile="${packages_internal}/hotSpot/Description.props"/>
+
+    <move file="${src}/${associations}/HotSpot.java" 
+          todir="${packages_internal}/hotSpot/${src}/${associations}" failonerror="false"/>
+    <move file="${src-test}/${associations}/HotSpotTest.java" 
+          todir="${packages_internal}/hotSpot/${src-test}/${associations}" failonerror="false"/>
+
+    <!-- predictiveApriori -->
+    <mkdir dir="${packages_internal}/predictiveApriori"/>
+    <mkdir dir="${packages_internal}/predictiveApriori/${lib}"/>
+    <mkdir dir="${packages_internal}/predictiveApriori/${src}/${associations}"/>
+    <mkdir dir="${packages_internal}/predictiveApriori/${src-test}/${associations}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/predictiveApriori"/>
+    <copy file="descriptions/predictiveAprioriDescription.props"
+          tofile="${packages_internal}/predictiveApriori/Description.props"/>
+
+    <move file="${src}/${associations}/PredictiveApriori.java" 
+          todir="${packages_internal}/predictiveApriori/${src}/${associations}" failonerror="false"/>
+    <move file="${src}/${associations}/CaRuleGeneration.java" 
+          todir="${packages_internal}/predictiveApriori/${src}/${associations}" failonerror="false"/>
+    <move file="${src}/${associations}/RuleGeneration.java" 
+          todir="${packages_internal}/predictiveApriori/${src}/${associations}" failonerror="false"/>
+    <move file="${src}/${associations}/PriorEstimation.java" 
+          todir="${packages_internal}/predictiveApriori/${src}/${associations}" failonerror="false"/>
+    <move file="${src}/${associations}/RuleItem.java" 
+          todir="${packages_internal}/predictiveApriori/${src}/${associations}" failonerror="false"/>
+    <move file="${src-test}/${associations}/PredictiveAprioriTest.java" 
+          todir="${packages_internal}/predictiveApriori/${src-test}/${associations}" failonerror="false"/>
+
+    <!-- ======= Attribute Selection ======== -->
+
+    <!-- chiSquaredAttributeEval -->
+    <mkdir dir="${packages_internal}/chiSquaredAttributeEval"/>
+    <mkdir dir="${packages_internal}/chiSquaredAttributeEval/${lib}"/>
+    <mkdir dir="${packages_internal}/chiSquaredAttributeEval/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_internal}/chiSquaredAttributeEval/${src-test}/${attributeSelection}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/chiSquaredAttributeEval"/>
+    <copy file="descriptions/chiSquaredAttributeEvalDescription.props"
+          tofile="${packages_internal}/chiSquaredAttributeEval/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/ChiSquaredAttributeEval.java" 
+          todir="${packages_internal}/chiSquaredAttributeEval/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/ChiSquaredAttributeEvalTest.java" 
+          todir="${packages_internal}/chiSquaredAttributeEval/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- consistencySubsetEval -->
+    <mkdir dir="${packages_internal}/consistencySubsetEval"/>
+    <mkdir dir="${packages_internal}/consistencySubsetEval/${lib}"/>
+    <mkdir dir="${packages_internal}/consistencySubsetEval/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_internal}/consistencySubsetEval/${src-test}/${attributeSelection}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/consistencySubsetEval"/>
+    <copy file="descriptions/consistencySubsetEvalDescription.props"
+          tofile="${packages_internal}/consistencySubsetEval/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/ConsistencySubsetEval.java" 
+          todir="${packages_internal}/consistencySubsetEval/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/ConsistencySubsetEvalTest.java" 
+          todir="${packages_internal}/consistencySubsetEval/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- classifierBasedAttributeSelection -->
+    <mkdir dir="${packages_internal}/classifierBasedAttributeSelection"/>
+    <mkdir dir="${packages_internal}/classifierBasedAttributeSelection/${lib}"/>
+    <mkdir dir="${packages_internal}/classifierBasedAttributeSelection/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_internal}/classifierBasedAttributeSelection/${src-test}/${attributeSelection}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/classifierBasedAttributeSelection"/>
+    <copy file="descriptions/classifierBasedAttributeSelectionDescription.props"
+          tofile="${packages_internal}/classifierBasedAttributeSelection/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/ClassifierSubsetEval.java" 
+          todir="${packages_internal}/classifierBasedAttributeSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/ClassifierAttributeEval.java" 
+          todir="${packages_internal}/classifierBasedAttributeSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/ClassifierSubsetEvalTest.java" 
+          todir="${packages_internal}/classifierBasedAttributeSelection/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/ClassifierAttributeEvalTest.java" 
+          todir="${packages_internal}/classifierBasedAttributeSelection/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- costSensitiveAttributeSelection -->
+    <mkdir dir="${packages_internal}/costSensitiveAttributeSelection"/>
+    <mkdir dir="${packages_internal}/costSensitiveAttributeSelection/${lib}"/>
+    <mkdir dir="${packages_internal}/costSensitiveAttributeSelection/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_internal}/costSensitiveAttributeSelection/${src-test}/${attributeSelection}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/costSensitiveAttributeSelection"/>
+    <copy file="descriptions/costSensitiveAttributeSelectionDescription.props"
+          tofile="${packages_internal}/costSensitiveAttributeSelection/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/CostSensitiveASEvaluation.java" 
+          todir="${packages_internal}/costSensitiveAttributeSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/CostSensitiveSubsetEval.java" 
+          todir="${packages_internal}/costSensitiveAttributeSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/CostSensitiveAttributeEval.java" 
+          todir="${packages_internal}/costSensitiveAttributeSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/CostSensitiveSubsetEvalTest.java" 
+          todir="${packages_internal}/costSensitiveAttributeSelection/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/CostSensitiveAttributeEvalTest.java" 
+          todir="${packages_internal}/costSensitiveAttributeSelection/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- raceSearch -->
+    <mkdir dir="${packages_internal}/raceSearch"/>
+    <mkdir dir="${packages_internal}/raceSearch/${lib}"/>
+    <mkdir dir="${packages_internal}/raceSearch/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_internal}/raceSearch/${src-test}/${attributeSelection}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/raceSearch"/>
+    <copy file="descriptions/raceSearchDescription.props"
+          tofile="${packages_internal}/raceSearch/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/RaceSearch.java" 
+          todir="${packages_internal}/raceSearch/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/RaceSearchTest.java" 
+          todir="${packages_internal}/raceSearch/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- filteredAttributeSelection -->
+
+    <mkdir dir="${packages_internal}/filteredAttributeSelection"/>
+    <mkdir dir="${packages_internal}/filteredAttributeSelection/${lib}"/>
+    <mkdir dir="${packages_internal}/filteredAttributeSelection/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_internal}/filteredAttributeSelection/${src-test}/${attributeSelection}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/filteredAttributeSelection"/>
+    <copy file="descriptions/filteredAttributeSelectionDescription.props"
+          tofile="${packages_internal}/filteredAttributeSelection/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/FilteredAttributeEval.java" 
+          todir="${packages_internal}/filteredAttributeSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/FilteredSubsetEval.java" 
+          todir="${packages_internal}/filteredAttributeSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/FilteredAttributeEvalTest.java" 
+          todir="${packages_internal}/filteredAttributeSelection/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/FilteredSubsetEvalTest.java" 
+          todir="${packages_internal}/filteredAttributeSelection/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- attributeSelectionSearchMethods -->
+    <mkdir dir="${packages_internal}/attributeSelectionSearchMethods"/>
+    <mkdir dir="${packages_internal}/attributeSelectionSearchMethods/${lib}"/>
+    <mkdir dir="${packages_internal}/attributeSelectionSearchMethods/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_internal}/attributeSelectionSearchMethods/${src-test}/${attributeSelection}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/attributeSelectionSearchMethods"/>
+    <copy file="descriptions/attributeSelectionSearchMethodsDescription.props"
+          tofile="${packages_internal}/attributeSelectionSearchMethods/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/ExhaustiveSearch.java" 
+          todir="${packages_internal}/attributeSelectionSearchMethods/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/GeneticSearch.java" 
+          todir="${packages_internal}/attributeSelectionSearchMethods/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/RandomSearch.java" 
+          todir="${packages_internal}/attributeSelectionSearchMethods/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/RankSearch.java" 
+          todir="${packages_internal}/attributeSelectionSearchMethods/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/ExhaustiveSearchTest.java" 
+          todir="${packages_internal}/attributeSelectionSearchMethods/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/GeneticSearchTest.java" 
+          todir="${packages_internal}/attributeSelectionSearchMethods/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/RandomSearchTest.java" 
+          todir="${packages_internal}/attributeSelectionSearchMethods/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/RankSearchTest.java" 
+          todir="${packages_internal}/attributeSelectionSearchMethods/${src-test}/${attributeSelection}" failonerror="false"/>    
+
+    <!-- SVMAttributeEval -->
+    <mkdir dir="${packages_internal}/SVMAttributeEval"/>
+    <mkdir dir="${packages_internal}/SVMAttributeEval/${lib}"/>
+    <mkdir dir="${packages_internal}/SVMAttributeEval/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_internal}/SVMAttributeEval/${src-test}/${attributeSelection}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/SVMAttributeEval"/>
+    <copy file="descriptions/SVMAttributeEvalDescription.props"
+          tofile="${packages_internal}/SVMAttributeEval/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/SVMAttributeEval.java" 
+          todir="${packages_internal}/SVMAttributeEval/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/SVMAttributeEvalTest.java" 
+          todir="${packages_internal}/SVMAttributeEval/${src-test}/${attributeSelection}" failonerror="false"/>  
+
+    <!-- ======= Classifiers ======== -->
+
+    <!-- gaussianProcesses -->
+    <mkdir dir="${packages_internal}/gaussianProcesses"/>
+    <mkdir dir="${packages_internal}/gaussianProcesses/${lib}"/>
+    <mkdir dir="${packages_internal}/gaussianProcesses/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/gaussianProcesses/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/gaussianProcesses"/>
+    <copy file="descriptions/gaussianProcessesDescription.props"
+          tofile="${packages_internal}/gaussianProcesses/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/GaussianProcesses.java" 
+          todir="${packages_internal}/gaussianProcesses/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/GaussianProcessesTest.java" 
+          todir="${packages_internal}/gaussianProcesses/${src-test}/${classifiers}/functions" failonerror="false"/>  
+
+    <!-- isotonicRegression -->
+    <mkdir dir="${packages_internal}/isotonicRegression"/>
+    <mkdir dir="${packages_internal}/isotonicRegression/${lib}"/>
+    <mkdir dir="${packages_internal}/isotonicRegression/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/isotonicRegression/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/isotonicRegression"/>
+    <copy file="descriptions/isotonicRegressionDescription.props"
+          tofile="${packages_internal}/isotonicRegression/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/IsotonicRegression.java" 
+          todir="${packages_internal}/isotonicRegression/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/IsotonicRegressionTest.java" 
+          todir="${packages_internal}/isotonicRegression/${src-test}/${classifiers}/functions" failonerror="false"/>  
+
+    <!-- leastMedSquared -->
+    <mkdir dir="${packages_internal}/leastMedSquared"/>
+    <mkdir dir="${packages_internal}/leastMedSquared/${lib}"/>
+    <mkdir dir="${packages_internal}/leastMedSquared/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/leastMedSquared/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/leastMedSquared"/>
+    <copy file="descriptions/leastMedSquaredDescription.props"
+          tofile="${packages_internal}/leastMedSquared/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/LeastMedSq.java" 
+          todir="${packages_internal}/leastMedSquared/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/LeastMedSqTest.java" 
+          todir="${packages_internal}/leastMedSquared/${src-test}/${classifiers}/functions" failonerror="false"/>  
+    <!-- partialLeastSquares (filter and classifier) -->
+    <mkdir dir="${packages_internal}/partialLeastSquares"/>
+    <mkdir dir="${packages_internal}/partialLeastSquares/${lib}"/>
+    <mkdir dir="${packages_internal}/partialLeastSquares/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/partialLeastSquares/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/partialLeastSquares"/>
+    <copy file="descriptions/partialLeastSquaresDescription.props"
+          tofile="${packages_internal}/partialLeastSquares/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/PLSClassifier.java" 
+          todir="${packages_internal}/partialLeastSquares/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/PLSClassifierTest.java" 
+          todir="${packages_internal}/partialLeastSquares/${src-test}/${classifiers}/functions" failonerror="false"/>  
+
+    <move file="${src}/${filters_sup}/attribute/PLSFilter.java" 
+          todir="${packages_internal}/partialLeastSquares/${src}/${filters_sup}/attribute" failonerror="false"/>
+    <move file="${src-test}/${filters_sup}/attribute/PLSFilterTest.java" 
+          todir="${packages_internal}/partialLeastSquares/${src-test}/${filters_sup}/attribute" failonerror="false"/>  
+
+    <!-- gridSearch -->
+    <mkdir dir="${packages_internal}/gridSearch"/>
+    <mkdir dir="${packages_internal}/gridSearch/${lib}"/>
+    <mkdir dir="${packages_internal}/gridSearch/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/gridSearch/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/gridSearch"/>
+    <copy file="descriptions/gridSearchDescription.props"
+          tofile="${packages_internal}/gridSearch/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/GridSearch.java" 
+          todir="${packages_internal}/gridSearch/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/GridSearchTest.java" 
+          todir="${packages_internal}/gridSearch/${src-test}/${classifiers}/meta" failonerror="false"/>  
+
+    <!-- paceRegression -->
+    <mkdir dir="${packages_internal}/paceRegression"/>
+    <mkdir dir="${packages_internal}/paceRegression/${lib}"/>
+    <mkdir dir="${packages_internal}/paceRegression/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/paceRegression/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/paceRegression"/>
+    <copy file="descriptions/paceRegressionDescription.props"
+          tofile="${packages_internal}/paceRegression/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/PaceRegression.java" 
+          todir="${packages_internal}/paceRegression/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/PaceRegressionTest.java" 
+          todir="${packages_internal}/paceRegression/${src-test}/${classifiers}/functions" failonerror="false"/>  
+    <move file="${src}/${classifiers}/functions/pace"
+          todir="${packages_internal}/paceRegression/${src}/${classifiers}/functions" failonerror="false"/>
+    <delete dir="${packages_internal}/paceRegression/${src}/${classifiers}/functions/pace/.svn"/>
+
+    <!-- RBFNetwork -->
+    <mkdir dir="${packages_internal}/RBFNetwork"/>
+    <mkdir dir="${packages_internal}/RBFNetwork/${lib}"/>
+    <mkdir dir="${packages_internal}/RBFNetwork/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/RBFNetwork/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/RBFNetwork"/>
+    <copy file="descriptions/RBFNetworkDescription.props"
+          tofile="${packages_internal}/RBFNetwork/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/RBFNetwork.java" 
+          todir="${packages_internal}/RBFNetwork/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/RBFNetworkTest.java" 
+          todir="${packages_internal}/RBFNetwork/${src-test}/${classifiers}/functions" failonerror="false"/>  
+
+    <!-- SPegasos -->
+    <mkdir dir="${packages_internal}/SPegasos"/>
+    <mkdir dir="${packages_internal}/SPegasos/${lib}"/>
+    <mkdir dir="${packages_internal}/SPegasos/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/SPegasos/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/SPegasos"/>
+    <copy file="descriptions/SPegasosDescription.props"
+          tofile="${packages_internal}/SPegasos/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/SPegasos.java" 
+          todir="${packages_internal}/SPegasos/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/SPegasosTest.java" 
+          todir="${packages_internal}/SPegasos/${src-test}/${classifiers}/functions" failonerror="false"/>  
+
+    <!-- multiInstanceLearning -->
+    <mkdir dir="${packages_internal}/multiInstanceLearning"/>
+    <mkdir dir="${packages_internal}/multiInstanceLearning/${lib}"/>
+    <mkdir dir="${packages_internal}/multiInstanceLearning/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/multiInstanceLearning/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/multiInstanceLearning"/>
+    <copy file="descriptions/multiInstanceLearningDescription.props"
+          tofile="${packages_internal}/multiInstanceLearning/Description.props"/>
+
+    <move file="${src}/${classifiers}/mi"
+          todir="${packages_internal}/multiInstanceLearning/${src}/${classifiers}" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/mi"
+          todir="${packages_internal}/multiInstanceLearning/${src-test}/${classifiers}" failonerror="false"/>
+
+    <delete dir="${packages_internal}/multiInstanceLearning/${src}/${classifiers}/mi/.svn"/>
+    <delete dir="${packages_internal}/multiInstanceLearning/${src}/${classifiers}/mi/supportVector/.svn"/>
+    <delete dir="${packages_internal}/multiInstanceLearning/${src-test}/${classifiers}/mi/.svn"/>
+    <delete dir="${packages_internal}/multiInstanceLearning/${src-test}/${classifiers}/mi/supportVector/.svn"/>
+
+    <!-- classificationViaRegression -->
+    <mkdir dir="${packages_internal}/classificationViaRegression"/>
+    <mkdir dir="${packages_internal}/classificationViaRegression/${lib}"/>
+    <mkdir dir="${packages_internal}/classificationViaRegression/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/classificationViaRegression/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/classificationViaRegression"/>
+    <copy file="descriptions/classificationViaRegressionDescription.props"
+          tofile="${packages_internal}/classificationViaRegression/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/ClassificationViaRegression.java" 
+          todir="${packages_internal}/classificationViaRegression/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/ClassificationViaRegressionTest.java" 
+          todir="${packages_internal}/classificationViaRegression/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- classificationViaClustering -->
+    <mkdir dir="${packages_internal}/classificationViaClustering"/>
+    <mkdir dir="${packages_internal}/classificationViaClustering/${lib}"/>
+    <mkdir dir="${packages_internal}/classificationViaClustering/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/classificationViaClustering/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/classificationViaClustering"/>
+    <copy file="descriptions/classificationViaClusteringDescription.props"
+          tofile="${packages_internal}/classificationViaClustering/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/ClassificationViaClustering.java" 
+          todir="${packages_internal}/classificationViaClustering/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/ClassificationViaClusteringTest.java" 
+          todir="${packages_internal}/classificationViaClustering/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- dagging -->
+    <mkdir dir="${packages_internal}/dagging"/>
+    <mkdir dir="${packages_internal}/dagging/${lib}"/>
+    <mkdir dir="${packages_internal}/dagging/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/dagging/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/dagging"/>
+    <copy file="descriptions/daggingDescription.props"
+          tofile="${packages_internal}/dagging/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/Dagging.java" 
+          todir="${packages_internal}/dagging/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/DaggingTest.java" 
+          todir="${packages_internal}/dagging/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- ensemblesOfNestedDichotomies -->
+    <mkdir dir="${packages_internal}/ensemblesOfNestedDichotomies"/>
+    <mkdir dir="${packages_internal}/ensemblesOfNestedDichotomies/${lib}"/>
+    <mkdir dir="${packages_internal}/ensemblesOfNestedDichotomies/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/ensemblesOfNestedDichotomies/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/ensemblesOfNestedDichotomies"/>
+    <copy file="descriptions/ensemblesOfNestedDichotomiesDescription.props"
+          tofile="${packages_internal}/ensemblesOfNestedDichotomies/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/END.java" 
+          todir="${packages_internal}/ensemblesOfNestedDichotomies/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/ENDTest.java" 
+          todir="${packages_internal}/ensemblesOfNestedDichotomies/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <move file="${src}/${classifiers}/meta/nestedDichotomies"
+          todir="${packages_internal}/ensemblesOfNestedDichotomies/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/nestedDichotomies"
+          todir="${packages_internal}/ensemblesOfNestedDichotomies/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <delete dir="${packages_internal}/ensemblesOfNestedDichotomies/${src}/${classifiers}/meta/nestedDichotomies/.svn"/>
+    <delete dir="${packages_internal}/multiInstanceLearning/${src-test}/${classifiers}/meta/nestedDichotomies/.svn"/>
+
+    <!-- grading -->
+    <mkdir dir="${packages_internal}/grading"/>
+    <mkdir dir="${packages_internal}/grading/${lib}"/>
+    <mkdir dir="${packages_internal}/grading/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/grading/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/grading"/>
+    <copy file="descriptions/gradingDescription.props"
+          tofile="${packages_internal}/grading/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/Grading.java" 
+          todir="${packages_internal}/grading/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/GradingTest.java" 
+          todir="${packages_internal}/grading/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- metaCost -->
+    <mkdir dir="${packages_internal}/metaCost"/>
+    <mkdir dir="${packages_internal}/metaCost/${lib}"/>
+    <mkdir dir="${packages_internal}/metaCost/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/metaCost/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/metaCost"/>
+    <copy file="descriptions/metaCostDescription.props"
+          tofile="${packages_internal}/metaCost/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/MetaCost.java" 
+          todir="${packages_internal}/metaCost/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/MetaCostTest.java" 
+          todir="${packages_internal}/metaCost/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- multiBoostAB -->
+    <mkdir dir="${packages_internal}/multiBoostAB"/>
+    <mkdir dir="${packages_internal}/multiBoostAB/${lib}"/>
+    <mkdir dir="${packages_internal}/multiBoostAB/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/multiBoostAB/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/multiBoostAB"/>
+    <copy file="descriptions/multiBoostABDescription.props"
+          tofile="${packages_internal}/multiBoostAB/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/MultiBoostAB.java" 
+          todir="${packages_internal}/multiBoostAB/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/MultiBoostABTest.java" 
+          todir="${packages_internal}/multiBoostAB/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- oneClassClassifier -->
+    <mkdir dir="${packages_internal}/oneClassClassifier"/>
+    <mkdir dir="${packages_internal}/oneClassClassifier/${lib}"/>
+    <mkdir dir="${packages_internal}/oneClassClassifier/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/oneClassClassifier/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/oneClassClassifier"/>
+    <copy file="descriptions/oneClassClassifierDescription.props"
+          tofile="${packages_internal}/oneClassClassifier/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/OneClassClassifier.java" 
+          todir="${packages_internal}/oneClassClassifier/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/OneClassClassifierTest.java" 
+          todir="${packages_internal}/oneClassClassifier/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <move file="${src}/${classifiers}/meta/generators"
+          todir="${packages_internal}/oneClassClassifier/${src}/${classifiers}/meta" failonerror="false"/>
+
+    <delete dir="${packages_internal}/oneClassClassifier/${src}/${classifiers}/meta/generators/.svn"/>
+
+    <!-- ordinalClassClassifier -->
+    <mkdir dir="${packages_internal}/ordinalClassClassifier"/>
+    <mkdir dir="${packages_internal}/ordinalClassClassifier/${lib}"/>
+    <mkdir dir="${packages_internal}/ordinalClassClassifier/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/ordinalClassClassifier/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/ordinalClassClassifier"/>
+    <copy file="descriptions/ordinalClassClassifierDescription.props"
+          tofile="${packages_internal}/ordinalClassClassifier/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/OrdinalClassClassifier.java" 
+          todir="${packages_internal}/ordinalClassClassifier/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/OrdinalClassClassifierTest.java" 
+          todir="${packages_internal}/ordinalClassClassifier/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- racedIncrementalLogitBoost -->
+        <mkdir dir="${packages_internal}/racedIncrementalLogitBoost"/>
+    <mkdir dir="${packages_internal}/racedIncrementalLogitBoost/${lib}"/>
+    <mkdir dir="${packages_internal}/racedIncrementalLogitBoost/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/racedIncrementalLogitBoost/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/racedIncrementalLogitBoost"/>
+    <copy file="descriptions/racedIncrementalLogitBoostDescription.props"
+          tofile="${packages_internal}/racedIncrementalLogitBoost/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/RacedIncrementalLogitBoost.java" 
+          todir="${packages_internal}/racedIncrementalLogitBoost/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/RacedIncrementalLogitBoostTest.java" 
+          todir="${packages_internal}/racedIncrementalLogitBoost/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- realAdaBoost -->
+        <mkdir dir="${packages_internal}/realAdaBoost"/>
+    <mkdir dir="${packages_internal}/realAdaBoost/${lib}"/>
+    <mkdir dir="${packages_internal}/realAdaBoost/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/realAdaBoost/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/realAdaBoost"/>
+    <copy file="descriptions/realAdaBoostDescription.props"
+          tofile="${packages_internal}/realAdaBoost/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/RealAdaBoost.java" 
+          todir="${packages_internal}/realAdaBoost/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/RealAdaBoostTest.java" 
+          todir="${packages_internal}/realAdaBoost/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- regressionByDiscretization -->
+        <mkdir dir="${packages_internal}/regressionByDiscretization"/>
+    <mkdir dir="${packages_internal}/regressionByDiscretization/${lib}"/>
+    <mkdir dir="${packages_internal}/regressionByDiscretization/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/regressionByDiscretization/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/regressionByDiscretization"/>
+    <copy file="descriptions/regressionByDiscretizationDescription.props"
+          tofile="${packages_internal}/regressionByDiscretization/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/RegressionByDiscretization.java" 
+          todir="${packages_internal}/regressionByDiscretization/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/RegressionByDiscretizationTest.java" 
+          todir="${packages_internal}/regressionByDiscretization/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- thresholdSelector -->
+        <mkdir dir="${packages_internal}/thresholdSelector"/>
+    <mkdir dir="${packages_internal}/thresholdSelector/${lib}"/>
+    <mkdir dir="${packages_internal}/thresholdSelector/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/thresholdSelector/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/thresholdSelector"/>
+    <copy file="descriptions/thresholdSelectorDescription.props"
+          tofile="${packages_internal}/thresholdSelector/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/ThresholdSelector.java" 
+          todir="${packages_internal}/thresholdSelector/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/ThresholdSelectorTest.java" 
+          todir="${packages_internal}/thresholdSelector/${src-test}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/ThresholdSelectorDummyClassifier.java" 
+          todir="${packages_internal}/thresholdSelector/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- hyperPipes -->
+    <mkdir dir="${packages_internal}/hyperPipes"/>
+    <mkdir dir="${packages_internal}/hyperPipes/${lib}"/>
+    <mkdir dir="${packages_internal}/hyperPipes/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/hyperPipes/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/hyperPipes"/>
+    <copy file="descriptions/hyperPipesDescription.props"
+          tofile="${packages_internal}/hyperPipes/Description.props"/>
+
+    <move file="${src}/${classifiers}/misc/HyperPipes.java" 
+          todir="${packages_internal}/hyperPipes/${src}/${classifiers}/misc" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/misc/HyperPipesTest.java" 
+          todir="${packages_internal}/hyperPipes/${src-test}/${classifiers}/misc" failonerror="false"/>
+
+    <!-- votingFeatureIntervals -->
+    <mkdir dir="${packages_internal}/votingFeatureIntervals"/>
+    <mkdir dir="${packages_internal}/votingFeatureIntervals/${lib}"/>
+    <mkdir dir="${packages_internal}/votingFeatureIntervals/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/votingFeatureIntervals/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/votingFeatureIntervals"/>
+    <copy file="descriptions/votingFeatureIntervalsDescription.props"
+          tofile="${packages_internal}/votingFeatureIntervals/Description.props"/>
+
+    <move file="${src}/${classifiers}/misc/VFI.java" 
+          todir="${packages_internal}/votingFeatureIntervals/${src}/${classifiers}/misc" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/misc/VFITest.java" 
+          todir="${packages_internal}/votingFeatureIntervals/${src-test}/${classifiers}/misc" failonerror="false"/>
+
+    <!-- conjunctiveRule -->
+    <mkdir dir="${packages_internal}/conjunctiveRule"/>
+    <mkdir dir="${packages_internal}/conjunctiveRule/${lib}"/>
+    <mkdir dir="${packages_internal}/conjunctiveRule/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/conjunctiveRule/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/conjunctiveRule"/>
+    <copy file="descriptions/conjunctiveRuleDescription.props"
+          tofile="${packages_internal}/conjunctiveRule/Description.props"/>
+
+    <move file="${src}/${classifiers}/rules/ConjunctiveRule.java" 
+          todir="${packages_internal}/conjunctiveRule/${src}/${classifiers}/rules" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/rules/ConjunctiveRuleTest.java" 
+          todir="${packages_internal}/conjunctiveRule/${src-test}/${classifiers}/rules" failonerror="false"/>
+
+    <!-- DTNB -->
+    <mkdir dir="${packages_internal}/DTNB"/>
+    <mkdir dir="${packages_internal}/DTNB/${lib}"/>
+    <mkdir dir="${packages_internal}/DTNB/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/DTNB/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/DTNB"/>
+    <copy file="descriptions/DTNBDescription.props"
+          tofile="${packages_internal}/DTNB/Description.props"/>
+
+    <move file="${src}/${classifiers}/rules/DTNB.java" 
+          todir="${packages_internal}/DTNB/${src}/${classifiers}/rules" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/rules/DTNBTest.java" 
+          todir="${packages_internal}/DTNB/${src-test}/${classifiers}/rules" failonerror="false"/>
+
+    <!-- ridor -->
+    <mkdir dir="${packages_internal}/ridor"/>
+    <mkdir dir="${packages_internal}/ridor/${lib}"/>
+    <mkdir dir="${packages_internal}/ridor/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/ridor/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/ridor"/>
+    <copy file="descriptions/ridorDescription.props"
+          tofile="${packages_internal}/ridor/Description.props"/>
+
+    <move file="${src}/${classifiers}/rules/Ridor.java" 
+          todir="${packages_internal}/ridor/${src}/${classifiers}/rules" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/rules/RidorTest.java" 
+          todir="${packages_internal}/ridor/${src-test}/${classifiers}/rules" failonerror="false"/>
+
+    <!-- scriptingClassifiers -->
+    <mkdir dir="${packages_internal}/scriptingClassifiers"/>
+    <mkdir dir="${packages_internal}/scriptingClassifiers/${lib}"/>
+    <mkdir dir="${packages_internal}/scriptingClassifiers/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/scriptingClassifiers/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/scriptingClassifiers"/>
+    <copy file="descriptions/scriptingClassifiersDescription.props"
+          tofile="${packages_internal}/scriptingClassifiers/Description.props"/>
+
+    <move file="${src}/${classifiers}/scripting/JythonClassifier.java" 
+          todir="${packages_internal}/scriptingClassifiers/${src}/${classifiers}/scripting" failonerror="false"/>
+    <move file="${src}/${classifiers}/scripting/GroovyClassifier.java" 
+          todir="${packages_internal}/scriptingClassifiers/${src}/${classifiers}/scripting" failonerror="false"/>
+    <!-- no junit tests for these classifiers
+    <move file="${src-test}/${classifiers}/scripting/JythonClassifierTest.java" 
+          todir="${packages_internal}/scriptingClassifiers/${src-test}/${classifiers}/scripting" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/scripting/GroovyClassifierTest.java" 
+          todir="${packages_internal}/scriptingClassifiers/${src-test}/${classifiers}/scripting" failonerror="false"/>
+    -->
+
+    <!-- alternatingDecisionTrees -->
+    <mkdir dir="${packages_internal}/alternatingDecisionTrees"/>
+    <mkdir dir="${packages_internal}/alternatingDecisionTrees/${lib}"/>
+    <mkdir dir="${packages_internal}/alternatingDecisionTrees/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/alternatingDecisionTrees/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/alternatingDecisionTrees"/>
+    <copy file="descriptions/alternatingDecisionTreesDescription.props"
+          tofile="${packages_internal}/alternatingDecisionTrees/Description.props"/>
+
+    <move file="${src}/${classifiers}/trees/adtree"
+          todir="${packages_internal}/alternatingDecisionTrees/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src}/${classifiers}/trees/ADTree.java"
+          todir="${packages_internal}/alternatingDecisionTrees/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/trees/ADTreeTest.java"
+          todir="${packages_internal}/alternatingDecisionTrees/${src-test}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src}/${classifiers}/trees/LADTree.java"
+          todir="${packages_internal}/alternatingDecisionTrees/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/trees/LADTreeTest.java"
+          todir="${packages_internal}/alternatingDecisionTrees/${src-test}/${classifiers}/trees" failonerror="false"/>
+
+    <delete dir="${packages_internal}/alternatingDecisionTrees/${src}/${classifiers}/trees/adtree.svn"/>
+
+    <!-- bestFirstTree -->
+    <mkdir dir="${packages_internal}/bestFirstTree"/>
+    <mkdir dir="${packages_internal}/bestFirstTree/${lib}"/>
+    <mkdir dir="${packages_internal}/bestFirstTree/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/bestFirstTree/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/bestFirstTree"/>
+    <copy file="descriptions/bestFirstTreeDescription.props"
+          tofile="${packages_internal}/bestFirstTree/Description.props"/>
+
+    <move file="${src}/${classifiers}/trees/BFTree.java" 
+          todir="${packages_internal}/bestFirstTree/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/trees/BFTreeTest.java" 
+          todir="${packages_internal}/bestFirstTree/${src-test}/${classifiers}/trees" failonerror="false"/>
+
+    <!-- naiveBayesTree -->
+    <mkdir dir="${packages_internal}/naiveBayesTree"/>
+    <mkdir dir="${packages_internal}/naiveBayesTree/${lib}"/>
+    <mkdir dir="${packages_internal}/naiveBayesTree/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/naiveBayesTree/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/naiveBayesTree"/>
+    <copy file="descriptions/naiveBayesTreeDescription.props"
+          tofile="${packages_internal}/naiveBayesTree/Description.props"/>
+
+    <move file="${src}/${classifiers}/trees/NBTree.java" 
+          todir="${packages_internal}/naiveBayesTree/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/trees/NBTreeTest.java" 
+          todir="${packages_internal}/naiveBayesTree/${src-test}/${classifiers}/trees" failonerror="false"/>
+
+    <!-- simpleCART -->
+    <mkdir dir="${packages_internal}/simpleCART"/>
+    <mkdir dir="${packages_internal}/simpleCART/${lib}"/>
+    <mkdir dir="${packages_internal}/simpleCART/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/simpleCART/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/simpleCART"/>
+    <copy file="descriptions/simpleCARTDescription.props"
+          tofile="${packages_internal}/simpleCART/Description.props"/>
+
+    <move file="${src}/${classifiers}/trees/SimpleCart.java" 
+          todir="${packages_internal}/simpleCART/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/trees/SimpleCartTest.java" 
+          todir="${packages_internal}/simpleCART/${src-test}/${classifiers}/trees" failonerror="false"/>
+
+    <!-- userClassifier -->
+    <mkdir dir="${packages_internal}/userClassifier"/>
+    <mkdir dir="${packages_internal}/userClassifier/${lib}"/>
+    <mkdir dir="${packages_internal}/userClassifier/${src}/${classifiers}"/>
+    <mkdir dir="${packages_internal}/userClassifier/${src-test}/${classifiers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/userClassifier"/>
+    <copy file="descriptions/userClassifierDescription.props"
+          tofile="${packages_internal}/userClassifier/Description.props"/>
+
+    <move file="${src}/${classifiers}/trees/UserClassifier.java" 
+          todir="${packages_internal}/userClassifier/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/trees/UserClassifierTest.java" 
+          todir="${packages_internal}/userClassifier/${src-test}/${classifiers}/trees" failonerror="false"/>
+
+    <!-- XMeans -->
+    <mkdir dir="${packages_internal}/XMeans"/>
+    <mkdir dir="${packages_internal}/XMeans/${lib}"/>
+    <mkdir dir="${packages_internal}/XMeans/${src}/${clusterers}"/>
+    <mkdir dir="${packages_internal}/XMeans/${src-test}/${clusterers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/XMeans"/>
+    <copy file="descriptions/XMeansDescription.props"
+          tofile="${packages_internal}/XMeans/Description.props"/>
+
+    <move file="${src}/${clusterers}/XMeans.java" 
+          todir="${packages_internal}/XMeans/${src}/${clusterers}/" failonerror="false"/>
+    <move file="${src-test}/${clusterers}/XMeansTest.java" 
+          todir="${packages_internal}/XMeans/${src-test}/${clusterers}" failonerror="false"/>
+
+    <!-- sequentialInformationalBottleneckClusterer -->
+    <mkdir dir="${packages_internal}/sequentialInformationalBottleneckClusterer"/>
+    <mkdir dir="${packages_internal}/sequentialInformationalBottleneckClusterer/${lib}"/>
+    <mkdir dir="${packages_internal}/sequentialInformationalBottleneckClusterer/${src}/${clusterers}"/>
+    <mkdir dir="${packages_internal}/sequentialInformationalBottleneckClusterer/${src-test}/${clusterers}"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/sequentialInformationalBottleneckClusterer"/>
+    <copy file="descriptions/sequentialInformationalBottleneckClustererDescription.props"
+          tofile="${packages_internal}/sequentialInformationalBottleneckClusterer/Description.props"/>
+
+    <move file="${src}/${clusterers}/sIB.java" 
+          todir="${packages_internal}/sequentialInformationalBottleneckClusterer/${src}/${clusterers}/" failonerror="false"/>
+    <move file="${src-test}/${clusterers}/sIBTest.java" 
+          todir="${packages_internal}/sequentialInformationalBottleneckClusterer/${src-test}/${clusterers}" failonerror="false"/>
+
+    <!-- denormalize -->
+    <mkdir dir="${packages_internal}/denormalize"/>
+    <mkdir dir="${packages_internal}/denormalize/${lib}"/>
+    <mkdir dir="${packages_internal}/denormalize/${src}/${filters_unsup}/instance"/>
+    <mkdir dir="${packages_internal}/denormalize/${src-test}/${filters_unsup}/instance"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/denormalize"/>
+    <copy file="descriptions/denormalizeDescription.props"
+          tofile="${packages_internal}/denormalize/Description.props"/>
+
+    <move file="${src}/${filters_unsup}/instance/Denormalize.java" 
+          todir="${packages_internal}/denormalize/${src}/${filters_unsup}/instance" failonerror="false"/>
+    <move file="${src-test}/${filters_unsup}/instance/DenormalizeTest.java" 
+          todir="${packages_internal}/denormalize/${src-test}/${filters_unsup}/instance" failonerror="false"/>
+
+    <!-- multiInstanceFilters -->
+    <mkdir dir="${packages_internal}/multiInstanceFilters"/>
+    <mkdir dir="${packages_internal}/multiInstanceFilters/${lib}"/>
+    <mkdir dir="${packages_internal}/multiInstanceFilters/${src}/${filters_unsup}/attribute"/>
+    <mkdir dir="${packages_internal}/multiInstanceFilters/${src-test}/${filters_unsup}/attribute"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/multiInstanceFilters"/>
+    <copy file="descriptions/multiInstanceFiltersDescription.props"
+          tofile="${packages_internal}/multiInstanceFilters/Description.props"/>
+
+    <move file="${src}/${filters_unsup}/attribute/MultiInstanceToPropositional.java" 
+          todir="${packages_internal}/multiInstanceFilters/${src}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src-test}/${filters_unsup}/attribute/MultiInstanceToPropositionalTest.java" 
+          todir="${packages_internal}/multiInstanceFilters/${src-test}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src}/${filters_unsup}/attribute/PropositionalToMultiInstance.java" 
+          todir="${packages_internal}/multiInstanceFilters/${src}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src-test}/${filters_unsup}/attribute/PropositionalToMultiInstanceTest.java" 
+          todir="${packages_internal}/multiInstanceFilters/${src-test}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src}/${filters_unsup}/attribute/RELAGGS.java" 
+          todir="${packages_internal}/multiInstanceFilters/${src}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src-test}/${filters_unsup}/attribute/RELAGGSTest.java" 
+          todir="${packages_internal}/multiInstanceFilters/${src-test}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src}/${filters_unsup}/attribute/MILESFilter.java" 
+          todir="${packages_internal}/multiInstanceFilters/${src}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src-test}/${filters_unsup}/attribute/MILESFilterTest.java" 
+          todir="${packages_internal}/multiInstanceFilters/${src-test}/${filters_unsup}/attribute" failonerror="false"/>
+
+    <!-- wavelet -->
+    <mkdir dir="${packages_internal}/wavelet"/>
+    <mkdir dir="${packages_internal}/wavelet/${lib}"/>
+    <mkdir dir="${packages_internal}/wavelet/${src}/${filters_unsup}/attribute"/>
+    <mkdir dir="${packages_internal}/wavelet/${src-test}/${filters_unsup}/attribute"/>
+
+    <copy file="misc/build_package.xml"
+          todir="${packages_internal}/wavelet"/>
+    <copy file="descriptions/waveletDescription.props"
+          tofile="${packages_internal}/wavelet/Description.props"/>
+
+    <move file="${src}/${filters_unsup}/attribute/Wavelet.java" 
+          todir="${packages_internal}/wavelet/${src}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src-test}/${filters_unsup}/attribute/WaveletTest.java" 
+          todir="${packages_internal}/wavelet/${src-test}/${filters_unsup}/attribute" failonerror="false"/>
+  </target>
+
+  <target name="extract_external" depends="init_all" description="Extract contributed packages">
+
+    <!-- ============= External stuff =============== -->
+
+    <!-- ======== Associations ==========  -->
+
+    <!-- generalizedSequentialPatterns -->
+    <mkdir dir="${packages_external}/generalizedSequentialPatterns"/>
+    <mkdir dir="${packages_external}/generalizedSequentialPatterns/${lib}"/>
+    <mkdir dir="${packages_external}/generalizedSequentialPatterns/${src}/${associations}"/>
+    <mkdir dir="${packages_external}/generalizedSequentialPatterns/${src-test}/${associations}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/generalizedSequentialPatterns"/>
+    <copy file="descriptions/generalizedSequentialPatternsDescription.props"
+          tofile="${packages_external}/generalizedSequentialPatterns/Description.props"/>
+    
+    <move file="${src}/${associations}/GeneralizedSequentialPatterns.java" 
+          todir="${packages_external}/generalizedSequentialPatterns/${src}/${associations}" failonerror="false"/>
+    <move file="${src-test}/${associations}/GeneralizedSequentialPatternsTest.java" 
+          todir="${packages_external}/generalizedSequentialPatterns/${src-test}/${associations}" failonerror="false"/>
+    <move file="${src}/${associations}/gsp"
+          todir="${packages_external}/generalizedSequentialPatterns/${src}/${associations}" failonerror="false"/>
+    <delete dir="${packages_external}/generalizedSequentialPatterns/${src}/${associations}/gsp/.svn"/>
+
+    <!-- tertius -->
+    <mkdir dir="${packages_external}/tertius"/>
+    <mkdir dir="${packages_external}/tertius/${lib}"/>
+    <mkdir dir="${packages_external}/tertius/${src}/${associations}"/>
+    <mkdir dir="${packages_external}/tertius/${src-test}/${associations}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/tertius"/>
+    <copy file="descriptions/tertiusDescription.props"
+          tofile="${packages_external}/tertius/Description.props"/>
+
+    <move file="${src}/${associations}/Tertius.java" 
+          todir="${packages_external}/tertius/${src}/${associations}" failonerror="false"/>
+    <move file="${src-test}/${associations}/TertiusTest.java" 
+          todir="${packages_external}/tertius/${src-test}/${associations}" failonerror="false"/>
+    <move file="${src}/${associations}/tertius"
+          todir="${packages_external}/tertius/${src}/${associations}" failonerror="false"/>
+    <delete dir="${packages_external}/tertius/${src}/${associations}/tertius/.svn"/>
+
+    <!-- ====== Attribute Selection ======= -->
+
+    <!-- fastCorrBasedFS -->
+
+    <mkdir dir="${packages_external}/fastCorrBasedFS"/>
+    <mkdir dir="${packages_external}/fastCorrBasedFS/${lib}"/>
+    <mkdir dir="${packages_external}/fastCorrBasedFS/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_external}/fastCorrBasedFS/${src-test}/${attributeSelection}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/fastCorrBasedFS"/>
+    <copy file="descriptions/fastCorrBasedFSDescription.props"
+          tofile="${packages_external}/fastCorrBasedFS/Description.props"/>
+    <move file="${src}/${attributeSelection}/FCBFSearch.java" 
+          todir="${packages_external}/fastCorrBasedFS/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/FCBFSearchTest.java" 
+          todir="${packages_external}/fastCorrBasedFS/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/SymmetricalUncertAttributeSetEval.java" 
+          todir="${packages_external}/fastCorrBasedFS/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/SymmetricalUncertAttributeSetEvalTest.java" 
+          todir="${packages_external}/fastCorrBasedFS/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- latentSemanticAnalysis -->
+    <mkdir dir="${packages_external}/latentSemanticAnalysis"/>
+    <mkdir dir="${packages_external}/latentSemanticAnalysis/${lib}"/>
+    <mkdir dir="${packages_external}/latentSemanticAnalysis/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_external}/latentSemanticAnalysis/${src-test}/${attributeSelection}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/latentSemanticAnalysis"/>
+    <copy file="descriptions/latentSemanticAnalysisDescription.props"
+          tofile="${packages_external}/latentSemanticAnalysis/Description.props"/>
+    <move file="${src}/${attributeSelection}/LatentSemanticAnalysis.java" 
+          todir="${packages_external}/latentSemanticAnalysis/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/LatentSemanticAnalysisTest.java" 
+          todir="${packages_external}/latentSemanticAnalysis/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- linearForwardSelection -->
+    <mkdir dir="${packages_external}/linearForwardSelection"/>
+    <mkdir dir="${packages_external}/linearForwardSelection/${lib}"/>
+    <mkdir dir="${packages_external}/linearForwardSelection/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_external}/linearForwardSelection/${src-test}/${attributeSelection}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/linearForwardSelection"/>
+    <copy file="descriptions/linearForwardSelectionDescription.props"
+          tofile="${packages_external}/linearForwardSelection/Description.props"/>
+
+    <move file="${src}/${attributeSelection}/LFSMethods.java" 
+          todir="${packages_external}/linearForwardSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/LinearForwardSelection.java" 
+          todir="${packages_external}/linearForwardSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/LinearForwardSelectionTest.java" 
+          todir="${packages_external}/linearForwardSelection/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/SubsetSizeForwardSelection.java" 
+          todir="${packages_external}/linearForwardSelection/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/SubsetSizeForwardSelectionTest.java" 
+          todir="${packages_external}/linearForwardSelection/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- probabilisticSignificanceAE -->
+    <mkdir dir="${packages_external}/probabilisticSignificanceAE"/>
+    <mkdir dir="${packages_external}/probabilisticSignificanceAE/${lib}"/>
+    <mkdir dir="${packages_external}/probabilisticSignificanceAE/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_external}/probabilisticSignificanceAE/${src-test}/${attributeSelection}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/probabilisticSignificanceAE"/>
+    <copy file="descriptions/probabilisticSignificanceAEDescription.props"
+          tofile="${packages_external}/probabilisticSignificanceAE/Description.props"/>
+    <move file="${src}/${attributeSelection}/SignificanceAttributeEval.java" 
+          todir="${packages_external}/probabilisticSignificanceAE/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/SignificanceAttributeEvalTest.java" 
+          todir="${packages_external}/probabilisticSignificanceAE/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- tabuAndScatterSearch -->
+    <mkdir dir="${packages_external}/tabuAndScatterSearch"/>
+    <mkdir dir="${packages_external}/tabuAndScatterSearch/${lib}"/>
+    <mkdir dir="${packages_external}/tabuAndScatterSearch/${src}/${attributeSelection}"/>
+    <mkdir dir="${packages_external}/tabuAndScatterSearch/${src-test}/${attributeSelection}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/tabuAndScatterSearch"/>
+    <copy file="descriptions/tabuAndScatterSearchDescription.props"
+          tofile="${packages_external}/tabuAndScatterSearch/Description.props"/>
+    <move file="${src}/${attributeSelection}/TabuSearch.java" 
+          todir="${packages_external}/tabuAndScatterSearch/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/TabuSearchTest.java" 
+          todir="${packages_external}/tabuAndScatterSearch/${src-test}/${attributeSelection}" failonerror="false"/>
+    <move file="${src}/${attributeSelection}/ScatterSearchV1.java" 
+          todir="${packages_external}/tabuAndScatterSearch/${src}/${attributeSelection}" failonerror="false"/>
+    <move file="${src-test}/${attributeSelection}/ScatterSearchV1Test.java" 
+          todir="${packages_external}/tabuAndScatterSearch/${src-test}/${attributeSelection}" failonerror="false"/>
+
+    <!-- ====== Classifiers ======= -->
+
+    <!-- ensembleLibrary -->
+    <mkdir dir="${packages_external}/ensembleLibrary"/>
+    <mkdir dir="${packages_external}/ensembleLibrary/${lib}"/>
+    <mkdir dir="${packages_external}/ensembleLibrary/${src}/${classifiers}/meta"/>
+    <mkdir dir="${packages_external}/ensembleLibrary/${src-test}/${classifiers}/meta"/>
+    <mkdir dir="${packages_external}/ensembleLibrary/${src}/${gui}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/ensembleLibrary"/>
+    <copy file="descriptions/ensembleLibraryDescription.props"
+          tofile="${packages_external}/ensembleLibrary/Description.props"/>
+
+    <move file="${src}/${classifiers}/EnsembleLibrary.java" 
+          todir="${packages_external}/ensembleLibrary/${src}/${classifiers}" failonerror="false"/>
+    <move file="${src}/${classifiers}/EnsembleLibraryModel.java" 
+          todir="${packages_external}/ensembleLibrary/${src}/${classifiers}" failonerror="false"/>
+    <move file="${src}/${classifiers}/EnsembleLibraryModelComparator.java" 
+          todir="${packages_external}/ensembleLibrary/${src}/${classifiers}" failonerror="false"/>
+    <move file="${src}/${gui}/EnsembleLibraryEditor.java" 
+          todir="${packages_external}/ensembleLibrary/${src}/${gui}" failonerror="false"/>
+    <move file="${src}/${gui}/EnsembleSelectionLibraryEditor.java" 
+          todir="${packages_external}/ensembleLibrary/${src}/${gui}" failonerror="false"/>
+    <move file="${src}/${classifiers}/meta/EnsembleSelection.java" 
+          todir="${packages_external}/ensembleLibrary/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/EnsembleSelectionTest.java" 
+          todir="${packages_external}/ensembleLibrary/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <move file="${src}/${gui}/ensembleLibraryEditor"
+          todir="${packages_external}/ensembleLibrary/${src}/${gui}" failonerror="false"/>
+    <delete dir="${packages_external}/ensembleLibrary/${src}/${gui}/ensembleLibraryEditor/.svn"/>
+    <delete dir="${packages_external}/ensembleLibrary/${src}/${gui}/ensembleLibraryEditor/tree/.svn"/>
+
+    <move file="${src}/${classifiers}/meta/ensembleSelection"
+          todir="${packages_external}/ensembleLibrary/${src}/${classifiers}/meta" failonerror="false"/>
+    <delete dir="${packages_external}/ensembleLibrary/${src}/${classifiers}/meta/ensembleSelection/.svn"/>
+
+    <!-- averagedOneDependenceEstimators -->
+    <mkdir dir="${packages_external}/averagedOneDependenceEstimators"/>
+    <mkdir dir="${packages_external}/averagedOneDependenceEstimators/${lib}"/>
+    <mkdir dir="${packages_external}/averagedOneDependenceEstimators/${src}/${classifiers}/bayes"/>
+    <mkdir dir="${packages_external}/averagedOneDependenceEstimators/${src-test}/${classifiers}/bayes"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/averagedOneDependenceEstimators"/>
+    <copy file="descriptions/averagedOneDependenceEstimatorsDescription.props"
+          tofile="${packages_external}/averagedOneDependenceEstimators/Description.props"/>
+
+    <move file="${src}/${classifiers}/bayes/AODE.java" 
+          todir="${packages_external}/averagedOneDependenceEstimators/${src}/${classifiers}/bayes" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/bayes/AODETest.java" 
+          todir="${packages_external}/averagedOneDependenceEstimators/${src-test}/${classifiers}/bayes" failonerror="false"/>
+    <move file="${src}/${classifiers}/bayes/WAODE.java" 
+          todir="${packages_external}/averagedOneDependenceEstimators/${src}/${classifiers}/bayes" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/bayes/WAODETest.java" 
+          todir="${packages_external}/averagedOneDependenceEstimators/${src-test}/${classifiers}/bayes" failonerror="false"/>
+    <move file="${src}/${classifiers}/bayes/AODEsr.java" 
+          todir="${packages_external}/averagedOneDependenceEstimators/${src}/${classifiers}/bayes" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/bayes/AODEsrTest.java" 
+          todir="${packages_external}/averagedOneDependenceEstimators/${src-test}/${classifiers}/bayes" failonerror="false"/>
+
+    <!-- bayesianLogisticRegression -->
+    <mkdir dir="${packages_external}/bayesianLogisticRegression"/>
+    <mkdir dir="${packages_external}/bayesianLogisticRegression/${lib}"/>
+    <mkdir dir="${packages_external}/bayesianLogisticRegression/${src}/${classifiers}/bayes"/>
+    <mkdir dir="${packages_external}/bayesianLogisticRegression/${src-test}/${classifiers}/bayes"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/bayesianLogisticRegression"/>
+    <copy file="descriptions/bayesianLogisticRegressionDescription.props"
+          tofile="${packages_external}/bayesianLogisticRegression/Description.props"/>
+
+    <move file="${src}/${classifiers}/bayes/BayesianLogisticRegression.java" 
+          todir="${packages_external}/bayesianLogisticRegression/${src}/${classifiers}/bayes" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/bayes/BayesianLogisticRegressionTest.java" 
+          todir="${packages_external}/bayesianLogisticRegression/${src-test}/${classifiers}/bayes" failonerror="false"/>
+
+    <move file="${src}/${classifiers}/bayes/blr"
+          todir="${packages_external}/bayesianLogisticRegression/${src}/${classifiers}/bayes" failonerror="false"/>
+    <delete dir="${packages_external}/bayesianLogsiticRegression/${src}/${classifiers}/bayes/blr/.svn"/>
+
+    <!-- hiddenNaiveBayes -->
+    <mkdir dir="${packages_external}/hiddenNaiveBayes"/>
+    <mkdir dir="${packages_external}/hiddenNaiveBayes/${lib}"/>
+    <mkdir dir="${packages_external}/hiddenNaiveBayes/${src}/${classifiers}/bayes"/>
+    <mkdir dir="${packages_external}/hiddenNaiveBayes/${src-test}/${classifiers}/bayes"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/hiddenNaiveBayes"/>
+    <copy file="descriptions/hiddenNaiveBayesDescription.props"
+          tofile="${packages_external}/hiddenNaiveBayes/Description.props"/>
+
+    <move file="${src}/${classifiers}/bayes/HNB.java" 
+          todir="${packages_external}/hiddenNaiveBayes/${src}/${classifiers}/bayes" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/bayes/HNBTest.java" 
+          todir="${packages_external}/hiddenNaiveBayes/${src-test}/${classifiers}/bayes" failonerror="false"/>
+
+    <!-- DMNBtext -->
+    <mkdir dir="${packages_external}/DMNBtext"/>
+    <mkdir dir="${packages_external}/DMNBtext/${lib}"/>
+    <mkdir dir="${packages_external}/DMNBtext/${src}/${classifiers}/bayes"/>
+    <mkdir dir="${packages_external}/DMNBtext/${src-test}/${classifiers}/bayes"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/DMNBtext"/>
+    <copy file="descriptions/DMNBtextDescription.props"
+          tofile="${packages_external}/DMNBtext/Description.props"/>
+
+    <move file="${src}/${classifiers}/bayes/DMNBtext.java" 
+          todir="${packages_external}/DMNBtext/${src}/${classifiers}/bayes" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/bayes/DMNBtextTest.java" 
+          todir="${packages_external}/DMNBtext/${src-test}/${classifiers}/bayes" failonerror="false"/>
+
+    <!-- LibSVM -->
+    <mkdir dir="${packages_external}/LibSVM"/>
+    <mkdir dir="${packages_external}/LibSVM/${lib}"/>
+    <mkdir dir="${packages_external}/LibSVM/${src}/${classifiers}/functions"/>
+    <mkdir dir="${packages_external}/LibSVM/${src-test}/${classifiers}/functions"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/LibSVM"/>
+    <copy file="descriptions/LibSVMDescription.props"
+          tofile="${packages_external}/LibSVM/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/LibSVM.java" 
+          todir="${packages_external}/LibSVM/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/LibSVMTest.java" 
+          todir="${packages_external}/LibSVM/${src-test}/${classifiers}/functions" failonerror="false"/>
+
+    <!-- LibLINEAR -->
+    <mkdir dir="${packages_external}/LibLINEAR"/>
+    <mkdir dir="${packages_external}/LibLINEAR/${lib}"/>
+    <mkdir dir="${packages_external}/LibLINEAR/${src}/${classifiers}/functions"/>
+    <mkdir dir="${packages_external}/LibLINEAR/${src-test}/${classifiers}/functions"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/LibLINEAR"/>
+    <copy file="descriptions/LibLINEARDescription.props"
+          tofile="${packages_external}/LibLINEAR/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/LibLINEAR.java" 
+          todir="${packages_external}/LibLINEAR/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/LibLINEARTest.java" 
+          todir="${packages_external}/LibLINEAR/${src-test}/${classifiers}/functions" failonerror="false"/>
+
+    <!-- multilayerPerceptronCS -->
+    <mkdir dir="${packages_external}/multilayerPerceptronCS"/>
+    <mkdir dir="${packages_external}/multilayerPerceptronCS/${lib}"/>
+    <mkdir dir="${packages_external}/multilayerPerceptronCS/${src}/${classifiers}/functions"/>
+    <mkdir dir="${packages_external}/multilayerPerceptronCS/${src-test}/${classifiers}/functions"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/multilayerPerceptronCS"/>
+    <copy file="descriptions/multilayerPerceptronCSDescription.props"
+          tofile="${packages_external}/multilayerPerceptronCS/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/MultilayerPerceptronCS.java" 
+          todir="${packages_external}/multilayerPerceptronCS/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/MultilayerPerceptronCSTest.java" 
+          todir="${packages_external}/multilayerPerceptronCS/${src-test}/${classifiers}/functions" failonerror="false"/>
+
+    <!-- winnow -->
+    <mkdir dir="${packages_external}/winnow"/>
+    <mkdir dir="${packages_external}/winnow/${lib}"/>
+    <mkdir dir="${packages_external}/winnow/${src}/${classifiers}/functions"/>
+    <mkdir dir="${packages_external}/winnow/${src-test}/${classifiers}/functions"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/winnow"/>
+    <copy file="descriptions/winnowDescription.props"
+          tofile="${packages_external}/winnow/Description.props"/>
+
+    <move file="${src}/${classifiers}/functions/Winnow.java" 
+          todir="${packages_external}/winnow/${src}/${classifiers}/functions" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/functions/WinnowTest.java" 
+          todir="${packages_external}/winnow/${src-test}/${classifiers}/functions" failonerror="false"/>
+
+    <!-- lazyBayesianRules -->
+    <mkdir dir="${packages_external}/lazyBayesianRules"/>
+    <mkdir dir="${packages_external}/lazyBayesianRules/${lib}"/>
+    <mkdir dir="${packages_external}/lazyBayesianRules/${src}/${classifiers}/lazy"/>
+    <mkdir dir="${packages_external}/lazyBayesianRules/${src-test}/${classifiers}/lazy"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/lazyBayesianRules"/>
+    <copy file="descriptions/lazyBayesianRulesDescription.props"
+          tofile="${packages_external}/lazyBayesianRules/Description.props"/>
+
+    <move file="${src}/${classifiers}/lazy/LBR.java" 
+          todir="${packages_external}/lazyBayesianRules/${src}/${classifiers}/lazy" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/lazy/LBRTest.java" 
+          todir="${packages_external}/lazyBayesianRules/${src-test}/${classifiers}/lazy" failonerror="false"/>
+
+    <!-- fuzzyUnorderedRuleInduction -->
+    <mkdir dir="${packages_external}/fuzzyUnorderedRuleInduction"/>
+    <mkdir dir="${packages_external}/fuzzyUnorderedRuleInduction/${lib}"/>
+    <mkdir dir="${packages_external}/fuzzyUnorderedRuleInduction/${src}/${classifiers}/rules"/>
+    <mkdir dir="${packages_external}/fuzzyUnorderedRuleInduction/${src-test}/${classifiers}/rules"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/fuzzyUnorderedRuleInduction"/>
+    <copy file="descriptions/fuzzyUnorderedRuleInductionDescription.props"
+          tofile="${packages_external}/fuzzyUnorderedRuleInduction/Description.props"/>
+
+    <move file="${src}/${classifiers}/rules/FURIA.java" 
+          todir="${packages_external}/fuzzyUnorderedRuleInduction/${src}/${classifiers}/rules" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/rules/FURIATest.java" 
+          todir="${packages_external}/fuzzyUnorderedRuleInduction/${src-test}/${classifiers}/rules" failonerror="false"/>
+
+    <!-- decorate -->
+    <mkdir dir="${packages_external}/decorate"/>
+    <mkdir dir="${packages_external}/decorate/${lib}"/>
+    <mkdir dir="${packages_external}/decorate/${src}/${classifiers}/meta"/>
+    <mkdir dir="${packages_external}/decorate/${src-test}/${classifiers}/meta"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/decorate"/>
+    <copy file="descriptions/decorateDescription.props"
+          tofile="${packages_external}/decorate/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/Decorate.java" 
+          todir="${packages_external}/decorate/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/DecorateTest.java" 
+          todir="${packages_external}/decorate/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- rotationForest -->
+    <mkdir dir="${packages_external}/rotationForest"/>
+    <mkdir dir="${packages_external}/rotationForest/${lib}"/>
+    <mkdir dir="${packages_external}/rotationForest/${src}/${classifiers}/meta"/>
+    <mkdir dir="${packages_external}/rotationForest/${src-test}/${classifiers}/meta"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/rotationForest"/>
+    <copy file="descriptions/rotationForestDescription.props"
+          tofile="${packages_external}/rotationForest/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/RotationForest.java" 
+          todir="${packages_external}/rotationForest/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/RotationForestTest.java" 
+          todir="${packages_external}/rotationForest/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- stackingC -->
+    <mkdir dir="${packages_external}/stackingC"/>
+    <mkdir dir="${packages_external}/stackingC/${lib}"/>
+    <mkdir dir="${packages_external}/stackingC/${src}/${classifiers}/meta"/>
+    <mkdir dir="${packages_external}/stackingC/${src-test}/${classifiers}/meta"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/stackingC"/>
+    <copy file="descriptions/stackingCDescription.props"
+          tofile="${packages_external}/stackingC/Description.props"/>
+
+    <move file="${src}/${classifiers}/meta/StackingC.java" 
+          todir="${packages_external}/stackingC/${src}/${classifiers}/meta" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/meta/StackingCTest.java" 
+          todir="${packages_external}/stackingC/${src-test}/${classifiers}/meta" failonerror="false"/>
+
+    <!-- citationKNN -->
+    <mkdir dir="${packages_external}/citationKNN"/>
+    <mkdir dir="${packages_external}/citationKNN/${lib}"/>
+    <mkdir dir="${packages_external}/citationKNN/${src}/${classifiers}/mi"/>
+    <mkdir dir="${packages_external}/citationKNN/${src-test}/${classifiers}/mi"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/citationKNN"/>
+    <copy file="descriptions/citationKNNDescription.props"
+          tofile="${packages_external}/citationKNN/Description.props"/>
+
+    <move file="${src}/${classifiers}/mi/CitationKNN.java" 
+          todir="${packages_external}/citationKNN/${src}/${classifiers}/mi" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/mi/CitationKNNTest.java" 
+          todir="${packages_external}/citationKNN/${src-test}/${classifiers}/mi" failonerror="false"/>
+
+    <!-- fuzzyLaticeReasoning -->
+    <mkdir dir="${packages_external}/fuzzyLaticeReasoning"/>
+    <mkdir dir="${packages_external}/fuzzyLaticeReasoning/${lib}"/>
+    <mkdir dir="${packages_external}/fuzzyLaticeReasoning/${src}/${classifiers}/misc"/>
+    <mkdir dir="${packages_external}/fuzzyLaticeReasoning/${src-test}/${classifiers}/misc"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/fuzzyLaticeReasoning"/>
+    <copy file="descriptions/fuzzyLaticeReasoningDescription.props"
+          tofile="${packages_external}/fuzzyLaticeReasoning/Description.props"/>
+
+    <move file="${src}/${classifiers}/misc/FLR.java" 
+          todir="${packages_external}/fuzzyLaticeReasoning/${src}/${classifiers}/misc" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/misc/FLRTest.java" 
+          todir="${packages_external}/fuzzyLaticeReasoning/${src-test}/${classifiers}/misc" failonerror="false"/>
+
+    <!-- ordinalStochasticDominance -->
+    <mkdir dir="${packages_external}/ordinalStochasticDominance"/>
+    <mkdir dir="${packages_external}/ordinalStochasticDominance/${lib}"/>
+    <mkdir dir="${packages_external}/ordinalStochasticDominance/${src}/${classifiers}/misc"/>
+    <mkdir dir="${packages_external}/ordinalStochasticDominance/${src-test}/${classifiers}/misc"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/ordinalStochasticDominance"/>
+    <copy file="descriptions/ordinalStochasticDominanceDescription.props"
+          tofile="${packages_external}/ordinalStochasticDominance/Description.props"/>
+
+    <move file="${src}/${classifiers}/misc/OSDL.java" 
+          todir="${packages_external}/ordinalStochasticDominance/${src}/${classifiers}/misc" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/misc/OSDLTest.java" 
+          todir="${packages_external}/ordinalStochasticDominance/${src-test}/${classifiers}/misc" failonerror="false"/>
+
+    <move file="${src}/${classifiers}/misc/monotone"
+          todir="${packages_external}/ordinalStochasticDominance/${src}/${classifiers}/misc" failonerror="false"/>
+    <delete dir="${packages_external}/ordinalStochasticDominance/${src}/${classifiers}/misc/monotone/.svn"/>
+
+    <!-- ordinalLearningMethod (OLM) -->
+    <mkdir dir="${packages_external}/ordinalLearningMethod"/>
+    <mkdir dir="${packages_external}/ordinalLearningMethod/${lib}"/>
+    <mkdir dir="${packages_external}/ordinalLearningMethod/${src}/${classifiers}/rules"/>
+    <mkdir dir="${packages_external}/ordinalLearningMethod/${src-test}/${classifiers}/rules"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/ordinalLearningMethod"/>
+    <copy file="descriptions/ordinalLearningMethodDescription.props"
+          tofile="${packages_external}/ordinalLearningMethod/Description.props"/>
+
+    <move file="${src}/${classifiers}/rules/OLM.java" 
+          todir="${packages_external}/ordinalLearningMethod/${src}/${classifiers}/rules" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/rules/OLMTest.java" 
+          todir="${packages_external}/ordinalLearningMethod/${src-test}/${classifiers}/rules" failonerror="false"/>
+
+    <!-- NNge -->
+    <mkdir dir="${packages_external}/NNge"/>
+    <mkdir dir="${packages_external}/NNge/${lib}"/>
+    <mkdir dir="${packages_external}/NNge/${src}/${classifiers}/rules"/>
+    <mkdir dir="${packages_external}/NNge/${src-test}/${classifiers}/rules"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/NNge"/>
+    <copy file="descriptions/NNgeDescription.props"
+          tofile="${packages_external}/NNge/Description.props"/>
+
+    <move file="${src}/${classifiers}/rules/NNge.java" 
+          todir="${packages_external}/NNge/${src}/${classifiers}/rules" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/rules/NNgeTest.java" 
+          todir="${packages_external}/NNge/${src-test}/${classifiers}/rules" failonerror="false"/>
+
+    <!-- J48graft -->
+    <mkdir dir="${packages_external}/J48graft"/>
+    <mkdir dir="${packages_external}/J48graft/${lib}"/>
+    <mkdir dir="${packages_external}/J48graft/${src}/${classifiers}/trees"/>
+    <mkdir dir="${packages_external}/J48graft/${src-test}/${classifiers}/trees"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/J48graft"/>
+    <copy file="descriptions/J48graftDescription.props"
+          tofile="${packages_external}/J48graft/Description.props"/>
+
+    <move file="${src}/${classifiers}/trees/J48graft.java" 
+          todir="${packages_external}/J48graft/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/trees/J48graftTest.java" 
+          todir="${packages_external}/J48graft/${src-test}/${classifiers}/trees" failonerror="false"/>
+
+    <!-- functionalTrees -->
+    <mkdir dir="${packages_external}/functionalTrees"/>
+    <mkdir dir="${packages_external}/functionalTrees/${lib}"/>
+    <mkdir dir="${packages_external}/functionalTrees/${src}/${classifiers}/trees"/>
+    <mkdir dir="${packages_external}/functionalTrees/${src-test}/${classifiers}/trees"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/functionalTrees"/>
+    <copy file="descriptions/functionalTreesDescription.props"
+          tofile="${packages_external}/functionalTrees/Description.props"/>
+
+    <move file="${src}/${classifiers}/trees/FT.java" 
+          todir="${packages_external}/functionalTrees/${src}/${classifiers}/trees" failonerror="false"/>
+    <move file="${src-test}/${classifiers}/trees/FTTest.java" 
+          todir="${packages_external}/functionalTrees/${src-test}/${classifiers}/trees" failonerror="false"/>
+
+    <move file="${src}/${classifiers}/trees/ft"
+          todir="${packages_external}/functionalTrees/${src}/${classifiers}/trees" failonerror="false"/>
+
+    <!-- ======== Clusterers ==========  -->
+
+    <!-- CLOPE -->
+    <mkdir dir="${packages_external}/CLOPE"/>
+    <mkdir dir="${packages_external}/CLOPE/${lib}"/>
+    <mkdir dir="${packages_external}/CLOPE/${src}/${clusterers}"/>
+    <mkdir dir="${packages_external}/CLOPE/${src-test}/${clusterers}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/CLOPE"/>
+    <copy file="descriptions/CLOPEDescription.props"
+          tofile="${packages_external}/CLOPE/Description.props"/>
+
+    <move file="${src}/${clusterers}/CLOPE.java" 
+          todir="${packages_external}/CLOPE/${src}/${clusterers}" failonerror="false"/>
+    <move file="${src-test}/${clusterers}/CLOPETest.java" 
+          todir="${packages_external}/CLOPE/${src-test}/${clusterers}" failonerror="false"/>
+
+    <!-- optics_dbScan -->
+    <mkdir dir="${packages_external}/optics_dbScan"/>
+    <mkdir dir="${packages_external}/optics_dbScan/${lib}"/>
+    <mkdir dir="${packages_external}/optics_dbScan/${src}/${clusterers}"/>
+    <mkdir dir="${packages_external}/optics_dbScan/${src-test}/${clusterers}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/optics_dbScan"/>
+    <copy file="descriptions/optics_dbScanDescription.props"
+          tofile="${packages_external}/optics_dbScan/Description.props"/>
+
+    <move file="${src}/${clusterers}/OPTICS.java" 
+          todir="${packages_external}/optics_dbScan/${src}/${clusterers}" failonerror="false"/>
+    <move file="${src-test}/${clusterers}/OPTICSTest.java" 
+          todir="${packages_external}/optics_dbScan/${src-test}/${clusterers}" failonerror="false"/>
+    <move file="${src}/${clusterers}/DBScan.java" 
+          todir="${packages_external}/optics_dbScan/${src}/${clusterers}" failonerror="false"/>
+    <move file="${src-test}/${clusterers}/DBScanTest.java" 
+          todir="${packages_external}/optics_dbScan/${src-test}/${clusterers}" failonerror="false"/>
+
+    <move file="${src}/${clusterers}/forOPTICSAndDBScan"
+          todir="${packages_external}/optics_dbScan/${src}/${clusterers}" failonerror="false"/>
+    <delete dir="${packages_external}/optics_dbScan/${src}/${clusterers}/forOPTICSAndDBScan/.svn"/>
+    <delete dir="${packages_external}/optics_dbScan/${src}/${clusterers}/forOPTICSAndDBScan/DataObjects/.svn"/>
+    <delete dir="${packages_external}/optics_dbScan/${src}/${clusterers}/forOPTICSAndDBScan/Databases/.svn"/>
+    <delete dir="${packages_external}/optics_dbScan/${src}/${clusterers}/forOPTICSAndDBScan/OPTICS_GUI/.svn"/>
+    <delete dir="${packages_external}/optics_dbScan/${src}/${clusterers}/forOPTICSAndDBScan/OPTICS_GUI/Graphics.svn"/>
+    <delete dir="${packages_external}/optics_dbScan/${src}/${clusterers}/forOPTICSAndDBScan/Utils/.svn"/>
+
+    <!-- ======== Core ==========  -->
+
+    <!-- levenshteinEditDistance -->
+    <mkdir dir="${packages_external}/levenshteinEditDistance"/>
+    <mkdir dir="${packages_external}/levenshteinEditDistance/${lib}"/>
+    <mkdir dir="${packages_external}/levenshteinEditDistance/${src}/${core}"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/levenshteinEditDistance"/>
+    <copy file="descriptions/levenshteinEditDistanceDescription.props"
+          tofile="${packages_external}/levenshteinEditDistance/Description.props"/>
+
+    <move file="${src}/${core}/AbstractStringDistanceFunction.java" 
+          todir="${packages_external}/levenshteinEditDistance/${src}/${core}" failonerror="false"/>
+    <move file="${src}/${core}/EditDistance.java" 
+          todir="${packages_external}/levenshteinEditDistance/${src}/${core}" failonerror="false"/>
+
+    <!-- ======== Filters ==========  -->
+
+    <!-- EMImputation -->
+    <mkdir dir="${packages_external}/EMImputation"/>
+    <mkdir dir="${packages_external}/EMImputation/${lib}"/>
+    <mkdir dir="${packages_external}/EMImputation/${src}/${filters_unsup}/attribute"/>
+    <mkdir dir="${packages_external}/EMImputation/${src-test}/${filters_unsup}/attribute"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/EMImputation"/>
+    <copy file="descriptions/EMImputationDescription.props"
+          tofile="${packages_external}/EMImputation/Description.props"/>
+
+    <move file="${src}/${filters_unsup}/attribute/EMImputation.java" 
+          todir="${packages_external}/EMImputation/${src}/${filters_unsup}/attribute" failonerror="false"/>
+    <move file="${src-test}/${filters_unsup}/attribute/EMImputationTest.java" 
+          todir="${packages_external}/EMImputation/${src-test}/${filters_unsup}/attribute" failonerror="false"/>
+
+    <!-- normalize -->
+    <mkdir dir="${packages_external}/normalize"/>
+    <mkdir dir="${packages_external}/normalize/${lib}"/>
+    <mkdir dir="${packages_external}/normalize/${src}/${filters_unsup}/instance"/>
+    <mkdir dir="${packages_external}/normalize/${src-test}/${filters_unsup}/instance"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/normalize"/>
+    <copy file="descriptions/normalizeDescription.props"
+          tofile="${packages_external}/normalize/Description.props"/>
+
+    <move file="${src}/${filters_unsup}/instance/Normalize.java" 
+          todir="${packages_external}/normalize/${src}/${filters_unsup}/instance" failonerror="false"/>
+    <move file="${src-test}/${filters_unsup}/instance/NormalizeTest.java" 
+          todir="${packages_external}/normalize/${src-test}/${filters_unsup}/instance" failonerror="false"/>
+
+    <!-- SMOTE -->
+    <mkdir dir="${packages_external}/SMOTE"/>
+    <mkdir dir="${packages_external}/SMOTE/${lib}"/>
+    <mkdir dir="${packages_external}/SMOTE/${src}/${filters_sup}/instance"/>
+    <mkdir dir="${packages_external}/SMOTE/${src-test}/${filters_sup}/instance"/>
+    <copy file="misc/build_package.xml"
+          todir="${packages_external}/SMOTE"/>
+    <copy file="descriptions/SMOTEDescription.props"
+          tofile="${packages_external}/SMOTE/Description.props"/>
+
+    <move file="${src}/${filters_sup}/instance/SMOTE.java" 
+          todir="${packages_external}/SMOTE/${src}/${filters_sup}/instance" failonerror="false"/>
+    <move file="${src-test}/${filters_sup}/instance/SMOTETest.java" 
+          todir="${packages_external}/SMOTE/${src-test}/${filters_sup}/instance" failonerror="false"/>
+
+  </target>
+
+  <target name="a_test">
+    <for param="dir">
+      <path>
+        <dirset dir="${packages_internal}" includes="*"/>        
+      </path>
+      <sequential>
+        <propertyregex property="result"
+              input="@{dir}"
+              regexp="/.*/([^\.]*)"
+              replace="\1"
+              casesensitive="false" 
+              override="yes" />
+        <echo message="${result}"/>
+      </sequential>
+    </for>
+  </target>
+
+  <target name="compile_tests_internal" depends="compile_tests" description="Compile tests for a named internal package (run with -DpackageName=package name)">
+    <echo message="Compiling ${packageName}"/>
+    <echo message="CLASSPATH ${wekaclasses}:${wekatestclasses}:${junitjar}:${cp}"/>  
+    <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="compile_tests" inheritall="false">
+      <property name="package" value="${packageName}" />
+      <property name="java.class.path" value="${wekaclasses}:${junitjar}:${wekatestclasses}:${cp}"/>
+    </ant>
+  </target>
+      
+  <target name="compile_internal" depends="compile" description="Compile a named internal package (run with -DpackageName=package name)">
+    <echo message="Compiling ${packageName}"/>
+    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
+    <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="compile" inheritall="false">
+      <property name="package" value="${packageName}" />
+      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
+    </ant>
+  </target>
+
+  <target name="make_internal" description="Make a named internal package - compiles, generates javadoc and creates the zip file (run with -DpackageName=package name)">
+    <echo message="Making ${packageName}"/>
+    <copy file="descriptions/${packageName}Description.props"
+          tofile="${packages_internal}/${packageName}/Description.props"/>
+    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
+    <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="make_package" inheritall="false">
+      <property name="package" value="${packageName}" />
+      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
+    </ant>
+  </target>
+
+  <!-- Temporary target for moving stuff in svn -->
+  <target name="svn_move_internal">
+    <echo message="Moving ${packageName} in svn working copy..."/>
+    <property name="source-root" value="."/>
+    <!-- <property name="repository.URL" value="https://svn.scms.waikato.ac.nz/svn/weka"/> -->
+    <java classname="org.tmatesoft.svn.cli.SVN"
+       dir="${source-root}/" fork="true">
+      <arg value="move"/>
+      <!-- <arg value="${repository.URL}/${weka_branch}/weka"/> -->
+      <classpath>
+        <pathelement location="${ant.home}/lib/svnkit.jar" />
+        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+      </classpath>
+    </java>
+  </target>
+
+  <target name="apply_all_internal" depends="compile" description="Apply command to all internal packages. Use -DpackageCommand=[make|compile|compile_tests]">
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="hotSpot"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="predictiveApriori"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="chiSquaredAttributeEval"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="consistencySubsetEval"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="classifierBasedAttributeSelection"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="costSensitiveAttributeSelection"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="raceSearch"/>
+      <param name="cp" value="../classifierBasedAttributeSelection/dist/classifierBasedAttributeSelection/classifierBasedAttributeSelection.jar"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="filteredAttributeSelection"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="attributeSelectionSearchMethods"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="SVMAttributeEval"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="gaussianProcesses"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="isotonicRegression"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="leastMedSquared"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="partialLeastSquares"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="gridSearch"/>
+      <param name="cp" value="../partialLeastSquares/dist/partialLeastSquares/partialLeastSquares.jar"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="paceRegression"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="RBFNetwork"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="SPegasos"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="multiInstanceFilters"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="multiInstanceLearning"/>
+      <param name="cp" value="../multiInstanceFilters/dist/multiInstanceFilters/multiInstanceFilters.jar"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="classificationViaRegression"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="classificationViaClustering"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="dagging"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="ensemblesOfNestedDichotomies"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="grading"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="metaCost"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="multiBoostAB"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="oneClassClassifier"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="ordinalClassClassifier"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="racedIncrementalLogitBoost"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="realAdaBoost"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="regressionByDiscretization"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="thresholdSelector"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="hyperPipes"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="votingFeatureIntervals"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="conjunctiveRule"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="DTNB"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="ridor"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="scriptingClassifiers"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="alternatingDecisionTrees"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="bestFirstTree"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="naiveBayesTree"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="simpleCART"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="userClassifier"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="XMeans"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="sequentialInformationalBottleneckClusterer"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="denormalize"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="wavelet"/>
+    </antcall>
+  </target>
+
+  <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
+    <echo message="Compiling ${packageName}"/>
+    <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="compile_tests" inheritall="false">
+      <property name="package" value="${packageName}" />
+      <property name="java.class.path" value="${wekaclasses}:${junitjar}:${wekatestclasses}:${cp}"/>
+    </ant>
+  </target>
+
+  <target name="compile_external" depends="compile_internal" description="Compile a named external package (run with -DpackageName=package name)">
+    <echo message="Compiling ${packageName}"/>
+    <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="compile" inheritall="false">
+      <property name="package" value="${packageName}" />
+      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
+    </ant>
+  </target>
+
+  <target name="make_external" description="Make a named external package - compiles, generates javadoc and creates the zip file (run with -DpackageName=package name)">
+    <echo message="Making ${packageName}"/>
+    <copy file="descriptions/${packageName}Description.props"
+          tofile="${packages_external}/${packageName}/Description.props"/>
+    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
+    <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="make_package" inheritall="false">
+      <property name="package" value="${packageName}" />
+      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
+    </ant>
+  </target>
+
+  <target name="apply_all_external" depends="compile" description="Apply command to all external packages. Use -DpackageCommand=[make|compile|compile_tests]">
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="CLOPE"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="DMNBText"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="EMImputation"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="J48graft"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="LibLINEAR"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="LibSVM"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="multilayerPerceptronCS"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="NNge"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="averagedOneDependenceEstimators"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="bayesianLogisticRegression"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="citationKNN"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="decorate"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="ensembleLibrary"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="fastCorrBasedFS"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="functionalTrees"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="fuzzyLaticeReasoning"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="generalizedSequentialPatterns"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="hiddenNaiveBayes"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="latentSemanticAnalysis"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="lazyBayesianRules"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="fuzzyUnorderedRuleInduction"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="levenshteinEditDistance"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="linearForwardSelection"/>
+      <param name="cp" value="../${packages_internal}/classifierBasedAttributeSelection/dist/classifierBasedAttributeSelection/classifierBasedAttributeSelection.jar"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="normalize"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="SMOTE"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="optics_dbScan"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="ordinalLearningMethod"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="ordinalStochasticDominance"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="probabilisticSignificanceAE"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="rotationForest"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="tabuAndScatterSearch"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="stackingC"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="tertius"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="winnow"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="prefuseTree"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="prefuseGraph"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="associationRulesVisualizer"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="scatterPlot3D"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="massiveOnlineAnalysis"/>
+    </antcall>
+  </target>
+
+  <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests]"> 
+    <antcall target="apply_all_internal"/>
+    <antcall target="apply_all_external"/>
+  </target>
 
   <target name="init_compile" depends="init_all">
     <!-- Create the build directory structure used by compile -->
@@ -95,6 +2044,11 @@
         <include name="java_cup/runtime/**/*"/>
       </patternset>
     </unzip>
+    <unzip src="${lib}/packageManager.jar" dest="${build}/classes">
+      <patternset>
+        <include name="org/**/*"/>
+      </patternset>
+    </unzip>
   </target>
 
   <!-- Make the javadocs -->
@@ -105,7 +2059,7 @@
     <javadoc sourcepath="${src}" 
              classpathref="project.class.path"
              destdir="${doc}" 
-             packagenames="weka.*"
+             packagenames="weka.*, org.*"
              Author="yes" 
              Public="yes" 
              maxmemory="256m"/>
@@ -168,15 +2122,35 @@
     </jar>
   </target>
 
-  <!-- Run the test cases via junit's testrunner class.
+  <!-- Run the test cases for the core via junit's testrunner class.
    This is a faster, simpler option than running the junit task -->
-  <target name="run_tests" depends="compile_tests" 
+  <target name="run_tests_core" depends="compile_tests" 
    description="Execute unit tests (fast)">
+<!--    <echo message="pacakge classpath ${pack.cp}"/> -->
      <java fork="yes" dir="."
       classname="junit.textui.TestRunner"
       taskname="junit" failonerror="${run_tests_fail}">
 	 <arg value="weka.AllTests"/>
          <classpath refid="project.class.path" /> 
+       <jvmarg value="-server"/>
+       <jvmarg value="-Xint"/>
+         <jvmarg value="-Djava.awt.headless=${headless}"/> 
+         <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
+     </java>
+  </target>
+
+  <!-- Run the test cases for the core and all packages via junit's testrunner class.
+   This is a faster, simpler option than running the junit task -->
+  <target name="run_tests_all" depends="compile_tests" 
+   description="Execute unit tests (fast)">
+<!--    <echo message="pacakge classpath ${pack.cp}"/> -->
+     <java fork="yes" dir="."
+      classname="junit.textui.TestRunner"
+      taskname="junit" failonerror="${run_tests_fail}">
+	 <arg value="weka.AllTests"/>
+         <classpath refid="package.class.path" /> 
+       <jvmarg value="-server"/>
+       <jvmarg value="-Xint"/>
          <jvmarg value="-Djava.awt.headless=${headless}"/> 
          <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
      </java>
@@ -285,7 +2259,7 @@
   </target>
 
   <!-- Make a release -->
-  <target name="release" depends="run_tests, release_sub_tasks"
+  <target name="release" depends="run_tests_core, release_sub_tasks"
    description="Make a release in ${release}. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
   </target>
 
@@ -446,7 +2420,7 @@
        <property name="weka_branch" value="${weka_branch}"/>
      </ant>
 
-     <ant antfile="${ant.file}" dir="weka" target="run_tests" output="../${reports}/nightly_build-results.txt">
+     <ant antfile="${ant.file}" dir="weka" target="run_tests_core" output="../${reports}/nightly_build-results.txt">
        <property name="mail_smtp_host" value="${mail_smtp_host}"/>
        <property name="mail_sender" value="${mail_sender}"/>
        <property name="mail_recipients" value="${mail_recipients}"/>
