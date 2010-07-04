@@ -80,6 +80,7 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -164,6 +165,9 @@ public class GUIChooser
   
   /** The frame containing the ensemble library interface */
   protected JFrame m_EnsembleLibraryFrame;
+  
+  /** The frame containing the package manager */
+  protected JFrame m_PackageManagerFrame;
 
   // Visualization
 
@@ -704,6 +708,45 @@ public class GUIChooser
     m_jMenuTools.setText("Tools");
     m_jMenuTools.setMnemonic('T');
     
+    // Package Manager
+    final JMenuItem jMenuItemToolsPackageManager = new JMenuItem();
+    m_jMenuTools.add(jMenuItemToolsPackageManager);
+    jMenuItemToolsPackageManager.setText("Package Manager");
+    jMenuItemToolsPackageManager.
+      setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, KeyEvent.CTRL_MASK));
+    jMenuItemToolsPackageManager.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_PackageManagerFrame == null) {
+          jMenuItemToolsPackageManager.setEnabled(false);
+          Thread temp = new Thread() {
+            public void run() {
+              final weka.gui.PackageManager pm;
+              pm = new weka.gui.PackageManager();
+              m_PackageManagerFrame = new JFrame("Package Manager");
+              m_PackageManagerFrame.setIconImage(m_Icon);
+              m_PackageManagerFrame.getContentPane().setLayout(new BorderLayout());
+              m_PackageManagerFrame.getContentPane().add(pm, BorderLayout.CENTER);
+              m_PackageManagerFrame.addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent w) {
+                  m_PackageManagerFrame.dispose();
+                  m_PackageManagerFrame = null;
+                  jMenuItemToolsPackageManager.setEnabled(true);
+                  checkExit();
+                }                
+              });
+              Dimension screenSize = m_PackageManagerFrame.getToolkit().getScreenSize();
+              int width = screenSize.width * 8 / 10;
+              int height = screenSize.height * 8 / 10;
+              m_PackageManagerFrame.setBounds(width/8, height/8, width, height);
+              m_PackageManagerFrame.setVisible(true);
+              pm.setInitialSplitPaneDividerLocation();
+            }
+          };
+          temp.start();
+        }
+      }
+    });
+    
     // Tools/ArffViewer
     JMenuItem jMenuItemToolsArffViewer = new JMenuItem();
     m_jMenuTools.add(jMenuItemToolsArffViewer);
@@ -1088,6 +1131,32 @@ public class GUIChooser
       }
     });
     pack();
+    
+    if (!Utils.getDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager")) {
+      Thread tipThread = new Thread() {
+        public void run() {
+          JCheckBox dontShow = new JCheckBox("Do not show this message again");
+          Object[] stuff = new Object[2];
+          stuff[0] = "Weka has a package manager that you\n"
+            + "can use to install many learning schemes and tools.\nThe package manager can be "
+            + "found under the \"Tools\" menu.\n";
+          stuff[1] = dontShow;
+          // Display the tip on finding/using the package manager
+          JOptionPane.showMessageDialog(GUIChooser.this, stuff, 
+              "Weka GUIChooser", JOptionPane.OK_OPTION);
+          
+          if (dontShow.isSelected()) {
+            try {
+              Utils.setDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager");
+            } catch (Exception ex) {
+              // quietly ignore
+            }
+          }
+        }
+      };
+      tipThread.setPriority(Thread.MIN_PRIORITY);
+      tipThread.start();
+    }
   }
   
   /**
