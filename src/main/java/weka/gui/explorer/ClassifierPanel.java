@@ -1725,10 +1725,10 @@ public class ClassifierPanel
         JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(preds, classAtt);
         Version version = new Version();
         if (pluginMenuItem != null) {
-          if (version.compareTo(plugin.getMinVersion()) < 0)
+          /*if (version.compareTo(plugin.getMinVersion()) < 0)
             pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
           if (version.compareTo(plugin.getMaxVersion()) >= 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
           visPlugins.add(pluginMenuItem);
         }
       }

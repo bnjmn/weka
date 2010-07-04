@@ -1308,7 +1308,7 @@ public abstract class Filter
    * @param filter	the filter to run
    * @param options	the commandline options
    */
-  protected static void runFilter(Filter filter, String[] options) {
+  public static void runFilter(Filter filter, String[] options) {
     try {
       if (Utils.getFlag('b', options)) {
 	Filter.batchFilterFile(filter, options);

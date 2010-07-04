@@ -200,6 +200,7 @@ public class PreprocessPanel
   protected Explorer m_Explorer = null;
   
   static {
+     weka.core.WekaPackageManager.loadPackages(false);
      GenericObjectEditor.registerEditors();
   }
   

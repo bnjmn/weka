@@ -27,6 +27,7 @@ import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -299,6 +300,106 @@ public class ClassDiscovery
 
     return result;
   }
+  
+  /**
+   * Get all class files in a directory (recursively)
+   * 
+   * @param baseDir the directory to look for class files in
+   * @param files an array list to hold the found files
+   */
+  private static void getFiles(File baseDir, 
+      ArrayList<File> files) {
+    File[] contents = baseDir.listFiles();
+    for (int i = 0; i < contents.length; i++) {
+      if (contents[i].isFile() && contents[i].getName().endsWith(".class")) {
+        files.add(contents[i]);
+      } else if (contents[i].isDirectory()) {
+        getFiles(contents[i], files);
+      }
+    }
+  }
+  
+  /**
+   * Find all classes that have the supplied matchText String in
+   * their suffix.
+   * 
+   * @param matchText the text to match
+   * @return an array list of matching fully qualified class names.
+   */
+  public static ArrayList<String> find(String matchText) {
+    String                part;
+    File                  dir;
+    int                   i;
+    String                classname;
+    JarFile               jar;
+    JarEntry              entry;
+    
+    ClassloaderUtil clu = new ClassloaderUtil();
+    URLClassLoader sysLoader = (URLClassLoader)clu.getClass().getClassLoader();
+    URL[] cl_urls = sysLoader.getURLs();
+    ArrayList<String> matches = new ArrayList<String>();
+    
+    for (i = 0; i < cl_urls.length; i++) {
+      part = cl_urls[i].toString();
+      if (part.startsWith("file:")) {
+        part = part.replace(" ", "%20");
+        try {
+          File temp = new File(new java.net.URI(part));
+          part = temp.getAbsolutePath();
+        } catch (URISyntaxException e) {
+          e.printStackTrace();
+        }
+      }
+      if (VERBOSE)
+        System.out.println("Classpath-part: " + part);
+
+      // find classes
+      ArrayList<File> files = new ArrayList<File>();
+      
+      dir = new File(part);
+      if (dir.isDirectory()) {
+        getFiles(dir, files);
+        // process list looking for matchText
+        for (File f : files) {
+          String fName = f.getAbsolutePath().replaceAll("\\.class", "");
+          fName = fName.substring(part.length() + 1);
+          fName = fName.replaceAll(File.separator, ".");
+
+          //if (fName.endsWith(matchText)) {
+          if (fName.contains(matchText)) {
+            matches.add(fName);
+          }
+        }
+      }
+      else {
+        try {
+          jar = new JarFile(part);
+          Enumeration enm = jar.entries();
+          while (enm.hasMoreElements()) {
+            entry = (JarEntry) enm.nextElement();
+
+            // only class files
+            if (    (entry.isDirectory())
+                || (!entry.getName().endsWith(".class")) )
+              continue;
+
+            classname = entry.getName().replaceAll("\\.class", "");
+            classname = classname.replaceAll("/", ".");
+
+            //if (classname.endsWith(matchText)) {
+            if (classname.contains(matchText)) {
+              matches.add(classname);
+            }
+          }
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    
+    return matches;
+  }
 
   /**
    * Checks the given package for classes that inherited from the given class,
@@ -339,7 +440,7 @@ public class ClassDiscovery
 
       // check all parts of the classpath, to include additional classes from
       // "parallel" directories/jars, not just the first occurence
-      /*tok = new StringTokenizer(
+      /* tok = new StringTokenizer(
 	  System.getProperty("java.class.path"), 
 	  System.getProperty("path.separator")); */
       
@@ -356,7 +457,8 @@ public class ClassDiscovery
           try {
             File temp = new File(new java.net.URI(part));
             part = temp.getAbsolutePath();
-          } catch (URISyntaxException e) {            
+          } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
           }
         }

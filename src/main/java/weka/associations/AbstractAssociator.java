@@ -133,7 +133,7 @@ public abstract class AbstractAssociator
    * @param associator	the associator to run
    * @param options	the commandline options
    */
-  protected static void runAssociator(Associator associator, String[] options) {
+  public static void runAssociator(Associator associator, String[] options) {
     try {
       System.out.println(
 	  AssociatorEvaluation.evaluate(associator, options));
