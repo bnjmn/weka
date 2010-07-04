@@ -1002,10 +1002,15 @@ public class PackageManager extends JPanel {
   
   protected boolean m_cacheEstablished = false;
   protected boolean m_cacheRefreshInProgress = false;
+  public static String PAGE_HEADER = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n" +
+    "<html>\n<head>\n<title>Waikato Environment for Knowledge Analysis (WEKA)</title>\n" +
+    "<!-- CSS Stylesheet -->\n<style>body\n{\nbackground: #ededed;\ncolor: #666666;\n" +
+    "font: 14px Tahoma, Helvetica, sans-serif;;\nmargin: 5px 10px 5px 10px;\npadding: 0px;\n" +
+    "}\n</style>\n\n</head>\n<body bgcolor=\"#ededed\" text=\"#666666\">\n";
   
   private static String initialPage() {
     StringBuffer initialPage = new StringBuffer();
-    initialPage.append(weka.core.RepositoryIndexGenerator.HEADER);
+    initialPage.append(PAGE_HEADER);
     initialPage.append("<h1>WEKA Package Manager</h1>\n\n</body></html>\n");
     return initialPage.toString();
   }
