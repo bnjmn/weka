@@ -1,0 +1,240 @@
+2001-07-06 12:56  mhall
+
+	* weka/experiment/Stats.java (1.8): Added method to subtract a
+	value n times.
+
+2001-07-06 12:52  mhall
+
+	* weka/gui/explorer/ClustererPanel.java (1.31): Added support for
+	visualizing the trees that Cobweb can now produce.
+
+2001-07-06 12:50  mhall
+
+	* weka/clusterers/Cobweb.java (1.11): Complete rewrite.
+
+2001-07-06 12:26  eibe
+
+	* weka/Makefile (1.33): Modified javadoc generation to put link to
+	our homepage on packages page.
+
+2001-07-06 11:33  eibe
+
+	* weka/gui/GenericObjectEditor.props (1.38): Added
+	StringToWordVectorFilter to GenericObjectEditor.props.
+
+2001-07-06 11:31  eibe
+
+	* weka/filters/Makefile (1.20): Added StringToWordVectorFilter to
+	Makefile.
+
+2001-07-04 15:08  rkirkby
+
+	* weka/core/Instances.java (1.33): Added check for unknown string
+	in renameAttributeValue().
+
+2001-07-04 15:07  rkirkby
+
+	* weka/core/Attribute.java (1.22): More fixes to handling of
+	compressed strings & hashtable.
+
+2001-07-04 15:03  mhall
+
+	* weka/: classifiers/Makefile (1.26), gui/GenericObjectEditor.props
+	(1.37): Added OrdinalClassClassifier
+
+2001-07-04 15:02  mhall
+
+	* weka/classifiers/OrdinalClassClassifier.java (1.1): Initial
+	import.
+
+2001-07-04 11:26  eibe
+
+	* weka/classifiers/Logistic.java (1.13): Made a couple of cosmetic
+	changes.
+
+2001-07-04 10:51  rkirkby
+
+	* weka/core/Attribute.java (1.21): Fixed compression of long
+	nominal labels.
+
+2001-06-18 15:19  rkirkby
+
+	* weka/core/Attribute.java (1.20): Restored behaviour of
+	indexOfValue() to return -1 if value is not found.
+
+2001-06-01 16:01  rkirkby
+
+	* weka/: classifiers/Makefile (1.25), gui/GenericObjectEditor.props
+	(1.36): Added LeastMedSq classifier.
+
+2001-06-01 16:00  rkirkby
+
+	* weka/classifiers/LeastMedSq.java (1.1): Initial import.
+
+2001-05-24 11:39  rkirkby
+
+	* weka/classifiers/adtree/PredictionNode.java (1.2): Fixed a
+	merging bug that caused to ordering of nodes to be incorrect.
+
+2001-05-22 17:23  eibe
+
+	* weka/filters/SplitDatasetFilter.java (1.12): Selection of
+	instances using -R was broken.
+
+2001-04-24 12:12  trigg
+
+	* weka/gui/explorer/PreprocessPanel.java (1.24): Added an
+	explanatory message when trying to use a filter that requires a
+	class attribute be set.
+
+2001-04-23 16:58  rkirkby
+
+	* weka/: classifiers/Makefile (1.24), gui/GenericObjectEditor.props
+	(1.35): Added Cleanser meta-classifier.
+
+2001-04-23 16:57  rkirkby
+
+	* weka/classifiers/Cleanser.java (1.1): Initial import.
+
+2001-04-23 15:37  rkirkby
+
+	* weka/classifiers/adtree/ADTree.java (1.2): Added Bernhard as an
+	author, and fixed a few comments.
+
+2001-04-23 15:11  rkirkby
+
+	* weka/classifiers/neural/NeuralNode.java (1.3): General
+	improvements.
+
+2001-04-23 15:10  rkirkby
+
+	* weka/classifiers/neural/NeuralNetwork.java (1.5): Added
+	toString() method and other general improvements.
+
+2001-04-05 17:20  eibe
+
+	* weka/filters/DiscretizeFilter.java (1.16): Implemented equal
+	frequency binning and got rid of a bug in the option handling.
+
+2001-04-05 10:20  rkirkby
+
+	* weka/clusterers/EM.java (1.14): Improved error output for when an
+	instance has zero cluster memberships.
+
+2001-04-03 16:10  rkirkby
+
+	* weka/gui/GenericObjectEditor.props (1.34): Added ADTree.
+
+2001-04-03 16:09  rkirkby
+
+	* weka/Makefile (1.32): Added adtree package.
+
+2001-04-03 16:09  rkirkby
+
+	* weka/classifiers/Makefile (1.23): Added adtree package +
+	IterativeClassifier interface.
+
+2001-04-03 16:05  rkirkby
+
+	* weka/classifiers/adtree/: PredictionNode.java (1.1),
+	ReferenceInstances.java (1.1), Splitter.java (1.1),
+	TwoWayNominalSplit.java (1.1), TwoWayNumericSplit.java (1.1),
+	Makefile (1.1): Initial import
+
+2001-04-03 16:01  rkirkby
+
+	* weka/classifiers/: IterativeClassifier.java (1.1),
+	adtree/ADTree.java (1.1): Initial import
+
+2001-04-03 15:28  rkirkby
+
+	* weka/core/Instances.java (1.32): Made private member variables
+	protected.
+
+2001-04-03 10:10  eibe
+
+	* weka/core/Attribute.java (1.19): Made indexOfValue throw a proper
+	Exception if value not found
+
+2001-04-02 14:29  eibe
+
+	* weka/classifiers/Evaluation.java (1.42): Fixed kappa statistic so
+	that it works if there is just one class in the test data.
+
+2001-03-30 10:45  rbk1
+
+	* weka/gui/explorer/ClassifierPanel.java (1.45): Added output in
+	the result buffer displaying the real time elapsed that it took to
+	build the full model.
+
+2001-03-30 10:42  rbk1
+
+	* weka/experiment/RegressionSplitEvaluator.java (1.13): Added new
+	measures returning the time spent training and the time spent
+	testing the classifier.
+
+2001-03-30 10:37  rbk1
+
+	* weka/experiment/ClassifierSplitEvaluator.java (1.14): Added new
+	measures returning the time spent training and the time spent
+	testing the classifier.
+
+2001-03-30 10:35  rbk1
+
+	* weka/classifiers/Evaluation.java (1.41): Added output of the real
+	time elapsed that it took for the model to be trained, and for the
+	model to be tested on the training data.
+
+2001-03-30 10:31  rbk1
+
+	* weka/classifiers/CostSensitiveClassifier.java (1.10): Allowed
+	classifiers to be graphed through the Drawable interface (if
+	possible).
+
+2001-03-30 09:53  rbk1
+
+	* weka/classifiers/j48/J48.java (1.22): Minor documentation fix.
+
+2001-03-29 12:02  mhall
+
+	* weka/attributeSelection/Makefile (1.14): Added ExhaustiveSearch
+	to the Makefile.
+
+2001-03-28 17:31  mhall
+
+	* weka/clusterers/ClusterEvaluation.java (1.18): Wrapped all
+	FileReaders in BufferedReaders. Speeds up I/O. Thanks to Bernhard
+	Pfahringer for noticing and rectifying.
+
+2001-03-27 15:11  rbk1
+
+	* weka/core/Utils.java (1.30): Made the stableSort method treat
+	Double.NaN as Double.MAX_VALUE
+
+2001-03-26 17:19  mhall
+
+	* weka/experiment/InstanceQuery.java (1.11): Fixed bug that
+	prevented retreiveInstances from working properly with the odbc
+	driver for MS Access.
+
+2001-03-23 16:10  mhall
+
+	* weka/gui/visualize/Plot2D.java (1.16): Fixed bug that caused some
+	lines to be drawn when visualizing classifier errors.
+
+2001-03-20 10:32  rbk1
+
+	* weka/: classifiers/Evaluation.java (1.40),
+	clusterers/ClusterEvaluation.java (1.17): Extended -p option to
+	allow desired attribute values to be output along with the
+	predictions.
+
+2001-03-16 11:11  eibe
+
+	* weka/filters/Makefile (1.19): Fixed makefile to process
+	AttributeExpressionFilter
+
+2001-03-16 10:56  rbk1
+
+	* weka/clusterers/: EM.java (1.13), SimpleKMeans.java (1.6):
+	Options documentation fix.
