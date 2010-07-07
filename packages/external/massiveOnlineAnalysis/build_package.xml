@@ -10,7 +10,7 @@
   <!-- set global properties for this build -->
   <property name="src" value="src/main/java"/>
   <property name="src-test" value="src/test/java"/>
-  <property name="regression_tests_root" value="src/test/resources/wekarefs"/>
+  <property name="lib" value="lib" />
   <property name="build" value="build"/>
   <property name="dist"  value="dist"/>
   <property name="doc"  value="doc"/>
