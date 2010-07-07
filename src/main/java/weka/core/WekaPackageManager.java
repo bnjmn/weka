@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
@@ -117,11 +118,29 @@ public class WekaPackageManager {
     try {
       String repURL = System.getProperty("weka.core.wekaPackageRepositoryURL");
       if (repURL == null || repURL.length() == 0) {
-        repURL = "http://www.cs.waikato.ac.nz/ml/weka/wekaLite";
+        // See if there is a URL named in $WEKA_HOME/props/PackageRepository.props
+        File repPropsFile = new File(PROPERTIES_DIR.toString() + File.separator
+            + "PackageRepository.props");
+        
+        
+        if (repPropsFile.exists()) {
+          Properties repProps = new Properties();
+          repProps.load(new FileInputStream(repPropsFile));
+          repURL = repProps.getProperty("weka.core.wekaPackageRepositoryURL");
+        }
       }
+      
+      if (repURL == null || repURL.length() == 0) {
+        repURL = "http://www.cs.waikato.ac.nz/ml/weka/wekaLite";
+      } else {
+        System.out.println("weka.core.WekaPackageRepositoryURL = " + repURL);
+      }
+      
       REP_URL = new URL(repURL);
       PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
     } catch (MalformedURLException ex) {
+      ex.printStackTrace();
+    } catch (IOException ex) {
       ex.printStackTrace();
     }
     
