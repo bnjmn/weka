@@ -1487,10 +1487,11 @@ public class ClassifierPanel
 		tempd.setShapeSize(plotSize);
 		tempd.setShapeType(plotShape);
 		tempd.setPlotName(name+" ("+inst.relationName()+")");
-		tempd.addInstanceNumberAttribute();
+		//tempd.addInstanceNumberAttribute();
 		
 		m_CurrentVis.addPlot(tempd);
-		m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
+		//m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
+		m_CurrentVis.setColourIndex(predInstances.classIndex());
 	    
                 FastVector vv = new FastVector();
                 if (outputModel) {
