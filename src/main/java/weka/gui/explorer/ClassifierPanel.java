@@ -2481,10 +2481,11 @@ public class ClassifierPanel
                   tempd.setShapeType(plotShape);
                   tempd.setPlotName(name+" ("+userTestStructure.relationName()
                                     +")");
-                  tempd.addInstanceNumberAttribute();
+                  //tempd.addInstanceNumberAttribute();
 	  
                   m_CurrentVis.addPlot(tempd);
-                  m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
+                  m_CurrentVis.setColourIndex(predInstances.classIndex());
+                  //m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
 	  
                   if (classifier instanceof Drawable) {
                     try {
