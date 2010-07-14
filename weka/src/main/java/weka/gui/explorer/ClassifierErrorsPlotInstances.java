@@ -472,7 +472,7 @@ public class ClassifierErrorsPlotInstances
     result.setShapeSize(m_PlotSizes);
     result.setShapeType(m_PlotShapes);
     result.setPlotName(name + " (" + m_Instances.relationName() + ")");
-    result.addInstanceNumberAttribute();
+//    result.addInstanceNumberAttribute();
 
     return result;
   }
