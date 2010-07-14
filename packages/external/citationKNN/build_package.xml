@@ -87,7 +87,8 @@
              classpathref="project.class.path"
              destdir="${doc}" 
              Author="yes" 
-             Public="yes" 
+             Public="yes"
+             link="http://weka.sourceforge.net/doc.dev/"
              maxmemory="256m"/>          
   </target> 
 
@@ -212,7 +213,7 @@
 
   <!-- Put all .java, and .props files into ${dist}/${package}-src.jar-->
   <target name="srcjar" depends="init_dist, init_all"
-   description="Create a jar file containing ${package} source in ./dist. Run with -Dpackage=[package name]">  
+   description="Create a jar file containing weka source in ./dist. Run with -Dpackage=[package name]">  
     <!-- jar up the source -->
     <jar jarfile="${dist}/${package}-src.jar" 
       basedir=".">
