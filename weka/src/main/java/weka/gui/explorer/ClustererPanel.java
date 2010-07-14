@@ -1279,6 +1279,7 @@ public class ClustererPanel
       // clear selected indices
       m_ignoreKeyList.clearSelection();
     }
+    updateCapabilitiesFilter(m_ClustererEditor.getCapabilitiesFilter());
   }
 
   /**
@@ -1586,6 +1587,10 @@ public class ClustererPanel
     else
       tempInst = new Instances(m_Instances);
     tempInst.setClassIndex(-1);
+    
+    if (!m_ignoreKeyList.isSelectionEmpty()) {
+      tempInst = removeIgnoreCols(tempInst);
+    }
 
     try {
       filterClass = Capabilities.forInstances(tempInst);
