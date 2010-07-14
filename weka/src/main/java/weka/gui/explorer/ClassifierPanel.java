@@ -1313,7 +1313,8 @@ public class ClassifierPanel
 		m_CurrentVis.setName(name+" ("+inst.relationName()+")");
 		m_CurrentVis.setLog(m_Log);
 		m_CurrentVis.addPlot(plotInstances.getPlotData(cname));
-		m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
+		//m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
+	        m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex());
 		plotInstances.cleanUp();
 	    
                 FastVector vv = new FastVector();
@@ -2288,7 +2289,8 @@ public class ClassifierPanel
                   m_CurrentVis.setName(name + " (" + userTestStructure.relationName() + ")");
                   m_CurrentVis.setLog(m_Log);
                   m_CurrentVis.addPlot(plotInstances.getPlotData(name));
-                  m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
+                  //m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
+                  m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex());
                   plotInstances.cleanUp();
 	  
                   if (classifier instanceof Drawable) {
