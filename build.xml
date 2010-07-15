@@ -500,6 +500,18 @@
     </antcall>
 
     <antcall target="${packageCommand}_external">
+      <param name="packageName" value="kfGroovy"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="kfKettle"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="classifierErrors"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
       <param name="packageName" value="massiveOnlineAnalysis"/>
     </antcall>
   </target>
