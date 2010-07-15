@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=A visualization component for displaying the errors made by numeric classifiers. This component uses the plotting classes from the JMathTools library.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://60.234.159.233/~mhall/wekaLite/classifierErrors/classifierErrors1.0.0.zip
+PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite//classifierErrors/classifierErrors1.0.0.zip
 
 # URL for further information
 URL=http://weka.wikispaces.com/Explorer+error+visualization+plugins
