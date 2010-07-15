@@ -108,8 +108,6 @@
 
   <target name="make_internal" description="Make a named internal package - compiles, generates javadoc and creates the zip file (run with -DpackageName=package name)">
     <echo message="Making ${packageName}"/>
-    <copy file="descriptions/${packageName}Description.props"
-          tofile="${packages_internal}/${packageName}/Description.props"/>
     <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="make_package" inheritall="false">
       <property name="package" value="${packageName}" />
@@ -340,8 +338,6 @@
 
   <target name="make_external" description="Make a named external package - compiles, generates javadoc and creates the zip file (run with -DpackageName=package name)">
     <echo message="Making ${packageName}"/>
-    <copy file="descriptions/${packageName}Description.props"
-          tofile="${packages_external}/${packageName}/Description.props"/>
     <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="make_package" inheritall="false">
       <property name="package" value="${packageName}" />
