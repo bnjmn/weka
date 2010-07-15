@@ -101,15 +101,15 @@ public class WekaPackageManager {
         System.err.println("Unable to create WEKA_HOME (" 
             + WEKA_HOME.getAbsolutePath() + ")");
         ok = false;
-      } else {
-        if (!PACKAGES_DIR.exists()) {
-          // create the packages dir
-          if (!PACKAGES_DIR.mkdir()) {
-            System.err.println("Unable to create packages directory (" 
-                + PACKAGES_DIR.getAbsolutePath() + ")");
-            ok = false;
-          }
-        }
+      }
+    }
+    
+    if (!PACKAGES_DIR.exists()) {
+      // create the packages dir
+      if (!PACKAGES_DIR.mkdir()) {
+        System.err.println("Unable to create packages directory (" 
+            + PACKAGES_DIR.getAbsolutePath() + ")");
+        ok = false;
       }
     }
     
