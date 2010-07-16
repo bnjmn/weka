@@ -1250,7 +1250,7 @@ public class PackageManager extends JPanel {
         private static final long serialVersionUID = -2886328542412471039L;
 
       public boolean isCellEditable(int row, int col) {
-        if (col != 4) {
+        if (col != 3) {
           return false;
         } else {
           return true;
@@ -1434,6 +1434,7 @@ public class PackageManager extends JPanel {
 
       for (int i = 0; i < selectedRows.length; i++) {
         if (!enableInstall || !enableUninstall) {
+          enableInstall = true; // we should always be able to install an already installed package
           String packageName = m_table.getValueAt(selectedRows[i], 
               getColumnIndex(PACKAGE_COLUMN)).toString();
           try {
@@ -1442,9 +1443,9 @@ public class PackageManager extends JPanel {
               enableUninstall = p.isInstalled(); 
             }
 
-            if (!enableInstall) {
+            /*if (!enableInstall) {
               enableInstall = !p.isInstalled();
-            }
+            } */
           } catch (Exception e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
