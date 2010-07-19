@@ -711,7 +711,7 @@ public class GUIChooser
     // Package Manager
     final JMenuItem jMenuItemToolsPackageManager = new JMenuItem();
     m_jMenuTools.add(jMenuItemToolsPackageManager);
-    jMenuItemToolsPackageManager.setText("Package Manager");
+    jMenuItemToolsPackageManager.setText("Package manager");
     jMenuItemToolsPackageManager.
       setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, KeyEvent.CTRL_MASK));
     jMenuItemToolsPackageManager.addActionListener(new ActionListener() {
