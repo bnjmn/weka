@@ -68,37 +68,57 @@ public class Run {
     try {
       if (args.length == 0 || args[0].equalsIgnoreCase("-h") ||
           args[0].equalsIgnoreCase("-help")) {
-        System.err.println("Usage:\n\tweka.Run [-no-scan | -no-load] <scheme name [scheme options]>");
+        System.err.println("Usage:\n\tweka.Run [-no-scan] [-no-load] <scheme name [scheme options]>");
         System.exit(1);
       }
+      boolean noScan = false;
+      boolean noLoad = false;
       if (args[0].equals("-list-packages")) {
         weka.core.WekaPackageManager.loadPackages(true);
         System.exit(0);
-      } else if (!args[0].equals("-no-load")) {
+      } else if (args[0].equals("-no-load")) {
+        noLoad = true;
+        if (args.length > 1) {
+          if (args[1].equals("-no-scan")) {
+            noScan = true;
+          }
+        }
+      } else if (args[0].equals("-no-scan")) {
+        noScan = true;
+        if (args.length > 1) {
+          if (args[1].equals("-no-load")) {
+            noLoad = true;
+          }
+        }
+      }
+      
+      if (!noLoad) {
         weka.core.WekaPackageManager.loadPackages(false);
+      }
+      
+      int schemeIndex = 0;
+      if (noLoad && noScan) {
+        schemeIndex = 2;
+      } else if (noLoad || noScan) {
+        schemeIndex = 1;
       }
       
       String schemeToRun = null;
       String[] options = null;
-      if (args[0].equals("-no-scan") || args[0].equals("-no-load")) {
-        if (args.length < 2) {
-          System.err.println("No scheme name given.");
-          System.exit(1);
-        }
-        schemeToRun = args[1];
-        options = new String[args.length - 2];
-        if (options.length > 0) {
-          System.arraycopy(args, 2, options, 0, options.length);
-        }
-      } else {
-        // scan packages for matches
-        schemeToRun = args[0];
-        options = new String[args.length - 1];
-        if (options.length > 0) {
-          System.arraycopy(args, 1, options, 0, options.length);
-        }
-
-        ArrayList<String> matches = weka.core.ClassDiscovery.find(args[0]);
+      
+      if (schemeIndex >= args.length) {
+        System.err.println("No scheme name given.");
+        System.exit(1);
+      }
+      schemeToRun = args[schemeIndex];
+      options = new String[args.length - schemeIndex - 1];
+      if (options.length > 0) {
+        System.arraycopy(args, schemeIndex + 1, options, 0, options.length);
+      }
+      
+           
+      if (!noScan) {     
+        ArrayList<String> matches = weka.core.ClassDiscovery.find(schemeToRun);
         ArrayList<String> prunedMatches = new ArrayList<String>();
         // prune list for anything that isn't a runnable scheme      
         for (int i = 0; i < matches.size(); i++) {
@@ -118,7 +138,7 @@ public class Run {
         }
 
         if (prunedMatches.size() == 0) {
-          System.err.println("Can't find scheme " + args[0] + ", or it is not runnable.");
+          System.err.println("Can't find scheme " + schemeToRun + ", or it is not runnable.");
           System.exit(1);
         } else if (prunedMatches.size() > 1) {
           java.io.BufferedReader br = 
