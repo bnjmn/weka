@@ -116,7 +116,7 @@ public class WekaPackageManager {
     m_wekaHomeEstablished = ok;
     PACKAGE_MANAGER.setPackageHome(PACKAGES_DIR);
     try {
-      String repURL = System.getProperty("weka.core.wekaPackageRepositoryURL");
+      String repURL = env.getVariableValue("weka.core.wekaPackageRepositoryURL");
       if (repURL == null || repURL.length() == 0) {
         // See if there is a URL named in $WEKA_HOME/props/PackageRepository.props
         File repPropsFile = new File(PROPERTIES_DIR.toString() + File.separator
