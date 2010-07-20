@@ -28,5 +28,6 @@ DateFormat=yyyy-MM-dd HH:mm:ss
 #   %t - the temp directory
 #   %h - the user's home directory
 #   %c - the current directory
+#   %w - WEKA_HOME
 #   %% - gets replaced by a single percentage sign
-LogFile=%h/weka.log
+LogFile=%w/weka.log
