@@ -163,7 +163,14 @@ Some basic statistics and validation of given ARFF files can be obtained via the
 \newpage
 \subsection{Classifier}
 
-Any learning algorithm in WEKA is derived from the abstract \texttt{weka.classifiers.Classifier} class. Surprisingly little is needed for a basic classifier: a routine which generates a classifier model from a training dataset (= \texttt{buildClassifier}) and another routine which evaluates the generated model on an unseen test dataset (= \texttt{classifyInstance}), or generates a probability distribution for all classes (= \texttt{distributionForInstance}).
+Any learning algorithm in WEKA is derived from the abstract
+\texttt{weka.classifiers.AbstractClassifier} class. This, in turn,
+implements \texttt{weka.classifiers.Classifier}. Surprisingly little
+is needed for a basic classifier: a routine which generates a
+classifier model from a training dataset (= \texttt{buildClassifier})
+and another routine which evaluates the generated model on an unseen
+test dataset (= \texttt{classifyInstance}), or generates a probability
+distribution for all classes (= \texttt{distributionForInstance}).
 
 A classifier model is an arbitrary complex mapping from all-but-one dataset attributes to the class attribute. The specific form and creation of this mapping, or model, differs from classifier to classifier. For example, ZeroR's (= \texttt{weka.classifiers.rules.ZeroR}) model just consists of a single value: the most common class, or the median of all numeric values in case of predicting a numeric value (= regression learning). ZeroR is a trivial classifier, but it gives a lower bound on the performance of a given dataset which should be significantly improved by more complex classifiers. As such it is a reasonable test on how well the class can be predicted without considering the other attributes.
 
@@ -663,3 +670,202 @@ If meta classifiers are used, i.e. classifiers whose options include classifier 
 \end{verbatim}}
 
 \noindent Notice that while \texttt{ClassificationViaRegression} honors the \texttt{--} parameter, \texttt{Stacking} itself does not. Sadly the option handling for sub-classifier specifications is not yet completely unified within WEKA, but hopefully one or the other approach mentioned here will work. 
+
+\section{Additional packages and the package manager}
+
+Up until now we've used the term {\it package} to refer to a Java's
+concept of organizing classes. In addition, Weka has the concept of a
+package as a bundle of additional functionality, separate from that
+supplied in the main weka.jar file. A package consists of various jar
+files, documentation, meta data, and possibly source code (see
+Appendix ???  for more information on the structure of packages for
+Weka). There are a number of packages available for Weka that add
+learning schemes or extend the functionality of the core system in
+some fashion. Many are provided by the Weka team and others are from
+third parties.
+
+Weka includes a facility for the management of packages and a
+mechanism to load them dynamically at runtime. There is both a
+command-line and GUI package manager; we describe the command-line
+version here and the GUI version in the next Chapter.
+
+\subsection{Package management}
+
+Assuming that the \texttt{weka.jar} file is in the classpath, the
+package manager can be accessed by typing:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.core.WekaPackageManager
+\end{verbatim}}
+
+Supplying no options will print the usage information:
+
+{\scriptsize
+\begin{verbatim}
+  Usage: weka.core.PackageManager [option]
+  Options:
+     -list-packages <all | installed | available>
+     -package-info <repository | installed | archive> packageName
+     -install-package <packageName | packageZip | URL> [version]
+     -uninstall-package <packageName>
+     -refresh-cache
+\end{verbatim}}
+
+Information (meta data) about packages is stored on a web server
+hosted on Sourceforge. The first time the package manager is run, for
+a new installation of Weka, there will be a short delay while the
+system downloads and stores a cache of the meta data from the
+server. Maintaining a cache speeds up the process of browsing
+the package information. From time to time you should update the
+local cache of package meta data in order to get the latest information
+on packages from the server. This can be achieved by supplying the
+\texttt{-refresh-cache} option.
+
+The \texttt{-list-packages} option will, as the name suggests, print
+information (version numbers and short descritions) about various
+packages. The option must be followed by one of three keywords:
+
+\begin{itemize}
+\item \texttt{all} will print information on all packages that the system knows about
+\item \texttt{installed} will print information on all packages that are installed locally
+\item \texttt{available} will print information on all packages that are not installed
+\end{itemize}
+
+The following shows an example of listing all packages installed locally:
+
+{\scriptsize
+\begin{verbatim}
+java weka.core.PackageManager -list-packages installed
+
+Installed    Repository    Package
+=========    ==========    =======
+1.0.0        1.0.0         DTNB: Class for building and using a decision table/naive bayes hybrid classifier.
+1.0.0        1.0.0         massiveOnlineAnalysis: MOA (Massive On-line Analysis).
+1.0.0        1.0.0         multiInstanceFilters: A collection of filters for manipulating multi-instance data.
+1.0.0        1.0.0         naiveBayesTree: Class for generating a decision tree with naive Bayes classifiers at the leaves.
+1.0.0        1.0.0         scatterPlot3D: A visualization component for displaying a 3D scatter plot of the data using Java 3D.
+\end{verbatim}}
+
+The \texttt{-package-info} command lists information about a package
+given its name. The command is followed by one of three keywords and
+then the name of a package:
+
+\begin{itemize}
+\item \texttt{repository} will print info from the repository for the named package
+\item \texttt{installed} will print info on the installed version of the named package
+\item \texttt{archive} will print info for a package stored in a zip archive. In this case, the ``archive''
+keyword must be followed by the path to an package zip archive file rather than just the name of a package
+\end{itemize}
+
+The following shows an example of listing information for the ``isotonicRegression'' package from
+the server:
+
+{\scriptsize
+\begin{verbatim}
+java weka.core.WekaPackageManager -package-info repository isotonicRegression
+
+Description:Learns an isotonic regression model. Picks the attribute that results 
+in the lowest squared error. Missing values are not allowed. Can only deal with 
+numeric attributes. Considers the monotonically increasing case as well as the 
+monotonically decreasing case.
+    Version:1.0.0
+ PackageURL:http://60.234.159.233/~mhall/wekaLite/isotonicRegression/isotonicRegression1.0.0.zip
+     Author:Eibe Frank
+PackageName:isotonicRegression
+      Title:Learns an isotonic regression model.
+       Date:2009-09-10
+        URL:http://weka.sourceforge.net/doc.dev/weka/classifiers/IsotonicRegression.html
+   Category:Regression
+    Depends:weka (>=3.7.1)
+    License:GPL 2.0
+ Maintainer:Weka team <wekalist@list.scms.waikato.ac.nz>
+\end{verbatim}}
+
+The \texttt{-install-package} command allows a package to be installed from one of three
+locations:
+
+\begin{itemize}
+\item specifying a name of a package will install the package using the
+  information in the package description meta data stored on the
+  server. If no version number is given, then the latest available
+  version of the package is installed.
+\item providing a path to a zip file will attempt to unpack and
+  install the archive as a Weka package
+\item providing a URL (beginning with http://) to a package zip file
+  on the web will download and attempt to install the zip file as a
+  Weka package
+\end{itemize}
+
+The \texttt{uninstall-package} command will uninstall the named package. Of course,
+the named package has to be installed for this command to have any effect!
+
+\subsection{Running installed learning algorithms}
+
+Running learning algorithms that come with the main weka distribution
+(i.e. are contained in the weka.jar file) was covered earlier in this
+chapter. But what about algorithms from packages that you've installed
+using the package manager? We don't want to have to add a ton of jar
+files to our classpath every time we wan't to run a particular
+algorithm. Fortunately, we don't have to. Weka has a mechanism to
+load installed packages dynamically at run time. We can run a named
+algorithm by using the \texttt{Run} command:
+
+\texttt{java weka.Run}
+
+If no arguments are supplied, then \texttt{Run} outputs the following usage
+information:
+
+{\scriptsize
+\begin{verbatim}
+Usage:
+  weka.Run [-no-scan] [-no-load] <scheme name [scheme options]>
+\end{verbatim}}
+
+The \texttt{Run} command supports sub-string matching, so you can run
+a classifier (such as J48) like so:
+
+{\scriptsize
+\begin{verbatim}
+java weka.Run J48
+\end{verbatim}}
+
+When there are multiple matches on a supplied scheme name you will be presented with
+a list. For example:
+
+{\scriptsize
+\begin{verbatim}
+java weka.Run NaiveBayes
+Select a scheme to run, or <return> to exit:
+    1) weka.classifiers.bayes.ComplementNaiveBayes
+    2) weka.classifiers.bayes.NaiveBayes
+    3) weka.classifiers.bayes.NaiveBayesMultinomial
+    4) weka.classifiers.bayes.NaiveBayesMultinomialUpdateable
+    5) weka.classifiers.bayes.NaiveBayesSimple
+    6) weka.classifiers.bayes.NaiveBayesUpdateable
+
+Enter a number >
+\end{verbatim}}
+
+You can turn off the scanning of packages and sub-string matching by
+providing the \texttt{-no-scan} option. This is useful when using the
+\texttt{Run} command in a script. In this case, you need to specify
+the fully qualified name of the algorithm to use. E.g.
+
+{\scriptsize
+\begin{verbatim}
+java weka.Run -no-scan weka.classifiers.bayes.NaiveBayes
+\end{verbatim}}
+
+To reduce startup time you can also turn off the dynamic loading of
+installed packages by specifying the \texttt{-no-load} option. In this
+case, you will need to explicitly include any packaged algorithms in
+your classpath if you plan to use them. E.g.
+
+{\scriptsize
+\begin{verbatim}
+java -classpath ./weka.jar:$HOME/wekafiles/packages/DTNB/DTNB.jar rweka.Run -no-load -no-scan weka.classifiers.rules.DTNB
+\end{verbatim}}
+
+
+
