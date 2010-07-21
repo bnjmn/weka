@@ -127,9 +127,10 @@ public final class Utils
     if (!WekaPackageManager.PROPERTIES_DIR.exists()) {
       WekaPackageManager.PROPERTIES_DIR.mkdir();
     }
-    File propFile = new File(WekaPackageManager.PROPERTIES_DIR.toString() + 
-                             + File.separatorChar
+    File propFile = new File(WekaPackageManager.PROPERTIES_DIR.toString()
+                             + File.separator
                              + resourceName);
+
     if (propFile.exists()) {
       try {
         userProps.load(new FileInputStream(propFile));
