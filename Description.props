@@ -32,7 +32,7 @@ Description=Resamples a dataset by applying the Synthetic Minority Oversampling 
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/SMOTE/SMOTE1.0.0.zip
 
 # URL for further information
-#URL=http://www.somewhere.net/algorithm.html
+#URL=http://weka.sourceforge.net/doc.packages/SMOTE
 
 # Related to other packages?
 #Related=
