@@ -32,7 +32,7 @@ Description=A visualization component for displaying a 3D scatter plot of the da
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/scatterPlot3D/scatterPlot3D1.0.0.zip
 
 # URL for further information
-URL=http://none
+URL=http://weka.sourceforge.net/doc.packages/scatterPlot3D
 
 # Related to other packages?
 #Related=
