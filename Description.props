@@ -29,7 +29,7 @@ License=GPL 2.0
 Description= Class that implements a normalized Gaussian radial basisbasis function network.<br/>It uses the k-means clustering algorithm to provide the basis functions and learns either a logistic regression (discrete class problems) or linear regression (numeric class problems) on top of that. Symmetric multivariate Gaussians are fit to the data from each cluster. If the class is nominal it uses the given number of clusters per class.It standardizes all numeric attributes to zero mean and unit variance.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/RBFNetwork/RBFNetwork1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/RBFNetwork1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/RBFNetwork
