@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=FURIA: Fuzzy Unordered Rule Induction Algorithm. For details please see: Jens Christian Huehn, Eyke Huellermeier (2009). FURIA: An Algorithm for Unordered Fuzzy Rule Induction. Data Mining and Knowledge Discovery.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/fuzzyUnorderedRuleInduction/fuzzyUnorderedRuleInduction1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/fuzzyUnorderedRuleInduction1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/fuzzyUnorderedRuleInduction
