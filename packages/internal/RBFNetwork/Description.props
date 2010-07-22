@@ -32,7 +32,7 @@ Description= Class that implements a normalized Gaussian radial basisbasis funct
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/RBFNetwork/RBFNetwork1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/package-summary.html
+URL=http://weka.sourceforge.net/doc.packages/RBFNetwork
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...

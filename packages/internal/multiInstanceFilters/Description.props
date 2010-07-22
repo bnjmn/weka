@@ -32,7 +32,7 @@ Description=A collection of filters for manipulating multi-instance data. Includ
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/multiInstanceFilters/multiInstanceFilters1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/filters/unsupervised/attribute/package-frame.html
+URL=http://weka.sourceforge.net/doc.packages/multiInstanceFilters
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...

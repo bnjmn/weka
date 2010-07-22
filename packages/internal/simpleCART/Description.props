@@ -32,7 +32,7 @@ Description=Class implementing minimal cost-complexity pruning.<br/>Note when de
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/simpleCART/simpleCART1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/trees/SimpleCart.html
+URL=http://weka.sourceforge.net/doc.packages/simpleCART
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...

@@ -32,7 +32,7 @@ Description=This meta classifier creates a number of disjoint, stratified folds 
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/dagging/dagging1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/meta/dagging.html
+URL=http://weka.sourceforge.net/doc.packages/dagging
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...

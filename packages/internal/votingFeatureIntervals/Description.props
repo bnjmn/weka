@@ -32,7 +32,7 @@ Description=Classification by voting feature intervals. Intervals are constucted
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/votingFeatureIntervals/votingFeatureIntervals1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/misc/VFI.html
+URL=http://weka.sourceforge.net/doc.packages/votingFeatureIntervals
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...

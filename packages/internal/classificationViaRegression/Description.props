@@ -32,7 +32,7 @@ Description=Class for doing classification using regression methods. Class is bi
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/classificationViaRegression/classificationViaRegression1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/meta/ClassificationViaRegression.html
+URL=http://weka.sourceforge.net/doc.packages/classificationViaRegression
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
