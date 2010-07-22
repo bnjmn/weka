@@ -32,7 +32,7 @@ Description=Class for generating a decision tree with naive Bayes classifiers at
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/naiveBayesTree/naiveBayesTree1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/trees/NBTree.html
+URL=http://weka.sourceforge.net/doc.packages/naiveBayesTree
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
