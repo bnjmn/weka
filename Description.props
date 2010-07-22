@@ -32,7 +32,7 @@ Description=Wrapper classifiers for Jython and Groovy code. Even though the clas
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/scriptingClassifiers/scriptingClassifiers1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/scripting/JythonClassifier.htm
+URL=http://weka.sourceforge.net/doc.packages/scriptingClassifiers
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
