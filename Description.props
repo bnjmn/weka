@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Implements a least median squared linear regression utilizing the existing weka LinearRegression class to form predictions. Least squared regression functions are generated from random subsamples of the data. The least squared regression with the lowest meadian squared error is chosen as the final model.<br/><br/>The basis of the algorithm is <br/><br/>Peter J. Rousseeuw, Annick M. Leroy (1987). Robust regression and outlier detection.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/leastMedSquared/leastMedSquared1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/leastMedSquared1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/leastMedSquared
