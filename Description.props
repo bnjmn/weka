@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Contructs Hidden Naive Bayes classification model with high classification accuracy and AUC. For more information refer to: H. Zhang, L. Jiang, J. Su: Hidden Naive Bayes. In: Twentieth National Conference on Artificial Intelligence, 919-924, 2005.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/hiddenNaiveBayes/hiddenNaiveBayes1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/hiddenNaiveBayes1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/hiddenNaiveBayes
