@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Class implementing minimal cost-complexity pruning.<br/>Note when dealing with missing values, use "fractional instances" method instead of surrogate split method.<br/><br/>For more information, see:<br/><br/>Leo Breiman, Jerome H. Friedman, Richard A. Olshen, Charles J. Stone (1984). Classification and Regression Trees. Wadsworth International Group, Belmont, California.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/simpleCART/simpleCART1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/simpleCART1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/simpleCART

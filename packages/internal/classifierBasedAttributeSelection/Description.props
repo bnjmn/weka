@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=This package provides two classes - one for evaluating the merit of individual attributes using a classifier (ClassifierAttributeEval), and second for evaluating the merit of subsets of attributes using a classifier (ClassifierSubsetEval). Both invoke a user-specified classifier to perform the evaluation, either under cross-validation or on the training data.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/classifierBasedAttributeSelection/classifierBasedAttributeSelection1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/classifierBasedAttributeSelection1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.dev/weka/attributeSelection/

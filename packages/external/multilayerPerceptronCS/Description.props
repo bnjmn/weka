@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=An extension of the standard MultilayerPerceptron classifier in Weka that adds context-sensitive Multiple Task Learning (csMTL)
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/multilayerPerceptronCS/multilayerPerceptronCS1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/multilayerPerceptronCS1.0.0.zip?download
 
 # URL for further information
 URL=http://www.somewhere.net/algorithm.html

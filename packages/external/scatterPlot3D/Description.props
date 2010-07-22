@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=A visualization component for displaying a 3D scatter plot of the data using Java 3D. Requires Java 3D to be installed.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/scatterPlot3D/scatterPlot3D1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/scatterPlot3D1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/scatterPlot3D

@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=The Fuzzy Lattice Reasoning Classifier uses the notion of Fuzzy Lattices for creating a Reasoning Environment. The current version can be used for classification using numeric predictors. For more information see: I. N. Athanasiadis, V. G. Kaburlasos, P. A. Mitkas, V. Petridis: Applying Machine Learning Techniques on Air Quality Data for Real-Time Decision Support. In: 1st Intl. NAISO Symposium on Information Technologies in Environmental Engineering (ITEE-2003), Gdansk, Poland, 2003; V. G. Kaburlasos, I. N. Athanasiadis, P. A. Mitkas, V. Petridis (2003). Fuzzy Lattice Reasoning (FLR) Classifier and its Application on Improved Estimation of Ambient Ozone Concentration.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/fuzzyLaticeReasoning/fuzzyLaticeReasoning1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/fuzzyLaticeReasoning1.0.0.zip?download
 
 # URL for further information
 #URL=http://weka.sourceforge.net/doc.packages/fuzzyLaticeReasoning

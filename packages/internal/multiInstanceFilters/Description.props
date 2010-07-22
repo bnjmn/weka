@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=A collection of filters for manipulating multi-instance data. Includes PropositionalToMultiInstance, MultiInstanceToPropositional, MILESFilter and RELAGGS. For more information see:<br/><br/>M.-A. Krogel, S. Wrobel: Facets of Aggregation Approaches to Propositionalization. In: Work-in-Progress Track at the Thirteenth International Conference on Inductive Logic Programming (ILP), 2003.<br/><br/>Y. Chen, J. Bi, J.Z. Wang (2006). MILES: Multiple-instance learning via embedded instance selection. IEEE PAMI. 28(12):1931-1947.<br/><br/>James Foulds, Eibe Frank: Revisiting multiple-instance learning via embedded instance selection. In: 21st Australasian Joint Conference on Artificial Intelligence, 300-310, 2008.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/multiInstanceFilters/multiInstanceFilters1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceFilters1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/multiInstanceFilters

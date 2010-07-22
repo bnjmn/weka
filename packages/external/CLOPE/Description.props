@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Yiling Yang, Xudong Guan, Jinyuan You: CLOPE: a fast and effective clustering algorithm for transactional data. In: Proceedings of the eighth ACM SIGKDD international conference on Knowledge discovery and data mining, 682-687, 2002.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/CLOPE/CLOPE1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/CLOPE1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/CLOPE

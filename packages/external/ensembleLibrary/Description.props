@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Manages a libary of ensemble classifiers
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/ensembleLibrary/ensembleLibrary1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/ensembleLibrary1.0.0.zip?download
 
 # URL for further information
 #URL=http://weka.sourceforge.net/doc.packages/ensembleLibrary

@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Class for generating a grafted (pruned or unpruned) C4.5 decision tree. For more information, see Geoff Webb: Decision Tree Grafting From the All-Tests-But-One Partition.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/J48graft/J48graft1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/J48graft1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/J48graft

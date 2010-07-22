@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Modified version of the Citation kNN multi instance classifier. For more information see: Jun Wang, Zucker, Jean-Daniel: Solving Multiple-Instance Problem: A Lazy Learning Approach. In: 17th International Conference on Machine Learning, 1119-1125, 2000.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/citationKNN/citationKNN1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/citationKNN1.0.0.zip?download
 
 # URL for further information
 #URL=http://weka.sourceforge.net/doc.packages/citationKNN

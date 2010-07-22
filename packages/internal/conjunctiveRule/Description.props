@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=This class implements a single conjunctive rule learner that can predict for numeric and nominal class labels.<br/><br/> A rule consists of antecedents "AND"ed together and the consequent (class value) for the classification/regression.  In this case, the consequent is the distribution of the available classes (or mean for a numeric value) in the dataset. If the test instance is not covered by this rule, then it's predicted using the default class distributions/value of the data not covered by the rule in the training data.This learner selects an antecedent by computing the Information Gain of each antecendent and prunes the generated rule using Reduced Error Prunning (REP) or simple pre-pruning based on the number of antecedents.<br/><br/>For classification, the Information of one antecedent is the weighted average of the entropies of both the data covered and not covered by the rule.<br/>For regression, the Information is the weighted average of the mean-squared errors of both the data covered and not covered by the rule.<br/><br/>In pruning, weighted average of the accuracy rates on the pruning data is used for classification while the weighted average of the mean-squared errors on the pruning data is used for regression.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/conjunctiveRule/conjunctiveRule1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/conjunctiveRule1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/conjunctiveRule

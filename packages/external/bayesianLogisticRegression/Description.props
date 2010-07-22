@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Implements Bayesian Logistic Regression for both Gaussian and Laplace Priors. For more information, see Alexander Genkin, David D. Lewis, David Madigan (2004). Large-scale bayesian logistic regression for text categorization.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/bayesianLogisticRegression/bayesianLogisticRegression1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/bayesianLogisticRegression1.0.0.zip?download
 
 # URL for further information
 URL=http://www.stat.rutgers.edu/~madigan/PAPERS/shortFat-v3a.pdf

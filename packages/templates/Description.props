@@ -29,7 +29,7 @@ License=GPL 2.0|Mozilla
 Description=A one paragraph description of the package.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://somewhere.net/weka/funkyPackage.zip
+PackageURL=http://somewhere.net/weka/funkyPackage.zip?download
 
 # URL for further information
 URL=http://somewhere.net/funkyResearchInfo.html

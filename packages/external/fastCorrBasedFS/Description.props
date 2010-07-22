@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Feature selection method based on correlation measureand relevance and redundancy analysis. Use in conjunction with an attribute set evaluator (SymmetricalUncertAttributeEval). For more information see: Lei Yu, Huan Liu: Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution. In: Proceedings of the Twentieth International Conference on Machine Learning, 856-863, 2003.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/fastCorrBasedFS/fastCorrBasedFS1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/fastCorrBasedFS1.0.0.zip?download
 
 # URL for further information
 #URL=http://weka.sourceforge.net/doc.packages/fastCorrBasedFS

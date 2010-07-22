@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=An ensemble learning method inspired by bagging and random sub-spaces. Traines an ensemble of decision trees on random subspaces of the data, where each subspace has been transformed using principal components analysis.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/rotationForest/rotationForest1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/rotationForest1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/rotationForest
