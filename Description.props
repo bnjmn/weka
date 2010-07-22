@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=AODE achieves highly accurate classification by averaging over all of a small space of alternative naive-Bayes-like models that have weaker (and hence less detrimental) independence assumptions than naive Bayes. The resulting algorithm is computationally efficient while delivering highly accurate classification on many learning  tasks. For more information, see G. Webb, J. Boughton, Z. Wang (2005). Not So Naive Bayes: Aggregating One-Dependence Estimators. Machine Learning. 58(1):5-24.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/averagedOneDependenceEstimators/averagedOneDependenceEstimators1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/averagedOneDependenceEstimators1.0.0.zip?download
 
 # URL for further information
 URL=http://www.csse.monash.edu.au/~webb/
