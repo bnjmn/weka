@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=A visualization component for displaying association rules that uses a modified version of the Association Rules Viewer from DESS IAGL of Lille. Requires Java 3D to be installed.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/associationRulesVisualizer/associationRulesVisualizer1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/associationRulesVisualizer1.0.0.zip?download
 
 # URL for further information
 URL=http://www2.lifl.fr/~jourdan/download/arv.html
