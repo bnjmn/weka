@@ -32,7 +32,7 @@ Description=Meta classifier that allows standard classification algorithms to be
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/ordinalClassClassifier/ordinalClassClassifier1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/meta/OrdinalClassClassifier.html
+URL=http://weka.sourceforge.net/doc.packages/ordinalClassClassifier
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
