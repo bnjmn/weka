@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=Cluster data using the X-means algorithm.<br/><br/>X-Means is K-Means extended by an Improve-Structure part In this part of the algorithm the centers are attempted to be split in its region. The decision between the children of each center and itself is done comparing the BIC-values of the two structures.<br/><br/>For more information see:<br/><br/>Dan Pelleg, Andrew W. Moore: X-means: Extending K-means with Efficient Estimation of the Number of Clusters. In: Seventeenth International Conference on Machine Learning, 727-734, 2000.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/XMeans/XMeans1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/XMeans1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/XMeans
