@@ -32,7 +32,7 @@ Description=The OPTICS and DBScan clustering algorithms. Martin Ester, Hans-Pete
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/optics_dbScan/optics_dbScan1.0.0.zip
 
 # URL for further information
-URL=http://www.somewhere.net/algorithm.html
+URL=http://weka.sourceforge.net/doc.packages/optics_dbScan
 
 # Related to other packages?
 #Related=

@@ -32,7 +32,7 @@ Description=Functional trees (decision trees with oblique splits and functions a
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/functionalTrees/functionalTrees1.0.0.zip
 
 # URL for further information
-URL=http://somewhere.net/functional_trees.html
+URL=http://weka.sourceforge.net/doc.packages/functionalTrees
 
 # Related to other packages?
 #Related=LMT,J48

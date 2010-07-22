@@ -32,7 +32,7 @@ Description=Performs latent semantic analysis and transformation of the data. Us
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/latentSemanticAnalysis/latentSemanticAnalysis1.0.0.zip
 
 # URL for further information
-URL=http://www.somewhere.net/algorithm.html
+URL=http://weka.sourceforge.net/doc.packages/latentSemanticAnalysis
 
 # Related to other packages?
 Related=PCA
