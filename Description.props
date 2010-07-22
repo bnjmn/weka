@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=A visualization component for displaying tree structures from those schemes that can output trees (e.g. decision tree learners, Cobweb clusterer etc.). This component is available from the popup menu in the Explorer's classify and cluster panels. The component uses the prefuse visualization library.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/prefuseTree/prefuseTree1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/prefuseTree1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.wikispaces.com/Explorer+tree+visualization+plugins
