@@ -29,7 +29,7 @@ License=GPL 2.0
 Description= A wrapper class for the libsvm tools (the libsvm classes, typically the jar file, need to be in the classpath to use this classifier). LibSVM runs faster than SMO since it uses LibSVM to build the SVM classifier. LibSVM allows users to experiment with One-class SVM, Regressing SVM, and nu-SVM supported by LibSVM tool. LibSVM reports many useful statistics about LibSVM classifier (e.g., confusion matrix,precision, recall, ROC score, etc.)
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/LibSVM/LibSVM1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.0.zip?download
 
 # URL for further information
 URL=http://www.cs.iastate.edu/~yasser/wlsvm/
