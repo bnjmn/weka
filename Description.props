@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=This package provides two meta attribute selection evaluators that can apply an arbitrary filter to the input data before executing the actual attribute selection scheme. One filters data and then passes it to an attribute evaluator (FilteredAttributeEval), and the other filters data and then passes it to a subset evaluator (FilteredSubsetEval).
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/filteredAttributeSelection/filteredAttributeSelection1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/filteredAttributeSelection1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/filteredAttributeSelection
