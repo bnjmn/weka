@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=An implementation of the Ordinal Learning Method (OLM). Further information regarding the algorithm and variants can be found in: Arie Ben-David (1992). Automatic Generation of Symbolic Multiattribute Ordinal Knowledge-Based DSSs: methodology and Applications. Decision Sciences. 23:1357-1372.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/ordinalLearningMethod/ordinalLearningMethod1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/ordinalLearningMethod1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/ordinalLearningMethod
