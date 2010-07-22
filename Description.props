@@ -29,7 +29,7 @@ License=GPL 2.0
 Description=This package contains a filter for computing partial least squares and transforming the input data into the PLS space. It also contains a classifier for performing PLS regression.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/partialLeastSquares/partialLeastSquares1.0.0.zip
+PackageURL=http://prdownloads.sourceforge.net/weka/partialLeastSquares1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/partialLeastSquares
