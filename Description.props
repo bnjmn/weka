@@ -32,7 +32,7 @@ Description=This metaclassifier makes its base classifier cost-sensitive using t
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/metaCost/metaCost1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/meta/MetaCost.html
+URL=http://weka.sourceforge.net/doc.packages/metaCost
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
