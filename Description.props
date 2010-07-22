@@ -32,7 +32,7 @@ Description=Performs a grid search of parameter pairs for the a classifier (Y-ax
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/gridSearch/gridSearch1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/classifiers/meta/GridSearch.html
+URL=http://weka.sourceforge.net/doc.packages/gridSearch
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
