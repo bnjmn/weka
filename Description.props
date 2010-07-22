@@ -32,7 +32,7 @@ Description=Cluster data using the X-means algorithm.<br/><br/>X-Means is K-Mean
 PackageURL=http://www.cs.waikato.ac.nz/ml/weka/wekaLite/XMeans/XMeans1.0.0.zip
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.dev/weka/clusterers/XMeans.html
+URL=http://weka.sourceforge.net/doc.packages/XMeans
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
