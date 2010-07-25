@@ -359,7 +359,12 @@ public class PackageManager extends JPanel {
     public Void doInBackground() {
       m_installing = true;
       m_installBut.setEnabled(false);
-      m_uninstallBut.setEnabled(false);
+      m_uninstallBut.setEnabled(false);      
+      m_refreshCacheBut.setEnabled(false);
+      m_availableBut.setEnabled(false);
+      m_allBut.setEnabled(false);
+      m_installedBut.setEnabled(false);
+      
       ProgressPrintStream pps = new ProgressPrintStream(this);
       m_progress.setMaximum(m_packageNamesToUninstall.size() * 5);
 
@@ -483,6 +488,11 @@ public class PackageManager extends JPanel {
         m_detailLabel.setText("Finished uninstalling.");
       }
       
+      m_refreshCacheBut.setEnabled(true);
+      m_availableBut.setEnabled(true);
+      m_allBut.setEnabled(true);
+      m_installedBut.setEnabled(true);
+      
       // force refresh of installed and available packages
       m_installedPackages = null;
       m_availablePackages = null;
@@ -532,6 +542,10 @@ public class PackageManager extends JPanel {
       m_installing = true;
       m_installBut.setEnabled(false);
       m_uninstallBut.setEnabled(false);
+      m_refreshCacheBut.setEnabled(false);
+      m_availableBut.setEnabled(false);
+      m_allBut.setEnabled(false);
+      m_installedBut.setEnabled(false);
       ProgressPrintStream pps = new ProgressPrintStream(this);
       m_progress.setMaximum(m_packageNamesToInstall.size() * 30);
 
@@ -939,6 +953,11 @@ public class PackageManager extends JPanel {
             , "");
         m_detailLabel.setText("Install complete.");
       }
+      
+      m_refreshCacheBut.setEnabled(true);
+      m_availableBut.setEnabled(true);
+      m_allBut.setEnabled(true);
+      m_installedBut.setEnabled(true);
       
       // force refresh of installed and available packages
       m_installedPackages = null;
