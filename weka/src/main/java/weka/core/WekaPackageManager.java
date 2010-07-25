@@ -131,9 +131,9 @@ public class WekaPackageManager {
       }
       
       if (repURL == null || repURL.length() == 0) {
-        repURL = "http://www.cs.waikato.ac.nz/ml/weka/wekaLite";
+        repURL = "http://weka.sourceforge.net/packageMetaData";
       } else {
-        System.out.println("weka.core.WekaPackageRepositoryURL = " + repURL);
+        System.err.println("weka.core.WekaPackageRepositoryURL = " + repURL);
       }
       
       REP_URL = new URL(repURL);
@@ -581,7 +581,7 @@ public class WekaPackageManager {
         conn = connURL.openConnection();
       }
       
-      conn.setConnectTimeout(60000); // timeout after one minute
+      conn.setConnectTimeout(30000); // timeout after 30 seconds
       
       BufferedReader bi = 
         new BufferedReader(new InputStreamReader(conn.getInputStream()));
