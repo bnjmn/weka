@@ -1750,10 +1750,10 @@ public class ClassifierPanel
         JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(vp.getInstances());
         Version version = new Version();
         if (pluginMenuItem != null) {
-          if (version.compareTo(plugin.getMinVersion()) < 0)
+          /*if (version.compareTo(plugin.getMinVersion()) < 0)
             pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
           if (version.compareTo(plugin.getMaxVersion()) >= 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
           visPlugins.add(pluginMenuItem);
         }
       }
@@ -1777,10 +1777,10 @@ public class ClassifierPanel
 	    JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
 	    Version version = new Version();
 	    if (pluginMenuItem != null) {
-	      if (version.compareTo(plugin.getMinVersion()) < 0)
+	      /*if (version.compareTo(plugin.getMinVersion()) < 0)
 		pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
 	      if (version.compareTo(plugin.getMaxVersion()) >= 0)
-		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
 	      visPlugins.add(pluginMenuItem);
 	    }
 	  }
@@ -1802,10 +1802,10 @@ public class ClassifierPanel
 	    JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
 	    Version version = new Version();
 	    if (pluginMenuItem != null) {
-	      if (version.compareTo(plugin.getMinVersion()) < 0)
+	      /*if (version.compareTo(plugin.getMinVersion()) < 0)
 		pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
 	      if (version.compareTo(plugin.getMaxVersion()) >= 0)
-		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
 	      visPlugins.add(pluginMenuItem);
 	    }
 	  }
