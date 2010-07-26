@@ -34,7 +34,7 @@ import junit.textui.TestRunner;
  * java weka.filters.unsupervised.attribute.PrincipalComponentsTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class PrincipalComponentsTest 
   extends AbstractFilterTest {
@@ -106,11 +106,12 @@ public class PrincipalComponentsTest
   }
 
   /**
-   * Runs filter with no normalization.
+   * Runs filter with covariance matrix + centering rather than correlation
+   * + standardizing.
    */
-  public void testNoNormalization() {
+  public void testCovariance() {
     m_Filter = getFilter();
-    ((PrincipalComponents) m_Filter).setNormalize(false);
+    ((PrincipalComponents) m_Filter).setCenterData(true);
     performTest();
   }
 
