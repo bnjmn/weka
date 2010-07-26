@@ -139,10 +139,10 @@ Eigenvectors
  0.599 	 0.273 	 0.099 	-0.7462	Date1
 
 Ranked attributes:
- 0.607393294141798784  1 0.599Date1+0.553Nominal2-0.439Nominal1+0.378Numeric1
- 0.331791845471497984  2 -0.658Numeric1-0.616Nominal1-0.335Nominal2+0.273Date1
- 0.155998992693042944  3 -0.651Numeric1+0.645Nominal2+0.388Nominal1+0.099Date1
- 0.000000000000000222  4 -0.746Date1-0.526Nominal1+0.407Nominal2-0.024Numeric1
+ 0.607  1 0.599Date1+0.553Nominal2-0.439Nominal1+0.378Numeric1
+ 0.332  2 -0.658Numeric1-0.616Nominal1-0.335Nominal2+0.273Date1
+ 0.156  3 -0.651Numeric1+0.645Nominal2+0.388Nominal1+0.099Date1
+ 0      4 -0.746Date1-0.526Nominal1+0.407Nominal2-0.024Numeric1
 
 Selected attributes: 1,2,3,4 : 4
 
@@ -177,10 +177,10 @@ Eigenvectors
  0.4165	 0.5631	 0.5989	 0.3883	Date1
 
 Ranked attributes:
- 0.58646957597813952   1 0.69 Nominal1+0.579Nominal2+0.417Date1-0.119Numeric1
- 0.319954061398876416  2 0.792Numeric1+0.563Date1-0.237Nominal2-0.004Nominal1
- 0.101037331846492432  3 0.599Date1-0.589Numeric1-0.543Nominal2-0.007Nominal1
- 0.000000000000000111  4 -0.723Nominal1+0.56 Nominal2+0.388Date1-0.112Numeric1
+ 0.586  1 0.69 Nominal1+0.579Nominal2+0.417Date1-0.119Numeric1
+ 0.32   2 0.792Numeric1+0.563Date1-0.237Nominal2-0.004Nominal1
+ 0.101  3 0.599Date1-0.589Numeric1-0.543Nominal2-0.007Nominal1
+ 0      4 -0.723Nominal1+0.56 Nominal2+0.388Date1-0.112Numeric1
 
 Selected attributes: 1,2,3,4 : 4
 
