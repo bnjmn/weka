@@ -232,7 +232,7 @@ public class RotationForest
    */
   protected Filter defaultFilter() {
     PrincipalComponents filter = new PrincipalComponents();
-    filter.setNormalize(false);
+    //    filter.setNormalize(false);
     filter.setVarianceCovered(1.0);
     return filter;
   }
