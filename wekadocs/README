@@ -4,8 +4,8 @@
                               README                                   
                               ======                                   
                                                                        
-                             WEKA 3.6.2
-                           12 January 2009
+                             WEKA 3.6.3
+                            30 July 2010
                                                                        
                  Java Programs for Machine Learning 
 
@@ -155,9 +155,9 @@ Comments are lines starting with % and are ignored by Weka.
 If you want to use Weka from your standard command-line interface
 (e.g. bash under Linux):
 
-a) Set WEKAHOME to be the directory which contains this README.
-b) Add $WEKAHOME/weka.jar to your CLASSPATH environment variable.
-c) Bookmark $WEKAHOME/doc/packages.html in your web browser.
+a) Set WEKAINSTALL to be the directory which contains this README.
+b) Add $WEKAINSTALL/weka.jar to your CLASSPATH environment variable.
+c) Bookmark $WEKAINSTALL/doc/packages.html in your web browser.
 
 Alternatively you can try using the SimpleCLI user interface available
 from the GUI chooser discussed above.
@@ -165,7 +165,7 @@ from the GUI chooser discussed above.
 In the following, the names of files assume use of a unix command-line
 with environment variables. For other command-lines (including
 SimpleCLI) you should substitute the name of the directory where
-weka.jar lives for $WEKAHOME. If your platform uses something other
+weka.jar lives for $WEKAINSTALL. If your platform uses something other
 character than / as the path separator, also make the appropriate
 substitutions.
 
@@ -175,7 +175,7 @@ Classifiers
 
 Try:
 
-java weka.classifiers.trees.J48 -t $WEKAHOME/data/iris.arff
+java weka.classifiers.trees.J48 -t $WEKAINSTALL/data/iris.arff
 
 This prints out a decision tree classifier for the iris dataset 
 and ten-fold cross-validation estimates of its performance. If you
@@ -193,7 +193,7 @@ knows that a class implements a classifier if it extends the
 Classifier class in weka.classifiers. Almost all classes in
 weka.classifiers fall into this category. Try, for example:
 
-java weka.classifiers.bayes.NaiveBayes -t $WEKAHOME/data/labor.arff
+java weka.classifiers.bayes.NaiveBayes -t $WEKAINSTALL/data/labor.arff
 
 Here is a list of some of the classifiers currently implemented in
 weka.classifiers:
@@ -228,7 +228,7 @@ Next to classification schemes, there is some other useful stuff in
 WEKA. Association rules, for example, can be extracted using the 
 Apriori algorithm. Try
 
-java weka.associations.Apriori -t $WEKAHOME/data/weather.nominal.arff
+java weka.associations.Apriori -t $WEKAINSTALL/data/weather.nominal.arff
 
 =======
 Filters
@@ -245,7 +245,7 @@ etc.
 Try:
 
 java weka.filters.supervised.attribute.Discretize -i
-  $WEKAHOME/data/iris.arff -c last
+  $WEKAINSTALL/data/iris.arff -c last
 
 ----------------------------------------------------------------------
 
@@ -339,7 +339,7 @@ t-tests using weka.experiment.PairedTTester (use the -h option to find
 out what options it needs).
 
 However, all this is much easier if you use the Experimenter GUI.
-See the section on the Experimenter in: $WEKAHOME/WekaManual.pdf
+See the section on the Experimenter in: $WEKAINSTALL/WekaManual.pdf
 
 ----------------------------------------------------------------------
 
@@ -347,14 +347,14 @@ See the section on the Experimenter in: $WEKAHOME/WekaManual.pdf
 ------------------
 
 A comprehensive manual covering Weka's graphical and command-line
-user interfaces. $WEKAHOME/WekaManual.pdf
+user interfaces. $WEKAINSTALL/WekaManual.pdf
 
 ----------------------------------------------------------------------
 
 7. Source code:
 ---------------
 
-The source code for WEKA is in $WEKAHOME/weka-src.jar. To expand it, 
+The source code for WEKA is in $WEKAINSTALL/weka-src.jar. To expand it, 
 use the jar utility that's in every Java distribution (or any file 
 archiver that can handle ZIP files).
 
