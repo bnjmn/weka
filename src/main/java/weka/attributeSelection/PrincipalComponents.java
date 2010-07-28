@@ -54,8 +54,10 @@ import weka.filters.unsupervised.attribute.Standardize;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -D
- *  Don't normalize input data.</pre>
+ * <pre> -C
+ *  Center (rather than standardize) the
+ *  data and compute PCA using the covariance (rather
+ *   than the correlation) matrix.</pre>
  * 
  * <pre> -R
  *  Retain enough PC attributes to account 
@@ -208,8 +210,10 @@ public class PrincipalComponents
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -D
-   *  Don't normalize input data.</pre>
+   * <pre> -C
+   *  Center (rather than standardize) the
+   *  data and compute PCA using the covariance (rather
+   *   than the correlation) matrix.</pre>
    * 
    * <pre> -R
    *  Retain enough PC attributes to account 
@@ -1053,3 +1057,4 @@ public class PrincipalComponents
     runEvaluator(new PrincipalComponents(), argv);
   }
 }
+
