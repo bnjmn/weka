@@ -1,0 +1,21 @@
+README
+======
+
+In order to use the example classes in this package, you have to add the
+"wekaexamples.gui.visualize.plugins" package to the list of packages to search
+in the GenericPropertiesCreator.props file. The affected property should
+look like this:
+
+
+# List of Explorer visualization plugins (classification panel)
+weka.gui.visualize.plugins.VisualizePlugin=\
+ weka.gui.visualize.plugins,\
+ wekaexamples.gui.visualize.plugins
+
+
+See also the following wiki article:
+- Explorer error visualization plugins
+  http://weka.wiki.sourceforge.net/Explorer+error+visualization+plugins
+  
+
+Version $Revision$

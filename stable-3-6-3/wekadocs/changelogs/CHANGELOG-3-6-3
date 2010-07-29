@@ -1,0 +1,615 @@
+------------------------------------------------------------------------
+r6220 | mhall | 2010-01-12 14:37:52 +1300 (Tue, 12 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/version.txt
+
+Updated for 3.6.2
+------------------------------------------------------------------------
+r6226 | fracpete | 2010-01-12 18:14:06 +1300 (Tue, 12 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/RelationalLocator.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/StringLocator.java
+
+if src and dest differ in number of attributes/length is different, the error message now states the two different numbers (helpful in figuring out in case this occurs)
+------------------------------------------------------------------------
+r6229 | fracpete | 2010-01-13 13:22:52 +1300 (Wed, 13 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/SerializationHelper.java
+
+uses now BufferedInput/OutputStream whenever possible to increase performance in reading/writing of serialized objects
+------------------------------------------------------------------------
+r6235 | mhall | 2010-01-15 10:17:04 +1300 (Fri, 15 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/search/local/TAN.java
+
+buildStructure now no longer throws an exception if there is one or no attributes (aside from the class) in the data.
+------------------------------------------------------------------------
+r6241 | mhall | 2010-01-22 13:30:22 +1300 (Fri, 22 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+
+Changed the file browser's behavior to allow directories to be selected. This allows the TextDirectoryLoader to be used from the Explorer.
+------------------------------------------------------------------------
+r6243 | mhall | 2010-01-25 08:43:03 +1300 (Mon, 25 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/ArffLoader.java
+
+When the source is a URL, a call to reset was defaulting back to a file as the source - fixed.
+------------------------------------------------------------------------
+r6245 | mhall | 2010-01-25 12:16:59 +1300 (Mon, 25 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/NominalToString.java
+
+Global info fix.
+------------------------------------------------------------------------
+r6249 | mhall | 2010-01-25 14:07:54 +1300 (Mon, 25 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Reorder.java
+
+Global info fix.
+------------------------------------------------------------------------
+r6253 | mhall | 2010-01-28 14:32:13 +1300 (Thu, 28 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/RankSearch.java
+
+Added technical information.
+------------------------------------------------------------------------
+r6255 | mhall | 2010-01-30 21:07:54 +1300 (Sat, 30 Jan 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/RandomSplitResultProducer.java
+
+Fixed a tip text.
+------------------------------------------------------------------------
+r6258 | mhall | 2010-02-02 20:42:28 +1300 (Tue, 02 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/DMNBtext.java
+
+Command line option handling was missing - fixed.
+------------------------------------------------------------------------
+r6260 | mhall | 2010-02-08 08:57:18 +1300 (Mon, 08 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/m5/M5Base.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/m5/Rule.java
+
+Fixed a memory leak for M5Rules
+------------------------------------------------------------------------
+r6269 | mhall | 2010-02-08 16:01:00 +1300 (Mon, 08 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/DTNB.java
+
+Technical info update.
+------------------------------------------------------------------------
+r6271 | fracpete | 2010-02-11 10:08:34 +1300 (Thu, 11 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/SortedTableModel.java
+
+rewrote sorting, resulting in huge speedup
+------------------------------------------------------------------------
+r6274 | fracpete | 2010-02-12 08:51:01 +1300 (Fri, 12 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/SortedTableModel.java
+
+used isSubclass instead of hasInterface to determine whether table cell is of type Comparable - fixed
+------------------------------------------------------------------------
+r6277 | mhall | 2010-02-18 10:19:47 +1300 (Thu, 18 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ScatterSearchV1.java
+
+Fixed spelling mistake in an option name.
+------------------------------------------------------------------------
+r6283 | fracpete | 2010-02-18 10:49:58 +1300 (Thu, 18 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/PartitionedMultiFilter.java
+
+the -R command-line option for a range now supports inverted ranges (the "inverted" information got lost previously)
+------------------------------------------------------------------------
+r6288 | mhall | 2010-02-18 20:57:46 +1300 (Thu, 18 Feb 2010) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/FLR.java
+
+Dropped from the stable branch
+------------------------------------------------------------------------
+r6290 | mhall | 2010-02-18 21:00:48 +1300 (Thu, 18 Feb 2010) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/FCBFSearch.java
+   D /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/SymmetricalUncertAttributeSetEval.java
+
+Dropped from the stable branch
+------------------------------------------------------------------------
+r6292 | mhall | 2010-02-18 21:10:21 +1300 (Thu, 18 Feb 2010) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/EnsembleLibrary.java
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/EnsembleLibraryModel.java
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/EnsembleLibraryModelComparator.java
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/EnsembleSelection.java
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/ensembleSelection
+
+Dropped from the stable branch.
+------------------------------------------------------------------------
+r6293 | mhall | 2010-02-18 21:11:53 +1300 (Thu, 18 Feb 2010) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/gui/EnsembleLibraryEditor.java
+   D /branches/stable-3-6/weka/src/main/java/weka/gui/EnsembleSelectionLibraryEditor.java
+   D /branches/stable-3-6/weka/src/main/java/weka/gui/ensembleLibraryEditor
+
+Dropped from the stable branch.
+------------------------------------------------------------------------
+r6296 | mhall | 2010-02-19 15:21:14 +1300 (Fri, 19 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Fixed a bug that was preventing graph connections to be made for wrapped classifiers that can produce a graph.
+------------------------------------------------------------------------
+r6299 | mhall | 2010-02-20 20:33:22 +1300 (Sat, 20 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/EM.java
+
+Cluster priors were wrong when iteration terminates due to non-improvement of log likelihood. This is because the E step is used to compute the likelihood *and* to also update the weights and recompute the priors. When iterate exits at iteration i because the likelihood doesn't increase, then the E step has actually advanced the priors to iteration i+1. Fixed.
+------------------------------------------------------------------------
+r6303 | mhall | 2010-02-24 09:43:37 +1300 (Wed, 24 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/NaiveBayesMultinomial.java
+
+toString() was printing out the class attribute in the conditional probability section of the output - fixed.
+------------------------------------------------------------------------
+r6306 | mhall | 2010-02-24 11:13:13 +1300 (Wed, 24 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Was printing a warning to the log and status when an incoming instance connection was made, even when the wrapped classifier was an UpdateableClassifier - fixed.
+------------------------------------------------------------------------
+r6308 | mhall | 2010-02-24 15:11:19 +1300 (Wed, 24 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/VFI.java
+
+Altered capabilities so that VFI no longer handles String attributes (didn't really handle them as such, since they were treated the same as nominal).
+------------------------------------------------------------------------
+r6312 | mhall | 2010-02-25 13:42:45 +1300 (Thu, 25 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.props
+
+Updated for the stuff that got removed.
+------------------------------------------------------------------------
+r6313 | fracpete | 2010-02-26 10:01:13 +1300 (Fri, 26 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/BrowserHelper.java
+
+added google-chrome as browser for the Linux platform
+------------------------------------------------------------------------
+r6318 | fracpete | 2010-02-26 15:25:23 +1300 (Fri, 26 Feb 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instances.java
+   A /branches/stable-3-6/weka/src/test/java/weka/core/InstancesTest.java
+   A /branches/stable-3-6/weka/src/test/java/weka/core/data
+   A /branches/stable-3-6/weka/src/test/java/weka/core/data/InstancesTest.arff
+
+the weka.core.Instances class no longer allows the creation of datasets with duplicate attribute names
+------------------------------------------------------------------------
+r6321 | mhall | 2010-03-01 16:18:57 +1300 (Mon, 01 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/RotationForest.java
+
+Updated for the fact that attribute names now have to be unique.
+------------------------------------------------------------------------
+r6325 | mhall | 2010-03-01 21:28:22 +1300 (Mon, 01 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/TestInstances.java
+
+Changed the generation of multi-instance data so that the names of the nested attributes in the relational data have a "bagAtt_" prifix. This is because of problems caused by the new constraint that attributes have unique names - converting an old generated multi-instance dataset using the MultiInstanceToPropositonal filter was resulting in a dataset with duplicated attribute names.
+------------------------------------------------------------------------
+r6332 | mhall | 2010-03-03 12:08:36 +1300 (Wed, 03 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/DatabaseLoader.java
+
+Added a fix for the old SQLLite closing result set also closes any meta data object issue.
+------------------------------------------------------------------------
+r6333 | mhall | 2010-03-03 14:38:21 +1300 (Wed, 03 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GUIEditors.props
+
+Removed ensemble library editor
+------------------------------------------------------------------------
+r6335 | mhall | 2010-03-07 20:21:22 +1300 (Sun, 07 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/ArffLoader.java
+
+ArffLoader's reset() method adjusted so that it doesn't re-initialize with the currently set file object if it is a directory (rather than a file).
+------------------------------------------------------------------------
+r6336 | mhall | 2010-03-07 20:32:34 +1300 (Sun, 07 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/ConverterUtils.java
+
+A call to reset() is needed before reading again from file-based loaders. ArffLoader's reset() method adjusted so that it doesn't re-initialize with the currently set file object if it is a directory (rather than a file).
+------------------------------------------------------------------------
+r6346 | mhall | 2010-03-13 20:32:37 +1300 (Sat, 13 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/Evaluation.java
+
+Made the computation of training/test split size when doing a percentage split consistent with how it is done in the Explorer and TrainTestSplitMaker.
+------------------------------------------------------------------------
+r6347 | mhall | 2010-03-15 13:38:53 +1300 (Mon, 15 Mar 2010) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/SPegasos.java
+
+Initial import
+------------------------------------------------------------------------
+r6350 | mhall | 2010-03-15 13:41:42 +1300 (Mon, 15 Mar 2010) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/JythonClassifier.java
+
+Removed from the book version.
+------------------------------------------------------------------------
+r6351 | mhall | 2010-03-15 13:43:15 +1300 (Mon, 15 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.props
+
+Removed JythonClassifier and added SPegasos.
+------------------------------------------------------------------------
+r6355 | mhall | 2010-03-18 12:04:03 +1300 (Thu, 18 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instances.java
+
+Added a list of problem attribute names to the Exception that gets thrown when non-unique names are detected.
+------------------------------------------------------------------------
+r6358 | mhall | 2010-03-18 16:04:10 +1300 (Thu, 18 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/HotSpot.java
+
+Changed so that instances with missing class values are not deleted and that missing class is checked for in the main routines. This allows HotSpot to be applied to market-basket data in Weka's standard dense format (i.e. with single valued attributes and missing values used to indicate absence of items).
+------------------------------------------------------------------------
+r6363 | mhall | 2010-03-19 11:43:06 +1300 (Fri, 19 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/DMNBtext.java
+
+Capabilities needed minimum num instances of 0 in order to prevent failing when used incrementally (where build classifier is first called with structure only).
+------------------------------------------------------------------------
+r6365 | mhall | 2010-03-20 13:23:28 +1300 (Sat, 20 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/PredictiveApriori.java
+
+A capabilities setting was preventing PredictiveApriori from being used in the Explorer - fixed.
+------------------------------------------------------------------------
+r6368 | mhall | 2010-03-20 13:37:57 +1300 (Sat, 20 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/Tertius.java
+
+A capabilities setting was preventing Tertius from being used in the Explorer - fixed.
+------------------------------------------------------------------------
+r6375 | mhall | 2010-03-23 11:27:44 +1300 (Tue, 23 Mar 2010) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/TLD.java
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/TLDSimple.java
+
+Removed from stable branch.
+------------------------------------------------------------------------
+r6376 | mhall | 2010-03-23 11:28:21 +1300 (Tue, 23 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.props
+
+Removed TLD and TLDSimple.
+------------------------------------------------------------------------
+r6383 | mhall | 2010-03-25 08:15:33 +1300 (Thu, 25 Mar 2010) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/associations/FPGrowth.java
+   A /branches/stable-3-6/weka/src/test/java/weka/associations/FPGrowthTest.java
+   A /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/associations/FPGrowthTest.ref
+
+Added FPGrowth to the stable-branch
+------------------------------------------------------------------------
+r6384 | mhall | 2010-03-25 08:16:14 +1300 (Thu, 25 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.props
+
+Added FPGrowth to the stable-branch
+------------------------------------------------------------------------
+r6387 | mhall | 2010-03-28 20:19:27 +1300 (Sun, 28 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/RotationForest.java
+
+Now makes sure that instance weights from the training data a passed through to the transformed data (in case that the base classifier is a WeightedInstanceHandler). Fix from Juan Jose Rodriguez.
+------------------------------------------------------------------------
+r6393 | mhall | 2010-03-30 12:10:31 +1300 (Tue, 30 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+now accesses savers and loaders via the wrappedAlgorithm method.
+------------------------------------------------------------------------
+r6394 | mhall | 2010-03-30 12:10:58 +1300 (Tue, 30 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Saver.java
+
+Fixed some bugs that prevented table names from getting set correctly. Now keeps a configured template of the saver to use. Copies are made from the template before saving operations are performed.
+------------------------------------------------------------------------
+r6395 | mhall | 2010-03-30 12:11:12 +1300 (Tue, 30 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/SaverCustomizer.java
+
+Fixed some bugs that prevented table names from getting set correctly. Now keeps a configured template of the saver to use. Copies are made from the template before saving operations are performed.
+------------------------------------------------------------------------
+r6403 | mhall | 2010-03-30 16:50:49 +1300 (Tue, 30 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Capabilities.java
+
+Added missing values and missing class values to the enableAll and disableAll methods
+------------------------------------------------------------------------
+r6404 | mhall | 2010-03-30 19:33:47 +1300 (Tue, 30 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/Id3.java
+
+Modified the toSource() method so that the generated code checks for missing (null) values in the instance to be classified.
+------------------------------------------------------------------------
+r6407 | mhall | 2010-03-31 09:44:43 +1300 (Wed, 31 Mar 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Capabilities.java
+
+disableAll now disables the NO_CLASS capability too.
+------------------------------------------------------------------------
+r6414 | mhall | 2010-04-07 15:35:47 +1200 (Wed, 07 Apr 2010) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/associations/HotSpot.java
+
+Removed from the new book version.
+------------------------------------------------------------------------
+r6416 | mhall | 2010-04-07 20:56:21 +1200 (Wed, 07 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/ConverterUtils.java
+
+Fixed a bug where a null pointer could get dereferenced in the nextElement() method of DataSource.
+------------------------------------------------------------------------
+r6419 | mhall | 2010-04-07 21:02:40 +1200 (Wed, 07 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/AveragingResultProducer.java
+
+Fixed a potential null ptr dereference in getCompatibilityState().
+------------------------------------------------------------------------
+r6422 | mhall | 2010-04-07 21:06:28 +1200 (Wed, 07 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseResultProducer.java
+
+Fixed a potential null ptr dereference in getCompatibilityState().
+------------------------------------------------------------------------
+r6425 | mhall | 2010-04-07 21:09:17 +1200 (Wed, 07 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/LearningRateResultProducer.java
+
+Fixed a potential null ptr dereference in getCompatibilityState().
+------------------------------------------------------------------------
+r6428 | mhall | 2010-04-07 21:13:17 +1200 (Wed, 07 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/sql/ResultSetHelper.java
+
+There was a missing break statement for one case in a switch statement - fixed.
+------------------------------------------------------------------------
+r6431 | mhall | 2010-04-07 21:27:14 +1200 (Wed, 07 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/PairedTTester.java
+
+Replaced some equality tests (that were incorrect anyway) against class types in getOptions with the instanceof operator.
+------------------------------------------------------------------------
+r6434 | mhall | 2010-04-07 21:38:17 +1200 (Wed, 07 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/GeneticSearch.java
+
+Taking the absolute value of Random.nextInteger() is problematic if the random number generator returns INTEGER.MIN_VALUE - fixed. 
+------------------------------------------------------------------------
+r6446 | mhall | 2010-04-09 11:51:22 +1200 (Fri, 09 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Capabilities.java
+
+Changed the toSource() method so that it doesn't output redundant capabilities.
+------------------------------------------------------------------------
+r6457 | mhall | 2010-04-20 11:29:56 +1200 (Tue, 20 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Filter.java
+
+Improved error message output to the status area when the wrapped filter throws an exception.
+------------------------------------------------------------------------
+r6462 | mhall | 2010-04-21 15:11:17 +1200 (Wed, 21 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/FieldRef.java
+
+Added a serial version UID and missing GPL header
+------------------------------------------------------------------------
+r6464 | mhall | 2010-04-22 11:21:45 +1200 (Thu, 22 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/MappingInfo.java
+
+No longer throws an exception if the mining schema contains a String attribute and the corresponding incoming attribute is nominal.
+------------------------------------------------------------------------
+r6477 | mhall | 2010-04-22 14:51:36 +1200 (Thu, 22 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/RacedIncrementalLogitBoost.java
+
+Added TechnicalInformation.
+------------------------------------------------------------------------
+r6483 | mhall | 2010-04-27 10:17:01 +1200 (Tue, 27 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/boundaryvisualizer/BoundaryVisualizer.java
+
+Fixed a bug that caused a widget layout problem when loading a dataset with a long relation name.
+------------------------------------------------------------------------
+r6493 | mhall | 2010-04-29 09:20:43 +1200 (Thu, 29 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GUIChooser.java
+
+Got rid of another ClassLoader.getSystemResource call.
+------------------------------------------------------------------------
+r6502 | mhall | 2010-04-30 15:25:29 +1200 (Fri, 30 Apr 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/Bagging.java
+
+The out-of-bag error computation was using voting for classification instead of averaging the probability estimates (as is done in distributionForInstance). Changed to make it consistent.
+------------------------------------------------------------------------
+r6508 | mhall | 2010-05-04 08:47:16 +1200 (Tue, 04 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GUIChooser.java
+
+Missed another system classloader call - fixed.
+------------------------------------------------------------------------
+r6531 | fracpete | 2010-05-06 16:50:36 +1200 (Thu, 06 May 2010) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/PartitionedMultiFilter.java
+
+Dale Fletcher's fix: the testInputFormat(Instances) method now creates fake subsets (with just one instance) for the ranges and tests the sub-filters with these, calling the setInputFormat(Instances) respectively
+Otherwise, the testInputFormat(Instances) call fails, since the sub-filters are tested against ALL of the attributes (e.g., filters that only handle numeric attributes will fail on string attributes, even though the string attributes aren't included in the range that they'll be processing)
+------------------------------------------------------------------------
+r6546 | mhall | 2010-05-18 09:38:52 +1200 (Tue, 18 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/FPGrowth.java
+
+Was not properly evaluating upper and lower bounds on min support when accepting a rule - fixed.
+------------------------------------------------------------------------
+r6549 | mhall | 2010-05-18 11:26:28 +1200 (Tue, 18 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/FPGrowth.java
+
+Can now specify lower and upper bounds on min support and delta as a number of instances as well as a fraction of the total instances.
+------------------------------------------------------------------------
+r6557 | mhall | 2010-05-20 21:09:03 +1200 (Thu, 20 May 2010) | 4 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+MLP was returning null from distributionForInstance when the array of probabilities contained a
+ll zeros! Fixed - now uses the ZeroR model in this case. This bug manifested itself on the lett
+er recognition data when the network was trained with -M 0.8 and -L 0.5 using a 2/3 1/3 split (
+one instance resulted in an array of all zeros).
+------------------------------------------------------------------------
+r6560 | mhall | 2010-05-23 08:37:40 +1200 (Sun, 23 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+Small change to toString() method to make it check the new m_useDefaultModel variable instead of checking whether m_ZeroR is non-null.
+------------------------------------------------------------------------
+r6563 | mhall | 2010-05-24 09:41:02 +1200 (Mon, 24 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+One small change to distributionForInstance was not propagated from the development version - fixed.
+------------------------------------------------------------------------
+r6565 | mhall | 2010-05-24 11:03:48 +1200 (Mon, 24 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/Discretize.java
+
+No longer creates duplicated attribute names (makeBinary option).
+------------------------------------------------------------------------
+r6568 | mhall | 2010-05-24 11:06:38 +1200 (Mon, 24 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Discretize.java
+
+No longer creates duplicated attribute names (makeBinary option).
+------------------------------------------------------------------------
+r6573 | mhall | 2010-05-24 11:31:27 +1200 (Mon, 24 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy/IBk.java
+
+Now uses a ZeroR model if there are no training instances.
+------------------------------------------------------------------------
+r6577 | mhall | 2010-05-25 13:46:22 +1200 (Tue, 25 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/SPegasos.java
+
+Some small bugfixes. Some scaling wasn't being done for every instance (regardless of loss) in the hinge loss case.
+------------------------------------------------------------------------
+r6580 | mhall | 2010-05-25 13:50:21 +1200 (Tue, 25 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/SPegasos.java
+
+Some code improvements from Eibe.
+------------------------------------------------------------------------
+r6588 | mhall | 2010-05-28 10:50:04 +1200 (Fri, 28 May 2010) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/clusterers/HierarchicalClusterer.java
+   A /branches/stable-3-6/weka/src/test/java/weka/clusterers/HierarchicalClustererTest.java
+   A /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/clusterers/HierarchicalClustererTest.ref
+
+Initial import
+------------------------------------------------------------------------
+r6589 | mhall | 2010-05-28 10:50:54 +1200 (Fri, 28 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Drawable.java
+
+Extra constant to for Newick type of graph.
+------------------------------------------------------------------------
+r6590 | mhall | 2010-05-28 11:07:46 +1200 (Fri, 28 May 2010) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/gui/hierarchyvisualizer
+   A /branches/stable-3-6/weka/src/main/java/weka/gui/hierarchyvisualizer/HierarchyVisualizer.java
+
+Initial import
+------------------------------------------------------------------------
+r6591 | mhall | 2010-05-28 11:08:15 +1200 (Fri, 28 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+Now supports the HierarchyVisualizer.
+------------------------------------------------------------------------
+r6592 | mhall | 2010-05-31 09:53:30 +1200 (Mon, 31 May 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/HierarchicalClusterer.java
+
+Remove a couple of @overide's.
+------------------------------------------------------------------------
+r6595 | fracpete | 2010-06-02 09:56:19 +1200 (Wed, 02 Jun 2010) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/PropertyDialog.java
+
+PropertyDialog now adjusts the height of the dialog if more than 95% of the screen height
+position of the dialog gets adjusted to be fully displayed on screen (unfortunately, the buttons might still get hidden by the Windows taskbar)
+------------------------------------------------------------------------
+r6603 | mhall | 2010-06-11 09:48:49 +1200 (Fri, 11 Jun 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+Made the cluster labels in the legend 0-based instead of 1-based in order to match the textual output.
+------------------------------------------------------------------------
+r6607 | mhall | 2010-06-11 10:35:52 +1200 (Fri, 11 Jun 2010) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/Cobweb.java
+
+IN PROGRESS - issue DATAMINING-239: Package management system for Weka 
+http://jira.pentaho.com/browse/DATAMINING-239
+------------------------------------------------------------------------
+r6608 | mhall | 2010-06-11 10:39:59 +1200 (Fri, 11 Jun 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/Cobweb.java
+
+Ignore previous history comment, it should have read: The clusterInstance method was downdating node stats using the instance to be clustered before finding the best host and then restoring the status quo. This probably makes sense for clustering the same data that was used to generate the tree, but doesn't really make sense for clustering new data.
+------------------------------------------------------------------------
+r6622 | mhall | 2010-07-05 10:26:43 +1200 (Mon, 05 Jul 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/RegOptimizer.java
+
+Fixed bug where a loop a loop iteration was not correct for sparse instances.
+------------------------------------------------------------------------
+r6656 | mhall | 2010-07-12 19:55:44 +1200 (Mon, 12 Jul 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Removed the redundant (and confusing) "instance number" attribute from the classifier errors visualization.
+------------------------------------------------------------------------
+r6657 | mhall | 2010-07-12 20:11:59 +1200 (Mon, 12 Jul 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Removed the "instance number" attribute from the error visualization when reevaluating a learned classifier on a given test set.
+------------------------------------------------------------------------
+r6660 | mhall | 2010-07-14 20:03:28 +1200 (Wed, 14 Jul 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+Capabilities check now takes ignored attributes into account.
+------------------------------------------------------------------------
+r6690 | mhall | 2010-07-26 14:12:41 +1200 (Mon, 26 Jul 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/PrincipalComponents.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/PrincipalComponents.java
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/unsupervised/attribute/PrincipalComponentsTest.java
+
+Was using the normalize filter, but should have been standardizing the data (for PCs computed from the correlation matrix) - fixed. Now also has an option to center the data and compute PCs from the covariance matrix. Transforming back to the original space now correctly reverses standardization/centering.
+------------------------------------------------------------------------
+r6696 | mhall | 2010-07-26 14:35:08 +1200 (Mon, 26 Jul 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/RotationForest.java
+
+Updated for changes to PrincipalComponents
+------------------------------------------------------------------------

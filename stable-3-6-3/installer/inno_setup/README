@@ -1,0 +1,70 @@
+README
+======
+
+Version $Revision: 1.1 $
+
+
+Parameter
+---------
+-version <version>
+ the detailed version of Weka, e.g., 3.4.7
+
+-input-dir <dir>
+ the directory with the content of the ZIP file, contains PDFs, JARs, etc.,
+ e.g., input/weka-3-4-7
+
+-output-dir <dir>
+ where to copy the content to, plus the scripts and templates
+ Note: the last directory in that path is used as path in the scripts, i.e.,
+       output\weka-3-4-7 will generate a sub-directory "weka-3-4-7" in the
+       directory output\weka-3-4-7 with all the PDFs, JARs, etc. The 
+       templates will be above this directory, in the actual output directory
+       output\weka-3-4-7.
+
+-dir <dir>
+ the directory where Weka will be installed to, e.g., Weka-3-4
+
+-link <name>
+ the name of the link in the Start menu, e.g., "Weka 3.4"
+
+-clear
+ deletes all the files in the output directory first, before generating
+ any files
+
+-scriptonly
+ doesn't copy any files, generates on the Inno setup files
+
+
+Examples
+--------
+
+- Weka 3.4.7
+  java GenerateSetup \
+    -version 3.4.7 \
+    -input-dir ../../weka.previous_releases/weka-3-4-7 \
+    -output-dir output/weka-3-4-7 \
+    -dir Weka-3-4 \
+    -link "Weka 3.4" \
+    -clear
+  
+- Weka 3.4.7 - with JRE
+  java GenerateSetup \
+    -version 3.4.7 \
+    -input-dir ../../weka.previous_releases/weka-3-4-7 \
+    -output-dir output/weka-3-4-7 \
+    -dir Weka-3-4 \
+    -link "Weka 3.4" \
+    -jre d:/installs/windows/programming/java/jdk.14/j2re-1_4_2_11-windows-i586-p.exe \
+    -clear
+  
+- Weka 3.5.2
+  java GenerateSetup \
+    -version 3.5.2 \
+    -input-dir ../../weka.previous_releases/weka-3-5-2 \
+    -output-dir output/weka-3-5-2 \
+    -dir Weka-3-5 \
+    -link "Weka 3.5" \
+    -clear
+  
+
+FracPete, 2006-05-16

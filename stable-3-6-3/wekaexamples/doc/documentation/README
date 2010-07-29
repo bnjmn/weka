@@ -1,0 +1,65 @@
+README
+======
+
+1. Directories
+==============
+In the following some information on the directories of this project:
+
+- "lib"
+  In order to compile the examples, you need to place a weka.jar in this
+  directory. You can either do this manually, or if you have WEKA's source
+  code as separate project, you can use the ant build file's "update"
+  target:
+     ant -Dweka=/path/to/weka/project update
+  If you are using examples that are accessing a database via JDBC, you will
+  need to add the necessary JDBC driver jar in this directory as well.
+     
+- "src/java"
+  This directory contains the Java examples. For details on using WEKA's API, 
+  see wiki article "Use Weka in your Java code":
+    http://weka.wiki.sourceforge.net/Use+Weka+in+your+Java+code
+
+- "src/groovy"
+  Here you can find the Groovy examples. For details on using Groovy, see wiki 
+  article "Using Weka from Groovy":
+    http://weka.wiki.sourceforge.net/Using+Weka+from+Groovy
+  
+- "src/jython"
+  The Jython examples are stored in this directory. For details on using 
+  Jython, see wiki article "Using Weka from Jython":
+    http://weka.wiki.sourceforge.net/Using+Weka+from+Jython
+
+
+2. Compiling/running examples
+=============================
+Some of the examples cannot be run straight away, as they require setting up
+first. This applies, for instance, to the Java WEKA converter examples that 
+are accessing a database. By default, these examples do not contain any
+JDBC URLs, user names or passwords.
+
+Also, a lot of the examples require command-line parameters as they load and/or
+process data. Check out the documentation of the specific source code that you 
+are interested in.
+
+
+3. Eclipse
+==========
+Since there are quite a Groovy and Jython scripts available, you should consider
+installing the appropriate Eclipse plugins:
+- Groovy
+  http://dist.codehaus.org/groovy/distributions/update/
+- Python
+  http://pydev.sourceforge.net/updates/
+
+Eclipse users can then just rename the .classpath-default and .project-default 
+files (by removing the "-default") and then import the project directly in Eclipse.
+
+
+4. Further information
+======================
+Always check out the documentation of the source code file that you are 
+interested in. In addition to that, also check out the other README files 
+for more information.
+
+
+$Revision$
