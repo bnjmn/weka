@@ -39,7 +39,7 @@ import java.util.Vector;
  * target="_blank">NSIS</a>.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.5 $
+ * @version   $Revision$
  */
 public class GenerateSetup {
 
@@ -69,6 +69,9 @@ public class GenerateSetup {
 
   /** the jre file */
   protected String mJRE = "";
+
+  /** 64 bit install */
+  protected String m64 = "";
 
   /**
    * initializes the setup generator
@@ -111,6 +114,10 @@ public class GenerateSetup {
    */
   public void setDir(String value) {
     mDir = value;
+  }
+
+  public void set64(String value) {
+    m64 = value;
   }
   
   /**
@@ -286,7 +293,14 @@ public class GenerateSetup {
     versionHyphen = mVersion.replaceAll("\\.", "-");
 
     // load file
-    setup = loadFile(TEMPLATES + "/" + "setup.nsi");
+    boolean use64bit = false;
+    if (m64.length() > 0) {
+      if (m64.equalsIgnoreCase("true")) {
+        use64bit = true;
+      }
+    }
+    String setupFile = (use64bit) ? "setup64.nsi" : "setup.nsi";
+    setup = loadFile(TEMPLATES + "/" + setupFile);
 
     // Weka
     block = "";
@@ -379,6 +393,7 @@ public class GenerateSetup {
     generator.setDir(getOption("dir", args));
     generator.setLinkPrefix(getOption("link-prefix", args));
     generator.setJRE(getOption("jre", args));
+    generator.set64(getOption("x64", args));
     System.out.println("Result = " + generator.execute());
   }
 }
