@@ -1,0 +1,71 @@
+# This props file contains default values for the Weka Experimenter.
+# "simple" indicates that this property is only available for simple
+# experiments.
+#
+# $Revision: 1.1.2.3 $
+
+# the default extension in the file-dialog
+# possible values: 
+#   .exp 
+#   .xml 
+#   .koml (if available)
+Extension=.exp
+
+# the default destination ("simple")
+# possible values:
+#   ARFF file
+#   CSV file
+#   JDBC database
+Destination=ARFF file
+
+# the experiment type ("simple")
+# possible values:
+#   Cross-validation
+#   Train/Test Percentage Split (data randomized)
+#   Train/Test Percentage Split (order preserved)
+ExperimentType=Cross-validation
+
+# whether classification is the default ("simple")
+UseClassification=true
+
+# the default number of CV folds ("simple")
+Folds=10
+
+# the default percentage for training ("simple")
+TrainPercentage=66
+
+# the default number of repetitions ("simple")
+Repetitions=10
+
+# whether datasets are first iterated ("simple")
+DatasetsFirst=true
+
+# the initial datasets directory
+# Note for Win32: the path backslashes have to written as "\\"
+InitialDatasetsDirectory=
+
+# whether to use relative paths
+UseRelativePaths=false
+
+# the row selection
+Row=Key_Dataset
+
+# the column selection
+Column=Key_Scheme,Key_Scheme_options,Key_Scheme_version_ID
+
+# the default comparison field (lower case!)
+# see ComboBox in Experimenter
+ComparisonField=percent_correct
+
+# the default significance
+Significance=0.05
+
+# whether stddevs are displayed by default
+ShowStdDev=false
+
+# the default precision for the mean
+MeanPrecision=2
+
+# the default precision for the stdev
+StdDevPrecision=2
+

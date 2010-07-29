@@ -1,0 +1,771 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-4-8 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-4-8 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://jakarta.apache.org/ant/">Ant</a>.</p>
+<hr>
+<table border="0" width="100%" cellspacing="1">
+<tr>
+<td class="dateAndAuthor">2006-06-09 03:53 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed some Javadoc
+added exception to buildClassifier if missing values are encountered</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayesMultinomial.html?rev=1.9.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayesMultinomial.html (1.9.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-09 03:52 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added exception to buildClassifier if there are 0 instances in the dataset</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/ComplementNaiveBayes.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/ComplementNaiveBayes.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-09 03:51 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added post-processing support for generated data (class PostProcessor and process-method)
+if a classifier performs worse than ZeroR it's no longer considered "failed"</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/CheckClassifier.html?rev=1.16.2.2&content-type=text/x-cvsweb-markup">classifiers/CheckClassifier.html (1.16.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-07 22:48 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>cleaned up imports
+removed custom splitOptions method with the one from the Utils class</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/SimpleCLI.html?rev=1.6.2.2&content-type=text/x-cvsweb-markup">gui/SimpleCLI.html (1.6.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-01 20:38 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed calculation of correlation coefficient: for very small numbers, Utils.smOrEq() returned 0 which resulted in a correlation coefficient of 0 instead of e.g. 0.89 (Bernhard/Eibe)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/Evaluation.html?r1=1.53.2.4&r2=1.53.2.3">classifiers/Evaluation.html (1.53.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-01 06:55 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>replaced tab, cr and lf with entities - avoids problems in options of OptionHandlers</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/xml/XMLSerialization.html?rev=1.1.2.10&content-type=text/x-cvsweb-markup">core/xml/XMLSerialization.html (1.1.2.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-30 02:10 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added missing attribute types for attribute info in parentheses, e.g, (Dat)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/AttributeVisualizationPanel.html?r1=1.18.2.5&r2=1.18.2.4">gui/AttributeVisualizationPanel.html (1.18.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-30 02:09 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added missing attribute types for attribute info in parentheses, e.g, (Dat)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/visualize/MatrixPanel.html?rev=1.11.2.2&content-type=text/x-cvsweb-markup">gui/visualize/MatrixPanel.html (1.11.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/VisualizePanel.html?rev=1.21.2.4&content-type=text/x-cvsweb-markup">gui/visualize/VisualizePanel.html (1.21.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-30 02:09 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added missing attribute types for attribute info in parentheses, e.g, (Dat)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/ClustererPanel.html?r1=1.45.2.5&r2=1.45.2.4">gui/explorer/ClustererPanel.html (1.45.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-30 02:09 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added missing attribute types for attribute info in parentheses, e.g, (Dat)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/AssociationsPanel.html?r1=1.17.2.2&r2=1.17.2.1">gui/explorer/AssociationsPanel.html (1.17.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/AttributeSelectionPanel.html?r1=1.31.2.3&r2=1.31.2.2">gui/explorer/AttributeSelectionPanel.html (1.31.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/ClassifierPanel.html?r1=1.79.2.5&r2=1.79.2.4">gui/explorer/ClassifierPanel.html (1.79.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-30 02:08 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added missing attribute types for attribute info in parentheses, e.g, (Dat)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/boundaryvisualizer/BoundaryVisualizer.html?rev=1.12.2.1&content-type=text/x-cvsweb-markup">gui/boundaryvisualizer/BoundaryVisualizer.html (1.12.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-30 02:07 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added missing attribute types for attribute info in parentheses, e.g, (Dat)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/ClassAssignerCustomizer.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">gui/beans/ClassAssignerCustomizer.html (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-23 22:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>brought up-to-date</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericObjectEditor.props?rev=1.105.2.2&content-type=text/x-cvsweb-markup">gui/GenericObjectEditor.props (1.105.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-23 05:40 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>applied Eibe's fix regarding missing values and class attribute</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AbstractTimeSeries.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AbstractTimeSeries.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/TimeSeriesDelta.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/TimeSeriesDelta.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/TimeSeriesTranslate.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/TimeSeriesTranslate.html (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-22 21:55 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>uses distributionForInstance now instead of classifyInstance</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/MetaCost.html?rev=1.15.2.2&content-type=text/x-cvsweb-markup">classifiers/meta/MetaCost.html (1.15.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-22 03:28 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>if class attribute is set, it is skipped now
+fixed loss of class attribute (problems with FilteredClassifier otherwise)</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/FirstOrder.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/FirstOrder.html (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-22 02:22 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed obsolete TODO</pre>
+<ul>
+<li>
+<a href="../doc/weka/TODO.dtd?rev=1.1.4.1&content-type=text/x-cvsweb-markup">TODO.dtd (1.1.4.1)</a>
+</li>
+<li>
+<a href="../doc/weka/TODO.xml?rev=1.1.4.1&content-type=text/x-cvsweb-markup">TODO.xml (1.1.4.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-22 02:03 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added "*.xml" to target "srcjar" to also add the build.xml file to the jar
+moved CVSROOT to variable "cvsroot_anon" (easier maintenance)</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.6&r2=1.19.2.5">build.xml (1.19.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-14 22:36 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>table is now read-only
+selection method is now SINGLE_SELECTION</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/AttributeSummaryPanel.html?rev=1.7.2.3&content-type=text/x-cvsweb-markup">gui/AttributeSummaryPanel.html (1.7.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-12 03:25 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added "-g &lt;file&gt;" option for outputting the graph representation of Drawable clusterers</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/ClusterEvaluation.html?rev=1.27.2.1&content-type=text/x-cvsweb-markup">clusterers/ClusterEvaluation.html (1.27.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-11 22:31 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed ambiguous output "Added driver", it now states success or error</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.html?rev=1.18.2.4&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.html (1.18.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-07 23:08 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed toString() method - thanks to Jos&Egrave; Marco de la Rosa</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/matrix/Matrix.html?rev=1.2.2.4&content-type=text/x-cvsweb-markup">core/matrix/Matrix.html (1.2.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-04 04:44 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added additional information to the toString() method: it now lists number of instances that correspond to the minimum support for finding large itemsets</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/Apriori.html?r1=1.19.2.3&r2=1.19.2.2">associations/Apriori.html (1.19.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-05-02 03:34 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>correct classIndex is set before ArffViewer panel is displayed</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/PreprocessPanel.html?r1=1.50.2.5&r2=1.50.2.4">gui/explorer/PreprocessPanel.html (1.50.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-04-30 22:13 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added tiptext for maximumAttributeNames
+fixed Javadoc</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/PrincipalComponents.html?r1=1.25.2.3&r2=1.25.2.2">attributeSelection/PrincipalComponents.html (1.25.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-04-29 13:05 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added -A option to getOptions, was missing</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/PrincipalComponents.html?rev=1.25.2.2&content-type=text/x-cvsweb-markup">attributeSelection/PrincipalComponents.html (1.25.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-04-23 01:03 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added comment that increasing heap size won't work from inside SimpleCLI</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Memory.html?rev=1.1.2.4&content-type=text/x-cvsweb-markup">core/Memory.html (1.1.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-04-12 21:12 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in rule output. Second number in the brackets at a leaf now reports the rms error as a percentage of the global standard deviation.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/Rule.html?rev=1.10.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/m5/Rule.html (1.10.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-04-09 22:51 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>"apply filter" set the class index to a specific value, even though the datasets are handled internally without any specific class index. if the class index wasn't set before, it's now unset again after using the filter (otherwise using a user-supplied test set on the classifier panel won't work)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/PreprocessPanel.html?r1=1.50.2.4&r2=1.50.2.3">gui/explorer/PreprocessPanel.html (1.50.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-04-03 22:43 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed so that .hsql props files are included in the archives.</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.5&r2=1.19.2.4">build.xml (1.19.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-04-03 22:29 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in tree output. Second number in the brackets at a leaf now reports the rms error as a percentage of the global standard deviation.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/m5/RuleNode.html?rev=1.8.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/m5/RuleNode.html (1.8.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-30 03:44 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added alt+left mousebutton as right click alternative for Mac users</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/TableSorter.html?rev=1.1.2.2&content-type=text/x-cvsweb-markup">gui/TableSorter.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-30 03:44 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added alt+left mousebutton as right click alternative for Mac users</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/arffviewer/ArffPanel.html?rev=1.1.2.3&content-type=text/x-cvsweb-markup">gui/arffviewer/ArffPanel.html (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-27 02:51 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed calculation of OutOfBagError</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/Bagging.html?rev=1.31.2.2&content-type=text/x-cvsweb-markup">classifiers/meta/Bagging.html (1.31.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-23 23:52 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>acced 'maxmemory="128m"' to Javadoc generation</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?rev=1.19.2.4&content-type=text/x-cvsweb-markup">build.xml (1.19.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-21 03:46 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>crossvalidation was run with built Classifier instead of only configured Classifier</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/Evaluation.html?rev=1.53.2.3&content-type=text/x-cvsweb-markup">classifiers/Evaluation.html (1.53.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-14 00:12 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>GUI editors are now centrally registered via "GenericObjectEditor.registerEditors()"</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/BayesNet.html?r1=1.21.2.4&r2=1.21.2.3">classifiers/bayes/BayesNet.html (1.21.2.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/UserClassifier.html?rev=1.18.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/UserClassifier.html (1.18.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/GenericArrayEditor.html?rev=1.13.2.1&content-type=text/x-cvsweb-markup">gui/GenericArrayEditor.html (1.13.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/GenericObjectEditor.html?rev=1.38.2.7&content-type=text/x-cvsweb-markup">gui/GenericObjectEditor.html (1.38.2.7)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/PropertySelectorDialog.html?rev=1.5.4.1&content-type=text/x-cvsweb-markup">gui/PropertySelectorDialog.html (1.5.4.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/SelectedTagEditor.html?rev=1.6.2.1&content-type=text/x-cvsweb-markup">gui/SelectedTagEditor.html (1.6.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/ClassifierCustomizer.html?rev=1.6.2.1&content-type=text/x-cvsweb-markup">gui/beans/ClassifierCustomizer.html (1.6.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/ClustererCustomizer.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/ClustererCustomizer.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/FilterCustomizer.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">gui/beans/FilterCustomizer.html (1.4.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/LoaderCustomizer.html?rev=1.7.2.2&content-type=text/x-cvsweb-markup">gui/beans/LoaderCustomizer.html (1.7.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/SaverCustomizer.html?rev=1.1.2.2&content-type=text/x-cvsweb-markup">gui/beans/SaverCustomizer.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/AlgorithmListPanel.html?rev=1.7.2.6&content-type=text/x-cvsweb-markup">gui/experiment/AlgorithmListPanel.html (1.7.2.6)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/SetupPanel.html?rev=1.23.2.4&content-type=text/x-cvsweb-markup">gui/experiment/SetupPanel.html (1.23.2.4)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/AssociationsPanel.html?rev=1.17.2.1&content-type=text/x-cvsweb-markup">gui/explorer/AssociationsPanel.html (1.17.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/AttributeSelectionPanel.html?rev=1.31.2.2&content-type=text/x-cvsweb-markup">gui/explorer/AttributeSelectionPanel.html (1.31.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/ClassifierPanel.html?rev=1.79.2.4&content-type=text/x-cvsweb-markup">gui/explorer/ClassifierPanel.html (1.79.2.4)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/ClustererPanel.html?rev=1.45.2.4&content-type=text/x-cvsweb-markup">gui/explorer/ClustererPanel.html (1.45.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-14 00:12 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>GUI editors are now centrally registered via "GenericObjectEditor.registerEditors()"</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/PreprocessPanel.html?rev=1.50.2.3&content-type=text/x-cvsweb-markup">gui/explorer/PreprocessPanel.html (1.50.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-14 00:07 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>GUI editor for Date format strings</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/SimpleDateFormatEditor.html?r1=1.1.2.2&r2=1.1.2.1">gui/SimpleDateFormatEditor.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-11 05:45 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed listOptions for -I
+fixed getOptions for -I
+added get/set methods for m_verbose (-V) and m_outputItemSets (-I)</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/Apriori.html?rev=1.19.2.2&content-type=text/x-cvsweb-markup">associations/Apriori.html (1.19.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-03-02 20:41 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed globalInfo</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/FilteredClassifier.html?rev=1.20.2.2&content-type=text/x-cvsweb-markup">classifiers/meta/FilteredClassifier.html (1.20.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-02-21 03:08 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>extended Javadoc regarding attribute types</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Instance.html?rev=1.19.2.2&content-type=text/x-cvsweb-markup">core/Instance.html (1.19.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-02-21 02:47 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed/extended Javadoc regarding attribute types</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Attribute.html?rev=1.32.2.3&content-type=text/x-cvsweb-markup">core/Attribute.html (1.32.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-02-14 22:44 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>file SimpleDateFormatEditor.html was added on branch book2ndEd-branch on 2006-03-14 00:07:53 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/SimpleDateFormatEditor.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/SimpleDateFormatEditor.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-02-14 20:50 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>instances with missing values were added to the left-most bin for non-numeric classes (fix by Ashraf)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/AttributeVisualizationPanel.html?rev=1.18.2.4&content-type=text/x-cvsweb-markup">gui/AttributeVisualizationPanel.html (1.18.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-02-13 00:40 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now does an exhaustive search :-)</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/ExhaustiveSearch.html?rev=1.8.2.2&content-type=text/x-cvsweb-markup">attributeSelection/ExhaustiveSearch.html (1.8.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-02-09 21:28 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed javadoc
+added paper reference</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/SVMAttributeEval.html?rev=1.17.2.1&content-type=text/x-cvsweb-markup">attributeSelection/SVMAttributeEval.html (1.17.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-02-09 02:37 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added package "weka.classifiers.misc" again to the classifier list</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericPropertiesCreator.props?rev=1.1.2.2&content-type=text/x-cvsweb-markup">gui/GenericPropertiesCreator.props (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-01-18 02:47 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed obsolete option -A
+fixed -Q and -E option: don't throw Exception when not supplied, but set default</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/BayesNet.html?rev=1.21.2.3&content-type=text/x-cvsweb-markup">classifiers/bayes/BayesNet.html (1.21.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-01-05 04:15 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed setWeights method (thanks to Yang Yu)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiBoostAB.html?rev=1.6.2.2&content-type=text/x-cvsweb-markup">classifiers/meta/MultiBoostAB.html (1.6.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>
