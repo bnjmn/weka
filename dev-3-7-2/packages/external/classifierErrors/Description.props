@@ -1,0 +1,41 @@
+# Description file for prefuseTree
+#
+# 
+
+# Package name (required)
+PackageName=classifierErrors
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=A visualization component for displaying errors from numeric schemes using the JMathTools library.
+
+Category=Visualization
+
+# Author (required)
+Author=Peter Reutemann <fracpete@cs.waikato.ac.nz>
+
+# Maintainer (required)
+Maintainer=Peter Reutemann <fracpete@cs.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=A visualization component for displaying the errors made by numeric classifiers. This component uses the plotting classes from the JMathTools library.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/classifierErrors1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.wikispaces.com/Explorer+error+visualization+plugins
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.5.9)

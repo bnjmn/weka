@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=classifierBasedAttributeSelection
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=A subset evaluator and an attribute evaluator for evaluating the merit of subsets and single attributes respectively using a classifier.
+
+Category=Attribute selection
+
+# Author (required)
+Author=Mark Hall, Peter Reutemann
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=This package provides two classes - one for evaluating the merit of individual attributes using a classifier (ClassifierAttributeEval), and second for evaluating the merit of subsets of attributes using a classifier (ClassifierSubsetEval). Both invoke a user-specified classifier to perform the evaluation, either under cross-validation or on the training data.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/classifierBasedAttributeSelection1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.dev/weka/attributeSelection/
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1)

@@ -1,0 +1,41 @@
+# Description file for ordinalLearningMethod
+#
+# 
+
+# Package name (required)
+PackageName=ordinalLearningMethod
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=An implementation of the Ordinal Learning Method (OLM)
+
+Category=Classification
+
+# Author (required)
+Author=TriDat Tran
+
+# Maintainer (required)
+Maintainer=TriDat Tran
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=An implementation of the Ordinal Learning Method (OLM). Further information regarding the algorithm and variants can be found in: Arie Ben-David (1992). Automatic Generation of Symbolic Multiattribute Ordinal Knowledge-Based DSSs: methodology and Applications. Decision Sciences. 23:1357-1372.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/ordinalLearningMethod1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/ordinalLearningMethod
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

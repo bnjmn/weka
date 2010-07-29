@@ -1,0 +1,41 @@
+# Description file for lazyBayesianRules
+#
+# 
+
+# Package name (required)
+PackageName=lazyBayesianRules
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Lazy Bayesian Rules Classifier
+
+Category=Classification
+
+# Author (required)
+Author=Zhihai Wang <zhw@deakin.edu.au>
+
+# Maintainer (required)
+Maintainer=Zhihai Wang <zhw@deakin.edu.au>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Lazy Bayesian Rules Classifier. The naive Bayesian classifier provides a simple and effective approach to classifier learning, but its attribute independence assumption is often violated in the real world. Lazy Bayesian Rules selectively relaxes the independence assumption, achieving lower error rates over a range of learning tasks. LBR defers processing to classification time, making it a highly efficient and accurate classification algorithm when small numbers of objects are to be classified. For more information, see: Zijian Zheng, G. Webb (2000). Lazy Learning of Bayesian Rules. Machine Learning. 4(1):53-84.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/lazyBayesianRules1.0.0.zip?download
+
+# URL for further information
+URL=http://www.csse.monash.edu.au/~webb/
+
+# Related to other packages?
+Related=NaiveBayes
+
+# Dependencies
+Depends=weka (>=3.7.1)

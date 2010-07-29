@@ -1,0 +1,41 @@
+# Description file for bayesianLogisticRegresssion
+#
+# 
+
+# Package name (required)
+PackageName=bayesianLogisticRegression
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Implements Bayesian Logistic Regression for both Gaussian and Laplace Priors
+
+Category=Text classification
+
+# Author (required)
+Author=Navendu Garg <gargnav@iit.edu>
+
+# Maintainer (required)
+Maintainer=Navendu Garg <gargnav@iit.edu>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Implements Bayesian Logistic Regression for both Gaussian and Laplace Priors. For more information, see Alexander Genkin, David D. Lewis, David Madigan (2004). Large-scale bayesian logistic regression for text categorization.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/bayesianLogisticRegression1.0.0.zip?download
+
+# URL for further information
+URL=http://www.stat.rutgers.edu/~madigan/PAPERS/shortFat-v3a.pdf
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

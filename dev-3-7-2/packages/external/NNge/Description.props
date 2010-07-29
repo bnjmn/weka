@@ -1,0 +1,41 @@
+# Description file for NNge
+#
+# 
+
+# Package name (required)
+PackageName=NNge
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Nearest-neighbor-like algorithm using non-nested generalized exemplars (which are hyperrectangles that can be viewed as if-then rules)
+
+Category=Classification
+
+# Author (required)
+Author=Brent Martin <bim20@cosc.canterbury.ac.nz>
+
+# Maintainer (required)
+Maintainer=Brent Martin <bim20@cosc.canterbury.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Nearest-neighbor-like algorithm using non-nested generalized exemplars (which are hyperrectangles that can be viewed as if-then rules). For more information, see Brent Martin (1995). Instance-Based learning: Nearest Neighbor With Generalization. Hamilton, New Zealand. Sylvain Roy (2002). Nearest Neighbor With Generalization. Christchurch, New Zealand.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/NNge1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/NNge
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

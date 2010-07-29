@@ -1,0 +1,19 @@
+README
+======
+
+Notes on the jar archives:
+
+- activation*.jar
+  JavaBeans Activation Framework
+  http://java.sun.com/products/javabeans/jaf/
+
+- mail-*.jar
+  JavaMail API
+  http://java.sun.com/products/javamail/
+
+- junit*.jar
+  JUnit
+  http://www.junit.org/
+  
+
+FracPete, 2007-05-28

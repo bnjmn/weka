@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=sequentialInformationalBottleneckClusterer
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2010-05-31
+
+# Title (required)
+Title=Cluster data using the sequential information bottleneck algorithm.
+
+Category=Clustering
+
+# Author (required)
+Author=Anna Huang
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Cluster data using the sequential information bottleneck algorithm.<br/><br/>Note: only hard clustering scheme is supported. sIB assign for each instance the cluster that have the minimum cost/distance to the instance. The trade-off beta is set to infinite so 1/beta is zero.<br/><br/>For more information, see:<br/><br/>Noam Slonim, Nir Friedman, Naftali Tishby: Unsupervised document classification using sequential information maximization. In: Proceedings of the 25th International ACM SIGIR Conference on Research and Development in Information Retrieval, 129-136, 2002.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/sequentialInformationalBottleneckClusterer1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/sequentialInformationalBottleneckClusterer
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

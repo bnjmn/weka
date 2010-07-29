@@ -1,0 +1,41 @@
+# Description file for linearForwardSelection
+#
+# 
+
+# Package name (required)
+PackageName=linearForwardSelection
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Extension of BestFirst that takes a restricted number of k attributes into account.
+
+Category=Attribute selection
+
+# Author (required)
+Author=Martin Guetlein <martin.guetlein@gmail.com>
+
+# Maintainer (required)
+Maintainer=Martin Guetlein <martin.guetlein@gmail.com>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Extension of BestFirst. Takes a restricted number of k attributes into account. Fixed-set selects a fixed number k of attributes, whereas k is increased in each step when fixed-width is selected. The search uses either the initial ordering to select the top k attributes, or performs a ranking (with the same evalutator the search uses later on). The search direction can be forward, or floating forward selection (with opitional backward search steps). For more information see: Martin Guetlein (2006). Large Scale Attribute Selection Using Wrappers. Freiburg, Germany.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/linearForwardSelection1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/linearForwardSelection
+
+# Related to other packages?
+Related=BestFirst, GreedyStepwize, WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1), classifierBasedAttributeSelection (>=1.0.0)

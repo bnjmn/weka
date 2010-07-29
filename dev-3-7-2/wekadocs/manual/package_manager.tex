@@ -1,0 +1,127 @@
+%
+%    This program is free software; you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation; either version 2 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program; if not, write to the Free Software
+%    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+%
+
+% Version: $Revision: 5897 $
+
+
+The Package Manager provides a graphical interface to Weka's package
+management system. All the functionality available in the command line
+client to the package management system covered in the previous
+Chapter is available in the GUI version, along with the ability to
+install and uninstall multiple packages in one hit.
+
+\section{Main window}
+
+\begin{center}
+	\epsfig{file=images/package_manager/manager_main.eps,height=10cm,angle=-90}
+\end{center}
+
+The package manager's window is split horizontally into two parts: at
+the top is a list of packages and at the bottom is a mini browser that
+can be used to display information on the currently selected
+package. 
+
+The package list shows the name of a package, its category, the
+currently installed version (if installed), the latest version
+available via the repository and whether the package has been loaded
+or not. This list may be sorted by either package name or category by
+clicking on the appropriate column header. A second click on the same
+header reverses the sort order. Three radio buttons in the upper left
+of the window can be used to filter what is displayed in the list. All
+packages (default), all available packages (i.e. those not yet
+installed) or only installed packages can be displayed.
+
+If multiple versions of a package are available, they can be accessed by
+clicking on an entry in the ``Repository version'' column:
+
+\begin{center}
+	\epsfig{file=images/package_manager/manager_versions.eps,height=10cm,angle=-90}
+\end{center}
+
+\section{Installing and removing packages}
+
+At the very top of the window are three buttons. On the left-hand side
+is a button that can be used to refresh the cached copy of the package
+repository meta data. The first time that the package manager (GUI or
+command line) is used there will be a short delay as the initial cache
+is established. \textbf{NOTE: Weka will not automatically check for
+new information at the central repository, so it is a good idea to
+refresh the local cache regularly}.
+
+The two buttons at the top right are used to install and remove
+packages repspectively. Multiple packages may be installed/removed by
+using a shift-left-click combination to select a range and/or by using
+a command-left-click combination to add to the selection. Underneath
+the install and uninstall buttons is a checkbox that can be enabled to
+ignore any dependencies required by selected packages and any
+conflicts that may occur. Installing packages while this checkbox is
+selected will \textbf{not} install required dependencies.
+
+Some packages may have additional information on how to complete the
+installation or special instructions that gets displayed when the
+package is installed:
+
+\begin{center}
+	\epsfig{file=images/package_manager/manager_specialInstructions.eps,height=10cm,angle=-90}
+\end{center}
+
+Usually it is not necessary to restart Weka after packages have been
+installed---the changes should be available immediately. An exception
+is when upgrading a package that is already installed. If in doubt, 
+restart Weka.
+
+\section{Using a http proxy}
+
+Both the GUI and command line package managers can operate via a http proxy. To do so,
+start Weka from the command line and supply property values for the proxy host and port:
+
+{\scriptsize
+\begin{verbatim}
+  java -Dhttp.proxyHost=some.proxy.somewhere.net -Dhttp.proxyPort=port weka.gui.GUIChooser
+\end{verbatim}}
+
+If your proxy requires authentication, then two more (non-standard) properties can be
+supplied:
+
+{\scriptsize
+\begin{verbatim}
+  -Dhttp.proxyUser=some_user_name -Dhttp.proxyPassword=some_password
+\end{verbatim}}
+
+\section{Using an alternative central package meta data repository}
+
+By default, both the command-line and GUI package managers use the
+central package meta data repository hosted on Sourceforge. In the
+unlikely event that this site is unavailable for one reason or
+another, it is possible to point the package management system at an
+alternative repository. This mechanism allows a temporary backup of
+the official repostory to be accessed, local mirrors to be established
+and alternative repositories to be set up for use etc.
+
+An alternative repository can be specified by setting a Java property:
+
+{\scriptsize
+\begin{verbatim}
+  weka.core.wekaPackageRepositoryURL=http://some.mirror.somewhere
+\end{verbatim}}
+
+This can either be set when starting Weka from the command line with
+the \texttt{-D} flag, or it can be placed into a file called
+``PackageRepository.props'' in \verb=$WEKA_HOME/props=. The default
+value of \verb=WEKA_HOME= is \verb=user.home/wekafiles=, where
+\verb=user.home= is the user's home directory. More information on how
+and where Weka stores configuration information is given in the
+Appendix (Chapter 19).

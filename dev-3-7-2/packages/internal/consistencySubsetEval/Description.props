@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=consistencySubsetEval
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Evaluates the worth of a subset of attributes by the level of consistency in the class values when the training instances are projected onto the subset of attributes.
+
+Category=Attribute selection
+
+# Author (required)
+Author=Mark Hall
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Evaluates the worth of a subset of attributes by the level of consistency in the class values when the training instances are projected onto the subset of attributes. The consistency of any subset can never be lower than that of the full set of attributes, hence the usual practice is to use this subset evaluator in conjunction with a Random or Exhaustive search which looks for the smallest subset with consistency equal to that of the full set of attributes. See: H. Liu, R. Setiono: A probabilistic approach to feature selection - A filter solution. In: 13th International Conference on Machine Learning, 319-327, 1996.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/consistencySubsetEval1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/consistencySubsetEval
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies
+Depends=weka (>=3.7.1)

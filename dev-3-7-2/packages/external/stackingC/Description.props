@@ -1,0 +1,41 @@
+# Description file for stackingC
+#
+# 
+
+# Package name (required)
+PackageName=stackingC
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Implements StackingC (more efficient version of stacking)
+
+Category=Ensemble learning
+
+# Author (required)
+Author=Alexander K. Seewald <alex@seewald.at>
+
+# Maintainer (required)
+Maintainer=Alexander K. Seewald <alex@seewald.at>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Implements StackingC (more efficient version of stacking). For more information, see A.K. Seewald: How to Make Stacking Better and Faster While Also Taking Care of an Unknown Weakness. In: Nineteenth International Conference on Machine Learning, 554-561, 2002. Note: requires meta classifier to be a numeric prediction scheme
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/stackingC1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/stackingC
+
+# Related to other packages?
+Related=Stacking
+
+# Dependencies
+Depends=weka (>=3.7.1)

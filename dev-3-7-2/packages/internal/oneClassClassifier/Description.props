@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=oneClassClassifier
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Performs one-class classification on a dataset.
+
+Category=Classification
+
+# Author (required)
+Author=Katherine Hempstalk and Eibe Frank
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description= Performs one-class classification on a dataset.<br/><br/>Classifier reduces the class being classified to just a single class, and learns the datawithout using any information from other classes.  The testing stage will classify as 'target'or 'outlier' - so in order to calculate the outlier pass rate the dataset must contain informationfrom more than one class.<br/><br/>Also, the output varies depending on whether the label 'outlier' exists in the instances usedto build the classifier.  If so, then 'outlier' will be predicted, if not, then the label willbe considered missing when the prediction does not favour the target class.  The 'outlier' classwill not be used to build the model if there are instances of this class in the dataset.  It cansimply be used as a flag, you do not need to relabel any classes.<br/><br/>For more information, see:<br/><br/>Kathryn Hempstalk, Eibe Frank, Ian H. Witten: One-Class Classification by Combining Density and Class Probability Estimation. In: Proceedings of the 12th European Conference on Principles and Practice of Knowledge Discovery in Databases and 19th European Conference on Machine Learning, ECMLPKDD2008, Berlin, 505--519, 2008.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/oneClassClassifier1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/oneClassClassifier
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1)

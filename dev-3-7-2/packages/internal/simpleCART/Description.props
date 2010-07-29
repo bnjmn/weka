@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=simpleCART
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2010-05-31
+
+# Title (required)
+Title=Class implementing minimal cost-complexity pruning.
+
+Category=Classification
+
+# Author (required)
+Author=Haijian Shi
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Class implementing minimal cost-complexity pruning.<br/>Note when dealing with missing values, use "fractional instances" method instead of surrogate split method.<br/><br/>For more information, see:<br/><br/>Leo Breiman, Jerome H. Friedman, Richard A. Olshen, Charles J. Stone (1984). Classification and Regression Trees. Wadsworth International Group, Belmont, California.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/simpleCART1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/simpleCART
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

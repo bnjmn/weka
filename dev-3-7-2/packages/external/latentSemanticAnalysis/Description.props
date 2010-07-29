@@ -1,0 +1,41 @@
+# Description file for latentSemanticAnalysis
+#
+# 
+
+# Package name (required)
+PackageName=latentSemanticAnalysis
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Performs latent semantic analysis and transformation of the data
+
+Category=Preprocessing
+
+# Author (required)
+Author=Amri Napolitano <amrifau@gmail.com>
+
+# Maintainer (required)
+Maintainer=Amri Napolitano <amrifau@gmail.com>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Performs latent semantic analysis and transformation of the data. Use in conjunction with a Ranker search. A low-rank approximation of the full data is found by specifying the number of singular values to use. The dataset may be transformed to give the relation of either the attributes or the instances (default) to the concept space created by the transformation.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/latentSemanticAnalysis1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/latentSemanticAnalysis
+
+# Related to other packages?
+Related=PCA
+
+# Dependencies
+Depends=weka (>=3.7.1)
