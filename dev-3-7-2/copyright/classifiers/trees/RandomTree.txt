@@ -1,21 +1,0 @@
-From: "Bruce Craig" <pcxcb1@nottingham.ac.uk>
-Date: January 21, 2009 10:52:06 AM GMT+13:00
-To: "Mark Hall" <mhall@pentaho.com>
-Subject: RE: [Wekalist] REPTree vs Random Tree
-
-Hi Mark,  That's fine, to be honest I think I copied most of it from J48 or REPTree anyway.  Cheers Craig   
-
------Original Message----- 
-From: Mark Hall [mailto:mhall@pentaho.com] 
-Sent: Tue 1/20/2009 21:14 
-To: Bruce Craig Subject: 
-Re: [Wekalist] REPTree vs Random Tree
-   
-On 21/01/2009, at 10:00 AM, Bruce Craig wrote:  
-> > Cool! Can we include your additions to RandomTree in Weka? 
->  Thanks Craig. 
-
-One last question - are you OK with giving copyright  for your changes to the University of Waikato?  
-
-Cheers, 
-Mark.
