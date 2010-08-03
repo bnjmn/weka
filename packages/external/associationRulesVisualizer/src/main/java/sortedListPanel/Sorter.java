@@ -1,7 +1,7 @@
 /*
  * Sorter.java
  *
- * Created on 5 février 2003, 18:59
+ * Created on 5 fevrier 2003, 18:59
  */
 
 
@@ -56,7 +56,7 @@ public class Sorter {
 			}
 			sorted.put(c, objectsToStock);
 		} else {
-			System.out.println("Déjà trié.");
+			System.out.println("Deja trie.");
 			Object[] objectsInStock = (Object[]) sorted.get(c);
 			for (int i = 0; i < objectsInStock.length; i++)
 				theObjects[i] = objectsInStock[i];

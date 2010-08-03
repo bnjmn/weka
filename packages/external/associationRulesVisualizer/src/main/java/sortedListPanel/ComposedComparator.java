@@ -1,7 +1,7 @@
 /*
  * ComposedComparator.java
  *
- * Created on 5 février 2003, 18:49
+ * Created on 5 fevrier 2003, 18:49
  */
 
 /*

@@ -650,7 +650,7 @@ public class Panel3D extends selection.DataPanel implements Printable {
 		float height,
 		Color3f col) {
 
-		//quadrilatère
+		//quadrilatere
 		QuadArray quad =
 			new QuadArray(24, QuadArray.COORDINATES | QuadArray.COLOR_3);
 		quad.setCoordinate(0, new Point3f(0.001f, height - 0.001f, 0.001f));
@@ -712,7 +712,7 @@ public class Panel3D extends selection.DataPanel implements Printable {
 
 		//dessine les aretes
 
-		//quadrilatère
+		//quadrilatere
 		QuadArray aretes =
 			new QuadArray(24, QuadArray.COORDINATES | QuadArray.COLOR_3);
 		aretes.setCoordinate(0, new Point3f(0.0f, 0.0f, 0.0f));
