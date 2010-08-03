@@ -199,6 +199,12 @@ cp $TMP/build.xml $FINISHED_DIR/weka
 echo "--> Compiling wekaexamples..."
 TMP=$TEMP_DIR/wekaexamples
 cp $TEMP_DIR/weka/dist/weka.jar $TMP/lib
+if [ "$BRANCH" = "trunk" ]
+then
+    # copy the LibSVM.jar
+    echo "---- copying LibSVM.jar -----"
+   cp $TEMP_DIR/../lib/*.jar $TMP/lib
+fi
 cd $TMP
 ant dist
 ant docs
@@ -207,7 +213,7 @@ rm lib/weka.jar
 rm dist/weka.jar
 find . -name .svn -type d -exec rm -Rf {} \;
 cd ../
-jar cfM wekaexamples.zip wekaexamples
+zip -r wekaexamples.zip wekaexamples
 cd $CURRENT
 cp $TEMP_DIR/wekaexamples.zip $FINISHED_DIR
 
