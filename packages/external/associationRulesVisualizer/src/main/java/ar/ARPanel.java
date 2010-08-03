@@ -201,7 +201,7 @@ public class ARPanel
 	}
 
 	private void showAbout(java.awt.event.ActionEvent evt) {
-		String message = "ARViewer 1.0 \n \n Sébastien Demay \n Damien Delautre \n \n LIFL - OPAC";
+		String message = "ARViewer 1.0 \n \n Sebastien Demay \n Damien Delautre \n \n LIFL - OPAC";
 		JOptionPane.showMessageDialog(this, message, "About ARViewer", JOptionPane.INFORMATION_MESSAGE);
 
 	}
