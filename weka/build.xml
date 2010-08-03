@@ -351,7 +351,7 @@
     </antcall>
 
     <antcall target="${packageCommand}_external">
-      <param name="packageName" value="DMNBText"/>
+      <param name="packageName" value="DMNBtext"/>
     </antcall>
 
     <antcall target="${packageCommand}_external">
