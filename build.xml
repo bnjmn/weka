@@ -71,7 +71,7 @@
      <include name="**/lib/*.zip"/>
    </fileset>
   </path>
-  <property name="pack.cp" refid="package.class.path"/>
+<!--  <property name="pack.cp" refid="package.class.path"/> -->
 
 <!-- 
  ============================================================================
