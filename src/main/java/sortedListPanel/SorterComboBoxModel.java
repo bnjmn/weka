@@ -1,7 +1,7 @@
 /*
  * SorterComboBoxModel.java
  *
- * Created on 13 février 2003, 12:28
+ * Created on 13 fevrier 2003, 12:28
  */
 
 /*
