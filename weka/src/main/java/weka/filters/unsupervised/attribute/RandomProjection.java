@@ -82,7 +82,7 @@ import java.util.Vector;
  * calculating the random matrix (default 42). <p>
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.3.2.3 $ [1.0 - 22 July 2003 - Initial version (Ashraf M.
+ * @version $Revision$ [1.0 - 22 July 2003 - Initial version (Ashraf M.
  *          Kibriya)]
  */
 public class RandomProjection extends Filter implements UnsupervisedFilter, OptionHandler {
@@ -103,8 +103,8 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
   public static final int SPARSE1=1, SPARSE2=2, GAUSSIAN=3;
 
   public static final Tag [] TAGS_DSTRS_TYPE = {
-    new Tag(SPARSE1, "Sparse 1"),
-    new Tag(SPARSE2, "Sparse 2"),
+    new Tag(SPARSE1, "Sparse1"),
+    new Tag(SPARSE2, "Sparse2"),
     new Tag(GAUSSIAN, "Gaussian"),
   };
 
