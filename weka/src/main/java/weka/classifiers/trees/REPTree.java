@@ -501,7 +501,7 @@ public class REPTree
      * @param maxDepth the maximum allowed depth of the tree
      * @throws Exception if generation fails
      */
-    protected void buildTree(int[][] sortedIndices, double[][] weights,
+    protected void buildTree(int[][][] sortedIndices, double[][][] weights,
 			     Instances data, double totalWeight, 
 			     double[] classProbs, Instances header,
 			     double minNum, double minVariance,
@@ -518,13 +518,15 @@ public class REPTree
       if (data.classIndex() == 0) {
 	helpIndex = 1;
       }
-      if (sortedIndices[helpIndex].length == 0) {
+      if (sortedIndices[0][helpIndex].length == 0) {
 	if (data.classAttribute().isNumeric()) {
 	  m_Distribution = new double[2];
 	} else {
 	  m_Distribution = new double[data.numClasses()];
 	}
 	m_ClassProbs = null;
+        sortedIndices[0] = null;
+        weights[0] = null;
 	return;
       }
       
@@ -533,12 +535,12 @@ public class REPTree
 
 	// Compute prior variance
 	double totalSum = 0, totalSumSquared = 0, totalSumOfWeights = 0; 
-	for (int i = 0; i < sortedIndices[helpIndex].length; i++) {
-	  Instance inst = data.instance(sortedIndices[helpIndex][i]);
-	  totalSum += inst.classValue() * weights[helpIndex][i];
+	for (int i = 0; i < sortedIndices[0][helpIndex].length; i++) {
+	  Instance inst = data.instance(sortedIndices[0][helpIndex][i]);
+	  totalSum += inst.classValue() * weights[0][helpIndex][i];
 	  totalSumSquared += 
-	    inst.classValue() * inst.classValue() * weights[helpIndex][i];
-	  totalSumOfWeights += weights[helpIndex][i];
+	    inst.classValue() * inst.classValue() * weights[0][helpIndex][i];
+	  totalSumOfWeights += weights[0][helpIndex][i];
 	}
 	priorVar = singleVariance(totalSum, totalSumSquared, 
 				  totalSumOfWeights);
@@ -579,6 +581,8 @@ public class REPTree
 	  m_Distribution[0] = priorVar;
 	  m_Distribution[1] = totalWeight;
 	}
+        sortedIndices[0] = null;
+        weights[0] = null;
 	return;
       }
 
@@ -594,8 +598,8 @@ public class REPTree
 	// Nominal case
 	for (int i = 0; i < data.numAttributes(); i++) {
 	  if (i != data.classIndex()) {
-	    splits[i] = distribution(props, dists, i, sortedIndices[i], 
-				     weights[i], totalSubsetWeights, data);
+	    splits[i] = distribution(props, dists, i, sortedIndices[0][i], 
+				     weights[0][i], totalSubsetWeights, data);
 	    vals[i] = gain(dists[i], priorVal(dists[i]));
 	  }
 	}
@@ -605,8 +609,8 @@ public class REPTree
 	for (int i = 0; i < data.numAttributes(); i++) {
 	  if (i != data.classIndex()) {
 	    splits[i] = 
-	      numericDistribution(props, dists, i, sortedIndices[i], 
-				  weights[i], totalSubsetWeights, data, 
+	      numericDistribution(props, dists, i, sortedIndices[0][i], 
+				  weights[0][i], totalSubsetWeights, data, 
 				  vals);
 	  }
 	}
@@ -631,28 +635,50 @@ public class REPTree
       // Any useful split found?
       if ((vals[m_Attribute] > 0) && (count > 1)) {
 
-	// Build subtrees
+        // Set split point, proportions, and temp arrays
 	m_SplitPoint = splits[m_Attribute];
 	m_Prop = props[m_Attribute];
-	int[][][] subsetIndices = 
-	  new int[numAttVals][data.numAttributes()][0];
-	double[][][] subsetWeights = 
-	  new double[numAttVals][data.numAttributes()][0];
+        double[][] attSubsetDists = dists[m_Attribute];
+        double[] attTotalSubsetWeights = totalSubsetWeights[m_Attribute];
+
+        // Release some memory before proceeding further
+        vals = null;
+        dists = null;
+        props = null;
+        totalSubsetWeights = null;
+        splits = null;
+
+	// Split data
+	int[][][][] subsetIndices = 
+	  new int[numAttVals][1][data.numAttributes()][0];
+	double[][][][] subsetWeights = 
+	  new double[numAttVals][1][data.numAttributes()][0];
 	splitData(subsetIndices, subsetWeights, m_Attribute, m_SplitPoint, 
-		  sortedIndices, weights, data);
+		  sortedIndices[0], weights[0], data);
+
+        // Release memory
+        sortedIndices[0] = null;
+        weights[0] = null;
+
+        // Build successors
 	m_Successors = new Tree[numAttVals];
 	for (int i = 0; i < numAttVals; i++) {
 	  m_Successors[i] = new Tree();
 	  m_Successors[i].
 	    buildTree(subsetIndices[i], subsetWeights[i], 
-		      data, totalSubsetWeights[m_Attribute][i],
-		      dists[m_Attribute][i], header, minNum, 
+		      data, attTotalSubsetWeights[i],
+		      attSubsetDists[i], header, minNum, 
 		      minVariance, depth + 1, maxDepth);
+
+          // Release as much memory as we can
+          attSubsetDists[i] = null;
 	}
       } else {
       
 	// Make leaf
 	m_Attribute = -1;
+        sortedIndices[0] = null;
+        weights[0] = null;
       }
 
       // Normalize class counts
@@ -699,8 +725,8 @@ public class REPTree
      * @param data the data to work with
      * @throws Exception if something goes wrong
      */
-    protected void splitData(int[][][] subsetIndices, 
-			     double[][][] subsetWeights,
+    protected void splitData(int[][][][] subsetIndices, 
+			     double[][][][] subsetWeights,
 			     int att, double splitPoint, 
 			     int[][] sortedIndices, double[][] weights, 
 			     Instances data) throws Exception {
@@ -716,8 +742,8 @@ public class REPTree
 	    // For nominal attributes
 	    num = new int[data.attribute(att).numValues()];
 	    for (int k = 0; k < num.length; k++) {
-	      subsetIndices[k][i] = new int[sortedIndices[i].length];
-	      subsetWeights[k][i] = new double[sortedIndices[i].length];
+	      subsetIndices[k][0][i] = new int[sortedIndices[i].length];
+	      subsetWeights[k][0][i] = new double[sortedIndices[i].length];
 	    }
 	    for (j = 0; j < sortedIndices[i].length; j++) {
 	      Instance inst = data.instance(sortedIndices[i][j]);
@@ -726,17 +752,17 @@ public class REPTree
 		// Split instance up
 		for (int k = 0; k < num.length; k++) {
 		  if (m_Prop[k] > 0) {
-		    subsetIndices[k][i][num[k]] = sortedIndices[i][j];
-		    subsetWeights[k][i][num[k]] = 
+		    subsetIndices[k][0][i][num[k]] = sortedIndices[i][j];
+		    subsetWeights[k][0][i][num[k]] = 
 		      m_Prop[k] * weights[i][j];
 		    num[k]++;
 		  }
 		}
 	      } else {
 		int subset = (int)inst.value(att);
-		subsetIndices[subset][i][num[subset]] = 
+		subsetIndices[subset][0][i][num[subset]] = 
 		  sortedIndices[i][j];
-		subsetWeights[subset][i][num[subset]] = weights[i][j];
+		subsetWeights[subset][0][i][num[subset]] = weights[i][j];
 		num[subset]++;
 	      }
 	    }
@@ -745,8 +771,8 @@ public class REPTree
 	    // For numeric attributes
 	    num = new int[2];
 	    for (int k = 0; k < 2; k++) {
-	      subsetIndices[k][i] = new int[sortedIndices[i].length];
-	      subsetWeights[k][i] = new double[weights[i].length];
+	      subsetIndices[k][0][i] = new int[sortedIndices[i].length];
+	      subsetWeights[k][0][i] = new double[weights[i].length];
 	    }
 	    for (j = 0; j < sortedIndices[i].length; j++) {
 	      Instance inst = data.instance(sortedIndices[i][j]);
@@ -755,17 +781,17 @@ public class REPTree
 		// Split instance up
 		for (int k = 0; k < num.length; k++) {
 		  if (m_Prop[k] > 0) {
-		    subsetIndices[k][i][num[k]] = sortedIndices[i][j];
-		    subsetWeights[k][i][num[k]] = 
+		    subsetIndices[k][0][i][num[k]] = sortedIndices[i][j];
+		    subsetWeights[k][0][i][num[k]] = 
 		      m_Prop[k] * weights[i][j];
 		    num[k]++;
 		  }
 		}
 	      } else {
 		int subset = (inst.value(att) < splitPoint) ? 0 : 1;
-		subsetIndices[subset][i][num[subset]] = 
+		subsetIndices[subset][0][i][num[subset]] = 
 		  sortedIndices[i][j];
-		subsetWeights[subset][i][num[subset]] = weights[i][j];
+		subsetWeights[subset][0][i][num[subset]] = weights[i][j];
 		num[subset]++;
 	      } 
 	    }
@@ -774,12 +800,12 @@ public class REPTree
 	  // Trim arrays
 	  for (int k = 0; k < num.length; k++) {
 	    int[] copy = new int[num[k]];
-	    System.arraycopy(subsetIndices[k][i], 0, copy, 0, num[k]);
-	    subsetIndices[k][i] = copy;
+	    System.arraycopy(subsetIndices[k][0][i], 0, copy, 0, num[k]);
+	    subsetIndices[k][0][i] = copy;
 	    double[] copyWeights = new double[num[k]];
-	    System.arraycopy(subsetWeights[k][i], 0,
+	    System.arraycopy(subsetWeights[k][0][i], 0,
 			     copyWeights, 0, num[k]);
-	    subsetWeights[k][i] = copyWeights;
+	    subsetWeights[k][0][i] = copyWeights;
 	  }
 	}
       }
@@ -1762,31 +1788,31 @@ public class REPTree
     }
 
     // Create array of sorted indices and weights
-    int[][] sortedIndices = new int[train.numAttributes()][0];
-    double[][] weights = new double[train.numAttributes()][0];
+    int[][][] sortedIndices = new int[1][train.numAttributes()][0];
+    double[][][] weights = new double[1][train.numAttributes()][0];
     double[] vals = new double[train.numInstances()];
     for (int j = 0; j < train.numAttributes(); j++) {
       if (j != train.classIndex()) {
-	weights[j] = new double[train.numInstances()];
+	weights[0][j] = new double[train.numInstances()];
 	if (train.attribute(j).isNominal()) {
 
 	  // Handling nominal attributes. Putting indices of
 	  // instances with missing values at the end.
-	  sortedIndices[j] = new int[train.numInstances()];
+	  sortedIndices[0][j] = new int[train.numInstances()];
 	  int count = 0;
 	  for (int i = 0; i < train.numInstances(); i++) {
 	    Instance inst = train.instance(i);
 	    if (!inst.isMissing(j)) {
-	      sortedIndices[j][count] = i;
-	      weights[j][count] = inst.weight();
+	      sortedIndices[0][j][count] = i;
+	      weights[0][j][count] = inst.weight();
 	      count++;
 	    }
 	  }
 	  for (int i = 0; i < train.numInstances(); i++) {
 	    Instance inst = train.instance(i);
 	    if (inst.isMissing(j)) {
-	      sortedIndices[j][count] = i;
-	      weights[j][count] = inst.weight();
+	      sortedIndices[0][j][count] = i;
+	      weights[0][j][count] = inst.weight();
 	      count++;
 	    }
 	  }
@@ -1797,9 +1823,9 @@ public class REPTree
 	    Instance inst = train.instance(i);
 	    vals[i] = inst.value(j);
 	  }
-	  sortedIndices[j] = Utils.sort(vals);
+	  sortedIndices[0][j] = Utils.sort(vals);
 	  for (int i = 0; i < train.numInstances(); i++) {
-	    weights[j][i] = train.instance(sortedIndices[j][i]).weight();
+	    weights[0][j][i] = train.instance(sortedIndices[0][j][i]).weight();
 	  }
 	}
       }
