@@ -133,8 +133,8 @@ public class RandomProjection
   /** The types of distributions that can be used for 
   calculating the random matrix */
   public static final Tag [] TAGS_DSTRS_TYPE = {
-    new Tag(SPARSE1, "Sparse 1"),
-    new Tag(SPARSE2, "Sparse 2"),
+    new Tag(SPARSE1, "Sparse1"),
+    new Tag(SPARSE2, "Sparse2"),
     new Tag(GAUSSIAN, "Gaussian"),
   };
 
