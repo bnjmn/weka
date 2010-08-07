@@ -1,4 +1,4 @@
-@relation 'FilterTest-weka.filters.supervised.attribute.NominalToBinary-weka.filters.unsupervised.attribute.RandomProjection-N10-R42-DSparse 1'
+@relation FilterTest-weka.filters.supervised.attribute.NominalToBinary-weka.filters.unsupervised.attribute.RandomProjection-N10-R42-DSparse1
 
 @attribute K1 numeric
 @attribute K2 numeric
