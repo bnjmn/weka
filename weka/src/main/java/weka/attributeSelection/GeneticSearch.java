@@ -952,10 +952,11 @@ public class GeneticSearch extends ASSearch implements
     r = m_random.nextDouble() * m_sumFitness;
     for (i=0;i<m_popSize;i++) {
       partsum += m_population[i].getFitness();
-      if (partsum >= r) {
+      if (partsum >= r || (i == m_popSize - 1)) {
 	break;
       }
     }
+    
     return i;
   }
 
