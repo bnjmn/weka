@@ -1519,7 +1519,8 @@ public class PackageManager extends JPanel {
       for (Package p : m_allPackages) {
         String loadStatus = "";
         if (p.isInstalled()) {
-          File packageRoot = new File(WekaPackageManager.getPackageHome().toString());
+          File packageRoot = new File(WekaPackageManager.getPackageHome().toString()
+              + File.separator + p.getName());
           boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
           loadStatus = (loaded) ? "Yes" : "No - check log";
         }
