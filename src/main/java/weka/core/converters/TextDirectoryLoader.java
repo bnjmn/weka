@@ -335,7 +335,9 @@ public class TextDirectoryLoader
       atts.add(new Attribute("text", (ArrayList<String>) null));
       if (m_OutputFilename)
 	atts.add(new Attribute("filename", (ArrayList<String>) null));
-      atts.add(new Attribute("class", classes));
+      // make sure that the name of the class attribute is unlikely to 
+      // clash with any attribute created via the StringToWordVector filter
+      atts.add(new Attribute("@@class@@", classes));
       
       String relName = directoryPath.replaceAll("/", "_");
       relName = relName.replaceAll("\\\\", "_").replaceAll(":", "_");
