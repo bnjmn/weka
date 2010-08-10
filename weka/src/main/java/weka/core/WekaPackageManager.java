@@ -843,12 +843,40 @@ public class WekaPackageManager {
   public static void installPackageFromArchive(String packageArchivePath, 
       PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();    
+    Package toInstall = PACKAGE_MANAGER.getPackageArchiveInfo(packageArchivePath);
+    
+    Object specialInstallMessage = 
+      toInstall.getPackageMetaDataElement("MessageToDisplayOnInstallation");
+    if (specialInstallMessage != null && 
+        specialInstallMessage.toString().length() > 0) {
+      String message = "**** Special installation message ****\n" 
+        + specialInstallMessage.toString()
+            + "\n**** Special installation message ****";
+      for (PrintStream p : progress) {
+        p.println(message);
+      }
+    }
+    
     PACKAGE_MANAGER.installPackageFromArchive(packageArchivePath, progress);    
   }
   
   public static void installPackageFromURL(URL packageURL, PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();    
-    PACKAGE_MANAGER.installPackageFromURL(packageURL, progress);
+    String packageName = PACKAGE_MANAGER.installPackageFromURL(packageURL, progress);
+    
+    Package installed = PACKAGE_MANAGER.getInstalledPackageInfo(packageName);
+    
+    Object specialInstallMessage = 
+      installed.getPackageMetaDataElement("MessageToDisplayOnInstallation");
+    if (specialInstallMessage != null && 
+        specialInstallMessage.toString().length() > 0) {
+      String message = "**** Special installation message ****\n" 
+        + specialInstallMessage.toString()
+            + "\n**** Special installation message ****";
+      for (PrintStream p : progress) {
+        p.println(message);
+      }
+    }
   }
   
   public static void uninstallPackage(String packageName, boolean updateKnowledgeFlow, 
