@@ -972,9 +972,8 @@ public class WekaPackageManager {
     try {
       toInstall = getRepositoryPackageInfo(packageName, version);
     } catch (Exception ex) {
-      System.err.println("Package " + packageName + " at version " + version
+      System.err.println("[WekaPackageManager] Package " + packageName + " at version " + version
           + " doesn't seem to exist!");
-      ex.printStackTrace();
       System.exit(1);
     }
     // First check to see if this package is compatible with the base system
@@ -1210,8 +1209,12 @@ public class WekaPackageManager {
       if (p.isInstalled()) {
         Package installedP = getInstalledPackageInfo(p.getName());
         installedV = installedP.getPackageMetaDataElement("Version").toString() + "    ";
-        Package repP = getRepositoryPackageInfo(p.getName());
-        repositoryV = repP.getPackageMetaDataElement("Version").toString() + "     ";
+        try {
+          Package repP = getRepositoryPackageInfo(p.getName());
+          repositoryV = repP.getPackageMetaDataElement("Version").toString() + "     ";
+        } catch (Exception ex) {
+          // not at the repository
+        }
       } else {
         repositoryV = p.getPackageMetaDataElement("Version").toString() + "     ";
       }
@@ -1258,7 +1261,14 @@ public class WekaPackageManager {
           if (args.length == 4) {
             version = args[3];
           }
-          printRepositoryPackageInfo(args[2], version);
+          try {
+            printRepositoryPackageInfo(args[2], version);
+          } catch (Exception ex) {
+            // problem with getting info on package from repository?
+            // Must not be an "official" repository package
+            System.out.println("[WekaPackageManager] Nothing known about package " 
+                + args[2] + " at the repository!");
+          }
         } else {
           System.err.println("[WekaPackageManager] Unknown argument " + args[2]);
           printUsage();
@@ -1276,8 +1286,7 @@ public class WekaPackageManager {
           if (args.length == 3) {
             version = args[2];
           }
-                       
-          installPackageFromRepository(args[1], version, false);
+          installPackageFromRepository(args[1], version, false);          
         }
       } else if (args[0].equals("-uninstall-package")) {
         if (args.length < 2) {
