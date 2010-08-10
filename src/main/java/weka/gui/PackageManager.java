@@ -1188,8 +1188,15 @@ public class PackageManager extends JPanel {
             try {
               p = WekaPackageManager.getRepositoryPackageInfo(packageName);
             } catch (Exception e1) {         
-              e1.printStackTrace();
-              continue;
+//              e1.printStackTrace();
+  //            continue;
+              // see if we can get installed package info
+              try {
+              p = WekaPackageManager.getInstalledPackageInfo(packageName);
+              } catch (Exception e2) {
+                e2.printStackTrace();
+                continue;
+              }
             }
             
             if (p.isInstalled()) {
@@ -1466,8 +1473,9 @@ public class PackageManager extends JPanel {
               enableInstall = !p.isInstalled();
             } */
           } catch (Exception e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            // not a repository package - just enable the uninstall button
+            enableUninstall = true;
+            enableInstall = false;
           }
         }
       }
@@ -1588,16 +1596,29 @@ public class PackageManager extends JPanel {
           }                    
           
           List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
-          List<Object> repVersions = (List<Object>) catAndVers.get(1);
-          Object repositoryV = repVersions.get(0);
+          Object repositoryV = "-----";
+          if (catAndVers != null) {
+            // handle non-repository packages
+            List<Object> repVersions = (List<Object>) catAndVers.get(1);
+            repositoryV = repVersions.get(0);
+          }
 //          String repString = getRepVersions(p.getName(), repositoryV);
 //          repositoryV = repositoryV + " " + repString;          
 
           m_model.setValueAt(category, row, getColumnIndex(CATEGORY_COLUMN));
           m_model.setValueAt(installedV, row, getColumnIndex(INSTALLED_COLUMN));
           m_model.setValueAt(repositoryV, row, getColumnIndex(REPOSITORY_COLUMN));
-          String loadStatus = (String)catAndVers.get(2);
-          m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
+          if (catAndVers != null) {
+            String loadStatus = (String)catAndVers.get(2);
+            m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
+          } else {
+            // handle non-repository packages
+            File packageRoot = new File(WekaPackageManager.getPackageHome().toString()
+                + File.separator + p.getName());
+            boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+            String loadStatus = (loaded) ? "Yes" : "No - check log";
+            m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
+          }
           row++;
         }
 
@@ -1643,7 +1664,13 @@ public class PackageManager extends JPanel {
   private void displayPackageInfo(int i) {
     String packageName = m_table.getValueAt(i, 
         getColumnIndex(PACKAGE_COLUMN)).toString();
-    
+
+    boolean repositoryPackage = true;
+    try {
+      Package repP = WekaPackageManager.getRepositoryPackageInfo(packageName);
+    } catch (Exception ex) {
+      repositoryPackage = false;
+    }
     String versionURL = WekaPackageManager.getPackageRepositoryURL().toString() 
       + "/" + packageName + "/index.html";
     
@@ -1655,7 +1682,30 @@ public class PackageManager extends JPanel {
       if (back != null) {
         m_browserHistory.add(back);
       }
-      m_infoPane.setPage(new URL(versionURL));
+      
+      if (repositoryPackage) {
+        m_infoPane.setPage(new URL(versionURL));
+      } else {
+        // try and display something on this non-official package
+        try {
+          Package p = WekaPackageManager.getInstalledPackageInfo(packageName);
+          Map<?, ?> meta = p.getPackageMetaData();
+          Set<?> keys = meta.keySet();
+          StringBuffer sb = new StringBuffer();
+          sb.append(weka.core.RepositoryIndexGenerator.HEADER);
+          sb.append("<H1>" + packageName + " (Unofficial) </H1>");
+          for (Object k : keys) {
+            if (!k.toString().equals("PackageName")) {
+              Object value = meta.get(k);
+              sb.append(k + " : " + value + "<p>");
+            }
+          }
+          sb.append("</html>\n");
+          m_infoPane.setText(sb.toString());
+        } catch (Exception e) {
+          // ignore
+        }
+      }
     } catch (Exception ex) {
       ex.printStackTrace();
     }
