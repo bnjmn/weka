@@ -82,15 +82,15 @@ and a number of directories:
 
 \section{Anatomy of a package}
 
-A Weka package is a zip archive that must unpack to a directory with
-exactly the same name as the package itself. For example, the DTNB
-package contains the decision table naive Bayes hybrid classifier and
-is delivered in a file called DTNB.zip. When unpacked this zip file
-creates the following directory structure:
+A Weka package is a zip archive that must unpack to the current
+directory. For example, the DTNB package contains the decision table
+naive Bayes hybrid classifier and is delivered in a file called
+DTNB.zip. When unpacked this zip file creates the following directory
+structure:
 
 {\scriptsize
 \begin{verbatim}
-  DTNB
+  <current directory>
     +-DTNB.jar
     +-Description.props
     +-build_package.xml
@@ -111,17 +111,21 @@ creates the following directory structure:
     +-doc
 \end{verbatim}}
 
-The contents of the \texttt{doc} directory have not been shown in the
-above diagram, but this directory contains javadoc for the DTNB
-class. A package \textbf{must} have a \texttt{Description.props} file
-and contain at least one \texttt{jar} file with compiled java classes.
-The package manager will attempt to load all \texttt{jar} files that
-it finds in the root directory and the \texttt{lib} directory. Other
-files are optional, but if the package is open-source then it is nice
-to include the source code and an ant build file that can be used to
-compile the code. Template versions of the \texttt{Description.props}
-file and \verb=build_package.xml= file are available from the Weka
-site and from the Weka wiki.
+When installing, the package manager will use the value of the
+``PackageName'' field in the \texttt{Description.props} file (see below) to
+create a directory in \verb=$WEKA_HOME/packages= to hold the package
+contents. The contents of the \texttt{doc} directory have not been
+shown in the above diagram, but this directory contains javadoc for
+the DTNB class. A package \textbf{must} have a
+\texttt{Description.props} file and contain at least one \texttt{jar}
+file with compiled java classes.  The package manager will attempt to
+load all \texttt{jar} files that it finds in the root directory and
+the \texttt{lib} directory. Other files are optional, but if the
+package is open-source then it is nice to include the source code and
+an ant build file that can be used to compile the code. Template
+versions of the \texttt{Description.props} file and
+\verb=build_package.xml= file are available from the Weka site and
+from the Weka wiki.
 
 \subsection{The description file}
 
