@@ -1002,7 +1002,8 @@ public class WekaPackageManager {
     } catch (Exception ex) {
       System.err.println("[WekaPackageManager] Package " + packageName + " at version " + version
           + " doesn't seem to exist!");
-      System.exit(1);
+      //System.exit(1);
+      return;
     }
     // First check to see if this package is compatible with the base system
     
@@ -1222,7 +1223,8 @@ public class WekaPackageManager {
     } else {
       System.err.println("[WekaPackageManager] Unknown argument " + arg);
       printUsage();
-      System.exit(1);
+      //System.exit(1);
+      return;
     }
     
     StringBuffer result = new StringBuffer();
@@ -1272,13 +1274,15 @@ public class WekaPackageManager {
       if (args.length == 0 || args[0].equalsIgnoreCase("-h") ||
           args[0].equalsIgnoreCase("-help")) {
         printUsage();
-        System.exit(1);
+        //System.exit(1);
+        return;
       }
       
       if (args[0].equals("-package-info")) {
         if (args.length < 3) {
           printUsage();
-          System.exit(1);
+          return;
+          //System.exit(1);
         }
         if (args[1].equals("archive")) {
           printPackageArchiveInfo(args[2]);
@@ -1300,7 +1304,8 @@ public class WekaPackageManager {
         } else {
           System.err.println("[WekaPackageManager] Unknown argument " + args[2]);
           printUsage();
-          System.exit(1);
+          return;
+          //System.exit(1);
         }
       } else if (args[0].equals("-install-package")) {
         if (args[1].startsWith("http://")) {
@@ -1319,7 +1324,8 @@ public class WekaPackageManager {
       } else if (args[0].equals("-uninstall-package")) {
         if (args.length < 2) {
           printUsage();
-          System.exit(1);
+          return;
+          //System.exit(1);
         }
         boolean force = false;
         
@@ -1330,11 +1336,13 @@ public class WekaPackageManager {
         }
         
         removeInstalledPackage(args[1], force, System.out);
-        System.exit(0);
+        //System.exit(0);
+        return;
       } else if (args[0].equals("-list-packages")) {
         if (args.length < 2) {
           printUsage();
-          System.exit(1);
+          //System.exit(1);
+          return;
         }
         listPackages(args[1]);
         
