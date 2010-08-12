@@ -281,7 +281,7 @@ protected static int compare(String version1, String version2) {
     indexBuf.append("<h1>WEKA Packages </h1>\n\n");
     indexBuf.append(/*"<h3>Download WekaLite</h3>\n<a href=\"wekaLite.jar\">wekaLite.jar</a>" + */
     		"<p><b>IMPORTANT: make sure there are no old versions of Weka (<3.7.2) in " +
-    		"your CLASSPATH before using Weka</b>\n\n");
+    		"your CLASSPATH before starting Weka</b>\n\n");
     
     indexBuf.append("<h3>Installation of Packages</h3>\n");
     indexBuf.append("A GUI package manager is available from the \"Tools\" menu of" +
