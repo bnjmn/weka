@@ -419,3 +419,82 @@ have published a new algorithm and want to quiclky make a beta version
 available for others to try without having to go through the official
 route.
 
+\section{Creating a mirror of the package meta data repository}
+
+In this section we discuss an easy approach to setting up and
+maintaining a mirror of the package meta data repository. Having a
+local mirror may provide faster access times than to that of the
+official repository on Sourceforge. Extending this approach to the
+creation of an alternative central repository (hosting packages not
+available at the official repository) should be straight forward.
+
+Just about everything necessary for creating a mirror exists in
+the local meta data cache created by Weka's package management
+system. This cache resides at \verb=$WEKA_HOME/repCache=. The only
+thing missing (in Weka 3.7.2) for a complete mirror is the
+file ``images.txt'', that lists all the image files used in the html
+index files. This file contains the following two lines:
+
+\begin{verbatim}
+  Title-Bird-Header.gif
+  pentaho_logo_rgb_sm.png
+\end{verbatim}
+
+``images.txt'' is downloaded automatically by the package management
+system in Weka 3.7.3 and higher.
+
+To create a mirror:
+
+\begin{enumerate}
+\item Copy the contents of \verb=$WEKA_HOME/repCache= to a temporary
+  directory. For the purposes of this example we'll call it
+  \texttt{tempRep}
+\item Change directory into \texttt{tempRep} and run\\\\
+
+\verb=java weka.core.RepositoryIndexGenerator .= \\
+
+Don't forget the ``.'' after the command (this tells
+\texttt{RepoistoryIndexGenerator} to operate on the current directory)
+
+\item Change directory to the parent of \texttt{tempRep} and synchronize its
+contents to wherever your web server is located (this is easy via rsync under
+Nix-like operating systems).
+\end{enumerate}
+
+\texttt{RepositoryIndexGenerator} automatically creates the main
+index.html file, all the package index.html files and html files
+correpsonding to all version prop files for each package. It will also
+create \texttt{packageList.txt} and \texttt{numPackages.txt} files.
+
+\textbf{IMPORTANT}: Make sure that all the files in \texttt{tempRep}
+are world readable.
+
+It is easy to make packages available that are not part of the
+official Weka repository. Assuming you want to add a package called
+``funkyPackage'' (as specified by the
+``PackageName'' field in the \texttt{Description.props} file):
+
+\begin{enumerate}
+\item Create a directory called ``funkyPackage'' in \texttt{tempRep}
+\item Copy the \texttt{Description.props} file to \texttt{tempRep/funkyPackage/Latest.props}
+\item Copy the \texttt{Description.props} file to \texttt{tempRep/funkyPackage/<version number>.props}, where ``version number'' is the version number specified in the ``Version'' field of \texttt{Description.props}
+\item Run \texttt{RepositoryIndexGenerator} as described previously and sync \texttt{tempRep} to your web server
+\end{enumerate}
+
+Adding a new version of an existing package is very similar to what
+has already been described. All that is required is that the new
+\texttt{Description.props} file corresponding to the new version is
+copied to \texttt{Latest.props} and to \texttt{<version numer>.props}
+in the package's folder. Running \texttt{RepositoryIndexGenerator}
+will ensure that all necessary html files are created and supporting
+text files are updated.
+
+Automating the mirroring process would simply involve using your OS's
+scheduler to execute a script that:
+
+\begin{enumerate}
+\item Runs \texttt{weka.core.WekaPackageManager -refresh-cache}
+\item rsyncs \verb=$WEKA_HOME/repCache= to \texttt{tempRep}
+\item Runs \texttt{weka.core.RepoistoryIndexGenerator}
+\item rsyncs \texttt{tempRep} to your web server
+\end{enumerate}
