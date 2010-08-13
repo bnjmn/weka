@@ -98,6 +98,9 @@ import java.util.Vector;
  * <pre> -U
  *  Generate unpruned decision list.</pre>
  * 
+ * <pre> -J
+ *  Do not use MDL correction for info gain on numeric attributes.</pre>
+ * 
  * <pre> -Q &lt;seed&gt;
  *  Seed for random data shuffling (default 1).</pre>
  * 
@@ -122,6 +125,9 @@ public class PART
 
   /** Minimum number of objects */
   private int m_minNumObj = 2;
+
+  /** Use MDL correction? */
+  private boolean m_useMDLcorrection = true;         
 
   /** Use reduced error pruning? */
   private boolean m_reducedErrorPruning = false;
@@ -212,9 +218,9 @@ public class PART
     ModelSelection modSelection;	 
 
     if (m_binarySplits)
-      modSelection = new BinC45ModelSelection(m_minNumObj, instances);
+      modSelection = new BinC45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
     else
-      modSelection = new C45ModelSelection(m_minNumObj, instances);
+      modSelection = new C45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
     if (m_unpruned) 
       m_root = new MakeDecList(modSelection, m_minNumObj);
     else if (m_reducedErrorPruning) 
@@ -286,7 +292,7 @@ public class PART
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(7);
+    Vector newVector = new Vector(8);
 
     newVector.
 	addElement(new Option("\tSet confidence threshold for pruning.\n" +
@@ -310,6 +316,9 @@ public class PART
     newVector.
 	addElement(new Option("\tGenerate unpruned decision list.",
 			      "U", 0, "-U"));
+    newVector.
+      addElement(new Option("\tDo not use MDL correction for info gain on numeric attributes.",
+                            "J", 0, "-J"));
     newVector.
       addElement(new Option("\tSeed for random data shuffling (default 1).",
 			    "Q", 1, "-Q <seed>"));
@@ -345,6 +354,9 @@ public class PART
    * <pre> -U
    *  Generate unpruned decision list.</pre>
    * 
+   * <pre> -J
+   *  Do not use MDL correction for info gain on numeric attributes.</pre>
+   * 
    * <pre> -Q &lt;seed&gt;
    *  Seed for random data shuffling (default 1).</pre>
    * 
@@ -359,6 +371,7 @@ public class PART
     m_unpruned = Utils.getFlag('U', options);
     m_reducedErrorPruning = Utils.getFlag('R', options);
     m_binarySplits = Utils.getFlag('B', options);
+    m_useMDLcorrection = !Utils.getFlag('J', options);
     String confidenceString = Utils.getOption('C', options);
     if (confidenceString.length() != 0) {
       if (m_reducedErrorPruning) {
@@ -408,7 +421,7 @@ public class PART
    */
   public String [] getOptions() {
 
-    String [] options = new String [11];
+    String [] options = new String [12];
     int current = 0;
 
     if (m_unpruned) {
@@ -428,6 +441,9 @@ public class PART
       options[current++] = "-N"; options[current++] = "" + m_numFolds;
     }
     options[current++] = "-Q"; options[current++] = "" + m_Seed;
+    if (!m_useMDLcorrection) {
+      options[current++] = "-J";
+    }
 
     while (current < options.length) {
       options[current++] = "";
@@ -607,6 +623,35 @@ public class PART
     
     m_unpruned = newunpruned;
   }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useMDLcorrectionTipText() {
+    return "Whether MDL correction is used when finding splits on numeric attributes.";
+  }
+
+  /**
+   * Get the value of useMDLcorrection.
+   *
+   * @return Value of useMDLcorrection.
+   */
+  public boolean getUseMDLcorrection() {
+    
+    return m_useMDLcorrection;
+  }
+  
+  /**
+   * Set the value of useMDLcorrection.
+   *
+   * @param newuseMDLcorrection Value to assign to useMDLcorrection.
+   */
+  public void setUseMDLcorrection(boolean newuseMDLcorrection) {
+    
+    m_useMDLcorrection = newuseMDLcorrection;
+  }
   
   /**
    * Returns the tip text for this property
@@ -716,3 +761,4 @@ public class PART
     runClassifier(new PART(), argv);
   }
 }
+

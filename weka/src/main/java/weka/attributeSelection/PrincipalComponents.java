@@ -54,8 +54,10 @@ import weka.filters.unsupervised.attribute.Standardize;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -D
- *  Don't normalize input data.</pre>
+ * <pre> -C
+ *  Center (rather than standardize) the
+ *  data and compute PCA using the covariance (rather
+ *   than the correlation) matrix.</pre>
  * 
  * <pre> -R
  *  Retain enough PC attributes to account 
@@ -142,9 +144,6 @@ public class PrincipalComponents
 
   /** The number of attributes in the pc transformed data */
   private int m_outputNumAtts = -1;
-  
-  /** normalize the input data? */
-  //private boolean m_normalize = true;
 
   /** the amount of variance to cover in the original data when
       retaining the best n PC's */
@@ -211,8 +210,10 @@ public class PrincipalComponents
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -D
-   *  Don't normalize input data.</pre>
+   * <pre> -C
+   *  Center (rather than standardize) the
+   *  data and compute PCA using the covariance (rather
+   *   than the correlation) matrix.</pre>
    * 
    * <pre> -R
    *  Retain enough PC attributes to account 
@@ -708,7 +709,7 @@ public class PrincipalComponents
         if (i == j) {
           m_correlation[i][j] = 1.0;
             // store the standard deviation
-            m_stdDevs[i] = Math.sqrt(Utils.variance(att1));
+          m_stdDevs[i] = Math.sqrt(Utils.variance(att1));
         } else {
           corr = Utils.correlation(att1,att2,m_numInstances);
           m_correlation[i][j] = corr;
@@ -1056,3 +1057,4 @@ public class PrincipalComponents
     runEvaluator(new PrincipalComponents(), argv);
   }
 }
+

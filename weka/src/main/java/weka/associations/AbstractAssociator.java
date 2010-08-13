@@ -36,7 +36,7 @@ import java.io.Serializable;
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.2 $ 
+ * @version $Revision$ 
  */
 public abstract class AbstractAssociator 
   implements Cloneable, Associator, Serializable, CapabilitiesHandler, RevisionHandler {
@@ -118,7 +118,7 @@ public abstract class AbstractAssociator
    * @param associator	the associator to run
    * @param options	the commandline options
    */
-  protected static void runAssociator(Associator associator, String[] options) {
+  public static void runAssociator(Associator associator, String[] options) {
     try {
       System.out.println(
 	  AssociatorEvaluation.evaluate(associator, options));

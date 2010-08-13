@@ -33,7 +33,7 @@ import weka.core.Capabilities.Capability;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14.2.1 $
+ * @version $Revision$
  */
 
 public class C45PruneableClassifierTree 
@@ -44,6 +44,9 @@ public class C45PruneableClassifierTree
   
   /** True if the tree is to be pruned. */
   boolean m_pruneTheTree = false;
+  
+  /** True if the tree is to be collapsed. */
+  boolean m_collapseTheTree = false;
 
   /** The confidence factor for pruning. */
   float m_CF = 0.25f;
@@ -68,7 +71,8 @@ public class C45PruneableClassifierTree
   public C45PruneableClassifierTree(ModelSelection toSelectLocModel,
 				    boolean pruneTree,float cf,
 				    boolean raiseTree,
-				    boolean cleanup)
+				    boolean cleanup,
+                                    boolean collapseTree)
        throws Exception {
 
     super(toSelectLocModel);
@@ -77,6 +81,7 @@ public class C45PruneableClassifierTree
     m_CF = cf;
     m_subtreeRaising = raiseTree;
     m_cleanup = cleanup;
+    m_collapseTheTree = collapseTree;
   }
 
   /**
@@ -119,7 +124,9 @@ public class C45PruneableClassifierTree
     data.deleteWithMissingClass();
     
    buildTree(data, m_subtreeRaising);
-   collapse();
+   if (m_collapseTheTree) {
+     collapse();
+   }
    if (m_pruneTheTree) {
      prune();
    }
@@ -227,7 +234,7 @@ public class C45PruneableClassifierTree
     
     C45PruneableClassifierTree newTree = 
       new C45PruneableClassifierTree(m_toSelectModel, m_pruneTheTree, m_CF,
-				     m_subtreeRaising, m_cleanup);
+				     m_subtreeRaising, m_cleanup, m_collapseTheTree);
     newTree.buildTree((Instances)data, m_subtreeRaising);
 
     return newTree;
@@ -367,6 +374,6 @@ public class C45PruneableClassifierTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
