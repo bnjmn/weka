@@ -1313,7 +1313,8 @@ public class ClassifierPanel
 		m_CurrentVis.setName(name+" ("+inst.relationName()+")");
 		m_CurrentVis.setLog(m_Log);
 		m_CurrentVis.addPlot(plotInstances.getPlotData(cname));
-		m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
+		//m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
+	        m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex());
 		plotInstances.cleanUp();
 	    
                 FastVector vv = new FastVector();
@@ -1725,10 +1726,10 @@ public class ClassifierPanel
         JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(preds, classAtt);
         Version version = new Version();
         if (pluginMenuItem != null) {
-          if (version.compareTo(plugin.getMinVersion()) < 0)
+          /*if (version.compareTo(plugin.getMinVersion()) < 0)
             pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
           if (version.compareTo(plugin.getMaxVersion()) >= 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
           visPlugins.add(pluginMenuItem);
         }
       }
@@ -1749,10 +1750,10 @@ public class ClassifierPanel
         JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(vp.getInstances());
         Version version = new Version();
         if (pluginMenuItem != null) {
-          if (version.compareTo(plugin.getMinVersion()) < 0)
+          /*if (version.compareTo(plugin.getMinVersion()) < 0)
             pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
           if (version.compareTo(plugin.getMaxVersion()) >= 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
           visPlugins.add(pluginMenuItem);
         }
       }
@@ -1776,10 +1777,10 @@ public class ClassifierPanel
 	    JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
 	    Version version = new Version();
 	    if (pluginMenuItem != null) {
-	      if (version.compareTo(plugin.getMinVersion()) < 0)
+	      /*if (version.compareTo(plugin.getMinVersion()) < 0)
 		pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
 	      if (version.compareTo(plugin.getMaxVersion()) >= 0)
-		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
 	      visPlugins.add(pluginMenuItem);
 	    }
 	  }
@@ -1801,10 +1802,10 @@ public class ClassifierPanel
 	    JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
 	    Version version = new Version();
 	    if (pluginMenuItem != null) {
-	      if (version.compareTo(plugin.getMinVersion()) < 0)
+	      /*if (version.compareTo(plugin.getMinVersion()) < 0)
 		pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
 	      if (version.compareTo(plugin.getMaxVersion()) >= 0)
-		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
 	      visPlugins.add(pluginMenuItem);
 	    }
 	  }
@@ -2288,7 +2289,8 @@ public class ClassifierPanel
                   m_CurrentVis.setName(name + " (" + userTestStructure.relationName() + ")");
                   m_CurrentVis.setLog(m_Log);
                   m_CurrentVis.addPlot(plotInstances.getPlotData(name));
-                  m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
+                  //m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
+                  m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex());
                   plotInstances.cleanUp();
 	  
                   if (classifier instanceof Drawable) {

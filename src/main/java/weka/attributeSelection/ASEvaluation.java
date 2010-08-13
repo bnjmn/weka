@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14.2.1 $
+ * @version $Revision$
  */
 public abstract class ASEvaluation
   implements Serializable, CapabilitiesHandler, RevisionHandler {
@@ -134,7 +134,7 @@ public abstract class ASEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
@@ -143,7 +143,7 @@ public abstract class ASEvaluation
    * @param evaluator	the evaluator to run
    * @param options	the commandline options
    */
-  protected static void runEvaluator(ASEvaluation evaluator, String[] options) {
+  public static void runEvaluator(ASEvaluation evaluator, String[] options) {
     try {
       System.out.println(
 	  AttributeSelection.SelectAttributes(evaluator, options));

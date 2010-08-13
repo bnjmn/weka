@@ -33,7 +33,7 @@ import java.util.Enumeration;
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13.2.1 $
+ * @version $Revision$
  */
 public class BinC45Split
   extends ClassifierSplitModel {
@@ -46,6 +46,9 @@ public class BinC45Split
 
   /** Minimum number of objects in a split.   */ 
   private int m_minNoObj;         
+
+  /** Use MDL correction? */
+  private boolean m_useMDLcorrection;         
 
   /** Value of split point. */
   private double m_splitPoint;  
@@ -68,7 +71,8 @@ public class BinC45Split
   /**
    * Initializes the split model.
    */
-  public BinC45Split(int attIndex,int minNoObj,double sumOfWeights){
+  public BinC45Split(int attIndex,int minNoObj,double sumOfWeights,
+                     boolean useMDLcorrection) {
 
     // Get index of attribute to split on.
     m_attIndex = attIndex;
@@ -78,6 +82,9 @@ public class BinC45Split
 
     // Set sum of weights;
     m_sumOfWeights = sumOfWeights;
+
+    // Whether to use the MDL correction for numeric attributes
+    m_useMDLcorrection = useMDLcorrection;
   }
 
   /**
@@ -283,7 +290,9 @@ public class BinC45Split
       return;
     
     // Compute modified information gain for best split.
-    m_infoGain = m_infoGain-(Utils.log2(index)/m_sumOfWeights);
+    if (m_useMDLcorrection) {
+      m_infoGain = m_infoGain-(Utils.log2(index)/m_sumOfWeights);
+    }
     if (Utils.smOrEq(m_infoGain,0))
       return;
     
@@ -484,6 +493,6 @@ public class BinC45Split
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

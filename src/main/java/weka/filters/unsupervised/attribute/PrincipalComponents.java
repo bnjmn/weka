@@ -52,8 +52,10 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -D
- *  Don't normalize input data.</pre>
+ * <pre> -C
+ *  Center (rather than standardize) the
+ *  data and compute PCA using the covariance (rather
+ *   than the correlation) matrix.</pre>
  * 
  * <pre> -R &lt;num&gt;
  *  Retain enough PC attributes to account
@@ -211,8 +213,10 @@ public class PrincipalComponents
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -D
-   *  Don't normalize input data.</pre>
+   * <pre> -C
+   *  Center (rather than standardize) the
+   *  data and compute PCA using the covariance (rather
+   *   than the correlation) matrix.</pre>
    * 
    * <pre> -R &lt;num&gt;
    *  Retain enough PC attributes to account
@@ -872,3 +876,4 @@ public class PrincipalComponents
     runFilter(new PrincipalComponents(), args);
   }
 }
+

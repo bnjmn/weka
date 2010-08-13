@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision$
  */
 public abstract class AbstractClusterer
   implements Clusterer, Cloneable, Serializable, CapabilitiesHandler, RevisionHandler {
@@ -189,7 +189,7 @@ public abstract class AbstractClusterer
    * @param clusterer		the clusterer to run
    * @param options	the commandline options
    */
-  protected static void runClusterer(Clusterer clusterer, String[] options) {
+  public static void runClusterer(Clusterer clusterer, String[] options) {
     try {
       System.out.println(ClusterEvaluation.evaluateClusterer(clusterer, options));
     } 

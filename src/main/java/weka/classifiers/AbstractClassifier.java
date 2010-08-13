@@ -295,7 +295,7 @@ public abstract class AbstractClassifier
    * @param classifier		the classifier to run
    * @param options	the commandline options
    */
-  protected static void runClassifier(Classifier classifier, String[] options) {
+  public static void runClassifier(Classifier classifier, String[] options) {
     try {
       System.out.println(Evaluation.evaluateModel(classifier, options));
     } 
