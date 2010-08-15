@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.core.Option;
+import weka.core.Randomizable;
 import weka.core.Utils;
 
 /**
@@ -37,7 +38,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public abstract class RandomizableParallelMultipleClassifiersCombiner extends
-    ParallelMultipleClassifiersCombiner {
+    ParallelMultipleClassifiersCombiner implements Randomizable {
 
   /** For serialization */
   private static final long serialVersionUID = 8274061943448676943L;
