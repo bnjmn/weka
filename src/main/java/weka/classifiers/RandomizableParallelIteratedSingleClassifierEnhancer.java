@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.core.Option;
+import weka.core.Randomizable;
 import weka.core.Utils;
 
 /**
@@ -37,7 +38,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public abstract class RandomizableParallelIteratedSingleClassifierEnhancer
-    extends ParallelIteratedSingleClassifierEnhancer {
+    extends ParallelIteratedSingleClassifierEnhancer implements Randomizable {
 
   /**
    * For serialization
