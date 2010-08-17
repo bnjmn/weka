@@ -506,7 +506,7 @@ public class WekaPackageManager {
     return result;
   }
   
-  public static void loadPackages(boolean verbose) {
+  public static synchronized void loadPackages(boolean verbose) {
     if (m_packagesLoaded) {
       return;
     }
