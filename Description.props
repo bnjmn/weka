@@ -6,7 +6,7 @@
 PackageName=rotationForest
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
 Date=2009-09-10
@@ -26,10 +26,13 @@ Maintainer=Juan Jose Rodriguez <jjrodriguez@ubu.es>
 License=GPL 2.0
 
 # Description (required)
-Description=An ensemble learning method inspired by bagging and random sub-spaces. Traines an ensemble of decision trees on random subspaces of the data, where each subspace has been transformed using principal components analysis.
+Description=An ensemble learning method inspired by bagging and random sub-spaces. Trains an ensemble of decision trees on random subspaces of the data, where each subspace has been transformed using principal components analysis.
+
+# Changes
+Changes=This release fixes an issue with duplicated attribute names in the transformed data used by the base classifiers
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/rotationForest1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/rotationForest1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/rotationForest
