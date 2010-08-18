@@ -39,6 +39,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
 import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 
 /**
  * Widget that displays a label and a combo box for selecting
@@ -50,7 +51,7 @@ import weka.core.Environment;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class EnvironmentField extends JPanel {
+public class EnvironmentField extends JPanel implements EnvironmentHandler {
   
   /** For serialization */
   private static final long serialVersionUID = -3125404573324734121L;
