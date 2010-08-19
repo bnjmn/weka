@@ -2218,8 +2218,8 @@ public class ClassifierPanel
         	classificationOutput = (AbstractOutput) m_ClassificationOutputEditor.getValue();
         	classificationOutput.setHeader(userTestStructure);
         	classificationOutput.setBuffer(outBuff);
-        	classificationOutput.setAttributes("");
-        	classificationOutput.setOutputDistribution(false);
+        	//classificationOutput.setAttributes("");
+        	//classificationOutput.setOutputDistribution(false);
         	classificationOutput.printHeader();
               }
 
