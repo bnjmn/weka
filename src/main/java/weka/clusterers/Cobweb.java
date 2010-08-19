@@ -909,7 +909,10 @@ public class Cobweb
 
     // randomize the instances
     data = new Instances(data);
-    data.randomize(new Random(getSeed()));
+    
+    if (getSeed() >= 0) {
+      data.randomize(new Random(getSeed()));
+    }
 
     for (int i = 0; i < data.numInstances(); i++) {
       updateClusterer(data.instance(i));
@@ -1245,6 +1248,18 @@ public class Cobweb
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    String result = super.seedTipText() + " Use -1 for no randomization.";
+    
+    return result;
   }
 
   /** 
