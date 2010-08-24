@@ -244,11 +244,11 @@ public class ExperimentDemo {
     tester.setRunColumn(result.attribute("Key_Run").index());
     if (classification)
       tester.setFoldColumn(result.attribute("Key_Fold").index());
-    tester.setResultsetKeyColumns(
+    tester.setDatasetKeyColumns(
 	new Range(
 	    "" 
 	    + (result.attribute("Key_Dataset").index() + 1)));
-    tester.setDatasetKeyColumns(
+    tester.setResultsetKeyColumns(
 	new Range(
 	    "" 
 	    + (result.attribute("Key_Scheme").index() + 1)
