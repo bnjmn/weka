@@ -2393,9 +2393,12 @@ public class ClassifierPanel
               outBuff.append("Attributes:   " 
         	  + userTestStructure.numAttributes() 
         	  + "\n\n");
-              if (trainHeader == null)
+              if (trainHeader == null &&
+                  !(classifier instanceof
+                      weka.classifiers.pmml.consumer.PMMLClassifier)) {
                 outBuff.append("NOTE - if test set is not compatible then results are "
-                               + "unpredictable\n\n");
+                    + "unpredictable\n\n");
+              }
 
               if (outputPredictionsText) {
                 outBuff.append("=== Predictions on test set ===\n\n");
