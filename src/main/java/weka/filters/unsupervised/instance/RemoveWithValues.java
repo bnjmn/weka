@@ -389,6 +389,19 @@ public class RemoveWithValues
     }
     return false;
   }
+  
+  /**
+   * RemoveWithValues may return false from input() (thus not
+   * making an instance available immediately) even after
+   * the first batch has been completed due to matching a value
+   * that the user wants to remove. Therefore this method returns
+   * true.
+   * 
+   * @return true
+   */
+  public boolean mayRemoveInstanceAfterFirstBatchDone() {
+    return true;
+  }
 
   /** 
    * Returns true if selection attribute is nominal.
