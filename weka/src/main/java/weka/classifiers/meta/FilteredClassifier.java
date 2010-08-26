@@ -423,8 +423,24 @@ public class FilteredClassifier
     t.start();
     */
     if (!m_Filter.input(instance)) {
-      throw new Exception("Filter didn't make the test instance"
-			  + " immediately available!");
+      if (!m_Filter.mayRemoveInstanceAfterFirstBatchDone()) {
+        throw new Exception("Filter didn't make the test instance"
+            + " immediately available!");
+      } else {
+        // filter has consumed the instance (e.g. RemoveWithValues
+        // may do this). We will indicate no prediction for this
+        // instance
+        double[] unclassified = null;
+        if (instance.classAttribute().isNumeric()) {
+          unclassified = new double[1];
+          unclassified[0] = Utils.missingValue();
+        } else {
+          // all zeros
+          unclassified = new double[instance.classAttribute().numValues()];
+        }
+        m_Filter.batchFinished();
+        return unclassified;
+      }
     }
     m_Filter.batchFinished();
     Instance newInstance = m_Filter.output();
