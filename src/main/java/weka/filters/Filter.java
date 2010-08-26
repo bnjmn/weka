@@ -134,6 +134,19 @@ public abstract class Filter
   public boolean isFirstBatchDone() {
     return m_FirstBatchDone;
   }
+  
+  /**
+   * Default implementation returns false. Some filters may not
+   * necessarily be able to produce an instance for output for
+   * every instance input after the first batch has been 
+   * completed - such filters should override this method
+   * and return true.
+   * 
+   * @return false by default
+   */
+  public boolean mayRemoveInstanceAfterFirstBatchDone() {
+    return false;
+  }
 
   /** 
    * Returns the Capabilities of this filter. Derived filters have to
