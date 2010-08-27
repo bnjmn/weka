@@ -92,6 +92,8 @@ public class WekaPackageManager {
     if (wh != null) {
       WEKA_HOME = new File(wh);
       PACKAGES_DIR = new File(wh + File.separator + "packages");
+    } else {
+      env.addVariableSystemWide("WEKA_HOME", WEKA_HOME.toString());
     }
     
     boolean ok = true;
@@ -1261,8 +1263,8 @@ public class WekaPackageManager {
     System.out.println("Options:\n"
         + "\t-list-packages <all | installed | available>\n"
         + "\t-package-info <repository | installed | archive> "
-        + "packageName\n\t-install-package <packageName | packageZip | URL> [version]\n"
-        + "\t-uninstall-package <packageName>\n"
+        + "<packageName | packageZip>\n\t-install-package <packageName | packageZip | URL> [version]\n"
+        + "\t-uninstall-package packageName\n"
         + "\t-refresh-cache");
   }
   
