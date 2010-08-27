@@ -31,8 +31,10 @@ import java.util.TreeMap;
 
 /**
  * This class encapsulates a map of all environment and java system properties.
- * There are methods for adding and removing variables as well as a method for
- * replacing key names (enclosed by ${}) with their associated value in Strings.
+ * There are methods for adding and removing variables to this
+ * Environment object as well as to the system wide global environment. There
+ * is also a method for replacing key names (enclosed by ${}) with their associated 
+ * value in Strings.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -123,13 +125,30 @@ public class Environment implements RevisionHandler {
   }
 
   /**
-   * Add a variable to the internal map.
+   * Add a variable to the internal map of this properties object.
    *
    * @param key the name of the variable
    * @param value its value
    */
   public void addVariable(String key, String value) {
     m_envVars.put(key, value);
+  }
+  
+  /**
+   * Add a a variable to the internal map of this properties
+   * object and to the global system-wide environment;
+   * 
+   * @param key the name of the variable
+   * @param value its value
+   */
+  public void addVariableSystemWide(String key, String value) {
+    addVariable(key, value); // local
+    
+    // system wide
+    if (this != getSystemWide()) {
+      getSystemWide().addVariableSystemWide(key, value);
+    }
+    System.setProperty(key, value);
   }
 
   /**
