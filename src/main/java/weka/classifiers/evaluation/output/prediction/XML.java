@@ -315,7 +315,8 @@ public class XML
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
-    withMissing.setMissing(withMissing.classIndex());
+    inst = preProcessInstance(inst, withMissing, classifier);
+    
     double predValue = classifier.classifyInstance(withMissing);
 
     // opening tag

@@ -443,7 +443,8 @@ public class PredictionAppender
               // with all missing values for a nominal class (in this
               // case we have no information on the legal class values
               // in the test data)
-              if (tempInst.isMissing(tempInst.classIndex())) {
+              if (tempInst.isMissing(tempInst.classIndex()) && 
+                  !(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
                 tempInst = (Instance)testSet.instance(i).copy();
                 tempInst.setDataset(trainSet);
               }
@@ -521,7 +522,8 @@ public class PredictionAppender
               // with all missing values for a nominal class (in this
               // case we have no information on the legal class values
               // in the test data)
-              if (tempInst.isMissing(tempInst.classIndex())) {
+              if (tempInst.isMissing(tempInst.classIndex()) && 
+                  !(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
                 tempInst = (Instance)testSet.instance(i).copy();
                 tempInst.setDataset(trainSet);
               }
@@ -676,6 +678,14 @@ public class PredictionAppender
 			     weka.classifiers.Classifier classifier,
 			     String relationNameModifier) 
   throws Exception {
+    
+    // adjust structure for InputMappedClassifier (if necessary)
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      format = 
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).
+        getModelHeader(new Instances(format, 0));
+    }
+    
     String classifierName = classifier.getClass().getName();
     classifierName = classifierName.
       substring(classifierName.lastIndexOf('.')+1, classifierName.length());
@@ -697,6 +707,13 @@ public class PredictionAppender
 				     weka.classifiers.Classifier classifier,
 				     String relationNameModifier) 
   throws Exception {
+    
+    // adjust structure for InputMappedClassifier (if necessary)
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      structure = 
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).
+        getModelHeader(new Instances(structure, 0));
+    }
     
     weka.filters.unsupervised.attribute.Add addF = new
       weka.filters.unsupervised.attribute.Add();

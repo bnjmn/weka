@@ -524,6 +524,37 @@ public abstract class AbstractOutput
   protected abstract void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception;
   
   /**
+   * Preprocesses an input instance and its copy (that will get its class
+   * value set to missing for prediction purposes). Basically this only does
+   * something special in the case when the classifier is an InputMappedClassifier.
+   * 
+   * @param inst the original instance to predict
+   * @param withMissing a copy of the instance to predict
+   * @param classifier the classifier that will be used to make the prediction
+   * @return the original instance unchanged or mapped (in the case of an InputMappedClassifier)
+   * and the withMissing copy with the class attribute set to missing value.
+   * @throws Exception if a problem occurs.
+   */
+  protected Instance preProcessInstance(Instance inst, Instance withMissing, 
+      Classifier classifier) throws Exception {
+    
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      inst = (Instance)inst.copy();
+      inst =
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).
+          constructMappedInstance(inst);
+      int mappedClass =
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).
+          getMappedClassIndex();
+      withMissing.setMissing(mappedClass);      
+    } else {
+      withMissing.setMissing(withMissing.classIndex());
+    }
+    
+    return inst;
+  }
+  
+  /**
    * Prints the classification to the buffer.
    * 
    * @param classifier	the classifier to use for printing the classification
