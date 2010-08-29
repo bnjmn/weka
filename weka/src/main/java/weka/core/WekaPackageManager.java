@@ -448,7 +448,13 @@ public class WekaPackageManager {
         toLoad.getPackageMetaDataElement("DoNotLoadIfClassNotPresentMessage");
       if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
         for (PrintStream p : progress) {
-          p.println("[Weka] " + doNotLoadMessage.toString());
+          String dnlM = doNotLoadMessage.toString();
+          try {
+            dnlM = Environment.getSystemWide().substitute(dnlM);
+          } catch (Exception e) {
+            // quietly ignore
+          }
+          p.println("[Weka] " + dnlM);
         }
       }
     }
@@ -499,8 +505,14 @@ public class WekaPackageManager {
       Object doNotLoadMessage = 
         toLoad.getPackageMetaDataElement("DoNotLoadIfFileNotPresentMessage");
       if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
+        String dnlM = doNotLoadMessage.toString();
+        try {
+          dnlM = Environment.getSystemWide().substitute(dnlM);
+        } catch (Exception ex) {
+          // quietly ignore
+        }
         for (PrintStream p : progress) {
-          p.println("[Weka] " + doNotLoadMessage.toString());
+          p.println("[Weka] " + dnlM);
         }
       }
     }
@@ -818,8 +830,14 @@ public class WekaPackageManager {
       toLoad.getPackageMetaDataElement("MessageToDisplayOnInstallation");
     if (specialInstallMessage != null && 
         specialInstallMessage.toString().length() > 0) {
+      String siM = specialInstallMessage.toString();
+      try {
+        siM = Environment.getSystemWide().substitute(siM);
+      } catch (Exception ex) {
+        // quietly ignore
+      }
       String message = "**** Special installation message ****\n" 
-        + specialInstallMessage.toString()
+        + siM
             + "\n**** Special installation message ****";
       for (PrintStream p : progress) {
         p.println(message);

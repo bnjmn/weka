@@ -83,6 +83,7 @@ import org.pentaho.packageManagement.Dependency;
 import org.pentaho.packageManagement.Package;
 import org.pentaho.packageManagement.PackageConstraint;
 
+import weka.core.Environment;
 import weka.core.Utils;
 import weka.core.WekaPackageManager;
 
@@ -570,8 +571,14 @@ public class PackageManager extends JPanel {
           packageToInstall.getPackageMetaDataElement("MessageToDisplayOnInstallation");
         if (specialInstallMessage != null && 
             specialInstallMessage.toString().length() > 0) {
+          String siM = specialInstallMessage.toString();
+          try {
+            siM = Environment.getSystemWide().substitute(siM);
+          } catch (Exception ex) {
+            // quietly ignore
+          }
           JOptionPane.showMessageDialog(PackageManager.this, 
-              packageToInstall + "\n\n" + specialInstallMessage.toString(), 
+              packageToInstall + "\n\n" + siM, 
               "Weka Package Manager", JOptionPane.OK_OPTION);
         }
 
