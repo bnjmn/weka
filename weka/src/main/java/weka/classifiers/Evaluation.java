@@ -982,17 +982,19 @@ public class Evaluation
 	}
       }
       if (trainSetPresent) {
-	template = train = trainSource.getStructure();
-	if (classIndex != -1) {
-	  train.setClassIndex(classIndex - 1);
-	} else {
-	  if ( (train.classIndex() == -1) || (classIndexString.length() != 0) )
-	    train.setClassIndex(train.numAttributes() - 1);
-	}
-	actualClassIndex = train.classIndex();
-	if ((testSetPresent) && !test.equalHeaders(train)) {
-	  throw new IllegalArgumentException("Train and test file not compatible!\n" + test.equalHeadersMsg(train));
-	}
+        template = train = trainSource.getStructure();
+        if (classIndex != -1) {
+          train.setClassIndex(classIndex - 1);
+        } else {
+          if ( (train.classIndex() == -1) || (classIndexString.length() != 0) )
+            train.setClassIndex(train.numAttributes() - 1);
+        }
+        actualClassIndex = train.classIndex();
+        if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
+          if ((testSetPresent) && !test.equalHeaders(train)) {
+            throw new IllegalArgumentException("Train and test file not compatible!\n" + test.equalHeadersMsg(train));
+          }
+        }
       }
       if (template == null) {
 	throw new Exception("No actual dataset provided to use as template");
@@ -1067,14 +1069,6 @@ public class Evaluation
 	  + makeOptionString(classifier, false));
     }
 
-    // Setup up evaluation objects
-    Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
-    Evaluation testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
-
-    // disable use of priors if no training file given
-    if (!trainSetPresent)
-      testingEvaluation.useNoPriors();
-
     if (objectInputFileName.length() != 0) {
       // Load classifier from file
       if (objectInputStream != null) {
@@ -1100,6 +1094,22 @@ public class Evaluation
 	xmlInputStream.close();
       }
     }
+    
+    // Setup up evaluation objects
+    Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
+    Evaluation testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      Instances mappedClassifierHeader = 
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).
+          getModelHeader(new Instances(template, 0));
+            
+      trainingEvaluation = new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
+      testingEvaluation = new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
+    }
+
+    // disable use of priors if no training file given
+    if (!trainSetPresent)
+      testingEvaluation.useNoPriors();
 
     // backup of fully setup classifier for cross-validation
     classifierBackup = AbstractClassifier.makeCopy(classifier);
@@ -1127,6 +1137,24 @@ public class Evaluation
     } else if (objectInputFileName.length() == 0) {
       // Build classifier in one go
       tempTrain = trainSource.getDataSet(actualClassIndex);
+      
+      if (classifier instanceof weka.classifiers.misc.InputMappedClassifier &&
+          !trainingEvaluation.getHeader().equalHeaders(tempTrain)) {
+        // we need to make a new dataset that maps the training instances to
+        // the structure expected by the mapped classifier - this is only
+        // to ensure that the structure and priors computed by the *testing*
+        // evaluation object is correct with respect to the mapped classifier
+        Instances mappedClassifierDataset = 
+          ((weka.classifiers.misc.InputMappedClassifier)classifier).
+            getModelHeader(new Instances(template, 0));
+        for (int zz = 0; zz < tempTrain.numInstances(); zz++) {
+          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier)classifier).
+            constructMappedInstance(tempTrain.instance(zz));
+          mappedClassifierDataset.add(mapped);
+        }
+        tempTrain = mappedClassifierDataset;
+      }
+      
       trainingEvaluation.setPriors(tempTrain);
       testingEvaluation.setPriors(tempTrain);
       trainTimeStart = System.currentTimeMillis();
@@ -1135,8 +1163,12 @@ public class Evaluation
     } 
 
     // backup of fully trained classifier for printing the classifications
-    if (classificationOutput != null)
+    if (classificationOutput != null) {
       classifierClassifications = AbstractClassifier.makeCopy(classifier);
+      if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+        classificationOutput.setHeader(trainingEvaluation.getHeader());
+      }
+    }
 
     // Save the classifier if an object output file is provided
     if (objectOutputFileName.length() != 0) {
@@ -1279,7 +1311,7 @@ public class Evaluation
       testSource.reset();
       test = testSource.getStructure(test.classIndex());
       Instance testInst;
-      while (testSource.hasMoreElements(test)) {
+      while (testSource.hasMoreElements(test)) {        
 	testInst = testSource.nextElement(test);
 	testingEvaluation.evaluateModelOnceAndRecordPrediction(
             (Classifier)classifier, testInst);
@@ -1508,10 +1540,26 @@ public class Evaluation
   protected double evaluationForSingleInstance(Classifier classifier,
                                                Instance instance, 
                                                boolean storePredictions) throws Exception {
-
+        
+        
+    
     Instance classMissing = (Instance)instance.copy();
     classMissing.setDataset(instance.dataset());
-    classMissing.setClassMissing();
+    
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      instance = (Instance)instance.copy();
+      instance = 
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).
+          constructMappedInstance(instance);
+//      System.out.println("Mapped instance " + instance);
+      int mappedClass = 
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).getMappedClassIndex();
+      classMissing.setMissing(mappedClass);
+    } else {
+      classMissing.setClassMissing();
+    }
+    
+//    System.out.println("instance (to predict)" + classMissing);
     double pred = evaluationForSingleInstance(classifier.distributionForInstance(classMissing), 
                                               instance, storePredictions);      
 
@@ -3371,7 +3419,7 @@ public class Evaluation
   throws Exception {
 
     int actualClass = (int)instance.classValue();
-
+    
     if (!instance.classIsMissing()) {
       updateMargins(predictedDistribution, actualClass, instance.weight());
 

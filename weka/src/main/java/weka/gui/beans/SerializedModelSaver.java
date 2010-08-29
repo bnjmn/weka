@@ -436,6 +436,17 @@ public class SerializedModelSaver
       return;
     }
     Instances trainHeader = new Instances(ce.getTrainSet().getDataSet(), 0);
+    
+    // adjust for InputMappedClassifier (if necessary)
+    if (ce.getClassifier() instanceof weka.classifiers.misc.InputMappedClassifier) {
+      try {
+        trainHeader = 
+          ((weka.classifiers.misc.InputMappedClassifier)ce.getClassifier()).
+            getModelHeader(trainHeader);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
     String titleString = ce.getClassifier().getClass().getName();		      
     titleString = titleString.
       substring(titleString.lastIndexOf('.') + 1,
