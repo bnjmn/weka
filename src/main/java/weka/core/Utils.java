@@ -25,8 +25,12 @@ package weka.core;
 import java.lang.Math;
 import java.lang.reflect.Array;
 import java.util.Properties;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
@@ -1979,6 +1983,67 @@ public final class Utils
     
     File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
     dialogFile.createNewFile();
+  }
+  
+  /**
+   * For a named dialog, if the user has opted not to view it again, 
+   * returns the answer the answer the user supplied when they
+   * closed the dialog. Returns null if the user did opt to view
+   * the dialog again.
+   * 
+   * @param dialogName the name of the dialog to check (e.g.
+   * weka.gui.GUICHooser.HowToFindPackageManager).
+   * @return the answer the user supplied the last time they
+   * viewed the named dialog (if they opted not to view it again
+   * in the future) or null if the user opted to view the dialog
+   * again in the future.
+   */
+  public static String getDontShowDialogResponse(String dialogName) throws Exception {
+    if (!getDontShowDialog(dialogName)) {
+      return null; // This must be the first time - no file recorded yet.
+    }
+    
+    File wekaHome = WekaPackageManager.WEKA_HOME;
+    File dialogSubDir = new File(wekaHome.toString() + File.separator 
+        + "systemDialogs" + File.separator + dialogName);
+
+    
+    BufferedReader br = new BufferedReader(new FileReader(dialogSubDir));
+    String response = br.readLine();
+    
+    br.close();
+    return response;
+  }
+  
+  /**
+   * Specify that the named dialog is not to be shown again in the future. 
+   * Also records the answer that the user chose when closing the dialog.
+   * 
+   * @param dialogName the name of the dialog to no longer display
+   * @param response the user selected response when they closed the dialog
+   * @throws Exception if there is a problem saving the information
+   */
+  public static void setDontShowDialogResponse(String dialogName, String response) 
+    throws Exception {
+    
+    File wekaHome = WekaPackageManager.WEKA_HOME;
+    
+    if (!wekaHome.exists()) {
+      return;
+    }
+    
+    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
+    if (!dialogSubDir.exists()) {
+      if (!dialogSubDir.mkdir()) {
+        return;
+      }
+    }
+    
+    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
+    BufferedWriter br = new BufferedWriter(new FileWriter(dialogFile));
+    br.write(response + "\n");
+    br.flush();
+    br.close();
   }
   
   /**
