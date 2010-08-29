@@ -156,8 +156,9 @@ public class PlainText
     int prec = m_NumDecimals;
 
     Instance withMissing = (Instance)inst.copy();
-    withMissing.setDataset(inst.dataset());
-    withMissing.setMissing(withMissing.classIndex());
+    withMissing.setDataset(inst.dataset());    
+    inst = preProcessInstance(inst, withMissing, classifier);
+    
     double predValue = classifier.classifyInstance(withMissing);
 
     // index
