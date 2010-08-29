@@ -23,10 +23,18 @@
 package weka.gui.beans;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyEditor;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -40,6 +48,7 @@ import javax.swing.event.CaretListener;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
+import weka.gui.CustomPanelSupplier;
 
 /**
  * Widget that displays a label and a combo box for selecting
@@ -51,7 +60,8 @@ import weka.core.EnvironmentHandler;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class EnvironmentField extends JPanel implements EnvironmentHandler {
+public class EnvironmentField extends JPanel 
+  implements EnvironmentHandler, PropertyEditor, CustomPanelSupplier {
   
   /** For serialization */
   private static final long serialVersionUID = -3125404573324734121L;
@@ -70,11 +80,14 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler {
   protected int m_previousCaretPos = 0;
   protected int m_currentCaretPos = 0;
   
+  protected PropertyChangeSupport m_support = new PropertyChangeSupport(this);
+  
   /**
    * Construct an EnvironmentField with no label.
    */
   public EnvironmentField() {
     this("");
+    setEnvironment(Environment.getSystemWide());
   }
   
   /**
@@ -85,6 +98,18 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler {
   public EnvironmentField(Environment env) {
     this("");
     setEnvironment(env);    
+  }
+  
+  /**
+   * Constructor.
+   * 
+   * @param label the label to use
+   * @param env the environment variables to display in
+   * the drop-down box
+   */
+  public EnvironmentField(String label, Environment env) {
+    this(label);
+    setEnvironment(env);
   }
   
   /**
@@ -114,21 +139,21 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler {
           m_currentCaretPos = e.getDot();
         }
       });
+      
+      ((JTextField)m_combo.getEditor().getEditorComponent()).addKeyListener(new KeyAdapter() {
+        public void keyReleased(KeyEvent e) {
+          m_support.firePropertyChange("", null, null);
+        }
+      });
+      
+      ((JTextField)m_combo.getEditor().getEditorComponent()).addFocusListener(new FocusAdapter() {
+        public void focusLost(FocusEvent e) {
+          m_support.firePropertyChange("", null, null);
+        }
+      });
     }
     add(m_combo, BorderLayout.CENTER);
     setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-  }
-  
-  /**
-   * Constructor.
-   * 
-   * @param label the label to use
-   * @param env the environment variables to display in
-   * the drop-down box
-   */
-  public EnvironmentField(String label, Environment env) {
-    this(label);
-    setEnvironment(env);
   }
   
   /**
@@ -148,6 +173,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler {
   public void setText(String text) {
     m_currentContents = text;
     m_combo.setSelectedItem(m_currentContents);
+    m_support.firePropertyChange("", null, null);
   }
   
   /**
@@ -157,6 +183,60 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler {
    */
   public String getText() {
     return (String)m_combo.getSelectedItem();
+  }
+  
+  public void setAsText(String s) {
+    setText(s);
+  }
+  
+  public String getAsText() {
+    return getText();
+  }
+  
+  public void setValue(Object o) {
+    setAsText((String)o);
+  }
+  
+  public Object getValue() {
+    return getAsText();
+  }
+
+  public String getJavaInitializationString() {
+    return null;
+  }
+  
+  public boolean isPaintable() {
+    return true; // we don't want to appear in a separate popup
+  }
+  
+  public String[] getTags() {
+    return null;
+  }
+
+  public boolean supportsCustomEditor() {
+    return true;
+  }
+  
+  public Component getCustomEditor() {
+    return this;
+  }
+  
+  public JPanel getCustomPanel() {
+    return this;
+  }
+  
+  public void addPropertyChangeListener(PropertyChangeListener pcl) {
+    m_support.addPropertyChangeListener(pcl);
+  }
+  
+  public void removePropertyChangeListener(PropertyChangeListener pcl) {
+    m_support.removePropertyChangeListener(pcl);
+  }
+  
+  @Override
+  public void paintValue(Graphics gfx, Rectangle box) {
+    // TODO Auto-generated method stub
+    
   }
   
   private String processSelected(String selected) {

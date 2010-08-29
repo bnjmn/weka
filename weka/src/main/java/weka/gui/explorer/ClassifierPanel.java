@@ -881,6 +881,81 @@ public class ClassifierPanel
     classificationOutput.printHeader();
   }
   
+  protected static Evaluation setupEval(Evaluation eval, Classifier classifier, 
+      Instances inst, CostMatrix costMatrix, 
+      ClassifierErrorsPlotInstances plotInstances, 
+      AbstractOutput classificationOutput, 
+      boolean onlySetPriors) throws Exception {
+        
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      Instances mappedClassifierHeader = 
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).
+          getModelHeader(new Instances(inst, 0));
+      
+      if (classificationOutput != null) {
+        classificationOutput.setHeader(mappedClassifierHeader);
+      }
+      
+      if (!onlySetPriors) {
+        if (costMatrix != null) {
+          eval = new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
+        } else {
+          eval = new Evaluation(new Instances(mappedClassifierHeader, 0));
+        }
+      }
+      
+      if (!eval.getHeader().equalHeaders(inst)) {
+        // When the InputMappedClassifier is loading a model, 
+        // we need to make a new dataset that maps the training instances to
+        // the structure expected by the mapped classifier - this is only
+        // to ensure that the structure and priors computed by
+        // evaluation object is correct with respect to the mapped classifier
+        Instances mappedClassifierDataset = 
+          ((weka.classifiers.misc.InputMappedClassifier)classifier).
+            getModelHeader(new Instances(mappedClassifierHeader, 0));
+        for (int zz = 0; zz < inst.numInstances(); zz++) {
+          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier)classifier).
+            constructMappedInstance(inst.instance(zz));
+          mappedClassifierDataset.add(mapped);
+        }
+        eval.setPriors(mappedClassifierDataset);
+        if (!onlySetPriors) {
+          if (plotInstances != null) {
+            plotInstances.setInstances(mappedClassifierDataset);
+            plotInstances.setClassifier(classifier);
+            /*          int mappedClass = 
+            ((weka.classifiers.misc.InputMappedClassifier)classifier).getMappedClassIndex();
+          System.err.println("Mapped class index " + mappedClass); */
+            plotInstances.setClassIndex(mappedClassifierDataset.classIndex());
+            plotInstances.setEvaluation(eval);
+          }
+        }
+      } else {
+        eval.setPriors(inst);
+        if (!onlySetPriors) {
+          if (plotInstances != null) {
+            plotInstances.setInstances(inst);
+            plotInstances.setClassifier(classifier);
+            plotInstances.setClassIndex(inst.classIndex());
+            plotInstances.setEvaluation(eval);
+          }
+        }
+      }
+    } else {
+      eval.setPriors(inst);
+      if (!onlySetPriors) {
+        if (plotInstances != null) {
+          plotInstances.setInstances(inst);
+          plotInstances.setClassifier(classifier);
+          plotInstances.setClassIndex(inst.classIndex());
+          plotInstances.setEvaluation(eval);
+        }
+      }
+    }
+    
+    return eval;
+  }  
+  
   /**
    * Starts running the currently configured classifier with the current
    * settings. This is run in a separate thread, and will only start if
@@ -982,12 +1057,61 @@ public class ClassifierPanel
 	      testMode = 4;
 	      // Check the test instance compatibility
 	      if (source == null) {
-		throw new Exception("No user test set has been specified");
+	        throw new Exception("No user test set has been specified");
 	      }
-	      if (!inst.equalHeaders(userTestStructure)) {
-		throw new Exception("Train and test set are not compatible\n" + inst.equalHeadersMsg(userTestStructure));
+	      userTestStructure.setClassIndex(classIndex);
+	      
+	      if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
+	        if (!inst.equalHeaders(userTestStructure)) {
+	          boolean wrapClassifier = false;
+	          if (!Utils.
+	              getDontShowDialog("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier")) {
+	            JCheckBox dontShow = new JCheckBox("Do not show this message again");
+	            Object[] stuff = new Object[2];
+	            stuff[0] = "Train and test set are not compatible.\n" +
+	            "Would you like to automatically wrap the classifier in\n" + 
+	            "an \"InputMappedClassifier\" before proceeding?.\n";
+	            stuff[1] = dontShow;
+
+	            int result = JOptionPane.showConfirmDialog(ClassifierPanel.this, stuff, 
+	                "ClassifierPanel", JOptionPane.YES_OPTION);
+	            
+	            if (result == JOptionPane.YES_OPTION) {
+	              wrapClassifier = true;
+	            }
+	            
+	            if (dontShow.isSelected()) {
+	              String response = (wrapClassifier) ? "yes" : "no";
+	              Utils.
+	                setDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier", 
+	                    response);
+	            }
+
+	          } else {
+	            // What did the user say - do they want to autowrap or not?
+	            String response = 
+	              Utils.getDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier");
+	            if (response != null && response.equalsIgnoreCase("yes")) {
+	              wrapClassifier = true;
+	            }
+	          }
+
+	          if (wrapClassifier) {
+	            weka.classifiers.misc.InputMappedClassifier temp =
+	              new weka.classifiers.misc.InputMappedClassifier();
+
+	            // pass on the known test structure so that we get the
+	            // correct mapping report from the toString() method
+	            // of InputMappedClassifier
+	            temp.setClassifier(classifier);
+	            temp.setTestStructure(userTestStructure);
+	            classifier = temp;
+	          } else {
+	            throw new Exception("Train and test set are not compatible\n" + inst.equalHeadersMsg(userTestStructure));
+	          }
+	        }
 	      }
-              userTestStructure.setClassIndex(classIndex);
+              
 	    } else {
 	      throw new Exception("Unknown test mode");
 	    }
@@ -1087,7 +1211,12 @@ public class ClassifierPanel
 	      case 3: // Test on training
 	      m_Log.statusMessage("Evaluating on training data...");
 	      eval = new Evaluation(inst, costMatrix);
-	      plotInstances.setEvaluation(eval);
+	      
+	      // make adjustments if the classifier is an InputMappedClassifier
+	      eval = setupEval(eval, classifier, inst, costMatrix, 
+	          plotInstances, classificationOutput, false);
+	      
+	      //plotInstances.setEvaluation(eval);
               plotInstances.setUp();
 	      
 	      if (outputPredictionsText) {
@@ -1130,7 +1259,12 @@ public class ClassifierPanel
 		inst.stratify(numFolds);
 	      }
 	      eval = new Evaluation(inst, costMatrix);
-	      plotInstances.setEvaluation(eval);
+	      
+	       // make adjustments if the classifier is an InputMappedClassifier
+              eval = setupEval(eval, classifier, inst, costMatrix, 
+                  plotInstances, classificationOutput, false);
+	      
+//	      plotInstances.setEvaluation(eval);
               plotInstances.setUp();
       
 	      if (outputPredictionsText) {
@@ -1142,7 +1276,12 @@ public class ClassifierPanel
 		m_Log.statusMessage("Creating splits for fold "
 				    + (fold + 1) + "...");
 		Instances train = inst.trainCV(numFolds, fold, random);
-		eval.setPriors(train);
+		
+		// make adjustments if the classifier is an InputMappedClassifier
+	        eval = setupEval(eval, classifier, train, costMatrix, 
+	            plotInstances, classificationOutput, true);
+	        
+//		eval.setPriors(train);
 		m_Log.statusMessage("Building model for fold "
 				    + (fold + 1) + "...");
 		Classifier current = null;
@@ -1198,7 +1337,12 @@ public class ClassifierPanel
 	      }
 	      current.buildClassifier(train);
 	      eval = new Evaluation(train, costMatrix);
-	      plotInstances.setEvaluation(eval);
+	      
+	      // make adjustments if the classifier is an InputMappedClassifier
+              eval = setupEval(eval, classifier, train, costMatrix, 
+                  plotInstances, classificationOutput, false);
+              	      
+//	      plotInstances.setEvaluation(eval);
               plotInstances.setUp();
 	      m_Log.statusMessage("Evaluating on test split...");
 	     
@@ -1227,7 +1371,11 @@ public class ClassifierPanel
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
 	      eval = new Evaluation(inst, costMatrix);
-	      plotInstances.setEvaluation(eval);
+	      // make adjustments if the classifier is an InputMappedClassifier
+              eval = setupEval(eval, classifier, inst, costMatrix, 
+                  plotInstances, classificationOutput, false);
+              
+//	      plotInstances.setEvaluation(eval);
               plotInstances.setUp();
 	      
 	      if (outputPredictionsText) {
@@ -2120,6 +2268,7 @@ public class ClassifierPanel
           public void run() {
             // Copy the current state of things
             m_Log.statusMessage("Setting up...");
+            Classifier classifierToUse = classifier;
 
             StringBuffer outBuff = m_History.getNamedBuffer(name);
             DataSource source = null;
@@ -2153,18 +2302,71 @@ public class ClassifierPanel
                 throw new Exception("No user test set has been specified");
               }
               if (trainHeader != null) {
+                boolean compatibilityProblem = false;
                 if (trainHeader.classIndex() > 
-                    userTestStructure.numAttributes()-1)
-                  throw new Exception("Train and test set are not compatible");
+                    userTestStructure.numAttributes()-1) {
+                  compatibilityProblem = true;
+                  //throw new Exception("Train and test set are not compatible");
+                }
                 userTestStructure.setClassIndex(trainHeader.classIndex());
                 if (!trainHeader.equalHeaders(userTestStructure)) {
-                  throw new Exception("Train and test set are not compatible:\n" + trainHeader.equalHeadersMsg(userTestStructure));
+                  compatibilityProblem = true;
+                  // throw new Exception("Train and test set are not compatible:\n" + trainHeader.equalHeadersMsg(userTestStructure));
+                  
+                  if (compatibilityProblem && 
+                      !(classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
+
+                    boolean wrapClassifier = false;
+                    if (!Utils.
+                        getDontShowDialog("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier")) {
+                      JCheckBox dontShow = new JCheckBox("Do not show this message again");
+                      Object[] stuff = new Object[2];
+                      stuff[0] = "Data used to train model and test set are not compatible.\n" +
+                      "Would you like to automatically wrap the classifier in\n" + 
+                      "an \"InputMappedClassifier\" before proceeding?.\n";
+                      stuff[1] = dontShow;
+
+                      int result = JOptionPane.showConfirmDialog(ClassifierPanel.this, stuff, 
+                          "ClassifierPanel", JOptionPane.YES_OPTION);
+                      
+                      if (result == JOptionPane.YES_OPTION) {
+                        wrapClassifier = true;
+                      }
+                      
+                      if (dontShow.isSelected()) {
+                        String response = (wrapClassifier) ? "yes" : "no";
+                        Utils.
+                          setDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier", 
+                              response);
+                      }
+
+                    } else {
+                      // What did the user say - do they want to autowrap or not?
+                      String response = 
+                        Utils.getDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier");
+                      if (response != null && response.equalsIgnoreCase("yes")) {
+                        wrapClassifier = true;
+                      }
+                    }
+
+                    if (wrapClassifier) {
+                      weka.classifiers.misc.InputMappedClassifier temp =
+                        new weka.classifiers.misc.InputMappedClassifier();
+
+                      temp.setClassifier(classifierToUse);
+                      temp.setModelHeader(trainHeader);
+                      classifierToUse = temp;
+                    } else {
+                      throw new Exception("Train and test set are not compatible\n" + 
+                          trainHeader.equalHeadersMsg(userTestStructure));
+                    }
+                  }
                 }
               } else {
-        	if (classifier instanceof PMMLClassifier) {
+        	if (classifierToUse instanceof PMMLClassifier) {
         	  // set the class based on information in the mining schema
         	  Instances miningSchemaStructure = 
-        	    ((PMMLClassifier)classifier).getMiningSchema().getMiningSchemaAsInstances();
+        	    ((PMMLClassifier)classifierToUse).getMiningSchema().getMiningSchemaAsInstances();
         	  String className = miningSchemaStructure.classAttribute().name();
         	  Attribute classMatch = userTestStructure.attribute(className);
         	  if (classMatch == null) {
@@ -2185,18 +2387,18 @@ public class ClassifierPanel
               m_Log.logMessage("Re-evaluating classifier (" + name 
                                + ") on test set");
               eval = new Evaluation(userTestStructure, costMatrix);
-              eval.useNoPriors();
       
               // set up the structure of the plottable instances for 
               // visualization if selected
               if (saveVis) {
         	plotInstances = new ClassifierErrorsPlotInstances();
         	plotInstances.setInstances(userTestStructure);
-        	plotInstances.setClassifier(classifier);
+        	plotInstances.setClassifier(classifierToUse);
         	plotInstances.setClassIndex(userTestStructure.classIndex());
         	plotInstances.setEvaluation(eval);
         	plotInstances.setUp();
               }
+              
       
               outBuff.append("\n=== Re-evaluation on test set ===\n\n");
               outBuff.append("User supplied test set\n");  
@@ -2209,9 +2411,12 @@ public class ClassifierPanel
               outBuff.append("Attributes:   " 
         	  + userTestStructure.numAttributes() 
         	  + "\n\n");
-              if (trainHeader == null)
+              if (trainHeader == null && 
+                  !(classifierToUse instanceof 
+                      weka.classifiers.pmml.consumer.PMMLClassifier)) {
                 outBuff.append("NOTE - if test set is not compatible then results are "
                                + "unpredictable\n\n");
+              }
 
               AbstractOutput classificationOutput = null;
               if (outputPredictionsText) {
@@ -2220,16 +2425,25 @@ public class ClassifierPanel
         	classificationOutput.setBuffer(outBuff);
 /*        	classificationOutput.setAttributes("");
         	classificationOutput.setOutputDistribution(false);*/
-        	classificationOutput.printHeader();        	
+//        	classificationOutput.printHeader();        	
+              }
+              
+              // make adjustments if the classifier is an InputMappedClassifier
+              eval = setupEval(eval, classifierToUse, userTestStructure, costMatrix,
+                  plotInstances, classificationOutput, false);
+              eval.useNoPriors();
+              
+              if (outputPredictionsText) {
+                printPredictionsHeader(outBuff, classificationOutput, "user test set");
               }
 
 	      Instance instance;
 	      int jj = 0;
 	      while (source.hasMoreElements(userTestStructure)) {
 		instance = source.nextElement(userTestStructure);
-		plotInstances.process(instance, classifier, eval);
+		plotInstances.process(instance, classifierToUse, eval);
 		if (outputPredictionsText) {
-		  classificationOutput.printClassification(classifier, instance, jj);
+		  classificationOutput.printClassification(classifierToUse, instance, jj);
 		}
 		if ((++jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test data. Processed "
@@ -2276,12 +2490,12 @@ public class ClassifierPanel
               m_Log.statusMessage("Problem evaluating classifier");
             } finally {
               try {
-        	if (classifier instanceof PMMLClassifier) {
+        	if (classifierToUse instanceof PMMLClassifier) {
         	  // signal the end of the scoring run so
         	  // that the initialized state can be reset
         	  // (forces the field mapping to be recomputed
         	  // for the next scoring run).
-        	  ((PMMLClassifier)classifier).done();
+        	  ((PMMLClassifier)classifierToUse).done();
         	}
         	
                 if (plotInstances != null && plotInstances.getPlotInstances().numInstances() > 0) {
@@ -2293,9 +2507,9 @@ public class ClassifierPanel
                   m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex());
                   plotInstances.cleanUp();
 	  
-                  if (classifier instanceof Drawable) {
+                  if (classifierToUse instanceof Drawable) {
                     try {
-                      grph = ((Drawable)classifier).graph();
+                      grph = ((Drawable)classifierToUse).graph();
                     } catch (Exception ex) {
                     }
                   }
@@ -2315,7 +2529,7 @@ public class ClassifierPanel
                     m_History.addObject(name, vv);
                   } else {
                     FastVector vv = new FastVector();
-                    vv.addElement(classifier);
+                    vv.addElement(classifierToUse);
                     if (trainHeader != null) vv.addElement(trainHeader);
                     m_History.addObject(name, vv);
                   }

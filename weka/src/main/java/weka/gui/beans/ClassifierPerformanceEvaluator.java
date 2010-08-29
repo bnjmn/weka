@@ -106,6 +106,43 @@ public class ClassifierPerformanceEvaluator
   
   /** for generating plottable instance with predictions appended. */
   private transient ClassifierErrorsPlotInstances m_PlotInstances = null;
+  
+  protected static Evaluation adjustForInputMappedClassifier(Evaluation eval, 
+      weka.classifiers.Classifier classifier,
+      Instances inst, ClassifierErrorsPlotInstances plotInstances) throws Exception {
+
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      Instances mappedClassifierHeader = 
+        ((weka.classifiers.misc.InputMappedClassifier)classifier).
+        getModelHeader(new Instances(inst, 0));
+
+      eval = new Evaluation(new Instances(mappedClassifierHeader, 0));
+
+      if (!eval.getHeader().equalHeaders(inst)) {
+        // When the InputMappedClassifier is loading a model, 
+        // we need to make a new dataset that maps the test instances to
+        // the structure expected by the mapped classifier - this is only
+        // to ensure that the ClassifierPlotInstances object is configured
+        // in accordance with what the embeded classifier was trained with
+        Instances mappedClassifierDataset = 
+          ((weka.classifiers.misc.InputMappedClassifier)classifier).
+          getModelHeader(new Instances(mappedClassifierHeader, 0));
+        for (int zz = 0; zz < inst.numInstances(); zz++) {
+          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier)classifier).
+          constructMappedInstance(inst.instance(zz));
+          mappedClassifierDataset.add(mapped);
+        }
+        
+        eval.setPriors(mappedClassifierDataset);
+        plotInstances.setInstances(mappedClassifierDataset);
+        plotInstances.setClassifier(classifier);
+        plotInstances.setClassIndex(mappedClassifierDataset.classIndex());
+        plotInstances.setEvaluation(eval);
+      }
+    }
+    
+    return eval;
+  }
 
   /**
    * Accept a classifier to be evaluated.
@@ -132,16 +169,29 @@ public class ClassifierPerformanceEvaluator
 		    // we have no training set to estimate majority class
 		    // or mean of target from
 		    m_eval = new Evaluation(ce.getTestSet().getDataSet());
+		    m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
+		    m_PlotInstances.setInstances(ce.getTestSet().getDataSet());
+		    m_PlotInstances.setClassifier(ce.getClassifier());
+		    m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
+		    m_PlotInstances.setEvaluation(m_eval);
+
+		    m_eval = adjustForInputMappedClassifier(m_eval, ce.getClassifier(),
+		        ce.getTestSet().getDataSet(), m_PlotInstances);
 		    m_eval.useNoPriors();
 		  } else {
+		    // we can set up with the training set here
 		    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
+		    m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
+		    m_PlotInstances.setInstances(ce.getTrainSet().getDataSet());
+		    m_PlotInstances.setClassifier(ce.getClassifier());
+		    m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
+		    m_PlotInstances.setEvaluation(m_eval);
+		    
+		    m_eval = adjustForInputMappedClassifier(m_eval, ce.getClassifier(),
+                        ce.getTrainSet().getDataSet(), m_PlotInstances);
 		  }
 //		  m_classifier = ce.getClassifier();
-		  m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-		  m_PlotInstances.setInstances(ce.getTestSet().getDataSet());
-		  m_PlotInstances.setClassifier(ce.getClassifier());
-		  m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
-		  m_PlotInstances.setEvaluation(m_eval);
+
 		  m_PlotInstances.setUp();
 		  
 		  m_currentBatchIdentifier = ce.getGroupIdentifier();
@@ -150,11 +200,11 @@ public class ClassifierPerformanceEvaluator
 //		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
 	        if (m_setsComplete < ce.getMaxSetNumber()) {
 		  
-		  if (ce.getTrainSet().getDataSet() != null &&
+		  /*if (ce.getTrainSet().getDataSet() != null &&
 		      ce.getTrainSet().getDataSet().numInstances() > 0) {
 		    // set the priors
 		    m_eval.setPriors(ce.getTrainSet().getDataSet());
-		  }
+		  } */
 		  
 //		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {

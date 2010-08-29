@@ -40,12 +40,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
 import weka.classifiers.rules.ZeroR;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -70,6 +73,7 @@ import weka.gui.Logger;
  * @see UserRequestAcceptor
  * @see TrainingSetListener
  * @see TestSetListener
+ * @see EnvironmentHandler
  */
 public class Classifier
   extends JPanel
@@ -77,7 +81,8 @@ public class Classifier
 	     WekaWrapper, EventConstraints,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
-	     InstanceListener, ConfigurationProducer {
+	     InstanceListener, ConfigurationProducer,
+	     EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 659603893917736008L;
@@ -157,6 +162,8 @@ public class Classifier
     new ExtensionFileFilter(XStream.FILE_EXTENSION + FILE_EXTENSION,
                             "XML serialized model file (*"
                             + XStream.FILE_EXTENSION + FILE_EXTENSION + ")");
+  
+  protected transient Environment m_env;
 
   /**
    * If the classifier is an incremental classifier, should we
@@ -366,6 +373,13 @@ public class Classifier
     }
     // get global info
     m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_ClassifierTemplate);
+    
+    try {
+      m_Classifier = weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
   
   /**
@@ -578,6 +592,9 @@ public class Classifier
 	    // initialize the classifier if it hasn't been trained yet
 	    m_trainingSet = new Instances(dataset, 0);
 	    m_Classifier = weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
+	    if (m_Classifier instanceof EnvironmentHandler && m_env != null) {
+	      ((EnvironmentHandler)m_Classifier).setEnvironment(m_env);
+	    }
 	    m_Classifier.buildClassifier(m_trainingSet);
 	  }
 	}
@@ -744,6 +761,9 @@ public class Classifier
           // copy the classifier configuration
           weka.classifiers.Classifier classifierCopy = 
             weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
+          if (classifierCopy instanceof EnvironmentHandler && m_env != null) {
+            ((EnvironmentHandler)classifierCopy).setEnvironment(m_env);
+          }
           
           // build this model
           classifierCopy.buildClassifier(m_train);
@@ -998,6 +1018,9 @@ public class Classifier
       return;
     }
     
+    
+    weka.classifiers.Classifier classifierToUse = m_Classifier;
+    
     Instances testSet = e.getTestSet();
     if (testSet != null) {
       if (testSet.classIndex() < 0) {
@@ -1015,17 +1038,34 @@ public class Classifier
         return;
       }
     }
-    
+
     // If we just have a test set connection or
     // there is just one run involving one set (and we are not
     // currently building a model), then use the
     // last saved model
-    if (m_Classifier != null && m_state == IDLE && 
+    if (classifierToUse != null && m_state == IDLE && 
         (!m_listenees.containsKey("trainingSet") || 
         (e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1))) {
       // if this is structure only then just return at this point
       if (e.getTestSet() != null && e.isStructureOnly()) {
         return;
+      }
+      
+      if (classifierToUse instanceof EnvironmentHandler && m_env != null) {
+        ((EnvironmentHandler)classifierToUse).setEnvironment(m_env);
+      }
+      
+      if (classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier) {
+        // make sure that we have the correct training header (if InputMappedClassifier
+        // is loading a model from a file).
+        try {
+          m_trainingSet = 
+            ((weka.classifiers.misc.InputMappedClassifier)classifierToUse).
+              getModelHeader(m_trainingSet); // this returns the argument if a model is not being loaded
+        } catch (Exception e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
       }
       
       // check that we have a training set/header (if we don't,
@@ -1049,9 +1089,72 @@ public class Classifier
       }
       
       if (testSet != null) {        
-        if (m_trainingSet.equalHeaders(testSet)) {
+        if (!m_trainingSet.equalHeaders(testSet) && 
+            !(classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
+          boolean wrapClassifier = false;
+          if (!Utils.
+              getDontShowDialog("weka.gui.beans.Classifier.AutoWrapInInputMappedClassifier")) {
+            
+            java.awt.GraphicsEnvironment ge = 
+              java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+            if (!ge.isHeadless()) {
+              JCheckBox dontShow = new JCheckBox("Do not show this message again");
+              Object[] stuff = new Object[2];
+              stuff[0] = "Data used to train model and test set are not compatible.\n" +
+              "Would you like to automatically wrap the classifier in\n" + 
+              "an \"InputMappedClassifier\" before proceeding?.\n";
+              stuff[1] = dontShow;
+
+              int result = JOptionPane.showConfirmDialog(this, stuff, 
+                  "KnowledgeFlow:Classifier", JOptionPane.YES_OPTION);
+
+              if (result == JOptionPane.YES_OPTION) {
+                wrapClassifier = true;
+              }
+
+              if (dontShow.isSelected()) {
+                String response = (wrapClassifier) ? "yes" : "no";
+                try {
+                  Utils.
+                  setDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier", 
+                      response);
+                } catch (Exception e1) {
+                  // TODO Auto-generated catch block
+                  e1.printStackTrace();
+                }
+              }
+            } else {
+              // running headless, so just go ahead and wrap anyway
+              wrapClassifier = true;
+            }
+          } else {
+            // What did the user say - do they want to autowrap or not?
+            String response;
+            try {
+              response = Utils.getDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier");
+              if (response != null && response.equalsIgnoreCase("yes")) {
+                wrapClassifier = true;
+              }
+            } catch (Exception e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            }
+          }
+          
+          if (wrapClassifier) {
+            weka.classifiers.misc.InputMappedClassifier temp =
+              new weka.classifiers.misc.InputMappedClassifier();
+
+            temp.setClassifier(classifierToUse);
+            temp.setModelHeader(new Instances(m_trainingSet, 0));
+            classifierToUse = temp;
+          }          
+        }         
+        
+        if (m_trainingSet.equalHeaders(testSet) || 
+            (classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
           BatchClassifierEvent ce =
-            new BatchClassifierEvent(this, m_Classifier,                                       
+            new BatchClassifierEvent(this, classifierToUse,                                       
                 new DataSetEvent(this, m_trainingSet),
                 new DataSetEvent(this, e.getTestSet()),
            e.getRunNumber(), e.getMaxRunNumber(), 
@@ -1084,7 +1187,7 @@ public class Classifier
               
               if (ok) {
                 BatchClassifierEvent ce =
-                  new BatchClassifierEvent(this, m_Classifier,                                       
+                  new BatchClassifierEvent(this, classifierToUse,                                       
                       new DataSetEvent(this, m_trainingSet),
                       new DataSetEvent(this, e.getTestSet()),
                  e.getRunNumber(), e.getMaxRunNumber(), 
@@ -2014,5 +2117,13 @@ public class Classifier
         Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()).length() > 0) 
         ? Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()) + "|"
             : "");
+  }
+
+  /**
+   * Set environment variables to pass on to the classifier (if
+   * if is an EnvironmentHandler)
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
   }
 }

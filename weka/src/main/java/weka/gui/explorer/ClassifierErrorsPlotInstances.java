@@ -268,6 +268,11 @@ public class ClassifierErrorsPlotInstances
     try {
       pred = eval.evaluateModelOnceAndRecordPrediction(classifier, toPredict);
       
+      if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+        toPredict = ((weka.classifiers.misc.InputMappedClassifier)classifier).
+          constructMappedInstance(toPredict);
+      }
+      
       if (!m_SaveForVisualization)
 	return;
 
@@ -464,7 +469,6 @@ public class ClassifierErrorsPlotInstances
    */
   protected PlotData2D createPlotData(String name) throws Exception {
     PlotData2D 	result;
-    
     if (!m_SaveForVisualization)
       return null;
     

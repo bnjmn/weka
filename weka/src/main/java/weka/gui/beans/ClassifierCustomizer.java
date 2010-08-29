@@ -24,6 +24,8 @@ package weka.gui.beans;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 
@@ -55,7 +57,7 @@ import javax.swing.SwingConstants;
 public class ClassifierCustomizer
   extends JPanel
   implements Customizer, CustomizerClosingListener, 
-  CustomizerCloseRequester {
+  CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6688000820160821429L;
@@ -87,6 +89,8 @@ public class ClassifierCustomizer
   
   /** Copy of the current classifier in case cancel is selected */
   protected weka.classifiers.Classifier m_backup;
+  
+  private Environment m_env = Environment.getSystemWide();
 
   public ClassifierCustomizer() {
     
@@ -159,6 +163,9 @@ public class ClassifierCustomizer
     JButton CancelBut = new JButton("Cancel");
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        // forces the template to be deep copied to the actual classifier.
+        // necessary for InputMappedClassifier that is loading from a file
+        m_dsClassifier.setClassifierTemplate(m_dsClassifier.getClassifierTemplate());
         m_parentFrame.dispose();
       }
     });
@@ -217,6 +224,7 @@ public class ClassifierCustomizer
     } catch (Exception ex) {
       // ignore
     }
+    m_ClassifierEditor.setEnvironment(m_env);
     m_ClassifierEditor.setTarget(m_dsClassifier.getClassifierTemplate());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
@@ -255,5 +263,15 @@ public class ClassifierCustomizer
 
   public void setParentFrame(JFrame parent) {
     m_parentFrame = parent;    
+  }
+  
+  /**
+   * Set any environment variables to pass to the PropertySheetPanel
+   * 
+   * @param env environment variables to pass to the property sheet
+   * panel
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
   }
 }
