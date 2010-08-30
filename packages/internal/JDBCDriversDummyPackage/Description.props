@@ -12,9 +12,9 @@ Version=1.0.0
 Date=2010-08-30
 
 # Title (required)
-Title=Dummy package that provides a place to drop JDBC driver jar files so that they are loaded by the system.
+Title=Dummy package that provides a place to drop JDBC driver jar files so that they get loaded by the system.
 
-Category=Associations
+Category=Misc
 
 # Author (required)
 Author=Mark Hall
@@ -26,7 +26,7 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=none
 
 # Description (required)
-Description=Dummy package that provides a place to drop JDBC driver jar files so that they are loaded by the system. JDBC driver jar files may be placed in either ${WEKA_HOME}/packages/JDBCDriversDummyPackage or ${WEKA_HOME}/packages/JDBCDriversDummyPackage/lib
+Description=Dummy package that provides a place to drop JDBC driver jar files so that they get loaded by the system. JDBC driver jar files may be placed in either ${WEKA_HOME}/packages/JDBCDriversDummyPackage or ${WEKA_HOME}/packages/JDBCDriversDummyPackage/lib
 
 # Package URL for obtaining the package archive (required)
 PackageURL=http://prdownloads.sourceforge.net/weka/JDBCDriversDummyPackage1.0.0.zip?download
