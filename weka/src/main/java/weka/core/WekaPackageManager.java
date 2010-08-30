@@ -92,7 +92,7 @@ public class WekaPackageManager {
     if (wh != null) {
       WEKA_HOME = new File(wh);
       PACKAGES_DIR = new File(wh + File.separator + "packages");
-    } else {
+    } else {      
       env.addVariableSystemWide("WEKA_HOME", WEKA_HOME.toString());
     }
     
@@ -869,8 +869,14 @@ public class WekaPackageManager {
       toInstall.getPackageMetaDataElement("MessageToDisplayOnInstallation");
     if (specialInstallMessage != null && 
         specialInstallMessage.toString().length() > 0) {
+      String siM = specialInstallMessage.toString();
+      try {
+        siM = Environment.getSystemWide().substitute(siM);
+      } catch (Exception ex) {
+        // quietly ignore
+      }
       String message = "**** Special installation message ****\n" 
-        + specialInstallMessage.toString()
+        + siM
             + "\n**** Special installation message ****";
       for (PrintStream p : progress) {
         p.println(message);
