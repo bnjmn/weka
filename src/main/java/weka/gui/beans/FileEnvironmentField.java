@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import javax.swing.filechooser.FileFilter;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -106,7 +107,7 @@ public class FileEnvironmentField extends EnvironmentField {
       }
     });
     
-    JFileChooser embeddedEditor = (JFileChooser)m_fileEditor.getCustomEditor();
+    final JFileChooser embeddedEditor = (JFileChooser)m_fileEditor.getCustomEditor();
     embeddedEditor.setFileSelectionMode(JFileChooser.FILES_ONLY);
     ExtensionFileFilter ff =
       new ExtensionFileFilter(".model", "Serialized Weka classifier (*.model)");
@@ -118,9 +119,21 @@ public class FileEnvironmentField extends EnvironmentField {
         try {
           String modelPath = getText();
           if (modelPath != null) {
-            m_fileEditor.setValue(new File(modelPath));
+            try {
+              modelPath = m_env.substitute(modelPath);
+            } catch (Exception ex) {              
+            }
+            
+            File toSet = new File(modelPath);            
+            if (toSet.isFile()) {
+              m_fileEditor.setValue(new File(modelPath));
+              toSet = toSet.getParentFile();              
+            }
+            if (toSet.isDirectory()) {
+              embeddedEditor.setCurrentDirectory(toSet);
+            }
           }
-          System.err.println("Here...");
+          
           showFileEditor();
         } catch (Exception ex) {
           ex.printStackTrace();
@@ -133,6 +146,24 @@ public class FileEnvironmentField extends EnvironmentField {
     bP.add(browseBut, BorderLayout.CENTER);
     
     add(bP, BorderLayout.EAST);    
+  }
+  
+  /**
+   * Add a file filter to use
+   * 
+   * @param toSet the file filter to use
+   */
+  public void addFileFilter(FileFilter toSet) {
+    JFileChooser embeddedEditor = (JFileChooser)m_fileEditor.getCustomEditor();
+    embeddedEditor.addChoosableFileFilter(toSet);
+  }
+  
+  /**
+   * Resets the list of choosable file filters.
+   */
+  public void resetFileFilters() {
+    JFileChooser embeddedEditor = (JFileChooser)m_fileEditor.getCustomEditor();
+    embeddedEditor.resetChoosableFileFilters();
   }
   
   private void showFileEditor() {
