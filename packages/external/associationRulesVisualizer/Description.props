@@ -38,4 +38,20 @@ URL=http://www2.lifl.fr/~jourdan/download/arv.html
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.7.2)
+
+# Special instructions to be displayed on installation of this package
+MessageToDisplayOnInstallation=This package requires Java 3D to be installed on your\n\
+ system before it can be used. Mac users will already have Java 3D available to\n\
+ them and will not require anything further. For other platforms, download and\n\
+ install Java3D from https://java3d.dev.java.net/binary-builds.html before restarting\n\
+ Weka.
+ 
+# External class check. Skip loading this package if the following
+# class can't be instantiated.
+DoNotLoadIfClassNotPresent=com.sun.j3d.utils.universe.SimpleUniverse
+
+# Log message to display if package can't be loaded because Java3D is not installed
+DoNotLoadIfClassNotPresentMessage=associationRulesViewer can't be loaded because \
+ Java3D does not seem to be installed. Download and install Java3D from \
+ https://java3d.dev.java.net/binary-builds.html before restarting Weka.
