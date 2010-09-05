@@ -1334,7 +1334,7 @@ public class WekaPackageManager {
           //System.exit(1);
         }
       } else if (args[0].equals("-install-package")) {
-        if (args[1].startsWith("http://")) {
+        if (args[1].startsWith("http://") || args[1].startsWith("https://")) {
           URL packageURL = new URL(args[1]);
           installPackageFromURL(packageURL, System.out);
         } else if (args[1].endsWith(".zip")) {
