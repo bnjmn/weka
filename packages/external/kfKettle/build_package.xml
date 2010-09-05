@@ -179,6 +179,12 @@
          <include name="*.zip"/>
        </fileset>
     </copy>
+    <mkdir dir="${dist}/${package}/doc"/>
+    <copy todir="${dist}/${package}/doc" >
+       <fileset dir="${doc}">
+         <include name="**/*"/>
+       </fileset>
+    </copy>
     <mkdir dir="${dist}/${package}/src"/>
     <copy todir="${dist}/${package}" >
        <fileset dir=".">
