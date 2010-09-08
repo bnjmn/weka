@@ -32,7 +32,7 @@ Description=DECORATE is a meta-learner for building diverse ensembles of classif
 PackageURL=http://prdownloads.sourceforge.net/weka/decorate1.0.0.zip?download
 
 # URL for further information
-#URL=http://weka.sourceforge.net/doc.packages/decorate
+URL=http://weka.sourceforge.net/doc.packages/decorate
 
 # Related to other packages?
 #Related=
