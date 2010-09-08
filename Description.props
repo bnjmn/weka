@@ -32,7 +32,7 @@ Description=An extension of the standard MultilayerPerceptron classifier in Weka
 PackageURL=http://prdownloads.sourceforge.net/weka/multilayerPerceptronCS1.0.0.zip?download
 
 # URL for further information
-URL=http://www.somewhere.net/algorithm.html
+URL=http://weka.sourceforge.net/doc.packages/multilayerPerceptronCS
 
 # Related to other packages?
 Related=MultilayerPerceptron
