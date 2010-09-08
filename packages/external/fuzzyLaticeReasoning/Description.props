@@ -32,7 +32,7 @@ Description=The Fuzzy Lattice Reasoning Classifier uses the notion of Fuzzy Latt
 PackageURL=http://prdownloads.sourceforge.net/weka/fuzzyLaticeReasoning1.0.0.zip?download
 
 # URL for further information
-#URL=http://weka.sourceforge.net/doc.packages/fuzzyLaticeReasoning
+URL=http://weka.sourceforge.net/doc.packages/fuzzyLaticeReasoning
 
 # Related to other packages?
 #Related=
