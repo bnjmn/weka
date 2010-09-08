@@ -32,7 +32,7 @@ Description=Manages a libary of ensemble classifiers
 PackageURL=http://prdownloads.sourceforge.net/weka/ensembleLibrary1.0.0.zip?download
 
 # URL for further information
-#URL=http://weka.sourceforge.net/doc.packages/ensembleLibrary
+URL=http://weka.sourceforge.net/doc.packages/ensembleLibrary
 
 # Related to other packages?
 #Related=
