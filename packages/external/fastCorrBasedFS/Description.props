@@ -32,7 +32,7 @@ Description=Feature selection method based on correlation measureand relevance a
 PackageURL=http://prdownloads.sourceforge.net/weka/fastCorrBasedFS1.0.0.zip?download
 
 # URL for further information
-#URL=http://weka.sourceforge.net/doc.packages/fastCorrBasedFS
+URL=http://weka.sourceforge.net/doc.packages/fastCorrBasedFS
 
 # Related to other packages?
 #Related=
