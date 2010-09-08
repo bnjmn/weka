@@ -102,16 +102,25 @@ public class RepositoryIndexGenerator {
       majMinRev[1] = minor;
       majMinRev[2] = revision;
     }
-    
+
     return majMinRev;
   }
   
-protected static int compare(String version1, String version2) {
+  private static String cleansePropertyValue(String propVal) {
+    propVal = propVal.replace("<", "&#60;");
+    propVal = propVal.replace(">", "&#62;");
+    propVal = propVal.replace("@", "{[at]}");
+    propVal = propVal.replace("\n", "<br/>");
     
+    return propVal;
+  }
+
+  protected static int compare(String version1, String version2) {
+
     // parse both of the versions
     int[] majMinRev1 = parseVersion(version1);
     int[] majMinRev2 = parseVersion(version2);
-    
+
     int result;
     
     if (majMinRev1[0] < majMinRev2[0]) {
@@ -172,8 +181,9 @@ protected static int compare(String version1, String version2) {
     });
     
     StringBuffer indexBuff = new StringBuffer();
-    indexBuff.append(HEADER + BIRD_IMAGE2);
-    indexBuff.append(PENTAHO_IMAGE2);
+    indexBuff.append(HEADER +"\n\n");
+    //indexBuff.append(HEADER + BIRD_IMAGE2);
+    //indexBuff.append(PENTAHO_IMAGE2);
     Properties latestProps = new Properties();
     latestProps.load(new BufferedReader(new FileReader(latest)));
     String packageName = latestProps.getProperty("PackageName") + ": ";
@@ -182,12 +192,33 @@ protected static int compare(String version1, String version2) {
     if (packageCategory == null) {
       packageCategory = "";
     }
-    indexBuff.append("<h2>" + packageName + packageTitle + "</h2>\n\n");
+    indexBuff.append("<h2>" + packageName + packageTitle + "</h2>\n\n");    
+    
+    String author = latestProps.getProperty("Author");
+    author = cleansePropertyValue(author);
+    String URL = latestProps.getProperty("URL");
+    if (URL != null) {
+      URL = cleansePropertyValue(URL);
+    }
+    String maintainer = latestProps.getProperty("Maintainer");
+    maintainer = cleansePropertyValue(maintainer);
+    
+    indexBuff.append("\n<table>\n");
+    if (URL != null && URL.length() > 0) {
+      indexBuff.append("<tr><td valign=top>"+ "URL" + ":</td><td width=50></td>");
+      URL = "<a href=\"" + URL +"\">" + URL + "</a>";
+      indexBuff.append("<td>" + URL + "</td></tr>\n");
+    }
+    indexBuff.append("<tr><td valign=top>"+ "Author" + ":</td><td width=50></td>");
+    indexBuff.append("<td>" + author + "</td></tr>\n");
+    indexBuff.append("<tr><td valign=top>"+ "Maintainer" + ":</td><td width=50></td>");
+    indexBuff.append("<td>" + maintainer + "</td></tr>\n");    
+    indexBuff.append("</table>\n<p>\n");
     
     String description = latestProps.getProperty("Description");
     indexBuff.append("<p>" + description.replace("\n", "<br/>") + "</p>\n\n");
     
-    indexBuff.append("Versions:<br>\n");
+    indexBuff.append("<p>All available versions:<br>\n");
     for (int i = 0; i < sortedPropsFiles.length; i++) {
       if (i > 0) {
         String versionNumber = 
@@ -200,8 +231,9 @@ protected static int compare(String version1, String version2) {
       indexBuff.append("<a href=\"" + name + ".html" + "\">" + name + "</a><br>\n");
 
       StringBuffer version = new StringBuffer();
-      version.append(HEADER + BIRD_IMAGE2);
-      version.append(PENTAHO_IMAGE2);
+      version.append(HEADER + "\n\n");
+      //version.append(HEADER + BIRD_IMAGE2);
+     // version.append(PENTAHO_IMAGE2);
       version.append("<table summary=\"Package " + packageName + " summary\">\n");
       Properties versionProps = new Properties();
       versionProps.load(new BufferedReader(new FileReader(sortedPropsFiles[i])));
