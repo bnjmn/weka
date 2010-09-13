@@ -111,6 +111,11 @@
     </copy>
     <rmic base="${build}/classes"
        classname="weka.experiment.RemoteEngine"/>
+    <unzip src="${lib}/packageManager.jar" dest="${build}/classes">
+      <patternset>
+        <include name="org/**/*"/>
+      </patternset>
+    </unzip>
   </target>
 
   <!-- Make the javadocs -->
