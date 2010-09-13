@@ -46,7 +46,7 @@ import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * A filter that removes a range of attributes from the dataset.
+ * An filter that removes a range of attributes from the dataset.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -171,6 +171,7 @@ public class Remove
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -211,7 +212,8 @@ public class Remove
       Attribute keep = (Attribute)instanceInfo.attribute(current).copy();
       attributes.addElement(keep);
     }
-    initInputLocators(instanceInfo, m_SelectedAttributes);
+    //initInputLocators(instanceInfo, m_SelectedAttributes);
+    initInputLocators(getInputFormat(), m_SelectedAttributes);
     Instances outputFormat = new Instances(instanceInfo.relationName(),
 					   attributes, 0); 
     outputFormat.setClassIndex(outputClass);
