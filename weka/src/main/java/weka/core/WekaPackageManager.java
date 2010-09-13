@@ -609,6 +609,57 @@ public class WekaPackageManager {
     }
     
     return numPackages;
+  }    
+  
+  /**
+   * Just get a list of the package names. 
+   * This is faster than calling getAllPackages(), especially
+   * if fetching from the online repository, since the full meta
+   * data for each package doesn't have to be read.
+   * 
+   * @param local true if the local package list in the cache should
+   * be read rather than the online repository
+   * 
+   * @return a Map<String, String> of all the package names available either
+   * locally or at the repository
+   */
+  public static Map<String, String> getPackageList(boolean local) {
+    Map<String, String> result = new HashMap<String, String>();
+    
+    try {
+    useCacheOrOnlineRepository();
+    
+    if (!local) {
+      PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
+    }
+    
+    String packageListS = PACKAGE_MANAGER.getPackageRepositoryURL().toString()
+    + "/packageList.txt";
+    URLConnection conn = null;
+    URL connURL = new URL(packageListS);
+
+    if (PACKAGE_MANAGER.setProxyAuthentication()) {
+      conn = connURL.openConnection(PACKAGE_MANAGER.getProxy());
+    } else {
+      conn = connURL.openConnection();
+    }
+    
+    conn.setConnectTimeout(30000); // timeout after 30 seconds
+    
+    BufferedReader bi = 
+      new BufferedReader(new InputStreamReader(conn.getInputStream()));
+    String l = null;
+    while ((l = bi.readLine()) != null) {
+      result.put(l,l);
+    }
+    bi.close();
+    
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      result = null;
+    } 
+    
+    return result;
   }
   
   public static Exception establishCacheIfNeeded(PrintStream... progress) {
