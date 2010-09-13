@@ -429,6 +429,7 @@ public abstract class Filter
     if (    (m_InputStringAtts.getAttributeIndices().length > 0) 
 	 || (m_InputRelAtts.getAttributeIndices().length > 0) ) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
+      m_InputStringAtts = new StringLocator(m_InputFormat, m_InputStringAtts.getAllowedIndices());
     } else {
       // This more efficient than new Instances(m_InputFormat, 0);
       m_InputFormat.delete();
@@ -542,6 +543,16 @@ public abstract class Filter
     flushInput();
     m_NewBatch = true;
     m_FirstBatchDone = true;
+    
+    if (m_OutputQueue.empty()) {
+      // Clear out references to old strings/relationals occasionally
+      if (    (m_OutputStringAtts.getAttributeIndices().length > 0)
+          || (m_OutputRelAtts.getAttributeIndices().length > 0) ) {
+        m_OutputFormat = m_OutputFormat.stringFreeStructure();
+        m_OutputStringAtts = new StringLocator(m_OutputFormat, m_OutputStringAtts.getAllowedIndices());
+      }
+    }
+    
     return (numPendingOutput() != 0);
   }
 
