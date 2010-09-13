@@ -31,6 +31,7 @@ import weka.core.OptionHandler;
 import weka.core.Queue;
 import weka.core.RelationalLocator;
 import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.StringLocator;
 import weka.core.UnsupportedAttributeTypeException;
@@ -133,6 +134,19 @@ public abstract class Filter
   public boolean isFirstBatchDone() {
     return m_FirstBatchDone;
   }
+  
+  /**
+   * Default implementation returns false. Some filters may not
+   * necessarily be able to produce an instance for output for
+   * every instance input after the first batch has been 
+   * completed - such filters should override this method
+   * and return true.
+   * 
+   * @return false by default
+   */
+  public boolean mayRemoveInstanceAfterFirstBatchDone() {
+    return false;
+  }
 
   /** 
    * Returns the Capabilities of this filter. Derived filters have to
@@ -145,9 +159,20 @@ public abstract class Filter
     Capabilities 	result;
 
     result = new Capabilities(this);
+    result.enableAll();
+    
     result.setMinimumNumberInstances(0);
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return            the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
 
   /** 
@@ -404,6 +429,7 @@ public abstract class Filter
     if (    (m_InputStringAtts.getAttributeIndices().length > 0) 
 	 || (m_InputRelAtts.getAttributeIndices().length > 0) ) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
+      m_InputStringAtts = new StringLocator(m_InputFormat, m_InputStringAtts.getAllowedIndices());
     } else {
       // This more efficient than new Instances(m_InputFormat, 0);
       m_InputFormat.delete();
@@ -517,6 +543,16 @@ public abstract class Filter
     flushInput();
     m_NewBatch = true;
     m_FirstBatchDone = true;
+    
+    if (m_OutputQueue.empty()) {
+      // Clear out references to old strings/relationals occasionally
+      if (    (m_OutputStringAtts.getAttributeIndices().length > 0)
+          || (m_OutputRelAtts.getAttributeIndices().length > 0) ) {
+        m_OutputFormat = m_OutputFormat.stringFreeStructure();
+        m_OutputStringAtts = new StringLocator(m_OutputFormat, m_OutputStringAtts.getAllowedIndices());
+      }
+    }
+    
     return (numPendingOutput() != 0);
   }
 
