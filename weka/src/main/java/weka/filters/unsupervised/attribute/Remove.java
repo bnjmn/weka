@@ -212,7 +212,8 @@ public class Remove
       Attribute keep = (Attribute)instanceInfo.attribute(current).copy();
       attributes.addElement(keep);
     }
-    initInputLocators(instanceInfo, m_SelectedAttributes);
+    //initInputLocators(instanceInfo, m_SelectedAttributes);
+    initInputLocators(getInputFormat(), m_SelectedAttributes);
     Instances outputFormat = new Instances(instanceInfo.relationName(),
 					   attributes, 0); 
     outputFormat.setClassIndex(outputClass);
