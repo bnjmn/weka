@@ -140,6 +140,10 @@ public class PackageManager extends JPanel {
   protected static final String BROWSER_HOME = "http://www.cs.waikato.ac.nz/ml/weka";
   protected JButton m_homeB;
   
+  protected JToolBar m_browserTools;
+  
+  protected JLabel m_newPackagesAvailableL;
+  
   protected DefaultTableModel m_model;
 
   protected Map<String, List<Object>> m_packageLookupInfo;
@@ -258,6 +262,48 @@ public class PackageManager extends JPanel {
     }
   }
   
+  class CheckForNewPackages extends SwingWorker<Void, Void> {
+    
+    public Void doInBackground() {
+      Map<String, String> localPackageNameList = 
+        WekaPackageManager.getPackageList(true);
+      
+      if (localPackageNameList == null) {
+        // quietly return and see if we can continue anyway
+        return null;
+      }
+      
+      Map<String, String> repositoryPackageNameList =
+        WekaPackageManager.getPackageList(false);
+      
+      if (repositoryPackageNameList == null) {
+        // quietly return and see if we can continue anyway
+        return null;
+      }
+      
+      StringBuffer newPackagesBuff = new StringBuffer();
+      
+      for (String s : repositoryPackageNameList.keySet()) {
+        if (!localPackageNameList.containsKey(s)) {
+          newPackagesBuff.append(s + "<br>");
+        }
+      }
+      
+      if (newPackagesBuff.length() > 0) {
+        String information = "<html><font size=-2>There are new packages available " +
+        		"on the server (do a cache refresh for more " +
+        		"information):<br><br>" + newPackagesBuff.toString() + 
+        		"</font></html>";
+        m_newPackagesAvailableL.setToolTipText(information);
+        m_browserTools.add(m_newPackagesAvailableL);
+
+        m_browserTools.revalidate();
+      }
+      
+      return null;
+    }
+  }
+  
   class RefreshCache extends SwingWorker<Void, Void> implements Progressable {
     private int m_progressCount = 0;
     private Exception m_error = null;
@@ -309,6 +355,12 @@ public class PackageManager extends JPanel {
       m_allBut.setEnabled(true);
       
       updateTable();
+      
+      try {
+        m_browserTools.remove(m_newPackagesAvailableL);
+        m_browserTools.revalidate();
+      } catch (Exception ex) { }
+      
       m_cacheRefreshInProgress = false;
     }
   }
@@ -1397,10 +1449,14 @@ public class PackageManager extends JPanel {
     m_homeB = new JButton(new ImageIcon(loadImage("weka/gui/images/home.gif")));
     m_homeB.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
     m_homeB.setToolTipText("Home");
-    JToolBar browserTools = new JToolBar();
-    browserTools.add(m_backB);
-    browserTools.add(m_homeB);
-    browserTools.setFloatable(false);
+    m_browserTools = new JToolBar();
+    m_browserTools.add(m_backB);
+    m_browserTools.add(m_homeB);
+    m_browserTools.setFloatable(false);
+    
+    // create the new packages available icon
+    m_newPackagesAvailableL = 
+      new JLabel(new ImageIcon(loadImage("weka/gui/images/information.gif")));
     
     // Start loading the home page
     Thread homePageThread = new HomePageThread();
@@ -1442,7 +1498,7 @@ public class PackageManager extends JPanel {
       }
     });
     
-    browserP.add(browserTools, BorderLayout.NORTH);
+    browserP.add(m_browserTools, BorderLayout.NORTH);
     browserP.add(new JScrollPane(m_infoPane), BorderLayout.CENTER);
   //  add(browserP, BorderLayout.CENTER);
     
@@ -1452,6 +1508,10 @@ public class PackageManager extends JPanel {
     add(m_splitP, BorderLayout.CENTER);
 
     updateTable();
+    
+    // check for any new packages on the server (if possible)
+    CheckForNewPackages cp = new CheckForNewPackages();
+    cp.execute();
   }
   
   private void updateInstallUninstallButtonEnablement() {
