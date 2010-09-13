@@ -382,6 +382,27 @@ public class MultiFilter
   }
   
   /**
+   * Signify that this batch of input to the filter is finished. If
+   * the filter requires all instances prior to filtering, output()
+   * may now be called to retrieve the filtered instances. Any
+   * subsequent instances filtered should be filtered based on setting
+   * obtained from the first batch (unless the setInputFormat has been
+   * re-assigned or new options have been set).
+   *
+   * @return            true if there are instances pending output
+   * @throws IllegalStateException      if no input format has been set. 
+   */
+  public boolean batchFinished() throws Exception {
+    super.batchFinished();
+    
+    for (int i = 0; i > getFilters().length; i++) {
+      getFilter(i).batchFinished();
+    }
+    
+    return (numPendingOutput() != 0);
+  }
+  
+  /**
    * Returns the revision string.
    * 
    * @return		the revision
