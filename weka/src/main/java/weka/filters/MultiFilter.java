@@ -52,7 +52,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6.2.1 $
+ * @version $Revision$
  * @see     weka.filters.StreamableFilter
  */
 public class MultiFilter
@@ -378,12 +378,33 @@ public class MultiFilter
   }
   
   /**
+   * Signify that this batch of input to the filter is finished. If
+   * the filter requires all instances prior to filtering, output()
+   * may now be called to retrieve the filtered instances. Any
+   * subsequent instances filtered should be filtered based on setting
+   * obtained from the first batch (unless the setInputFormat has been
+   * re-assigned or new options have been set).
+   *
+   * @return            true if there are instances pending output
+   * @throws IllegalStateException      if no input format has been set. 
+   */
+  public boolean batchFinished() throws Exception {
+    super.batchFinished();
+    
+    for (int i = 0; i > getFilters().length; i++) {
+      getFilter(i).batchFinished();
+    }
+    
+    return (numPendingOutput() != 0);
+  }
+  
+  /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
