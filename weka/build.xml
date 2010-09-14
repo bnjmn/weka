@@ -310,6 +310,10 @@
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="wavelet"/>
     </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="JDBCDriversDummyPackage"/>
+    </antcall>
   </target>
 
   <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
@@ -508,11 +512,11 @@
     </antcall>
 
     <antcall target="${packageCommand}_external">
-      <param name="packageName" value="classifierErrors"/>
+      <param name="packageName" value="kfPMMLClassifierScoring"/>
     </antcall>
 
     <antcall target="${packageCommand}_external">
-      <param name="packageName" value="massiveOnlineAnalysis"/>
+      <param name="packageName" value="classifierErrors"/>
     </antcall>
   </target>
 
