@@ -115,7 +115,7 @@
     </ant>
   </target>
 
-  <target name="apply_all_internal" depends="compile" description="Apply command to all internal packages. Use -DpackageCommand=[make|compile|compile_tests]">
+  <target name="apply_all_internal" depends="compile" description="Apply command to all internal packages. Use -DpackageCommand=[make|compile|compile_tests|clean]">
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="hotSpot"/>
     </antcall>
@@ -349,7 +349,7 @@
     </ant>
   </target>
 
-  <target name="apply_all_external" depends="compile" description="Apply command to all external packages. Use -DpackageCommand=[make|compile|compile_tests]">
+  <target name="apply_all_external" depends="compile" description="Apply command to all external packages. Use -DpackageCommand=[make|compile|compile_tests|clean]">
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="CLOPE"/>
     </antcall>
@@ -520,7 +520,7 @@
     </antcall>
   </target>
 
-  <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests]"> 
+  <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests|clean]"> 
     <antcall target="apply_all_internal"/>
     <antcall target="apply_all_external"/>
   </target>
