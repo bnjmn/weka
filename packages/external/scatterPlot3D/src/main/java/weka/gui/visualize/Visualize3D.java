@@ -28,13 +28,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -75,6 +78,18 @@ public class Visualize3D extends JPanel {
   
   /** A titled panel that holds the plot */
   protected JPanel m_plotSurround = new JPanel();
+
+  /** A reference to the current data set */
+  protected Instances m_masterInstances;
+
+  /** Field for the resampling percentage */
+  protected JTextField m_resamplePercent = new JTextField(5);
+
+  /** Field for the random seed for resampling */
+  protected JTextField m_randomSeed = new JTextField(5);
+
+  private double m_previousPercent = -1;
+  private int m_previousSeed = 1;
   
   public Visualize3D() {
     setLayout(new BorderLayout());
@@ -102,7 +117,18 @@ public class Visualize3D extends JPanel {
     
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new BorderLayout());
-    butHolder.add(m_updateBut, BorderLayout.NORTH);
+    //    butHolder.add(m_updateBut, BorderLayout.SOUTH);
+    JPanel samplingAndUpdateHolder = new JPanel();
+    samplingAndUpdateHolder.setLayout(new BorderLayout());
+    JPanel samplingPanel = new JPanel();    
+    samplingPanel.add(new JLabel("Sample %"));
+    samplingPanel.add(m_resamplePercent);
+    samplingPanel.add(new JLabel("Random seed"));
+    m_randomSeed.setText("" + 1);
+    samplingPanel.add(m_randomSeed);
+    samplingAndUpdateHolder.add(samplingPanel, BorderLayout.WEST);
+    samplingAndUpdateHolder.add(m_updateBut, BorderLayout.CENTER);
+    butHolder.add(samplingAndUpdateHolder, BorderLayout.NORTH);
     controlHolder.add(butHolder, BorderLayout.SOUTH);
     
     add(controlHolder, BorderLayout.NORTH);
@@ -148,16 +174,62 @@ public class Visualize3D extends JPanel {
    * Tell's the panel to update the visualization. 
    */
   public void updateDisplay() {
+    double currentPercent = -1;
+    int currentSeed = Integer.MAX_VALUE;
+    boolean doUpdate = false;
+    int x = 0, y = 0, z = 0, c = 0;
+    Instances inst = m_masterInstances;
+
+    try {
+      currentPercent = Double.parseDouble(m_resamplePercent.getText());
+      currentSeed = Integer.parseInt(m_randomSeed.getText());
+
+      if (currentPercent < 100 && currentPercent > 0) {
+        if (currentPercent != m_previousPercent || 
+            currentSeed != m_previousSeed) {
+          
+          inst = new Instances(m_masterInstances, 0, m_masterInstances.numInstances());
+          inst.randomize(new Random(currentSeed));
+          inst = new Instances(inst, 0, 
+                               (int)Math.round(currentPercent / 100D * inst.numInstances()));
+          m_previousPercent = currentPercent;
+          m_previousSeed = currentSeed;
+          m_visPanel.setInstances(inst);
+
+          doUpdate = true;
+
+        }
+      } else {
+        if (currentPercent != m_previousPercent) {
+          m_visPanel.setInstances(m_masterInstances);
+          doUpdate = true;
+          m_previousPercent = 100;
+          m_resamplePercent.setText("" + 100);
+        }
+      }
+    } catch (NumberFormatException ex) { }
+
+    if (m_combosReady) {
+      x = m_xCombo.getSelectedIndex();
+      y = m_yCombo.getSelectedIndex();
+      z = m_zCombo.getSelectedIndex();
+      c = m_cCombo.getSelectedIndex();
+    }
+
     if (m_combosChanged) {
-      int x = m_xCombo.getSelectedIndex();
-      int y = m_yCombo.getSelectedIndex();
-      int z = m_zCombo.getSelectedIndex();
-      int c = m_cCombo.getSelectedIndex();
+      x = m_xCombo.getSelectedIndex();
+      y = m_yCombo.getSelectedIndex();
+      z = m_zCombo.getSelectedIndex();
+      c = m_cCombo.getSelectedIndex();
 
       if (m_combosReady) {
-        m_visPanel.setAxes(x, y, z, c);
         m_combosChanged = false;
+        doUpdate = true;
       }
+    }
+
+    if (doUpdate) {
+      m_visPanel.setAxes(x, y, z, c);
     }
   }
 
@@ -168,12 +240,26 @@ public class Visualize3D extends JPanel {
    * @param display true if the display should be updated at this point.
    */
   public void setInstances(Instances inst, boolean display) {
-    m_visPanel.setInstances(inst);
+    m_masterInstances = inst;
+    setPercent();
+    
+    m_visPanel.setInstances(m_masterInstances);
     m_plotSurround.setBorder(BorderFactory.createTitledBorder("Plot: "
-        + inst.relationName()));
+        + m_masterInstances.relationName()));
     setupComboBoxes(inst);
     if (display) {
       updateDisplay();
+    }
+  }
+
+  private void setPercent() {
+    if (m_masterInstances.numInstances() > 5000) {
+      double percent = 5000D / m_masterInstances.numInstances() * 100.0;
+      percent = Math.round(percent * 100.0);
+      percent /= 100.0;
+      m_resamplePercent.setText("" + percent);
+    } else {
+      m_resamplePercent.setText("100");
     }
   }
   
