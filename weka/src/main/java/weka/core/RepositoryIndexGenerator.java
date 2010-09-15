@@ -247,7 +247,7 @@ public class RepositoryIndexGenerator {
         // String key = (String)keyI.next();
         if (key.equalsIgnoreCase("PackageName") || 
             key.equalsIgnoreCase("Title") || 
-            key.equalsIgnoreCase("Description") ||
+            /*key.equalsIgnoreCase("Description") || */
             key.equalsIgnoreCase("DoNotLoadIfFileNotPresentMessage") || 
             key.equalsIgnoreCase("DoNotLoadIfClassNotPresentMessage")) {
 
