@@ -448,7 +448,6 @@ public class Apriori
       m_allTheRules[0] = new FastVector();
       m_allTheRules[1] = new FastVector();
       m_allTheRules[2] = new FastVector();
-      // TODO
       //if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	m_allTheRules[3] = new FastVector();
 	m_allTheRules[4] = new FastVector();
@@ -500,10 +499,12 @@ public class Apriori
 	sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[j-i]));
 	sortedRuleSet[1].addElement(m_allTheRules[1].elementAt(indices[j-i]));
 	sortedRuleSet[2].addElement(m_allTheRules[2].elementAt(indices[j-i]));
+	if (!m_car) {
 	//if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	  sortedRuleSet[3].addElement(m_allTheRules[3].elementAt(indices[j-i]));
 	  sortedRuleSet[4].addElement(m_allTheRules[4].elementAt(indices[j-i]));
 	  sortedRuleSet[5].addElement(m_allTheRules[5].elementAt(indices[j-i]));
+	}
 	//}
       }
 
@@ -529,9 +530,11 @@ public class Apriori
 	m_allTheRules[1].addElement(sortedRuleSet[1].elementAt(indices[i]));
 	m_allTheRules[2].addElement(sortedRuleSet[2].elementAt(indices[i]));
 	//if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+	if (!m_car) {
 	  m_allTheRules[3].addElement(sortedRuleSet[3].elementAt(indices[i]));
 	  m_allTheRules[4].addElement(sortedRuleSet[4].elementAt(indices[i]));
 	  m_allTheRules[5].addElement(sortedRuleSet[5].elementAt(indices[i]));
+	}
 	//}
       }
 
