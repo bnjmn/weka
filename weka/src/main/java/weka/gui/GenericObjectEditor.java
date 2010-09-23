@@ -172,50 +172,63 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       // make sure we load all packages first!!!
       WekaPackageManager.loadPackages(false);
 
-      GenericPropertiesCreator creator = new GenericPropertiesCreator();
 
-      // dynamic approach?
-      if (creator.useDynamic()) {
-        try {
-          creator.execute(false);
-          EDITOR_PROPERTIES = creator.getOutputProperties();
-        }
-        catch (Exception e) {
-          JOptionPane.showMessageDialog(
-              null,
-              "Could not determine the properties for the generic object\n"
-              + "editor. This exception was produced:\n"
-              + e.toString(),
-              "GenericObjectEditor",
-              JOptionPane.ERROR_MESSAGE);
-        }
-      }
-      else {
-        // Allow a properties file in the current directory to override
-        try {
-          EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-          java.util.Enumeration keys = 
-            (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
-          if (!keys.hasMoreElements()) {
-            throw new Exception("Failed to read a property file for the "
-                +"generic object editor");
+        
+      EDITOR_PROPERTIES = GenericPropertiesCreator.getGlobalOutputProperties();
+      if (EDITOR_PROPERTIES == null) {
+        // try creating a new one from scratch
+        GenericPropertiesCreator creator = new GenericPropertiesCreator();
+
+        // dynamic approach?
+        if (creator.useDynamic()) {
+          try {
+            creator.execute(false);
+            EDITOR_PROPERTIES = creator.getOutputProperties();
+          }
+          catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                null,
+                "Could not determine the properties for the generic object\n"
+                + "editor. This exception was produced:\n"
+                + e.toString(),
+                "GenericObjectEditor",
+                JOptionPane.ERROR_MESSAGE);
           }
         }
-        catch (Exception ex) {
-          JOptionPane.showMessageDialog(
-              null,
-              "Could not read a configuration file for the generic object\n"
-              +"editor. An example file is included with the Weka distribution.\n"
-              +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-              +"should be placed either in your user home (which is set\n"
-              + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-              + "or the directory that java was started from\n",
-              "GenericObjectEditor",
-              JOptionPane.ERROR_MESSAGE);
+        else {
+          // Allow a properties file in the current directory to override
+          try {
+            EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+            java.util.Enumeration keys = 
+              (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
+            if (!keys.hasMoreElements()) {
+              throw new Exception("Failed to read a property file for the "
+                  +"generic object editor");
+            }
+          }
+          catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                null,
+                "Could not read a configuration file for the generic object\n"
+                +"editor. An example file is included with the Weka distribution.\n"
+                +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
+                +"should be placed either in your user home (which is set\n"
+                + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+                + "or the directory that java was started from\n",
+                "GenericObjectEditor",
+                JOptionPane.ERROR_MESSAGE);
+          }
         }
       }
-    }
-    catch (Exception e) {
+      
+      if (EDITOR_PROPERTIES == null) {
+        JOptionPane.showMessageDialog(
+            null,
+            "Could not initialize the GenericPropertiesCreator. ",
+            "GenericObjectEditor",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    } catch (Exception e) {
       JOptionPane.showMessageDialog(
           null,
           "Could not initialize the GenericPropertiesCreator. "
