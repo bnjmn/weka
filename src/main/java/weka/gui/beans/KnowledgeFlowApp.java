@@ -256,18 +256,22 @@ public class KnowledgeFlowApp
       TOOLBARS = new Vector();
       
       TreeMap wrapList = new TreeMap();
-      GenericPropertiesCreator creator = new GenericPropertiesCreator();
-      Properties GEOProps = null;
+      Properties GEOProps = GenericPropertiesCreator.getGlobalOutputProperties();
+      
+      if (GEOProps == null) {
+        GenericPropertiesCreator creator = new GenericPropertiesCreator();
 
-      if (creator.useDynamic()) {
-        creator.execute(false);
-        /* now process the keys in the GenericObjectEditor.props. For each
+
+        if (creator.useDynamic()) {
+          creator.execute(false);
+          /* now process the keys in the GenericObjectEditor.props. For each
            key that has an entry in the Beans.props associating it with a
            bean component a button tool bar will be created */
-        GEOProps = creator.getOutputProperties();
-      } else {
-        // Read the static information from the GenericObjectEditor.props
-        GEOProps = Utils.readProperties("weka/gui/GenericObjectEditor.props");
+          GEOProps = creator.getOutputProperties();
+        } else {
+          // Read the static information from the GenericObjectEditor.props
+          GEOProps = Utils.readProperties("weka/gui/GenericObjectEditor.props");
+        }
       }
       Enumeration en = GEOProps.propertyNames();
       while (en.hasMoreElements()) {
@@ -1812,9 +1816,11 @@ public class KnowledgeFlowApp
 
         Vector esdV = new Vector();
 
-        for (int i = 0; i < compInfoOutputs.size(); i++) {
+        //for (int i = 0; i < compInfoOutputs.size(); i++) {
+        for (int i = 0; i < compInfo.size(); i++) {
           EventSetDescriptor[] temp = 
-            ((BeanInfo) compInfoOutputs.elementAt(i)).getEventSetDescriptors();
+          //  ((BeanInfo) compInfoOutputs.elementAt(i)).getEventSetDescriptors();
+          ((BeanInfo) compInfo.elementAt(i)).getEventSetDescriptors();
 
           if ((temp != null) && (temp.length > 0)) {
             esdV.add(temp);
@@ -1833,14 +1839,16 @@ public class KnowledgeFlowApp
           menuItemCount++;
         }
 
-        final Vector finalOutputs = outputBeans;
+        //final Vector finalOutputs = outputBeans;
+        final Vector finalOutputs = associatedBeans;
 
         for (int j = 0; j < esdV.size(); j++) {
           final int fj = j;
           String sourceBeanName = "";
 
           if (bc instanceof MetaBean) {
-            Object sourceBean = ((BeanInstance) outputBeans.elementAt(j)).getBean();
+            //Object sourceBean = ((BeanInstance) outputBeans.elementAt(j)).getBean();
+            Object sourceBean = ((BeanInstance) associatedBeans.elementAt(j)).getBean();
             if (sourceBean instanceof BeanCommon) {
               sourceBeanName = ((BeanCommon)sourceBean).getCustomName();
             } else {
