@@ -54,6 +54,7 @@ import org.pentaho.packageManagement.PackageConstraint;
 import org.pentaho.packageManagement.PackageManager;
 
 import weka.gui.GenericObjectEditor;
+import weka.gui.GenericPropertiesCreator;
 import weka.gui.beans.KnowledgeFlowApp;
 import weka.gui.explorer.ExplorerDefaults;
 
@@ -215,6 +216,40 @@ public class WekaPackageManager {
     }
   }
   
+  protected static void processGenericPropertiesCreatorProps(File propsFile) {
+    try {
+      Properties expProps = new Properties();
+      BufferedInputStream bi = new BufferedInputStream(new FileInputStream(propsFile));
+      expProps.load(bi);
+      bi.close();
+      bi = null;
+      Properties GPCInputProps = GenericPropertiesCreator.getGlobalInputProperties();
+      
+      Set keys = expProps.keySet();
+      Iterator keysI = keys.iterator();
+      while (keysI.hasNext()) {
+        String key = (String)keysI.next();
+        // see if this key is in the GPC input props
+        String existingVal = GPCInputProps.getProperty(key, "");
+        if (existingVal.length() > 0) {
+          // append
+          String newVal = expProps.getProperty(key);
+          // only append if this value is not already there!!
+          if (existingVal.indexOf(newVal) < 0) {
+            newVal = existingVal + "," + newVal;
+            GPCInputProps.put(key, newVal);
+          }
+        } else {
+          // simply add this new key/value combo
+          String newVal = expProps.getProperty(key);
+          GPCInputProps.put(key, newVal);
+        }
+      }
+    } catch (Exception ex) {
+      // ignore
+    }
+  }
+  
   protected static void processExplorerProps(File propsFile) {
     try {
       Properties expProps = new Properties();
@@ -287,7 +322,7 @@ public class WekaPackageManager {
     } catch (Exception ex) {
       // ignore
     }
-  }
+  }    
   
   protected static void loadPackageDirectory(File directory, boolean verbose) throws Exception {
     File[] contents = directory.listFiles();
@@ -325,7 +360,11 @@ public class WekaPackageManager {
           contents[i].getPath().endsWith("GUIEditors.props")) {
         // Editor for a particular component
         processGUIEditorsProps(contents[i]);
-      }/* else if (contents[i].isFile() &&
+      } else if (contents[i].isFile() &&
+          contents[i].getPath().endsWith("GenericPropertiesCreator.props")) {
+        processGenericPropertiesCreatorProps(contents[i]);
+      }
+        /* else if (contents[i].isFile() &&
           contents[i].getPath().endsWith(".jar")) {
         if (verbose) {
           System.out.println("[Weka] loading " + contents[i].getPath());
@@ -521,6 +560,10 @@ public class WekaPackageManager {
   }
   
   public static synchronized void loadPackages(boolean verbose) {
+    loadPackages(verbose, true);
+  }
+  
+  public static synchronized void loadPackages(boolean verbose, boolean refreshGOEProperties) {
     if (m_packagesLoaded) {
       return;
     }
@@ -561,10 +604,18 @@ public class WekaPackageManager {
         }
       }
     }
+    
+    // do we need to regenerate the list of available schemes for
+    // the GUIs (this is not necessary when executing stuff from
+    // the command line
+    if (refreshGOEProperties) {
+      refreshGOEProperties();
+    }
   }
   
   public static void refreshGOEProperties() {
     ClassDiscovery.clearCache();
+    GenericPropertiesCreator.regenerateGlobalOutputProperties();
     GenericObjectEditor.determineClasses();
     KnowledgeFlowApp.disposeSingleton();
     KnowledgeFlowApp.reInitialize();
