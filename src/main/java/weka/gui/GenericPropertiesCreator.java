@@ -129,6 +129,11 @@ public class GenericPropertiesCreator {
   /** the output properties file with the filled in classes */
   protected Properties m_OutputProperties;
   
+  /** Globally available properties */
+  protected static GenericPropertiesCreator GLOBAL_CREATOR;
+  protected static Properties GLOBAL_INPUT_PROPERTIES;
+  protected static Properties GLOBAL_OUTPUT_PROPERTIES;
+  
   /** whether an explicit input file was given - if false, the Utils class
    * is used to locate the props-file */
   protected boolean m_ExplicitPropsFile;
@@ -136,6 +141,59 @@ public class GenericPropertiesCreator {
   /** the hashtable that stores the excludes: 
    * key -&gt; Hashtable(prefix -&gt; Vector of classnames) */
   protected Hashtable m_Excludes;
+  
+  static {
+    try {
+      GenericPropertiesCreator creator = new GenericPropertiesCreator();
+      GLOBAL_CREATOR = creator;
+      if (creator.useDynamic()) {
+        creator.execute(false, true);
+        GLOBAL_INPUT_PROPERTIES = creator.getInputProperties();
+        GLOBAL_OUTPUT_PROPERTIES = creator.getOutputProperties();
+      } else {
+        // Read the static information from the GenericObjectEditor.props
+        GLOBAL_OUTPUT_PROPERTIES = 
+          Utils.readProperties("weka/gui/GenericObjectEditor.props");
+      }
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+  
+  /**
+   * Get the global output properties
+   * 
+   * @return the global output properties
+   */
+  public static Properties getGlobalOutputProperties() {
+    return GLOBAL_OUTPUT_PROPERTIES;
+  }
+  
+  /**
+   * Get the global input properties
+   * 
+   * @return the global input properties
+   */
+  public static Properties getGlobalInputProperties() {
+    return GLOBAL_INPUT_PROPERTIES;
+  }
+  
+  /**
+   * Regenerate the global output properties. Does not load the
+   * input properties, instead uses the GLOBAL_INPUT_PROPERTIES
+   */
+  public static void regenerateGlobalOutputProperties() {
+    if (GLOBAL_CREATOR != null) {
+      try {
+        GLOBAL_CREATOR.execute(false, false);
+        GLOBAL_OUTPUT_PROPERTIES = GLOBAL_CREATOR.getOutputProperties();
+      } catch (Exception e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
+  }
   
   /**
    * initializes the creator, locates the props file with the Utils class.
@@ -512,7 +570,17 @@ public class GenericPropertiesCreator {
    * @see #execute(boolean)
    */
   public void execute() throws Exception {
-    execute(true);
+    execute(true, true);
+  }
+  
+  /**
+   * generates the props-file for the GenericObjectEditor
+   * 
+   * @param store true if the generated props should be stored
+   * @throws Exception
+   */
+  public void execute(boolean store) throws Exception {
+    execute(store, true);
   }
   
   /**
@@ -523,14 +591,17 @@ public class GenericPropertiesCreator {
    * 
    * @param store     	if TRUE then the properties file is stored to the stored 
    *                  	filename
+   * @param loadInputProps true if the input properties should be loaded
    * @throws Exception	if something goes wrong
    * @see #getOutputFilename()
    * @see #setOutputFilename(String)
    * @see #getOutputProperties()
    */
-  public void execute(boolean store) throws Exception {
+  public void execute(boolean store, boolean loadInputProps) throws Exception {
     // read properties file
-    loadInputProperties();
+    if (loadInputProps) {
+      loadInputProperties();
+    }
     
     // generate the props file
     generateOutputProperties();
