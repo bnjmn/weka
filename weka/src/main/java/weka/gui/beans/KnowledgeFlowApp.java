@@ -256,18 +256,22 @@ public class KnowledgeFlowApp
       TOOLBARS = new Vector();
       
       TreeMap wrapList = new TreeMap();
-      GenericPropertiesCreator creator = new GenericPropertiesCreator();
-      Properties GEOProps = null;
+      Properties GEOProps = GenericPropertiesCreator.getGlobalOutputProperties();
+      
+      if (GEOProps == null) {
+        GenericPropertiesCreator creator = new GenericPropertiesCreator();
 
-      if (creator.useDynamic()) {
-        creator.execute(false);
-        /* now process the keys in the GenericObjectEditor.props. For each
+
+        if (creator.useDynamic()) {
+          creator.execute(false);
+          /* now process the keys in the GenericObjectEditor.props. For each
            key that has an entry in the Beans.props associating it with a
            bean component a button tool bar will be created */
-        GEOProps = creator.getOutputProperties();
-      } else {
-        // Read the static information from the GenericObjectEditor.props
-        GEOProps = Utils.readProperties("weka/gui/GenericObjectEditor.props");
+          GEOProps = creator.getOutputProperties();
+        } else {
+          // Read the static information from the GenericObjectEditor.props
+          GEOProps = Utils.readProperties("weka/gui/GenericObjectEditor.props");
+        }
       }
       Enumeration en = GEOProps.propertyNames();
       while (en.hasMoreElements()) {
