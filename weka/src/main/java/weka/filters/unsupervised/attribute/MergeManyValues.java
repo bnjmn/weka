@@ -56,7 +56,7 @@ import java.util.Vector;
  *  Sets the attribute index
  *  (default: last)</pre>
  * 
- * <pre> -M &lt;label&gt;
+ * <pre> -L &lt;label&gt;
  *  Sets the label of the newly merged classes
  *  (default: 'merged')</pre>
  * 
@@ -112,7 +112,7 @@ public class MergeManyValues
     newVector.addElement(new Option(
 	"\tSets the label of the newly merged classes\n"
 	+ "\t(default: 'merged')",
-	"M", 1, "-M <label>"));
+	"L", 1, "-L <label>"));
 
     newVector.addElement(new Option(
 	"\tSets the merge range. 'first and 'last' are accepted as well.'\n"
@@ -134,7 +134,7 @@ public class MergeManyValues
    *  Sets the attribute index
    *  (default: last)</pre>
    * 
-   * <pre> -M &lt;label&gt;
+   * <pre> -L &lt;label&gt;
    *  Sets the label of the newly merged classes
    *  (default: 'merged')</pre>
    * 
