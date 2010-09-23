@@ -326,6 +326,7 @@
 
   <target name="compile_external" depends="compile" description="Compile a named external package (run with -DpackageName=package name)">
     <echo message="Compiling ${packageName}"/>
+    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="compile" inheritall="false">
       <property name="package" value="${packageName}" />
       <property name="java.class.path" value="${wekaclasses}:${cp}"/>
@@ -517,6 +518,11 @@
 
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="classifierErrors"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="classAssociationRules"/>
+      <param name="cp" value="../../${packages_internal}/predictiveApriori/build/classes"/>
     </antcall>
   </target>
 
