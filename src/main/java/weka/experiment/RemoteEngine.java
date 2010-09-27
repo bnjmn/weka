@@ -42,7 +42,7 @@ import java.util.Hashtable;
  * A general purpose server for executing Task objects sent via RMI.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.3 $
+ * @version $Revision$
  */
 public class RemoteEngine
   extends UnicastRemoteObject
@@ -217,6 +217,9 @@ public class RemoteEngine
                                      +m_HostName
                                      +") : unknown initialization error.");
                 System.err.println("Task id " + taskId + " Unknown initialization error");
+                er.printStackTrace();
+                System.err.println("Detailed message " + er.getMessage());
+                System.err.println("Detailed cause: " + er.getCause().toString());
               }
 	    } catch (Exception ex) {
 	      tsi.setExecutionStatus(TaskStatusInfo.FAILED);
@@ -308,7 +311,7 @@ public class RemoteEngine
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -319,6 +322,10 @@ public class RemoteEngine
    * @param args 
    */
   public static void main(String[] args) {
+    // make sure that all packages are loaded and available to
+    // the remote engines
+    weka.gui.GenericObjectEditor.determineClasses();
+    
     if (System.getSecurityManager() == null) {
       System.setSecurityManager(new RMISecurityManager());
     }
