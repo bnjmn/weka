@@ -23,7 +23,7 @@
  * - cd to /home/johndoe/remote_engine
  * - start engine
  *   java -Xmx256m \
- *     -classpath remoteEngine.jar:/home/johndoe/jars/<db.jar> \
+ *     -classpath remoteEngine.jar:/home/johndoe/weka/weka.jar:/home/johndoe/jars/<db.jar> \
  *     -Djava.security.policy=remote.policy \
  *     weka.experiment.RemoteEngine &
  *
