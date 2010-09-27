@@ -4,7 +4,7 @@
  * Start Experimenter in directory /home/johndoe/remote_engine:
  *
  * java \
- *   -classpath /path to weka jar/weka.jar:/path to database jar/<db.jar> \
+ *   -classpath /path to weka/weka.jar:/path to database jar/<db.jar> \
  *   -Djava.rmi.server.codebase=file:/path to weka jar/weka.jar \
  *   weka.gui.experiment.Experimenter
  *
@@ -12,14 +12,14 @@
  * - cd to /path to dir containing remoteEngine.jar
  * - start engine
  *   java -Xmx256m \
- *     -classpath remoteEngine.jar:/path to database jar/<db.jar> \
+ *     -classpath remoteEngine.jar:/path to database jar/<db.jar>:/path to weka/weka.jar \
  *     -Djava.security.policy=remote.policy \
  *      weka.experiment.RemoteEngine &
  *
  * Note:
  * replace <db.jar> with actual jar filename, e.g., mysql.jar
  *
- * Version: $Revision: 1.7.2.1 $
+ * Version: $Revision: 1.8 $
  */
 
 grant {
