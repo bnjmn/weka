@@ -777,7 +777,7 @@ We won't go into the details of setting up a MySQL server, but this is rather st
       	\item HSQLDB
 				\begin{verbatim}
 java -Xmx256m \
-  -classpath /home/johndoe/jars/hsqldb.jar:remoteEngine.jar \
+  -classpath /home/johndoe/jars/hsqldb.jar:remoteEngine.jar:/home/johndoe/weka/weka.jar \
   -Djava.security.policy=remote.policy \
   weka.experiment.RemoteEngine &
 				\end{verbatim}
@@ -785,7 +785,7 @@ java -Xmx256m \
 			\item MySQL
 				\begin{verbatim}
 java -Xmx256m \
-  -classpath /home/johndoe/jars/mysql.jar:remoteEngine.jar \
+  -classpath /home/johndoe/jars/mysql.jar:remoteEngine.jar:/home/johndoe/weka/weka.jar \
   -Djava.security.policy=remote.policy \
   weka.experiment.RemoteEngine &
 				\end{verbatim}
