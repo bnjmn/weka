@@ -712,16 +712,16 @@ public class ConverterUtils
     Vector classnames;
     
     try {
+      // init
+      m_FileLoaders    = new Hashtable<String,String>();
+      m_URLFileLoaders = new Hashtable<String,String>();
+      m_FileSavers     = new Hashtable<String,String>();
+      
       // generate properties 
       // Note: does NOT work with RMI, hence m_FileLoadersCore/m_FileSaversCore
       GenericPropertiesCreator creator = new GenericPropertiesCreator();
       creator.execute(false);
       Properties props = creator.getOutputProperties();
-
-      // init
-      m_FileLoaders    = new Hashtable<String,String>();
-      m_URLFileLoaders = new Hashtable<String,String>();
-      m_FileSavers     = new Hashtable<String,String>();
       
       // loaders
       m_FileLoaders = getFileConverters(
