@@ -23,14 +23,14 @@
  * - cd to /home/johndoe/remote_engine
  * - start engine
  *   java -Xmx256m \
- *     -classpath remoteEngine.jar:/home/johndoe/jars/<db.jar> \
+ *     -classpath remoteEngine.jar:/home/johndoe/weka/weka.jar:/home/johndoe/jars/<db.jar> \
  *     -Djava.security.policy=remote.policy \
  *     weka.experiment.RemoteEngine &
  *
  * Note:
  * replace <db.jar> with actual jar filename, e.g., mysql.jar
  *
- * Version: $Revision: 1.2.2.1 $
+ * Version: $Revision: 1.3 $
  */
 
 grant {
