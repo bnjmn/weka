@@ -118,6 +118,7 @@ public class Run {
       
            
       if (!noScan) {     
+        weka.core.ClassDiscovery.clearCache();
         ArrayList<String> matches = weka.core.ClassDiscovery.find(schemeToRun);
         ArrayList<String> prunedMatches = new ArrayList<String>();
         // prune list for anything that isn't a runnable scheme      
