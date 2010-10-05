@@ -22,62 +22,6 @@
 
 package weka.gui.explorer;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.CostMatrix;
-import weka.classifiers.Evaluation;
-import weka.classifiers.Sourcable;
-import weka.classifiers.evaluation.CostCurve;
-import weka.classifiers.evaluation.MarginCurve;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.classifiers.evaluation.output.prediction.AbstractOutput;
-import weka.classifiers.evaluation.output.prediction.Null;
-import weka.classifiers.pmml.consumer.PMMLClassifier;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Drawable;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.converters.IncrementalConverter;
-import weka.core.converters.Loader;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.pmml.PMMLFactory;
-import weka.core.pmml.PMMLModel;
-import weka.gui.CostMatrixEditor;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.Logger;
-import weka.gui.PropertyDialog;
-import weka.gui.PropertyPanel;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.SetInstancesPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.beans.CostBenefitAnalysis;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.graphvisualizer.BIFFormatException;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.ThresholdVisualizePanel;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.plugins.ErrorVisualizePlugin;
-import weka.gui.visualize.plugins.GraphVisualizePlugin;
-import weka.gui.visualize.plugins.TreeVisualizePlugin;
-import weka.gui.visualize.plugins.VisualizePlugin;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -133,6 +77,62 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.Evaluation;
+import weka.classifiers.Sourcable;
+import weka.classifiers.evaluation.CostCurve;
+import weka.classifiers.evaluation.MarginCurve;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.classifiers.evaluation.output.prediction.AbstractOutput;
+import weka.classifiers.evaluation.output.prediction.Null;
+import weka.classifiers.pmml.consumer.PMMLClassifier;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.core.converters.IncrementalConverter;
+import weka.core.converters.Loader;
+import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.pmml.PMMLFactory;
+import weka.core.pmml.PMMLModel;
+import weka.gui.CostMatrixEditor;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.Logger;
+import weka.gui.PropertyDialog;
+import weka.gui.PropertyPanel;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.SetInstancesPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.beans.CostBenefitAnalysis;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.graphvisualizer.BIFFormatException;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.plugins.ErrorVisualizePlugin;
+import weka.gui.visualize.plugins.GraphVisualizePlugin;
+import weka.gui.visualize.plugins.TreeVisualizePlugin;
+import weka.gui.visualize.plugins.VisualizePlugin;
+
 /** 
  * This panel allows the user to select and configure a classifier, set the
  * attribute of the current dataset to be used as the class, and evaluate
@@ -150,70 +150,70 @@ public class ClassifierPanel
   extends JPanel
   implements CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
    
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = 6959973704963624003L;
 
-  /** the parent frame */
+  /** the parent frame. */
   protected Explorer m_Explorer = null;
 
-  /** The filename extension that should be used for model files */
+  /** The filename extension that should be used for model files. */
   public static String MODEL_FILE_EXTENSION = ".model";
   
-  /** The filename extension that should be used for PMML xml files */
+  /** The filename extension that should be used for PMML xml files. */
   public static String PMML_FILE_EXTENSION = ".xml";
 
-  /** Lets the user configure the classifier */
+  /** Lets the user configure the classifier. */
   protected GenericObjectEditor m_ClassifierEditor =
     new GenericObjectEditor();
 
-  /** The panel showing the current classifier selection */
+  /** The panel showing the current classifier selection. */
   protected PropertyPanel m_CEPanel = new PropertyPanel(m_ClassifierEditor);
   
-  /** The output area for classification results */
+  /** The output area for classification results. */
   protected JTextArea m_OutText = new JTextArea(20, 40);
 
-  /** The destination for log/status messages */
+  /** The destination for log/status messages. */
   protected Logger m_Log = new SysErrLog();
 
-  /** The buffer saving object for saving output */
+  /** The buffer saving object for saving output. */
   SaveBuffer m_SaveOut = new SaveBuffer(m_Log, this);
 
-  /** A panel controlling results viewing */
+  /** A panel controlling results viewing. */
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
 
-  /** Lets the user select the class column */
+  /** Lets the user select the class column. */
   protected JComboBox m_ClassCombo = new JComboBox();
 
-  /** Click to set test mode to cross-validation */
+  /** Click to set test mode to cross-validation. */
   protected JRadioButton m_CVBut = new JRadioButton("Cross-validation");
 
-  /** Click to set test mode to generate a % split */
+  /** Click to set test mode to generate a % split. */
   protected JRadioButton m_PercentBut = new JRadioButton("Percentage split");
 
-  /** Click to set test mode to test on training data */
+  /** Click to set test mode to test on training data. */
   protected JRadioButton m_TrainBut = new JRadioButton("Use training set");
 
-  /** Click to set test mode to a user-specified test set */
+  /** Click to set test mode to a user-specified test set. */
   protected JRadioButton m_TestSplitBut =
     new JRadioButton("Supplied test set");
 
   /** Check to save the predictions in the results list for visualizing
-      later on */
+      later on. */
   protected JCheckBox m_StorePredictionsBut = 
     new JCheckBox("Store predictions for visualization");
 
-  /** Check to output the model built from the training data */
+  /** Check to output the model built from the training data. */
   protected JCheckBox m_OutputModelBut = new JCheckBox("Output model");
 
-  /** Check to output true/false positives, precision/recall for each class */
+  /** Check to output true/false positives, precision/recall for each class. */
   protected JCheckBox m_OutputPerClassBut =
     new JCheckBox("Output per-class stats");
 
-  /** Check to output a confusion matrix */
+  /** Check to output a confusion matrix. */
   protected JCheckBox m_OutputConfusionBut =
     new JCheckBox("Output confusion matrix");
 
-  /** Check to output entropy statistics */
+  /** Check to output entropy statistics. */
   protected JCheckBox m_OutputEntropyBut =
     new JCheckBox("Output entropy evaluation measures");
 
@@ -223,40 +223,40 @@ public class ClassifierPanel
   /** ClassificationOutput configuration. */
   protected PropertyPanel m_ClassificationOutputPanel = new PropertyPanel(m_ClassificationOutputEditor);
   
-  /** the range of attributes to output */
+  /** the range of attributes to output. */
   protected Range m_OutputAdditionalAttributesRange = null;
   
-  /** Check to evaluate w.r.t a cost matrix */
+  /** Check to evaluate w.r.t a cost matrix. */
   protected JCheckBox m_EvalWRTCostsBut =
     new JCheckBox("Cost-sensitive evaluation");
 
-  /** for the cost matrix */
+  /** for the cost matrix. */
   protected JButton m_SetCostsBut = new JButton("Set...");
 
-  /** Label by where the cv folds are entered */
+  /** Label by where the cv folds are entered. */
   protected JLabel m_CVLab = new JLabel("Folds", SwingConstants.RIGHT);
 
-  /** The field where the cv folds are entered */
+  /** The field where the cv folds are entered. */
   protected JTextField m_CVText = new JTextField("10", 3);
 
-  /** Label by where the % split is entered */
+  /** Label by where the % split is entered. */
   protected JLabel m_PercentLab = new JLabel("%", SwingConstants.RIGHT);
 
-  /** The field where the % split is entered */
+  /** The field where the % split is entered. */
   protected JTextField m_PercentText = new JTextField("66", 3);
 
-  /** The button used to open a separate test dataset */
+  /** The button used to open a separate test dataset. */
   protected JButton m_SetTestBut = new JButton("Set...");
 
-  /** The frame used to show the test set selection panel */
+  /** The frame used to show the test set selection panel. */
   protected JFrame m_SetTestFrame;
 
-  /** The frame used to show the cost matrix editing panel */
+  /** The frame used to show the cost matrix editing panel. */
   protected PropertyDialog m_SetCostsFrame;
 
   /**
    * Alters the enabled/disabled status of elements associated with each
-   * radio button
+   * radio button.
    */
   ActionListener m_RadioListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
@@ -264,58 +264,61 @@ public class ClassifierPanel
     }
   };
 
-  /** Button for further output/visualize options */
+  /** Button for further output/visualize options. */
   JButton m_MoreOptions = new JButton("More options...");
 
-  /** User specified random seed for cross validation or % split */
+  /** User specified random seed for cross validation or % split. */
   protected JTextField m_RandomSeedText = new JTextField("1", 3);
   
-  /** the label for the random seed textfield */
+  /** the label for the random seed textfield. */
   protected JLabel m_RandomLab = new JLabel("Random seed for XVal / % Split", 
 					    SwingConstants.RIGHT);
 
-  /** Whether randomization is turned off to preserve order */
+  /** Whether randomization is turned off to preserve order. */
   protected JCheckBox m_PreserveOrderBut = new JCheckBox("Preserve order for % Split");
 
-  /** Whether to output the source code (only for classifiers importing Sourcable) */
+  /** Whether to output the source code (only for classifiers importing Sourcable). */
   protected JCheckBox m_OutputSourceCode = new JCheckBox("Output source code");
 
-  /** The name of the generated class (only applicable to Sourcable schemes) */
+  /** The name of the generated class (only applicable to Sourcable schemes). */
   protected JTextField m_SourceCodeClass = new JTextField("WekaClassifier", 10);
   
-  /** Click to start running the classifier */
+  /** Click to start running the classifier. */
   protected JButton m_StartBut = new JButton("Start");
 
-  /** Click to stop a running classifier */
+  /** Click to stop a running classifier. */
   protected JButton m_StopBut = new JButton("Stop");
 
-  /** Stop the class combo from taking up to much space */
+  /** Stop the class combo from taking up to much space. */
   private Dimension COMBO_SIZE = new Dimension(150, m_StartBut
 					       .getPreferredSize().height);
 
-  /** The cost matrix editor for evaluation costs */
+  /** The cost matrix editor for evaluation costs. */
   protected CostMatrixEditor m_CostMatrixEditor = new CostMatrixEditor();
 
-  /** The main set of instances we're playing with */
+  /** The main set of instances we're playing with. */
   protected Instances m_Instances;
 
-  /** The loader used to load the user-supplied test set (if any) */
+  /** The loader used to load the user-supplied test set (if any). */
   protected Loader m_TestLoader;
   
-  /** A thread that classification runs in */
+  /** the class index for the supplied test set. */
+  protected int m_TestClassIndex = -1;
+  
+  /** A thread that classification runs in. */
   protected Thread m_RunThread;
 
-  /** The current visualization object */
+  /** The current visualization object. */
   protected VisualizePanel m_CurrentVis = null;
 
-  /** Filter to ensure only model files are selected */  
+  /** Filter to ensure only model files are selected. */  
   protected FileFilter m_ModelFilter =
     new ExtensionFileFilter(MODEL_FILE_EXTENSION, "Model object files");
   
   protected FileFilter m_PMMLModelFilter =
     new ExtensionFileFilter(PMML_FILE_EXTENSION, "PMML model files");
 
-  /** The file chooser for selecting model files */
+  /** The file chooser for selecting model files. */
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
 
@@ -325,7 +328,7 @@ public class ClassifierPanel
   }
   
   /**
-   * Creates the classifier panel
+   * Creates the classifier panel.
    */
   public ClassifierPanel() {
 
@@ -776,7 +779,7 @@ public class ClassifierPanel
   }
 
   /**
-   * Sets the Logger to receive informational messages
+   * Sets the Logger to receive informational messages.
    *
    * @param newLog the Logger that will now get info messages
    */
@@ -795,26 +798,7 @@ public class ClassifierPanel
 
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "";
-      switch (m_Instances.attribute(i).type()) {
-      case Attribute.NOMINAL:
-	type = "(Nom) ";
-	break;
-      case Attribute.NUMERIC:
-	type = "(Num) ";
-	break;
-      case Attribute.STRING:
-	type = "(Str) ";
-	break;
-      case Attribute.DATE:
-	type = "(Dat) ";
-	break;
-      case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
-      default:
-	type = "(???) ";
-      }
+      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
@@ -841,7 +825,7 @@ public class ClassifierPanel
   protected void setTestSet() {
 
     if (m_SetTestFrame == null) {
-      final SetInstancesPanel sp = new SetInstancesPanel(true);
+      final SetInstancesPanel sp = new SetInstancesPanel(true, true);
 
       if (m_TestLoader != null) {
         try {
@@ -854,7 +838,8 @@ public class ClassifierPanel
       }
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
-	  m_TestLoader = sp.getLoader();
+	  m_TestLoader     = sp.getLoader();
+	  m_TestClassIndex = sp.getClassIndex();
 	}
       });
       // Add propertychangelistener to update m_TestLoader whenever
@@ -987,6 +972,7 @@ public class ClassifierPanel
               m_TestLoader.reset();
               source = new DataSource(m_TestLoader);
               userTestStructure = source.getStructure();
+              userTestStructure.setClassIndex(m_TestClassIndex);
             }
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -1026,17 +1012,9 @@ public class ClassifierPanel
 	    classificationOutput.setHeader(header);
 	    classificationOutput.setBuffer(outBuff);
 	  }
-	  String name = (new SimpleDateFormat("HH:mm:ss - "))
-	  .format(new Date());
-	  String cname = classifier.getClass().getName();
-	  if (cname.startsWith("weka.classifiers.")) {
-	    name += cname.substring("weka.classifiers.".length());
-	  } else {
-	    name += cname;
-	  }
-          String cmd = m_ClassifierEditor.getValue().getClass().getName();
-          if (m_ClassifierEditor.getValue() instanceof OptionHandler)
-            cmd += " " + Utils.joinOptions(((OptionHandler) m_ClassifierEditor.getValue()).getOptions());
+	  String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
+	  String cname = "";
+          String cmd = "";
 	  Evaluation eval = null;
 	  try {
 	    if (m_CVBut.isSelected()) {
@@ -1059,7 +1037,7 @@ public class ClassifierPanel
 	      if (source == null) {
 	        throw new Exception("No user test set has been specified");
 	      }
-	      userTestStructure.setClassIndex(classIndex);
+	      inst.setClassIndex(classIndex);
 	      
 	      if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
 	        if (!inst.equalHeaders(userTestStructure)) {
@@ -1115,8 +1093,17 @@ public class ClassifierPanel
 	    } else {
 	      throw new Exception("Unknown test mode");
 	    }
-	    inst.setClassIndex(classIndex);
 
+	    cname = classifier.getClass().getName();
+	    if (cname.startsWith("weka.classifiers.")) {
+	      name += cname.substring("weka.classifiers.".length());
+	    } else {
+	      name += cname;
+	    }
+	    cmd = classifier.getClass().getName();
+	    if (classifier instanceof OptionHandler)
+	      cmd += " " + Utils.joinOptions(((OptionHandler) classifier).getOptions());
+	    
 	    // set up the structure of the plottable instances for 
 	    // visualization
 	    plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
@@ -1972,7 +1959,8 @@ public class ClassifierPanel
 
   /**
    * Pops up a TreeVisualizer for the classifier from the currently
-   * selected item in the results list
+   * selected item in the results list.
+   * 
    * @param dottyString the description of the tree in dotty format
    * @param treeName the title to assign to the display
    */
@@ -1997,7 +1985,7 @@ public class ClassifierPanel
 
   /**
    * Pops up a GraphVisualizer for the BayesNet classifier from the currently
-   * selected item in the results list
+   * selected item in the results list.
    * 
    * @param XMLBIF the description of the graph in XMLBIF ver. 0.3
    * @param graphName the name of the graph
@@ -2054,7 +2042,8 @@ public class ClassifierPanel
 
   /**
    * Pops up a VisualizePanel for visualizing the data and errors for 
-   * the classifier from the currently selected item in the results list
+   * the classifier from the currently selected item in the results list.
+   * 
    * @param sp the VisualizePanel to pop up.
    */
   protected void visualizeClassifierErrors(VisualizePanel sp) {
@@ -2105,7 +2094,7 @@ public class ClassifierPanel
   }
 
   /**
-   * Saves the currently selected classifier
+   * Saves the currently selected classifier.
    * 
    * @param name the name of the run
    * @param classifier the classifier to save
@@ -2150,7 +2139,7 @@ public class ClassifierPanel
   }
 
   /**
-   * Loads a classifier
+   * Loads a classifier.
    */
   protected void loadClassifier() {
 
@@ -2296,6 +2285,7 @@ public class ClassifierPanel
                 m_TestLoader.reset();
                 source = new DataSource(m_TestLoader);
                 userTestStructure = source.getStructure();
+                userTestStructure.setClassIndex(m_TestClassIndex);
               }
               // Check the test instance compatibility
               if (source == null) {
@@ -2561,7 +2551,7 @@ public class ClassifierPanel
   }
   
   /**
-   * updates the capabilities filter of the GOE
+   * updates the capabilities filter of the GOE.
    * 
    * @param filter	the new filter to use
    */
@@ -2607,7 +2597,7 @@ public class ClassifierPanel
   }
   
   /**
-   * method gets called in case of a change event
+   * method gets called in case of a change event.
    * 
    * @param e		the associated change event
    */
@@ -2620,7 +2610,7 @@ public class ClassifierPanel
 
   /**
    * Sets the Explorer to use as parent frame (used for sending notifications
-   * about changes in the data)
+   * about changes in the data).
    * 
    * @param parent	the parent frame
    */
@@ -2629,7 +2619,7 @@ public class ClassifierPanel
   }
   
   /**
-   * returns the parent Explorer frame
+   * returns the parent Explorer frame.
    * 
    * @return		the parent
    */
@@ -2638,7 +2628,7 @@ public class ClassifierPanel
   }
   
   /**
-   * Returns the title for the tab in the Explorer
+   * Returns the title for the tab in the Explorer.
    * 
    * @return 		the title of this tab
    */
@@ -2647,7 +2637,7 @@ public class ClassifierPanel
   }
   
   /**
-   * Returns the tooltip for the tab in the Explorer
+   * Returns the tooltip for the tab in the Explorer.
    * 
    * @return 		the tooltip of this tab
    */
