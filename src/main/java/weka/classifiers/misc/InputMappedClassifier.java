@@ -47,9 +47,44 @@ import weka.core.Capabilities.Capability;
 
 /**
  <!-- globalinfo-start -->
+ * Wrapper classifier that addresses incompatible training and test data by building a mapping between the training data that a classifier has been built with and the incoming test instances' structure. Model attributes that are not found in the incoming instances receive missing values, so do incoming nominal attribute values that the classifier has not seen before. A new classifier can be trained or an existing one loaded from a file.
+ * <p/>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -I
+ *  Ignore case when matching attribute names and nominal values.</pre>
+ * 
+ * <pre> -M
+ *  Suppress the output of the mapping report.</pre>
+ * 
+ * <pre> -trim
+ *  Trim white space from either end of names before matching.</pre>
+ * 
+ * <pre> -L &lt;path to model to load&gt;
+ *  Path to a model to load. If set, this model
+ *  will be used for prediction and any base classifier
+ *  specification will be ignored. Environment variables
+ *  may be used in the path (e.g. ${HOME}/myModel.model)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
  <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
@@ -115,7 +150,7 @@ public class InputMappedClassifier extends SingleClassifierEnhancer
    */
   public String globalInfo() {
     return "Wrapper classifier that addresses incompatible training and test " +
-    		" data by building a mapping between the training data that " +
+    		"data by building a mapping between the training data that " +
     		"a classifier has been built with and the incoming test instances' " +
     		"structure. Model attributes that are not found in the incoming " +
     		"instances receive missing values, so do incoming nominal attribute " +
@@ -279,6 +314,39 @@ public class InputMappedClassifier extends SingleClassifierEnhancer
    * Returns an enumeration describing the available options.
    * 
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -I
+   *  Ignore case when matching attribute names and nominal values.</pre>
+   * 
+   * <pre> -M
+   *  Suppress the output of the mapping report.</pre>
+   * 
+   * <pre> -trim
+   *  Trim white space from either end of names before matching.</pre>
+   * 
+   * <pre> -L &lt;path to model to load&gt;
+   *  Path to a model to load. If set, this model
+   *  will be used for prediction and any base classifier
+   *  specification will be ignored. Environment variables
+   *  may be used in the path (e.g. ${HOME}/myModel.model)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
    <!-- options-end -->
    *
    * @return an enumeration of all the available options.
@@ -309,7 +377,40 @@ public class InputMappedClassifier extends SingleClassifierEnhancer
   /**
    * Parses a given list of options. <p/>
    *
-   <!-- options-start --> 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -I
+   *  Ignore case when matching attribute names and nominal values.</pre>
+   * 
+   * <pre> -M
+   *  Suppress the output of the mapping report.</pre>
+   * 
+   * <pre> -trim
+   *  Trim white space from either end of names before matching.</pre>
+   * 
+   * <pre> -L &lt;path to model to load&gt;
+   *  Path to a model to load. If set, this model
+   *  will be used for prediction and any base classifier
+   *  specification will be ignored. Environment variables
+   *  may be used in the path (e.g. ${HOME}/myModel.model)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
    <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
@@ -844,3 +945,4 @@ public class InputMappedClassifier extends SingleClassifierEnhancer
   }
 
 }
+
