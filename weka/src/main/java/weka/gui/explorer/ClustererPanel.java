@@ -558,29 +558,8 @@ public class ClustererPanel
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       String name = m_Instances.attribute(i).name();
       m_ignoreKeyModel.addElement(name);
-
-       String type = "";
-      switch (m_Instances.attribute(i).type()) {
-      case Attribute.NOMINAL:
-	type = "(Nom) ";
-	break;
-      case Attribute.NUMERIC:
-	type = "(Num) ";
-	break;
-      case Attribute.STRING:
-	type = "(Str) ";
-	break;
-      case Attribute.DATE:
-	type = "(Dat) ";
-	break;
-      case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
-      default:
-	type = "(???) ";
-      }
+      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
       String attnm = m_Instances.attribute(i).name();
-     
       attribNames[i] = type + attnm;
     }
 

@@ -671,25 +671,7 @@ public class MatrixPanel
 
     m_classAttrib.removeAllItems();
     for(int i=0; i<tempAttribNames.length; i++) {
-      switch (m_data.attribute(i).type()) {
-      case Attribute.NOMINAL:
-	type = " (Nom)";
-	break;
-      case Attribute.NUMERIC:
-	type = " (Num)";
-	break;
-      case Attribute.STRING:
-	type = " (Str)";
-	break;
-      case Attribute.DATE:
-	type = " (Dat)";
-	break;
-      case Attribute.RELATIONAL:
-	type = " (Rel)";
-	break;
-      default:
-	type = " (???)";
-      }
+      type = " (" + Attribute.typeToStringShort(m_data.attribute(i)) + ")";
       tempAttribNames[i] = new String("Colour: "+m_data.attribute(i).name()+" "+type);
       m_classAttrib.addItem(tempAttribNames[i]);
     }
