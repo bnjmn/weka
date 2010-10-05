@@ -315,26 +315,7 @@ public class AssociationsPanel
     m_Instances = inst;
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "";
-      switch (m_Instances.attribute(i).type()) {
-      case Attribute.NOMINAL:
-	type = "(Nom) ";
-	break;
-      case Attribute.NUMERIC:
-	type = "(Num) ";
-	break;
-      case Attribute.STRING:
-	type = "(Str) ";
-	break;
-      case Attribute.DATE:
-	type = "(Dat) ";
-	break;
-      case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
-      default:
-	type = "(???) ";
-      }
+      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_StartBut.setEnabled(m_RunThread == null);
