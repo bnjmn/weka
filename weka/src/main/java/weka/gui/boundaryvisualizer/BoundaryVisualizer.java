@@ -885,26 +885,7 @@ public class BoundaryVisualizer
 
     for (int i = 0; i < m_trainingInstances.numAttributes(); i++) {
       classAttNames[i] = m_trainingInstances.attribute(i).name();
-      String type = "";
-      switch (m_trainingInstances.attribute(i).type()) {
-	case Attribute.NOMINAL:
-	  type = " (Nom)";
-	  break;
-	case Attribute.NUMERIC:
-	  type = " (Num)";
-	  break;
-	case Attribute.STRING:
-	  type = " (Str)";
-	  break;
-	case Attribute.DATE:
-	  type = " (Dat)";
-	  break;
-	case Attribute.RELATIONAL:
-	  type = " (Rel)";
-	  break;
-	default:
-	  type = " (???)";
-      }
+      String type = "(" + Attribute.typeToStringShort(m_trainingInstances.attribute(i)) + ")";
       classAttNames[i] += type;
       if (m_trainingInstances.attribute(i).isNumeric()) {
 	xAttNames.addElement("X: "+classAttNames[i]);

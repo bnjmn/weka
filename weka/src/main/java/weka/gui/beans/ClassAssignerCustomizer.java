@@ -42,7 +42,7 @@ import javax.swing.JPanel;
  * GUI customizer for the class assigner bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class ClassAssignerCustomizer
   extends JPanel
@@ -104,26 +104,7 @@ public class ClassAssignerCustomizer
     String [] attribNames = new String [format.numAttributes()+1];
     attribNames[0] = "NO CLASS";
     for (int i = 1; i < attribNames.length; i++) {
-      String type = "";
-      switch (format.attribute(i-1).type()) {
-      case Attribute.NOMINAL:
-	type = "(Nom) ";
-	break;
-      case Attribute.NUMERIC:
-	type = "(Num) ";
-	break;
-      case Attribute.STRING:
-	type = "(Str) ";
-	break;
-      case Attribute.DATE:
-	type = "(Dat) ";
-	break;
-      case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
-      default:
-	type = "(???) ";
-      }
+      String type = "(" + Attribute.typeToStringShort(format.attribute(i-1)) + ") ";
       attribNames[i] = type + format.attribute(i-1).name();
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));

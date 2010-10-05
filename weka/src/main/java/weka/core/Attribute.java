@@ -540,6 +540,53 @@ public class Attribute
     
     return result;
   }
+  
+  /**
+   * Returns a short string representation of the attribute type.
+   * 
+   * @param att		the attribute to return the type string for
+   * @return		the string representation of the attribute type
+   */
+  public static String typeToStringShort(Attribute att) {
+    return typeToStringShort(att.type());
+  }
+  
+  /**
+   * Returns a short string representation of the attribute type.
+   * 
+   * @param type	the type of the attribute
+   * @return		the string representation of the attribute type
+   */
+  public static String typeToStringShort(int type) {
+    String	result;
+    
+    switch(type) {
+      case NUMERIC:
+	result = "Num";
+	break;
+	
+      case NOMINAL:
+	result = "Nom";
+	break;
+	
+      case STRING:
+	result = "Str";
+	break;
+	
+      case DATE:
+	result = "Dat";
+	break;
+	
+      case RELATIONAL:
+	result = "Rel";
+	break;
+	
+      default:
+	result = "???";
+    }
+    
+    return result;
+  }
 
   /**
    * Returns the index of this attribute.
