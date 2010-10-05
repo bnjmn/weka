@@ -256,28 +256,8 @@ public class AttributeVisualizationPanel
       m_colorAttrib.removeAllItems();
       m_colorAttrib.addItem("No class");
       for(int i=0; i<m_data.numAttributes(); i++) {
-	String type = "";
-	switch (m_data.attribute(i).type()) {
-	  case Attribute.NOMINAL:
-	    type = "(Nom) ";
-	    break;
-	  case Attribute.NUMERIC:
-	    type = "(Num) ";
-	    break;
-	  case Attribute.STRING:
-	    type = "(Str) ";
-	    break;
-	  case Attribute.DATE:
-	    type = "(Dat) ";
-	    break;
-	  case Attribute.RELATIONAL:
-	    type = "(Rel) ";
-	    break;
-	  default:
-	    type = "(???) ";
-	}
-        m_colorAttrib.addItem(new String("Class: "+m_data.attribute(i).name()+
-        " " + type));
+	String type = "(" + Attribute.typeToStringShort(m_data.attribute(i)) + ")";
+        m_colorAttrib.addItem(new String("Class: " + m_data.attribute(i).name() + " " + type));
       }
       if (m_data.classIndex() >= 0) {
         m_colorAttrib.setSelectedIndex(m_data.classIndex() + 1);
