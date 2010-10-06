@@ -995,6 +995,7 @@ public class ClassifierPanel
 	  int numFolds = 10;
           double percent = 66;
 	  int classIndex = m_ClassCombo.getSelectedIndex();
+	  inst.setClassIndex(classIndex);
 	  Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
 	  Classifier template = null;
 	  try {
@@ -1037,7 +1038,6 @@ public class ClassifierPanel
 	      if (source == null) {
 	        throw new Exception("No user test set has been specified");
 	      }
-	      inst.setClassIndex(classIndex);
 	      
 	      if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
 	        if (!inst.equalHeaders(userTestStructure)) {
