@@ -25,7 +25,7 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance; 
+import weka.core.Instance;
 import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -43,35 +43,35 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-/** 
+/**
  <!-- globalinfo-start -->
  * Adds the labels from the given list to an attribute if they are missing. The labels can also be sorted in an ascending manner. If no labels are provided then only the (optional) sorting applies.
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -C &lt;col&gt;
  *  Sets the attribute index
  *  (default last).</pre>
- * 
+ *
  * <pre> -L &lt;label1,label2,...&gt;
  *  Comma-separated list of labels to add.
  *  (default: none)</pre>
- * 
+ *
  * <pre> -S
  *  Turns on the sorting of the labels.</pre>
- * 
+ *
  <!-- options-end -->
  *
  * Based on code from AddValues.
  *
- * @author  FracPete (fracpete at waikato dot ac dot nz) 
+ * @author  FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  * @see     AddValues
  */
-public class AddValues 
+public class AddValues
   extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
@@ -79,7 +79,7 @@ public class AddValues
   private static final long serialVersionUID = -8100622241742393656L;
 
   /** The attribute's index setting. */
-  protected SingleIndex m_AttIndex = new SingleIndex("last"); 
+  protected SingleIndex m_AttIndex = new SingleIndex("last");
 
   /** The values to add. */
   protected Vector m_Labels = new Vector();
@@ -89,7 +89,7 @@ public class AddValues
 
   /** the array with the sorted label indices */
   protected int[] m_SortedIndices;
-  
+
   /**
    * Returns a string describing this filter
    *
@@ -97,7 +97,7 @@ public class AddValues
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
+    return
         "Adds the labels from the given list to an attribute if they are "
       + "missing. The labels can also be sorted in an ascending manner. "
       + "If no labels are provided then only the (optional) sorting applies.";
@@ -110,7 +110,7 @@ public class AddValues
    */
   public Enumeration listOptions() {
     Vector	result;
-    
+
     result = new Vector();
 
     result.addElement(new Option(
@@ -133,21 +133,21 @@ public class AddValues
 
   /**
    * Parses a given list of options. <p/>
-   * 
+   *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -C &lt;col&gt;
    *  Sets the attribute index
    *  (default last).</pre>
-   * 
+   *
    * <pre> -L &lt;label1,label2,...&gt;
    *  Comma-separated list of labels to add.
    *  (default: none)</pre>
-   * 
+   *
    * <pre> -S
    *  Turns on the sorting of the labels.</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -155,7 +155,7 @@ public class AddValues
    */
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
-    
+
     tmpStr = Utils.getOption('C', options);
     if (tmpStr.length() != 0)
       setAttributeIndex(tmpStr);
@@ -169,7 +169,7 @@ public class AddValues
       setLabels("");
 
     setSort(Utils.getFlag('S', options));
-   
+
     if (getInputFormat() != null)
       setInputFormat(getInputFormat());
   }
@@ -181,22 +181,22 @@ public class AddValues
    */
   public String[] getOptions() {
     Vector	result;
-    
+
     result = new Vector();
 
     result.add("-C");
     result.add("" + getAttributeIndex());
-    
+
     result.add("-L");
     result.add("" + getLabels());
-    
+
     if (getSort())
       result.add("-S");
 
     return (String[]) result.toArray(new String[result.size()]);
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -208,23 +208,23 @@ public class AddValues
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
   /**
    * Sets the format of the input instances.
    *
-   * @param instanceInfo 	an Instances object containing the input 
-   * 				instance structure (any instances contained 
-   * 				in the object are ignored - only the 
+   * @param instanceInfo 	an Instances object containing the input
+   * 				instance structure (any instances contained
+   * 				in the object are ignored - only the
    * 				structure is required).
-   * @return 			true if the outputFormat may be collected 
+   * @return 			true if the outputFormat may be collected
    * 				immediately
    * @throws Exception 		if the input format can't be set successfully
    */
@@ -239,12 +239,12 @@ public class AddValues
     Instances	instNew;
 
     super.setInputFormat(instanceInfo);
-    
+
     m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
     att = instanceInfo.attribute(m_AttIndex.getIndex());
     if (!att.isNominal())
       throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
-    
+
     // merge labels
     allLabels = new Vector();
     enm = att.enumerateValues();
@@ -254,7 +254,7 @@ public class AddValues
       if (!allLabels.contains(m_Labels.get(i)))
 	allLabels.add(m_Labels.get(i));
     }
-    
+
     // generate index array
     if (getSort())
       Collections.sort(allLabels);
@@ -265,7 +265,7 @@ public class AddValues
       m_SortedIndices[i] = allLabels.indexOf(enm.nextElement());
       i++;
     }
-    
+
     // generate new header
     values = new FastVector();
     for (i = 0; i < allLabels.size(); i++)
@@ -279,13 +279,13 @@ public class AddValues
       else
 	atts.addElement(instanceInfo.attribute(i));
     }
-    
+
     instNew = new Instances(instanceInfo.relationName(), atts, 0);
     instNew.setClassIndex(instanceInfo.classIndex());
-    
+
     // set new format
     setOutputFormat(instNew);
-    
+
     return true;
   }
 
@@ -309,17 +309,18 @@ public class AddValues
       resetQueue();
       m_NewBatch = false;
     }
-    
+
     // generate new Instance
     values = instance.toDoubleArray();
-    values[m_AttIndex.getIndex()] = m_SortedIndices[(int) values[m_AttIndex.getIndex()]];
+    if (!instance.isMissing(m_AttIndex.getIndex()))
+      values[m_AttIndex.getIndex()] = m_SortedIndices[(int) values[m_AttIndex.getIndex()]];
     newInstance = new DenseInstance(instance.weight(), values);
 
     // copy string values etc. from input to output
     copyValues(instance, false, instance.dataset(), getOutputFormat());
-    
+
     push(newInstance);
-    
+
     return true;
   }
 
@@ -377,7 +378,7 @@ public class AddValues
 	result += ",";
       result += Utils.quote((String) m_Labels.get(i));
     }
-    
+
     return result;
   }
 
@@ -391,13 +392,13 @@ public class AddValues
     String	label;
     boolean	quoted;
     boolean	add;
-    
+
     m_Labels.clear();
-    
+
     label  = "";
     quoted = false;
     add    = false;
-    
+
     for (i = 0; i < value.length(); i++) {
       // quotes?
       if (value.charAt(i) == '"') {
@@ -416,7 +417,7 @@ public class AddValues
 	if (i == value.length() - 1)
 	  add = true;
       }
-      
+
       if (add) {
 	if (label.length() != 0)
 	  m_Labels.add(label);
@@ -453,20 +454,20 @@ public class AddValues
   public void setSort(boolean value) {
     m_Sort = value;
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-  
+
   /**
    * Main method for testing and running this class.
    *
-   * @param args 	should contain arguments to the filter: 
+   * @param args 	should contain arguments to the filter:
    * 			use -h for help
    */
   public static void main(String[] args) {
