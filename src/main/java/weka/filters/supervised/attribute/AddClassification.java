@@ -21,13 +21,20 @@
 
 package weka.filters.supervised.attribute;
 
-import weka.classifiers.Classifier;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.ObjectInputStream;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -36,13 +43,6 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.WekaException;
 import weka.filters.SimpleBatchFilter;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.ObjectInputStream;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -94,32 +94,35 @@ import java.util.Vector;
 public class AddClassification
   extends SimpleBatchFilter {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -1931467132568441909L;
 
-  /** The classifier template used to do the classification */
+  /** The classifier template used to do the classification. */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
 
-  /** The file from which to load a serialized classifier */
+  /** The file from which to load a serialized classifier. */
   protected File m_SerializedClassifierFile = new File(System.getProperty("user.dir"));
   
-  /** The actual classifier used to do the classification */
+  /** The actual classifier used to do the classification. */
   protected Classifier m_ActualClassifier = null;
 
-  /** whether to output the classification */
+  /** the header of the file the serialized classifier was trained with. */
+  protected Instances m_SerializedHeader = null;
+  
+  /** whether to output the classification. */
   protected boolean m_OutputClassification = false;
 
-  /** whether to remove the old class attribute */
+  /** whether to remove the old class attribute. */
   protected boolean m_RemoveOldClass = false;
   
-  /** whether to output the class distribution */
+  /** whether to output the class distribution. */
   protected boolean m_OutputDistribution = false;
   
-  /** whether to output the error flag */
+  /** whether to output the error flag. */
   protected boolean m_OutputErrorFlag = false;
 
   /**
-   * Returns a string describing this filter
+   * Returns a string describing this filter.
    *
    * @return 		a description of the filter suitable for
    * 			displaying in the explorer/experimenter gui
@@ -317,6 +320,59 @@ public class AddClassification
     return (String[]) result.toArray(new String[result.size()]);	  
   }
 
+  /**
+   * resets the filter, i.e., m_ActualClassifier to null.
+   *
+   * @see #m_ActualClassifier
+   */
+  protected void reset() {
+    super.reset();
+    
+    m_ActualClassifier = null;
+    m_SerializedHeader = null;
+  }
+
+  /**
+   * Returns the actual classifier to use, either from the serialized model
+   * or the one specified by the user.
+   * 
+   * @return		the classifier to use, null in case of an error
+   */
+  protected Classifier getActualClassifier() {
+    File		file;
+    ObjectInputStream 	ois;
+
+    if (m_ActualClassifier == null) {
+      try {
+	file = getSerializedClassifierFile();
+	if (!file.isDirectory()) {
+	  ois = new ObjectInputStream(new FileInputStream(file));
+	  m_ActualClassifier = (Classifier) ois.readObject();
+	  m_SerializedHeader = null;
+	  // let's see whether there's an Instances header stored as well
+	  try {
+	    m_SerializedHeader = (Instances) ois.readObject();
+	  }
+	  catch (Exception e) {
+	    // ignored
+	    m_SerializedHeader = null;
+	  }
+	  ois.close();
+	}
+	else {
+	  m_ActualClassifier = AbstractClassifier.makeCopy(m_Classifier);
+	}
+      }
+      catch (Exception e) {
+	m_ActualClassifier = null;
+	System.err.println("Failed to instantiate classifier:");
+	e.printStackTrace();
+      }
+    }
+    
+    return m_ActualClassifier;
+  }
+  
   /** 
    * Returns the Capabilities of this filter.
    *
@@ -326,11 +382,11 @@ public class AddClassification
   public Capabilities getCapabilities() {
     Capabilities 	result;
     
-    if (getClassifier() == null) {
+    if (getActualClassifier() == null) {
       result = super.getCapabilities();
       result.disableAll();
     } else {
-      result = getClassifier().getCapabilities();
+      result = getActualClassifier().getCapabilities();
     }
     
     result.setMinimumNumberInstances(0);
@@ -339,7 +395,7 @@ public class AddClassification
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -385,7 +441,7 @@ public class AddClassification
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -420,7 +476,7 @@ public class AddClassification
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -448,7 +504,7 @@ public class AddClassification
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -476,7 +532,7 @@ public class AddClassification
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -507,7 +563,7 @@ public class AddClassification
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -549,9 +605,7 @@ public class AddClassification
    * @see   #hasImmediateOutputFormat()
    * @see   #batchFinished()
    */
-  protected Instances determineOutputFormat(Instances inputFormat)
-      throws Exception {
-    
+  protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
     Instances	result;
     FastVector	atts;
     int		i;
@@ -631,34 +685,19 @@ public class AddClassification
     int			n;
     Instance		newInstance;
     Instance		oldInstance;
-    Instances		header;
     double[]		distribution;
-    File		file;
-    ObjectInputStream 	ois;
     
     // load or train classifier
     if (!isFirstBatchDone()) {
-      file = getSerializedClassifierFile();
-      if (!file.isDirectory()) {
-	ois = new ObjectInputStream(new FileInputStream(file));
-	m_ActualClassifier = (Classifier) ois.readObject();
-	header = null;
-	// let's see whether there's an Instances header stored as well
-	try {
-	  header = (Instances) ois.readObject();
-	}
-	catch (Exception e) {
-	  // ignored
-	}
-	ois.close();
+      getActualClassifier();
+      if (!getSerializedClassifierFile().isDirectory()) {
 	// same dataset format?
-	if ((header != null) && (!header.equalHeaders(instances)))
+	if ((m_SerializedHeader != null) && (!m_SerializedHeader.equalHeaders(instances)))
 	  throw new WekaException(
 	      "Training header of classifier and filter dataset don't match:\n"
-	      + header.equalHeadersMsg(instances));
+	      + m_SerializedHeader.equalHeadersMsg(instances));
       }
       else {
-	m_ActualClassifier = AbstractClassifier.makeCopy(m_Classifier);
 	m_ActualClassifier.buildClassifier(instances);
       }
     }
@@ -733,7 +772,7 @@ public class AddClassification
   }
 
   /**
-   * runs the filter with the given arguments
+   * runs the filter with the given arguments.
    *
    * @param args      the commandline arguments
    */
