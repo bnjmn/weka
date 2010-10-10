@@ -313,7 +313,8 @@ public class AddValues
     
     // generate new Instance
     values = instance.toDoubleArray();
-    values[m_AttIndex.getIndex()] = m_SortedIndices[(int) values[m_AttIndex.getIndex()]];
+    if (!instance.isMissing(m_AttIndex.getIndex()))
+      values[m_AttIndex.getIndex()] = m_SortedIndices[(int) values[m_AttIndex.getIndex()]];
     newInstance = new DenseInstance(instance.weight(), values);
 
     // copy string values etc. from input to output
