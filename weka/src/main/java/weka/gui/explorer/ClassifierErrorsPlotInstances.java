@@ -453,10 +453,11 @@ public class ClassifierErrorsPlotInstances
     if (!m_SaveForVisualization)
       return;
     
-    if (m_Instances.attribute(m_ClassIndex).isNumeric())
+    if (m_Instances.attribute(m_ClassIndex).isNumeric()) {
       scaleNumericPredictions();
-    if (m_Classifier instanceof IntervalEstimator)
-      addPredictionIntervals();
+      if (m_Classifier instanceof IntervalEstimator)
+	addPredictionIntervals();
+    }
   }
   
   /**
