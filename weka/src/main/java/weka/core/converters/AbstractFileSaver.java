@@ -272,19 +272,26 @@ public abstract class AbstractFileSaver
         }
     }
     if (outputString.length() != 0){
-        //add appropriate file extension
-        if(!outputString.endsWith(FILE_EXTENSION)){
-            if(outputString.lastIndexOf('.') != -1)
-                outputString = (outputString.substring(0,outputString.lastIndexOf('.'))) + FILE_EXTENSION;
-            else
-                outputString = outputString + FILE_EXTENSION;
-        }
-        try{
-            File output = new File(outputString);
-            setFile(output);
-        } catch(Exception ex) {
-            throw new IOException("Cannot create output file (Reason: " + ex.toString() + "). Standard out is used.");
-        }
+      boolean validExt = false;
+      for (String ext: getFileExtensions()) {
+	if (outputString.endsWith(ext)) {
+	  validExt = true;
+	  break;
+	}
+      }
+      //add appropriate file extension
+      if(!validExt){
+	if(outputString.lastIndexOf('.') != -1)
+	  outputString = (outputString.substring(0,outputString.lastIndexOf('.'))) + FILE_EXTENSION;
+	else
+	  outputString = outputString + FILE_EXTENSION;
+      }
+      try{
+	File output = new File(outputString);
+	setFile(output);
+      } catch(Exception ex) {
+	throw new IOException("Cannot create output file (Reason: " + ex.toString() + "). Standard out is used.");
+      }
     }
   }
 
