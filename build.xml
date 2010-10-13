@@ -744,7 +744,7 @@
    description="Create a jar file containing classes for remote experiments in ./dist">
      <jar jarfile="${dist}/remoteEngine.jar"
       basedir="${build}/classes"
-      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core/Utils.class,weka/core/RevisionUtils.class"/>
+      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core/Utils.class,weka/core/RevisionUtils.class,weka/gui/GenericPropertiesCreator.props,weka/gui/GenericObjectEditor.props"/>
      <copy todir="${dist}" >
        <fileset dir="${src}/weka/experiment">
           <include name="remote.policy"/>
