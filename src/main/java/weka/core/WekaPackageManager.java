@@ -615,7 +615,7 @@ public class WekaPackageManager {
   }
   
   public static void refreshGOEProperties() {
-    ClassDiscovery.clearCache();
+    ClassDiscovery.clearClassCache();
     GenericPropertiesCreator.regenerateGlobalOutputProperties();
     GenericObjectEditor.determineClasses();
     KnowledgeFlowApp.disposeSingleton();
