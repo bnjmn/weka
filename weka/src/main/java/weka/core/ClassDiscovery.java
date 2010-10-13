@@ -467,11 +467,21 @@ public class ClassDiscovery
   }
 
   /**
-   * clears the cache for class/classnames relation.
+   * clears the cache for class/classnames queries.
    */
   public static void clearCache() {
     initCache();
     m_Cache.clear();
+  }
+  
+  /**
+   * Calls clearCache() and resets the cache of classes on the classpath
+   * (i.e. forces a rescan of the classpath).
+   */
+  public static void clearClassCache() {
+    clearCache();
+    // make sure that any new classes are picked up
+    m_ClassCache = new ClassCache();
   }
 
   /**
