@@ -46,7 +46,9 @@ public class Run {
     CLUSTERER("clusterer"),
     ASSOCIATOR("association rules"),
     ATTRIBUTE_SELECTION("attribute selection"),
-    FILTER("filter");
+    FILTER("filter"),
+    LOADER("loader"),
+    SAVER("saver");
     
     private final String m_stringVal;
     
@@ -130,7 +132,9 @@ public class Run {
                 scheme instanceof weka.clusterers.Clusterer ||
                 scheme instanceof weka.associations.Associator ||
                 scheme instanceof weka.attributeSelection.ASEvaluation ||
-                scheme instanceof weka.filters.Filter) {
+                scheme instanceof weka.filters.Filter ||
+                scheme instanceof weka.core.converters.AbstractFileLoader ||
+                scheme instanceof weka.core.converters.AbstractFileSaver) {
               prunedMatches.add(matches.get(i));
             }
           } catch (Exception ex) {
@@ -199,6 +203,12 @@ public class Run {
       if (scheme instanceof weka.filters.Filter) {
         types.add(SchemeType.FILTER);
       }
+      if (scheme instanceof weka.core.converters.AbstractFileLoader) {
+        types.add(SchemeType.LOADER);
+      }
+      if (scheme instanceof weka.core.converters.AbstractFileSaver) {
+        types.add(SchemeType.SAVER);
+      }
       
       SchemeType selectedType = null;
       if (types.size() == 0) {
@@ -247,6 +257,12 @@ public class Run {
         weka.associations.AbstractAssociator.runAssociator((weka.associations.Associator)scheme, options);
       } else if (selectedType == SchemeType.FILTER) {
         weka.filters.Filter.runFilter((weka.filters.Filter)scheme, options);
+      } else if (selectedType == SchemeType.LOADER) {
+        weka.core.converters.AbstractFileLoader.
+          runFileLoader((weka.core.converters.AbstractFileLoader)scheme, options);
+      } else if (selectedType == SchemeType.SAVER) {
+        weka.core.converters.AbstractFileSaver.
+          runFileSaver((weka.core.converters.AbstractFileSaver)scheme, options);
       }
     } 
     catch (Exception e) {
