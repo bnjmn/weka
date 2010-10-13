@@ -392,10 +392,11 @@ public class WekaPackageManager {
     
     if (!load) {
       for (PrintStream p : progress) {
-      p.println("[Weka] Skipping package " + toLoad.getName()
-          + " because it is not compatible with Weka " 
-          + PACKAGE_MANAGER.getBaseSystemVersion().toString());
+        p.println("[Weka] Skipping package " + toLoad.getName()
+            + " because it is not compatible with Weka " 
+            + PACKAGE_MANAGER.getBaseSystemVersion().toString());
       }
+      return false;
     }
     
     // first check for missing special files/directories and 
