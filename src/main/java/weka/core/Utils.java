@@ -22,16 +22,16 @@
 
 package weka.core;
 
-import java.lang.Math;
-import java.lang.reflect.Array;
-import java.util.Properties;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
+import java.lang.reflect.Array;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
@@ -110,13 +110,23 @@ public final class Utils
     try {
       // Apparently hardcoded slashes are OK here
       // jdk1.1/docs/guide/misc/resources.html
-      //      defaultProps.load(ClassLoader.getSystemResourceAsStream(resourceName));
-      defaultProps.load((new Utils()).getClass().getClassLoader().getResourceAsStream(resourceName));
+      Utils utils = new Utils();
+      Enumeration<URL> urls = utils.getClass().getClassLoader().getResources(resourceName);
+      boolean first = true;
+      while (urls.hasMoreElements()) {
+	URL url = urls.nextElement();
+	if (first) {
+	  defaultProps.load(url.openStream());
+	}
+	else {
+	  Properties props = new Properties(defaultProps);
+	  props.load(url.openStream());
+	  defaultProps = props;
+	}
+      }
     } catch (Exception ex) {
-/*      throw new Exception("Problem reading default properties: "
-	+ ex.getMessage()); */
-      System.err.println("Warning, unable to load properties file from "
-			 +"system resource (Utils.java)");
+      System.err.println("Warning, unable to load properties file(s) from "
+			 +"system resource (Utils.java): " + resourceName);
     }
 
     // Hardcoded slash is OK here
