@@ -197,6 +197,12 @@ public class CrossValidationSplitResultProducer
     key[2] = "" + (fold + 1);
     System.arraycopy(seKey, 0, key, 3, seKey.length);
     if (m_ResultListener.isResultRequired(this, key)) {
+
+      // Just to make behaviour absolutely consistent with CrossValidationResultProducer
+      for (int tempFold = 0; tempFold < fold; tempFold++) {
+        Instances train = runInstances.trainCV(m_NumFolds, tempFold, random);
+      }
+
       Instances train = runInstances.trainCV(m_NumFolds, fold, random);
       Instances test = runInstances.testCV(m_NumFolds, fold);
       try {
