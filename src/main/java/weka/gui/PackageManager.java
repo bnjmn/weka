@@ -137,7 +137,7 @@ public class PackageManager extends JPanel {
   
   protected JButton m_backB;
   protected LinkedList<URL> m_browserHistory = new LinkedList<URL>();
-  protected static final String BROWSER_HOME = "http://www.cs.waikato.ac.nz/ml/weka";
+  protected static final String BROWSER_HOME = "http://www.cs.waikato.ac.nz/ml/weka/index_home_pm.html";
   protected JButton m_homeB;
   
   protected JToolBar m_browserTools;
