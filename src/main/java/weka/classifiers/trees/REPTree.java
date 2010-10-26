@@ -85,7 +85,7 @@ public class REPTree
 	     AdditionalMeasureProducer, Sourcable {
 
   /** for serialization */
-  static final long serialVersionUID = -8562443428621539458L;
+  static final long serialVersionUID = -9216785998198681299L;
   
   /** ZeroR model that is used if no attributes are present. */
   protected ZeroR m_zeroR;
@@ -135,9 +135,9 @@ public class REPTree
 	in the numeric case. */
     protected double[] m_Distribution = null;
     
-    /** Class distribution of hold-out set at node in the nominal case. 
-	Straight sum of weights in the numeric case (i.e. array has
-	only one element. */
+    /** Class distribution of hold-out set at node in the nominal
+	case.  Straight sum of weights plus sum of weighted targets in
+	the numeric case (i.e. array has only two elements). */
     protected double[] m_HoldOutDist = null;
     
     /** The hold-out error of the node. The number of miss-classified
@@ -511,7 +511,11 @@ public class REPTree
       // Store structure of dataset, set minimum number of instances
       // and make space for potential info from pruning data
       m_Info = header;
-      m_HoldOutDist = new double[data.numClasses()];
+      if (data.classAttribute().isNumeric()) {
+        m_HoldOutDist = new double[2];
+      } else {
+        m_HoldOutDist = new double[data.numClasses()];
+      }
 	
       // Make leaf if there are no training instances
       int helpIndex = 0;
@@ -1226,6 +1230,7 @@ public class REPTree
 	
 	// Numeric case
 	m_HoldOutDist[0] += weight;
+        m_HoldOutDist[1] += weight * inst.classValue();
 	double diff = 0;
 	if (m_ClassProbs == null) {
 	  diff = parent.m_ClassProbs[0] - inst.classValue();
@@ -1269,81 +1274,49 @@ public class REPTree
     }
   
     /**
-     * Inserts hold-out set into tree.
+     * Backfits data from holdout set.
      * 
-     * @param data the data to insert
      * @throws Exception if insertion fails
      */
-    protected void backfitHoldOutSet(Instances data) throws Exception {
-      
-      for (int i = 0; i < data.numInstances(); i++) {
-	backfitHoldOutInstance(data.instance(i), data.instance(i).weight(),
-			       this);
-      }
-    }
-    
-    /**
-     * Inserts an instance from the hold-out set into the tree.
-     * 
-     * @param inst the instance to insert
-     * @param weight the weight of the instance
-     * @param parent the parent node
-     * @throws Exception if insertion fails
-     */
-    protected void backfitHoldOutInstance(Instance inst, double weight, 
-					  Tree parent) throws Exception {
+    protected void backfitHoldOutSet() throws Exception {
       
       // Insert instance into hold-out class distribution
-      if (inst.classAttribute().isNominal()) {
+      if (m_Info.classAttribute().isNominal()) {
 	
 	// Nominal case
 	if (m_ClassProbs == null) {
-	  m_ClassProbs = new double[inst.numClasses()];
+	  m_ClassProbs = new double[m_Info.numClasses()];
 	}
-	System.arraycopy(m_Distribution, 0, m_ClassProbs, 0, inst.numClasses());
-	m_ClassProbs[(int)inst.classValue()] += weight;
-	Utils.normalize(m_ClassProbs);
+	System.arraycopy(m_Distribution, 0, m_ClassProbs, 0, m_Info.numClasses());
+        for (int i = 0; i < m_HoldOutDist.length; i++) {
+          m_ClassProbs[i] += m_HoldOutDist[i];
+        }
+        if (Utils.sum(m_ClassProbs) > 0) {
+          Utils.normalize(m_ClassProbs);
+        } else {
+          m_ClassProbs = null;
+        }
       } else {
 	
 	// Numeric case
+        double sumOfWeightsTrainAndHoldout = m_Distribution[1] + m_HoldOutDist[0];
+        if (sumOfWeightsTrainAndHoldout <= 0) {
+          return;
+        }
 	if (m_ClassProbs == null) {
 	  m_ClassProbs = new double[1];
-	}
-	m_ClassProbs[0] *= m_Distribution[1];
-	m_ClassProbs[0] += weight * inst.classValue();
-	m_ClassProbs[0] /= (m_Distribution[1] + weight);
+	} else {
+          m_ClassProbs[0] *= m_Distribution[1];
+        }
+	m_ClassProbs[0] += m_HoldOutDist[1];
+	m_ClassProbs[0] /= sumOfWeightsTrainAndHoldout;
       }	
       
       // The process is recursive
       if (m_Attribute != -1) {
-	
-	// If node is not a leaf
-	if (inst.isMissing(m_Attribute)) {
-	  
-	  // Distribute instance
-	  for (int i = 0; i < m_Successors.length; i++) {
-	    if (m_Prop[i] > 0) {
-	      m_Successors[i].backfitHoldOutInstance(inst, weight * 
-						     m_Prop[i], this);
-	    }
-	  }
-	} else {
-	  
-	  if (m_Info.attribute(m_Attribute).isNominal()) {
-	    
-	    // Treat nominal attributes
-	    m_Successors[(int)inst.value(m_Attribute)].
-	      backfitHoldOutInstance(inst, weight, this);
-	  } else {
-	    
-	    // Treat numeric attributes
-	    if (inst.value(m_Attribute) < m_SplitPoint) {
-	      m_Successors[0].backfitHoldOutInstance(inst, weight, this);
-	    } else {
-	      m_Successors[1].backfitHoldOutInstance(inst, weight, this);
-	    }
-	  }
-	}
+        for (int i = 0; i < m_Successors.length; i++) {
+          m_Successors[i].backfitHoldOutSet();
+        }
       }
     }
     
@@ -1862,7 +1835,7 @@ public class REPTree
     if (!m_NoPruning) {
       m_Tree.insertHoldOutSet(prune);
       m_Tree.reducedErrorPrune();
-      m_Tree.backfitHoldOutSet(prune);
+      m_Tree.backfitHoldOutSet();
     }
   }
 
