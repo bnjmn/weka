@@ -885,7 +885,7 @@ public class BoundaryVisualizer
 
     for (int i = 0; i < m_trainingInstances.numAttributes(); i++) {
       classAttNames[i] = m_trainingInstances.attribute(i).name();
-      String type = "(" + Attribute.typeToStringShort(m_trainingInstances.attribute(i)) + ")";
+      String type = " (" + Attribute.typeToStringShort(m_trainingInstances.attribute(i)) + ")";
       classAttNames[i] += type;
       if (m_trainingInstances.attribute(i).isNumeric()) {
 	xAttNames.addElement("X: "+classAttNames[i]);
