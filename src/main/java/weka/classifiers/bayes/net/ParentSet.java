@@ -32,7 +32,7 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class ParentSet 
   implements Serializable, RevisionHandler {
@@ -168,9 +168,9 @@ public class ParentSet
    * @param _Instances used for updating the internals
    */
   public void addParent(int nParent, Instances _Instances) {
-   if (m_nNrOfParents == 10) {
+    if (m_nNrOfParents == m_nParents.length) { // 10) {
 	// reserve more memory
-	int [] nParents = new int[50];
+      int [] nParents = new int[2 * m_nParents.length]; // 50];
         for (int i = 0; i < m_nNrOfParents; i++) {
             nParents[i] = m_nParents[i];
         }
@@ -190,9 +190,9 @@ public class ParentSet
    * @param _Instances used for updating the internals
    */
   public void addParent(int nParent, int iParent, Instances _Instances) {
-   if (m_nNrOfParents == 10) {
+    if (m_nNrOfParents == m_nParents.length) { // 10) {
 	// reserve more memory
-	int [] nParents = new int[50];
+      int [] nParents = new int[2 * m_nParents.length]; // 50];
 		for (int i = 0; i < m_nNrOfParents; i++) {
 			nParents[i] = m_nParents[i];
 		}
@@ -262,7 +262,7 @@ public class ParentSet
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
  
 }      // class ParentSet
