@@ -48,7 +48,8 @@ public class Run {
     ATTRIBUTE_SELECTION("attribute selection"),
     FILTER("filter"),
     LOADER("loader"),
-    SAVER("saver");
+    SAVER("saver"),
+    COMMANDLINE("general commandline runnable");
     
     private final String m_stringVal;
     
@@ -120,7 +121,7 @@ public class Run {
       
            
       if (!noScan) {     
-        weka.core.ClassDiscovery.clearCache();
+        weka.core.ClassDiscovery.clearClassCache();
         ArrayList<String> matches = weka.core.ClassDiscovery.find(schemeToRun);
         ArrayList<String> prunedMatches = new ArrayList<String>();
         // prune list for anything that isn't a runnable scheme      
@@ -134,7 +135,8 @@ public class Run {
                 scheme instanceof weka.attributeSelection.ASEvaluation ||
                 scheme instanceof weka.filters.Filter ||
                 scheme instanceof weka.core.converters.AbstractFileLoader ||
-                scheme instanceof weka.core.converters.AbstractFileSaver) {
+                scheme instanceof weka.core.converters.AbstractFileSaver ||
+                scheme instanceof weka.core.CommandlineRunnable) {
               prunedMatches.add(matches.get(i));
             }
           } catch (Exception ex) {
@@ -209,6 +211,9 @@ public class Run {
       if (scheme instanceof weka.core.converters.AbstractFileSaver) {
         types.add(SchemeType.SAVER);
       }
+      if (scheme instanceof weka.core.CommandlineRunnable) {
+        types.add(SchemeType.COMMANDLINE);
+      }
       
       SchemeType selectedType = null;
       if (types.size() == 0) {
@@ -263,6 +268,8 @@ public class Run {
       } else if (selectedType == SchemeType.SAVER) {
         weka.core.converters.AbstractFileSaver.
           runFileSaver((weka.core.converters.AbstractFileSaver)scheme, options);
+      } else if (selectedType == SchemeType.COMMANDLINE) {
+        ((weka.core.CommandlineRunnable)scheme).run(scheme, options);
       }
     } 
     catch (Exception e) {
