@@ -399,6 +399,26 @@ public class MultiFilter
   }
   
   /**
+   * RemoveWithValues may return false from input() (thus not
+   * making an instance available immediately) even after
+   * the first batch has been completed due to matching a value
+   * that the user wants to remove. Therefore this method returns
+   * true.
+   * 
+   * @return true if one of the base filters returns true for
+   * this method.
+   */
+  public boolean mayRemoveInstanceAfterFirstBatchDone() {
+    boolean result = false;
+    
+    for (Filter f : m_Filters) {
+      result = (result || f.mayRemoveInstanceAfterFirstBatchDone());
+    }
+    
+    return result;
+  }
+  
+  /**
    * Returns the revision string.
    * 
    * @return		the revision
