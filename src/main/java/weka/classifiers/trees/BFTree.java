@@ -828,6 +828,9 @@ public class BFTree
       // remove the first element
       BestFirstElements.removeElementAt(0);
       nodeToSplit.makeLeaf(train);
+      if (BestFirstElements.size() == 0) {
+        return false;
+      }
       BFTree nextNode = (BFTree)
       ((FastVector)BestFirstElements.elementAt(0)).elementAt(0);
       return root.makeTree(BestFirstElements, root, train,
