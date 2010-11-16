@@ -636,8 +636,8 @@ public class REPTree
 	}
       }
 
-      // Any useful split found?
-      if ((vals[m_Attribute] > 0) && (count > 1)) {
+      // Any useful split found?      
+      if (Utils.gr(vals[m_Attribute], 0) && (count > 1)) {      
 
         // Set split point, proportions, and temp arrays
 	m_SplitPoint = splits[m_Attribute];
