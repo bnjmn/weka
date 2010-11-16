@@ -57,7 +57,7 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.2 $ 
+ * @version $Revision$ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
@@ -572,7 +572,7 @@ public class REPTree extends Classifier
       }
 
       // Any useful split found?
-      if ((vals[m_Attribute] > 0) && (count > 1)) {
+      if (Utils.gr(vals[m_Attribute], 0) && (count > 1)) {      
 
 	// Build subtrees
 	m_SplitPoint = splits[m_Attribute];
