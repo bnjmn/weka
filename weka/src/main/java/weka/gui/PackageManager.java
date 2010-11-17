@@ -160,7 +160,6 @@ public class PackageManager extends JPanel {
   
   protected Comparator<Package> m_packageComparator = new Comparator<Package>() {
 
-    @Override
     public int compare(Package o1, Package o2) {
       String meta1 = "";
       String meta2 = "";
@@ -278,6 +277,16 @@ public class PackageManager extends JPanel {
       
       if (repositoryPackageNameList == null) {
         // quietly return and see if we can continue anyway
+        return null;
+      }
+      
+      if (repositoryPackageNameList.keySet().size() < 
+          localPackageNameList.keySet().size()) {
+        // package(s) have disappeared from the repository.
+        // Force a cache refresh...
+        RefreshCache r = new RefreshCache();
+        r.execute();
+        
         return null;
       }
       
