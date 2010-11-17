@@ -728,6 +728,45 @@ public class WekaPackageManager {
     return problem;
   }
   
+  public static Exception checkForNewPackages(PrintStream... progress) {
+    Exception problem = null;
+    
+    Map<String, String> localPackageNameList = getPackageList(true);
+    
+    if (localPackageNameList == null) {
+      // quietly return and see if we can continue anyway
+      return null;
+    }
+    
+    Map<String, String> repositoryPackageNameList = getPackageList(false);
+    
+    if (repositoryPackageNameList == null) {
+      // quietly return and see if we can continue anyway
+      return null;
+    }
+    
+    if (repositoryPackageNameList.keySet().size() != 
+        localPackageNameList.keySet().size()) {
+      // package(s) have disappeared from the repository.
+      // Force a cache refresh...
+      if (repositoryPackageNameList.keySet().size() < 
+          localPackageNameList.keySet().size()) {
+        for (PrintStream p : progress) {
+          p.println("Some packages no longer exist at the repository. " +
+          "Refreshing cache...");
+        }
+      } else {
+        for (PrintStream p : progress) {
+          p.println("There are new packages at the repository. " +
+          "Refreshing cache...");
+        }
+      }
+      problem = refreshCache(progress);
+    }      
+    
+    return problem;
+  }
+  
   public static Exception refreshCache(PrintStream... progress) {
     Exception problem = null;
     if (CACHE_URL == null) {
@@ -1400,6 +1439,8 @@ public class WekaPackageManager {
     try {
       
       establishCacheIfNeeded(System.out);
+      checkForNewPackages(System.out);
+      
       if (args.length == 0 || args[0].equalsIgnoreCase("-h") ||
           args[0].equalsIgnoreCase("-help")) {
         printUsage();
