@@ -281,6 +281,16 @@ public class PackageManager extends JPanel {
         return null;
       }
       
+      if (repositoryPackageNameList.keySet().size() < 
+          localPackageNameList.keySet().size()) {
+        // package(s) have disappeared from the repository.
+        // Force a cache refresh...
+        RefreshCache r = new RefreshCache();
+        r.execute();
+        
+        return null;
+      }
+      
       StringBuffer newPackagesBuff = new StringBuffer();
       
       for (String s : repositoryPackageNameList.keySet()) {
