@@ -117,6 +117,7 @@ public final class Utils
 	URL url = urls.nextElement();
 	if (first) {
 	  defaultProps.load(url.openStream());
+	  first = false;
 	}
 	else {
 	  Properties props = new Properties(defaultProps);
