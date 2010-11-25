@@ -94,7 +94,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.TableModel;
 
 /** 
  * This panel controls simple preprocessing of instances. Summary
@@ -332,6 +335,7 @@ public class PreprocessPanel
 	    }
 	    r.setAttributeIndicesArray(selected);
 	    applyFilter(r);
+	    m_RemoveButton.setEnabled(false);
 	  } catch (Exception ex) {
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskFinished();
@@ -481,9 +485,26 @@ public class PreprocessPanel
     try {
       Runnable r = new Runnable() {
 	public void run() {
+	  boolean first = 
+	    (m_AttPanel.getTableModel() == null);
+	  
 	  m_InstSummaryPanel.setInstances(m_Instances);
 	  m_AttPanel.setInstances(m_Instances);
-	  m_RemoveButton.setEnabled(true);
+	  
+	  if (first) {
+	    TableModel model = m_AttPanel.getTableModel(); 
+	    model.addTableModelListener(new TableModelListener() {
+	      public void tableChanged(TableModelEvent e) {
+	        if (m_AttPanel.getSelectedAttributes() != null &&
+	            m_AttPanel.getSelectedAttributes().length > 0) {
+	          m_RemoveButton.setEnabled(true);
+	        } else {
+	          m_RemoveButton.setEnabled(false);
+	        }
+	      }
+	    });
+	  }
+//	  m_RemoveButton.setEnabled(true);
 	  m_AttSummaryPanel.setInstances(m_Instances);
 	  m_AttVisualizePanel.setInstances(m_Instances);
 
@@ -1355,6 +1376,21 @@ public class PreprocessPanel
     
     // set new filter
     m_FilterEditor.setCapabilitiesFilter(filterClass);
+    
+    // check capabilities
+    m_ApplyFilterBut.setEnabled(true);
+    Capabilities currentCapabilitiesFilter = m_FilterEditor.getCapabilitiesFilter();
+    Filter currentFilter = (Filter) m_FilterEditor.getValue();
+    Capabilities currentFilterCapabilities = null;
+    if (currentFilter != null && currentCapabilitiesFilter != null &&
+        (currentFilter instanceof CapabilitiesHandler)) {
+      currentFilterCapabilities = ((CapabilitiesHandler)currentFilter).getCapabilities();
+      
+      if (!currentFilterCapabilities.supportsMaybe(currentCapabilitiesFilter) &&
+          !currentFilterCapabilities.supports(currentCapabilitiesFilter)) {
+        m_ApplyFilterBut.setEnabled(false);
+      }
+    }
   }
   
   /**
