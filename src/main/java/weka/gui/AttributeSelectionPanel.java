@@ -38,6 +38,7 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.BorderFactory;
 
 /**
@@ -172,7 +173,8 @@ public class AttributeSelectionPanel
     public void setValueAt(Object value, int row, int col) {
       
       if (col == 1) {
-	m_Selected[row] = ((Boolean) value).booleanValue(); 
+	m_Selected[row] = ((Boolean) value).booleanValue();
+	fireTableRowsUpdated(0, m_Selected.length);
       }
     }
     
@@ -262,6 +264,18 @@ public class AttributeSelectionPanel
       for (int i = 0; i < m_Selected.length; i++)
         m_Selected[i] = Pattern.matches(
                           pattern, m_Instances.attribute(i).name());
+      fireTableRowsUpdated(0, m_Selected.length);
+    }
+    
+    public void setSelectedAttributes(boolean [] selected) throws Exception {
+      if (selected.length != m_Selected.length) {
+        throw new Exception("Supplied array does not have the same number " +
+        		"of elements as there are attributes!");
+      }
+      
+      for (int i = 0; i < selected.length; i++) {
+        m_Selected[i] = selected[i];
+      }
       fireTableRowsUpdated(0, m_Selected.length);
     }
   }
@@ -372,8 +386,18 @@ public class AttributeSelectionPanel
     }
 
     setLayout(new BorderLayout());
-    add(p1, BorderLayout.NORTH);
+    if (include || remove || invert || pattern) {
+      add(p1, BorderLayout.NORTH);
+    }
     add(new JScrollPane(m_Table), BorderLayout.CENTER);
+  }
+  
+  public Dimension getPreferredScrollableViewportSize() {
+    return m_Table.getPreferredScrollableViewportSize();
+  }
+  
+  public void setPreferredScrollableViewportSize(Dimension d) {
+    m_Table.setPreferredScrollableViewportSize(d);
   }
 
   /**
@@ -410,7 +434,33 @@ public class AttributeSelectionPanel
    */
   public int [] getSelectedAttributes() {
     
-    return m_Model.getSelectedAttributes();
+    return (m_Model == null) ? null : m_Model.getSelectedAttributes();
+  }
+  
+  /**
+   * Set the selected attributes in the widget. Note that
+   * setInstances() must have been called first.
+   * 
+   * @param selected an array of boolean indicating which attributes
+   * are to have their check boxes selected.
+   * @throws Exception if the supplied array of booleans does not have
+   * the same number of elements as there are attributes.
+   */
+  public void setSelectedAttributes(boolean[] selected) throws Exception {
+    if (m_Model != null) {
+      m_Model.setSelectedAttributes(selected);
+    }
+  }
+  
+  /**
+   * Get the table model in use (or null if no instances
+   * have been set yet).
+   * 
+   * @return the table model in use or null if no instances
+   * have been seen yet.
+   */
+  public TableModel getTableModel() {
+    return m_Model;
   }
   
   /**
