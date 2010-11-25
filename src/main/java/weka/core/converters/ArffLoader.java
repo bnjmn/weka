@@ -1042,11 +1042,15 @@ public class ArffLoader
     }
     setRetrieval(INCREMENTAL);
 
-    Instance current = m_ArffReader.readInstance(m_structure);
-    if (current == null) {
+    Instance current = null;
+    if (m_sourceReader != null)
+      current = m_ArffReader.readInstance(m_structure);
+    
+    if ((m_sourceReader != null) && (current == null)) {
       try {
         // close the stream
         m_sourceReader.close();
+        m_sourceReader = null;
         //        reset();
       } catch (Exception ex) {
         ex.printStackTrace();
