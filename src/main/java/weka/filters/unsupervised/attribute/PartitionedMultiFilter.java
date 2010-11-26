@@ -23,7 +23,6 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -33,7 +32,6 @@ import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.AllFilter;
 import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
@@ -272,31 +270,6 @@ public class PartitionedMultiFilter
       Instances subset = generateSubset(newi, range);
       getFilters()[i].setInputFormat(subset);
     }
-  }
-
-  /**
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities	result;
-
-    if (getFilters().length == 0) {
-      result = super.getCapabilities();
-      result.disableAll();
-    } else {
-      result = getFilters()[0].getCapabilities();
-    }
-
-    // disable attributes
-    result.disable(Capability.STRING_ATTRIBUTES);
-    result.disableDependency(Capability.STRING_ATTRIBUTES);
-    result.disable(Capability.RELATIONAL_ATTRIBUTES);
-    result.disableDependency(Capability.RELATIONAL_ATTRIBUTES);
-
-    return result;
   }
 
   /**
