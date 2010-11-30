@@ -255,10 +255,12 @@ public class RepositoryIndexGenerator {
           version.append("<tr><td valign=top>"+ key + ":</td><td width=50></td>");
           String propValue = versionProps.getProperty(key);
           
-          propValue = propValue.replace("<", "&#60;");
-          propValue = propValue.replace(">", "&#62;");
-          propValue = propValue.replace("@", "{[at]}");
-          propValue = propValue.replace("\n", "<br/>");
+          if (!key.equalsIgnoreCase("Description")) {
+            propValue = propValue.replace("<", "&#60;");
+            propValue = propValue.replace(">", "&#62;");
+            propValue = propValue.replace("@", "{[at]}");
+            propValue = propValue.replace("\n", "<br/>");
+          }
 
           /*if (key.equals("Author") || key.equals("Maintainer")) {
             propValue = propValue.replace(".", "{[dot]}");
