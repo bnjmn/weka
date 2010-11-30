@@ -12,7 +12,7 @@ Version=1.0.0
 Date=2009-09-10
 
 # Title (required)
-Title=A regression scheme that employs any classifier on a copy of the data that has the class attribute (equal-width) discretized.
+Title=A regression scheme that employs any classifier on a copy of the data that has the class attribute (equal-width) discretized.<br/><br/><strong>This package moved back into the core Weka distribution in Weka 3.7.3</strong>.
 
 Category=Regression
 
@@ -41,4 +41,4 @@ URL=http://weka.sourceforge.net/doc.packages/regressionByDiscretization
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (=3.7.2)
