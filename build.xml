@@ -196,10 +196,6 @@
     </antcall>
 
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="classificationViaRegression"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_internal">
       <param name="packageName" value="classificationViaClustering"/>
     </antcall>
 
@@ -237,10 +233,6 @@
 
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="realAdaBoost"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="regressionByDiscretization"/>
     </antcall>
 
     <antcall target="${packageCommand}_internal">
