@@ -158,10 +158,6 @@
     </antcall>
 
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="gaussianProcesses"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_internal">
       <param name="packageName" value="isotonicRegression"/>
     </antcall>
 
