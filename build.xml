@@ -314,6 +314,10 @@
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="JDBCDriversDummyPackage"/>
     </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="complementNaiveBayes"/>
+    </antcall>
   </target>
 
   <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
