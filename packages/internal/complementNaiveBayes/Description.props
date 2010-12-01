@@ -1,0 +1,44 @@
+# Description file for complementNaiveBayes
+#
+# 
+
+# Package name (required)
+PackageName=complementNaiveBayes
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2010-11-30
+
+# Title (required)
+Title=Class for building and using a Complement class Naive Bayes classifier.
+
+Category=Classification
+
+# Author (required)
+Author=Ashraf M. Kibriya <amk14@cs.waikato.ac.nz>
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Class for building and using a Complement class Naive Bayes classifier.<br/><br/>For more information see, <br/><br/>Jason D. Rennie, Lawrence Shih, Jaime Teevan, David R. Karger: Tackling the Poor Assumptions of Naive Bayes Text Classifiers. In: ICML, 616-623, 2003.<br/><br/>P.S.: TF, IDF and length normalization transforms, as described in the paper, can be performed through weka.filters.unsupervised.StringToWordVector.
+
+# Changes
+#Changes=
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/complementNaiveBayes1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/complementNaiveBayes
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.3)
