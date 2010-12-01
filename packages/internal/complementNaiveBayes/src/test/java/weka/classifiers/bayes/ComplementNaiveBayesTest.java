@@ -32,7 +32,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.bayes.ComplementNaiveBayesTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class ComplementNaiveBayesTest 
   extends AbstractClassifierTest {
