@@ -18,7 +18,7 @@
  * Copyright 2002 University of Waikato
  */
 
-package weka.classifiers.lazy;
+package weka.classifiers.trees;
 
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
@@ -27,23 +27,23 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests IB1. Run from the command line with:<p>
- * java weka.classifiers.lazy.IB1Test
+ * Tests Id3. Run from the command line with:<p>
+ * java weka.classifiers.trees.Id3Test
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
-public class IB1Test extends AbstractClassifierTest {
+public class Id3Test extends AbstractClassifierTest {
 
-  public IB1Test(String name) { super(name);  }
+  public Id3Test(String name) { super(name);  }
 
-  /** Creates a default IB1 */
+  /** Creates a default Id3 */
   public Classifier getClassifier() {
-    return new IB1();
+    return new Id3();
   }
 
   public static Test suite() {
-    return new TestSuite(IB1Test.class);
+    return new TestSuite(Id3Test.class);
   }
 
   public static void main(String[] args){

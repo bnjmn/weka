@@ -18,7 +18,7 @@
  * Copyright 2002 University of Waikato
  */
 
-package weka.classifiers.bayes;
+package weka.classifiers.lazy;
 
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
@@ -27,23 +27,23 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests NaiveBayesSimple. Run from the command line with:<p>
- * java weka.classifiers.bayes.NaiveBayesSimpleTest
+ * Tests IB1. Run from the command line with:<p>
+ * java weka.classifiers.lazy.IB1Test
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
-public class NaiveBayesSimpleTest extends AbstractClassifierTest {
+public class IB1Test extends AbstractClassifierTest {
 
-  public NaiveBayesSimpleTest(String name) { super(name);  }
+  public IB1Test(String name) { super(name);  }
 
-  /** Creates a default NaiveBayesSimple */
+  /** Creates a default IB1 */
   public Classifier getClassifier() {
-    return new NaiveBayesSimple();
+    return new IB1();
   }
 
   public static Test suite() {
-    return new TestSuite(NaiveBayesSimpleTest.class);
+    return new TestSuite(IB1Test.class);
   }
 
   public static void main(String[] args){

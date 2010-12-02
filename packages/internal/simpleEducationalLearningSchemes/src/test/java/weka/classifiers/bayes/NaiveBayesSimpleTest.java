@@ -18,7 +18,7 @@
  * Copyright 2002 University of Waikato
  */
 
-package weka.classifiers.rules;
+package weka.classifiers.bayes;
 
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
@@ -27,23 +27,23 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests Prism. Run from the command line with:<p>
- * java weka.classifiers.rules.PrismTest
+ * Tests NaiveBayesSimple. Run from the command line with:<p>
+ * java weka.classifiers.bayes.NaiveBayesSimpleTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
-public class PrismTest extends AbstractClassifierTest {
+public class NaiveBayesSimpleTest extends AbstractClassifierTest {
 
-  public PrismTest(String name) { super(name);  }
+  public NaiveBayesSimpleTest(String name) { super(name);  }
 
-  /** Creates a default Prism */
+  /** Creates a default NaiveBayesSimple */
   public Classifier getClassifier() {
-    return new Prism();
+    return new NaiveBayesSimple();
   }
 
   public static Test suite() {
-    return new TestSuite(PrismTest.class);
+    return new TestSuite(NaiveBayesSimpleTest.class);
   }
 
   public static void main(String[] args){

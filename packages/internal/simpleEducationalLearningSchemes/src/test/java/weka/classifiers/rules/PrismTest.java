@@ -18,7 +18,7 @@
  * Copyright 2002 University of Waikato
  */
 
-package weka.classifiers.trees;
+package weka.classifiers.rules;
 
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
@@ -27,23 +27,23 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests Id3. Run from the command line with:<p>
- * java weka.classifiers.trees.Id3Test
+ * Tests Prism. Run from the command line with:<p>
+ * java weka.classifiers.rules.PrismTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
-public class Id3Test extends AbstractClassifierTest {
+public class PrismTest extends AbstractClassifierTest {
 
-  public Id3Test(String name) { super(name);  }
+  public PrismTest(String name) { super(name);  }
 
-  /** Creates a default Id3 */
+  /** Creates a default Prism */
   public Classifier getClassifier() {
-    return new Id3();
+    return new Prism();
   }
 
   public static Test suite() {
-    return new TestSuite(Id3Test.class);
+    return new TestSuite(PrismTest.class);
   }
 
   public static void main(String[] args){
