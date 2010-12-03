@@ -161,6 +161,7 @@ public class Copy
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -196,10 +197,8 @@ public class Copy
       int current = m_SelectedAttributes[i];
       // Create a copy of the attribute with a different name
       Attribute origAttribute = instanceInfo.attribute(current);
-      outputFormat.insertAttributeAt((Attribute)origAttribute.copy(),
+      outputFormat.insertAttributeAt((Attribute)origAttribute.copy("Copy of " + origAttribute.name()),
 				     outputFormat.numAttributes());
-      outputFormat.renameAttribute(outputFormat.numAttributes() - 1,
-				   "Copy of " + origAttribute.name());
 
     }
 
