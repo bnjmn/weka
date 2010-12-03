@@ -52,13 +52,13 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23.2.1 $ 
+ * @version $Revision$
  */
 public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
   /** The meta classifier */
   protected Classifier m_MetaClassifier = new ZeroR();
- 
+
   /** Format for meta data */
   protected Instances m_MetaFormat = null;
 
@@ -67,7 +67,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
   /** Set the number of folds for the cross-validation */
   protected int m_NumFolds = 10;
-    
+
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -81,14 +81,14 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
       + "David H. Wolpert (1992). \"Stacked "
       + "generalization\". Neural Networks, 5:241-259, Pergamon Press.";
   }
-  
+
   /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    
+
     Vector newVector = new Vector(2);
     newVector.addElement(new Option(
 	      metaOption(),
@@ -179,11 +179,11 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
     options[current++] = getMetaClassifier().getClass().getName() + " "
       + Utils.joinOptions(((OptionHandler)getMetaClassifier()).getOptions());
 
-    System.arraycopy(superOptions, 0, options, current, 
+    System.arraycopy(superOptions, 0, options, current,
 		     superOptions.length);
     return options;
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -193,7 +193,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
     return "The number of folds used for cross-validation.";
   }
 
-  /** 
+  /**
    * Gets the number of folds for the cross-validation.
    *
    * @return the number of folds for the cross-validation
@@ -210,14 +210,14 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
    * @exception Exception if parameter illegal
    */
   public void setNumFolds(int numFolds) throws Exception {
-    
+
     if (numFolds < 0) {
       throw new IllegalArgumentException("Stacking: Number of cross-validation " +
 					 "folds must be positive.");
     }
     m_NumFolds = numFolds;
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -236,14 +236,14 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
     m_MetaClassifier = classifier;
   }
-  
+
   /**
    * Gets the meta classifier.
    *
    * @return the meta classifier
    */
   public Classifier getMetaClassifier() {
-    
+
     return m_MetaClassifier;
   }
 
@@ -290,7 +290,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
   /**
    * Generates the meta data
    */
-  protected void generateMetaLevel(Instances newData, Random random) 
+  protected void generateMetaLevel(Instances newData, Random random)
     throws Exception {
 
     Instances metaData = metaFormat(newData);
@@ -343,7 +343,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
     for (int i = 0; i < m_Classifiers.length; i++) {
       result += getClassifier(i).toString() +"\n\n";
     }
-   
+
     result += "\n\nMeta classifier\n\n";
     result += m_MetaClassifier.toString();
 
@@ -360,17 +360,15 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
     FastVector attributes = new FastVector();
     Instances metaFormat;
-    Attribute attribute;
-    int i = 0;
 
     for (int k = 0; k < m_Classifiers.length; k++) {
       Classifier classifier = (Classifier) getClassifier(k);
-      String name = classifier.getClass().getName();
+      String name = classifier.getClass().getName() + "-" + (k+1);
       if (m_BaseFormat.classAttribute().isNumeric()) {
 	attributes.addElement(new Attribute(name));
       } else {
 	for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
-	  attributes.addElement(new Attribute(name + ":" + 
+	  attributes.addElement(new Attribute(name + ":" +
 					      m_BaseFormat
 					      .classAttribute().value(j)));
 	}
@@ -384,7 +382,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
   /**
    * Makes a level-1 instance from the given instance.
-   * 
+   *
    * @param instance the instance to be transformed
    * @return the level-1 instance
    */

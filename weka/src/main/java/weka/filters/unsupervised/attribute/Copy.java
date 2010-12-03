@@ -28,7 +28,7 @@ import java.io.*;
 import java.util.*;
 import weka.core.*;
 
-/** 
+/**
  * An instance filter that copies a range of attributes in the dataset.
  * This is used in conjunction with other filters that overwrite attribute
  * during the course of their operation -- this filter allows the original
@@ -45,7 +45,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class Copy extends Filter implements UnsupervisedFilter,
 					    StreamableFilter, OptionHandler {
@@ -59,9 +59,9 @@ public class Copy extends Filter implements UnsupervisedFilter,
    */
   protected int [] m_SelectedAttributes;
 
-  /** 
+  /**
    * Contains an index of string attributes in the input format
-   * that survive the filtering process -- some entries may be duplicated 
+   * that survive the filtering process -- some entries may be duplicated
    */
   protected int [] m_InputStringIndex;
 
@@ -106,7 +106,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
       setAttributeIndices(copyList);
     }
     setInvertSelection(Utils.getFlag('V', options));
-    
+
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
@@ -147,11 +147,11 @@ public class Copy extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
-    
+
     m_CopyCols.setUpper(instanceInfo.numAttributes() - 1);
 
     // Create the output buffer
-    Instances outputFormat = new Instances(instanceInfo, 0); 
+    Instances outputFormat = new Instances(instanceInfo, 0);
     m_SelectedAttributes = m_CopyCols.getSelection();
     int inStrCopiedLen = 0;
     int [] inStrCopied = new int[m_SelectedAttributes.length];
@@ -159,23 +159,21 @@ public class Copy extends Filter implements UnsupervisedFilter,
       int current = m_SelectedAttributes[i];
       // Create a copy of the attribute with a different name
       Attribute origAttribute = instanceInfo.attribute(current);
-      outputFormat.insertAttributeAt((Attribute)origAttribute.copy(),
+      outputFormat.insertAttributeAt((Attribute)origAttribute.copy("Copy of " + origAttribute.name()),
 				     outputFormat.numAttributes());
-      outputFormat.renameAttribute(outputFormat.numAttributes() - 1,
-				   "Copy of " + origAttribute.name());
       if (origAttribute.type() == Attribute.STRING) {
         inStrCopied[inStrCopiedLen++] = current;
       }
     }
-    int [] origIndex = getInputStringIndex(); 
+    int [] origIndex = getInputStringIndex();
     m_InputStringIndex = new int [origIndex.length + inStrCopiedLen];
     System.arraycopy(origIndex, 0, m_InputStringIndex, 0, origIndex.length);
-    System.arraycopy(inStrCopied, 0, m_InputStringIndex, origIndex.length, 
+    System.arraycopy(inStrCopied, 0, m_InputStringIndex, origIndex.length,
                      inStrCopiedLen);
     setOutputFormat(outputFormat);
     return true;
   }
-  
+
 
   /**
    * Input an instance for filtering. Ordinarily the instance is processed
@@ -257,7 +255,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Set whether selected columns should be removed or kept. If true the 
+   * Set whether selected columns should be removed or kept. If true the
    * selected columns are kept and unselected columns are copied. If false
    * selected columns are copied and unselected columns are kept.
    *
@@ -327,7 +325,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
 
     try {
       if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new Copy(), argv); 
+ 	Filter.batchFilterFile(new Copy(), argv);
       } else {
 	Filter.filterFile(new Copy(), argv);
       }

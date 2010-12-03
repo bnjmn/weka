@@ -33,7 +33,7 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.io.IOException;
 
-/** 
+/**
  * Class for handling an attribute. Once an attribute has been created,
  * it can't be changed. <p>
  *
@@ -50,14 +50,14 @@ import java.io.IOException;
  *         nominal values. Usually used in text classification.
  *    </li>
  *    <li> date: <br/>
- *         This type of attribute represents a date, internally represented as 
- *         floating-point number storing the milliseconds since January 1, 
+ *         This type of attribute represents a date, internally represented as
+ *         floating-point number storing the milliseconds since January 1,
  *         1970, 00:00:00 GMT. The string representation of the date must be
  *         <a href="http://www.iso.org/iso/en/prods-services/popstds/datesandtime.html" target="_blank">
  *         ISO-8601</a> compliant, the default is <code>yyyy-MM-dd'T'HH:mm:ss</code>.
  *    </li>
  * </ul>
- * 
+ *
  * Typical usage (code from the main() method of this class): <p>
  *
  * <code>
@@ -66,7 +66,7 @@ import java.io.IOException;
  * // Create numeric attributes "length" and "weight" <br>
  * Attribute length = new Attribute("length"); <br>
  * Attribute weight = new Attribute("weight"); <br><br>
- * 
+ *
  * // Create vector to hold nominal values "first", "second", "third" <br>
  * FastVector my_nominal_values = new FastVector(3); <br>
  * my_nominal_values.addElement("first"); <br>
@@ -131,9 +131,9 @@ public class Attribute implements Copyable, Serializable {
 
   /** The attribute's type. */
   private /*@ spec_public @*/ int m_Type;
-  /*@ invariant m_Type == NUMERIC || 
-                m_Type == DATE || 
-                m_Type == STRING || 
+  /*@ invariant m_Type == NUMERIC ||
+                m_Type == DATE ||
+                m_Type == STRING ||
                 m_Type == NOMINAL;
   */
 
@@ -261,12 +261,12 @@ public class Attribute implements Copyable, Serializable {
    * the attribute is assumed to be a string.
    *
    * @param attributeName the name for the attribute
-   * @param attributeValues a vector of strings denoting the 
+   * @param attributeValues a vector of strings denoting the
    * attribute values. Null if the attribute is a string attribute.
    */
   //@ requires attributeName != null;
   //@ ensures  m_Name == attributeName;
-  public Attribute(String attributeName, 
+  public Attribute(String attributeName,
 		   FastVector attributeValues) {
 
     this(attributeName, attributeValues,
@@ -279,7 +279,7 @@ public class Attribute implements Copyable, Serializable {
    * to the method, the attribute is assumed to be a string.
    *
    * @param attributeName the name for the attribute
-   * @param attributeValues a vector of strings denoting the 
+   * @param attributeValues a vector of strings denoting the
    * attribute values. Null if the attribute is a string attribute.
    * @param metadata the attribute's properties
    */
@@ -288,12 +288,12 @@ public class Attribute implements Copyable, Serializable {
   /*@ ensures  m_Name == attributeName;
       ensures  m_Index == -1;
       ensures  attributeValues == null && m_Type == STRING
-            || attributeValues != null && m_Type == NOMINAL 
+            || attributeValues != null && m_Type == NOMINAL
                   && m_Values.size() == attributeValues.size();
-      signals (IllegalArgumentException ex) 
+      signals (IllegalArgumentException ex)
                  (* if duplicate strings in attributeValues *);
   */
-  public Attribute(String attributeName, 
+  public Attribute(String attributeName,
 		   FastVector attributeValues,
 		   ProtectedProperties metadata) {
 
@@ -345,13 +345,13 @@ public class Attribute implements Copyable, Serializable {
     copy.m_Hashtable = m_Hashtable;
     copy.m_DateFormat = m_DateFormat;
     copy.setMetadata(m_Metadata);
- 
+
     return copy;
   }
 
   /**
    * Returns an enumeration of all the attribute's values if
-   * the attribute is nominal or a string, null otherwise. 
+   * the attribute is nominal or a string, null otherwise.
    *
    * @return enumeration of all the attribute's values
    */
@@ -423,7 +423,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param value the value for which the index is to be returned
    * @return the index of the given attribute value if attribute
-   * is nominal or a string, -1 if it is numeric or the value 
+   * is nominal or a string, -1 if it is numeric or the value
    * can't be found
    */
   public final int indexOfValue(String value) {
@@ -498,7 +498,7 @@ public class Attribute implements Copyable, Serializable {
 
     return m_Name;
   }
-  
+
   /**
    * Returns the number of attribute values. Returns 0 for numeric attributes.
    *
@@ -521,9 +521,9 @@ public class Attribute implements Copyable, Serializable {
    * @return a description of this attribute as a string
    */
   public final String toString() {
-    
+
     StringBuffer text = new StringBuffer();
-    
+
     text.append(ARFF_ATTRIBUTE).append(" ").append(Utils.quote(m_Name)).append(" ");
     switch (m_Type) {
     case NOMINAL:
@@ -564,7 +564,7 @@ public class Attribute implements Copyable, Serializable {
   }
 
   /**
-   * Returns a value of a nominal or string attribute. 
+   * Returns a value of a nominal or string attribute.
    * Returns an empty string if the attribute is neither
    * nominal nor a string attribute.
    *
@@ -572,12 +572,12 @@ public class Attribute implements Copyable, Serializable {
    * @return the attribute's value as a string
    */
   public final /*@ non_null pure @*/ String value(int valIndex) {
-    
+
     if (!isNominal() && !isString()) {
       return "";
     } else {
       Object val = m_Values.elementAt(valIndex);
-      
+
       // If we're storing strings compressed, uncompress it.
       if (val instanceof SerializedObject) {
         val = ((SerializedObject)val).getObject();
@@ -615,7 +615,7 @@ public class Attribute implements Copyable, Serializable {
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  Attribute(String attributeName, String dateFormat, 
+  Attribute(String attributeName, String dateFormat,
 	    int index) {
 
     this(attributeName, dateFormat);
@@ -637,7 +637,7 @@ public class Attribute implements Copyable, Serializable {
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  Attribute(String attributeName, FastVector attributeValues, 
+  Attribute(String attributeName, FastVector attributeValues,
 	    int index) {
 
     this(attributeName, attributeValues);
@@ -650,7 +650,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param value The string value to add
    * @return the index assigned to the string, or -1 if the attribute is not
-   * of type Attribute.STRING 
+   * of type Attribute.STRING
    */
   /*@ requires value != null;
       ensures  isString() && 0 <= \result && \result < m_Values.size() ||
@@ -690,7 +690,7 @@ public class Attribute implements Copyable, Serializable {
    * @param src The Attribute containing the string value to add.
    * @param int index the index of the string value in the source attribute.
    * @return the index assigned to the string, or -1 if the attribute is not
-   * of type Attribute.STRING 
+   * of type Attribute.STRING
    */
   /*@ requires src != null;
       requires 0 <= index && index < src.m_Values.size();
@@ -737,7 +737,7 @@ public class Attribute implements Copyable, Serializable {
   //@ ensures \result.m_Name  == newName;
   //@ ensures \result.m_Index == m_Index;
   //@ ensures \result.m_Type  == m_Type;
-  final /*@ pure non_null @*/ Attribute copy(String newName) {
+  public final /*@ pure non_null @*/ Attribute copy(String newName) {
 
     Attribute copy = new Attribute(newName);
 
@@ -747,12 +747,12 @@ public class Attribute implements Copyable, Serializable {
     copy.m_Values = m_Values;
     copy.m_Hashtable = m_Hashtable;
     copy.setMetadata(m_Metadata);
- 
+
     return copy;
   }
 
   /**
-   * Removes a value of a nominal or string attribute. Creates a 
+   * Removes a value of a nominal or string attribute. Creates a
    * fresh list of attribute values before removing it.
    *
    * @param index the value's index
@@ -761,8 +761,8 @@ public class Attribute implements Copyable, Serializable {
   //@ requires isNominal() || isString();
   //@ requires 0 <= index && index < m_Values.size();
   final void delete(int index) {
-    
-    if (!isNominal() && !isString()) 
+
+    if (!isNominal() && !isString())
       throw new IllegalArgumentException("Can only remove value of" +
                                          "nominal or string attribute!");
     else {
@@ -825,14 +825,14 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param index the value's index
    * @param string the value
-   * @exception IllegalArgumentException if the attribute is not nominal or 
+   * @exception IllegalArgumentException if the attribute is not nominal or
    * string.
    */
   //@ requires string != null;
   //@ requires isNominal() || isString();
   //@ requires 0 <= index && index < m_Values.size();
   final void setValue(int index, String string) {
-    
+
     switch (m_Type) {
     case NOMINAL:
     case STRING:
@@ -886,7 +886,7 @@ public class Attribute implements Copyable, Serializable {
    * Returns the properties supplied for this attribute.
    *
    * @return metadata for this attribute
-   */  
+   */
   public final /*@ pure @*/ ProtectedProperties getMetadata() {
 
     return m_Metadata;
@@ -894,7 +894,7 @@ public class Attribute implements Copyable, Serializable {
 
   /**
    * Returns the ordering of the attribute. One of the following:
-   * 
+   *
    * ORDERING_SYMBOLIC - attribute values should be treated as symbols.
    * ORDERING_ORDERED  - attribute values have a global ordering.
    * ORDERING_MODULO   - attribute values have an ordering which wraps.
@@ -994,7 +994,7 @@ public class Attribute implements Copyable, Serializable {
    */
   public final /*@ pure @*/ boolean isInRange(double value) {
 
-    // dates and missing values are a special case 
+    // dates and missing values are a special case
     if (m_Type == DATE || Instance.isMissingValue(value)) return true;
     if (m_Type != NUMERIC) {
       // do label range check
@@ -1021,7 +1021,7 @@ public class Attribute implements Copyable, Serializable {
    * metadata of the attribute so that the properties can be set up for the
    * easy-access metadata methods. Any strings sought that are omitted will
    * cause default values to be set.
-   * 
+   *
    * The following properties are recognised:
    * ordering, averageable, zeropoint, regular, weight, and range.
    *
@@ -1033,7 +1033,7 @@ public class Attribute implements Copyable, Serializable {
    */
   //@ requires metadata != null;
   private void setMetadata(ProtectedProperties metadata) {
-    
+
     m_Metadata = metadata;
 
     if (m_Type == DATE) {
@@ -1045,7 +1045,7 @@ public class Attribute implements Copyable, Serializable {
 
       // get ordering
       String orderString = m_Metadata.getProperty("ordering","");
-      
+
       // numeric ordered attributes are averagable and zeropoint by default
       String def;
       if (m_Type == NUMERIC
@@ -1053,7 +1053,7 @@ public class Attribute implements Copyable, Serializable {
 	  && orderString.compareTo("symbolic") != 0)
 	def = "true";
       else def = "false";
-      
+
       // determine boolean states
       m_IsAveragable =
 	(m_Metadata.getProperty("averageable",def).compareTo("true") == 0);
@@ -1063,7 +1063,7 @@ public class Attribute implements Copyable, Serializable {
       if (m_IsAveragable || m_HasZeropoint) def = "true";
       m_IsRegular =
 	(m_Metadata.getProperty("regular",def).compareTo("true") == 0);
-      
+
       // determine ordering
       if (orderString.compareTo("symbolic") == 0)
 	m_Ordering = ORDERING_SYMBOLIC;
@@ -1103,7 +1103,7 @@ public class Attribute implements Copyable, Serializable {
 	m_Weight = Double.valueOf(weightString).doubleValue();
       } catch (NumberFormatException e) {
 	// Check if value is really a number
-	throw new IllegalArgumentException("Not a valid attribute weight: '" 
+	throw new IllegalArgumentException("Not a valid attribute weight: '"
 					   + weightString + "'");
       }
     }
@@ -1135,8 +1135,8 @@ public class Attribute implements Copyable, Serializable {
     // set up a tokenzier to parse the string
     StreamTokenizer tokenizer =
       new StreamTokenizer(new StringReader(rangeString));
-    tokenizer.resetSyntax();         
-    tokenizer.whitespaceChars(0, ' ');    
+    tokenizer.resetSyntax();
+    tokenizer.whitespaceChars(0, ' ');
     tokenizer.wordChars(' '+1,'\u00FF');
     tokenizer.ordinaryChar('[');
     tokenizer.ordinaryChar('(');
@@ -1148,7 +1148,7 @@ public class Attribute implements Copyable, Serializable {
 
       // get opening brace
       tokenizer.nextToken();
-    
+
       if (tokenizer.ttype == '[') m_LowerBoundIsOpen = false;
       else if (tokenizer.ttype == '(') m_LowerBoundIsOpen = true;
       else throw new IllegalArgumentException("Expected opening brace on range,"
@@ -1201,7 +1201,7 @@ public class Attribute implements Copyable, Serializable {
 
       // get closing brace
       tokenizer.nextToken();
-    
+
       if (tokenizer.ttype == ']') m_UpperBoundIsOpen = false;
       else if (tokenizer.ttype == ')') m_UpperBoundIsOpen = true;
       else throw new IllegalArgumentException("Expected closing brace on range,"
@@ -1234,7 +1234,7 @@ public class Attribute implements Copyable, Serializable {
   public static void main(String[] ops) {
 
     try {
-      
+
       // Create numeric attributes "length" and "weight"
       Attribute length = new Attribute("length");
       Attribute weight = new Attribute("weight");
@@ -1250,14 +1250,14 @@ public class Attribute implements Copyable, Serializable {
       dd = new Date().getTime();
       System.out.println("Date now = " + dd);
       System.out.println(date.formatDate(dd));
-      
-      // Create vector to hold nominal values "first", "second", "third" 
-      FastVector my_nominal_values = new FastVector(3); 
-      my_nominal_values.addElement("first"); 
-      my_nominal_values.addElement("second"); 
-      my_nominal_values.addElement("third"); 
-      
-      // Create nominal attribute "position" 
+
+      // Create vector to hold nominal values "first", "second", "third"
+      FastVector my_nominal_values = new FastVector(3);
+      my_nominal_values.addElement("first");
+      my_nominal_values.addElement("second");
+      my_nominal_values.addElement("third");
+
+      // Create nominal attribute "position"
       Attribute position = new Attribute("position", my_nominal_values);
 
       // Print the name of "position"
@@ -1277,7 +1277,7 @@ public class Attribute implements Copyable, Serializable {
       System.out.println("Copy is the same as original: " + copy.equals(position));
 
       // Print index of attribute "weight" (should be unset: -1)
-      System.out.println("Index of attribute \"weight\" (should be -1): " + 
+      System.out.println("Index of attribute \"weight\" (should be -1): " +
 			 weight.index());
 
       // Print index of value "first" of attribute "position"
@@ -1291,7 +1291,7 @@ public class Attribute implements Copyable, Serializable {
 
       // Prints name of attribute "position"
       System.out.println("Name of \"position\": " + position.name());
-    
+
       // Prints number of values of attribute "position"
       System.out.println("Number of values for \"position\": " + position.numValues());
 
@@ -1325,4 +1325,4 @@ public class Attribute implements Copyable, Serializable {
     }
   }
 }
-  
+

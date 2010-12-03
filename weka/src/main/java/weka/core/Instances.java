@@ -22,9 +22,17 @@
 
 package weka.core;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Serializable;
+import java.io.StreamTokenizer;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Random;
 
 /**
  * Class for handling an ordered set of weighted instances. <p>
@@ -591,6 +599,10 @@ public class Instances implements Serializable {
 	(position > m_Attributes.size())) {
       throw new IllegalArgumentException("Index out of range");
     }
+    if (attribute(att.name()) != null) {
+      throw new IllegalArgumentException(
+	  "Attribute name '" + att.name() + "' already in use at position #" + attribute(att.name()).index());
+    }
     att = (Attribute)att.copy();
     freshAttributeInfo();
     att.setIndex(position);
@@ -876,10 +888,18 @@ public class Instances implements Serializable {
    * @param name the new name
    */
   public void renameAttribute(int att, String name) {
+    // name already present?
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i == att)
+	continue;
+      if (attribute(i).name().equals(name)) {
+	throw new IllegalArgumentException(
+	    "Attribute name '" + name + "' already present at position #" + i);
+      }
+    }
 
     Attribute newAtt = attribute(att).copy(name);
     FastVector newVec = new FastVector(numAttributes());
-
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
 	newVec.addElement(newAtt);
