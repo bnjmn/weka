@@ -653,6 +653,10 @@ public class Instances
 	(position > m_Attributes.size())) {
       throw new IllegalArgumentException("Index out of range");
     }
+    if (attribute(att.name()) != null) {
+      throw new IllegalArgumentException(
+	  "Attribute name '" + att.name() + "' already in use at position #" + attribute(att.name()).index());
+    }
     att = (Attribute)att.copy();
     freshAttributeInfo();
     att.setIndex(position);
@@ -948,10 +952,18 @@ public class Instances
    * @param name the new name
    */
   public void renameAttribute(int att, String name) {
+    // name already present?
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i == att)
+	continue;
+      if (attribute(i).name().equals(name)) {
+	throw new IllegalArgumentException(
+	    "Attribute name '" + name + "' already present at position #" + i);
+      }
+    }
 
     Attribute newAtt = attribute(att).copy(name);
     FastVector newVec = new FastVector(numAttributes());
-
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
 	newVec.addElement(newAtt);
