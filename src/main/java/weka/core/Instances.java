@@ -22,6 +22,9 @@
 
 package weka.core;
 
+import weka.core.converters.ArffLoader.ArffReader;
+import weka.core.converters.ConverterUtils.DataSource;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -32,9 +35,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-
-import weka.core.converters.ArffLoader.ArffReader;
-import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * Class for handling an ordered set of weighted instances. <p>
@@ -687,6 +687,10 @@ public class Instances extends AbstractList<Instance>
 	(position > m_Attributes.size())) {
       throw new IllegalArgumentException("Index out of range");
     }
+    if (attribute(att.name()) != null) {
+      throw new IllegalArgumentException(
+	  "Attribute name '" + att.name() + "' already in use at position #" + attribute(att.name()).index());
+    }
     att = (Attribute)att.copy();
     freshAttributeInfo();
     att.setIndex(position);
@@ -1021,10 +1025,18 @@ public class Instances extends AbstractList<Instance>
    * @param name the new name
    */
   public void renameAttribute(int att, String name) {
-
+    // name already present?
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i == att)
+	continue;
+      if (attribute(i).name().equals(name)) {
+	throw new IllegalArgumentException(
+	    "Attribute name '" + name + "' already present at position #" + i);
+      }
+    }
+    
     Attribute newAtt = attribute(att).copy(name);
     ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
-
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
 	newVec.add(newAtt);

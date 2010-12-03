@@ -22,16 +22,19 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
-import weka.classifiers.RandomizableMultipleClassifiersCombiner;
+import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableParallelMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
 import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -41,10 +44,6 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -472,24 +471,23 @@ public class Stacking
    * @throws Exception if the format generation fails
    */
   protected Instances metaFormat(Instances instances) throws Exception {
-
-    FastVector attributes = new FastVector();
+    ArrayList<Attribute> attributes = new ArrayList<Attribute>();
     Instances metaFormat;
 
     for (int k = 0; k < m_Classifiers.length; k++) {
       Classifier classifier = (Classifier) getClassifier(k);
-      String name = classifier.getClass().getName();
+      String name = classifier.getClass().getName() + "-" + (k+1);
       if (m_BaseFormat.classAttribute().isNumeric()) {
-	attributes.addElement(new Attribute(name));
+	attributes.add(new Attribute(name));
       } else {
 	for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
-	  attributes.addElement(new Attribute(name + ":" + 
-					      m_BaseFormat
-					      .classAttribute().value(j)));
+	  attributes.add(
+	      new Attribute(
+		  name + ":" + m_BaseFormat.classAttribute().value(j)));
 	}
       }
     }
-    attributes.addElement(m_BaseFormat.classAttribute().copy());
+    attributes.add((Attribute) m_BaseFormat.classAttribute().copy());
     metaFormat = new Instances("Meta format", attributes, 0);
     metaFormat.setClassIndex(metaFormat.numAttributes() - 1);
     return metaFormat;
