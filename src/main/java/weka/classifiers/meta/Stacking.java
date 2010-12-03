@@ -71,42 +71,42 @@ import java.util.Vector;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -M &lt;scheme specification&gt;
  *  Full name of meta classifier, followed by options.
  *  (default: "weka.classifiers.rules.Zero")</pre>
- * 
+ *
  * <pre> -X &lt;number of folds&gt;
  *  Sets the number of cross-validation folds.</pre>
- * 
+ *
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 1)</pre>
- * 
+ *
  * <pre> -B &lt;classifier specification&gt;
  *  Full class name of classifier to include, followed
  *  by scheme options. May be specified multiple times.
  *  (default: "weka.classifiers.rules.ZeroR")</pre>
- * 
+ *
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $ 
+ * @version $Revision$
  */
-public class Stacking 
+public class Stacking
   extends RandomizableMultipleClassifiersCombiner
   implements TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5134738557155845452L;
-  
+
   /** The meta classifier */
   protected Classifier m_MetaClassifier = new ZeroR();
- 
+
   /** Format for meta data */
   protected Instances m_MetaFormat = null;
 
@@ -115,7 +115,7 @@ public class Stacking
 
   /** Set the number of folds for the cross-validation */
   protected int m_NumFolds = 10;
-    
+
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -130,15 +130,15 @@ public class Stacking
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
+   * Returns an instance of a TechnicalInformation object, containing
    * detailed information about the technical background of this class,
    * e.g., paper reference or book this class is based on.
-   * 
+   *
    * @return the technical information about this class
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
-    
+
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "David H. Wolpert");
     result.setValue(Field.YEAR, "1992");
@@ -147,17 +147,17 @@ public class Stacking
     result.setValue(Field.VOLUME, "5");
     result.setValue(Field.PAGES, "241-259");
     result.setValue(Field.PUBLISHER, "Pergamon Press");
-    
+
     return result;
   }
-  
+
   /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    
+
     Vector newVector = new Vector(2);
     newVector.addElement(new Option(
 	      metaOption(),
@@ -175,7 +175,7 @@ public class Stacking
 
   /**
    * String describing option for setting meta classifier
-   * 
+   *
    * @return the string describing the option
    */
   protected String metaOption() {
@@ -189,27 +189,27 @@ public class Stacking
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -M &lt;scheme specification&gt;
    *  Full name of meta classifier, followed by options.
    *  (default: "weka.classifiers.rules.Zero")</pre>
-   * 
+   *
    * <pre> -X &lt;number of folds&gt;
    *  Sets the number of cross-validation folds.</pre>
-   * 
+   *
    * <pre> -S &lt;num&gt;
    *  Random number seed.
    *  (default 1)</pre>
-   * 
+   *
    * <pre> -B &lt;classifier specification&gt;
    *  Full class name of classifier to include, followed
    *  by scheme options. May be specified multiple times.
    *  (default: "weka.classifiers.rules.ZeroR")</pre>
-   * 
+   *
    * <pre> -D
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -229,7 +229,7 @@ public class Stacking
 
   /**
    * Process options setting meta classifier.
-   * 
+   *
    * @param options the options to parse
    * @throws Exception if the parsing fails
    */
@@ -263,11 +263,11 @@ public class Stacking
     options[current++] = getMetaClassifier().getClass().getName() + " "
       + Utils.joinOptions(((OptionHandler)getMetaClassifier()).getOptions());
 
-    System.arraycopy(superOptions, 0, options, current, 
+    System.arraycopy(superOptions, 0, options, current,
 		     superOptions.length);
     return options;
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -277,7 +277,7 @@ public class Stacking
     return "The number of folds used for cross-validation.";
   }
 
-  /** 
+  /**
    * Gets the number of folds for the cross-validation.
    *
    * @return the number of folds for the cross-validation
@@ -294,14 +294,14 @@ public class Stacking
    * @throws Exception if parameter illegal
    */
   public void setNumFolds(int numFolds) throws Exception {
-    
+
     if (numFolds < 0) {
       throw new IllegalArgumentException("Stacking: Number of cross-validation " +
 					 "folds must be positive.");
     }
     m_NumFolds = numFolds;
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -320,14 +320,14 @@ public class Stacking
 
     m_MetaClassifier = classifier;
   }
-  
+
   /**
    * Gets the meta classifier.
    *
    * @return the meta classifier
    */
   public Classifier getMetaClassifier() {
-    
+
     return m_MetaClassifier;
   }
 
@@ -339,7 +339,7 @@ public class Stacking
    */
   public Capabilities getCapabilities() {
     Capabilities      result;
-    
+
     result = super.getCapabilities();
     result.setMinimumNumberInstances(getNumFolds());
 
@@ -367,7 +367,7 @@ public class Stacking
     Instances newData = new Instances(data);
     m_BaseFormat = new Instances(data, 0);
     newData.deleteWithMissingClass();
-    
+
     Random random = new Random(m_Seed);
     newData.randomize(random);
     if (newData.classAttribute().isNominal()) {
@@ -385,12 +385,12 @@ public class Stacking
 
   /**
    * Generates the meta data
-   * 
+   *
    * @param newData the data to work on
    * @param random the random number generator to use for cross-validation
    * @throws Exception if generation fails
    */
-  protected void generateMetaLevel(Instances newData, Random random) 
+  protected void generateMetaLevel(Instances newData, Random random)
     throws Exception {
 
     Instances metaData = metaFormat(newData);
@@ -428,7 +428,7 @@ public class Stacking
 
   /**
    * Output a representation of this classifier
-   * 
+   *
    * @return a string representation of the classifier
    */
   public String toString() {
@@ -446,7 +446,7 @@ public class Stacking
     for (int i = 0; i < m_Classifiers.length; i++) {
       result += getClassifier(i).toString() +"\n\n";
     }
-   
+
     result += "\n\nMeta classifier\n\n";
     result += m_MetaClassifier.toString();
 
@@ -467,12 +467,12 @@ public class Stacking
 
     for (int k = 0; k < m_Classifiers.length; k++) {
       Classifier classifier = (Classifier) getClassifier(k);
-      String name = classifier.getClass().getName();
+      String name = classifier.getClass().getName() + "-" + (k+1);
       if (m_BaseFormat.classAttribute().isNumeric()) {
 	attributes.addElement(new Attribute(name));
       } else {
 	for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
-	  attributes.addElement(new Attribute(name + ":" + 
+	  attributes.addElement(new Attribute(name + ":" +
 					      m_BaseFormat
 					      .classAttribute().value(j)));
 	}
@@ -486,7 +486,7 @@ public class Stacking
 
   /**
    * Makes a level-1 instance from the given instance.
-   * 
+   *
    * @param instance the instance to be transformed
    * @return the level-1 instance
    * @throws Exception if the instance generation fails
@@ -512,14 +512,14 @@ public class Stacking
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.32 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
