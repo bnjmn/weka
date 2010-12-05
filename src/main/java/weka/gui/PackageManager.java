@@ -32,6 +32,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +61,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -86,6 +89,7 @@ import org.pentaho.packageManagement.PackageConstraint;
 import weka.core.Environment;
 import weka.core.Utils;
 import weka.core.WekaPackageManager;
+import weka.gui.beans.FileEnvironmentField;
 
 /**
  * A GUI interface the the package management system.
@@ -157,6 +161,14 @@ public class PackageManager extends JPanel {
   
   /** Reverse the sort order if the user clicks the same column header twice */
   protected boolean m_reverseSort = false;
+  
+  /** Button to pop up the file environment field widget */
+  protected JButton m_unofficialBut = new JButton("File/URL");
+  
+  /** Widget for specifying a URL or path to an unofficial package to install */
+  protected FileEnvironmentField m_unofficialChooser = 
+    new FileEnvironmentField("File/URL", Environment.getSystemWide());
+  protected JFrame m_unofficialFrame = null;
   
   protected Comparator<Package> m_packageComparator = new Comparator<Package>() {
 
@@ -312,7 +324,7 @@ public class PackageManager extends JPanel {
       
       return null;
     }
-  }
+  } 
   
   class RefreshCache extends SwingWorker<Void, Void> implements Progressable {
     private int m_progressCount = 0;
@@ -338,6 +350,7 @@ public class PackageManager extends JPanel {
       m_progress.setMaximum(numPackages);
       m_refreshCacheBut.setEnabled(false);
       m_installBut.setEnabled(false);
+      m_unofficialBut.setEnabled(false);
       m_installedBut.setEnabled(false);
       m_availableBut.setEnabled(false);
       m_allBut.setEnabled(false);      
@@ -359,6 +372,7 @@ public class PackageManager extends JPanel {
       }
       
       m_installBut.setEnabled(true);
+      m_unofficialBut.setEnabled(true);
       m_refreshCacheBut.setEnabled(true);
       m_installedBut.setEnabled(true);
       m_availableBut.setEnabled(true);
@@ -422,6 +436,7 @@ public class PackageManager extends JPanel {
     public Void doInBackground() {
       m_installing = true;
       m_installBut.setEnabled(false);
+      m_unofficialBut.setEnabled(false);
       m_uninstallBut.setEnabled(false);      
       m_refreshCacheBut.setEnabled(false);
       m_availableBut.setEnabled(false);
@@ -551,6 +566,7 @@ public class PackageManager extends JPanel {
         m_detailLabel.setText("Finished uninstalling.");
       }
       
+      m_unofficialBut.setEnabled(true);
       m_refreshCacheBut.setEnabled(true);
       m_availableBut.setEnabled(true);
       m_allBut.setEnabled(true);
@@ -559,6 +575,117 @@ public class PackageManager extends JPanel {
       // force refresh of installed and available packages
       m_installedPackages = null;
       m_availablePackages = null;
+//      m_installBut.setEnabled(true);
+      m_installing = false;
+      updateTable();
+      if (m_table.getSelectedRow() >= 0) {
+        // mainly to update the install/uninstall button status
+        //displayPackageInfo(m_table.getSelectedRow());
+        updateInstallUninstallButtonEnablement();
+      }
+    }
+  }
+  
+  class UnofficialInstallTask extends SwingWorker<Void, Void> implements Progressable {
+    
+    private String m_target;
+    private int m_progressCount = 0;
+    private boolean m_errorOccurred = false;
+    
+    public void setTargetToInstall(String target) {
+      m_target = target;
+    }
+    
+    public void makeProgress(String progressMessage) {
+      m_detailLabel.setText(progressMessage);
+      m_progressCount++;
+      m_progress.setValue(m_progressCount);
+      if (m_progressCount == m_progress.getMaximum()) {
+        m_progress.setMaximum(m_progressCount + 5);
+      }
+    }
+    
+    public Void doInBackground() {
+      m_installing = true;
+      m_installBut.setEnabled(false);
+      m_uninstallBut.setEnabled(false);
+      m_refreshCacheBut.setEnabled(false);
+      m_unofficialBut.setEnabled(false);
+      m_availableBut.setEnabled(false);
+      m_allBut.setEnabled(false);
+      m_installedBut.setEnabled(false);
+      ProgressPrintStream pps = new ProgressPrintStream(this);
+      m_progress.setMaximum(30);
+      
+      Package installedPackage = null;
+      
+      try {
+        if (m_target.toLowerCase().startsWith("http://") || 
+            m_target.toLowerCase().startsWith("https://")) {
+
+          String packageName = 
+            WekaPackageManager.installPackageFromURL(new URL(m_target), pps);
+          installedPackage = WekaPackageManager.getInstalledPackageInfo(packageName);
+        } else if (m_target.toLowerCase().endsWith(".zip")){
+          String packageName = WekaPackageManager.installPackageFromArchive(m_target, pps);
+          installedPackage = WekaPackageManager.getInstalledPackageInfo(packageName);
+        } else {
+          displayErrorDialog("Unable to install package " +
+              "\nfrom " + m_target + ". Unrecognized as a URL or zip archive.",
+              (String)null);
+          m_errorOccurred = true;
+          return null;
+        }
+      } catch (Exception ex) {
+        displayErrorDialog("Unable to install package " +
+            "\nfrom " + m_target + ". Check the log for error messages.",
+             ex);
+        m_errorOccurred = true;
+        return null;
+      }
+      
+      if (installedPackage != null) {
+        try {        
+          File packageRoot = 
+            new File(WekaPackageManager.getPackageHome() + File.separator 
+                + installedPackage.getName());
+          boolean loadCheck  = 
+            WekaPackageManager.loadCheck(installedPackage, packageRoot, pps);
+          
+          if (!loadCheck) {
+            displayErrorDialog("Package was installed correctly but could not " +
+            		"be loaded. Check log for details", (String)null);
+          }
+        } catch (Exception ex) {
+          displayErrorDialog("Unable to install package " +
+              "\nfrom " + m_target + ".",
+              ex);
+          m_errorOccurred = true;
+        }
+
+        WekaPackageManager.refreshGOEProperties();
+      }
+      return null;
+    }
+    
+    public void done() {
+      m_progress.setValue(m_progress.getMinimum());
+      if (m_errorOccurred) {
+        m_detailLabel.setText("Problem installing - check log.");
+      } else {
+        m_detailLabel.setText("Package installed successfully.");
+      }
+      
+      m_unofficialBut.setEnabled(true);
+      m_refreshCacheBut.setEnabled(true);      
+      m_availableBut.setEnabled(true);
+      m_allBut.setEnabled(true);
+      m_installedBut.setEnabled(true);
+      
+      // force refresh of installed and available packages
+      m_installedPackages = null;
+      m_availablePackages = null;
+      
 //      m_installBut.setEnabled(true);
       m_installing = false;
       updateTable();
@@ -604,6 +731,7 @@ public class PackageManager extends JPanel {
     public Void doInBackground() {
       m_installing = true;
       m_installBut.setEnabled(false);
+      m_unofficialBut.setEnabled(true);
       m_uninstallBut.setEnabled(false);
       m_refreshCacheBut.setEnabled(false);
       m_availableBut.setEnabled(false);
@@ -1023,6 +1151,7 @@ public class PackageManager extends JPanel {
         m_detailLabel.setText("Install complete.");
       }
       
+      m_unofficialBut.setEnabled(true);
       m_refreshCacheBut.setEnabled(true);
       m_availableBut.setEnabled(true);
       m_allBut.setEnabled(true);
@@ -1180,7 +1309,12 @@ public class PackageManager extends JPanel {
     packageDHolder.add(m_allBut);
     packageDisplayP.add(packageDHolder, BorderLayout.SOUTH);
     packageDisplayP.add(m_refreshCacheBut, BorderLayout.NORTH);
-    butPanel.add(packageDisplayP, BorderLayout.WEST);
+    JPanel officialHolder = new JPanel();
+    officialHolder.setLayout(new BorderLayout());
+    officialHolder.setBorder(BorderFactory.createTitledBorder("Official"));
+    officialHolder.add(packageDisplayP, BorderLayout.WEST);
+    
+    butPanel.add(officialHolder, BorderLayout.WEST);
     
     m_refreshCacheBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -1188,8 +1322,14 @@ public class PackageManager extends JPanel {
         r.execute();
       }
     });
+    
+    JPanel unofficialHolder = new JPanel();
+    unofficialHolder.setLayout(new BorderLayout());
+    unofficialHolder.setBorder(BorderFactory.createTitledBorder("Unofficial"));
+    unofficialHolder.add(m_unofficialBut, BorderLayout.NORTH);
+    butPanel.add(unofficialHolder, BorderLayout.EAST);
 
-    JPanel installP = new JPanel();
+    JPanel installP = new JPanel();    
     JPanel buttP = new JPanel();
     buttP.setLayout(new GridLayout(1,2));
     installP.setLayout(new BorderLayout());
@@ -1199,7 +1339,69 @@ public class PackageManager extends JPanel {
     m_uninstallBut.setEnabled(false);
     installP.add(buttP, BorderLayout.NORTH);
     installP.add(m_forceBut, BorderLayout.SOUTH);
-    butPanel.add(installP, BorderLayout.EAST);
+    m_forceBut.setEnabled(false);
+//    butPanel.add(installP, BorderLayout.EAST);
+    officialHolder.add(installP, BorderLayout.EAST);
+    
+    m_installBut.setToolTipText("Install the selected official package(s) " +
+    		"from the list");
+    m_uninstallBut.setToolTipText("Uninstall the selected package(s) from the list");
+    m_unofficialBut.setToolTipText("Install an unofficial package from a file or URL");
+    m_unofficialChooser.resetFileFilters();
+    m_unofficialChooser.
+      addFileFilter(new ExtensionFileFilter(".zip", "Package archive file"));
+
+    m_unofficialBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_unofficialFrame == null) {
+          final JFrame jf = new JFrame("Unofficial package install");
+          jf.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+              jf.dispose();
+              m_unofficialBut.setEnabled(true);
+              m_unofficialFrame = null;
+            }
+          });
+          jf.setLayout(new BorderLayout());
+          JButton okBut = new JButton("OK");
+          JButton cancelBut = new JButton("Cancel");
+          JPanel butHolder = new JPanel();
+          butHolder.setLayout(new GridLayout(1,2));
+          butHolder.add(okBut);
+          butHolder.add(cancelBut);
+          jf.add(m_unofficialChooser, BorderLayout.CENTER);
+          jf.add(butHolder, BorderLayout.SOUTH);         
+          jf.pack();
+          jf.setVisible(true);
+          m_unofficialFrame = jf;
+          m_unofficialBut.setEnabled(false);
+          cancelBut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              if (m_unofficialFrame != null) {
+                jf.dispose();
+                m_unofficialBut.setEnabled(true);
+                m_unofficialFrame = null;
+              }
+            }
+          });
+          
+          okBut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              String target = m_unofficialChooser.getText();
+              UnofficialInstallTask t = new UnofficialInstallTask();
+              t.setTargetToInstall(target);
+              t.execute();
+              if (m_unofficialFrame != null) {
+                jf.dispose();
+                m_unofficialBut.setEnabled(true);
+                m_unofficialFrame = null;
+              }
+            }
+          });
+        }
+      }
+    });
+
     m_installBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         int[] selectedRows = m_table.getSelectedRows();
@@ -1304,13 +1506,15 @@ public class PackageManager extends JPanel {
     
     JPanel progressP = new JPanel();
     progressP.setLayout(new BorderLayout());
+    progressP.setBorder(BorderFactory.
+        createTitledBorder("Install/Uninstall/Refresh progress"));
     progressP.add(m_progress, BorderLayout.NORTH);
-    progressP.add(m_detailLabel, BorderLayout.SOUTH);
+    progressP.add(m_detailLabel, BorderLayout.CENTER);
     butPanel.add(progressP, BorderLayout.CENTER);
     
     JPanel topPanel = new JPanel();
     topPanel.setLayout(new BorderLayout());
-    topPanel.setBorder(BorderFactory.createTitledBorder("Packages"));
+//    topPanel.setBorder(BorderFactory.createTitledBorder("Packages"));
     topPanel.add(butPanel, BorderLayout.NORTH);
     m_allBut.setSelected(true);
     
@@ -1528,6 +1732,8 @@ public class PackageManager extends JPanel {
     boolean enableInstall = false;
     boolean enableUninstall = false;
     
+    m_unofficialBut.setEnabled(true);
+    
     if (!m_installing) {
       int[] selectedRows = m_table.getSelectedRows(); 
       // check the package to see whether we should enable the
@@ -1556,10 +1762,13 @@ public class PackageManager extends JPanel {
           }
         }
       }
+    } else {
+      m_unofficialBut.setEnabled(false);
     }
     
     // now set the button enablement
     m_installBut.setEnabled(enableInstall);
+    m_forceBut.setEnabled(enableInstall);
     m_uninstallBut.setEnabled(enableUninstall);
   }
   
