@@ -1002,7 +1002,7 @@ public class WekaPackageManager {
     }
   }
   
-  public static void installPackageFromArchive(String packageArchivePath, 
+  public static String installPackageFromArchive(String packageArchivePath, 
       PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();    
     Package toInstall = PACKAGE_MANAGER.getPackageArchiveInfo(packageArchivePath);
@@ -1025,10 +1025,23 @@ public class WekaPackageManager {
       }
     }
     
-    PACKAGE_MANAGER.installPackageFromArchive(packageArchivePath, progress);    
+    PACKAGE_MANAGER.installPackageFromArchive(packageArchivePath, progress);
+    
+    boolean loadIt = checkForMissingClasses(toInstall, progress);
+    if (loadIt) {
+      File packageRoot = 
+        new File(PACKAGE_MANAGER.getPackageHome() + File.separator 
+            + toInstall.getName());
+      loadIt = checkForMissingFiles(toInstall, packageRoot, progress);
+      if (loadIt) {
+        loadPackageDirectory(packageRoot, false);
+      }
+    }
+    
+    return toInstall.getName();
   }
   
-  public static void installPackageFromURL(URL packageURL, PrintStream... progress) throws Exception {
+  public static String installPackageFromURL(URL packageURL, PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();    
     String packageName = PACKAGE_MANAGER.installPackageFromURL(packageURL, progress);
     
@@ -1045,6 +1058,18 @@ public class WekaPackageManager {
         p.println(message);
       }
     }
+    
+    boolean loadIt = checkForMissingClasses(installed, progress);
+    if (loadIt) {
+      File packageRoot = 
+        new File(PACKAGE_MANAGER.getPackageHome() + File.separator 
+            + installed.getName());
+      loadIt = checkForMissingFiles(installed, packageRoot, progress);
+      if (loadIt) {
+        loadPackageDirectory(packageRoot, false);
+      }
+    }
+    return packageName;
   }
   
   public static void uninstallPackage(String packageName, boolean updateKnowledgeFlow, 
