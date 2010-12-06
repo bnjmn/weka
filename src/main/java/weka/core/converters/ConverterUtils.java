@@ -707,8 +707,12 @@ public class ConverterUtils
   /** all available savers (extension &lt;-&gt; classname). */
   protected static Hashtable<String,String> m_FileSavers;
   
-  // determine all loaders/savers
+  // determine all loaders/savers  
   static {
+    initialize();
+  }
+  
+  public static void initialize() {
     Vector classnames;
     
     try {
@@ -719,26 +723,31 @@ public class ConverterUtils
       
       // generate properties 
       // Note: does NOT work with RMI, hence m_FileLoadersCore/m_FileSaversCore
-      GenericPropertiesCreator creator = new GenericPropertiesCreator();
-      creator.execute(false);
-      Properties props = creator.getOutputProperties();
+      
+      Properties props = GenericPropertiesCreator.getGlobalOutputProperties();
+      if (props == null) {
+        GenericPropertiesCreator creator = new GenericPropertiesCreator();
+        
+        creator.execute(false);
+        props = creator.getOutputProperties();
+      }
       
       // loaders
       m_FileLoaders = getFileConverters(
-	  		props.getProperty(Loader.class.getName(), CORE_FILE_LOADERS),
-	  		new String[]{FileSourcedConverter.class.getName()});
+                        props.getProperty(Loader.class.getName(), CORE_FILE_LOADERS),
+                        new String[]{FileSourcedConverter.class.getName()});
       
       // URL loaders
       m_URLFileLoaders = getFileConverters(
-	  		   props.getProperty(Loader.class.getName(), CORE_FILE_LOADERS),
-	  		   new String[]{
-	  		     FileSourcedConverter.class.getName(), 
-	  		     URLSourcedLoader.class.getName()});
+                           props.getProperty(Loader.class.getName(), CORE_FILE_LOADERS),
+                           new String[]{
+                             FileSourcedConverter.class.getName(), 
+                             URLSourcedLoader.class.getName()});
 
       // savers
       m_FileSavers = getFileConverters(
-	  		props.getProperty(Saver.class.getName(), CORE_FILE_SAVERS),
-	  		new String[]{FileSourcedConverter.class.getName()});
+                        props.getProperty(Saver.class.getName(), CORE_FILE_SAVERS),
+                        new String[]{FileSourcedConverter.class.getName()});
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -747,45 +756,45 @@ public class ConverterUtils
     finally {
       // loaders
       if (m_FileLoaders.size() == 0) {
-	classnames = GenericObjectEditor.getClassnames(AbstractFileLoader.class.getName());
-	if (classnames.size() > 0)
-	  m_FileLoaders = getFileConverters(
-	                    classnames,
-	                    new String[]{FileSourcedConverter.class.getName()});
-	else
-	  m_FileLoaders = getFileConverters(
-	                    CORE_FILE_LOADERS,
-	                    new String[]{FileSourcedConverter.class.getName()});
+        classnames = GenericObjectEditor.getClassnames(AbstractFileLoader.class.getName());
+        if (classnames.size() > 0)
+          m_FileLoaders = getFileConverters(
+                            classnames,
+                            new String[]{FileSourcedConverter.class.getName()});
+        else
+          m_FileLoaders = getFileConverters(
+                            CORE_FILE_LOADERS,
+                            new String[]{FileSourcedConverter.class.getName()});
       }
 
       // URL loaders
       if (m_URLFileLoaders.size() == 0) {
         classnames = GenericObjectEditor.getClassnames(AbstractFileLoader.class.getName());
         if (classnames.size() > 0)
-	  m_URLFileLoaders = getFileConverters(
-	  		       classnames,
-	  		       new String[]{
-	  			   FileSourcedConverter.class.getName(), 
-	  			   URLSourcedLoader.class.getName()});
+          m_URLFileLoaders = getFileConverters(
+                               classnames,
+                               new String[]{
+                                   FileSourcedConverter.class.getName(), 
+                                   URLSourcedLoader.class.getName()});
         else
           m_URLFileLoaders = getFileConverters(
-	                       CORE_FILE_LOADERS,
-	                       new String[]{
-	                	   FileSourcedConverter.class.getName(), 
-	                	   URLSourcedLoader.class.getName()});
+                               CORE_FILE_LOADERS,
+                               new String[]{
+                                   FileSourcedConverter.class.getName(), 
+                                   URLSourcedLoader.class.getName()});
       }
 
       // savers
       if (m_FileSavers.size() == 0) {
-	classnames = GenericObjectEditor.getClassnames(AbstractFileSaver.class.getName());
-	if (classnames.size() > 0)
-	  m_FileSavers = getFileConverters(
-	  		   classnames,
-	  		   new String[]{FileSourcedConverter.class.getName()});
-	else
-	  m_FileSavers = getFileConverters(
-	                   CORE_FILE_SAVERS,
-	                   new String[]{FileSourcedConverter.class.getName()});
+        classnames = GenericObjectEditor.getClassnames(AbstractFileSaver.class.getName());
+        if (classnames.size() > 0)
+          m_FileSavers = getFileConverters(
+                           classnames,
+                           new String[]{FileSourcedConverter.class.getName()});
+        else
+          m_FileSavers = getFileConverters(
+                           CORE_FILE_SAVERS,
+                           new String[]{FileSourcedConverter.class.getName()});
       }
     }
   }
