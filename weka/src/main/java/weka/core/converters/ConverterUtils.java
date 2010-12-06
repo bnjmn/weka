@@ -797,6 +797,8 @@ public class ConverterUtils
                            new String[]{FileSourcedConverter.class.getName()});
       }
     }
+    
+    weka.gui.ConverterFileChooser.initDefaultFilters();
   }
   
   /**
