@@ -126,6 +126,13 @@ public class ConverterFileChooser
   protected boolean m_CoreConvertersOnly = false;
   
   static {
+    initDefaultFilters();
+  }
+  
+  /**
+   * Initialize the default set of filters for loaders and savers
+   */
+  public static void initDefaultFilters() {
     initFilters(true, ConverterUtils.getFileLoaders());
     initFilters(false, ConverterUtils.getFileSavers());
   }
