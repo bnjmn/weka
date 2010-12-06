@@ -53,6 +53,7 @@ import org.pentaho.packageManagement.Package;
 import org.pentaho.packageManagement.PackageConstraint;
 import org.pentaho.packageManagement.PackageManager;
 
+import weka.core.converters.ConverterUtils;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.beans.KnowledgeFlowApp;
@@ -618,6 +619,7 @@ public class WekaPackageManager {
     ClassDiscovery.clearClassCache();
     GenericPropertiesCreator.regenerateGlobalOutputProperties();
     GenericObjectEditor.determineClasses();
+    ConverterUtils.initialize();
     KnowledgeFlowApp.disposeSingleton();
     KnowledgeFlowApp.reInitialize();
   }
