@@ -1,0 +1,31 @@
+------------------------------------------------------------------------
+r6752 | mhall | 2010-08-06 21:18:29 +1200 (Fri, 06 Aug 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/attribute/RandomProjection.java
+
+Tags for the two sparse options do not match what setOptions() parses for - fixed.
+------------------------------------------------------------------------
+r6758 | mhall | 2010-08-09 09:31:15 +1200 (Mon, 09 Aug 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/attributeSelection/GeneticSearch.java
+
+Selecting a population member for crossover can very rarely return an index outside of the number of population members due to floating point comparison problems - fixed.
+------------------------------------------------------------------------
+r6953 | mhall | 2010-11-16 14:51:32 +1300 (Tue, 16 Nov 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees/REPTree.java
+
+Fixed a bug that sometimes resulted in endless splitting (possibly when missing values are present).
+------------------------------------------------------------------------
+r6995 | fracpete | 2010-12-03 13:37:38 +1300 (Fri, 03 Dec 2010) | 4 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/meta/Stacking.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/Attribute.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/Instances.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/attribute/Copy.java
+
+Attribute.copy(String) is now public
+Instances.renameAttribute/insertAttributeAt now check first whether the new name is already present and throw an IllegalArgumentException if that's the case (attribute names have to be unique in a dataset!)
+updated Copy filter to create a copy of the attribute with a new name instead of inserted a copy of it and then renaming it (which fails now)
+Stacking now appends the classifier index (1-based) to the classifier class name, otherwise non-unique attribute names can be generated if the same base classifier is used more than once
+------------------------------------------------------------------------
