@@ -844,7 +844,8 @@ public class RotationForest
 	// Include the projected attributes in the attributes of the 
 	// transformed dataset
         for( int a = 0; a < projectedData.numAttributes() - 1; a++ ) {
-          transformedAttributes.addElement( projectedData.attribute(a).copy());
+          String newName = projectedData.attribute(a).name() + "_" + j;
+          transformedAttributes.addElement( projectedData.attribute(a).copy(newName));
         }
       }
       
