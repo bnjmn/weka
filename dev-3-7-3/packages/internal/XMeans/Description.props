@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=XMeans
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2010-05-31
+
+# Title (required)
+Title=Cluster data using the X-means algorithm.
+
+Category=Clustering
+
+# Author (required)
+Author=Gabi Schmidberger, Malcom Ware and Mark Hall
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Cluster data using the X-means algorithm.<br/><br/>X-Means is K-Means extended by an Improve-Structure part In this part of the algorithm the centers are attempted to be split in its region. The decision between the children of each center and itself is done comparing the BIC-values of the two structures.<br/><br/>For more information see:<br/><br/>Dan Pelleg, Andrew W. Moore: X-means: Extending K-means with Efficient Estimation of the Number of Clusters. In: Seventeenth International Conference on Machine Learning, 727-734, 2000.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/XMeans1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/XMeans
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

@@ -1,0 +1,41 @@
+# Description file for CLOPE
+#
+# 
+
+# Package name (required)
+PackageName=CLOPE
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=CLOPE: a fast and effective clustering algorithm for transactional data
+
+Category=Clustering
+
+# Author (required)
+Author=Alexander Smirnov <austellus@gmail.com>
+
+# Maintainer (required)
+Maintainer=Alexander Smirnov <austellus@gmail.com>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Yiling Yang, Xudong Guan, Jinyuan You: CLOPE: a fast and effective clustering algorithm for transactional data. In: Proceedings of the eighth ACM SIGKDD international conference on Knowledge discovery and data mining, 682-687, 2002.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/CLOPE1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/CLOPE
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

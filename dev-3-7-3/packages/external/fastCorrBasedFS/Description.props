@@ -1,0 +1,41 @@
+# Description file for fastCorrBasedFS
+#
+# 
+
+# Package name (required)
+PackageName=fastCorrBasedFS
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Feature selection method based on correlation measureand relevance and redundancy analysis
+
+Category=Attribute selection
+
+# Author (required)
+Author=Zheng Zhao <zhaozheng@asu.edu>
+
+# Maintainer (required)
+Maintainer=Zheng Zhao <zhaozheng@asu.edu>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Feature selection method based on correlation measureand relevance and redundancy analysis. Use in conjunction with an attribute set evaluator (SymmetricalUncertAttributeEval). For more information see: Lei Yu, Huan Liu: Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution. In: Proceedings of the Twentieth International Conference on Machine Learning, 856-863, 2003.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/fastCorrBasedFS1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/fastCorrBasedFS
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

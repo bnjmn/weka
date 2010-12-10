@@ -1,0 +1,44 @@
+# Description file for RotationForest
+#
+# 
+
+# Package name (required)
+PackageName=classAssociationRules
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2010-09-22
+
+# Title (required)
+Title=Class association rules algorithms (including an implementation of the CBA algorithm).
+
+Category=Associations
+
+# Author (required)
+Author= Stefan Mutter <mutter@cs.waikato.ac.nz>
+
+# Maintainer (required)
+Maintainer=Stefan Mutter <mutter@cs.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Class association rules algorithms (including an implementation of the CBA algorithm). For more information see:<br><br> W. Li, J. Han, J.Pei: CMAR: Accurate and Efficient Classification Based on Multiple Class-Association Rules. In ICDM'01:369-376,2001.<br><br>B. Liu, W. Hsu, Y. Ma: Integrating Classification and Association Rule Mining. In KDD'98:80-86,1998.
+
+# Changes
+#Changes=
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/classAssociationRules1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/classAssociationRules
+
+# Related to other packages?
+#Related=predictiveApriori
+
+# Dependencies
+Depends=weka (>=3.7.3), predictiveApriori (>=1.0.0)

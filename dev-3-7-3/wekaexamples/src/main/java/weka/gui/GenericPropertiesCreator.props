@@ -1,0 +1,45 @@
+########################
+# Main menu extensions #
+########################
+
+# List of extensions for the main GUI, package "weka.gui" is not allowed
+#
+# See also:
+#   http://weka.wiki.sourceforge.net/Extensions+for+Weka%27s+main+GUI
+
+weka.gui.MainMenuExtension=\
+  wekaexamples.gui.extensions
+
+#########################
+# Visualization plugins #
+#########################
+
+# See also the following wiki articles:
+# - Explorer error visualization plugins
+#   http://weka.wiki.sourceforge.net/Explorer+error+visualization+plugins
+# - Explorer graph visualization plugins
+#   http://weka.wiki.sourceforge.net/Explorer+graph+visualization+plugins
+# - Explorer prediction visualization plugins
+#   http://weka.wiki.sourceforge.net/Explorer+prediction+visualization+plugins
+# - Explorer tree visualization plugins
+#   http://weka.wiki.sourceforge.net/Explorer+tree+visualization+plugins
+
+# List of Explorer visualization plugins (classification panel)
+weka.gui.visualize.plugins.VisualizePlugin=\
+ weka.gui.visualize.plugins,\
+ wekaexamples.gui.visualize.plugins
+
+# List of Explorer tree visualization plugins (classification panel)
+weka.gui.visualize.plugins.TreeVisualizePlugin=\
+ weka.gui.visualize.plugins,\
+ wekaexamples.gui.visualize.plugins
+
+# List of Explorer graph visualization plugins (classification panel)
+weka.gui.visualize.plugins.GraphVisualizePlugin=\
+ weka.gui.visualize.plugins,\
+ wekaexamples.gui.visualize.plugins
+
+# List of Explorer error visualization plugins (classification panel)
+weka.gui.visualize.plugins.ErrorVisualizePlugin=\
+ weka.gui.visualize.plugins,\
+ wekaexamples.gui.visualize.plugins

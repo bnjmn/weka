@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=ordinalClassClassifier
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title= Meta classifier that allows standard classification algorithms to be applied to ordinal class problems.
+
+Category=Classification
+
+# Author (required)
+Author=Mark Hall and Eibe Frank
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Meta classifier that allows standard classification algorithms to be applied to ordinal class problems.<br/><br/>For more information see: <br/><br/>Eibe Frank, Mark Hall: A Simple Approach to Ordinal Classification. In: 12th European Conference on Machine Learning, 145-156, 2001.<br/><br/>Robert E. Schapire, Peter Stone, David A. McAllester, Michael L. Littman, Janos A. Csirik: Modeling Auction Price Uncertainty Using Boosting-based Conditional Density Estimation. In: Machine Learning, Proceedings of the Nineteenth International Conference (ICML 2002), 546-553, 2002.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/ordinalClassClassifier1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/ordinalClassClassifier
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1)

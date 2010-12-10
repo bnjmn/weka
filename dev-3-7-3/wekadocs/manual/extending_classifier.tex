@@ -1,0 +1,657 @@
+%
+%    This program is free software; you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation; either version 2 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program; if not, write to the Free Software
+%    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+%
+
+% Version: $Revision$
+
+\subsection{Choosing the base class}
+Common to all classifiers in WEKA is the \texttt{weka.classifiers.Classifier}
+interface. Your new classifier must implement this interface in order to be
+visible through the GenericObjectEditor. But in order to make implementations of
+new classifiers even easier, WEKA comes already with a range of other abstract
+classes that implement \texttt{weka.classifiers.Classifier}. In the following
+you will find an overview that will help you decide what base class to use for
+your classifier. For better readability, the \texttt{weka.classifiers} prefix
+was dropped from the class names:
+\begin{tight_itemize}
+  \item simple classifier
+	\begin{tight_itemize}
+	  \item \texttt{AbstractClassifier} -- not randomizable
+	  \item \texttt{RandomizableClassifier} -- randomizable
+	\end{tight_itemize}
+  \item meta classifier
+	\begin{tight_itemize}
+	  \item single base classifier
+		\begin{tight_itemize}
+		  \item \texttt{SingleClassifierEnhancer} -- not randomizable, not
+iterated
+		  \item \texttt{RandomizableSingleClassifierEnhancer} -- randomizable,
+not iterated
+		  \item \texttt{IteratedSingleClassifierEnhancer} -- not randomizable,
+iterated
+		  \item \texttt{RandomizableIteratedSingleClassifierEnhancer} --
+randomizable, iterated
+		\end{tight_itemize}
+	  \item multiple base classifiers
+		\begin{tight_itemize}
+		  \item \texttt{MultipleClassifiersCombiner} -- not randomizable
+		  \item \texttt{RandomizableMultipleClassifiersCombiner} -- randomizable
+		\end{tight_itemize}
+	\end{tight_itemize}
+\end{tight_itemize}
+In order to make the most of multi-core machines, WEKA offers also
+meta-classifiers that can build the base-classifiers in parallel:
+\begin{tight_itemize}
+  \item \texttt{ParallelIteratedSingleClassifierEnhancer}
+  \item \texttt{ParallelMultipleClassifiersCombiner}
+  \item \texttt{RandomizableParallelIteratedSingleClassifierEnhancer} -- e.g.,
+\texttt{Bagging}
+  \item \texttt{RandomizableParallelMultipleClassifiersCombiner} -- e.g.,
+\texttt{Stacking}
+\end{tight_itemize}
+If you are still unsure about what superclass to choose, then check out the
+Javadoc of those superclasses. In the Javadoc you will find all the classifiers
+that are derived from it, which should give you a better idea whether this
+particular superclass is suited for your needs.
+
+\newpage
+\subsection{Additional interfaces}
+The abstract classes listed above basically just implement various combinations
+of the following two interfaces:
+\begin{tight_itemize}
+  \item \texttt{weka.core.Randomizable} -- to allow (seeded) randomization
+taking place
+  \item \texttt{weka.classifiers.IterativeClassifier} -- to make the classifier
+an iterated one
+\end{tight_itemize}
+But these interfaces are not the only ones that can be implemented by
+a classifier. Here is a list for further interfaces:
+\begin{tight_itemize}
+  \item \texttt{weka.core.AdditionalMeasureProducer} -- the classifier returns
+additional information, e.g., \texttt{J48} returns the tree size with this
+method.
+  \item \texttt{weka.core.WeightedInstancesHandler} -- denotes that the
+classifier can make use of weighted \texttt{Instance} objects (the
+default weight of an \texttt{Instance} is 1.0).
+  \item \texttt{weka.core.TechnicalInformationHandler} -- for returning paper
+references and publications this classifier is based on.
+  \item \texttt{weka.classifiers.Sourcable} -- classifiers implementing this
+interface can return Java code of a built model, which can be used elsewhere.
+  \item \texttt{weka.classifiers.UpdateableClassifier} -- for classifiers that
+can be trained incrementally, i.e., row by row like
+\texttt{NaiveBayesUpdateable}.
+\end{tight_itemize}
+
+\subsection{Packages}
+A few comments about the different sub-packages in the \texttt{weka.classifiers}
+package:
+
+\begin{tight_itemize}
+  \item \texttt{bayes} -- contains bayesian classifiers, e.g.,
+\texttt{NaiveBayes}
+  \item \texttt{evaluation} -- classes related to evaluation, e.g., confusion
+matrix, threshold curve (= ROC)
+  \item \texttt{functions} -- e.g., Support Vector Machines, regression
+algorithms, neural nets
+  \item \texttt{lazy} -- ``learning'' is performed at prediction time, e.g.,
+k-nearest neighbor (k-NN)
+  \item \texttt{meta} -- meta-classifiers that use a base one or more
+classifiers as input, e.g., boosting, bagging or stacking
+  \item \texttt{mi} -- classifiers that handle multi-instance data
+  \item \texttt{misc} -- various classifiers that don't fit in any another
+category
+  \item \texttt{rules} -- rule-based classifiers, e.g., ZeroR
+  \item \texttt{trees} -- tree classifiers, like decision trees with
+\texttt{J48} a very common one
+\end{tight_itemize}
+
+\newpage
+
+\subsection{Implementation}
+In the following you will find information on what methods need to be
+implemented and other coding guidelines for methods, option handling and
+documentation of the source code.
+
+\subsubsection{Methods}
+\label{classifier_methods}
+This section explains what methods need to be implemented in general and more
+specialized ones in case of meta-classifiers (either with single or multiple
+base-classifiers).
+
+\heading{General}
+Here is an overview of methods that your new classifier needs to implement in
+order to integrate nicely into the WEKA framework. Since
+\texttt{AbstractClassifier} implements
+\texttt{weka.core.OptionHandler}, these methods are listed as well.
+
+\heading{globalInfo()}
+returns a short description that is displayed in the GUI, like the Explorer or
+Experimenter. How long this description will be is really up to you, but it
+should be sufficient to understand the classifier's underlying algorithm. If the
+classifier implements the \texttt{weka.core.TechnicalInformationHandler}
+interface then you could refer to the publication(s) by extending the returned
+string by \texttt{getTechnicalInformation().toString()}.
+
+\heading{listOptions()}
+returns a \texttt{java.util.Enumeration} of \texttt{weka.core.Option} objects.
+This enumeration is used to display the help on the command-line, hence it needs
+to return the \texttt{Option} objects of the superclass as well.
+
+\heading{setOptions(String[])}
+parses the options that the classifier would receive from a command-line
+invocation. A parameter and argument are always two elements in the string
+array. A common mistake is to use a single cell in the string array for both of
+them, e.g., \texttt{"-S 1"} instead of \texttt{"-S","1"}. You can use the
+methods \texttt{getOption} and \texttt{getFlag} of the \texttt{weka.core.Utils}
+class to retrieve the values of an option or to ascertain whether a flag is
+present. But note that these calls \textbf{remove} the option and, if
+applicable, the argument from the string array (``destructive''). The last call
+in the \texttt{setOptions} methods should always be the
+\texttt{super.setOptions(String[])} one, in order to pass on any other arguments
+still present in the array to the superclass.
+
+\clearpage
+
+The following code snippet just parses the only option ``alpha'' that an
+imaginary classifier defines:
+{\small \begin{verbatim}
+  import weka.core.Utils;
+  ...
+  public void setOptions(String[] options) throws Exception {
+    String tmpStr = Utils.getOption("alpha", options);
+    if (tmpStr.length() == 0) {
+      setAlpha(0.75);
+    }
+    else {
+      setAlpha(Double.parseDouble(tmpStr));
+    }
+    super.setOptions(options);
+  }
+\end{verbatim}}
+
+\heading{getOptions()}
+returns a string array of command-line options that resemble the current
+classifier setup. Supplying this array to the \texttt{setOptions(String[])}
+method must result in the same configuration. This method will get called in the
+GUI when copying a classifier setup to the clipboard. Since handling of arrays
+is a bit cumbersome in Java (due to fixed length), using an instance of
+\texttt{java.util.Vector} is a lot easier for creating the array that needs to
+be returned. The following code snippet just adds the only option ``alpha'' that
+the classifier defines to the array that is being returned, including the
+options of the superclass:
+\begin{verbatim}
+  import java.util.Arrays;
+  import java.util.Vector;
+  ...
+  public String[] getOptions() {
+    Vector<String> result = new Vector<String>();
+    result.add("-alpha");
+    result.add("" + getAlpha());
+    result.addAll(Arrays.asList(super.getOptions())); // superclass
+    return result.toArray(new String[result.size()]);
+  }
+\end{verbatim}
+Note, that the \texttt{getOptions()} method requires you to add the preceding
+dash for an option, opposed to the \texttt{getOption}/\texttt{getFlag} calls in
+the \texttt{setOptions} method.
+
+\heading{getCapabilities()}
+returns meta-information on what type of data the classifier can handle, in
+regards to attributes and class attributes. See section ``Capabilities'' on page
+\pageref{classifier_capabilities} for more information.
+
+\clearpage
+
+\heading{buildClassifier(Instances)}
+builds the model from scratch with the provided dataset. Each subsequent call of
+this method \textbf{must} result in the same model being built. The
+\texttt{buildClassifier} method also tests whether the supplied data can be
+handled at all by the classifier, utilizing the capabilities returned by the
+\texttt{getCapabilities()} method:
+\begin{verbatim}
+  public void buildClassifier(Instances data) throws Exception {
+    // test data against capabilities
+    getCapabilities().testWithFail(data);
+    // remove instances with missing class value,
+    // but don't modify original data
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    // actual model generation
+    ...
+  }
+\end{verbatim}
+
+\heading{toString()}
+is used for outputting the built model. This is not required, but it is useful
+for the user to see properties of the model. Decision trees normally ouput the
+tree, support vector machines the support vectors and rule-based classifiers the
+generated rules.
+
+\heading{distributionForInstance(Instance)}
+returns the class probabilities array of the prediction for the given
+\texttt{weka.core.Instance} object. If your classifier handles \textit{nominal}
+class attributes, then you need to override this method.
+
+\heading{classifyInstance(Instance)}
+returns the classification or regression for the given
+\texttt{weka.core.Instance} object. In case of a \textit{nominal} class
+attribute, this method returns the index of the class label that got predicted.
+You do not need to override this method in this case as the
+\texttt{weka.classifiers.Classifier} superclass already determines the class
+label index based on the probabilities array that the
+\texttt{distributionForInstance(Instance)} method returns (it returns the index
+in the array with the highest probability; in case of ties the first one). For
+\textit{numeric} class attributes, you need to override this method, as it has
+to return the regression value predicted by the model.
+
+\heading{main(String[])}
+executes the classifier from command-line. If your new algorithm is called
+\texttt{FunkyClassifier}, then use the following code as your \texttt{main}
+method:
+\begin{verbatim}
+  /**
+   * Main method for executing this classifier.
+   *
+   * @param args the options, use "-h" to display options
+   */
+  public static void main(String[] args) {
+    AbstractClassifier.runClassifier(new FunkyClassifier(), args);
+  }
+\end{verbatim}
+
+\newpage
+\subsubsection*{Meta-classifiers}
+Meta-classifiers define a range of other methods that you might want to
+override. Normally, this should not be the case. But if your classifier requires
+the base-classifier(s) to be of a certain type, you can override the specific
+set-method and add additional checks.
+
+\heading{SingleClassifierEnhancer}
+The following methods are used for handling the single base-classifier of this
+meta-classifier.
+
+\heading{defaultClassifierString()}
+returns the class name of the classifier that is used as the default one for
+this meta-classifier.
+
+\heading{setClassifier(Classifier)}
+sets the classifier object. Override this method if you require further checks,
+like that the classifiers needs to be of a certain class. This is necessary, if
+you still want to allow the user to parametrize the base-classifier, but not
+choose another classifier with the GenericObjectEditor. Be aware that this
+method does not create a copy of the provided classifier.
+
+\heading{getClassifier()}
+returns the currently set classifier object. Note, this method returns the
+internal object and not a copy.
+
+\heading{MultipleClassifiersCombiner}
+This meta-classifier handles its multiple base-classifiers with the following
+methods:
+
+\heading{setClassifiers(Classifier[])}
+sets the array of classifiers to use as base-classifiers. If you require the
+base-classifiers to implement a certain interface or be of a certain class, then
+override this method and add the necessary checks. Note, this method does not
+create a copy of the array, but just uses this reference internally.
+
+\heading{getClassifiers()}
+returns the array of classifiers that is in use. Careful, this method returns
+the internal array and not a copy of it.
+
+\heading{getClassifier(int)}
+returns the classifier from the internal classifier array specified by the given
+index. Once again, this method does not return a copy of the classifier, but the
+actual object used by this classifier.
+
+\newpage
+\subsubsection{Guidelines}
+WEKA's code base requires you to follow a few rules. The following sections can
+be used as guidelines in writing your code.
+
+\heading{Parameters}
+\label{classifier_parameters}
+There are two different ways of setting/obtaining parameters of an algorithm.
+Both of them are unfortunately completely independent, which makes option
+handling so prone to errors. Here are the two:
+\begin{tight_enumerate}
+  \item command-line options, using the \texttt{setOptions}/\texttt{getOptions}
+methods
+  \item using the properties through the GenericObjectEditor in the GUI
+\end{tight_enumerate}
+Each command-line option must have a corresponding GUI property and vice versa.
+In case of GUI properties, the get- and set-method for a property must
+comply with Java Beans style in order to show up in the GUI. You need to supply
+three methods for each property:
+\begin{tight_itemize}
+  \item \texttt{public void set\textit{<PropertyName>}(\textit{<Type>})} --
+checks whether the supplied value is valid and only then updates the
+corresponding member variable. In any other case it should ignore the value
+and output a warning in the console or throw an
+\texttt{IllegalArgumentException}.
+  \item \texttt{public \textit{<Type>} get\textit{<PropertyName>}()} --
+performs any necessary conversions of the internal value and returns it.
+  \item \texttt{public String \textit{<propertyName>}TipText()} -- returns the
+help text that is available through the GUI. Should be the same as on the
+command-line. Note: everything after the first period ``.'' gets truncated from
+the tool tip that pops up in the GUI when hovering with the mouse cursor over
+the field in the GenericObjectEditor.
+\end{tight_itemize}
+With a property called ``alpha'' of type ``double'', we get the following
+method signatures:
+\begin{tight_itemize}
+  \item \texttt{public void setAlpha(double)}
+  \item \texttt{public double getAlpha()}
+  \item \texttt{public String alphaTipText()}
+\end{tight_itemize}
+These get- and set-methods should be used in the \texttt{getOptions} and
+\texttt{setOptions} methods as well, to impose the same checks when
+getting/setting parameters.
+
+\heading{Randomization}
+In order to get repeatable experiments, one is not allowed to use unseeded
+random number generators like \texttt{Math.random()}. Instead, one has to
+instantiate a \texttt{java.util.Random} object in the
+\texttt{buildClassifier(Instances)} method with a specific seed value. The seed
+value can be user supplied, of course, which all the \texttt{Randomizable...}
+abstract classifiers already implement.
+
+\newpage
+\heading{Capabilities}
+\label{classifier_capabilities}
+By default, the \texttt{weka.classifiers.AbstractClassifier} superclass returns
+an object that denotes that the classifier can handle \textbf{any} type of data.
+This is useful for rapid prototyping of new algorithms, but also very
+dangerous. If you do not specifically define what type of data can be handled by
+your classifier, you can end up with meaningless models or errors. This can
+happen if you devise a new classifier which is supposed to handle only numeric
+attributes. By using the \texttt{value(int/Attribute)} method of a
+\texttt{weka.core.Instance} to obtain the numeric value of an attribute, you
+also obtain the internal format of nominal, string and relational attributes. Of
+course, treating these attribute types as numeric ones does not make any sense.
+Hence it is highly recommended (and required for contributions) to override this
+method in your own classifier. \\
+
+\noindent There are three different types of capabilities that you can define:
+\begin{tight_enumerate}
+  \item \textit{attribute related} -- e.g., nominal, numeric, date, missing
+values, ...
+  \item \textit{class attribute related} -- e.g., no-class, nominal, numeric,
+missing class values, ...
+  \item \textit{miscellaneous} -- e.g., only multi-instance data, minimum number
+of instances in the training data
+\end{tight_enumerate}
+There are some special cases:
+\begin{tight_itemize}
+  \item \textit{incremental classifiers} -- need to set the minimum number of
+instances in the training data to 0, since the default is 1: \\
+  \texttt{setMinimumNumberInstances(0)}
+  
+  \item \textit{multi-instance classifiers} -- in order to signal that the
+special multi-instance format (\textit{bag-id, bag-data, class}) is used, they
+need to enable the following capability: \\
+  \texttt{enable(Capability.ONLY\_MULTIINSTANCE)} \\
+  These classifiers also need to implement the interface specific to
+multi-instance, \texttt{weka.core.MultiInstanceCapabilitiesHandler}, which
+returns the capabilities for the \textit{bag-data}.
+
+  \item \textit{cluster algorithms} -- since clusterers are unsupervised
+algorithms, they cannot process data with the class attribute set. The
+capability that denotes that an algorithm can handle data without a class
+attribute is \texttt{Capability.NO\_CLASS}
+\end{tight_itemize}
+And a note on enabling/disabling \textit{nominal attributes} or \textit{nominal
+class attributes}. These operations automatically enable/disable the
+\textit{binary}, \textit{unary} and \textit{empty nominal} capabilities as well.
+The following sections list a few examples of how to configure the capabilities.
+
+\newpage
+\heading{Simple classifier}
+A classifier that handles only numeric classes and numeric and nominal
+attributes, but no missing values at all, would configure the
+\texttt{Capabilities} object like this:
+\begin{verbatim}
+  public Capabilities getCapabilities() {
+    Capabilities result = new Capabilities(this);
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    // class
+    result.enable(Capability.NUMERIC_CLASS);
+    return result;
+  }
+\end{verbatim}
+Another classifier, that only handles binary classes and only nominal
+attributes and missing values, would implement the \texttt{getCapabilities()}
+method as follows:
+\begin{verbatim}
+  public Capabilities getCapabilities() {
+    Capabilities result = new Capabilities(this);
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    // class
+    result.enable(Capability.BINARY_CLASS);
+    result.disable(Capability.UNNARY_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    return result;
+  }
+\end{verbatim}
+
+\heading{Meta-classifier}
+Meta-classifiers, by default, just return the capabilities of their base
+classifiers - in case of descendants of the
+\texttt{weka.classifier.MultipleClassifiersCombiner}, an \textbf{AND} over all
+the \texttt{Capabilities} of the base classifiers is returned.
+
+Due to this behavior, the capabilities depend -- normally -- only on the
+currently configured base classifier(s). To \textit{soften} filtering for
+certain behavior, meta-classifiers also define so-called \textit{Dependencies}
+on a per-Capability basis. These dependencies tell the filter that even though a
+certain capability is not supported right now, it is possible that it will be
+supported with a different base classifier. By default, all
+capabilities are initialized as \textit{Dependencies}.
+
+\texttt{weka.classifiers.meta.LogitBoost}, e.g., is restricted to nominal
+classes. For that reason it disables the \textit{Dependencies} for the class:
+{\small \begin{verbatim}
+    result.disableAllClasses();              // disable all class types
+    result.disableAllClassDependencies();    // no dependencies!
+    result.enable(Capability.NOMINAL_CLASS); // only nominal classes allowed
+\end{verbatim}}
+
+\newpage
+\heading{Javadoc}
+\label{classifier_javadoc}
+In order to keep code-quality high and maintenance low, source code needs to
+be well documented. This includes the following Javadoc requirements:
+\begin{tight_itemize}
+  \item \textbf{class}
+    \begin{tight_itemize}
+      \item description of the classifier
+      \item listing of command-line parameters
+      \item publication(s), if applicable
+      \item \texttt{@author} and \texttt{@version} tag
+    \end{tight_itemize}
+
+  \item \textbf{methods} (all, not just public)
+    \begin{tight_itemize}
+      \item each \textit{parameter} is documented
+      \item \textit{return} value, if applicable, is documented
+      \item \textit{exception(s)} are documented
+      \item the \texttt{setOptions(String[])} method also lists the
+command-line parameters
+    \end{tight_itemize}
+\end{tight_itemize}
+Most of the \textit{class}-related and the \texttt{setOptions} Javadoc is
+already available through the source code:
+\begin{tight_itemize}
+  \item description of the classifier -- \texttt{globalInfo()}
+  \item listing of command-line parameters -- \texttt{listOptions()}
+  \item publication(s), if applicable -- \texttt{getTechnicalInformation()}
+\end{tight_itemize}
+In order to avoid manual syncing between Javadoc and source code, WEKA comes
+with some tools for updating the Javadoc automatically. The following tools take
+a concrete class and update its source code (the source code directory needs to
+be supplied as well, of course):
+\begin{tight_itemize}
+  \item \texttt{weka.core.AllJavadoc} -- executes all Javadoc-producing
+classes (this is the tool, you would normally use)
+  \item \texttt{weka.core.GlobalInfoJavadoc} -- updates the \textit{globalinfo}
+tags
+  \item \texttt{weka.core.OptionHandlerJavadoc} -- updates the \textit{option}
+tags
+  \item \texttt{weka.core.TechnicalInformationHandlerJavadoc} -- updates the
+\textit{technical} tags (plain text and BibTeX)
+\end{tight_itemize}
+These tools look for specific comment tags in the source code and replace
+everything in between the start and end tag with the documentation obtained
+from the actual class.
+\begin{tight_itemize}
+  \item description of the classifier
+    \begin{verbatim}
+    <!-- globalinfo-start -->
+    will be automatically replaced
+    <!-- globalinfo-end -->
+    \end{verbatim}
+  \item listing of command-line parameters
+    \begin{verbatim}
+    <!-- options-start -->
+    will be automatically replaced
+    <!-- options-end -->
+   \end{verbatim}
+  \item publication(s), if applicable
+    \begin{verbatim}
+    <!-- technical-bibtex-start -->
+    will be automatically replaced
+    <!-- technical-bibtex-end -->
+    \end{verbatim}
+    for a shortened, plain-text version use the following:
+    \begin{verbatim}
+    <!-- technical-plaintext-start -->
+    will be automatically replaced
+    <!-- technical-plaintext-end -->
+   \end{verbatim}
+\end{tight_itemize}
+
+\newpage
+\noindent Here is a template of a Javadoc class block for an imaginary
+classifier that also implements the
+\texttt{weka.core.TechnicalInformationHandler} interface:
+\begin{verbatim}
+/**
+ <!-- globalinfo-start -->
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ <!-- options-end -->
+ *
+ * @author John Doe (john dot doe at no dot where dot com)
+ * @version $Revision$
+ */
+\end{verbatim}
+The template for any classifier's \texttt{setOptions(String[])} method
+is as follows:
+\begin{verbatim}
+  /**
+   * Parses a given list of options.
+   *
+   <!-- options-start -->
+   <!-- options-end -->
+   *
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+\end{verbatim}
+Running the \texttt{weka.core.AllJavadoc} tool over this code will output code
+with the comments filled out accordingly.
+
+\heading{Revisions}
+\label{classifier_revisions}
+Classifiers implement the \texttt{weka.core.RevisionHandler} interface. This
+provides the functionality of obtaining the Subversion revision from within
+Java. Classifiers that are not part of the official WEKA distribution
+do not have to implement the method \texttt{getRevision()} as the
+\texttt{weka.classifiers.Classifier} class already implements this method.
+Contributions, on the other hand, need to implement it as follows, in order to
+obtain the revision of this particular source file:
+\begin{verbatim}
+  /**
+   * Returns the revision string.
+   *
+   * @return        the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
+  }
+\end{verbatim}
+Note, a commit into Subversion will replace the revision number above with the
+actual revision number.
+
+\heading{Testing}
+WEKA provides already a test framework to ensure correct basic functionality of
+a classifier. It is essential for the classifier to pass these tests.
+
+\heading{Option handling}
+You can check the option handling of your classifier with the following tool
+from command-line:
+\begin{verbatim}
+ weka.core.CheckOptionHandler -W classname [-- additional parameters]
+\end{verbatim}
+All tests need to return \textit{yes}.
+
+\heading{GenericObjectEditor}
+The \texttt{CheckGOE} class checks whether all the properties available in the
+GUI have a tooltip accompanying them and whether the \texttt{globalInfo()}
+method is declared:
+\begin{verbatim}
+ weka.core.CheckGOE -W classname [-- additional parameters]
+\end{verbatim}
+All tests, once again, need to return \textit{yes}.
+
+\heading{Source code}
+Classifiers that implement the \texttt{weka.classifiers.Sourcable} interface can
+output Java code of the built model. In order to check the generated  code, one
+should not only compile the code, but also test it with the following test
+class:
+\begin{verbatim}
+ weka.classifiers.CheckSource
+\end{verbatim}
+This class takes the original WEKA classifier, the generated code and the
+dataset used for generating the model (and an optional class index) as
+parameters. It builds the WEKA classifier on the dataset and compares the
+output, the one from the WEKA classifier and the one from the generated source
+code, whether they are the same.
+
+Here is an example call for \texttt{weka.filters.trees.J48} and the
+generated class \texttt{weka.filters.WEKAWrapper} (it wraps the actual generated
+code in a pseudo-classifier):
+\begin{verbatim}
+ java weka.classifiers.CheckSource \
+    -W weka.classifiers.trees.J48 \
+    -S weka.classifiers.WEKAWrapper \
+    -t data.arff
+\end{verbatim}
+It needs to return \textit{Tests OK!}.
+
+\heading{Unit tests}
+In order to make sure that your classifier applies to the WEKA criteria, you
+should add your classifier to the junit unit test framework, i.e., by creating a
+Test class. The superclass for classifier unit tests is
+\texttt{weka.classifiers.AbstractClassifierTest}.
+

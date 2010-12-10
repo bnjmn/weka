@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=bestFirstTree
+
+# Version (required)
+Version=1.0.1
+
+#Date
+Date=2010-11-16
+
+# Title (required)
+Title=Class for building a best-first decision tree classifier.
+
+Category=Classification
+
+# Author (required)
+Author=Haijian Shi
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Class for building a best-first decision tree classifier. This class uses binary split for both nominal and numeric attributes. For missing values, the method of 'fractional' instances is used.<br/><br/>For more information, see:<br/><br/>Haijian Shi (2007). Best-first decision tree learning. Hamilton, NZ.<br/> <br/>Jerome Friedman, Trevor Hastie, Robert Tibshirani (2000). Additive logistic regression : A statistical view of boosting. Annals of statistics. 28(2):337-407.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/bestFirstTree1.0.1.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/bestFirstTree
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.2)

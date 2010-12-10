@@ -1,0 +1,41 @@
+# Description file for citationKNN
+#
+# 
+
+# Package name (required)
+PackageName=citationKNN
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title= Modified version of the Citation kNN multi instance classifier
+
+Category=Multi-instance learning
+
+# Author (required)
+Author=Miguel Garcia Torres <mgarciat@ull.es>
+
+# Maintainer (required)
+Maintainer=Miguel Garcia Torres <mgarciat@ull.es>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Modified version of the Citation kNN multi instance classifier. For more information see: Jun Wang, Zucker, Jean-Daniel: Solving Multiple-Instance Problem: A Lazy Learning Approach. In: 17th International Conference on Machine Learning, 1119-1125, 2000.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/citationKNN1.0.0.zip?download
+
+# URL for further information
+#URL=http://weka.sourceforge.net/doc.packages/citationKNN
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

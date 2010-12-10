@@ -1,0 +1,41 @@
+# Description file for normalize
+#
+# 
+
+# Package name (required)
+PackageName=SMOTE
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Resamples a dataset by applying the Synthetic Minority Oversampling TEchnique (SMOTE).
+
+Category=Preprocessing
+
+# Author (required)
+Author=Ryan Lichtenwalter <rlichtenwalter@gmail.com>
+
+# Maintainer (required)
+Maintainer=Ryan Lichtenwalter <rlichtenwalter@gmail.com>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Resamples a dataset by applying the Synthetic Minority Oversampling TEchnique (SMOTE). The original dataset must fit entirely in memory. The amount of SMOTE and number of nearest neighbors may be specified. For more information, see <br/><br/>Nitesh V. Chawla et. al. (2002). Synthetic Minority Over-sampling Technique. Journal of Artificial Intelligence Research. 16:321-357.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/SMOTE1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/SMOTE
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

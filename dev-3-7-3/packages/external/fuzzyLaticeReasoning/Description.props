@@ -1,0 +1,41 @@
+# Description file for fuzzyLaticeReasoning
+#
+# 
+
+# Package name (required)
+PackageName=fuzzyLaticeReasoning
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=The Fuzzy Lattice Reasoning Classifier uses the notion of Fuzzy Lattices for creating a Reasoning Environment
+
+Category=Classification
+
+# Author (required)
+Author=Ioannis N. Athanasiadis <ionathan@iti.gr>
+
+# Maintainer (required)
+Maintainer=Ioannis N. Athanasiadis <ionathan@iti.gr>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=The Fuzzy Lattice Reasoning Classifier uses the notion of Fuzzy Lattices for creating a Reasoning Environment. The current version can be used for classification using numeric predictors. For more information see: I. N. Athanasiadis, V. G. Kaburlasos, P. A. Mitkas, V. Petridis: Applying Machine Learning Techniques on Air Quality Data for Real-Time Decision Support. In: 1st Intl. NAISO Symposium on Information Technologies in Environmental Engineering (ITEE-2003), Gdansk, Poland, 2003; V. G. Kaburlasos, I. N. Athanasiadis, P. A. Mitkas, V. Petridis (2003). Fuzzy Lattice Reasoning (FLR) Classifier and its Application on Improved Estimation of Ambient Ozone Concentration.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/fuzzyLaticeReasoning1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/fuzzyLaticeReasoning
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

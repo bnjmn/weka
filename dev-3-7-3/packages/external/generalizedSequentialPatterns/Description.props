@@ -1,0 +1,41 @@
+# Description file for generalizedSequentialPatterns
+#
+# 
+
+# Package name (required)
+PackageName=generalizedSequentialPatterns
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Class implementing a GSP algorithm for discovering sequential patterns in a sequential data set
+
+Category=Associations
+
+# Author (required)
+Author=Sebastian Beer
+
+# Maintainer (required)
+Maintainer=Sebastian Beer
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Class implementing a GSP algorithm for discovering sequential patterns in a sequential data set. The attribute identifying the distinct data sequences contained in the set can be determined by the respective option. Furthermore, the set of output results can be restricted by specifying one or more attributes that have to be contained in each element/itemset of a sequence. For further information see: Ramakrishnan Srikant, Rakesh Agrawal (1996). Mining Sequential Patterns: Generalizations and Performance Improvements.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/generalizedSequentialPatterns1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/generalizedSequentialPatterns
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

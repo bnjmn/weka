@@ -1,0 +1,41 @@
+# Description file for decorate
+#
+# 
+
+# Package name (required)
+PackageName=decorate
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=DECORATE is a meta-learner for building diverse ensembles of classifiers by using specially constructed artificial training examples
+
+Category=Ensemble learning
+
+# Author (required)
+Author=Prem Melville <melville@cs.utexas.edu>
+
+# Maintainer (required)
+Maintainer=Prem Melville <melville@cs.utexas.edu>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=DECORATE is a meta-learner for building diverse ensembles of classifiers by using specially constructed artificial training examples. Comprehensive experiments have demonstrated that this technique is consistently more accurate than the base classifier, Bagging and Random Forests. Decorate also obtains higher accuracy than Boosting on small training sets, and achieves comparable performance on larger training sets. For more details see: P. Melville, R. J. Mooney: Constructing Diverse Classifier Ensembles Using Artificial Training Examples. In: Eighteenth International Joint Conference on Artificial Intelligence, 505-510, 2003; P. Melville, R. J. Mooney (2004). Creating Diversity in Ensembles Using Artificial Data. Information Fusion: Special Issue on Diversity in Multiclassifier Systems.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/decorate1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/decorate
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

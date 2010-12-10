@@ -1,0 +1,37 @@
+/* 
+ * CSS for Weka Documentation
+ *
+ * Author:  FracPete (fracpete at waikato dot ac dot nz)
+ * Version: $Revision: 1.1 $
+ */
+
+/* general body setup */
+body {
+  background: #FFFFFF;
+  color: #000000;
+}
+
+/* links */
+a {
+    text-decoration: underline;
+    color: #4F2F2F;
+    background: none;
+}
+a:visited { 
+  color: #666633; 
+}
+a:active { 
+  color: #cc9900; 
+}
+a:hover { 
+  text-decoration: none; 
+}
+
+/* header */
+h1, h2, h3, h4, h5, h6 {
+  color: #990000;
+  font-family: verdana; 
+  font-weight: bold; 
+}
+
+

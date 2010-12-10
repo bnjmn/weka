@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=multiInstanceFilters
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2010-05-31
+
+# Title (required)
+Title=A collection of filters for manipulating multi-instance data.
+
+Category=Preprocessing
+
+# Author (required)
+Author=Lin Dong and Peter Reutemann
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=A collection of filters for manipulating multi-instance data. Includes PropositionalToMultiInstance, MultiInstanceToPropositional, MILESFilter and RELAGGS. For more information see:<br/><br/>M.-A. Krogel, S. Wrobel: Facets of Aggregation Approaches to Propositionalization. In: Work-in-Progress Track at the Thirteenth International Conference on Inductive Logic Programming (ILP), 2003.<br/><br/>Y. Chen, J. Bi, J.Z. Wang (2006). MILES: Multiple-instance learning via embedded instance selection. IEEE PAMI. 28(12):1931-1947.<br/><br/>James Foulds, Eibe Frank: Revisiting multiple-instance learning via embedded instance selection. In: 21st Australasian Joint Conference on Artificial Intelligence, 300-310, 2008.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceFilters1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/multiInstanceFilters
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)
