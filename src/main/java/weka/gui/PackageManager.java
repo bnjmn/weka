@@ -618,20 +618,23 @@ public class PackageManager extends JPanel {
       m_progress.setMaximum(30);
       
       Package installedPackage = null;
+      String toInstall = m_target;
+      try {
+        toInstall = Environment.getSystemWide().substitute(m_target);
+      } catch (Exception ex) {}
       
       try {
-        if (m_target.toLowerCase().startsWith("http://") || 
-            m_target.toLowerCase().startsWith("https://")) {
-
+        if (toInstall.toLowerCase().startsWith("http://") || 
+            toInstall.toLowerCase().startsWith("https://")) {
           String packageName = 
-            WekaPackageManager.installPackageFromURL(new URL(m_target), pps);
+            WekaPackageManager.installPackageFromURL(new URL(toInstall), pps);
           installedPackage = WekaPackageManager.getInstalledPackageInfo(packageName);
-        } else if (m_target.toLowerCase().endsWith(".zip")){
-          String packageName = WekaPackageManager.installPackageFromArchive(m_target, pps);
+        } else if (toInstall.toLowerCase().endsWith(".zip")){
+          String packageName = WekaPackageManager.installPackageFromArchive(toInstall, pps);
           installedPackage = WekaPackageManager.getInstalledPackageInfo(packageName);
         } else {
           displayErrorDialog("Unable to install package " +
-              "\nfrom " + m_target + ". Unrecognized as a URL or zip archive.",
+              "\nfrom " + toInstall + ". Unrecognized as a URL or zip archive.",
               (String)null);
           m_errorOccurred = true;
           return null;
