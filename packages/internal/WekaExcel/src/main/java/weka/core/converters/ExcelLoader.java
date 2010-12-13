@@ -22,6 +22,16 @@
 
 package weka.core.converters;
 
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.Utils;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -33,20 +43,11 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Vector;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
-import weka.core.Utils;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 /**
  <!-- globalinfo-start -->
@@ -99,7 +100,7 @@ public class ExcelLoader
   protected transient InputStream m_sourceStream = null;
 
   /** the currently open Excel document. */
-  protected HSSFWorkbook m_Workbook;
+  protected Workbook m_Workbook;
 
   /** the sheet to load. */
   protected SingleIndex m_SheetIndex = new SingleIndex("first");
@@ -357,9 +358,9 @@ public class ExcelLoader
 
     if (m_structure == null) {
       try {
-	m_Workbook = new HSSFWorkbook(m_sourceStream);
+	m_Workbook = WorkbookFactory.create(m_sourceStream);
 	m_SheetIndex.setUpper(m_Workbook.getNumberOfSheets() - 1);
-	HSSFSheet sheet = m_Workbook.getSheetAt(m_SheetIndex.getIndex());
+	Sheet sheet = m_Workbook.getSheetAt(m_SheetIndex.getIndex());
 	if (sheet.getPhysicalNumberOfRows() == 0)
 	  throw new IllegalStateException("No rows in sheet #" + m_SheetIndex.getSingleIndex());
 	ArrayList<Attribute> atts = new ArrayList<Attribute>();
@@ -419,7 +420,7 @@ public class ExcelLoader
       Vector<Object[]> data = new Vector<Object[]>();
       boolean newHeader = false;
       int[] attType = new int[m_structure.numAttributes()];
-      HSSFSheet sheet = m_Workbook.getSheetAt(m_SheetIndex.getIndex());
+      Sheet sheet = m_Workbook.getSheetAt(m_SheetIndex.getIndex());
       for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
 	Object[] dataRow = new Object[m_structure.numAttributes()];
 	data.add(dataRow);
