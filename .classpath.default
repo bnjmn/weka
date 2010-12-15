@@ -3,9 +3,7 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" output="build/testcases" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/odfdom.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jOpenDocument.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/weka.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/weka-tests.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
