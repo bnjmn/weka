@@ -6,10 +6,10 @@
 PackageName=WekaODF
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date (year-month-day)
-Date=2010-10-13
+Date=2010-12-16
 
 # Title (required)
 Title=WEKA ODF loader/saver
@@ -27,13 +27,13 @@ Maintainer=FracPete (fracpete at waikato dot ac dot nz)
 License=GPL 2.0
 
 # Description (required)
-Description=WekaODF adds support to directory read from and write to spreadsheets in ODF (Open Document Format for Office Applications, ISO/IEC 26300:2006) format. ODF is used by the OpenOffice.org suite, for instance. WekaODF uses ODFDOM (http://odftoolkit.org/projects/odfdom, Apache 2.0) in order to read/write ODF spreadsheets.
+Description=WekaODF adds support to directory read from and write to spreadsheets in ODF (Open Document Format for Office Applications, ISO/IEC 26300:2006) format. ODF is used by the OpenOffice.org suite, for instance. WekaODF uses jOpenDocument (http://www.jOpenDocument.org, GPL) in order to read/write ODF spreadsheets.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/WekaODF1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/WekaODF1.0.1.zip?download
 
 # URL for further information
-URL=http://java.dzone.com/news/integrate-openoffice-java
+URL=
 
 # Related to other packages?
 Related=WekaExcel
