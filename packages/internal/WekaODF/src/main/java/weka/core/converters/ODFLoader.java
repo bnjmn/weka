@@ -44,14 +44,10 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Vector;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-
-import org.odftoolkit.odfdom.OdfFileDom;
-import org.odftoolkit.odfdom.doc.OdfDocument;
-import org.odftoolkit.odfdom.dom.element.table.TableTableCellElement;
-import org.odftoolkit.odfdom.dom.element.table.TableTableRowElement;
-import org.w3c.dom.NodeList;
+import org.jopendocument.dom.ODPackage;
+import org.jopendocument.dom.ODValueType;
+import org.jopendocument.dom.spreadsheet.Sheet;
+import org.jopendocument.dom.spreadsheet.SpreadSheet;
 
 /**
  <!-- globalinfo-start -->
@@ -101,7 +97,7 @@ public class ODFLoader
   protected transient InputStream m_sourceStream = null;
 
   /** the currently open ODF document. */
-  protected OdfDocument m_ODFDoc;
+  protected SpreadSheet m_Spreadsheet;
 
   /** the sheet to load. */
   protected SingleIndex m_SheetIndex = new SingleIndex("first");
@@ -254,7 +250,7 @@ public class ODFLoader
    */
   public void reset() throws IOException {
     m_structure   = null;
-    m_ODFDoc      = null;
+    m_Spreadsheet = null;
     m_SheetIndex.setSingleIndex("first");
 
     setRetrieval(NONE);
@@ -301,8 +297,8 @@ public class ODFLoader
    * @throws IOException 	if an error occurs
    */
   public void setSource(URL url) throws IOException {
-    m_structure = null;
-    m_ODFDoc    = null;
+    m_structure   = null;
+    m_Spreadsheet = null;
 
     setRetrieval(NONE);
 
@@ -359,20 +355,18 @@ public class ODFLoader
 
     if (m_structure == null) {
       try {
-	m_ODFDoc = OdfDocument.loadDocument(m_sourceStream);
-	OdfFileDom odfContent = m_ODFDoc.getContentDom();
-	XPath xpath = m_ODFDoc.getXPath();
-	NodeList sheetList = (NodeList) xpath.evaluate("//table:table", odfContent, XPathConstants.NODESET);
-	m_SheetIndex.setUpper(sheetList.getLength() - 1);
-	int row = 1;
-	NodeList colList = (NodeList) xpath.evaluate("//table:table[" + (m_SheetIndex.getIndex() + 1) + "]/table:table-row[" + row + "]/table:table-cell", odfContent, XPathConstants.NODESET);
+	m_Spreadsheet = SpreadSheet.create(new ODPackage(m_sourceStream));
+	m_SheetIndex.setUpper(m_Spreadsheet.getSheetCount() - 1);
+	Sheet sheet = m_Spreadsheet.getSheet(m_SheetIndex.getIndex());
 	ArrayList<Attribute> atts = new ArrayList<Attribute>();
-	for (int i = 0; i < colList.getLength(); i++) {
-	  TableTableCellElement cell = (TableTableCellElement) colList.item(i);
-          if (!cell.getTextContent().isEmpty())
-            atts.add(new Attribute(cell.getTextContent()));
-          else
-            atts.add(new Attribute("column-" + (i+1)));
+	for (int i = 0; i < sheet.getColumnCount(); i++) {
+	  if (sheet.getCellAt(i, 0).getTextValue().length() == 0)
+	    break;
+	  String cellStr = sheet.getCellAt(i, 0).getTextValue();
+	  if (cellStr.length() == 0)
+	    atts.add(new Attribute("column-" + (i+1)));
+	  else
+	    atts.add(new Attribute(cellStr));
 	}
 	m_structure = new Instances("WekaODF", atts, 0);
       }
@@ -439,33 +433,31 @@ public class ODFLoader
       Vector<Object[]> data = new Vector<Object[]>();
       boolean newHeader = false;
       int[] attType = new int[m_structure.numAttributes()];
-      OdfFileDom odfContent = m_ODFDoc.getContentDom();
-      XPath xpath = m_ODFDoc.getXPath();
-      NodeList rowList = (NodeList) xpath.evaluate("//table:table[" + (m_SheetIndex.getIndex() + 1) + "]/table:table-row", odfContent, XPathConstants.NODESET);
-      for (int i = 1; i < rowList.getLength(); i++) {
-	Object[] dataRow = new Object[m_structure.numAttributes()];
-	data.add(dataRow);
-	TableTableRowElement row = (TableTableRowElement) rowList.item(i);
-	NodeList colList = (NodeList) xpath.evaluate(".//table:table-cell", row, XPathConstants.NODESET);
-	for (int n = 0; n < colList.getLength(); n++) {
-	  TableTableCellElement cell = (TableTableCellElement) colList.item(n);
-	  if (!cell.getTextContent().isEmpty()) {
-	    String cellStr = cell.getTextContent();
-	    if ((m_MissingValue.length() > 0) && cellStr.equals(m_MissingValue)) {
-	      dataRow[n] = null;
-	    }
-	    else {
-	      dataRow[n] = convert(cellStr);
-	      if (dataRow[n] instanceof String) {
-		attType[n] = Attribute.NOMINAL;
-		newHeader = true;
-	      }
-	    }
-	  }
-	  else {
-	    dataRow[n] = null;
+      m_SheetIndex.setUpper(m_Spreadsheet.getSheetCount() - 1);
+      Sheet sheet = m_Spreadsheet.getSheet(m_SheetIndex.getIndex());
+      for (int n = 1; n < sheet.getRowCount(); n++) {
+	Object[] row = new Object[m_structure.numAttributes()];
+	boolean empty = true;
+	for (int i = 0; i < row.length; i++) {
+	  row[i] = sheet.getCellAt(i, n).getValue();
+	  if (sheet.getCellAt(i, n).getTextValue().length() > 0)
+	    empty = false;
+	  // missing value?
+	  if (sheet.getCellAt(i, n).getTextValue().equals(m_MissingValue))
+	    row[i] = null;
+	}
+	// no more data?
+	if (empty)
+	  break;
+	// analyze type
+	for (int i = 0; i < row.length; i++) {
+	  if (sheet.getCellAt(i, n).getValueType() != ODValueType.FLOAT) {
+	    attType[i] = Attribute.NOMINAL;
+	    newHeader = true;
 	  }
 	}
+	// add row
+	data.add(row);
       }
 
       // new structure necessary?
@@ -478,7 +470,7 @@ public class ODFLoader
 	  else if (attType[i] == Attribute.NOMINAL) {
 	    HashSet<String> strings = new HashSet<String>();
 	    for (int n = 0; n < data.size(); n++) {
-	      if (data.get(n)[i] != null)
+	      if ((data.get(n)[i] != null) && !data.get(n)[i].toString().equals(m_MissingValue))
 		strings.add(data.get(n)[i].toString());
 	    }
 	    ArrayList<String> attValues = new ArrayList<String>(strings);

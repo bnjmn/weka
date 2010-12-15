@@ -22,7 +22,6 @@
 
 package weka.core.converters;
 
-import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -33,13 +32,11 @@ import weka.core.Capabilities.Capability;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Vector;
 
-import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument;
-import org.odftoolkit.odfdom.doc.table.OdfTable;
-import org.odftoolkit.odfdom.doc.table.OdfTableCell;
-import org.odftoolkit.odfdom.doc.table.OdfTableRow;
+import javax.swing.table.DefaultTableModel;
+
+import org.jopendocument.dom.spreadsheet.SpreadSheet;
 
 /**
  <!-- globalinfo-start -->
@@ -274,58 +271,29 @@ public class ODFSaver
 
     try {
       Instances data = getInstances();
-      OdfSpreadsheetDocument outputDocument = OdfSpreadsheetDocument.newSpreadsheetDocument();
-      OdfTable table;
-      List<OdfTable> tables = outputDocument.getTableList();
-      for (OdfTable t: tables)
-	t.remove();
-      table = OdfTable.newTable(outputDocument, data.numInstances() + 1, data.numAttributes());  // +1 for header
-      table.setTableName(data.relationName());
-      OdfTableRow row;
-      OdfTableCell cell;
-      Instance inst;
-
+      DefaultTableModel model = new DefaultTableModel(data.numInstances() + 1, data.numAttributes());  // +1 for header
       // header
-      row = table.getRowByIndex(0);
-      for (int i = 0; i < data.numAttributes(); i++) {
-	cell = row.getCellByIndex(i);
-	cell.setStringValue(data.attribute(i).name());
-      }
-
+      String[] header = new String[data.numAttributes()];
+      for (int i = 0; i < data.numAttributes(); i++)
+	header[i] = data.attribute(i).name();
+      model.setColumnIdentifiers(header);
       // data
       for (int n = 0; n < data.numInstances(); n++) {
-	row = table.getRowByIndex(n + 1);
-	inst = data.instance(n);
+	Instance inst = data.instance(n);
 	for (int i = 0; i < data.numAttributes(); i++) {
-	  cell = row.getCellByIndex(i);
-
-	  if (inst.isMissing(i)) {
-	    if (m_MissingValue.length() > 0)
-	      cell.setStringValue(m_MissingValue);
-	    continue;
-	  }
-
-	  switch (data.attribute(i).type()) {
-	    case Attribute.NUMERIC:
-	      cell.setDoubleValue(inst.value(i));
-	      break;
-
-	    case Attribute.NOMINAL:
-	    case Attribute.STRING:
-	      cell.setStringValue(inst.stringValue(i));
-	      break;
-
-	    default:
-	      throw new IllegalStateException("Unhandled attribute type: " + data.attribute(i).type());
-	  }
+	  if (inst.isMissing(i))
+	    model.setValueAt(m_MissingValue, n, i);
+	  else if (inst.attribute(i).isNumeric())
+	    model.setValueAt(inst.value(i), n, i);
+	  else
+	    model.setValueAt(inst.stringValue(i), n, i);
 	}
       }
-
-      // save
+      SpreadSheet spreadsheet = SpreadSheet.createEmpty(model);
       if (retrieveFile() == null)
-        outputDocument.save(System.out);
+	spreadsheet.getPackage().save(System.out);
       else
-        outputDocument.save(retrieveFile());
+        spreadsheet.saveAs(retrieveFile());
     }
     catch (Exception e) {
       throw new IOException(e);
