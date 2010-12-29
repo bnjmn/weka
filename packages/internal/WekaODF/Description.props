@@ -29,6 +29,9 @@ License=GPL 2.0
 # Description (required)
 Description=WekaODF adds support to directory read from and write to spreadsheets in ODF (Open Document Format for Office Applications, ISO/IEC 26300:2006) format. ODF is used by the OpenOffice.org suite, for instance. WekaODF uses jOpenDocument (http://www.jOpenDocument.org, GPL) in order to read/write ODF spreadsheets.
 
+# Changes in this version
+Changes=This version implements improved support for ODF spreadsheets by using the jOpenDocument library.
+
 # Package URL for obtaining the package archive (required)
 PackageURL=http://prdownloads.sourceforge.net/weka/WekaODF1.0.1.zip?download
 
