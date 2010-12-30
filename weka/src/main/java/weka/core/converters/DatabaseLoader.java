@@ -66,7 +66,7 @@ import java.util.Vector;
  * Sets incremental loading
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.5 $
+ * @version $Revision$
  * @see Loader
  */
 public class DatabaseLoader extends AbstractLoader implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
@@ -644,7 +644,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
                 case STRING :
                     //System.err.println("String --> nominal");
                     ResultSet rs1;
-                    String columnName = md.getColumnName(i);
+                    String columnName = md.getColumnLabel(i);
                     if(m_DataBaseConnection.getUpperCase())
                         columnName = columnName.toUpperCase();
                     m_nominalIndexes[i - 1] = new Hashtable();
@@ -716,7 +716,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
         for (int i = 0; i < numAttributes; i++) {
             /* Fix for databases that uppercase column names */
             //String attribName = attributeCaseFix(md.getColumnName(i + 1));
-            String attribName = md.getColumnName(i + 1);
+            String attribName = md.getColumnLabel(i + 1);
             switch (attributeTypes[i]) {
                 case Attribute.NOMINAL:
                     attribInfo.addElement(new Attribute(attribName, m_nominalStrings[i]));
@@ -797,7 +797,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	
       case STRING :
         ResultSet rs1;
-        String columnName = md.getColumnName(i);
+        String columnName = md.getColumnLabel(i);
         if(m_DataBaseConnection.getUpperCase())
             columnName = columnName.toUpperCase();
         String end = endOfQuery(false);
@@ -954,7 +954,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
     for (int i = 0; i < numAttributes; i++) {
       /* Fix for databases that uppercase column names */
       //String attribName = attributeCaseFix(md.getColumnName(i + 1));
-      String attribName = md.getColumnName(i + 1);
+      String attribName = md.getColumnLabel(i + 1);
       switch (attributeTypes[i]) {
       case Attribute.NOMINAL:
 	attribInfo.addElement(new Attribute(attribName, m_nominalStrings[i]));
