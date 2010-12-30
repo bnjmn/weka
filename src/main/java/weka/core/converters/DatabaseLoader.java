@@ -731,7 +731,7 @@ public class DatabaseLoader
                 case DatabaseConnection.STRING :
                     //System.err.println("String --> nominal");
                     ResultSet rs1;
-                    String columnName = md.getColumnName(i);
+                    String columnName = md.getColumnLabel(i);
                     if(m_DataBaseConnection.getUpperCase())
                         columnName = columnName.toUpperCase();
                     m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
@@ -766,7 +766,7 @@ public class DatabaseLoader
                     break;
                 case DatabaseConnection.TEXT:
                     //System.err.println("boolean --> string");
-                    columnName = md.getColumnName(i);
+                    columnName = md.getColumnLabel(i);
                     if(m_DataBaseConnection.getUpperCase())
                       columnName = columnName.toUpperCase();
                     m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
@@ -828,7 +828,7 @@ public class DatabaseLoader
         for (int i = 0; i < numAttributes; i++) {
             /* Fix for databases that uppercase column names */
             //String attribName = attributeCaseFix(md.getColumnName(i + 1));
-            String attribName = md.getColumnName(i + 1);
+            String attribName = md.getColumnLabel(i + 1);
             switch (attributeTypes[i]) {
                 case Attribute.NOMINAL:
                     attribInfo.add(new Attribute(attribName, m_nominalStrings[i]));
@@ -917,7 +917,7 @@ public class DatabaseLoader
 	
       case DatabaseConnection.STRING :
         ResultSet rs1;
-        String columnName = md.getColumnName(i);
+        String columnName = md.getColumnLabel(i);
         if(m_DataBaseConnection.getUpperCase())
             columnName = columnName.toUpperCase();
         String end = endOfQuery(false);
@@ -936,7 +936,7 @@ public class DatabaseLoader
 //        rs1.close();  
 	break;
       case DatabaseConnection.TEXT:
-        columnName = md.getColumnName(i);
+        columnName = md.getColumnLabel(i);
         if(m_DataBaseConnection.getUpperCase())
             columnName = columnName.toUpperCase();
         end = endOfQuery(false);
@@ -1001,7 +1001,7 @@ public class DatabaseLoader
     // the tuples below will close the md object:  
     Vector<String> columnNames = new Vector<String>(); 
     for (int i = 0; i < numAttributes; i++) {
-      columnNames.add(md.getColumnName(i + 1));
+      columnNames.add(md.getColumnLabel(i + 1));
     }
 
     // Step through the tuples
