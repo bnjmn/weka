@@ -100,7 +100,7 @@ public class ResultSetHelper {
       // columns names
       m_ColumnNames = new String[meta.getColumnCount()];
       for (i = 1; i <= meta.getColumnCount(); i++)
-        m_ColumnNames[i - 1] = meta.getColumnName(i);
+        m_ColumnNames[i - 1] = meta.getColumnLabel(i);
       
       // numeric columns
       m_NumericColumns = new boolean[meta.getColumnCount()];
