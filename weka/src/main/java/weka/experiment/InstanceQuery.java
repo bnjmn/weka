@@ -47,7 +47,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15.2.2 $
+ * @version $Revision$
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -435,7 +435,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     FastVector attribInfo = new FastVector();
     for (int i = 0; i < numAttributes; i++) {
       /* Fix for databases that uppercase column names */
-      String attribName = attributeCaseFix(md.getColumnName(i + 1));
+      String attribName = attributeCaseFix(md.getColumnLabel(i + 1));
       switch (attributeTypes[i]) {
       case Attribute.NOMINAL:
 	attribInfo.addElement(new Attribute(attribName, nominalStrings[i]));
