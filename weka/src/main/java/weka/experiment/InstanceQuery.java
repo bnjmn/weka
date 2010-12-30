@@ -384,7 +384,7 @@ public class InstanceQuery
     // the tuples below will close the md object:  
     Vector<String> columnNames = new Vector<String>(); 
     for (int i = 0; i < numAttributes; i++) {
-      columnNames.add(md.getColumnName(i + 1));
+      columnNames.add(md.getColumnLabel(i + 1));
     }
 
     // Step through the tuples
