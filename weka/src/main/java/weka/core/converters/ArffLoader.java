@@ -968,13 +968,12 @@ public class ArffLoader
    * @return the structure of the data set as an empty set of Instances
    * @throws IOException if an error occurs
    */
-  public Instances getStructure() throws IOException {
-
-    if (m_sourceReader == null) {
-      throw new IOException("No source has been specified");
-    }
+  public Instances getStructure() throws IOException {    
 
     if (m_structure == null) {
+      if (m_sourceReader == null) {
+        throw new IOException("No source has been specified");
+      }
       try {
 	m_ArffReader = new ArffReader(m_sourceReader, 1);
 	m_structure  = m_ArffReader.getStructure();
