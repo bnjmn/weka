@@ -361,7 +361,7 @@
     <jarbundler dir="${macdistrib}"
                 name="weka-${release}"
                 mainclass="weka.gui.GUIChooser"
-                icon="${src}/weka/gui/weka_icon.icns"
+                icon="${src}/weka/gui/weka_icon_new.icns"
                 version="${release}"
                 verbose="true"
                 VMOptions="-Xmx256M"
