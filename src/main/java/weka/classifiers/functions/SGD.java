@@ -16,18 +16,12 @@
 
 /*
  *    SGD.java
- *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2011 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.functions;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
@@ -41,12 +35,18 @@ import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Implements stochastic gradient descent for learning various linear models (binary class SVM, binary class logistic regression and linear  regression). globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes, so the coefficients in the output are based on the normalized data.
+ * Implements stochastic gradient descent for learning various linear models (binary class SVM, binary class logistic regression and linear regression). Globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes, so the coefficients in the output are based on the normalized data.<br/>
+ * For numeric class attributes, the squared loss function (2) must be used.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -152,8 +152,10 @@ public class SGD extends RandomizableClassifier
     result.enable(Capability.MISSING_VALUES);
     
     // class
-    result.enable(Capability.BINARY_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
+    if (m_loss == SQUAREDLOSS)
+      result.enable(Capability.NUMERIC_CLASS);
+    else
+      result.enable(Capability.BINARY_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     
     // instances
@@ -467,10 +469,12 @@ public class SGD extends RandomizableClassifier
     		" various linear models (binary class SVM, binary class" +
     		" logistic regression and linear" +
     		" regression)." +
-    		" globally replaces all missing values and transforms nominal" +
+    		" Globally replaces all missing values and transforms nominal" +
     		" attributes into binary ones. It also normalizes all attributes," +
     		" so the coefficients in the output are based on the normalized" +
-    		" data.";  
+    		" data.\n" +
+    		"For numeric class attributes, the squared loss function " +
+    		"(" + SQUAREDLOSS + ") must be used.";
   }
   
   /**
@@ -495,16 +499,6 @@ public class SGD extends RandomizableClassifier
     
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
-    // check loss function with respect to class attribute
-    if (m_loss != SQUAREDLOSS && data.classAttribute().isNumeric()) {
-      throw new Exception("Must use squared loss with a numeric class!");
-    }
-    
-    if (m_loss == SQUAREDLOSS && data.classAttribute().isNominal()) {
-      throw new Exception("Must use either the hinge or log loss " +
-      		"with a discrete class!");
-    }
     
     if (data.numInstances() > 0 && !m_dontReplaceMissing) {
       m_replaceMissing = new ReplaceMissingValues();
@@ -551,9 +545,14 @@ public class SGD extends RandomizableClassifier
     }
   }
   
-  protected static final int HINGE = 0;
-  protected static final int LOGLOSS = 1;
-  protected static final int SQUAREDLOSS = 2;
+  /** the hinge loss function. */
+  public static final int HINGE = 0;
+  
+  /** the log loss function. */
+  public static final int LOGLOSS = 1;
+  
+  /** the squared loss funtion. */
+  public static final int SQUAREDLOSS = 2;
   
   /** The current loss function to minimize */
   protected int m_loss = HINGE;
@@ -790,4 +789,3 @@ public class SGD extends RandomizableClassifier
     runClassifier(new SGD(), args);
   }
 }
-
