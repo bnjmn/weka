@@ -40,7 +40,7 @@ import javax.swing.JLabel;
  * weka.core.SelectedTag object.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class SelectedTagEditor extends PropertyEditorSupport {
 
@@ -128,11 +128,11 @@ public class SelectedTagEditor extends PropertyEditorSupport {
     try {
       GenericObjectEditor.registerEditors();
       Tag [] tags =  {
-	new Tag(1, "First option"),
-	new Tag(2, "Second option"),
-	new Tag(3, "Third option"),
-	new Tag(4, "Fourth option"),
-	new Tag(5, "Fifth option"),
+	new Tag(1, Messages.getInstance().getString("SelectedTagEditor_Main_Tags_Text_First")),
+	new Tag(2, Messages.getInstance().getString("SelectedTagEditor_Main_Tags_Text_Second")),
+	new Tag(3, Messages.getInstance().getString("SelectedTagEditor_Main_Tags_Text_Third")),
+	new Tag(4, Messages.getInstance().getString("SelectedTagEditor_Main_Tags_Text_Fourth")),
+	new Tag(5, Messages.getInstance().getString("SelectedTagEditor_Main_Tags_Text_Fifth")),
       };
       SelectedTag initial = new SelectedTag(1, tags);
       SelectedTagEditor ce = new SelectedTagEditor();

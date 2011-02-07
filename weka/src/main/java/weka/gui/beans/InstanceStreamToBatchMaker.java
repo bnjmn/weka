@@ -90,7 +90,7 @@ public class InstanceStreamToBatchMaker extends JPanel
       
       // notify dataset listeners of structure available
       if (m_log != null) {
-        m_log.logMessage("[InstanceStreamToBatch] passing on structure.");
+        m_log.logMessage(Messages.getInstance().getString("InstanceStreamToBatchMaker_AcceptInstance_LogMessage_Text_First"));
       }
       DataSetEvent dse = new DataSetEvent(this, m_structure);
       notifyDataListeners(dse);
@@ -113,7 +113,7 @@ public class InstanceStreamToBatchMaker extends JPanel
       m_batch = null;
       
       if (m_log != null) {
-        m_log.logMessage("[InstanceStreamToBatch] sending batch to listeners.");
+        m_log.logMessage(Messages.getInstance().getString("InstanceStreamToBatchMaker_AcceptInstance_LogMessage_Text_Second"));
       }
       
       // notify dataset listeners

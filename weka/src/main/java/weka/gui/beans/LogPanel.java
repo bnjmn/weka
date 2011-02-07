@@ -87,7 +87,7 @@ public class LogPanel extends JPanel implements Logger {
     
   public LogPanel() {
     
-    String[] columnNames = {"Component", "Parameters", "Time", "Status"};
+    String[] columnNames = {Messages.getInstance().getString("LogPanel_ColumnNames_Text_Index0"), Messages.getInstance().getString("LogPanel_ColumnNames_Text_Index1"), Messages.getInstance().getString("LogPanel_ColumnNames_Text_Index2"), Messages.getInstance().getString("LogPanel_ColumnNames_Text_Index3")};
     m_tableModel = new DefaultTableModel(columnNames, 0);
     
     // JTable with error/warning indication for rows.
@@ -126,8 +126,8 @@ public class LogPanel extends JPanel implements Logger {
     JPanel statusPan = new JPanel();
     statusPan.setLayout(new BorderLayout());
     statusPan.add(new JScrollPane(m_table), BorderLayout.CENTER);
-    m_tabs.addTab("Status", statusPan);
-    m_tabs.addTab("Log", m_logPanel);
+    m_tabs.addTab(Messages.getInstance().getString("LogPanel_Tabs_AddTab_Text_First"), statusPan);
+    m_tabs.addTab(Messages.getInstance().getString("LogPanel_Tabs_AddTab_Text_Second"), m_logPanel);
     
     setLayout(new BorderLayout());
     add(m_tabs, BorderLayout.CENTER);
@@ -194,8 +194,8 @@ public class LogPanel extends JPanel implements Logger {
     String stepStatus = "";
     
     if (!hasDelimiters) {
-      stepName = "Unknown";
-      stepHash = "Unknown";
+      stepName = Messages.getInstance().getString("LogPanel_StatusMessage_StepName_Text");
+      stepHash = Messages.getInstance().getString("LogPanel_StatusMessage_StepHash_Text");
       stepStatus = message;
     } else {
       // Extract the fields of the status message
@@ -384,7 +384,7 @@ public class LogPanel extends JPanel implements Logger {
    */
   public static void main(String[] args) {
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame("Status/Log Panel");
+      final javax.swing.JFrame jf = new javax.swing.JFrame(Messages.getInstance().getString("LogPanel_Main_Jf_JFrame_Text"));
       
       jf.getContentPane().setLayout(new BorderLayout());
       final LogPanel lp = new LogPanel();
@@ -399,21 +399,21 @@ public class LogPanel extends JPanel implements Logger {
       });
       jf.pack();
       jf.setVisible(true);
-      lp.statusMessage("Step 1|Some options here|A status message");
-      lp.statusMessage("Step 2$hashkey|Status message: no options");
+      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_StatusMessage_First"));
+      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_StatusMessage_Second"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|Funky Chickens!!!");
+      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_StatusMessage_Third"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 1|Some options here|finished");
+      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_StatusMessage_Fourth"));
       //lp.statusMessage("Step 1|Some options here|back again!");
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|ERROR! More Funky Chickens!!!");
+      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_StatusMessage_Sixth"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|WARNING - now a warning...");
+      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_StatusMessage_Seventh"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|Back to normal.");
+      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_StatusMessage_Eighth"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|INTERRUPTED.");
+      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_StatusMessage_Nineth"));
       
     } catch (Exception ex) {
       ex.printStackTrace();

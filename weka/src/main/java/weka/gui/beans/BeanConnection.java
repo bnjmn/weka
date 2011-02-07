@@ -535,7 +535,7 @@ public class BeanConnection
         // have to do the popup thing here
         int menuItemCount = 0;
         JPopupMenu targetConnectionMenu = new JPopupMenu();
-        targetConnectionMenu.insert(new JLabel("Select target",
+        targetConnectionMenu.insert(new JLabel(Messages.getInstance().getString("BeanConnection_DoMetaConnection_TargetConnectionMenu_Insert_Text_First"),
                                                SwingConstants.CENTER),
                                     menuItemCount++);
         for (int i = 0; i < receivers.size(); i++) {
@@ -603,11 +603,11 @@ public class BeanConnection
 	}
 	CONNECTIONS.addElement(this);
       } catch (Exception ex) {
-	System.err.println("[BeanConnection] Unable to connect beans");
+	System.err.println(Messages.getInstance().getString("BeanConnection_Error_Text_First"));
 	ex.printStackTrace();
       }
     } else {
-      System.err.println("[BeanConnection] Unable to connect beans");
+      System.err.println(Messages.getInstance().getString("BeanConnection_Error_Text_Second"));
     }
   }
 
@@ -694,7 +694,7 @@ public class BeanConnection
      try {
        BeanInfo sourceInfo = Introspector.getBeanInfo(bc.getClass());
        if (sourceInfo == null) {
-       System.err.println("[BeanConnection] Error getting bean info, source info is null.");
+       System.err.println(Messages.getInstance().getString("BeanConnection_GetSourceEventSetDescriptor_Error_Text_First"));
        } else {
 	 EventSetDescriptor [] esds = sourceInfo.getEventSetDescriptors();
 	 for (int i = 0; i < esds.length; i++) {
@@ -704,7 +704,7 @@ public class BeanConnection
 	 }
        }
      } catch (Exception ex) {
-       System.err.println("[BeanConnection] Problem retrieving event set descriptor");
+       System.err.println(Messages.getInstance().getString("BeanConnection_GetSourceEventSetDescriptor_Error_Text_Second"));
      }
      return null;
      

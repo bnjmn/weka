@@ -42,7 +42,7 @@ import javax.swing.JScrollPane;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision$
  */
 public class AttributeSummarizer
   extends DataVisualizer {
@@ -82,7 +82,7 @@ public class AttributeSummarizer
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Plot summary bar charts for incoming data/training/test sets.";
+    return Messages.getInstance().getString("AttributeSummarizer_GlobalInfo_Text");
   }
 
   /**
@@ -263,10 +263,7 @@ public class AttributeSummarizer
    */
   public void setInstances(Instances inst) throws Exception {
     if (m_design) {
-      throw new Exception("This method is not to be used during design "
-			  +"time. It is meant to be used if this "
-			  +"bean is being used programatically as as "
-			  +"stand alone component.");
+      throw new Exception(Messages.getInstance().getString("AttributeSummarizer_SetInstances_Exception_Text"));
     }
     m_visualizeDataSet = inst;
     setUpFinal();
@@ -291,7 +288,7 @@ public class AttributeSummarizer
 	  final JScrollPane holderP = makePanel();
 
 	  final javax.swing.JFrame jf = 
-	    new javax.swing.JFrame("Visualize");
+	    new javax.swing.JFrame(Messages.getInstance().getString("AttributeSummarizer_PerformRequest_Jf_JFrame_Text"));
 	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(holderP, BorderLayout.CENTER);
@@ -312,14 +309,14 @@ public class AttributeSummarizer
       }
     } else {
       throw new IllegalArgumentException(request
-		+ " not supported (AttributeSummarizer)");
+		+ Messages.getInstance().getString("AttributeSummarizer_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
   public static void main(String [] args) {
     try {
       if (args.length != 1) {
-	System.err.println("Usage: AttributeSummarizer <dataset>");
+	System.err.println(Messages.getInstance().getString("AttributeSummarizer_Main_Error_Text_First"));
 	System.exit(1);
       }
       java.io.Reader r = new java.io.BufferedReader(

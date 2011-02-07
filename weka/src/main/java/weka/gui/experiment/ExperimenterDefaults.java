@@ -40,7 +40,7 @@ import java.util.Vector;
  * the props file <code>weka/gui/experiment/Experimenter.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see #PROPERTY_FILE
  */
 public class ExperimenterDefaults
@@ -59,7 +59,7 @@ public class ExperimenterDefaults
       PROPERTIES = Utils.readProperties(PROPERTY_FILE);
     }
     catch (Exception e) {
-      System.err.println("Problem reading properties. Fix before continuing.");
+      System.err.println(Messages.getInstance().getString("ExperimenterDefaults_STATIC_Error_Text"));
       e.printStackTrace();
       PROPERTIES = new Properties();
     }
@@ -101,7 +101,7 @@ public class ExperimenterDefaults
    * @return              the destination
    */
   public final static String getDestination() {
-    return get("Destination", "ARFF file");
+    return get("Destination", Messages.getInstance().getString("ExperimenterDefaults_GetDestination_Text"));
   }
 
   /**
@@ -110,7 +110,7 @@ public class ExperimenterDefaults
    * @return              the type
    */
   public final static String getExperimentType() {
-    return get("ExperimentType", "Cross-validation");
+    return get("ExperimentType", Messages.getInstance().getString("ExperimenterDefaults_GetExperimentType_Text"));
   }
 
   /**
@@ -306,7 +306,7 @@ public class ExperimenterDefaults
     String		name;
     Vector		sorted;
     
-    System.out.println("\nExperimenter defaults:");
+    System.out.println(Messages.getInstance().getString("ExperimenterDefaults_Main_Text"));
     names = PROPERTIES.propertyNames();
 
     // sort names

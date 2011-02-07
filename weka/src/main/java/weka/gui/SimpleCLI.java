@@ -36,7 +36,7 @@ import java.awt.event.WindowEvent;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class SimpleCLI
   extends Frame {
@@ -50,7 +50,7 @@ public class SimpleCLI
    * @throws Exception if an error occurs
    */
   public SimpleCLI() throws Exception {
-    setTitle("SimpleCLI");
+    setTitle(Messages.getInstance().getString("SimpleCL_SetTitle_Text"));
     setLayout(new BorderLayout());
     add(new SimpleCLIPanel());
     pack();
@@ -69,7 +69,7 @@ public class SimpleCLI
       final SimpleCLI frame = new SimpleCLI();
       frame.addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent param1) {
-	  System.err.println("window closed");
+	  System.err.println(Messages.getInstance().getString("SimpleCL_Main_Error_Text"));
 	  frame.dispose();
 	}
       });

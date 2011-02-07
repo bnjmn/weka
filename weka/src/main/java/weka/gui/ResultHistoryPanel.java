@@ -61,7 +61,7 @@ import javax.swing.text.JTextComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision$
  */
 public class ResultHistoryPanel
   extends JPanel {
@@ -439,13 +439,13 @@ public class ResultHistoryPanel
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Explorer: Classifier");
+	new javax.swing.JFrame(Messages.getInstance().getString("ResultHistoryPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final ResultHistoryPanel jd = new ResultHistoryPanel(null);
-      jd.addResult("blah", new StringBuffer("Nothing to see here"));
-      jd.addResult("blah1", new StringBuffer("Nothing to see here1"));
-      jd.addResult("blah2", new StringBuffer("Nothing to see here2"));
-      jd.addResult("blah3", new StringBuffer("Nothing to see here3"));
+      jd.addResult(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_First"), new StringBuffer(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Second")));
+      jd.addResult(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Third"), new StringBuffer(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Fourth")));
+      jd.addResult(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Fifth"), new StringBuffer(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Sixth")));
+      jd.addResult(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Seventh"), new StringBuffer(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Eighth")));
       jf.getContentPane().add(jd, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	public void windowClosing(java.awt.event.WindowEvent e) {

@@ -34,7 +34,7 @@ import javax.swing.JPanel;
  * A bean that counts instances streamed to it.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class InstanceCounter
   extends JPanel
@@ -50,21 +50,21 @@ public class InstanceCounter
   public void input(Instance instance) throws Exception {
     
     if (m_Debug) {
-      System.err.println("InstanceCounter::input(" + instance +")");
+      System.err.println(Messages.getInstance().getString("InstanceCounter_Input_Error_Text_First") + instance +Messages.getInstance().getString("InstanceCounter_Input_Error_Text_Second"));
     }
     m_Count++;
-    m_Count_Lab.setText(""+m_Count+" instances");
+    m_Count_Lab.setText(""+m_Count+Messages.getInstance().getString("InstanceCounter_Input_Count_Lab_SetText_Text_Second"));
     repaint();
   }
   
   public void inputFormat(Instances instanceInfo) {
     
     if (m_Debug) {
-      System.err.println("InstanceCounter::inputFormat()");
+      System.err.println(Messages.getInstance().getString("InstanceCounter_InputFormat_Error_Text_First"));
     }
     Instances inputInstances = new Instances(instanceInfo,0);
     m_Count = 0;
-    m_Count_Lab.setText(""+m_Count+" instances");
+    m_Count_Lab.setText(""+m_Count+Messages.getInstance().getString("InstanceCounter_InputFormat_Count_Lab_SetText_Text_Second"));
   }
 
   public void setDebug(boolean debug) {
@@ -80,7 +80,7 @@ public class InstanceCounter
   public InstanceCounter() {
     
     m_Count = 0;
-    m_Count_Lab = new JLabel("no instances");
+    m_Count_Lab = new JLabel(Messages.getInstance().getString("InstanceCounter_Count_Lab_JLabel_Text"));
     add(m_Count_Lab);
     //    setSize(60,40);
     setBackground(Color.lightGray);
@@ -101,25 +101,17 @@ public class InstanceCounter
 	  break;
 	case InstanceEvent.BATCH_FINISHED:
 	  if (m_Debug)
-	    System.err.println("InstanceCounter::instanceProduced() - End of instance batch");
+	    System.err.println(Messages.getInstance().getString("InstanceCounter_InstanceProduced_InstanceEventBATCH_FINISHED_Error_Text"));
 	  break;
 	default:
-	  System.err.println("InstanceCounter::instanceProduced() - unknown event type");
+	  System.err.println(Messages.getInstance().getString("InstanceCounter_InstanceProduced_InstanceEventDEFAULT_Error_Text"));
 	  break;
 	}
       } catch (Exception ex) {
 	System.err.println(ex.getMessage());
       }
     } else {
-      System.err.println("InstanceCounter::instanceProduced() - Unknown source object type");
+      System.err.println(Messages.getInstance().getString("InstanceCounter_InstanceProduced_Error_Text"));
     }
   }
 }
-
-
-
-
-
-
-
-

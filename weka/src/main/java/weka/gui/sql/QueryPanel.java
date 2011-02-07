@@ -57,7 +57,7 @@ import javax.swing.event.CaretListener;
  * Represents a panel for entering an SQL query.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.4 $
+ * @version     $Revision$
  */
 public class QueryPanel 
   extends JPanel 
@@ -79,13 +79,13 @@ public class QueryPanel
   protected JTextArea m_TextQuery;
 
   /** the execute button. */
-  protected JButton m_ButtonExecute = new JButton("Execute");
+  protected JButton m_ButtonExecute = new JButton(Messages.getInstance().getString("QueryPanel_ButtonExecute_JButton_Text"));
 
   /** the clear button. */
-  protected JButton m_ButtonClear = new JButton("Clear");
+  protected JButton m_ButtonClear = new JButton(Messages.getInstance().getString("QueryPanel_ButtonClear_JButton_Text"));
 
   /** the history button. */
-  protected JButton m_ButtonHistory = new JButton("History...");
+  protected JButton m_ButtonHistory = new JButton(Messages.getInstance().getString("QueryPanel_ButtonHistory_JButton_Text"));
 
   /** the spinner for the maximum number of rows. */
   protected JSpinner m_SpinnerMaxRows = new JSpinner();
@@ -170,7 +170,7 @@ public class QueryPanel
 
     // limit
     panel3 = new JPanel(new FlowLayout());
-    panel3.add(new JLabel("max. rows"));
+    panel3.add(new JLabel(Messages.getInstance().getString("QueryPanel_CreatePanel_Panel3_JLabel_Text")));
     panel3.add(m_SpinnerMaxRows);
     panel2.add(panel3, BorderLayout.SOUTH);
     model = (SpinnerNumberModel) m_SpinnerMaxRows.getModel();
@@ -180,7 +180,7 @@ public class QueryPanel
     model.setStepSize(new Integer(100));
     m_SpinnerMaxRows.setMinimumSize(
         new Dimension(50, m_SpinnerMaxRows.getHeight()));
-    m_SpinnerMaxRows.setToolTipText("with 0 all rows are retrieved");
+    m_SpinnerMaxRows.setToolTipText(Messages.getInstance().getString("QueryPanel_CreatePanel_SpinnerMaxRows_SetToolTipText_Text"));
       
     // set initial state
     setButtons();

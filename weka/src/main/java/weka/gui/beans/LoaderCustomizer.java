@@ -113,7 +113,7 @@ public class LoaderCustomizer
 	      public void propertyChange(PropertyChangeEvent e) {
 		repaint();
 		if (m_dsLoader != null) {
-		  System.err.println("Property change!!");
+		  System.err.println(Messages.getInstance().getString("LoaderCustomizer_Error_Text_First"));
 		  m_dsLoader.setLoader(m_dsLoader.getLoader());
 		}
 	      }
@@ -170,23 +170,23 @@ public class LoaderCustomizer
       JPanel db = new JPanel();
       db.setLayout(new GridLayout(6, 1));
       m_dbaseURLText = new JTextField(((DatabaseConverter)m_dsLoader.getLoader()).getUrl(),50); 
-      JLabel dbaseURLLab = new JLabel(" Database URL:", SwingConstants.LEFT);
+      JLabel dbaseURLLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_DbaseURLLab_JLabel_Text"), SwingConstants.LEFT);
       dbaseURLLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
       m_userNameText = new JTextField(((DatabaseConverter)m_dsLoader.getLoader()).getUser(),50); 
-      JLabel userNameLab = new JLabel(" Username:    ", SwingConstants.LEFT);
+      JLabel userNameLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_UserNameLab_JLabel_Text"), SwingConstants.LEFT);
       userNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
       m_passwordText = new JPasswordField(50); 
-      JLabel passwordLab = new JLabel(" Password:    ", SwingConstants.LEFT);
+      JLabel passwordLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_PasswordLab_JLabel_Text"), SwingConstants.LEFT);
       passwordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
       
       m_queryText = new JTextField(((DatabaseLoader)m_dsLoader.getLoader()).getQuery(),50); 
-      JLabel queryLab = new JLabel(" Query:       ", SwingConstants.LEFT);
+      JLabel queryLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_QueryLab_JLabel_Text"), SwingConstants.LEFT);
       queryLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
       m_keyText = new JTextField(((DatabaseLoader)m_dsLoader.getLoader()).getKeys(),50); 
-      JLabel keyLab = new JLabel(" Key columns: ", SwingConstants.LEFT);
+      JLabel keyLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_KeyLab_JLabel_Text"), SwingConstants.LEFT);
       keyLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
       JPanel urlP = new JPanel();   
@@ -227,8 +227,8 @@ public class LoaderCustomizer
       JPanel buttonsP = new JPanel();
       buttonsP.setLayout(new FlowLayout());
       JButton ok,cancel;
-      buttonsP.add(ok = new JButton("OK"));
-      buttonsP.add(cancel=new JButton("Cancel"));
+      buttonsP.add(ok = new JButton(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_ButtonsP_Ok_JButton_Text")));
+      buttonsP.add(cancel=new JButton(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_ButtonsP_Cancel_JButton_Text")));
       ok.addActionListener(new ActionListener(){
 	public void actionPerformed(ActionEvent evt){
           ((DatabaseLoader)m_dsLoader.getLoader()).resetStructure();  
@@ -293,7 +293,7 @@ public class LoaderCustomizer
     }
     add(m_fileChooser, BorderLayout.CENTER);
 
-    m_relativeFilePath = new JCheckBox("Use relative file paths");
+    m_relativeFilePath = new JCheckBox(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_RelativeFilePath_JCheckBox_Text"));
     m_relativeFilePath.
       setSelected(((FileSourcedConverter)m_dsLoader.getLoader()).getUseRelativePath());
 

@@ -31,7 +31,7 @@ import javax.swing.DefaultListModel;
  *
  * @see         HistoryChangedListener
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision$
  */
 public class HistoryChangedEvent
   extends EventObject {
@@ -82,7 +82,7 @@ public class HistoryChangedEvent
 
     result  = super.toString();
     result  = result.substring(0, result.length() - 1);  // remove "]"
-    result +=   ",name=" + getHistoryName() 
+    result += ",name=" + getHistoryName() 
               + ",history=" + getHistory()
               + "]";
 

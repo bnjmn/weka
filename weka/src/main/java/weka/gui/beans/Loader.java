@@ -152,9 +152,9 @@ public class Loader
 	
 	String msg = statusMessagePrefix();
 	if (m_Loader instanceof FileSourcedConverter) {
-	  msg += "Loading " + ((FileSourcedConverter)m_Loader).retrieveFile().getName();
+	  msg += Messages.getInstance().getString("Loader_LoadThread_Msg_Text_First") + ((FileSourcedConverter)m_Loader).retrieveFile().getName();
 	} else {
-	  msg += "Loading...";
+	  msg += Messages.getInstance().getString("Loader_LoadThread_Msg_Text_Second");
 	}
 	if (m_log != null) {
 	  m_log.statusMessage(msg);
@@ -174,8 +174,8 @@ public class Loader
 	  } catch (IOException e) {
 	    if (m_log != null) {
 	      m_log.statusMessage(statusMessagePrefix()
-	          +"ERROR (See log for details");
-	      m_log.logMessage("[Loader] " + statusMessagePrefix()
+	          + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_First"));
+	      m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Second") + statusMessagePrefix()
 	          + " " + e.getMessage());
 	    }
 	    e.printStackTrace();
@@ -185,8 +185,8 @@ public class Loader
 	  } catch (IOException e) {
 	    if (m_log != null) {
 	      m_log.statusMessage(statusMessagePrefix()
-	          +"ERROR (See log for details");
-	      m_log.logMessage("[Loader] " + statusMessagePrefix()
+	          + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Third"));
+	      m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Fourth") + statusMessagePrefix()
 	          + " " + e.getMessage());
 	    }
 	    e.printStackTrace();
@@ -221,7 +221,7 @@ public class Loader
 //              m_visual.setText("" + z + " instances...");
               if (m_log != null) {
                 m_log.statusMessage(statusMessagePrefix() 
-                    + "Loaded " + z + " instances");
+                    + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Fifth") + z + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Sixth"));
               }
             }
 	  }
@@ -232,8 +232,8 @@ public class Loader
 	  m_dataSet = m_Loader.getDataSet();
 	  m_visual.setStatic();
 	  if (m_log != null) {
-	    m_log.logMessage("[Loader] " + statusMessagePrefix() 
-	        + " loaded " + m_dataSet.relationName());
+	    m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_LogMessage_Text_First") + statusMessagePrefix() 
+	        + Messages.getInstance().getString("Loader_LoadThread_LogMessage_Text_Second") + m_dataSet.relationName());
 	  }
 //	  m_visual.setText(m_dataSet.relationName());
 	  notifyDataSetLoaded(new DataSetEvent(m_DP, m_dataSet));
@@ -241,16 +241,16 @@ public class Loader
       } catch (Exception ex) {
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix()
-              +"ERROR (See log for details");
-          m_log.logMessage("[Loader] " + statusMessagePrefix()
+              + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Seventh"));
+          m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Eighth") + statusMessagePrefix()
               + " " + ex.getMessage());
         }
 	ex.printStackTrace();
       } finally {
         if (Thread.currentThread().isInterrupted()) {
           if (m_log != null) {
-            m_log.logMessage("[Loader] " + statusMessagePrefix() 
-                + " loading interrupted!");
+            m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_LogMessage_Text_Third") + statusMessagePrefix() 
+                + Messages.getInstance().getString("Loader_LoadThread_LogMessage_Text_Fourth"));
           }
         }
 	m_ioThread = null;
@@ -260,7 +260,7 @@ public class Loader
         m_state = IDLE;
         m_stopped = false;
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Nineth"));
         }
         block(false);
       }
@@ -290,7 +290,7 @@ public class Loader
   protected void appearanceFinal() {
     removeAll();
     setLayout(new BorderLayout());
-    JButton goButton = new JButton("Start...");
+    JButton goButton = new JButton(Messages.getInstance().getString("Loader_AppearanceFinal_GoButton_JButton_Text"));
     add(goButton, BorderLayout.CENTER);
     goButton.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -362,7 +362,7 @@ public class Loader
         }
         m_dataFormat = m_Loader.getStructure();
         //      System.err.println(m_dataFormat);
-        System.out.println("[Loader] Notifying listeners of instance structure avail.");
+        System.out.println(Messages.getInstance().getString("Loader_NewFileSelected_Text"));
         notifyStructureAvailable(m_dataFormat);
       }catch (Exception ex) {
       }
@@ -388,8 +388,7 @@ public class Loader
     {
 
     if (!(algorithm instanceof weka.core.converters.Loader)) { 
-      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
-					 +"type of algorithm (Loader)");
+      throw new IllegalArgumentException(algorithm.getClass() + Messages.getInstance().getString("Loader_SetWrappedAlgorithm_IllegalArgumentException_Text"));
     }
     setLoader((weka.core.converters.Loader)algorithm);
   }
@@ -539,7 +538,7 @@ public class Loader
    */
   public String getStartMessage() {
     boolean ok = true;
-    String entry = "Start loading";
+    String entry = Messages.getInstance().getString("Loader_GetStartMessage_Entry_Text");
     if (m_ioThread == null) {
       if (m_Loader instanceof FileSourcedConverter) {
         String temp = ((FileSourcedConverter) m_Loader).retrieveFile().getPath();
@@ -830,4 +829,3 @@ public class Loader
     m_env = Environment.getSystemWide();
   }
 }
-

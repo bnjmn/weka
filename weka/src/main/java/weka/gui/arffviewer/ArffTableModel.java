@@ -54,7 +54,7 @@ import javax.swing.table.TableModel;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision$ 
  */
 public class ArffTableModel 
   implements TableModel, Undoable {
@@ -184,7 +184,7 @@ public class ArffTableModel
       catch (Exception e) {
         ComponentHelper.showMessageBox(
             null, 
-            "Error loading file...", 
+            Messages.getInstance().getString("ArffTableModel_LoadFile_ComponentHelperShowMessageBox_Text"), 
             e.toString(), 
             JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.ERROR_MESSAGE );
@@ -517,42 +517,42 @@ public class ArffTableModel
     
     if ( (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
       if (columnIndex == 0) {
-        result = "<html><center>No.<br><font size=\"-2\">&nbsp;</font></center></html>";
+        result = Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Text_First");
       }
       else {
         if (m_Data != null) {
           if ( (columnIndex - 1 < m_Data.numAttributes()) ) {
-            result = "<html><center>";
+            result = Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Text_Second");
             // name
             if (isClassIndex(columnIndex))
-              result +=   "<b>" 
+              result +=   Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Text_Third") 
                 + m_Data.attribute(columnIndex - 1).name() 
-                + "</b>";
+                + Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Text_Forth");
             else
               result += m_Data.attribute(columnIndex - 1).name();
             
             // attribute type
             switch (getType(columnIndex)) {
               case Attribute.DATE: 
-                result += "<br><font size=\"-2\">Date</font>";
+                result += Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Date_Text");
                 break;
               case Attribute.NOMINAL:
-                result += "<br><font size=\"-2\">Nominal</font>";
+                result += Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Nominal_Text");
                 break;
               case Attribute.STRING:
-                result += "<br><font size=\"-2\">String</font>";
+                result += Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_String_Text");
                 break;
               case Attribute.NUMERIC:
-                result += "<br><font size=\"-2\">Numeric</font>";
+                result += Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Numeric_Text");
                 break;
               case Attribute.RELATIONAL:
-                result += "<br><font size=\"-2\">Relational</font>";
+                result += Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Relational_Text");
                 break;
               default:
-                result += "<br><font size=\"-2\">???</font>";
+                result += Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Default_Text");
             }
             
-            result += "</center></html>";
+            result += Messages.getInstance().getString("ArffTableModel_GetColumnName_Result_Text_End");
           }
         }
       }
@@ -764,7 +764,7 @@ public class ArffTableModel
           break;
           
         default:
-          throw new IllegalArgumentException("Unsupported Attribute type: " + type + "!");
+          throw new IllegalArgumentException(Messages.getInstance().getString("ArffTableModel_SetValueAt_Default_Error_Text_Front") + type + Messages.getInstance().getString("ArffTableModel_SetValueAt_Default_Error_Text_End"));
       }
     }
     

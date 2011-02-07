@@ -140,7 +140,7 @@ public class SortedTableModel
      * @return		the string representation (value + index)
      */
     public String toString() {
-      return "value=" + m_Value + ", index=" + m_Index;
+      return Messages.getInstance().getString("SortedTableModel_ToString_Text_First") + m_Value + Messages.getInstance().getString("SortedTableModel_ToString_Text_Second") + m_Index;
     }
   }
 
@@ -363,7 +363,7 @@ public class SortedTableModel
          || (getModel().getRowCount() != mIndices.length) ) {
 
       System.out.println(
-          this.getClass().getName() + ": Table model not initialized!");
+          this.getClass().getName() + Messages.getInstance().getString("SortedTableModel_Sort_Text_Firt"));
 
       return;
     }

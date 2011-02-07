@@ -91,28 +91,28 @@ public class SetupPanel
   protected Experiment m_Exp;
 
   /** Click to load an experiment */
-  protected JButton m_OpenBut = new JButton("Open...");
+  protected JButton m_OpenBut = new JButton(Messages.getInstance().getString("SetupPanel_OpenBut_JButton_Text"));
 
   /** Click to save an experiment */
-  protected JButton m_SaveBut = new JButton("Save...");
+  protected JButton m_SaveBut = new JButton(Messages.getInstance().getString("SetupPanel_SaveBut_JButton_Text"));
 
   /** Click to create a new experiment with default settings */
-  protected JButton m_NewBut = new JButton("New");
+  protected JButton m_NewBut = new JButton(Messages.getInstance().getString("SetupPanel_NewBut_JButton_Text"));
 
   /** A filter to ensure only experiment files get shown in the chooser */
   protected FileFilter m_ExpFilter = 
     new ExtensionFileFilter(Experiment.FILE_EXTENSION, 
-                            "Experiment configuration files (*" + Experiment.FILE_EXTENSION + ")");
+    		Messages.getInstance().getString("SetupPanel_ExpFilter_ExtensionFileFilter_Text_First") + Experiment.FILE_EXTENSION + Messages.getInstance().getString("SetupPanel_ExpFilter_ExtensionFileFilter_Text_Second"));
 
   /** A filter to ensure only experiment (in KOML format) files get shown in the chooser */
   protected FileFilter m_KOMLFilter = 
     new ExtensionFileFilter(KOML.FILE_EXTENSION, 
-                            "Experiment configuration files (*" + KOML.FILE_EXTENSION + ")");
+    		Messages.getInstance().getString("SetupPanel_KOMLFilter_ExtensionFileFilter_Text_First") + KOML.FILE_EXTENSION + Messages.getInstance().getString("SetupPanel_KOMLFilter_ExtensionFileFilter_Text_Second"));
 
   /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(".xml", 
-                            "Experiment configuration files (*.xml)");
+    		Messages.getInstance().getString("SetupPanel_XMLFilter_ExtensionFileFilter_Text"));
 
   /** The file chooser for selecting experiments */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
@@ -144,10 +144,10 @@ public class SetupPanel
   protected DatasetListPanel m_DatasetListPanel = new DatasetListPanel();
 
   /** A button for bringing up the notes */
-  protected JButton m_NotesButton =  new JButton("Notes");
+  protected JButton m_NotesButton =  new JButton(Messages.getInstance().getString("SetupPanel_NotesButton_JButton_Text"));
 
   /** Frame for the notes */
-  protected JFrame m_NotesFrame = new JFrame("Notes");
+  protected JFrame m_NotesFrame = new JFrame(Messages.getInstance().getString("SetupPanel_NotesFrame_JFrame_Text"));
 
   /** Area for user notes Default of 10 rows */
   protected JTextArea m_NotesText = new JTextArea(null, 10, 0);
@@ -160,11 +160,11 @@ public class SetupPanel
 
   /** Click to advacne data set before custom generator */
   protected JRadioButton m_advanceDataSetFirst = 
-    new JRadioButton("Data sets first");
+    new JRadioButton(Messages.getInstance().getString("SetupPanel_AdvanceDataSetFirst_JRadioButton_Text"));
 
   /** Click to advance custom generator before data set */
   protected JRadioButton m_advanceIteratorFirst = 
-    new JRadioButton("Custom generator first");
+    new JRadioButton(Messages.getInstance().getString("SetupPanel_AdvanceIteratorFirst_JRadioButton_Text"));
 
   /** Handle radio buttons */
   ActionListener m_RadioListener = new ActionListener() {
@@ -320,7 +320,7 @@ public class SetupPanel
     JPanel src = new JPanel();
     src.setLayout(new BorderLayout());
     src.setBorder(BorderFactory.createCompoundBorder(
-		  BorderFactory.createTitledBorder("Result generator"),
+		  BorderFactory.createTitledBorder(Messages.getInstance().getString("SetupPanel_Src_JPane_BorderFactoryCreateTitledBorder_Text")),
 		  BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		  ));
     src.add(m_RPEditorPanel, BorderLayout.NORTH);
@@ -329,7 +329,7 @@ public class SetupPanel
     JPanel dest = new JPanel();
     dest.setLayout(new BorderLayout());
     dest.setBorder(BorderFactory.createCompoundBorder(
-		   BorderFactory.createTitledBorder("Destination"),
+		   BorderFactory.createTitledBorder(Messages.getInstance().getString("SetupPanel_Dest_JPane_BorderFactoryCreateTitledBorder_Text")),
 		   BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		   ));
     dest.add(m_RLEditorPanel, BorderLayout.NORTH);
@@ -338,9 +338,9 @@ public class SetupPanel
     m_advanceDataSetFirst.setEnabled(false);
     m_advanceIteratorFirst.setEnabled(false);
     m_advanceDataSetFirst.
-      setToolTipText("Advance data set before custom generator");
+      setToolTipText(Messages.getInstance().getString("SetupPanel_AdvanceDataSetFirst_SetToolTipText_Text"));
     m_advanceIteratorFirst.
-      setToolTipText("Advance custom generator before data set");
+      setToolTipText(Messages.getInstance().getString("SetupPanel_AdvanceIteratorFirst_SetToolTipText_Text"));
     m_advanceDataSetFirst.setSelected(true);
     ButtonGroup bg = new ButtonGroup();
     bg.add(m_advanceDataSetFirst);
@@ -350,7 +350,7 @@ public class SetupPanel
 
     JPanel radioButs = new JPanel();
     radioButs.setBorder(BorderFactory.
-			createTitledBorder("Iteration control"));
+			createTitledBorder(Messages.getInstance().getString("SetupPanel_RadioButs_JPanel_BorderFactoryCreateTitledBorder_Text")));
     radioButs.setLayout(new GridLayout(1, 2));
     radioButs.add(m_advanceDataSetFirst);
     radioButs.add(m_advanceIteratorFirst);
@@ -505,13 +505,13 @@ public class SetupPanel
     try {
       Experiment exp = Experiment.read(expFile.getAbsolutePath());
       setExperiment(exp);
-      System.err.println("Opened experiment:\n" + m_Exp);
+      System.err.println(Messages.getInstance().getString("SetupPanel_OpenExperiment_Error_Text") + m_Exp);
     } catch (Exception ex) {
       ex.printStackTrace();
-      JOptionPane.showMessageDialog(this, "Couldn't open experiment file:\n"
-				    + expFile
-				    + "\nReason:\n" + ex.getMessage(),
-				    "Open Experiment",
+      JOptionPane.showMessageDialog(this, Messages.getInstance().getString("SetupPanel_OpenExperiment_Exception_JOptionPaneShowMessageDialog_Text_First")
+				    + expFile + 
+				    Messages.getInstance().getString("SetupPanel_OpenExperiment_Exception_JOptionPaneShowMessageDialog_Text_Second") + ex.getMessage(),
+				    Messages.getInstance().getString("SetupPanel_OpenExperiment_Exception_JOptionPaneShowMessageDialog_Text_Third"),
 				    JOptionPane.ERROR_MESSAGE);
       // Pop up error dialog
     }
@@ -545,13 +545,13 @@ public class SetupPanel
     
     try {
       Experiment.write(expFile.getAbsolutePath(), m_Exp);
-      System.err.println("Saved experiment:\n" + m_Exp);
+      System.err.println(Messages.getInstance().getString("SetupPanel_SaveExperiment_Error_Text") + m_Exp);
     } catch (Exception ex) {
       ex.printStackTrace();
-      JOptionPane.showMessageDialog(this, "Couldn't save experiment file:\n"
+      JOptionPane.showMessageDialog(this, Messages.getInstance().getString("SetupPanel_SaveExperiment_Exception_JOptionPaneShowMessageDialog_Text_First")
 				    + expFile
-				    + "\nReason:\n" + ex.getMessage(),
-				    "Save Experiment",
+				    + Messages.getInstance().getString("SetupPanel_SaveExperiment_Exception_JOptionPaneShowMessageDialog_Text_Second") + ex.getMessage(),
+				    Messages.getInstance().getString("SetupPanel_SaveExperiment_Exception_JOptionPaneShowMessageDialog_Text_Third"),
 				    JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -605,7 +605,7 @@ public class SetupPanel
       final boolean writeExp = Utils.getFlag('s', args);
       final String expFile = Utils.getOption('f', args);
       if ((readExp || writeExp) && (expFile.length() == 0)) {
-	throw new Exception("A filename must be given with the -f option");
+	throw new Exception(Messages.getInstance().getString("SetupPanel_Main_Exception_Text"));
       }
       Experiment exp = null;
       if (readExp) {
@@ -617,15 +617,15 @@ public class SetupPanel
       } else {
 	exp = new Experiment();
       }
-      System.err.println("Initial Experiment:\n" + exp.toString());
-      final JFrame jf = new JFrame("Weka Experiment Setup");
+      System.err.println(Messages.getInstance().getString("SetupPanel_Main_Error_Text_First") + exp.toString());
+      final JFrame jf = new JFrame(Messages.getInstance().getString("SetupPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final SetupPanel sp = new SetupPanel();
       //sp.setBorder(BorderFactory.createTitledBorder("Setup"));
       jf.getContentPane().add(sp, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent e) {
-	  System.err.println("\nFinal Experiment:\n"
+	  System.err.println(Messages.getInstance().getString("SetupPanel_Main_WindowClosing_Error_Text_First")
 			     + sp.m_Exp.toString());
 	  // Save the experiment to a file
 	  if (writeExp) {
@@ -637,7 +637,7 @@ public class SetupPanel
 	      oo.close();
 	    } catch (Exception ex) {
               ex.printStackTrace();
-	      System.err.println("Couldn't write experiment to: " + expFile
+	      System.err.println(Messages.getInstance().getString("SetupPanel_Main_WindowClosing_Error_Text_Second") + expFile
 				 + '\n' + ex.getMessage());
 	    }
 	  }
@@ -647,9 +647,9 @@ public class SetupPanel
       });
       jf.pack();
       jf.setVisible(true);
-      System.err.println("Short nap");
+      System.err.println(Messages.getInstance().getString("SetupPanel_Main_Error_Text_Second"));
       Thread.currentThread().sleep(3000);
-      System.err.println("Done");
+      System.err.println(Messages.getInstance().getString("SetupPanel_Main_Error_Text_Third"));
       sp.setExperiment(exp);
     } catch (Exception ex) {
       ex.printStackTrace();

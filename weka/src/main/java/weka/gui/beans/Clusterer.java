@@ -225,8 +225,7 @@ public class Clusterer
     {
 
     if (!(algorithm instanceof weka.clusterers.Clusterer)) { 
-      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
-					 +"type of algorithm (Clusterer)");
+      throw new IllegalArgumentException(algorithm.getClass() + Messages.getInstance().getString("Clusterer_SetWrappedAlgorithm_IllegalArgumentException_Text"));
     }
     setClusterer((weka.clusterers.Clusterer)algorithm);
   }
@@ -275,7 +274,7 @@ public class Clusterer
 //		    m_visual.setText("Building clusters...");
 		    if (m_log != null) {
 		      m_log.statusMessage(statusMessagePrefix() 
-		          + "Building clusters...");
+		          + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text"));
 		    }
 		    buildClusterer();
                     if(m_batchClustererListeners.size() > 0){
@@ -294,7 +293,7 @@ public class Clusterer
 		      grphTitle = grphTitle.substring(grphTitle.
 						      lastIndexOf('.')+1, 
 						      grphTitle.length());
-		      grphTitle = "Set " + e.getSetNumber() + " ("
+		      grphTitle = Messages.getInstance().getString("Clusterer_AcceptTrainingSet_GrphTitle_Text_First") + e.getSetNumber() + " ("
 			+e.getTrainingSet().relationName() + ") "
 			+grphTitle;
 		      
@@ -312,15 +311,14 @@ public class Clusterer
 		      titleString = titleString.
 			substring(titleString.lastIndexOf('.') + 1,
 				  titleString.length());
-		      modelString = "=== Clusterer model ===\n\n" +
-			"Scheme:   " +titleString+"\n" +
-			"Relation: "  + m_trainingSet.relationName() + 
+		      modelString = Messages.getInstance().getString("Clusterer_AcceptTrainingSet_ModelString_Text_First") + titleString +
+		      Messages.getInstance().getString("Clusterer_AcceptTrainingSet_ModelString_Text_Second") + m_trainingSet.relationName() + 
 			((e.getMaxSetNumber() > 1) 
-			 ? "\nTraining Fold: "+e.getSetNumber()
+			 ? Messages.getInstance().getString("Clusterer_AcceptTrainingSet_ModelString_Text_Third") + e.getSetNumber()
 			 :"")
 			+ "\n\n"
 			+ modelString;
-		      titleString = "Model: " + titleString;
+		      titleString = Messages.getInstance().getString("Clusterer_AcceptTrainingSet_TitleString_Text") + titleString;
 
 		      TextEvent nt = new TextEvent(Clusterer.this,
 						   modelString,
@@ -332,9 +330,9 @@ public class Clusterer
 		  Clusterer.this.stop(); // stop processing
 		  if (m_log != null) {
 		    m_log.statusMessage(statusMessagePrefix()
-		        + "ERROR (See log for details");
-		    m_log.logMessage("[Clusterer] " + statusMessagePrefix()
-		        + " problem training clusterer. " + ex.getMessage());
+		        + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_StatusMessage_Text_First"));
+		    m_log.logMessage(Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_First") + statusMessagePrefix()
+		        + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_First_Alpha") + ex.getMessage());
 		  }
 		  ex.printStackTrace();
 		} finally {
@@ -345,16 +343,16 @@ public class Clusterer
 		    // prevent any clusterer events from being fired
 		    m_trainingSet = null;
 		    if (m_log != null) {
-		      m_log.logMessage("[Clusterer]" + statusMessagePrefix() 
-		          + " Build clusterer interrupted!");
+		      m_log.logMessage(Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_First") + statusMessagePrefix() 
+		          + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_Second"));
 		      m_log.statusMessage(statusMessagePrefix() 
-		          + "INTERRUPTED");
+		          + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_StatusMessage_Text_Second"));
 		    }
 		  } else {
 		    // save header
 		    m_trainingSet = new Instances(m_trainingSet, 0);
 		    if (m_log != null) {
-		      m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		      m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_StatusMessage_Text_Third"));
 		    }
 		  }
 		  block(false);
@@ -405,9 +403,9 @@ public class Clusterer
         stop(); // stop any processing
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (see log for details");
-          m_log.logMessage("[Clusterer] " + statusMessagePrefix()
-              + " problem during testing. " + ex.getMessage());
+              + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_StatusMessage_Text_Fourth"));
+          m_log.logMessage(Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_Third") + statusMessagePrefix()
+              + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_Fourth") + ex.getMessage());
         }
 	ex.printStackTrace();
       }
@@ -715,16 +713,16 @@ public class Clusterer
         }
         os.close();
         if (m_log != null) {
-          m_log.logMessage("[Clusterer] Saved clusterer " + getCustomName());
+          m_log.logMessage(Messages.getInstance().getString("Clusterer_SaveModel_LogMessage_Text_Fourth") + getCustomName());
         }
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Clusterer.this,
-                                    "Problem saving clusterer.\n",
-                                    "Save Model",
+    		  Messages.getInstance().getString("Clusterer_SaveModel_JOptionPane_ShowMessageDialog_Text_First"),
+    		  Messages.getInstance().getString("Clusterer_SaveModel_JOptionPane_ShowMessageDialog_Text_Second"),
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage("[Clusterer] Problem saving clusterer. " 
+        m_log.logMessage(Messages.getInstance().getString("Clusterer_SaveModel_LogMessage_Text_Fifth") 
             + getCustomName() + ex.getMessage());
       }
     }
@@ -759,17 +757,17 @@ public class Clusterer
         }
         is.close();
         if (m_log != null) {
-          m_log.logMessage("[Clusterer] Loaded clusterer: "
+          m_log.logMessage(Messages.getInstance().getString("Clusterer_LoadModel_LogMessage_Text_First")
                            + m_Clusterer.getClass().toString());
         }
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Clusterer.this,
-                                    "Problem loading classifier.\n",
-                                    "Load Model",
+    		  Messages.getInstance().getString("Clusterer_LoadModel_JOptionPane_ShowMessageDialog_Text_First"),
+    		  Messages.getInstance().getString("Clusterer_LoadModel_JOptionPane_ShowMessageDialog_Text_Second"),
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage("[Clusterer] Problem loading classifier. " 
+        m_log.logMessage(Messages.getInstance().getString("Clusterer_LoadModel_LogMessage_Text_Second") 
             + ex.getMessage());
       }
     }
@@ -812,8 +810,7 @@ public class Clusterer
     } else if (request.compareTo("Load model") == 0) {
       loadModel();
     } else {
-      throw new IllegalArgumentException(request
-					 + " not supported (Clusterer)");
+      throw new IllegalArgumentException(request + " not supported (Clusterer)");
     }
   }
 

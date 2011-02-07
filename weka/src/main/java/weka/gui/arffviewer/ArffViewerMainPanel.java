@@ -64,7 +64,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision$ 
  */
 
 public class ArffViewerMainPanel 
@@ -131,7 +131,7 @@ public class ArffViewerMainPanel
    */
   public ArffViewerMainPanel(Container parentFrame) {
     parent     = parentFrame;
-    frameTitle = "ARFF-Viewer"; 
+    frameTitle = Messages.getInstance().getString("ArffViewerMainPanel_Title_Text"); 
     createPanel();
   }
   
@@ -151,25 +151,25 @@ public class ArffViewerMainPanel
     
     // menu
     menuBar        = new JMenuBar();
-    menuFile       = new JMenu("File");
-    menuFileOpen   = new JMenuItem("Open...", ComponentHelper.getImageIcon("open.gif"));
+    menuFile       = new JMenu(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_File_JMenu_Text"));
+    menuFileOpen   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_FileOpen_JMenuItem_Text"), ComponentHelper.getImageIcon("open.gif"));
     menuFileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_MASK));
     menuFileOpen.addActionListener(this);
-    menuFileSave   = new JMenuItem("Save", ComponentHelper.getImageIcon("save.gif"));
+    menuFileSave   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Save_JMenuItem_Text"), ComponentHelper.getImageIcon("save.gif"));
     menuFileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK));
     menuFileSave.addActionListener(this);
-    menuFileSaveAs = new JMenuItem("Save as...", ComponentHelper.getImageIcon("empty.gif"));
+    menuFileSaveAs = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_SaveAs_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuFileSaveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
     menuFileSaveAs.addActionListener(this);
-    menuFileClose  = new JMenuItem("Close", ComponentHelper.getImageIcon("empty.gif"));
+    menuFileClose  = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Close_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuFileClose.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_MASK));
     menuFileClose.addActionListener(this);
-    menuFileCloseAll = new JMenuItem("Close all", ComponentHelper.getImageIcon("empty.gif"));
+    menuFileCloseAll = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_CloseAll_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuFileCloseAll.addActionListener(this);
-    menuFileProperties  = new JMenuItem("Properties", ComponentHelper.getImageIcon("empty.gif"));
+    menuFileProperties  = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Properties_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuFileProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_MASK));
     menuFileProperties.addActionListener(this);
-    menuFileExit   = new JMenuItem("Exit", ComponentHelper.getImageIcon("forward.gif"));
+    menuFileExit   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Exit_JMenuItem_Text"), ComponentHelper.getImageIcon("forward.gif"));
     menuFileExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.ALT_MASK));
     menuFileExit.addActionListener(this);
     menuFile.add(menuFileOpen);
@@ -183,32 +183,32 @@ public class ArffViewerMainPanel
     menuFile.add(menuFileExit);
     menuBar.add(menuFile);
     
-    menuEdit       = new JMenu("Edit");
-    menuEditUndo   = new JMenuItem("Undo", ComponentHelper.getImageIcon("undo.gif"));
+    menuEdit       = new JMenu(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Edit_JMenuItem_Text"));
+    menuEditUndo   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Undo_JMenuItem_Text"), ComponentHelper.getImageIcon("undo.gif"));
     menuEditUndo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_MASK));
     menuEditUndo.addActionListener(this);
-    menuEditCopy   = new JMenuItem("Copy", ComponentHelper.getImageIcon("copy.gif"));
+    menuEditCopy   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Copy_JMenuItem_Text"), ComponentHelper.getImageIcon("copy.gif"));
     menuEditCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.CTRL_MASK));
     menuEditCopy.addActionListener(this);
-    menuEditSearch   = new JMenuItem("Search...", ComponentHelper.getImageIcon("find.gif"));
+    menuEditSearch   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Search_JMenuItem_Text"), ComponentHelper.getImageIcon("find.gif"));
     menuEditSearch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
     menuEditSearch.addActionListener(this);
-    menuEditClearSearch   = new JMenuItem("Clear search", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditClearSearch   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_ClearSearch_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuEditClearSearch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
     menuEditClearSearch.addActionListener(this);
-    menuEditRenameAttribute = new JMenuItem("Rename attribute", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditRenameAttribute = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_RenameAttribute_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuEditRenameAttribute.addActionListener(this);
-    menuEditAttributeAsClass = new JMenuItem("Attribute as class", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditAttributeAsClass = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_AttributeAsClass_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuEditAttributeAsClass.addActionListener(this);
-    menuEditDeleteAttribute = new JMenuItem("Delete attribute", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditDeleteAttribute = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_DeleteAttribute_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuEditDeleteAttribute.addActionListener(this);
-    menuEditDeleteAttributes = new JMenuItem("Delete attributes", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditDeleteAttributes = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_DeleteAttributes_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuEditDeleteAttributes.addActionListener(this);
-    menuEditDeleteInstance = new JMenuItem("Delete instance", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditDeleteInstance = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_DeleteInstance_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuEditDeleteInstance.addActionListener(this);
-    menuEditDeleteInstances = new JMenuItem("Delete instances", ComponentHelper.getImageIcon("empty.gif"));
+    menuEditDeleteInstances = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_DeleteInstances_JMenuItem_Text"), ComponentHelper.getImageIcon("empty.gif"));
     menuEditDeleteInstances.addActionListener(this);
-    menuEditSortInstances = new JMenuItem("Sort data (ascending)", ComponentHelper.getImageIcon("sort.gif"));
+    menuEditSortInstances = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_SortDataAscending_JMenuItem_Text"), ComponentHelper.getImageIcon("sort.gif"));
     menuEditSortInstances.addActionListener(this);
     menuEdit.add(menuEditUndo);
     menuEdit.addSeparator();
@@ -227,14 +227,14 @@ public class ArffViewerMainPanel
     menuEdit.add(menuEditSortInstances);
     menuBar.add(menuEdit);
     
-    menuView       = new JMenu("View");
-    menuViewAttributes   = new JMenuItem("Attributes...", ComponentHelper.getImageIcon("objects.gif"));
+    menuView       = new JMenu(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_View_JMenu_Text"));
+    menuViewAttributes   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_ViewAttributes_JMenuItem_Text"), ComponentHelper.getImageIcon("objects.gif"));
     menuViewAttributes.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
     menuViewAttributes.addActionListener(this);
-    menuViewValues   = new JMenuItem("Values...", ComponentHelper.getImageIcon("properties.gif"));
+    menuViewValues   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_ViewValues_JMenuItem_Text"), ComponentHelper.getImageIcon("properties.gif"));
     menuViewValues.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
     menuViewValues.addActionListener(this);
-    menuViewOptimalColWidths = new JMenuItem("Optimal column width (all)", ComponentHelper.getImageIcon("resize.gif"));
+    menuViewOptimalColWidths = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_ViewOptimalColWidths_JMenuItem_Text"), ComponentHelper.getImageIcon("resize.gif"));
     menuViewOptimalColWidths.addActionListener(this);
     menuView.add(menuViewAttributes);
     menuView.add(menuViewValues);
@@ -355,7 +355,7 @@ public class ArffViewerMainPanel
     if (getCurrentFilename().equals(""))
       return frameTitle;
     else
-      return frameTitle + " - " + getCurrentFilename();
+      return frameTitle + Messages.getInstance().getString("ArffViewerMainPanel_GetFrameTitle_Text") + getCurrentFilename();
   }
   
   /**
@@ -559,15 +559,15 @@ public class ArffViewerMainPanel
         if (showCancel)
           button = ComponentHelper.showMessageBox(
               this,
-              "Changed",
-              "The file is not saved - Do you want to save it?",
+              Messages.getInstance().getString("ArffViewerMainPanel_SaveChanges_ComponentHelperShowMessageBox_Text_First"),
+              Messages.getInstance().getString("ArffViewerMainPanel_SaveChanges_ComponentHelperShowMessageBox_Text_Second"),
               JOptionPane.YES_NO_CANCEL_OPTION,
               JOptionPane.QUESTION_MESSAGE );
         else
           button = ComponentHelper.showMessageBox(
               this,
-              "Changed",
-              "The file is not saved - Do you want to save it?",
+              Messages.getInstance().getString("ArffViewerMainPanel_SaveChanges_ComponentHelperShowMessageBox_Text_Third"),
+              Messages.getInstance().getString("ArffViewerMainPanel_SaveChanges_ComponentHelperShowMessageBox_Text_Fourth"),
               JOptionPane.YES_NO_OPTION,
               JOptionPane.QUESTION_MESSAGE );
       }
@@ -669,7 +669,7 @@ public class ArffViewerMainPanel
     // no panel? -> exit
     panel = getCurrentPanel();
     if (panel == null) {
-      System.out.println("nothing selected!");
+      System.out.println(Messages.getInstance().getString("ArffViewerMainPanel_SaveFileAs_Text"));
       return;
     }
     
@@ -759,12 +759,12 @@ public class ArffViewerMainPanel
     
     // get some data
     props = new Vector();
-    props.add("Filename: " + panel.getFilename());
-    props.add("Relation name: " + inst.relationName());
-    props.add("# of instances: " + inst.numInstances());
-    props.add("# of attributes: " + inst.numAttributes());
-    props.add("Class attribute: " + inst.classAttribute().name());
-    props.add("# of class labels: " + inst.numClasses());
+    props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_Filename_Text") + panel.getFilename());
+    props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_Filename_Text") + inst.relationName());
+    props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_Instances_Text") + inst.numInstances());
+    props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_Attributes_Text") + inst.numAttributes());
+    props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_ClassAttribute_Text") + inst.classAttribute().name());
+    props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_ClassLabels_Text") + inst.numClasses());
     
     dialog = new ListSelectorDialog(getParentFrame(), new JList(props));
     dialog.showDialog();

@@ -99,7 +99,7 @@ public class IncrementalClassifierEvaluator
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Evaluate the performance of incrementally trained classifiers.";
+    return Messages.getInstance().getString("IncrementalClassifierEvaluator_GlobalInfo_Text");
   }
 
   /**
@@ -119,13 +119,13 @@ public class IncrementalClassifierEvaluator
 	m_reset = true;
 	m_dataPoint = new double[0];
 	Instances inst = ce.getStructure();
-	System.err.println("NEW BATCH");
+	System.err.println(Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_Error_Text"));
         m_instanceCount = 0;
         if (m_logger != null) {
           m_logger.statusMessage(statusMessagePrefix() 
-              + "IncrementalClassifierEvaluator: started processing...");
-          m_logger.logMessage("[IncrementalClassifierEvaluator]" +
-              statusMessagePrefix() + " started processing...");
+              + Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_StatusMessage_Text_First"));
+          m_logger.logMessage(Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_LogMessage_Text_First") +
+              statusMessagePrefix() + Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_LogMessage_Text_Second"));
         }
 	/* if (inst.classIndex() >= 0) {
 	  if (inst.attribute(inst.classIndex()).isNominal()) {
@@ -145,8 +145,8 @@ public class IncrementalClassifierEvaluator
       } else {
         if (m_instanceCount > 0 && m_instanceCount % m_statusFrequency == 0) {
           if (m_logger != null) {
-            m_logger.statusMessage(statusMessagePrefix() + "Processed "
-                                   + m_instanceCount + " instances.");
+            m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_StatusMessage_Text_Second")
+                                   + m_instanceCount + Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_StatusMessage_Text_Third"));
           }
         }
         m_instanceCount++;
@@ -247,18 +247,17 @@ public class IncrementalClassifierEvaluator
 
 	  if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED) {
             if (m_logger != null) {
-              m_logger.logMessage("[IncrementalClassifierEvaluator]"
-                  + statusMessagePrefix() + " Finished processing.");
-              m_logger.statusMessage(statusMessagePrefix() + "Done.");
+              m_logger.logMessage(Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_LogMessage_Text_Third")
+                  + statusMessagePrefix() + Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_LogMessage_Text_Fourth"));
+              m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_StatusMessage_Text_Fourth"));
             }
 	    if (m_textListeners.size() > 0) {
 	      String textTitle = ce.getClassifier().getClass().getName();
 	      textTitle = 
 		textTitle.substring(textTitle.lastIndexOf('.')+1,
 				    textTitle.length());
-	      String results = "=== Performance information ===\n\n"
-		+  "Scheme:   " + textTitle + "\n"
-		+  "Relation: "+ inst.dataset().relationName() + "\n\n"
+	      String results = Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_Result_Text_First") + textTitle 
+		+  Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_Result_Text_Second") + inst.dataset().relationName() + "\n\n"
 		+ m_eval.toSummaryString();
               if (inst.classIndex() >= 0 && 
                   inst.classAttribute().isNominal() &&
@@ -270,7 +269,7 @@ public class IncrementalClassifierEvaluator
                   inst.classAttribute().isNominal()) {
                 results += "\n" + m_eval.toMatrixString();
               }
-	      textTitle = "Results: " + textTitle;
+	      textTitle = Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_TextTitle_Text") + textTitle;
 	      TextEvent te = 
 		new TextEvent(this, 
 			      results,
@@ -282,11 +281,11 @@ public class IncrementalClassifierEvaluator
       }
     } catch (Exception ex) {
       if (m_logger != null) {
-        m_logger.logMessage("[IncrementalClassifierEvaluator]"
-            + statusMessagePrefix() + " Error processing prediction " 
+        m_logger.logMessage(Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_LogMessage_Text_Fifth")
+            + statusMessagePrefix() + Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_LogMessage_Text_Sixth") 
             + ex.getMessage());
         m_logger.statusMessage(statusMessagePrefix() 
-            + "ERROR: problem processing prediction (see log for details)");
+            + Messages.getInstance().getString("IncrementalClassifierEvaluator_AcceptClassifier_StatusMessage_Text_Fifth"));
       }
       ex.printStackTrace();
       stop();
@@ -393,7 +392,7 @@ public class IncrementalClassifierEvaluator
    * @return a string for the tip text
    */
   public String statusFrequencyTipText() {
-    return "How often to report progress to the status bar.";
+    return Messages.getInstance().getString("IncrementalClassifierEvaluator_StatusFrequencyTipText_Text");
   }
 
   /**
@@ -421,8 +420,7 @@ public class IncrementalClassifierEvaluator
    * @return a string for the tip text
    */
   public String outputPerClassInfoRetrievalStatsTipText() {
-    return "Output per-class info retrieval stats. If set to true, predictions get "
-      +"stored so that stats such as AUC can be computed. Note: this consumes some memory.";
+    return Messages.getInstance().getString("IncrementalClassifierEvaluator_OutputPerClassInfoRetrievalStatsTipText_Text");
   }
 
   /**

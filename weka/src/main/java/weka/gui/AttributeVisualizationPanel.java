@@ -255,29 +255,29 @@ public class AttributeVisualizationPanel
     m_data = new Instances(newins);
     if(m_colorAttrib!=null) {
       m_colorAttrib.removeAllItems();
-      m_colorAttrib.addItem("No class");
+      m_colorAttrib.addItem(Messages.getInstance().getString("AttributeVisualizationPanel_SetInstances_ColorAttrib_Text_First"));
       for(int i=0; i<m_data.numAttributes(); i++) {
 	String type = "";
 	switch (m_data.attribute(i).type()) {
 	  case Attribute.NOMINAL:
-	    type = "(Nom) ";
+	    type = Messages.getInstance().getString("AttributeVisualizationPanel_SetInstances_AttributeNOMINAL_Text");
 	    break;
 	  case Attribute.NUMERIC:
-	    type = "(Num) ";
+	    type = Messages.getInstance().getString("AttributeVisualizationPanel_SetInstances_AttributeNUMERIC_Text");
 	    break;
 	  case Attribute.STRING:
-	    type = "(Str) ";
+	    type = Messages.getInstance().getString("AttributeVisualizationPanel_SetInstances_AttributeSTRING_Text");
 	    break;
 	  case Attribute.DATE:
-	    type = "(Dat) ";
+	    type = Messages.getInstance().getString("AttributeVisualizationPanel_SetInstances_AttributeDATE_Text");
 	    break;
 	  case Attribute.RELATIONAL:
-	    type = "(Rel) ";
+	    type = Messages.getInstance().getString("AttributeVisualizationPanel_SetInstances_AttributeRELATIONAL_Text");
 	    break;
 	  default:
-	    type = "(???) ";
+	    type = Messages.getInstance().getString("AttributeVisualizationPanel_SetInstances_AttributeDEFAULT_Text");
 	}
-        m_colorAttrib.addItem(new String("Class: "+m_data.attribute(i).name()+
+        m_colorAttrib.addItem(new String(Messages.getInstance().getString("AttributeVisualizationPanel_SetInstances_ColorAttrib_Text_Second") + m_data.attribute(i).name()+
         " " + type));
       }
       if (m_data.classIndex() >= 0) {
@@ -806,17 +806,17 @@ public class AttributeVisualizationPanel
             }
             catch(ArrayIndexOutOfBoundsException ae) {
               ae.printStackTrace();
-              System.out.println("t:"+(t)+
-              " barRange:"+barRange+
-              " histLength:"+histCounts.length+
-              " value:"+m_data.instance(k).value(m_attribIndex)+
-              " min:"+m_as.numericStats.min+
-              " sumResult:"+
+              System.out.println(Messages.getInstance().getString("AttributeVisualizationPanel_HistCalc_Run_ArrayIndexOutOfBoundsException_Text_First") + (t)+
+              Messages.getInstance().getString("AttributeVisualizationPanel_HistCalc_Run_ArrayIndexOutOfBoundsException_Text_Second") + barRange+
+              Messages.getInstance().getString("AttributeVisualizationPanel_HistCalc_Run_ArrayIndexOutOfBoundsException_Text_Third") + histCounts.length+
+              Messages.getInstance().getString("AttributeVisualizationPanel_HistCalc_Run_ArrayIndexOutOfBoundsException_Text_Fourth") + m_data.instance(k).value(m_attribIndex)+
+              Messages.getInstance().getString("AttributeVisualizationPanel_HistCalc_Run_ArrayIndexOutOfBoundsException_Text_Fifth") + m_as.numericStats.min+
+              Messages.getInstance().getString("AttributeVisualizationPanel_HistCalc_Run_ArrayIndexOutOfBoundsException_Text_Sixth") +
               (m_data.instance(k).value(m_attribIndex)-m_as.numericStats.min)+
-              " divideResult:"+
+              Messages.getInstance().getString("AttributeVisualizationPanel_HistCalc_Run_ArrayIndexOutOfBoundsException_Text_Seventh") +
               (float)((m_data.instance(k).value(m_attribIndex) -
               m_as.numericStats.min)/barRange)+
-              " finalResult:"+
+              Messages.getInstance().getString("AttributeVisualizationPanel_HistCalc_Run_ArrayIndexOutOfBoundsException_Text_Eighth") +
               Math.ceil( (float)((m_data.instance(k).value(m_attribIndex) -
               m_as.numericStats.min) / barRange)) );
             }
@@ -1013,10 +1013,10 @@ public class AttributeVisualizationPanel
               sum += m_histBarClassCounts[0].valueSparse(k);
             //return the count of the interval mouse is pointing to plus 
             //the range of values that fall into this interval
-            return ("<html><center><font face=Dialog size=-1>"+sum+"<br>"+
-                    "["+Utils.doubleToString(bar+m_barRange*temp,3)+
+            return (Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_First") + sum+
+            		Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Second") + Utils.doubleToString(bar+m_barRange*temp,3)+
                     ", "+Utils.doubleToString((bar+m_barRange*(temp+1)),3)+
-                    "]"+"</font></center></html>");
+                    Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Fourth"));
           }
           else if( temp < m_histBarClassCounts.length ) { //handle case temp!=0
             int sum=0;
@@ -1024,10 +1024,10 @@ public class AttributeVisualizationPanel
               sum+=m_histBarClassCounts[temp].valueSparse(k);
             //return the count of the interval mouse is pointing to plus 
             //the range of values that fall into this interval
-            return ("<html><center><font face=Dialog size=-1>"+sum+"<br>("+
+            return (Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Fifth") + sum + Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Sixth") +
                     Utils.doubleToString(bar+m_barRange*temp,3)+", "+
                     Utils.doubleToString((bar+m_barRange*(temp+1)),3)+
-                    "]</font></center></html>");
+                    Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Eighth"));
           }
         }
       }
@@ -1049,19 +1049,15 @@ public class AttributeVisualizationPanel
           
           //return interval count as well as its range
           if(temp == 0) //handle special case temp==0. see footnote 1.
-            return ("<html><center><font face=Dialog size=-1>"+
-                    m_histBarCounts[0]+"<br>"+
-                    "["+Utils.doubleToString(bar+m_barRange*temp,3)+", "+
+            return (Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Nineth") +
+                    m_histBarCounts[0]+Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Texth") + Utils.doubleToString(bar+m_barRange*temp,3)+", "+
                     Utils.doubleToString((bar+m_barRange*(temp+1)),3)+
-                    "]"+
-                    "</font></center></html>");
+                    Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Twelveth"));
           else if(temp < m_histBarCounts.length) //handle case temp!=0
-            return ("<html><center><font face=Dialog size=-1>"+
-                    m_histBarCounts[temp]+"<br>"+
-                    "("+Utils.doubleToString(bar+m_barRange*temp,3)+", "+
+            return (Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Thirteenth") +
+                    m_histBarCounts[temp]+ Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Fourteenth") + Utils.doubleToString(bar+m_barRange*temp,3)+", "+
                     Utils.doubleToString((bar+m_barRange*(temp+1)),3)+
-                    "]"+
-                    "</font></center></html>");
+                    Messages.getInstance().getString("AttributeVisualizationPanel_GetToolTipText_Text_Sixteenth"));
         }
       }
     }
@@ -1404,22 +1400,22 @@ public class AttributeVisualizationPanel
           
         } else {
           g.clearRect(0, 0, this.getWidth(), this.getHeight());
-          g.drawString("Attribute is neither numeric nor nominal.",
+          g.drawString(Messages.getInstance().getString("AttributeVisualizationPanel_PaintComponent_G_DrawString_Text_First"),
           this.getWidth()/2 - m_fm.
-          stringWidth("Attribute is neither numeric nor nominal.")/2,
+          stringWidth(Messages.getInstance().getString("AttributeVisualizationPanel_PaintComponent_StringWidth_Text_First"))/2,
           this.getHeight()/2-m_fm.getHeight()/2);
         }
       } //<--end if of calculation thread
       else if (m_displayCurrentAttribute) {   //if still calculation thread is running plot
         g.clearRect(0, 0, this.getWidth(), this.getHeight());
-        g.drawString("Calculating. Please Wait...",
-        this.getWidth()/2 - m_fm.stringWidth("Calculating. Please Wait...")/2,
+        g.drawString(Messages.getInstance().getString("AttributeVisualizationPanel_PaintComponent_G_DrawString_Text_Second"),
+        this.getWidth()/2 - m_fm.stringWidth(Messages.getInstance().getString("AttributeVisualizationPanel_PaintComponent_StringWidth_Text_Second"))/2,
         this.getHeight()/2-m_fm.getHeight()/2);
       }
       else if (!m_displayCurrentAttribute) {
         g.clearRect(0, 0, this.getWidth(), this.getHeight());
-        g.drawString("Too many values to display.",
-        this.getWidth()/2 - m_fm.stringWidth("Too many values to display.")/2,
+        g.drawString(Messages.getInstance().getString("AttributeVisualizationPanel_PaintComponent_G_DrawString_Text_Third"),
+        this.getWidth()/2 - m_fm.stringWidth(Messages.getInstance().getString("AttributeVisualizationPanel_PaintComponent_StringWidth_Text_Third"))/2,
         this.getHeight()/2-m_fm.getHeight()/2);
       }
     } //<--end if(m_as==null) this means 
@@ -1433,18 +1429,18 @@ public class AttributeVisualizationPanel
    */
   public static void main(String [] args) {
     if(args.length!=3) {
-      final JFrame jf = new JFrame("AttribVisualization");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("AttributeVisualizationPanel_Main_JFrame_Text"));
       AttributeVisualizationPanel ap = new AttributeVisualizationPanel();
       try {
         Instances ins = new Instances( new FileReader(args[0]) );
         ap.setInstances(ins);
-        System.out.println("Loaded: "+args[0]+
-                           "\nRelation: "+ap.m_data.relationName()+
-                           "\nAttributes: "+ap.m_data.numAttributes());
+        System.out.println(Messages.getInstance().getString("AttributeVisualizationPanel_Main_Text_First") + args[0]+
+                           Messages.getInstance().getString("AttributeVisualizationPanel_Main_Text_Second") + ap.m_data.relationName()+
+                           Messages.getInstance().getString("AttributeVisualizationPanel_Main_Text_Third") + ap.m_data.numAttributes());
         ap.setAttribute( Integer.parseInt(args[1]) );
       }
       catch(Exception ex) { ex.printStackTrace(); System.exit(-1); }
-      System.out.println("The attributes are: ");
+      System.out.println(Messages.getInstance().getString("AttributeVisualizationPanel_Main_Text_Fourth"));
       for(int i=0; i<ap.m_data.numAttributes(); i++)
         System.out.println(ap.m_data.attribute(i).name());
       
@@ -1455,8 +1451,7 @@ public class AttributeVisualizationPanel
       jf.setVisible(true);
     }
     else
-      System.out.println("Usage: java AttributeVisualizationPanel"+
-                         " [arff file] [index of attribute]");
+      System.out.println(Messages.getInstance().getString("AttributeVisualizationPanel_Main_Text_Fifth"));
   }
 }
 

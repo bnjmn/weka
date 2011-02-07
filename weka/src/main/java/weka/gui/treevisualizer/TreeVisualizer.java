@@ -297,7 +297,7 @@ public class TreeVisualizer
     
     //generate the node structure in here
     if (m_ShowBorder)
-      setBorder(BorderFactory.createTitledBorder("Tree View")); 
+      setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("TreeVisualizer_BorderFactoryCreateTitledBorder_Text_First"))); 
     m_listener = tdl;
 
     TreeBuild builder = new TreeBuild();
@@ -343,21 +343,21 @@ public class TreeVisualizer
 
 
     m_winMenu = new JPopupMenu();
-    m_topN = new JMenuItem("Center on Top Node");           //note to change 
+    m_topN = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_TopN_JMenuItem_Text_First"));           //note to change 
     //language change this line
-    m_topN.setActionCommand("Center on Top Node");          //but not this one,
+    m_topN.setActionCommand(Messages.getInstance().getString("TreeVisualizer_TopN_JMenuItem_SetActionCommand_Text_First"));          //but not this one,
     //same for all menu items
-    m_fitToScreen = new JMenuItem("Fit to Screen");
-    m_fitToScreen.setActionCommand("Fit to Screen");
+    m_fitToScreen = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_FitToScreen_JMenuItem_Text_First"));
+    m_fitToScreen.setActionCommand(Messages.getInstance().getString("TreeVisualizer_FitToScreen_JMenuItem_SetActionCommand_Text_First"));
     //unhide = new JMenuItem("Unhide all Nodes");
-    m_selectFont = new JMenu("Select Font");
-    m_selectFont.setActionCommand("Select Font");
-    m_autoScale = new JMenuItem("Auto Scale");
-    m_autoScale.setActionCommand("Auto Scale");
+    m_selectFont = new JMenu(Messages.getInstance().getString("TreeVisualizer_SelectFont_JMenu_Text_First"));
+    m_selectFont.setActionCommand(Messages.getInstance().getString("TreeVisualizer_SelectFont_JMenu_SetActionCommand_Text_First"));
+    m_autoScale = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_AutoScale_JMenuItem_Text_First"));
+    m_autoScale.setActionCommand(Messages.getInstance().getString("TreeVisualizer_AutoScale_JMenuItem_SetActionCommand_Text_First"));
     m_selectFontGroup = new ButtonGroup();
     
-    m_accept = new JMenuItem("Accept The Tree");
-    m_accept.setActionCommand("Accept The Tree");
+    m_accept = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_Accept_JMenuItem_Text_First"));
+    m_accept.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Accept_JMenuItem_SetActionCommand_Text_First"));
     
     m_winMenu.add(m_topN);
     m_winMenu.addSeparator();
@@ -379,33 +379,33 @@ public class TreeVisualizer
     m_autoScale.addActionListener(this);
     m_accept.addActionListener(this);
         
-    m_size24 = new JRadioButtonMenuItem("Size 24",false);//,select_font_group);
-    m_size22 = new JRadioButtonMenuItem("Size 22",false);//,select_font_group);
-    m_size20 = new JRadioButtonMenuItem("Size 20",false);//,select_font_group);
-    m_size18 = new JRadioButtonMenuItem("Size 18",false);//,select_font_group);
-    m_size16 = new JRadioButtonMenuItem("Size 16",false);//,select_font_group);
-    m_size14 = new JRadioButtonMenuItem("Size 14",false);//,select_font_group);
-    m_size12 = new JRadioButtonMenuItem("Size 12",true);//,select_font_group);
-    m_size10 = new JRadioButtonMenuItem("Size 10",false);//,select_font_group);
-    m_size8 = new JRadioButtonMenuItem("Size 8",false);//,select_font_group);
-    m_size6 = new JRadioButtonMenuItem("Size 6",false);//,select_font_group);
-    m_size4 = new JRadioButtonMenuItem("Size 4",false);//,select_font_group);
-    m_size2 = new JRadioButtonMenuItem("Size 2",false);//,select_font_group);
-    m_size1 = new JRadioButtonMenuItem("Size 1",false);//,select_font_group);
+    m_size24 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size24_Text_First"),false);//,select_font_group);
+    m_size22 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size22_Text_First"),false);//,select_font_group);
+    m_size20 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size20_Text_First"),false);//,select_font_group);
+    m_size18 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size18_Text_First"),false);//,select_font_group);
+    m_size16 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size16_Text_First"),false);//,select_font_group);
+    m_size14 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size14_Text_First"),false);//,select_font_group);
+    m_size12 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size12_Text_First"),true);//,select_font_group);
+    m_size10 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size10_Text_First"),false);//,select_font_group);
+    m_size8 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size8_Text_First"),false);//,select_font_group);
+    m_size6 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size6_Text_First"),false);//,select_font_group);
+    m_size4 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size4_Text_First"),false);//,select_font_group);
+    m_size2 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size2_Text_First"),false);//,select_font_group);
+    m_size1 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size1_Text_First"),false);//,select_font_group);
 
-    m_size24.setActionCommand("Size 24");//,select_font_group);
-    m_size22.setActionCommand("Size 22");//,select_font_group);
-    m_size20.setActionCommand("Size 20");//,select_font_group);
-    m_size18.setActionCommand("Size 18");//,select_font_group);
-    m_size16.setActionCommand("Size 16");//,select_font_group);
-    m_size14.setActionCommand("Size 14");//,select_font_group);
-    m_size12.setActionCommand("Size 12");//,select_font_group);
-    m_size10.setActionCommand("Size 10");//,select_font_group);
-    m_size8.setActionCommand("Size 8");//,select_font_group);
-    m_size6.setActionCommand("Size 6");//,select_font_group);
-    m_size4.setActionCommand("Size 4");//,select_font_group);
-    m_size2.setActionCommand("Size 2");//,select_font_group);
-    m_size1.setActionCommand("Size 1");//,select_font_group);
+    m_size24.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size24_Text_First"));//,select_font_group);
+    m_size22.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size22_Text_First"));//,select_font_group);
+    m_size20.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size20_Text_First"));//,select_font_group);
+    m_size18.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size18_Text_First"));//,select_font_group);
+    m_size16.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size16_Text_First"));//,select_font_group);
+    m_size14.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size14_Text_First"));//,select_font_group);
+    m_size12.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size12_Text_First"));//,select_font_group);
+    m_size10.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size10_Text_First"));//,select_font_group);
+    m_size8.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size8_Text_First"));//,select_font_group);
+    m_size6.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size6_Text_First"));//,select_font_group);
+    m_size4.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size4_Text_First"));//,select_font_group);
+    m_size2.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size2_Text_First"));//,select_font_group);
+    m_size1.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size1_Text_First"));//,select_font_group);
     
     
     m_selectFontGroup.add(m_size24);
@@ -477,20 +477,20 @@ public class TreeVisualizer
 
     m_nodeMenu = new JPopupMenu();
     /* A visualize choice for the node, may not be available. */
-    m_visualise = new JMenuItem("Visualize The Node");
-    m_visualise.setActionCommand("Visualize The Node");
+    m_visualise = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_Visualise_JMenuItem_Text_First"));
+    m_visualise.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Visualise_JMenuItem_SetActionCommand_Text_First"));
     m_visualise.addActionListener(this);
     m_nodeMenu.add(m_visualise);
    
     if (m_listener != null) {
-      m_remChildren = new JMenuItem("Remove Child Nodes");
-      m_remChildren.setActionCommand("Remove Child Nodes");
+      m_remChildren = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_RemChildren_JMenuItem_Text_First"));
+      m_remChildren.setActionCommand(Messages.getInstance().getString("TreeVisualizer_RemChildren_JMenuItem_SetActionCommand_Text_First"));
       m_remChildren.addActionListener(this);
       m_nodeMenu.add(m_remChildren);
       
       
-      m_classifyChild = new JMenuItem("Use Classifier...");
-      m_classifyChild.setActionCommand("classify_child");
+      m_classifyChild = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_ClassifyChild_JMenuItem_Text_First"));
+      m_classifyChild.setActionCommand(Messages.getInstance().getString("TreeVisualizer_ClassifyChild_JMenuItem_SetActionCommand_Text_First"));
       m_classifyChild.addActionListener(this);
       m_nodeMenu.add(m_classifyChild);
       
@@ -526,7 +526,7 @@ public class TreeVisualizer
     
     //if the size needs to be automatically alocated I will do it here
     if (m_ShowBorder)
-      setBorder(BorderFactory.createTitledBorder("Tree View")); 
+      setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("TreeVisualizer_BorderFactoryCreateTitledBorder_Text_Second"))); 
     m_listener = tdl;
     m_topNode = n;
     m_placer = p;
@@ -559,26 +559,22 @@ public class TreeVisualizer
     m_newMousePos = new Dimension(0, 0);
     m_frameLimiter = new Timer(120, this);
 
-
-
-
-
     m_winMenu = new JPopupMenu();
-    m_topN = new JMenuItem("Center on Top Node");           //note to change 
+    m_topN = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_TopN_JMenuItem_Text_Second"));           //note to change 
     //language change this line
-    m_topN.setActionCommand("Center on Top Node");          //but not this 
+    m_topN.setActionCommand(Messages.getInstance().getString("TreeVisualizer_TopN_JMenuItem_SetActionCommand_Text_Second"));          //but not this 
     //one, same for all menu items
-    m_fitToScreen = new JMenuItem("Fit to Screen");
-    m_fitToScreen.setActionCommand("Fit to Screen");
+    m_fitToScreen = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_FitToScreen_JMenuItem_Text_Second"));
+    m_fitToScreen.setActionCommand(Messages.getInstance().getString("TreeVisualizer_FitToScreen_JMenuItem_SetActionCommand_Text_Second"));
     //unhide = new JMenuItem("Unhide all Nodes");
-    m_selectFont = new JMenu("Select Font");
-    m_selectFont.setActionCommand("Select Font");
-    m_autoScale = new JMenuItem("Auto Scale");
-    m_autoScale.setActionCommand("Auto Scale");
+    m_selectFont = new JMenu(Messages.getInstance().getString("TreeVisualizer_SelectFont_JMenu_Text_Second"));
+    m_selectFont.setActionCommand(Messages.getInstance().getString("TreeVisualizer_SelectFont_JMenu_SetActionCommand_Text_Second"));
+    m_autoScale = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_AutoScale_JMenuItem_Text_Second"));
+    m_autoScale.setActionCommand(Messages.getInstance().getString("TreeVisualizer_AutoScale_JMenuItem_SetActionCommand_Text_Second"));
     m_selectFontGroup = new ButtonGroup();
     
-    m_accept = new JMenuItem("Accept The Tree");
-    m_accept.setActionCommand("Accept The Tree");
+    m_accept = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_Accept_JMenuItem_Text_Second"));
+    m_accept.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Accept_JMenuItem_SetActionCommand_Text_Second"));
     
     m_winMenu.add(m_topN);
     m_winMenu.addSeparator();
@@ -600,33 +596,33 @@ public class TreeVisualizer
     m_autoScale.addActionListener(this);
     m_accept.addActionListener(this);
         
-    m_size24 = new JRadioButtonMenuItem("Size 24",false);//,select_font_group);
-    m_size22 = new JRadioButtonMenuItem("Size 22",false);//,select_font_group);
-    m_size20 = new JRadioButtonMenuItem("Size 20",false);//,select_font_group);
-    m_size18 = new JRadioButtonMenuItem("Size 18",false);//,select_font_group);
-    m_size16 = new JRadioButtonMenuItem("Size 16",false);//,select_font_group);
-    m_size14 = new JRadioButtonMenuItem("Size 14",false);//,select_font_group);
-    m_size12 = new JRadioButtonMenuItem("Size 12",true);//,select_font_group);
-    m_size10 = new JRadioButtonMenuItem("Size 10",false);//,select_font_group);
-    m_size8 = new JRadioButtonMenuItem("Size 8",false);//,select_font_group);
-    m_size6 = new JRadioButtonMenuItem("Size 6",false);//,select_font_group);
-    m_size4 = new JRadioButtonMenuItem("Size 4",false);//,select_font_group);
-    m_size2 = new JRadioButtonMenuItem("Size 2",false);//,select_font_group);
-    m_size1 = new JRadioButtonMenuItem("Size 1",false);//,select_font_group);
+    m_size24 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size24_Text_Second"),false);//,select_font_group);
+    m_size22 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size22_Text_Second"),false);//,select_font_group);
+    m_size20 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size20_Text_Second"),false);//,select_font_group);
+    m_size18 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size18_Text_Second"),false);//,select_font_group);
+    m_size16 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size16_Text_Second"),false);//,select_font_group);
+    m_size14 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size14_Text_Second"),false);//,select_font_group);
+    m_size12 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size12_Text_Second"),true);//,select_font_group);
+    m_size10 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size10_Text_Second"),false);//,select_font_group);
+    m_size8 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size8_Text_Second"),false);//,select_font_group);
+    m_size6 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size6_Text_Second"),false);//,select_font_group);
+    m_size4 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size4_Text_Second"),false);//,select_font_group);
+    m_size2 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size2_Text_Second"),false);//,select_font_group);
+    m_size1 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size1_Text_Second"),false);//,select_font_group);
 
-    m_size24.setActionCommand("Size 24");//,select_font_group);
-    m_size22.setActionCommand("Size 22");//,select_font_group);
-    m_size20.setActionCommand("Size 20");//,select_font_group);
-    m_size18.setActionCommand("Size 18");//,select_font_group);
-    m_size16.setActionCommand("Size 16");//,select_font_group);
-    m_size14.setActionCommand("Size 14");//,select_font_group);
-    m_size12.setActionCommand("Size 12");//,select_font_group);
-    m_size10.setActionCommand("Size 10");//,select_font_group);
-    m_size8.setActionCommand("Size 8");//,select_font_group);
-    m_size6.setActionCommand("Size 6");//,select_font_group);
-    m_size4.setActionCommand("Size 4");//,select_font_group);
-    m_size2.setActionCommand("Size 2");//,select_font_group);
-    m_size1.setActionCommand("Size 1");//,select_font_group);
+    m_size24.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size24_Text_Second"));//,select_font_group);
+    m_size22.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size22_Text_Second"));//,select_font_group);
+    m_size20.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size20_Text_Second"));//,select_font_group);
+    m_size18.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size18_Text_Second"));//,select_font_group);
+    m_size16.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size16_Text_Second"));//,select_font_group);
+    m_size14.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size14_Text_Second"));//,select_font_group);
+    m_size12.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size12_Text_Second"));//,select_font_group);
+    m_size10.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size10_Text_Second"));//,select_font_group);
+    m_size8.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size8_Text_Second"));//,select_font_group);
+    m_size6.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size6_Text_Second"));//,select_font_group);
+    m_size4.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size4_Text_Second"));//,select_font_group);
+    m_size2.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size2_Text_Second"));//,select_font_group);
+    m_size1.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size1_Text_Second"));//,select_font_group);
 
 
 
@@ -707,24 +703,24 @@ public class TreeVisualizer
 
     m_nodeMenu = new JPopupMenu();
     /* A visualize choice for the node, may not be available. */
-    m_visualise = new JMenuItem("Visualize The Node");
-    m_visualise.setActionCommand("Visualize The Node");
+    m_visualise = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_Visualise_JMenuItem_Text_Second"));
+    m_visualise.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Visualise_JMenuItem_SetActionCommand_Text_Second"));
     m_visualise.addActionListener(this);
     m_nodeMenu.add(m_visualise);
 
     if (m_listener != null) {
-      m_remChildren = new JMenuItem("Remove Child Nodes");
-      m_remChildren.setActionCommand("Remove Child Nodes");
+      m_remChildren = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_RemChildren_JMenuItem_Text_Second"));
+      m_remChildren.setActionCommand(Messages.getInstance().getString("TreeVisualizer_RemChildren_JMenuItem_SetActionCommand_Text_Second"));
       m_remChildren.addActionListener(this);
       m_nodeMenu.add(m_remChildren);
       
-      m_classifyChild = new JMenuItem("Use Classifier...");
-      m_classifyChild.setActionCommand("classify_child");
+      m_classifyChild = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_ClassifyChild_JMenuItem_Text_Second"));
+      m_classifyChild.setActionCommand(Messages.getInstance().getString("TreeVisualizer_ClassifyChild_JMenuItem_SetActionCommand_Text_Second"));
       m_classifyChild.addActionListener(this);
       m_nodeMenu.add(m_classifyChild);
       
-      m_sendInstances = new JMenuItem("Add Instances To Viewer");
-      m_sendInstances.setActionCommand("send_instances");
+      m_sendInstances = new JMenuItem(Messages.getInstance().getString("TreeVisualizer_SendInstances_JMenuItem_Text"));
+      m_sendInstances.setActionCommand(Messages.getInstance().getString("TreeVisualizer_SendInstances_JMenuItem_SetActionCommand_Text"));
       m_sendInstances.addActionListener(this);
       m_nodeMenu.add(m_sendInstances);
       
@@ -867,7 +863,7 @@ public class TreeVisualizer
 	animateScaling(m_nViewPos, m_nViewSize, m_scaling);
       }
     }
-    else if (e.getActionCommand().equals("Fit to Screen")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_FitToScreen_Text"))) {
       
       Dimension np = new Dimension();
       Dimension ns = new Dimension();
@@ -877,7 +873,7 @@ public class TreeVisualizer
       animateScaling(np, ns, 10);
       
     }
-    else if (e.getActionCommand().equals("Center on Top Node")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_CenterOnTopNode_Text"))) {
       
       int tpx = (int)(m_topNode.getCenter() * m_viewSize.width);   //calculate
       //the top nodes postion but don't adjust for where 
@@ -891,11 +887,11 @@ public class TreeVisualizer
       animateScaling(np, m_viewSize, 10);
       
     }
-    else if (e.getActionCommand().equals("Auto Scale")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_AutoScale_Text"))) {
       autoScale();  //this will figure the best scale value 
       //keep the focus on the middle of the screen and call animate
     }
-    else if (e.getActionCommand().equals("Visualize The Node")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_VisualizeTheNode_Text"))) {
       //send the node data to the visualizer 
       if (m_focusNode >= 0) {
 	Instances inst;
@@ -908,20 +904,18 @@ public class TreeVisualizer
 	  nf.setVisible(true);
 	}
 	else {
-	  JOptionPane.showMessageDialog(this, "Sorry, there is no " + 
-					"available Instances data for " +
-					"this Node.", "Sorry!",
+	  JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_First"), 
+			  Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Second"),
 					JOptionPane.WARNING_MESSAGE); 
 	}
       }
       else {
-	JOptionPane.showMessageDialog(this, "Error, there is no " + 
-				      "selected Node to perform " +
-				      "this operation on.", "Error!",
+	JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Third"), 
+			Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Fourth"),
 				      JOptionPane.ERROR_MESSAGE); 
       }
     }
-    else if (e.getActionCommand().equals("Create Child Nodes")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_CreateChildNodes_Text"))) {
       if (m_focusNode >= 0) {
 	if (m_listener != null) {
 	  //then send message to the listener
@@ -930,21 +924,18 @@ public class TreeVisualizer
 	     m_nodes[m_focusNode].m_node.getRefer()));
 	}
 	else {
-	  JOptionPane.showMessageDialog(this, "Sorry, there is no " + 
-					"available Decision Tree to " +
-					"perform this operation on.",
-					"Sorry!", 
+	  JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Sixth"),
+					Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Seventh"), 
 					JOptionPane.WARNING_MESSAGE);
 	}
       }
       else {
-	JOptionPane.showMessageDialog(this, "Error, there is no " +
-				      "selected Node to perform this " +
-				      "operation on.", "Error!",
+	JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Eighth"), 
+			Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Eighth"),
 				      JOptionPane.ERROR_MESSAGE);
       }
     }
-    else if (e.getActionCommand().equals("Remove Child Nodes")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_RemoveChildNodes_Text"))) {
       if (m_focusNode >= 0) {
 	if (m_listener != null) {
 	  //then send message to the listener
@@ -953,21 +944,18 @@ public class TreeVisualizer
 			     m_nodes[m_focusNode].m_node.getRefer()));
 	}
 	else {
-	  JOptionPane.showMessageDialog(this, "Sorry, there is no " + 
-					"available Decsion Tree to " +
-					"perform this operation on.",
-					"Sorry!", 
+	  JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Nineth"),
+					Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Tenth"), 
 					JOptionPane.WARNING_MESSAGE);
 	}
       }
       else {
-	JOptionPane.showMessageDialog(this, "Error, there is no " +
-				      "selected Node to perform this " +
-				      "operation on.", "Error!",
+	JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Eleventh"), 
+			Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Twelveth"),
 				      JOptionPane.ERROR_MESSAGE);
       }
     }
-    else if (e.getActionCommand().equals("classify_child")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_Classify_Child_Text"))) {
       if (m_focusNode >= 0) {
 	if (m_listener != null) {
 	  //then send message to the listener
@@ -976,21 +964,18 @@ public class TreeVisualizer
 	     m_nodes[m_focusNode].m_node.getRefer()));
 	}
 	else {
-	  JOptionPane.showMessageDialog(this, "Sorry, there is no " + 
-					"available Decsion Tree to " +
-					"perform this operation on.",
-					"Sorry!", 
+	  JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Thirteenth"),
+					Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Fourteenth"), 
 					JOptionPane.WARNING_MESSAGE);
 	}
       }
       else {
-	JOptionPane.showMessageDialog(this, "Error, there is no " +
-				      "selected Node to perform this " +
-				      "operation on.", "Error!",
+	JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Fifteenth"),
+			"			" + Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Sixteenth"),
 				      JOptionPane.ERROR_MESSAGE);
       }
     }
-    else if (e.getActionCommand().equals("send_instances")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_Send_Instances_Text"))) {
       if (m_focusNode >= 0) {
 	if (m_listener != null) {
 	  //then send message to the listener
@@ -999,31 +984,26 @@ public class TreeVisualizer
 	     m_nodes[m_focusNode].m_node.getRefer()));
 	}
 	else {
-	  JOptionPane.showMessageDialog(this, "Sorry, there is no " + 
-					"available Decsion Tree to " +
-					"perform this operation on.",
-					"Sorry!", 
+	  JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Seventeenth"),
+					Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Eighteenth"), 
 					JOptionPane.WARNING_MESSAGE);
 	}
       }
       else {
-	JOptionPane.showMessageDialog(this, "Error, there is no " +
-				      "selected Node to perform this " +
-				      "operation on.", "Error!",
+	JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Nineteenth"), 
+			Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_Twentyth"),
 				      JOptionPane.ERROR_MESSAGE);
       }
     }
-    else if (e.getActionCommand().equals("Accept The Tree")) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_AcceptTheTree_Text"))) {
       if (m_listener != null) {
 	//then send message to the listener saying that the tree is done
 	m_listener.userCommand(new TreeDisplayEvent(TreeDisplayEvent.ACCEPT,
 						  null));
       }
       else {
-	JOptionPane.showMessageDialog(this, "Sorry, there is no " +
-				      "available Decision Tree to " +
-				      "perform this operation on.",
-				      "Sorry!", 
+	JOptionPane.showMessageDialog(this, Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_TwentyFirst"),
+				      Messages.getInstance().getString("TreeVisualizer_ActionPerformed_JOptionPaneShowMessageDialog_Text_TwentySecond"), 
 				      JOptionPane.WARNING_MESSAGE);
       }
     }
@@ -1037,46 +1017,46 @@ public class TreeVisualizer
   public void itemStateChanged(ItemEvent e)
   {
     JRadioButtonMenuItem c = (JRadioButtonMenuItem)e.getSource();
-    if (c.getActionCommand().equals("Size 24")) {
+    if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size24_Text"))) {
       changeFontSize(24);
     }
-    else if (c.getActionCommand().equals("Size 22")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size22_Text"))) {
       changeFontSize(22);
     }
-    else if (c.getActionCommand().equals("Size 20")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size20_Text"))) {
       changeFontSize(20);
     }
-    else if (c.getActionCommand().equals("Size 18")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size18_Text"))) {
       changeFontSize(18);
     } 
-    else if (c.getActionCommand().equals("Size 16")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size16_Text"))) {
       changeFontSize(16);
     }
-    else if (c.getActionCommand().equals("Size 14")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size14_Text"))) {
       changeFontSize(14);
     }
-    else if (c.getActionCommand().equals("Size 12")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size12_Text"))) {
       changeFontSize(12);
     }
-    else if (c.getActionCommand().equals("Size 10")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size10_Text"))) {
       changeFontSize(10);
     }
-    else if (c.getActionCommand().equals("Size 8")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size8_Text"))) {
       changeFontSize(8);
     }
-    else if (c.getActionCommand().equals("Size 6")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size6_Text"))) {
       changeFontSize(6);
     }
-    else if (c.getActionCommand().equals("Size 4")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size4_Text"))) {
       changeFontSize(4);
     }
-    else if (c.getActionCommand().equals("Size 2")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size2_Text"))) {
       changeFontSize(2);
     }
-    else if (c.getActionCommand().equals("Size 1")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_Size1_Text"))) {
       changeFontSize(1);
     }
-    else if (c.getActionCommand().equals("Hide Descendants")) {
+    else if (c.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_HideDescendants_Text"))) {
       //focus_node.setCVisible(!c.isSelected());
       //no longer used...
     }
@@ -1113,12 +1093,12 @@ public class TreeVisualizer
       if (m_focusNode != -1) {
 	if (m_listener != null) {
 	  //then set this to be the selected node for editing
-	  actionPerformed(new ActionEvent(this, 32000, "Create Child Nodes"));
+	  actionPerformed(new ActionEvent(this, 32000, Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_ActionPerformed_Text_First")));
 	  
 	}
 	else {
 	  //then open a visualize to display this nodes instances if possible
-	  actionPerformed(new ActionEvent(this, 32000, "Visualize The Node"));
+	  actionPerformed(new ActionEvent(this, 32000, Messages.getInstance().getString("TreeVisualizer_ItemStateChanged_GetActionCommand_ActionPerformed_Text_Second")));
 	}
       }
     }
@@ -1939,7 +1919,7 @@ public class TreeVisualizer
     //I will have to use a global variable since I am doing it proportionally
 
     if (frames == 0) {
-      System.out.println("the timer didn't end in time");
+      System.out.println(Messages.getInstance().getString("TreeVisualizer_AnimateScaling_Text"));
       m_scaling = 0;
     }
     else {
@@ -2189,7 +2169,7 @@ public class TreeVisualizer
    */
   public static void main(String[] args) {
     try {
-      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("TreeVisualizer_Main_Logger_Text"));
       //put in the random data generator right here
       // this call with import java.lang gives me between 0 and 1 Math.random
       TreeBuild builder = new TreeBuild();

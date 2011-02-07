@@ -271,7 +271,7 @@ public class XMLBeans
     else if (value == DATATYPE_USERCOMPONENTS)
       m_DataType = value;
     else
-      System.out.println("DataType '" + value + "' is unknown!");
+      System.out.println(Messages.getInstance().getString("XMLBeans_SetDataType_DataType_Text_Front") + value + Messages.getInstance().getString("XMLBeans_SetDataType_DataType_Text_End"));
   }
   
   /**
@@ -415,7 +415,7 @@ public class XMLBeans
         addBeanInstances(((MetaBean) list.get(i)).getBeansInSubFlow());
       }
       else {
-        System.out.println("addBeanInstances does not support Vectors of class '" + list.get(i) + "'!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_SetDataType_AddBeanInstances_Text_Front") + list.get(i) + Messages.getInstance().getString("XMLBeans_SetDataType_AddBeanInstances_Text_End"));
       }
     }
   }
@@ -445,7 +445,7 @@ public class XMLBeans
         break;
         
       default:
-        System.out.println("writePreProcess: data type '" + getDataType() + "' is not recognized!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_WritePreProcess_Text_Front") + getDataType() + Messages.getInstance().getString("XMLBeans_WritePreProcess_Text_End"));
         break;
     }
     
@@ -852,8 +852,9 @@ public class XMLBeans
       else if (name.equals(VAL_BLUE))
         blue = readIntFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadColor_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadColor_Text_Second") + node.getAttribute(ATT_NAME) + 
+            Messages.getInstance().getString("XMLBeans_ReadColor_Text_Third"));
     }
     
     result = new Color(red, green, blue);
@@ -927,8 +928,8 @@ public class XMLBeans
       else if (name.equals(VAL_HEIGHT))
         height = readDoubleFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadDimension_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadDimension_Text_Second") + node.getAttribute(ATT_NAME) + Messages.getInstance().getString("XMLBeans_ReadDimension_Text_Third"));
     }
     
     result = new Dimension();
@@ -1008,8 +1009,8 @@ public class XMLBeans
       else if (name.equals(VAL_SIZE))
         size = readIntFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadFont_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadFont_Text_Second") + node.getAttribute(ATT_NAME) + Messages.getInstance().getString("XMLBeans_ReadFont_Text_Third"));
     }
     
     result = new Font(fontname, style, size);
@@ -1083,8 +1084,9 @@ public class XMLBeans
       else if (name.equals(VAL_Y))
         y = readDoubleFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadPoint_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadPoint_Text_Second") + node.getAttribute(ATT_NAME) 
+            + Messages.getInstance().getString("XMLBeans_ReadPoint_Text_Third"));
     }
     
     result = new Point();
@@ -1153,8 +1155,9 @@ public class XMLBeans
       if (name.equals(VAL_COLOR))
         color = (Color) invokeReadFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadColorUIResource_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadColorUIResource_Text_Second") + node.getAttribute(ATT_NAME)
+            + Messages.getInstance().getString("XMLBeans_ReadColorUIResource_Text_Third"));
     }
     
     result = new ColorUIResource(color);
@@ -1222,8 +1225,9 @@ public class XMLBeans
       if (name.equals(VAL_FONT))
         font = (Font) invokeReadFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadFontUIResource_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadFontUIResource_Text_Second") + node.getAttribute(ATT_NAME)
+            + Messages.getInstance().getString("XMLBeans_ReadFontUIResource_Text_Third"));
     }
     
     result = new FontUIResource(font);
@@ -1317,8 +1321,9 @@ public class XMLBeans
       } else if (name.equals(VAL_BEAN)) {
         bean = invokeReadFromXML(child);
       } else {
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadBeanInstance_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadBeanInstance_Text_Second") + node.getAttribute(ATT_NAME)
+            + Messages.getInstance().getString("XMLBeans_ReadBeanInstance_Text_Third"));
       }
     }
     
@@ -1461,8 +1466,9 @@ public class XMLBeans
       else if (name.equals(VAL_HIDDEN))
         hidden = readBooleanFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadBeanConnection_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadBeanConnection_Text_Second") + node.getAttribute(ATT_NAME) 
+            + Messages.getInstance().getString("XMLBeans_ReadBeanConnection_Text_Third"));
     }
 
     // get position of id
@@ -1577,7 +1583,8 @@ public class XMLBeans
       known = false;
 
     if (!known)
-      System.out.println("WARNING: unknown loader class '" + loader.getClass().getName() + "' - cannot retrieve file!");
+      System.out.println(Messages.getInstance().getString("XMLBeans_WriteLoader_Text_First") + loader.getClass().getName() 
+    		  + Messages.getInstance().getString("XMLBeans_WriteLoader_Text_Second"));
 
     Boolean relativeB = null;
     if (loader instanceof weka.core.converters.FileSourcedConverter) {
@@ -1673,7 +1680,8 @@ public class XMLBeans
       if (containsEnv || fl.exists()) {
         ((weka.core.converters.AbstractFileLoader) result).setSource(new File(file));
       } else {
-        System.out.println("WARNING: The file '" + tempFile + "' does not exist!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadLoader_Text_Front") + tempFile 
+        		+ Messages.getInstance().getString("XMLBeans_ReadLoader_Text_End"));
       }
     }
     
@@ -1726,7 +1734,8 @@ public class XMLBeans
     }
     
     if (!known)
-      System.out.println("WARNING: unknown saver class '" + saver.getClass().getName() + "' - cannot retrieve file!");
+      System.out.println(Messages.getInstance().getString("XMLBeans_WriteSaver_Text_Front") + saver.getClass().getName() 
+    		  + Messages.getInstance().getString("XMLBeans_WriteSaver_Text_End"));
 
     Boolean relativeB = null;
     if (saver instanceof weka.core.converters.FileSourcedConverter) {
@@ -2035,9 +2044,9 @@ public class XMLBeans
       else if (name.equals(VAL_ORIGINALCOORDS))
         coords = (Vector) invokeReadFromXML(child);
       else if (name.equals(VAL_INPUTS))
-        System.out.println("INFO: '" + name + "' will be restored later.");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadMetaBean_Input_Text_Front") + name + Messages.getInstance().getString("XMLBeans_ReadMetaBean_Input_Text_End"));
       else if (name.equals(VAL_OUTPUTS))
-        System.out.println("INFO: '" + name + "' will be restored later.");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadMetaBean_Output_Text_Front") + name + Messages.getInstance().getString("XMLBeans_ReadMetaBean_Output_Text_End"));
       else
         readFromXML(result, name, child);
     }

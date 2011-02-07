@@ -47,7 +47,7 @@ import javax.swing.SpinnerNumberModel;
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class OutputFormatDialog
   extends JDialog {
@@ -112,10 +112,10 @@ public class OutputFormatDialog
   protected JCheckBox m_RemoveFilterNameCheckBox = new JCheckBox("");
   
   /** Click to activate the current set parameters. */
-  protected JButton m_OkButton = new JButton("OK");
+  protected JButton m_OkButton = new JButton(Messages.getInstance().getString("OutputFormatDialog_OkButton_JButton_Text"));
 
   /** Click to cancel the dialog. */
-  protected JButton m_CancelButton = new JButton("Cancel");
+  protected JButton m_CancelButton = new JButton(Messages.getInstance().getString("OutputFormatDialog_CancelButton_JButton_Text"));
   
   /** the number of digits after the period (= precision) for printing the mean. */
   protected int m_MeanPrec = 2;
@@ -136,7 +136,7 @@ public class OutputFormatDialog
    * @param parent the parent of this dialog
    */
   public OutputFormatDialog(Frame parent) {
-    super(parent, "Output Format...", true);
+    super(parent, Messages.getInstance().getString("OutputFormatDialog_Title_Text"), true);
     createDialog();
   }
   
@@ -160,19 +160,19 @@ public class OutputFormatDialog
     model = (SpinnerNumberModel) m_StdDevPrecSpinner.getModel();
     model.setMaximum(new Integer(20));
     model.setMinimum(new Integer(0));
-    label = new JLabel("Mean Precision");
+    label = new JLabel(Messages.getInstance().getString("OutputFormatDialog_CreateDialog_MeanPrecision_JLabel_Text"));
     label.setDisplayedMnemonic('M');
     label.setLabelFor(m_MeanPrecSpinner);
     panel.add(label);
     panel.add(m_MeanPrecSpinner);
-    label = new JLabel("StdDev. Precision");
+    label = new JLabel(Messages.getInstance().getString("OutputFormatDialog_CreateDialog_StdDevPrecision_JLabel_Text"));
     label.setDisplayedMnemonic('S');
     label.setLabelFor(m_StdDevPrecSpinner);
     panel.add(label);
     panel.add(m_StdDevPrecSpinner);
     
     // Format
-    label = new JLabel("Output Format");
+    label = new JLabel(Messages.getInstance().getString("OutputFormatDialog_CreateDialog_OutputFormat_JLabel_Text"));
     label.setDisplayedMnemonic('F');
     label.setLabelFor(m_OutputFormatComboBox);
     panel.add(label);
@@ -184,14 +184,14 @@ public class OutputFormatDialog
       });
 
     // Average
-    label = new JLabel("Show Average");
+    label = new JLabel(Messages.getInstance().getString("OutputFormatDialog_CreateDialog_ShowAverage_JLabel_Text"));
     label.setDisplayedMnemonic('A');
     label.setLabelFor(m_ShowAverageCheckBox);
     panel.add(label);
     panel.add(m_ShowAverageCheckBox);
 
     // Remove filter classname
-    label = new JLabel("Remove filter classnames");
+    label = new JLabel(Messages.getInstance().getString("OutputFormatDialog_CreateDialog_RemoveFilterClassnames_JLabel_Text"));
     label.setDisplayedMnemonic('R');
     label.setLabelFor(m_RemoveFilterNameCheckBox);
     panel.add(label);
@@ -402,8 +402,8 @@ public class OutputFormatDialog
     
     dialog = new OutputFormatDialog(null);
     if (dialog.showDialog() == APPROVE_OPTION)
-      System.out.println("Accepted");
+      System.out.println(Messages.getInstance().getString("OutputFormatDialog_Main_Accepted_Text"));
     else
-      System.out.println("Aborted");
+      System.out.println(Messages.getInstance().getString("OutputFormatDialog_Main_Aborted_Text"));
   }
 }

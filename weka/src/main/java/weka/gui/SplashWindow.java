@@ -60,7 +60,7 @@ import java.net.URL;
  *
  * @author  Werner Randelshofer
  * @author  Mark Hall
- * @version $Revision: 1.3 $ 
+ * @version $Revision$ 
  */
 public class SplashWindow
   extends Window {
@@ -232,7 +232,7 @@ public class SplashWindow
         .getMethod(methodName, new Class[] {String[].class})
         .invoke(null, new Object[] {args});
     } catch (Exception e) {
-      InternalError error = new InternalError("Failed to invoke method: "
+      InternalError error = new InternalError(Messages.getInstance().getString("SplashWindow_InvokeMethod_Exception_InternalError_Text")
                                               +methodName);
       error.initCause(e);
       throw error;
@@ -250,7 +250,7 @@ public class SplashWindow
         .getMethod("main", new Class[] {String[].class})
         .invoke(null, new Object[] {args});
     } catch (Exception e) {
-      InternalError error = new InternalError("Failed to invoke main method");
+      InternalError error = new InternalError(Messages.getInstance().getString("SplashWindow_InvokeMain_Exception_InternalError_Text"));
       error.initCause(e);
       throw error;
     }

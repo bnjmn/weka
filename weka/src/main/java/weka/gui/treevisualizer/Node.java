@@ -39,7 +39,7 @@ import weka.core.Instances;
  * This class records all the data about a particular node for displaying.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class Node {
   
@@ -137,7 +137,7 @@ public class Node {
       try {
 	m_theData = new Instances(new StringReader(m_data));
       } catch(Exception e) {
-	System.out.println("Error : " + e);
+	System.out.println(Messages.getInstance().getString("Node_GetInstances_Exception_Text") + e);
       }
       m_data = null;
     }
@@ -200,13 +200,6 @@ public class Node {
       childInv(s);
     }
   }
-  
-
- 
-  
- 
-  
-
 
   /**
    * Get the value of refer.

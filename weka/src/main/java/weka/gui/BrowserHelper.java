@@ -94,13 +94,13 @@ public class BrowserHelper {
 	  }
 	}
 	if (browser == null)
-	  throw new Exception("Could not find web browser");
+	  throw new Exception(Messages.getInstance().getString("BrowserHelper_Exception_Text"));
 	else
 	  Runtime.getRuntime().exec(new String[] {browser, url});
       }
     }
     catch (Exception e) {
-      String errMsg = "Error attempting to launch web browser:\n" + e.getMessage();
+      String errMsg = Messages.getInstance().getString("BrowserHelper_Exception_ErrMsg_Text") + e.getMessage();
 
       if (showDialog)
 	JOptionPane.showMessageDialog(

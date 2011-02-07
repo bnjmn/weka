@@ -84,7 +84,7 @@ public class WekaTaskMonitor
       m_iconAnimated = new ImageIcon(pic2);
     }
     
-    m_MonitorLabel = new JLabel(" x "+m_ActiveTasks,m_iconStationary,SwingConstants.CENTER);
+    m_MonitorLabel = new JLabel(Messages.getInstance().getString("WekaTaskMonitor_MonitorLabel_JLabel_Text") + m_ActiveTasks,m_iconStationary,SwingConstants.CENTER);
     /*
     setBorder(BorderFactory.createCompoundBorder(
   	      BorderFactory.createTitledBorder("Weka Tasks"),
@@ -146,7 +146,7 @@ public class WekaTaskMonitor
       jf.getContentPane().setLayout(new BorderLayout());
       final WekaTaskMonitor tm = new WekaTaskMonitor();
       tm.setBorder(BorderFactory.createCompoundBorder(
-  	           BorderFactory.createTitledBorder("Weka Tasks"),
+  	           BorderFactory.createTitledBorder(Messages.getInstance().getString("WekaTaskMonitor_Main_JFrame_BorderFactoryCreateTitledBorder_Text")),
   	           BorderFactory.createEmptyBorder(0, 5, 5, 5)
   	           ));
       jf.getContentPane().add(tm, BorderLayout.CENTER);

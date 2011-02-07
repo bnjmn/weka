@@ -150,7 +150,7 @@ public class KnowledgeFlowApp
    */
   public static void loadProperties() {
     if (BEAN_PROPERTIES == null) {
-      System.out.println("[KnowledgeFlow] Loading properties and plugins...");
+      System.out.println(Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Text_First"));
       /** Loads the configuration property file */
       //  static {
       // Allow a properties file in the current directory to override
@@ -159,17 +159,17 @@ public class KnowledgeFlowApp
         java.util.Enumeration keys =
           (java.util.Enumeration)BEAN_PROPERTIES.propertyNames();
         if (!keys.hasMoreElements()) {
-          throw new Exception( "Could not read a configuration file for the bean\n"
-                               +"panel. An example file is included with the Weka distribution.\n"
-                               +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-                               +"should be placed either in your user home (which is set\n"
-                               + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-                               + "or the directory that java was started from\n");
+          throw new Exception(Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Exception_Text_First") 
+        		  + Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Exception_Text_Second")
+        		  + PROPERTY_FILE 
+        		  + Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Exception_Text_Third") 
+        		  + System.getProperties().getProperty("user.home") 
+        		  + Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Exception_Text_Fourth"));
         }
       } catch (Exception ex) {
         JOptionPane.showMessageDialog(null,
                                       ex.getMessage(),
-                                      "KnowledgeFlow",
+                                      Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Exception_JOptionPaneShowMessageDialog_Text"),
                                       JOptionPane.ERROR_MESSAGE);
       }
 
@@ -197,15 +197,14 @@ public class KnowledgeFlowApp
               File anyJars[] = contents[i].listFiles();
               for (int j = 0; j < anyJars.length; j++) {
                 if (anyJars[j].getPath().endsWith(".jar")) {
-                  System.out.println("[KnowledgeFlow] Plugins: adding "+anyJars[j].getPath()
-                                     +" to classpath...");
+                  System.out.println(Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Text_Second") + anyJars[j].getPath()
+                                     + Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Text_Third"));
                   ClassloaderUtil.addFile(anyJars[j].getPath());
                 }
               }
             } catch (Exception ex) {
               // Don't make a fuss
-              System.err.println("[KnowledgeFlow] Warning: Unable to load bean properties for plugin "
-                                 +"directory: " + contents[i].getPath());
+              System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_LoadProperties_Error_Text_First") + contents[i].getPath());
             }
           }
           //        BEAN_PLUGINS_PROPERTIES = new Properties();
@@ -223,7 +222,7 @@ public class KnowledgeFlowApp
    * from.
    */
   private static void init() {
-    System.out.println("[KnowledgeFlow] Initializing KF...");
+    System.out.println(Messages.getInstance().getString("KnowledgeFlowApp_Init_Text_First"));
 
     try {
       TreeMap wrapList = new TreeMap();
@@ -319,13 +318,10 @@ public class KnowledgeFlowApp
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
-          "Could not read a configuration file for the generic objecte editor"
-         +". An example file is included with the Weka distribution.\n"
-         +"This file should be named \"GenericObjectEditor.props\" and\n"
-         +"should be placed either in your user home (which is set\n"
-         + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-         + "or the directory that java was started from\n",
-         "KnowledgeFlow",
+    	Messages.getInstance().getString("KnowledgeFlowApp_Init_Exception_JOptionPaneShowMessageDialog_Text_First")
+    		  + System.getProperties().getProperty("user.home")
+         + Messages.getInstance().getString("KnowledgeFlowApp_Init_Exception_JOptionPaneShowMessageDialog_Text_Second"), 
+         Messages.getInstance().getString("KnowledgeFlowApp_Init_Exception_JOptionPaneShowMessageDialog_Text_Third"),
          JOptionPane.ERROR_MESSAGE);
     }
 
@@ -356,7 +352,7 @@ public class KnowledgeFlowApp
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
 				    ex.getMessage(),
-				    "KnowledgeFlow",
+				    Messages.getInstance().getString("KnowledgeFlowApp_Init_Exception_JOptionPaneShowMessageDialog_Text_Fourth"),
 				    JOptionPane.ERROR_MESSAGE);
     }
   } 
@@ -496,29 +492,29 @@ public class KnowledgeFlowApp
       the chooser */
   protected FileFilter m_KfFilter = 
     new ExtensionFileFilter(FILE_EXTENSION, 
-                            "Binary KnowledgeFlow configuration files (*" 
-                            + FILE_EXTENSION + ")");
+    		Messages.getInstance().getString("KnowledgeFlowApp_KfFilter_Text_First") 
+                            + FILE_EXTENSION + Messages.getInstance().getString("KnowledgeFlowApp_KfFilter_Text_Second"));
 
   /** A filter to ensure only KnowledgeFlow files in KOML format 
       get shown in the chooser */
   protected FileFilter m_KOMLFilter = 
     new ExtensionFileFilter(KOML.FILE_EXTENSION + "kf", 
-                            "XML KnowledgeFlow configuration files (*" 
-                            + KOML.FILE_EXTENSION + "kf)");
+    		Messages.getInstance().getString("KnowledgeFlowApp_KOMLFilter_Text_Second") 
+                            + KOML.FILE_EXTENSION + Messages.getInstance().getString("KnowledgeFlowApp_KOMLFilter_Text_Third"));
 
   /** A filter to ensure only KnowledgeFlow files in XStream format 
       get shown in the chooser */
   protected FileFilter m_XStreamFilter = 
     new ExtensionFileFilter(XStream.FILE_EXTENSION + "kf", 
-                            "XML KnowledgeFlow configuration files (*" 
-                            + XStream.FILE_EXTENSION + "kf)");
+    		Messages.getInstance().getString("KnowledgeFlowApp_XStreamFilter_Text_Second") 
+                            + XStream.FILE_EXTENSION + Messages.getInstance().getString("KnowledgeFlowApp_XStreamFilter_Text_Third"));
 
   /** A filter to ensure only KnowledgeFlow layout files in XML format get 
       shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(FILE_EXTENSION_XML, 
-                            "XML KnowledgeFlow layout files (*" 
-                            + FILE_EXTENSION_XML + ")");
+    		Messages.getInstance().getString("KnowledgeFlowApp_XMLFilter_Text_First") 
+                            + FILE_EXTENSION_XML + Messages.getInstance().getString("KnowledgeFlowApp_XMLFilter_Text_Second"));
 
   /** the scrollbar increment of the layout scrollpane */
   protected int m_ScrollBarIncrementLayout = 20;
@@ -816,13 +812,13 @@ public class KnowledgeFlowApp
      
      String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
        .format(new Date());
-     m_logPanel.logMessage("Weka Knowledge Flow was written by Mark Hall");
-     m_logPanel.logMessage("Weka Knowledge Flow");
-     m_logPanel.logMessage("(c) 2002-" + Copyright.getToYear() + " " 
+     m_logPanel.logMessage(Messages.getInstance().getString("KnowledgeFlowApp_MouseClicked_LogPanel_LogMessage_Text_First"));
+     m_logPanel.logMessage(Messages.getInstance().getString("KnowledgeFlowApp_MouseClicked_LogPanel_LogMessage_Text_Second"));
+     m_logPanel.logMessage(Messages.getInstance().getString("KnowledgeFlowApp_MouseClicked_LogPanel_LogMessage_Text_Third") + Copyright.getToYear() + " " 
 	 + Copyright.getOwner() + ", " + Copyright.getAddress());
-     m_logPanel.logMessage("web: " + Copyright.getURL());
+     m_logPanel.logMessage(Messages.getInstance().getString("KnowledgeFlowApp_MouseClicked_LogPanel_LogMessage_Text_Fourth") + Copyright.getURL());
      m_logPanel.logMessage( date);
-     m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
+     m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_MouseClicked_LogPanel_StatusMessage_Text_First"));
      m_logPanel.getStatusTable().addMouseListener(new MouseAdapter() {
        public void mouseClicked(MouseEvent e) {
          if (m_logPanel.getStatusTable().rowAtPoint(e.getPoint()) == 0) {
@@ -834,11 +830,11 @@ public class KnowledgeFlowApp
              long totalM = currR.totalMemory();
              long maxM = currR.maxMemory();
              m_logPanel.
-             logMessage("[KnowledgeFlow] Memory (free/total/max.) in bytes: " 
+             logMessage(Messages.getInstance().getString("KnowledgeFlowApp_MouseClicked_LogPanel_LogMessage_Text_Fifth") 
                  + String.format("%,d", freeM) + " / " 
                  + String.format("%,d", totalM) + " / " 
                  + String.format("%,d", maxM));
-             m_logPanel.statusMessage("[KnowledgeFlow]|Memory (free/total/max.) in bytes: " 
+             m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_MouseClicked_LogPanel_StatusMessage_Text_Second") 
                  + String.format("%,d", freeM) + " / " 
                  + String.format("%,d", totalM) + " / " 
                  + String.format("%,d", maxM)); 
@@ -851,7 +847,7 @@ public class KnowledgeFlowApp
      p1.setLayout(new BorderLayout());
      p1.setBorder(javax.swing.BorderFactory.createCompoundBorder(
 			    javax.swing.BorderFactory.
-			    createTitledBorder("Knowledge Flow Layout"),
+			    createTitledBorder(Messages.getInstance().getString("KnowledgeFlowApp_P1_JPanel_BorderFactoryCreateTitledBorder_Text")),
                    javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5)
                    ));
      final JScrollPane js = new JScrollPane(m_beanLayout);
@@ -907,13 +903,13 @@ public class KnowledgeFlowApp
       fixedTools.setOrientation(JToolBar.VERTICAL);
       m_saveB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
               "Save24.gif")));
-      m_saveB.setToolTipText("Save layout");
+      m_saveB.setToolTipText(Messages.getInstance().getString("KnowledgeFlowApp_SaveB_SetToolTipText_Text"));
       m_loadB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
               "Open24.gif")));
-      m_loadB.setToolTipText("Load layout");
+      m_loadB.setToolTipText(Messages.getInstance().getString("KnowledgeFlowApp_LoadB_SetToolTipText_Text"));
       m_newB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
               "New24.gif")));
-      m_newB.setToolTipText("Clear the layout");
+      m_newB.setToolTipText(Messages.getInstance().getString("KnowledgeFlowApp_NewB_SetToolTipText_Text"));
       fixedTools.add(m_newB);
       fixedTools.add(m_saveB);
       fixedTools.add(m_loadB);
@@ -945,8 +941,8 @@ public class KnowledgeFlowApp
             "Stop24.gif")));
     m_helpB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
             "Help24.gif")));
-    m_stopB.setToolTipText("Stop all execution");
-    m_helpB.setToolTipText("Display help");
+    m_stopB.setToolTipText(Messages.getInstance().getString("KnowledgeFlowApp_StopB_SetToolTipText_Text"));
+    m_helpB.setToolTipText(Messages.getInstance().getString("KnowledgeFlowApp_HelpB_SetToolTipText_Text"));
 
     Image tempI = loadImage(BeanVisual.ICON_PATH + "Pointer.gif");
     m_pointerB = new JToggleButton(new ImageIcon(tempI));
@@ -979,9 +975,9 @@ public class KnowledgeFlowApp
     // end modifications by Zerbetto
     m_stopB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          m_logPanel.statusMessage("[KnowledgeFlow]|Attempting to stop all components...");
+          m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_StopB_LogPanel_StatusMessage_Text_First"));
           stopFlow();
-          m_logPanel.statusMessage("[KnowledgeFlow]|OK.");
+          m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_StopB_LogPanel_StatusMessage_Text_Second"));
         }
       });
 
@@ -1034,7 +1030,7 @@ public class KnowledgeFlowApp
           // end modifications by Zerbetto
         } catch (Exception ex) {
           // ignore
-          System.err.println("[KnowledgeFlow] Failed to instantiate: " + tempBeanCompName);
+          System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_Error_Text") + tempBeanCompName);
 
           break;
         }
@@ -1058,7 +1054,7 @@ public class KnowledgeFlowApp
           hpp = (HierarchyPropertyParser) hpps.get(root);
 
           if (!hpp.goTo(rootPackage)) {
-            System.out.println("[KnowledgeFlow] Processing user package... ");
+            System.out.println(Messages.getInstance().getString("KnowledgeFlowApp_Text_First"));
             //            System.exit(1);
             userPrefix = root + ".";
           }
@@ -1232,8 +1228,8 @@ public class KnowledgeFlowApp
         
         // end modifications by Zerbetto
       } catch (Exception ex) {
-	System.err.println("[KnowledgeFlow] Failed to instantiate :"+tempBeanCompName
-			   +"KnowledgeFlowApp.instantiateToolBarBean()");
+	System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_InstantiateToolBarBean_Error_Text_First") + tempBeanCompName
+			   + "KnowledgeFlowApp.instantiateToolBarBean()");
 	return null;
       }
       if (tempBean instanceof WekaWrapper) {
@@ -1242,15 +1238,15 @@ public class KnowledgeFlowApp
 	try {
 	  c = Class.forName(algName);
 	} catch (Exception ex) {
-	  System.err.println("[KnowledgeFlow] Can't find class called: "+algName);
+	  System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_InstantiateToolBarBean_Error_Text_Third") + algName);
 	  return null;
 	}
 	try {
 	  Object o = c.newInstance();
 	  ((WekaWrapper)tempBean).setWrappedAlgorithm(o);
 	} catch (Exception ex) {
-	  System.err.println("[KnowledgeFlow] Failed to configure "+tempBeanCompName
-			     +" with "+algName);
+	  System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_InstantiateToolBarBean_Error_Text_Fourth") + tempBeanCompName
+			     + Messages.getInstance().getString("KnowledgeFlowApp_InstantiateToolBarBean_Error_Text_Fifth") + algName);
 	  return null;
 	}
       }
@@ -1264,8 +1260,8 @@ public class KnowledgeFlowApp
         // end modifications
       } catch (Exception ex) {
 	ex.printStackTrace();
-	System.err.println("[KnowledgeFlow] Failed to instantiate :"+tempBeanCompName
-			   +"KnowledgeFlowApp.setUpToolBars()");
+	System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_InstantiateToolBarBean_Error_Text_Sixth") + tempBeanCompName
+			   + "KnowledgeFlowApp.setUpToolBars()");
 	return null;
       }
     }
@@ -1413,7 +1409,7 @@ public class KnowledgeFlowApp
             }
 	  } catch (Exception ex) {
 	    System.err.
-	      println("[KnowledgeFlow] Problem adding bean to data flow layout");
+	      println(Messages.getInstance().getString("KnowledgeFlowApp_MakeHolderPanelForToolBarBean_Error_Text"));
             ex.printStackTrace();
 	  }
           notifyIsDirty();
@@ -1421,7 +1417,7 @@ public class KnowledgeFlowApp
       });
     
     if (tempBean instanceof MetaBean) {
-      tempButton.setToolTipText("Hold down shift and click to remove");
+      tempButton.setToolTipText(Messages.getInstance().getString("KnowledgeFlowApp_MakeHolderPanelForToolBarBean_TempButton_SetToolTipText_Text"));
       m_userComponents.add(tempBean);
     } else {
       // set tool tip text from global info if supplied
@@ -1491,31 +1487,31 @@ public class KnowledgeFlowApp
   private void setUpUserToolBar() {
     m_userBoxPanel = Box.createHorizontalBox();
     m_userBoxPanel.setBorder(javax.swing.BorderFactory.
-                             createTitledBorder("User"));
+                             createTitledBorder(Messages.getInstance().getString("KnowledgeFlowApp_SetUpUserToolBar_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     m_userToolBar = new JToolBar();
     m_userToolBar.add(m_userBoxPanel);
     JScrollPane tempJScrollPane = 
       createScrollPaneForToolBar(m_userToolBar);
     // ok, now create tabbed pane to hold this toolbar
     
-    m_toolBars.addTab("User", null, 
+    m_toolBars.addTab(Messages.getInstance().getString("KnowledgeFlowApp_SetUpUserToolBar_AddTab_Text_First"), null, 
                       tempJScrollPane,
-                      "User created components");
+                      Messages.getInstance().getString("KnowledgeFlowApp_SetUpUserToolBar_AddTab_Text_Second"));
   }
 
   private void setUpPluginsToolBar() {
     m_pluginsBoxPanel = Box.createHorizontalBox();
     m_pluginsBoxPanel.setBorder(javax.swing.BorderFactory.
-                                createTitledBorder("Plugins"));
+                                createTitledBorder(Messages.getInstance().getString("KnowledgeFlowApp_SetUpPluginsToolBar_PluginsBoxPanel_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     m_pluginsToolBar = new JToolBar();
     m_pluginsToolBar.add(m_pluginsBoxPanel);
     JScrollPane tempJScrollPane = 
       createScrollPaneForToolBar(m_pluginsToolBar);
     // ok, now create tabbed pane to hold this toolbar
     
-    m_toolBars.addTab("Plugins", null, 
+    m_toolBars.addTab(Messages.getInstance().getString("KnowledgeFlowApp_SetUpUserToolBar_AddTab_Text_Third"), null, 
                       tempJScrollPane,
-                      "Plugin components");
+                      Messages.getInstance().getString("KnowledgeFlowApp_SetUpUserToolBar_AddTab_Text_Fourth"));
   }
 
   /**
@@ -1571,7 +1567,7 @@ public class KnowledgeFlowApp
     m_beanLayout.revalidate();
     m_beanLayout.repaint();
     m_logPanel.clearStatus();
-    m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
+    m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_ClearLayout_StatusMessage_Text"));
   }
   
   /**
@@ -1599,14 +1595,14 @@ public class KnowledgeFlowApp
     //    beanContextMenu.insert(new JLabel("Edit", 
     //				      SwingConstants.CENTER), 
     //			   menuItemCount);
-    MenuItem edit = new MenuItem("Edit:");
+    MenuItem edit = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_Edit_MenuItem_Text"));
     edit.setEnabled(false);
     beanContextMenu.insert(edit, menuItemCount);
     menuItemCount++;
 
     if (bc instanceof MetaBean) {
       //JMenuItem ungroupItem = new JMenuItem("Ungroup");
-      MenuItem ungroupItem = new MenuItem("Ungroup");
+      MenuItem ungroupItem = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_UngroupItem_MenuItem_Text"));
       ungroupItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             // ungroup
@@ -1636,7 +1632,7 @@ public class KnowledgeFlowApp
 
       // Add to user tab
       //JMenuItem addToUserTabItem = new JMenuItem("Add to user tab");
-      MenuItem addToUserTabItem = new MenuItem("Add to user tab");
+      MenuItem addToUserTabItem = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_AddToUserTabItem_MenuItem_Text"));
       addToUserTabItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             addToUserToolBar((MetaBean) bi.getBean(), true);
@@ -1648,7 +1644,7 @@ public class KnowledgeFlowApp
     }
 
     //JMenuItem deleteItem = new JMenuItem("Delete");
-    MenuItem deleteItem = new MenuItem("Delete");
+    MenuItem deleteItem = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_DeleteItem_MenuItem_Text"));
     deleteItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           BeanConnection.removeConnections(bi);
@@ -1671,12 +1667,12 @@ public class KnowledgeFlowApp
     menuItemCount++;
 
     if (bc instanceof BeanCommon) {
-      MenuItem nameItem = new MenuItem("Set name");
+      MenuItem nameItem = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_NameItem_MenuItem_Text"));
       nameItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             String oldName = ((BeanCommon)bc).getCustomName();
             String name = JOptionPane.showInputDialog(KnowledgeFlowApp.this,
-                                                      "Enter a name for this component",
+            		Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_Name_JOptionPane_ShowInputDialog_Text"),
                                                       oldName);
             if (name != null) {
               ((BeanCommon)bc).setCustomName(name);
@@ -1714,7 +1710,7 @@ public class KnowledgeFlowApp
       final Vector tempAssociatedBeans = associatedBeans;
 
       if (compInfo == null) {
-        System.err.println("[KnowledgeFlow] Error in doPopup()");
+        System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_Error_Text_First"));
       } else {
         //	System.err.println("Got bean info");
         for (int zz = 0; zz < compInfo.size(); zz++) {
@@ -1731,7 +1727,7 @@ public class KnowledgeFlowApp
 
             if (!(bc instanceof MetaBean)) {
               //custItem = new JMenuItem("Configure...");
-              custItem = new MenuItem("Configure...");
+              custItem = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_CustItem_MenuItem_Text_First"));
               if (bc instanceof BeanCommon) {
                 customizationEnabled = 
                   !((BeanCommon)bc).isBusy();
@@ -1753,7 +1749,7 @@ public class KnowledgeFlowApp
                                             custName.length());
               }
               //custItem = new JMenuItem("Configure: "+ custName);
-              custItem = new MenuItem("Configure: " + custName);
+              custItem = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_CustItem_MenuItem_Text_Second") + custName);
               if (tbi.getBean() instanceof BeanCommon) {
                 customizationEnabled = 
                   !((BeanCommon)tbi.getBean()).isBusy();
@@ -1777,7 +1773,7 @@ public class KnowledgeFlowApp
             beanContextMenu.add(custItem);
             menuItemCount++;
           } else {
-            System.err.println("[KnowledgeFlow] No customizer class");
+            System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_Error_Text_Second"));
           }
         }
 
@@ -1800,7 +1796,7 @@ public class KnowledgeFlowApp
           //          beanContextMenu.insert(new JLabel("Connections", 
           //                                            SwingConstants.CENTER), 
           //                                 menuItemCount);
-          MenuItem connections = new MenuItem("Connections:");
+          MenuItem connections = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_Connection_MenuItem_Text"));
           connections.setEnabled(false);
           beanContextMenu.insert(connections, menuItemCount);
           menuItemCount++;
@@ -1886,7 +1882,7 @@ public class KnowledgeFlowApp
         //	beanContextMenu.insert(new JLabel("Actions", 
         //					  SwingConstants.CENTER), 
         //			       menuItemCount);
-        MenuItem actions = new MenuItem("Actions:");
+        MenuItem actions = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DoPopup_Actions_Text"));
         actions.setEnabled(false);
         beanContextMenu.insert(actions, menuItemCount);
         menuItemCount++;
@@ -1941,7 +1937,7 @@ public class KnowledgeFlowApp
           // 
           int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
               tempS2,
-              "Confirm action",
+              Messages.getInstance().getString("KnowledgeFlowApp_InsertUserOrStartableMenuItem_Result_JOptionPane_ShowConfirmDialog_Text"),
               JOptionPane.YES_NO_OPTION);
           if (result == JOptionPane.YES_OPTION) {
             Thread startPointThread = new Thread() {
@@ -2131,7 +2127,7 @@ public class KnowledgeFlowApp
       //      deleteConnectionMenu.insert(new JLabel("Delete Connection", 
       //					     SwingConstants.CENTER), 
       //				  menuItemCount);
-      MenuItem deleteConnection = new MenuItem("Delete Connection:");
+      MenuItem deleteConnection = new MenuItem(Messages.getInstance().getString("KnowledgeFlowApp_DeleteConnectionPopup_DeleteConnection_MenuItem_Text"));
       deleteConnection.setEnabled(false);
       deleteConnectionMenu.insert(deleteConnection, menuItemCount);
       menuItemCount++;
@@ -2367,16 +2363,16 @@ public class KnowledgeFlowApp
 
     // Confirmation pop-up
     int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
-                                               "Group this sub-flow?",
-                                               "Group Components",
+                                               Messages.getInstance().getString("KnowledgeFlowApp_CheckSubFlow_Result_JOptionPane_ShowConfirmDialog_Text_First"),
+                                               Messages.getInstance().getString("KnowledgeFlowApp_CheckSubFlow_Result_JOptionPane_ShowConfirmDialog_Text_Second"),
                                                JOptionPane.YES_NO_OPTION);
     if (result == JOptionPane.YES_OPTION) {
       Vector associatedConnections = 
         BeanConnection.associatedConnections(selected);
 
       String name = JOptionPane.showInputDialog(KnowledgeFlowApp.this,
-                                                "Enter a name for this group",
-                                                "MyGroup");
+    		  Messages.getInstance().getString("KnowledgeFlowApp_CheckSubFlow_Result_Name_ShowConfirmDialog_Text_First"),
+    		  Messages.getInstance().getString("KnowledgeFlowApp_CheckSubFlow_Result_Name_ShowConfirmDialog_Text_Second"));
       if (name != null) {       
         MetaBean group = new MetaBean();
         group.setSubFlow(selected);
@@ -2504,11 +2500,11 @@ public class KnowledgeFlowApp
         integrateFlow(beans, connections);
         setEnvironment();
         m_logPanel.clearStatus();
-        m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
+        m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_LoadLayout_StatusMessage_Text_First"));
       } catch (Exception ex) {
-        m_logPanel.statusMessage("[KnowledgeFlow]|Unable to load flow (see log).");
-        m_logPanel.logMessage("[KnowledgeFlow] Unable to load flow ("
-            + ex.getMessage() + ").");
+        m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_LoadLayout_StatusMessage_Text_Second"));
+        m_logPanel.logMessage(Messages.getInstance().getString("KnowledgeFlowApp_LoadLayout_LogMessage_Text_First")
+            + ex.getMessage() + Messages.getInstance().getString("KnowledgeFlowApp_LoadLayout_LogMessage_Text_Second"));
 	ex.printStackTrace();
       }
     }
@@ -2722,15 +2718,15 @@ public class KnowledgeFlowApp
           oos.flush();
           oos.close();
         }
-        m_logPanel.statusMessage("[KnowledgeFlow]|Flow saved.");
+        m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_SaveLayout_StatusMessage_Text_First"));
         
         // set the internal knowledgeflow directory environment var for this flow
         m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
         setEnvironment();
       } catch (Exception ex) {
-        m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
-        m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
-            + ex.getMessage() + ").");
+        m_logPanel.statusMessage(Messages.getInstance().getString("KnowledgeFlowApp_SaveLayout_StatusMessage_Text_Second"));
+        m_logPanel.logMessage(Messages.getInstance().getString("KnowledgeFlowApp_SaveLayout_LogMessage_Text_First")
+            + ex.getMessage() + Messages.getInstance().getString("KnowledgeFlowApp_SaveLayout_LogMessage_Text_Second"));
 	ex.printStackTrace();
       } finally {
 	// restore this panel as a property change listener in the beans
@@ -2831,7 +2827,7 @@ public class KnowledgeFlowApp
           ois.close();
         }
       } catch (Exception ex) {
-        System.err.println("[KnowledgeFlow] Problem reading user components.");
+        System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_LoadUserComponents_Error_Text"));
         ex.printStackTrace();
         return;
       }
@@ -2849,14 +2845,13 @@ public class KnowledgeFlowApp
     ((java.awt.Window)getTopLevelAncestor()).
       addWindowListener(new java.awt.event.WindowAdapter() {
           public void windowClosing(java.awt.event.WindowEvent e) {
-            System.out.println("[KnowledgeFlow] Saving user components....");
+            System.out.println(Messages.getInstance().getString("KnowledgeFlowApp_InstallWindowListenerForSavingUserBeans_Text"));
             File sFile = 
               new File(System.getProperty("user.home")
                        +File.separator+".knowledgeFlow");
             if (!sFile.exists()) {
               if (!sFile.mkdir()) {
-                System.err.println("[KnowledgeFlow] Unable to create .knowledgeFlow "
-                                   +"directory in your HOME.");
+                System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_InstallWindowListenerForSavingUserBeans_Error_Text_First"));
               } else {
                 // make the plugins subdirectory for the user
                 sFile = new File(sFile.toString() + File.separator 
@@ -2885,7 +2880,7 @@ public class KnowledgeFlowApp
                 oos.close();
               }
             } catch (Exception ex) {
-              System.err.println("[KnowledgeFlow] Unable to save user components");
+              System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_InstallWindowListenerForSavingUserBeans_Error_Text_Second"));
               ex.printStackTrace();
             } 
 
@@ -3026,7 +3021,7 @@ public class KnowledgeFlowApp
         }
       }
     } else {
-      System.err.println("[KnowledgeFlow] File '" + fileName + "' does not exists.");
+      System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_LoadInitialLayout_Error_Text_First") + fileName + Messages.getInstance().getString("KnowledgeFlowApp_LoadInitialLayout_Error_Text_Second"));
     }
 
     try {
@@ -3148,9 +3143,9 @@ public class KnowledgeFlowApp
                 m_Memory.stopThreads();
                
                 // display error
-                System.err.println("\n[KnowledgeFlow] displayed message:");
+                System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_Main_Error_Text_First"));
                 m_Memory.showOutOfMemory();
-                System.err.println("\nexiting");
+                System.err.println(Messages.getInstance().getString("KnowledgeFlowApp_Main_Error_Text_Second"));
                 System.exit(-1);
               }
 

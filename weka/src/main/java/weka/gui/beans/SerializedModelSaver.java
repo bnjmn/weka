@@ -111,18 +111,18 @@ public class SerializedModelSaver
   public static ArrayList<Tag> s_fileFormatsAvailable;
   static {
     s_fileFormatsAvailable = new ArrayList<Tag>();
-    s_fileFormatsAvailable.add(new Tag(BINARY, "Binary serialized model file (*"
-                                       + FILE_EXTENSION + ")", "", false));
+    s_fileFormatsAvailable.add(new Tag(BINARY, Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_First")
+                                       + FILE_EXTENSION + Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Second"), "", false));
     if (KOML.isPresent()) {
       s_fileFormatsAvailable.add(new Tag(KOMLV,
-                                         "XML serialized model file (*"
-                                         + KOML.FILE_EXTENSION + FILE_EXTENSION + ")", "", false));
+    		  Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Third")
+                                         + KOML.FILE_EXTENSION + FILE_EXTENSION + Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Fourth"), "", false));
     }
 
     if (XStream.isPresent()) {
       s_fileFormatsAvailable.add(new Tag(XSTREAM,
-                                         "XML serialized model file (*"
-                                         + XStream.FILE_EXTENSION + FILE_EXTENSION + ")", "", false));
+    		  Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Fifth")
+                                         + XStream.FILE_EXTENSION + FILE_EXTENSION + Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Sixth"), "", false));
     }
   }
   
@@ -305,14 +305,14 @@ public class SerializedModelSaver
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
       stop(); // stop all processing
-      String message = "[SerializedModelSaver] " 
+      String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_Message_Text_First") 
         + statusMessagePrefix() 
-        + " Can't save model. Reason: " 
+        + Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_Message_Text_Second")
         + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_StatusMessage_Text_First"));
       } else {
         System.err.println(message);
       }
@@ -331,13 +331,13 @@ public class SerializedModelSaver
       dirName = m_env.substitute(dirName);
     } catch (Exception ex) {
       stop(); // stop all processing
-      String message = "[SerializedModelSaver] "
-        + statusMessagePrefix() + " Can't save model. Reason: " 
+      String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_Message_Text_Third")
+        + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_Message_Text_Fourth") 
                            + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_StatusMessage_Text_Second"));
       } else {
         System.err.println(message);
       }
@@ -370,13 +370,13 @@ public class SerializedModelSaver
         prefix = m_env.substitute(m_filenamePrefix);
       } catch (Exception ex) {
         stop(); // stop processing
-        String message = "[SerializedModelSaver] "
-          + statusMessagePrefix() + " Can't save model. Reason: " 
+        String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_First")
+          + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Second") 
           + ex.getMessage();
         if (m_logger != null) {
           m_logger.logMessage(message);
           m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
+              + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_StatusMessage_Text_First"));
         } else {
           System.err.println(message);
         }
@@ -391,13 +391,13 @@ public class SerializedModelSaver
         dirName = m_env.substitute(dirName);
       } catch (Exception ex) {
         stop(); // stop processing
-        String message = "[SerializedModelSaver] "
-          + statusMessagePrefix() + " Can't save model. Reason: " 
+        String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Third")
+          + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Fourth") 
           + ex.getMessage();
         if (m_logger != null) {
           m_logger.logMessage(message);
           m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
+              + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_StatusMessage_Text_Second"));
         } else {
           System.err.println(message);
         }
@@ -434,13 +434,13 @@ public class SerializedModelSaver
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
       stop(); // stop processing
-      String message = "[SerializedModelSaver] "
-        + statusMessagePrefix() + " Can't save model. Reason: " 
+      String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Fifth")
+        + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Sixth") 
         + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_StatusMessage_Text_Third"));
       } else {
         System.err.println(message);
       }
@@ -460,13 +460,13 @@ public class SerializedModelSaver
       dirName = m_env.substitute(dirName);
     } catch (Exception ex) {
       stop(); // stop processing
-      String message = "[SerializedModelSaver] "
-        + statusMessagePrefix() + " Can't save model. Reason: " 
+      String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Seventh")
+        + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Eighth") 
                            + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_StatusMessage_Text_Fourth"));
       } else {
         System.err.println(message);
       }
@@ -484,6 +484,8 @@ public class SerializedModelSaver
   /**
    * Helper routine to actually save the models.
    */
+  
+  
   private void saveModel(String fileName, Instances trainHeader, Object model) {
     m_fileFormat = validateFileFormat(m_fileFormat);
     if (m_fileFormat == null) {
@@ -507,12 +509,12 @@ public class SerializedModelSaver
       }        
     } catch (Exception ex) {
       stop(); // stop all processing
-      System.err.println("[SerializedModelSaver] Problem saving model");
+      System.err.println(Messages.getInstance().getString("SerializedModelSaver_SaveModel_Error_Text"));
       if (m_logger != null) {
-        m_logger.logMessage("[SerializedModelSaver] "
-            + statusMessagePrefix() + " Problem saving model");
+        m_logger.logMessage(Messages.getInstance().getString("SerializedModelSaver_SaveModel_LogMessage_Text_First")
+            + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_SaveModel_LogMessage_Text_Second"));
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_SaveModel_StatusMessage_Text"));
       }
     }
   }
@@ -638,7 +640,7 @@ public class SerializedModelSaver
    * @return information about this bean.
    */
   public String globalInfo() {
-    return "Save trained models to serialized object files.";
+    return Messages.getInstance().getString("SerializedModelSaver_GlobalInfo_Text");
   }
 
   /**

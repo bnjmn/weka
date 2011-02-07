@@ -40,7 +40,7 @@ import org.w3c.dom.Element;
  * that are passed to it through the constructor.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision$ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class BIFParser implements GraphConstants {
   
@@ -106,12 +106,12 @@ public class BIFParser implements GraphConstants {
     else if(inString!=null)
       dc = db.parse(new org.xml.sax.InputSource(new StringReader(inString)));
     else
-    { throw new Exception("No input given"); }
+    { throw new Exception(Messages.getInstance().getString("BIFParser_Parse_Exception_Text")); }
     
     NodeList nl = dc.getElementsByTagName( "NETWORK" );
     
     if(nl.getLength()==0) {
-      throw new BIFFormatException( "NETWORK tag not found" );
+      throw new BIFFormatException( Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_First"));
     }
     
     //take only the first network node
@@ -126,8 +126,7 @@ public class BIFParser implements GraphConstants {
       
       templist = ((Element)nl.item(i)).getElementsByTagName("NAME");
       if(templist.getLength()>1)
-        throw new BIFFormatException("More than one name tags found for "+
-        "variable no. "+(i+1));
+        throw new BIFFormatException(Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Second") + (i+1));
       
       String nodename =
       ((org.w3c.dom.Node)templist.item(0)).getFirstChild().getNodeValue();
@@ -192,18 +191,18 @@ public class BIFParser implements GraphConstants {
       //creating the probability table for the node
       templist = ((Element)nl.item(i)).getElementsByTagName("TABLE");
       if(templist.getLength()>1)
-        throw new BIFFormatException("More than one Probability Table for "+
+        throw new BIFFormatException(Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Second_Alpha") +
         n.ID);
       
       String probs = templist.item(0).getFirstChild().getNodeValue();
       StringTokenizer tk = new StringTokenizer(probs, " \n\t");
       
       if(parntOutcomes*n.outcomes.length > tk.countTokens())
-        throw new BIFFormatException("Probability Table for "+n.ID+
-        " contains more values than it should");
+        throw new BIFFormatException(Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Third") + n.ID+
+        		Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Fourth"));
       else if(parntOutcomes*n.outcomes.length < tk.countTokens())
-        throw new BIFFormatException("Probability Table for "+n.ID+
-        " contains less values than it should");
+        throw new BIFFormatException(Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Fifth") + n.ID+
+        		Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Sixth"));
       else {
         n.probs = new double[parntOutcomes][n.outcomes.length];
         for(int r=0; r<parntOutcomes; r++)     //row

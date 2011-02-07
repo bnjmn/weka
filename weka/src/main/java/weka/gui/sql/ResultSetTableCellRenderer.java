@@ -35,7 +35,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * DefaultTableCellRenderer.
  *
  * @author     FracPete (fracpete at waikato dot ac dot nz)
- * @version    $Revision: 1.2 $
+ * @version    $Revision$
  */
 public class ResultSetTableCellRenderer
   extends DefaultTableCellRenderer {
@@ -87,7 +87,7 @@ public class ResultSetTableCellRenderer
       // normal cell
       if (row >= 0) {
         if (model.isNullAt(row, column)) {
-          setToolTipText("NULL");
+          setToolTipText(Messages.getInstance().getString("ResultSetTableCellRenderer_GetTableCellRendererComponent_SetToolTipText_Text"));
           if (isSelected)
             result.setBackground(missingColorSelected);
           else

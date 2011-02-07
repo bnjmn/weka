@@ -30,7 +30,7 @@ import java.util.Date;
  * This Logger just sends messages to System.err.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class SysErrLog implements Logger {
 
@@ -52,7 +52,7 @@ public class SysErrLog implements Logger {
    */
   public void logMessage(String message) {
     
-    System.err.println("LOG " + SysErrLog.getTimestamp() + ": "
+    System.err.println(Messages.getInstance().getString("SysErrLog_LogMessage_Text_First") + SysErrLog.getTimestamp() + Messages.getInstance().getString("SysErrLog_LogMessage_Text_Second")
 		       + message);
   }
 
@@ -63,6 +63,6 @@ public class SysErrLog implements Logger {
    */
   public void statusMessage(String message) {
 
-    System.err.println("STATUS: " + message);
+    System.err.println(Messages.getInstance().getString("SysErrLog_StatusMessage_Text") + message);
   }
 }

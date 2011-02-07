@@ -85,7 +85,7 @@ public class FileEditor extends PropertyEditorSupport {
 	m_FileChooser 
 	  = new JFileChooser(new File(System.getProperty("user.dir")));
       }
-      m_FileChooser.setApproveButtonText("Select");
+      m_FileChooser.setApproveButtonText(Messages.getInstance().getString("FileEditor_GetCustomEditor_FileChooser_SetApproveButtonText_Text"));
       m_FileChooser.setApproveButtonMnemonic('S');
       m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       m_FileChooser.addActionListener(new ActionListener() {
@@ -122,7 +122,7 @@ public class FileEditor extends PropertyEditorSupport {
     FontMetrics fm = gfx.getFontMetrics();
     int vpad = (box.height - fm.getHeight()) / 2 ;
     File f = (File) getValue();
-    String val = "No file";
+    String val = Messages.getInstance().getString("FileEditor_PaintValue_Val_Text");
     if (f != null) {
       val = f.getName();
     }

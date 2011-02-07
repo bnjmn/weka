@@ -89,17 +89,17 @@ public class SaveBuffer {
 
 	if (sFile.exists()) {
 	  Object [] options = new String[4];
-	  options[0] = "Append";
-	  options[1] = "Overwrite";
-	  options[2] = "Choose new name";
-	  options[3] = "Cancel";
+	  options[0] = Messages.getInstance().getString("SaveBuffer_Save_Options_0_Text");
+	  options[1] = Messages.getInstance().getString("SaveBuffer_Save_Options_1_Text");
+	  options[2] = Messages.getInstance().getString("SaveBuffer_Save_Options_2_Text");
+	  options[3] = Messages.getInstance().getString("SaveBuffer_Save_Options_3_Text");
 	
-	  JOptionPane jop = new JOptionPane("File exists",
+	  JOptionPane jop = new JOptionPane(Messages.getInstance().getString("SaveBuffer_Save_JOptionPane_Text"),
 					     JOptionPane.QUESTION_MESSAGE,
 					    1,
 					    null,
 					    options);
-	  JDialog dialog = jop.createDialog(m_parentComponent, "File query");
+	  JDialog dialog = jop.createDialog(m_parentComponent, Messages.getInstance().getString("SaveBuffer_Save_Dialog_JopCreateDialog_Text"));
 	  dialog.setVisible(true);
 	  Object selectedValue = jop.getValue();
 	  if (selectedValue == null) {
@@ -147,9 +147,9 @@ public class SaveBuffer {
       String path = sFile.getPath();
       if (m_Log != null) {
 	if (append) {
-	  m_Log.statusMessage("Appending to file...");
+	  m_Log.statusMessage(Messages.getInstance().getString("SaveBuffer_SaveOverwriteAppend_Log_StatusMessage_Text_First"));
 	} else {
-	  m_Log.statusMessage("Saving to file...");
+	  m_Log.statusMessage(Messages.getInstance().getString("SaveBuffer_SaveOverwriteAppend_Log_StatusMessage_Text_Second"));
 	}
       }
       PrintWriter out
@@ -158,7 +158,7 @@ public class SaveBuffer {
       out.write(buf.toString(),0,buf.toString().length());
       out.close();
       if (m_Log != null) {
-	m_Log.statusMessage("OK");
+	m_Log.statusMessage(Messages.getInstance().getString("SaveBuffer_SaveOverwriteAppend_Log_StatusMessage_Text_Third"));
       }
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -177,16 +177,16 @@ public class SaveBuffer {
   public static void main(String [] args) {
      try {
        final javax.swing.JFrame jf =
-	 new javax.swing.JFrame("SaveBuffer test");
+	 new javax.swing.JFrame(Messages.getInstance().getString("SaveBuffer_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
       weka.gui.LogPanel lp = new weka.gui.LogPanel();
-      javax.swing.JButton jb = new javax.swing.JButton("Save");
+      javax.swing.JButton jb = new javax.swing.JButton(Messages.getInstance().getString("SaveBuffer_Main_Jb_JButton_Text"));
       jf.getContentPane().add(jb,java.awt.BorderLayout.SOUTH);
       jf.getContentPane().add(lp, java.awt.BorderLayout.CENTER);
       final SaveBuffer svb = new SaveBuffer(lp, jf);
       jb.addActionListener(new java.awt.event.ActionListener() {
 	  public void actionPerformed(java.awt.event.ActionEvent e) {
-	    svb.save(new StringBuffer("A bit of test text"));
+	    svb.save(new StringBuffer(Messages.getInstance().getString("SaveBuffer_Main_Svb_Save_Text")));
 	  }
 	});
 

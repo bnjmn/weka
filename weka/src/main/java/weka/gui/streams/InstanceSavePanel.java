@@ -37,7 +37,7 @@ import java.io.PrintWriter;
  * A bean that saves a stream of instances to a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class InstanceSavePanel
   extends Panel
@@ -55,9 +55,9 @@ public class InstanceSavePanel
   public void input(Instance instance) throws Exception {
     
     if (b_Debug)
-      System.err.println("InstanceSavePanel::input(" + instance +")");
+      System.err.println(Messages.getInstance().getString("InstanceSavePanel_Input_Error_Text_First") + instance + Messages.getInstance().getString("InstanceSavePanel_Input_Error_Text_Second"));
     m_Count++;
-    count_Lab.setText(""+m_Count+" instances");
+    count_Lab.setText(""+m_Count+Messages.getInstance().getString("InstanceSavePanel_Input_Count_Lab_SetText_Second"));
     if (outputWriter != null)
       outputWriter.println(instance.toString());      
   }
@@ -65,25 +65,24 @@ public class InstanceSavePanel
   public void inputFormat(Instances instanceInfo) {
     
     if (b_Debug)
-      System.err.println("InstanceSavePanel::inputFormat()\n"
-			 +instanceInfo.toString());
+      System.err.println(Messages.getInstance().getString("InstanceSavePanel::inputFormat()\n") + instanceInfo.toString());
     m_Count = 0;
-    count_Lab.setText(""+m_Count+" instances");
+    count_Lab.setText(""+m_Count+Messages.getInstance().getString("InstanceSavePanel_InputFormat_Count_Lab_SetText_Second"));
     try {
       outputWriter = new PrintWriter(new FileOutputStream(arffFile_Tex.getText()));
       outputWriter.println(instanceInfo.toString());
       if (b_Debug)
-	System.err.println("InstanceSavePanel::inputFormat() - written header");
+	System.err.println(Messages.getInstance().getString("InstanceSavePanel_InputFormat_Error_Text_Second"));
     } catch (Exception ex) {
       outputWriter = null;
-      System.err.println("InstanceSavePanel::inputFormat(): "+ex.getMessage());
+      System.err.println(Messages.getInstance().getString("InstanceSavePanel_InputFormat_Error_Text_Third") + ex.getMessage());
     }
   }
 
   public void batchFinished() {
     
     if (b_Debug)
-      System.err.println("InstanceSavePanel::batchFinished()");
+      System.err.println(Messages.getInstance().getString("InstanceSavePanel_BatchFinished_Error_Text_First"));
     if (outputWriter != null)
       outputWriter.close();
   }
@@ -93,8 +92,8 @@ public class InstanceSavePanel
     setLayout(new BorderLayout());
     arffFile_Tex = new TextField("arffoutput.arff");
     add("Center", arffFile_Tex);
-    count_Lab = new Label("0 instances");
-    add("East", count_Lab);
+    count_Lab = new Label(Messages.getInstance().getString("InstanceSavePanel_Count_Lab_Label_Text"));
+    add(Messages.getInstance().getString("InstanceSavePanel_Count_Lab_Label_Add_Text"), count_Lab);
     //    setSize(60,40);
     setBackground(Color.lightGray);
   }
@@ -132,16 +131,14 @@ public class InstanceSavePanel
 	  batchFinished();
 	  break;
 	default:
-	  System.err.println("InstanceSavePanel::instanceProduced() - unknown event type");
+	  System.err.println(Messages.getInstance().getString("InstanceSavePanel_InstanceProduced_InstanceProducerDEFAULT_Error_Text"));
 	  break;
 	}
       } catch (Exception ex) {
 	System.err.println(ex.getMessage());
       }
     } else {
-      System.err.println("InstanceSavePanel::instanceProduced() - Unknown source object type");
+      System.err.println(Messages.getInstance().getString("InstanceSavePanel_InstanceProduced_Error_Text"));
     }
   }
 }
-
-  

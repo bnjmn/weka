@@ -27,7 +27,7 @@ package weka.gui.treevisualizer;
  * An event containing the user selection from the tree display
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class TreeDisplayEvent {
   public static final int NO_COMMAND = 0;
@@ -79,8 +79,3 @@ public class TreeDisplayEvent {
     return m_nodeId;
   }
 }
-
-
-
-
-

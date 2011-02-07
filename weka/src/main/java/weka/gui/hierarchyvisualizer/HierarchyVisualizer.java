@@ -295,7 +295,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 				sStr = sStr.substring(sStr.lastIndexOf('['));
 				i2 = sStr.indexOf(']');
 				if (i2 < 0) {
-					throw new Exception("unbalanced square bracket found:" + sStr);
+					throw new Exception(Messages.getInstance().getString("HierarchicalClusterer_ParseNewick2_Exception_Text_First") + sStr);
 				}
 				sStr2 = sStr.substring(1, i2);
 				node.m_sMetaData = sStr2;
@@ -314,7 +314,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 				int i1 = sStr.indexOf('[');
 				int i2 = sStr.indexOf(']');
 				if (i2 < 0) {
-					throw new Exception("unbalanced square bracket found:" + sStr);
+					throw new Exception(Messages.getInstance().getString("HierarchicalClusterer_ParseNewick2_Exception_Text_Second") + sStr);
 				}
 				String sStr2 = sStr.substring(i1+1, i2);
 				sStr = sStr.substring(0, i1) +sStr.substring(i2+1);

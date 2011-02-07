@@ -72,7 +72,7 @@ public class TrainingSetMaker
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Designate an incoming data set as a training set.";
+    return Messages.getInstance().getString("TrainingSetMaker_GlobalInfo_Text");
   }
 
   /**
@@ -82,7 +82,7 @@ public class TrainingSetMaker
    */
   public void acceptDataSet(DataSetEvent e) {
     m_receivedStopNotification = false;
-    System.err.println("In accept data set");
+    System.err.println(Messages.getInstance().getString("TrainingSetMaker_AcceptDataSet_Error_Text"));
     TrainingSetEvent tse = new TrainingSetEvent(this, e.getDataSet());
     tse.m_setNumber = 1;
     tse.m_maxSetNumber = 1;
@@ -103,15 +103,15 @@ public class TrainingSetMaker
       for(int i = 0; i < l.size(); i++) {
         if (m_receivedStopNotification) {
           if (m_logger != null) {
-            m_logger.logMessage("T[rainingSetMaker] "
-                +statusMessagePrefix() + " stopping.");
+            m_logger.logMessage(Messages.getInstance().getString("TrainingSetMaker_NotifyTrainingSetProduced_LogMessage_Text_First")
+                +statusMessagePrefix() + Messages.getInstance().getString("TrainingSetMaker_NotifyTrainingSetProduced_LogMessage_Text_Second"));
             m_logger.statusMessage(statusMessagePrefix()
-                + "INTERRUPTED");
+                + Messages.getInstance().getString("TrainingSetMaker_NotifyTrainingSetProduced_LogMessage_Text_Third"));
           }
           m_receivedStopNotification = false;
           break;
         }
-	System.err.println("Notifying listeners (training set maker)");
+	System.err.println(Messages.getInstance().getString("TrainingSetMaker_NotifyTrainingSetProduced_Error_Text"));
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
     }

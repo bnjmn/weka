@@ -70,6 +70,8 @@ public class Experimenter
    */
   public Experimenter(boolean classFirst) {
 
+	  System.out.println("[DEBUGGER] ---- " + Messages.getInstance().getString("Experimenter_TabbedPane_Setup_Key_Text"));
+	  
     m_SetupPanel = new SetupModePanel();
     m_ResultsPanel = new ResultsPanel();
     m_RunPanel = new RunPanel();
@@ -77,10 +79,9 @@ public class Experimenter
     
     m_ClassFirst = classFirst;
 
-    m_TabbedPane.addTab("Setup", null, m_SetupPanel, "Set up the experiment");
-    m_TabbedPane.addTab("Run", null, m_RunPanel, "Run the experiment");
-    m_TabbedPane.addTab("Analyse", null, m_ResultsPanel,
-			"Analyse experiment results");
+    m_TabbedPane.addTab(Messages.getInstance().getString("Experimenter_TabbedPane_Setup_Key_Text"), null, m_SetupPanel, Messages.getInstance().getString("Experimenter_TabbedPane_Setup_Value_Text"));
+    m_TabbedPane.addTab(Messages.getInstance().getString("Experimenter_TabbedPane_Run_Key_Text"), null, m_RunPanel, Messages.getInstance().getString("Experimenter_TabbedPane_Run_Value_Text"));
+    m_TabbedPane.addTab(Messages.getInstance().getString("Experimenter_TabbedPane_Analyse_Key_Text"), null, m_ResultsPanel, Messages.getInstance().getString("Experimenter_TabbedPane_Analyse_Value_Text"));
     m_TabbedPane.setSelectedIndex(0);
     m_TabbedPane.setEnabledAt(1, false);
     m_SetupPanel.addPropertyChangeListener(new PropertyChangeListener() {
@@ -112,7 +113,7 @@ public class Experimenter
    * @param args ignored.
    */
   public static void main(String [] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");    
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("Experimenter_Main_LoggingStarted_Text"));    
     LookAndFeel.setLookAndFeel();
     
     try {
@@ -124,7 +125,7 @@ public class Experimenter
 	classFirst = args[0].equals("CLASS_FIRST");
       }
       m_experimenter = new Experimenter(classFirst);
-      final JFrame jf = new JFrame("Weka Experiment Environment");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("Experimenter_Main_WekaExperimentEnvironment_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_experimenter, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
@@ -155,9 +156,9 @@ public class Experimenter
                 m_Memory.stopThreads();
 
                 // display error
-                System.err.println("\ndisplayed message:");
+                System.err.println(Messages.getInstance().getString("Experimenter_Main_Error_Text_First"));
                 m_Memory.showOutOfMemory();
-                System.err.println("\nexiting");
+                System.err.println(Messages.getInstance().getString("Experimenter_Main_Error_Text_Second"));
                 System.exit(-1);
               }
 

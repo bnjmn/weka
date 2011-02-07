@@ -135,25 +135,25 @@ public class AlgorithmListPanel
   protected JList m_List;
 
   /** Click to add an algorithm */
-  protected JButton m_AddBut = new JButton("Add new...");
+  protected JButton m_AddBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_AddBut_JButton_Text"));
   
   /** Click to edit the selected algorithm */
-  protected JButton m_EditBut = new JButton("Edit selected...");
+  protected JButton m_EditBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_EditBut_JButton_Text"));
 
   /** Click to remove the selected dataset from the list */
-  protected JButton m_DeleteBut = new JButton("Delete selected");
+  protected JButton m_DeleteBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_DeleteBut_JButton_Text"));
   
   /** Click to edit the load the options for athe selected algorithm */
-  protected JButton m_LoadOptionsBut = new JButton("Load options...");
+  protected JButton m_LoadOptionsBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_LoadOptionsBut_JButton_Text"));
   
   /** Click to edit the save the options from selected algorithm */
-  protected JButton m_SaveOptionsBut = new JButton("Save options...");
+  protected JButton m_SaveOptionsBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_SaveOptionsBut_JButton_Text"));
   
   /** Click to move the selected algorithm(s) one up */
-  protected JButton m_UpBut = new JButton("Up");
+  protected JButton m_UpBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_UpBut_JButton_Text"));
   
   /** Click to move the selected algorithm(s) one down */
-  protected JButton m_DownBut = new JButton("Down");
+  protected JButton m_DownBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_DownBut_JButton_Text"));
   
   /** The file chooser for selecting experiments */
   protected JFileChooser m_FileChooser =
@@ -162,7 +162,7 @@ public class AlgorithmListPanel
   /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(".xml", 
-                            "Classifier options (*.xml)");
+    		Messages.getInstance().getString("AlgorithmListPanel_XMLFilter_Text_End"));
 
   /** Whether an algorithm is added or only edited  */
   protected boolean m_Editing = false;
@@ -217,12 +217,12 @@ public class AlgorithmListPanel
 	    JPopupMenu menu = new JPopupMenu();
 	    JMenuItem item;
 
-	    item = new JMenuItem("Add configuration...");
+	    item = new JMenuItem(Messages.getInstance().getString("AlgorithmListPanel_Item_JMenuItem_Text_First"));
 	    item.addActionListener(new ActionListener() {
 	      public void actionPerformed(ActionEvent e) {
 		String str = JOptionPane.showInputDialog(
 		    self, 
-		    "Configuration (<classname> [<options>])");
+		    Messages.getInstance().getString("AlgorithmListPanel_JOptionPaneShowInputDialog_Text"));
 		if (str != null) {
 		  try {
 		    String[] options = Utils.splitOptions(str);
@@ -236,8 +236,8 @@ public class AlgorithmListPanel
 		    ex.printStackTrace();
 		    JOptionPane.showMessageDialog(
 			self, 
-			"Error parsing commandline:\n" + ex, 
-			"Error...",
+			Messages.getInstance().getString("AlgorithmListPanel_Error_JOptionPaneShowMessageDialog_Text_Front") + ex, 
+			Messages.getInstance().getString("AlgorithmListPanel_Error_JOptionPaneShowMessageDialog_Text_End"),
 			JOptionPane.ERROR_MESSAGE);
 		  }
 		}
@@ -248,7 +248,7 @@ public class AlgorithmListPanel
 	    if (m_List.getSelectedValue() != null) {
 	      menu.addSeparator();
 
-	      item = new JMenuItem("Show properties...");
+	      item = new JMenuItem(Messages.getInstance().getString("AlgorithmListPanel_Item_JMenuItem_Text_Second"));
 	      item.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		  self.actionPerformed(new ActionEvent(m_EditBut, 0, ""));
@@ -256,7 +256,7 @@ public class AlgorithmListPanel
 	      });
 	      menu.add(item);
 
-	      item = new JMenuItem("Copy configuration to clipboard");
+	      item = new JMenuItem(Messages.getInstance().getString("AlgorithmListPanel_Item_JMenuItem_Text_Third"));
 	      item.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		  String str = m_List.getSelectedValue().getClass().getName();
@@ -269,12 +269,12 @@ public class AlgorithmListPanel
 	      });
 	      menu.add(item);
 
-	      item = new JMenuItem("Enter configuration...");
+	      item = new JMenuItem(Messages.getInstance().getString("AlgorithmListPanel_Item_JMenuItem_Text_Fourth"));
 	      item.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		  String str = JOptionPane.showInputDialog(
 		      self, 
-		      "Configuration (<classname> [<options>])");
+		      Messages.getInstance().getString("AlgorithmListPanel_ActionPerformed_JOptionPaneShowInputDialog_Text"));
 		  if (str != null) {
 		    try {
 		      String[] options = Utils.splitOptions(str);
@@ -288,8 +288,8 @@ public class AlgorithmListPanel
 		      ex.printStackTrace();
 		      JOptionPane.showMessageDialog(
 			  self, 
-			  "Error parsing commandline:\n" + ex, 
-			  "Error...",
+			  Messages.getInstance().getString("AlgorithmListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_First") + ex, 
+			  Messages.getInstance().getString("AlgorithmListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_Second"),
 			  JOptionPane.ERROR_MESSAGE);
 		    }
 		  }
@@ -345,7 +345,7 @@ public class AlgorithmListPanel
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     setLayout(new BorderLayout());
-    setBorder(BorderFactory.createTitledBorder("Algorithms"));
+    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("AlgorithmListPanel_SetBorder_Text")));
     JPanel topLab = new JPanel();
     GridBagLayout gb = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
@@ -590,7 +590,7 @@ public class AlgorithmListPanel
       SerializedObject so = new SerializedObject(source);
       result = so.getObject();
     } catch (Exception ex) {
-      System.err.println("AlgorithmListPanel: Problem copying object");
+      System.err.println(Messages.getInstance().getString("AlgorithmListPanel_CopyObject_Error_Text"));
       System.err.println(ex);
     }
     return result;
@@ -604,7 +604,7 @@ public class AlgorithmListPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Algorithm List Editor");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("AlgorithmListPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       AlgorithmListPanel dp = new AlgorithmListPanel();
       jf.getContentPane().add(dp,
@@ -617,9 +617,9 @@ public class AlgorithmListPanel
       });
       jf.pack();
       jf.setVisible(true);
-      System.err.println("Short nap");
+      System.err.println(Messages.getInstance().getString("AlgorithmListPanel_Main_Error_Text_First"));
       Thread.currentThread().sleep(3000);
-      System.err.println("Done");
+      System.err.println(Messages.getInstance().getString("AlgorithmListPanel_Main_Error_Text_Second"));
       dp.setExperiment(new Experiment());
     } catch (Exception ex) {
       ex.printStackTrace();

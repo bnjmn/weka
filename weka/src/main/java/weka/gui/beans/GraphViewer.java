@@ -51,7 +51,7 @@ import javax.swing.JPanel;
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class GraphViewer 
   extends JPanel
@@ -124,14 +124,14 @@ public class GraphViewer
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Graphically visualize trees or graphs produced by classifiers/clusterers.";
+    return Messages.getInstance().getString("GraphViewer_GlobalInfo_Text");
   }
 
   private void setUpResultHistory() {
     if (m_history == null) {
       m_history = new ResultHistoryPanel(null);
     }
-    m_history.setBorder(BorderFactory.createTitledBorder("Graph list"));
+    m_history.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("GraphViewer_SetUpResultHistory_History_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     m_history.setHandleRightClicks(false);
     m_history.getList().
       addMouseListener(new ResultHistoryPanel.RMouseAdapter() {
@@ -254,7 +254,7 @@ public class GraphViewer
       if (m_history == null) {
 	setUpResultHistory();
       }
-      m_resultsFrame = new JFrame("Graph Viewer");
+      m_resultsFrame = new JFrame(Messages.getInstance().getString("GraphViewer_ShowResult_ResultsFrame_JFrame_Text"));
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       m_resultsFrame.getContentPane().add(m_history, BorderLayout.CENTER);
       m_resultsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -282,7 +282,7 @@ public class GraphViewer
 
     if(grphType == Drawable.TREE){
         final javax.swing.JFrame jf = 
-            new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+name);
+            new javax.swing.JFrame(Messages.getInstance().getString("GraphViewer_DoPopup_Jf_JFrame_Text_First") + name);
         jf.setSize(500,400);
         jf.getContentPane().setLayout(new BorderLayout());
         TreeVisualizer tv = 
@@ -300,7 +300,7 @@ public class GraphViewer
     }
     if(grphType == Drawable.BayesNet) {
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Classifier Graph Visualizer: "+name);
+	new javax.swing.JFrame(Messages.getInstance().getString("GraphViewer_DoPopup_Jf_JFrame_Text_Second") + name);
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       GraphVisualizer gv = 
@@ -309,7 +309,7 @@ public class GraphViewer
 	gv.readBIF(grphString);
       }
       catch (BIFFormatException be) { 
-	System.err.println("unable to visualize BayesNet"); be.printStackTrace(); 
+	System.err.println(Messages.getInstance().getString("GraphViewer_DoPopup_Error_Text")); be.printStackTrace(); 
       }
       gv.layoutGraph();
       jf.getContentPane().add(gv, BorderLayout.CENTER);
@@ -348,7 +348,7 @@ public class GraphViewer
     } else {
       throw new 
 	IllegalArgumentException(request
-		    + " not supported (GraphViewer)");
+		    + Messages.getInstance().getString("GraphViewer_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 }

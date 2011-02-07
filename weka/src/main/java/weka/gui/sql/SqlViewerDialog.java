@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * A little dialog containing the SqlViewer.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.3 $
+ * @version     $Revision$
  */
 public class SqlViewerDialog 
   extends JDialog 
@@ -62,10 +62,10 @@ public class SqlViewerDialog
   protected JPanel m_PanelButtons;
 
   /** the OK button */
-  protected JButton m_ButtonOK = new JButton("OK");
+  protected JButton m_ButtonOK = new JButton(Messages.getInstance().getString("SqlViewerDialog_ButtonOK_JButton_Text"));
 
   /** the Cancel button */
-  protected JButton m_ButtonCancel = new JButton("Cancel");
+  protected JButton m_ButtonCancel = new JButton(Messages.getInstance().getString("SqlViewerDialog_ButtonCancel_JButton_Text"));
 
   /** displays the current query */
   protected JLabel m_LabelQuery = new JLabel("");
@@ -89,7 +89,7 @@ public class SqlViewerDialog
    * initializes the dialog
    */
   public SqlViewerDialog(JFrame parent) {
-    super(parent, "SQL-Viewer", true);
+    super(parent, Messages.getInstance().getString("SqlViewerDialog_SQL_Viewer_Text"), true);
 
     m_Parent   = parent;
     m_URL      = "";
@@ -229,7 +229,7 @@ public class SqlViewerDialog
     m_User     = evt.getUser();
     m_Password = evt.getPassword();
     m_Query    = evt.getQuery();
-    m_LabelQuery.setText("Current query: " + m_Query);
+    m_LabelQuery.setText(Messages.getInstance().getString("SqlViewerDialog_ResultChanged_Text") + m_Query);
   }
 
   /**
@@ -241,12 +241,12 @@ public class SqlViewerDialog
     dialog = new SqlViewerDialog(null);
     dialog.setDefaultCloseOperation(SqlViewerDialog.DISPOSE_ON_CLOSE);
     dialog.setVisible(true);
-    System.out.println("ReturnValue = " + dialog.getReturnValue());
+    System.out.println(Messages.getInstance().getString("SqlViewerDialog_Main_Text_First") + dialog.getReturnValue());
     if (dialog.getReturnValue() == JOptionPane.OK_OPTION) {
-      System.out.println("URL      = " + dialog.getURL());
-      System.out.println("User     = " + dialog.getUser());
-      System.out.println("Password = " + dialog.getPassword().replaceAll(".", "*"));
-      System.out.println("Query    = " + dialog.getQuery());
+      System.out.println(Messages.getInstance().getString("SqlViewerDialog_Main_Text_Second") + dialog.getURL());
+      System.out.println(Messages.getInstance().getString("SqlViewerDialog_Main_Text_Third") + dialog.getUser());
+      System.out.println(Messages.getInstance().getString("SqlViewerDialog_Main_Text_Fourth") + dialog.getPassword().replaceAll(".", "*"));
+      System.out.println(Messages.getInstance().getString("SqlViewerDialog_Main_Text_Fifth") + dialog.getQuery());
     }
   }
 }

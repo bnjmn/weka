@@ -77,8 +77,7 @@ public class ClassAssigner
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Designate which column is to be considered the class column "
-      +"in incoming data.";
+    return Messages.getInstance().getString("ClassAssigner_GlobalInfo_Text");
   }
 
   public ClassAssigner() {
@@ -110,7 +109,7 @@ public class ClassAssigner
    * @return a <code>String</code> value
    */
   public String classColumnTipText() {
-    return "Specify the number of the column that contains the class attribute";
+    return Messages.getInstance().getString("ClassAssigner_ClassColumnTipText_Text");
   }
 
   /**
@@ -178,7 +177,7 @@ public class ClassAssigner
       notifyInstanceListeners(e);
 
       // tell any listening customizers (or other interested parties)
-      System.err.println("Notifying customizer...");
+      System.err.println(Messages.getInstance().getString("ClassAssigner_AcceptInstance_Error_Text"));
       notifyDataFormatListeners();
     } else {
       //      Instances dataSet = e.getInstance().dataset();
@@ -197,8 +196,7 @@ public class ClassAssigner
       classCol = Integer.parseInt(m_classColumn) - 1;
       if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
 	if (m_logger != null) {
-	  m_logger.logMessage("Class column outside range of data "
-			      +"(ClassAssigner)");
+	  m_logger.logMessage(Messages.getInstance().getString("ClassAssigner_AssignClass_LogMessage_Text"));
 	}
       } else {
 	dataSet.setClassIndex(classCol);
@@ -213,8 +211,7 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying test listeners "
-			   +"(ClassAssigner)");
+	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyTestListeners_Error_Text"));
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
       }
     }
@@ -227,8 +224,7 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying training listeners "
-			   +"(ClassAssigner)");
+	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyTrainingListeners_Error_Text"));
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
     }
@@ -241,8 +237,7 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying data listeners "
-			   +"(ClassAssigner)");
+	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyDataListeners_Error_Text"));
 	((DataSourceListener)l.elementAt(i)).acceptDataSet(tse);
       }
     }

@@ -103,10 +103,10 @@ public class FlowRunner implements RevisionHandler {
         ex.printStackTrace();
         if (m_log != null) {
           m_log.logMessage(ex.getMessage());
-          m_log.logMessage("Aborting...");
+          m_log.logMessage(Messages.getInstance().getString("FlowRunner_RunSequentially_LogMessage_Text_First"));
         } else {
           System.err.println(ex.getMessage());
-          System.err.println("Aborting...");
+          System.err.println(Messages.getInstance().getString("FlowRunner_RunSequentially_LogMessage_Text_Second"));
         }
         break;
       }
@@ -188,9 +188,9 @@ public class FlowRunner implements RevisionHandler {
       }
     } catch (Exception ex) {
       if (m_log != null) {
-        m_log.logMessage("[FlowRunner] Attempting to stop all flows...");
+        m_log.logMessage(Messages.getInstance().getString("FlowRunner_WaitUntilFinished_LogMessage_Text"));
       } else {
-        System.err.println("[FlowRunner] Attempting to stop all flows...");
+        System.err.println(Messages.getInstance().getString("FlowRunner_WaitUntilFinished_Error_Text"));
       }
       stopAllFlows();
       //      ex.printStackTrace();
@@ -205,8 +205,7 @@ public class FlowRunner implements RevisionHandler {
    */
   public void load(String fileName) throws Exception {
     if (!fileName.endsWith(".kf") && !fileName.endsWith(".kfml")) {
-      throw new Exception("Can only load and run binary or xml serialized KnowledgeFlows "
-                          + "(*.kf | *.kfml)");
+      throw new Exception(Messages.getInstance().getString("FlowRunner_Load_Exception_Text"));
     }
     
     if (fileName.endsWith(".kf")) {
@@ -224,7 +223,7 @@ public class FlowRunner implements RevisionHandler {
    */
   public void loadBinary(String fileName) throws Exception {
     if (!fileName.endsWith(".kf")) {
-      throw new Exception("File must be a binary flow (*.kf)");
+      throw new Exception(Messages.getInstance().getString("FlowRunner_LoadBinary_Exception_Text_First"));
     }
 
     InputStream is = new FileInputStream(fileName);
@@ -252,7 +251,7 @@ public class FlowRunner implements RevisionHandler {
    */
   public void loadXML(String fileName) throws Exception {
     if (!fileName.endsWith(".kfml")) {
-      throw new Exception("File must be an XML flow (*.kfml)");
+      throw new Exception(Messages.getInstance().getString("FlowRunner_LoadXML_Exception_Text"));
     }
 
     XMLBeans xml = new XMLBeans(null, null);
@@ -267,7 +266,7 @@ public class FlowRunner implements RevisionHandler {
       m_env.addVariable("Internal.knowledgeflow.directory", 
           parentDir);
     } else {
-      System.err.println("++++++++++++ Environment variables null!!...");
+      System.err.println(Messages.getInstance().getString("FlowRunner_LoadXML_Error_Text"));
     }
   }
   
@@ -337,7 +336,7 @@ public class FlowRunner implements RevisionHandler {
    */
   public void run() throws Exception {
     if (m_beans == null) {
-      throw new Exception("Don't seem to have any beans I can execute.");
+      throw new Exception(Messages.getInstance().getString("FlowRunner_Run_Exception_Text"));
     }
     
     // register the log (if set) with the beans
@@ -358,9 +357,9 @@ public class FlowRunner implements RevisionHandler {
 
     if (m_log != null) {
       if (m_startSequentially) {
-        m_log.logMessage("[FlowRunner] launching flow start points sequentially...");
+        m_log.logMessage(Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_First"));
       } else {
-        m_log.logMessage("[FlowRunner] launching flow start points in parallel...");
+        m_log.logMessage(Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Second"));
       }
     }
     TreeMap<Integer, Startable> startables = new TreeMap<Integer, Startable>();
@@ -373,9 +372,9 @@ public class FlowRunner implements RevisionHandler {
         if (!m_startSequentially) {
           if (s.getStartMessage().charAt(0) != '$') {
             if (m_log != null) {
-              m_log.logMessage("[FlowRunner] Launching flow "+numFlows+"...");
+              m_log.logMessage(Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Third") + numFlows + Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Fourth"));
             } else {
-              System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
+              System.out.println(Messages.getInstance().getString("FlowRunner_Run_Text_First") + numFlows + Messages.getInstance().getString("FlowRunner_Run_Text_Second"));
             }
             launchThread(s, numFlows);
             numFlows++;
@@ -386,9 +385,9 @@ public class FlowRunner implements RevisionHandler {
               beanName = customName;
             }
             if (m_log != null) {
-              m_log.logMessage("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
+              m_log.logMessage(Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Fifth") + beanName + Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Sixth"));
             } else {
-              System.out.println("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
+              System.out.println(Messages.getInstance().getString("FlowRunner_Run_Text_Third") + beanName + Messages.getInstance().getString("FlowRunner_Run_Text_Fourth"));
             }
           }
         } else {
@@ -421,18 +420,19 @@ public class FlowRunner implements RevisionHandler {
           
           if (s.getStartMessage().charAt(0) != '$') {
             if (m_log != null) {
-              m_log.logMessage("[FlowRunner] adding start point " + beanName
-                  + " to the execution list (position " + position + ")");
+              m_log.logMessage(Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Seventh") + beanName
+                  + Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Eighth") + position 
+                  + Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Nineth"));
             } else {
-              System.out.println("[FlowRunner] adding start point " + beanName
-                  + " to the execution list (position " + position + ")");
+              System.out.println(Messages.getInstance().getString("FlowRunner_Run_Text_Fifth") + beanName
+                  + Messages.getInstance().getString("FlowRunner_Run_Text_Sixth") + position + Messages.getInstance().getString("FlowRunner_Run_Text_Seventh"));
             }
             startables.put(position, s);
           } else {
             if (m_log != null) {
-              m_log.logMessage("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
+              m_log.logMessage(Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Tenth") + beanName + Messages.getInstance().getString("FlowRunner_Run_LogMessage_Text_Eleventh"));
             } else {
-              System.out.println("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
+              System.out.println(Messages.getInstance().getString("FlowRunner_Run_Text_Eighth") + beanName + Messages.getInstance().getString("FlowRunner_Run_Text_Nineth"));
             }
           }
         }
@@ -452,11 +452,9 @@ public class FlowRunner implements RevisionHandler {
    * @param args command line arguments
    */
   public static void main(String[] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("FlowRunner_Main_Logger_Text"));
     if (args.length < 1) {
-      System.err.println("Usage:\n\nFlowRunner <serialized kf file> [-s]\n\n" 
-          + "\tUse -s to launch start points sequentially (default launches "
-          + "in parallel).");
+      System.err.println(Messages.getInstance().getString("FlowRunner_Main_Error_Text"));
     } else {
       try {
         FlowRunner fr = new FlowRunner();
@@ -476,7 +474,7 @@ public class FlowRunner implements RevisionHandler {
         fr.load(fileName);
         fr.run();
         fr.waitUntilFinished();
-        System.out.println("Finished all flows.");
+        System.out.println(Messages.getInstance().getString("FlowRunner_Main_Text"));
         System.exit(1);
       } catch (Exception ex) {
         ex.printStackTrace();

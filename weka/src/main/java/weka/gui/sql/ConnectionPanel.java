@@ -53,7 +53,7 @@ import javax.swing.event.CaretEvent;
  * to this database.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.3 $
+ * @version     $Revision$
  */
 public class ConnectionPanel 
   extends JPanel 
@@ -81,19 +81,19 @@ public class ConnectionPanel
   protected String m_Password = "";
 
   /** the label for the URL. */
-  protected JLabel m_LabelURL = new JLabel("URL ");
+  protected JLabel m_LabelURL = new JLabel(Messages.getInstance().getString("ConnectionPanel_LabelURL_JLabel_Text"));
 
   /** the textfield for the URL. */
   protected JTextField m_TextURL = new JTextField(40);
 
   /** the button for the DB-Dialog. */
-  protected JButton m_ButtonDatabase = new JButton("User...");
+  protected JButton m_ButtonDatabase = new JButton(Messages.getInstance().getString("ConnectionPanel_ButtonDatabase_JButton_Text"));
 
   /** the button for connecting to the database. */
-  protected JButton m_ButtonConnect = new JButton("Connect");
+  protected JButton m_ButtonConnect = new JButton(Messages.getInstance().getString("ConnectionPanel_ButtonConnect_JButton_Text"));
 
   /** the button for the history. */
-  protected JButton m_ButtonHistory = new JButton("History...");
+  protected JButton m_ButtonHistory = new JButton(Messages.getInstance().getString("ConnectionPanel_ButtonHistory_JButton_Text"));
 
   /** the connection listeners. */
   protected HashSet m_ConnectionListeners;

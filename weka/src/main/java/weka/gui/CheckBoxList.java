@@ -41,7 +41,7 @@ import javax.swing.ListModel;
  * the wrapper is removed and only the payload object is returned.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class CheckBoxList
   extends JList {
@@ -53,7 +53,7 @@ public class CheckBoxList
    * represents an item in the CheckBoxListModel
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision$
    */
   protected class CheckBoxListItem {
     
@@ -121,7 +121,7 @@ public class CheckBoxList
      */
     public boolean equals(Object o) {
       if (!(o instanceof CheckBoxListItem))
-	throw new IllegalArgumentException("Must be a CheckBoxListItem!");
+	throw new IllegalArgumentException(Messages.getInstance().getString("CheckBoxList_Equals_IllegalArgumentException_Text"));
       
       return getContent().equals(((CheckBoxListItem) o).getContent());
     }
@@ -131,7 +131,7 @@ public class CheckBoxList
    * A specialized model.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision$
    */
   public class CheckBoxListModel
     extends DefaultListModel {
@@ -212,7 +212,7 @@ public class CheckBoxList
      */
     public void copyInto(Object[] anArray) {
       if (anArray.length < getSize())
-	throw new IndexOutOfBoundsException("Array not big enough!");
+	throw new IndexOutOfBoundsException(Messages.getInstance().getString("CheckBoxList_CopyInto_IndexOutOfBoundsException_Text"));
       
       for (int i = 0; i < getSize(); i++)
 	anArray[i] = ((CheckBoxListItem) getElementAt(i)).getContent();
@@ -450,7 +450,7 @@ public class CheckBoxList
    * A specialized CellRenderer for the CheckBoxList
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision$
    * @see CheckBoxList
    */
   public class CheckBoxListRenderer 
@@ -543,7 +543,7 @@ public class CheckBoxList
    */
   public void setModel(ListModel model) {
     if (!(model instanceof CheckBoxListModel))
-      throw new IllegalArgumentException("Model must be an instance of CheckBoxListModel!");
+      throw new IllegalArgumentException(Messages.getInstance().getString("CheckBoxList_SetModel_IllegalArgumentException_Text"));
     
     super.setModel(model);
   }

@@ -35,7 +35,7 @@ import javax.swing.JOptionPane;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision$ 
  */
 
 public class ComponentHelper {
@@ -170,7 +170,7 @@ public class ComponentHelper {
     Object        result;
     
     if (title == null)
-      title = "Input...";
+      title = Messages.getInstance().getString("ComponentHelper_ShowInputBox_Title_Text");
     
     result = JOptionPane.showInputDialog(
              parent, msg, title, JOptionPane.QUESTION_MESSAGE, getImageIcon("question.gif"), null, initialValue);

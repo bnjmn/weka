@@ -35,7 +35,7 @@ import javax.swing.table.TableColumnModel;
  * and the corresponding query.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision$
  */
 public class ResultSetTable
   extends JTable {
@@ -93,7 +93,7 @@ public class ResultSetTable
           JTableHelper.setOptimalColumnWidth(table, column);
       }
     });
-    getTableHeader().setToolTipText("double left click on column displays the column with optimal width");
+    getTableHeader().setToolTipText(Messages.getInstance().getString("ResultSetTable_GetTableHeader_SetToolTipText_Text"));
   }
 
   /**

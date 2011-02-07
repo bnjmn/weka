@@ -43,7 +43,7 @@ import javax.swing.event.ChangeListener;
  *
  * @see weka.gui.arffviewer.ArffViewer
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision$ 
  */
 public class ViewerDialog 
   extends JDialog 
@@ -62,13 +62,13 @@ public class ViewerDialog
   protected int m_Result = CANCEL_OPTION;
   
   /** Click to activate the current set parameters */
-  protected JButton m_OkButton = new JButton("OK");
+  protected JButton m_OkButton = new JButton(Messages.getInstance().getString("ViewerDialog_OkButton_JButton_Text"));
 
   /** Click to cancel the dialog */
-  protected JButton m_CancelButton = new JButton("Cancel");
+  protected JButton m_CancelButton = new JButton(Messages.getInstance().getString("ViewerDialog_CancelButton_JButton_Text"));
 
   /** Click to undo the last action */
-  protected JButton m_UndoButton = new JButton("Undo");
+  protected JButton m_UndoButton = new JButton(Messages.getInstance().getString("ViewerDialog_UndoButton_JButton_Text"));
   
   /** the panel to display the Instances-object */
   protected ArffPanel m_ArffPanel = new ArffPanel();
@@ -89,7 +89,7 @@ public class ViewerDialog
   protected void createDialog() {
     JPanel              panel;
 
-    setTitle("Viewer");
+    setTitle(Messages.getInstance().getString("ViewerDialog_CreateDialog_SetTitle_Text"));
     
     getContentPane().setLayout(new BorderLayout());
     

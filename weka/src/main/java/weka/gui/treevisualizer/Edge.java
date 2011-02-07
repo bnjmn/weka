@@ -32,7 +32,7 @@ import java.awt.*;
  * This in particular contains information about an edges in the tree.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision$ 
  */
 public class Edge {
   /** The text caption for the edge. */
@@ -223,8 +223,3 @@ public class Edge {
     v.setParent(this);
   }
 }
-
-
-
-
-

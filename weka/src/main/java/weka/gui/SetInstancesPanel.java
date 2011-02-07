@@ -59,7 +59,7 @@ import javax.swing.JPanel;
  * then retrieve the instances by calling getInstances().
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class SetInstancesPanel
   extends JPanel {
@@ -68,13 +68,13 @@ public class SetInstancesPanel
   private static final long serialVersionUID = -384804041420453735L;
   
   /** Click to open instances from a file */
-  protected JButton m_OpenFileBut = new JButton("Open file...");
+  protected JButton m_OpenFileBut = new JButton(Messages.getInstance().getString("SetInstancesPanel_OpenFileBut_JButton_Text"));
 
   /** Click to open instances from a URL */
-  protected JButton m_OpenURLBut = new JButton("Open URL...");
+  protected JButton m_OpenURLBut = new JButton(Messages.getInstance().getString("SetInstancesPanel_OpenURLBut_JButton_Text"));
 
   /** Click to close the dialog */
-  protected JButton m_CloseBut = new JButton("Close");
+  protected JButton m_CloseBut = new JButton(Messages.getInstance().getString("SetInstancesPanel_CloseBut_JButton_Text"));
 
   /** The instance summary component */
   protected InstancesSummaryPanel m_Summary = new InstancesSummaryPanel();
@@ -114,9 +114,9 @@ public class SetInstancesPanel
    */
   public SetInstancesPanel() {
 
-    m_OpenFileBut.setToolTipText("Open a set of instances from a file");
-    m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
-    m_CloseBut.setToolTipText("Closes the dialog");
+    m_OpenFileBut.setToolTipText(Messages.getInstance().getString("SetInstancesPanel_OpenFileBut_SetToolTipText_Text"));
+    m_OpenURLBut.setToolTipText(Messages.getInstance().getString("SetInstancesPanel_OpenURLBut_SetToolTipText_Text"));
+    m_CloseBut.setToolTipText(Messages.getInstance().getString("SetInstancesPanel_CloseBut_SetToolTipText_Text"));
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -204,9 +204,8 @@ public class SetInstancesPanel
       }
     } else {
       JOptionPane.showMessageDialog(this,
-				    "Can't load at this time,\n"
-				    + "currently busy with other IO",
-				    "Load Instances",
+    		  Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFileQ_JOptionPaneShowMessageDialog_Text_First"),
+    		  Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFileQ_JOptionPaneShowMessageDialog_Text_Second"),
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -221,8 +220,8 @@ public class SetInstancesPanel
     if (m_IOThread == null) {
       try {
 	String urlName = (String) JOptionPane.showInputDialog(this,
-			"Enter the source URL",
-			"Load Instances",
+			Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFileQ_UrlName_JOptionPaneShowMessageDialog_Text_First"),
+			Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFileQ_UrlName_JOptionPaneShowMessageDialog_Text_Second"),
 			JOptionPane.QUESTION_MESSAGE,
 			null,
 			null,
@@ -241,16 +240,15 @@ public class SetInstancesPanel
 	}
       } catch (Exception ex) {
 	JOptionPane.showMessageDialog(this,
-				      "Problem with URL:\n"
+			Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFileQ_Exception_JOptionPaneShowMessageDialog_Text_First")
 				      + ex.getMessage(),
-				      "Load Instances",
+				      Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFileQ_Exception_JOptionPaneShowMessageDialog_Text_Second"),
 				      JOptionPane.ERROR_MESSAGE);
       }
     } else {
       JOptionPane.showMessageDialog(this,
-				    "Can't load at this time,\n"
-				    + "currently busy with other IO",
-				    "Load Instances",
+    		  Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFileQ_Exception_JOptionPaneShowMessageDialog_Text_Third"),
+    		  Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFileQ_Exception_JOptionPaneShowMessageDialog_Text_Fourth"),
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -268,7 +266,7 @@ public class SetInstancesPanel
     try {
       m_Loader = ConverterUtils.getLoaderForFile(f);
       if (m_Loader == null)
-	throw new Exception("No suitable FileSourcedConverter found for file!\n" + f);
+	throw new Exception(Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFile_Exception_Text_First") + f);
       
       // not an incremental loader?
       if (!(m_Loader instanceof IncrementalConverter))
@@ -283,9 +281,9 @@ public class SetInstancesPanel
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
-				    "Couldn't read from file:\n"
+    		  Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFile_Exception_JOptionPaneShowMessageDialog_Text_First")
 				    + f.getName(),
-				    "Load Instances",
+				    Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromFile_Exception_JOptionPaneShowMessageDialog_Text_Second"),
 				    JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -301,7 +299,7 @@ public class SetInstancesPanel
     try {
       m_Loader = ConverterUtils.getURLLoaderForFile(u.toString());
       if (m_Loader == null)
-	throw new Exception("No suitable URLSourcedLoader found for URL!\n" + u);
+	throw new Exception(Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromURL_Exception_Text_First") + u);
       
       // not an incremental loader?
       if (!(m_Loader instanceof IncrementalConverter))
@@ -316,9 +314,9 @@ public class SetInstancesPanel
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
-				    "Couldn't read from URL:\n"
+    		  Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromURL_Exception_JOptionPaneShowMessageDialog_Text_First")
 				    + u,
-				    "Load Instances",
+				    Messages.getInstance().getString("SetInstancesPanel_SetInstancesFromURL_Exception_JOptionPaneShowMessageDialog_Text_Second"),
 				    JOptionPane.ERROR_MESSAGE);
     }
   }

@@ -47,7 +47,7 @@ import javax.swing.JTextField;
  * use.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class HostListPanel
   extends JPanel
@@ -63,7 +63,7 @@ public class HostListPanel
   protected JList m_List;
 
   /** Click to remove the selected host from the list */
-  protected JButton m_DeleteBut = new JButton("Delete selected");
+  protected JButton m_DeleteBut = new JButton(Messages.getInstance().getString("HostListPanel_DeleteBut_JButton_Text"));
 
   /** The field with which to enter host names */
   protected JTextField m_HostField = new JTextField(25);
@@ -88,7 +88,7 @@ public class HostListPanel
     m_DeleteBut.addActionListener(this);
     m_HostField.addActionListener(this);
     setLayout(new BorderLayout());
-    setBorder(BorderFactory.createTitledBorder("Hosts"));
+    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("HostListPanel_BorderFactoryCreateTitledBorder_Text")));
 
     JPanel topLab = new JPanel();
     GridBagLayout gb = new GridBagLayout();
@@ -161,7 +161,7 @@ public class HostListPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Host List Editor");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("HostListPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       HostListPanel dp = new HostListPanel();
       jf.getContentPane().add(dp,

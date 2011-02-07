@@ -31,7 +31,7 @@ import javax.swing.JList;
  * derived models.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  * @see     JList
  * @see     DefaultListModel
  */
@@ -87,8 +87,8 @@ public class JListHelper {
 
       default:
         System.err.println(
-            JListHelper.class.getName() + ": direction '" 
-            + direction + "' is unknown!");
+            JListHelper.class.getName() + Messages.getInstance().getString("JListHelper_MoveItems_Error_Text_First")
+            + direction + Messages.getInstance().getString("JListHelper_MoveItems_Error_Text_Second"));
     }
   }
 

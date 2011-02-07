@@ -96,7 +96,7 @@ public class ClassifierPerformanceEvaluator
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Evaluate the performance of batch trained classifiers.";
+    return Messages.getInstance().getString("ClassifierPerformanceEvaluator_GlobalInfo_Text");
   }
 
   // ----- Stuff for ROC curves
@@ -159,8 +159,8 @@ public class ClassifierPerformanceEvaluator
 //		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
 		    m_logger.statusMessage(statusMessagePrefix()
-					   +"Evaluating ("+ce.getSetNumber()
-					   +")...");
+					   + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_Visual_SetText_Text_First") + ce.getSetNumber()
+					   + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_Visual_SetText_Text_Second"));
 		  }
 		  m_visual.setAnimated();
 		  /*
@@ -190,10 +190,9 @@ public class ClassifierPerformanceEvaluator
 		  textTitle = 
 		    textTitle.substring(textTitle.lastIndexOf('.')+1,
 					textTitle.length());
-		  String resultT = "=== Evaluation result ===\n\n"
-		    + "Scheme: " + textTitle + "\n"
-		    + ((textOptions.length() > 0) ? "Options: " + textOptions + "\n": "")
-		    + "Relation: " + ce.getTestSet().getDataSet().relationName()
+		  String resultT = Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_ResultT_Text_First") + textTitle + "\n"
+		    + ((textOptions.length() > 0) ? Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_ResultT_Text_Second") + textOptions + "\n": "")
+		    + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_ResultT_Text_Third") + ce.getTestSet().getDataSet().relationName()
 		    + "\n\n" + m_eval.toSummaryString();
                   
                   if (ce.getTestSet().getDataSet().
@@ -231,7 +230,7 @@ public class ClassifierPerformanceEvaluator
 		    result.
 		      setRelationName(ce.getTestSet().getDataSet().relationName());
 		    PlotData2D pd = new PlotData2D(result);
-		    String htmlTitle = "<html><font size=-2>"
+		    String htmlTitle = Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_HtmlTitle_Text_First")
 		      + textTitle;
 		    String newOptions = "";
 		    if (classifier instanceof OptionHandler) {
@@ -252,14 +251,14 @@ public class ClassifierPerformanceEvaluator
 		      }
 		    }
 		    
-		   htmlTitle += " " + newOptions + "<br>" 
-		      + " (class: "
+		   htmlTitle += " " + newOptions +  
+		      Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_HtmlTitle_Text_Second")
                       +ce.getTestSet().getDataSet().
                         classAttribute().value(0) + ")" 
-                      + "</font></html>";
-		    pd.setPlotName(textTitle + " (class: "
+                      + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_HtmlTitle_Text_Third");
+		    pd.setPlotName(textTitle + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_HtmlTitle_Text_Fourth")
 	                      +ce.getTestSet().getDataSet().
-	                        classAttribute().value(0) + ")");
+	                        classAttribute().value(0) + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_HtmlTitle_Text_Fifth"));
 		    pd.setPlotNameHTML(htmlTitle);
 		    boolean [] connectPoints = 
 		      new boolean [result.numInstances()];
@@ -277,7 +276,7 @@ public class ClassifierPerformanceEvaluator
 				       notifyTextListeners(te); */
 		  }
 		  if (m_logger != null) {
-		    m_logger.statusMessage(statusMessagePrefix() + "Finished.");
+		    m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_StatusMessage_Text_Third"));
 		  }
 
 		  // save memory
@@ -289,9 +288,9 @@ public class ClassifierPerformanceEvaluator
 	        errorOccurred = true;
 	        ClassifierPerformanceEvaluator.this.stop(); // stop all processing
 	        if (m_logger != null) {
-	          m_logger.logMessage("[ClassifierPerformanceEvaluator] "
+	          m_logger.logMessage(Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_LogMessage_Text_First")
 	              + statusMessagePrefix() 
-	              + " problem evaluating classifier. " 
+	              + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_LogMessage_Text_Second") 
 	              + ex.getMessage());
 	        }
 		ex.printStackTrace();
@@ -303,11 +302,11 @@ public class ClassifierPerformanceEvaluator
 		if (m_logger != null) {
 		  if (errorOccurred) {
 		    m_logger.statusMessage(statusMessagePrefix() 
-		        + "ERROR (See log for details)");
+		        + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_StatusMessage_Text_Fourth"));
 		  } else if (isInterrupted()) {
-		    m_logger.logMessage("[" + getCustomName() +"] Evaluation interrupted!");
+		    m_logger.logMessage(Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_LogMessage_Text_Third") + getCustomName() + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_LogMessage_Text_Fourth"));
 		    m_logger.statusMessage(statusMessagePrefix() 
-		        + "INTERRUPTED");
+		        + Messages.getInstance().getString("ClassifierPerformanceEvaluator_AcceptClassifier_StatusMessage_Text_Fifth"));
 		  }
 		}
 		block(false);
@@ -404,7 +403,7 @@ public class ClassifierPerformanceEvaluator
       throw new 
 	IllegalArgumentException(request
 
-		    + " not supported (ClassifierPerformanceEvaluator)");
+		    + Messages.getInstance().getString("ClassifierPerformanceEvaluator_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 

@@ -45,7 +45,7 @@ import javax.swing.JScrollPane;
  * make a selection from, or cancel the selection.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class ListSelectorDialog
   extends JDialog {
@@ -54,13 +54,13 @@ public class ListSelectorDialog
   private static final long serialVersionUID = 906147926840288895L;
   
   /** Click to choose the currently selected property */
-  protected JButton m_SelectBut = new JButton("Select");
+  protected JButton m_SelectBut = new JButton(Messages.getInstance().getString("ListSelectorDialog_SelectBut_JButton_Text"));
 
   /** Click to cancel the property selection */
-  protected JButton m_CancelBut = new JButton("Cancel");
+  protected JButton m_CancelBut = new JButton(Messages.getInstance().getString("ListSelectorDialog_CancelBut_JButton_Text"));
 
   /** Click to enter a regex pattern for selection */
-  protected JButton m_PatternBut = new JButton("Pattern");
+  protected JButton m_PatternBut = new JButton(Messages.getInstance().getString("ListSelectorDialog_PatternBut_JButton_Text"));
 
   /** The list component */
   protected JList m_List;
@@ -85,7 +85,7 @@ public class ListSelectorDialog
    */
   public ListSelectorDialog(Frame parentFrame, JList userList) {
     
-    super(parentFrame, "Select items", true);
+    super(parentFrame, Messages.getInstance().getString("ListSelectorDialog_Text"), true);
     m_List = userList;
     m_CancelBut.setMnemonic('C');
     m_CancelBut.addActionListener(new ActionListener() {
@@ -156,7 +156,7 @@ public class ListSelectorDialog
   protected void selectPattern() {
     String pattern = JOptionPane.showInputDialog(
                         m_PatternBut.getParent(),
-                        "Enter a Perl regular expression ('.*' for all)",
+                        Messages.getInstance().getString("ListSelectorDialog_SelectPattern_Pattern_JOptionPaneShowInputDialog_Text"),
                         m_PatternRegEx);
     if (pattern != null) {
       try {
@@ -172,9 +172,8 @@ public class ListSelectorDialog
       catch (Exception ex) {
         JOptionPane.showMessageDialog(
           m_PatternBut.getParent(),
-          "'" + pattern + "' is not a valid Perl regular expression!\n" 
-          + "Error: " + ex, 
-          "Error in Pattern...", 
+          Messages.getInstance().getString("ListSelectorDialog_SelectPattern_Exception_JOptionPaneShowInputDialog_Text_First") + pattern + Messages.getInstance().getString("ListSelectorDialog_SelectPattern_Exception_JOptionPaneShowInputDialog_Text_Second") + ex, 
+          Messages.getInstance().getString("ListSelectorDialog_SelectPattern_Exception_JOptionPaneShowInputDialog_Text_Third"), 
           JOptionPane.ERROR_MESSAGE);
       }
     }
@@ -189,23 +188,23 @@ public class ListSelectorDialog
 
     try {
       DefaultListModel lm = new DefaultListModel();      
-      lm.addElement("one");
-      lm.addElement("two");
-      lm.addElement("three");
-      lm.addElement("four");
-      lm.addElement("five");
+      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_First"));
+      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_Second"));
+      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_Third"));
+      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_Fourth"));
+      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_Fifth"));
       JList jl = new JList(lm);
       final ListSelectorDialog jd = new ListSelectorDialog(null, jl);
       int result = jd.showDialog();
       if (result == ListSelectorDialog.APPROVE_OPTION) {
-	System.err.println("Fields Selected");
+	System.err.println(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_Error_Text_First"));
 	int [] selected = jl.getSelectedIndices();
 	for (int i = 0; i < selected.length; i++) {
 	  System.err.println("" + selected[i]
 			     + " " + lm.elementAt(selected[i]));
 	}
       } else {
-	System.err.println("Cancelled");
+	System.err.println(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_Error_Text_Second"));
       }
       System.exit(0);
     } catch (Exception ex) {

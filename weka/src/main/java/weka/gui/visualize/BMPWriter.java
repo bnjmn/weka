@@ -85,7 +85,7 @@ public class BMPWriter
    * @return 		the name of the writer
    */
   public String getDescription() {
-    return "BMP-Image";
+    return Messages.getInstance().getString("BMPWriter_GetDescription_Text");
   }
   
   /**
@@ -143,17 +143,17 @@ public class BMPWriter
    * @throws Exception 	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    System.out.println("building TreeVisualizer...");
+    System.out.println(Messages.getInstance().getString("BMPWriter_Main_Text_First"));
     weka.gui.treevisualizer.TreeBuild builder = new weka.gui.treevisualizer.TreeBuild();
     weka.gui.treevisualizer.NodePlace arrange = new weka.gui.treevisualizer.PlaceNode2();
-    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader("digraph atree { top [label=\"the top\"] a [label=\"the first node\"] b [label=\"the second nodes\"] c [label=\"comes off of first\"] top->a top->b b->c }"));
+    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader(Messages.getInstance().getString("BMPWriter_Main_Text_Second")));
     weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
     tv.setSize(800 ,600);
     
     String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.bmp";
-    System.out.println("outputting to '" + filename + "'...");
+    System.out.println(Messages.getInstance().getString("BMPWriter_Main_Text_Third") + filename + Messages.getInstance().getString("BMPWriter_Main_Text_Fourth"));
     toOutput(new BMPWriter(), tv, new File(filename));
 
-    System.out.println("done!");
+    System.out.println(Messages.getInstance().getString("BMPWriter_Main_Text_Fifth"));
   }
 }

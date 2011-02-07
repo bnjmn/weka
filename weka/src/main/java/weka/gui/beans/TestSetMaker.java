@@ -72,7 +72,7 @@ public class TestSetMaker
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Designate an incoming data set as a test set.";
+    return Messages.getInstance().getString("TestSetMaker_GlobalInfo_Text");
   }
 
   /**
@@ -102,10 +102,10 @@ public class TestSetMaker
       for(int i = 0; i < l.size(); i++) {
         if (m_receivedStopNotification) {
           if (m_logger != null) {
-            m_logger.logMessage("[TestSetMaker] "
-                + statusMessagePrefix() + " stopping.");
+            m_logger.logMessage(Messages.getInstance().getString("TestSetMaker_NotifyTestSetProduced_LogMessage_Text_First")
+                + statusMessagePrefix() + Messages.getInstance().getString("TestSetMaker_NotifyTestSetProduced_LogMessage_Text_Second"));
             m_logger.statusMessage(statusMessagePrefix()
-                + "INTERRUPTED");
+                + Messages.getInstance().getString("TestSetMaker_NotifyTestSetProduced_LogMessage_Text_Third"));
           }
           m_receivedStopNotification = false;
           break;

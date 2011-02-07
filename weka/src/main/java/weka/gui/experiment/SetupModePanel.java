@@ -39,7 +39,7 @@ import javax.swing.JRadioButton;
  * This panel switches between simple and advanced experiment setup panels.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class SetupModePanel
   extends JPanel {
@@ -49,11 +49,11 @@ public class SetupModePanel
 
   /** The button for choosing simple setup mode */
   protected JRadioButton m_SimpleSetupRBut = 
-    new JRadioButton("Simple");
+    new JRadioButton(Messages.getInstance().getString("SetupModePanel_SimpleSetupRBut_JRadioButton_Text"));
 
   /** The button for choosing advanced setup mode */
   protected JRadioButton m_AdvancedSetupRBut = 
-    new JRadioButton("Advanced");  
+    new JRadioButton(Messages.getInstance().getString("SetupModePanel_AdvancedSetupRBut_JRadioButton_Text"));  
 
   /** The simple setup panel */
   protected SimpleSetupPanel m_simplePanel = new SimpleSetupPanel();
@@ -94,7 +94,7 @@ public class SetupModePanel
 
     JPanel switchPanel = new JPanel();
     switchPanel.setLayout(new GridLayout(1,0));
-    switchPanel.add(new JLabel("Experiment Configuration Mode:"));
+    switchPanel.add(new JLabel(Messages.getInstance().getString("SetupModePanel_SwitchPanel_JPanel_Text")));
     switchPanel.add(modeButtons);
 
     setLayout(new BorderLayout());

@@ -53,7 +53,7 @@ public class ExplorerDefaults
       PROPERTIES = Utils.readProperties(PROPERTY_FILE);
     }
     catch (Exception e) {
-      System.err.println("Problem reading properties. Fix before continuing.");
+      System.err.println(Messages.getInstance().getString("ExplorerDefaults_Error_Text"));
       e.printStackTrace();
       PROPERTIES = new Properties();
     }
@@ -198,7 +198,7 @@ public class ExplorerDefaults
     Object	result;
     
     result = getObject(
-		"Classifier", 
+    	"Classifier", 
 		weka.classifiers.rules.ZeroR.class.getName(), 
 		weka.classifiers.Classifier.class);
     if (result == null)
@@ -480,7 +480,7 @@ public class ExplorerDefaults
     String		name;
     Vector		sorted;
     
-    System.out.println("\nExplorer defaults:");
+    System.out.println(Messages.getInstance().getString("ExplorerDefaults_Main_Message_Text"));
     names = PROPERTIES.propertyNames();
 
     // sort names

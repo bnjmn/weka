@@ -74,14 +74,14 @@ public class AssociatorCustomizer
     
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new GridLayout(1,2));
-    JButton OKBut = new JButton("OK");
+    JButton OKBut = new JButton(Messages.getInstance().getString("AssociatorCustomizer_OKBut_JButton_Text"));
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         m_parentFrame.dispose();
       }
     });
 
-    JButton CancelBut = new JButton("Cancel");
+    JButton CancelBut = new JButton(Messages.getInstance().getString("AssociatorCustomizer_CancelBut_JButton_Text"));
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         // cancel requested, so revert to backup and then
