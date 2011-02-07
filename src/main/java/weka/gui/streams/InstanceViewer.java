@@ -37,7 +37,7 @@ import javax.swing.JTextArea;
  * might be more spreadsheet-like
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class InstanceViewer
   extends JPanel
@@ -66,7 +66,7 @@ public class InstanceViewer
   public void inputFormat(Instances instanceInfo) {
     
     if (m_Debug) {
-      System.err.println("InstanceViewer::inputFormat()\n"
+      System.err.println(Messages.getInstance().getString("InstanceViewer_InputFormat_Error_Text")
 			 + instanceInfo.toString());
     }
     if (m_Clear) {
@@ -79,7 +79,7 @@ public class InstanceViewer
   public void input(Instance instance) throws Exception {
     
     if (m_Debug) {
-      System.err.println("InstanceViewer::input(" + instance +")");
+      System.err.println(Messages.getInstance().getString("InstanceViewer_Input_Error_Text_First") + instance +Messages.getInstance().getString("InstanceViewer_Input_Error_Text_Second"));
     }
     m_UpdateString += instance.toString() + "\n";
     updateOutput();
@@ -89,7 +89,7 @@ public class InstanceViewer
     
     updateOutput();
     if (m_Debug) {
-      System.err.println("InstanceViewer::batchFinished()");
+      System.err.println(Messages.getInstance().getString("InstanceViewer_BatchFinished_Error_Text"));
     }
   }
 
@@ -140,16 +140,14 @@ public class InstanceViewer
 	  batchFinished();
 	  break;
 	default:
-	  System.err.println("InstanceViewer::instanceProduced()"
-			     + " - unknown event type");
+	  System.err.println(Messages.getInstance().getString("InstanceViewer_InstanceProduced_InstanceEventDEFAULT_Error_Text"));
 	  break;
 	}
       } catch (Exception ex) {
 	System.err.println(ex.getMessage());
       }
     } else {
-      System.err.println("InstanceViewer::instanceProduced()"
-			 + " - Unknown source object type");
+      System.err.println(Messages.getInstance().getString("InstanceViewer_InstanceProduced_Error_Text"));
     }
   }
 }

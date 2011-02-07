@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * GUI Customizer for the strip chart bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class StripChartCustomizer
   extends JPanel
@@ -55,7 +55,7 @@ public class StripChartCustomizer
 
     setLayout(new BorderLayout());
     add(m_cvEditor, BorderLayout.CENTER);
-    add(new javax.swing.JLabel("StripChartCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("StripChartCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
   }
   

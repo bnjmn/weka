@@ -100,8 +100,7 @@ public class PredictionAppender
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Accepts batch or incremental classifier events and "
-      +"produces a new data set with classifier predictions appended.";
+    return Messages.getInstance().getString("PredictionAppender_GlobalInfo_Text");
   }
 
   /**
@@ -136,8 +135,7 @@ public class PredictionAppender
    * @return a <code>String</code> value
    */
   public String appendPredictedProbabilitiesTipText() {
-    return "append probabilities rather than labels for discrete class "
-      +"predictions";
+    return Messages.getInstance().getString("PredictionAppender_AppendPredictedProbabilitiesTipText_Text");
   }
 
   /**
@@ -552,15 +550,12 @@ public class PredictionAppender
 	+e.getMaxSetNumber();
       if (!m_appendProbabilities || !(clusterer instanceof DensityBasedClusterer)) {
 	if(m_appendProbabilities && !(clusterer instanceof DensityBasedClusterer)){
-          System.err.println("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
+          System.err.println(Messages.getInstance().getString("PredictionAppender_AcceptClusterer_Error_Text_First"));
           if (m_logger != null) {
-            m_logger.logMessage("[PredictionAppender] "
-                + statusMessagePrefix() + " Only density based clusterers can "
-                +"append probabilities. Instead cluster will be assigned for each "
-                +"instance.");
+            m_logger.logMessage(Messages.getInstance().getString("PredictionAppender_AcceptClusterer_LogMessage_Text_First")
+                + statusMessagePrefix() + Messages.getInstance().getString("PredictionAppender_AcceptClusterer_LogMessage_Text_Second"));
             m_logger.statusMessage(statusMessagePrefix()
-                +"WARNING: Only density based clusterers can append probabilities. "
-                +"Instead cluster will be assigned for each instance.");
+                + Messages.getInstance().getString("PredictionAppender_AcceptClusterer_StatusMessage_Text_First"));
           }
         }
         try {

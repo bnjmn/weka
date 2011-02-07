@@ -45,7 +45,7 @@ import javax.swing.JPanel;
  * A panel for generating artificial data via DataGenerators.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class DataGeneratorPanel
   extends JPanel {
@@ -162,19 +162,19 @@ public class DataGeneratorPanel
       cmd += " " + Utils.joinOptions(((OptionHandler) generator).getOptions());
     
     try {
-      m_Log.logMessage("Started " + cname);
-      m_Log.logMessage("Command: " + cmd);
+      m_Log.logMessage(Messages.getInstance().getString("DataGeneratorPanel_Execute_Log_LogMessage_Text_First") + cname);
+      m_Log.logMessage(Messages.getInstance().getString("DataGeneratorPanel_Execute_Log_LogMessage_Text_Second") + cmd);
       m_Output = new StringWriter();
       generator.setOutput(new PrintWriter(m_Output));
       DataGenerator.makeData(generator, generator.getOptions());
       m_Instances = new Instances(new StringReader(getOutput()));
-      m_Log.logMessage("Finished " + cname);
+      m_Log.logMessage(Messages.getInstance().getString("DataGeneratorPanel_Execute_Log_LogMessage_Text_Third") + cname);
     }
     catch (Exception e) {
       e.printStackTrace();
       JOptionPane.showMessageDialog(
-          this, "Error generating data:\n" + e.getMessage(), 
-          "Error", JOptionPane.ERROR_MESSAGE);
+          this, Messages.getInstance().getString("DataGeneratorPanel_Execute_JOptionPaneShowMessageDialog_Text_First") + e.getMessage(), 
+          Messages.getInstance().getString("DataGeneratorPanel_Execute_JOptionPaneShowMessageDialog_Text_Second"), JOptionPane.ERROR_MESSAGE);
       m_Instances = null;
       m_Output    = new StringWriter();
       result      = false;

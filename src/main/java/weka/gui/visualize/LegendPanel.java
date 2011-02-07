@@ -101,7 +101,7 @@ public class LegendPanel
 	      
 	      if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
 		Color tmp = JColorChooser.showDialog
-		  (LegendPanel.this, "Select new Color", 
+		  (LegendPanel.this, Messages.getInstance().getString("LegendPanel_Main_JColorChooserShowDialog_Text"), 
 		   m_plotData.m_customColour);
 		
 		if (tmp != null) {
@@ -243,13 +243,12 @@ public class LegendPanel
   public static void main(String [] args) {
     try {
       if (args.length < 1) {
-	System.err.println("Usage : weka.gui.visualize.LegendPanel "
-			   +"<dataset> [dataset2], [dataset3],...");
+	System.err.println(Messages.getInstance().getString("LegendPanel_Main_Error_Text_First"));
 	System.exit(1);
       }
 
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Explorer: Legend");
+	new javax.swing.JFrame(Messages.getInstance().getString("LegendPanel_Main_JFrame_Text"));
       jf.setSize(100,100);
       jf.getContentPane().setLayout(new BorderLayout());
       final LegendPanel p2 = new LegendPanel();
@@ -263,7 +262,7 @@ public class LegendPanel
 
       FastVector plotList = new FastVector();
       for (int j=0;j<args.length;j++) {
-	System.err.println("Loading instances from " + args[j]);
+	System.err.println(Messages.getInstance().getString("LegendPanel_Main_Error_Text_Second") + args[j]);
 	java.io.Reader r = new java.io.BufferedReader(
 			   new java.io.FileReader(args[j]));
 	Instances i = new Instances(r);

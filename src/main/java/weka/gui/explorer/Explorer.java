@@ -201,12 +201,13 @@ public class Explorer
   public Explorer() {
     
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy")).format(new Date());
-    m_LogPanel.logMessage("Weka Explorer");
-    m_LogPanel.logMessage("(c) " + Copyright.getFromYear() + "-" + Copyright.getToYear() 
+    m_LogPanel.logMessage(Messages.getInstance().getString("Explorer_LogPanel_LogMessage_Text_First"));
+    m_LogPanel.logMessage(Messages.getInstance().getString("Explorer_LogPanel_LogMessage_Text_Second") + Copyright.getFromYear() + Messages.getInstance().getString("Explorer_LogPanel_LogMessage_Text_Third")
+    		 + Copyright.getToYear() 
 	+ " " + Copyright.getOwner() + ", " + Copyright.getAddress());
-    m_LogPanel.logMessage("web: " + Copyright.getURL());
-    m_LogPanel.logMessage("Started on " + date);
-    m_LogPanel.statusMessage("Welcome to the Weka Explorer");
+    m_LogPanel.logMessage(Messages.getInstance().getString("Explorer_LogPanel_LogMessage_Text_Fourth") + Copyright.getURL());
+    m_LogPanel.logMessage(Messages.getInstance().getString("Explorer_LogPanel_LogMessage_Text_Fifth") + date);
+    m_LogPanel.statusMessage(Messages.getInstance().getString("Explorer_LogPanel_StatusMessage_Text_First"));
 
     // intialize pre-processpanel
     m_PreprocessPanel.setLog(m_LogPanel);
@@ -351,7 +352,7 @@ public class Explorer
    */
   public static void main(String [] args) {
 
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("Explorer_Main_Logger_Text"));
     
     LookAndFeel.setLookAndFeel();
     
@@ -360,7 +361,7 @@ public class Explorer
       //m_Memory.setEnabled(false);
 
       m_explorer = new Explorer();
-      final JFrame jf = new JFrame("Weka Explorer");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("Explorer_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_explorer, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
@@ -377,7 +378,7 @@ public class Explorer
       jf.setIconImage(icon);
 
       if (args.length == 1) {
-        System.err.println("Loading instances from " + args[0]);
+        System.err.println(Messages.getInstance().getString("Explorer_Main_Run_Error_Text") + args[0]);
         AbstractFileLoader loader = ConverterUtils.getLoaderForFile(args[0]);
 	loader.setFile(new File(args[0]));
         m_explorer.m_PreprocessPanel.setInstancesFromFile(loader);
@@ -402,9 +403,9 @@ public class Explorer
                 m_Memory.stopThreads();
 
                 // display error
-                System.err.println("\ndisplayed message:");
+                System.err.println(Messages.getInstance().getString("Explorer_Main_Run_Error_Text_First"));
                 m_Memory.showOutOfMemory();
-                System.err.println("\nexiting");
+                System.err.println(Messages.getInstance().getString("Explorer_Main_Run_Error_Text_Second"));
                 System.exit(-1);
               }
 

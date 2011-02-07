@@ -38,7 +38,7 @@ import javax.swing.JComponent;
  *
  * @see #setScalingEnabled(boolean)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public abstract class JComponentWriter {
   /** whether to print some debug information */
@@ -47,7 +47,7 @@ public abstract class JComponentWriter {
   /** output if we're in debug mode */
   static {
     if (DEBUG)
-      System.err.println(JComponentWriter.class.getName() + ": DEBUG ON");
+      System.err.println(JComponentWriter.class.getName() + Messages.getInstance().getString("JComponentWriter_Error_Text_First"));
   }
   
   /** the component to print in the output format */
@@ -202,7 +202,7 @@ public abstract class JComponentWriter {
     }
     
     if (DEBUG)
-      System.err.println("xScale = " + m_xScale + ", yScale = " + m_yScale);
+      System.err.println(Messages.getInstance().getString("JComponentWriter_SetScale_Error_Text_First") + m_xScale + Messages.getInstance().getString("JComponentWriter_SetScale_Error_Text_Second") + m_yScale);
   }
   
   /**
@@ -299,9 +299,9 @@ public abstract class JComponentWriter {
     int		oldHeight;
 
     if (getFile() == null)
-      throw new Exception("The file is not set!");
+      throw new Exception(Messages.getInstance().getString("JComponentWriter_ToOutput_Exception_Text_First"));
     if (getComponent() == null)
-      throw new Exception("The component is not set!");
+      throw new Exception(Messages.getInstance().getString("JComponentWriter_ToOutput_Exception_Text_Second"));
 
     // backup original dimensions and set custom ones if necessary
     oldWidth  = getComponent().getWidth();

@@ -141,7 +141,7 @@ public class TextViewer
     JPanel holder = new JPanel();
     holder.setLayout(new BorderLayout());
     JScrollPane js = new JScrollPane(m_outText);
-    js.setBorder(BorderFactory.createTitledBorder("Text"));
+    js.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("TextViewer_SetUpFinal_JScrollPane_BorderFactoryCreateTitledBorder_Text")));
     holder.add(js, BorderLayout.CENTER);
     holder.add(m_history, BorderLayout.WEST);
 
@@ -154,7 +154,7 @@ public class TextViewer
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "General purpose text display.";
+    return Messages.getInstance().getString("TextViewer_GlobalInfo_Text");
   }
 
   private void setUpResultHistory() {
@@ -168,7 +168,7 @@ public class TextViewer
       m_outText.setEditable(false);
       m_outText.setFont(new Font("Monospaced", Font.PLAIN, 12));
       m_outText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
+      m_history.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("TextViewer_SetUpResultHistory_BorderFactoryCreateTitledBorder_Text")));
       m_history.setHandleRightClicks(false);
       m_history.getList().addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent e) {
@@ -199,7 +199,7 @@ public class TextViewer
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
     
-    JMenuItem visMainBuffer = new JMenuItem("View in main window");
+    JMenuItem visMainBuffer = new JMenuItem(Messages.getInstance().getString("TextViewer_Visualize_VisMainBuffer_JMenuItem_Text"));
     if (selectedName != null) {
       visMainBuffer.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -211,7 +211,7 @@ public class TextViewer
     }
     resultListMenu.add(visMainBuffer);
     
-    JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    JMenuItem visSepBuffer = new JMenuItem(Messages.getInstance().getString("TextViewer_Visualize_VisSepBuffer_JMenuItem_Text"));
     if (selectedName != null) {
       visSepBuffer.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -223,7 +223,7 @@ public class TextViewer
     }
     resultListMenu.add(visSepBuffer);
     
-    JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    JMenuItem saveOutput = new JMenuItem(Messages.getInstance().getString("TextViewer_Visualize_SaveOutput_JMenuItem_Text"));
     if (selectedName != null) {
       saveOutput.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -239,7 +239,7 @@ public class TextViewer
     }
     resultListMenu.add(saveOutput);
     
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
+    JMenuItem deleteOutput = new JMenuItem(Messages.getInstance().getString("TextViewer_Visualize_DeleteOutput_JMenuItem_Text"));
     if (selectedName != null) {
       deleteOutput.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -360,10 +360,10 @@ public class TextViewer
       if (m_outText == null) {
 	setUpResultHistory();
       }
-      m_resultsFrame = new JFrame("Text Viewer");
+      m_resultsFrame = new JFrame(Messages.getInstance().getString("TextViewer_ShowResults_ResultsFrame_JFrame_Text"));
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       final JScrollPane js = new JScrollPane(m_outText);
-      js.setBorder(BorderFactory.createTitledBorder("Text"));
+      js.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("TextViewer_ShowResults_Js_SetBorder_BorderFactoryCreateTitledBorder_Text")));
       m_resultsFrame.getContentPane().add(js, BorderLayout.CENTER);
       m_resultsFrame.getContentPane().add(m_history, BorderLayout.WEST);
       m_resultsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -408,7 +408,7 @@ public class TextViewer
     } else {
       throw new 
 	IllegalArgumentException(request
-		    + " not supported (TextViewer)");
+		    + Messages.getInstance().getString("TextViewer_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
@@ -632,8 +632,7 @@ public class TextViewer
 
       final TextViewer tv = new TextViewer();
 
-      tv.acceptText(new TextEvent(tv, "Here is some test text from the main "
-				  +"method of this class.", "The Title"));
+      tv.acceptText(new TextEvent(tv, Messages.getInstance().getString("TextViewer_Main_TextEvent_Text_First"), Messages.getInstance().getString("TextViewer_Main_TextEvent_Text_Second")));
       jf.getContentPane().add(tv, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         public void windowClosing(java.awt.event.WindowEvent e) {

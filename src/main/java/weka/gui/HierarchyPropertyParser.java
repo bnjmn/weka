@@ -1,5 +1,5 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
+‚ˆ *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
@@ -41,7 +41,7 @@ import java.util.Vector;
  * goToXXX() and information accessing functions).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class HierarchyPropertyParser
     implements Serializable {
@@ -131,8 +131,7 @@ public class HierarchyPropertyParser
 	while(st.hasMoreTokens()){
 	    String property = st.nextToken().trim();
 	    if(!isHierachic(property))
-		throw new Exception("The given property is not in"+
-				    "hierachy structure with seperators!");
+		throw new Exception(Messages.getInstance().getString("HierarchyPropertyParser_Build_Exception_Text"));
 	    add(property);	   
 	}
 	goToRoot();
@@ -414,7 +413,7 @@ public class HierarchyPropertyParser
     public synchronized void goToChild(int pos) throws Exception {
 	if((m_Current.children == null) || 
 	   (pos < 0) || (pos >= m_Current.children.size()))
-	    throw new Exception("Position out of range or leaf reached");
+	    throw new Exception(Messages.getInstance().getString("HierarchyPropertyParser_GoToChild_Exception_Text"));
 	
 	m_Current = (TreeNode)m_Current.children.elementAt(pos);
     }
@@ -594,46 +593,46 @@ public class HierarchyPropertyParser
 	String p = sb.toString();
 	try{
 	    HierarchyPropertyParser hpp = new HierarchyPropertyParser(p, ", ");
-	    System.out.println("seperator: "+hpp.getSeperator());
-	    System.out.println("depth: "+hpp.depth());
-	    System.out.println("The tree:\n\n"+hpp.showTree());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_First") + hpp.getSeperator());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Second") + hpp.depth());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Third") + hpp.showTree());
 	    hpp.goToRoot();
-	    System.out.println("goto: "+hpp.goTo("node1.node1_2.node1_2_1")
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Fourth") + hpp.goTo("node1.node1_2.node1_2_1")
 			       +": "+hpp.getValue()+" | "+hpp.fullValue()+
-			       " leaf? "+ hpp.isLeafReached());
-	    System.out.println("go down(wrong): "+hpp.goDown("node1"));
-	    System.out.println("Stay still? "+hpp.getValue());
-	    System.out.println("go to child: "+hpp.goToChild("node1_2_1_1")
+			       Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Fifth") + hpp.isLeafReached());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Sixth") + hpp.goDown("node1"));
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Seventh") + hpp.getValue());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Eighth") + hpp.goToChild("node1_2_1_1")
 			       +": "+hpp.getValue()+" | "+hpp.fullValue()+
-			       " leaf? "+ hpp.isLeafReached()
-			       +" root? "+ hpp.isRootReached());
-	    System.out.println("parent: "+hpp.parentValue());
-	    System.out.println("level: "+hpp.getLevel());
-	    System.out.println("context: "+hpp.context());
+			       Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Nineth") + hpp.isLeafReached()
+			       + Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Tenth") + hpp.isRootReached());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Eleventh") + hpp.parentValue());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Twelveth") + hpp.getLevel());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Thirteenth") + hpp.context());
 	    hpp.goToRoot();
-	    System.out.println("After gotoRoot. leaf? "+ hpp.isLeafReached()
-			       +" root? "+ hpp.isRootReached());
-	    System.out.println("Go down(correct): "+
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Fourteenth") + hpp.isLeafReached()
+			       + Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Fifteenth") + hpp.isRootReached());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Sixteenth") +
 			       hpp.goDown("node1_1.node1_1_1")+
-			       " value: "+hpp.getValue()+" | "+hpp.fullValue()
-			       +" level: "+hpp.getLevel()
-			       +" leaf? "+ hpp.isLeafReached()
-			       +" root? "+ hpp.isRootReached());
+			       Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Seventeenth") + hpp.getValue()+" | "+hpp.fullValue()
+			       + Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Eighteenth") + hpp.getLevel()
+			       + Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Nineteenth") + hpp.isLeafReached()
+			       + Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_Twenty") + hpp.isRootReached());
 	    hpp.goToParent();
-	    System.out.println("value: "+hpp.getValue()+" | "+hpp.fullValue());
-	    System.out.println("level: "+hpp.getLevel());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_TwentyFirst") + hpp.getValue()+" | "+hpp.fullValue());
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_TwentySecond") + hpp.getLevel());
 	    
 	    String[] chd = hpp.childrenValues();
 	    for(int i=0; i < chd.length; i++){
-		System.out.print("children "+i+": "+chd[i]);
+		System.out.print(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_TwentyThird") + i + ": " + chd[i]);
 		hpp.goDown(chd[i]);
-		System.out.println("real value: "+hpp.getValue()+" | "+
+		System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_TwentyFourth") + hpp.getValue()+" | "+
 				   hpp.fullValue()+
-				   "(level: "+hpp.getLevel()+")");
+				   Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_TwentyFifth") + hpp.getLevel()+Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_TwentySixth"));
 		hpp.goToParent();
 	    }
 	    
-	    System.out.println("Another way to go to root:"+hpp.goTo("node1")
+	    System.out.println(Messages.getInstance().getString("HierarchyPropertyParser_Main_Text_TwentySeventh") + hpp.goTo("node1")
 			       +": "+hpp.getValue()+" | "+hpp.fullValue()); 
    	}catch(Exception e){
 	    System.out.println(e.getMessage());

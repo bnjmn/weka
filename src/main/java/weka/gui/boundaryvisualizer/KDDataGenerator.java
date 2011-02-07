@@ -35,7 +35,7 @@ import java.util.Random;
  * instances based on a supplied set of instances.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision$
  * @since 1.0
  * @see DataGenerator
  * @see Serializable
@@ -424,8 +424,7 @@ public class KDDataGenerator
 	  }
 	}
 	if (bandwidth <= 0) {
-	  throw new Exception("All training instances coincide with "
-			      +"test instance!");
+	  throw new Exception(Messages.getInstance().getString("KDDataGenerator_UpdateMinMax_Error_Text"));
 	}
       }
       for (int j = 0; j < m_instances.numAttributes(); j++) {

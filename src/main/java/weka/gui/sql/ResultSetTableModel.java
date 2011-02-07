@@ -32,7 +32,7 @@ import javax.swing.table.TableModel;
 * The model for an SQL ResultSet.
 *
 * @author     FracPete (fracpete at waikato dot ac dot nz)
-* @version    $Revision: 1.3 $
+* @version    $Revision$
 */
 public class ResultSetTableModel implements TableModel {
   
@@ -127,7 +127,7 @@ public class ResultSetTableModel implements TableModel {
         && (columnIndex >= 0) 
         && (columnIndex < getColumnCount()) ) {
       if (columnIndex == 0)
-        result = "Row";
+        result = Messages.getInstance().getString("ResultSetTableModel_GetColumnName_Text");
       else
         result = m_Helper.getColumnNames()[columnIndex - 1];
     }

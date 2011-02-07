@@ -55,7 +55,7 @@ public class IncrementalClassifierEvaluatorCustomizer
 
     setLayout(new BorderLayout());
     add(m_ieEditor, BorderLayout.CENTER);
-    add(new javax.swing.JLabel("IncrementalClassifierEvaluatorCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("IncrementalClassifierEvaluatorCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
   }
   

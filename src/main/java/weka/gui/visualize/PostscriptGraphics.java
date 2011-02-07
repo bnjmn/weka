@@ -50,7 +50,7 @@ import java.text.*;
  * @see #m_PSFontReplacement
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 
 public class PostscriptGraphics extends Graphics2D {
@@ -187,7 +187,7 @@ public class PostscriptGraphics extends Graphics2D {
   /** output if we're in debug mode */
   static {
     if (DEBUG)
-      System.err.println(PostscriptGraphics.class.getName() + ": DEBUG ON");
+      System.err.println(PostscriptGraphics.class.getName() + Messages.getInstance().getString("PostscriptGraphics_Error_Text"));
     
     // get font replacements
     m_PSFontReplacement = new Hashtable();
@@ -781,7 +781,7 @@ public class PostscriptGraphics extends Graphics2D {
     if (m_PSFontReplacement.containsKey(font)) {
       result = m_PSFontReplacement.get(font).toString();
       if (DEBUG)
-        System.out.println("switched font from '" + font + "' to '" + result +  "'");
+        System.out.println(Messages.getInstance().getString("PostscriptGraphics_ReplacePSFont_Text_First") + font + Messages.getInstance().getString("PostscriptGraphics_ReplacePSFont_Text_Second") + result +  Messages.getInstance().getString("PostscriptGraphics_ReplacePSFont_Text_Third"));
     }
     
     return result;
@@ -833,7 +833,7 @@ public class PostscriptGraphics extends Graphics2D {
    */
   public void translate(int x, int y){
     if (DEBUG)
-      System.out.println("translate with x = " + x + " and y = " + y);
+      System.out.println(Messages.getInstance().getString("PostscriptGraphics_Translate_Text_First") + x + Messages.getInstance().getString("PostscriptGraphics_Translate_Text_Second") + y);
     m_localGraphicsState.setXOffset(m_localGraphicsState.getXOffset() + xScale(x));
     m_localGraphicsState.setYOffset(m_localGraphicsState.getYOffset() + yScale(y));
     m_psGraphicsState.setXOffset(m_psGraphicsState.getXOffset() + xScale(x));
@@ -871,7 +871,7 @@ public class PostscriptGraphics extends Graphics2D {
     m_localGraphicsState.setXScale(d1);
     m_localGraphicsState.setYScale(d2);
     if (DEBUG)
-      System.err.println("d1 = " + d1 + ", d2 = " + d2);
+      System.err.println(Messages.getInstance().getString("PostscriptGraphics_Scale_Error_Text_First") + d1 + Messages.getInstance().getString("PostscriptGraphics_Scale_Error_Text_Second") + d2);
   }
   public void rotate(double d1, double d2, double d3){}
   public void rotate(double d1){}

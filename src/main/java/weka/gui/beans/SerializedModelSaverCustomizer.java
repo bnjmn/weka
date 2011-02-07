@@ -100,7 +100,7 @@ public class SerializedModelSaverCustomizer
 	      public void propertyChange(PropertyChangeEvent e) {
 		repaint();
 		if (m_smSaver != null) {
-		  System.err.println("Property change!!");
+		  System.err.println(Messages.getInstance().getString("SerializedModelSaverCustomizer_Error_Text"));
                   //		  m_smSaver.setSaver(m_smSaver.getSaver());
 		}
 	      }
@@ -113,7 +113,7 @@ public class SerializedModelSaverCustomizer
 
     m_fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
     m_fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    m_fileChooser.setApproveButtonText("Select directory and prefix");
+    m_fileChooser.setApproveButtonText(Messages.getInstance().getString("SerializedModelSaverCustomizer_FileChooser_SetApproveButtonText_Text"));
 
     m_fileChooser.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -151,7 +151,7 @@ public class SerializedModelSaverCustomizer
         { public boolean accept(File f)
             { return f.isDirectory();}
           public String getDescription()
-            { return "Directory";}
+            { return Messages.getInstance().getString("SerializedModelSaverCustomizer_SetUpFile_GetDescription_Text");}
          });
 
     m_fileChooser.setAcceptAllFileFilterUsed(false);
@@ -170,7 +170,7 @@ public class SerializedModelSaverCustomizer
     innerPanel.setLayout(new BorderLayout());
     try {
       m_prefixText = new JTextField(m_smSaver.getPrefix(), 25); 
-      JLabel prefixLab = new JLabel("Prefix for file name:", SwingConstants.LEFT);
+      JLabel prefixLab = new JLabel(Messages.getInstance().getString("SerializedModelSaverCustomizer_SetUpFile_PrefixLab_JLabel_Text"), SwingConstants.LEFT);
       JPanel prefixP = new JPanel();   
       prefixP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
       //      prefixP.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -182,7 +182,7 @@ public class SerializedModelSaverCustomizer
       JPanel ffP = new JPanel();
       ffP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
       ffP.setLayout(new BorderLayout());
-      ffP.add(new JLabel(" File format:"), BorderLayout.WEST);
+      ffP.add(new JLabel(Messages.getInstance().getString("SerializedModelSaverCustomizer_SetUpFile_FfP_JLabel_Text")), BorderLayout.WEST);
       setUpFileFormatComboBox();
       ffP.add(m_fileFormatBox, BorderLayout.CENTER);
       innerPanel.add(ffP, BorderLayout.CENTER);
@@ -196,7 +196,7 @@ public class SerializedModelSaverCustomizer
     add(innerPanel, BorderLayout.NORTH);
     add(m_fileChooser, BorderLayout.CENTER);
 
-    m_relativeFilePath = new JCheckBox("Use relative file paths");
+    m_relativeFilePath = new JCheckBox(Messages.getInstance().getString("SerializedModelSaverCustomizer_SetUpFile_RelativeFilePath_JCheckBox_Text"));
     m_relativeFilePath.
       setSelected(m_smSaver.getUseRelativePath());
 

@@ -164,18 +164,17 @@ public class GraphVisualizer
     if(tempURL!=null)
       m_jBtSave.setIcon(new ImageIcon(tempURL) );
     else
-      System.err.println(ICONPATH+
-      "save.gif not found for weka.gui.graphvisualizer.Graph");
-    m_jBtSave.setToolTipText("Save Graph");
+      System.err.println(ICONPATH+ Messages.getInstance().getString("GraphVisualizer_Error_Text_First"));
+    m_jBtSave.setToolTipText(Messages.getInstance().getString("GraphVisualizer_JBtSave_SetToolTipText_Text"));
     m_jBtSave.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
-        ExtensionFileFilter ef1 = new ExtensionFileFilter(".dot", "DOT files");
+        ExtensionFileFilter ef1 = new ExtensionFileFilter(".dot", Messages.getInstance().getString("GraphVisualizer_EF1_ExtensionFileFilter_Text"));
         ExtensionFileFilter ef2 = new ExtensionFileFilter(".xml",
-        "XML BIF files");
+        		Messages.getInstance().getString("GraphVisualizer_EF2_ExtensionFileFilter_Text"));
         fc.addChoosableFileFilter(ef1);
         fc.addChoosableFileFilter(ef2);
-        fc.setDialogTitle("Save Graph As");
+        fc.setDialogTitle(Messages.getInstance().getString("GraphVisualizer_FC_SetDialogTitle_Text"));
         int rval = fc.showSaveDialog(GraphVisualizer.this);
         
         if (rval == JFileChooser.APPROVE_OPTION) {
@@ -203,8 +202,8 @@ public class GraphVisualizer
       jBtZoomIn.setIcon(new ImageIcon(tempURL) );
     else
       System.err.println(ICONPATH+
-      "zoomin.gif not found for weka.gui.graphvisualizer.Graph");
-    jBtZoomIn.setToolTipText("Zoom In");
+    		  Messages.getInstance().getString("GraphVisualizer_Error_Text_Second"));
+    jBtZoomIn.setToolTipText(Messages.getInstance().getString("GraphVisualizer_JBtZoomIn_SetToolTipText_Text"));
     
     final JButton jBtZoomOut = new JButton();
     tempURL = ClassLoader.getSystemResource(ICONPATH+"zoomout.gif");
@@ -212,13 +211,13 @@ public class GraphVisualizer
       jBtZoomOut.setIcon(new ImageIcon(tempURL) );
     else
       System.err.println(ICONPATH+
-      "zoomout.gif not found for weka.gui.graphvisualizer.Graph");
-    jBtZoomOut.setToolTipText("Zoom Out");
+    		  Messages.getInstance().getString("GraphVisualizer_Error_Text_Third"));
+    jBtZoomOut.setToolTipText(Messages.getInstance().getString("GraphVisualizer_JBtZoomOut_SetToolTipText_Text"));
     
     final JTextField jTfZoom = new JTextField("100%");
     jTfZoom.setMinimumSize( jTfZoom.getPreferredSize() );
     jTfZoom.setHorizontalAlignment(JTextField.CENTER);
-    jTfZoom.setToolTipText("Zoom");
+    jTfZoom.setToolTipText(Messages.getInstance().getString("GraphVisualizer_JBtZoom_SetToolTipText_Text"));
     
     jTfZoom.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
@@ -256,8 +255,8 @@ public class GraphVisualizer
           m_js.revalidate();
         } catch(NumberFormatException ne) {
           JOptionPane.showMessageDialog(GraphVisualizer.this.getParent(),
-          "Invalid integer entered for zoom.",
-          "Error",
+        		  Messages.getInstance().getString("GraphVisualizer_JOptionPaneShowMessageDialog_Text_First"),
+        		  Messages.getInstance().getString("GraphVisualizer_JOptionPaneShowMessageDialog_Text_Second"),
           JOptionPane.ERROR_MESSAGE);
           jt.setText((scale*100)+"%");
         }
@@ -351,13 +350,13 @@ public class GraphVisualizer
       jBtExtraControls.setIcon(new ImageIcon(tempURL) );
     else
       System.err.println(ICONPATH+
-      "extra.gif not found for weka.gui.graphvisualizer.Graph");
-    jBtExtraControls.setToolTipText("Show/Hide extra controls");
+    		  Messages.getInstance().getString("GraphVisualizer_Error_Text_Fourth"));
+    jBtExtraControls.setToolTipText(Messages.getInstance().getString("GraphVisualizer_JBtExtraControls_SetToolTipText_Text"));
     
     
-    final JCheckBox jCbCustomNodeSize = new JCheckBox("Custom Node Size");
-    final JLabel jLbNodeWidth = new JLabel("Width");
-    final JLabel jLbNodeHeight = new JLabel("Height");
+    final JCheckBox jCbCustomNodeSize = new JCheckBox(Messages.getInstance().getString("GraphVisualizer_JCbCustomNodeSize_JCheckBox_Text"));
+    final JLabel jLbNodeWidth = new JLabel(Messages.getInstance().getString("GraphVisualizer_JLbNodeWidth_JLabel_Text"));
+    final JLabel jLbNodeHeight = new JLabel(Messages.getInstance().getString("GraphVisualizer_JLbNodeHeight_JLabel_Text"));
     
     jTfNodeWidth.setHorizontalAlignment(JTextField.CENTER);
     jTfNodeWidth.setText(""+nodeWidth);
@@ -387,7 +386,7 @@ public class GraphVisualizer
     });
     
     
-    jBtLayout  = new JButton("Layout Graph");
+    jBtLayout  = new JButton(Messages.getInstance().getString("GraphVisualizer_JBtLayout_JButton_Text"));
     jBtLayout.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         int tmpW, tmpH;
@@ -396,8 +395,8 @@ public class GraphVisualizer
           try{ tmpW = Integer.parseInt(jTfNodeWidth.getText()); }
           catch(NumberFormatException ne) {
             JOptionPane.showMessageDialog(GraphVisualizer.this.getParent(),
-            "Invalid integer entered for node width.",
-            "Error",
+            		Messages.getInstance().getString("GraphVisualizer_JOptionPaneShowMessageDialog_Text_First"),
+            		Messages.getInstance().getString("GraphVisualizer_JOptionPaneShowMessageDialog_Text_Second"),
             JOptionPane.ERROR_MESSAGE);
             tmpW = nodeWidth;
             jTfNodeWidth.setText(""+nodeWidth);
@@ -406,8 +405,8 @@ public class GraphVisualizer
           try{ tmpH = Integer.parseInt(jTfNodeHeight.getText()); }
           catch(NumberFormatException ne) {
             JOptionPane.showMessageDialog(GraphVisualizer.this.getParent(),
-            "Invalid integer entered for node height.",
-            "Error",
+            		Messages.getInstance().getString("GraphVisualizer_JOptionPaneShowMessageDialog_Text_Third"),
+            		Messages.getInstance().getString("GraphVisualizer_JOptionPaneShowMessageDialog_Text_Fourth"),
             JOptionPane.ERROR_MESSAGE);
             tmpH = nodeHeight;
             jTfNodeWidth.setText(""+nodeHeight);
@@ -459,7 +458,7 @@ public class GraphVisualizer
     p.add( jBtLayout, gbc );
     gbc.fill = gbc.NONE;
     p.setBorder(BorderFactory.createCompoundBorder(
-    BorderFactory.createTitledBorder("ExtraControls"),
+    BorderFactory.createTitledBorder(Messages.getInstance().getString("GraphVisualizer_P_BorderFactoryCreateTitledBorder_Text")),
     BorderFactory.createEmptyBorder(4,4,4,4)
     ) );
     p.setPreferredSize( new Dimension(0, 0) );
@@ -666,7 +665,7 @@ public class GraphVisualizer
     try {
       graphID = bp.parse();
     } catch(BIFFormatException bf) {
-      System.out.println("BIF format error");
+      System.out.println(Messages.getInstance().getString("GraphVisualizer_ReadBIF_Error_Text_First"));
       bf.printStackTrace();
     }
     catch(Exception ex) { ex.printStackTrace(); return; }
@@ -689,7 +688,7 @@ public class GraphVisualizer
     try {
       graphID = bp.parse();
     } catch(BIFFormatException bf) {
-      System.out.println("BIF format error");
+      System.out.println(Messages.getInstance().getString("GraphVisualizer_ReadBIF_Error_Text_Second"));
       bf.printStackTrace();
     }
     catch(Exception ex) { ex.printStackTrace(); return; }
@@ -765,7 +764,7 @@ public class GraphVisualizer
           if(n.probs==null)
             return n.lbl;
           else
-            return n.lbl+" (click to view the probability dist. table)";
+            return n.lbl+Messages.getInstance().getString("GraphVisualizer_GetToolTipText_Text");
         }
       }
       return null;
@@ -1207,8 +1206,8 @@ public class GraphVisualizer
               noOfPrntsOutcomes *= n2.outcomes.length;
             }
             if(noOfPrntsOutcomes>511) {
-              System.err.println("Too many outcomes of parents ("+noOfPrntsOutcomes+
-                                 ") can't display probabilities");
+              System.err.println(Messages.getInstance().getString("GraphVisualizer_GraphVisualizerMouseListener_MouseClicked_Error_Text_First") + noOfPrntsOutcomes+
+            		  Messages.getInstance().getString("GraphVisualizer_GraphVisualizerMouseListener_MouseClicked_Error_Text_Second"));
               return;
             }
           }
@@ -1307,7 +1306,6 @@ public class GraphVisualizer
               }
             }
             
-            
             gbc.gridwidth = 1;
             //The following panel contains the names of the parents
             //and is displayed above the row names to identify
@@ -1338,10 +1336,9 @@ public class GraphVisualizer
             js.setCorner( JScrollPane.UPPER_LEFT_CORNER, jPlRowNames );
           }
           
-          
           JDialog jd = 
                 new JDialog((Frame)GraphVisualizer.this.getTopLevelAncestor(),
-                            "Probability Distribution Table For "+n.lbl, true);
+                		Messages.getInstance().getString("GraphVisualizer_Main_Jd_JDialog_Text") + n.lbl, true);
           jd.setSize(500, 400);
           jd.setLocation(GraphVisualizer.this.getLocation().x+
                             GraphVisualizer.this.getWidth()/2-250,
@@ -1413,8 +1410,8 @@ public class GraphVisualizer
    * line
    */
   public static void main(String [] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
-    JFrame jf = new JFrame("Graph Visualizer");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("GraphVisualizer_Main_Logger_Text"));
+    JFrame jf = new JFrame(Messages.getInstance().getString("GraphVisualizer_Main_JFrame_Text"));
     GraphVisualizer g = new GraphVisualizer();
     
     try{

@@ -79,7 +79,7 @@ public class GenericArrayEditor
   private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
 
   /** The label for when we can't edit that type. */
-  private JLabel m_Label = new JLabel("Can't edit", SwingConstants.CENTER);
+  private JLabel m_Label = new JLabel(Messages.getInstance().getString("GenericArrayEditor_Label_JLabel_Text"), SwingConstants.CENTER);
   
   /** The list component displaying current values. */
   private JList m_ElementList = new JList();
@@ -94,19 +94,19 @@ public class GenericArrayEditor
   private PropertyEditor m_ElementEditor;
 
   /** Click this to delete the selected array values. */
-  private JButton m_DeleteBut = new JButton("Delete");
+  private JButton m_DeleteBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_DeleteBut_JButton_Text"));
 
   /** Click this to edit the selected array value. */
-  private JButton m_EditBut = new JButton("Edit");
+  private JButton m_EditBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_EditBut_JButton_Text"));
 
   /** Click this to move the selected array value(s) one up. */
-  private JButton m_UpBut = new JButton("Up");
+  private JButton m_UpBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_UpBut_JButton_Text"));
 
   /** Click this to move the selected array value(s) one down. */
-  private JButton m_DownBut = new JButton("Down");
+  private JButton m_DownBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_DownBut_JButton_Text"));
 
   /** Click to add the current object configuration to the array. */
-  private JButton m_AddBut = new JButton("Add");
+  private JButton m_AddBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_AddBut_JButton_Text"));
 
   /** The property editor for editing existing elements. */
   private PropertyEditor m_Editor = new GenericObjectEditor();
@@ -176,7 +176,7 @@ public class GenericArrayEditor
 	  m_Support.firePropertyChange("", null, null);
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(GenericArrayEditor.this,
-					"Could not create an object copy",
+			  Messages.getInstance().getString("GenericArrayEditor_InnerActionListener_JOptionPaneShowMessageDialog_Text"),
 					null,
 					JOptionPane.ERROR_MESSAGE);
 	}
@@ -244,11 +244,11 @@ public class GenericArrayEditor
     m_AddBut.addActionListener(m_InnerActionListener);
     m_ElementList.addListSelectionListener(m_InnerSelectionListener);
     m_ElementList.addMouseListener(m_InnerMouseListener);
-    m_AddBut.setToolTipText("Add the current item to the list");
-    m_DeleteBut.setToolTipText("Delete the selected list item");
-    m_EditBut.setToolTipText("Edit the selected list item");
-    m_UpBut.setToolTipText("Move the selected item(s) one up");
-    m_DownBut.setToolTipText("Move the selected item(s) one down");
+    m_AddBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_AddBut_SetToolTipText_Text"));
+    m_DeleteBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_DeleteBut_SetToolTipText_Text"));
+    m_EditBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_EditBut_SetToolTipText_Text"));
+    m_UpBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_UpBut_SetToolTipText_Text"));
+    m_DownBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_DownBut_SetToolTipText_Text"));
   }
 
   /** This class handles the creation of list cell renderers from the 
@@ -382,7 +382,7 @@ public class GenericArrayEditor
 	}
       }
       if (view == null) {
-	System.err.println("No property editor for class: "
+	System.err.println(Messages.getInstance().getString("GenericArrayEditor_UpdateEditorType_Error_Text")
 			   + elementClass.getName());
       } else {
 	m_ElementEditor = editor;

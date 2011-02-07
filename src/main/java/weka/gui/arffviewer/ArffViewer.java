@@ -67,7 +67,7 @@ public class ArffViewer
    * initializes the object
    */
   public ArffViewer() {
-    super("ARFF-Viewer");
+    super(Messages.getInstance().getString("ArffViewer_ArffViewer_Text"));
     createFrame();
   }
   
@@ -221,8 +221,8 @@ public class ArffViewer
     if (getConfirmExit()) {
       button = ComponentHelper.showMessageBox(
           this,
-          "Quit - " + getTitle(),
-          "Do you really want to quit?",
+          Messages.getInstance().getString("ArffViewer_WindowClosing_ComponentHelperShowMessageBox_Text_First") + getTitle(),
+          Messages.getInstance().getString("ArffViewer_WindowClosing_ComponentHelperShowMessageBox_Text_Second"),
           JOptionPane.YES_NO_OPTION,
           JOptionPane.QUESTION_MESSAGE);
       if (button == JOptionPane.YES_OPTION)
@@ -285,7 +285,7 @@ public class ArffViewer
    * @throws Exception	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("ArffViewer_Main_Logger_Text"));
     LookAndFeel.setLookAndFeel();
     
     try {
@@ -328,9 +328,9 @@ public class ArffViewer
                 m_Memory.stopThreads();
 
                 // display error
-                System.err.println("\ndisplayed message:");
+                System.err.println(Messages.getInstance().getString("ArffViewer_Main_Error_DisplayedMessage_Text"));
                 m_Memory.showOutOfMemory();
-                System.err.println("\nrestarting...");
+                System.err.println(Messages.getInstance().getString("ArffViewer_Main_Error_Restarting_Text"));
 
                 // restart GUI
                 System.gc();

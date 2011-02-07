@@ -112,7 +112,7 @@ public class PropertyPanel
   protected void createDefaultPanel() {
 
     setBorder(BorderFactory.createEtchedBorder());
-    setToolTipText("Left-click to edit properties for this object, right-click/Alt+Shift+left-click for menu");
+    setToolTipText(Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_SetToolTipText_Text"));
     setOpaque(true);
     final Component comp = this;
     addMouseListener(new MouseAdapter() {
@@ -127,7 +127,7 @@ public class PropertyPanel
             JMenuItem item;
 
             if (m_Editor.getValue() != null) {
-              item = new JMenuItem("Show properties...");
+              item = new JMenuItem(Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Item_JMenuItem_Text_First"));
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                   showPropertyDialog();
@@ -135,7 +135,7 @@ public class PropertyPanel
               });
               menu.add(item);
 
-              item = new JMenuItem("Copy configuration to clipboard");
+              item = new JMenuItem(Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Item_JMenuItem_Text_Second"));
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                   String str = m_Editor.getValue().getClass().getName();
@@ -149,12 +149,12 @@ public class PropertyPanel
               menu.add(item);
             }
             
-            item = new JMenuItem("Enter configuration...");
+            item = new JMenuItem(Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Item_JMenuItem_Text_Third"));
             item.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent e) {
         	String str = JOptionPane.showInputDialog(
         	                 comp, 
-        	                 "Configuration (<classname> [<options>])");
+        	                 Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Str_JOptionPaneShowInputDialog_Text"));
         	if (str != null) {
         	  try {
         	    String[] options = Utils.splitOptions(str);
@@ -168,8 +168,8 @@ public class PropertyPanel
         	    ex.printStackTrace();
         	    JOptionPane.showMessageDialog(
         		comp, 
-        		"Error parsing commandline:\n" + ex, 
-        		"Error...",
+        		Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Exception_Text_First") + ex, 
+        		Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Exception_Text_Second"),
         		JOptionPane.ERROR_MESSAGE);
         	  }
         	}

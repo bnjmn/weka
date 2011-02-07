@@ -32,7 +32,7 @@ import java.util.Vector;
  * A bean that joins two streams of instances into one.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class InstanceJoiner
   implements Serializable, InstanceProducer, SerialInstanceListener {
@@ -102,7 +102,7 @@ public class InstanceJoiner
   public Instances outputFormat() throws Exception {
     
     if (m_InputFormat == null) {
-      throw new Exception("No output format defined.");
+      throw new Exception(Messages.getInstance().getString("InstanceJoiner_OutputFormat_Exception_Text"));
     }
     return new Instances(m_InputFormat,0);
   }
@@ -110,7 +110,7 @@ public class InstanceJoiner
   public boolean input(Instance instance) throws Exception {
     
     if (m_InputFormat == null) {
-      throw new Exception("No input instance format defined");
+      throw new Exception(Messages.getInstance().getString("InstanceJoiner_Input_Exception_Text"));
     }
     if (instance != null) {
       m_OutputInstance = (Instance)instance.copy();
@@ -135,7 +135,7 @@ public class InstanceJoiner
   public void batchFinished() throws Exception {
     
     if (m_InputFormat == null) {
-      throw new Exception("No input instance format defined");
+      throw new Exception(Messages.getInstance().getString("InstanceJoiner_BatchFinished_Exception_Text"));
     }
     notifyInstanceProduced(new InstanceEvent(this,
 					     InstanceEvent.BATCH_FINISHED));
@@ -153,7 +153,7 @@ public class InstanceJoiner
   public Instance outputPeek() throws Exception {
     
     if (m_InputFormat == null) {
-      throw new Exception("No output instance format defined");
+      throw new Exception(Messages.getInstance().getString("InstanceJoiner_OutputPeek_Exception_Text"));
     }
     if (m_OutputInstance == null) {
       return null;
@@ -187,7 +187,7 @@ public class InstanceJoiner
     if (listeners.size() > 0) {
       if (b_Debug) {
 	System.err.println(this.getClass().getName()
-			   + "::notifyInstanceProduced()");
+			   + Messages.getInstance().getString("InstanceJoiner_NotifyInstanceProduced_Error_Text_First"));
       }
       Vector l;
       synchronized (this) {
@@ -203,9 +203,7 @@ public class InstanceJoiner
 	  m_OutputInstance = null;
 	}
       } catch (Exception ex) {
-	System.err.println("Problem: notifyInstanceProduced() was\n"
-			   + "called with INSTANCE_AVAILABLE, but output()\n"
-			   + "threw an exception: " + ex.getMessage());
+	System.err.println(Messages.getInstance().getString("InstanceJoiner_NotifyInstanceProduced_Exception_Text") + ex.getMessage());
       }
     }
   }
@@ -220,28 +218,28 @@ public class InstanceJoiner
 	case InstanceEvent.FORMAT_AVAILABLE:
 	  if (b_Debug) {
 	    System.err.println(this.getClass().getName()
-			+ "::firstInstanceProduced() - Format available");
+			+ Messages.getInstance().getString("InstanceJoiner_InstanceProduced_InstanceEventFORMAT_AVAILABLE_Error_Text"));
 	  }
 	  inputFormat(a.outputFormat());
 	  break;
 	case InstanceEvent.INSTANCE_AVAILABLE:
 	  if (b_Debug) {
 	    System.err.println(this.getClass().getName()
-			+ "::firstInstanceProduced() - Instance available");
+			+ Messages.getInstance().getString("InstanceJoiner_InstanceProduced_InstanceEventINSTANCE_AVAILABLE_Error_Text"));
 	  }
 	  input(a.outputPeek());
 	  break;
 	case InstanceEvent.BATCH_FINISHED:
 	  if (b_Debug) {
 	    System.err.println(this.getClass().getName()
-			+ "::firstInstanceProduced() - End of instance batch");
+			+ Messages.getInstance().getString("InstanceJoiner_InstanceProduced_InstanceEventBATCH_FINISHED_Error_Text"));
 	  }
 	  batchFinished();
 	  b_FirstInputFinished = true;
 	  break;
 	default:
 	  System.err.println(this.getClass().getName()
-	       + "::firstInstanceProduced() - unknown event type");
+	       + Messages.getInstance().getString("InstanceJoiner_InstanceProduced_InstanceEventDEFAULT_Error_Text"));
 	  break;
 	}
       } catch (Exception ex) {
@@ -249,7 +247,7 @@ public class InstanceJoiner
       }
     } else {
       System.err.println(this.getClass().getName()
-	     + "::firstInstanceProduced() - Unknown source object type");
+	     + Messages.getInstance().getString("InstanceJoiner_InstanceProduced_InstanceEventDEFAULT_Error_Text"));
     }
   }
 
@@ -260,39 +258,38 @@ public class InstanceJoiner
       try {
 	if (!b_FirstInputFinished) {
 	  throw new Exception(this.getClass().getName()
-	  + "::secondInstanceProduced() - Input received from"
-	  + " second stream before first stream finished");
+	  + Messages.getInstance().getString("InstanceJoiner_InstanceProduced_Error_Text"));
 	}
 	InstanceProducer a = (InstanceProducer) source;
 	switch (e.getID()) {
 	case InstanceEvent.FORMAT_AVAILABLE:
 	  if (b_Debug) {
 	    System.err.println(this.getClass().getName()
-	    + "::secondInstanceProduced() - Format available");
+	    + Messages.getInstance().getString("InstanceJoiner_SecondInstanceProduced_Error_Text_First"));
 	  }
 	  // Check the formats are compatible
 	  if (!(a.outputFormat()).equalHeaders(outputFormat())) {
 	    throw new Exception(this.getClass().getName()
-	    + "::secondInstanceProduced() - incompatible instance streams");
+	    + Messages.getInstance().getString("InstanceJoiner_SecondInstanceProduced_InstanceEventFORMAT_AVAILABLE_Error_Text"));
 	  }
 	  break;
 	case InstanceEvent.INSTANCE_AVAILABLE:
 	  if (b_Debug) {
 	    System.err.println(this.getClass().getName()
-	    + "::secondInstanceProduced() - Instance available");
+	    + Messages.getInstance().getString("InstanceJoiner_SecondInstanceProduced_InstanceEventINSTANCE_AVAILABLE_Error_Text"));
 	  }
 	  input(a.outputPeek());
 	  break;
 	case InstanceEvent.BATCH_FINISHED:
 	  if (b_Debug) {
 	    System.err.println(this.getClass().getName()
-	    + "::secondInstanceProduced() - End of instance batch");
+	    + Messages.getInstance().getString("InstanceJoiner_SecondInstanceProduced_InstanceEventBATCH_FINISHED_Error_Text"));
 	  }
 	  batchFinished();
 	  break;
 	default:
 	  System.err.println(this.getClass().getName()
-		+ "::secondInstanceProduced() - unknown event type");
+		+ Messages.getInstance().getString("InstanceJoiner_SecondInstanceProduced_InstanceEventDEFAULT_Error_Text"));
 	  break;
 	}
       } catch (Exception ex) {
@@ -300,15 +297,7 @@ public class InstanceJoiner
       }
     } else {
       System.err.println(this.getClass().getName()
-	  + "::secondInstanceProduced() - Unknown source object type");
+	  + Messages.getInstance().getString("InstanceJoiner_SecondInstanceProduced_Error_Text_Second"));
     }
   }
 }
-
-
-
-
-
-
-
-

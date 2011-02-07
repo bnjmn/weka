@@ -81,8 +81,7 @@ public class CrossValidationFoldMaker
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Split an incoming data set into cross validation folds. "
-      +"Separate train and test sets are produced for each of the k folds.";
+    return Messages.getInstance().getString("CrossValidationFoldMaker_GlobalInfo_Text");
   }
 
   /**
@@ -133,15 +132,14 @@ public class CrossValidationFoldMaker
 		  dataSet.attribute(dataSet.classIndex()).isNominal()) {
 		dataSet.stratify(getFolds());
 		if (m_logger != null) {
-		  m_logger.logMessage("[" + getCustomName() + "] "
-				      +"stratifying data");
+		  m_logger.logMessage(Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_LogMessage_Text_First") + getCustomName() + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_LogMessage_Text_Second"));
 		}
 	      }
 	      
 	      for (int i = 0; i < getFolds(); i++) {
 		if (m_foldThread == null) {
 		  if (m_logger != null) {
-		    m_logger.logMessage("[" + getCustomName() + "] Cross validation has been canceled!");
+		    m_logger.logMessage(Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_LogMessage_Text_Third") + getCustomName() + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_LogMessage_Text_Fourth"));
 		  }
 		  // exit gracefully
 		  break;
@@ -155,8 +153,8 @@ public class CrossValidationFoldMaker
 		String msg = getCustomName() + "$" 
 		  + CrossValidationFoldMaker.this.hashCode() + "|";
 		if (m_logger != null) {
-		  m_logger.statusMessage(msg + "seed: " + getSeed() + " folds: "
-		      + getFolds() + "|Training fold " + (i+1));
+		  m_logger.statusMessage(msg + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_First") + getSeed() + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_Second")
+		      + getFolds() + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_Third") + (i+1));
 		}
 		if (m_foldThread != null) {
 		  //		  System.err.println("--Just before notify training set");
@@ -169,8 +167,8 @@ public class CrossValidationFoldMaker
 		teste.m_setNumber = i+1; teste.m_maxSetNumber = getFolds();
 		
 		if (m_logger != null) {
-		  m_logger.statusMessage(msg + "seed: " + getSeed() + " folds: "
-		      + getFolds() + "|Test fold " + (i+1));
+		  m_logger.statusMessage(msg + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_Fourth") + getSeed() + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_Fifth")
+		      + getFolds() + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_Sixth") + (i+1));
 		}
 		if (m_foldThread != null) {
 		  notifyTestSetProduced(teste);
@@ -181,8 +179,8 @@ public class CrossValidationFoldMaker
 	      errorOccurred = true;
 	      CrossValidationFoldMaker.this.stop();
 	      if (m_logger != null) {
-	        m_logger.logMessage("[" + getCustomName() 
-	            + "] problem during fold creation. "
+	        m_logger.logMessage(Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_LogMessage_Text_Fifth") + getCustomName() 
+	            + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_LogMessage_Text_Sixth")
 	            + ex.getMessage());
 	      }
 	      ex.printStackTrace();
@@ -193,15 +191,15 @@ public class CrossValidationFoldMaker
 	          m_logger.statusMessage(getCustomName() 
 	              + "$" + CrossValidationFoldMaker.this.hashCode()
 	              + "|"
-	              + "ERROR (See log for details).");
+	              + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_Seventh"));
 	        }
 	      } else if (isInterrupted()) {
-	        String msg = "[" + getCustomName() + "] Cross validation interrupted";
+	        String msg = Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_Msg_Text_First") + getCustomName() + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_Msg_Text_Second");
 	        if (m_logger != null) {
-	          m_logger.logMessage("[" + getCustomName() + "] Cross validation interrupted");
+	          m_logger.logMessage(Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_LogMessage_Text_Fifth") + getCustomName() + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_LogMessage_Text_Sixth_Alpha"));
 	          m_logger.statusMessage(getCustomName() + "$"
 	              + CrossValidationFoldMaker.this.hashCode() + "|"
-	              + "INTERRUPTED");
+	              + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_Eighth"));
 	        } else {
 	          System.err.println(msg);
 	        }
@@ -209,7 +207,7 @@ public class CrossValidationFoldMaker
 	        String msg = getCustomName() + "$" 
 	        + CrossValidationFoldMaker.this.hashCode() + "|";
 	        if (m_logger != null) {
-	          m_logger.statusMessage(msg + "Finished.");
+	          m_logger.statusMessage(msg + Messages.getInstance().getString("CrossValidationFoldMaker_AcceptDataSet_StatusMessage_Text_Nineth"));
 	        }
 	      }
 	      block(false);
@@ -295,7 +293,7 @@ public class CrossValidationFoldMaker
    * @return a <code>String</code> value
    */
   public String foldsTipText() {
-    return "The number of train and test splits to produce";
+    return Messages.getInstance().getString("CrossValidationFoldMaker_FoldsTipText_Text");
   }
     
   /**
@@ -322,7 +320,7 @@ public class CrossValidationFoldMaker
    * @return a <code>String</code> value
    */
   public String seedTipText() {
-    return "The randomization seed";
+    return Messages.getInstance().getString("CrossValidationFoldMaker_SeedTipText_Text");
   }
   
   /**
@@ -399,7 +397,7 @@ public class CrossValidationFoldMaker
       stop();
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (CrossValidation)");
+					 + Messages.getInstance().getString("CrossValidationFoldMaker_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 

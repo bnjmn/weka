@@ -31,7 +31,7 @@ import java.awt.*;
  * with Edge's and Node's
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class TreeBuild {
   //this class will parse the tree into relevant strings
@@ -340,7 +340,7 @@ public class TreeBuild {
 	y.setSource(sour);
       }
       else {
-	System.out.println("logic error");
+	System.out.println(Messages.getInstance().getString("TreeBuild_GenerateStructures_Error_Text"));
       }
     }
     
@@ -360,13 +360,13 @@ public class TreeBuild {
    * @return An Integer representing the shape.
    */
   private Integer getShape(String sh) {
-    if (sh.equalsIgnoreCase("box") || sh.equalsIgnoreCase("rectangle")) {
+    if (sh.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_GetShape_Box_Text")) || sh.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_GetShape_Rectangle_Text"))) {
       return new Integer(1);
     }
-    else if (sh.equalsIgnoreCase("oval")) {
+    else if (sh.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_GetShape_Oval_Text"))) {
       return new Integer(2);
     }
-    else if (sh.equalsIgnoreCase("diamond")) {
+    else if (sh.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_GetShape_Diamond_Text"))) {
       return new Integer(3);
     }
     else {
@@ -382,7 +382,7 @@ public class TreeBuild {
    * @return An Integer representing the shape.
    */
   private Integer getStyle(String sty) {
-    if (sty.equalsIgnoreCase("filled")) {
+    if (sty.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_GetStyle_Filled_Text"))) {
       return new Integer(1);
     }
     else {
@@ -442,10 +442,10 @@ public class TreeBuild {
     }
     
     if (t == m_st.TT_EOF) {
-      System.out.println("eof , " + r);
+      System.out.println(Messages.getInstance().getString("TreeBuild_NextToken_StTT_EOF_Text") + r);
     }
     else if (t == m_st.TT_NUMBER) {
-      System.out.println("got a number , " + r);
+      System.out.println(Messages.getInstance().getString("TreeBuild_NextToken_StTT_NUMBER_Text") + r);
     }
   }
   
@@ -458,30 +458,30 @@ public class TreeBuild {
     String s;
     //expect digraph
     int t;
-    nextToken("expected 'digraph'");
+    nextToken(Messages.getInstance().getString("TreeBuild_Graph_NextToken_Text_First"));
     
-    if (m_st.sval.equalsIgnoreCase("digraph")) {
+    if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_Graph_StSval_Text"))) {
       m_digraph = true;
     }
     else {
-      System.out.println("expected 'digraph'");
+      System.out.println(Messages.getInstance().getString("TreeBuild_Graph_Error_Text_First"));
     }
     
-    nextToken("expected a Graph Name");
+    nextToken(Messages.getInstance().getString("TreeBuild_Graph_NextToken_Text_Second"));
     if (m_st.sval != null) {
       m_graphName = m_st.sval;
     }
     else {
-      System.out.println("expected a Graph Name");
+      System.out.println(Messages.getInstance().getString("TreeBuild_Graph_Error_Text_Second"));
     }
     
-    nextToken("expected '{'");
+    nextToken(Messages.getInstance().getString("TreeBuild_Graph_NextToken_Text_Third"));
     
     if (m_st.ttype == '{') {
       stmtList();
     }
     else {
-      System.out.println("expected '{'");
+      System.out.println(Messages.getInstance().getString("TreeBuild_Graph_Text"));
     }
   }
 
@@ -495,13 +495,13 @@ public class TreeBuild {
     String s;
     int t;
     while(flag) {
-      nextToken("expects a STMT_LIST item or '}'");
+      nextToken(Messages.getInstance().getString("TreeBuild_StmtList_NextToken_Text"));
       if (m_st.ttype == '}') {
 	flag = false;
       }
-      else if (m_st.sval.equalsIgnoreCase("graph") ||
-	       m_st.sval.equalsIgnoreCase("node") ||
-	       m_st.sval.equalsIgnoreCase("edge")) {
+      else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_StmtList_StSval_Graph_Text")) ||
+	       m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_StmtList_StSval_Node_Text")) ||
+	       m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_StmtList_StSval_Edge_Text"))) {
 	m_st.pushBack();
 	attrStmt();
       }
@@ -509,7 +509,7 @@ public class TreeBuild {
 	nodeId(m_st.sval,0);
       }
       else {
-	System.out.println("expects a STMT_LIST item or '}'");
+	System.out.println(Messages.getInstance().getString("TreeBuild_StmtList_Text"));
       }
     }
   }
@@ -520,38 +520,38 @@ public class TreeBuild {
    */
   private void attrStmt() {
     
-    nextToken("expected 'graph' or 'node' or 'edge'");
+    nextToken(Messages.getInstance().getString("TreeBuild_AttrStmt_NextToken_Text_First"));
     
-    if (m_st.sval.equalsIgnoreCase("graph")) {
-      nextToken("expected a '['");
+    if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrStmt_StSval_Graph_Text"))) {
+      nextToken(Messages.getInstance().getString("TreeBuild_AttrStmt_NextToken_Text_Second"));
       if (m_st.ttype == '[') {
 	attrList(m_grObj);
       }
       else {
-	System.out.println("expected a '['");
+	System.out.println(Messages.getInstance().getString("TreeBuild_AttrStmt_NextToken_Text_Second_Alpha"));
       }
     }
-    else if (m_st.sval.equalsIgnoreCase("node")) {
-      nextToken("expected a '['");
+    else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrStmt_StSval_Node_Text"))) {
+      nextToken(Messages.getInstance().getString("TreeBuild_AttrStmt_Text_First"));
       if (m_st.ttype == '[') {
 	attrList(m_noObj);
       }
       else {
-	System.out.println("expected a '['");
+	System.out.println(Messages.getInstance().getString("TreeBuild_AttrStmt_Text_First_Alpha"));
       }
     }
-    else if (m_st.sval.equalsIgnoreCase("edge")) {
-      nextToken("expected a '['");
+    else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrStmt_StSval_Edge_Text"))) {
+      nextToken(Messages.getInstance().getString("TreeBuild_AttrStmt_NextToken_Text_Third"));
       if (m_st.ttype == '[') {
 	attrList(m_edObj);
       }
       else {
-	System.out.println("expected a '['");
+	System.out.println(Messages.getInstance().getString("TreeBuild_AttrStmt_Text_Second"));
       }
       
     }
     else {
-      System.out.println("expected 'graph' or 'node' or 'edge'"); 
+      System.out.println(Messages.getInstance().getString("TreeBuild_AttrStmt_Text_Third")); 
     }
   }
 
@@ -565,7 +565,7 @@ public class TreeBuild {
    */
   private void nodeId(String s,int t) {
     
-    nextToken("error occurred in node_id");
+    nextToken(Messages.getInstance().getString("TreeBuild_NodeId_NextToken_Text_First"));
 
     if (m_st.ttype == '}') {
       //creates a node if t is zero
@@ -575,12 +575,12 @@ public class TreeBuild {
       m_st.pushBack();
     }
     else if (m_st.ttype == '-') {
-      nextToken("error occurred checking for an edge");
+      nextToken(Messages.getInstance().getString("TreeBuild_NodeId_NextToken_Text_Second"));
       if (m_st.ttype == '>') {
 	edgeStmt(s);
       }
       else {
-	System.out.println("error occurred checking for an edge");
+	System.out.println(Messages.getInstance().getString("TreeBuild_NodeId_Text_First"));
       }
     }
     else if (m_st.ttype == '[') {
@@ -601,7 +601,7 @@ public class TreeBuild {
       m_st.pushBack();
     }
     else {
-      System.out.println("error occurred in node_id");
+      System.out.println(Messages.getInstance().getString("TreeBuild_NodeId_Text_Second"));
     }
   }
 
@@ -611,16 +611,16 @@ public class TreeBuild {
    * @param i The source of the edge.
    */
   private void edgeStmt(String i) {
-    nextToken("error getting target of edge");
+    nextToken(Messages.getInstance().getString("TreeBuild_EdgeStmt_NextToken_Text_First"));
     
     if (m_st.sval != null) {
-      m_edges.addElement(new InfoObject("an edge ,no id"));
+      m_edges.addElement(new InfoObject(Messages.getInstance().getString("TreeBuild_EdgeStmt_EdgesAddElement_Text_First")));
       ((InfoObject)m_edges.lastElement()).m_source = i;
       ((InfoObject)m_edges.lastElement()).m_target = m_st.sval;
       nodeId(m_st.sval,1);
     }
     else {
-      System.out.println("error getting target of edge");
+      System.out.println(Messages.getInstance().getString("TreeBuild_EdgeStmt_Text"));
     }
   }
 
@@ -631,105 +631,106 @@ public class TreeBuild {
    */
   private void attrList(InfoObject a) {
     boolean flag = true;
-    
+     
     while (flag) {
-      nextToken("error in attr_list");
+      nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_First"));
       //System.out.println(st.sval);
       if (m_st.ttype == ']') {
 	flag = false;
       }
-      else if (m_st.sval.equalsIgnoreCase("color")) {
-	nextToken("error getting color");
+
+      else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrList_StSval_Color_Text"))) {
+	nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Second"));
 	if (m_st.ttype == '=') {
-	  nextToken("error getting color");
+	  nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Third"));
 	  if (m_st.sval != null) {
 	    a.m_color = m_st.sval;
 	  }
 	  else {
-	    System.out.println("error getting color");
+	    System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_First"));
 	  }
 	}
 	else {
-	  System.out.println("error getting color");
+	  System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Second"));
 	}
       }
-      else if (m_st.sval.equalsIgnoreCase("fontcolor")) {
-	nextToken("error getting font color");
+      else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrList_StSval_FontColor_Text"))) {
+	nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Fourth"));
 	if (m_st.ttype == '=') {
-	  nextToken("error getting font color");
+	  nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Fourth_Alpha"));
 	  if (m_st.sval != null) {
 	    a.m_fontColor = m_st.sval;
 	  }
 	  else {
-	    System.out.println("error getting font color");
+	    System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Third"));
 	  }
 	}
 	else {
-	  System.out.println("error getting font color");
+	  System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Fourth"));
 	}
       }
-      else if (m_st.sval.equalsIgnoreCase("fontsize")) {
-	nextToken("error getting font size");
+      else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrList_StSval_FontSize_Text"))) {
+	nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Fifth"));
 	if (m_st.ttype == '=') {
-	  nextToken("error getting font size");
+	  nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Fifth_Alpha"));
 	  if (m_st.sval != null) {
 	    a.m_fontSize = m_st.sval;
 	  }
 	  else {
-	    System.out.println("error getting font size");
+	    System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Fifth"));
 	  }
 	}
 	else {
-	  System.out.println("error getting font size");
+	  System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Sixth"));
 	}
       }
-      else if (m_st.sval.equalsIgnoreCase("label")) {
-	nextToken("error getting label");
+      else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrList_StSval_Label_Text"))) {
+	nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Sixth"));
 	if (m_st.ttype == '=') {
-	  nextToken("error getting label");
+	  nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Seventh"));
 	  if (m_st.sval != null) {
 	    a.m_label = m_st.sval;
 	  }
 	  else {
-	    System.out.println("error getting label");
+	    System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Seventh"));
 	  }
 	}
 	else {
-	  System.out.println("error getting label");
+	  System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Eighth"));
 	}
       }
-      else if (m_st.sval.equalsIgnoreCase("shape")) {
-	nextToken("error getting shape");
+      else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrList_StSval_Shape_Text"))) {
+	nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Eighth"));
 	if (m_st.ttype == '=') {
-	  nextToken("error getting shape");
+	  nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Nineth"));
 	  if (m_st.sval != null) {
 	    a.m_shape = m_st.sval;
 	  }
 	  else {
-	    System.out.println("error getting shape");
+	    System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Nineth"));
 	  }
 	}
 	else {
-	  System.out.println("error getting shape");
+	  System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Tenth"));
 	}
       }
-      else if (m_st.sval.equalsIgnoreCase("style")) {
-	nextToken("error getting style");
+      else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrList_StSval_Style_Text"))) {
+	nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Tenth"));
 	if (m_st.ttype == '=') {
-	  nextToken("error getting style");
+	  nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Eleventh"));
 	  if (m_st.sval != null) {
 	    a.m_style = m_st.sval;
 	  }
 	  else {
-	    System.out.println("error getting style");
+	    System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Eleventh"));
 	  }
 	}
 	else {
-	  System.out.println("error getting style");
+	  System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Twelveth"));
 	}
       }
-      else if (m_st.sval.equalsIgnoreCase("data")) {
-	nextToken("error getting data");
+      else if (m_st.sval.equalsIgnoreCase(Messages.getInstance().getString("TreeBuild_AttrList_StSval_Data_Text"))) {
+	nextToken(Messages.getInstance().getString("TreeBuild_AttrList_NextToken_Text_Twelveth"));
 	if (m_st.ttype == '=') {
 	  //data has a special data string that can have anything
 	  //this is delimited by a single comma on an otherwise empty line
@@ -737,7 +738,7 @@ public class TreeBuild {
 	  a.m_data = new String("");
 	  
 	  while (true) {
-	    nextToken("error getting data");
+	    nextToken(Messages.getInstance().getString("TreeBuild_AttrList_Text_Thirteenth"));
 	    if (m_st.sval != null && a.m_data 
 		!= null && m_st.sval.equals(",")) {
 	      break;
@@ -752,13 +753,13 @@ public class TreeBuild {
 	      a.m_data = a.m_data.concat("\n");
 	    }
 	    else {
-	      System.out.println("error getting data");
+	      System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Thirteenth"));
 	    }
 	  }
 	  setSyntax();
 	}
 	else {
-	  System.out.println("error getting data");
+	  System.out.println(Messages.getInstance().getString("TreeBuild_AttrList_Text_Fourteenth"));
 	}
       }
     }

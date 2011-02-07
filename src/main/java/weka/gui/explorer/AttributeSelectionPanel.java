@@ -146,24 +146,44 @@ public class AttributeSelectionPanel
   protected JComboBox m_ClassCombo = new JComboBox();
 
   /** Click to set evaluation mode to cross-validation */
-  protected JRadioButton m_CVBut = new JRadioButton("Cross-validation");
+  protected JRadioButton m_CVBut = new JRadioButton(Messages.getInstance().getString("AttributeSelectionPanel_CVBut_JRadioButton_Text"));
 
   /** Click to set test mode to test on training data */
-  protected JRadioButton m_TrainBut = 
-    new JRadioButton("Use full training set");
+  protected JRadioButton m_TrainBut = new JRadioButton(Messages.getInstance().getString("AttributeSelectionPanel_TrainBut_JRadioButton_Text"));
 
   /** Label by where the cv folds are entered */
-  protected JLabel m_CVLab = new JLabel("Folds", SwingConstants.RIGHT);
+  protected JLabel m_CVLab = new JLabel(Messages.getInstance().getString("AttributeSelectionPanel_CVLab_JLabel_Text"), SwingConstants.RIGHT);
 
   /** The field where the cv folds are entered */
-  protected JTextField m_CVText = new JTextField("10");
+  protected JTextField m_CVText = new JTextField(Messages.getInstance().getString("AttributeSelectionPanel_CVText_JTextField_Text"));
 
+  //protected JTextField m_CVText = new JTextField(10);
+  
   /** Label by where cv random seed is entered */
-  protected JLabel m_SeedLab = new JLabel("Seed",SwingConstants.RIGHT);
+  protected JLabel m_SeedLab = new JLabel(Messages.getInstance().getString("AttributeSelectionPanel_SeedLab_JLabel_Text"),SwingConstants.RIGHT);
 
   /** The field where the seed value is entered */
-  protected JTextField m_SeedText = new JTextField("1");
+  protected JTextField m_SeedText = new JTextField(Messages.getInstance().getString("AttributeSelectionPanel_SeedText_JTextField_Text"));
 
+  /** Click to set evaluation mode to cross-validation */
+  //protected JRadioButton m_CVBut = new JRadioButton("Cross-validation");
+
+  /** Click to set test mode to test on training data */
+  //protected JRadioButton m_TrainBut = 
+  //  new JRadioButton("Use full training set");
+
+  /** Label by where the cv folds are entered */
+  //protected JLabel m_CVLab = new JLabel("Folds", SwingConstants.RIGHT);
+
+  /** The field where the cv folds are entered */
+  //protected JTextField m_CVText = new JTextField("10");
+
+  /** Label by where cv random seed is entered */
+  //protected JLabel m_SeedLab = new JLabel("Seed",SwingConstants.RIGHT);
+
+  /** The field where the seed value is entered */
+  //protected JTextField m_SeedText = new JTextField("1");
+  
   /**
    * Alters the enabled/disabled status of elements associated with each
    * radio button
@@ -175,10 +195,10 @@ public class AttributeSelectionPanel
   };
 
   /** Click to start running the attribute selector */
-  protected JButton m_StartBut = new JButton("Start");
+  protected JButton m_StartBut = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_StartBut_JButton_Text"));
 
   /** Click to stop a running classifier */
-  protected JButton m_StopBut = new JButton("Stop");
+  protected JButton m_StopBut = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_StopBut_JButton_Text"));
 
  /** Stop the class combo from taking up to much space */
   private Dimension COMBO_SIZE = new Dimension(150, m_StartBut
@@ -199,7 +219,6 @@ public class AttributeSelectionPanel
    * Creates the classifier panel
    */
   public AttributeSelectionPanel() {
-
     // Connect / configure the components
     m_OutText.setEditable(false);
     m_OutText.setFont(new Font("Monospaced", Font.PLAIN, 12));
@@ -212,7 +231,7 @@ public class AttributeSelectionPanel
 	}
       }
     });
-    m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
+    m_History.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("AttributeSelectionPanel_History_BorderFactoryCreateTitledBorder_Text")));
     m_AttributeEvaluatorEditor.setClassType(ASEvaluation.class);
     m_AttributeEvaluatorEditor.setValue(ExplorerDefaults.getASEvaluator());
     m_AttributeEvaluatorEditor.
@@ -222,11 +241,10 @@ public class AttributeSelectionPanel
           if (!(m_AttributeSearchEditor.getValue() instanceof Ranker)) {
             Object backup = m_AttributeEvaluatorEditor.getBackup();
             int result = 
-              JOptionPane.showConfirmDialog(null, "You must use use the Ranker search method "
-                                            +"in order to use\n"
+              JOptionPane.showConfirmDialog(null, Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_First")
                                             +m_AttributeEvaluatorEditor.getValue().getClass().getName()
-                                            +".\nShould I select the Ranker search method for you?",
-                                            "Alert!", JOptionPane.YES_NO_OPTION);
+                                            +Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Second"),
+                                            Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Third"), JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION) {
               m_AttributeSearchEditor.setValue(new Ranker());
             } else {
@@ -240,13 +258,10 @@ public class AttributeSelectionPanel
           if (m_AttributeSearchEditor.getValue() instanceof Ranker) {
             Object backup = m_AttributeEvaluatorEditor.getBackup();
             int result = 
-              JOptionPane.showConfirmDialog(null, "You must use use a search method that explores \n"
-                                            +"the space of attribute subsets (such as GreedyStepwise) in "
-                                            +"order to use\n"
+              JOptionPane.showConfirmDialog(null, Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Fourth")
                                             +m_AttributeEvaluatorEditor.getValue().getClass().getName()
-                                            +".\nShould I select the GreedyStepwise search method for "
-                                            +"you?\n(you can always switch to a different method afterwards)",
-                                            "Alert!", JOptionPane.YES_NO_OPTION);
+                                            +Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Fifth"),
+                                            Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Sixth"), JOptionPane.YES_NO_OPTION);
             if (result == JOptionPane.YES_OPTION) {
               m_AttributeSearchEditor.setValue(new weka.attributeSelection.GreedyStepwise());
             } else {
@@ -286,12 +301,8 @@ public class AttributeSelectionPanel
             if (!(m_AttributeEvaluatorEditor.getValue() instanceof AttributeEvaluator)) {
               Object backup = m_AttributeSearchEditor.getBackup();
               int result = 
-                JOptionPane.showConfirmDialog(null, "You must use use an evaluator that evaluates\n"
-                                              +"single attributes (such as InfoGain) in order to use\n"
-                                              +"the Ranker. Should I select the InfoGain evaluator "
-                                              +"for you?\n"
-                                              +"(You can always switch to a different method afterwards)" ,
-                                              "Alert!", JOptionPane.YES_NO_OPTION);
+                JOptionPane.showConfirmDialog(null, Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Seventh"),
+                                              Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Eigth"), JOptionPane.YES_NO_OPTION);
               if (result == JOptionPane.YES_OPTION) {
                 m_AttributeEvaluatorEditor.setValue(new weka.attributeSelection.InfoGainAttributeEval());
               } else {
@@ -305,12 +316,10 @@ public class AttributeSelectionPanel
             if (m_AttributeEvaluatorEditor.getValue() instanceof AttributeEvaluator) {
               Object backup = m_AttributeSearchEditor.getBackup();
               int result = 
-                JOptionPane.showConfirmDialog(null, "You must use use an evaluator that evaluates\n"
-                                              +"subsets of attributes (such as CFS) in order to use\n"
+                JOptionPane.showConfirmDialog(null, Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Nineth")
                                               +m_AttributeEvaluatorEditor.getValue().getClass().getName()
-                                              +".\nShould I select the CFS subset evaluator for you?"
-                                              +"\n(you can always switch to a different method afterwards)",
-                                              "Alert!", JOptionPane.YES_NO_OPTION);
+                                              +Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Tenth"),
+                                              Messages.getInstance().getString("AttributeSelectionPanel_Result_JOptionPaneShowConfirmDialog_Text_Eleventh"), JOptionPane.YES_NO_OPTION);
 
               if (result == JOptionPane.YES_OPTION) {
                 m_AttributeEvaluatorEditor.setValue(new weka.attributeSelection.CfsSubsetEval());
@@ -332,13 +341,12 @@ public class AttributeSelectionPanel
       }
     });
 
-    m_ClassCombo.setToolTipText("Select the attribute to use as the class");
-    m_TrainBut.setToolTipText("select attributes using the full training "
-			      + "dataset");
-    m_CVBut.setToolTipText("Perform a n-fold cross-validation");
+    m_ClassCombo.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_ClassCombo_SetToolTipText_Text"));
+    m_TrainBut.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_TrainBut_SetToolTipText_Text"));
+    m_CVBut.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_CVBut_SetToolTipText_Text"));
 
-    m_StartBut.setToolTipText("Starts attribute selection");
-    m_StopBut.setToolTipText("Stops a attribute selection task");
+    m_StartBut.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_StartBut_SetToolTipText_Text"));
+    m_StopBut.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_StopBut_SetToolTipText_Text"));
     
     m_ClassCombo.setPreferredSize(COMBO_SIZE);
     m_ClassCombo.setMaximumSize(COMBO_SIZE);
@@ -395,7 +403,7 @@ public class AttributeSelectionPanel
     // Layout the GUI
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createCompoundBorder(
-		 BorderFactory.createTitledBorder("Attribute Evaluator"),
+		 BorderFactory.createTitledBorder(Messages.getInstance().getString("AttributeSelectionPanel_P1_BorderFactoryCreateTitledBorder_Text")),
 		 BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		 ));
     p1.setLayout(new BorderLayout());
@@ -403,7 +411,7 @@ public class AttributeSelectionPanel
 
     JPanel p1_1 = new JPanel();
     p1_1.setBorder(BorderFactory.createCompoundBorder(
-		 BorderFactory.createTitledBorder("Search Method"),
+		 BorderFactory.createTitledBorder(Messages.getInstance().getString("AttributeSelectionPanel_P1_1_BorderFactoryCreateTitledBorder_Text")),
 		 BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		 ));
     p1_1.setLayout(new BorderLayout());
@@ -418,7 +426,7 @@ public class AttributeSelectionPanel
     GridBagLayout gbL = new GridBagLayout();
     p2.setLayout(gbL);
     p2.setBorder(BorderFactory.createCompoundBorder(
-		 BorderFactory.createTitledBorder("Attribute Selection Mode"),
+		 BorderFactory.createTitledBorder(Messages.getInstance().getString("AttributeSelectionPanel_P2_BorderFactoryCreateTitledBorder_Text")),
 		 BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		 ));
     GridBagConstraints gbC = new GridBagConstraints();
@@ -479,7 +487,7 @@ public class AttributeSelectionPanel
     
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.
-		 createTitledBorder("Attribute selection output"));
+		 createTitledBorder(Messages.getInstance().getString("AttributeSelectionPanel_P3_BorderFactoryCreateTitledBorder_Text")));
     p3.setLayout(new BorderLayout());
     final JScrollPane js = new JScrollPane(m_OutText);
     p3.add(js, BorderLayout.CENTER);
@@ -574,22 +582,22 @@ public class AttributeSelectionPanel
       String type = "";
       switch (m_Instances.attribute(i).type()) {
       case Attribute.NOMINAL:
-	type = "(Nom) ";
+	type = Messages.getInstance().getString("AttributeSelectionPanel_SetInstances_AttributeNOMINAL_Type_Text");
 	break;
       case Attribute.NUMERIC:
-	type = "(Num) ";
+	type = Messages.getInstance().getString("AttributeSelectionPanel_SetInstances_AttributeNUMERIC_Type_Text");
 	break;
       case Attribute.STRING:
-	type = "(Str) ";
+	type = Messages.getInstance().getString("AttributeSelectionPanel_SetInstances_AttributeSTRING_Type_Text");
 	break;
       case Attribute.DATE:
-	type = "(Dat) ";
+	type = Messages.getInstance().getString("AttributeSelectionPanel_SetInstances_AttributeDATE_Type_Text");
 	break;
       case Attribute.RELATIONAL:
-	type = "(Rel) ";
+	type = Messages.getInstance().getString("AttributeSelectionPanel_SetInstances_AttributeRELATIONAL_Type_Text");
 	break;
       default:
-	type = "(???) ";
+	type = Messages.getInstance().getString("AttributeSelectionPanel_SetInstances_AttributeDEFAULT_Type_Text");
       }
       String attnm = m_Instances.attribute(i).name();
      
@@ -619,7 +627,7 @@ public class AttributeSelectionPanel
       m_RunThread = new Thread() {
 	public void run() {
 	  // Copy the current state of things
-	  m_Log.statusMessage("Setting up...");
+	  m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_First"));
 	  Instances inst = new Instances(m_Instances);
 
 	  int testMode = 0;
@@ -692,49 +700,49 @@ public class AttributeSelectionPanel
 	      numFolds = Integer.parseInt(m_CVText.getText());
 	      seed = Integer.parseInt(m_SeedText.getText());
 	      if (numFolds <= 1) {
-		throw new Exception("Number of folds must be greater than 1");
+		throw new Exception(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Exception_Text_First"));
 	      }
 	    } 
 	    inst.setClassIndex(classIndex);
 
 	    // Output some header information
-	    m_Log.logMessage("Started " + ename);
-	    m_Log.logMessage("Command: " + cmd);
-            m_Log.logMessage("Filter command: " + cmdFilter);
-            m_Log.logMessage("Meta-classifier command: " + cmdClassifier);
+	    m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_LogMessage_Text_First") + ename);
+	    m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_LogMessage_Text_Second") + cmd);
+            m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_LogMessage_Text_Third") + cmdFilter);
+            m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_LogMessage_Text_Fourth") + cmdClassifier);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
-	    outBuff.append("=== Run information ===\n\n");
-	    outBuff.append("Evaluator:    " + ename);
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_First"));
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Second") + ename);
 	    if (evaluator instanceof OptionHandler) {
 	      String [] o = ((OptionHandler) evaluator).getOptions();
 	      outBuff.append(" " + Utils.joinOptions(o));
 	    }
-	    outBuff.append("\nSearch:       " + sname);
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Third") + sname);
 	    if (search instanceof OptionHandler) {
 	      String [] o = ((OptionHandler) search).getOptions();
 	      outBuff.append(" " + Utils.joinOptions(o));
 	    }
-	    outBuff.append("\n");
-	    outBuff.append("Relation:     " + inst.relationName() + '\n');
-	    outBuff.append("Instances:    " + inst.numInstances() + '\n');
-	    outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Fourth"));
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Fifth") + inst.relationName() + '\n');
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Sixth") + inst.numInstances() + '\n');
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Seventh") + inst.numAttributes() + '\n');
 	    if (inst.numAttributes() < 100) {
 	      for (int i = 0; i < inst.numAttributes(); i++) {
 		outBuff.append("              " + inst.attribute(i).name()
 			       + '\n');
 	      }
 	    } else {
-	      outBuff.append("              [list of attributes omitted]\n");
+	      outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Eigth"));
 	    }
-	    outBuff.append("Evaluation mode:    ");
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Nineth"));
 	    switch (testMode) {
 	      case 0: // select using all training
-	      outBuff.append("evaluate on all training data\n");
+	      outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Tenth"));
 	      break;
 	      case 1: // CV mode
-	      outBuff.append("" + numFolds + "-fold cross-validation\n");
+	      outBuff.append("" + numFolds + Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Eleventh"));
 	      break;
 	    }
 	    outBuff.append("\n");
@@ -742,7 +750,7 @@ public class AttributeSelectionPanel
 	    m_History.setSingle(name);
 	    
 	    // Do the feature selection and output the results.
-	    m_Log.statusMessage("Doing feature selection...");
+	    m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text"));
 	    m_History.updateResult(name);
 	    
 	    eval = new AttributeSelection();
@@ -756,30 +764,30 @@ public class AttributeSelectionPanel
 	    	    
 	    switch (testMode) {
 	      case 0: // select using training
-	      m_Log.statusMessage("Evaluating on training data...");
+	      m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_First"));
 	      eval.SelectAttributes(inst);
 	      break;
 
 	      case 1: // CV mode
-	      m_Log.statusMessage("Randomizing instances...");
+	      m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Second"));
 	      Random random = new Random(seed);
 	      inst.randomize(random);
 	      if (inst.attribute(classIndex).isNominal()) {
-		m_Log.statusMessage("Stratifying instances...");
+		m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Third"));
 		inst.stratify(numFolds);
 	      }
 	      for (int fold = 0; fold < numFolds;fold++) {
-		m_Log.statusMessage("Creating splits for fold "
-				    + (fold + 1) + "...");
+		m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Fourth")
+				    + (fold + 1) + Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Fifth"));
 		Instances train = inst.trainCV(numFolds, fold, random);
-		m_Log.statusMessage("Selecting attributes using all but fold "
-				    + (fold + 1) + "...");
+		m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Sixth")
+				    + (fold + 1) + Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Seventh"));
 		
 		eval.selectAttributesCVSplit(train);
 	      }
 	      break;
 	      default:
-	      throw new Exception("Test mode not implemented");
+	      throw new Exception(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Exception_Text_Second"));
 	    }
 
 	    if (testMode == 0) {
@@ -788,20 +796,20 @@ public class AttributeSelectionPanel
 	      outBuff.append(eval.CVResultsString());
 	    }
 	  
-	    outBuff.append("\n");
+	    outBuff.append(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_OutBuffer_Text_Thirteenth"));
 	    m_History.updateResult(name);
-	    m_Log.logMessage("Finished " + ename+" "+sname);
-	    m_Log.statusMessage("OK");
+	    m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_LogMessage_Text_Fifth") + ename+" "+sname);
+	    m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Eigth"));
 	  } catch (Exception ex) {
 	    m_Log.logMessage(ex.getMessage());
-	    m_Log.statusMessage("See error log");
+	    m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Ninth"));
 	  } finally {
 	    if (evaluator instanceof AttributeTransformer) {
 	      try {
 		Instances transformed = 
 		  ((AttributeTransformer)evaluator).transformedData(inst);
 		transformed.
-		  setRelationName("AT: "+transformed.relationName());
+		  setRelationName(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Transformed_SetRelationName_Text") + transformed.relationName());
 
 		FastVector vv = new FastVector();
 		vv.addElement(transformed);
@@ -821,8 +829,8 @@ public class AttributeSelectionPanel
 	      }
 	    }
 	    if (isInterrupted()) {
-	      m_Log.logMessage("Interrupted " + ename+" "+sname);
-	      m_Log.statusMessage("See error log");
+	      m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_LogMessage_Text_Sixth") + ename+" "+sname);
+	      m_Log.statusMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_StatusMessage_Text_Tenth"));
 	    }
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
@@ -860,7 +868,7 @@ public class AttributeSelectionPanel
     StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
-	m_Log.logMessage("Save succesful.");
+	m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_SaveBuffer_Log_LogMessage_Text"));
       }
     }
   }
@@ -876,7 +884,7 @@ public class AttributeSelectionPanel
       mp.setInstances(ti);
       String plotName = ti.relationName();
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Attribute Selection Visualize: "
+	new javax.swing.JFrame(Messages.getInstance().getString("AttributeSelectionPanel_VisualizeTransformedData_JFrame_Text")
 			       +plotName);
       jf.setSize(800,600);
       jf.getContentPane().setLayout(new BorderLayout());
@@ -903,7 +911,7 @@ public class AttributeSelectionPanel
     ExtensionFileFilter filter;
 
     fc     = new JFileChooser();
-    filter = new ExtensionFileFilter(".arff", "ARFF data files");
+    filter = new ExtensionFileFilter(".arff", Messages.getInstance().getString("AttributeSelectionPanel_SaveTransformedData_Filter_Text"));
     fc.setFileFilter(filter);
     retVal = fc.showSaveDialog(this);
 
@@ -916,11 +924,11 @@ public class AttributeSelectionPanel
       }
       catch (Exception e) {
         e.printStackTrace();
-        m_Log.logMessage("Problem saving data: " + e.getMessage());
+        m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_SaveTransformedData_Log_LogMessage_Text") + e.getMessage());
         JOptionPane.showMessageDialog(
             this, 
-            "Problem saving data:\n" + e.getMessage(), 
-            "Error", 
+            Messages.getInstance().getString("AttributeSelectionPanel_SaveTransformedData_JOptionPaneShowMessageDialog_Text_First") + e.getMessage(), 
+            Messages.getInstance().getString("AttributeSelectionPanel_SaveTransformedData_JOptionPaneShowMessageDialog_Text_Second"), 
             JOptionPane.ERROR_MESSAGE);
       }
     }
@@ -937,7 +945,7 @@ public class AttributeSelectionPanel
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
 
-    JMenuItem visMainBuffer = new JMenuItem("View in main window");
+    JMenuItem visMainBuffer = new JMenuItem(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_VisMainBuffer_JMenuItem_Text"));
     if (selectedName != null) {
       visMainBuffer.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -949,7 +957,7 @@ public class AttributeSelectionPanel
     }
     resultListMenu.add(visMainBuffer);
 
-    JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    JMenuItem visSepBuffer = new JMenuItem(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_VisSepBuffer_JMenuItem_Text"));
     if (selectedName != null) {
     visSepBuffer.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -961,7 +969,7 @@ public class AttributeSelectionPanel
     }
     resultListMenu.add(visSepBuffer);
 
-    JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    JMenuItem saveOutput = new JMenuItem(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_SaveOutput_JMenuItem_Text"));
     if (selectedName != null) {
     saveOutput.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -973,7 +981,7 @@ public class AttributeSelectionPanel
     }
     resultListMenu.add(saveOutput);
     
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
+    JMenuItem deleteOutput = new JMenuItem(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_DeleteOutput_JMenuItem_Text"));
     if (selectedName != null) {
       deleteOutput.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -1010,10 +1018,10 @@ public class AttributeSelectionPanel
     JMenuItem visTrans = null;
     
     if (ti != null) {
-      if (ti.relationName().startsWith("AT:")) {
-	visTrans = new JMenuItem("Visualize transformed data");
+      if (ti.relationName().startsWith(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_RelationName_Text_First"))) {
+	visTrans = new JMenuItem(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_VisTrans_JMenuItem_Text_First"));
       } else {
-	visTrans = new JMenuItem("Visualize reduced data");
+	visTrans = new JMenuItem(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_VisTrans_JMenuItem_Text_Second"));
       }
       resultListMenu.addSeparator();
     }
@@ -1033,10 +1041,10 @@ public class AttributeSelectionPanel
     
     JMenuItem saveTrans = null;
     if (ti != null) {
-      if (ti.relationName().startsWith("AT:"))
-        saveTrans = new JMenuItem("Save transformed data...");
+      if (ti.relationName().startsWith(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_RelationName_Text_Second")))
+        saveTrans = new JMenuItem(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_SaveTrans_JMenuItem_Text_First"));
       else
-        saveTrans = new JMenuItem("Save reduced data...");
+        saveTrans = new JMenuItem(Messages.getInstance().getString("AttributeSelectionPanel_Visualize_SaveTrans_JMenuItem_Text_Second"));
     }
     if (saveTrans != null) {
       saveTrans.addActionListener(new ActionListener() {
@@ -1135,7 +1143,7 @@ public class AttributeSelectionPanel
    * @return 		the title of this tab
    */
   public String getTabTitle() {
-    return "Select attributes";
+    return Messages.getInstance().getString("AttributeSelectionPanel_GetTabTitle_Text");
   }
   
   /**
@@ -1144,7 +1152,7 @@ public class AttributeSelectionPanel
    * @return 		the tooltip of this tab
    */
   public String getTabTitleToolTip() {
-    return "Determine relevance of attributes";
+    return Messages.getInstance().getString("AttributeSelectionPanel_GetTabTitleToolTip_Text");
   }
 
   /**
@@ -1156,7 +1164,7 @@ public class AttributeSelectionPanel
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Explorer: Select attributes");
+	new javax.swing.JFrame(Messages.getInstance().getString("AttributeSelectionPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final AttributeSelectionPanel sp = new AttributeSelectionPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -1172,7 +1180,7 @@ public class AttributeSelectionPanel
       jf.pack();
       jf.setVisible(true);
       if (args.length == 1) {
-	System.err.println("Loading instances from " + args[0]);
+	System.err.println(Messages.getInstance().getString("AttributeSelectionPanel_Main_Error_Text") + args[0]);
 	java.io.Reader r = new java.io.BufferedReader(
 			   new java.io.FileReader(args[0]));
 	Instances i = new Instances(r);

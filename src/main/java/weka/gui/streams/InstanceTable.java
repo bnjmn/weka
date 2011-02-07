@@ -37,7 +37,7 @@ import javax.swing.table.TableModel;
  * A bean that takes a stream of instances and displays in a table.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class InstanceTable
   extends JPanel
@@ -56,7 +56,7 @@ public class InstanceTable
   public void inputFormat(Instances instanceInfo) {
     
     if (m_Debug) {
-      System.err.println("InstanceTable::inputFormat()\n"
+      System.err.println(Messages.getInstance().getString("InstanceTable_InputFormat_Error_Text")
 			 + instanceInfo.toString());
     }
     m_Instances = instanceInfo;
@@ -65,7 +65,7 @@ public class InstanceTable
   public void input(Instance instance) throws Exception {
     
     if (m_Debug) {
-      System.err.println("InstanceTable::input(" + instance +")");
+      System.err.println(Messages.getInstance().getString("InstanceTable_Input_Error_Text_First") + instance +Messages.getInstance().getString("InstanceTable_Input_Error_Text_Second"));
     }
     m_Instances.add(instance);
   }
@@ -93,7 +93,7 @@ public class InstanceTable
     };
     m_InstanceTable.setModel(newModel);
     if (m_Debug) {
-      System.err.println("InstanceTable::batchFinished()");
+      System.err.println(Messages.getInstance().getString("InstanceTable_BatchFinished_Error_Text"));
     }
   }
 
@@ -131,20 +131,14 @@ public class InstanceTable
 	  batchFinished();
 	  break;
 	default:
-	  System.err.println("InstanceTable::instanceProduced()"
-			     + " - unknown event type");
+	  System.err.println(Messages.getInstance().getString("InstanceTable_InstanceProduced_InstanceEventDEFAULT_Error_Text"));
 	  break;
 	}
       } catch (Exception ex) {
 	System.err.println(ex.getMessage());
       }
     } else {
-      System.err.println("InstanceTable::instanceProduced()"
-			 + " - Unknown source object type");
+      System.err.println(Messages.getInstance().getString("InstanceTable_InstanceProduced_Error_Text"));
     }
   }
 }
-
-
-
-

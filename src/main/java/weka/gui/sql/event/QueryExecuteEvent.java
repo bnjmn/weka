@@ -32,7 +32,7 @@ import java.util.EventObject;
  *
  * @see         QueryExecuteListener
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision$
  */
 public class QueryExecuteEvent
   extends EventObject {
@@ -140,7 +140,7 @@ public class QueryExecuteEvent
 
     result  = super.toString();
     result  = result.substring(0, result.length() - 1);  // remove "]"
-    result +=   ",query=" + getQuery() 
+    result += ",query=" + getQuery() 
               + ",maxrows=" + getMaxRows()
               + ",failed=" + failed()
               + ",exception=" + getException() + "]";

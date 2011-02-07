@@ -63,7 +63,7 @@ import javax.swing.table.AbstractTableModel;
  * load cost matrices from files.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision$
  */
 public class CostMatrixEditor 
   implements PropertyEditor {
@@ -226,15 +226,15 @@ public class CostMatrixEditor
       // set up the file chooser
       m_fileChooser.setFileFilter(
 	     new ExtensionFileFilter(CostMatrix.FILE_EXTENSION, 
-				     "Cost files")
+				     Messages.getInstance().getString("CostMatrixEditor_CustomEditor_FileChooser_SetFileFilter_Text"))
 	       );
       m_fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
       // create the buttons + field
-      m_defaultButton = new JButton("Defaults");
-      m_openButton = new JButton("Open...");
-      m_saveButton = new JButton("Save...");
-      m_resizeButton = new JButton("Resize");
+      m_defaultButton = new JButton(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_DefaultButton_JButton_Text"));
+      m_openButton = new JButton(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_OpenButton_JButton_Text"));
+      m_saveButton = new JButton(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_SaveButton_JButton_Text"));
+      m_resizeButton = new JButton(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_ResizeButton_JButton_Text"));
       m_classesField = new JTextField("" + m_matrix.size());
 
       m_defaultButton.addActionListener(this);
@@ -246,7 +246,7 @@ public class CostMatrixEditor
       // lay out the GUI
       JPanel classesPanel = new JPanel();
       classesPanel.setLayout(new GridLayout(1, 2, 0, 0));
-      classesPanel.add(new JLabel("Classes:", SwingConstants.RIGHT));
+      classesPanel.add(new JLabel(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_ClassesPanel_JLabel_Text"), SwingConstants.RIGHT));
       classesPanel.add(m_classesField);
 
       JPanel rightPanel = new JPanel();
@@ -351,10 +351,10 @@ public class CostMatrixEditor
 	  matrixChanged();
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(this, 
-					"Error reading file '"
+			  Messages.getInstance().getString("CostMatrixEditor_OpenMatrix_JOptionPaneShowMessageDialog_Text_First")
 					+ selectedFile.getName()
-					+ "':\n" + ex.getMessage(),
-					"Load failed",
+					+ Messages.getInstance().getString("CostMatrixEditor_OpenMatrix_JOptionPaneShowMessageDialog_Text_Second") + ex.getMessage(),
+					Messages.getInstance().getString("CostMatrixEditor_OpenMatrix_JOptionPaneShowMessageDialog_Text_Third"),
 					JOptionPane.ERROR_MESSAGE);
 	  System.out.println(ex.getMessage());
 	}
@@ -386,10 +386,10 @@ public class CostMatrixEditor
 	  writer.close();
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(this, 
-					"Error writing file '"
+			  Messages.getInstance().getString("CostMatrixEditor_SaveMatrix_JOptionPaneShowMessageDialog_Text_First")
 					+ selectedFile.getName()
-					+ "':\n" + ex.getMessage(),
-					"Save failed",
+					+ Messages.getInstance().getString("CostMatrixEditor_SaveMatrix_JOptionPaneShowMessageDialog_Text_Second") + ex.getMessage(),
+					Messages.getInstance().getString("CostMatrixEditor_SaveMatrix_JOptionPaneShowMessageDialog_Text_Third"),
 					JOptionPane.ERROR_MESSAGE);
 	  System.out.println(ex.getMessage());
 	}
@@ -483,9 +483,7 @@ public class CostMatrixEditor
    * @throws IllegalArgumentException always throws an IllegalArgumentException
    */   
   public void setAsText(String text) {
-    throw new IllegalArgumentException("CostMatrixEditor: "
-				       + "CostMatrix properties cannot be "
-				       + "expressed as text");
+    throw new IllegalArgumentException(Messages.getInstance().getString("CostMatrixEditor_SetAsText_IllegalArgumentException_Text"));
   }
 
   /**

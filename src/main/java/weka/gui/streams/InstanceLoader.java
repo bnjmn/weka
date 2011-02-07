@@ -42,7 +42,7 @@ import javax.swing.JTextField;
  * A bean that produces a stream of instances from a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class InstanceLoader
   extends JPanel 
@@ -70,19 +70,17 @@ public class InstanceLoader
     public void run() {
       
       try {
-	m_StartBut.setText("Stop");
+	m_StartBut.setText(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_StartBut_SetText_Text"));
 	m_StartBut.setBackground(Color.red);
 	if (m_Debug) {
-	  System.err.println("InstanceLoader::LoadThread::run()");
+	  System.err.println(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_Error_Text_First"));
 	}
 	// Load the instances one at a time and pass them on to the listener
 	Reader input = new BufferedReader(
 		       new FileReader(m_FileNameTex.getText()));
 	m_OutputInstances = new Instances(input, 1);
 	if (m_Debug) {
-	  System.err.println("InstanceLoader::LoadThread::run()"
-			     + " - Instances opened from: "
-			     + m_FileNameTex.getText());
+	  System.err.println(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_Error_Text_Second") + m_FileNameTex.getText());
 	}
 	InstanceEvent ie = new InstanceEvent(m_IP,
 					     InstanceEvent.FORMAT_AVAILABLE);
@@ -92,8 +90,7 @@ public class InstanceLoader
 	    return;
 	  }
 	  if (m_Debug) {
-	    System.err.println("InstanceLoader::LoadThread::run()"
-			       + " - read instance");
+	    System.err.println(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_Error_Text_Third"));
 	  }
 	  // put the instance into a queue?
 	  m_OutputInstance = m_OutputInstances.instance(0);
@@ -107,7 +104,7 @@ public class InstanceLoader
 	System.err.println(ex.getMessage());
       } finally {
 	m_LoaderThread = null;
-	m_StartBut.setText("Start");
+	m_StartBut.setText(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_StatusBut_SetText_Text"));
 	m_StartBut.setBackground(Color.green);
       }
     }
@@ -115,12 +112,12 @@ public class InstanceLoader
 
   public InstanceLoader() {
     setLayout(new BorderLayout());
-    m_StartBut = new JButton("Start");
+    m_StartBut = new JButton(Messages.getInstance().getString("InstanceLoader_StartBut_JButton_Text"));
     m_StartBut.setBackground(Color.green);
-    add("West",m_StartBut);
+    add(Messages.getInstance().getString("InstanceLoader_StartBut_JButton_Add_Text_First"), m_StartBut);
     m_StartBut.addActionListener(this);
     m_FileNameTex = new JTextField("/home/trigg/datasets/UCI/iris.arff");
-    add("Center",m_FileNameTex);
+    add(Messages.getInstance().getString("InstanceLoader_StartBut_JButton_Add_Text_Second"), m_FileNameTex);
     m_Listeners = new Vector();
     //    setSize(60,40);
   }
@@ -157,7 +154,7 @@ public class InstanceLoader
   protected void notifyInstanceProduced(InstanceEvent e) {
     
     if (m_Debug) {
-      System.err.println("InstanceLoader::notifyInstanceProduced()");
+      System.err.println(Messages.getInstance().getString("InstanceLoader_NotifyInstanceProduced_Error_Text"));
     }
     Vector l;
     synchronized (this) {
@@ -176,7 +173,7 @@ public class InstanceLoader
   public Instances outputFormat() throws Exception {
     
     if (m_OutputInstances == null) {
-      throw new Exception("No output format defined.");
+      throw new Exception(Messages.getInstance().getString("InstanceLoader_OutputFormat_Exception_Text"));
     }
     return new Instances(m_OutputInstances,0);
   }

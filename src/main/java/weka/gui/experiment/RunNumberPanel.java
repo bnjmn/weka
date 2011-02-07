@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * in an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class RunNumberPanel
   extends JPanel {
@@ -59,10 +59,10 @@ public class RunNumberPanel
   private static final long serialVersionUID = -1644336658426067852L;
 
   /** Configures the lower run number */
-  protected JTextField m_LowerText = new JTextField("1");
+  protected JTextField m_LowerText = new JTextField(Messages.getInstance().getString("RunNumberPanel_LowerText_JTextField_Text"));
 
   /** Configures the upper run number */
-  protected JTextField m_UpperText = new JTextField("10");
+  protected JTextField m_UpperText = new JTextField(Messages.getInstance().getString("RunNumberPanel_UpperText_JTextField_Text"));
 
   /** The experiment being configured */
   protected Experiment m_Exp;
@@ -99,16 +99,16 @@ public class RunNumberPanel
 
     // Set the GUI layout
     setLayout(new GridLayout(1,2));
-    setBorder(BorderFactory.createTitledBorder("Runs"));
+    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("RunNumberPanel_SetBorder_BorderFactoryCreateTitledBorder_Text")));
     Box b1 = new Box(BoxLayout.X_AXIS);
     b1.add(Box.createHorizontalStrut(10));
-    b1.add(new JLabel("From:", SwingConstants.RIGHT));
+    b1.add(new JLabel(Messages.getInstance().getString("RunNumberPanel_B1_JLabel_Text"), SwingConstants.RIGHT));
     b1.add(Box.createHorizontalStrut(5));
     b1.add(m_LowerText);
     add(b1);
     Box b2 = new Box(BoxLayout.X_AXIS);
     b2.add(Box.createHorizontalStrut(10));
-    b2.add(new JLabel("To:", SwingConstants.RIGHT));
+    b2.add(new JLabel(Messages.getInstance().getString("RunNumberPanel_B2_JLabel_Text"), SwingConstants.RIGHT));
     b2.add(Box.createHorizontalStrut(5));
     b2.add(m_UpperText);
     add(b2);
@@ -177,7 +177,7 @@ public class RunNumberPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Dataset List Editor");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("RunNumberPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(new RunNumberPanel(new Experiment()),
 			      BorderLayout.CENTER);

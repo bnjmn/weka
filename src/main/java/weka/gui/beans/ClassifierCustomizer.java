@@ -75,7 +75,7 @@ public class ClassifierCustomizer
 
   private JPanel m_incrementalPanel = new JPanel();
   private JCheckBox m_updateIncrementalClassifier 
-    = new JCheckBox("Update classifier on incoming instance stream");
+    = new JCheckBox(Messages.getInstance().getString("ClassifierCustomizer_UpdateIncrementalClassifier_JCheckBox_Text"));
   private boolean m_panelVisible = false;
   
   private JPanel m_holderPanel = new JPanel();
@@ -89,11 +89,10 @@ public class ClassifierCustomizer
   public ClassifierCustomizer() {
     
     m_ClassifierEditor.
-      setBorder(BorderFactory.createTitledBorder("Classifier options"));
+      setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassifierCustomizer_ClassifierEditor_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     
     m_updateIncrementalClassifier.
-      setToolTipText("Train the classifier on "
-		     +"each individual incoming streamed instance.");
+      setToolTipText(Messages.getInstance().getString("ClassifierCustomizer_UpdateIncrementalClassifier_SetToolTipText_Text"));
     m_updateIncrementalClassifier.
       addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -131,20 +130,20 @@ public class ClassifierCustomizer
     JPanel executionSlotsPanel = new JPanel();
     executionSlotsPanel.
       setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-    JLabel executionSlotsLabel = new JLabel("Execution slots");
+    JLabel executionSlotsLabel = new JLabel(Messages.getInstance().getString("ClassifierCustomizer_ExecutionSlotsLabel_JLabel_Text"));
     executionSlotsPanel.setLayout(new BorderLayout());
     executionSlotsPanel.add(executionSlotsLabel, BorderLayout.WEST);
     executionSlotsPanel.add(m_executionSlotsText, BorderLayout.CENTER);
     m_holderPanel.
-      setBorder(BorderFactory.createTitledBorder("More options"));
+      setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassifierCustomizer_HolderPanel_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     m_holderPanel.setLayout(new BorderLayout());
     m_holderPanel.add(executionSlotsPanel, BorderLayout.NORTH);
 
     JPanel holder2 = new JPanel();
     holder2.setLayout(new BorderLayout());
     holder2.add(m_holderPanel, BorderLayout.NORTH);
-    JButton OKBut = new JButton("OK");
-    JButton CancelBut = new JButton("Cancel");
+    JButton OKBut = new JButton(Messages.getInstance().getString("ClassifierCustomizer_OKBut_JButton_Text"));
+    JButton CancelBut = new JButton(Messages.getInstance().getString("ClassifierCustomizer_CancelBut_JButton_Text"));
     OKBut.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           m_parentFrame.dispose();

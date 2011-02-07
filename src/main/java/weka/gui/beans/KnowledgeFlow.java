@@ -58,7 +58,7 @@ public class KnowledgeFlow {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("KnowledgeFlow_Main_Logger_Text"));
       weka.gui.SplashWindow.splash(ClassLoader.
                                    getSystemResource("weka/gui/beans/icons/splash.jpg"));
       weka.gui.SplashWindow.invokeMain("weka.gui.beans.KnowledgeFlowApp", args);

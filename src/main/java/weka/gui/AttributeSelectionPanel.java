@@ -153,11 +153,11 @@ public class AttributeSelectionPanel
       
       switch (column) {
       case 0:
-	return new String("No.");
+	return new String(Messages.getInstance().getString("AttributeSelectionPanel_GetColumnName_Text_First"));
       case 1:
-	return new String("");
+	return new String(Messages.getInstance().getString("AttributeSelectionPanel_GetColumnName_Text_Second"));
       case 2:
-	return new String("Name");
+	return new String(Messages.getInstance().getString("AttributeSelectionPanel_GetColumnName_Text_Third"));
       default:
 	return null;
       }
@@ -281,16 +281,16 @@ public class AttributeSelectionPanel
   }
 
   /** Press to select all attributes */  
-  protected JButton m_IncludeAll = new JButton("All");
+  protected JButton m_IncludeAll = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_IncludeAll_JButton_Text"));
 
   /** Press to deselect all attributes */
-  protected JButton m_RemoveAll = new JButton("None");
+  protected JButton m_RemoveAll = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_RemoveAll_JButton_Text"));
 
   /** Press to invert the current selection */
-  protected JButton m_Invert = new JButton("Invert");
+  protected JButton m_Invert = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_Invert_JButton_Text"));
 
   /** Press to enter a perl regular expression for selection */
-  protected JButton m_Pattern = new JButton("Pattern");
+  protected JButton m_Pattern = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_Pattern_JButton_Text"));
 
   /** The table displaying attribute names and selection status */
   protected JTable m_Table = new JTable();
@@ -318,34 +318,34 @@ public class AttributeSelectionPanel
   public AttributeSelectionPanel(boolean include, boolean remove, boolean invert,
       boolean pattern) {
 
-    m_IncludeAll.setToolTipText("Selects all attributes");
+    m_IncludeAll.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_IncludeAll_SetToolTipText_Text"));
     m_IncludeAll.setEnabled(false);
     m_IncludeAll.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Model.includeAll();
       }
     });
-    m_RemoveAll.setToolTipText("Unselects all attributes");
+    m_RemoveAll.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_RemoveAll_SetToolTipText_Text"));
     m_RemoveAll.setEnabled(false);
     m_RemoveAll.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Model.removeAll();
       }
     });
-    m_Invert.setToolTipText("Inverts the current attribute selection");
+    m_Invert.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_Invert_SetToolTipText_Text"));
     m_Invert.setEnabled(false);
     m_Invert.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Model.invert();
       }
     });
-    m_Pattern.setToolTipText("Selects all attributes that match a reg. expression");
+    m_Pattern.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_Pattern_SetToolTipText_Text"));
     m_Pattern.setEnabled(false);
     m_Pattern.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         String pattern = JOptionPane.showInputDialog(
                             m_Pattern.getParent(),
-                            "Enter a Perl regular expression",
+                            Messages.getInstance().getString("AttributeSelectionPanel_Pattern_JOptionPaneShowInputDialog_Text"),
                             m_PatternRegEx);
         if (pattern != null) {
           try {
@@ -356,9 +356,8 @@ public class AttributeSelectionPanel
           catch (Exception ex) {
             JOptionPane.showMessageDialog(
               m_Pattern.getParent(),
-              "'" + pattern + "' is not a valid Perl regular expression!\n" 
-              + "Error: " + ex, 
-              "Error in Pattern...", 
+              Messages.getInstance().getString("AttributeSelectionPanel_Exception_JOptionPaneShowMessageDialog_Text_First") + pattern + Messages.getInstance().getString("AttributeSelectionPanel_Exception_JOptionPaneShowMessageDialog_Text_Second") + ex, 
+              Messages.getInstance().getString("AttributeSelectionPanel_Exception_JOptionPaneShowMessageDialog_Text_Third"), 
               JOptionPane.ERROR_MESSAGE);
           }
         }
@@ -482,13 +481,13 @@ public class AttributeSelectionPanel
 
     try {
       if (args.length == 0) {
-	throw new Exception("supply the name of an arff file");
+	throw new Exception(Messages.getInstance().getString("AttributeSelectionPanel_Main_Exception_Text"));
       }
       Instances i = new Instances(new java.io.BufferedReader(
 				  new java.io.FileReader(args[0])));
       AttributeSelectionPanel asp = new AttributeSelectionPanel();
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Attribute Selection Panel");
+	new javax.swing.JFrame(Messages.getInstance().getString("AttributeSelectionPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(asp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {

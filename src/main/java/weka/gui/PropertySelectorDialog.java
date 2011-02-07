@@ -53,7 +53,7 @@ import javax.swing.tree.TreeSelectionModel;
  * properties that any of it's property values may have.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class PropertySelectorDialog
   extends JDialog {
@@ -62,10 +62,10 @@ public class PropertySelectorDialog
   private static final long serialVersionUID = -3155058124137930518L;
   
   /** Click to choose the currently selected property */
-  protected JButton m_SelectBut = new JButton("Select");
+  protected JButton m_SelectBut = new JButton(Messages.getInstance().getString("PropertySelectorDialog_SelectBut_JButton_Text"));
 
   /** Click to cancel the property selection */
-  protected JButton m_CancelBut = new JButton("Cancel");
+  protected JButton m_CancelBut = new JButton(Messages.getInstance().getString("PropertySelectorDialog_CancelBut_JButton_Text"));
 
   /** The root of the property tree */
   protected DefaultMutableTreeNode m_Root;
@@ -96,7 +96,7 @@ public class PropertySelectorDialog
    */
   public PropertySelectorDialog(Frame parentFrame, Object rootObject) {
     
-    super(parentFrame, "Select a property", true);
+    super(parentFrame, Messages.getInstance().getString("PropertySelectorDialog_Text"), true);
     m_CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = CANCEL_OPTION;
@@ -182,7 +182,7 @@ public class PropertySelectorDialog
       BeanInfo bi = Introspector.getBeanInfo(localObject.getClass());
       localProperties = bi.getPropertyDescriptors();
     } catch (IntrospectionException ex) {
-      System.err.println("PropertySelectorDialog: Couldn't introspect");
+      System.err.println(Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_First"));
       return;
     }
 
@@ -219,14 +219,14 @@ public class PropertySelectorDialog
 	  continue;
 	}
       } catch (InvocationTargetException ex) {
-	System.err.println("Skipping property " + name
-			   + " ; exception on target: "
+	System.err.println(Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_Second") + name
+			   + Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_Third")
 			   + ex.getTargetException());
 	ex.getTargetException().printStackTrace();
 	continue;
       } catch (Exception ex) {
-	System.err.println("Skipping property " + name
-			   + " ; exception: " + ex);
+	System.err.println(Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_Fourth") + name
+			   + Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_Fifth") + ex);
 	ex.printStackTrace();
 	continue;
       }
@@ -256,7 +256,7 @@ public class PropertySelectorDialog
       final PropertySelectorDialog jd = new PropertySelectorDialog(null, rp);
       int result = jd.showDialog();
       if (result == PropertySelectorDialog.APPROVE_OPTION) {
-	System.err.println("Property Selected");
+	System.err.println(Messages.getInstance().getString("PropertySelectorDialog_Main_Error_Text_First"));
 	PropertyNode [] path = jd.getPath();
 	for (int i = 0; i < path.length; i++) {
 	  PropertyNode pn = path[i];
@@ -264,7 +264,7 @@ public class PropertySelectorDialog
 			     + " " + pn.value.toString());
 	}
       } else {
-	System.err.println("Cancelled");
+	System.err.println(Messages.getInstance().getString("PropertySelectorDialog_Main_Error_Text_Second"));
       }
       System.exit(0);
     } catch (Exception ex) {

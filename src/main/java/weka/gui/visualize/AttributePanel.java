@@ -472,7 +472,7 @@ public class AttributePanel
    */
   public void setInstances(Instances ins) throws Exception {
     if (ins.numAttributes() > 512) {
-      throw new Exception("Can't display more than 512 attributes!");
+      throw new Exception(Messages.getInstance().getString("AttributePanel_SetInstances_Exception_Text"));
     }
 
     if (m_span == null) {
@@ -483,11 +483,11 @@ public class AttributePanel
 	    super.paintComponent(gx);
 	    gx.setColor(Color.red);
 	    if (m_yIndex != m_xIndex) {
-	      gx.drawString("X", 5, m_xIndex * 20 + 16);
-	      gx.drawString("Y", 5, m_yIndex * 20 + 16);
+	      gx.drawString(Messages.getInstance().getString("AttributePanel_SetInstances_PaintComponent_DrawString_Text_First"), 5, m_xIndex * 20 + 16);
+	      gx.drawString(Messages.getInstance().getString("AttributePanel_SetInstances_PaintComponent_DrawString_Text_Second"), 5, m_yIndex * 20 + 16);
 	    }
 	    else {
-	      gx.drawString("B", 5, m_xIndex * 20 + 16);
+	      gx.drawString(Messages.getInstance().getString("AttributePanel_SetInstances_PaintComponent_DrawString_Text_Third"), 5, m_xIndex * 20 + 16);
 	    }
 	  }
 	};
@@ -584,21 +584,20 @@ public class AttributePanel
   public static void main(String [] args) {
     try {
       if (args.length < 1) {
-	System.err.println("Usage : weka.gui.visualize.AttributePanel "
-			   +"<dataset> [class col]");
+	System.err.println(Messages.getInstance().getString("AttributePanel_Main_Error_Text_First"));
 	System.exit(1);
       }
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Explorer: Attribute");
+	new javax.swing.JFrame(Messages.getInstance().getString("AttributePanel_Main_JFrame_Text"));
       jf.setSize(100,100);
       jf.getContentPane().setLayout(new BorderLayout());
       final AttributePanel p2 = new AttributePanel();
       p2.addAttributePanelListener(new AttributePanelListener() {
 	  public void attributeSelectionChange(AttributePanelEvent e) {
 	    if (e.m_xChange) {
-	      System.err.println("X index changed to : "+e.m_indexVal);
+	      System.err.println(Messages.getInstance().getString("AttributePanel_Main_Error_Text_Second") + e.m_indexVal);
 	    } else {
-	      System.err.println("Y index changed to : "+e.m_indexVal);
+	      System.err.println(Messages.getInstance().getString("AttributePanel_Main_Error_Text_Third") + e.m_indexVal);
 	    }
 	  }
 	});
@@ -610,7 +609,7 @@ public class AttributePanel
 	  }
 	});
       if (args.length >= 1) {
-	System.err.println("Loading instances from " + args[0]);
+	System.err.println(Messages.getInstance().getString("AttributePanel_Main_Error_Text_Fourth") + args[0]);
 	java.io.Reader r = new java.io.BufferedReader(
 			   new java.io.FileReader(args[0]));
 	Instances i = new Instances(r);

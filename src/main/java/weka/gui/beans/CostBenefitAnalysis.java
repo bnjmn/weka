@@ -146,38 +146,38 @@ public class CostBenefitAnalysis extends JPanel
     /** The slider for adjusting the threshold */
     protected JSlider m_thresholdSlider = new JSlider(0,100,0);
     
-    protected JRadioButton m_percPop = new JRadioButton("% of Population");
-    protected JRadioButton m_percOfTarget = new JRadioButton("% of Target (recall)");
-    protected JRadioButton m_threshold = new JRadioButton("Score Threshold");
+    protected JRadioButton m_percPop = new JRadioButton(Messages.getInstance().getString("CostBenefitAnalysis_PpercPop_JRadioButton_Text"));
+    protected JRadioButton m_percOfTarget = new JRadioButton(Messages.getInstance().getString("CostBenefitAnalysis_PercOfTarget_JRadioButton_Text"));
+    protected JRadioButton m_threshold = new JRadioButton(Messages.getInstance().getString("CostBenefitAnalysis_Threshold_JRadioButton_Text"));
     
     protected JLabel m_percPopLab = new JLabel();
     protected JLabel m_percOfTargetLab = new JLabel();
     protected JLabel m_thresholdLab = new JLabel();
     
     // Confusion matrix stuff
-    protected JLabel m_conf_predictedA = new JLabel("Predicted (a)", SwingConstants.RIGHT);
-    protected JLabel m_conf_predictedB = new JLabel("Predicted (b)", SwingConstants.RIGHT);
-    protected JLabel m_conf_actualA = new JLabel(" Actual (a):");
-    protected JLabel m_conf_actualB = new JLabel(" Actual (b):");
+    protected JLabel m_conf_predictedA = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_Conf_PredictedA_JLabel_Text"), SwingConstants.RIGHT);
+    protected JLabel m_conf_predictedB = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_Conf_PredictedB_JLabel_Text"), SwingConstants.RIGHT);
+    protected JLabel m_conf_actualA = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_Conf_ActualA_JLabel_Text"));
+    protected JLabel m_conf_actualB = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_Conf_ActualB_JLabel_Text"));
     protected ConfusionCell m_conf_aa = new ConfusionCell();
     protected ConfusionCell m_conf_ab = new ConfusionCell();
     protected ConfusionCell m_conf_ba = new ConfusionCell();
     protected ConfusionCell m_conf_bb = new ConfusionCell();
     
     // Cost matrix stuff
-    protected JLabel m_cost_predictedA = new JLabel("Predicted (a)", SwingConstants.RIGHT);
-    protected JLabel m_cost_predictedB = new JLabel("Predicted (b)", SwingConstants.RIGHT);
-    protected JLabel m_cost_actualA = new JLabel(" Actual (a)");
-    protected JLabel m_cost_actualB = new JLabel(" Actual (b)");
+    protected JLabel m_cost_predictedA = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_Cost_PredictedA_JLabel_Text"), SwingConstants.RIGHT);
+    protected JLabel m_cost_predictedB = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_Cost_PredictedB_JLabel_Text"), SwingConstants.RIGHT);
+    protected JLabel m_cost_actualA = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_Cost_ActualA_JLabel_Text"));
+    protected JLabel m_cost_actualB = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_Cost_ActualB_JLabel_Text"));
     protected JTextField m_cost_aa = new JTextField("0.0", 5);
     protected JTextField m_cost_ab = new JTextField("1.0", 5);
     protected JTextField m_cost_ba = new JTextField("1.0", 5);
     protected JTextField m_cost_bb = new JTextField("0.0", 5);
-    protected JButton m_maximizeCB = new JButton("Maximize Cost/Benefit");
-    protected JButton m_minimizeCB = new JButton("Minimize Cost/Benefit");
-    protected JRadioButton m_costR = new JRadioButton("Cost");
-    protected JRadioButton m_benefitR = new JRadioButton("Benefit");
-    protected JLabel m_costBenefitL = new JLabel("Cost: ", SwingConstants.RIGHT);
+    protected JButton m_maximizeCB = new JButton(Messages.getInstance().getString("CostBenefitAnalysis_MaximizeCB_JButton_Text"));
+    protected JButton m_minimizeCB = new JButton(Messages.getInstance().getString("CostBenefitAnalysis_MinimizeCB_JButton_Text"));
+    protected JRadioButton m_costR = new JRadioButton(Messages.getInstance().getString("CostBenefitAnalysis_CostR_JRadioButton_Text"));
+    protected JRadioButton m_benefitR = new JRadioButton(Messages.getInstance().getString("CostBenefitAnalysis_BenefitR_JRadioButton_Text"));
+    protected JLabel m_costBenefitL = new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_CostBenefitL_JLabel_Text"), SwingConstants.RIGHT);
     protected JLabel m_costBenefitV = new JLabel("0");
     protected JLabel m_randomV = new JLabel("0");
     protected JLabel m_gainV = new JLabel("0");
@@ -311,9 +311,9 @@ public class CostBenefitAnalysis extends JPanel
       ActionListener rl = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if (m_costR.isSelected()) {
-            m_costBenefitL.setText("Cost: ");
+            m_costBenefitL.setText(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_CostBenefitL_SetText_Text_First"));
           } else {
-            m_costBenefitL.setText("Benefit: ");
+            m_costBenefitL.setText(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_CostBenefitL_SetText_Text_Second"));
           }
 
           double gain = Double.parseDouble(m_gainV.getText());
@@ -338,15 +338,15 @@ public class CostBenefitAnalysis extends JPanel
       
       JPanel threshInfoPanel = new JPanel();
       threshInfoPanel.setLayout(new GridLayout(3,2));
-      threshInfoPanel.add(new JLabel("% of Population: ", SwingConstants.RIGHT));
+      threshInfoPanel.add(new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_ThreshInfoPanel_JLabel_Text_First"), SwingConstants.RIGHT));
       threshInfoPanel.add(m_percPopLab);
-      threshInfoPanel.add(new JLabel("% of Target: ", SwingConstants.RIGHT));
+      threshInfoPanel.add(new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_ThreshInfoPanel_JLabel_Text_Second"), SwingConstants.RIGHT));
       threshInfoPanel.add(m_percOfTargetLab);
-      threshInfoPanel.add(new JLabel("Score Threshold: ", SwingConstants.RIGHT));
+      threshInfoPanel.add(new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_ThreshInfoPanel_JLabel_Text_Third"), SwingConstants.RIGHT));
       threshInfoPanel.add(m_thresholdLab);
       
       JPanel threshHolder = new JPanel();
-      threshHolder.setBorder(BorderFactory.createTitledBorder("Threshold"));
+      threshHolder.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_ThreshInfoPanel_ThreshHolder_SetBorder_BorderFactory_CreateTitledBorder_Text")));
       threshHolder.setLayout(new BorderLayout());
       threshHolder.add(threshPanel, BorderLayout.CENTER);
       threshHolder.add(threshInfoPanel, BorderLayout.EAST);
@@ -371,12 +371,12 @@ public class CostBenefitAnalysis extends JPanel
       confusionPanel.add(m_conf_actualB);
       JPanel tempHolderCA = new JPanel();
       tempHolderCA.setLayout(new BorderLayout());
-      tempHolderCA.setBorder(BorderFactory.createTitledBorder("Confusion Matrix"));
+      tempHolderCA.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_ThreshInfoPanel_TempHolderCA_SetBorder_BorderFactory_CreateTitledBorder_Text")));
       tempHolderCA.add(confusionPanel, BorderLayout.CENTER);
       
       JPanel accHolder = new JPanel();
       accHolder.setLayout(new FlowLayout(FlowLayout.LEFT));
-      accHolder.add(new JLabel("Classification Accuracy: "));
+      accHolder.add(new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_ThreshInfoPanel_AccHolder_Add_JLabel_Text")));
       accHolder.add(m_classificationAccV);
       tempHolderCA.add(accHolder, BorderLayout.SOUTH);
       
@@ -384,7 +384,7 @@ public class CostBenefitAnalysis extends JPanel
       
       // cost matrix
       JPanel costPanel = new JPanel();
-      costPanel.setBorder(BorderFactory.createTitledBorder("Cost Matrix"));
+      costPanel.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_CostPanel_SetBorder_BorderFactory_CcreateTitledBorder_Text")));
       costPanel.setLayout(new BorderLayout());
       
       JPanel cmHolder = new JPanel();
@@ -450,9 +450,9 @@ public class CostBenefitAnalysis extends JPanel
       tempP.setLayout(new GridLayout(3, 2));
       tempP.add(m_costBenefitL);
       tempP.add(m_costBenefitV);
-      tempP.add(new JLabel("Random: ", SwingConstants.RIGHT));
+      tempP.add(new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_CbHolder_TempP_JPanel_Add_JLabel_Text_First"), SwingConstants.RIGHT));
       tempP.add(m_randomV);
-      tempP.add(new JLabel("Gain: ", SwingConstants.RIGHT));
+      tempP.add(new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_CbHolder_TempP_JPanel_Add_JLabel_Text_Second"), SwingConstants.RIGHT));
       tempP.add(m_gainV);
       cbHolder.add(tempP, BorderLayout.NORTH);
       JPanel butHolder = new JPanel();
@@ -478,7 +478,7 @@ public class CostBenefitAnalysis extends JPanel
       popCBR.setLayout(new GridLayout(1, 2));
       JPanel popHolder = new JPanel();
       popHolder.setLayout(new FlowLayout(FlowLayout.LEFT));
-      popHolder.add(new JLabel("Total Population: "));
+      popHolder.add(new JLabel(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_PopHolder_Add_JLabel_Text")));
       popHolder.add(m_totalPopField);
       
       JPanel radioHolder2 = new JPanel();
@@ -853,7 +853,7 @@ public class CostBenefitAnalysis extends JPanel
     
     private void setClassForConfusionMatrix(Attribute classAtt) {
       m_classAttribute = classAtt;
-      m_conf_actualA.setText(" Actual (a): " + classAtt.value(0));
+      m_conf_actualA.setText(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_SetClassForConfusionMatrix_Conf_ActualA_SetText_Text") + classAtt.value(0));
       m_conf_actualA.setToolTipText(classAtt.value(0));
       String negClasses = "";
       for (int i = 1; i < classAtt.numValues(); i++) {
@@ -862,7 +862,7 @@ public class CostBenefitAnalysis extends JPanel
           negClasses += ",";
         }
       }
-      m_conf_actualB.setText(" Actual (b): " + negClasses);
+      m_conf_actualB.setText(Messages.getInstance().getString("CostBenefitAnalysis_AnalysisPanel_SetClassForConfusionMatrix_Conf_ActualB_SetText_Text") + negClasses);
       m_conf_actualB.setToolTipText(negClasses);
     }
     
@@ -966,7 +966,7 @@ public class CostBenefitAnalysis extends JPanel
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Visualize performance charts (such as ROC).";
+    return Messages.getInstance().getString("CostBenefitAnalysis_GlobalInfo_Text");
   }
 
   /**
@@ -977,7 +977,7 @@ public class CostBenefitAnalysis extends JPanel
     try {
       setCurveData(e.getDataSet(), e.getClassAttribute());
     } catch (Exception ex) {
-      System.err.println("[CostBenefitAnalysis] Problem setting up visualization.");
+      System.err.println(Messages.getInstance().getString("CostBenefitAnalysis_AcceptDataSet_Error_Text"));
       ex.printStackTrace();
     }
   }
@@ -1029,7 +1029,7 @@ public class CostBenefitAnalysis extends JPanel
           m_framePoppedUp = true;
 
           final javax.swing.JFrame jf = 
-            new javax.swing.JFrame("Cost/Benefit Analysis");
+            new javax.swing.JFrame(Messages.getInstance().getString("CostBenefitAnalysis_PerformRequest_Jf_JFrame_Text"));
           jf.setSize(1000,600);
           jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(m_analysisPanel, BorderLayout.CENTER);
@@ -1050,7 +1050,7 @@ public class CostBenefitAnalysis extends JPanel
       }
     } else {
       throw new IllegalArgumentException(request
-          + " not supported (Cost/Benefit Analysis");
+          + Messages.getInstance().getString("CostBenefitAnalysis_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
@@ -1225,7 +1225,7 @@ public class CostBenefitAnalysis extends JPanel
       }
       pd.setConnectPoints(connectPoints);
       final javax.swing.JFrame jf = 
-        new javax.swing.JFrame("CostBenefitTest");
+        new javax.swing.JFrame(Messages.getInstance().getString("CostBenefitAnalysis_PerformRequest_Main_JF_JFrame_Text"));
       jf.setSize(1000,600);
       //jf.pack();
       jf.getContentPane().setLayout(new BorderLayout());

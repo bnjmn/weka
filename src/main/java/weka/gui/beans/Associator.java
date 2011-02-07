@@ -181,8 +181,8 @@ public class Associator
   public void setWrappedAlgorithm(Object algorithm) {
 
     if (!(algorithm instanceof weka.associations.Associator)) { 
-      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
-					 +"type of algorithm (Associator)");
+      throw new IllegalArgumentException(algorithm.getClass()
+					 + Messages.getInstance().getString("Associator_SetWrappedAlgorithm_IllegalArgumentException_Text"));
     }
     setAssociator((weka.associations.Associator)algorithm);
   }
@@ -231,7 +231,7 @@ public class Associator
 //		    m_visual.setText("Building model...");
 		    if (m_log != null) {
 		      m_log.statusMessage(statusMessagePrefix() 
-		          + "Building model...");
+		          + Messages.getInstance().getString("Associator_AcceptDataSet_StatusMessage_Text_First"));
 		    }
 		    buildAssociations(trainingData);
 
@@ -242,12 +242,11 @@ public class Associator
 		      titleString = titleString.
 			substring(titleString.lastIndexOf('.') + 1,
 				  titleString.length());
-		      modelString = "=== Associator model ===\n\n" +
-			"Scheme:   " +titleString+"\n" +
-			"Relation: "  + trainingData.relationName() + 
-                        "\n\n"
-			+ modelString;
-		      titleString = "Model: " + titleString;
+		      modelString = Messages.getInstance().getString("Associator_AcceptDataSet_ModelString_Text_First") 
+		      + Messages.getInstance().getString("Associator_AcceptDataSet_ModelString_Text_Second")  + trainingData.relationName() 
+		      + "\n\n" + modelString;
+
+		      titleString = Messages.getInstance().getString("Associator_AcceptDataSet_TitleString_Text_First") + titleString;
 
 		      TextEvent nt = new TextEvent(Associator.this,
 						   modelString,
@@ -279,9 +278,9 @@ public class Associator
 		  Associator.this.stop();
 		  if (m_log != null) {
 		    m_log.statusMessage(statusMessagePrefix()
-		        + "ERROR (See log for details)");
-		    m_log.logMessage("[Associator] " + statusMessagePrefix()
-		        + " problem training associator. " + ex.getMessage());
+		        + Messages.getInstance().getString("Associator_AcceptDataSet_StatusMessage_Text_Second"));
+		    m_log.logMessage(Messages.getInstance().getString("Associator_AcceptDataSet_LogMessage_Text_First") + statusMessagePrefix()
+		        + Messages.getInstance().getString("Associator_AcceptDataSet_LogMessage_Text_Second") + ex.getMessage());
 		  }
 		  ex.printStackTrace();
 		} finally {
@@ -294,13 +293,13 @@ public class Associator
 		      titleString = titleString.
 			substring(titleString.lastIndexOf('.') + 1,
 				  titleString.length());
-		      m_log.logMessage("[Associator] " + statusMessagePrefix() 
-		          + " Build associator interrupted!");
-		      m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
+		      m_log.logMessage(Messages.getInstance().getString("Associator_AcceptDataSet_LogMessage_Text_Third") + statusMessagePrefix() 
+		          + Messages.getInstance().getString("Associator_AcceptDataSet_LogMessage_Text_Fourth"));
+		      m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Associator_AcceptDataSet_StatusMessage_Text_Third"));
 		    }
 		  } else {
 		    if (m_log != null) {
-		      m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		      m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Associator_AcceptDataSet_StatusMessage_Text_Fourth"));
 		    }
 		  }
 		  block(false);
@@ -565,7 +564,7 @@ public class Associator
       stop();
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (Associator)");
+					 + Messages.getInstance().getString("Associator_PerformRequest_IllegalArgumentException_Text_First"));
     }
   }
 

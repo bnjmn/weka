@@ -38,7 +38,7 @@ import javax.swing.table.TableModel;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision$ 
  */
 
 public class JTableHelper {
@@ -122,7 +122,7 @@ public class JTableHelper {
       return -1;
     
     if (col < 0 || col > table.getColumnCount()) {
-      System.out.println("invalid col " + col);
+      System.out.println(Messages.getInstance().getString("JTableHelper_CalcHeaderWidth_Text") + col);
       return -1;
     }
     

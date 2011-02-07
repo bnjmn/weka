@@ -31,7 +31,7 @@ import java.awt.BorderLayout;
  * A slightly extended MatrixPanel for better support in the Explorer.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.15 $
+ * @version $Revision$
  * @see MatrixPanel
  */
 public class VisualizePanel
@@ -69,7 +69,7 @@ public class VisualizePanel
    * @return 		the title of this tab
    */
   public String getTabTitle() {
-    return "Visualize";
+    return Messages.getInstance().getString("VisualizePanel_GetTabTitle_Text");
   }
   
   /**
@@ -78,7 +78,7 @@ public class VisualizePanel
    * @return 		the tooltip of this tab
    */
   public String getTabTitleToolTip() {
-    return "Explore the data";
+    return Messages.getInstance().getString("VisualizePanel_GetTabTitleToolTip_Text");
   }
 
   /**
@@ -90,7 +90,7 @@ public class VisualizePanel
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Explorer: Visualize");
+	new javax.swing.JFrame(Messages.getInstance().getString("VisualizePanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final VisualizePanel sp = new VisualizePanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -104,7 +104,7 @@ public class VisualizePanel
       jf.setSize(800, 600);
       jf.setVisible(true);
       if (args.length == 1) {
-	System.err.println("Loading instances from " + args[0]);
+	System.err.println(Messages.getInstance().getString("VisualizePanel_Main_Error_Text") + args[0]);
 	java.io.Reader r = new java.io.BufferedReader(
 			   new java.io.FileReader(args[0]));
 	Instances i = new Instances(r);

@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * GUI Customizer for the prediction appender bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 
 public class PredictionAppenderCustomizer
@@ -56,7 +56,7 @@ public class PredictionAppenderCustomizer
 
     setLayout(new BorderLayout());
     add(m_paEditor, BorderLayout.CENTER);
-    add(new javax.swing.JLabel("PredcitionAppenderCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("PredictionAppenderCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
   }
 

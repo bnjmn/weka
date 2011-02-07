@@ -263,7 +263,7 @@ public class GenericPropertiesCreator {
    */
   protected void loadInputProperties()  {
     if (VERBOSE)
-      System.out.println("Loading '" + getInputFilename() + "'...");
+      System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_LoadInputProperties_Text_First") + getInputFilename() + Messages.getInstance().getString("GenericPropertiesCreator_LoadInputProperties_Text_Second"));
     m_InputProperties = new Properties();
     try {
       File f = new File(getInputFilename());
@@ -321,9 +321,7 @@ public class GenericPropertiesCreator {
     // in the system classpath
     if (!ClassLoader.getSystemClassLoader().equals(this.getClass().getClassLoader())) {
       if (Boolean.parseBoolean(getInputProperties().getProperty(USE_DYNAMIC, "true")) == true) {
-        System.out.println("[GenericPropertiesCreator] classloader in use is not the system "
-            + "classloader: using static entries in weka/gui/GenericObjectEditor.props rather "
-            + "than dynamic class discovery.");
+        System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_UseDynamic_Text"));
       }
       return false;
     }
@@ -457,7 +455,7 @@ public class GenericPropertiesCreator {
           classes = ClassDiscovery.find(Class.forName(key), pkg);
         }
         catch (Exception e) {
-          System.out.println("Problem with '" + key + "': " + e);
+          System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_GenerateOutputProperties_Text_First") + key + Messages.getInstance().getString("GenericPropertiesCreator_GenerateOutputProperties_Text_Second") + e);
           classes = new Vector();
         }
         
@@ -499,10 +497,10 @@ public class GenericPropertiesCreator {
    */
   protected void storeOutputProperties() throws Exception {
     if (VERBOSE)
-      System.out.println("Saving '" + getOutputFilename() + "'...");
+      System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_StoreOutputProperties_Text_First") + getOutputFilename() + Messages.getInstance().getString("GenericPropertiesCreator_StoreOutputProperties_Text_Second"));
     m_OutputProperties.store(
         new FileOutputStream(getOutputFilename()), 
-        " Customises the list of options given by the GenericObjectEditor\n# for various superclasses.");
+        Messages.getInstance().getString("GenericPropertiesCreator_StoreOutputProperties_Text_Third"));
   }
   
   /**
@@ -578,7 +576,7 @@ public class GenericPropertiesCreator {
       c.setOutputFilename(args[1]);
     }
     else {
-      System.out.println("usage: " + GenericPropertiesCreator.class.getName() + " [<input.props>] [<output.props>]");
+      System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_Main_Text_First") + GenericPropertiesCreator.class.getName() + Messages.getInstance().getString("GenericPropertiesCreator_Main_Text_Second"));
       System.exit(1);
     }
     

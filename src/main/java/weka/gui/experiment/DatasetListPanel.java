@@ -64,7 +64,7 @@ import javax.swing.event.ListSelectionListener;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision$
  */
 public class DatasetListPanel
   extends JPanel
@@ -80,22 +80,22 @@ public class DatasetListPanel
   protected JList m_List;
 
   /** Click to add a dataset. */
-  protected JButton m_AddBut = new JButton("Add new...");
+  protected JButton m_AddBut = new JButton(Messages.getInstance().getString("DatasetListPanel_AddBut_JButton_Text"));
   
   /** Click to edit the selected algorithm. */
-  protected JButton m_EditBut = new JButton("Edit selected...");
+  protected JButton m_EditBut = new JButton(Messages.getInstance().getString("DatasetListPanel_EditBut_JButton_Text"));
 
   /** Click to remove the selected dataset from the list. */
-  protected JButton m_DeleteBut = new JButton("Delete selected");
+  protected JButton m_DeleteBut = new JButton(Messages.getInstance().getString("DatasetListPanel_DeleteBut_JButton_Text"));
   
   /** Click to move the selected dataset(s) one up. */
-  protected JButton m_UpBut = new JButton("Up");
+  protected JButton m_UpBut = new JButton(Messages.getInstance().getString("DatasetListPanel_UpBut_JButton_Text"));
   
   /** Click to move the selected dataset(s) one down. */
-  protected JButton m_DownBut = new JButton("Down");
+  protected JButton m_DownBut = new JButton(Messages.getInstance().getString("DatasetListPanel_DownBut_JButton_Text"));
 
   /** Make file paths relative to the user (start) directory. */
-  protected JCheckBox m_relativeCheck = new JCheckBox("Use relative paths");
+  protected JCheckBox m_relativeCheck = new JCheckBox(Messages.getInstance().getString("DatasetListPanel_RelativeCheck_JCheckBox_Text"));
 
   /** The user (start) directory. */
   //  protected File m_UserDir = new File(System.getProperty("user.dir"));
@@ -158,10 +158,9 @@ public class DatasetListPanel
     m_DownBut.setEnabled(false);
     m_DownBut.addActionListener(this);
     m_relativeCheck.setSelected(ExperimenterDefaults.getUseRelativePaths());
-    m_relativeCheck.setToolTipText("Store file paths relative to "
-				   +"the start directory");
+    m_relativeCheck.setToolTipText(Messages.getInstance().getString("DatasetListPanel_RelativeCheck_SetToolTipText_Text"));
     setLayout(new BorderLayout());
-    setBorder(BorderFactory.createTitledBorder("Datasets"));
+    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("DatasetListPanel_RelativeCheck_SetBorder_Text")));
     JPanel topLab = new JPanel();
     GridBagLayout gb = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
@@ -259,7 +258,7 @@ public class DatasetListPanel
 	}
       }
     } catch (Exception e) {
-      System.err.println("IOError occured when reading list of files");
+      System.err.println(Messages.getInstance().getString("DatasetListPanel_GetFilesRecursively_Error_Text"));
     }
   }
   
@@ -376,7 +375,7 @@ public class DatasetListPanel
 	  if ((result == ViewerDialog.APPROVE_OPTION) && (dialog.isChanged())) {
 	    result = JOptionPane.showConfirmDialog(
 			this,
-			"File was modified - save changes?");
+			Messages.getInstance().getString("DatasetListPanel_ActionPerformed_Result_JOptionPaneShowConfirmDialog_Text"));
 	    if (result == JOptionPane.YES_OPTION) {
 	      Saver saver = ConverterUtils.getSaverForFile(filename);
 	      saver.setFile(new File(filename));
@@ -388,8 +387,8 @@ public class DatasetListPanel
 	catch (Exception ex) {
 	  JOptionPane.showMessageDialog(
 	      this,
-	      "Error loading file '" + filename + "':\n" + ex.toString(),
-	      "Error loading file",
+	      Messages.getInstance().getString("DatasetListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_First") + filename + Messages.getInstance().getString("DatasetListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_Second") + ex.toString(),
+	      Messages.getInstance().getString("DatasetListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_Third"),
 	      JOptionPane.INFORMATION_MESSAGE);
 	}
       }
@@ -409,7 +408,7 @@ public class DatasetListPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Dataset List Editor");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("DatasetListPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       DatasetListPanel dp = new DatasetListPanel();
       jf.getContentPane().add(dp,
@@ -422,9 +421,9 @@ public class DatasetListPanel
       });
       jf.pack();
       jf.setVisible(true);
-      System.err.println("Short nap");
+      System.err.println(Messages.getInstance().getString("DatasetListPanel_Main_Error_Text_First"));
       Thread.currentThread().sleep(3000);
-      System.err.println("Done");
+      System.err.println(Messages.getInstance().getString("DatasetListPanel_Main_Error_Text_Second"));
       dp.setExperiment(new Experiment());
     } catch (Exception ex) {
       ex.printStackTrace();

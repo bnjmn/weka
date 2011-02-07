@@ -39,7 +39,7 @@ import javax.swing.JPanel;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class ClassValuePickerCustomizer
   extends JPanel
@@ -58,16 +58,16 @@ public class ClassValuePickerCustomizer
   private JComboBox m_ClassValueCombo = new JComboBox();
   private JPanel m_holderP = new JPanel();
 
-  private JLabel m_messageLabel = new JLabel("No customization possible at present.");
+  private JLabel m_messageLabel = new JLabel(Messages.getInstance().getString("ClassValuePickerCustomizer_MessageLabel_JLabel_Text"));
 
   public ClassValuePickerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
     
     setLayout(new BorderLayout());
-    add(new javax.swing.JLabel("ClassValuePickerCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("ClassValuePickerCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
     m_holderP.setLayout(new BorderLayout());
-    m_holderP.setBorder(BorderFactory.createTitledBorder("Choose class value"));
+    m_holderP.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassValuePickerCustomizer_HolderP_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     m_holderP.add(m_ClassValueCombo, BorderLayout.CENTER);
     m_ClassValueCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -139,7 +139,7 @@ public class ClassValuePickerCustomizer
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassValuePicker (if necessary)
     if (m_classValuePicker != null) {
-      System.err.println("Customizer deregistering with class value picker");
+      System.err.println(Messages.getInstance().getString("ClassValuePickerCustomizer_CustomizerClosing_Text"));
       m_classValuePicker.removeDataFormatListener(this);
     }
   }

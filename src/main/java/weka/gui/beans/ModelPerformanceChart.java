@@ -95,7 +95,7 @@ public class ModelPerformanceChart
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Visualize performance charts (such as ROC).";
+    return Messages.getInstance().getString("ModelPerformanceChart_GlobalInfo_Text");
   }
 
   protected void appearanceDesign() {
@@ -149,7 +149,7 @@ public class ModelPerformanceChart
       }
       m_visPanel.setXIndex(4); m_visPanel.setYIndex(5);
     } catch (Exception ex) {
-      System.err.println("Problem setting up visualization (ModelPerformanceChart)");
+      System.err.println(Messages.getInstance().getString("ModelPerformanceChart_AcceptDataSet_Error_Text"));
       ex.printStackTrace();
     }
   }
@@ -169,7 +169,8 @@ public class ModelPerformanceChart
     try {
       m_visPanel.setMasterPlot(m_masterPlot);
     } catch (Exception ex) {
-      System.err.println("Problem setting up visualization (ModelPerformanceChart)");
+      System.err.println(Messages.getInstance().getString("ModelPerformanceChart_AcceptDataSet_Error_Text")
+    		  );
       ex.printStackTrace();
     }
     m_visPanel.validate();
@@ -300,7 +301,7 @@ public class ModelPerformanceChart
 	  m_framePoppedUp = true;
 
 	  final javax.swing.JFrame jf = 
-	    new javax.swing.JFrame("Model Performance Chart");
+	    new javax.swing.JFrame(Messages.getInstance().getString("ModelPerformanceChart_PerformRequest_Jf_JFRame_Text"));
 	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(m_visPanel, BorderLayout.CENTER);
@@ -326,14 +327,14 @@ public class ModelPerformanceChart
         m_masterPlot = null;
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (Model Performance Chart)");
+					 + Messages.getInstance().getString("ModelPerformanceChart_PerformRequest_IllegalArgumentException_Text"));
     }
   }
   
   public static void main(String [] args) {
     try {
       if (args.length != 1) {
-	System.err.println("Usage: ModelPerformanceChart <dataset>");
+	System.err.println(Messages.getInstance().getString("ModelPerformanceChart_Main_Error_Text"));
 	System.exit(1);
       }
       java.io.Reader r = new java.io.BufferedReader(

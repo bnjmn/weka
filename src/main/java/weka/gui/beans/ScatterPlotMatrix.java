@@ -32,7 +32,7 @@ import java.awt.BorderLayout;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class ScatterPlotMatrix
   extends DataVisualizer {
@@ -56,8 +56,7 @@ public class ScatterPlotMatrix
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Visualize incoming data/training/test sets in a scatter "
-      +"plot matrix.";
+    return Messages.getInstance().getString("ScatterPlotMatrix_GlobalInfo_Text");
   }
 
   protected void appearanceDesign() {
@@ -93,10 +92,7 @@ public class ScatterPlotMatrix
    */
   public void setInstances(Instances inst) throws Exception {
     if (m_design) {
-      throw new Exception("This method is not to be used during design "
-			  +"time. It is meant to be used if this "
-			  +"bean is being used programatically as as "
-			  +"stand alone component.");
+      throw new Exception(Messages.getInstance().getString("ScatterPlotMatrix_SetInstances_Exception_Text"));
     }
     m_visualizeDataSet = inst;
     m_matrixPanel.setInstances(m_visualizeDataSet);
@@ -118,7 +114,7 @@ public class ScatterPlotMatrix
 	  vis.setInstances(m_visualizeDataSet);
 
 	  final javax.swing.JFrame jf = 
-	    new javax.swing.JFrame("Visualize");
+	    new javax.swing.JFrame(Messages.getInstance().getString("ScatterPlotMatrix_PerformRequest_Jf_JFrame_Text"));
 	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(vis, BorderLayout.CENTER);
@@ -139,14 +135,14 @@ public class ScatterPlotMatrix
       }
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (ScatterPlotMatrix)");
+					 + Messages.getInstance().getString("ScatterPlotMatrix_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
   public static void main(String [] args) {
     try {
       if (args.length != 1) {
-	System.err.println("Usage: ScatterPlotMatrix <dataset>");
+	System.err.println(Messages.getInstance().getString("ScatterPlotMatrix_Main_Error_Text"));
 	System.exit(1);
       }
       java.io.Reader r = new java.io.BufferedReader(

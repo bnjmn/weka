@@ -101,7 +101,7 @@ public class JPEGWriter
    * @return the name of the writer
    */
   public String getDescription() {
-    return "JPEG-Image";
+    return Messages.getInstance().getString("JPEGWriter_GetDescription_Text");
   }
   
   /**
@@ -180,7 +180,7 @@ public class JPEGWriter
     if (iter.hasNext())
       writer = (ImageWriter) iter.next();
     else
-      throw new Exception("No writer available for " + getDescription() + "!");
+      throw new Exception(Messages.getInstance().getString("JPEGWriter_GenerateOutput_Exception_Text_First") + getDescription() + Messages.getInstance().getString("JPEGWriter_GenerateOutput_Exception_Text_Second"));
 
     // prepare output file
     ios = ImageIO.createImageOutputStream(getFile());
@@ -207,17 +207,17 @@ public class JPEGWriter
    * @throws Exception if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    System.out.println("building TreeVisualizer...");
+    System.out.println(Messages.getInstance().getString("JPEGWriter_Main_Text_First"));
     weka.gui.treevisualizer.TreeBuild builder = new weka.gui.treevisualizer.TreeBuild();
     weka.gui.treevisualizer.NodePlace arrange = new weka.gui.treevisualizer.PlaceNode2();
-    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader("digraph atree { top [label=\"the top\"] a [label=\"the first node\"] b [label=\"the second nodes\"] c [label=\"comes off of first\"] top->a top->b b->c }"));
+    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader(Messages.getInstance().getString("JPEGWriter_Main_Text_Second")));
     weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
     tv.setSize(800 ,600);
     
     String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.jpg";
-    System.out.println("outputting to '" + filename + "'...");
+    System.out.println(Messages.getInstance().getString("JPEGWriter_Main_Text_Third") + filename + Messages.getInstance().getString("JPEGWriter_Main_Text_Fourth"));
     toOutput(new JPEGWriter(), tv, new File(filename));
 
-    System.out.println("done!");
+    System.out.println(Messages.getInstance().getString("JPEGWriter_Main_Text_Fifth"));
   }
 }

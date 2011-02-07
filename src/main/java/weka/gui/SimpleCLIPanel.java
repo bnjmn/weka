@@ -95,19 +95,18 @@ public class SimpleCLIPanel
 	(java.util.Enumeration) PROPERTIES.propertyNames();
       if (!keys.hasMoreElements()) {
 	throw new Exception(
-	    "Failed to read a property file for the SimpleCLI");
+	    Messages.getInstance().getString("SimpleCLIPanel_Exception_Text_First"));
       }
     }
     catch (Exception ex) {
       JOptionPane.showMessageDialog(
 	  null,
-	  "Could not read a configuration file for the SimpleCLI.\n"
-	  + "An example file is included with the Weka distribution.\n"
-	  + "This file should be named \"" + PROPERTY_FILE + "\" and\n"
-	  + "should be placed either in your user home (which is set\n"
-	  + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-	  + "or the directory that java was started from\n",
-	  "SimpleCLI",
+	  Messages.getInstance().getString("SimpleCLIPanel_Exception_JOptionPaneShowMessageDialog_Text_First")
+	  + PROPERTY_FILE 
+	  + Messages.getInstance().getString("SimpleCLIPanel_Exception_JOptionPaneShowMessageDialog_Text_Second") 
+	  + System.getProperties().getProperty("user.home") 
+	  + Messages.getInstance().getString("SimpleCLIPanel_Exception_JOptionPaneShowMessageDialog_Text_Third"),
+	  Messages.getInstance().getString("SimpleCLIPanel_Exception_JOptionPaneShowMessageDialog_Text_Fourth"),
 	  JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -219,9 +218,9 @@ public class SimpleCLIPanel
       m_MainMethod = theClass.getMethod("main", argTemplate);
       if (((m_MainMethod.getModifiers() & Modifier.STATIC) == 0)
 	  || (m_MainMethod.getModifiers() & Modifier.PUBLIC) == 0) {
-	throw new NoSuchMethodException("main(String[]) method of " +
+	throw new NoSuchMethodException(Messages.getInstance().getString("SimpleCLIPanel_ClassRunner_Exception_NoSuchMethodException_Text_First") +
 					theClass.getName() +
-					" is not public and static.");
+					Messages.getInstance().getString("SimpleCLIPanel_ClassRunner_Exception_NoSuchMethodException_Text_Second"));
       }
     }
 
@@ -265,13 +264,13 @@ public class SimpleCLIPanel
 	Object[] args = {m_CommandArgs};
 	m_MainMethod.invoke(null, args);
 	if (isInterrupted()) {
-	  System.err.println("[...Interrupted]");
+	  System.err.println(Messages.getInstance().getString("SimpleCLIPanel_ClassRunner_Run_Error_Text_First"));
 	}
       } catch (Exception ex) {
 	if (ex.getMessage() == null) {
-	  System.err.println("[...Killed]");
+	  System.err.println(Messages.getInstance().getString("SimpleCLIPanel_ClassRunner_Run_Error_Text_Second"));
 	} else {
-	  System.err.println("[Run exception] " + ex.getMessage());
+	  System.err.println(Messages.getInstance().getString("SimpleCLIPanel_ClassRunner_Run_Error_Text_Third") + ex.getMessage());
 	}
       } finally {
 	m_RunThread = null;
@@ -282,7 +281,7 @@ public class SimpleCLIPanel
 	outNew.flush();
 	outNew.close();
 	System.setOut(outOld);
-	System.out.println("Finished redirecting output to '" + outFilename + "'.");
+	System.out.println(Messages.getInstance().getString("SimpleCLIPanel_ClassRunner_Run_Text_First") + outFilename + Messages.getInstance().getString("SimpleCLIPanel_ClassRunner_Run_Text_Second"));
       }
     }
   }
@@ -451,7 +450,7 @@ public class SimpleCLIPanel
       // is the OS case-sensitive?
       caseSensitive = (File.separatorChar != '\\');
       if (m_Debug)
-	System.out.println("case-sensitive=" + caseSensitive);
+	System.out.println(Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetFileMatches_Text_First") + caseSensitive);
       
       // is "~" used for home directory? -> replace with actual home directory
       if (partial.startsWith("~"))
@@ -478,7 +477,7 @@ public class SimpleCLIPanel
       }
 
       if (m_Debug)
-	System.out.println("search in dir=" + dir + ", prefix=" + prefix);
+	System.out.println(Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetFileMatches_Text_Second") + dir + Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetFileMatches_Text_Third") + prefix);
       
       // list all files in dir
       if (dir != null) {
@@ -509,7 +508,7 @@ public class SimpleCLIPanel
 	  }
 	}
 	else {
-	  System.err.println("Invalid path: " + partial);
+	  System.err.println(Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetFileMatches_Error_Text") + partial);
 	}
       }
       
@@ -519,7 +518,7 @@ public class SimpleCLIPanel
       
       // print results
       if (m_Debug) {
-	System.out.println("file matches:");
+	System.out.println(Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetFileMatches_Text_Third"));
 	for (i = 0; i < result.size(); i++)
 	  System.out.println(result.get(i));
       }
@@ -549,7 +548,7 @@ public class SimpleCLIPanel
       
       if (getDebug())
 	System.out.println(
-	    "\nsearch for: '" + partial + "' => package=" + pkg + ", class=" + cls);
+			Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetClassMatches_Text_First") + partial + Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetClassMatches_Text_Second") + pkg + Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetClassMatches_Text_Third") + cls);
 
       result = new Vector<String>();
 
@@ -589,7 +588,7 @@ public class SimpleCLIPanel
 
       // print results
       if (m_Debug) {
-	System.out.println("class/package matches:");
+	System.out.println(Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetClassMatches_Text_Fifth"));
 	for (i = 0; i < result.size(); i++)
 	  System.out.println(result.get(i));
       }
@@ -626,7 +625,7 @@ public class SimpleCLIPanel
       result = trie.getCommonPrefix();
       
       if (m_Debug)
-	System.out.println(list + "\n  --> common prefix: '" + result + "'");
+	System.out.println(list + Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetCommonPrefix_Text_First") + result + Messages.getInstance().getString("SimpleCLIPanel_CommandlineCompletion_GetCommonPrefix_Text_Second"));
       
       return result;
     }
@@ -640,8 +639,8 @@ public class SimpleCLIPanel
   public SimpleCLIPanel() throws Exception {
     
     setLayout(new BorderLayout());
-    add(new JScrollPane(m_OutputArea), "Center");
-    add(m_Input, "South");
+    add(new JScrollPane(m_OutputArea), Messages.getInstance().getString("SimpleCLIPanel_JScrollPane_Text_First"));
+    add(m_Input, Messages.getInstance().getString("SimpleCLIPanel_JScrollPane_Text_Second"));
 
     m_Input.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_Input.addActionListener(this);
@@ -673,18 +672,10 @@ public class SimpleCLIPanel
     m_Completion = new CommandlineCompletion();
     
     System.out.println(
-	  "\nWelcome to the WEKA SimpleCLI\n\n"
-	+ "Enter commands in the textfield at the bottom of \n"
-	+ "the window. Use the up and down arrows to move \n"
-	+ "through previous commands.\n"
-	+ "Command completion for classnames and files is \n"
-	+ "initiated with <Tab>. In order to distinguish \n"
-	+ "between files and classnames, file names must \n"
-	+ "be either absolute or start with '." + File.separator + "' or '~/'\n"
-	+ "(the latter is a shortcut for the home directory).\n"
-	+ "<Alt+BackSpace> is used for deleting the text\n"
-	+ "in the commandline in chunks.\n");
-    runCommand("help");
+    Messages.getInstance().getString("SimpleCLIPanel_JScrollPane_Text_Third")
+	+ File.separator 
+	+ Messages.getInstance().getString("SimpleCLIPanel_JScrollPane_Text_Fouth"));
+    runCommand(Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Text"));
     
     loadHistory();
   }
@@ -708,13 +699,12 @@ public class SimpleCLIPanel
       commandArgs[0] = "";
       try {
 	if (commandArgs.length == 1) {
-	  throw new Exception("No class name given");
+	  throw new Exception(Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Exception_Text_First"));
 	}
 	String className = commandArgs[1];
 	commandArgs[1] = "";
 	if (m_RunThread != null) {
-	  throw new Exception("An object is already running, use \"break\""
-			      + " to interrupt it.");
+	  throw new Exception(Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Exception_Text_Second"));
 	}
 	Class theClass = Class.forName(className);
 
@@ -736,22 +726,22 @@ public class SimpleCLIPanel
       // Clear the text area
       m_OutputArea.setText("");
     } else if (commandArgs[0].equals("history")) {
-      System.out.println("Command history:");
+      System.out.println(Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Text_First"));
       for (int i = 0; i < m_CommandHistory.size(); i++)
 	System.out.println(m_CommandHistory.get(i));
       System.out.println();
     } else if (commandArgs[0].equals("break")) {
       if (m_RunThread == null) {
-	System.err.println("Nothing is currently running.");
+	System.err.println(Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_First"));
       } else {
-	System.out.println("[Interrupt...]");
+	System.out.println(Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Text_Second"));
 	m_RunThread.interrupt();
       }
     } else if (commandArgs[0].equals("kill")) {
       if (m_RunThread == null) {
-	System.err.println("Nothing is currently running.");
+	System.err.println(Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Second"));
       } else {
-	System.out.println("[Kill...]");
+	System.out.println(Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Text_Third"));
 	m_RunThread.stop();
 	m_RunThread = null;
       }
@@ -789,51 +779,28 @@ public class SimpleCLIPanel
 		      && commandArgs[0].equals("help"));
       if (help && commandArgs[1].equals("java")) {
 	System.err.println(
-	    "java <classname> <args>\n\n"
-	    + "Starts the main method of <classname> with "
-	    + "the supplied command line arguments (if any).\n"
-	    + "The command is started in a separate thread, "
-	    + "and may be interrupted with the \"break\"\n"
-	    + "command (friendly), or killed with the \"kill\" "
-	    + "command (unfriendly).\n"
-	    + "Redirecting can be done with '>' followed by the "
-	    + "file to write to, e.g.:\n"
-	    + "  java some.Class > ." + File.separator + "some.txt");
+			Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Third") 
+	    + File.separator 
+	    + Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Fourth"));
       } else if (help && commandArgs[1].equals("break")) {
 	System.err.println(
-	    "break\n\n"
-	    + "Attempts to nicely interrupt the running job, "
-	    + "if any. If this doesn't respond in an\n"
-	    + "acceptable time, use \"kill\".\n");
+			Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Fifth"));
       } else if (help && commandArgs[1].equals("kill")) {
 	System.err.println(
-	    "kill\n\n"
-	    + "Kills the running job, if any. You should only "
-	    + "use this if the job doesn't respond to\n"
-	    + "\"break\".\n");
+			Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Sixth"));
       } else if (help && commandArgs[1].equals("cls")) {
 	System.err.println(
-	    "cls\n\n"
-	    + "Clears the output area.\n");
+			Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Seventh"));
       } else if (help && commandArgs[1].equals("history")) {
 	System.err.println(
-	    "history\n\n"
-	    + "Prints all issued commands.\n");
+			Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Eighth"));
       } else if (help && commandArgs[1].equals("exit")) {
 	System.err.println(
-	    "exit\n\n"
-	    + "Exits the SimpleCLI program.\n");
+			Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Nineth"));
       } else {
 	// Print a help message
 	System.err.println(
-	    "Command must be one of:\n"
-	    + "\tjava <classname> <args> [ > file]\n"
-	    + "\tbreak\n"
-	    + "\tkill\n"
-	    + "\tcls\n"
-	    + "\thistory\n"
-	    + "\texit\n"
-	    + "\thelp <command>\n");
+			Messages.getInstance().getString("SimpleCLIPanel_RunCommand_Error_Text_Tenth"));
       }
     }
   }
@@ -928,7 +895,7 @@ public class SimpleCLIPanel
 		  }
 		  // ambigiuous? -> print matches
 		  else if (list.size() > 1) {
-		    System.out.println("\nPossible matches:");
+		    System.out.println(Messages.getInstance().getString("SimpleCLIPanel_DoCommandlineCompletion_Text"));
 		    for (int i = 0; i < list.size(); i++)
 		      System.out.println("  " + list.get(i));
 		  }
@@ -1081,7 +1048,7 @@ public class SimpleCLIPanel
   public static void main(String[] args) throws Exception {
     SimpleCLIPanel panel = new SimpleCLIPanel();
     JFrame f = new JFrame();
-    f.setTitle("SimpleCLI");
+    f.setTitle(Messages.getInstance().getString("SimpleCLIPanel_Main_JFrame_SetText_Text"));
     f.getContentPane().add(panel);
     f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     f.pack();

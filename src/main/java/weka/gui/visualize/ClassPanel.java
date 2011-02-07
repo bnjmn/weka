@@ -22,6 +22,7 @@
 
 package weka.gui.visualize;
 
+
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -718,12 +719,11 @@ public class ClassPanel
   public static void main(String [] args) {
     try {
       if (args.length < 1) {
-	System.err.println("Usage : weka.gui.visualize.ClassPanel <dataset> "
-			   +"[class col]");
+	System.err.println(Messages.getInstance().getString("ClassPanel_Main_Error_Text_First"));
 	System.exit(1);
       }
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Explorer: Class");
+	new javax.swing.JFrame(Messages.getInstance().getString("ClassPanel_Main_JFrame_Text"));
       jf.setSize(500,100);
       jf.getContentPane().setLayout(new BorderLayout());
       final ClassPanel p2 = new ClassPanel();
@@ -736,7 +736,7 @@ public class ClassPanel
 	});
 	
       if (args.length >= 1) {
-	System.err.println("Loading instances from " + args[0]);
+	System.err.println(Messages.getInstance().getString("ClassPanel_Main_Error_Text_Second") + args[0]);
 	java.io.Reader r = new java.io.BufferedReader(
 			   new java.io.FileReader(args[0]));
 	Instances i = new Instances(r);

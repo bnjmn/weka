@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -98,7 +98,7 @@ public class DataVisualizer extends JPanel
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Visualize incoming data/training/test sets in a 2D scatter plot.";
+    return Messages.getInstance().getString("DataVisualizer_GlobalInfo_Text");
   }
 
   protected void appearanceDesign() {
@@ -296,10 +296,7 @@ public class DataVisualizer extends JPanel
    */
   public void setInstances(Instances inst) throws Exception {
     if (m_design) {
-      throw new Exception("This method is not to be used during design "
-			  +"time. It is meant to be used if this "
-			  +"bean is being used programatically as as "
-			  +"stand alone component.");
+      throw new Exception(Messages.getInstance().getString("DataVisualizer_SetInstances_Exception_Text"));
     }
     m_visualizeDataSet = inst;
     PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
@@ -307,8 +304,7 @@ public class DataVisualizer extends JPanel
     try {
       m_visPanel.setMasterPlot(pd1);
     } catch (Exception ex) {
-      System.err.println("Problem setting up "
-			 +"visualization (DataVisualizer)");
+      System.err.println(Messages.getInstance().getString("DataVisualizer_SetInstances_Error_Text"));
       ex.printStackTrace();
     }
   }
@@ -348,11 +344,10 @@ public class DataVisualizer extends JPanel
 	  try {
 	    vis.setMasterPlot(pd1);
 	  } catch (Exception ex) {
-	    System.err.println("Problem setting up "
-			       +"visualization (DataVisualizer)");
+	    System.err.println(Messages.getInstance().getString("DataVisualizer_PerformRequest_Error_Text"));
 	    ex.printStackTrace();
 	  }
-	  final JFrame jf = new JFrame("Visualize");
+	  final JFrame jf = new JFrame(Messages.getInstance().getString("DataVisualizer_PerformRequest_Jf_JFrame_Text"));
 	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(vis, BorderLayout.CENTER);
@@ -373,7 +368,7 @@ public class DataVisualizer extends JPanel
       }
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (DataVisualizer)");
+					 + Messages.getInstance().getString("DataVisualizer_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
@@ -398,7 +393,7 @@ public class DataVisualizer extends JPanel
   public static void main(String [] args) {
     try {
       if (args.length != 1) {
-	System.err.println("Usage: DataVisualizer <dataset>");
+	System.err.println(Messages.getInstance().getString("DataVisualizer_Main_Error_Text_First"));
 	System.exit(1);
       }
       java.io.Reader r = new java.io.BufferedReader(

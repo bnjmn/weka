@@ -136,7 +136,7 @@ public class SqlViewer
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.NORTH);
     panel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createTitledBorder("Connection"),
+                    BorderFactory.createTitledBorder(Messages.getInstance().getString("SqlViewer_CreatePanel_Panel_BorderFactoryCreateTitledBorder_Text")),
                     BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel.add(m_ConnectionPanel, BorderLayout.CENTER);
 
@@ -146,7 +146,7 @@ public class SqlViewer
     add(panel, BorderLayout.CENTER);
     panel2 = new JPanel(new BorderLayout());
     panel2.setBorder(BorderFactory.createCompoundBorder(
-                     BorderFactory.createTitledBorder("Query"),
+                     BorderFactory.createTitledBorder(Messages.getInstance().getString("SqlViewer_CreatePanel_Panel2_BorderFactoryCreateTitledBorder_Text_First")),
                      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel2.add(m_QueryPanel, BorderLayout.NORTH);
     panel.add(panel2, BorderLayout.NORTH);
@@ -156,7 +156,7 @@ public class SqlViewer
     m_ResultPanel.setQueryPanel(m_QueryPanel);
     panel2 = new JPanel(new BorderLayout());
     panel2.setBorder(BorderFactory.createCompoundBorder(
-                     BorderFactory.createTitledBorder("Result"),
+                     BorderFactory.createTitledBorder(Messages.getInstance().getString("SqlViewer_CreatePanel_Panel2_BorderFactoryCreateTitledBorder_Text_Second")),
                      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel2.add(m_ResultPanel, BorderLayout.CENTER);
     panel.add(panel2, BorderLayout.CENTER);
@@ -166,7 +166,7 @@ public class SqlViewer
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.SOUTH);
     panel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createTitledBorder("Info"),
+                    BorderFactory.createTitledBorder(Messages.getInstance().getString("SqlViewer_CreatePanel_Panel_BorderFactoryCreateTitledBorder_Text_Second")),
                     BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel.add(m_InfoPanel, BorderLayout.CENTER);
 
@@ -190,12 +190,12 @@ public class SqlViewer
    */
   public void connectionChange(ConnectionEvent evt) {
     if (evt.getType() == ConnectionEvent.DISCONNECT) {
-      m_InfoPanel.append(   "disconnect from: " 
+      m_InfoPanel.append(   Messages.getInstance().getString("SqlViewer_ConnectionChange_InfoPanel_Text_First") 
                           + evt.getDbUtils().getDatabaseURL(),
                           "information_small.gif" );
     }
     else {
-      m_InfoPanel.append(   "connecting to: " 
+      m_InfoPanel.append(   Messages.getInstance().getString("SqlViewer_ConnectionChange_InfoPanel_Text_Second") 
                           + evt.getDbUtils().getDatabaseURL() 
                           + " = " + evt.isConnected(),
                           "information_small.gif" );
@@ -203,7 +203,7 @@ public class SqlViewer
 
     // did an exception happen?
     if (evt.getException() != null)
-      m_InfoPanel.append("exception: " + evt.getException(), "error_small.gif");
+      m_InfoPanel.append(Messages.getInstance().getString("SqlViewer_ConnectionChange_InfoPanel_Text_Third") + evt.getException(), "error_small.gif");
 
     // set focus
     if (evt.isConnected())
@@ -221,23 +221,23 @@ public class SqlViewer
     ResultSetHelper   helper;
     
     if (evt.failed()) {
-      m_InfoPanel.append("Query:" + evt.getQuery(), "error_small.gif");
-      m_InfoPanel.append("exception: " + evt.getException(), "error_small.gif");
+      m_InfoPanel.append(Messages.getInstance().getString("SqlViewer_QueryExecuted_InfoPanel_Text_First") + evt.getQuery(), "error_small.gif");
+      m_InfoPanel.append(Messages.getInstance().getString("SqlViewer_QueryExecuted_InfoPanel_Text_Second") + evt.getException(), "error_small.gif");
     }
     else {
-      m_InfoPanel.append("Query: " + evt.getQuery(), "information_small.gif");
+      m_InfoPanel.append(Messages.getInstance().getString("SqlViewer_QueryExecuted_InfoPanel_Text_Third") + evt.getQuery(), "information_small.gif");
       try {
         if (evt.hasResult()) {
           helper = new ResultSetHelper(evt.getResultSet());
           if ((evt.getMaxRows() > 0) && (helper.getRowCount() >= evt.getMaxRows()))
-            m_InfoPanel.append(helper.getRowCount() + " rows selected (" 
-                + evt.getMaxRows() + " displayed).", 
+            m_InfoPanel.append(helper.getRowCount() + Messages.getInstance().getString("SqlViewer_QueryExecuted_InfoPanel_Text_Fourth") 
+                + evt.getMaxRows() + Messages.getInstance().getString("SqlViewer_QueryExecuted_InfoPanel_Text_Fifth"), 
                 "information_small.gif");
           else if (helper.getRowCount() == -1)
-            m_InfoPanel.append("Unknown number of rows selected (due to JDBC driver restrictions).", 
+            m_InfoPanel.append(Messages.getInstance().getString("SqlViewer_QueryExecuted_InfoPanel_Text_Sixth"), 
               "information_small.gif");
           else
-            m_InfoPanel.append(helper.getRowCount() + " rows selected.", 
+            m_InfoPanel.append(helper.getRowCount() + Messages.getInstance().getString("SqlViewer_QueryExecuted_InfoPanel_Text_Seventh"), 
                 "information_small.gif");
         }
 
@@ -616,14 +616,14 @@ public class SqlViewer
    * @param args	the commandline arguments - ignored
    */
   public static void main(String[] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("SqlViewer_Main_Log_Text"));
     LookAndFeel.setLookAndFeel();
     
     try {
       // uncomment to disable the memory management:
       //m_Memory.setEnabled(false);
 
-      final JFrame jf = new JFrame("Weka SQL-Viewer");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("SqlViewer_Main_JFrame_Text"));
       m_Viewer = new SqlViewer(jf);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_Viewer, BorderLayout.CENTER);
@@ -656,9 +656,9 @@ public class SqlViewer
                 m_Memory.stopThreads();
 
                 // display error
-                System.err.println("\ndisplayed message:");
+                System.err.println(Messages.getInstance().getString("SqlViewer_Main_Error_Text_First"));
                 m_Memory.showOutOfMemory();
-                System.err.println("\nexiting");
+                System.err.println(Messages.getInstance().getString("SqlViewer_Main_Error_Text_Second"));
                 System.exit(-1);
               }
 

@@ -280,9 +280,9 @@ public class BoundaryVisualizer
     new Dimension((int)(m_plotAreaWidth * 0.75),
 		  m_classAttBox.getPreferredSize().height);
 
-  protected JButton m_startBut = new JButton("Start");
+  protected JButton m_startBut = new JButton(Messages.getInstance().getString("BoundaryVisualizer_Start_JButton_Text"));
 
-  protected JCheckBox m_plotTrainingData = new JCheckBox("Plot training data");
+  protected JCheckBox m_plotTrainingData = new JCheckBox(Messages.getInstance().getString("BoundaryVisualizer_PlotTrainingData_JCheckBox_Text"));
 
   protected JPanel m_controlPanel;
 
@@ -330,15 +330,15 @@ public class BoundaryVisualizer
     = new JFileChooser(new File(System.getProperty("user.dir")));
   protected ExtensionFileFilter m_arffFileFilter = 
     new ExtensionFileFilter(Instances.FILE_EXTENSION,
-			    "Arff data files");
+			    Messages.getInstance().getString("BoundaryVisualizer_ExtensionFileFilter_Text"));
   protected JLabel dataFileLabel = new JLabel(); //stores the name of the data file (currently stores relation name rather than filename)
   protected JPanel m_addRemovePointsPanel = new JPanel(); //a panel which contains the controls to add and remove points
   protected JComboBox m_classValueSelector = new JComboBox(); //a widget to select the class attribute.
   protected JRadioButton m_addPointsButton = new JRadioButton(); //when this is selected, clicking on the BoundaryPanel will add points.
   protected JRadioButton m_removePointsButton = new JRadioButton(); //when this is selected, clicking on the BoundaryPanel will remove points.
   protected ButtonGroup m_addRemovePointsButtonGroup = new ButtonGroup();
-  protected JButton removeAllButton = new JButton ("Remove all"); //button to remove all points
-  protected JButton chooseButton = new JButton("Open File"); //button to choose a data file
+  protected JButton removeAllButton = new JButton(Messages.getInstance().getString("BoundaryVisualizer_RemoveAll_JButton_Text")); //button to remove all points
+  protected JButton chooseButton = new JButton(Messages.getInstance().getString("BoundaryVisualizer_Choose_JButton_Text")); //button to choose a data file
   
   /* Register the property editors we need */
   static {
@@ -351,8 +351,7 @@ public class BoundaryVisualizer
    * displaying in various Weka GUIs
    */
   public String globalInfo() {
-    return "Class for visualizing class probability estimates.\n\n"
-    + "For more information, see\n\n"
+    return Messages.getInstance().getString("BoundaryVisualizer_GlobalInfo_Text")
     + getTechnicalInformation().toString();
   }
   
@@ -367,14 +366,13 @@ public class BoundaryVisualizer
     TechnicalInformation        result;
 
     result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Eibe Frank and Mark Hall");
-    result.setValue(Field.TITLE, "Visualizing class probability estimators");
-    result.setValue(Field.BOOKTITLE, "European Conference on Principles and Practice of " +
-    		"Knowledge Discovery in Databases");
-    result.setValue(Field.YEAR, "2003");
-    result.setValue(Field.PAGES, "168-169");
-    result.setValue(Field.PUBLISHER, "Springer-Verlag");
-    result.setValue(Field.ADDRESS, "Cavtat-Dubrovnik");
+    result.setValue(Field.AUTHOR, Messages.getInstance().getString("BoundaryVisualizer_GetTechnicalInformation_FieldAUTHOR"));
+    result.setValue(Field.TITLE, Messages.getInstance().getString("BoundaryVisualizer_GetTechnicalInformation_FieldTITLE"));
+    result.setValue(Field.BOOKTITLE, Messages.getInstance().getString("BoundaryVisualizer_GetTechnicalInformation_FieldBOOKTITLE"));
+    result.setValue(Field.YEAR, Messages.getInstance().getString("BoundaryVisualizer_GetTechnicalInformation_FieldYEAR"));
+    result.setValue(Field.PAGES, Messages.getInstance().getString("BoundaryVisualizer_GetTechnicalInformation_FieldPAGES"));
+    result.setValue(Field.PUBLISHER, Messages.getInstance().getString("BoundaryVisualizer_GetTechnicalInformation_FieldPUBLISHER"));
+    result.setValue(Field.ADDRESS, Messages.getInstance().getString("BoundaryVisualizer_GetTechnicalInformation_FieldADDRESS"));
 
     return result;
   }
@@ -384,7 +382,6 @@ public class BoundaryVisualizer
    * Creates a new <code>BoundaryVisualizer</code> instance.
    */
   public BoundaryVisualizer() {
-    
     setLayout(new BorderLayout());
     m_classAttBox.setMinimumSize(COMBO_SIZE);
     m_classAttBox.setPreferredSize(COMBO_SIZE);
@@ -396,15 +393,14 @@ public class BoundaryVisualizer
 		try { 
 			m_classPanel.setCindex(m_classAttBox.getSelectedIndex());
 			plotTrainingData();
-			System.err.println("Here in class att box listener");
+			System.err.println(Messages.getInstance().getString("BoundaryVisualizer_SetLayout_Error_Text"));
 		} catch (Exception ex) {ex.printStackTrace();}
 		
 		//set up the add points selector combo box. -jimmy
 		setUpClassValueSelectorCB();
 	}
       }
-      });
-	    
+    });
 
     m_xAttBox.setMinimumSize(COMBO_SIZE);
     m_xAttBox.setPreferredSize(COMBO_SIZE);
@@ -427,7 +423,7 @@ public class BoundaryVisualizer
     
     //jimmy
     JPanel dataChooseHolder = new JPanel(new BorderLayout());
-    dataChooseHolder.setBorder(BorderFactory.createTitledBorder("Dataset"));
+    dataChooseHolder.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("BoundaryVisualizer_DataChooseHolder_JPanel_Text")));
     dataChooseHolder.add(dataFileLabel, BorderLayout.WEST);
     
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -453,7 +449,7 @@ public class BoundaryVisualizer
     dataChooseHolder.add(chooseButton, BorderLayout.EAST);
     
     JPanel classifierHolder = new JPanel();
-    classifierHolder.setBorder(BorderFactory.createTitledBorder("Classifier"));
+    classifierHolder.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("BoundaryVisualizer_ClassifierHolder_JPanel_Text")));
     classifierHolder.setLayout(new BorderLayout());
     m_classifierEditor.setClassType(weka.classifiers.Classifier.class);
     
@@ -473,13 +469,13 @@ public class BoundaryVisualizer
         
 
     JPanel cHolder = new JPanel();
-    cHolder.setBorder(BorderFactory.createTitledBorder("Class Attribute"));
+    cHolder.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("BoundaryVisualizer_CHolder_JPanel_Text")));
     cHolder.add(m_classAttBox);
 
     JPanel vAttHolder = new JPanel();
     vAttHolder.setLayout(new GridLayout(2,1));
     vAttHolder.setBorder(BorderFactory.
-			 createTitledBorder("Visualization Attributes"));
+			 createTitledBorder(Messages.getInstance().getString("BoundaryVisualizer_VAttHolder_JPanel_Text")));
     vAttHolder.add(m_xAttBox);
     vAttHolder.add(m_yAttBox);
 
@@ -491,23 +487,23 @@ public class BoundaryVisualizer
 
     JPanel tempPanel = new JPanel();
     tempPanel.setBorder(BorderFactory.
-			createTitledBorder("Sampling control"));
+			createTitledBorder(Messages.getInstance().getString("BoundaryVisualizer_TempPanel_JPanel_Text")));
     tempPanel.setLayout(new GridLayout(3,1));
 
     JPanel colTwo = new JPanel();
     colTwo.setLayout(new BorderLayout());
     JPanel gsP = new JPanel(); gsP.setLayout(new BorderLayout());
-    gsP.add(new JLabel(" Base for sampling (r)"), BorderLayout.CENTER);
+    gsP.add(new JLabel(Messages.getInstance().getString("BoundaryVisualizer_ColTwo_JPanel_Text")), BorderLayout.CENTER);
     gsP.add(m_generatorSamplesText, BorderLayout.WEST);
     tempPanel.add(gsP);
 
     JPanel rsP = new JPanel(); rsP.setLayout(new BorderLayout());
-    rsP.add(new JLabel(" Num. locations per pixel"), BorderLayout.CENTER);
+    rsP.add(new JLabel(Messages.getInstance().getString("BoundaryVisualizer_RsP_JPanel_Text")), BorderLayout.CENTER);
     rsP.add(m_regionSamplesText, BorderLayout.WEST);
     tempPanel.add(rsP);
 
     JPanel ksP = new JPanel(); ksP.setLayout(new BorderLayout());
-    ksP.add(new JLabel(" Kernel bandwidth (k)"), BorderLayout.CENTER);
+    ksP.add(new JLabel(Messages.getInstance().getString("BoundaryVisualizer_KsP_JPanel_Text")), BorderLayout.CENTER);
     ksP.add(m_kernelBandwidthText, BorderLayout.WEST);
     tempPanel.add(ksP);
     
@@ -517,7 +513,7 @@ public class BoundaryVisualizer
 
     JPanel startPanel = new JPanel();
     startPanel.setBorder(BorderFactory.
-			 createTitledBorder("Plotting"));
+			 createTitledBorder(Messages.getInstance().getString("BoundaryVisualizer_StartPanel_JPanel_Text")));
     startPanel.setLayout(new BorderLayout());
     startPanel.add(m_startBut, BorderLayout.CENTER);
     startPanel.add(m_plotTrainingData, BorderLayout.WEST);
@@ -528,7 +524,7 @@ public class BoundaryVisualizer
     m_controlPanel.add(colTwo, BorderLayout.CENTER);
     JPanel classHolder = new JPanel();
     classHolder.setLayout(new BorderLayout()); //jimmy
-    classHolder.setBorder(BorderFactory.createTitledBorder("Class color"));
+    classHolder.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("BoundaryVisualizer_ClassHolder_JPanel_Text")));
     classHolder.add(m_classPanel, BorderLayout.CENTER);
     m_controlPanel.add(classHolder, BorderLayout.SOUTH);
     
@@ -547,7 +543,7 @@ public class BoundaryVisualizer
     //classHolder.add(newWindowButton, BorderLayout.EAST);
    
     // set up the add-remove points widgets
-    m_addRemovePointsPanel.setBorder(BorderFactory.createTitledBorder("Add / remove data points"));
+    m_addRemovePointsPanel.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_JPanel_Text")));
     m_addRemovePointsPanel.setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
     constraints.weightx = 1.0;
@@ -557,21 +553,21 @@ public class BoundaryVisualizer
     constraints.fill = GridBagConstraints.BOTH;
     m_addRemovePointsPanel.add(m_addPointsButton);
     constraints.gridx = 1;
-    m_addRemovePointsPanel.add(new JLabel("Add points"), constraints);
+    m_addRemovePointsPanel.add(new JLabel(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_JLabel_Text_First")), constraints);
     constraints.gridx = 2;
     m_addRemovePointsPanel.add(m_classValueSelector);
     constraints.gridx = 0;
     constraints.gridy = 1;
     m_addRemovePointsPanel.add(m_removePointsButton, constraints);
     constraints.gridx = 1;
-    m_addRemovePointsPanel.add(new JLabel("Remove points"),constraints);
+    m_addRemovePointsPanel.add(new JLabel(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_JLabel_Text_Second")),constraints);
     
     
     	removeAllButton.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			if (m_trainingInstances != null)
 			{
-				if (m_startBut.getText().equals("Stop")) //we are plotting
+				if (m_startBut.getText().equals(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_ActionPerformed_StartBut_Text_Stop_First"))) //we are plotting
 					return;
 				m_boundaryPanel.removeAllInstances();
 				computeBounds();
@@ -631,7 +627,7 @@ public class BoundaryVisualizer
 
     rightHandToolsPanel.add(m_addRemovePointsPanel);
     
-    JButton newWindowButton = new JButton("Open a new window"); //the button for spawning a new window for the program.
+    JButton newWindowButton = new JButton(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_NewWindowButton_JButton_Text")); //the button for spawning a new window for the program.
     //newWindowButton.setMaximumSize(new Dimension(100, 100));
     //newWindowButton.setPreferredSize(new Dimension(120, m_addRemovePointsPanel.getHeight()));
     newWindowButton.addActionListener(new ActionListener() {
@@ -665,19 +661,19 @@ public class BoundaryVisualizer
     m_startBut.setEnabled(false);
     m_startBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  if (m_startBut.getText().equals("Start")) {
+	  if (m_startBut.getText().equals(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_ActionPerformed_StartBut_Text_Start_First"))) {
 	    if (m_trainingInstances != null && m_classifier != null) {
 		try {
 			
 			int BPSuccessCode = setUpBoundaryPanel(); //set up the boundary panel, find out if it was successful or not.
 			
 			if (BPSuccessCode == 1)
-				JOptionPane.showMessageDialog(null,"Error: Kernel Bandwidth can't be less than zero!");
+				JOptionPane.showMessageDialog(null,Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_ActionPerformed_JOptionPaneShowMessageDialog_Text_First"));
 			else if (BPSuccessCode == 2) {
-				JOptionPane.showMessageDialog(null,"Error: Kernel Bandwidth must be less than the number of training instances!");
+				JOptionPane.showMessageDialog(null,Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_ActionPerformed_JOptionPaneShowMessageDialog_Text_Second"));
 			} else {
 				m_boundaryPanel.start();
-				m_startBut.setText("Stop");
+				m_startBut.setText(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_ActionPerformed_StartBut_Text_Stop_Second"));
 				setControlEnabledStatus(false);
 			}
 		} catch (Exception ex) {
@@ -686,7 +682,7 @@ public class BoundaryVisualizer
 	    }
 	  } else {
 	    m_boundaryPanel.stopPlotting();
-	    m_startBut.setText("Start");
+	    m_startBut.setText(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_ActionPerformed_StartBut_Text_Start_Second"));
 	    setControlEnabledStatus(true);
 	  }
 	}
@@ -694,7 +690,7 @@ public class BoundaryVisualizer
 
     m_boundaryPanel.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
-	  m_startBut.setText("Start");
+	  m_startBut.setText(Messages.getInstance().getString("BoundaryVisualizer_AddRemovePointsPanel_ActionPerformed_StartBut_Text_Start_Third"));
 	  setControlEnabledStatus(true);
 	}
       });
@@ -722,7 +718,7 @@ public class BoundaryVisualizer
     	public void mouseClicked(MouseEvent e) {
 // 		System.err.println("boundary panel mouseClick " + e.getX() + " " + e.getY());
 		if (m_trainingInstances != null) {
-			if (m_startBut.getText().equals("Stop")) //we are plotting
+			if (m_startBut.getText().equals(Messages.getInstance().getString("BoundaryVisualizer_BoundaryPanel_MouseClicked_StartBut_Stop_Text"))) //we are plotting
 				return;
 		
 			if (m_addPointsButton.isSelected()) {//we are in add mode
@@ -737,8 +733,8 @@ public class BoundaryVisualizer
 						classVal = Double.parseDouble(indexStr);
 					} catch (Exception ex) {
 						if (indexStr == null) indexStr = "";
-						JOptionPane.showMessageDialog(null,"Error adding a point: \"" + indexStr + "\""
-							+ " is not a valid class value.");
+						JOptionPane.showMessageDialog(null,Messages.getInstance().getString("BoundaryVisualizer_BoundaryPanel_MouseClicked_JOptionPaneShowMessageDialog_Text_First") + indexStr + Messages.getInstance().getString("BoundaryVisualizer_BoundaryPanel_MouseClicked_JOptionPaneShowMessageDialog_Text_Second")
+							+ Messages.getInstance().getString("BoundaryVisualizer_BoundaryPanel_MouseClicked_JOptionPaneShowMessageDialog_Text_Third"));
 						validInput = false;
 					}
 				}
@@ -812,11 +808,11 @@ public class BoundaryVisualizer
     if (xName == null) {
       return;
     }
-    xName = Utils.removeSubstring(xName, "X: ");
-    xName = Utils.removeSubstring(xName, " (Num)");
+    xName = Utils.removeSubstring(xName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_First"));
+    xName = Utils.removeSubstring(xName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_Second"));
     String yName = (String)m_yAttBox.getSelectedItem();
-    yName = Utils.removeSubstring(yName, "Y: ");
-    yName = Utils.removeSubstring(yName, " (Num)");
+    yName = Utils.removeSubstring(yName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_First"));
+    yName = Utils.removeSubstring(yName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_Second"));
 
     m_xIndex = -1;
     m_yIndex = -1;
@@ -868,8 +864,7 @@ public class BoundaryVisualizer
     }
     
     if (numCount < 2) {
-      JOptionPane.showMessageDialog(null,"We need at least two numeric " +
-      		"attributes in order to visualize!");
+      JOptionPane.showMessageDialog(null,Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_JOptionPaneShowMessageDialog_Text"));
       return;
     }
         
@@ -885,27 +880,27 @@ public class BoundaryVisualizer
       String type = "";
       switch (m_trainingInstances.attribute(i).type()) {
 	case Attribute.NOMINAL:
-	  type = " (Nom)";
+	  type = Messages.getInstance().getString("BoundaryVisualizer_SetInstances_AttributeNOMINAL_Text");
 	  break;
 	case Attribute.NUMERIC:
-	  type = " (Num)";
+	  type = Messages.getInstance().getString("BoundaryVisualizer_SetInstances_AttributeNUMERIC_Text");
 	  break;
 	case Attribute.STRING:
-	  type = " (Str)";
+	  type = Messages.getInstance().getString("BoundaryVisualizer_SetInstances_AttributeSTRING_Text");
 	  break;
 	case Attribute.DATE:
-	  type = " (Dat)";
+	  type = Messages.getInstance().getString("BoundaryVisualizer_SetInstances_AttributeDATE_Text");
 	  break;
 	case Attribute.RELATIONAL:
-	  type = " (Rel)";
+	  type = Messages.getInstance().getString("BoundaryVisualizer_SetInstances_AttributeRELATIONAL_Text");
 	  break;
 	default:
-	  type = " (???)";
+	  type = Messages.getInstance().getString("BoundaryVisualizer_SetInstances_AttributeDEFAULT_Text");
       }
       classAttNames[i] += type;
       if (m_trainingInstances.attribute(i).isNumeric()) {
-	xAttNames.addElement("X: "+classAttNames[i]);
-	yAttNames.addElement("Y: "+classAttNames[i]);
+	xAttNames.addElement(Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XAttNames_Text") + classAttNames[i]);
+	yAttNames.addElement(Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_YAttNames_Text") + classAttNames[i]);
       }
     }
 
@@ -1056,9 +1051,8 @@ public class BoundaryVisualizer
 	dataFileLabel.setToolTipText(relationName);
 	} catch (Exception e)
 	{
-		JOptionPane.showMessageDialog(this,"Can't load at this time,\n"
-				    + "currently busy with other IO",
-				    "Load Instances",
+		JOptionPane.showMessageDialog(this,Messages.getInstance().getString("BoundaryVisualizer_SetInstancesFromFileQ_JOptionPaneShowMessageDialog_Text"),
+				    Messages.getInstance().getString("BoundaryVisualizer_SetInstancesFromFileQ_JOptionPaneShowMessageDialog_Text_First"),
 				    JOptionPane.WARNING_MESSAGE);
 		    e.printStackTrace();
 	
@@ -1164,7 +1158,7 @@ public class BoundaryVisualizer
       m_WindowCount++;
   
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka classification boundary visualizer");
+	new javax.swing.JFrame(Messages.getInstance().getString("BoundaryVisualizer_CreateNewVisualizerWindow_Title_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final BoundaryVisualizer bv = new BoundaryVisualizer();
       jf.getContentPane().add(bv, BorderLayout.CENTER);
@@ -1213,7 +1207,7 @@ public class BoundaryVisualizer
    * @param args a <code>String[]</code> value
    */
   public static void main(String [] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("BoundaryVisualizer_Main_Logger_Text"));
     try {
     	if (args.length < 2) {
 		createNewVisualizerWindow(null, null);
@@ -1228,7 +1222,7 @@ public class BoundaryVisualizer
 		}
 		Classifier c = Classifier.forName(args[1], argsR);
 		
-		System.err.println("Loading instances from : "+args[0]);
+		System.err.println(Messages.getInstance().getString("BoundaryVisualizer_Main_Error_Text") + args[0]);
 		java.io.Reader r = new java.io.BufferedReader(
 					new java.io.FileReader(args[0]));
 		Instances i = new Instances(r);
@@ -1241,5 +1235,3 @@ public class BoundaryVisualizer
     }
   }
 }
-
-

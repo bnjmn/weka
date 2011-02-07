@@ -49,7 +49,7 @@ import javax.swing.event.ChangeListener;
  * Represents a panel for displaying the results of a query in table format.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.3 $
+ * @version   $Revision$
  */
 public class ResultPanel 
   extends JPanel 
@@ -71,16 +71,16 @@ public class ResultPanel
   protected JTabbedPane m_TabbedPane;
 
   /** the close button */
-  protected JButton m_ButtonClose = new JButton("Close");
+  protected JButton m_ButtonClose = new JButton(Messages.getInstance().getString("ResultPanel_ButtonClose_JButton_Text"));
 
   /** the close all button */
-  protected JButton m_ButtonCloseAll = new JButton("Close all");
+  protected JButton m_ButtonCloseAll = new JButton(Messages.getInstance().getString("ResultPanel_ButtonCloseAll_JButton_Text"));
 
   /** the button that copies the query into the QueryPanel */
-  protected JButton m_ButtonCopyQuery = new JButton("Re-use query");
+  protected JButton m_ButtonCopyQuery = new JButton(Messages.getInstance().getString("ResultPanel_ButtonCopyQuery_JButton_Text"));
 
   /** the button for the optimal column width of the current table */
-  protected JButton m_ButtonOptWidth = new JButton("Optimal width");
+  protected JButton m_ButtonOptWidth = new JButton(Messages.getInstance().getString("ResultPanel_ButtonOptWidth_JButton_Text"));
 
   /** the counter for the tab names */
   protected int m_NameCounter;
@@ -144,7 +144,7 @@ public class ResultPanel
     panel2.add(m_ButtonCloseAll, BorderLayout.NORTH);
     
     m_ButtonCopyQuery.setMnemonic('Q');
-    m_ButtonCopyQuery.setToolTipText("Copies the query of the currently selected tab into the query field.");
+    m_ButtonCopyQuery.setToolTipText(Messages.getInstance().getString("ResultPanel_CreatePanel_ButtonCopyQuery_SetToolTipText_Text"));
     m_ButtonCopyQuery.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  copyQuery();
@@ -153,7 +153,7 @@ public class ResultPanel
     panel3.add(m_ButtonCopyQuery, BorderLayout.NORTH);
     
     m_ButtonOptWidth.setMnemonic('p');
-    m_ButtonOptWidth.setToolTipText("Calculates the optimal column width for the current table.");
+    m_ButtonOptWidth.setToolTipText(Messages.getInstance().getString("ResultPanel_CreatePanel_ButtonOptWidth_SetToolTipText_Text"));
     m_ButtonOptWidth.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  calcOptimalWidth();
@@ -203,7 +203,7 @@ public class ResultPanel
    */
   protected String getNextTabName() {
     m_NameCounter++;
-    return "Query" + m_NameCounter;
+    return Messages.getInstance().getString("ResultPanel_GetNextTabName_Text") + m_NameCounter;
   }
   
   /**

@@ -165,16 +165,13 @@ public class BoundaryPanel
 	return null;
       }
       
-      String pVec = "(X: "
-	+Utils.doubleToString(convertFromPanelX((double)event.getX()), 2)
-	+" Y: "
-	+Utils.doubleToString(convertFromPanelY((double)event.getY()), 2)+") ";
+      String pVec = Messages.getInstance().getString("BoundaryPanel_GetToolTipText_Text_First") + Utils.doubleToString(convertFromPanelX((double)event.getX()), 2) 
+      				+ Messages.getInstance().getString("BoundaryPanel_GetToolTipText_Text_Second") + Utils.doubleToString(convertFromPanelY((double)event.getY()), 2)
+      				+ Messages.getInstance().getString("BoundaryPanel_GetToolTipText_Text_Third");
+      
       // construct a string holding the probability vector
       for (int i = 0; i < m_trainingData.classAttribute().numValues(); i++) {
-	pVec += 
-	  Utils.
-	  doubleToString(m_probabilityCache[event.getY()][event.getX()][i],
-			 3)+" ";
+    	  pVec += Utils.doubleToString(m_probabilityCache[event.getY()][event.getX()][i], 3)+" ";
       }
       return pVec;
     }
@@ -405,18 +402,17 @@ public class BoundaryPanel
 
     m_stopReplotting = true;
     if (m_trainingData == null) {
-      throw new Exception("No training data set (BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_Start_Error_NoTrainingDataSet_Text"));
     }
     if (m_classifier == null) {
-      throw new Exception("No classifier set (BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_Start_Error_NoClassifierSet_Text"));
     }
     if (m_dataGenerator == null) {
-      throw new Exception("No data generator set (BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_Start_Error_NoDataGeneratorSet_Text"));
     }
     if (m_trainingData.attribute(m_xAttribute).isNominal() || 
 	m_trainingData.attribute(m_yAttribute).isNominal()) {
-      throw new Exception("Visualization dimensions must be numeric "
-			  +"(BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_Start_Error_VisualizationDimensionsMustBeNumeric_Text"));
     }
     
     computeMinMaxAtts();
@@ -545,7 +541,7 @@ public class BoundaryPanel
 	      
       } catch (Exception ex) {
         ex.printStackTrace();
-	JOptionPane.showMessageDialog(null,"Error while plotting: \"" + ex.getMessage() + "\"");
+	JOptionPane.showMessageDialog(null, Messages.getInstance().getString("BoundaryPanel_PlotThread_JOptionPaneShowMessageDialog_Text_Front") + ex.getMessage() + Messages.getInstance().getString("BoundaryPanel_PlotThread_JOptionPaneShowMessageDialog_Text_End"));
       } finally {
         m_plotThread = null;
         // notify any listeners that we are finished
@@ -777,7 +773,7 @@ public class BoundaryPanel
 
     m_trainingData = trainingData;
     if (m_trainingData.classIndex() < 0) {
-      throw new Exception("No class attribute set (BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetTrainingData_Error_Text"));
     }
     m_classIndex = m_trainingData.classIndex();
   }
@@ -788,7 +784,7 @@ public class BoundaryPanel
   	
   	if (m_trainingData == null) {
 		//TODO
-		System.err.println("Trying to add to a null training set (BoundaryPanel)");
+		System.err.println(Messages.getInstance().getString("BoundaryPanel_AddTrainingInstance_Error_Text"));
 	}
   	
   	m_trainingData.add(instance);
@@ -838,15 +834,14 @@ public class BoundaryPanel
    */
   public void setXAttribute(int xatt) throws Exception {
     if (m_trainingData == null) {
-      throw new Exception("No training data set (BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetXAttribute_Error_Text_First"));
     }
     if (xatt < 0 || 
         xatt > m_trainingData.numAttributes()) {
-      throw new Exception("X attribute out of range (BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetXAttribute_Error_Text_Second"));
     }
     if (m_trainingData.attribute(xatt).isNominal()) {
-      throw new Exception("Visualization dimensions must be numeric "
-                          +"(BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetXAttribute_Error_Text_Third"));
     }
     /*if (m_trainingData.numDistinctValues(xatt) < 2) {
       throw new Exception("Too few distinct values for X attribute "
@@ -863,15 +858,14 @@ public class BoundaryPanel
    */
   public void setYAttribute(int yatt) throws Exception {
     if (m_trainingData == null) {
-      throw new Exception("No training data set (BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetYAttribute_Error_Text_First"));
     }
     if (yatt < 0 || 
         yatt > m_trainingData.numAttributes()) {
-      throw new Exception("X attribute out of range (BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetYAttribute_Error_Text_Second"));
     }
     if (m_trainingData.attribute(yatt).isNominal()) {
-      throw new Exception("Visualization dimensions must be numeric "
-                          +"(BoundaryPanel)");
+      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetYAttribute_Error_Text_Third"));
     }
     /*if (m_trainingData.numDistinctValues(yatt) < 2) {
       throw new Exception("Too few distinct values for Y attribute "
@@ -1010,7 +1004,7 @@ public class BoundaryPanel
       if (iter.hasNext())
 	writer = (ImageWriter) iter.next();
       else
-	throw new Exception("No JPEG writer available!");
+	throw new Exception(Messages.getInstance().getString("BoundaryPanel_SaveImage_Error_Text"));
 
       // prepare output file
       ios = ImageIO.createImageOutputStream(new File(fileName));
@@ -1156,19 +1150,14 @@ public class BoundaryPanel
   public static void main (String [] args) {
     try {
       if (args.length < 8) {
-	System.err.println("Usage : BoundaryPanel <dataset> "
-			   +"<class col> <xAtt> <yAtt> "
-			   +"<base> <# loc/pixel> <kernel bandwidth> "
-			   +"<display width> "
-			   +"<display height> <classifier "
-			   +"[classifier options]>");
+	System.err.println(Messages.getInstance().getString("BoundaryPanel_Main_Error_Text_First"));
 	System.exit(1);
       }
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka classification boundary visualizer");
+	new javax.swing.JFrame(Messages.getInstance().getString("BoundaryPanel_Main_Title_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
 
-      System.err.println("Loading instances from : "+args[0]);
+      System.err.println(Messages.getInstance().getString("BoundaryPanel_Main_Error_Text_Second") + args[0]);
       java.io.Reader r = new java.io.BufferedReader(
 			 new java.io.FileReader(args[0]));
       final Instances i = new Instances(r);
@@ -1237,7 +1226,7 @@ public class BoundaryPanel
 	FastVector colors = (FastVector)ois.readObject();
 	bv.setColors(colors);	
       } catch (Exception ex) {
-	System.err.println("No color map file");
+	System.err.println(Messages.getInstance().getString("BoundaryPanel_Main_Error_Text_Third"));
       }
       bv.start();
     } catch (Exception ex) {

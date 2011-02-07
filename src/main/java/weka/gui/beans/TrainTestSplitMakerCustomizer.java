@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * GUI customizer for the train test split maker bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class TrainTestSplitMakerCustomizer
   extends JPanel
@@ -55,7 +55,7 @@ public class TrainTestSplitMakerCustomizer
     
     setLayout(new BorderLayout());
     add(m_splitEditor, BorderLayout.CENTER);
-    add(new javax.swing.JLabel("TrainTestSplitMakerCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("TrainTestSplitMakerCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
   }
   

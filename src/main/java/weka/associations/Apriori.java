@@ -237,7 +237,7 @@ public class Apriori
     TechnicalInformation 	additional;
     
     result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "R. Agrawal and R. Srikant");
+    result.setValue(Field.AUTHOR, Messages.getInstance().getString("APRIORI_AUTHOR"));
     result.setValue(Field.TITLE, "Fast Algorithms for Mining Association Rules in Large Databases");
     result.setValue(Field.BOOKTITLE, "20th International Conference on Very Large Data Bases");
     result.setValue(Field.YEAR, "1994");

@@ -47,7 +47,7 @@ import javax.swing.filechooser.FileFilter;
  * can set a Capabilities filter.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  * @see	    #setCapabilitiesFilter(Capabilities)
  */
 public class ConverterFileChooser
@@ -424,7 +424,7 @@ public class ConverterFileChooser
    */
   public int showDialog(Component parent, String approveButtonText) {
     if (m_DialogType == UNHANDLED_DIALOG)
-      throw new IllegalStateException("Either use showOpenDialog or showSaveDialog!");
+      throw new IllegalStateException(Messages.getInstance().getString("ConverterFileChooser_ShowDialog_IllegalStateException_Text"));
     else
       return super.showDialog(parent, approveButtonText);
   }
@@ -465,9 +465,9 @@ public class ConverterFileChooser
 	 && (!getSelectedFile().exists()) ) {
       int retVal = JOptionPane.showConfirmDialog(
 	  parent, 
-	  "The file '" 
+	  Messages.getInstance().getString("ConverterFileChooser_ShowOpenDialog_RetVal_JOptionPaneShowConfirmDialog_Text_First")
 	  + getSelectedFile() 
-	  + "' does not exist - please select again!");
+	  + Messages.getInstance().getString("ConverterFileChooser_ShowOpenDialog_RetVal_JOptionPaneShowConfirmDialog_Text_Second"));
       if (retVal == JOptionPane.OK_OPTION)
 	result = showOpenDialog(parent);
       else
@@ -537,9 +537,9 @@ public class ConverterFileChooser
 	 && (getSelectedFile().exists()) ) {
       int retVal = JOptionPane.showConfirmDialog(
 	  	  parent, 
-	  	  "The file '" 
+	  	Messages.getInstance().getString("")
 	  	  + getSelectedFile() 
-	  	  + "' already exists - overwrite it?");
+	  	  + Messages.getInstance().getString("ConverterFileChooser_ShowSaveDialog_RetVal_JOptionPaneShowConfirmDialog_Text_Second"));
       if (retVal == JOptionPane.OK_OPTION)
 	result = APPROVE_OPTION;
       else if (retVal == JOptionPane.NO_OPTION)
@@ -643,7 +643,7 @@ public class ConverterFileChooser
       else if (dialogType == SAVER_DIALOG)
 	m_CurrentConverter = ConverterUtils.getSaverForFile(filename);
       else
-	throw new IllegalStateException("Cannot determine loader/saver!");
+	throw new IllegalStateException(Messages.getInstance().getString("ConverterFileChooser_ConfigureCurrentConverter_IllegalStateException_Text"));
       
       // none found?
       if (m_CurrentConverter == null)
@@ -689,11 +689,11 @@ public class ConverterFileChooser
 	saver.writeBatch();
       }
       else {
-	System.out.println("Saving aborted!");
+	System.out.println(Messages.getInstance().getString("ConverterFileChooser_Main_Text_First"));
       }
     }
     else {
-      System.out.println("Loading aborted!");
+      System.out.println(Messages.getInstance().getString("ConverterFileChooser_Main_Text_Second"));
     }
   }
 }

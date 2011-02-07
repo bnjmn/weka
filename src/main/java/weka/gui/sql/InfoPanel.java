@@ -46,7 +46,7 @@ import javax.swing.event.ListSelectionListener;
  * A simple panel for displaying information, e.g. progress information etc.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.3 $
+ * @version     $Revision$
  */
 
 public class InfoPanel
@@ -104,7 +104,7 @@ public class InfoPanel
     // clear button
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.EAST);
-    m_ButtonClear = new JButton("Clear");
+    m_ButtonClear = new JButton(Messages.getInstance().getString("InfoPanel_CreatePanel_ButtonClear_JButton_Text"));
     m_ButtonClear.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  clear();
@@ -115,7 +115,7 @@ public class InfoPanel
     // clear button
     panel2 = new JPanel(new BorderLayout());
     panel.add(panel2, BorderLayout.CENTER);
-    m_ButtonCopy = new JButton("Copy");
+    m_ButtonCopy = new JButton(Messages.getInstance().getString("InfoPanel_CreatePanel_ButtonCopy_JButton_Text"));
     m_ButtonCopy.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  copyToClipboard();

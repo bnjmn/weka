@@ -38,7 +38,7 @@ import javax.swing.JComponent;
  * this issue. :-(
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  * @see PostscriptGraphics
  */
 public class PostscriptWriter
@@ -75,7 +75,7 @@ public class PostscriptWriter
    * must be overridden in the derived class.
    */
   public String getDescription() {
-    return "Postscript-File";
+    return Messages.getInstance().getString("PostscriptWriter_GetDescription_Text");
   }
   
   /**
@@ -124,17 +124,17 @@ public class PostscriptWriter
    * for testing only
    */
   public static void main(String[] args) throws Exception {
-    System.out.println("building TreeVisualizer...");
+    System.out.println(Messages.getInstance().getString("PostscriptWriter_Main_Text_First"));
     weka.gui.treevisualizer.TreeBuild builder = new weka.gui.treevisualizer.TreeBuild();
     weka.gui.treevisualizer.NodePlace arrange = new weka.gui.treevisualizer.PlaceNode2();
-    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader("digraph atree { top [label=\"the top\"] a [label=\"the first node\"] b [label=\"the second nodes\"] c [label=\"comes off of first\"] top->a top->b b->c }"));
+    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader(Messages.getInstance().getString("PostscriptWriter_Main_Text_Second")));
     weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
     tv.setSize(800 ,600);
     
     String filename = System.getProperty("java.io.tmpdir") + "test.eps";
-    System.out.println("outputting to '" + filename + "'...");
+    System.out.println(Messages.getInstance().getString("PostscriptWriter_Main_Text_Third") + filename + Messages.getInstance().getString("PostscriptWriter_Main_Text_Fourth"));
     toOutput(new PostscriptWriter(), tv, new File(filename));
 
-    System.out.println("done!");
+    System.out.println(Messages.getInstance().getString("PostscriptWriter_Main_Text_Fifth"));
   }
 }

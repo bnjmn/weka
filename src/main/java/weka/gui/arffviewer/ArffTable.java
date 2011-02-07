@@ -53,7 +53,7 @@ import javax.swing.table.TableModel;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision$ 
  */
 public class ArffTable
   extends JTable {
@@ -96,7 +96,7 @@ public class ArffTable
       m_RowIndex    = rowIndex;
       m_ColumnIndex = columnIndex;
       
-      m_Button = new JButton("...");
+      m_Button = new JButton(Messages.getInstance().getString("ArffTable_RelationalCellEditor_RelationalCellEditor_JButton_Text"));
       m_Button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent evt) {
           ViewerDialog        dialog;
@@ -104,7 +104,7 @@ public class ArffTable
           
           dialog = new ViewerDialog(null);
           dialog.setTitle(
-              "Relational attribute Viewer - " 
+        		  Messages.getInstance().getString("ArffTable_RelationalCellEditor_RelationalCellEditor_ViewerDialog_Text") 
               + ((ArffSortedTableModel) getModel()).getInstances().attribute(m_ColumnIndex - 1).name());
           result = dialog.showDialog(m_CurrentInst);
           if (result == ViewerDialog.APPROVE_OPTION) {
@@ -322,7 +322,7 @@ public class ArffTable
     
     if ( (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
       if (columnIndex == 0)
-        result = "No.";
+        result = Messages.getInstance().getString("ArffTable_GetPlainColumnName_Result_Text");
       else
         result = arffModel.getAttributeAt(columnIndex).name();
     }
@@ -351,8 +351,8 @@ public class ArffTable
       // really?
       if (ComponentHelper.showMessageBox(
             getParent(),
-            "Question...",
-            "Do you really want to copy the whole table?",
+            Messages.getInstance().getString("ArffTable_GetStringSelection_ComponentHelperShowMessageBox_Text_First"),
+            Messages.getInstance().getString("ArffTable_GetStringSelection_ComponentHelperShowMessageBox_Text_Second"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE ) != JOptionPane.YES_OPTION)
         return result;

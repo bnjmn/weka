@@ -42,7 +42,7 @@ import javax.swing.JPanel;
  * GUI customizer for the class assigner bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class ClassAssignerCustomizer
   extends JPanel
@@ -68,10 +68,10 @@ public class ClassAssignerCustomizer
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
 
     setLayout(new BorderLayout());
-    add(new javax.swing.JLabel("ClassAssignerCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("ClassAssignerCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
     m_holderP.setLayout(new BorderLayout());
-    m_holderP.setBorder(BorderFactory.createTitledBorder("Choose class attribute"));
+    m_holderP.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassAssignerCustomizer_HolderP_SetBorder_BorderFactoryCreateTitledBorder_Text")));
     m_holderP.add(m_ClassCombo, BorderLayout.CENTER);
     m_ClassCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -102,27 +102,27 @@ public class ClassAssignerCustomizer
       existingClassCol = 0;
     }
     String [] attribNames = new String [format.numAttributes()+1];
-    attribNames[0] = "NO CLASS";
+    attribNames[0] = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttribNames0_Text");
     for (int i = 1; i < attribNames.length; i++) {
       String type = "";
       switch (format.attribute(i-1).type()) {
       case Attribute.NOMINAL:
-	type = "(Nom) ";
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeNOMINAL_Text");
 	break;
       case Attribute.NUMERIC:
-	type = "(Num) ";
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeNUMERIC_Text");
 	break;
       case Attribute.STRING:
-	type = "(Str) ";
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeSTRING_Text");
 	break;
       case Attribute.DATE:
-	type = "(Dat) ";
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeDATE_Text");
 	break;
       case Attribute.RELATIONAL:
-	type = "(Rel) ";
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeRELATIONAL_Text");
 	break;
       default:
-	type = "(???) ";
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeDEFAULT_Text");
       }
       attribNames[i] = type + format.attribute(i-1).name();
     }
@@ -161,7 +161,7 @@ public class ClassAssignerCustomizer
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassAssigner (if necessary)
     if (m_classAssigner != null) {
-      System.err.println("Customizer deregistering with class assigner");
+      System.err.println(Messages.getInstance().getString("ClassAssignerCustomizer_CustomizerClosing_Error_Text"));
       m_classAssigner.removeDataFormatListener(this);
     }
   }

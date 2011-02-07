@@ -36,7 +36,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision$ 
  */
 
 public class ArffTableCellRenderer 
@@ -134,7 +134,7 @@ public class ArffTableCellRenderer
       // normal cell
       if (row >= 0) {
         if (model.isMissingAt(row, column)) {
-          setToolTipText("missing");
+          setToolTipText(Messages.getInstance().getString("ArffTableCellRenderer_GetTableCellRendererComponent_SetToolTipText_Text"));
           if (found) {
             if (isSelected)
               result.setBackground(highlightColorSelected);
@@ -180,7 +180,6 @@ public class ArffTableCellRenderer
           result.setBackground(UIManager.getColor("TableHeader.background"));
       }
     }
-    
     return result;
   }
 }

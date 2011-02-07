@@ -29,7 +29,7 @@ import java.awt.*;
  * This class contains a color name and the rgb values of that color
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class NamedColor {
 
@@ -50,10 +50,3 @@ public class NamedColor {
     m_col = new Color(r,g,b);
   }
 }
-
-
-
-
-
-
-

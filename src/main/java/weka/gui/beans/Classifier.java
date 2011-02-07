@@ -145,18 +145,18 @@ public class Classifier
   private transient JFileChooser m_fileChooser = null; 
 
   protected FileFilter m_binaryFilter =
-    new ExtensionFileFilter("."+FILE_EXTENSION, "Binary serialized model file (*"
-                            + FILE_EXTENSION + ")");
+    new ExtensionFileFilter("."+FILE_EXTENSION, Messages.getInstance().getString("Classifier_BinaryFilter_ExtensionFileFilter_Text_First")
+                            + FILE_EXTENSION + Messages.getInstance().getString("Classifier_BinaryFilter_ExtensionFileFilter_Text_Second"));
 
   protected FileFilter m_KOMLFilter =
     new ExtensionFileFilter(KOML.FILE_EXTENSION + FILE_EXTENSION,
-                            "XML serialized model file (*"
-                            + KOML.FILE_EXTENSION + FILE_EXTENSION + ")");
+    		Messages.getInstance().getString("Classifier_KOMLFilter_ExtensionFileFilter_Text_First")
+                            + KOML.FILE_EXTENSION + FILE_EXTENSION + Messages.getInstance().getString("Classifier_KOMLFilter_ExtensionFileFilter_Text_Second"));
 
   protected FileFilter m_XStreamFilter =
     new ExtensionFileFilter(XStream.FILE_EXTENSION + FILE_EXTENSION,
-                            "XML serialized model file (*"
-                            + XStream.FILE_EXTENSION + FILE_EXTENSION + ")");
+    		Messages.getInstance().getString("Classifier_XStreamFilter_ExtensionFileFilter_Text_First")
+                            + XStream.FILE_EXTENSION + FILE_EXTENSION + Messages.getInstance().getString("Classifier_XStreamFilter_ExtensionFileFilter_Text_Second"));
 
   /**
    * If the classifier is an incremental classifier, should we
@@ -327,8 +327,8 @@ public class Classifier
     if (!(m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier) &&
 	(m_listenees.containsKey("instance"))) {
       if (m_log != null) {
-	m_log.logMessage("[Classifier] " + statusMessagePrefix() + " WARNING : "
-	    + getCustomName() +" is not an incremental classifier");
+	m_log.logMessage(Messages.getInstance().getString("Classifier_SetClassifierTemplate_LogMessage_Text_First") + statusMessagePrefix() + Messages.getInstance().getString("Classifier_SetClassifierTemplate_LogMessage_Text_Second")
+	    + getCustomName() + Messages.getInstance().getString("Classifier_SetClassifierTemplate_LogMessage_Text_Third"));
       }
     }
     // get global info
@@ -355,9 +355,9 @@ public class Classifier
       setClassifierTemplate(newTemplate);
     } catch (Exception ex) {
       if (m_log != null) {
-        m_log.logMessage("[Classifier] " + statusMessagePrefix() + ex.getMessage());
+        m_log.logMessage(Messages.getInstance().getString("Classifier_SetTrainedClassifier_LogMessage_Text_First") + statusMessagePrefix() + ex.getMessage());
         String errorMessage = statusMessagePrefix()
-        + "ERROR: see log for details.";
+        + Messages.getInstance().getString("Classifier_SetTrainedClassifier_ErrorMessage_Text_First");
         m_log.statusMessage(errorMessage);        
       } else {
         ex.printStackTrace();
@@ -417,8 +417,8 @@ public class Classifier
     {
 
     if (!(algorithm instanceof weka.classifiers.Classifier)) { 
-      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
-					 +"type of algorithm (Classifier)");
+      throw new IllegalArgumentException(algorithm.getClass()
+					 + Messages.getInstance().getString("Classifier_SetWrappedAlgorithm_IllegalArgumentException_Text_First"));
     }
     setClassifierTemplate((weka.classifiers.Classifier)algorithm);
   }
@@ -470,12 +470,11 @@ public class Classifier
         (m_executorPool.getQueue().size() > 0 || 
             m_executorPool.getActiveCount() > 0)) {
       
-      String messg = "[Classifier] " + statusMessagePrefix() 
-        + " is currently batch training!";
+      String messg = Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Messg_Text_First") + statusMessagePrefix() 
+        + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Messg_Text_Second");
       if (m_log != null) {
 	m_log.logMessage(messg);
-	m_log.statusMessage(statusMessagePrefix() + "WARNING: "
-	    + "Can't accept instance - batch training in progress.");
+	m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_StatusMessage_Text_First"));
       } else {
 	System.err.println(messg);
       }
@@ -494,12 +493,12 @@ public class Classifier
       if (dataset.classIndex() < 0) {
         stop();
         String errorMessage = statusMessagePrefix()
-            + "ERROR: no class attribute set in incoming stream!";
+            + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_ErrorMessage_Text_First");
         if (m_log != null) {
           m_log.statusMessage(errorMessage);
-          m_log.logMessage("[" + getCustomName() + "] " + errorMessage);
+          m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_First") + getCustomName() + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Second") + errorMessage);
         } else {
-          System.err.println("[" + getCustomName() + "] " + errorMessage);
+          System.err.println(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Error_Text_First") + getCustomName() + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Error_Text_Second") + errorMessage);
         }
         return;
 
@@ -517,13 +516,10 @@ public class Classifier
 	    if (m_log != null) {
 	      String msg = (m_trainingSet == null)
 		? statusMessagePrefix()
-		+ "ERROR: classifier has not been batch "
-		+"trained; can't process instance events."
+		+ Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Msg_Text_First")
 		: statusMessagePrefix() 
-		  + "ERROR: instance event's structure is different from "
-		  +"the data that "
-		  + "was used to batch train this classifier; can't continue.";
-	      m_log.logMessage("[Classifier] " + msg);
+		  + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Msg_Text_Second");
+	      m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Third") + msg);
 	      m_log.statusMessage(msg);
 	    }
 	    return;
@@ -532,10 +528,8 @@ public class Classifier
 	      (!dataset.equalHeaders(m_trainingSet))) {
 	    if (m_log != null) {
 	      String msg = statusMessagePrefix() 
-              + " WARNING : structure of instance events differ "
-              +"from data used in batch training this "
-              +"classifier. Resetting classifier...";
-	      m_log.logMessage("[Classifier] " + msg);
+              + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Msg_Text_Third");
+	      m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Fourth") + msg);
 	      m_log.statusMessage(msg);
 	    }
 	    m_trainingSet = null;
@@ -551,9 +545,9 @@ public class Classifier
         stop();
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
-          m_log.logMessage("[Classifier] " + statusMessagePrefix()
-              + " problem during incremental processing. " 
+              + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_StatusMessage_Text_Second"));
+          m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Fifth") + statusMessagePrefix()
+              + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Sixth") 
               + ex.getMessage());
         }
 	ex.printStackTrace();
@@ -616,11 +610,10 @@ public class Classifier
 	  titleString = titleString.
 	    substring(titleString.lastIndexOf('.') + 1,
 		      titleString.length());
-	  modelString = "=== Classifier model ===\n\n" +
-	    "Scheme:   " +titleString+"\n" +
-	    "Relation: "  + m_trainingSet.relationName() + "\n\n"
+	  modelString = Messages.getInstance().getString("Classifier_HandleIncrementalEvent_ModelString_Text_First") + titleString+"\n" +
+	  Messages.getInstance().getString("Classifier_HandleIncrementalEvent_ModelString_Text_Second")  + m_trainingSet.relationName() + "\n\n"
 	    + modelString;
-	  titleString = "Model: " + titleString;
+	  titleString = Messages.getInstance().getString("Classifier_HandleIncrementalEvent_TitleString_Text_First") + titleString;
 	  TextEvent nt = new TextEvent(this,
 				       modelString,
 				       titleString);
@@ -630,10 +623,10 @@ public class Classifier
     } catch (Exception ex) {
       stop();
       if (m_log != null) {
-	m_log.logMessage("[Classifier] " + statusMessagePrefix()
+	m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Seventh") + statusMessagePrefix()
 	    + ex.getMessage());
 	m_log.statusMessage(statusMessagePrefix()
-	    + "ERROR (see log for details)");
+	    + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_StatusMessage_Text_Third"));
 	ex.printStackTrace();
       } else {
         ex.printStackTrace();
@@ -670,12 +663,12 @@ public class Classifier
             // stop all processing
             stop();
             String errorMessage = statusMessagePrefix()
-                + "ERROR: no class attribute set in test data!";
+                + Messages.getInstance().getString("Classifier_TrainingTask_Execute_ErrorMessage_Text_First");
             if (m_log != null) {
               m_log.statusMessage(errorMessage);
-              m_log.logMessage("[Classifier] " + errorMessage);
+              m_log.logMessage(Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_First") + errorMessage);
             } else {
-              System.err.println("[Classifier] " + errorMessage);
+              System.err.println(Messages.getInstance().getString("Classifier_TrainingTask_Execute_Error_Text_First") + errorMessage);
             }
             return;
 
@@ -699,7 +692,7 @@ public class Classifier
           //m_visual.setAnimated();
           //m_visual.setText("Building model...");
           String msg = statusMessagePrefix()
-            + "Building model for run " + m_runNum + " fold " + m_setNum;
+            + Messages.getInstance().getString("Classifier_TrainingTask_Execute_Msg_Text_First") + m_runNum + Messages.getInstance().getString("Classifier_TrainingTask_Execute_Msg_Text_Second") + m_setNum;
           if (m_log != null) {
             m_log.statusMessage(msg);
           } else {
@@ -744,8 +737,8 @@ public class Classifier
             grphTitle = grphTitle.substring(grphTitle.
                 lastIndexOf('.')+1, 
                 grphTitle.length());
-            grphTitle = "Set " + m_setNum + " ("
-            + m_train.relationName() + ") "
+            grphTitle = Messages.getInstance().getString("Classifier_TrainingTask_Execute_GrphTitle_Text_First") + m_setNum 
+            + " (" + m_train.relationName() + ") "
             + grphTitle;
 
             GraphEvent ge = new GraphEvent(Classifier.this, 
@@ -762,15 +755,14 @@ public class Classifier
             titleString = titleString.
             substring(titleString.lastIndexOf('.') + 1,
                 titleString.length());
-            modelString = "=== Classifier model ===\n\n" +
-            "Scheme:   " +titleString+"\n" +
-            "Relation: "  + m_train.relationName() + 
+            modelString = Messages.getInstance().getString("Classifier_TrainingTask_Execute_ModelString_Text_First") + titleString+"\n" +
+            Messages.getInstance().getString("Classifier_TrainingTask_Execute_ModelString_Text_Second") + m_train.relationName() + 
             ((m_maxSetNum > 1) 
-                ? "\nTraining Fold: " + m_setNum
+                ? Messages.getInstance().getString("Classifier_TrainingTask_Execute_ModelString_Text_Third") + m_setNum
                     :"")
                     + "\n\n"
                     + modelString;
-            titleString = "Model: " + titleString;
+            titleString = Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_First") + titleString;
 
             TextEvent nt = new TextEvent(Classifier.this,
                 modelString,
@@ -783,21 +775,22 @@ public class Classifier
         stop();
         ex.printStackTrace();
         if (m_log != null) {
-          String titleString = "[Classifier] " + statusMessagePrefix();
+          String titleString = Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Second") + statusMessagePrefix();
 
-          titleString += " run " + m_runNum + " fold " + m_setNum
-          + " failed to complete.";
-          m_log.logMessage(titleString + " (build classifier). " 
+          titleString += Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Third") + m_runNum 
+          + Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Fourth") + m_setNum
+          + Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Fifth");
+          m_log.logMessage(titleString + Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Fourth") 
               + ex.getMessage());
           m_log.statusMessage(statusMessagePrefix() 
-              + "ERROR (see log for details)");
+              + Messages.getInstance().getString("Classifier_TrainingTask_Execute_StatusMessage_Text_First"));
           ex.printStackTrace();
         }
         m_taskInfo.setExecutionStatus(TaskStatusInfo.FAILED);
       } finally {
         m_visual.setStatic();
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_TrainingTask_Execute_StatusMessage_Text_Second"));
         }
         m_state = IDLE;
 
@@ -805,11 +798,12 @@ public class Classifier
           // prevent any classifier events from being fired
           m_trainingSet = null;
           if (m_log != null) {
-            String titleString = "[Classifier] " + statusMessagePrefix();                 
+            String titleString = Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Sixth") + statusMessagePrefix();                 
          
-            m_log.logMessage(titleString + " ("
-               + " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
-            m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
+            m_log.logMessage(titleString + Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Fifth") 
+            		+ m_runNum + Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Sixth") + m_setNum 
+            		+ Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Seventh"));
+            m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Seventh"));
             
             /*
             // are we the last active thread?
@@ -882,10 +876,10 @@ public class Classifier
     if (m_block) {
       //block(true);
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
-            + "at this time.");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix()
-            + " BUSY. Can't accept data at this time.");
+        m_log.statusMessage(statusMessagePrefix() 
+            + Messages.getInstance().getString("Classifier_AcceptTrainingSet_StatusMessage_Text_First"));
+        m_log.logMessage(Messages.getInstance().getString("Classifier_AcceptTrainingSet_LogMessage_Text_First") + statusMessagePrefix()
+            + Messages.getInstance().getString("Classifier_AcceptTrainingSet_LogMessage_Text_Second"));
       }
       return;
     }
@@ -897,9 +891,9 @@ public class Classifier
       m_trainingSet = new Instances(e.getTrainingSet(), 0);
       m_state = BUILDING_MODEL;
 
-      String msg = "[Classifier] " + statusMessagePrefix() 
-        + " starting executor pool ("
-        + getExecutionSlots() + " slots)...";
+      String msg = Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_First") + statusMessagePrefix() 
+        + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Second")
+        + getExecutionSlots() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Third");
       if (m_log != null) {
         m_log.logMessage(msg);
       } else {
@@ -911,7 +905,7 @@ public class Classifier
       }
             
       // setup output queues
-      msg = "[Classifier] " + statusMessagePrefix() + " setup output queues.";
+      msg = Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Fourth") + statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Fifth");
       if (m_log != null) {
         m_log.logMessage(msg);
       } else {
@@ -927,8 +921,8 @@ public class Classifier
     // create a new task and schedule for execution
     TrainingTask newTask = new TrainingTask(e.getRunNumber(), e.getMaxRunNumber(),
         e.getSetNumber(), e.getMaxSetNumber(), e.getTrainingSet());
-    String msg = "[Classifier] " + statusMessagePrefix() + " scheduling run " 
-    + e.getRunNumber() +" fold " + e.getSetNumber() + " for execution...";
+    String msg = Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Sixth") + statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Seventh") 
+    + e.getRunNumber() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Eighth") + e.getSetNumber() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Nineth");
     if (m_log != null) {
       m_log.logMessage(msg);
     } else {
@@ -952,10 +946,9 @@ public class Classifier
     if (m_block) {
       //block(true);
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
-                            + "at this time.");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix()
-                         + " BUSY. Can't accept data at this time.");
+        m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_StatusMessage_Text_Second"));
+        m_log.logMessage(Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Nineth") + statusMessagePrefix()
+                         + Messages.getInstance().getString("Classifier_AcceptTrainingSet_StatusMessage_Text_Second"));
       }
       return;
     }
@@ -967,12 +960,12 @@ public class Classifier
         // stop all processing
         stop();
         String errorMessage = statusMessagePrefix()
-            + "ERROR: no class attribute set in test data!";
+            + Messages.getInstance().getString("Classifier_AcceptTestSet_ErrorMessage_Text_First");
         if (m_log != null) {
           m_log.statusMessage(errorMessage);
-          m_log.logMessage("[Classifier] " + errorMessage);
+          m_log.logMessage(Messages.getInstance().getString("Classifier_AcceptTestSet_LogMessage_Text_First") + errorMessage);
         } else {
-          System.err.println("[Classifier] " + errorMessage);
+          System.err.println(Messages.getInstance().getString("Classifier_AcceptTestSet_Error_Text_First") + errorMessage);
         }
         return;
       }
@@ -996,12 +989,12 @@ public class Classifier
       if (m_trainingSet == null) {
         stop();
         String errorMessage = statusMessagePrefix()
-          + "ERROR: no trained/loaded classifier to use for prediction!";
+          + Messages.getInstance().getString("Classifier_AcceptTestSet_ErrorMessage_Text_First_Alpha");
         if (m_log != null) {
           m_log.statusMessage(errorMessage);
-          m_log.logMessage("[Classifier] " + errorMessage);
+          m_log.logMessage(Messages.getInstance().getString("Classifier_AcceptTestSet_LogMessage_Text_Second") + errorMessage);
         } else {
-          System.err.println("[Classifier] " + errorMessage);
+          System.err.println(Messages.getInstance().getString("Classifier_AcceptTestSet_Error_Text_Second") + errorMessage);
         }
         return;
       }
@@ -1026,7 +1019,7 @@ public class Classifier
           ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
           
           if (m_log != null && !e.isStructureOnly()) {
-            m_log.statusMessage(statusMessagePrefix() + "Finished.");
+            m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTestSet_StatusMessage_Text_First"));
           }
           notifyBatchClassifierListeners(ce);
         }
@@ -1063,9 +1056,9 @@ public class Classifier
   private synchronized void classifierTrainingComplete(BatchClassifierEvent ce) {
     // check the output queues if we have an incoming test set connection
     if (m_listenees.containsKey("testSet")) {
-      String msg = "[Classifier] " + statusMessagePrefix() 
-      + " storing model for run " + ce.getRunNumber() 
-      + " fold " + ce.getSetNumber();
+      String msg = Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_First") + statusMessagePrefix() 
+      + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Second") + ce.getRunNumber() 
+      + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Third") + ce.getSetNumber();
       if (m_log != null) {
         m_log.logMessage(msg);
       } else {
@@ -1094,8 +1087,8 @@ public class Classifier
       if (m_outputQueues[runNum - 1][i] != null) {
         if (m_outputQueues[runNum - 1][i].getClassifier() != null &&
             m_outputQueues[runNum - 1][i].getTestSet() != null) {
-          String msg = "[Classifier] " + statusMessagePrefix() 
-          + " dispatching run/set " + runNum + "/" + (i+1) + " to listeners.";
+          String msg = Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Fourth") + statusMessagePrefix() 
+          + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Fifth") + runNum + "/" + (i+1) + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Sixth");
           if (m_log != null) {
             m_log.logMessage(msg);
           } else {
@@ -1128,8 +1121,8 @@ public class Classifier
     }
     
     if (done) {
-      String msg = "[Classifier] " + statusMessagePrefix() 
-      + " last classifier unblocking...";
+      String msg = Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Seventh") + statusMessagePrefix() 
+      + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Eighth");
 
       if (m_log != null) {
         m_log.logMessage(msg);
@@ -1139,7 +1132,7 @@ public class Classifier
       //m_visual.setText(m_oldText);
 
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "Finished.");
+        m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTestSet_StatusMessage_Text_Second"));
       }
       // m_outputQueues = null; // free memory
 
@@ -1427,12 +1420,10 @@ public class Classifier
     if (eventName.compareTo("instance") == 0) {
       if (!(m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier)) {
 	if (m_log != null) {
-	  String msg = statusMessagePrefix() + "WARNING: "
+	  String msg = statusMessagePrefix() + Messages.getInstance().getString("Classifier_ConnectionNotification_Msg_Text_First")
 	  + m_ClassifierTemplate.getClass().getName()
-          + " Is not an updateable classifier. This "
-          +"classifier will only be evaluated on incoming "
-          +"instance events and not trained on them.";
-	  m_log.logMessage("[Classifier] " + msg);
+          + Messages.getInstance().getString("Classifier_ConnectionNotification_Msg_Text_Second");
+	  m_log.logMessage(Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_First") + msg);
 	  m_log.statusMessage(msg);
 	}
       }
@@ -1595,22 +1586,21 @@ public class Classifier
         m_trainingSet = tempHeader;
 
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Loaded model.");
-          m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-              + "Loaded classifier: "
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_ConnectionNotification_StatusMessage_Text_First"));
+          m_log.logMessage(Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_Second") + statusMessagePrefix() 
+              + Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_Third")
               + m_Classifier.getClass().toString());
         }
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Classifier.this,
-                                    "Problem loading classifier.\n",
-                                    "Load Model",
+    		  Messages.getInstance().getString("Classifier_ConnectionNotification_JOptionPane_ShowMessageDialog_Text_First"),
+    		  Messages.getInstance().getString("Classifier_ConnectionNotification_JOptionPane_ShowMessageDialog_Text_Second"),
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "ERROR: unable to load " +
-        		"model (see log).");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-            + "Problem loading classifier. " 
+        m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_ConnectionNotification_StatusMessage_Text_Second"));
+        m_log.logMessage(Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_Fourth") + statusMessagePrefix() 
+            + Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_Fifth")
             + ex.getMessage());
       }
     }
@@ -1686,21 +1676,20 @@ public class Classifier
           os.close();
         }
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Model saved.");
-          m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-              + " Saved classifier " + getCustomName());
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_SaveModel_StatusMessage_Text_First"));
+          m_log.logMessage(Messages.getInstance().getString("Classifier_SaveModel_LogMessage_Text_First") + statusMessagePrefix() 
+              + Messages.getInstance().getString("Classifier_SaveModel_LogMessage_Text_Second") + getCustomName());
         }
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Classifier.this,
-                                    "Problem saving classifier.\n",
-                                    "Save Model",
+    		  Messages.getInstance().getString("Classifier_SaveModel_JOptionPane_ShowMessageDialog_Text_First"),
+    		  Messages.getInstance().getString("Classifier_SaveModel_JOptionPane_ShowMessageDialog_Text_Second"),
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "ERROR: unable to" +
-        		" save model (see log).");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-            + " Problem saving classifier " + getCustomName() 
+        m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_SaveModel_StatusMessage_Text_Second"));
+        m_log.logMessage(Messages.getInstance().getString("Classifier_SaveModel_LogMessage_Text_Third") + statusMessagePrefix() 
+            + Messages.getInstance().getString("Classifier_SaveModel_LogMessage_Text_Fourth") + getCustomName() 
             + ex.getMessage());
       }
     }
@@ -1758,7 +1747,7 @@ public class Classifier
       loadModel();
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (Classifier)");
+					 + Messages.getInstance().getString("Classifier_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 

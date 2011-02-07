@@ -81,7 +81,7 @@ public class TrainTestSplitMaker
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Split an incoming data set into separate train and test sets." ;
+    return Messages.getInstance().getString("TrainTestSplitMaker_GlobalInfo_Text");
   }
 
   /**
@@ -90,7 +90,7 @@ public class TrainTestSplitMaker
    * @return a <code>String</code> value
    */
   public String trainPercentTipText() {
-    return "The percentage of data to go into the training set";
+    return Messages.getInstance().getString("TrainTestSplitMaker_TrainPercentTipText_Text");
   }
 
   /**
@@ -118,7 +118,7 @@ public class TrainTestSplitMaker
    * @return a <code>String</code> value
    */
   public String seedTipText() {
-    return "The randomization seed";
+    return Messages.getInstance().getString("TrainTestSplitMaker_SeedTipText_Text");
   }
 
   /**
@@ -195,30 +195,30 @@ public class TrainTestSplitMaker
 		notifyTestSetProduced(teste);
 	      } else {
 		if (m_logger != null) {
-		  m_logger.logMessage("[TrainTestSplitMaker] "
-		      + statusMessagePrefix() + " Split has been canceled!");
+		  m_logger.logMessage(Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_First")
+		      + statusMessagePrefix() + Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_Second"));
 		  m_logger.statusMessage(statusMessagePrefix()
-		      + "INTERRUPTED");
+		      + Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_Third"));
 		}
 	      }
 	    } catch (Exception ex) {
 	      stop(); // stop all processing
 	      if (m_logger != null) {
 	          m_logger.statusMessage(statusMessagePrefix()
-	              + "ERROR (See log for details)");
-	          m_logger.logMessage("[TrainTestSplitMaker] " 
+	              + Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_Fourth"));
+	          m_logger.logMessage(Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_Fifth")
 	              + statusMessagePrefix()
-	              + " problem during split creation. " 
+	              + Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_Sixth")
 	              + ex.getMessage());
 	      }
 	      ex.printStackTrace();
 	    } finally {
 	      if (isInterrupted()) {
 	        if (m_logger != null) {
-	          m_logger.logMessage("[TrainTestSplitMaker] "
-	              + statusMessagePrefix() + " Split has been canceled!");
+	          m_logger.logMessage(Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_Sixth_Alpha")
+	              + statusMessagePrefix() + Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_Seventh"));
 	          m_logger.statusMessage(statusMessagePrefix()
-	              + "INTERRUPTED");
+	              + Messages.getInstance().getString("TrainTestSplitMaker_AcceptDataSet_Run_LogMessage_Text_Eighth"));
 	        }
 	      }
 	      block(false);
@@ -352,8 +352,7 @@ public class TrainTestSplitMaker
     if (request.compareTo("Stop") == 0) {
       stop();
     } else {
-      throw new IllegalArgumentException(request
-			 + " not supported (TrainTestSplitMaker)");
+      throw new IllegalArgumentException(request + " not supported (TrainTestSplitMaker)");
     }
   }
 

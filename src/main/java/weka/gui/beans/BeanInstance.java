@@ -351,7 +351,7 @@ public class BeanInstance
   public void removeBean(JComponent container) {
     for (int i = 0; i < COMPONENTS.size(); i++) {
       if ((BeanInstance)COMPONENTS.elementAt(i) == this) {
-	System.err.println("Removing bean");
+	System.err.println(Messages.getInstance().getString("BeanInstance_RemoveBean_Error_Text"));
 	COMPONENTS.removeElementAt(i);
       }
     }
@@ -381,7 +381,7 @@ public class BeanInstance
 
     // Ignore invisible components
     if (!Beans.isInstanceOf(m_bean, JComponent.class)) {
-      System.err.println("Component is invisible!");
+      System.err.println(Messages.getInstance().getString("BeanInstance_AddBean_Error_Text"));
       return;
     }
     

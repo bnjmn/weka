@@ -44,7 +44,7 @@ import javax.swing.event.DocumentListener;
  * Class for editing SimpleDateFormat strings. 
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  * @see SimpleDateFormat
  */
 public class SimpleDateFormatEditor 
@@ -87,8 +87,8 @@ public class SimpleDateFormatEditor
      */
     public CustomEditor() {
       m_FormatText    = new JTextField(20);
-      m_DefaultButton = new JButton("Default");
-      m_ApplyButton   = new JButton("Apply");
+      m_DefaultButton = new JButton(Messages.getInstance().getString("SimpleDateFormatEditor_DefaultButton_JButton_Text"));
+      m_ApplyButton   = new JButton(Messages.getInstance().getString("SimpleDateFormatEditor_ApplyButton_JButton_Text"));
 
       m_DefaultButton.setMnemonic('D');
       m_ApplyButton.setMnemonic('A');
@@ -98,7 +98,7 @@ public class SimpleDateFormatEditor
       m_ApplyButton.addActionListener(this);
 
       setLayout(new FlowLayout());
-      add(new JLabel("ISO 8601 Date format"));
+      add(new JLabel(Messages.getInstance().getString("SimpleDateFormatEditor_JLabel_Text")));
       add(m_FormatText);
       add(m_DefaultButton);
       add(m_ApplyButton);
@@ -153,9 +153,9 @@ public class SimpleDateFormatEditor
       }
       else {
 	throw new IllegalArgumentException(
-	    "Date format '" 
+			Messages.getInstance().getString("SimpleDateFormatEditor_ApplyFormat_IllegalArgumentException_Text_First")
 	    + m_FormatText.getText() 
-	    + "' is invalid! Cannot execute applyFormat!");
+	    + Messages.getInstance().getString("SimpleDateFormatEditor_ApplyFormat_IllegalArgumentException_Text_Second"));
       }
     }
     

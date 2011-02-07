@@ -40,7 +40,7 @@ import javax.swing.table.TableColumnModel;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class AttributeListPanel
   extends JPanel {
@@ -129,9 +129,9 @@ public class AttributeListPanel
       
       switch (column) {
       case 0:
-	return new String("No.");
+	return new String(Messages.getInstance().getString("AttributeListPanel_getColumnName_Number_Text"));
       case 1:
-	return new String("Name");
+	return new String(Messages.getInstance().getString("AttributeListPanel_getColumnName_Name_Text"));
       default:
 	return null;
       }
@@ -219,13 +219,13 @@ public class AttributeListPanel
 
     try {
       if (args.length == 0) {
-	throw new Exception("supply the name of an arff file");
+	throw new Exception(Messages.getInstance().getString("AttributeListPanel_Main_Error_Text"));
       }
       Instances i = new Instances(new java.io.BufferedReader(
 				  new java.io.FileReader(args[0])));
       AttributeListPanel asp = new AttributeListPanel();
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Attribute List Panel");
+	new javax.swing.JFrame(Messages.getInstance().getString("AttributeListPanel_Main_AttributeListPanel_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(asp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {

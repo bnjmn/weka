@@ -37,7 +37,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
  * available Look and Feel themes.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class LookAndFeel {
   
@@ -53,13 +53,12 @@ public class LookAndFeel {
     } 
     catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
-       "LookAndFeel: Could not read a LookAndFeel configuration file.\n"
-       +"An example file is included in the Weka distribution.\n"
-       +"This file should be named \"" + PROPERTY_FILE + "\"  and\n"
-       +"should be placed either in your user home (which is set\n"
-       +"to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-       +"or the directory that java was started from\n",
-       "LookAndFeel",
+       Messages.getInstance().getString("LookAndFeel_Exception_JOptionPaneShowMessageDialog_Text_First") 
+       + PROPERTY_FILE 
+       + Messages.getInstance().getString("LookAndFeel_Exception_JOptionPaneShowMessageDialog_Text_Second") 
+       + System.getProperties().getProperty("user.home") 
+       + Messages.getInstance().getString("LookAndFeel_Exception_JOptionPaneShowMessageDialog_Text_Third"),
+       Messages.getInstance().getString("LookAndFeel_Exception_JOptionPaneShowMessageDialog_Text_Fourth"),
        JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -94,7 +93,7 @@ public class LookAndFeel {
   public static boolean setLookAndFeel() {
     String           classname;
 
-    classname = LOOKANDFEEL_PROPERTIES.getProperty("Theme", "");
+    classname = LOOKANDFEEL_PROPERTIES.getProperty(Messages.getInstance().getString("LookAndFeel_SetLookAndFeel_ClassName_Text"), "");
     if (classname.equals("")) {
       // Java 1.5 crashes under Gnome if one sets it to the GTKLookAndFeel 
       // theme, hence we don't set any theme by default if we're on a Linux 
@@ -146,11 +145,11 @@ public class LookAndFeel {
     String[]	list;
     int		i;
     
-    System.out.println("\nInstalled Look and Feel themes:");
+    System.out.println(Messages.getInstance().getString("LookAndFeel_Main_Text_First"));
     list = getInstalledLookAndFeels();
     for (i = 0; i < list.length; i++)
       System.out.println((i+1) + ". " + list[i]);
 
-    System.out.println("\nNote: a theme can be set in '" + PROPERTY_FILE + "'.");
+    System.out.println(Messages.getInstance().getString("LookAndFeel_Main_Text_Second") + PROPERTY_FILE + Messages.getInstance().getString("LookAndFeel_Main_Text_Third"));
   }
 }

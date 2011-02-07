@@ -268,7 +268,7 @@ public class StripChart
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Visualize incremental classifier performance as a scrolling plot.";
+    return Messages.getInstance().getString("StripChart_GlobalInfo_Text");
   }
 
   /**
@@ -277,7 +277,7 @@ public class StripChart
    * @return a <code>String</code> value
    */
   public String xLabelFreqTipText() {
-    return "Show x axis labels this often";
+    return Messages.getInstance().getString("StripChart_XLabelFreqTipText_Text");
   }
 
   /**
@@ -306,7 +306,7 @@ public class StripChart
    * @return a <code>String</code> value
    */
   public String refreshFreqTipText() {
-    return "Plot every x'th data point";
+    return Messages.getInstance().getString("StripChart_RefreshFreqTipText_Text");
   }
 
   /**
@@ -436,7 +436,7 @@ public class StripChart
    */
   public void showChart() {
     if (m_outputFrame == null) {
-      m_outputFrame = new JFrame("Strip Chart");
+      m_outputFrame = new JFrame(Messages.getInstance().getString("StripChart_ShowChart_OutputFrame_JFrame_Text"));
       m_outputFrame.getContentPane().setLayout(new BorderLayout());
       JPanel panel = new JPanel(new BorderLayout());
       new PrintableComponent(panel);
@@ -453,14 +453,14 @@ public class StripChart
 			      createTitledBorder(BorderFactory.
 				    createEtchedBorder(Color.gray,
 						       Color.darkGray),
-				    "Legend" ,
+						       Messages.getInstance().getString("StripChart_ShowChart_LegendPanel_SetBorder_BorderFactoryCreateEtchedBorder_Text") ,
 				    TitledBorder.CENTER,
 				    TitledBorder.DEFAULT_POSITION, lf,
 				    m_LegendPanelBorderColor));
       m_outputFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent e) {
 	    if (m_updateHandler != null) {
-	      System.err.println("Interrupting");
+	      System.err.println(Messages.getInstance().getString("StripChart_ShowChart_WindowClosing_Error_Text"));
 	      m_updateHandler.interrupt();
 	      m_updateHandler = null;
 	    }
@@ -484,7 +484,7 @@ public class StripChart
       m_previousY[0] = -1;
       setRefreshWidth();
       if (m_updateHandler == null) {
-	System.err.println("Starting handler");
+	System.err.println(Messages.getInstance().getString("StripChart_ShowChart_Error_Text"));
 	startHandler();
       }
     } else {
@@ -855,7 +855,7 @@ public class StripChart
     } else {
       throw new
 	IllegalArgumentException(request
-				 + " not supported (StripChart)");
+				 + Messages.getInstance().getString("StripChart_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
@@ -868,7 +868,7 @@ public class StripChart
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Knowledge Flow : StipChart");
+	new javax.swing.JFrame(Messages.getInstance().getString("StripChart_Main_Jf_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final StripChart jd = new StripChart();
       jf.getContentPane().add(jd, BorderLayout.CENTER);
@@ -887,7 +887,7 @@ public class StripChart
 	pos[0] = r.nextDouble();
 	jd.acceptDataPoint(pos);
       }
-      System.err.println("Done sending data");
+      System.err.println(Messages.getInstance().getString("StripChart_Main_Error_Text"));
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());

@@ -38,7 +38,7 @@ import javax.swing.SwingConstants;
  * attributes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class InstancesSummaryPanel
   extends JPanel {
@@ -47,7 +47,7 @@ public class InstancesSummaryPanel
   private static final long serialVersionUID = -5243579535296681063L;
 
   /** Message shown when no instances have been loaded */
-  protected static final String NO_SOURCE = "None";
+  protected static final String NO_SOURCE = Messages.getInstance().getString("InstancesSummaryPanel_NO_SOURCE_Text");
 
   /** Displays the name of the relation */
   protected JLabel m_RelationNameLab = new JLabel(NO_SOURCE);
@@ -68,7 +68,7 @@ public class InstancesSummaryPanel
 
     GridBagLayout gbLayout = new GridBagLayout();
     setLayout(gbLayout);
-    JLabel lab = new JLabel("Relation:", SwingConstants.RIGHT);
+    JLabel lab = new JLabel(Messages.getInstance().getString("InstancesSummaryPanel_Lab_JLabel_Text_First"), SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
     GridBagConstraints gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -85,7 +85,7 @@ public class InstancesSummaryPanel
     add(m_RelationNameLab);
     m_RelationNameLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
     
-    lab = new JLabel("Instances:", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("InstancesSummaryPanel_Lab_JLabel_Text_Second"), SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -102,7 +102,7 @@ public class InstancesSummaryPanel
     add(m_NumInstancesLab);
     m_NumInstancesLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
 
-    lab = new JLabel("Attributes:", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("InstancesSummaryPanel_Lab_JLabel_Text_Third"), SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -142,10 +142,10 @@ public class InstancesSummaryPanel
   public static void main(String [] args) {
 
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame("Instances Panel");
+      final javax.swing.JFrame jf = new javax.swing.JFrame(Messages.getInstance().getString("InstancesSummaryPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final InstancesSummaryPanel p = new InstancesSummaryPanel();
-      p.setBorder(BorderFactory.createTitledBorder("Relation"));
+      p.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("InstancesSummaryPanel_Main_P_SetBorder_BorderFactoryCreateTitledBorder_Text")));
       jf.getContentPane().add(p, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	public void windowClosing(java.awt.event.WindowEvent e) {
@@ -166,5 +166,4 @@ public class InstancesSummaryPanel
       System.err.println(ex.getMessage());
     }
   }
-  
 }
