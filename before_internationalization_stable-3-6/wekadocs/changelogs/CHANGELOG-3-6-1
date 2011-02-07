@@ -1,0 +1,1389 @@
+------------------------------------------------------------------------
+r4904 | fracpete | 2008-12-30 11:31:39 +1300 (Tue, 30 Dec 2008) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/alignbottom.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/alignleft.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/alignright.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/aligntop.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/arrow-s.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/arrow.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/centerhorizontal.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/centervertical.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/copy.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/cut.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/help.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/layout.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/line-s.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/line.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/lines-s.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/lines.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/new.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/open.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/oval-s.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/oval.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/paste.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/print.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/rect-s.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/rect.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/redo.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/rrect.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/save.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/select-s.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/select.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/spacehorizontal.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/spacevertical.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/undo.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/zoomin.png
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons/zoomout.png
+
+background is now transparent (no longer ugly grey background), using indexed PNGs with alpha channel
+------------------------------------------------------------------------
+r4905 | fracpete | 2008-12-30 11:41:35 +1300 (Tue, 30 Dec 2008) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/GUI.java
+
+uses now weka.gui.ConverterFileChooser instead of plain JFileChooser for loading/saving datasets
+------------------------------------------------------------------------
+r4907 | fracpete | 2008-12-30 15:11:14 +1300 (Tue, 30 Dec 2008) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/SerializedInstancesSaver.java
+
+fixed saving to stream
+------------------------------------------------------------------------
+r4908 | fracpete | 2008-12-30 15:12:23 +1300 (Tue, 30 Dec 2008) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/CSVSaver.java
+
+due to changes in ARFF format (output of instance weights), the Instance.toString() couldn't be used anymore to generate CSV output
+------------------------------------------------------------------------
+r4921 | mhall | 2008-12-31 16:31:54 +1300 (Wed, 31 Dec 2008) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ScatterSearchV1.java
+
+Removed non-utf characters.
+------------------------------------------------------------------------
+r4924 | fracpete | 2009-01-05 14:08:18 +1300 (Mon, 05 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/ConverterUtils.java
+
+fixed DataSource class when using a Loader (could end up trying to read from a closed stream)
+------------------------------------------------------------------------
+r4930 | mhall | 2009-01-05 21:19:17 +1300 (Mon, 05 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Loader.java
+
+log object was not transient causing binary serialization to fail.
+------------------------------------------------------------------------
+r4933 | mhall | 2009-01-05 22:17:24 +1300 (Mon, 05 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Filter.java
+
+Fixed a status message.
+------------------------------------------------------------------------
+r4936 | fracpete | 2009-01-07 16:03:07 +1300 (Wed, 07 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instances.java
+
+one can now compare the headers of two files via "weka.core.Instances headers <file1> <file2>"; enables one to perform a quick test on the commandline
+------------------------------------------------------------------------
+r4942 | fracpete | 2009-01-11 11:54:54 +1300 (Sun, 11 Jan 2009) | 5 lines
+Changed paths:
+   M /branches/stable-3-6/weka/build.xml
+   A /branches/stable-3-6/weka/lib/JFlex.jar
+   A /branches/stable-3-6/weka/lib/README
+   A /branches/stable-3-6/weka/lib/java-cup.jar
+   A /branches/stable-3-6/weka/lib/libsvm.jar
+   M /branches/stable-3-6/weka/parsers.xml
+   M /branches/stable-3-6/weka/src/main/java/weka/core/MathematicalExpression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/mathematicalexpression/Parser.cup
+   M /branches/stable-3-6/weka/src/main/java/weka/core/mathematicalexpression/Parser.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/mathematicalexpression/Scanner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/mathematicalexpression/Scanner.jflex
+   M /branches/stable-3-6/weka/src/main/java/weka/core/mathematicalexpression/sym.java
+   D /branches/stable-3-6/weka/src/main/java/weka/core/parser
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/MathExpression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Parser.cup
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Parser.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Scanner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Scanner.jflex
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/sym.java
+
+added java-cup.jar and JFlex.jar to "lib" directory
+removed package weka.core.parser
+adapted all imports and classpaths (removing prefix "weka.core.parser.")
+"compile" target in build.xml copies the java_cup/runtime directory of the java-cup.jar into the build/classes directory, since these classes are the only ones necessary at runtime
+added lib/README to list versions and links of used libraries
+------------------------------------------------------------------------
+r4945 | fracpete | 2009-01-11 11:56:36 +1300 (Sun, 11 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ScatterSearchV1.java
+
+removed non-ascii characters
+------------------------------------------------------------------------
+r4950 | mhall | 2009-01-12 10:24:50 +1300 (Mon, 12 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/ClassValuePicker.java
+
+Now clears any warning status messages once problems are resolved.
+------------------------------------------------------------------------
+r4952 | fracpete | 2009-01-16 08:58:33 +1300 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/sql/ResultSetHelper.java
+
+didn't list any data for ResultSets of type ResultSet.TYPE_FORWARD_ONLY, e.g., Sqlite
+------------------------------------------------------------------------
+r4955 | mhall | 2009-01-16 20:19:54 +1300 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/ClassifierPerformanceEvaluator.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/CrossValidationFoldMaker.java
+
+Small error/interrupted status message bug fix.
+------------------------------------------------------------------------
+r4956 | mhall | 2009-01-16 20:20:01 +1300 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Fixed nasty bug that prevented a MetaBean that had been stored in the user tab from being binary serialized when the flow was saved.
+------------------------------------------------------------------------
+r4961 | fracpete | 2009-01-17 13:30:12 +1300 (Sat, 17 Jan 2009) | 3 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/treevisualizer/TreeVisualizer.java
+   A /branches/stable-3-6/weka/src/main/java/weka/gui/treevisualizer/TreeVisualizer.props
+
+added props file for color customization of the TreeVisualizer
+in response to odd behavior on Mac OS X when saving tree to file:
+https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2009-January/015661.html
+------------------------------------------------------------------------
+r4967 | mhall | 2009-01-20 14:00:31 +1300 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Environment.java
+
+Changed so that clients can use either a system-wide shared set of environment variables, or a local set
+------------------------------------------------------------------------
+r4968 | mhall | 2009-01-20 14:00:59 +1300 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/core/EnvironmentHandler.java
+
+Initial import
+------------------------------------------------------------------------
+r4969 | mhall | 2009-01-20 14:01:59 +1300 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/AbstractFileLoader.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/AbstractFileSaver.java
+
+Altered to reflect changes to Environment.java
+------------------------------------------------------------------------
+r4970 | mhall | 2009-01-20 14:02:19 +1300 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+Altered to reflect changes to Environment.java
+------------------------------------------------------------------------
+r4971 | mhall | 2009-01-20 14:02:47 +1300 (Tue, 20 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FlowRunner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/SerializedModelSaver.java
+
+Altered to reflect changes to Environment.java
+------------------------------------------------------------------------
+r4972 | fracpete | 2009-01-21 13:45:08 +1300 (Wed, 21 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/LogWindow.java
+
+print-method now checks whether the object is NULL; if that's the case, it just prints the string "null" otherwise it uses the object's toString() method
+------------------------------------------------------------------------
+r4975 | mhall | 2009-01-21 14:22:38 +1300 (Wed, 21 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Added Craig Bruce's implementation of the Drawable interface.
+------------------------------------------------------------------------
+r4978 | mhall | 2009-01-21 14:59:00 +1300 (Wed, 21 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ScatterSearchV1.java
+
+Fixed doc bug
+------------------------------------------------------------------------
+r4985 | mhall | 2009-01-23 15:10:09 +1300 (Fri, 23 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/AbstractFileLoader.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/AbstractFileSaver.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/ArffLoader.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/CSVLoader.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/SVMLightLoader.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/XRFFLoader.java
+
+More changes to support local environment variables
+------------------------------------------------------------------------
+r4986 | mhall | 2009-01-23 15:11:30 +1300 (Fri, 23 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Loader.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Saver.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+More changes to support local environment variables
+------------------------------------------------------------------------
+r4993 | mhall | 2009-01-23 15:20:46 +1300 (Fri, 23 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Doc update
+------------------------------------------------------------------------
+r5000 | mhall | 2009-01-28 10:19:37 +1300 (Wed, 28 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/TrainingSetMaker.java
+
+Stop notification was not getting reset.
+------------------------------------------------------------------------
+r5003 | mhall | 2009-01-29 09:33:04 +1300 (Thu, 29 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy/LWL.java
+
+Fixed bug that prevented LWL from running incrementally from the command line.
+------------------------------------------------------------------------
+r5009 | mhall | 2009-01-30 11:36:34 +1300 (Fri, 30 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/Expression.java
+
+Fixed typo
+------------------------------------------------------------------------
+r5011 | fracpete | 2009-01-30 16:56:21 +1300 (Fri, 30 Jan 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy/LWL.java
+
+reverted use of Instances.equalHeadersMsg(...) method (got introduced with the last bugfix)
+------------------------------------------------------------------------
+r5020 | fracpete | 2009-02-02 11:21:56 +1300 (Mon, 02 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.props
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericPropertiesCreator.props
+
+added JythonClassifier again to list of available classifiers
+------------------------------------------------------------------------
+r5035 | mhall | 2009-02-06 21:14:42 +1300 (Fri, 06 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/IncrementalClassifierEvaluator.java
+
+Now prints a status and log message if an exception arises during processing of an incoming event.
+------------------------------------------------------------------------
+r5037 | fracpete | 2009-02-07 10:35:28 +1300 (Sat, 07 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/Explorer.props
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ExplorerDefaults.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+
+the initial directory for datasets in the Preprocesspanel of the Explorer can now be set in the weka/gui/explorer/Explorer.props file as well (property "InitialDirectory")
+------------------------------------------------------------------------
+r5039 | fracpete | 2009-02-07 11:03:10 +1300 (Sat, 07 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/LibSVM.java
+
+added example to tiptext of weights property (it is a blank-separated list of weights, e.g., "1 1 1" for a 3-class problem)
+------------------------------------------------------------------------
+r5042 | fracpete | 2009-02-07 11:16:27 +1300 (Sat, 07 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/LibSVM.java
+
+updated tiptext, listOptions and Javadoc in regards to -W parameter/weights property for weights for classes (wasn't very informative)
+------------------------------------------------------------------------
+r5046 | fracpete | 2009-02-07 13:01:22 +1300 (Sat, 07 Feb 2009) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/SimpleStreamFilter.java
+
+methods input and batchFinished now correctly throw Exceptions (like in Filter base class)
+removed try-catch-blocks that did become unnecessary in the process
+------------------------------------------------------------------------
+r5048 | fracpete | 2009-02-07 13:04:08 +1300 (Sat, 07 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/AddClassification.java
+
+checks now whether a header is present in the serialized model file and if yes, compares it to the dataset that is to be filtered
+------------------------------------------------------------------------
+r5051 | fracpete | 2009-02-07 13:58:20 +1300 (Sat, 07 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/AddClassification.java
+
+removed use of equalHeadersMsg method (copy/paste error)
+------------------------------------------------------------------------
+r5057 | fracpete | 2009-02-10 13:47:44 +1300 (Tue, 10 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Tee.java
+
+added missing print/println/write methods
+------------------------------------------------------------------------
+r5062 | mhall | 2009-02-13 16:46:38 +1300 (Fri, 13 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/PredictionAppender.java
+
+Prediction appender was re-using an array for creating the instance values in instance events! Fixed.
+------------------------------------------------------------------------
+r5065 | mhall | 2009-02-15 14:58:17 +1300 (Sun, 15 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Fixed bug that prevented a trained model from being used to generate predictions when a train and test set connection from separate sources are connected. Improved some status messages. Enforced the use of a ClassAssigner to set the class attribute (it used to default to the last attribute if none was set, but this was not consistent under all situations).
+------------------------------------------------------------------------
+r5076 | mhall | 2009-02-18 13:51:09 +1300 (Wed, 18 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/Filter.java
+
+output() was calling stringFreeStructure() on the output format instances resulting in a structure that was incompatible for subsequent batches.
+------------------------------------------------------------------------
+r5080 | mhall | 2009-02-18 16:40:43 +1300 (Wed, 18 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+Now saves the relationNameAsFilename property for Savers
+------------------------------------------------------------------------
+r5081 | mhall | 2009-02-18 16:40:55 +1300 (Wed, 18 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FlowRunner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Loader.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/LoaderCustomizer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/SaverCustomizer.java
+
+FlowRunner now allows startable beans to be executed sequentially as well as in parallel (default). The order that Startable beans (i.e. data sources) in a flow are launched can be controlled by setting the name of the bean using a number as a prefix (e.g. for an ArffLoader that loads the training data, it might be called  1:LoadMyTrainingData)
+------------------------------------------------------------------------
+r5085 | mhall | 2009-02-19 10:13:21 +1300 (Thu, 19 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/Evaluation.java
+
+Now suppresses detailed class information when printing predictions.
+------------------------------------------------------------------------
+r5090 | mhall | 2009-02-23 16:52:26 +1300 (Mon, 23 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/InstanceQuery.java
+
+Added Andy Hessling's fix for sqlite driver versions > v042.
+------------------------------------------------------------------------
+r5092 | mhall | 2009-02-24 10:01:05 +1300 (Tue, 24 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/MathExpression.java
+
+Fixed bug where, for SparseInstances, attributes to be ignored by the filter were getting zero'd
+------------------------------------------------------------------------
+r5101 | mhall | 2009-02-25 14:24:41 +1300 (Wed, 25 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/TestSetMaker.java
+
+A flag was not getting reset after a stop was received from downstream components.
+------------------------------------------------------------------------
+r5103 | mhall | 2009-02-26 15:04:32 +1300 (Thu, 26 Feb 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/MiningFieldMetaInfo.java
+
+Outlier treatment method was not getting initialized correctly, except in the default case.
+------------------------------------------------------------------------
+r5125 | fracpete | 2009-03-01 17:34:46 +1300 (Sun, 01 Mar 2009) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseResultListener.java
+   A /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.msaccess
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.odbc
+
+running Experiments in the Experimenter now works with MS Access as well: second call to getString(4) in method "determineColumnConstraints" of DatabaseResultListener class resulted in Exception (fixed this by using local variable)
+added sample setup for MS Access: DatabaseUtils.props.msaccess
+------------------------------------------------------------------------
+r5145 | mhall | 2009-03-11 11:09:12 +1300 (Wed, 11 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/visualize/AttributePanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/visualize/ClassPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/visualize/Plot2D.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/visualize/VisualizePanel.java
+
+Now does not set any of the colours for the points, classes etc. equal to the background colour of the plot panel.
+------------------------------------------------------------------------
+r5149 | mhall | 2009-03-11 12:17:27 +1300 (Wed, 11 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FlowRunner.java
+
+Now implements RevisionHandler
+------------------------------------------------------------------------
+r5151 | mhall | 2009-03-11 14:42:19 +1300 (Wed, 11 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Fixed bug that introduced in r4914, where handling of quoted strings got deleted.
+------------------------------------------------------------------------
+r5153 | mhall | 2009-03-12 11:22:53 +1300 (Thu, 12 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FlowRunner.java
+
+Added a 200 millisecond delay after a start point is launched (under sequential mode) before the beans are polled to see if any are busy. It is possible that the poll may complete a sweep of the beans before any manage to set their busy flags, and this could cause the next consecutive start point to get launched before the first has completed.
+------------------------------------------------------------------------
+r5156 | fracpete | 2009-03-17 13:19:55 +1300 (Tue, 17 Mar 2009) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Add.java
+
+setAttributeName(String) method no longer tries to "fix" the name by checking for single quotes/blanks, but just accepts the name as it is (if empty, "unnamed" is still used, though)
+added Utils.unbackQuoteChars/backQuoteChars to setOptions/getOptions to correctly escape tabs etc.
+------------------------------------------------------------------------
+r5160 | fracpete | 2009-03-19 09:48:18 +1300 (Thu, 19 Mar 2009) | 3 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/DatabaseSaver.java
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.java
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.hsql
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.msaccess
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.mssqlserver
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.mssqlserver2005
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.mysql
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.odbc
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.oracle
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.postgresql
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.sqlite3
+
+fixed DatabaseSaver to correctly store date attributes
+added CREATE_DATE/DateFormat properties to DatabaseUtils.props* files, specifying the columnn type to create for date attributes and what format the date type expects (= SimpleDateFormat format string)
+DatabaseUtils class now outputs "database driver (JDBC)" instead of "JDBC driver", since users don't seem to be familiar with the JDBC acronym
+------------------------------------------------------------------------
+r5163 | fracpete | 2009-03-19 10:34:30 +1300 (Thu, 19 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/Evaluation.java
+
+fixed source code generation: generated classifier didn't implement getRevision() method
+------------------------------------------------------------------------
+r5166 | mhall | 2009-03-19 16:06:49 +1300 (Thu, 19 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Fixed null pointer bug that occurred when connected to a TrainTestSplitMaker
+------------------------------------------------------------------------
+r5169 | mhall | 2009-03-19 16:53:48 +1300 (Thu, 19 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/Ridor.java
+
+Removed TechnicalInformationHandler interface and methods. Ridor is not an implementation of the ripple down rules learner discribed in Gaines' Induct paper.
+------------------------------------------------------------------------
+r5172 | mhall | 2009-03-19 16:56:19 +1300 (Thu, 19 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/Ridor.java
+
+Forgot to update the javadoc.
+------------------------------------------------------------------------
+r5177 | fracpete | 2009-03-23 11:07:43 +1300 (Mon, 23 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericArrayEditor.java
+
+fixed the "Delete" button: worked from the start of the indices and not from the rear, resulting in indices that no longer existed and throwing exceptions
+------------------------------------------------------------------------
+r5181 | mhall | 2009-03-23 14:09:11 +1300 (Mon, 23 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/Ridor.java
+
+Random shuffling of the training instances was broken.
+------------------------------------------------------------------------
+r5188 | mhall | 2009-03-24 11:23:05 +1300 (Tue, 24 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FlowRunner.java
+
+Environment variables were not being set on the flow(s) in some cases and Internal.knowledgeflow.directory was not being set correctly
+------------------------------------------------------------------------
+r5191 | fracpete | 2009-03-24 20:55:54 +1300 (Tue, 24 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/Apriori.java
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/HotSpot.java
+
+fixed typo in GPL preamble
+------------------------------------------------------------------------
+r5196 | mhall | 2009-03-26 14:26:46 +1300 (Thu, 26 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.java
+
+
+------------------------------------------------------------------------
+r5199 | mhall | 2009-03-31 14:48:59 +1300 (Tue, 31 Mar 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/WekaTaskMonitor.java
+
+Changed the image loading to retrieve image resources using the current class loader rather than the system class loader. This allows thing to work properly when running in an app server or as an applet.
+------------------------------------------------------------------------
+r5203 | fracpete | 2009-04-03 12:17:05 +1300 (Fri, 03 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/FileEditor.java
+
+fixed long-standing issue with FileEditor: one closes the editor now when clicking Select or Cancel
+------------------------------------------------------------------------
+r5211 | mhall | 2009-04-06 11:56:29 +1200 (Mon, 06 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/ClassifierPerformanceEvaluator.java
+
+Save a bit of memory by creating certain data structures only if needed under the current flow setup.
+------------------------------------------------------------------------
+r5212 | mhall | 2009-04-06 12:14:18 +1200 (Mon, 06 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/AssociationsPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/AttributeSelectionPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+
+Greyed out items are now selectable (so that capabilities, more info etc. can be viewed) but Start/Apply buttons are disabled for schemes that don't meet the capabilities constraints.
+------------------------------------------------------------------------
+r5217 | mhall | 2009-04-07 16:36:16 +1200 (Tue, 07 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Blocking was not preventing test folds from being overwritten
+------------------------------------------------------------------------
+r5220 | fracpete | 2009-04-08 09:36:21 +1200 (Wed, 08 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/logging/FileLogger.java
+
+added some sanity checks (whether m_LogFile != null) to make subclassing easier
+------------------------------------------------------------------------
+r5222 | mhall | 2009-04-08 15:25:04 +1200 (Wed, 08 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Fixed some more minor concurrency issues.
+------------------------------------------------------------------------
+r5240 | fracpete | 2009-04-13 19:34:37 +1200 (Mon, 13 Apr 2009) | 4 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/DatabaseSaver.java
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.java
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.hsql
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.msaccess
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.mssqlserver
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.mssqlserver2005
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.mysql
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.odbc
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.oracle
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.postgresql
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DatabaseUtils.props.sqlite3
+
+the DatabaseSaver converter now avoids clashes of table/attribute names with database keywords
+DatabaseUtils.props received the following two new properties:
+  Keywords - contains all the keywords
+  KeywordsMaskChar - the character to mask the keyword, i.e., gets appended
+------------------------------------------------------------------------
+r5242 | mhall | 2009-04-15 12:27:22 +1200 (Wed, 15 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FlowRunner.java
+
+Now checks the start message of Startable beans and does not launch any that cannot be started (i.e. where the first character of the start message is a $).
+------------------------------------------------------------------------
+r5256 | mhall | 2009-04-16 09:35:13 +1200 (Thu, 16 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FlowRunner.java
+
+Removed calls to Startable.getStartMessage() as this is a new feature in the development code line
+------------------------------------------------------------------------
+r5278 | mhall | 2009-04-16 20:32:05 +1200 (Thu, 16 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Now only resets the executor pool on receipt of a run 1, fold 1 training set if it has been shutdown.
+------------------------------------------------------------------------
+r5287 | fracpete | 2009-04-18 23:42:48 +1200 (Sat, 18 Apr 2009) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/GeneticSearch.java
+
+population size needs to be an even number
+documentation now states this and set-method only allows even numbers as well
+------------------------------------------------------------------------
+r5290 | mhall | 2009-04-22 15:01:02 +1200 (Wed, 22 Apr 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Eibe's speed improvements.
+------------------------------------------------------------------------
+r5295 | mhall | 2009-05-04 14:20:52 +1200 (Mon, 04 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/SimpleCart.java
+
+For numeric split points, a 'clean' split point was being computed by using Math.rint() - this results in a bug where an instance that should be in the left subset actually ends up in the right subset.
+------------------------------------------------------------------------
+r5301 | mhall | 2009-05-06 14:51:04 +1200 (Wed, 06 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Small improvement to the checks that the isBusy() method does.
+------------------------------------------------------------------------
+r5306 | mhall | 2009-05-07 16:33:51 +1200 (Thu, 07 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/Dagging.java
+
+Now randomizes the data and generates splits using Instances.testCV()
+------------------------------------------------------------------------
+r5310 | mhall | 2009-05-08 09:51:28 +1200 (Fri, 08 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Now makes sure that, when stop() is called and the executor pool is shut down, subsequent batches of data will force the creation of a new executor pool.
+------------------------------------------------------------------------
+r5315 | mhall | 2009-05-08 11:19:11 +1200 (Fri, 08 May 2009) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/MinMaxExtension.java
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/OLM.java
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/OSDL.java
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/monotone
+
+Removed - implementation incorrect or unreliable.
+------------------------------------------------------------------------
+r5316 | mhall | 2009-05-08 11:19:45 +1200 (Fri, 08 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.props
+
+Updated after the removal of monotone classifiers.
+------------------------------------------------------------------------
+r5323 | mhall | 2009-05-11 14:26:10 +1200 (Mon, 11 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/IncrementalClassifierEvaluator.java
+
+Was outputting relative performance measures - fixed.
+------------------------------------------------------------------------
+r5325 | fracpete | 2009-05-11 23:17:36 +1200 (Mon, 11 May 2009) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/sql/ResultSetHelper.java
+
+getObject method of the ResultSet returns arrays of bytes in case of Strings, which gets displayed rather ugly in the table. checks now whether the type of the column is a string and explicitly uses the getString method in this case, otherwise the getObject method.
+also no longer uses the ResultSet's metadata to determine the class, but it's own method (which was only used if the JDBC driver didn't support this function)
+------------------------------------------------------------------------
+r5332 | mhall | 2009-05-15 10:14:27 +1200 (Fri, 15 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/boundaryvisualizer/BoundaryVisualizer.java
+
+Was not calling GenericObjectEditor.registerEditor(). So property dialogs were missing editors for complex types.
+------------------------------------------------------------------------
+r5334 | mhall | 2009-05-15 10:31:41 +1200 (Fri, 15 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/search/local/TAN.java
+
+Now doesn't cause an exception if presented with an empty set of attributes.
+------------------------------------------------------------------------
+r5338 | mhall | 2009-05-17 14:30:12 +1200 (Sun, 17 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.java
+
+Made the makeCopy() method into a static utility method.
+------------------------------------------------------------------------
+r5339 | mhall | 2009-05-17 15:27:32 +1200 (Sun, 17 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/AssociatorCustomizer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/ClassifierCustomizer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/ClustererCustomizer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FilterCustomizer.java
+
+Made customizers for classifiers, clusterers, filters and associators consistent with OK and Cancel buttons that work as expected
+------------------------------------------------------------------------
+r5351 | fracpete | 2009-05-17 16:23:24 +1200 (Sun, 17 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka
+   M /branches/stable-3-6/weka/lib
+   M /branches/stable-3-6/weka/src
+   M /branches/stable-3-6/weka/src/main
+   M /branches/stable-3-6/weka/src/main/java
+   M /branches/stable-3-6/weka/src/main/java/weka
+   M /branches/stable-3-6/weka/src/main/java/weka/associations
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/gsp
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/tertius
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/blr
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/estimate
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/icons
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/search
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/search/ci
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/search/fixed
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/search/global
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/search/local
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/evaluation
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/neural
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/pace
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy/kstar
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/ensembleSelection
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/nestedDichotomies
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/supportVector
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/pmml
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/pmml/consumer
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/part
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/adtree
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/ft
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/j48
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/lmt
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/m5
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/xml
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/Databases
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/Graphics
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/Utils
+   M /branches/stable-3-6/weka/src/main/java/weka/core
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters
+   M /branches/stable-3-6/weka/src/main/java/weka/core/logging
+   M /branches/stable-3-6/weka/src/main/java/weka/core/mathematicalexpression
+   M /branches/stable-3-6/weka/src/main/java/weka/core/matrix
+   M /branches/stable-3-6/weka/src/main/java/weka/core/neighboursearch
+   M /branches/stable-3-6/weka/src/main/java/weka/core/neighboursearch/balltrees
+   M /branches/stable-3-6/weka/src/main/java/weka/core/neighboursearch/covertrees
+   M /branches/stable-3-6/weka/src/main/java/weka/core/neighboursearch/kdtrees
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml
+   M /branches/stable-3-6/weka/src/main/java/weka/core/stemmers
+   M /branches/stable-3-6/weka/src/main/java/weka/core/tokenizers
+   M /branches/stable-3-6/weka/src/main/java/weka/core/xml
+   M /branches/stable-3-6/weka/src/main/java/weka/datagenerators
+   M /branches/stable-3-6/weka/src/main/java/weka/datagenerators/classifiers
+   M /branches/stable-3-6/weka/src/main/java/weka/datagenerators/classifiers/classification
+   M /branches/stable-3-6/weka/src/main/java/weka/datagenerators/classifiers/regression
+   M /branches/stable-3-6/weka/src/main/java/weka/datagenerators/clusterers
+   M /branches/stable-3-6/weka/src/main/java/weka/estimators
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/xml
+   M /branches/stable-3-6/weka/src/main/java/weka/filters
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/instance
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression
+   M /branches/stable-3-6/weka/src/main/java/weka/gui
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/arffviewer
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/icons
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/xml
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/boundaryvisualizer
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/ensembleLibraryEditor
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/ensembleLibraryEditor/tree
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/experiment
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/graphvisualizer
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/graphvisualizer/icons
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/images
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/sql
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/sql/event
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/streams
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/treevisualizer
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/visualize
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/visualize/plugins
+   M /branches/stable-3-6/weka/src/test
+   M /branches/stable-3-6/weka/src/test/java
+   M /branches/stable-3-6/weka/src/test/java/weka
+   M /branches/stable-3-6/weka/src/test/java/weka/associations
+   M /branches/stable-3-6/weka/src/test/java/weka/attributeSelection
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/bayes
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/data
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/functions
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/functions/supportVector
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/lazy
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/meta
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/meta/nestedDichotomies
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/mi
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/mi/supportVector
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/misc
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/pmml
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/pmml/consumer
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/pmml/data
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/rules
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/trees
+   M /branches/stable-3-6/weka/src/test/java/weka/clusterers
+   M /branches/stable-3-6/weka/src/test/java/weka/core
+   M /branches/stable-3-6/weka/src/test/java/weka/core/converters
+   M /branches/stable-3-6/weka/src/test/java/weka/core/neighboursearch
+   M /branches/stable-3-6/weka/src/test/java/weka/core/tokenizers
+   M /branches/stable-3-6/weka/src/test/java/weka/datagenerators
+   M /branches/stable-3-6/weka/src/test/java/weka/datagenerators/classifiers
+   M /branches/stable-3-6/weka/src/test/java/weka/datagenerators/classifiers/classification
+   M /branches/stable-3-6/weka/src/test/java/weka/datagenerators/classifiers/regression
+   M /branches/stable-3-6/weka/src/test/java/weka/datagenerators/clusterers
+   M /branches/stable-3-6/weka/src/test/java/weka/filters
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/data
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/supervised
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/supervised/attribute
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/supervised/instance
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/unsupervised
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/unsupervised/attribute
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/unsupervised/instance
+   M /branches/stable-3-6/weka/src/test/java/weka/test
+   M /branches/stable-3-6/weka/src/test/resources
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/associations
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/attributeSelection
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/bayes
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/functions
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/functions/supportVector
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/lazy
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/meta
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/meta/nestedDichotomies
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/mi
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/mi/supportVector
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/misc
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/pmml
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/pmml/consumer
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/rules
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/classifiers/trees
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/clusterers
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/core
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/core/neighboursearch
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/core/tokenizers
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/filters
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/filters/supervised
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/filters/supervised/attribute
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/filters/supervised/instance
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/filters/unsupervised
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/filters/unsupervised/attribute
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/filters/unsupervised/instance
+
+updated ignore patterns
+------------------------------------------------------------------------
+r5356 | fracpete | 2009-05-19 11:25:10 +1200 (Tue, 19 May 2009) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instances.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+
+removed System.exit(1) call from weka.core.Instances (bad if run from SimpleCLI)
+SimpleCLI's ClassRunner class now trims the string array used as command-line arguments for the class's main method that is about to be executed after removing the "> file" bits (weka.core.Instances didn't like the additional two empty strings and just exited)
+------------------------------------------------------------------------
+r5360 | mhall | 2009-05-19 14:18:56 +1200 (Tue, 19 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/RandomVariates.java
+
+Amri's fix for negative values in nextGamma().
+------------------------------------------------------------------------
+r5370 | mhall | 2009-05-20 14:03:43 +1200 (Wed, 20 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Environment.java
+
+Fixed a bug that caused an infinite loop in substitute(). Now uses a TreeMap instead of a HashMap so that keys are kept in sorted order.
+------------------------------------------------------------------------
+r5377 | fracpete | 2009-05-21 14:27:02 +1200 (Thu, 21 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/ClassDiscovery.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericPropertiesCreator.java
+
+skips duplicate class names now
+------------------------------------------------------------------------
+r5388 | mhall | 2009-05-22 14:32:08 +1200 (Fri, 22 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/AssociationsPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/AttributeSelectionPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+Fixed a bug where the enabled/disabled state of the start button was not being updated when a new data set was set on this panel.
+------------------------------------------------------------------------
+r5401 | fracpete | 2009-05-26 12:52:54 +1200 (Tue, 26 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/Experiment.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/experiment/SetupPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/experiment/SimpleSetupPanel.java
+
+moved reading/writing of experiments into weka.experiment.Experiment class (reducing duplicate code)
+------------------------------------------------------------------------
+r5403 | mhall | 2009-05-26 14:05:09 +1200 (Tue, 26 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/neural/NeuralConnection.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/neural/NeuralNode.java
+
+When using a validation set to stop training, the weights from the last iteration performed were getting used instead of the weights corresponding to the minimal error on the validation set.
+------------------------------------------------------------------------
+r5428 | mhall | 2009-05-27 14:34:32 +1200 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericPropertiesCreator.java
+
+Now checks the current classloader against the system classloader and returns false from useDynamic() if they are not equal. This ensures that the static GOE.props are used in systems that use a custom classloader.
+------------------------------------------------------------------------
+r5429 | mhall | 2009-05-27 14:35:31 +1200 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericPropertiesCreator.props
+
+useDynamic set back to true as there is now a check in GenericPropertiesCreator.java for whether the system classloader or a custom classloader has been used to load classes.
+------------------------------------------------------------------------
+r5431 | mhall | 2009-05-27 14:52:45 +1200 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericPropertiesCreator.java
+
+Now outputs a message to the console if dynamic classloading can't be used due to non-system classloader.
+------------------------------------------------------------------------
+r5438 | mhall | 2009-05-27 15:39:34 +1200 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   D /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/SVMreg.java
+
+Renamed to SMOreg; original SMOreg deleted.
+------------------------------------------------------------------------
+r5439 | mhall | 2009-05-27 15:40:02 +1200 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/SMOreg.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/RegOptimizer.java
+
+Replaced by Remco's SVMreg. RegOptimizer updated to reflect the name change.
+------------------------------------------------------------------------
+r5440 | mhall | 2009-05-27 15:40:38 +1200 (Wed, 27 May 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.props
+
+Updated to reflect the renaming of SVMreg to SMOreg.
+------------------------------------------------------------------------
+r5476 | mhall | 2009-06-02 10:28:28 +1200 (Tue, 02 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/ClassifierPerformanceEvaluator.java
+
+Evaluation object was getting initialized with the test set rather than the training set (screwed up relative metrics). Fixed. Now checks for empty training set and initializes with test set and useNoPriors in this case.
+------------------------------------------------------------------------
+r5502 | mhall | 2009-06-03 09:49:46 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Capabilities.java
+
+Added enableAll and disableAll methods.
+------------------------------------------------------------------------
+r5503 | mhall | 2009-06-03 10:04:28 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/AbstractAssociator.java
+
+Now has maximally permissive capabilities as default and default implementation of RevisionHandler.
+------------------------------------------------------------------------
+r5504 | mhall | 2009-06-03 10:05:02 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/Apriori.java
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/FilteredAssociator.java
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/GeneralizedSequentialPatterns.java
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/HotSpot.java
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/PredictiveApriori.java
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/SingleAssociatorEnhancer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/Tertius.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5507 | mhall | 2009-06-03 11:01:20 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+
+Now checks capabilities when data changes.
+------------------------------------------------------------------------
+r5509 | mhall | 2009-06-03 11:33:31 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+
+Fixed a class cast exception.
+------------------------------------------------------------------------
+r5510 | mhall | 2009-06-03 11:35:49 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ASEvaluation.java
+
+Now has maximally permissive capabilities as default and default implementation of RevisionHandler.
+------------------------------------------------------------------------
+r5511 | mhall | 2009-06-03 11:37:51 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/CfsSubsetEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ChiSquaredAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ClassifierSubsetEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ConsistencySubsetEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/CostSensitiveASEvaluation.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/FilteredAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/FilteredSubsetEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/GainRatioAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/InfoGainAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/LatentSemanticAnalysis.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/OneRAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/PrincipalComponents.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/ReliefFAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/SymmetricalUncertAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/SymmetricalUncertAttributeSetEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/WrapperSubsetEval.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5513 | mhall | 2009-06-03 12:20:38 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/ClassAssigner.java
+
+Now passes on stop notifications to upstream beans.
+------------------------------------------------------------------------
+r5516 | mhall | 2009-06-03 12:26:56 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/AODE.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/AODEsr.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/BayesNet.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/BayesianLogisticRegression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/ComplementNaiveBayes.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/DMNBtext.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/HNB.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/NaiveBayes.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/NaiveBayesMultinomial.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/NaiveBayesSimple.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/WAODE.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5517 | mhall | 2009-06-03 12:32:50 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/Kernel.java
+
+Now has maximally permissive capabilities as default and default implementation of RevisionHandler.
+------------------------------------------------------------------------
+r5518 | mhall | 2009-06-03 12:33:35 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/PolyKernel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/PrecomputedKernelMatrixKernel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/Puk.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/RBFKernel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/StringKernel.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5519 | mhall | 2009-06-03 14:49:04 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+Now implements Randomizable
+------------------------------------------------------------------------
+r5521 | mhall | 2009-06-03 14:52:03 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+Forgot to rename the tipText method for the seed option.
+------------------------------------------------------------------------
+r5523 | mhall | 2009-06-03 15:02:28 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/IsotonicRegression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/LeastMedSq.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/LibLINEAR.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/LibSVM.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/LinearRegression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/Logistic.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/PaceRegression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/SimpleLinearRegression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/SimpleLogistic.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/VotedPerceptron.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/Winnow.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5525 | mhall | 2009-06-03 15:06:13 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy/IB1.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy/IBk.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy/KStar.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/lazy/LBR.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5526 | mhall | 2009-06-03 15:17:53 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/EnsembleSelection.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5527 | mhall | 2009-06-03 15:27:14 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/CitationKNN.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MIDD.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MILR.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MINND.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MIOptimalBall.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MISVM.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/TLD.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/TLDSimple.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5528 | mhall | 2009-06-03 15:29:48 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/FLR.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/HyperPipes.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/SerializedClassifier.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/misc/VFI.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5529 | mhall | 2009-06-03 15:35:30 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/ConjunctiveRule.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/DecisionTable.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/JRip.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/NNge.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/OneR.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/Prism.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/Ridor.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/ZeroR.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/part/MakeDecList.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5531 | mhall | 2009-06-03 15:40:01 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/j48/ClassifierTree.java
+
+Now enables all capabilities by default
+------------------------------------------------------------------------
+r5535 | mhall | 2009-06-03 15:52:44 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/ADTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/BFTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/DecisionStump.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/FT.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/Id3.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/J48graft.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/LADTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/LMT.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/REPTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/SimpleCart.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/UserClassifier.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTreeG.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/j48/NBTreeClassifierTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/j48/PruneableClassifierTree.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5536 | mhall | 2009-06-03 15:55:05 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/Classifier.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/JythonClassifier.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/MultipleClassifiersCombiner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/SingleClassifierEnhancer.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5537 | mhall | 2009-06-03 16:09:36 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/AbstractClusterer.java
+
+Now has maximally permissive capabilities as default and default implementation of RevisionHandler.
+------------------------------------------------------------------------
+r5538 | mhall | 2009-06-03 16:10:18 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/CLOPE.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/Cobweb.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/DBScan.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/FarthestFirst.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/FilteredClusterer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/MakeDensityBasedClusterer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/OPTICS.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/XMeans.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/sIB.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5539 | mhall | 2009-06-03 16:15:28 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/estimators/Estimator.java
+
+Now has maximally permissive capabilities as default and default implementation of RevisionHandler.
+------------------------------------------------------------------------
+r5540 | mhall | 2009-06-03 16:16:01 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/estimators/KernelEstimator.java
+   M /branches/stable-3-6/weka/src/main/java/weka/estimators/MahalanobisEstimator.java
+   M /branches/stable-3-6/weka/src/main/java/weka/estimators/NormalEstimator.java
+   M /branches/stable-3-6/weka/src/main/java/weka/estimators/PoissonEstimator.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5541 | mhall | 2009-06-03 16:32:42 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/AddClassification.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/AttributeSelection.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/ClassOrder.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/Discretize.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/NominalToBinary.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/PLSFilter.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5542 | mhall | 2009-06-03 20:47:57 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/instance/Resample.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/instance/SMOTE.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/instance/SpreadSubsample.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/instance/StratifiedRemoveFolds.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5543 | mhall | 2009-06-03 21:20:37 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Add.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/AddExpression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/AddID.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/AddNoise.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/AddValues.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Center.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/ChangeDateFormat.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/ClassAssigner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Copy.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Discretize.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/FirstOrder.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/InterquartileRange.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/KernelFilter.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/MakeIndicator.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/MathExpression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/MergeTwoValues.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/MultiInstanceToPropositional.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/NominalToBinary.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/NominalToString.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Normalize.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/NumericCleaner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/NumericToBinary.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/NumericToNominal.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/NumericTransform.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Obfuscate.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/PartitionedMultiFilter.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/PrincipalComponents.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5545 | mhall | 2009-06-04 10:08:08 +1200 (Thu, 04 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MDD.java
+
+Now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5546 | mhall | 2009-06-04 10:08:50 +1200 (Thu, 04 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MIEMDD.java
+
+Now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5547 | mhall | 2009-06-04 10:23:35 +1200 (Thu, 04 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/PropositionalToMultiInstance.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/RELAGGS.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/RandomProjection.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/RandomSubset.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Remove.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/RemoveType.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/RemoveUseless.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Reorder.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/ReplaceMissingValues.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Standardize.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/StringToNominal.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/StringToWordVector.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/SwapValues.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/TimeSeriesDelta.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/TimeSeriesTranslate.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Wavelet.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5548 | mhall | 2009-06-04 10:32:25 +1200 (Thu, 04 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/NonSparseToSparse.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/Normalize.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/Randomize.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/RemoveFolds.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/RemoveFrequentValues.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/RemoveMisclassified.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/RemovePercentage.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/RemoveRange.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/RemoveWithValues.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/Resample.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/ReservoirSample.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/SparseToNonSparse.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/SubsetByExpression.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5549 | mhall | 2009-06-04 10:33:42 +1200 (Thu, 04 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/Filter.java
+
+Now has maximally permissive capabilities as default and default implementation of RevisionHandler.
+------------------------------------------------------------------------
+r5550 | mhall | 2009-06-04 10:34:11 +1200 (Thu, 04 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/AllFilter.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/MultiFilter.java
+
+getCapabilities() now disables all capabilities before enabling individual ones.
+------------------------------------------------------------------------
+r5559 | mhall | 2009-06-04 14:15:01 +1200 (Thu, 04 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Copyright.props
+   M /branches/stable-3-6/weka/src/main/java/weka/core/version.txt
+
+Updated for 3-6-1
+------------------------------------------------------------------------
+r5562 | mhall | 2009-06-04 15:06:15 +1200 (Thu, 04 Jun 2009) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/HotSpot.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/CostSensitiveASEvaluation.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/CostSensitiveAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/CostSensitiveSubsetEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/FilteredAttributeEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/FilteredSubsetEval.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/pmml/consumer/GeneralRegression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/pmml/consumer/NeuralNetwork.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/pmml/consumer/PMMLClassifier.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/pmml/consumer/Regression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/ClassloaderUtil.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Environment.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/EnvironmentHandler.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/Apply.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/BuiltInArithmetic.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/BuiltInMath.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/Constant.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/DefineFunction.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/DerivedFieldMetaInfo.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/Discretize.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/Expression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/FieldMetaInfo.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/Function.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/MappingInfo.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/MiningFieldMetaInfo.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/MiningSchema.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/NormContinuous.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/NormDiscrete.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/PMMLFactory.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/PMMLModel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/PMMLUtils.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/TargetMetaInfo.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/pmml/TransformationDictionary.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/xml/XStream.java
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/DensityBasedClustererSplitEvaluator.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/ReservoirSample.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/FlowRunner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/IncrementalClassifierEvaluatorCustomizer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/InstanceStreamToBatchMaker.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/InstanceStreamToBatchMakerBeanInfo.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/LogPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/SerializedModelSaver.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/SerializedModelSaverBeanInfo.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/SerializedModelSaverCustomizer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Startable.java
+   M /branches/stable-3-6/weka/src/test/java/weka/associations/HotSpotTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/attributeSelection/CostSensitiveAttributeEvalTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/attributeSelection/CostSensitiveSubsetEvalTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/attributeSelection/FilteredAttributeEvalTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/attributeSelection/FilteredSubsetEvalTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/attributeSelection/ScatterSearchV1Test.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/bayes/DMNBtextTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/functions/LibLINEARTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/meta/RotationForestTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/pmml/consumer/AllTests.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/pmml/consumer/GeneralRegressionTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/pmml/consumer/NeuralNetworkTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/pmml/consumer/RegressionTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/rules/DTNBTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/classifiers/trees/LADTreeTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/clusterers/CLOPETest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/clusterers/sIBTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/core/MathematicalExpressionTest.java
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/unsupervised/instance/ReservoirSampleTest.java
+
+UoW automatically gets copyright for Pentaho contributions.
+------------------------------------------------------------------------
