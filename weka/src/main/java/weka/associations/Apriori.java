@@ -73,7 +73,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.4 $ */
+ * @version $Revision$ */
 
 public class Apriori extends Associator implements OptionHandler {
 
@@ -289,6 +289,10 @@ public class Apriori extends Associator implements OptionHandler {
 	findRulesBruteForce();
       else
 	findRulesQuickly();
+
+      if (m_upperBoundMinSupport < 1) {
+	  pruneRulesForUpperBoundSupport();
+      }
       
       // Sort rules according to their support
       supports = new double[m_allTheRules[2].size()];
@@ -355,6 +359,36 @@ public class Apriori extends Associator implements OptionHandler {
 	     (necSupport >= 1));
     m_minSupport += m_delta;
   }
+
+    private void pruneRulesForUpperBoundSupport() {
+	int necMaxSupport = (int)(m_upperBoundMinSupport * (double)m_instances.numInstances()+0.5);
+    
+	FastVector[] prunedRules = new FastVector[6];
+	for (int i = 0; i < 3; i++) {
+	    prunedRules[i] = new FastVector();
+	}
+    
+	for (int i = 0; i < m_allTheRules[0].size(); i++) {
+	    if (((ItemSet)m_allTheRules[1].elementAt(i)).support() <= necMaxSupport) {
+		prunedRules[0].addElement(m_allTheRules[0].elementAt(i));
+		prunedRules[1].addElement(m_allTheRules[1].elementAt(i));
+		prunedRules[2].addElement(m_allTheRules[2].elementAt(i));
+		if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+		    prunedRules[3].addElement(m_allTheRules[3].elementAt(i));
+		    prunedRules[4].addElement(m_allTheRules[4].elementAt(i));
+		    prunedRules[5].addElement(m_allTheRules[5].elementAt(i));
+		}
+	    }
+	}
+	m_allTheRules[0] = prunedRules[0];
+	m_allTheRules[1] = prunedRules[1];
+	m_allTheRules[2] = prunedRules[2];
+	if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+	    m_allTheRules[3] = prunedRules[3];
+	    m_allTheRules[4] = prunedRules[4];
+	    m_allTheRules[5] = prunedRules[5];
+	}
+    }
 
   /**
    * Returns an enumeration describing the available options.
@@ -934,7 +968,7 @@ public class Apriori extends Associator implements OptionHandler {
    
     kSets = AprioriItemSet.singletons(instances);
     AprioriItemSet.upDateCounters(kSets, instances);
-    kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
+    kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, m_instances.numInstances());
     if (kSets.size() == 0)
       return;
     do {
@@ -945,7 +979,7 @@ public class Apriori extends Associator implements OptionHandler {
       m_hashtables.addElement(hashtable);
       kSets = AprioriItemSet.pruneItemSets(kSets, hashtable);
       AprioriItemSet.upDateCounters(kSets, instances);
-      kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
+      kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, m_instances.numInstances());
       i++;
     } while (kSets.size() > 0);
   }  
