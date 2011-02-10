@@ -2250,7 +2250,7 @@ public class FPGrowth extends AbstractAssociator
       : m_delta;
       
     //    double currentSupport = upperBoundMinSuppAsFraction;      
-    currentSupport = 1.0;
+    double currentSupport = 1.0;
              
     if (m_findAllRulesForSupportLevel) {
       currentSupport = lowerBoundMinSuppAsFraction;
