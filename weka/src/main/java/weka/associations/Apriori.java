@@ -441,7 +441,6 @@ public class Apriori
     }
 
     do {
-
       // Reserve space for variables
       m_Ls = new FastVector();
       m_hashtables = new FastVector();
@@ -474,6 +473,11 @@ public class Apriori
       else{
           findLargeCarItemSets();
           findCarRulesQuickly();
+      }
+      
+      // prune rules for upper bound min support
+      if (m_upperBoundMinSupport < 1.0) {
+        pruneRulesForUpperBoundSupport();
       }
       
       // Sort rules according to their support
@@ -542,21 +546,17 @@ public class Apriori
       if (m_verbose) {
 	if (m_Ls.size() > 1) {
 	  System.out.println(toString());
-	}
-	
-	// prune rules for upper bound min support
-	if (m_upperBoundMinSupport < 1.0) {
-	  pruneRulesForUpperBoundSupport();
-	}
-	
+	}		
       }
+      
+      
       if(m_minSupport == lowerBoundMinSupportToUse || m_minSupport - m_delta >  lowerBoundMinSupportToUse)
         m_minSupport -= m_delta;
       else
         m_minSupport = lowerBoundMinSupportToUse;
       
       
-      necSupport = Math.rint(m_minSupport * (double)m_instances.numInstances());
+      necSupport = Math.rint(m_minSupport * (double)m_instances.numInstances());      
 
       m_cycles++;
     } while ((m_allTheRules[0].size() < m_numRules) &&
@@ -576,7 +576,7 @@ public class Apriori
     }
     
     for (int i = 0; i < m_allTheRules[0].size(); i++) {
-      if (((ItemSet)m_allTheRules[1].elementAt(i)).support() >= necMaxSupport) {
+      if (((ItemSet)m_allTheRules[1].elementAt(i)).support() <= necMaxSupport) {
         prunedRules[0].addElement(m_allTheRules[0].elementAt(i));
         prunedRules[1].addElement(m_allTheRules[1].elementAt(i));
         prunedRules[2].addElement(m_allTheRules[2].elementAt(i));
@@ -588,14 +588,13 @@ public class Apriori
         }        
       }
     }
-    if (prunedRules[0].size() > 0) {
-      m_allTheRules[0] = prunedRules[0];
-      m_allTheRules[1] = prunedRules[1];
-      m_allTheRules[2] = prunedRules[2];
-      m_allTheRules[3] = prunedRules[3];
-      m_allTheRules[4] = prunedRules[4];
-      m_allTheRules[5] = prunedRules[5];
-    }
+    m_allTheRules[0] = prunedRules[0];
+    m_allTheRules[1] = prunedRules[1];
+    m_allTheRules[2] = prunedRules[2];
+    m_allTheRules[3] = prunedRules[3];
+    m_allTheRules[4] = prunedRules[4];
+    m_allTheRules[5] = prunedRules[5];
+
   }
   
   
@@ -1399,7 +1398,7 @@ public class Apriori
       m_hashtables.addElement(hashtable);
       kSets = AprioriItemSet.pruneItemSets(kSets, hashtable);
       AprioriItemSet.upDateCounters(kSets, m_instances);
-      kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
+      kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, m_instances.numInstances());
       i++;
     } while (kSets.size() > 0);
   }  
@@ -1502,7 +1501,7 @@ public class Apriori
 	LabeledItemSet.upDateCounters(kSets, m_instances,m_onlyClass);
         
         //check if a item set of lentgh one is frequent, if not delete it
-	kSets = LabeledItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
+	kSets = LabeledItemSet.deleteItemSets(kSets, necSupport, m_instances.numInstances());
         if (kSets.size() == 0)
 	    return;
 	do {
@@ -1512,7 +1511,7 @@ public class Apriori
 	    hashtable = LabeledItemSet.getHashtable(kMinusOneSets, kMinusOneSets.size());
 	    kSets = LabeledItemSet.pruneItemSets(kSets, hashtable);
 	    LabeledItemSet.upDateCounters(kSets, m_instances,m_onlyClass);
-	    kSets = LabeledItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
+	    kSets = LabeledItemSet.deleteItemSets(kSets, necSupport, m_instances.numInstances());
 	    i++;
 	} while (kSets.size() > 0);
     } 
