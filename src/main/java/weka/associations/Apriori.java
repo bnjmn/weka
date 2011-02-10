@@ -433,7 +433,8 @@ public class Apriori
     }
     else{
         // Decrease minimum support until desired number of rules found.
-        m_minSupport = m_upperBoundMinSupport - m_delta;
+        //m_minSupport = m_upperBoundMinSupport - m_delta;
+        m_minSupport = 1.0 - m_delta;
         m_minSupport = (m_minSupport < lowerBoundMinSupportToUse) 
             ? lowerBoundMinSupportToUse 
             : m_minSupport;
@@ -542,6 +543,12 @@ public class Apriori
 	if (m_Ls.size() > 1) {
 	  System.out.println(toString());
 	}
+	
+	// prune rules for upper bound min support
+	if (m_upperBoundMinSupport < 1.0) {
+	  pruneRulesForUpperBoundSupport();
+	}
+	
       }
       if(m_minSupport == lowerBoundMinSupportToUse || m_minSupport - m_delta >  lowerBoundMinSupportToUse)
         m_minSupport -= m_delta;
@@ -558,6 +565,37 @@ public class Apriori
 	     /*	     (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport)) */ &&     
 	     (necSupport >= 1));
     m_minSupport += m_delta;
+  }
+
+  private void pruneRulesForUpperBoundSupport() {
+    int necMaxSupport = (int)(m_upperBoundMinSupport * (double)m_instances.numInstances()+0.5);
+    
+    FastVector[] prunedRules = new FastVector[6];
+    for (int i = 0; i < 6; i++) {
+      prunedRules[i] = new FastVector();
+    }
+    
+    for (int i = 0; i < m_allTheRules[0].size(); i++) {
+      if (((ItemSet)m_allTheRules[1].elementAt(i)).support() >= necMaxSupport) {
+        prunedRules[0].addElement(m_allTheRules[0].elementAt(i));
+        prunedRules[1].addElement(m_allTheRules[1].elementAt(i));
+        prunedRules[2].addElement(m_allTheRules[2].elementAt(i));
+        
+        if (!m_car) {
+          prunedRules[3].addElement(m_allTheRules[3].elementAt(i));
+          prunedRules[4].addElement(m_allTheRules[4].elementAt(i));
+          prunedRules[5].addElement(m_allTheRules[5].elementAt(i));
+        }        
+      }
+    }
+    if (prunedRules[0].size() > 0) {
+      m_allTheRules[0] = prunedRules[0];
+      m_allTheRules[1] = prunedRules[1];
+      m_allTheRules[2] = prunedRules[2];
+      m_allTheRules[3] = prunedRules[3];
+      m_allTheRules[4] = prunedRules[4];
+      m_allTheRules[5] = prunedRules[5];
+    }
   }
   
   
@@ -1350,7 +1388,7 @@ public class Apriori
    
     kSets = AprioriItemSet.singletons(m_instances, m_treatZeroAsMissing);
     AprioriItemSet.upDateCounters(kSets,m_instances);
-    kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
+    kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, m_instances.numInstances());
     if (kSets.size() == 0)
       return;
     do {
