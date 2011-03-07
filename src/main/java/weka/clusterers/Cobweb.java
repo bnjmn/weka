@@ -119,7 +119,7 @@ public class Cobweb
    *
    * @see Serializable
    */
-  private class CNode 
+  public class CNode 
     implements Serializable, RevisionHandler {
 
     /** for serialization */
@@ -993,6 +993,15 @@ public class Cobweb
   public int numberOfClusters() {
     determineNumberOfClusters();
     return m_numberOfClusters;
+  }
+  
+  /**
+   * Get the root of the tree.
+   * 
+   * @return the root of the tree.
+   */
+  public CNode getTreeRoot() {
+    return m_cobwebTree;
   }
 
   /**
