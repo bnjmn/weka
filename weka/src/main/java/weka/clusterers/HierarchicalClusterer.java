@@ -245,7 +245,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements OptionHa
       }
     }
   }
-  Node [] m_clusters;
+  protected Node [] m_clusters;
   int [] m_nClusterNr;
 
 
