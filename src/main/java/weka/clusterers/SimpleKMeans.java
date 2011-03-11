@@ -32,6 +32,10 @@ import weka.core.Instances;
 import weka.core.ManhattanDistance;
 import weka.core.Option;
 import weka.core.RevisionUtils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -45,9 +49,25 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Cluster data using the k means algorithm. Can use either the Euclidean distance (default) or the Manhattan distance. If the Manhattan distance is used, then centroids are computed as the component-wise median rather than mean.
+ * Cluster data using the k means algorithm. Can use either the Euclidean distance (default) or the Manhattan distance. If the Manhattan distance is used, then centroids are computed as the component-wise median rather than mean. For more information see:<br/>
+ * <br/>
+ * D. Arthur, S. Vassilvitskii: k-means++: the advantages of carefull seeding. In: Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete algorithms, 1027-1035, 2007.
  * <p/>
  <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inproceedings{Arthur2007,
+ *    author = {D. Arthur and S. Vassilvitskii},
+ *    booktitle = {Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete algorithms},
+ *    pages = {1027-1035},
+ *    title = {k-means++: the advantages of carefull seeding},
+ *    year = {2007}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
  <!-- options-start -->
  * Valid options are: <p/>
@@ -55,6 +75,10 @@ import java.util.Vector;
  * <pre> -N &lt;num&gt;
  *  number of clusters.
  *  (default 2).</pre>
+ * 
+ * <pre> -P
+ *  Initialize using the k-means++ method.
+ * </pre>
  * 
  * <pre> -V
  *  Display std. deviations for centroids.
@@ -94,7 +118,8 @@ import java.util.Vector;
  */
 public class SimpleKMeans
   extends RandomizableClusterer 
-  implements NumberOfClustersRequestable, WeightedInstancesHandler {
+  implements NumberOfClustersRequestable, WeightedInstancesHandler,
+    TechnicalInformationHandler {
 
   /** for serialization. */
   static final long serialVersionUID = -3235809600124455376L;
@@ -184,6 +209,9 @@ public class SimpleKMeans
   /** whether to use fast calculation of distances (using a cut-off). */
   protected boolean m_FastDistanceCalc = false;
   
+  /** Whether to initialize cluster centers using the k-means++ method */
+  protected boolean m_initializeWithKMeansPlusPlus = false;
+  
   /**
    * the default constructor.
    */
@@ -192,6 +220,20 @@ public class SimpleKMeans
     
     m_SeedDefault = 10;
     setSeed(m_SeedDefault);
+  }
+  
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "D. Arthur and S. Vassilvitskii");
+    result.setValue(Field.TITLE, "k-means++: the advantages of carefull seeding");
+    result.setValue(Field.BOOKTITLE, "Proceedings of the eighteenth annual " +
+    		"ACM-SIAM symposium on Discrete algorithms");
+    result.setValue(Field.YEAR, "2007");
+    result.setValue(Field.PAGES, "1027-1035");
+    
+    return result;
   }
   
   /**
@@ -203,7 +245,9 @@ public class SimpleKMeans
     return "Cluster data using the k means algorithm. Can use either "
       + "the Euclidean distance (default) or the Manhattan distance."
       + " If the Manhattan distance is used, then centroids are computed "
-      + "as the component-wise median rather than mean.";
+      + "as the component-wise median rather than mean."
+      + " For more information see:\n\n" 
+      + getTechnicalInformation().toString();
   }
 
   /**
@@ -291,19 +335,23 @@ public class SimpleKMeans
       initInstances = new Instances(instances);
     else
       initInstances = instances;
-		
-    for (int j = initInstances.numInstances() - 1; j >= 0; j--) {
-      instIndex = RandomO.nextInt(j+1);
-      hk = new DecisionTableHashKey(initInstances.instance(instIndex),
-                                    initInstances.numAttributes(), true);
-      if (!initC.containsKey(hk)) {
-        m_ClusterCentroids.add(initInstances.instance(instIndex));
-	initC.put(hk, null);
-      }
-      initInstances.swap(j, instIndex);
-      
-      if (m_ClusterCentroids.numInstances() == m_NumClusters) {
-	break;
+
+    if (m_initializeWithKMeansPlusPlus) {
+      kMeansPlusPlusInit(initInstances);
+    } else {
+      for (int j = initInstances.numInstances() - 1; j >= 0; j--) {
+        instIndex = RandomO.nextInt(j+1);
+        hk = new DecisionTableHashKey(initInstances.instance(instIndex),
+            initInstances.numAttributes(), true);
+        if (!initC.containsKey(hk)) {
+          m_ClusterCentroids.add(initInstances.instance(instIndex));
+          initC.put(hk, null);
+        }
+        initInstances.swap(j, instIndex);
+
+        if (m_ClusterCentroids.numInstances() == m_NumClusters) {
+          break;
+        }
       }
     }
 
@@ -399,6 +447,88 @@ public class SimpleKMeans
       m_ClusterSizes[i] = tempI[i].numInstances();
     }
   }
+  
+  protected void kMeansPlusPlusInit(Instances data) throws Exception {
+    Random randomO = new Random(getSeed());
+    HashMap<DecisionTableHashKey, String> initC = new HashMap<DecisionTableHashKey, String>();
+    
+    // choose initial center uniformly at random
+    int index = randomO.nextInt(data.numInstances());
+    m_ClusterCentroids.add(data.instance(index));
+    DecisionTableHashKey hk = new DecisionTableHashKey(data.instance(index),
+        data.numAttributes(), true);
+    initC.put(hk, null);
+    
+    int iteration = 0;
+    int remainingInstances = data.numInstances() - 1;
+    if (m_NumClusters > 1) {
+      // proceed with selecting the rest
+
+      // distances to the initial randomly chose center
+      double[] distances = new double[data.numInstances()];
+      double[] cumProbs = new double[data.numInstances()];
+      for (int i = 0; i < data.numInstances(); i++) {
+        distances[i] = 
+          m_DistanceFunction.distance(data.instance(i), 
+              m_ClusterCentroids.instance(iteration));
+      }
+
+      // now choose the remaining cluster centers
+      for (int i = 1; i < m_NumClusters; i++) {
+
+        // distances converted to probabilities
+        double[] weights = new double[data.numInstances()];
+        System.arraycopy(distances, 0, weights, 0, distances.length);
+        Utils.normalize(weights);
+
+        double sumOfProbs = 0;
+        for (int k = 0; k < data.numInstances(); k++) {
+          sumOfProbs += weights[k];
+          cumProbs[k] = sumOfProbs;
+        }
+
+        cumProbs[data.numInstances() - 1] = 1.0; // make sure there are no rounding issues
+
+        // choose a random instance
+        double prob = randomO.nextDouble();
+        for (int k = 0; k < cumProbs.length; k++) {
+          if (prob < cumProbs[k]) {
+            Instance candidateCenter = data.instance(k);
+            hk = new DecisionTableHashKey(candidateCenter, data.numAttributes(), true);
+            if (!initC.containsKey(hk)) {
+              initC.put(hk, null);
+              m_ClusterCentroids.add(candidateCenter);
+            } else {
+              // we shouldn't get here because any instance that is a duplicate of
+              // an already chosen cluster center should have zero distance (and hence
+              // zero probability of getting chosen) to that center.
+              System.err.println("We shouldn't get here....");
+            }
+            remainingInstances--;
+            break;
+          }
+        }
+        iteration++;
+
+        if (remainingInstances == 0) {
+          break;
+        }
+        
+        // prepare to choose the next cluster center.
+        // check distances against the new cluster center to see if it is closer
+        for (int k = 0; k < data.numInstances(); k++) {
+          if (distances[k] > 0) {
+            double newDist = m_DistanceFunction.distance(data.instance(k), 
+                m_ClusterCentroids.instance(iteration));
+            if (newDist < distances[k]) {
+              distances[k] = newDist;
+            }
+          }
+        }        
+      }
+    }
+  }
+
 
   /**
    * Move the centroid to it's new coordinates. Generate the centroid coordinates based 
@@ -541,13 +671,18 @@ public class SimpleKMeans
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions () {
+  public Enumeration listOptions() {
     Vector result = new Vector();
 
     result.addElement(new Option(
                                  "\tnumber of clusters.\n"
                                  + "\t(default 2).", 
                                  "N", 1, "-N <num>"));
+    
+    result.addElement(new Option(
+        "\tInitialize using the k-means++ method.\n", 
+        "P", 0, "-P"));
+    
     result.addElement(new Option(
                                  "\tDisplay std. deviations for centroids.\n", 
                                  "V", 0, "-V"));
@@ -609,6 +744,40 @@ public class SimpleKMeans
    */
   public int getNumClusters() {
     return m_NumClusters;
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String initializeUsingKMeansPlusPlusTipText() {
+    return "Initialize cluster centers using the probabilistic "
+      + " farthest first method of the k-means++ algorithm";
+  }
+  
+  /**
+   * Set whether to initialize using the probabilistic farthest
+   * first like method of the k-means++ algorithm (rather than
+   * the standard random selection of initial cluster centers).
+   * 
+   * @param k true if the k-means++ method is to be used to select
+   * initial cluster centers.
+   */
+  public void setInitializeUsingKMeansPlusPlusMethod(boolean k) {
+    m_initializeWithKMeansPlusPlus = k;
+  }
+  
+  /**
+   * Get whether to initialize using the probabilistic farthest
+   * first like method of the k-means++ algorithm (rather than
+   * the standard random selection of initial cluster centers).
+   * 
+   * @return true if the k-means++ method is to be used to select
+   * initial cluster centers.
+   */
+  public boolean getInitializeUsingKMeansPlusPlusMethod() {
+    return m_initializeWithKMeansPlusPlus;
   }
 
   /**
@@ -808,6 +977,10 @@ public class SimpleKMeans
    *  number of clusters.
    *  (default 2).</pre>
    * 
+   * <pre> -P
+   *  Initialize using the k-means++ method.
+   * </pre>
+   * 
    * <pre> -V
    *  Display std. deviations for centroids.
    * </pre>
@@ -847,6 +1020,7 @@ public class SimpleKMeans
 
     m_displayStdDevs = Utils.getFlag("V", options);
     m_dontReplaceMissing = Utils.getFlag("M", options);
+    m_initializeWithKMeansPlusPlus = Utils.getFlag('P', options);
 
     String optionString = Utils.getOption('N', options);
 
@@ -894,6 +1068,10 @@ public class SimpleKMeans
     String[]  	options;
 
     result = new Vector();
+    
+    if (m_initializeWithKMeansPlusPlus) {
+      result.add("-P");
+    }
 
     if (m_displayStdDevs) {
       result.add("-V");
@@ -1328,3 +1506,4 @@ public class SimpleKMeans
     runClusterer(new SimpleKMeans(), args);
   }
 }
+
