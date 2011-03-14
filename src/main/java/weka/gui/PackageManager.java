@@ -211,8 +211,17 @@ public class PackageManager extends JPanel {
     }
     
     public void println(String string) {
-      System.out.println(string); // make sure the log picks it up
-      m_listener.makeProgress(string);
+      boolean messageOnly = false;
+      if (string.startsWith("%%")) {
+        string = string.substring(2);
+        messageOnly = true;
+      }
+      if (!messageOnly) {
+        System.out.println(string); // make sure the log picks it up
+        m_listener.makeProgress(string);
+      } else {
+        m_listener.makeProgressMessageOnly(string);
+      }
     }
     
     public void println(Object obj) {
@@ -220,8 +229,18 @@ public class PackageManager extends JPanel {
     }
     
     public void print(String string) {
-      System.out.print(string); // make sure the log picks it up
-      m_listener.makeProgress(string);
+      boolean messageOnly = false;
+      if (string.startsWith("%%")) {
+        string = string.substring(2);
+        messageOnly = true;
+      }
+      
+      if (!messageOnly) {
+        System.out.print(string); // make sure the log picks it up
+        m_listener.makeProgress(string);
+      } else {
+        m_listener.makeProgressMessageOnly(string);
+      }
     }
     
     public void print(Object obj) {
@@ -231,6 +250,7 @@ public class PackageManager extends JPanel {
   
   interface Progressable {
     void makeProgress(String progressMessage);
+    void makeProgressMessageOnly(String progressMessage);
   }
   
   class EstablishCache extends SwingWorker<Void, Void> implements Progressable {
@@ -243,6 +263,10 @@ public class PackageManager extends JPanel {
       m_progress.setNote(progressMessage);
       m_progressCount++;
       m_progress.setProgress(m_progressCount);
+    }
+    
+    public void makeProgressMessageOnly(String progressMessage) {
+      m_progress.setNote(progressMessage);
     }
     
     public Void doInBackground() {
@@ -334,6 +358,10 @@ public class PackageManager extends JPanel {
       m_detailLabel.setText(progressMessage);
       m_progressCount++;
       m_progress.setValue(m_progressCount);
+    }
+    
+    public void makeProgressMessageOnly(String progressMessage) {
+      m_detailLabel.setText(progressMessage);
     }
     
     public Void doInBackground() {
@@ -431,6 +459,10 @@ public class PackageManager extends JPanel {
       if (m_progressCount == m_progress.getMaximum()) {
         m_progress.setMaximum(m_progressCount + 5);
       }
+    }
+    
+    public void makeProgressMessageOnly(String progressMessage) {
+      m_detailLabel.setText(progressMessage);
     }
     
     public Void doInBackground() {
@@ -605,6 +637,10 @@ public class PackageManager extends JPanel {
       }
     }
     
+    public void makeProgressMessageOnly(String progressMessage) {
+      m_detailLabel.setText(progressMessage);
+    }
+    
     public Void doInBackground() {
       m_installing = true;
       m_installBut.setEnabled(false);
@@ -725,6 +761,10 @@ public class PackageManager extends JPanel {
       if (m_progressCount == m_progress.getMaximum()) {
         m_progress.setMaximum(m_progressCount + 5);
       }
+    }
+    
+    public void makeProgressMessageOnly(String progressMessage) {
+      m_detailLabel.setText(progressMessage);
     }
 
     /*
