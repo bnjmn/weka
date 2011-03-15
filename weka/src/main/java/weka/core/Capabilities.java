@@ -273,6 +273,11 @@ public class Capabilities
     m_MissingValuesTest          = Boolean.parseBoolean(PROPERTIES.getProperty("MissingValuesTest", "true")) && m_Test;
     m_MissingClassValuesTest     = Boolean.parseBoolean(PROPERTIES.getProperty("MissingClassValuesTest", "true")) && m_Test;
     m_MinimumNumberInstancesTest = Boolean.parseBoolean(PROPERTIES.getProperty("MinimumNumberInstancesTest", "true")) && m_Test;
+    
+    if (owner instanceof weka.classifiers.UpdateableClassifier ||
+        owner instanceof weka.clusterers.UpdateableClusterer) {
+      setMinimumNumberInstances(0);
+    }
   }
   
   /**
