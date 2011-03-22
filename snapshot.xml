@@ -159,13 +159,14 @@
     <delete dir="${dist}"/>
   </target>
 
-  <target name="snapshot" depends="clean, copy-files" description="Make a SNAPSHOT distribution of Weka">
+  <target name="snapshot" depends="copy-files" description="Make a SNAPSHOT distribution of Weka">
     <echo message="Making snapshot zip..."/>
     <zip destfile="${dist}/${branch}-SNAPSHOT.zip" basedir="${temp}">
       <include name="**/*"/>
     </zip>
     <echo message="Cleaning up..."/>
     <delete dir="${temp}"/>
+    <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
   </target>
 
 </project>
