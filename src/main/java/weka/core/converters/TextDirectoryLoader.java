@@ -22,22 +22,23 @@
 
 package weka.core.converters;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
-import weka.core.Instance;
 import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
@@ -94,6 +95,12 @@ public class TextDirectoryLoader
   /** whether to include the filename as an extra attribute */
   protected boolean m_OutputFilename = false;
   
+  /** 
+   * The charset to use when loading text files (default is to just use the 
+   * default charset). 
+   */
+  protected String m_charSet = "";
+  
   /**
    * default constructor
    */
@@ -139,6 +146,10 @@ public class TextDirectoryLoader
 	+ "\t(default: current directory)",
 	"dir", 0, "-dir <directory>"));
     
+    result.add(new Option("\tThe character set to use, e.g UTF-8.\n\t" +
+    		"(default: use the default character set)", "charset", 1, 
+    		"-charset <charset name>"));
+    
     return  result.elements();
   }
   
@@ -171,6 +182,12 @@ public class TextDirectoryLoader
     setOutputFilename(Utils.getFlag("F", options));
     
     setDirectory(new File(Utils.getOption("dir", options)));
+    
+    String charSet = Utils.getOption("charset", options);
+    m_charSet = "";
+    if (charSet.length() > 0) {
+      m_charSet = charSet;
+    }
   }
   
   /** 
@@ -190,7 +207,43 @@ public class TextDirectoryLoader
     options.add("-dir");
     options.add(getDirectory().getAbsolutePath());
     
+    if (m_charSet != null && m_charSet.length() > 0) {
+      options.add("-charset");
+      options.add(m_charSet);
+    }
+    
     return (String[]) options.toArray(new String[options.size()]);
+  }
+  
+  /**
+   * the tip text for this property
+   * 
+   * @return            the tip text
+   */
+  public String charSetTipText() {
+    return "The character set to use when reading text files (eg UTF-8) - leave" +
+    		" blank to use the default character set.";
+  }
+  
+  /**
+   * Set the character set to use when reading text files (an empty string
+   * indicates that the default character set will be used).
+   * 
+   * @param charSet the character set to use.
+   */
+  public void setCharSet(String charSet) {
+    m_charSet = charSet;
+  }
+  
+  /**
+   * Get the character set to use when reading text files. An empty
+   * string indicates that the default character set will be used.
+   * 
+   * @return the character set name to use (or empty string to indicate
+   * that the default character set will be used).
+   */
+  public String getCharSet() {
+    return m_charSet;
   }
   
   /**
@@ -385,8 +438,12 @@ public class TextDirectoryLoader
 	  else
 	    newInst = new double[2];		    
 	  File txt = new File(directoryPath + File.separator + subdirPath + File.separator + files[j]);
-	  BufferedInputStream is;
-	  is = new BufferedInputStream(new FileInputStream(txt));
+	  BufferedReader is;
+	  if (m_charSet == null || m_charSet.length() == 0) {
+	    is = new BufferedReader(new InputStreamReader(new FileInputStream(txt)));
+	  } else {
+	    is = new BufferedReader(new InputStreamReader(new FileInputStream(txt), m_charSet));
+	  }
 	  StringBuffer txtStr = new StringBuffer();
 	  int c;
 	  while ((c = is.read()) != -1) {
