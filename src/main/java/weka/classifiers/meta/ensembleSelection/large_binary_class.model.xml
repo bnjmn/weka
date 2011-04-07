@@ -5582,7 +5582,7 @@
          <object class="java.lang.String" name="3">0</object>
          <object class="java.lang.String" name="4">-I</object>
          <object class="java.lang.String" name="5">-A</object>
-         <object class="java.lang.String" name="6">weka.core.LinearNN -A weka.core.EuclideanDistance</object>
+         <object class="java.lang.String" name="6">weka.core.neighboursearch.LinearNNSearch -A weka.core.EuclideanDistance</object>
          <object class="java.lang.String" name="7"/>
          <object class="java.lang.String" name="8"/>
          <object class="java.lang.String" name="9"/>
