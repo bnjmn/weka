@@ -2203,6 +2203,7 @@ public class FPGrowth extends AbstractAssociator
     Instances data = null;
     Capabilities capabilities = getCapabilities();
     boolean arffLoader = false;
+    boolean breakOnNext = false;
     
     if (source instanceof weka.core.converters.ArffLoader) {
       data = ((weka.core.converters.ArffLoader)source).getStructure();
@@ -2306,11 +2307,15 @@ public class FPGrowth extends AbstractAssociator
       }
       
       if (!m_findAllRulesForSupportLevel) {
+        if (breakOnNext) {
+          break;
+        }
         currentSupport -= deltaAsFraction;
         if (currentSupport < lowerBoundMinSuppAsFraction) {
           if (currentSupport + deltaAsFraction > lowerBoundMinSuppAsFraction) {
             // ensure that the lower bound does get evaluated
             currentSupport = lowerBoundMinSuppAsFraction;
+            breakOnNext = true;
           } else {
             break;
           }
