@@ -566,6 +566,12 @@ public class WekaPackageManager {
   }
   
   public static synchronized void loadPackages(boolean verbose, boolean refreshGOEProperties) {
+    Environment env = Environment.getSystemWide();
+    String loadPackages = env.getVariableValue("weka.core.loadPackages");
+    if (loadPackages != null && loadPackages.equalsIgnoreCase("false")) {
+      return;
+    }
+
     if (m_packagesLoaded) {
       return;
     }
