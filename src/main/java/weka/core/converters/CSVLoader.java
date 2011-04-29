@@ -39,6 +39,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -64,6 +66,16 @@ import java.util.ArrayList;
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
  *  (default: -none-)</pre>
+ * 
+ * <pre> -D &lt;range&gt;
+ *  The range of attribute to force type to be DATE.
+ *  'first' and 'last' are accepted as well.
+ *  Examples: "first-last", "1,4,5-27,50-last"
+ *  (default: -none-)</pre>
+ * 
+ * <pre> -format &lt;date format&gt;
+ *  The date formatting string to use to parse date values.
+ *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
  * 
  * <pre> -M &lt;str&gt;
  *  The string representing a missing value.
@@ -111,6 +123,15 @@ public class CSVLoader
   
   /** The range of attributes to force to type string. */
   protected Range m_StringAttributes = new Range();
+  
+  /** The range of attributes to force to type date */
+  protected Range m_dateAttributes = new Range();
+  
+  /** The formatting string to use to parse dates */
+  protected String m_dateFormat = "";
+  
+  /** The formatter to use on dates */
+  protected SimpleDateFormat m_formatter;
   
   /** The placeholder for missing values. */
   protected String m_MissingValue = "?";
@@ -194,6 +215,18 @@ public class CSVLoader
         "S", 1, "-S <range>"));
     
     result.add(new Option(
+        "\tThe range of attribute to force type to be DATE.\n"
+        + "\t'first' and 'last' are accepted as well.\n"
+        + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
+        + "\t(default: -none-)",
+        "D", 1, "-D <range>"));
+    
+    result.add(new Option(
+        "\tThe date formatting string to use to parse date values.\n"        
+        + "\t(default: \"yyyy-MM-dd'T'HH:mm:ss\")",
+        "format", 1, "-format <date format>"));
+    
+    result.add(new Option(
         "\tThe string representing a missing value.\n"
         + "\t(default: ?)",
         "M", 1, "-M <str>"));
@@ -224,6 +257,16 @@ public class CSVLoader
    *  'first' and 'last' are accepted as well.
    *  Examples: "first-last", "1,4,5-27,50-last"
    *  (default: -none-)</pre>
+   * 
+   * <pre> -D &lt;range&gt;
+   *  The range of attribute to force type to be DATE.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -format &lt;date format&gt;
+   *  The date formatting string to use to parse date values.
+   *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
    * 
    * <pre> -M &lt;str&gt;
    *  The string representing a missing value.
@@ -265,6 +308,15 @@ public class CSVLoader
       setFieldSeparator(tmpStr);
     else
       setFieldSeparator(",");
+    
+    tmpStr = Utils.getOption('D', options);
+    if (tmpStr.length() > 0) {
+      setDateAttributes(tmpStr);
+    }
+    tmpStr = Utils.getOption("format", options);
+    if (tmpStr.length() > 0) {
+      setDateFormat(tmpStr);
+    }
   }
 
   /**
@@ -285,6 +337,13 @@ public class CSVLoader
     if (getStringAttributes().length() > 0) {
       result.add("-S");
       result.add(getStringAttributes());
+    }
+    
+    if (getDateAttributes().length() > 0) {
+      result.add("-D");
+      result.add(getDateAttributes());
+      result.add("-format");
+      result.add(getDateFormat());
     }
 
     result.add("-M");
@@ -352,6 +411,65 @@ public class CSVLoader
         "The range of attributes to force to be of type STRING, example "
       + "ranges: 'first-last', '1,4,7-14,50-last'.";
   }
+  
+  /**
+   * Set the attribute range to be forced to type date.
+   * 
+   * @param value the range
+   */
+  public void setDateAttributes(String value) {
+    m_dateAttributes.setRanges(value);
+  }
+  
+  /**
+   * Returns the current attribute range to be forced to type date.
+   * 
+   * @return the range.
+   */
+  public String getDateAttributes() {
+    return m_dateAttributes.getRanges();
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String dateAttributesTipText() {
+    return "The range of attributes to force to type STRING, example "
+    + "ranges: 'first-last', '1,4,7-14, 50-last'.";
+  }
+  
+  /**
+   * Set the format to use for parsing date values.
+   * 
+   * @param value the format to use.
+   */
+  public void setDateFormat(String value) {
+    m_dateFormat = value;
+    m_formatter = null;
+  }
+  
+  /**
+   * Get the format to use for parsing date values.
+   * 
+   * @return the format to use for parsing date values.
+   * 
+   */
+  public String getDateFormat() {
+    return m_dateFormat;
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String dateFormatTipText() {
+    return "The format to use for parsing date values.";
+  }  
   
   /**
    * Sets the placeholder for missing values.
@@ -520,7 +638,11 @@ public class CSVLoader
       String attname = m_structure.attribute(i).name();
       Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
       if (tempHash.size() == 0) {
-	atts.add(new Attribute(attname));
+        if (m_dateAttributes.isInRange(i)) {
+          atts.add(new Attribute(attname, m_dateFormat));
+        } else {
+          atts.add(new Attribute(attname));
+        }
       } else {
 	if (m_StringAttributes.isInRange(i)) {
 	  atts.add(new Attribute(attname, (ArrayList<String>) null));
@@ -702,7 +824,7 @@ public class CSVLoader
   /**
    * Checks the current instance against what is known about the structure
    * of the data set so far. If there is a nominal value for an attribute
-   * that was beleived to be numeric then all previously seen values for this
+   * that was believed to be numeric then all previously seen values for this
    * attribute are stored in a Hashtable.
    *
    * @param current a <code>ArrayList</code> value
@@ -727,36 +849,58 @@ public class CSVLoader
     if (m_FirstCheck) {
       m_NominalAttributes.setUpper(current.size() - 1);
       m_StringAttributes.setUpper(current.size() - 1);
+      m_dateAttributes.setUpper(current.size() - 1);
       m_FirstCheck = false;
     }
     
     for (int i = 0; i < current.size(); i++) {
       Object ob = current.get(i);
-      if ((ob instanceof String) || (m_NominalAttributes.isInRange(i)) || (m_StringAttributes.isInRange(i))) {
+      if ((ob instanceof String) || (m_NominalAttributes.isInRange(i)) || 
+          (m_StringAttributes.isInRange(i)) || m_dateAttributes.isInRange(i)) {
 	if (ob.toString().compareTo(m_MissingValue) == 0) {
 	  // do nothing
 	} else {
-	  Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
-	  if (!tempHash.containsKey(ob)) {
-	    // may have found a nominal value in what was previously thought to
-	    // be a numeric variable.
-	    if (tempHash.size() == 0) {
-	      for (int j = 0; j < m_cumulativeInstances.size(); j++) {
-		ArrayList tempUpdate = 
-		  ((ArrayList)m_cumulativeInstances.get(j));
-		Object tempO = tempUpdate.get(i);
-		if (tempO instanceof String) {
-		  // must have been a missing value
-		} else {
-		  if (!tempHash.containsKey(tempO)) {
-		    tempHash.put(new Double(((Double)tempO).doubleValue()), 
-				 new Integer(tempHash.size()));
-		  }
-		}
-	      }
+	  
+	  boolean notDate = true;
+	  if (m_dateAttributes.isInRange(i)) {
+	    // try to parse date string
+	    if (m_formatter == null) {
+	      m_formatter = new SimpleDateFormat(m_dateFormat);
 	    }
-	    int newIndex = tempHash.size();
-	    tempHash.put(ob, new Integer(newIndex));
+	    
+	    try {
+	      long time = m_formatter.parse(ob.toString()).getTime();
+	      Double timeL = new Double(time);
+	      current.set(i, timeL);
+	      notDate = false;
+	    } catch (ParseException e) {
+	      notDate = true;
+	    }	    
+	  }
+	  
+	  if (notDate) {
+	    Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
+	    if (!tempHash.containsKey(ob)) {
+	      // may have found a nominal value in what was previously thought to
+	      // be a numeric variable.
+	      if (tempHash.size() == 0) {
+	        for (int j = 0; j < m_cumulativeInstances.size(); j++) {
+	          ArrayList tempUpdate = 
+	            ((ArrayList)m_cumulativeInstances.get(j));
+	          Object tempO = tempUpdate.get(i);
+	          if (tempO instanceof String) {
+	            // must have been a missing value
+	          } else {
+	            if (!tempHash.containsKey(tempO)) {
+	              tempHash.put(new Double(((Double)tempO).doubleValue()), 
+	                  new Integer(tempHash.size()));
+	            }
+	          }
+	        }
+	      }
+	      int newIndex = tempHash.size();
+	      tempHash.put(ob, new Integer(newIndex));
+	    }
 	  }
 	}
       } else if (ob instanceof Double) {
@@ -865,3 +1009,4 @@ public class CSVLoader
     runFileLoader(new CSVLoader(), args);
   }
 }
+
