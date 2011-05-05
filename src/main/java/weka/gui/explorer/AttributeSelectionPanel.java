@@ -22,33 +22,6 @@
 
 package weka.gui.explorer;
 
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeEvaluator;
-import weka.attributeSelection.AttributeSelection;
-import weka.attributeSelection.AttributeTransformer;
-import weka.attributeSelection.Ranker;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.Logger;
-import weka.gui.PropertyPanel;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.visualize.MatrixPanel;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -90,6 +63,33 @@ import javax.swing.JViewport;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.AttributeEvaluator;
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.AttributeTransformer;
+import weka.attributeSelection.Ranker;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.Logger;
+import weka.gui.PropertyPanel;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.visualize.MatrixPanel;
 
 /** 
  * This panel allows the user to select and configure an attribute
@@ -577,8 +577,9 @@ public class AttributeSelectionPanel
   public void setInstances(Instances inst) {
     
     m_Instances = inst;
-    String [] attribNames = new String [m_Instances.numAttributes()];
-    for (int i = 0; i < attribNames.length; i++) {
+    String [] attribNames = new String [m_Instances.numAttributes() + 1];
+    attribNames[0] = "No class";      
+    for (int i = 0; i < inst.numAttributes(); i++) {
       String type = "";
       switch (m_Instances.attribute(i).type()) {
       case Attribute.NOMINAL:
@@ -601,7 +602,7 @@ public class AttributeSelectionPanel
       }
       String attnm = m_Instances.attribute(i).name();
      
-      attribNames[i] = type + attnm;
+      attribNames[i + 1] = type + attnm;
     }
     m_StartBut.setEnabled(m_RunThread == null);
     m_StopBut.setEnabled(m_RunThread != null);
@@ -633,7 +634,7 @@ public class AttributeSelectionPanel
 	  int testMode = 0;
 	  int numFolds = 10;
 	  int seed = 1;
-	  int classIndex = m_ClassCombo.getSelectedIndex();
+	  int classIndex = m_ClassCombo.getSelectedIndex() - 1;
 	  ASEvaluation evaluator = 
 	     (ASEvaluation) m_AttributeEvaluatorEditor.getValue();
 
@@ -702,8 +703,11 @@ public class AttributeSelectionPanel
 	      if (numFolds <= 1) {
 		throw new Exception(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Exception_Text_First"));
 	      }
-	    } 
-	    inst.setClassIndex(classIndex);
+	    }
+	    
+	    if (classIndex >= 0) {
+	      inst.setClassIndex(classIndex);
+	    }
 
 	    // Output some header information
 	    m_Log.logMessage(Messages.getInstance().getString("AttributeSelectionPanel_StartAttributeSelection_Run_Log_LogMessage_Text_First") + ename);
@@ -1077,7 +1081,11 @@ public class AttributeSelectionPanel
       tempInst = new Instances(m_Instances, 0);
     else
       tempInst = new Instances(m_Instances);
-    tempInst.setClassIndex(m_ClassCombo.getSelectedIndex());
+    int clIndex = m_ClassCombo.getSelectedIndex() - 1;
+    
+    if (clIndex >= 0) {
+      tempInst.setClassIndex(clIndex);
+    }        
 
     try {
       filterClass = Capabilities.forInstances(tempInst);
