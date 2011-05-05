@@ -23,81 +23,63 @@
 
 package weka.gui.explorer;
 
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Attribute;
-import weka.core.Utils;
-import weka.core.Range;
-import weka.core.FastVector;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeTransformer;
-import weka.attributeSelection.AttributeSelection;
-import weka.attributeSelection.Ranker;
-import weka.attributeSelection.AttributeEvaluator;
-import weka.filters.Filter;
-import weka.gui.Logger;
-import weka.gui.TaskLogger;
-import weka.gui.SysErrLog;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertyPanel;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SetInstancesPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.FileEditor;
-import weka.gui.visualize.*;
-
-import java.util.Random;
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.awt.FlowLayout;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Random;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.io.PrintWriter;
-
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JButton;
 import javax.swing.BorderFactory;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
-import javax.swing.JOptionPane;
-import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.JViewport;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import java.awt.Point;
-import java.awt.Dimension;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenu;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.AttributeEvaluator;
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.AttributeTransformer;
+import weka.attributeSelection.Ranker;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.gui.GenericObjectEditor;
+import weka.gui.Logger;
+import weka.gui.PropertyPanel;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.visualize.MatrixPanel;
 
 /** 
  * This panel allows the user to select and configure an attribute
@@ -110,7 +92,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.31.2.3 $
+ * @version $Revision$
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -545,8 +527,9 @@ public class AttributeSelectionPanel extends JPanel {
   public void setInstances(Instances inst) {
     
     m_Instances = inst;
-    String [] attribNames = new String [m_Instances.numAttributes()];
-    for (int i = 0; i < attribNames.length; i++) {
+    String [] attribNames = new String [m_Instances.numAttributes() + 1];
+    attribNames[0] = "No class";
+    for (int i = 0; i < inst.numAttributes(); i++) {
       String type = "";
       switch (m_Instances.attribute(i).type()) {
       case Attribute.NOMINAL:
@@ -566,7 +549,7 @@ public class AttributeSelectionPanel extends JPanel {
       }
       String attnm = m_Instances.attribute(i).name();
      
-      attribNames[i] = type + attnm;
+      attribNames[i + 1] = type + attnm;
     }
     m_StartBut.setEnabled(m_RunThread == null);
     m_StopBut.setEnabled(m_RunThread != null);
@@ -595,7 +578,7 @@ public class AttributeSelectionPanel extends JPanel {
 	  int testMode = 0;
 	  int numFolds = 10;
 	  int seed = 1;
-	  int classIndex = m_ClassCombo.getSelectedIndex();
+	  int classIndex = m_ClassCombo.getSelectedIndex() - 1;
 	  ASEvaluation evaluator = 
 	     (ASEvaluation) m_AttributeEvaluatorEditor.getValue();
 
@@ -629,7 +612,10 @@ public class AttributeSelectionPanel extends JPanel {
 		throw new Exception("Number of folds must be greater than 1");
 	      }
 	    } 
-	    inst.setClassIndex(classIndex);
+	    
+	    if (classIndex >= 0) {
+	      inst.setClassIndex(classIndex);
+	    }
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + ename);
