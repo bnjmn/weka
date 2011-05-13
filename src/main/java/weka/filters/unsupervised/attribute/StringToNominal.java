@@ -144,6 +144,24 @@ public class StringToNominal
 
     if (isOutputFormatDefined()) {
       Instance newInstance = (Instance)instance.copy();
+      
+      // make sure that we get the right indexes set for the converted
+      // string attributes when operating on a second batch of instances
+      for (int i = 0; i < newInstance.numAttributes(); i++) {
+        if (newInstance.attribute(i).isString() &&
+            !newInstance.isMissing(i) &&
+            m_AttIndices.isInRange(i)) {
+          Attribute outAtt = 
+            getOutputFormat().attribute(newInstance.attribute(i).name());
+          String inVal = newInstance.stringValue(i);
+          int outIndex = outAtt.indexOfValue(inVal);
+          if (outIndex < 0) {
+            newInstance.setMissing(i);
+          } else {
+            newInstance.setValue(i, outIndex);
+          }
+        }
+      }
       push(newInstance);
       return true;
     }
