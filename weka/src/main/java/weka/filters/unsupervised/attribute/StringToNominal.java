@@ -31,8 +31,8 @@ import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.Range;
 import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -51,8 +51,8 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -C &lt;col&gt;
- *  Sets the attribute index (default last).</pre>
+ * <pre> -R &lt;col&gt;
+ *  Sets the range of attribute indices (default last).</pre>
  * 
  <!-- options-end -->
  *
@@ -64,10 +64,10 @@ public class StringToNominal
   implements UnsupervisedFilter, OptionHandler {
 
   /** for serialization */
-  static final long serialVersionUID = 8655492378380068939L;
-  
-  /** The attribute's index setting. */
-  private SingleIndex m_AttIndex = new SingleIndex("last"); 
+	private static final long serialVersionUID = 4864084427902797605L;
+	
+/** The attribute's range indices setting. */
+  private Range m_AttIndices = new Range("last"); 
 
   /**
    * Returns a string describing this filter
@@ -77,7 +77,7 @@ public class StringToNominal
    */
   public String globalInfo() {
 
-    return "Converts a string attribute (unspecified number of values) to nominal "
+    return "Converts a range of string attributes (unspecified number of values) to nominal "
       + "(set number of values). You should ensure that all string values that "
       + "will appear are represented in the first batch of the data.";
   }
@@ -90,6 +90,7 @@ public class StringToNominal
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -119,11 +120,7 @@ public class StringToNominal
        throws Exception {
 
     super.setInputFormat(instanceInfo);
-    m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
-    if (!instanceInfo.attribute(m_AttIndex.getIndex()).isString()) {
-      throw new UnsupportedAttributeTypeException("Chosen attribute is not of "
-						  + "type string.");
-    }
+    m_AttIndices.setUpper(instanceInfo.numAttributes() - 1);
     return false;
   }
 
@@ -148,6 +145,24 @@ public class StringToNominal
 
     if (isOutputFormatDefined()) {
       Instance newInstance = (Instance)instance.copy();
+      
+      // make sure that we get the right indexes set for the converted
+      // string attributes when operating on a second batch of instances
+      for (int i = 0; i < newInstance.numAttributes(); i++) {
+        if (newInstance.attribute(i).isString() &&
+            !newInstance.isMissing(i) &&
+            m_AttIndices.isInRange(i)) {
+          Attribute outAtt = 
+            getOutputFormat().attribute(newInstance.attribute(i).name());
+          String inVal = newInstance.stringValue(i);
+          int outIndex = outAtt.indexOfValue(inVal);
+          if (outIndex < 0) {
+            newInstance.setMissing(i);
+          } else {
+            newInstance.setValue(i, outIndex);
+          }
+        }
+      }
       push(newInstance);
       return true;
     }
@@ -191,13 +206,17 @@ public class StringToNominal
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-              "\tSets the attribute index (default last).",
-              "C", 1, "-C <col>"));
+              "\tSets the range of attribute indices (default last).",
+              "R", 1, "-R <col>"));
+    
+    newVector.addElement(new Option(
+            "\tInvert the range specified by -R.",
+            "V", 1, "-V <col>"));
 
     return newVector.elements();
   }
@@ -209,8 +228,11 @@ public class StringToNominal
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -C &lt;col&gt;
-   *  Sets the attribute index (default last).</pre>
+   * <pre> -R &lt;col&gt;
+   *  Sets the range of attribute indices (default last).</pre>
+   *  
+   * <pre> -V &lt;col&gt;
+   *  Inverts the selection specified by -R.</pre>
    * 
    <!-- options-end -->
    *
@@ -219,11 +241,18 @@ public class StringToNominal
    */
   public void setOptions(String[] options) throws Exception {
     
-    String attIndex = Utils.getOption('C', options);
-    if (attIndex.length() != 0) {
-      setAttributeIndex(attIndex);
+    String attIndices = Utils.getOption('R', options);
+    if (attIndices.length() != 0) {
+      setAttributeRange(attIndices);
     } else {
-      setAttributeIndex("last");
+      setAttributeRange("last");
+    }
+    
+    String invertSelection = Utils.getOption('V', options);
+    if (invertSelection.length() != 0) {
+      m_AttIndices.setInvert(true);
+    } else {
+    	m_AttIndices.setInvert(false);
     }
        
     if (getInputFormat() != null) {
@@ -238,15 +267,21 @@ public class StringToNominal
    */
   public String [] getOptions() {
 
-    String [] options = new String [6];
+    String [] options = new String [this.m_AttIndices.getInvert() ? 7 : 6];
     int current = 0;
 
-    options[current++] = "-C";
-    options[current++] = "" + (getAttributeIndex());
-
+    options[current++] = "-R";
+    options[current++] = "" + (getAttributeRange());
+    
+    
     while (current < options.length) {
       options[current++] = "";
     }
+    
+    if(this.m_AttIndices.getInvert()) {
+    	options[current++] = "-V";
+    }
+    
     return options;
   }
 
@@ -254,30 +289,31 @@ public class StringToNominal
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String attributeIndexTipText() {
+  public String attributeRangeTipText() {
 
-    return "Sets which attribute to process. This attribute "
-      + "must be a string attribute (\"first\" and \"last\" are valid values)";
+    return "Sets which attributes to process. This attributes "
+      + "must be string attributes (\"first\" and \"last\" are valid values " +
+      		"as well as ranges and lists)";
   }
 
   /**
-   * Get the index of the attribute used.
+   * Get the range of indices of the attributes used.
    *
    * @return the index of the attribute
    */
-  public String getAttributeIndex() {
+  public String getAttributeRange() {
 
-    return m_AttIndex.getSingleIndex();
+    return m_AttIndices.getRanges();
   }
 
   /**
-   * Sets index of the attribute used.
+   * Sets range of indices of the attributes used.
    *
-   * @param attIndex the index of the attribute
+   * @param rangeList the list of attribute indices
    */
-  public void setAttributeIndex(String attIndex) {
+  public void setAttributeRange(String rangeList) {
     
-    m_AttIndex.setSingleIndex(attIndex);
+    m_AttIndices.setRanges(rangeList);
   }
 
   /**
@@ -295,7 +331,7 @@ public class StringToNominal
     newAtts = new FastVector(getInputFormat().numAttributes());
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
-      if (j != m_AttIndex.getIndex()) {
+      if(!m_AttIndices.isInRange(j) || !att.isString()) {
 
 	// We don't have to copy the attribute because the
 	// attribute index remains unchanged.
