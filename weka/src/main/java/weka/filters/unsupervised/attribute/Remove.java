@@ -275,7 +275,11 @@ public class Remove
   public String globalInfo() {
 
     return "A filter that removes a range of"
-      + " attributes from the dataset.";
+      + " attributes from the dataset. Will " +
+      		"re-order the remaining attributes " +
+      		"if invert matching sense is turned " +
+      		"on and the attribute column indices " +
+      		"are not specified in ascending order.";
   }
 
   /**
