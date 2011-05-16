@@ -40,7 +40,10 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * A filter that deletes a range of attributes from the dataset.<p>
+ * A filter that deletes a range of attributes from the dataset. Will
+ * re-order the remaining attributes if invert matching sense is turned
+ * on and the attribute column indices are not specified in ascending
+ * order.<p>
  *
  * Valid filter-specific options are:<p>
  *
@@ -242,7 +245,11 @@ public class Remove extends Filter
   public String globalInfo() {
 
     return "An filter that removes a range of"
-      + " attributes from the dataset.";
+      + " attributes from the dataset. Will " +
+                "re-order the remaining attributes " +
+                "if invert matching sense is turned " +
+                "on and the attribute column indices " +
+                "are not specified in ascending order.";
   }
 
   /**
