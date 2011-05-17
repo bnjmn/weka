@@ -61,6 +61,9 @@ public class FileEnvironmentField extends EnvironmentField {
   /** Dialog to hold the file editor */
   protected PropertyDialog m_fileEditorDialog;
   
+  /** The button to pop up the file dialog */
+  protected JButton m_browseBut;
+  
   /**
    * Constructor
    */
@@ -113,8 +116,8 @@ public class FileEnvironmentField extends EnvironmentField {
       new ExtensionFileFilter(".model", "Serialized Weka classifier (*.model)");
     embeddedEditor.addChoosableFileFilter(ff);    
     
-    JButton browseBut = new JButton("Browse...");
-    browseBut.addActionListener(new ActionListener() {
+    m_browseBut = new JButton("Browse...");
+    m_browseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
           String modelPath = getText();
@@ -143,7 +146,7 @@ public class FileEnvironmentField extends EnvironmentField {
     
     JPanel bP = new JPanel(); bP.setLayout(new BorderLayout());
     //bP.setBorder(BorderFactory.createEmptyBorder(5,0,5,5));
-    bP.add(browseBut, BorderLayout.CENTER);
+    bP.add(m_browseBut, BorderLayout.CENTER);
     
     add(bP, BorderLayout.EAST);    
   }
@@ -187,5 +190,15 @@ public class FileEnvironmentField extends EnvironmentField {
       m_fileEditorDialog.dispose();
       m_fileEditorDialog = null;
     }
+  }
+  
+  /**
+   * Set the enabled status of the combo box and button
+   * 
+   * @param enabled true if the combo box and button are to be enabled
+   */
+  public void setEnabled(boolean enabled) {
+    super.setEnabled(enabled);
+    m_browseBut.setEnabled(enabled);
   }
 }
