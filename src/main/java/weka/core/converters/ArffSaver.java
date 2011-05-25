@@ -204,10 +204,23 @@ public class ArffSaver
           setWriteMode(WAIT);
           return;
       }
+      
       PrintWriter outW = new PrintWriter(getWriter());
-      outW.print((getInstances()).toString());
+      Instances data = getInstances();
+      
+      // header
+      Instances header = new Instances(data, 0);
+      outW.print(header.toString());
+      
+      // data
+      for (int i = 0; i < data.numInstances(); i++) {
+	if (i % 1000 == 0)
+	  outW.flush();
+        outW.println(data.instance(i));
+      }
       outW.flush();
       outW.close();
+      
       setWriteMode(WAIT);
       outW = null;
       resetWriter();
