@@ -36,33 +36,33 @@ import java.io.PrintWriter;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -i &lt;the input file&gt;
  * The input file</pre>
- * 
+ *
  * <pre> -o &lt;the output file&gt;
  * The output file</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
  * @version $Revision$
  * @see Saver
  */
-public class ArffSaver 
-  extends AbstractFileSaver 
+public class ArffSaver
+  extends AbstractFileSaver
   implements BatchConverter, IncrementalConverter {
 
   /** for serialization */
-  static final long serialVersionUID = 2223634248900042228L;    
-  
-  /** Constructor */  
+  static final long serialVersionUID = 2223634248900042228L;
+
+  /** Constructor */
   public ArffSaver(){
-  
+
       resetOptions();
   }
-   
-   
+
+
   /**
    * Returns a string describing this Saver
    * @return a description of the Saver suitable for
@@ -73,7 +73,7 @@ public class ArffSaver
       +"format. ";
   }
 
-  
+
   /**
    * Returns a description of the file type.
    *
@@ -84,7 +84,7 @@ public class ArffSaver
   }
 
   /**
-   * Resets the Saver 
+   * Resets the Saver
    */
   public void resetOptions() {
 
@@ -92,7 +92,7 @@ public class ArffSaver
     setFileExtension(".arff");
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this saver.
    *
    * @return            the capabilities of this object
@@ -100,35 +100,35 @@ public class ArffSaver
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    
+
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
-  
+
   /** Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method.
    * @param inst the instance to save
    * @throws IOException throws IOEXception if an instance cannot be saved incrementally.
-   */  
+   */
   public void writeIncremental(Instance inst) throws IOException{
-  
+
       int writeMode = getWriteMode();
       Instances structure = getInstances();
       PrintWriter outW = null;
-      
+
       if(getRetrieval() == BATCH || getRetrieval() == NONE)
           throw new IOException("Batch and incremental saving cannot be mixed.");
       if(getWriter() != null)
           outW = new PrintWriter(getWriter());
-          
+
       if(writeMode == WAIT){
         if(structure == null){
             setWriteMode(CANCEL);
@@ -161,7 +161,7 @@ public class ArffSaver
           if(structure == null)
               throw new IOException("No instances information available.");
           if(inst != null){
-          //write instance 
+          //write instance
               if(retrieveFile() == null || outW == null)
                 System.out.println(inst);
               else{
@@ -187,12 +187,12 @@ public class ArffSaver
           }
       }
   }
-  
+
   /** Writes a Batch of instances
    * @throws IOException throws IOException if saving in batch mode is not possible
    */
   public void writeBatch() throws IOException {
-  
+
       if(getInstances() == null)
           throw new IOException("No instances to save");
       if(getRetrieval() == INCREMENTAL)
@@ -204,19 +204,32 @@ public class ArffSaver
           setWriteMode(WAIT);
           return;
       }
+
       PrintWriter outW = new PrintWriter(getWriter());
-      outW.print((getInstances()).toString());
+      Instances data = getInstances();
+
+      // header
+      Instances header = new Instances(data, 0);
+      outW.print(header.toString());
+
+      // data
+      for (int i = 0; i < data.numInstances(); i++) {
+	if (i % 1000 == 0)
+	  outW.flush();
+        outW.println(data.instance(i));
+      }
       outW.flush();
       outW.close();
+
       setWriteMode(WAIT);
       outW = null;
       resetWriter();
       setWriteMode(CANCEL);
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
