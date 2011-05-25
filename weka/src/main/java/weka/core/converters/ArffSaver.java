@@ -50,19 +50,19 @@ import weka.core.Option;
  *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision$
  * @see Saver
  */
 public class ArffSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
 
-    
-  /** Constructor */  
+
+  /** Constructor */
   public ArffSaver(){
-  
+
       resetOptions();
   }
-   
-   
+
+
   /**
    * Returns a string describing this Saver
    * @return a description of the Saver suitable for
@@ -73,7 +73,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
       +"format. ";
   }
 
-  
+
   /**
    * Returns a description of the file type.
    *
@@ -84,7 +84,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
   }
 
   /**
-   * Resets the Saver 
+   * Resets the Saver
    */
   public void resetOptions() {
 
@@ -93,23 +93,23 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
   }
 
 
-  
+
   /** Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method.
    * @param inst the instance to save
    * @throws IOException throws IOEXception if an instance cannot be saved incrementally.
-   */  
+   */
   public void writeIncremental(Instance inst) throws IOException{
-  
+
       int writeMode = getWriteMode();
       Instances structure = getInstances();
       PrintWriter outW = null;
-      
+
       if(getRetrieval() == BATCH || getRetrieval() == NONE)
           throw new IOException("Batch and incremental saving cannot be mixed.");
       if(getWriter() != null)
           outW = new PrintWriter(getWriter());
-          
+
       if(writeMode == WAIT){
         if(structure == null){
             setWriteMode(CANCEL);
@@ -142,7 +142,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
           if(structure == null)
               throw new IOException("No instances information available.");
           if(inst != null){
-          //write instance 
+          //write instance
               if(retrieveFile() == null || outW == null)
                 System.out.println(inst);
               else{
@@ -166,12 +166,12 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
           }
       }
   }
-  
+
   /** Writes a Batch of instances
    * @throws IOException throws IOException if saving in batch mode is not possible
    */
   public void writeBatch() throws IOException {
-  
+
       if(getInstances() == null)
           throw new IOException("No instances to save");
       if(getRetrieval() == INCREMENTAL)
@@ -183,10 +183,23 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
           setWriteMode(WAIT);
           return;
       }
+
       PrintWriter outW = new PrintWriter(getWriter());
-      outW.print((getInstances()).toString());
+      Instances data = getInstances();
+
+      // header
+      Instances header = new Instances(data, 0);
+      outW.print(header.toString());
+
+      // data
+      for (int i = 0; i < data.numInstances(); i++) {
+	if (i % 1000 == 0)
+	  outW.flush();
+        outW.println(data.instance(i));
+      }
       outW.flush();
       outW.close();
+
       setWriteMode(WAIT);
   }
 
@@ -196,7 +209,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
    * @param options should contain the options of a Saver.
    */
   public static void main(String [] options) {
-      
+
       StringBuffer text = new StringBuffer();
       try{
         ArffSaver asv = new ArffSaver();
@@ -208,7 +221,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
             text.append(option.description()+'\n');
         }
         try {
-          asv.setOptions(options);  
+          asv.setOptions(options);
         } catch (Exception ex) {
             System.out.println("\n"+text);
             System.exit(1);
@@ -221,14 +234,14 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
             asv.writeIncremental(instances.instance(i));
         }
         asv.writeIncremental(null);*/
-        
+
         //batch
         asv.writeBatch();
       } catch (Exception ex) {
 	ex.printStackTrace();
 	}
-      
+
     }
 }
-  
-  
+
+
