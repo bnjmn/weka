@@ -119,8 +119,8 @@ public class LogPanel extends JPanel implements Logger {
     m_table.setModel(m_tableModel);
     m_table.getColumnModel().getColumn(0).setPreferredWidth(100);
     m_table.getColumnModel().getColumn(1).setPreferredWidth(150);
-    m_table.getColumnModel().getColumn(2).setPreferredWidth(2);
-    m_table.getColumnModel().getColumn(3).setPreferredWidth(500);
+    m_table.getColumnModel().getColumn(2).setPreferredWidth(30);
+    m_table.getColumnModel().getColumn(3).setPreferredWidth(400);
     m_table.setShowVerticalLines(true);
     
     JPanel statusPan = new JPanel();

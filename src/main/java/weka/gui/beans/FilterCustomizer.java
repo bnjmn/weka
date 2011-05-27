@@ -22,23 +22,20 @@
 
 package weka.gui.beans;
 
-import weka.filters.Filter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
 
 /**
  * GUI customizer for the filter bean
@@ -48,7 +45,7 @@ import javax.swing.JPanel;
  */
 public class FilterCustomizer
   extends JPanel
-  implements Customizer, CustomizerCloseRequester {
+  implements BeanCustomizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = 2049895469240109738L;
@@ -70,7 +67,9 @@ public class FilterCustomizer
   private PropertySheetPanel m_filterEditor = 
     new PropertySheetPanel();
   
-  private JFrame m_parentFrame;
+  private Window m_parentWindow;
+  
+  private ModifyListener m_modifyListener;
  
   public FilterCustomizer() {
     m_filterEditor.
@@ -86,7 +85,11 @@ public class FilterCustomizer
     JButton OKBut = new JButton("OK");
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(FilterCustomizer.this, true);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
 
@@ -98,7 +101,11 @@ public class FilterCustomizer
         if (m_backup != null) {
           m_filter.setFilter(m_backup);
         }
-        m_parentFrame.dispose();
+        
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(FilterCustomizer.this, false);
+        }
+        m_parentWindow.dispose();
       }
     });
     
@@ -141,8 +148,13 @@ public class FilterCustomizer
     m_pcSupport.removePropertyChangeListener(pcl);
   }
 
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;
+  public void setParentWindow(Window parent) {
+    m_parentWindow = parent;
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
   }
 }
 

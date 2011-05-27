@@ -233,15 +233,22 @@ public class XMLBeans
    * null in the bean */
   protected BeanContextSupport m_BeanContextSupport = null;
   
+  /** The index of the vector of bean instances or connections to use.
+   * this corresponds to a tab in the main KnowledgeFlow UI
+   */
+  protected int m_vectorIndex = 0;
+  
   /**
    * initializes the serialization for layouts
    * 
    * @param layout      the component that manages the layout
    * @param context     the bean context support to use
+   * @param tab         the index of the vector of bean instances or connections
+   * to use (this corresponds to a visible tab in the main KnowledgeFlow UI)
    * @throws Exception  if initialization fails
    */
-  public XMLBeans(JComponent layout, BeanContextSupport context) throws Exception {
-    this(layout, context, DATATYPE_LAYOUT);
+  public XMLBeans(JComponent layout, BeanContextSupport context, int tab) throws Exception {
+    this(layout, context, DATATYPE_LAYOUT, tab);
   }
   
   /**
@@ -252,9 +259,11 @@ public class XMLBeans
    * @param datatype    the type of data to read/write
    * @throws Exception  if initialization fails
    */
-  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype) throws Exception {
+  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype, 
+      int tab) throws Exception {
     super();
     
+    m_vectorIndex = tab;
     m_BeanLayout = layout;
     m_BeanContextSupport = context;
     setDataType(datatype);
@@ -438,7 +447,7 @@ public class XMLBeans
     
     switch (getDataType()) {
       case DATATYPE_LAYOUT:
-        addBeanInstances(BeanInstance.getBeanInstances());
+        addBeanInstances(BeanInstance.getBeanInstances(m_vectorIndex));
         break;
 
       case DATATYPE_USERCOMPONENTS:
@@ -599,7 +608,7 @@ public class XMLBeans
 
     for (i = 0; i < esds.length; i++) {
       if (esds[i].getName().equals(event)) {
-        result = new BeanConnection(instSource, instTarget, esds[i]);
+        result = new BeanConnection(instSource, instTarget, esds[i], m_vectorIndex);
         ((BeanConnection) result).setHidden(hidden);
         break;
       }
@@ -649,7 +658,7 @@ public class XMLBeans
       }
       // MetaBean? -> find BeanConnection 
       else {
-        beanconns = BeanConnection.getConnections();
+        beanconns = BeanConnection.getConnections(m_vectorIndex);
         
         for (i = 0; i < beanconns.size(); i++) {
           conn = (BeanConnection) beanconns.get(i);
@@ -1323,7 +1332,7 @@ public class XMLBeans
       }
     }
     
-    result   = new BeanInstance(m_BeanLayout, bean, x, y);
+    result   = new BeanInstance(m_BeanLayout, bean, x, y, m_vectorIndex);
     beaninst = (BeanInstance) result;
     
     // set parent of BeanVisual
