@@ -22,26 +22,13 @@
 
 package weka.gui.beans;
 
-import weka.core.ClassloaderUtil;
-import weka.core.Copyright;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Memory;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.xml.KOML;
-import weka.core.xml.XStream;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.GenericPropertiesCreator;
-import weka.gui.HierarchyPropertyParser;
-import weka.gui.LookAndFeel;
-import weka.gui.beans.xml.XMLBeans;
-import weka.gui.visualize.PrintablePanel;
-
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -81,6 +68,7 @@ import java.io.LineNumberReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -88,28 +76,63 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.JTree;
 import javax.swing.JWindow;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+
+import weka.core.Copyright;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instances;
+import weka.core.Memory;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.xml.KOML;
+import weka.core.xml.XStream;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.GenericPropertiesCreator;
+import weka.gui.HierarchyPropertyParser;
+import weka.gui.LookAndFeel;
+import weka.gui.beans.xml.XMLBeans;
+import weka.gui.visualize.PrintablePanel;
 
 /**
  * Main GUI class for the KnowledgeFlow. Modifications to allow interoperability
@@ -123,7 +146,7 @@ import javax.swing.filechooser.FileFilter;
  */
 public class KnowledgeFlowApp
   extends JPanel
-  implements PropertyChangeListener {
+  implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   /** for serialization */
   private static final long serialVersionUID = -7064906770289728431L;
@@ -243,7 +266,7 @@ public class KnowledgeFlowApp
       loadProperties();
     }
     init();
-  }
+  }  
 
   /**
    * Initializes the temporary files necessary to construct the toolbars
@@ -276,6 +299,7 @@ public class KnowledgeFlowApp
       Enumeration en = GEOProps.propertyNames();
       while (en.hasMoreElements()) {
 	String geoKey = (String)en.nextElement();
+//	System.err.println("GEOKey " + geoKey);
 
 	// try to match this key with one in the Beans.props file
 	String beanCompName = BEAN_PROPERTIES.getProperty(geoKey);
@@ -319,7 +343,7 @@ public class KnowledgeFlowApp
             weka.gui.HierarchyPropertyParser hpp = 
               new weka.gui.HierarchyPropertyParser();
             hpp.build(classes, ", ");
-            //System.err.println(hpp.showTree());
+//            System.err.println(hpp.showTree());
             hpps.put(root, hpp);
           }
 
@@ -394,6 +418,115 @@ public class KnowledgeFlowApp
     }
   } 
   
+  protected class BeanIconRenderer extends DefaultTreeCellRenderer {
+    public Component getTreeCellRendererComponent(JTree tree, Object value, 
+        boolean sel, boolean expanded, boolean leaf, int row, 
+        boolean hasFocus) {
+      super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, 
+          row, hasFocus);
+
+      if (leaf) {
+        Object userO = ((DefaultMutableTreeNode)value).getUserObject();
+        if (userO instanceof JTreeLeafDetails) {
+          Icon i = ((JTreeLeafDetails)userO).getIcon();
+          if (i != null) {
+            setIcon(i);
+          }        
+        }
+      }
+      return this;
+    }    
+  }
+  
+  protected class JTreeLeafDetails {
+    protected String m_fullyQualifiedCompName = "";
+    protected String m_leafLabel = "";
+    protected String m_wekaAlgoName = "";
+    
+    protected Icon m_scaledIcon = null;
+    
+    protected MetaBean m_metaBean = null;
+    
+    protected String m_toolTipText = null;
+    
+    public JTreeLeafDetails(String fullName, Icon icon) {
+      this(fullName, "", icon);
+    }
+    
+    public JTreeLeafDetails(String name, MetaBean bean, Icon icon) {
+      this(name, "", icon);
+      
+      m_metaBean = bean;
+      m_toolTipText = "Hold down shift and click to remove";
+    }
+    
+    public JTreeLeafDetails(String fullName, String wekaAlgoName, Icon icon) {
+      m_fullyQualifiedCompName = fullName;
+      m_wekaAlgoName = wekaAlgoName;
+      m_leafLabel = (wekaAlgoName.length() > 0) ? wekaAlgoName : m_fullyQualifiedCompName;
+      if (m_leafLabel.lastIndexOf('.') > 0) {
+        m_leafLabel = m_leafLabel.substring(m_leafLabel.lastIndexOf('.') + 1, 
+            m_leafLabel.length());
+      }
+      m_scaledIcon = icon;
+    }
+    
+    public String getToolTipText() {
+      return m_toolTipText;
+    }
+    
+    public String toString() {
+      return m_leafLabel;
+    }
+    
+    public Icon getIcon() {
+      return m_scaledIcon;
+    }
+    
+    public void setIcon(Icon icon) {
+      m_scaledIcon = icon;
+    }
+    
+    public boolean isWrappedAlgorithm() {
+      return (m_wekaAlgoName != null && m_wekaAlgoName.length() > 0);
+    }
+    
+    public boolean isMetaBean() {
+      return (m_metaBean != null);
+    }
+    
+    public MetaBean getMetaBean() {
+      return m_metaBean;
+    }
+    
+    public void instantiateBean() {
+      try {        
+        if (isMetaBean()) {
+          MetaBean copy = copyMetaBean(m_metaBean);
+          copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
+          m_toolBarBean = copy;
+        } else {
+          m_toolBarBean = Beans.instantiate(KnowledgeFlowApp.this.getClass().getClassLoader(), 
+              m_fullyQualifiedCompName);
+          if (isWrappedAlgorithm()) {
+            Object algo = Beans.instantiate(KnowledgeFlowApp.this.getClass().getClassLoader(),
+                m_wekaAlgoName);
+            ((WekaWrapper)m_toolBarBean).setWrappedAlgorithm(algo);
+          }
+        }
+
+        setCursor(Cursor.
+            getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        m_mode = ADDING;
+
+      } catch (Exception ex) {
+        System.err.println("Problem instantiating bean \"" 
+            + m_fullyQualifiedCompName + "\" (JTreeLeafDetails.instantiateBean()");
+        ex.printStackTrace();
+      }      
+    }
+  }
+  
   /**
    * Used for displaying the bean components and their visible
    * connections
@@ -411,8 +544,8 @@ public class KnowledgeFlowApp
 
     public void paintComponent(Graphics gx) {
       super.paintComponent(gx);
-      BeanInstance.paintLabels(gx);
-      BeanConnection.paintConnections(gx);
+      BeanInstance.paintLabels(gx, m_mainKFPerspective.getCurrentTabIndex());
+      BeanConnection.paintConnections(gx, m_mainKFPerspective.getCurrentTabIndex());
       //      BeanInstance.paintConnections(gx);
       if (m_mode == CONNECTING) {
 	gx.drawLine(m_startX, m_startY, m_oldX, m_oldY);
@@ -425,7 +558,7 @@ public class KnowledgeFlowApp
 
     public void doLayout() {
       super.doLayout();
-      Vector comps = BeanInstance.getBeanInstances();
+      Vector comps = BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
       for (int i = 0; i < comps.size(); i++) {
 	BeanInstance bi = (BeanInstance)comps.elementAt(i);
 	JComponent c = (JComponent)bi.getBean();
@@ -435,6 +568,480 @@ public class KnowledgeFlowApp
       }
     }
   }
+  
+  /**
+   * Interface for perspectives
+   *
+   */
+  public static interface KFPerspective {
+    
+    void setInstances(Instances insts);
+    
+    String getPerspectiveTitle();
+    
+    String getPerspectiveTipText();
+    
+    Icon getPerspectiveIcon();
+  }
+  
+  
+  /**
+   * Main Knowledge Flow perspective
+   *
+   */
+  private class MainKFPerspective extends JPanel implements KFPerspective {
+    
+    /** Holds the tabs of the perspective */
+    protected JTabbedPane m_flowTabs = new JTabbedPane();
+    
+    /** List of layouts - one for each tab */
+    protected List<BeanLayout> m_beanLayouts = new ArrayList<BeanLayout>();
+    
+    /** List of log panels - one for each tab */
+    protected List<LogPanel> m_logPanels = new ArrayList<LogPanel>();
+    
+    /** List of environment variable settings - one for each tab */
+    protected List<Environment> m_environmentSettings = new ArrayList<Environment>();
+    
+    /** List of flow file paths - one for each tab */
+    protected List<File> m_filePaths = new ArrayList<File>();
+    
+    /** Keeps track of which tabs have been edited but not saved */
+    protected List<Boolean> m_editedList = new ArrayList<Boolean>();
+    
+    /** Keeps track of which tabs have flows that are executing */
+    protected List<Boolean> m_executingList = new ArrayList<Boolean>();
+    
+    public JTabbedPane getTabbedPane() {
+      return m_flowTabs;
+    }
+    
+    public synchronized int getNumTabs() {
+      return m_flowTabs.getTabCount();
+    }
+    
+    public synchronized int getCurrentTabIndex() {
+      return m_flowTabs.getSelectedIndex();
+    }
+    
+    public synchronized LogPanel getCurrentLogPanel() {
+      if (getCurrentTabIndex() >= 0) {
+        return m_logPanels.get(getCurrentTabIndex());
+      }
+      return null;
+    }
+    
+    public synchronized LogPanel getLogPanel(int index) {
+      if (index >= 0 && index < m_logPanels.size()) {
+        return m_logPanels.get(index);
+      }      
+      return null;
+    }
+    
+    public synchronized BeanLayout getCurrentBeanLayout() {
+      if (getCurrentTabIndex() >= 0) {
+        return m_beanLayouts.get(getCurrentTabIndex());
+      }
+      return null;
+    }
+    
+    public synchronized BeanLayout getBeanLayout(int index) {
+      if (index >= 0 && index < m_logPanels.size()) {
+        return m_beanLayouts.get(getCurrentTabIndex());
+      }      
+      return null;
+    }
+    
+    public synchronized void setActiveTab(int index) {
+      if (index < getNumTabs() && index >= 0) {
+        m_flowTabs.setSelectedIndex(index);
+        
+        System.out.println("Setting tab to : " + index);
+        
+        // set the log and layout to the ones belonging to this tab
+        m_logPanel = m_logPanels.get(index);
+        m_beanLayout = m_beanLayouts.get(index);
+        m_flowEnvironment = m_environmentSettings.get(index);
+        
+        m_saveB.setEnabled(!getExecuting());
+        m_saveBB.setEnabled(!getExecuting());
+        m_playB.setEnabled(!getExecuting());
+        m_playBB.setEnabled(!getExecuting());
+        m_stopB.setEnabled(getExecuting());
+      }
+    }
+    
+    public synchronized void setExecuting(boolean executing) {
+      if (getNumTabs() > 0) {
+        setExecuting(getCurrentTabIndex(), executing);
+      }
+    }
+    
+    public synchronized void setExecuting(int index, boolean executing) {
+      if (index < getNumTabs() && index >= 0) {
+        m_executingList.set(index, new Boolean(executing));
+        ((CloseableTabTitle)m_flowTabs.getTabComponentAt(index)).setButtonEnabled(!executing);
+        
+        m_saveB.setEnabled(!getExecuting());
+        m_saveBB.setEnabled(!getExecuting());
+        m_playB.setEnabled(!getExecuting());
+        m_playBB.setEnabled(!getExecuting());
+        m_stopB.setEnabled(getExecuting());
+      }
+    }
+    
+    public synchronized boolean getExecuting() {
+      return getExecuting(getCurrentTabIndex());
+    }
+    
+    public synchronized boolean getExecuting(int index) {
+      if (index < getNumTabs() && index >= 0) {
+        return m_executingList.get(index);
+      }
+      return false;
+    }
+    
+    public synchronized File getFlowFile() {
+      if (getNumTabs() > 0) {
+        return getFlowFile(getCurrentTabIndex());
+      }
+      return null;
+    }
+    
+    public synchronized File getFlowFile(int index) {
+      if (index >= 0 && index < getNumTabs()) {
+        return m_filePaths.get(index);
+      }
+      
+      return null;
+    }
+    
+    public synchronized void setFlowFile(File flowFile) {
+      if (getNumTabs() > 0) {
+        setFlowFile(getCurrentTabIndex(), flowFile);
+      }
+    }
+    
+    public synchronized void setFlowFile(int index, File flowFile) {
+      if (index < getNumTabs() && index >= 0) {
+        m_filePaths.set(index, flowFile);
+      }
+    }
+    
+    public synchronized void setTabTitle(String title) {
+      if (getNumTabs() > 0) {
+        setTabTitle(getCurrentTabIndex(), title);
+      }
+    }
+    
+    public synchronized void setTabTitle(int index, String title) {
+      if (index < getNumTabs() && index >= 0) {
+        System.err.println("Setting tab title to " + title);
+        m_flowTabs.setTitleAt(index, title);
+        ((CloseableTabTitle)m_flowTabs.getTabComponentAt(index)).revalidate();
+        
+      }
+    }
+    
+    public synchronized void setEditedStatus(boolean status) {
+      if (getNumTabs() > 0) {
+        int current = getCurrentTabIndex();
+        setEditedStatus(current, status);
+      }
+    }
+    
+    public synchronized void setEditedStatus(int index, boolean status) {
+      if (index < getNumTabs() && index >= 0) {
+        Boolean newStatus = new Boolean(status);
+        m_editedList.set(index, newStatus);
+        ((CloseableTabTitle)m_flowTabs.getTabComponentAt(index)).setBold(status);
+      }
+    }
+    
+    /**
+     * Get the edited status of the currently selected tab. Returns
+     * false if there are no tabs
+     * 
+     * @return the edited status of the currently selected tab or
+     * false if there are no tabs
+     */
+    public synchronized boolean getEditedStatus() {
+      if (getNumTabs() <= 0) {
+        return false;
+      }
+      
+      return getEditedStatus(getCurrentTabIndex());
+    }
+    
+    /**
+     * Get the edited status of the tab at the supplied index. Returns
+     * false if the index is out of bounds or there are no tabs
+     * 
+     * @param index the index of the tab to check
+     * @return the edited status of the tab
+     */
+    public synchronized boolean getEditedStatus(int index) {
+      if (index < getNumTabs() && index >= 0) {
+        return m_editedList.get(index);
+      }
+      return false;
+    }
+
+    @Override
+    public void setInstances(Instances insts) {
+      // nothing to do as we don't process externally supplied instances
+      
+    }
+
+    /**
+     * Get the title of this perspective
+     */
+    public String getPerspectiveTitle() {
+      return "Data mining processes";
+    }
+
+    /**
+     * Get the tool tip text for this perspective
+     */
+    public String getPerspectiveTipText() {
+      return "Knowledge Flow processes";
+    }
+
+    /**
+     * Get the icon for this perspective
+     */
+    public Icon getPerspectiveIcon() {
+      // TODO use the funky blue weka icon (scaled appropriately)
+      return null;
+    }
+    
+    public MainKFPerspective() {
+      setLayout(new BorderLayout());
+      add(m_flowTabs, BorderLayout.CENTER);
+
+      m_flowTabs.addChangeListener(new ChangeListener() {
+        // This method is called whenever the selected tab changes
+        public void stateChanged(ChangeEvent evt) {
+
+          // Get current tab
+          int sel = m_flowTabs.getSelectedIndex();
+          setActiveTab(sel);
+        }
+      });
+    }
+    
+    public synchronized void removeTab(int tabIndex) {
+      if (tabIndex < 0 || tabIndex >= getNumTabs()) {
+        return;
+      }
+      
+      if (m_editedList.get(tabIndex)) {
+        // prompt for save
+        String tabTitle = m_flowTabs.getTitleAt(tabIndex);
+        String message = "\"" + tabTitle + "\" has been modified. Save changes " +
+        		"before closing?";
+        int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this, message, 
+            "Save changes", JOptionPane.YES_NO_CANCEL_OPTION);
+        
+        if (result == JOptionPane.YES_OPTION) {
+          saveLayout(tabIndex, false);
+        } else if (result == JOptionPane.CANCEL_OPTION) {
+          return;
+        }
+      }
+      
+      BeanLayout bl = m_beanLayouts.get(tabIndex);           
+      BeanInstance.removeBeanInstances(bl, tabIndex);
+      BeanConnection.removeConnectionList(tabIndex);
+      m_beanLayouts.remove(tabIndex);
+      m_logPanels.remove(tabIndex);
+      m_editedList.remove(tabIndex);
+      m_environmentSettings.remove(tabIndex);
+      bl = null;
+      
+      m_flowTabs.remove(tabIndex);
+      
+      if (getCurrentTabIndex() < 0) {
+        m_beanLayout = null;
+        m_logPanel = null;
+      }
+    }
+    
+    public synchronized void addTab(String tabTitle) {
+      // new beans for this tab
+      BeanInstance.addBeanInstances(new Vector(), null);
+      // new connections for this tab
+      BeanConnection.addConnections(new Vector());
+      
+      JPanel p1 = new JPanel();
+      p1.setLayout(new BorderLayout());
+      p1.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                             javax.swing.BorderFactory.
+                             createTitledBorder("Knowledge Flow Layout"),
+                    javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5)
+                    ));
+      BeanLayout tabBeanLayout = new BeanLayout();
+      
+      final JScrollPane js = new JScrollPane(tabBeanLayout);
+      p1.add(js, BorderLayout.CENTER);
+      js.getVerticalScrollBar().setUnitIncrement(m_ScrollBarIncrementLayout);
+      js.getHorizontalScrollBar().setUnitIncrement(m_ScrollBarIncrementLayout);
+      
+
+      configureBeanLayout(tabBeanLayout);
+      m_beanLayouts.add(tabBeanLayout);
+      
+      tabBeanLayout.setSize(m_FlowWidth, m_FlowHeight);
+      Dimension d = tabBeanLayout.getPreferredSize();
+      tabBeanLayout.setMinimumSize(d);
+      //tabBeanLayout.setMaximumSize(d);
+      tabBeanLayout.setPreferredSize(d);
+      
+      LogPanel tabLogPanel = new LogPanel();
+      setUpLogPanel(tabLogPanel);
+      Dimension d2 = new Dimension(100, 170);
+      tabLogPanel.setPreferredSize(d2);
+      tabLogPanel.setMinimumSize(d2);
+      m_logPanels.add(tabLogPanel);
+      
+      m_environmentSettings.add(new Environment());
+      m_filePaths.add(new File("-NONE-"));
+      
+      JSplitPane p2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, p1, tabLogPanel);
+      p2.setOneTouchExpandable(true);
+      p2.setDividerLocation(500);
+      p2.setResizeWeight(1.0);
+      JPanel splitHolder = new JPanel();
+      splitHolder.setLayout(new BorderLayout());
+      splitHolder.add(p2, BorderLayout.CENTER);
+      
+      //add(splitHolder, BorderLayout.CENTER);
+      
+      m_editedList.add(new Boolean(false));
+      m_executingList.add(new Boolean(false));
+      m_flowTabs.addTab(tabTitle, splitHolder);
+      int tabIndex = getNumTabs() - 1;
+      m_flowTabs.setTabComponentAt(tabIndex, new CloseableTabTitle(m_flowTabs));
+      setActiveTab(getNumTabs() - 1);      
+    }
+  }
+  
+  private class CloseableTabTitle extends JPanel {
+    private final JTabbedPane m_enclosingPane;
+    
+    private JLabel m_tabLabel;
+    private TabButton m_tabButton;
+    
+    public CloseableTabTitle(final JTabbedPane pane) {
+      super(new FlowLayout(FlowLayout.LEFT, 0, 0));
+      
+      m_enclosingPane = pane;
+      setOpaque(false);
+      setBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0));
+      
+      // read the title from the JTabbedPane
+      m_tabLabel = new JLabel() {
+        public String getText() {
+          int index = m_enclosingPane.indexOfTabComponent(CloseableTabTitle.this);
+          if (index >= 0) {
+            return m_enclosingPane.getTitleAt(index);
+          }
+          return null;
+        }
+      };
+      
+      add(m_tabLabel);
+      m_tabLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+      m_tabButton = new TabButton();
+      add(m_tabButton);
+
+    }
+    
+    public void setBold(boolean bold) {
+      m_tabLabel.setEnabled(bold);
+    }
+    
+    public void setButtonEnabled(boolean enabled) {
+      m_tabButton.setEnabled(enabled);
+    }
+    
+    private class TabButton extends JButton implements ActionListener {
+      public TabButton() {
+        int size = 17;
+        setPreferredSize(new Dimension(size, size));
+        setToolTipText("close this tab");
+        //Make the button looks the same for all Laf's
+        setUI(new BasicButtonUI());
+        //Make it transparent
+        setContentAreaFilled(false);
+        //No need to be focusable
+        setFocusable(false);
+        setBorder(BorderFactory.createEtchedBorder());
+        setBorderPainted(false);
+        //Making nice rollover effect
+        //we use the same listener for all buttons
+        addMouseListener(new MouseAdapter() {
+          public void mouseEntered(MouseEvent e) {
+            Component component = e.getComponent();
+
+            if (component instanceof AbstractButton) {
+                AbstractButton button = (AbstractButton) component;
+                button.setBorderPainted(true);
+            }
+        }
+
+        public void mouseExited(MouseEvent e) {
+            Component component = e.getComponent();
+            if (component instanceof AbstractButton) {
+                AbstractButton button = (AbstractButton) component;
+                button.setBorderPainted(false);
+            }
+        }
+        });
+        setRolloverEnabled(true);
+        //Close the proper tab by clicking the button
+        addActionListener(this);
+      }
+
+      public void actionPerformed(ActionEvent e) {
+        int i = m_enclosingPane.indexOfTabComponent(CloseableTabTitle.this);
+        if (i >= 0) {
+          //m_enclosingPane.remove(i);
+          // TODO
+          m_mainKFPerspective.removeTab(i);
+        }
+      }
+
+      //we don't want to update UI for this button
+      public void updateUI() {
+      }
+
+      //paint the cross
+      protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D) g.create();
+        //shift the image for pressed buttons
+        if (getModel().isPressed()) {
+          g2.translate(1, 1);
+        }
+        g2.setStroke(new BasicStroke(2));
+        g2.setColor(Color.BLACK);
+        if (!isEnabled()) {
+          g2.setColor(Color.GRAY);
+        }
+        if (getModel().isRollover()) {
+          g2.setColor(Color.MAGENTA);
+        }
+        int delta = 6;
+        g2.drawLine(delta, delta, getWidth() - delta - 1, getHeight() - delta - 1);
+        g2.drawLine(getWidth() - delta - 1, delta, delta, getHeight() - delta - 1);
+        g2.dispose();
+      }
+    }
+  }
+  
+  
+  
 
   // Used for measuring and splitting icon labels
   // over multiple lines
@@ -466,7 +1073,7 @@ public class KnowledgeFlowApp
   /**
    * The layout area
    */
-  private BeanLayout m_beanLayout = new BeanLayout();
+  private BeanLayout m_beanLayout = null;//new BeanLayout();
 
   /**
    * Tabbed pane to hold tool bars
@@ -489,8 +1096,11 @@ public class KnowledgeFlowApp
 
   private JToggleButton m_pointerB;
   private JButton m_saveB;
+  private JButton m_saveBB;
   private JButton m_loadB;
   private JButton m_stopB;
+  private JButton m_playB;
+  private JButton m_playBB;
   private JButton m_helpB;
   private JButton m_newB;
 
@@ -515,7 +1125,19 @@ public class KnowledgeFlowApp
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
 
-  protected LogPanel m_logPanel = new LogPanel();//new LogPanel(null, true);
+  protected LogPanel m_logPanel = null; //new LogPanel();//new LogPanel(null, true);
+  
+  /** Component that holds the currently visible perspective */
+  protected JPanel m_perspectiveHolder;
+  
+  /** 
+   * Holds the list of currently loaded perspectives. Element at 0 is always
+   * the main KF data mining flow perspective
+   */
+  protected List<KFPerspective> m_perspectives = new ArrayList<KFPerspective>();
+  
+  /** Shortcut to the main perspective */
+  protected MainKFPerspective m_mainKFPerspective;
 
   protected BeanContextSupport m_bcSupport = new BeanContextSupport();
 
@@ -560,10 +1182,10 @@ public class KnowledgeFlowApp
   protected int m_ScrollBarIncrementComponents = 50;
 
   /** the flow layout width */
-  protected int m_FlowWidth = 1024;
+  protected int m_FlowWidth = 2560;
 
   /** the flow layout height */
-  protected int m_FlowHeight = 768;
+  protected int m_FlowHeight = 1440;
 
   /** the preferred file extension */
   protected String m_PreferredExtension = FILE_EXTENSION;
@@ -573,6 +1195,9 @@ public class KnowledgeFlowApp
   
   /** Environment variables for the current flow */
   protected Environment m_flowEnvironment = new Environment();
+  
+  protected JTree m_componentTree;
+  protected DefaultMutableTreeNode m_userCompNode;
   
   /**
    * Set the environment variables to use. NOTE: loading a new layout
@@ -588,7 +1213,7 @@ public class KnowledgeFlowApp
   private void setEnvironment() {
     // pass m_flowEnvironment to all components
     // that implement EnvironmentHandler
-    Vector beans = BeanInstance.getBeanInstances();
+    Vector beans = BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
     for (int i = 0; i < beans.size(); i++) {
       Object temp = ((BeanInstance) beans.elementAt(i)).getBean();
 
@@ -666,66 +1291,120 @@ public class KnowledgeFlowApp
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     m_bcSupport.setDesignTime(true);
-    m_beanLayout.setLayout(null);
+        
+     
+    // TODO --- 
+     //configureBeanLayout(m_beanLayout);
+    
+     
+     JPanel mainPanel = new JPanel();
+     m_perspectiveHolder = new JPanel();
+     m_perspectiveHolder.setLayout(new BorderLayout());
+     
+     mainPanel.setLayout(new BorderLayout());
+     // TODO North will hold main perspective toggle buttons
+     // WEST will hold JTree - perhaps not
+     // CENTER will hold perspective
+     
+     
+     
+     /*JPanel p2 = new JPanel();
+     p2.setLayout(new BorderLayout()); */
+
+
+     m_mainKFPerspective = new MainKFPerspective();
+     
+     m_perspectiveHolder.add(m_mainKFPerspective, BorderLayout.CENTER);
+     m_perspectives.add(m_mainKFPerspective);
+     
+     mainPanel.add(m_perspectiveHolder, BorderLayout.CENTER);
+     setLayout(new BorderLayout());
+     
+     add(mainPanel, BorderLayout.CENTER);
+     
+     // setUpToolBars(p2);
+     setUpToolsAndJTree(m_mainKFPerspective);
+     
+     // ---
+     JScrollPane treeView = new JScrollPane(m_componentTree);
+     JPanel treeHolder = new JPanel();
+     treeHolder.setLayout(new BorderLayout());
+     treeHolder.setBorder(BorderFactory.createTitledBorder("Design"));
+     treeHolder.add(treeView, BorderLayout.CENTER);
+     
+     m_perspectiveHolder.add(treeHolder, BorderLayout.WEST);
+     Dimension d = treeView.getPreferredSize();
+     d = new Dimension((int)(d.getWidth() * 1.5), (int)d.getHeight());
+     treeView.setPreferredSize(d);
+     
+     loadUserComponents();
+     clearLayout(); // add an initial "Untitled" tab
+  }
+  
+  private void configureBeanLayout(final BeanLayout layout) {
+    
+    layout.setLayout(null);
     
     // handle mouse events
-    m_beanLayout.addMouseListener(new MouseAdapter() {
+    layout.addMouseListener(new MouseAdapter() {
 
-	public void mousePressed(MouseEvent me) {
-	  if (m_toolBarBean == null) {
-	    if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
-		 == InputEvent.BUTTON1_MASK) && m_mode == NONE) {
-	      BeanInstance bi = BeanInstance.findInstance(me.getPoint());
-	      JComponent bc = null;
-	      if (bi != null) {
-		bc = (JComponent)(bi.getBean());
-	      }
-	      if (bc != null && (bc instanceof Visible)) {
-		m_editElement = bi;
-		m_oldX = me.getX();
-		m_oldY = me.getY();
-		m_mode = MOVING;
-	      }
+        public void mousePressed(MouseEvent me) {
+          if (m_toolBarBean == null) {
+            if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
+                 == InputEvent.BUTTON1_MASK) && m_mode == NONE) {
+              BeanInstance bi = BeanInstance.findInstance(me.getPoint(), 
+                  m_mainKFPerspective.getCurrentTabIndex());
+              JComponent bc = null;
+              if (bi != null) {
+                bc = (JComponent)(bi.getBean());
+              }
+              if (bc != null && (bc instanceof Visible)) {
+                m_editElement = bi;
+                m_oldX = me.getX();
+                m_oldY = me.getY();
+                m_mode = MOVING;
+              }
               if (m_mode != MOVING) {
                 m_mode = SELECTING;
                 m_oldX = me.getX();
                 m_oldY = me.getY();
                 m_startX = m_oldX;
                 m_startY = m_oldY;
-                Graphics2D gx = (Graphics2D)m_beanLayout.getGraphics();
+                Graphics2D gx = (Graphics2D)layout.getGraphics();
                 gx.setXORMode(java.awt.Color.white);
                 //                gx.drawRect(m_oldX, m_oldY, m_oldX, m_oldY);
                 //                gx.drawLine(m_startX, m_startY, m_startX, m_startY);
                 gx.dispose();
                 m_mode = SELECTING;
               }
-	    }
-	  }
-	}
+            }
+          }
+        }
 
-	public void mouseReleased(MouseEvent me) {
-	  if (m_editElement != null && m_mode == MOVING) {
-	    m_editElement = null;
-	    revalidate();
-	    m_beanLayout.repaint();
-	    m_mode = NONE;
-	  }
+        public void mouseReleased(MouseEvent me) {
+          if (m_editElement != null && m_mode == MOVING) {
+            m_editElement = null;
+            revalidate();
+            layout.repaint();
+            m_mode = NONE;
+          }
           if (m_mode == SELECTING) {
             revalidate();
-            m_beanLayout.repaint();
+            layout.repaint();
             m_mode = NONE;
                         
             checkSubFlow(m_startX, m_startY, me.getX(), me.getY());
           }
-	}
+        }
 
-	public void mouseClicked(MouseEvent me) {
-	  BeanInstance bi = BeanInstance.findInstance(me.getPoint());
-	  if (m_mode == ADDING || m_mode == NONE) {
-	    // try and popup a context sensitive menu if we have
-	    // been clicked over a bean.
-	    if (bi != null) {
-	      JComponent bc = (JComponent)bi.getBean();
+        public void mouseClicked(MouseEvent me) {
+          BeanInstance bi = BeanInstance.findInstance(me.getPoint(), 
+              m_mainKFPerspective.getCurrentTabIndex());
+          if (m_mode == ADDING || m_mode == NONE) {
+            // try and popup a context sensitive menu if we have
+            // been clicked over a bean.
+            if (bi != null) {
+              JComponent bc = (JComponent)bi.getBean();
               // if we've been double clicked, then popup customizer
               // as long as we're not a meta bean
               if (me.getClickCount() == 2 && !(bc instanceof MetaBean)) {
@@ -747,168 +1426,149 @@ public class KnowledgeFlowApp
                 }
               } else if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
                           != InputEvent.BUTTON1_MASK) || me.isAltDown()) {
-		doPopup(me.getPoint(), bi, me.getX(), me.getY());
-	      }
-	    } else {
-	      if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
-		   != InputEvent.BUTTON1_MASK) || me.isAltDown()) {
-		// find connections if any close to this point
-		int delta = 10;
-		deleteConnectionPopup(BeanConnection.
-		      getClosestConnections(new Point(me.getX(), me.getY()), 
-					    delta), me.getX(), me.getY());
-	      } else if (m_toolBarBean != null) {
-		// otherwise, if a toolbar button is active then 
-		// add the component
-		addComponent(me.getX(), me.getY());
-	      }
-	    }
-	  }
-	
-	  if (m_mode == CONNECTING) {
-	    // turn off connecting points and remove connecting line
-	    m_beanLayout.repaint();
-	    Vector beanInstances = BeanInstance.getBeanInstances();
-	    for (int i = 0; i < beanInstances.size(); i++) {
-	      JComponent bean = 
-		(JComponent)((BeanInstance)beanInstances.elementAt(i)).
-		getBean();
-	      if (bean instanceof Visible) {
-		((Visible)bean).getVisual().setDisplayConnectors(false);
-	      }
-	    }
+                doPopup(me.getPoint(), bi, me.getX(), me.getY());
+              }
+            } else {
+              if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
+                   != InputEvent.BUTTON1_MASK) || me.isAltDown()) {
+                // find connections if any close to this point
+                int delta = 10;
+                deleteConnectionPopup(BeanConnection.
+                      getClosestConnections(new Point(me.getX(), me.getY()), 
+                                            delta), me.getX(), me.getY());
+              } else if (m_toolBarBean != null) {
+                // otherwise, if a toolbar button is active then 
+                // add the component
+                addComponent(me.getX(), me.getY());
+                m_componentTree.clearSelection();
+                m_mainKFPerspective.setEditedStatus(true);
+              }
+            }
+          }
+        
+          if (m_mode == CONNECTING) {
+            // turn off connecting points and remove connecting line
+            layout.repaint();
+            Vector beanInstances = 
+              BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
+            for (int i = 0; i < beanInstances.size(); i++) {
+              JComponent bean = 
+                (JComponent)((BeanInstance)beanInstances.elementAt(i)).
+                getBean();
+              if (bean instanceof Visible) {
+                ((Visible)bean).getVisual().setDisplayConnectors(false);
+              }
+            }
 
-	    if (bi != null) {
-	      boolean doConnection = false;
-	      if (!(bi.getBean() instanceof BeanCommon)) {
-		doConnection = true;
-	      } else {
-		// Give the target bean a chance to veto the proposed
-		// connection
-		if (((BeanCommon)bi.getBean()).
-		    //connectionAllowed(m_sourceEventSetDescriptor.getName())) {
-		    connectionAllowed(m_sourceEventSetDescriptor)) {
-		  doConnection = true;
-		}
-	      }
-	      if (doConnection) {
-		// attempt to connect source and target beans
+            if (bi != null) {
+              boolean doConnection = false;
+              if (!(bi.getBean() instanceof BeanCommon)) {
+                doConnection = true;
+              } else {
+                // Give the target bean a chance to veto the proposed
+                // connection
+                if (((BeanCommon)bi.getBean()).
+                    //connectionAllowed(m_sourceEventSetDescriptor.getName())) {
+                    connectionAllowed(m_sourceEventSetDescriptor)) {
+                  doConnection = true;
+                }
+              }
+              if (doConnection) {
+                // attempt to connect source and target beans
 
                 if (bi.getBean() instanceof MetaBean) {
                   BeanConnection.doMetaConnection(m_editElement, bi,
                                                   m_sourceEventSetDescriptor,
-                                                  m_beanLayout);
+                                                  layout);
                 } else {
                   BeanConnection bc = 
                     new BeanConnection(m_editElement, bi, 
-                                       m_sourceEventSetDescriptor);
+                                       m_sourceEventSetDescriptor,
+                                       m_mainKFPerspective.getCurrentTabIndex());
                 }
-	      }
-	      m_beanLayout.repaint();
-	    }
-	    m_mode = NONE;
-	    m_editElement = null;
-	    m_sourceEventSetDescriptor = null;
-	  }
-	}
+                m_mainKFPerspective.setEditedStatus(true);
+              }
+              layout.repaint();
+            }
+            m_mode = NONE;
+            m_editElement = null;
+            m_sourceEventSetDescriptor = null;
+          }
+        }
       });
     
-     m_beanLayout.addMouseMotionListener(new MouseMotionAdapter() {
+    layout.addMouseMotionListener(new MouseMotionAdapter() {
 
-	public void mouseDragged(MouseEvent me) {
-	  if (m_editElement != null && m_mode == MOVING) {
-	    ImageIcon ic = ((Visible)m_editElement.getBean()).
-	      getVisual().getStaticIcon();
-	    int width = ic.getIconWidth() / 2;
-	    int height = ic.getIconHeight() / 2;
+        public void mouseDragged(MouseEvent me) {
+          if (m_editElement != null && m_mode == MOVING) {
+            ImageIcon ic = ((Visible)m_editElement.getBean()).
+              getVisual().getStaticIcon();
+            int width = ic.getIconWidth() / 2;
+            int height = ic.getIconHeight() / 2;
 
-            /*	    m_editElement.setX(m_oldX-width);
+            /*      m_editElement.setX(m_oldX-width);
                     m_editElement.setY(m_oldY-height); */
 
             m_editElement.setXY(m_oldX-width,
                                 m_oldY-height);
-	    m_beanLayout.repaint();
-	    
-	    // note the new points
-	    m_oldX = me.getX(); m_oldY = me.getY();
-	  }
+            layout.repaint();
+            
+            // note the new points
+            m_oldX = me.getX(); m_oldY = me.getY();
+            m_mainKFPerspective.setEditedStatus(true);
+          }
           if (m_mode == SELECTING) {
-            m_beanLayout.repaint();
+            layout.repaint();
             m_oldX = me.getX(); m_oldY = me.getY();
           }
-	}
+        }
 
-	 public void mouseMoved(MouseEvent e) {
-	   if (m_mode == CONNECTING) {
-	     m_beanLayout.repaint();
-	     // note the new coordinates
-	     m_oldX = e.getX(); m_oldY = e.getY();
-	   }
-	 }
-       });
-     
-     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
-       .format(new Date());
-     m_logPanel.logMessage("Weka Knowledge Flow was written by Mark Hall");
-     m_logPanel.logMessage("Weka Knowledge Flow");
-     m_logPanel.logMessage("(c) 2002-" + Copyright.getToYear() + " " 
-	 + Copyright.getOwner() + ", " + Copyright.getAddress());
-     m_logPanel.logMessage("web: " + Copyright.getURL());
-     m_logPanel.logMessage( date);
-     m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
-     m_logPanel.getStatusTable().addMouseListener(new MouseAdapter() {
-       public void mouseClicked(MouseEvent e) {
-         if (m_logPanel.getStatusTable().rowAtPoint(e.getPoint()) == 0) {
-           if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
-               != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
-             System.gc();
-             Runtime currR = Runtime.getRuntime();
-             long freeM = currR.freeMemory();
-             long totalM = currR.totalMemory();
-             long maxM = currR.maxMemory();
-             m_logPanel.
-             logMessage("[KnowledgeFlow] Memory (free/total/max.) in bytes: " 
-                 + String.format("%,d", freeM) + " / " 
-                 + String.format("%,d", totalM) + " / " 
-                 + String.format("%,d", maxM));
-             m_logPanel.statusMessage("[KnowledgeFlow]|Memory (free/total/max.) in bytes: " 
-                 + String.format("%,d", freeM) + " / " 
-                 + String.format("%,d", totalM) + " / " 
-                 + String.format("%,d", maxM)); 
+         public void mouseMoved(MouseEvent e) {
+           if (m_mode == CONNECTING) {
+             layout.repaint();
+             // note the new coordinates
+             m_oldX = e.getX(); m_oldY = e.getY();
            }
          }
-       }
-     });
-    
-     JPanel p1 = new JPanel();
-     p1.setLayout(new BorderLayout());
-     p1.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-			    javax.swing.BorderFactory.
-			    createTitledBorder("Knowledge Flow Layout"),
-                   javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5)
-                   ));
-     final JScrollPane js = new JScrollPane(m_beanLayout);
-     p1.add(js, BorderLayout.CENTER);
-     js.getVerticalScrollBar().setUnitIncrement(m_ScrollBarIncrementLayout);
-     js.getHorizontalScrollBar().setUnitIncrement(m_ScrollBarIncrementLayout);
-
-     setLayout(new BorderLayout());
-     
-     add(p1, BorderLayout.CENTER);
-     m_beanLayout.setSize(m_FlowWidth, m_FlowHeight);
-     Dimension d = m_beanLayout.getPreferredSize();
-     m_beanLayout.setMinimumSize(d);
-     m_beanLayout.setMaximumSize(d);
-     m_beanLayout.setPreferredSize(d);
-
-     Dimension d2 = new Dimension(100, 170);
-     m_logPanel.setPreferredSize(d2);
-     m_logPanel.setMinimumSize(d2);
-     add(m_logPanel, BorderLayout.SOUTH);
-     
-     setUpToolBars();
-     loadUserComponents();
+       });
   }
+  
+  private void setUpLogPanel(final LogPanel logPanel) {
+    String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
+    .format(new Date());
+    logPanel.logMessage("Weka Knowledge Flow was written by Mark Hall");
+    logPanel.logMessage("Weka Knowledge Flow");
+    logPanel.logMessage("(c) 2002-" + Copyright.getToYear() + " " 
+        + Copyright.getOwner() + ", " + Copyright.getAddress());
+    logPanel.logMessage("web: " + Copyright.getURL());
+    logPanel.logMessage(date);
+    logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
+    logPanel.getStatusTable().addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if (logPanel.getStatusTable().rowAtPoint(e.getPoint()) == 0) {
+          if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
+              != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
+            System.gc();
+            Runtime currR = Runtime.getRuntime();
+            long freeM = currR.freeMemory();
+            long totalM = currR.totalMemory();
+            long maxM = currR.maxMemory();
+            logPanel.
+            logMessage("[KnowledgeFlow] Memory (free/total/max.) in bytes: " 
+                + String.format("%,d", freeM) + " / " 
+                + String.format("%,d", totalM) + " / " 
+                + String.format("%,d", maxM));
+            logPanel.statusMessage("[KnowledgeFlow]|Memory (free/total/max.) in bytes: " 
+                + String.format("%,d", freeM) + " / " 
+                + String.format("%,d", totalM) + " / " 
+                + String.format("%,d", maxM)); 
+          }
+        }
+      }
+    });
+  }
+  
+
   
   private Image loadImage(String path) {
     Image pic = null;
@@ -925,11 +1585,8 @@ public class KnowledgeFlowApp
     }
     return pic;
   }
-
-  /**
-   * Describe <code>setUpToolBars</code> method here.
-   */
-  private void setUpToolBars() {
+  
+  private void setUpToolsAndJTree(JPanel targetP) {
     JPanel toolBarPanel = new JPanel();
     toolBarPanel.setLayout(new BorderLayout());
 
@@ -937,25 +1594,49 @@ public class KnowledgeFlowApp
     // first construct the toolbar for saving, loading etc
     if (m_showFileMenu) {
       JToolBar fixedTools = new JToolBar();
-      fixedTools.setOrientation(JToolBar.VERTICAL);
+      fixedTools.setOrientation(JToolBar.HORIZONTAL);
+
       m_saveB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-              "Save24.gif")));
+              "disk.png")));      
+      m_saveB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
       m_saveB.setToolTipText("Save layout");
+      m_saveBB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
+        "disk_multiple.png")));
+      m_saveBB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_saveBB.setToolTipText("Save layout with new name");
+      
       m_loadB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-              "Open24.gif")));
+              "folder_add.png")));
       m_loadB.setToolTipText("Load layout");
+      m_loadB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
       m_newB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-              "New24.gif")));
-      m_newB.setToolTipText("Clear the layout");
+              "page_add.png")));
+      m_newB.setToolTipText("New layout");
+      m_newB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      
+      m_helpB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
+        "help.png")));
+      m_helpB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_helpB.setToolTipText("Display help");
+      
       fixedTools.add(m_newB);
       fixedTools.add(m_saveB);
+      fixedTools.add(m_saveBB);
       fixedTools.add(m_loadB);
+      
+      fixedTools.add(m_helpB);
 
       m_saveB.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            saveLayout();
+            saveLayout(m_mainKFPerspective.getCurrentTabIndex(), false);
           }
         });
+      
+      m_saveBB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          saveLayout(m_mainKFPerspective.getCurrentTabIndex(), true);
+        }
+      });
 
       m_loadB.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -971,23 +1652,43 @@ public class KnowledgeFlowApp
         });
 
       fixedTools.setFloatable(false);
-      toolBarPanel.add(fixedTools, BorderLayout.WEST);
+      toolBarPanel.add(fixedTools, BorderLayout.EAST);
     }
+    
+    m_playB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        "resultset_next.png")));
+    m_playB.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    m_playB.setToolTipText("Run this flow (all start points launched in parallel)");
+    m_playB.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        runFlow(false);
+      }
+    });
+    
+    m_playBB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+    "resultset_last.png")));
+    m_playBB.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    m_playBB.setToolTipText("Run this flow (start points launched sequentially)");
+    m_playBB.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        runFlow(true);
+      }
+    });
 
     m_stopB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-            "Stop24.gif")));
-    m_helpB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-            "Help24.gif")));
+            "shape_square.png")));
+    m_stopB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
     m_stopB.setToolTipText("Stop all execution");
-    m_helpB.setToolTipText("Display help");
 
-    Image tempI = loadImage(BeanVisual.ICON_PATH + "Pointer.gif");
+    Image tempI = loadImage(BeanVisual.ICON_PATH + "cursor.png");
     m_pointerB = new JToggleButton(new ImageIcon(tempI));
+    m_pointerB.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     m_pointerB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           m_toolBarBean = null;
           m_mode = NONE;
           setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          m_componentTree.clearSelection();
         }
       });
 
@@ -1000,15 +1701,16 @@ public class KnowledgeFlowApp
     m_toolBarGroup.add(m_pointerB);
 
     JToolBar fixedTools2 = new JToolBar();
-    fixedTools2.setOrientation(JToolBar.VERTICAL);
+    fixedTools2.setOrientation(JToolBar.HORIZONTAL);
     fixedTools2.setFloatable(false);
     fixedTools2.add(m_pointerB);
-    fixedTools2.add(m_helpB);
+    fixedTools2.add(m_playB);
+    fixedTools2.add(m_playBB);
     fixedTools2.add(m_stopB);
     //    m_helpB.setPreferredSize(dP);
     //    m_helpB.setMaximumSize(dP);
-    m_helpB.setSize(m_pointerB.getSize().width, m_pointerB.getSize().height);
-    toolBarPanel.add(fixedTools2, BorderLayout.EAST);
+    //m_helpB.setSize(m_pointerB.getSize().width, m_pointerB.getSize().height);
+    toolBarPanel.add(fixedTools2, BorderLayout.WEST);
     // end modifications by Zerbetto
     m_stopB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -1024,20 +1726,25 @@ public class KnowledgeFlowApp
         }
       });
 
-    final int STANDARD_TOOLBAR = 0;
-    final int WEKAWRAPPER_TOOLBAR = 1;
+    
+    
+    final int standard_toolset = 0;
+    final int wrapper_toolset = 1;
 
-    int toolBarType = STANDARD_TOOLBAR;
+    int toolBarType = standard_toolset;
 
-    // set up wrapper toolbars
+    DefaultMutableTreeNode jtreeRoot = new DefaultMutableTreeNode("Weka");
+    // set up wrapper toolsets
     for (int i = 0; i < TOOLBARS.size(); i++) {
       Vector tempBarSpecs = (Vector) TOOLBARS.elementAt(i);
 
       // name for the tool bar
-      String tempBarName = (String) tempBarSpecs.elementAt(0);
+      String tempToolSetName = (String) tempBarSpecs.elementAt(0);
+      DefaultMutableTreeNode subTreeNode = new DefaultMutableTreeNode(tempToolSetName);
+      jtreeRoot.add(subTreeNode);
 
       // Used for weka leaf packages 
-      Box singletonHolderPanel = null;
+//      Box singletonHolderPanel = null;
 
       // name of the bean component to handle this class of weka algorithms
       String tempBeanCompName = (String) tempBarSpecs.elementAt(1);
@@ -1054,9 +1761,9 @@ public class KnowledgeFlowApp
       // Is this a wrapper toolbar?
       if (tempBeanCompName.compareTo("null") != 0) {
         tempBean = null;
-        toolBarType = WEKAWRAPPER_TOOLBAR;
+        toolBarType = wrapper_toolset;
         rootPackage = (String) tempBarSpecs.elementAt(2);
-        //	hpp = (weka.gui.HierarchyPropertyParser)tempBarSpecs.elementAt(3);
+        //      hpp = (weka.gui.HierarchyPropertyParser)tempBarSpecs.elementAt(3);
         hpps = (Hashtable) tempBarSpecs.elementAt(3);
 
         try {
@@ -1072,17 +1779,17 @@ public class KnowledgeFlowApp
           break;
         }
       } else {
-        toolBarType = STANDARD_TOOLBAR;
+        toolBarType = standard_toolset;
       }
-
+      
       // a toolbar to hold buttons---one for each algorithm
-      JToolBar tempToolBar = new JToolBar();
+//      JToolBar tempToolBar = new JToolBar();
 
       //      System.err.println(tempToolBar.getLayout());
       //      tempToolBar.setLayout(new FlowLayout());
       int z = 2;
 
-      if (toolBarType == WEKAWRAPPER_TOOLBAR) {
+      if (toolBarType == wrapper_toolset) {
         Enumeration enm = hpps.keys();
 
         while (enm.hasMoreElements()) {
@@ -1099,72 +1806,138 @@ public class KnowledgeFlowApp
           String[] primaryPackages = hpp.childrenValues();
 
           for (int kk = 0; kk < primaryPackages.length; kk++) {
+            
             hpp.goToChild(primaryPackages[kk]);
 
             // check to see if this is a leaf - if so then there are no
             // sub packages
             if (hpp.isLeafReached()) {
-              if (singletonHolderPanel == null) {
+/*              if (singletonHolderPanel == null) {
                 singletonHolderPanel = Box.createHorizontalBox();
                 singletonHolderPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
-                    tempBarName));
-              }
+                    tempToolSetName));
+              } */
 
               String algName = hpp.fullValue();
-              tempBean = instantiateToolBarBean(true, tempBeanCompName, algName);
+              // -- tempBean = instantiateToolBarBean(true, tempBeanCompName, algName);
+              Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+                  tempBeanCompName, algName);
 
-              if (tempBean != null) {
+              //if (tempBean != null) {
+              if (visibleCheck != null) {
                 // tempToolBar.add(tempBean);
-                singletonHolderPanel.add(tempBean);
+//                singletonHolderPanel.add(tempBean);
+                
+                
+                /*Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+                    tempBeanCompName, algName); */
+                if (visibleCheck instanceof BeanContextChild) {
+                  m_bcSupport.add(visibleCheck);
+                }
+                ImageIcon scaledForTree = null;
+                if (visibleCheck instanceof Visible) {
+                  BeanVisual bv = ((Visible)visibleCheck).getVisual();
+                  if (bv != null) {
+                    scaledForTree = new ImageIcon(bv.scale(0.33));
+                    // m_iconLookup.put(algName, scaledForTree);
+                  }
+                }
+                JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, algName, 
+                    scaledForTree);
+                DefaultMutableTreeNode leafAlgo = 
+                  new DefaultMutableTreeNode(leafData);
+                subTreeNode.add(leafAlgo);             
               }
 
               hpp.goToParent();
             } else {
               // make a titledborder JPanel to hold all the schemes in this
               // package
-              //	    JPanel holderPanel = new JPanel();
-              Box holderPanel = Box.createHorizontalBox();
+              //            JPanel holderPanel = new JPanel();
+              /* Box holderPanel = Box.createHorizontalBox();
               holderPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(userPrefix +
-                  primaryPackages[kk]));
-              processPackage(holderPanel, tempBeanCompName, hpp);
-              tempToolBar.add(holderPanel);
+                  primaryPackages[kk])); */
+              
+              DefaultMutableTreeNode firstLevelOfMainAlgoType = 
+                new DefaultMutableTreeNode(primaryPackages[kk]);
+              subTreeNode.add(firstLevelOfMainAlgoType);
+              
+              //processPackage(holderPanel, tempBeanCompName, hpp, firstLevelOfMainAlgoType);
+              processPackage(tempBeanCompName, hpp, firstLevelOfMainAlgoType);
+//              tempToolBar.add(holderPanel);
             }
           }
 
-          if (singletonHolderPanel != null) {
+/*          if (singletonHolderPanel != null) {
             tempToolBar.add(singletonHolderPanel);
             singletonHolderPanel = null;
-          }
+          } */
         }
       } else {
-        Box holderPanel = Box.createHorizontalBox();
+/*        Box holderPanel = Box.createHorizontalBox();
         holderPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(
-            tempBarName));
+            tempToolSetName)); */
 
         for (int j = z; j < tempBarSpecs.size(); j++) {
           tempBean = null;
           tempBeanCompName = (String) tempBarSpecs.elementAt(j);
-          tempBean = instantiateToolBarBean((toolBarType == WEKAWRAPPER_TOOLBAR),
+          Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
               tempBeanCompName, "");
+          
+/* --         tempBean = instantiateToolBarBean((toolBarType == wrapper_toolset),
+              tempBeanCompName, ""); */
 
-          if (tempBean != null) {
+          //if (tempBean != null) {
+          if (visibleCheck != null) {
             // set tool tip text (if any)
             // setToolTipText(tempBean)
-            holderPanel.add(tempBean);
+//            holderPanel.add(tempBean);
+
+            String treeName = tempBeanCompName;
+            if (treeName.lastIndexOf('.') > 0) {
+              treeName = treeName.substring(treeName.lastIndexOf('.') + 1, 
+                  treeName.length());
+            }
+            
+            /*Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+                tempBeanCompName, ""); */
+            if (visibleCheck instanceof BeanContextChild) {
+              m_bcSupport.add(visibleCheck);
+            }
+            ImageIcon scaledForTree = null;
+            
+            if (visibleCheck instanceof Visible) {
+              BeanVisual bv = ((Visible)visibleCheck).getVisual();
+              if (bv != null) {
+                scaledForTree = new ImageIcon(bv.scale(0.33));
+
+                //m_iconLookup.put(treeName, scaledForTree);
+              }
+            }
+            JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "", 
+                scaledForTree);
+            DefaultMutableTreeNode fixedLeafNode = new DefaultMutableTreeNode(leafData);
+            subTreeNode.add(fixedLeafNode);            
           }
         }
 
-        tempToolBar.add(holderPanel);
+  //      tempToolBar.add(holderPanel);
       }
 
-      JScrollPane tempJScrollPane = createScrollPaneForToolBar(tempToolBar);
+//      JScrollPane tempJScrollPane = createScrollPaneForToolBar(tempToolBar);
       // ok, now create tabbed pane to hold this toolbar
-      m_toolBars.addTab(tempBarName, null, tempJScrollPane, tempBarName);
+//      m_toolBars.addTab(tempToolSetName, null, tempJScrollPane, tempToolSetName);
     }
-
+    
+    /// ----
+    
     // Any plugin components to process?
     if (BEAN_PLUGINS_PROPERTIES != null && 
         BEAN_PLUGINS_PROPERTIES.size() > 0) {
+      
+      DefaultMutableTreeNode userSubTree = new DefaultMutableTreeNode("Plugins");
+      jtreeRoot.add(userSubTree);
+      
       for (int i = 0; i < BEAN_PLUGINS_PROPERTIES.size(); i++) {
         Properties tempP = BEAN_PLUGINS_PROPERTIES.get(i);
         JPanel tempBean = null;
@@ -1174,87 +1947,258 @@ public class KnowledgeFlowApp
 
         while (st2.hasMoreTokens()) {
           String tempBeanCompName = st2.nextToken().trim();
-          tempBean = instantiateToolBarBean(false, tempBeanCompName, "");
-          if (m_pluginsToolBar == null) {
+          
+          String treeName = tempBeanCompName;
+          if (treeName.lastIndexOf('.') > 0) {
+            treeName = treeName.substring(treeName.lastIndexOf('.') + 1, 
+                treeName.length());
+          }
+          
+//          tempBean = instantiateToolBarBean(false, tempBeanCompName, "");
+/*          if (m_pluginsToolBar == null) {
             // need to create the plugins tab and toolbar
             setUpPluginsToolBar();
           }
-          m_pluginsBoxPanel.add(tempBean);
+          m_pluginsBoxPanel.add(tempBean); */
+          
+          Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+              tempBeanCompName, "");
+          if (visibleCheck instanceof BeanContextChild) {
+            m_bcSupport.add(visibleCheck);
+          }
+          ImageIcon scaledForTree = null;
+          if (visibleCheck instanceof Visible) {
+            BeanVisual bv = ((Visible)visibleCheck).getVisual();
+            if (bv != null) {
+              scaledForTree = new ImageIcon(bv.scale(0.33));
+              //m_iconLookup.put(tempBeanCompName, scaledForTree);
+            }
+          }
+          JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "", 
+              scaledForTree);
+          DefaultMutableTreeNode pluginLeaf = new DefaultMutableTreeNode(leafData);
+          userSubTree.add(pluginLeaf);
         }
       }
     }
 
-    toolBarPanel.add(m_toolBars, BorderLayout.CENTER);
+//    toolBarPanel.add(m_toolBars, BorderLayout.CENTER);
 
     //    add(m_toolBars, BorderLayout.NORTH);
-    add(toolBarPanel, BorderLayout.NORTH);
+    targetP.add(toolBarPanel, BorderLayout.NORTH);
+    
+    DefaultTreeModel model = new DefaultTreeModel(jtreeRoot);
+    
+    // subclass JTree so that tool tips can be displayed for leaves (if necessary)
+    m_componentTree = new JTree(model) {
+      public String getToolTipText(MouseEvent e) {
+        if ((getRowForLocation(e.getX(), e.getY())) == -1) {
+          return null;
+        }
+        TreePath currPath = getPathForLocation(e.getX(), e.getY());
+        if (currPath.getLastPathComponent() instanceof DefaultMutableTreeNode) {
+          DefaultMutableTreeNode node = 
+            (DefaultMutableTreeNode)currPath.getLastPathComponent();
+          if (node.isLeaf()) {
+            JTreeLeafDetails leaf = (JTreeLeafDetails)node.getUserObject();
+            return leaf.getToolTipText();
+          }
+        }
+        return null;
+      }      
+    };
+    
+    m_componentTree.setEnabled(true);
+    m_componentTree.setToolTipText("");
+    m_componentTree.setRootVisible(false);
+    m_componentTree.setShowsRootHandles(true);
+    m_componentTree.setCellRenderer(new BeanIconRenderer());
+    DefaultTreeSelectionModel selectionModel = new DefaultTreeSelectionModel();
+    selectionModel.setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    m_componentTree.setSelectionModel(selectionModel);
+    
+    m_componentTree.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        
+        if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
+          != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
+            boolean clearSelection = true;
+            /*TreePath path = 
+              m_componentTree.getPathForLocation(e.getX(), e.getY());
+            if (path != null) {
+              DefaultMutableTreeNode tNode = 
+                (DefaultMutableTreeNode)path.getLastPathComponent();
+              
+              if (tNode.isLeaf()) {
+                System.out.println("Rick click selection");
+               
+//                m_componentTree.setSelectionPath(path);
+              }
+            }*/
+            
+            if (clearSelection) {
+              // right click cancels selected component
+              m_toolBarBean = null;
+              m_mode = NONE;
+              setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+              m_componentTree.clearSelection();
+            }
+        }
+
+
+        TreePath p = m_componentTree.getSelectionPath();
+        if (p != null) {
+          if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
+            DefaultMutableTreeNode tNode = (DefaultMutableTreeNode)p.getLastPathComponent();
+
+            if (tNode.isLeaf()) {
+              System.err.println("Selected : " + tNode.getUserObject().toString());
+              Object userObject = tNode.getUserObject();
+              if (userObject instanceof JTreeLeafDetails) {
+
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0 &&
+                    ((JTreeLeafDetails)userObject).isMetaBean()) {
+                  if (m_firstUserComponentOpp) {
+                    installWindowListenerForSavingUserBeans();
+                    m_firstUserComponentOpp = false;
+                  }
+
+                  MetaBean toRemove = ((JTreeLeafDetails)userObject).getMetaBean();
+                  DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
+                  MutableTreeNode userRoot = (MutableTreeNode)tNode.getParent(); // The "User" folder
+                  model.removeNodeFromParent(tNode);
+                  m_userComponents.remove(toRemove);
+                  
+                  if (m_userComponents.size() == 0) {
+                    model.removeNodeFromParent(userRoot);
+                    m_userCompNode = null;
+                  }
+
+                } else {
+                  ((JTreeLeafDetails)userObject).instantiateBean();
+                }
+              }                
+            }
+          }
+        }
+      }
+    });
+    
+  }
+  
+  /**
+   * Run all start-points in a layout in parallel or sequentially. Order
+   * of execution is arbitrary if the user has not prefixed the names of
+   * the start points with "<num> :" in order to specify the order. In both
+   * parallel and sequential mode, a start point can be ommitted from exectution
+   * by prefixing its name with "! :".
+   * 
+   * @param sequential true if the flow layout is to have its start points run
+   * sequentially rather than in parallel
+   * 
+   */
+  private void runFlow(final boolean sequential) {
+    if (m_mainKFPerspective.getNumTabs() > 0) {      
+      Thread runThread = new Thread() {
+        
+        int m_flowIndex;
+        
+        public void run() {
+          m_flowIndex = m_mainKFPerspective.getCurrentTabIndex();
+          m_mainKFPerspective.setExecuting(true);
+          
+          FlowRunner runner = new FlowRunner(false, false);
+          runner.setStartSequentially(sequential);
+          runner.setEnvironment(m_flowEnvironment);
+          runner.setLog(m_logPanel);
+          Vector comps = BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
+
+          runner.setFlows(comps);
+          try {
+            runner.run();
+            runner.waitUntilFinished();
+          } catch (Exception ex) {
+            m_logPanel.logMessage("An error occurred while running the flow: " +
+                ex.getMessage());
+          } finally {
+            m_mainKFPerspective.setExecuting(m_flowIndex, false);
+          }
+        }
+      };
+      
+      runThread.start();
+    }    
   }
   
   private void stopFlow() {
-    Vector components = BeanInstance.getBeanInstances();
+    if (m_mainKFPerspective.getCurrentTabIndex() >= 0) {
+      Vector components = 
+        BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
 
-    for (int i = 0; i < components.size(); i++) {
-      Object temp = ((BeanInstance) components.elementAt(i)).getBean();
+      if (components != null) {
+        for (int i = 0; i < components.size(); i++) {
+          Object temp = ((BeanInstance) components.elementAt(i)).getBean();
 
-      if (temp instanceof BeanCommon) {
-        ((BeanCommon) temp).stop();
+          if (temp instanceof BeanCommon) {
+            ((BeanCommon) temp).stop();
+          }
+        }
       }
     }
   }
 
-
-  private JScrollPane createScrollPaneForToolBar(JToolBar tb) {
-    JScrollPane tempJScrollPane = 
-      new JScrollPane(tb, 
-                      JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-                      JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-    
-    Dimension d = tb.getPreferredSize();
-    tempJScrollPane.setMinimumSize(new Dimension((int)d.getWidth(),
-                                                 (int)(d.getHeight()+15)));
-    tempJScrollPane.setPreferredSize(new Dimension((int)d.getWidth(),
-                                                   (int)(d.getHeight()+15)));
-    tempJScrollPane.getHorizontalScrollBar().setUnitIncrement(
-        m_ScrollBarIncrementComponents);
-
-    return tempJScrollPane;
-  }
-
-  private void processPackage(JComponent holderPanel,
-			      String tempBeanCompName,
-			      weka.gui.HierarchyPropertyParser hpp) {
+  private void processPackage(String tempBeanCompName,
+			      weka.gui.HierarchyPropertyParser hpp,
+			      DefaultMutableTreeNode parentNode) {
     if (hpp.isLeafReached()) {
       // instantiate a bean and add it to the holderPanel
       //      System.err.println("Would add "+hpp.fullValue());
-      String algName = hpp.fullValue();
+      /*String algName = hpp.fullValue();
       JPanel tempBean = 
 	instantiateToolBarBean(true, tempBeanCompName, algName);
-      if (tempBean != null) {
-	holderPanel.add(tempBean);
-      }
+      if (tempBean != null && holderPanel != null) {
+        holderPanel.add(tempBean);
+      }*/
+      
       hpp.goToParent();
       return;
     }
     String [] children = hpp.childrenValues();
     for (int i = 0; i < children.length; i++) {
       hpp.goToChild(children[i]);
-      processPackage(holderPanel, tempBeanCompName, hpp);
+      DefaultMutableTreeNode child = null;
+      
+      if (hpp.isLeafReached()) {
+        String algName = hpp.fullValue();
+        
+        Object visibleCheck = instantiateBean(true, 
+            tempBeanCompName, algName);
+        if (visibleCheck instanceof BeanContextChild) {
+          m_bcSupport.add(visibleCheck);
+        }
+        ImageIcon scaledForTree = null;
+        if (visibleCheck instanceof Visible) {
+          BeanVisual bv = ((Visible)visibleCheck).getVisual();
+          if (bv != null) {
+            scaledForTree = new ImageIcon(bv.scale(0.33));
+            // m_iconLookup.put(algName, scaledForTree);
+          }
+        }
+        JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, algName, 
+            scaledForTree);
+        child = new DefaultMutableTreeNode(leafData);        
+      } else {
+        child = new DefaultMutableTreeNode(children[i]);
+      }
+      parentNode.add(child);
+      
+      processPackage(tempBeanCompName, hpp, child);
     }
     hpp.goToParent();
   }
-
-  /**
-   * Instantiates a bean for display in the toolbars
-   *
-   * @param wekawrapper true if the bean to be instantiated is a wekawrapper
-   * @param tempBeanCompName the name of the bean to instantiate
-   * @param algName holds the name of a weka algorithm to configure the
-   * bean with if it is a wekawrapper bean
-   * @return a JPanel holding the instantiated (and configured bean)
-   */
-  private JPanel instantiateToolBarBean(boolean wekawrapper, 
-					String tempBeanCompName,
-					String algName) {
+  
+  private Object instantiateBean(boolean wekawrapper, String tempBeanCompName,
+      String algName) {
     Object tempBean;
     if (wekawrapper) {
       try {
@@ -1265,27 +2209,27 @@ public class KnowledgeFlowApp
         
         // end modifications by Zerbetto
       } catch (Exception ex) {
-	System.err.println("[KnowledgeFlow] Failed to instantiate :"+tempBeanCompName
-			   +"KnowledgeFlowApp.instantiateToolBarBean()");
-	return null;
+        System.err.println("[KnowledgeFlow] Failed to instantiate :"+tempBeanCompName
+                           +"KnowledgeFlowApp.instantiateBean()");
+        return null;
       }
       if (tempBean instanceof WekaWrapper) {
-	//	algName = (String)tempBarSpecs.elementAt(j);
-	Class c = null;
-	try {
-	  c = Class.forName(algName);
-	} catch (Exception ex) {
-	  System.err.println("[KnowledgeFlow] Can't find class called: "+algName);
-	  return null;
-	}
-	try {
-	  Object o = c.newInstance();
-	  ((WekaWrapper)tempBean).setWrappedAlgorithm(o);
-	} catch (Exception ex) {
-	  System.err.println("[KnowledgeFlow] Failed to configure "+tempBeanCompName
-			     +" with "+algName);
-	  return null;
-	}
+        //      algName = (String)tempBarSpecs.elementAt(j);
+        Class c = null;
+        try {
+          c = Class.forName(algName);
+        } catch (Exception ex) {
+          System.err.println("[KnowledgeFlow] Can't find class called: "+algName);
+          return null;
+        }
+        try {
+          Object o = c.newInstance();
+          ((WekaWrapper)tempBean).setWrappedAlgorithm(o);
+        } catch (Exception ex) {
+          System.err.println("[KnowledgeFlow] Failed to configure "+tempBeanCompName
+                             +" with "+algName);
+          return null;
+        }
       }
     } else {
       try {
@@ -1296,259 +2240,13 @@ public class KnowledgeFlowApp
 
         // end modifications
       } catch (Exception ex) {
-	ex.printStackTrace();
-	System.err.println("[KnowledgeFlow] Failed to instantiate :"+tempBeanCompName
-			   +"KnowledgeFlowApp.setUpToolBars()");
-	return null;
+        ex.printStackTrace();
+        System.err.println("[KnowledgeFlow] Failed to instantiate :"+tempBeanCompName
+                           +"KnowledgeFlowApp.instantiateBean()");
+        return null;
       }
     }
-    
-    if (tempBean instanceof BeanContextChild) {
-      m_bcSupport.add(tempBean);
-    }
-    if (tempBean instanceof Visible) {
-      ((Visible)tempBean).getVisual().scale(3);
-    }
-
-    return makeHolderPanelForToolBarBean(tempBeanCompName, tempBean, 
-                                         wekawrapper, algName, false);
-  }
-
-  /**
-   * Instantiates (by making a serialized copy) the supplied
-   * template meta bean for display in the user tool bar
-   * 
-   * @param bean the prototype MetaBean to display in the toolbar
-   */
-  private JPanel instantiateToolBarMetaBean(MetaBean bean) {
-    // copy the bean via serialization
-    ((Visible)bean).getVisual().removePropertyChangeListener(this);
-    bean.removePropertyChangeListenersSubFlow(this);
-    Object copy = null;
-    try {
-      SerializedObject so = new SerializedObject(bean);
-      copy = (MetaBean)so.getObject();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      return null;
-    }
-    ((Visible)bean).getVisual().addPropertyChangeListener(this);
-    bean.addPropertyChangeListenersSubFlow(this);
-
-    String displayName ="";
-    //
-    if (copy instanceof Visible) {
-      ((Visible)copy).getVisual().scale(3);
-      displayName = ((Visible)copy).getVisual().getText();
-    }
-    return makeHolderPanelForToolBarBean(displayName,
-                                         copy,
-                                         false,
-                                         null,
-                                         true);
-  }
-
-  private JPanel makeHolderPanelForToolBarBean(final String tempName,
-                                               Object tempBean,
-                                               boolean wekawrapper,
-                                               String algName,
-                                               final boolean metabean) {
-    // ---------------------------------------
-    JToggleButton tempButton;
-    final JPanel tempP = new JPanel();
-    JLabel tempL = new JLabel();
-    tempL.setFont(new Font(null, Font.PLAIN, 9));
-
-    String labelName = (wekawrapper == true) 
-      ? algName 
-      : tempName;
-    labelName = labelName.substring(labelName.lastIndexOf('.')+1, 
-				    labelName.length());
-    tempL.setText(" "+labelName+" ");
-    tempL.setHorizontalAlignment(JLabel.CENTER);
-    tempP.setLayout(new BorderLayout());
-
-    if (tempBean instanceof Visible) {
-      BeanVisual bv = ((Visible)tempBean).getVisual();
-
-      tempButton = 
-	new JToggleButton(bv.getStaticIcon());
-      int width = bv.getStaticIcon().getIconWidth();
-      int height = bv.getStaticIcon().getIconHeight();
-      
-      JPanel labelPanel = 
-	multiLineLabelPanel(labelName, width);
-      tempP.add(labelPanel, BorderLayout.SOUTH);
-    } else {
-      tempButton = new JToggleButton();
-      tempP.add(tempL, BorderLayout.SOUTH);
-    }
-    tempP.add(tempButton, BorderLayout.NORTH);
-    //    tempP.add(tempL, BorderLayout.SOUTH);
-    
-    //  holderPanel.add(tempP);
-    //    tempToolBar.add(tempP);
-    m_toolBarGroup.add(tempButton);
-    
-    // add an action listener for the button here
-    final Object tempBN = tempBean;
-    final JToggleButton fButton = tempButton;
-    //	  final JToggleButton tempButton2 = tempButton;
-    tempButton.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-          boolean changeCursor = true;
-	  try {
-	    m_toolBarBean = null;
-            if (metabean) {
-              if ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
-                changeCursor = false;
-                m_toolBarGroup.remove(fButton);
-                m_userBoxPanel.remove(tempP);
-                m_userBoxPanel.revalidate();
-                m_userComponents.remove(tempBN);
-                if (m_firstUserComponentOpp) {
-                  installWindowListenerForSavingUserBeans();
-                  m_firstUserComponentOpp = false;
-                }
-                if (m_userComponents.size() == 0) {
-                  m_toolBars.removeTabAt(m_toolBars.getTabCount() - 1);
-                  m_userToolBar = null;
-                  notifyIsDirty();
-                }
-              } else {
-                SerializedObject so = new SerializedObject(tempBN);
-                MetaBean copy = (MetaBean)so.getObject();
-                /*((Visible)copy).getVisual().
-                  addPropertyChangeListener(KnowledgeFlowApp.this); */
-                copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
-                m_toolBarBean = copy;
-              }
-            } else {
-              // modifications by Zerbetto
-              //m_toolBarBean = Beans.instantiate(null, tempName);
-              m_toolBarBean = Beans.instantiate(this.getClass().getClassLoader(),
-                  tempName);
-
-              // end modifications
-            }
-            if (m_toolBarBean instanceof WekaWrapper) {
-	      Object wrappedAlg = 
-		((WekaWrapper)tempBN).getWrappedAlgorithm();
-	      
-	      ((WekaWrapper)m_toolBarBean).
-                setWrappedAlgorithm(wrappedAlg.getClass().newInstance());
-	      //		    tempButton2.setSelected(false);
-	    }
-            if (changeCursor) {
-              setCursor(Cursor.
-                        getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-              m_mode = ADDING;
-            }
-	  } catch (Exception ex) {
-	    System.err.
-	      println("[KnowledgeFlow] Problem adding bean to data flow layout");
-            ex.printStackTrace();
-	  }
-          notifyIsDirty();
-	}
-      });
-    
-    if (tempBean instanceof MetaBean) {
-      tempButton.setToolTipText("Hold down shift and click to remove");
-      m_userComponents.add(tempBean);
-    } else {
-      // set tool tip text from global info if supplied
-      String summary = getGlobalInfo(tempBean);
-      if (summary != null) {
-        int ci = summary.indexOf('.');
-        if (ci != -1) {
-          summary = summary.substring(0, ci + 1);
-        }
-        tempButton.setToolTipText(summary);
-      }
-    }
-
-    //return tempBean;
-    return tempP;
-  }
-
-  private JPanel multiLineLabelPanel(String sourceL,
-				     int splitWidth) {
-    JPanel jp = new JPanel();
-    Vector v = new Vector();
-
-    int labelWidth = m_fontM.stringWidth(sourceL);
-
-    if (labelWidth < splitWidth) {
-      v.addElement(sourceL);
-    } else {
-      // find mid point
-      int mid = sourceL.length() / 2;
-      
-      // look for split point closest to the mid
-      int closest = sourceL.length();
-      int closestI = -1;
-      for (int i = 0; i < sourceL.length(); i++) {
-	if (sourceL.charAt(i) < 'a') {
-	  if (Math.abs(mid - i) < closest) {
-	    closest = Math.abs(mid - i);
-	    closestI = i;
-	  }
-	}
-      }
-      if (closestI != -1) {
-	String left = sourceL.substring(0, closestI);
-	String right = sourceL.substring(closestI, sourceL.length());
-	if (left.length() > 1 && right.length() > 1) {
-	  v.addElement(left);
-	  v.addElement(right);
-	} else {
-	  v.addElement(sourceL);
-	}
-      } else {
-	v.addElement(sourceL);
-      }
-    }
-
-    jp.setLayout(new GridLayout(v.size(), 1));
-    for (int i = 0; i < v.size(); i++) {
-      JLabel temp = new JLabel();
-      temp.setFont(new Font(null, Font.PLAIN, 9));
-      temp.setText(" "+((String)v.elementAt(i))+" ");
-      temp.setHorizontalAlignment(JLabel.CENTER);
-      jp.add(temp);
-    }
-    return jp;
-  }
-
-  private void setUpUserToolBar() {
-    m_userBoxPanel = Box.createHorizontalBox();
-    m_userBoxPanel.setBorder(javax.swing.BorderFactory.
-                             createTitledBorder("User"));
-    m_userToolBar = new JToolBar();
-    m_userToolBar.add(m_userBoxPanel);
-    JScrollPane tempJScrollPane = 
-      createScrollPaneForToolBar(m_userToolBar);
-    // ok, now create tabbed pane to hold this toolbar
-    
-    m_toolBars.addTab("User", null, 
-                      tempJScrollPane,
-                      "User created components");
-  }
-
-  private void setUpPluginsToolBar() {
-    m_pluginsBoxPanel = Box.createHorizontalBox();
-    m_pluginsBoxPanel.setBorder(javax.swing.BorderFactory.
-                                createTitledBorder("Plugins"));
-    m_pluginsToolBar = new JToolBar();
-    m_pluginsToolBar.add(m_pluginsBoxPanel);
-    JScrollPane tempJScrollPane = 
-      createScrollPaneForToolBar(m_pluginsToolBar);
-    // ok, now create tabbed pane to hold this toolbar
-    
-    m_toolBars.addTab("Plugins", null, 
-                      tempJScrollPane,
-                      "Plugin components");
+    return tempBean;
   }
 
   /**
@@ -1599,12 +2297,15 @@ public class KnowledgeFlowApp
 
   public void clearLayout() {
     stopFlow(); // try and stop any running components
-    BeanInstance.reset(m_beanLayout);
+    
+    m_mainKFPerspective.addTab("Untitled");
+    
+    /*BeanInstance.reset(m_beanLayout);
     BeanConnection.reset();
     m_beanLayout.revalidate();
     m_beanLayout.repaint();
     m_logPanel.clearStatus();
-    m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
+    m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow"); */
   }
   
   /**
@@ -1643,7 +2344,7 @@ public class KnowledgeFlowApp
       ungroupItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             // ungroup
-            bi.removeBean(m_beanLayout);
+            bi.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
 
             Vector group = ((MetaBean) bc).getBeansInSubFlow();
             Vector associatedConnections = ((MetaBean) bc).getAssociatedConnections();
@@ -1661,7 +2362,8 @@ public class KnowledgeFlowApp
             }
 
             m_beanLayout.repaint();
-            notifyIsDirty();
+            m_mainKFPerspective.setEditedStatus(true);
+            notifyIsDirty();            
           }
         });
       beanContextMenu.add(ungroupItem);
@@ -1672,7 +2374,8 @@ public class KnowledgeFlowApp
       MenuItem addToUserTabItem = new MenuItem("Add to user tab");
       addToUserTabItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            addToUserToolBar((MetaBean) bi.getBean(), true);
+            //addToUserToolBar((MetaBean) bi.getBean(), true);
+            addToUserTreeNode((MetaBean) bi.getBean(), true);
             notifyIsDirty();
           }
         });
@@ -1684,14 +2387,15 @@ public class KnowledgeFlowApp
     MenuItem deleteItem = new MenuItem("Delete");
     deleteItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          BeanConnection.removeConnections(bi);
-          bi.removeBean(m_beanLayout);
+          BeanConnection.removeConnections(bi, m_mainKFPerspective.getCurrentTabIndex());
+          bi.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
           if (bc instanceof BeanCommon) {            
             String key = ((BeanCommon)bc).getCustomName()
               + "$" + bc.hashCode();
             m_logPanel.statusMessage(key + "|remove");
           }
           revalidate();
+          m_mainKFPerspective.setEditedStatus(true);
           notifyIsDirty();
         }
       });
@@ -1713,6 +2417,7 @@ public class KnowledgeFlowApp
                                                       oldName);
             if (name != null) {
               ((BeanCommon)bc).setCustomName(name);
+              m_mainKFPerspective.setEditedStatus(true);
             }
           }
         });
@@ -2025,6 +2730,17 @@ public class KnowledgeFlowApp
 
     beanContextMenu.add(custItem); 
   }
+  
+  /**
+   * Tells us about the modified status of a particular object - typically
+   * a customizer that is editing a flow component. Allows us to set
+   * the modified flag for the current flow.
+   */
+  public void setModifiedStatus(Object source, boolean modified) {
+    if (source instanceof BeanCustomizer && modified) {
+      m_mainKFPerspective.setEditedStatus(modified);
+    }
+  }
 
   /**
    * Popup the customizer for this bean
@@ -2040,49 +2756,71 @@ public class KnowledgeFlowApp
       if (customizer instanceof EnvironmentHandler) {
         ((EnvironmentHandler)customizer).setEnvironment(m_flowEnvironment);
       }
-      ((Customizer)customizer).setObject(bc);
-      final javax.swing.JFrame jf = new javax.swing.JFrame();
-      jf.getContentPane().setLayout(new BorderLayout());
-      jf.getContentPane().add((JComponent)customizer, BorderLayout.CENTER);
-      if (customizer instanceof CustomizerCloseRequester) {
-	((CustomizerCloseRequester)customizer).setParentFrame(jf);
+      
+      if (customizer instanceof BeanCustomizer) {
+        ((BeanCustomizer)customizer).setModifiedListener(this);
       }
-      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+      
+      ((Customizer)customizer).setObject(bc);
+      // final javax.swing.JFrame jf = new javax.swing.JFrame();
+      final JDialog d = new JDialog((JFrame)KnowledgeFlowApp.this.getTopLevelAncestor(), true);
+      d.setLayout(new BorderLayout());
+      d.getContentPane().add((JComponent)customizer, BorderLayout.CENTER);
+      
+//      jf.getContentPane().setLayout(new BorderLayout());
+  //    jf.getContentPane().add((JComponent)customizer, BorderLayout.CENTER);
+      if (customizer instanceof CustomizerCloseRequester) {
+	((CustomizerCloseRequester)customizer).setParentWindow(d);
+      }
+      d.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent e) {
 	    if (customizer instanceof CustomizerClosingListener) {
 	      ((CustomizerClosingListener)customizer).customizerClosing();
 	    }
-	    jf.dispose();
+	    d.dispose();
 	  }
 	});
-      jf.pack();
-      jf.setVisible(true);
+//      jf.pack();
+  //    jf.setVisible(true);
+      d.pack();
+      d.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
   }
-
-                                
-  /**
-   * Handles adding a custom MetaBean to the user toolbar
-   *
-   * @param bean the MetaBean
-   * @param installListener install a listener for window close
-   * events so as to save the user components
-   */
-  private void addToUserToolBar(MetaBean bean, 
-                                boolean installListener) {
-
-    if (m_userToolBar == null) {
-      // need to create the user tab and toolbar
-      setUpUserToolBar();
+  
+  private MetaBean copyMetaBean(MetaBean bean) {
+    // copy the bean via serialization
+    ((Visible)bean).getVisual().removePropertyChangeListener(this);
+    bean.removePropertyChangeListenersSubFlow(this);
+    Object copy = null;
+    try {
+      SerializedObject so = new SerializedObject(bean);
+      copy = (MetaBean)so.getObject();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      return null;
     }
+    ((Visible)bean).getVisual().addPropertyChangeListener(this);
+    bean.addPropertyChangeListenersSubFlow(this);    
+    
+    return (MetaBean)copy;
+  }
 
+  private void addToUserTreeNode(MetaBean bean, boolean installListener) {
+    DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
+    DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+    if (m_userCompNode == null) {            
+      m_userCompNode = new DefaultMutableTreeNode("User");
+      model.insertNodeInto(m_userCompNode, root, 0);
+    }
+    
     // Disconnect any beans connected to the inputs or outputs
     // of this MetaBean (prevents serialization of the entire
     // KnowledgeFlow!!)
     Vector tempRemovedConnections = new Vector();
-    Vector allConnections = BeanConnection.getConnections();
+    Vector allConnections = 
+      BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
     Vector inputs = bean.getInputs();
     Vector outputs = bean.getOutputs();
     Vector allComps = bean.getSubFlow();
@@ -2119,12 +2857,26 @@ public class KnowledgeFlowApp
     for (int i = 0; i < tempRemovedConnections.size(); i++) {
       BeanConnection temp = 
         (BeanConnection)tempRemovedConnections.elementAt(i);
-      temp.remove();
+      temp.remove(m_mainKFPerspective.getCurrentTabIndex());
     }
     
-    // now add to user tool bar
-    JPanel tempUser = instantiateToolBarMetaBean(bean);
-    m_userBoxPanel.add(tempUser);
+    MetaBean copy = copyMetaBean(bean);
+    String displayName ="";
+    ImageIcon scaledIcon = null;
+    //
+    if (copy instanceof Visible) {
+      //((Visible)copy).getVisual().scale(3);
+      scaledIcon = new ImageIcon(((Visible)copy).getVisual().scale(0.33));
+      displayName = ((Visible)copy).getVisual().getText();
+    }
+    
+    JTreeLeafDetails metaLeaf = new JTreeLeafDetails(displayName, copy, scaledIcon);
+    DefaultMutableTreeNode newUserComp = new DefaultMutableTreeNode(metaLeaf);
+    model.insertNodeInto(newUserComp, m_userCompNode, 0);
+    
+    // add to the list of user components
+    m_userComponents.add(copy);
+    
     if (installListener && m_firstUserComponentOpp) {
       try {
         installWindowListenerForSavingUserBeans();
@@ -2133,17 +2885,18 @@ public class KnowledgeFlowApp
         ex.printStackTrace();
       }
     }
-
+    
     // Now reinstate any deleted connections to the original MetaBean
     for (int i = 0; i < tempRemovedConnections.size(); i++) {
       BeanConnection temp = 
         (BeanConnection)tempRemovedConnections.elementAt(i);
       BeanConnection newC = 
         new BeanConnection(temp.getSource(), temp.getTarget(),
-                           temp.getSourceEventSetDescriptor());
+                           temp.getSourceEventSetDescriptor(),
+                           m_mainKFPerspective.getCurrentTabIndex());
     }    
   }
-
+                                
   /**
    * Popup a menu giving choices for connections to delete (if any)
    *
@@ -2184,9 +2937,10 @@ public class KnowledgeFlowApp
         MenuItem deleteItem = new MenuItem(connName + "-->" + targetName);
         deleteItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              bc.remove();
+              bc.remove(m_mainKFPerspective.getCurrentTabIndex());
               m_beanLayout.revalidate();
               m_beanLayout.repaint();
+              m_mainKFPerspective.setEditedStatus(true);
               notifyIsDirty();
             }
           });
@@ -2220,7 +2974,8 @@ public class KnowledgeFlowApp
     // now determine which (if any) of the other beans implement this
     // listener
     int targetCount = 0;
-    Vector beanInstances = BeanInstance.getBeanInstances();
+    Vector beanInstances = 
+      BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
     for (int i = 0; i < beanInstances.size(); i++) {
       JComponent bean = 
 	(JComponent)((BeanInstance)beanInstances.elementAt(i)).getBean();
@@ -2323,7 +3078,8 @@ public class KnowledgeFlowApp
     if (m_toolBarBean instanceof BeanContextChild) {
       m_bcSupport.add(m_toolBarBean);
     }
-    BeanInstance bi = new BeanInstance(m_beanLayout, m_toolBarBean, x, y);
+    BeanInstance bi = new BeanInstance(m_beanLayout, m_toolBarBean, x, y, 
+        m_mainKFPerspective.getCurrentTabIndex());
     //    addBean((JComponent)bi.getBean());
     m_toolBarBean = null;
     addComponent(bi, true);
@@ -2344,11 +3100,14 @@ public class KnowledgeFlowApp
                              Math.abs(startX - endX),
                              Math.abs(startY - endY));
     //    System.err.println(r);
-    Vector selected = BeanInstance.findInstances(r);
+    Vector selected = 
+      BeanInstance.findInstances(r, m_mainKFPerspective.getCurrentTabIndex());
     //    System.err.println(r);
     // check if sub flow is valid
-    Vector inputs = BeanConnection.inputs(selected);
-    Vector outputs = BeanConnection.outputs(selected);
+    Vector inputs = BeanConnection.inputs(selected, 
+        m_mainKFPerspective.getCurrentTabIndex());
+    Vector outputs = BeanConnection.outputs(selected, 
+        m_mainKFPerspective.getCurrentTabIndex());
     
     // screen the inputs and outputs
     if (inputs.size() == 0 || outputs.size() == 0) {
@@ -2427,10 +3186,11 @@ public class KnowledgeFlowApp
         }
         BeanInstance bi = new BeanInstance(m_beanLayout, group, 
                                            (int)r.getX()+(int)(r.getWidth()/2),
-                                           (int)r.getY()+(int)(r.getHeight()/2));
+                                           (int)r.getY()+(int)(r.getHeight()/2),
+                                           m_mainKFPerspective.getCurrentTabIndex());
         for (int i = 0; i < selected.size(); i++) {
           BeanInstance temp = (BeanInstance)selected.elementAt(i);
-          temp.removeBean(m_beanLayout);
+          temp.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
           if (temp.getBean() instanceof Visible) {
             ((Visible)temp.getBean()).getVisual().removePropertyChangeListener(this);
           }
@@ -2470,14 +3230,15 @@ public class KnowledgeFlowApp
   private void loadLayout() {
     m_loadB.setEnabled(false);
     m_saveB.setEnabled(false);
+    m_playB.setEnabled(false);
+    m_playBB.setEnabled(false);
     int returnVal = m_FileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       stopFlow();
 
       // determine filename
       File oFile = m_FileChooser.getSelectedFile();
-      // set internal flow directory environment variable
-      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
+      // set internal flow directory environment variable      
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
@@ -2501,6 +3262,16 @@ public class KnowledgeFlowApp
                            oFile.getName() + XStream.FILE_EXTENSION + "kf");
         }
       }
+      
+      String flowName = oFile.getName();
+      if (flowName.lastIndexOf('.') > 0) {
+        flowName = flowName.substring(0, flowName.lastIndexOf('.'));
+      }
+      m_mainKFPerspective.addTab(flowName);
+      m_mainKFPerspective.setActiveTab(m_mainKFPerspective.getNumTabs() - 1);
+      m_mainKFPerspective.setFlowFile(oFile);
+      
+      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
     
       try {
         Vector beans       = new Vector();
@@ -2521,7 +3292,8 @@ public class KnowledgeFlowApp
           connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
         } /* XML? */ else if (oFile.getAbsolutePath().toLowerCase().
                               endsWith(FILE_EXTENSION_XML)) {
-          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport); 
+          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+              m_mainKFPerspective.getCurrentTabIndex());
           Vector v     = (Vector) xml.read(oFile);
           beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
           connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
@@ -2532,7 +3304,7 @@ public class KnowledgeFlowApp
           beans = (Vector) ois.readObject();
           connections = (Vector) ois.readObject();
           ois.close();
-        }
+        }                
 
         integrateFlow(beans, connections);
         setEnvironment();
@@ -2546,7 +3318,10 @@ public class KnowledgeFlowApp
       }
     }
     m_loadB.setEnabled(true);
+    m_playB.setEnabled(true);
+    m_playBB.setEnabled(true);
     m_saveB.setEnabled(true);
+    
   }
 
   // Link the supplied beans into the KnowledgeFlow gui
@@ -2576,8 +3351,10 @@ public class KnowledgeFlowApp
         m_bcSupport.add(tempB.getBean());
       }
     }
-    BeanInstance.setBeanInstances(beans, m_beanLayout);
-    BeanConnection.setConnections(connections);
+    BeanInstance.setBeanInstances(beans, m_beanLayout, 
+        m_mainKFPerspective.getCurrentTabIndex());
+    BeanConnection.setConnections(connections, 
+        m_mainKFPerspective.getCurrentTabIndex());
     m_beanLayout.revalidate();
     m_beanLayout.repaint();
   }
@@ -2615,8 +3392,10 @@ public class KnowledgeFlowApp
    */
   public Vector getFlow() throws Exception {
     Vector v = new Vector();
-    Vector beans = BeanInstance.getBeanInstances();
-    Vector connections = BeanConnection.getConnections();
+    Vector beans = 
+      BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
+    Vector connections = 
+      BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
     detachFromLayout(beans);
     v.add(beans);
     v.add(connections);
@@ -2682,20 +3461,28 @@ public class KnowledgeFlowApp
   /**
    * Serialize the layout to a file
    */
-  private void saveLayout() {
+  private void saveLayout(int tabIndex, boolean showDialog) {
     //    m_loadB.setEnabled(false);
     //    m_saveB.setEnabled(false);
-    int returnVal = m_FileChooser.showSaveDialog(this);
     java.awt.Color bckC = getBackground();
+    
+    File sFile = m_mainKFPerspective.getFlowFile(tabIndex);
+    int returnVal = JFileChooser.APPROVE_OPTION;
+    
+    if (showDialog || sFile.getName().equals("-NONE-")) {
+      returnVal = m_FileChooser.showSaveDialog(this);
+    }
+    
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       // temporarily remove this panel as a property changle listener from
       // each bean
 
-      Vector beans = BeanInstance.getBeanInstances();
+      Vector beans = 
+        BeanInstance.getBeanInstances(tabIndex);
       detachFromLayout(beans);
 
       // determine filename
-      File sFile = m_FileChooser.getSelectedFile();
+      sFile = m_FileChooser.getSelectedFile();
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
@@ -2729,7 +3516,8 @@ public class KnowledgeFlowApp
           Vector v = new Vector();
           v.setSize(2);
           v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-          v.set(XMLBeans.INDEX_BEANCONNECTIONS, BeanConnection.getConnections());
+          v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+              BeanConnection.getConnections(tabIndex));
           KOML.write(sFile.getAbsolutePath(), v);
         } /* XStream */ else if ((XStream.isPresent()) && 
             (sFile.getAbsolutePath().toLowerCase().
@@ -2737,21 +3525,23 @@ public class KnowledgeFlowApp
           Vector v = new Vector();
           v.setSize(2);
           v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-          v.set(XMLBeans.INDEX_BEANCONNECTIONS, BeanConnection.getConnections());
+          v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+              BeanConnection.getConnections(tabIndex));
           XStream.write(sFile.getAbsolutePath(), v);
         } /* XML? */ else if (sFile.getAbsolutePath().
                               toLowerCase().endsWith(FILE_EXTENSION_XML)) {
           Vector v = new Vector();
           v.setSize(2);
           v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-          v.set(XMLBeans.INDEX_BEANCONNECTIONS, BeanConnection.getConnections());
-          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport); 
+          v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+              BeanConnection.getConnections(tabIndex));
+          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, tabIndex); 
           xml.write(sFile, v);
         } /* binary */ else {
           OutputStream os = new FileOutputStream(sFile);
           ObjectOutputStream oos = new ObjectOutputStream(os);
           oos.writeObject(beans);
-          oos.writeObject(BeanConnection.getConnections());
+          oos.writeObject(BeanConnection.getConnections(tabIndex));
           oos.flush();
           oos.close();
         }
@@ -2760,6 +3550,14 @@ public class KnowledgeFlowApp
         // set the internal knowledgeflow directory environment var for this flow
         m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
         setEnvironment();
+        
+        m_mainKFPerspective.setEditedStatus(tabIndex, false);
+        m_mainKFPerspective.setFlowFile(tabIndex, sFile);
+        String flowName = sFile.getName();
+        if (flowName.lastIndexOf('.') > 0) {
+          flowName = flowName.substring(0, flowName.lastIndexOf('.'));
+        }
+        m_mainKFPerspective.setTabTitle(tabIndex, flowName);
       } catch (Exception ex) {
         m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
         m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
@@ -2795,10 +3593,10 @@ public class KnowledgeFlowApp
    *
    * @param out		the output stream to save the layout in
    */
-  public void saveLayout(OutputStream out) {
+  public void saveLayout(OutputStream out, int tabIndex) {
     // temporarily remove this panel as a property changle listener from
     // each bean
-    Vector beans = BeanInstance.getBeanInstances();
+    Vector beans = BeanInstance.getBeanInstances(tabIndex);
 
     for (int i = 0; i < beans.size(); i++) {
       BeanInstance tempB = (BeanInstance) beans.elementAt(i);
@@ -2818,9 +3616,10 @@ public class KnowledgeFlowApp
       Vector v = new Vector();
       v.setSize(2);
       v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-      v.set(XMLBeans.INDEX_BEANCONNECTIONS, BeanConnection.getConnections());
+      v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+          BeanConnection.getConnections(tabIndex));
 
-      XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport);
+      XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, tabIndex);
       xml.write(out, v);
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -2872,7 +3671,8 @@ public class KnowledgeFlowApp
         // create the user tab and add the components
         for (int i = 0; i < tempV.size(); i++) {
           MetaBean tempB = (MetaBean)tempV.elementAt(i);
-          addToUserToolBar(tempB, false);
+          //addToUserToolBar(tempB, false);
+          addToUserTreeNode(tempB, false);
         }
       }
     }
@@ -3078,7 +3878,8 @@ public class KnowledgeFlowApp
         connections = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
       } /* XML? */ else if (oFile.getAbsolutePath().toLowerCase()
                                      .endsWith(FILE_EXTENSION_XML)) {
-        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport);
+        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+            m_mainKFPerspective.getCurrentTabIndex());
         Vector v = (Vector) xml.read(oFile);
         beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
         connections = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
@@ -3120,8 +3921,10 @@ public class KnowledgeFlowApp
         }
       }
 
-      BeanInstance.setBeanInstances(beans, m_beanLayout);
-      BeanConnection.setConnections(connections);
+      BeanInstance.setBeanInstances(beans, m_beanLayout, 
+          m_mainKFPerspective.getCurrentTabIndex());
+      BeanConnection.setConnections(connections, 
+          m_mainKFPerspective.getCurrentTabIndex());
       m_beanLayout.revalidate();
       m_beanLayout.repaint();
     } catch (Exception ex) {
@@ -3162,7 +3965,7 @@ public class KnowledgeFlowApp
       jf.getContentPane().add(m_knowledgeFlow, java.awt.BorderLayout.CENTER);
       jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-      jf.setSize(1000,750);
+      jf.setSize(1024,768);
       jf.setVisible(true);     
 
       

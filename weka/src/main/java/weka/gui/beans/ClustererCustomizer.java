@@ -27,6 +27,7 @@ import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -45,7 +46,7 @@ import javax.swing.JPanel;
  */
 public class ClustererCustomizer
   extends JPanel
-  implements Customizer, CustomizerCloseRequester {
+  implements BeanCustomizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = -2035688458149534161L;
@@ -62,10 +63,12 @@ public class ClustererCustomizer
   private PropertySheetPanel m_ClustererEditor = 
     new PropertySheetPanel();
   
-  private JFrame m_parentFrame;
+  private Window m_parentWindow;
   
   /** Backup if the user presses cancel */
   private weka.clusterers.Clusterer m_backup;
+  
+  private ModifyListener m_modifyListener;
 
   
   public ClustererCustomizer() {
@@ -78,7 +81,11 @@ public class ClustererCustomizer
     JButton OKBut = new JButton("OK");
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(ClustererCustomizer.this, true);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
 
@@ -90,7 +97,12 @@ public class ClustererCustomizer
         if (m_backup != null) {
           m_dsClusterer.setClusterer(m_backup);
         }
-        m_parentFrame.dispose();
+        
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(ClustererCustomizer.this, false);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
     
@@ -135,7 +147,12 @@ public class ClustererCustomizer
     m_pcSupport.removePropertyChangeListener(pcl);
   }
 
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;
+  public void setParentWindow(Window parent) {
+    m_parentWindow = parent;
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
   }
 }

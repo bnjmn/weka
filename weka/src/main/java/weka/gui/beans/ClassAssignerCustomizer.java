@@ -46,7 +46,7 @@ import javax.swing.JPanel;
  */
 public class ClassAssignerCustomizer
   extends JPanel
-  implements Customizer, CustomizerClosingListener, DataFormatListener {
+  implements BeanCustomizer, CustomizerClosingListener, DataFormatListener {
 
   /** for serialization */
   private static final long serialVersionUID = 476539385765301907L;
@@ -63,6 +63,8 @@ public class ClassAssignerCustomizer
 
   private JComboBox m_ClassCombo = new JComboBox();
   private JPanel m_holderP = new JPanel();
+  
+  private ModifyListener m_modifyListener;
 
   public ClassAssignerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
@@ -142,8 +144,12 @@ public class ClassAssignerCustomizer
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassAssigner (if necessary)
     if (m_classAssigner != null) {
-      System.err.println("Customizer deregistering with class assigner");
+      System.out.println("Customizer deregistering with class assigner");
       m_classAssigner.removeDataFormatListener(this);
+    }
+    
+    if (m_modifyListener != null) {
+      m_modifyListener.setModifiedStatus(this, true);
     }
   }
 
@@ -172,5 +178,10 @@ public class ClassAssignerCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
   }
 }
