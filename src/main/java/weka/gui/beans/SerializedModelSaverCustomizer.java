@@ -22,30 +22,19 @@
 
 package weka.gui.beans;
 
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Tag;
-
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.beans.Customizer;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 
-import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -53,11 +42,14 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.BorderFactory;
-
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
+
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Tag;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
 
 /**
  * GUI Customizer for the SerializedModelSaver bean
@@ -67,7 +59,7 @@ import javax.swing.filechooser.FileFilter;
  */
 public class SerializedModelSaverCustomizer
   extends JPanel
-  implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
+  implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4874208115942078471L;
@@ -88,7 +80,7 @@ public class SerializedModelSaverCustomizer
     = new JFileChooser(new File(System.getProperty("user.dir")));
   
 
-  private JFrame m_parentFrame;
+  private Window m_parentWindow;
   
   private JFrame m_fileChooserFrame;
   
@@ -104,6 +96,8 @@ public class SerializedModelSaverCustomizer
   private Environment m_env = Environment.getSystemWide();
   
   private EnvironmentField m_directoryText;
+  
+  private ModifyListener m_modifyListener;
   
 
   /** Constructor */  
@@ -145,15 +139,15 @@ public class SerializedModelSaverCustomizer
 	    }
 	  }
 	  // closing
-	  if (m_parentFrame != null) {
+	  if (m_parentWindow != null) {
 	    m_fileChooserFrame.dispose();
 	  }
 	}
       });   
   }
 
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;
+  public void setParentWindow(Window parent) {
+    m_parentWindow = parent;
   }
   
   private void setUpOther() {
@@ -360,14 +354,22 @@ public class SerializedModelSaverCustomizer
           ex.printStackTrace();
         }
         
-        m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(SerializedModelSaverCustomizer.this, true);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
 
     JButton CancelBut = new JButton("Cancel");
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(SerializedModelSaverCustomizer.this, true);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
     
@@ -442,5 +444,10 @@ public class SerializedModelSaverCustomizer
    */
   public void setEnvironment(Environment env) {
     m_env = env;
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
   }
 }

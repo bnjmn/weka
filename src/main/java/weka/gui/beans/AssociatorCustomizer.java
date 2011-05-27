@@ -27,6 +27,7 @@ import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -45,7 +46,7 @@ import javax.swing.JPanel;
  */
 public class AssociatorCustomizer
   extends JPanel
-  implements Customizer, CustomizerCloseRequester {
+  implements BeanCustomizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = 5767664969353495974L;
@@ -63,10 +64,12 @@ public class AssociatorCustomizer
   private PropertySheetPanel m_AssociatorEditor = 
     new PropertySheetPanel();
   
-  protected JFrame m_parentFrame;
+  protected Window m_parentWindow;
   
   /** Backup is user presses cancel */
   private weka.associations.Associator m_backup;
+  
+  private ModifyListener m_modifyListener;
 
   public AssociatorCustomizer() {
     setLayout(new BorderLayout());
@@ -77,7 +80,12 @@ public class AssociatorCustomizer
     JButton OKBut = new JButton("OK");
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_parentFrame.dispose();
+        
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(AssociatorCustomizer.this, true);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
 
@@ -89,7 +97,12 @@ public class AssociatorCustomizer
         if (m_backup != null) {
           m_dsAssociator.setAssociator(m_backup);
         }
-        m_parentFrame.dispose();
+        
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(AssociatorCustomizer.this, false);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
     
@@ -134,7 +147,12 @@ public class AssociatorCustomizer
     m_pcSupport.removePropertyChangeListener(pcl);
   }
 
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;
+  public void setParentWindow(Window parent) {
+    m_parentWindow = parent;
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
   }
 }

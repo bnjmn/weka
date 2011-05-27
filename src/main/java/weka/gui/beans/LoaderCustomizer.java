@@ -38,6 +38,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -66,7 +67,7 @@ import javax.swing.JCheckBox;
  */
 public class LoaderCustomizer
   extends JPanel
-  implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
+  implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 6990446313118930298L;
@@ -89,7 +90,7 @@ public class LoaderCustomizer
     new JDialog((JFrame)getTopLevelAncestor(),
     true); */
 
-  private JFrame m_parentFrame;
+  private Window m_parentWindow;
   private JFrame m_fileChooserFrame;
   
   private EnvironmentField m_dbaseURLText;
@@ -107,6 +108,8 @@ public class LoaderCustomizer
   private EnvironmentField m_fileText;
   
   private Environment m_env = Environment.getSystemWide();
+  
+  private ModifyListener m_modifyListener;
 
   public LoaderCustomizer() {
     /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -167,8 +170,8 @@ public class LoaderCustomizer
       });   
   }
 
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;
+  public void setParentWindow(Window parent) {
+    m_parentWindow = parent;
   }
   
   private void setUpOther() {
@@ -319,15 +322,15 @@ public class LoaderCustomizer
           m_dsLoader.setDB(true);
         }catch (Exception ex){
         }
-        if (m_parentFrame != null) {
-          m_parentFrame.dispose();
+        if (m_parentWindow != null) {
+          m_parentWindow.dispose();
         }
       }
     });
     cancel.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        if (m_parentFrame != null) {
-          m_parentFrame.dispose();
+        if (m_parentWindow != null) {
+          m_parentWindow.dispose();
         }
       }
     });
@@ -494,15 +497,20 @@ public class LoaderCustomizer
         } catch (Exception ex) {
           ex.printStackTrace();
         }
-        
-        m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(LoaderCustomizer.this, true);
+        }
+        m_parentWindow.dispose();
       }
     });
 
     JButton CancelBut = new JButton("Cancel");
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(LoaderCustomizer.this, false);
+        }
+        m_parentWindow.dispose();
       }
     });
     
@@ -552,5 +560,10 @@ public class LoaderCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;    
   }
 }
