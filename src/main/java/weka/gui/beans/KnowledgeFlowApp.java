@@ -33,7 +33,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.Point;
@@ -68,7 +67,6 @@ import java.io.LineNumberReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -104,7 +102,6 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.JWindow;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
@@ -2620,7 +2617,7 @@ public class KnowledgeFlowApp
         req = ((UserRequestAcceptor) bc).enumerateRequests();
       }
 
-      if ((bc instanceof Startable) || (req !=null && req.hasMoreElements())) {
+      if (/*(bc instanceof Startable) ||*/ (req !=null && req.hasMoreElements())) {
         //	beanContextMenu.insert(new JLabel("Actions", 
         //					  SwingConstants.CENTER), 
         //			       menuItemCount);
@@ -2630,10 +2627,10 @@ public class KnowledgeFlowApp
         menuItemCount++;
       }
 
-      if (bc instanceof Startable) {
+      /*if (bc instanceof Startable) {
         String tempS = ((Startable)bc).getStartMessage();
         insertUserOrStartableMenuItem(bc, true, tempS, beanContextMenu);
-      }
+      }*/
       
       while (req != null && req.hasMoreElements()) {
         String tempS = (String) req.nextElement();
@@ -3084,6 +3081,26 @@ public class KnowledgeFlowApp
     m_toolBarBean = null;
     addComponent(bi, true);
   }
+  
+  private void highlightSubFlow(int startX, int startY,
+      int endX, int endY) {
+    java.awt.Rectangle r = 
+      new java.awt.Rectangle((startX < endX) ? startX : endX,
+                             (startY < endY) ? startY: endY,
+                             Math.abs(startX - endX),
+                             Math.abs(startY - endY));
+    //    System.err.println(r);
+    Vector selected = 
+      BeanInstance.findInstances(r, m_mainKFPerspective.getCurrentTabIndex());
+    
+    // show connector dots for selected beans
+    for (int i = 0; i < selected.size(); i++) {
+      BeanInstance temp = (BeanInstance)selected.elementAt(i);
+      if (temp.getBean() instanceof Visible) {
+        ((Visible)temp.getBean()).getVisual().setDisplayConnectors(true);
+      }
+    }
+  }
 
   /**
    * Handles the checking of a selected set of components
@@ -3268,8 +3285,9 @@ public class KnowledgeFlowApp
         flowName = flowName.substring(0, flowName.lastIndexOf('.'));
       }
       m_mainKFPerspective.addTab(flowName);
-      m_mainKFPerspective.setActiveTab(m_mainKFPerspective.getNumTabs() - 1);
+      //m_mainKFPerspective.setActiveTab(m_mainKFPerspective.getNumTabs() - 1);
       m_mainKFPerspective.setFlowFile(oFile);
+      m_mainKFPerspective.setEditedStatus(false);
       
       m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
     
