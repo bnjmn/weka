@@ -27,6 +27,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -63,7 +64,7 @@ import weka.gui.PropertySheetPanel;
  */
 public class SaverCustomizer
 extends JPanel
-implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
+implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4874208115942078471L;
@@ -84,7 +85,7 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
   = new JFileChooser(new File(System.getProperty("user.dir")));
 
 
-  private JFrame m_parentFrame;
+  private Window m_parentWindow;
   
   private JFrame m_fileChooserFrame;
 
@@ -109,6 +110,8 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
   private Environment m_env = Environment.getSystemWide();
   
   private EnvironmentField m_directoryText;
+  
+  private ModifyListener m_modifyListener;
 
 
   /** Constructor */  
@@ -157,8 +160,8 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
     });   
   }
 
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;
+  public void setParentWindow(Window parent) {
+    m_parentWindow = parent;
   }
 
   /** Sets up dialog for saving instances in other data sinks then files
@@ -326,15 +329,23 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
         }
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setAutoKeyGeneration(m_idBox.isSelected());
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setRelationForTableName(m_tabBox.isSelected());
-        if (m_parentFrame != null) {
-          m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(SaverCustomizer.this, true);
+        }
+        
+        if (m_parentWindow != null) {
+          m_parentWindow.dispose();
         }
       }
     });
     cancel.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        if (m_parentFrame != null) {
-          m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(SaverCustomizer.this, false);
+        }
+        
+        if (m_parentWindow != null) {
+          m_parentWindow.dispose();
         }
       }
     });
@@ -557,14 +568,22 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
           ex.printStackTrace();
         }
         
-        m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(SaverCustomizer.this, true);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
 
     JButton CancelBut = new JButton("Cancel");
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_parentFrame.dispose();
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(SaverCustomizer.this, false);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
     
@@ -623,5 +642,11 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
    */
   public void setEnvironment(Environment env) {
     m_env = env;
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    // TODO Auto-generated method stub
+    m_modifyListener = l;
   }
 }

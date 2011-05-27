@@ -57,8 +57,8 @@ weka.associations.Associator.alias=Associations
 # GUI behaviour
 ScrollBarIncrementLayout=20
 ScrollBarIncrementComponents=50
-FlowWidth=1024
-FlowHeight=768
+FlowWidth=2560
+FlowHeight=1440
 PreferredExtension=.kf
 UserComponentsInXML=false
 

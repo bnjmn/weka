@@ -45,7 +45,7 @@ import javax.swing.JPanel;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision$
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -157,6 +157,23 @@ public class BeanVisual
       setMaximumSize(d2);   
     }
   }
+  
+  public Image scale(double percent) {
+    if (m_icon != null) {
+      Image pic = m_icon.getImage();
+      double width = m_icon.getIconWidth();
+      double height = m_icon.getIconHeight();
+      
+      width *= percent;
+      height *= percent;
+      
+      pic = pic.getScaledInstance((int)width, (int)height, Image.SCALE_SMOOTH);
+      
+      return pic;
+    }
+    
+    return null;
+  }
 
   /**
    * Loads static and animated versions of a beans icons. These are
@@ -227,7 +244,8 @@ public class BeanVisual
    *
    */
   public void setStatic() {
-    m_visualLabel.setIcon(m_icon);
+    setDisplayConnectors(false);
+    //m_visualLabel.setIcon(m_icon);
   }
 
   /**
@@ -235,7 +253,8 @@ public class BeanVisual
    *
    */
   public void setAnimated() {
-    m_visualLabel.setIcon(m_animatedIcon);
+    setDisplayConnectors(true);
+    //m_visualLabel.setIcon(m_animatedIcon);
   }
 
   /**
