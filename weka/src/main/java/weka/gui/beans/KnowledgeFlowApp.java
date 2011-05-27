@@ -609,6 +609,9 @@ public class KnowledgeFlowApp
     /** Keeps track of which tabs have flows that are executing */
     protected List<Boolean> m_executingList = new ArrayList<Boolean>();
     
+    /** Keeps track of any highlighted beans on the canvas for a tab */
+    protected List<Vector> m_selectedBeans = new ArrayList<Vector>();
+    
     public JTabbedPane getTabbedPane() {
       return m_flowTabs;
     }
@@ -783,8 +786,49 @@ public class KnowledgeFlowApp
       }
       return false;
     }
+    
+    public Vector getSelectedBeans() {
+      if (getNumTabs() > 0) {
+        return getSelectedBeans(getCurrentTabIndex());
+      }
+      return null;
+    }
+    
+    public Vector getSelectedBeans(int index) {
+      if (index < getNumTabs() && index >= 0) {
+        return m_selectedBeans.get(index);
+      }
+      return null;
+    }
+    
+    public synchronized void setSelectedBeans(Vector beans) {
+      if (getNumTabs() > 0) {
+        setSelectedBeans(getCurrentTabIndex(), beans);                
+      }
+    }
+    
+    public synchronized void setSelectedBeans(int index, Vector beans) {
+      if (index < getNumTabs() && index >= 0) {
+        // turn turn off any set ones
+        for (int i = 0; i < m_selectedBeans.get(index).size(); i++) {
+          BeanInstance temp = (BeanInstance)m_selectedBeans.get(index).elementAt(i);
+          if (temp.getBean() instanceof Visible) {
+            ((Visible)temp.getBean()).getVisual().setDisplayConnectors(false);
+          }
+        }
+        
+        m_selectedBeans.set(index, beans);
+        
+        // highlight any new ones
+        for (int i = 0; i < beans.size(); i++) {
+          BeanInstance temp = (BeanInstance)beans.elementAt(i);
+          if (temp.getBean() instanceof Visible) {
+            ((Visible)temp.getBean()).getVisual().setDisplayConnectors(true);
+          }
+        }
+      }
+    }
 
-    @Override
     public void setInstances(Instances insts) {
       // nothing to do as we don't process externally supplied instances
       
@@ -854,6 +898,7 @@ public class KnowledgeFlowApp
       m_logPanels.remove(tabIndex);
       m_editedList.remove(tabIndex);
       m_environmentSettings.remove(tabIndex);
+      m_selectedBeans.remove(tabIndex);
       bl = null;
       
       m_flowTabs.remove(tabIndex);
@@ -916,6 +961,7 @@ public class KnowledgeFlowApp
       
       m_editedList.add(new Boolean(false));
       m_executingList.add(new Boolean(false));
+      m_selectedBeans.add(new Vector());
       m_flowTabs.addTab(tabTitle, splitHolder);
       int tabIndex = getNumTabs() - 1;
       m_flowTabs.setTabComponentAt(tabIndex, new CloseableTabTitle(m_flowTabs));
@@ -1004,7 +1050,6 @@ public class KnowledgeFlowApp
         int i = m_enclosingPane.indexOfTabComponent(CloseableTabTitle.this);
         if (i >= 0) {
           //m_enclosingPane.remove(i);
-          // TODO
           m_mainKFPerspective.removeTab(i);
         }
       }
@@ -1390,7 +1435,8 @@ public class KnowledgeFlowApp
             layout.repaint();
             m_mode = NONE;
                         
-            checkSubFlow(m_startX, m_startY, me.getX(), me.getY());
+            //checkSubFlow(m_startX, m_startY, me.getX(), me.getY());
+            highlightSubFlow(m_startX, m_startY, me.getX(), me.getY());
           }
         }
 
@@ -1432,7 +1478,8 @@ public class KnowledgeFlowApp
                 int delta = 10;
                 deleteConnectionPopup(BeanConnection.
                       getClosestConnections(new Point(me.getX(), me.getY()), 
-                                            delta), me.getX(), me.getY());
+                                            delta, m_mainKFPerspective.getCurrentTabIndex()), 
+                                            me.getX(), me.getY());
               } else if (m_toolBarBean != null) {
                 // otherwise, if a toolbar button is active then 
                 // add the component
@@ -1490,6 +1537,11 @@ public class KnowledgeFlowApp
             m_mode = NONE;
             m_editElement = null;
             m_sourceEventSetDescriptor = null;
+          }
+          
+          if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+            // TODO
+            m_mainKFPerspective.setSelectedBeans(new Vector());
           }
         }
       });
@@ -3094,12 +3146,14 @@ public class KnowledgeFlowApp
       BeanInstance.findInstances(r, m_mainKFPerspective.getCurrentTabIndex());
     
     // show connector dots for selected beans
-    for (int i = 0; i < selected.size(); i++) {
+    /*for (int i = 0; i < selected.size(); i++) {
       BeanInstance temp = (BeanInstance)selected.elementAt(i);
       if (temp.getBean() instanceof Visible) {
         ((Visible)temp.getBean()).getVisual().setDisplayConnectors(true);
       }
-    }
+    }*/
+    
+    m_mainKFPerspective.setSelectedBeans(selected);
   }
 
   /**
@@ -3116,10 +3170,16 @@ public class KnowledgeFlowApp
                              (startY < endY) ? startY: endY,
                              Math.abs(startX - endX),
                              Math.abs(startY - endY));
-    //    System.err.println(r);
+    /*//    System.err.println(r);
     Vector selected = 
       BeanInstance.findInstances(r, m_mainKFPerspective.getCurrentTabIndex());
-    //    System.err.println(r);
+    //    System.err.println(r); */
+    
+    Vector selected = m_mainKFPerspective.getSelectedBeans();
+    if (selected.size() == 0) {
+      return;
+    }
+    
     // check if sub flow is valid
     Vector inputs = BeanConnection.inputs(selected, 
         m_mainKFPerspective.getCurrentTabIndex());
