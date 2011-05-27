@@ -39,11 +39,11 @@ import javax.swing.JPanel;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class ClassValuePickerCustomizer
   extends JPanel
-  implements Customizer, CustomizerClosingListener, DataFormatListener {
+  implements BeanCustomizer, CustomizerClosingListener, DataFormatListener {
 
   /** for serialization */
   private static final long serialVersionUID = 8213423053861600469L;
@@ -59,6 +59,9 @@ public class ClassValuePickerCustomizer
   private JPanel m_holderP = new JPanel();
 
   private JLabel m_messageLabel = new JLabel("No customization possible at present.");
+  
+  private ModifyListener m_modifyListener;
+  private boolean m_modified = false;
 
   public ClassValuePickerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
@@ -73,6 +76,7 @@ public class ClassValuePickerCustomizer
 	public void actionPerformed(ActionEvent e) {
 	  if (m_classValuePicker != null) {
 	    m_classValuePicker.setClassValueIndex(m_ClassValueCombo.getSelectedIndex());
+	    m_modified = true;
 	  }
 	}
       });
@@ -139,8 +143,12 @@ public class ClassValuePickerCustomizer
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassValuePicker (if necessary)
     if (m_classValuePicker != null) {
-      System.err.println("Customizer deregistering with class value picker");
+      System.out.println("Customizer deregistering with class value picker");
       m_classValuePicker.removeDataFormatListener(this);
+    }
+    
+    if (m_modifyListener != null) {
+      m_modifyListener.setModifiedStatus(this, m_modified);
     }
   }
 
@@ -168,5 +176,10 @@ public class ClassValuePickerCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
   }
 }

@@ -22,31 +22,28 @@
 
 package weka.gui.beans;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+
+import weka.classifiers.Classifier;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
 
 /**
  * GUI customizer for the classifier wrapper bean
@@ -56,7 +53,7 @@ import javax.swing.SwingConstants;
  */
 public class ClassifierCustomizer
   extends JPanel
-  implements Customizer, CustomizerClosingListener, 
+  implements BeanCustomizer, CustomizerClosingListener, 
   CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
@@ -85,12 +82,18 @@ public class ClassifierCustomizer
   
   private JCheckBox m_blockOnLastFold = new JCheckBox("Block on last fold of last run");
   
-  private JFrame m_parentFrame;
+  private Window m_parentWindow;
   
   /** Copy of the current classifier in case cancel is selected */
   protected weka.classifiers.Classifier m_backup;
   
   private Environment m_env = Environment.getSystemWide();
+  
+  /**
+   *  Listener that wants to know the the modified status of the object that
+   * we're customizing
+   */
+  private ModifyListener m_modifyListener;
 
   public ClassifierCustomizer() {
     
@@ -166,7 +169,12 @@ public class ClassifierCustomizer
         // forces the template to be deep copied to the actual classifier.
         // necessary for InputMappedClassifier that is loading from a file
         m_dsClassifier.setClassifierTemplate(m_dsClassifier.getClassifierTemplate());
-        m_parentFrame.dispose();
+        
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(ClassifierCustomizer.this, true);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
     
@@ -177,7 +185,12 @@ public class ClassifierCustomizer
         if (m_backup != null) {
           m_dsClassifier.setClassifierTemplate(m_backup);
         }
-        m_parentFrame.dispose();
+        
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(ClassifierCustomizer.this, false);
+        }
+        
+        m_parentWindow.dispose();
       }
     });
     
@@ -261,8 +274,8 @@ public class ClassifierCustomizer
     m_pcSupport.removePropertyChangeListener(pcl);
   }
 
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;    
+  public void setParentWindow(Window parent) {
+    m_parentWindow = parent;    
   }
   
   /**
@@ -273,5 +286,10 @@ public class ClassifierCustomizer
    */
   public void setEnvironment(Environment env) {
     m_env = env;
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
   }
 }

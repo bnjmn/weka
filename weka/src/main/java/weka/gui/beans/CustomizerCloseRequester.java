@@ -22,24 +22,24 @@
 
 package weka.gui.beans;
 
-import javax.swing.JFrame;
+import java.awt.Window;
 
 /**
  * Customizers who want to be able to close the customizer window
  * themselves can implement this window. The KnowledgeFlow will
- * pass in the reference to the parent JFrame when constructing
+ * pass in the reference to the parent Window when constructing
  * the customizer. The customizer can then call dispose() the
  * Frame whenever it suits them.
  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public interface CustomizerCloseRequester {
 
   /**
    * A reference to the parent is passed in
    *
-   * @param parent the parent frame
+   * @param parent the parent Window
    */
-  void setParentFrame(JFrame parent);
+  void setParentWindow(Window parent);
 }
