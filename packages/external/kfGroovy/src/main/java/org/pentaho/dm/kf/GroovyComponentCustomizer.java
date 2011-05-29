@@ -38,6 +38,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import java.awt.Window;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -45,6 +46,7 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 
 import weka.core.Utils;
+import weka.gui.beans.BeanCustomizer;
 import weka.gui.beans.CustomizerCloseRequester;
 import weka.gui.scripting.GroovyScript;
 import weka.gui.scripting.SyntaxDocument;
@@ -57,7 +59,7 @@ import weka.gui.visualize.VisualizeUtils;
  * @version $Revision $
  */
 public class GroovyComponentCustomizer extends JPanel 
-  implements Customizer, CustomizerCloseRequester {
+  implements BeanCustomizer, CustomizerCloseRequester {
 
   /** The object to edit */
   protected GroovyComponent m_groovyP;
@@ -67,12 +69,14 @@ public class GroovyComponentCustomizer extends JPanel
   
   protected JTextPane m_textPane = new JTextPane();
   
-  protected JFrame m_parentFrame;
+  protected Window m_parentWindow;
   
   /** Holds the template text of a new script */
   protected String m_newScript;
   
   protected JMenuBar m_menuBar;
+
+  protected ModifyListener m_modifyListener;
   
   /** the Groovy setup. */
   public final static String PROPERTIES_FILE = "weka/gui/scripting/Groovy.props";
@@ -157,9 +161,13 @@ public class GroovyComponentCustomizer extends JPanel
       public void actionPerformed(ActionEvent e) {
         if (m_groovyP != null) {
           m_groovyP.setScript(m_script.getContent());
+
+          if (m_modifyListener != null) {
+            m_modifyListener.setModifiedStatus(GroovyComponentCustomizer.this, true);
+          }
           
           // close the dialog
-          m_parentFrame.dispose();
+          m_parentWindow.dispose();
         }
       }
     });
@@ -169,7 +177,11 @@ public class GroovyComponentCustomizer extends JPanel
         // just close the dialog
         //TODO if their are mods, ask the user (same if the frame is closed
         // from the close widget)
-        m_parentFrame.dispose();
+          if (m_modifyListener != null) {
+            m_modifyListener.setModifiedStatus(GroovyComponentCustomizer.this, false);
+          }
+
+        m_parentWindow.dispose();
       }
     });
     
@@ -324,10 +336,12 @@ public class GroovyComponentCustomizer extends JPanel
     }
   }
 
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;
-    m_parentFrame.setJMenuBar(m_menuBar);
-    m_parentFrame.setTitle("Groovy Script Editor");
+  public void setParentWindow(Window parent) {
+    m_parentWindow = parent;
+    if (parent instanceof javax.swing.JDialog) {
+      ((javax.swing.JDialog)m_parentWindow).setJMenuBar(m_menuBar);
+      ((javax.swing.JDialog)m_parentWindow).setTitle("Groovy Script Editor");
+    }
   }
   
   protected void setUpNewScript() {
@@ -487,4 +501,7 @@ public class GroovyComponentCustomizer extends JPanel
     m_newScript = temp.toString();
   }
 
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
+  }
 }
