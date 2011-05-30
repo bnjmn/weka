@@ -1127,6 +1127,9 @@ public class KnowledgeFlowApp
    * Holds the selected toolbar bean
    */
   private Object m_toolBarBean;
+  
+  /** Snap-to-grid spacing */
+  private int m_gridSpacing = 40;
 
   /**
    * The layout area
@@ -1136,7 +1139,7 @@ public class KnowledgeFlowApp
   private Vector m_userComponents = new Vector();
   private boolean m_firstUserComponentOpp = true;
 
-  private JToggleButton m_pointerB;
+  private JButton m_pointerB;
   private JButton m_saveB;
   private JButton m_saveBB;
   private JButton m_loadB;
@@ -1150,6 +1153,8 @@ public class KnowledgeFlowApp
   private JButton m_copyB;
   private JButton m_pasteB;
   private JButton m_deleteB;
+  
+  private JToggleButton m_snapToGridB;
   // private JButton m_deleteB;
 
   /**
@@ -1395,6 +1400,30 @@ public class KnowledgeFlowApp
      clearLayout(); // add an initial "Untitled" tab
   }
   
+  private void snapSelectedToGrid() {
+    Vector v = m_mainKFPerspective.getSelectedBeans();
+    if (v.size() > 0) {
+      for (int i = 0; i < v.size(); i++) {
+        BeanInstance b = (BeanInstance)v.get(i);
+        int x = b.getX();
+        int y = b.getY();
+        b.setXY(snapToGrid(x), snapToGrid(y));
+      }
+      revalidate();
+      m_beanLayout.repaint();
+      notifyIsDirty();
+      m_mainKFPerspective.setEditedStatus(true);
+    }
+  }
+  
+  private int snapToGrid(int val) {
+    int r = val % m_gridSpacing; val /= m_gridSpacing;
+    if (r > (m_gridSpacing/ 2)) val++;
+    val *= m_gridSpacing;
+    
+    return val;
+  }
+  
   private void configureBeanLayout(final BeanLayout layout) {
     
     layout.setLayout(null);
@@ -1412,7 +1441,7 @@ public class KnowledgeFlowApp
               if (bi != null) {
                 bc = (JComponent)(bi.getBean());
               }
-              if (bc != null && (bc instanceof Visible)) {
+              if (bc != null /*&& (bc instanceof Visible) */) {
                 m_editElement = bi;
                 m_oldX = me.getX();
                 m_oldY = me.getY();
@@ -1437,6 +1466,13 @@ public class KnowledgeFlowApp
 
         public void mouseReleased(MouseEvent me) {
           if (m_editElement != null && m_mode == MOVING) {
+            if (m_snapToGridB.isSelected()) {
+              int x = snapToGrid(m_editElement.getX());
+              int y = snapToGrid(m_editElement.getY());
+              m_editElement.setXY(x, y);
+              snapSelectedToGrid();
+            }
+            
             m_editElement = null;
             revalidate();
             layout.repaint();
@@ -1486,10 +1522,15 @@ public class KnowledgeFlowApp
                 }
                 return;
               } else {
-                // TODO just select this bean
-                Vector v = new Vector();
-                v.add(bi);
+                // just select this bean
+                Vector v = m_mainKFPerspective.getSelectedBeans();
+                if (me.isShiftDown()) {
+                } else {
+                  v = new Vector();
+                }
+                v.add(bi);             
                 m_mainKFPerspective.setSelectedBeans(v);
+                
                 return;
               }
             } else {
@@ -1509,7 +1550,16 @@ public class KnowledgeFlowApp
               } else if (m_toolBarBean != null) {
                 // otherwise, if a toolbar button is active then 
                 // add the component
-                addComponent(me.getX(), me.getY());
+                
+                // snap to grid
+                int x = me.getX();
+                int y = me.getY();
+                if (m_snapToGridB.isSelected()) {
+                  x = snapToGrid(me.getX()); 
+                  y = snapToGrid(me.getY());
+                }
+                
+                addComponent(x, y);
                 m_componentTree.clearSelection();
                 m_mainKFPerspective.setEditedStatus(true);
               }
@@ -1575,25 +1625,32 @@ public class KnowledgeFlowApp
 
         public void mouseDragged(MouseEvent me) {
           if (m_editElement != null && m_mode == MOVING) {
-            ImageIcon ic = ((Visible)m_editElement.getBean()).
-              getVisual().getStaticIcon();
-            int width = ic.getIconWidth() / 2;
-            int height = ic.getIconHeight() / 2;
+
+            /*int width = ic.getIconWidth() / 2;
+            int height = ic.getIconHeight() / 2; */ 
+            /*int width = m_oldX - m_editElement.getX();
+            int height = m_oldY - m_editElement.getY(); */
             
             int deltaX = me.getX() - m_oldX;
             int deltaY = me.getY() - m_oldY;
 
             /*      m_editElement.setX(m_oldX-width);
                     m_editElement.setY(m_oldY-height); */
+            //int newX = snapToGrid(m_oldX-width);
+            //int newX = m_oldX-width;
+            //int newY = snapToGrid(m_oldY-height);
+            //int newY = m_oldY-height;            
 
-            m_editElement.setXY(m_oldX-width,
-                                m_oldY-height);
+            m_editElement.setXY(m_editElement.getX() + deltaX, 
+                m_editElement.getY() + deltaY);
             
             if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
               Vector v = m_mainKFPerspective.getSelectedBeans();
               for (int i = 0; i < v.size(); i++) {
                 BeanInstance b = (BeanInstance)v.get(i);
-                b.setXY(b.getX() + deltaX, b.getY() + deltaY);                
+                if (b != m_editElement) {
+                  b.setXY(b.getX() + deltaX, b.getY() + deltaY);
+                }                                
               }
             }
             layout.repaint();
@@ -1697,6 +1754,13 @@ public class KnowledgeFlowApp
         "delete.png")));
       m_deleteB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
       m_deleteB.setToolTipText("Delete selected");
+      m_snapToGridB = new JToggleButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+          "shape_handles.png")));
+      //m_snapToGridB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_snapToGridB.setToolTipText("Snap to grid");
+      /*Dimension d = m_snapToGridB.getPreferredSize();
+      d = new Dimension((int)d.getWidth() * 8, (int)d.getHeight()*8);
+      m_snapToGridB.setPreferredSize(d);*/
 
       m_saveB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
               "disk.png")));      
@@ -1725,6 +1789,8 @@ public class KnowledgeFlowApp
       fixedTools.add(m_copyB);
       fixedTools.add(m_deleteB);
       fixedTools.add(m_pasteB);
+      fixedTools.addSeparator();
+      fixedTools.add(m_snapToGridB);
       fixedTools.addSeparator();
       fixedTools.add(m_newB);
       fixedTools.add(m_saveB);
@@ -1789,6 +1855,14 @@ public class KnowledgeFlowApp
           }
         }
       });
+      
+      m_snapToGridB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (m_snapToGridB.isSelected()) {
+            snapSelectedToGrid();
+          }
+        }
+      });
 
       fixedTools.setFloatable(false);
       toolBarPanel.add(fixedTools, BorderLayout.EAST);
@@ -1820,7 +1894,7 @@ public class KnowledgeFlowApp
     m_stopB.setToolTipText("Stop all execution");
 
     Image tempI = loadImage(BeanVisual.ICON_PATH + "cursor.png");
-    m_pointerB = new JToggleButton(new ImageIcon(tempI));
+    m_pointerB = new JButton(new ImageIcon(tempI));
     m_pointerB.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     m_pointerB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -3168,13 +3242,23 @@ public class KnowledgeFlowApp
       BeanConnection.getClosestConnections(new Point(x, y), 
                             10, m_mainKFPerspective.getCurrentTabIndex());
 
+    PopupMenu rightClickMenu = new PopupMenu();
+    int menuItemCount = 0;
     if (m_mainKFPerspective.getSelectedBeans().size() > 0 ||
         closestConnections.size() > 0 || 
         (m_pasteBuffer != null && m_pasteBuffer.length() > 0)) {
-      PopupMenu rightClickMenu = new PopupMenu();
-      int menuItemCount = 0;
       
       if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+        
+        MenuItem snapItem = new MenuItem("Snap selected to grid");
+        snapItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            snapSelectedToGrid();
+          }
+        });
+        rightClickMenu.add(snapItem);
+        menuItemCount++;
+        
         MenuItem copyItem = new MenuItem("Copy selected");
         copyItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -3262,9 +3346,12 @@ public class KnowledgeFlowApp
           rightClickMenu.add(groupItem);
           menuItemCount++;
         }                        
-      }
+      }      
       
       if (m_pasteBuffer != null && m_pasteBuffer.length() > 0) {
+        rightClickMenu.addSeparator();
+        menuItemCount++;
+        
         MenuItem pasteItem = new MenuItem("Paste");
         pasteItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -3282,7 +3369,11 @@ public class KnowledgeFlowApp
         menuItemCount++;
       }
       
+      
       if (closestConnections.size() > 0) {
+        rightClickMenu.addSeparator();
+        menuItemCount++;
+        
         MenuItem deleteConnection = new MenuItem("Delete Connection:");
         deleteConnection.setEnabled(false);
         rightClickMenu.insert(deleteConnection, menuItemCount);
@@ -3316,11 +3407,31 @@ public class KnowledgeFlowApp
           rightClickMenu.add(deleteItem);
           menuItemCount++;
         }
-      }
-      //
-      m_beanLayout.add(rightClickMenu);
-      rightClickMenu.show(m_beanLayout, x, y);
+      }            
     }
+    
+    if (menuItemCount > 0) {
+      rightClickMenu.addSeparator();
+      menuItemCount++;
+    }
+    
+    MenuItem noteItem = new MenuItem("New note");
+    noteItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        
+        Note n = new Note();
+        m_toolBarBean = n;
+       
+        setCursor(Cursor.
+            getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        m_mode = ADDING;
+      }
+    });
+    rightClickMenu.add(noteItem);
+    menuItemCount++;
+    
+    m_beanLayout.add(rightClickMenu);
+    rightClickMenu.show(m_beanLayout, x, y);
   }
                                 
   /**
@@ -3441,23 +3552,24 @@ public class KnowledgeFlowApp
     if (targetCount > 0) {
       //      System.err.println("target count "+targetCount);
       if (source instanceof Visible) {
-	((Visible)source).getVisual().setDisplayConnectors(true);
+        ((Visible)source).getVisual().setDisplayConnectors(true);
+
+
+        m_editElement = bi;
+        Point closest = ((Visible)source).getVisual().
+        getClosestConnectorPoint(new Point(x, y));
+
+        m_startX = (int)closest.getX();
+        m_startY = (int)closest.getY();
+        m_oldX = m_startX;
+        m_oldY = m_startY;
+
+        Graphics2D gx = (Graphics2D)m_beanLayout.getGraphics();
+        gx.setXORMode(java.awt.Color.white);
+        gx.drawLine(m_startX, m_startY, m_startX, m_startY);
+        gx.dispose();
+        m_mode = CONNECTING;
       }
-
-      m_editElement = bi;
-      Point closest = ((Visible)source).getVisual().
-	getClosestConnectorPoint(new Point(x, y));
-
-      m_startX = (int)closest.getX();
-      m_startY = (int)closest.getY();
-      m_oldX = m_startX;
-      m_oldY = m_startY;
-
-      Graphics2D gx = (Graphics2D)m_beanLayout.getGraphics();
-      gx.setXORMode(java.awt.Color.white);
-      gx.drawLine(m_startX, m_startY, m_startX, m_startY);
-      gx.dispose();
-      m_mode = CONNECTING;
     }
   }
 
@@ -3550,13 +3662,13 @@ public class KnowledgeFlowApp
       }
       
       if (b.getX() > lowerRightX) {
-        ImageIcon ic = ((Visible)b.getBean()).getVisual().getStaticIcon();
+        // ImageIcon ic = ((Visible)b.getBean()).getVisual().getStaticIcon();
 //        lowerRightX = (b.getX() + ic.getIconWidth());
         lowerRightX = b.getX();
       }
       
       if (b.getY() > lowerRightY) {
-        ImageIcon ic = ((Visible)b.getBean()).getVisual().getStaticIcon();
+        // ImageIcon ic = ((Visible)b.getBean()).getVisual().getStaticIcon();
         // lowerRightY = (b.getY() + ic.getIconHeight());
         lowerRightY = b.getY();
       }
