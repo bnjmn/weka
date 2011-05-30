@@ -133,6 +133,22 @@ public class BeanConnection
   public static void addConnections(Vector connections) {
     TABBED_CONNECTIONS.add(connections);
   }
+  
+  /**
+   * Append the supplied connections to the list for the given tab index
+   * 
+   * @param connections the connections to append
+   * @param tab the index of the list to append to
+   */
+  public static void appendConnections(Vector connections, int tab) {
+    if (tab < TABBED_CONNECTIONS.size()) {
+      Vector cons = TABBED_CONNECTIONS.get(tab);
+      
+      for (int i = 0; i < connections.size(); i++) {
+        cons.add(connections.get(i));
+      }
+    }
+  }
 
   /**
    * Returns true if there is a link between the supplied source and
