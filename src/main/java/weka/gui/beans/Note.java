@@ -63,7 +63,13 @@ public class Note extends JPanel {
     m_label.setText(convertToHTML(m_noteText));
     m_label.setOpaque(true);
     m_label.setBackground(Color.YELLOW);
-    add(m_label, BorderLayout.CENTER);
+    JPanel holder = new JPanel();
+    holder.setLayout(new BorderLayout());
+    holder.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+    holder.setOpaque(true);
+    holder.setBackground(Color.YELLOW);
+    holder.add(m_label, BorderLayout.CENTER);
+    add(holder, BorderLayout.CENTER);
   }
   
   private String convertToHTML(String text) {
