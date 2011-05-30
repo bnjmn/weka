@@ -667,6 +667,13 @@ public class KnowledgeFlowApp
         m_saveBB.setEnabled(!getExecuting());
         m_playB.setEnabled(!getExecuting());
         m_playBB.setEnabled(!getExecuting());
+        m_saveB.setEnabled(!getExecuting());
+        m_saveBB.setEnabled(!getExecuting());
+        m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0) 
+            && !getExecuting());
         m_stopB.setEnabled(getExecuting());
       }
     }
@@ -687,6 +694,11 @@ public class KnowledgeFlowApp
         m_playB.setEnabled(!getExecuting());
         m_playBB.setEnabled(!getExecuting());
         m_stopB.setEnabled(getExecuting());
+        m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0) 
+            && !getExecuting());
       }
     }
     
@@ -803,7 +815,10 @@ public class KnowledgeFlowApp
     
     public synchronized void setSelectedBeans(Vector beans) {
       if (getNumTabs() > 0) {
-        setSelectedBeans(getCurrentTabIndex(), beans);                
+        setSelectedBeans(getCurrentTabIndex(), beans);
+        m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
       }
     }
     
@@ -1117,23 +1132,7 @@ public class KnowledgeFlowApp
    * The layout area
    */
   private BeanLayout m_beanLayout = null;//new BeanLayout();
-
-  /**
-   * Tabbed pane to hold tool bars
-   */
-  private JTabbedPane m_toolBars = new JTabbedPane();
-
-  /**
-   * Stuff relating to plugin beans
-   */
-  private JToolBar m_pluginsToolBar = null;
-  private Box m_pluginsBoxPanel = null;
   
-  /**
-   * Stuff relating to user created meta beans
-   */
-  private JToolBar m_userToolBar = null;
-  private Box m_userBoxPanel = null;
   private Vector m_userComponents = new Vector();
   private boolean m_firstUserComponentOpp = true;
 
@@ -1146,6 +1145,12 @@ public class KnowledgeFlowApp
   private JButton m_playBB;
   private JButton m_helpB;
   private JButton m_newB;
+  
+  private JButton m_cutB;
+  private JButton m_copyB;
+  private JButton m_pasteB;
+  private JButton m_deleteB;
+  // private JButton m_deleteB;
 
   /**
    * Reference to bean being manipulated
@@ -1239,8 +1244,14 @@ public class KnowledgeFlowApp
   /** Environment variables for the current flow */
   protected Environment m_flowEnvironment = new Environment();
   
+  /** Palette of components stored in a JTree */
   protected JTree m_componentTree;
+  
+  /** The node of the JTree that holds "user" (metabean) components */
   protected DefaultMutableTreeNode m_userCompNode;
+  
+  /** The clip board */
+  protected StringBuffer m_pasteBuffer;
   
   /**
    * Set the environment variables to use. NOTE: loading a new layout
@@ -1470,17 +1481,31 @@ public class KnowledgeFlowApp
                 }
               } else if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
                           != InputEvent.BUTTON1_MASK) || me.isAltDown()) {
-                doPopup(me.getPoint(), bi, me.getX(), me.getY());
+                if (!m_mainKFPerspective.getExecuting()) {
+                  doPopup(me.getPoint(), bi, me.getX(), me.getY());
+                }
+                return;
+              } else {
+                // TODO just select this bean
+                Vector v = new Vector();
+                v.add(bi);
+                m_mainKFPerspective.setSelectedBeans(v);
+                return;
               }
             } else {
               if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
                    != InputEvent.BUTTON1_MASK) || me.isAltDown()) {
+                
                 // find connections if any close to this point
-                int delta = 10;
+                if (!m_mainKFPerspective.getExecuting()) {
+                  rightClickCanvasPopup(me.getX(), me.getY());
+                }
+                return;
+                /*int delta = 10;
                 deleteConnectionPopup(BeanConnection.
                       getClosestConnections(new Point(me.getX(), me.getY()), 
                                             delta, m_mainKFPerspective.getCurrentTabIndex()), 
-                                            me.getX(), me.getY());
+                                            me.getX(), me.getY()); */
               } else if (m_toolBarBean != null) {
                 // otherwise, if a toolbar button is active then 
                 // add the component
@@ -1541,7 +1566,6 @@ public class KnowledgeFlowApp
           }
           
           if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
-            // TODO
             m_mainKFPerspective.setSelectedBeans(new Vector());
           }
         }
@@ -1555,12 +1579,23 @@ public class KnowledgeFlowApp
               getVisual().getStaticIcon();
             int width = ic.getIconWidth() / 2;
             int height = ic.getIconHeight() / 2;
+            
+            int deltaX = me.getX() - m_oldX;
+            int deltaY = me.getY() - m_oldY;
 
             /*      m_editElement.setX(m_oldX-width);
                     m_editElement.setY(m_oldY-height); */
 
             m_editElement.setXY(m_oldX-width,
                                 m_oldY-height);
+            
+            if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+              Vector v = m_mainKFPerspective.getSelectedBeans();
+              for (int i = 0; i < v.size(); i++) {
+                BeanInstance b = (BeanInstance)v.get(i);
+                b.setXY(b.getX() + deltaX, b.getY() + deltaY);                
+              }
+            }
             layout.repaint();
             
             // note the new points
@@ -1645,6 +1680,23 @@ public class KnowledgeFlowApp
     if (m_showFileMenu) {
       JToolBar fixedTools = new JToolBar();
       fixedTools.setOrientation(JToolBar.HORIZONTAL);
+      
+      m_cutB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+          "cut.png")));
+      m_cutB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_cutB.setToolTipText("Cut selected");
+      m_copyB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        "page_copy.png")));
+      m_copyB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_copyB.setToolTipText("Copy selected");
+      m_pasteB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        "paste_plain.png")));
+      m_pasteB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_pasteB.setToolTipText("Paste from clipboard");
+      m_deleteB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        "delete.png")));
+      m_deleteB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_deleteB.setToolTipText("Delete selected");
 
       m_saveB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
               "disk.png")));      
@@ -1668,7 +1720,12 @@ public class KnowledgeFlowApp
         "help.png")));
       m_helpB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
       m_helpB.setToolTipText("Display help");
-      
+
+      fixedTools.add(m_cutB);
+      fixedTools.add(m_copyB);
+      fixedTools.add(m_deleteB);
+      fixedTools.add(m_pasteB);
+      fixedTools.addSeparator();
       fixedTools.add(m_newB);
       fixedTools.add(m_saveB);
       fixedTools.add(m_saveBB);
@@ -1700,6 +1757,38 @@ public class KnowledgeFlowApp
             clearLayout();
           }
         });
+      
+      m_cutB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          // only delete if our copy was successful!
+          if (copyToClipboard()) {              
+            deleteSelectedBeans();
+          }
+        }
+      });
+      
+      m_deleteB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          deleteSelectedBeans();
+        }
+      });
+      
+      m_copyB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          copyToClipboard();
+          m_mainKFPerspective.setSelectedBeans(new Vector());
+        }
+      });
+      
+      m_pasteB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          pasteFromClipboard(10, 10);
+
+          if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+            m_mainKFPerspective.setSelectedBeans(new Vector());
+          }
+        }
+      });
 
       fixedTools.setFloatable(false);
       toolBarPanel.add(fixedTools, BorderLayout.EAST);
@@ -2387,6 +2476,19 @@ public class KnowledgeFlowApp
     edit.setEnabled(false);
     beanContextMenu.insert(edit, menuItemCount);
     menuItemCount++;
+    
+    if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+      MenuItem copyItem = new MenuItem("Copy");
+      copyItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          copyToClipboard();
+          m_mainKFPerspective.setSelectedBeans(new Vector());
+        }
+      });
+      beanContextMenu.add(copyItem);
+      menuItemCount++;
+    }
+    
 
     if (bc instanceof MetaBean) {
       //JMenuItem ungroupItem = new JMenuItem("Ungroup");
@@ -2403,7 +2505,7 @@ public class KnowledgeFlowApp
             for (int i = 0; i < group.size(); i++) {
               BeanInstance tbi = (BeanInstance) group.elementAt(i);
               addComponent(tbi, false);
-              tbi.addBean(m_beanLayout);
+              tbi.addBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
             }
 
             for (int i = 0; i < associatedConnections.size(); i++) {
@@ -2444,6 +2546,12 @@ public class KnowledgeFlowApp
               + "$" + bc.hashCode();
             m_logPanel.statusMessage(key + "|remove");
           }
+          
+          // delete any that have been actively selected
+          if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+            deleteSelectedBeans();
+          }
+          
           revalidate();
           m_mainKFPerspective.setEditedStatus(true);
           notifyIsDirty();
@@ -2946,6 +3054,274 @@ public class KnowledgeFlowApp
                            m_mainKFPerspective.getCurrentTabIndex());
     }    
   }
+  
+  private boolean copyToClipboard() {
+    Vector selectedBeans = m_mainKFPerspective.getSelectedBeans();
+    if (selectedBeans == null || selectedBeans.size() == 0) {
+      return false;
+    }
+    
+    Vector associatedConnections = 
+      BeanConnection.associatedConnections(selectedBeans, 
+          m_mainKFPerspective.getCurrentTabIndex());
+    
+    // xml serialize to a string and store in the
+    // clipboard variable
+    Vector v = new Vector();
+    v.setSize(2);
+    v.set(XMLBeans.INDEX_BEANINSTANCES, selectedBeans);
+    v.set(XMLBeans.INDEX_BEANCONNECTIONS, associatedConnections);
+    try {
+      XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+          m_mainKFPerspective.getCurrentTabIndex());
+      java.io.StringWriter sw = new java.io.StringWriter();
+      xml.write(sw, v);
+      m_pasteBuffer = sw.getBuffer();
+      //System.out.println(m_pasteBuffer.toString());
+    } catch (Exception e1) {
+      m_logPanel.logMessage("[KnowledgeFlow] problem copying beans: " 
+          + e1.getMessage());
+      e1.printStackTrace();
+      return false;
+    }
+    
+    m_pasteB.setEnabled(true);
+    return true;
+  }
+  
+  private boolean pasteFromClipboard(int x, int y) {
+    
+    java.io.StringReader sr = 
+      new java.io.StringReader(m_pasteBuffer.toString());
+    try {
+      XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+          m_mainKFPerspective.getCurrentTabIndex());
+      Vector v = (Vector)xml.read(sr);
+      Vector beans = (Vector)v.get(XMLBeans.INDEX_BEANINSTANCES);
+      Vector connections = (Vector)v.get(XMLBeans.INDEX_BEANCONNECTIONS);
+      
+      // TODO adjust beans coords with respect to x, y. Look for 
+      // the smallest x and the smallest y (top left corner of the bounding)
+      // box.
+      int minX = Integer.MAX_VALUE;
+      int minY = Integer.MAX_VALUE;
+      boolean adjust = false;
+      for (int i = 0; i < beans.size(); i++) {
+        BeanInstance b = (BeanInstance)beans.get(i);
+        if (b.getX() < minX) {
+          minX = b.getX();
+          adjust = true;
+        }
+        if (b.getY() < minY) {
+          minY = b.getY();
+          adjust = true;
+        }
+      }
+      if (adjust) {
+        int deltaX = x - minX;
+        int deltaY = y - minY;
+        for (int i = 0; i < beans.size(); i++) {
+          BeanInstance b = (BeanInstance)beans.get(i);
+          b.setX(b.getX() + deltaX);
+          b.setY(b.getY() + deltaY);
+        }
+      }            
+      
+      // TODO integrate these beans
+      integrateFlow(beans, connections, false, false);
+      setEnvironment();
+      notifyIsDirty();
+    } catch (Exception e) {
+      m_logPanel.logMessage("[KnowledgeFlow] problem pasting beans: " 
+          + e.getMessage());
+      e.printStackTrace();
+    }
+    
+    revalidate();
+    notifyIsDirty();
+    
+    return true;
+  }
+  
+  private void deleteSelectedBeans() {
+    Vector v = m_mainKFPerspective.getSelectedBeans();
+    for (int i = 0; i < v.size(); i++) {
+      BeanInstance b = (BeanInstance)v.get(i);
+
+      BeanConnection.removeConnections(b, m_mainKFPerspective.getCurrentTabIndex());
+      b.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
+      if (b instanceof BeanCommon) {            
+        String key = ((BeanCommon)b).getCustomName()
+        + "$" + b.hashCode();
+        m_logPanel.statusMessage(key + "|remove");
+      }
+    }
+    m_mainKFPerspective.setSelectedBeans(new Vector());
+    revalidate();
+    notifyIsDirty();
+  }
+  
+  // right click over empty canvas (not on a bean)
+  private void rightClickCanvasPopup(final int x, final int y) {
+    
+    Vector closestConnections = 
+      BeanConnection.getClosestConnections(new Point(x, y), 
+                            10, m_mainKFPerspective.getCurrentTabIndex());
+
+    if (m_mainKFPerspective.getSelectedBeans().size() > 0 ||
+        closestConnections.size() > 0 || 
+        (m_pasteBuffer != null && m_pasteBuffer.length() > 0)) {
+      PopupMenu rightClickMenu = new PopupMenu();
+      int menuItemCount = 0;
+      
+      if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+        MenuItem copyItem = new MenuItem("Copy selected");
+        copyItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            
+            copyToClipboard();
+            m_mainKFPerspective.setSelectedBeans(new Vector());
+          }
+        });
+        rightClickMenu.add(copyItem);
+        menuItemCount++;
+        
+        MenuItem cutItem = new MenuItem("Cut selected");
+        cutItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            // only delete if our copy was successful!
+            if (copyToClipboard()) {              
+              deleteSelectedBeans();
+            }
+          }
+        });
+        rightClickMenu.add(cutItem);
+        menuItemCount++;
+        
+        MenuItem deleteSelected = new MenuItem("Delete selected");
+        deleteSelected.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            
+            deleteSelectedBeans();
+          }
+        });
+        rightClickMenu.add(deleteSelected);
+        menuItemCount++;
+        
+        // Able to group selected subflow?
+        boolean groupable = true;
+        final Vector selected = m_mainKFPerspective.getSelectedBeans();
+        // check if sub flow is valid
+        final Vector inputs = BeanConnection.inputs(selected, 
+            m_mainKFPerspective.getCurrentTabIndex());
+        final Vector outputs = BeanConnection.outputs(selected, 
+            m_mainKFPerspective.getCurrentTabIndex());
+        
+        // screen the inputs and outputs
+        if (inputs.size() == 0 || outputs.size() == 0) {
+          groupable = false;
+        }
+
+        // dissallow MetaBeans in the selected set (for the
+        // time being).
+        if (groupable) {
+          for (int i = 0; i < selected.size(); i++) {
+            BeanInstance temp = (BeanInstance)selected.elementAt(i);
+            if (temp.getBean() instanceof MetaBean) {
+              groupable = false;
+              break;
+            }
+          }
+        }
+
+        if (groupable) {
+          // show connector dots for input beans
+          for (int i = 0; i < inputs.size(); i++) {
+            BeanInstance temp = (BeanInstance)inputs.elementAt(i);
+            if (temp.getBean() instanceof Visible) {
+              ((Visible)temp.getBean()).getVisual().
+              setDisplayConnectors(true, java.awt.Color.red);
+            }
+          }
+
+          // show connector dots for output beans
+          for (int i = 0; i < outputs.size(); i++) {
+            BeanInstance temp = (BeanInstance)outputs.elementAt(i);
+            if (temp.getBean() instanceof Visible) {
+              ((Visible)temp.getBean()).getVisual().
+              setDisplayConnectors(true, java.awt.Color.green);
+            }
+          }
+          
+          MenuItem groupItem = new MenuItem("Group selected");
+          groupItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              groupSubFlow(selected, inputs, outputs);
+            }
+          });
+          rightClickMenu.add(groupItem);
+          menuItemCount++;
+        }                        
+      }
+      
+      if (m_pasteBuffer != null && m_pasteBuffer.length() > 0) {
+        MenuItem pasteItem = new MenuItem("Paste");
+        pasteItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            // deserialize, integerate and
+            // position at x, y
+
+            pasteFromClipboard(x, y);
+
+            if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+              m_mainKFPerspective.setSelectedBeans(new Vector());
+            }
+          }        
+        });
+        rightClickMenu.add(pasteItem);
+        menuItemCount++;
+      }
+      
+      if (closestConnections.size() > 0) {
+        MenuItem deleteConnection = new MenuItem("Delete Connection:");
+        deleteConnection.setEnabled(false);
+        rightClickMenu.insert(deleteConnection, menuItemCount);
+        menuItemCount++;
+
+        for (int i = 0; i < closestConnections.size(); i++) {
+          final BeanConnection bc = (BeanConnection) closestConnections.elementAt(i);
+          String connName = bc.getSourceEventSetDescriptor().getName();
+
+          //JMenuItem deleteItem = new JMenuItem(connName);
+          String targetName = "";
+          if (bc.getTarget().getBean() instanceof BeanCommon) {
+            targetName = ((BeanCommon)bc.getTarget().getBean()).getCustomName();
+          } else {
+            targetName = bc.getTarget().getBean().getClass().getName();
+            targetName = targetName.substring(targetName.lastIndexOf('.')+1, targetName.length());
+          }
+          MenuItem deleteItem = new MenuItem(connName + "-->" + targetName);
+          deleteItem.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                bc.remove(m_mainKFPerspective.getCurrentTabIndex());
+                m_beanLayout.revalidate();
+                m_beanLayout.repaint();
+                m_mainKFPerspective.setEditedStatus(true);
+                if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
+                  m_mainKFPerspective.setSelectedBeans(new Vector());
+                }                
+                notifyIsDirty();
+              }
+            });
+          rightClickMenu.add(deleteItem);
+          menuItemCount++;
+        }
+      }
+      //
+      m_beanLayout.add(rightClickMenu);
+      rightClickMenu.show(m_beanLayout, x, y);
+    }
+  }
                                 
   /**
    * Popup a menu giving choices for connections to delete (if any)
@@ -3156,80 +3532,42 @@ public class KnowledgeFlowApp
     
     m_mainKFPerspective.setSelectedBeans(selected);
   }
-
-  /**
-   * Handles the checking of a selected set of components
-   * for suitability for grouping. If suitable the user
-   * is prompted for a name and then a MetaBean is used
-   * group the components.
-   */
-  private void checkSubFlow(int startX, int startY,
-                            int endX, int endY) {
-
-    java.awt.Rectangle r = 
-      new java.awt.Rectangle((startX < endX) ? startX : endX,
-                             (startY < endY) ? startY: endY,
-                             Math.abs(startX - endX),
-                             Math.abs(startY - endY));
-    /*//    System.err.println(r);
-    Vector selected = 
-      BeanInstance.findInstances(r, m_mainKFPerspective.getCurrentTabIndex());
-    //    System.err.println(r); */
+  
+  private void groupSubFlow(Vector selected, Vector inputs, Vector outputs) {
     
-    Vector selected = m_mainKFPerspective.getSelectedBeans();
-    if (selected.size() == 0) {
-      return;
-    }
-    
-    // check if sub flow is valid
-    Vector inputs = BeanConnection.inputs(selected, 
-        m_mainKFPerspective.getCurrentTabIndex());
-    Vector outputs = BeanConnection.outputs(selected, 
-        m_mainKFPerspective.getCurrentTabIndex());
-    
-    // screen the inputs and outputs
-    if (inputs.size() == 0 || outputs.size() == 0) {
-      return;
-    }
-
-    // dissallow MetaBeans in the selected set (for the
-    // time being).
+    int upperLeftX = Integer.MAX_VALUE;
+    int upperLeftY = Integer.MAX_VALUE;
+    int lowerRightX = Integer.MIN_VALUE;
+    int lowerRightY = Integer.MIN_VALUE;
     for (int i = 0; i < selected.size(); i++) {
-      BeanInstance temp = (BeanInstance)selected.elementAt(i);
-      if (temp.getBean() instanceof MetaBean) {
-        return;
+      BeanInstance b = (BeanInstance)selected.get(i);
+      if (b.getX() < upperLeftX) {
+        upperLeftX = b.getX();
+      }
+      
+      if (b.getY() < upperLeftY) {
+        upperLeftY = b.getY();
+      }
+      
+      if (b.getX() > lowerRightX) {
+        ImageIcon ic = ((Visible)b.getBean()).getVisual().getStaticIcon();
+//        lowerRightX = (b.getX() + ic.getIconWidth());
+        lowerRightX = b.getX();
+      }
+      
+      if (b.getY() > lowerRightY) {
+        ImageIcon ic = ((Visible)b.getBean()).getVisual().getStaticIcon();
+        // lowerRightY = (b.getY() + ic.getIconHeight());
+        lowerRightY = b.getY();
       }
     }
-
-    // show connector dots for selected beans
-    for (int i = 0; i < selected.size(); i++) {
-      BeanInstance temp = (BeanInstance)selected.elementAt(i);
-      if (temp.getBean() instanceof Visible) {
-        ((Visible)temp.getBean()).getVisual().setDisplayConnectors(true);
-      }
-    }
-
-    // show connector dots for input beans
-    for (int i = 0; i < inputs.size(); i++) {
-      BeanInstance temp = (BeanInstance)inputs.elementAt(i);
-      if (temp.getBean() instanceof Visible) {
-        ((Visible)temp.getBean()).getVisual().
-          setDisplayConnectors(true, java.awt.Color.red);
-      }
-    }
-
-    // show connector dots for output beans
-    for (int i = 0; i < outputs.size(); i++) {
-      BeanInstance temp = (BeanInstance)outputs.elementAt(i);
-      if (temp.getBean() instanceof Visible) {
-        ((Visible)temp.getBean()).getVisual().
-          setDisplayConnectors(true, java.awt.Color.green);
-      }
-    }
+        
+    java.awt.Rectangle r = new java.awt.Rectangle(upperLeftX, upperLeftY,
+        lowerRightX, lowerRightY);
     
     BufferedImage subFlowPreview = null; 
     try {
-      	subFlowPreview = createImage(m_beanLayout, r);              
+        subFlowPreview = createImage(m_beanLayout, r);              
     } catch (IOException ex) {
       ex.printStackTrace();
       // drop through quietly
@@ -3262,10 +3600,17 @@ public class KnowledgeFlowApp
         if (group instanceof BeanContextChild) {
           m_bcSupport.add(group);
         }
-        BeanInstance bi = new BeanInstance(m_beanLayout, group, 
+        
+        int bx = (int)r.getCenterX();
+        int by = (int)r.getCenterY();
+        
+        /*BeanInstance bi = new BeanInstance(m_beanLayout, group, 
                                            (int)r.getX()+(int)(r.getWidth()/2),
                                            (int)r.getY()+(int)(r.getHeight()/2),
-                                           m_mainKFPerspective.getCurrentTabIndex());
+                                           m_mainKFPerspective.getCurrentTabIndex()); */
+        BeanInstance bi = new BeanInstance(m_beanLayout, group, bx, by, 
+            m_mainKFPerspective.getCurrentTabIndex());
+        System.err.println("Meta x, y " + bi.getX() + " " +bi.getY());
         for (int i = 0; i < selected.size(); i++) {
           BeanInstance temp = (BeanInstance)selected.elementAt(i);
           temp.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
@@ -3282,14 +3627,18 @@ public class KnowledgeFlowApp
         addComponent(bi, true);
       }
     }
-
-    // hide connector dots
+    
     for (int i = 0; i < selected.size(); i++) {
       BeanInstance temp = (BeanInstance)selected.elementAt(i);
       if (temp.getBean() instanceof Visible) {
         ((Visible)temp.getBean()).getVisual().setDisplayConnectors(false);
       }
-    }    
+    }
+    
+    m_mainKFPerspective.setSelectedBeans(new Vector());
+    
+    revalidate();
+    notifyIsDirty();
   }
 
   /**
@@ -3385,7 +3734,7 @@ public class KnowledgeFlowApp
           ois.close();
         }                
 
-        integrateFlow(beans, connections);
+        integrateFlow(beans, connections, true, false);
         setEnvironment();
         m_logPanel.clearStatus();
         m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
@@ -3404,7 +3753,8 @@ public class KnowledgeFlowApp
   }
 
   // Link the supplied beans into the KnowledgeFlow gui
-  private void integrateFlow(Vector beans, Vector connections) {
+  private void integrateFlow(Vector beans, Vector connections, boolean replace,
+      boolean notReplaceAndSourcedFromBinary) {
     java.awt.Color bckC = getBackground();
     m_bcSupport = new BeanContextSupport();
     m_bcSupport.setDesignTime(true);
@@ -3430,10 +3780,18 @@ public class KnowledgeFlowApp
         m_bcSupport.add(tempB.getBean());
       }
     }
-    BeanInstance.setBeanInstances(beans, m_beanLayout, 
-        m_mainKFPerspective.getCurrentTabIndex());
-    BeanConnection.setConnections(connections, 
-        m_mainKFPerspective.getCurrentTabIndex());
+    
+    if (replace) {
+      BeanInstance.setBeanInstances(beans, m_beanLayout, 
+          m_mainKFPerspective.getCurrentTabIndex());
+      BeanConnection.setConnections(connections, 
+          m_mainKFPerspective.getCurrentTabIndex());
+    } else if (notReplaceAndSourcedFromBinary){
+      BeanInstance.appendBeans(m_beanLayout, beans, 
+          m_mainKFPerspective.getCurrentTabIndex());
+      BeanConnection.appendConnections(connections, 
+          m_mainKFPerspective.getCurrentTabIndex());
+    }
     m_beanLayout.revalidate();
     m_beanLayout.repaint();
   }
@@ -3458,7 +3816,7 @@ public class KnowledgeFlowApp
     
     // reset environment variables
     m_flowEnvironment = new Environment();
-    integrateFlow(beans, connections);
+    integrateFlow(beans, connections, true, false);
   }
 
   /**
@@ -3484,7 +3842,7 @@ public class KnowledgeFlowApp
 
     //    tempWrite(beans, connections);
     
-    integrateFlow(beans, connections);
+    integrateFlow(beans, connections, true, false);
     return copy;
   }
   
