@@ -500,6 +500,28 @@ public class BeanInstance
       container.repaint();
     }
   }
+  
+  public static void appendBeans(JComponent container, Vector beans, int tab) {
+    if (TABBED_COMPONENTS.size() > 0 && tab < TABBED_COMPONENTS.size()) {
+      Vector components = TABBED_COMPONENTS.get(tab);
+      //
+      
+      for (int i = 0; i < beans.size(); i++) {
+        components.add(beans.get(i));
+        if (container != null) {
+          Object bean = ((BeanInstance)beans.elementAt(i)).getBean();
+          if (Beans.isInstanceOf(bean, JComponent.class)) {
+            container.add((JComponent)bean);
+          }
+        }        
+      }
+      
+      if (container != null) {
+        container.revalidate();
+        container.repaint();
+      }      
+    }
+  }
 
   /**
    * Adds this bean to the global list of beans and
