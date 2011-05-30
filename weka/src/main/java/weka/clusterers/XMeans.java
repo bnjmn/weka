@@ -2351,6 +2351,15 @@ public class XMeans
     temp.append("BIC-Value : " + Utils.doubleToString(m_Bic,6) + "\n");
     return temp.toString();
   }
+  
+  /**
+   * Return the centers of the clusters as an Instances object
+   * 
+   * @return the cluster centers.
+   */
+  public Instances getClusterCenters() {
+    return m_ClusterCenters;
+  }
 
   /**
    * Print centers for debug.
