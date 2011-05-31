@@ -542,7 +542,6 @@ public class BeanInstance
     
     Vector components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
-      System.out.println("Adding to list " + index);
       components = TABBED_COMPONENTS.get(index);
     }
 
