@@ -1927,8 +1927,19 @@ public class KnowledgeFlowApp
         public void actionPerformed(ActionEvent e) {
           if (BeanInstance.
               getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0) {
-            m_mainKFPerspective.setSelectedBeans(BeanInstance.
-                getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()));
+            
+            // toggle
+            if (BeanInstance.getBeanInstances(m_mainKFPerspective.
+                getCurrentTabIndex()).size() == 
+                  m_mainKFPerspective.getSelectedBeans().size()) {
+              // unselect all beans
+              m_mainKFPerspective.setSelectedBeans(new Vector());
+            } else {
+              
+              // select all beans
+              m_mainKFPerspective.setSelectedBeans(BeanInstance.
+                  getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()));
+            }
           }
         }
       });
