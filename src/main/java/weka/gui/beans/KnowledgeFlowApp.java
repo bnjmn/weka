@@ -76,6 +76,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -515,6 +516,7 @@ public class KnowledgeFlowApp
         setCursor(Cursor.
             getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         m_mode = ADDING;
+        m_pasteB.setEnabled(false);
 
       } catch (Exception ex) {
         System.err.println("Problem instantiating bean \"" 
@@ -612,6 +614,9 @@ public class KnowledgeFlowApp
     /** Keeps track of any highlighted beans on the canvas for a tab */
     protected List<Vector> m_selectedBeans = new ArrayList<Vector>();
     
+    /** Keeps track of the undo buffers for each tab */
+    protected List<Stack<File>> m_undoBufferList = new ArrayList<Stack<File>>();
+    
     public JTabbedPane getTabbedPane() {
       return m_flowTabs;
     }
@@ -677,6 +682,7 @@ public class KnowledgeFlowApp
         m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0) 
             && !getExecuting());
         m_stopB.setEnabled(getExecuting());
+        m_undoB.setEnabled(!getExecuting() && getUndoBuffer().size() > 0);
       }
     }
     
@@ -703,6 +709,7 @@ public class KnowledgeFlowApp
         m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0) 
             && !getExecuting());
+        m_undoB.setEnabled(!getExecuting() && getUndoBuffer().size() > 0);
       }
     }
     
@@ -803,14 +810,40 @@ public class KnowledgeFlowApp
       return false;
     }
     
-    public Vector getSelectedBeans() {
+    public synchronized void setUndoBuffer(Stack<File> buffer) {
+      if (getNumTabs() > 0) {
+        setUndoBuffer(getCurrentTabIndex(), buffer);
+      }
+    }
+    
+    public synchronized void setUndoBuffer(int index, Stack<File> buffer) {
+      if (index < getNumTabs() && index >= 0) {
+        m_undoBufferList.set(index, buffer);
+      }
+    }
+    
+    public synchronized Stack<File> getUndoBuffer() {
+      if (getNumTabs() > 0) {
+        return getUndoBuffer(getCurrentTabIndex());
+      }
+      return null;
+    }
+    
+    public synchronized Stack<File> getUndoBuffer(int index) {
+      if (index >= 0 && index < getNumTabs()) {
+        return m_undoBufferList.get(index);
+      }
+      return null;
+    }
+    
+    public synchronized Vector getSelectedBeans() {
       if (getNumTabs() > 0) {
         return getSelectedBeans(getCurrentTabIndex());
       }
       return null;
     }
     
-    public Vector getSelectedBeans(int index) {
+    public synchronized Vector getSelectedBeans(int index) {
       if (index < getNumTabs() && index >= 0) {
         return m_selectedBeans.get(index);
       }
@@ -850,6 +883,20 @@ public class KnowledgeFlowApp
           }
         }
       }
+    }
+    
+    public synchronized Environment getEnvironmentSettings() {
+      if (getNumTabs() > 0) {
+        return getEnvironmentSettings(getCurrentTabIndex());
+      }
+      return null;
+    }
+    
+    public synchronized Environment getEnvironmentSettings(int index) {
+      if (index < getNumTabs() && index >= 0) {
+        return m_environmentSettings.get(index);
+      }
+      return null;
     }
 
     @Override
@@ -987,6 +1034,8 @@ public class KnowledgeFlowApp
       m_editedList.add(new Boolean(false));
       m_executingList.add(new Boolean(false));
       m_selectedBeans.add(new Vector());
+      m_undoBufferList.add(new Stack<File>());
+      
       m_flowTabs.addTab(tabTitle, splitHolder);
       int tabIndex = getNumTabs() - 1;
       m_flowTabs.setTabComponentAt(tabIndex, new CloseableTabTitle(m_flowTabs));
@@ -1106,10 +1155,7 @@ public class KnowledgeFlowApp
       }
     }
   }
-  
-  
-  
-
+      
   // Used for measuring and splitting icon labels
   // over multiple lines
   FontMetrics m_fontM;
@@ -1120,6 +1166,7 @@ public class KnowledgeFlowApp
   protected static final int CONNECTING = 2;
   protected static final int ADDING = 3;
   protected static final int SELECTING = 4;
+  protected static final int PASTING = 5;
 
   // which operation is in progress
   private int m_mode = NONE;
@@ -1167,6 +1214,7 @@ public class KnowledgeFlowApp
   private JButton m_deleteB;
   private JButton m_noteB;
   private JButton m_selectAllB;
+  private JButton m_undoB;
   
   private JToggleButton m_snapToGridB;
   // private JButton m_deleteB;
@@ -1575,11 +1623,19 @@ public class KnowledgeFlowApp
                   y = snapToGrid(me.getY());
                 }
                 
+                addUndoPoint();
                 addComponent(x, y);
                 m_componentTree.clearSelection();
                 m_mainKFPerspective.setEditedStatus(true);
               }
             }
+          }
+          
+          if (m_mode == PASTING && m_pasteBuffer.length() > 0) {
+            pasteFromClipboard(me.getX(), me.getY());
+            m_mode = NONE;
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            return;
           }
         
           if (m_mode == CONNECTING) {
@@ -1610,8 +1666,9 @@ public class KnowledgeFlowApp
                 }
               }
               if (doConnection) {
-                // attempt to connect source and target beans
-
+                
+                addUndoPoint();
+                // attempt to connect source and target beans                                
                 if (bi.getBean() instanceof MetaBean) {
                   BeanConnection.doMetaConnection(m_editElement, bi,
                                                   m_sourceEventSetDescriptor,
@@ -1812,12 +1869,18 @@ public class KnowledgeFlowApp
       m_selectAllB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
       m_selectAllB.setToolTipText("Select all");
       
+      m_undoB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
+        "arrow_undo.png")));
+      m_undoB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_undoB.setToolTipText("Undo");
+      
 
       fixedTools.add(m_selectAllB);
       fixedTools.add(m_cutB);
       fixedTools.add(m_copyB);
       fixedTools.add(m_deleteB);
       fixedTools.add(m_pasteB);
+      fixedTools.add(m_undoB);
       fixedTools.add(m_noteB);
       fixedTools.addSeparator();
       fixedTools.add(m_snapToGridB);      
@@ -1888,11 +1951,15 @@ public class KnowledgeFlowApp
       
       m_pasteB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          pasteFromClipboard(10, 10);
+          
+          setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+          m_mode = PASTING;
+          
+          /* pasteFromClipboard(10, 10);
 
           if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
             m_mainKFPerspective.setSelectedBeans(new Vector());
-          }
+          } */
         }
       });
       
@@ -1916,6 +1983,19 @@ public class KnowledgeFlowApp
         setCursor(Cursor.
             getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         m_mode = ADDING;
+      }
+    });
+    
+    m_undoB.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        Stack<File> undo = m_mainKFPerspective.getUndoBuffer();
+        if (undo.size() > 0) {
+          File undoF = undo.pop();
+          if (undo.size() == 0) {
+            m_undoB.setEnabled(false);
+          }          
+          loadLayout(undoF, false, true);          
+        }        
       }
     });
     
@@ -3227,6 +3307,7 @@ public class KnowledgeFlowApp
   }
   
   private boolean pasteFromClipboard(int x, int y) {
+    addUndoPoint();
     
     java.io.StringReader sr = 
       new java.io.StringReader(m_pasteBuffer.toString());
@@ -3268,6 +3349,7 @@ public class KnowledgeFlowApp
       integrateFlow(beans, connections, false, false);
       setEnvironment();
       notifyIsDirty();
+      m_mainKFPerspective.setSelectedBeans(beans);
     } catch (Exception e) {
       m_logPanel.logMessage("[KnowledgeFlow] problem pasting beans: " 
           + e.getMessage());
@@ -3281,7 +3363,13 @@ public class KnowledgeFlowApp
   }
   
   private void deleteSelectedBeans() {
+    
     Vector v = m_mainKFPerspective.getSelectedBeans();
+    if (v.size() > 0) {
+      m_mainKFPerspective.setSelectedBeans(new Vector());
+    }
+    addUndoPoint();
+    
     for (int i = 0; i < v.size(); i++) {
       BeanInstance b = (BeanInstance)v.get(i);
 
@@ -3299,6 +3387,28 @@ public class KnowledgeFlowApp
     
     m_selectAllB.setEnabled(BeanInstance.
         getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);
+  }
+  
+  private void addUndoPoint() {
+    try {
+      Stack undo = m_mainKFPerspective.getUndoBuffer();
+      File tempFile = File.createTempFile("knowledgeFlow", FILE_EXTENSION);
+      tempFile.deleteOnExit();
+
+      if(saveLayout(tempFile, m_mainKFPerspective.getCurrentTabIndex(), true)) {
+        undo.push(tempFile);
+        
+        // keep no more than 20 undo points
+        if (undo.size() > 20) {
+          undo.remove(0);
+        }
+        m_undoB.setEnabled(true);
+      }
+      
+    } catch (Exception ex) {
+      m_logPanel.logMessage("[KnowledgeFlow] a problem occurred while trying to " +
+      		"create a undo point : " + ex.getMessage());
+    }    
   }
   
   // right click over empty canvas (not on a bean)
@@ -3425,10 +3535,6 @@ public class KnowledgeFlowApp
             // position at x, y
 
             pasteFromClipboard(x, y);
-
-            if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
-              m_mainKFPerspective.setSelectedBeans(new Vector());
-            }
           }        
         });
         rightClickMenu.add(pasteItem);
@@ -3460,6 +3566,8 @@ public class KnowledgeFlowApp
           MenuItem deleteItem = new MenuItem(connName + "-->" + targetName);
           deleteItem.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent e) {
+                addUndoPoint();
+                
                 bc.remove(m_mainKFPerspective.getCurrentTabIndex());
                 m_beanLayout.revalidate();
                 m_beanLayout.repaint();
@@ -3969,6 +4077,10 @@ public class KnowledgeFlowApp
           + ex.getMessage() + ").");
       ex.printStackTrace();
     }        
+    m_loadB.setEnabled(true);
+    m_saveB.setEnabled(true);
+    m_playB.setEnabled(true);
+    m_playBB.setEnabled(true);
   }
 
   // Link the supplied beans into the KnowledgeFlow gui
@@ -4116,6 +4228,89 @@ public class KnowledgeFlowApp
       }
     }
   }
+  
+  public void saveLayout(File toFile, int tabIndex) {
+    saveLayout(toFile, tabIndex, false);
+  }
+  
+  protected boolean saveLayout(File sFile, int tabIndex, boolean isUndoPoint) {
+    java.awt.Color bckC = getBackground();
+    
+    Vector beans = 
+      BeanInstance.getBeanInstances(tabIndex);
+    detachFromLayout(beans);
+
+    // now serialize components vector and connections vector
+    try {
+      // KOML?
+      if ((KOML.isPresent()) && 
+          (sFile.getAbsolutePath().toLowerCase().
+              endsWith(KOML.FILE_EXTENSION + "kf")) ) {
+        Vector v = new Vector();
+        v.setSize(2);
+        v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
+        v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+            BeanConnection.getConnections(tabIndex));
+        KOML.write(sFile.getAbsolutePath(), v);
+      } /* XStream */ else if ((XStream.isPresent()) && 
+          (sFile.getAbsolutePath().toLowerCase().
+              endsWith(XStream.FILE_EXTENSION + "kf")) ) {
+        Vector v = new Vector();
+        v.setSize(2);
+        v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
+        v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+            BeanConnection.getConnections(tabIndex));
+        XStream.write(sFile.getAbsolutePath(), v);
+      } /* XML? */ else if (sFile.getAbsolutePath().
+          toLowerCase().endsWith(FILE_EXTENSION_XML)) {
+        Vector v = new Vector();
+        v.setSize(2);
+        v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
+        v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+            BeanConnection.getConnections(tabIndex));
+        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, tabIndex); 
+        xml.write(sFile, v);
+      } /* binary */ else {
+        OutputStream os = new FileOutputStream(sFile);
+        ObjectOutputStream oos = new ObjectOutputStream(os);
+        oos.writeObject(beans);
+        oos.writeObject(BeanConnection.getConnections(tabIndex));
+        oos.flush();
+        oos.close();
+      } 
+    } catch (Exception ex) {
+        m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
+        m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
+            + ex.getMessage() + ").");
+        ex.printStackTrace();
+        return false;
+      } finally {
+        // restore this panel as a property change listener in the beans
+        for (int i = 0; i < beans.size(); i++) {
+          BeanInstance tempB = (BeanInstance)beans.elementAt(i);
+          if (tempB.getBean() instanceof Visible) {
+            ((Visible)(tempB.getBean())).getVisual().
+            addPropertyChangeListener(this);
+
+            if (tempB.getBean() instanceof MetaBean) {
+              ((MetaBean)tempB.getBean()).
+              addPropertyChangeListenersSubFlow(this);
+            }
+            // Restore the default background colour
+            ((Visible)(tempB.getBean())).getVisual().
+            setBackground(bckC);
+            ((JComponent)(tempB.getBean())).setBackground(bckC);
+          }
+        }
+        
+        if (!isUndoPoint) {
+          Environment e = m_mainKFPerspective.getEnvironmentSettings();
+          e.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
+          m_mainKFPerspective.setEditedStatus(tabIndex, false);
+        }
+      }
+      return true;
+    }
 
   /**
    * Serialize the layout to a file
@@ -4165,85 +4360,9 @@ public class KnowledgeFlowApp
                            sFile.getName() + FILE_EXTENSION_XML);
         }
       }
-    
-      // now serialize components vector and connections vector
-      try {
-        // KOML?
-        if ((KOML.isPresent()) && 
-            (sFile.getAbsolutePath().toLowerCase().
-             endsWith(KOML.FILE_EXTENSION + "kf")) ) {
-          Vector v = new Vector();
-          v.setSize(2);
-          v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-          v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
-              BeanConnection.getConnections(tabIndex));
-          KOML.write(sFile.getAbsolutePath(), v);
-        } /* XStream */ else if ((XStream.isPresent()) && 
-            (sFile.getAbsolutePath().toLowerCase().
-             endsWith(XStream.FILE_EXTENSION + "kf")) ) {
-          Vector v = new Vector();
-          v.setSize(2);
-          v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-          v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
-              BeanConnection.getConnections(tabIndex));
-          XStream.write(sFile.getAbsolutePath(), v);
-        } /* XML? */ else if (sFile.getAbsolutePath().
-                              toLowerCase().endsWith(FILE_EXTENSION_XML)) {
-          Vector v = new Vector();
-          v.setSize(2);
-          v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-          v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
-              BeanConnection.getConnections(tabIndex));
-          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, tabIndex); 
-          xml.write(sFile, v);
-        } /* binary */ else {
-          OutputStream os = new FileOutputStream(sFile);
-          ObjectOutputStream oos = new ObjectOutputStream(os);
-          oos.writeObject(beans);
-          oos.writeObject(BeanConnection.getConnections(tabIndex));
-          oos.flush();
-          oos.close();
-        }
-        m_logPanel.statusMessage("[KnowledgeFlow]|Flow saved.");
-        
-        // set the internal knowledgeflow directory environment var for this flow
-        m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
-        setEnvironment();
-        
-        m_mainKFPerspective.setEditedStatus(tabIndex, false);
-        m_mainKFPerspective.setFlowFile(tabIndex, sFile);
-        String flowName = sFile.getName();
-        if (flowName.lastIndexOf('.') > 0) {
-          flowName = flowName.substring(0, flowName.lastIndexOf('.'));
-        }
-        m_mainKFPerspective.setTabTitle(tabIndex, flowName);
-      } catch (Exception ex) {
-        m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
-        m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
-            + ex.getMessage() + ").");
-	ex.printStackTrace();
-      } finally {
-	// restore this panel as a property change listener in the beans
-	for (int i = 0; i < beans.size(); i++) {
-	  BeanInstance tempB = (BeanInstance)beans.elementAt(i);
-	  if (tempB.getBean() instanceof Visible) {
-	    ((Visible)(tempB.getBean())).getVisual().
-	      addPropertyChangeListener(this);
-
-            if (tempB.getBean() instanceof MetaBean) {
-              ((MetaBean)tempB.getBean()).
-                addPropertyChangeListenersSubFlow(this);
-            }
-	    // Restore the default background colour
-	    ((Visible)(tempB.getBean())).getVisual().
-	      setBackground(bckC);
-	    ((JComponent)(tempB.getBean())).setBackground(bckC);
-	  }
-	}
-      }
-    }
-    //    m_saveB.setEnabled(true);
-    //    m_loadB.setEnabled(true);
+      
+      saveLayout(sFile, m_mainKFPerspective.getCurrentTabIndex(), false);
+    } 
   }
 
   /**
