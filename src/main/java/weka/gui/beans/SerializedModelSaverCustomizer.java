@@ -38,6 +38,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -82,7 +83,7 @@ public class SerializedModelSaverCustomizer
 
   private Window m_parentWindow;
   
-  private JFrame m_fileChooserFrame;
+  private JDialog m_fileChooserFrame;
   
   //private JTextField m_prefixText;
   private EnvironmentField m_prefixText;
@@ -267,12 +268,15 @@ public class SerializedModelSaverCustomizer
     browseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
-          final JFrame jf = new JFrame("Choose directory");
+          //final JFrame jf = new JFrame("Choose directory");
+          final JDialog jf = 
+            new JDialog((JDialog)SerializedModelSaverCustomizer.this.getTopLevelAncestor(), 
+                "Choose directory", true);
           jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
+          m_fileChooserFrame = jf;
           jf.pack();
           jf.setVisible(true);
-          m_fileChooserFrame = jf;
         } catch (Exception ex) {
           ex.printStackTrace();
         }
