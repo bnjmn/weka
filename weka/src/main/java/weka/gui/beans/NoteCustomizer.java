@@ -26,7 +26,6 @@ import java.awt.BorderLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.Customizer;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -40,7 +39,7 @@ import javax.swing.JScrollPane;
  * @version $Revision$
  *
  */
-public class NoteCustomizer extends JPanel implements Customizer,
+public class NoteCustomizer extends JPanel implements BeanCustomizer,
     CustomizerCloseRequester, CustomizerClosingListener {
   
   /**
@@ -56,6 +55,12 @@ public class NoteCustomizer extends JPanel implements Customizer,
   
   /** text area for displaying the note's text */
   protected JTextArea m_textArea = new JTextArea(5, 20);
+  
+  /**
+   *  Listener that wants to know the the modified status of the object that
+   * we're customizing
+   */
+  private ModifyListener m_modifyListener;
   
   /**
    * Constructs a new note customizer
@@ -98,6 +103,15 @@ public class NoteCustomizer extends JPanel implements Customizer,
   public void customizerClosing() {
     if (m_note != null) {
       m_note.setNoteText(m_textArea.getText());
+      
+      if (m_modifyListener != null) {
+        m_modifyListener.setModifiedStatus(NoteCustomizer.this, true);
+      }
     }    
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
   }
 }
