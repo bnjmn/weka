@@ -88,6 +88,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -2010,6 +2011,10 @@ public class KnowledgeFlowApp
     m_playB.setToolTipText("Run this flow (all start points launched in parallel)");
     m_playB.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        if (BeanInstance.getBeanInstances(m_mainKFPerspective.
+            getCurrentTabIndex()).size() == 0) {
+          return;
+        }
         runFlow(false);
       }
     });
@@ -2020,6 +2025,36 @@ public class KnowledgeFlowApp
     m_playBB.setToolTipText("Run this flow (start points launched sequentially)");
     m_playBB.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        if (BeanInstance.getBeanInstances(m_mainKFPerspective.
+            getCurrentTabIndex()).size() == 0) {
+          return;
+        }
+        if (!Utils.getDontShowDialog("weka.gui.beans.KnowledgeFlow.SequentialRunInfo")) {
+          JCheckBox dontShow = new JCheckBox("Do not show this message again");
+          Object[] stuff = new Object[2];
+          stuff[0] = "The order that data sources are launched in can be\n" +
+            "specified by setting a custom name for each data source that\n" + 
+            "that includes a number. E.g. \"1:MyArffLoader\". To set a name,\n" +
+            "right-click over a data source and select \"Set name\"\n\n" +
+            "If the prefix is not specified, then the order of execution\n" +
+            "will correspond to the order that the components were added\n" +
+            "to the layout. Note that it is also possible to prevent a data\n" +
+            "source from executing by prefixing its name with a \"!\". E.g\n" +
+            "\"!:MyArffLoader\"";
+          stuff[1] = dontShow;
+
+          JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff, 
+              "Sequential execution information", JOptionPane.OK_OPTION);
+          
+          if (dontShow.isSelected()) {
+            try {
+              Utils.setDontShowDialog("weka.gui.beans.KnowledgeFlow.SequentialRunInfo");
+            } catch (Exception ex) {
+              // quietly ignore
+            }
+          }
+        }
+        
         runFlow(true);
       }
     });

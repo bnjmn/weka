@@ -50,6 +50,7 @@ import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -91,7 +92,7 @@ public class LoaderCustomizer
     true); */
 
   private Window m_parentWindow;
-  private JFrame m_fileChooserFrame;
+  private JDialog m_fileChooserFrame;
   
   private EnvironmentField m_dbaseURLText;
   
@@ -160,10 +161,9 @@ public class LoaderCustomizer
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    }
-	  }
+	  }	  
 	  // closing
 	  if (m_fileChooserFrame != null) {
-	    // m_parentFrame.dispose();
 	    m_fileChooserFrame.dispose();
 	  }
 	}
@@ -411,12 +411,15 @@ public class LoaderCustomizer
     browseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
-          final JFrame jf = new JFrame("Choose file");
-          jf.getContentPane().setLayout(new BorderLayout());
+          //final JFrame jf = new JFrame("Choose file");
+          final JDialog jf = new JDialog((JDialog)LoaderCustomizer.this.getTopLevelAncestor(), 
+              "Choose file", true);
+          jf.setLayout(new BorderLayout());
+          //jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
+          m_fileChooserFrame = jf;
           jf.pack();
           jf.setVisible(true);
-          m_fileChooserFrame = jf;
         } catch (Exception ex) {
           ex.printStackTrace();
         }
@@ -492,7 +495,7 @@ public class LoaderCustomizer
           setFile(new File(ef.getText()));
           // tell the loader that a new file has been selected so
           // that it can attempt to load the header
-          m_dsLoader.setLoader(m_dsLoader.getLoader());
+          //m_dsLoader.setLoader(m_dsLoader.getLoader());
           m_dsLoader.newFileSelected();
         } catch (Exception ex) {
           ex.printStackTrace();

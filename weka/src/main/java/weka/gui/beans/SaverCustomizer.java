@@ -40,6 +40,7 @@ import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -87,7 +88,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
 
   private Window m_parentWindow;
   
-  private JFrame m_fileChooserFrame;
+  private JDialog m_fileChooserFrame;
 
   private EnvironmentField m_dbaseURLText;
 
@@ -502,12 +503,14 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     browseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
-          final JFrame jf = new JFrame("Choose directory");
-          jf.getContentPane().setLayout(new BorderLayout());
+          //final JFrame jf = new JFrame("Choose directory");
+          final JDialog jf = new JDialog((JDialog)SaverCustomizer.this.getTopLevelAncestor(), 
+              "Choose directory", true);
+          jf.setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
+          m_fileChooserFrame = jf;
           jf.pack();
           jf.setVisible(true);
-          m_fileChooserFrame = jf;
         } catch (Exception ex) {
           ex.printStackTrace();
         }
