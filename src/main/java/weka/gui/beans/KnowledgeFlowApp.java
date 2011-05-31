@@ -672,6 +672,8 @@ public class KnowledgeFlowApp
         m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_selectAllB.setEnabled(BeanInstance.
+            getBeanInstances(getCurrentTabIndex()).size() > 0 && !getExecuting());
         m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0) 
             && !getExecuting());
         m_stopB.setEnabled(getExecuting());
@@ -696,6 +698,8 @@ public class KnowledgeFlowApp
         m_stopB.setEnabled(getExecuting());
         m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_selectAllB.setEnabled(BeanInstance.
+            getBeanInstances(getCurrentTabIndex()).size() > 0 && !getExecuting());
         m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0) 
             && !getExecuting());
@@ -829,6 +833,8 @@ public class KnowledgeFlowApp
           BeanInstance temp = (BeanInstance)m_selectedBeans.get(index).elementAt(i);
           if (temp.getBean() instanceof Visible) {
             ((Visible)temp.getBean()).getVisual().setDisplayConnectors(false);
+          } else if (temp.getBean() instanceof Note) {
+            ((Note)temp.getBean()).setHighlighted(false);
           }
         }
         
@@ -839,6 +845,8 @@ public class KnowledgeFlowApp
           BeanInstance temp = (BeanInstance)beans.elementAt(i);
           if (temp.getBean() instanceof Visible) {
             ((Visible)temp.getBean()).getVisual().setDisplayConnectors(true);
+          } else if (temp.getBean() instanceof Note) {
+            ((Note)temp.getBean()).setHighlighted(true);
           }
         }
       }
@@ -967,7 +975,8 @@ public class KnowledgeFlowApp
       
       JSplitPane p2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, p1, tabLogPanel);
       p2.setOneTouchExpandable(true);
-      p2.setDividerLocation(500);
+      //p2.setDividerLocation(500);
+      p2.setDividerLocation(0.7);
       p2.setResizeWeight(1.0);
       JPanel splitHolder = new JPanel();
       splitHolder.setLayout(new BorderLayout());
@@ -1136,6 +1145,9 @@ public class KnowledgeFlowApp
    */
   private BeanLayout m_beanLayout = null;//new BeanLayout();
   
+  /** Whether to allow more than one tab or not */
+  private boolean m_allowMultipleTabs = true;
+  
   private Vector m_userComponents = new Vector();
   private boolean m_firstUserComponentOpp = true;
 
@@ -1153,6 +1165,8 @@ public class KnowledgeFlowApp
   private JButton m_copyB;
   private JButton m_pasteB;
   private JButton m_deleteB;
+  private JButton m_noteB;
+  private JButton m_selectAllB;
   
   private JToggleButton m_snapToGridB;
   // private JButton m_deleteB;
@@ -1405,9 +1419,11 @@ public class KnowledgeFlowApp
     if (v.size() > 0) {
       for (int i = 0; i < v.size(); i++) {
         BeanInstance b = (BeanInstance)v.get(i);
-        int x = b.getX();
-        int y = b.getY();
-        b.setXY(snapToGrid(x), snapToGrid(y));
+        //if (!(b.getBean() instanceof Note)) {
+          int x = b.getX();
+          int y = b.getY();
+          b.setXY(snapToGrid(x), snapToGrid(y));
+        //}
       }
       revalidate();
       m_beanLayout.repaint();
@@ -1779,18 +1795,32 @@ public class KnowledgeFlowApp
               "page_add.png")));
       m_newB.setToolTipText("New layout");
       m_newB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_newB.setEnabled(getAllowMultipleTabs());
       
       m_helpB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
         "help.png")));
       m_helpB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
       m_helpB.setToolTipText("Display help");
+      
+      m_noteB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
+        "note_add.png")));
+      m_noteB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_noteB.setToolTipText("Add a note to the layout");
+      
+      m_selectAllB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
+        "shape_group.png")));
+      m_selectAllB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+      m_selectAllB.setToolTipText("Select all");
+      
 
+      fixedTools.add(m_selectAllB);
       fixedTools.add(m_cutB);
       fixedTools.add(m_copyB);
       fixedTools.add(m_deleteB);
       fixedTools.add(m_pasteB);
+      fixedTools.add(m_noteB);
       fixedTools.addSeparator();
-      fixedTools.add(m_snapToGridB);
+      fixedTools.add(m_snapToGridB);      
       fixedTools.addSeparator();
       fixedTools.add(m_newB);
       fixedTools.add(m_saveB);
@@ -1823,6 +1853,16 @@ public class KnowledgeFlowApp
             clearLayout();
           }
         });
+      
+      m_selectAllB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (BeanInstance.
+              getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0) {
+            m_mainKFPerspective.setSelectedBeans(BeanInstance.
+                getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()));
+          }
+        }
+      });
       
       m_cutB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -1867,6 +1907,17 @@ public class KnowledgeFlowApp
       fixedTools.setFloatable(false);
       toolBarPanel.add(fixedTools, BorderLayout.EAST);
     }
+    
+    m_noteB.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        Note n = new Note();
+        m_toolBarBean = n;
+       
+        setCursor(Cursor.
+            getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+        m_mode = ADDING;
+      }
+    });
     
     m_playB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
         "resultset_next.png")));
@@ -2511,7 +2562,17 @@ public class KnowledgeFlowApp
   public void clearLayout() {
     stopFlow(); // try and stop any running components
     
-    m_mainKFPerspective.addTab("Untitled");
+    if (m_mainKFPerspective.getNumTabs() == 0 || getAllowMultipleTabs()) {
+      m_mainKFPerspective.addTab("Untitled");
+    }
+    
+    if (!getAllowMultipleTabs()) {
+      BeanConnection.setConnections(new Vector(), 
+          m_mainKFPerspective.getCurrentTabIndex());
+      BeanInstance.setBeanInstances(new Vector(), 
+          m_mainKFPerspective.getBeanLayout(m_mainKFPerspective.getCurrentTabIndex()), 
+          m_mainKFPerspective.getCurrentTabIndex());
+    }
     
     /*BeanInstance.reset(m_beanLayout);
     BeanConnection.reset();
@@ -2629,6 +2690,8 @@ public class KnowledgeFlowApp
           revalidate();
           m_mainKFPerspective.setEditedStatus(true);
           notifyIsDirty();
+          m_selectAllB.setEnabled(BeanInstance.
+              getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);
         }
       });
     if (bc instanceof BeanCommon) {
@@ -3233,6 +3296,9 @@ public class KnowledgeFlowApp
     m_mainKFPerspective.setSelectedBeans(new Vector());
     revalidate();
     notifyIsDirty();
+    
+    m_selectAllB.setEnabled(BeanInstance.
+        getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);
   }
   
   // right click over empty canvas (not on a bean)
@@ -3602,6 +3668,9 @@ public class KnowledgeFlowApp
     }
     m_pointerB.setSelected(true);
     m_mode = NONE;
+    
+    m_selectAllB.setEnabled(BeanInstance.
+        getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);
   }
 
   private void addComponent(int x, int y) {
@@ -3771,6 +3840,7 @@ public class KnowledgeFlowApp
     m_saveB.setEnabled(false);
     m_playB.setEnabled(false);
     m_playBB.setEnabled(false);
+    
     int returnVal = m_FileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       stopFlow();
@@ -3806,62 +3876,99 @@ public class KnowledgeFlowApp
       if (flowName.lastIndexOf('.') > 0) {
         flowName = flowName.substring(0, flowName.lastIndexOf('.'));
       }
-      m_mainKFPerspective.addTab(flowName);
-      //m_mainKFPerspective.setActiveTab(m_mainKFPerspective.getNumTabs() - 1);
-      m_mainKFPerspective.setFlowFile(oFile);
-      m_mainKFPerspective.setEditedStatus(false);
       
-      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
-    
-      try {
-        Vector beans       = new Vector();
-        Vector connections = new Vector();
-
-        // KOML?
-        if ( (KOML.isPresent()) && 
-             (oFile.getAbsolutePath().toLowerCase().
-              endsWith(KOML.FILE_EXTENSION + "kf")) ) {
-          Vector v     = (Vector) KOML.read(oFile.getAbsolutePath());
-          beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
-          connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-        } /* XStream */ else if ( (XStream.isPresent()) && 
-             (oFile.getAbsolutePath().toLowerCase().
-              endsWith(XStream.FILE_EXTENSION + "kf")) ) {
-          Vector v     = (Vector) XStream.read(oFile.getAbsolutePath());
-          beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
-          connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-        } /* XML? */ else if (oFile.getAbsolutePath().toLowerCase().
-                              endsWith(FILE_EXTENSION_XML)) {
-          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
-              m_mainKFPerspective.getCurrentTabIndex());
-          Vector v     = (Vector) xml.read(oFile);
-          beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
-          connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-          //connections  = new Vector();
-        } /* binary */ else {
-          InputStream is = new FileInputStream(oFile);
-          ObjectInputStream ois = new ObjectInputStream(is);
-          beans = (Vector) ois.readObject();
-          connections = (Vector) ois.readObject();
-          ois.close();
-        }                
-
-        integrateFlow(beans, connections, true, false);
-        setEnvironment();
-        m_logPanel.clearStatus();
-        m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
-      } catch (Exception ex) {
-        m_logPanel.statusMessage("[KnowledgeFlow]|Unable to load flow (see log).");
-        m_logPanel.logMessage("[KnowledgeFlow] Unable to load flow ("
-            + ex.getMessage() + ").");
-	ex.printStackTrace();
-      }
+      loadLayout(oFile, getAllowMultipleTabs());
     }
     m_loadB.setEnabled(true);
     m_playB.setEnabled(true);
     m_playBB.setEnabled(true);
-    m_saveB.setEnabled(true);
+    m_saveB.setEnabled(true);    
+  }
+  
+  /**
+   * Load a layout from a file
+   * 
+   * @param oFile the file to load from
+   * @param newTab true if the loaded layout should be displayed in a new tab
+   */
+  public void loadLayout(File oFile, boolean newTab) {
+    loadLayout(oFile, newTab, false);
+  }
+  
+  /**
+   * Load a layout from a file
+   * 
+   * @param oFile the file to load from
+   * @param newTab true if the loaded layout should be displayed in a new tab
+   * @param isUndo is this file an "undo" file?
+   */
+  protected void loadLayout(File oFile, boolean newTab, boolean isUndo) {
+    stopFlow();
+    m_loadB.setEnabled(false);
+    m_saveB.setEnabled(false);
+    m_playB.setEnabled(false);
+    m_playBB.setEnabled(false);
     
+    if (newTab) {
+      String flowName = oFile.getName();
+      if (flowName.lastIndexOf('.') > 0) {
+        flowName = flowName.substring(0, flowName.lastIndexOf('.'));
+      }
+      m_mainKFPerspective.addTab(flowName);
+      //m_mainKFPerspective.setActiveTab(m_mainKFPerspective.getNumTabs() - 1);
+      m_mainKFPerspective.setFlowFile(oFile);
+      m_mainKFPerspective.setEditedStatus(false);
+    }
+    
+    if (!isUndo) {
+      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
+    }
+    
+    try {
+      Vector beans       = new Vector();
+      Vector connections = new Vector();
+
+      // KOML?
+      if ( (KOML.isPresent()) && 
+           (oFile.getAbsolutePath().toLowerCase().
+            endsWith(KOML.FILE_EXTENSION + "kf")) ) {
+        Vector v     = (Vector) KOML.read(oFile.getAbsolutePath());
+        beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+        connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
+      } /* XStream */ else if ( (XStream.isPresent()) && 
+           (oFile.getAbsolutePath().toLowerCase().
+            endsWith(XStream.FILE_EXTENSION + "kf")) ) {
+        Vector v     = (Vector) XStream.read(oFile.getAbsolutePath());
+        beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+        connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
+      } /* XML? */ else if (oFile.getAbsolutePath().toLowerCase().
+                            endsWith(FILE_EXTENSION_XML)) {
+        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+            m_mainKFPerspective.getCurrentTabIndex());
+        Vector v     = (Vector) xml.read(oFile);
+        beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+        connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
+        //connections  = new Vector();
+      } /* binary */ else {
+        InputStream is = new FileInputStream(oFile);
+        ObjectInputStream ois = new ObjectInputStream(is);
+        beans = (Vector) ois.readObject();
+        connections = (Vector) ois.readObject();
+        ois.close();
+      }                
+
+      integrateFlow(beans, connections, true, false);
+      setEnvironment();
+      if (newTab) {
+        m_logPanel.clearStatus();
+        m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
+      }
+    } catch (Exception ex) {
+      m_logPanel.statusMessage("[KnowledgeFlow]|Unable to load flow (see log).");
+      m_logPanel.logMessage("[KnowledgeFlow] Unable to load flow ("
+          + ex.getMessage() + ").");
+      ex.printStackTrace();
+    }        
   }
 
   // Link the supplied beans into the KnowledgeFlow gui
@@ -3906,6 +4013,9 @@ public class KnowledgeFlowApp
     }
     m_beanLayout.revalidate();
     m_beanLayout.repaint();
+    
+    m_selectAllB.setEnabled(BeanInstance.
+        getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);    
   }
 
   /**
@@ -4479,6 +4589,18 @@ public class KnowledgeFlowApp
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+  }
+  
+  public void setAllowMultipleTabs(boolean multiple) {
+    m_allowMultipleTabs = multiple;
+    
+    if (!multiple) {
+      m_newB.setEnabled(false);
+    }
+  }
+  
+  public boolean getAllowMultipleTabs() {
+    return m_allowMultipleTabs;
   }
 
   //end modifications
