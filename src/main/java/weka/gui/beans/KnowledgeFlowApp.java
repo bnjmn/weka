@@ -1426,16 +1426,14 @@ public class KnowledgeFlowApp
      // TODO North will hold main perspective toggle buttons
      // WEST will hold JTree - perhaps not
      // CENTER will hold perspective
-     
-     
-     
+               
      /*JPanel p2 = new JPanel();
      p2.setLayout(new BorderLayout()); */
 
 
      m_mainKFPerspective = new MainKFPerspective();
      
-     m_perspectiveHolder.add(m_mainKFPerspective, BorderLayout.CENTER);
+     // m_perspectiveHolder.add(m_mainKFPerspective, BorderLayout.CENTER);
      m_perspectives.add(m_mainKFPerspective);
      
      mainPanel.add(m_perspectiveHolder, BorderLayout.CENTER);
@@ -1453,10 +1451,17 @@ public class KnowledgeFlowApp
      treeHolder.setBorder(BorderFactory.createTitledBorder("Design"));
      treeHolder.add(treeView, BorderLayout.CENTER);
      
-     m_perspectiveHolder.add(treeHolder, BorderLayout.WEST);
+     //m_perspectiveHolder.add(treeHolder, BorderLayout.WEST);
+    
+     
+     JSplitPane p2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeHolder, m_mainKFPerspective);
+     p2.setOneTouchExpandable(true);
+     m_perspectiveHolder.add(p2, BorderLayout.CENTER);
+     
      Dimension d = treeView.getPreferredSize();
      d = new Dimension((int)(d.getWidth() * 1.5), (int)d.getHeight());
      treeView.setPreferredSize(d);
+     treeView.setMinimumSize(d);
      
      loadUserComponents();
      clearLayout(); // add an initial "Untitled" tab
