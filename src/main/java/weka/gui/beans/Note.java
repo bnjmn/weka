@@ -72,6 +72,15 @@ public class Note extends JPanel {
     add(holder, BorderLayout.CENTER);
   }
   
+  public void setHighlighted(boolean highlighted) {
+    if (highlighted) {
+      setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLUE));
+    } else {
+      setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+    }
+    revalidate();
+  }
+  
   private String convertToHTML(String text) {
     String htmlString = m_noteText.replace("\n", "<br>");
     htmlString = "<html><font size=" 

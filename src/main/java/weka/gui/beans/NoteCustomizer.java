@@ -91,6 +91,7 @@ public class NoteCustomizer extends JPanel implements Customizer,
     // TODO Auto-generated method stub
     m_note = (Note)ob;
     m_textArea.setText(m_note.getNoteText());
+    m_textArea.selectAll();
   }
 
   @Override
