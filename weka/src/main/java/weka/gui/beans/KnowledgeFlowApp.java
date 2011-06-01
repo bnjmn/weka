@@ -38,6 +38,7 @@ import java.awt.MenuItem;
 import java.awt.Point;
 import java.awt.PopupMenu;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -544,6 +545,13 @@ public class KnowledgeFlowApp
 
     public void paintComponent(Graphics gx) {
       super.paintComponent(gx);
+      
+      ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+          RenderingHints.VALUE_ANTIALIAS_ON);
+      
+      ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, 
+          RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
+      
       BeanInstance.paintLabels(gx, m_mainKFPerspective.getCurrentTabIndex());
       BeanConnection.paintConnections(gx, m_mainKFPerspective.getCurrentTabIndex());
       //      BeanInstance.paintConnections(gx);
@@ -1123,7 +1131,7 @@ public class KnowledgeFlowApp
 
       public void actionPerformed(ActionEvent e) {
         int i = m_enclosingPane.indexOfTabComponent(CloseableTabTitle.this);
-        if (i >= 0) {
+        if (i >= 0 && getAllowMultipleTabs()) {
           //m_enclosingPane.remove(i);
           m_mainKFPerspective.removeTab(i);
         }
@@ -4174,8 +4182,10 @@ public class KnowledgeFlowApp
       BeanConnection.appendConnections(connections, 
           m_mainKFPerspective.getCurrentTabIndex());
     }
+    revalidate();
     m_beanLayout.revalidate();
     m_beanLayout.repaint();
+    notifyIsDirty();
     
     m_selectAllB.setEnabled(BeanInstance.
         getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);    
@@ -4185,14 +4195,32 @@ public class KnowledgeFlowApp
    * Set the flow for the KnowledgeFlow to edit. Assumes that client
    * has loaded a Vector of beans and a Vector of connections. the supplied
    * beans and connections are deep-copied via serialization before being
-   * set in the layout.
+   * set in the layout. The beans get added to the flow at position 0.
    *
    * @param v a Vector containing a Vector of beans and a Vector of connections
    * @exception Exception if something goes wrong
    */
   public void setFlow(Vector v) throws Exception {
     //    Vector beansCopy = null, connectionsCopy = null;
-    clearLayout();
+    // clearLayout();
+    if (getAllowMultipleTabs()) {
+      throw new Exception("[KnowledgeFlow] setFlow() - can only set a flow in " +
+      		"singe tab only mode");
+    }
+    
+    /*int tabI = 0;
+    
+    BeanInstance.
+      removeAllBeansFromContainer((JComponent)m_mainKFPerspective.getBeanLayout(tabI), tabI);
+    BeanInstance.setBeanInstances(new Vector(), m_mainKFPerspective.getBeanLayout(tabI));
+    BeanConnection.setConnections(new Vector()); */
+    //m_mainKFPerspective.removeTab(0);
+    //m_mainKFPerspective.addTab("Untitled");
+    m_beanLayout.removeAll();
+    BeanInstance.init();
+    BeanConnection.init();
+    
+    
     SerializedObject so = new SerializedObject(v);
     Vector copy = (Vector)so.getObject();
     
@@ -4202,6 +4230,8 @@ public class KnowledgeFlowApp
     // reset environment variables
     m_flowEnvironment = new Environment();
     integrateFlow(beans, connections, true, false);
+    revalidate();
+    notifyIsDirty();
   }
 
   /**
