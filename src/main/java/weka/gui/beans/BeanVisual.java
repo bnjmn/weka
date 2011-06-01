@@ -26,8 +26,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -389,6 +391,9 @@ public class BeanVisual
   }
 
   public void paintComponent(Graphics gx) {
+    ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+        RenderingHints.VALUE_ANTIALIAS_ON);
+    
     super.paintComponent(gx);
     if (m_displayConnectors) {
       gx.setColor(m_connectorColor);
