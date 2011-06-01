@@ -413,7 +413,7 @@ public class BeanConnection
    *
    * @param gx a <code>Graphics</code> value
    */
-  public static void paintConnections(Graphics gx, Integer... tab) {
+  public static void paintConnections(Graphics gx, Integer... tab) {    
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
