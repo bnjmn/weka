@@ -68,18 +68,23 @@ import java.io.LineNumberReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.SortedSet;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.swing.AbstractButton;
@@ -154,13 +159,21 @@ public class KnowledgeFlowApp
   /**
    * Location of the property file for the KnowledgeFlowApp
    */
-  protected static String PROPERTY_FILE = "weka/gui/beans/Beans.props";
+  protected static final String PROPERTY_FILE = "weka/gui/beans/Beans.props";
 
   /** Contains the editor properties */
   protected static Properties BEAN_PROPERTIES;
 
   private static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES = 
     new ArrayList<Properties>();
+  
+  protected static String VISIBLE_PERSPECTIVES_PROPERTIES_FILE = 
+    "weka/gui/beans/PluginPerspetives.props";
+  
+  protected static Map<String, String> PLUGIN_PERSPECTIVES = new HashMap<String, String>();
+  protected static SortedSet<String> VISIBLE_PERSPECTIVES;
+  protected static Map<String, KFPerspective> PERSPECTIVE_CACHE = 
+    new HashMap<String, KFPerspective>();
 
   /**
    * Holds the details needed to construct button bars for various supported
@@ -215,49 +228,34 @@ public class KnowledgeFlowApp
                                       "KnowledgeFlow",
                                       JOptionPane.ERROR_MESSAGE);
       }
+      
+      if (VISIBLE_PERSPECTIVES == null) {
+        VISIBLE_PERSPECTIVES = new TreeSet<String>();
+        
+        try {
+          Properties visible = Utils.readProperties(VISIBLE_PERSPECTIVES_PROPERTIES_FILE);
+          if (visible.keySet().size() > 0) {
+            String listedPerspectives = 
+              visible.getProperty("weka.gui.beans.KnowledgeFlow.SelectedPerspectives");
+            if (listedPerspectives != null && listedPerspectives.length() > 0) {
+              // split up the list of user selected perspectives and populate
+              // VISIBLE_PERSPECTIVES
+              StringTokenizer st = new StringTokenizer(listedPerspectives, ", ");
 
-
-      // try and load any plugin beans properties
-      File pluginDir = new File(System.getProperty("user.home")
-                                +File.separator+".knowledgeFlow"
-                                +File.separator+"plugins");
-      /*if (pluginDir.exists() && pluginDir.isDirectory()) {
-        BEAN_PLUGINS_PROPERTIES = new ArrayList<Properties>();
-        // How many sub-dirs are there?
-        File[] contents = pluginDir.listFiles();
-        for (int i = 0; i < contents.length; i++) {
-          if (contents[i].isDirectory() && 
-              contents[i].listFiles().length > 0) {
-            try {      
-              Properties tempP = new Properties();
-              File propFile = new File(contents[i].getPath()
-                                       + File.separator
-                                       + "Beans.props");
-              tempP.load(new FileInputStream(propFile));
-              BEAN_PLUGINS_PROPERTIES.add(tempP);
-
-              // Now try and add all jar files in this directory to the classpath
-              File anyJars[] = contents[i].listFiles();
-              for (int j = 0; j < anyJars.length; j++) {
-                if (anyJars[j].getPath().endsWith(".jar")) {
-                  System.out.println("[KnowledgeFlow] Plugins: adding "+anyJars[j].getPath()
-                                     +" to classpath...");
-                  ClassloaderUtil.addFile(anyJars[j].getPath());
-                }
+              while (st.hasMoreTokens()) {
+                String perspectiveName = st.nextToken().trim();
+                VISIBLE_PERSPECTIVES.add(perspectiveName);
               }
-            } catch (Exception ex) {
-              // Don't make a fuss
-              System.err.println("[KnowledgeFlow] Warning: Unable to load bean properties for plugin "
-                                 +"directory: " + contents[i].getPath());
             }
           }
-          //        BEAN_PLUGINS_PROPERTIES = new Properties();
-          //        BEAN_PLUGINS_PROPERTIES.load(new FileInputStream(pluginDir));
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null,
+              ex.getMessage(),
+              "KnowledgeFlow",
+              JOptionPane.ERROR_MESSAGE);
         }
-      } else {
-        // make the plugin directory for the user
-        pluginDir.mkdir();
-      } */
+      }
+
     }
   }
   
@@ -438,14 +436,21 @@ public class KnowledgeFlowApp
     }    
   }
   
-  protected class JTreeLeafDetails {
+  
+  protected class JTreeLeafDetails implements Serializable {
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = 6197221540272931626L;
+    
     protected String m_fullyQualifiedCompName = "";
     protected String m_leafLabel = "";
     protected String m_wekaAlgoName = "";
     
-    protected Icon m_scaledIcon = null;
+    protected transient Icon m_scaledIcon = null;
     
-    protected MetaBean m_metaBean = null;
+    protected StringBuffer m_metaBean = null;
+    protected boolean m_isMeta = false;
     
     protected String m_toolTipText = null;
     
@@ -453,10 +458,13 @@ public class KnowledgeFlowApp
       this(fullName, "", icon);
     }
     
-    public JTreeLeafDetails(String name, MetaBean bean, Icon icon) {
+    public JTreeLeafDetails(String name, StringBuffer serializedMeta, 
+        Icon icon) {
       this(name, "", icon);
       
-      m_metaBean = bean;
+    //  m_isMeta = isMeta;
+      m_metaBean = serializedMeta;
+      m_isMeta = true;
       m_toolTipText = "Hold down shift and click to remove";
     }
     
@@ -493,18 +501,20 @@ public class KnowledgeFlowApp
     
     public boolean isMetaBean() {
       return (m_metaBean != null);
+      //return (m_wekaAlgoName.length() == 0);
+      //return m_isMeta;
     }
     
-    public MetaBean getMetaBean() {
+    public StringBuffer getMetaBean() {
       return m_metaBean;
     }
     
     public void instantiateBean() {
       try {        
         if (isMetaBean()) {
-          MetaBean copy = copyMetaBean(m_metaBean);
-          copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
-          m_toolBarBean = copy;
+          //    MetaBean copy = copyMetaBean(m_metaBean, false);
+          //copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
+          m_toolBarBean = m_metaBean;
         } else {
           m_toolBarBean = Beans.instantiate(KnowledgeFlowApp.this.getClass().getClassLoader(), 
               m_fullyQualifiedCompName);
@@ -932,8 +942,19 @@ public class KnowledgeFlowApp
      * Get the icon for this perspective
      */
     public Icon getPerspectiveIcon() {
-      // TODO use the funky blue weka icon (scaled appropriately)
-      return null;
+      Image wekaI = loadImage("weka/gui/weka_icon_new.png");
+      ImageIcon icon = new ImageIcon(wekaI);
+      
+      double width = icon.getIconWidth();
+      double height = icon.getIconHeight();
+      width *= 0.035;
+      height *= 0.035;
+      
+      wekaI = wekaI.getScaledInstance((int)width, (int)height, 
+          Image.SCALE_SMOOTH);
+      icon = new ImageIcon(wekaI);
+
+      return icon;
     }
     
     public MainKFPerspective() {
@@ -1205,6 +1226,7 @@ public class KnowledgeFlowApp
   private boolean m_allowMultipleTabs = true;
   
   private Vector m_userComponents = new Vector();
+  
   private boolean m_firstUserComponentOpp = true;
 
   private JButton m_pointerB;
@@ -1636,9 +1658,18 @@ public class KnowledgeFlowApp
                   x = snapToGrid(me.getX()); 
                   y = snapToGrid(me.getY());
                 }
-                
+                                
                 addUndoPoint();
-                addComponent(x, y);
+                if (m_toolBarBean instanceof StringBuffer) {
+                  // serialized user meta bean
+                  pasteFromClipboard(x, y, (StringBuffer)m_toolBarBean, false);
+                  m_mode = NONE;
+                  setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                  m_toolBarBean = null;
+                } else {
+                  // saveLayout(m_mainKFPerspective.getCurrentTabIndex(), false);
+                  addComponent(x, y);
+                }
                 m_componentTree.clearSelection();
                 m_mainKFPerspective.setEditedStatus(true);
               }
@@ -1646,7 +1677,7 @@ public class KnowledgeFlowApp
           }
           
           if (m_mode == PASTING && m_pasteBuffer.length() > 0) {
-            pasteFromClipboard(me.getX(), me.getY());
+            pasteFromClipboard(me.getX(), me.getY(), m_pasteBuffer, true);
             m_mode = NONE;
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             return;
@@ -1686,7 +1717,7 @@ public class KnowledgeFlowApp
                 if (bi.getBean() instanceof MetaBean) {
                   BeanConnection.doMetaConnection(m_editElement, bi,
                                                   m_sourceEventSetDescriptor,
-                                                  layout);
+                                                  layout, m_mainKFPerspective.getCurrentTabIndex());
                 } else {
                   BeanConnection bc = 
                     new BeanConnection(m_editElement, bi, 
@@ -1935,18 +1966,22 @@ public class KnowledgeFlowApp
         public void actionPerformed(ActionEvent e) {
           if (BeanInstance.
               getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0) {
-            
+            // select all beans
+            Vector allBeans = BeanInstance.
+              getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
+            Vector newSelected = new Vector();
+            for (int i = 0; i < allBeans.size(); i++) {
+              newSelected.add(allBeans.get(i));
+            }
+                        
             // toggle
-            if (BeanInstance.getBeanInstances(m_mainKFPerspective.
-                getCurrentTabIndex()).size() == 
+            if (newSelected.size() == 
                   m_mainKFPerspective.getSelectedBeans().size()) {
               // unselect all beans
               m_mainKFPerspective.setSelectedBeans(new Vector());
-            } else {
-              
+            } else {              
               // select all beans
-              m_mainKFPerspective.setSelectedBeans(BeanInstance.
-                  getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()));
+              m_mainKFPerspective.setSelectedBeans(newSelected);             
             }
           }
         }
@@ -2334,6 +2369,9 @@ public class KnowledgeFlowApp
     
     /// ----
     
+    // TODO Prescan for bean plugins and only create user tree node if there
+    // are actually some beans (rather than just all perspectives)
+    
     // Any plugin components to process?
     if (BEAN_PLUGINS_PROPERTIES != null && 
         BEAN_PLUGINS_PROPERTIES.size() > 0) {
@@ -2345,7 +2383,7 @@ public class KnowledgeFlowApp
         Properties tempP = BEAN_PLUGINS_PROPERTIES.get(i);
         JPanel tempBean = null;
         String components = 
-        tempP.getProperty("weka.gui.beans.KnowledgeFlow.Plugins");
+          tempP.getProperty("weka.gui.beans.KnowledgeFlow.Plugins");
         StringTokenizer st2 = new StringTokenizer(components, ", ");
 
         while (st2.hasMoreTokens()) {
@@ -2382,6 +2420,47 @@ public class KnowledgeFlowApp
           DefaultMutableTreeNode pluginLeaf = new DefaultMutableTreeNode(leafData);
           userSubTree.add(pluginLeaf);
         }
+        
+        // TODO check for perspectives
+        String perspectives = 
+          tempP.getProperty(("weka.gui.beans.KnowledgeFlow.Perspectives"));
+        if (perspectives != null && perspectives.length() > 0) {
+          st2 = new StringTokenizer(perspectives, ",");
+          while (st2.hasMoreTokens()) {
+            String className = st2.nextToken();
+            try {
+              Object p = Class.forName(className).newInstance();
+              if (p instanceof KFPerspective &&
+                  p instanceof JPanel) {
+                String title = ((KFPerspective)p).getPerspectiveTitle();
+                PLUGIN_PERSPECTIVES.put(className, title);
+                
+                // check to see if user has selected to use this perspective
+                if (VISIBLE_PERSPECTIVES.contains(className)) {
+                  // add to the perspective cache. After processing
+                  // all plugins we will iterate over the sorted
+                  // VISIBLE_PERSPECTIVES in order to add them
+                  // to the toolbar in consistent sorted order
+                  PERSPECTIVE_CACHE.put(className, (KFPerspective)p);
+                }
+              }
+            } catch (Exception ex) {
+              if (m_logPanel != null) {
+                m_logPanel.logMessage("[KnowledgeFlow] WARNING: " +
+                		"unable to instantiate perspective \""
+                    + className + "\"");
+              } else {
+                System.err.println("[KnowledgeFlow] WARNING: " +
+                                "unable to instantiate perspective \""
+                    + className + "\"");
+              }
+            }
+          }
+        }
+      }
+      
+      if (PERSPECTIVE_CACHE.size() > 0) {
+        // TODO set up the perspective toolbar toggle buttons
       }
     }
 
@@ -2466,7 +2545,7 @@ public class KnowledgeFlowApp
                     m_firstUserComponentOpp = false;
                   }
 
-                  MetaBean toRemove = ((JTreeLeafDetails)userObject).getMetaBean();
+                  StringBuffer toRemove = ((JTreeLeafDetails)userObject).getMetaBean();
                   DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
                   MutableTreeNode userRoot = (MutableTreeNode)tNode.getParent(); // The "User" folder
                   model.removeNodeFromParent(tNode);
@@ -2774,7 +2853,7 @@ public class KnowledgeFlowApp
 
             Vector group = ((MetaBean) bc).getBeansInSubFlow();
             Vector associatedConnections = ((MetaBean) bc).getAssociatedConnections();
-            ((MetaBean) bc).restoreBeans();
+            ((MetaBean) bc).restoreBeans(xx, yy);
 
             for (int i = 0; i < group.size(); i++) {
               BeanInstance tbi = (BeanInstance) group.elementAt(i);
@@ -2801,7 +2880,8 @@ public class KnowledgeFlowApp
       addToUserTabItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             //addToUserToolBar((MetaBean) bi.getBean(), true);
-            addToUserTreeNode((MetaBean) bi.getBean(), true);
+            //addToUserTreeNode((MetaBean) bi.getBean(), true);
+            addToUserTreeNode(bi, true);
             notifyIsDirty();
           }
         });
@@ -3223,7 +3303,74 @@ public class KnowledgeFlowApp
     }
   }
   
-  private MetaBean copyMetaBean(MetaBean bean) {
+  private MetaBean copyMetaBean(MetaBean bean, boolean reattach) {
+    /*MetaBean copy = null;
+    Vector beanHolder = new Vector();
+    beanHolder.add(bean);
+    XMLBeans xml;
+    try {
+      xml = new XMLBeans(null, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS,
+          m_mainKFPerspective.getCurrentTabIndex());
+      java.io.StringWriter sw = new java.io.StringWriter();
+      xml.write(sw, beanHolder);
+      
+      String serialized = sw.toString();
+      java.io.StringReader sr = 
+        new java.io.StringReader(serialized);
+      xml = new XMLBeans(null, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS,
+          m_mainKFPerspective.getCurrentTabIndex());
+      beanHolder = (Vector) xml.read(sr);
+      copy = (MetaBean)beanHolder.get(0);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }*/
+    
+    
+    
+    
+    /*Vector v = new Vector();
+    Vector beanHolder = new Vector();
+    beanHolder.add(new BeanInstance(bean, 0, 0));
+    v.setSize(2);
+    v.set(XMLBeans.INDEX_BEANINSTANCES, beanHolder);
+    v.set(XMLBeans.INDEX_BEANCONNECTIONS, new Vector());
+    try {
+      XMLBeans xml = new XMLBeans(null, m_bcSupport, 
+          m_mainKFPerspective.getCurrentTabIndex());
+      java.io.StringWriter sw = new java.io.StringWriter();
+      xml.write(sw, v);
+      String serialized = sw.toString();
+      //System.out.println(serialized);
+      //System.out.println(m_pasteBuffer.toString());
+
+      java.io.StringReader sr = 
+        new java.io.StringReader(serialized);
+      xml = new XMLBeans(null, m_bcSupport, 
+          m_mainKFPerspective.getCurrentTabIndex());
+      v = (Vector)xml.read(sr);
+      Vector beans = (Vector)v.get(XMLBeans.INDEX_BEANINSTANCES);
+      Vector connections = (Vector)v.get(XMLBeans.INDEX_BEANCONNECTIONS);
+      //copy = beans.get(0);
+      System.err.println("Number of beans in copied vector " + beans.size());
+      for (int i = 0; i < beans.size(); i++) {
+        BeanInstance b = (BeanInstance)beans.get(i);
+        if (b.getBean() instanceof MetaBean) {
+          copy = b.getBean();
+          break;
+        }
+      }
+      
+    } catch (Exception e1) {
+      m_logPanel.logMessage("[KnowledgeFlow] problem copying meta bean: " 
+          + e1.getMessage());
+      e1.printStackTrace();
+      return null;
+    }*/
+    
+    
+    
+    
     // copy the bean via serialization
     ((Visible)bean).getVisual().removePropertyChangeListener(this);
     bean.removePropertyChangeListenersSubFlow(this);
@@ -3235,13 +3382,16 @@ public class KnowledgeFlowApp
       ex.printStackTrace();
       return null;
     }
-    ((Visible)bean).getVisual().addPropertyChangeListener(this);
-    bean.addPropertyChangeListenersSubFlow(this);    
+    
+    if (reattach) {
+      ((Visible)bean).getVisual().addPropertyChangeListener(this);
+      bean.addPropertyChangeListenersSubFlow(this);
+    }
     
     return (MetaBean)copy;
   }
 
-  private void addToUserTreeNode(MetaBean bean, boolean installListener) {
+  private void addToUserTreeNode(BeanInstance meta, boolean installListener) {
     DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
     DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
     if (m_userCompNode == null) {            
@@ -3249,10 +3399,57 @@ public class KnowledgeFlowApp
       model.insertNodeInto(m_userCompNode, root, 0);
     }
     
+    Vector beanHolder = new Vector();
+    beanHolder.add(meta);
+    
+    try {
+      StringBuffer serialized = copyToBuffer(beanHolder);
+      
+      String displayName ="";
+      ImageIcon scaledIcon = null;
+      //
+      if (meta.getBean() instanceof Visible) {
+        //((Visible)copy).getVisual().scale(3);
+        scaledIcon = new ImageIcon(((Visible)meta.getBean()).getVisual().scale(0.33));
+        displayName = ((Visible)meta.getBean()).getVisual().getText();      
+      }
+      
+      Vector metaDetails = new Vector();
+      metaDetails.add(displayName);
+      metaDetails.add(serialized);
+      metaDetails.add(scaledIcon);
+      SerializedObject so = new SerializedObject(metaDetails);
+      Vector copy = (Vector)so.getObject();
+      
+      JTreeLeafDetails metaLeaf = new JTreeLeafDetails(displayName, serialized, scaledIcon);
+
+      
+      DefaultMutableTreeNode newUserComp = new DefaultMutableTreeNode(metaLeaf);
+      model.insertNodeInto(newUserComp, m_userCompNode, 0);
+            
+      // add to the list of user components
+      m_userComponents.add(copy);
+      
+      if (installListener && m_firstUserComponentOpp) {
+        try {
+          installWindowListenerForSavingUserBeans();
+          m_firstUserComponentOpp = false;
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }            
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    
+    /*java.awt.Color bckC = getBackground();
+    Vector beans = BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
+    detachFromLayout(beans); */
+    
     // Disconnect any beans connected to the inputs or outputs
     // of this MetaBean (prevents serialization of the entire
     // KnowledgeFlow!!)
-    Vector tempRemovedConnections = new Vector();
+/*    Vector tempRemovedConnections = new Vector();
     Vector allConnections = 
       BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
     Vector inputs = bean.getInputs();
@@ -3292,16 +3489,17 @@ public class KnowledgeFlowApp
       BeanConnection temp = 
         (BeanConnection)tempRemovedConnections.elementAt(i);
       temp.remove(m_mainKFPerspective.getCurrentTabIndex());
-    }
+    }        
     
-    MetaBean copy = copyMetaBean(bean);
+    MetaBean copy = copyMetaBean(bean, true);
+    
     String displayName ="";
     ImageIcon scaledIcon = null;
     //
     if (copy instanceof Visible) {
       //((Visible)copy).getVisual().scale(3);
       scaledIcon = new ImageIcon(((Visible)copy).getVisual().scale(0.33));
-      displayName = ((Visible)copy).getVisual().getText();
+      displayName = ((Visible)copy).getVisual().getText();      
     }
     
     JTreeLeafDetails metaLeaf = new JTreeLeafDetails(displayName, copy, scaledIcon);
@@ -3328,18 +3526,33 @@ public class KnowledgeFlowApp
         new BeanConnection(temp.getSource(), temp.getTarget(),
                            temp.getSourceEventSetDescriptor(),
                            m_mainKFPerspective.getCurrentTabIndex());
-    }    
+    } */
+    
+    /*for (int i = 0; i < beans.size(); i++) {
+      BeanInstance tempB = (BeanInstance)beans.elementAt(i);
+      if (tempB.getBean() instanceof Visible) {
+        ((Visible)(tempB.getBean())).getVisual().
+        addPropertyChangeListener(KnowledgeFlowApp.this);
+
+        if (tempB.getBean() instanceof MetaBean) {
+          ((MetaBean)tempB.getBean()).
+          addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
+        }
+        // Restore the default background colour
+        ((Visible)(tempB.getBean())).getVisual().
+        setBackground(bckC);
+        ((JComponent)(tempB.getBean())).setBackground(bckC);
+      }
+    }*/
   }
   
-  private boolean copyToClipboard() {
-    Vector selectedBeans = m_mainKFPerspective.getSelectedBeans();
-    if (selectedBeans == null || selectedBeans.size() == 0) {
-      return false;
-    }
-    
+  private StringBuffer copyToBuffer(Vector selectedBeans) 
+    throws Exception {
+
     Vector associatedConnections = 
-      BeanConnection.associatedConnections(selectedBeans, 
-          m_mainKFPerspective.getCurrentTabIndex());
+      BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
+    /*  BeanConnection.associatedConnections(selectedBeans, 
+          m_mainKFPerspective.getCurrentTabIndex()); */
     
     // xml serialize to a string and store in the
     // clipboard variable
@@ -3347,17 +3560,30 @@ public class KnowledgeFlowApp
     v.setSize(2);
     v.set(XMLBeans.INDEX_BEANINSTANCES, selectedBeans);
     v.set(XMLBeans.INDEX_BEANCONNECTIONS, associatedConnections);
+    
+    XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+        m_mainKFPerspective.getCurrentTabIndex());
+    java.io.StringWriter sw = new java.io.StringWriter();
+    xml.write(sw, v);
+    
+    return sw.getBuffer();
+    //System.out.println(m_pasteBuffer.toString());
+    
+  }
+  
+  private boolean copyToClipboard() {
+    Vector selectedBeans = m_mainKFPerspective.getSelectedBeans();
+    if (selectedBeans == null || selectedBeans.size() == 0) {
+      return false;
+    }
+    m_mainKFPerspective.setSelectedBeans(new Vector());
+    
     try {
-      XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
-          m_mainKFPerspective.getCurrentTabIndex());
-      java.io.StringWriter sw = new java.io.StringWriter();
-      xml.write(sw, v);
-      m_pasteBuffer = sw.getBuffer();
-      //System.out.println(m_pasteBuffer.toString());
-    } catch (Exception e1) {
+      m_pasteBuffer = copyToBuffer(selectedBeans);
+    } catch (Exception ex) {
       m_logPanel.logMessage("[KnowledgeFlow] problem copying beans: " 
-          + e1.getMessage());
-      e1.printStackTrace();
+          + ex.getMessage());
+      ex.printStackTrace();
       return false;
     }
     
@@ -3365,11 +3591,15 @@ public class KnowledgeFlowApp
     return true;
   }
   
-  private boolean pasteFromClipboard(int x, int y) {
-    addUndoPoint();
+  private boolean pasteFromClipboard(int x, int y, 
+      StringBuffer pasteBuffer, boolean addUndoPoint) {
+    
+    if (addUndoPoint) {
+      addUndoPoint();
+    }
     
     java.io.StringReader sr = 
-      new java.io.StringReader(m_pasteBuffer.toString());
+      new java.io.StringReader(pasteBuffer.toString());
     try {
       XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
           m_mainKFPerspective.getCurrentTabIndex());
@@ -3377,7 +3607,21 @@ public class KnowledgeFlowApp
       Vector beans = (Vector)v.get(XMLBeans.INDEX_BEANINSTANCES);
       Vector connections = (Vector)v.get(XMLBeans.INDEX_BEANCONNECTIONS);
       
-      // TODO adjust beans coords with respect to x, y. Look for 
+      for (int i = 0; i < beans.size(); i++) {
+        BeanInstance b = (BeanInstance)beans.get(i);
+        if (b.getBean() instanceof MetaBean) {
+          Vector subFlow = ((MetaBean)b.getBean()).getSubFlow();
+          for (int j = 0; j < subFlow.size(); j++) {
+            BeanInstance subB = (BeanInstance)subFlow.get(j);
+            subB.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
+            if (subB.getBean() instanceof Visible) {
+              ((Visible)subB.getBean()).getVisual().removePropertyChangeListener(this);
+            }
+          }
+        }
+      }
+      
+      // adjust beans coords with respect to x, y. Look for 
       // the smallest x and the smallest y (top left corner of the bounding)
       // box.
       int minX = Integer.MAX_VALUE;
@@ -3399,12 +3643,13 @@ public class KnowledgeFlowApp
         int deltaY = y - minY;
         for (int i = 0; i < beans.size(); i++) {
           BeanInstance b = (BeanInstance)beans.get(i);
-          b.setX(b.getX() + deltaX);
-          b.setY(b.getY() + deltaY);
+          /*b.setX(b.getX() + deltaX);
+          b.setY(b.getY() + deltaY); */
+          b.setXY(b.getX() + deltaX, b.getY() + deltaY);
         }
       }            
       
-      // TODO integrate these beans
+      // integrate these beans
       integrateFlow(beans, connections, false, false);
       setEnvironment();
       notifyIsDirty();
@@ -3593,7 +3838,7 @@ public class KnowledgeFlowApp
             // deserialize, integerate and
             // position at x, y
 
-            pasteFromClipboard(x, y);
+            pasteFromClipboard(x, y, m_pasteBuffer, true);
           }        
         });
         rightClickMenu.add(pasteItem);
@@ -3827,7 +4072,7 @@ public class KnowledgeFlowApp
       for (int i = 0; i < list.size(); i++) {
         ((BeanInstance) list.get(i)).setX(comp.getX());
         ((BeanInstance) list.get(i)).setY(comp.getY());
-      }
+      }      
     }
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     if (repaint) {
@@ -3846,7 +4091,12 @@ public class KnowledgeFlowApp
       // to BeanConnection's vector
       Vector associatedConnections = 
         ((MetaBean)m_toolBarBean).getAssociatedConnections();
-      BeanConnection.getConnections().addAll(associatedConnections);
+      BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex()).
+        addAll(associatedConnections);
+
+      //((MetaBean)m_toolBarBean).setXDrop(x);
+      //((MetaBean)m_toolBarBean).setYDrop(y);
+      ((MetaBean)m_toolBarBean).addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
     }
 
     if (m_toolBarBean instanceof BeanContextChild) {
@@ -3889,6 +4139,7 @@ public class KnowledgeFlowApp
     int lowerRightY = Integer.MIN_VALUE;
     for (int i = 0; i < selected.size(); i++) {
       BeanInstance b = (BeanInstance)selected.get(i);
+
       if (b.getX() < upperLeftX) {
         upperLeftX = b.getX();
       }
@@ -3909,17 +4160,20 @@ public class KnowledgeFlowApp
         lowerRightY = b.getY();
       }
     }
+    
+    int bx = upperLeftX + ((lowerRightX - upperLeftX) / 2);
+    int by = upperLeftY + ((lowerRightY - upperLeftY) / 2);
         
     java.awt.Rectangle r = new java.awt.Rectangle(upperLeftX, upperLeftY,
         lowerRightX, lowerRightY);
     
-    BufferedImage subFlowPreview = null; 
+  /*  BufferedImage subFlowPreview = null; 
     try {
         subFlowPreview = createImage(m_beanLayout, r);              
     } catch (IOException ex) {
       ex.printStackTrace();
       // drop through quietly
-    }
+    } */
 
     // Confirmation pop-up
     int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
@@ -3928,18 +4182,21 @@ public class KnowledgeFlowApp
                                                JOptionPane.YES_NO_OPTION);
     if (result == JOptionPane.YES_OPTION) {
       Vector associatedConnections = 
-        BeanConnection.associatedConnections(selected);
+        BeanConnection.associatedConnections(selected, 
+            m_mainKFPerspective.getCurrentTabIndex());
 
       String name = JOptionPane.showInputDialog(KnowledgeFlowApp.this,
                                                 "Enter a name for this group",
                                                 "MyGroup");
       if (name != null) {       
         MetaBean group = new MetaBean();
+        //group.setXCreate(bx); group.setYCreate(by);
+        //group.setXDrop(bx); group.setYDrop(by);
         group.setSubFlow(selected);
         group.setAssociatedConnections(associatedConnections);
         group.setInputs(inputs);
         group.setOutputs(outputs);
-        group.setSubFlowPreview(new ImageIcon(subFlowPreview));
+//        group.setSubFlowPreview(new ImageIcon(subFlowPreview));
         if (name.length() > 0) {
           //          group.getVisual().setText(name);
           group.setCustomName(name);
@@ -3949,16 +4206,21 @@ public class KnowledgeFlowApp
           m_bcSupport.add(group);
         }
         
-        int bx = (int)r.getCenterX();
-        int by = (int)r.getCenterY();
+        //int bx = (int)r.getCenterX() - group.getVisual().m_icon.getIconWidth();
+        //int by = (int)r.getCenterY() - group.getVisual().m_icon.getIconHeight();
+        
         
         /*BeanInstance bi = new BeanInstance(m_beanLayout, group, 
                                            (int)r.getX()+(int)(r.getWidth()/2),
                                            (int)r.getY()+(int)(r.getHeight()/2),
                                            m_mainKFPerspective.getCurrentTabIndex()); */
-        BeanInstance bi = new BeanInstance(m_beanLayout, group, bx, by, 
+        Dimension d = group.getPreferredSize();;
+        int dx = (int)(d.getWidth() / 2);
+        int dy = (int)(d.getHeight() / 2);
+        
+        BeanInstance bi = new BeanInstance(m_beanLayout, group, bx + dx, by + dy, 
             m_mainKFPerspective.getCurrentTabIndex());
-        System.err.println("Meta x, y " + bi.getX() + " " +bi.getY());
+
         for (int i = 0; i < selected.size(); i++) {
           BeanInstance temp = (BeanInstance)selected.elementAt(i);
           temp.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
@@ -4320,6 +4582,7 @@ public class KnowledgeFlowApp
     Vector beans = 
       BeanInstance.getBeanInstances(tabIndex);
     detachFromLayout(beans);
+    detachFromLayout(beans);
 
     // now serialize components vector and connections vector
     try {
@@ -4360,38 +4623,38 @@ public class KnowledgeFlowApp
         oos.close();
       } 
     } catch (Exception ex) {
-        m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
-        m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
-            + ex.getMessage() + ").");
-        ex.printStackTrace();
-        return false;
-      } finally {
-        // restore this panel as a property change listener in the beans
-        for (int i = 0; i < beans.size(); i++) {
-          BeanInstance tempB = (BeanInstance)beans.elementAt(i);
-          if (tempB.getBean() instanceof Visible) {
-            ((Visible)(tempB.getBean())).getVisual().
-            addPropertyChangeListener(this);
+      m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
+      m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
+          + ex.getMessage() + ").");
+      ex.printStackTrace();
+      return false;
+    } finally {
+      // restore this panel as a property change listener in the beans
+      for (int i = 0; i < beans.size(); i++) {
+        BeanInstance tempB = (BeanInstance)beans.elementAt(i);
+        if (tempB.getBean() instanceof Visible) {
+          ((Visible)(tempB.getBean())).getVisual().
+          addPropertyChangeListener(this);
 
-            if (tempB.getBean() instanceof MetaBean) {
-              ((MetaBean)tempB.getBean()).
-              addPropertyChangeListenersSubFlow(this);
-            }
-            // Restore the default background colour
-            ((Visible)(tempB.getBean())).getVisual().
-            setBackground(bckC);
-            ((JComponent)(tempB.getBean())).setBackground(bckC);
+          if (tempB.getBean() instanceof MetaBean) {
+            ((MetaBean)tempB.getBean()).
+            addPropertyChangeListenersSubFlow(this);
           }
-        }
-        
-        if (!isUndoPoint) {
-          Environment e = m_mainKFPerspective.getEnvironmentSettings();
-          e.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
-          m_mainKFPerspective.setEditedStatus(tabIndex, false);
+          // Restore the default background colour
+          ((Visible)(tempB.getBean())).getVisual().
+          setBackground(bckC);
+          ((JComponent)(tempB.getBean())).setBackground(bckC);
         }
       }
-      return true;
+
+      if (!isUndoPoint) {
+        Environment e = m_mainKFPerspective.getEnvironmentSettings();
+        e.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
+        m_mainKFPerspective.setEditedStatus(tabIndex, false);
+      }
     }
+    return true;
+  }
 
   /**
    * Serialize the layout to a file
@@ -4511,27 +4774,46 @@ public class KnowledgeFlowApp
                +ext);
     if (sFile.exists()) {
       try {
-        if (m_UserComponentsInXML) {
-          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS);
+        /*if (m_UserComponentsInXML) {
+          XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS,
+              0);
           tempV = (Vector) xml.read(sFile);
         }
-        else {
+        else {*/
           InputStream is = new FileInputStream(sFile);
           ObjectInputStream ois = new ObjectInputStream(is);
           tempV = (Vector)ois.readObject();
           ois.close();
-        }
+        //}
       } catch (Exception ex) {
         System.err.println("[KnowledgeFlow] Problem reading user components.");
         ex.printStackTrace();
         return;
       }
       if (tempV.size() > 0) {
-        // create the user tab and add the components
+        DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+        if (m_userCompNode == null) {            
+          m_userCompNode = new DefaultMutableTreeNode("User");
+          model.insertNodeInto(m_userCompNode, root, 0);
+        }
+        
+        // add the components
         for (int i = 0; i < tempV.size(); i++) {
-          MetaBean tempB = (MetaBean)tempV.elementAt(i);
+          Vector tempB = (Vector)tempV.elementAt(i);
+          String displayName = (String)tempB.get(0);
+          StringBuffer serialized = (StringBuffer)tempB.get(1);
+          ImageIcon scaledIcon = (ImageIcon)tempB.get(2);
+          JTreeLeafDetails treeLeaf = new JTreeLeafDetails(displayName, serialized,
+              scaledIcon);
+          DefaultMutableTreeNode newUserComp = new DefaultMutableTreeNode(treeLeaf);
+          model.insertNodeInto(newUserComp, m_userCompNode, 0);
+          
+          // add to the list of user components
+          m_userComponents.add(tempB);
+          
           //addToUserToolBar(tempB, false);
-          addToUserTreeNode(tempB, false);
+          //addToUserTreeNode(tempB, false);
         }
       }
     }
@@ -4558,24 +4840,25 @@ public class KnowledgeFlowApp
             }
             try {
               String ext = "";
-              if (m_UserComponentsInXML)
-                ext = USERCOMPONENTS_XML_EXTENSION;
+/*              if (m_UserComponentsInXML)
+                ext = USERCOMPONENTS_XML_EXTENSION; */
               File sFile2 = new File(sFile.getAbsolutePath()
                                      +File.separator
                                      +"userComponents"
                                      +ext);
                 
-              if (m_UserComponentsInXML) {
-                XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS);
+              /*if (m_UserComponentsInXML) {
+                XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS,
+                    m_mainKFPerspective.getCurrentTabIndex());
                 xml.write(sFile2, m_userComponents);
               }
-              else {
+              else { */
                 OutputStream os = new FileOutputStream(sFile2);
                 ObjectOutputStream oos = new ObjectOutputStream(os);
                 oos.writeObject(m_userComponents);
                 oos.flush();
                 oos.close();
-              }
+              //}
             } catch (Exception ex) {
               System.err.println("[KnowledgeFlow] Unable to save user components");
               ex.printStackTrace();
