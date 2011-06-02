@@ -58,7 +58,8 @@ public class Note extends JPanel {
    */
   public Note() {
     setLayout(new BorderLayout());
-    setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+//    setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+    setBorder(new ShadowBorder(2, Color.GRAY));
 
     m_label.setText(convertToHTML(m_noteText));
     m_label.setOpaque(true);
@@ -76,7 +77,8 @@ public class Note extends JPanel {
     if (highlighted) {
       setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLUE));
     } else {
-      setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+      //setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+      setBorder(new ShadowBorder(2, Color.GRAY));
     }
     revalidate();
   }
