@@ -1332,7 +1332,7 @@ public class XMLBeans
       }
     }
     
-    result   = new BeanInstance(m_BeanLayout, bean, x, y, m_vectorIndex);
+    result   = new BeanInstance(m_BeanLayout, bean, x, y, m_vectorIndex);  
     beaninst = (BeanInstance) result;
     
     // set parent of BeanVisual
