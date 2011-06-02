@@ -413,7 +413,7 @@ public class BeanConnection
    *
    * @param gx a <code>Graphics</code> value
    */
-  public static void paintConnections(Graphics gx, Integer... tab) {
+  public static void paintConnections(Graphics gx, Integer... tab) {    
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
@@ -651,7 +651,8 @@ public class BeanConnection
 
   public static void doMetaConnection(BeanInstance source, BeanInstance target,
                                       final EventSetDescriptor esd,
-                                      final JComponent displayComponent) {
+                                      final JComponent displayComponent,
+                                      final int tab) {
 
     Object targetBean = target.getBean();
     BeanInstance realTarget = null;
@@ -661,7 +662,7 @@ public class BeanConnection
       if (receivers.size() == 1) {
         realTarget = (BeanInstance)receivers.elementAt(0);
         BeanConnection bc = new BeanConnection(realSource, realTarget,
-                                               esd);
+                                               esd, tab);
         //        m_target = (BeanInstance)receivers.elementAt(0);
       } else {
         // have to do the popup thing here
@@ -683,7 +684,7 @@ public class BeanConnection
                 //    finalTarget.add(tempTarget);
                 BeanConnection bc = 
                   new BeanConnection(realSource, tempTarget,
-                                     esd);
+                                     esd, tab);
                 displayComponent.repaint();
               }
             });

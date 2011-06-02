@@ -431,7 +431,7 @@ public class BeanInstance
     boundingBox.setBounds(minX, minY, maxX - minX, maxY - minY);
     
     return result;
-  }
+  }  
 
   /**
    * Creates a new <code>BeanInstance</code> instance.

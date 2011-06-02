@@ -29,7 +29,6 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.beans.EventSetDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -78,12 +77,19 @@ public class MetaBean
   
   // Holds a preview image of the encapsulated sub-flow
   protected ImageIcon m_subFlowPreview = null;
+  
+  // offset from where originally grouped if the meta bean 
+  // dropped onto the canvas from the user toolbar
+  protected int m_xCreate = 0;
+  protected int m_yCreate = 0;
+  protected int m_xDrop = 0;
+  protected int m_yDrop = 0;
 
   public MetaBean() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
-
+  
   /**
    * Set a custom (descriptive) name for this bean
    * 
@@ -295,14 +301,15 @@ public class MetaBean
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       if (save) {
-        Point p = new Point(temp.getX(), temp.getY());
+        // save offsets from this point
+        Point p = new Point(temp.getX() - targetX, temp.getY() - targetY);
         m_originalCoords.add(p);
       }
       temp.setX(targetX); temp.setY(targetY);
     }
   }
 
-  public void restoreBeans() {
+  public void restoreBeans(int x, int y) {
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       Point p = (Point)m_originalCoords.elementAt(i);
@@ -310,8 +317,8 @@ public class MetaBean
       Dimension d = c.getPreferredSize();
       int dx = (int)(d.getWidth() / 2);
       int dy = (int)(d.getHeight() / 2);
-      temp.setX((int)p.getX()+dx);
-      temp.setY((int)p.getY()+dy);
+      temp.setX(x + (int)p.getX());// + (m_xDrop - m_xCreate));
+      temp.setY(y + (int)p.getY());// + (m_yDrop - m_yCreate));
     }
   }
 
@@ -337,8 +344,8 @@ public class MetaBean
    * time
    */
   public boolean eventGeneratable(String eventName) {
-    for (int i = 0; i < m_outputs.size(); i++) {
-      BeanInstance output = (BeanInstance)m_outputs.elementAt(i);
+    for (int i = 0; i < m_subFlow.size(); i++) {
+      BeanInstance output = (BeanInstance)m_subFlow.elementAt(i);
       if (output.getBean() instanceof EventConstraints) {
         if (((EventConstraints)output.getBean()).eventGeneratable(eventName)) {
           return true;
@@ -500,6 +507,21 @@ public class MetaBean
           }
           newVector.add(prefix+" "+req);
         }          
+      } else if (temp.getBean() instanceof Startable) {
+        String prefix = "";
+        if ((temp.getBean() instanceof BeanCommon)) {
+          prefix = ((BeanCommon)temp.getBean()).getCustomName();
+        } else {
+          prefix = temp.getBean().getClass().getName();
+          prefix = prefix.substring(prefix.lastIndexOf('.')+1, prefix.length());
+        }
+        prefix = ""+(i+1)+": ("+prefix+")";
+        String startMessage = ((Startable)temp.getBean()).getStartMessage();
+        if (startMessage.charAt(0) == '$') {
+          prefix = '$'+prefix;
+          startMessage = startMessage.substring(1, startMessage.length());
+        }
+        newVector.add(prefix + " " + startMessage);
       }
     }
     
@@ -571,10 +593,20 @@ public class MetaBean
     index--;
     String req = request.substring(request.indexOf(')')+1, 
                                    request.length()).trim();
-    UserRequestAcceptor target = 
-      (UserRequestAcceptor)(((BeanInstance)m_subFlow.elementAt(index)).getBean());
-    target.performRequest(req);
-                                   
+    
+    Object target = (((BeanInstance)m_subFlow.elementAt(index)).getBean());
+    if (target instanceof Startable && req.equals(((Startable)target).getStartMessage())) {
+      try {
+        ((Startable)target).start();
+      } catch (Exception ex) {
+        if (m_log != null) {
+          String compName = (target instanceof BeanCommon) ? ((BeanCommon)target).getCustomName() : "";
+          m_log.logMessage("Problem starting subcomponent " + compName);
+        }
+      }
+    } else {    
+      ((UserRequestAcceptor)target).performRequest(req);
+    }                                   
   }
 
   /**
