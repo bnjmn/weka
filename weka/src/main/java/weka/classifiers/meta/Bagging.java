@@ -490,15 +490,16 @@ public class Bagging
   protected synchronized Instances getTrainingSet(int iteration) throws Exception {
     int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
     Instances bagData = null;
+    Random r = new Random(m_Seed + iteration);
 
     // create the in-bag dataset
     if (m_CalcOutOfBag) {
       m_inBag[iteration] = new boolean[m_data.numInstances()];
-      bagData = resampleWithWeights(m_data, m_random, m_inBag[iteration]);
+      bagData = resampleWithWeights(m_data, r, m_inBag[iteration]);
     } else {
-      bagData = m_data.resampleWithWeights(m_random);
+      bagData = m_data.resampleWithWeights(r);
       if (bagSize < m_data.numInstances()) {
-        bagData.randomize(m_random);
+        bagData.randomize(r);
         Instances newBagData = new Instances(bagData, 0, bagSize);
         bagData = newBagData;
       }
