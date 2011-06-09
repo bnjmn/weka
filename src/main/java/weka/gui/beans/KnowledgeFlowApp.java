@@ -532,7 +532,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           }
         }
 
-        setCursor(Cursor.
+        KnowledgeFlowApp.this.setCursor(Cursor.
             getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         m_mode = ADDING;
         m_pasteB.setEnabled(false);
@@ -1151,7 +1151,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_pasteB.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
 
-            setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+            KnowledgeFlowApp.this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
             m_mode = PASTING;
 
             /* pasteFromClipboard(10, 10);
@@ -1179,7 +1179,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           Note n = new Note();
           m_toolBarBean = n;
 
-          setCursor(Cursor.
+          KnowledgeFlowApp.this.setCursor(Cursor.
               getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
           m_mode = ADDING;
         }
@@ -1264,7 +1264,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         public void actionPerformed(ActionEvent e) {
           m_toolBarBean = null;
           m_mode = NONE;
-          setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          KnowledgeFlowApp.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
           m_componentTree.clearSelection();
         }
       });
@@ -1697,7 +1697,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               // right click cancels selected component
               m_toolBarBean = null;
               m_mode = NONE;
-              setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+              KnowledgeFlowApp.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
               m_componentTree.clearSelection();
             }
           }
@@ -2699,7 +2699,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 // serialized user meta bean
                 pasteFromClipboard(x, y, (StringBuffer)m_toolBarBean, false);
                 m_mode = NONE;
-                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                KnowledgeFlowApp.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 m_toolBarBean = null;
               } else {
                 // saveLayout(m_mainKFPerspective.getCurrentTabIndex(), false);
@@ -2714,7 +2714,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         if (m_mode == PASTING && m_pasteBuffer.length() > 0) {
           pasteFromClipboard(me.getX(), me.getY(), m_pasteBuffer, true);
           m_mode = NONE;
-          setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          KnowledgeFlowApp.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
           return;
         }
 
@@ -4317,7 +4317,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         Note n = new Note();
         m_toolBarBean = n;
 
-        setCursor(Cursor.
+        KnowledgeFlowApp.this.setCursor(Cursor.
             getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         m_mode = ADDING;
       }
@@ -4491,7 +4491,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         ((BeanInstance) list.get(i)).setY(comp.getY());
       }      
     }
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    
+    KnowledgeFlowApp.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     if (repaint) {
       m_beanLayout.repaint();
     }
