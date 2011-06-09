@@ -132,6 +132,7 @@ import weka.core.Instances;
 import weka.core.Memory;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.WekaPackageManager;
 import weka.core.converters.FileSourcedConverter;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
@@ -444,28 +445,62 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   }
 
 
+  /**
+   * Inner class for encapsulating information about a bean that
+   * is represented at a leaf in the JTree.
+   */
   protected class JTreeLeafDetails implements Serializable {
+    
     /**
      * For serialization
      */
     private static final long serialVersionUID = 6197221540272931626L;
 
+    /** fully qualified bean name */
     protected String m_fullyQualifiedCompName = "";
+    
+    /**
+     * the label (usually derived from the qualified name or wrapped 
+     * algorithm) for the leaf 
+     */
     protected String m_leafLabel = "";
+    
+    /** the fully qualified wrapped weka algorithm name */
     protected String m_wekaAlgoName = "";
 
+    /** icon to display at the leaf (scaled appropriately) */
     protected transient Icon m_scaledIcon = null;
 
-    protected StringBuffer m_metaBean = null;
+    /** XML serialized MetaBean (if this is a user component) */
+    //protected StringBuffer m_metaBean = null;
+    protected Vector m_metaBean = null;
+    
+    /** true if this is a MetaBean (user component) */
     protected boolean m_isMeta = false;
 
+    /** tool tip text to display */
     protected String m_toolTipText = null;
 
-    public JTreeLeafDetails(String fullName, Icon icon) {
+    /**
+     * Constructor.
+     * 
+     * @param fullName flully qualified name of the bean
+     * @param icon icon for the bean
+     */
+    protected JTreeLeafDetails(String fullName, Icon icon) {
       this(fullName, "", icon);
     }
 
-    public JTreeLeafDetails(String name, StringBuffer serializedMeta, 
+    /**
+     * Constructor
+     * 
+     * @param name fully qualified name of the bean
+     * @param serializedMeta empty string or XML serialized MetaBean if this
+     * leaf represents a "user" component
+     * 
+     * @param icon icon for the bean
+     */
+    protected JTreeLeafDetails(String name, Vector serializedMeta, 
         Icon icon) {
       this(name, "", icon);
 
@@ -475,7 +510,16 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       m_toolTipText = "Hold down shift and click to remove";
     }
 
-    public JTreeLeafDetails(String fullName, String wekaAlgoName, Icon icon) {
+    /**
+     * Constructor
+     * 
+     * @param fullName fully qualified name of the bean
+     * @param wekaAlgoName fully qualified name of the encapsulated (wrapped)
+     * weka algorithm, or null if this bean does not wrap a Weka algorithm
+     * 
+     * @param icon icon for the bean
+     */
+    protected JTreeLeafDetails(String fullName, String wekaAlgoName, Icon icon) {
       m_fullyQualifiedCompName = fullName;
       m_wekaAlgoName = wekaAlgoName;
       m_leafLabel = (wekaAlgoName.length() > 0) ? wekaAlgoName : m_fullyQualifiedCompName;
@@ -486,42 +530,82 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       m_scaledIcon = icon;
     }
 
-    public String getToolTipText() {
+    /**
+     * Get the tool tip for this leaf
+     * 
+     * @return the tool tip
+     */
+    protected String getToolTipText() {
       return m_toolTipText;
     }
 
+    /**
+     * Returns the leaf label
+     * 
+     * @return the leaf label
+     */
     public String toString() {
       return m_leafLabel;
     }
 
-    public Icon getIcon() {
+    /**
+     * Gets the icon for this bean
+     * 
+     * @return the icon for this bean
+     */
+    protected Icon getIcon() {
       return m_scaledIcon;
     }
 
-    public void setIcon(Icon icon) {
+    /**
+     * Set the icon to use for this bean
+     * 
+     * @param icon the icon to use
+     */
+    protected void setIcon(Icon icon) {
       m_scaledIcon = icon;
     }
 
-    public boolean isWrappedAlgorithm() {
+    /**
+     * Returns true if this leaf represents a wrapped Weka algorithm (i.e.
+     * filter, classifier, clusterer etc.).
+     * 
+     * @return true if this leaf represents a wrapped algorithm
+     */
+    protected boolean isWrappedAlgorithm() {
       return (m_wekaAlgoName != null && m_wekaAlgoName.length() > 0);
     }
 
-    public boolean isMetaBean() {
+    /**
+     * Returns true if this leaf represents a MetaBean (i.e. "user" component)
+     * 
+     * @return true if this leaf represents a MetaBean
+     */
+    protected boolean isMetaBean() {
       return (m_metaBean != null);
       //return (m_wekaAlgoName.length() == 0);
       //return m_isMeta;
     }
 
-    public StringBuffer getMetaBean() {
+    /**
+     * Gets the XML serialized MetaBean and associated information (icon, displayname)
+     * 
+     * @return the XML serialized MetaBean as a 3-element Vector containing display name 
+     * serialized bean and icon
+     */
+    protected Vector getMetaBean() {
       return m_metaBean;
     }
 
-    public void instantiateBean() {
+    /**
+     * "Instantiates" the bean represented by this leaf.
+     */
+    protected void instantiateBean() {
       try {        
         if (isMetaBean()) {
           //    MetaBean copy = copyMetaBean(m_metaBean, false);
           //copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
-          m_toolBarBean = m_metaBean;
+          m_toolBarBean = m_metaBean.get(1);
         } else {
           m_toolBarBean = Beans.instantiate(KnowledgeFlowApp.this.getClass().getClassLoader(), 
               m_fullyQualifiedCompName);
@@ -554,8 +638,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * @since 1.0
    * @see PrintablePanel
    */
-  protected class BeanLayout
-  extends PrintablePanel {
+  protected class BeanLayout extends PrintablePanel {
 
     /** for serialization */
     private static final long serialVersionUID = -146377012429662757L;
@@ -595,22 +678,73 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   }
 
   /**
-   * Interface for perspectives
-   *
+   * Interface for perspectives.
    */
   public static interface KFPerspective {
 
+    /**
+     * Set instances (if the perspective accepts them)
+     * 
+     * @param insts the instances
+     */
     void setInstances(Instances insts);
+    
+    /**
+     * Returns true if this perspective accepts instances
+     * 
+     * @return true if this perspective can accept instances
+     */
+    boolean acceptsInstances();
 
+    /**
+     * Get the title of this perspective
+     * 
+     * @return the title of this perspective
+     */
     String getPerspectiveTitle();
 
+    /**
+     * Get the tool tip text for this perspective.
+     * 
+     * @return the tool tip text for this perspective
+     */
     String getPerspectiveTipText();
 
+    /**
+     * Get the icon for this perspective.
+     * 
+     * @return the Icon for this perspective (or null if the
+     * perspective does not have an icon)
+     */
     Icon getPerspectiveIcon();
 
+    /**
+     * Set active status of this perspective. True indicates
+     * that this perspective is the visible active perspective
+     * in the KnowledgeFlow
+     * 
+     * @param active true if this perspective is the active one
+     */
     void setActive(boolean active);
 
+    /**
+     * Set whether this perspective is "loaded" - i.e. whether
+     * or not the user has opted to have it available in the
+     * perspective toolbar. The perspective can make the decision
+     * as to allocating or freeing resources on the basis of this.
+     * 
+     * @param loaded true if the perspective is available in
+     * the perspective toolbar of the KnowledgeFlow
+     */
     void setLoaded(boolean loaded);
+    
+    /**
+     * Set a reference to the main KnowledgeFlow perspective - i.e.
+     * the perspective that manages flow layouts.
+     * 
+     * @param main the main KnowledgeFlow perspective.
+     */
+    void setMainKFPerspective(KnowledgeFlowApp.MainKFPerspective main);
   }
 
 
@@ -618,7 +752,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * Main Knowledge Flow perspective
    *
    */
-  private class MainKFPerspective extends JPanel implements KFPerspective {
+  public class MainKFPerspective extends JPanel implements KFPerspective {
 
     /** Holds the tabs of the perspective */
     protected JTabbedPane m_flowTabs = new JTabbedPane();
@@ -651,9 +785,15 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       // nothing to do here
     }
 
+    @Override
     public void setLoaded(boolean loaded) {
       // we are always loaded and part of the set of perspectives
     }
+    
+    @Override
+    public void setMainKFPerspective(MainKFPerspective main) {
+      // we don't need this :-)
+    }    
 
     public JTabbedPane getTabbedPane() {
       return m_flowTabs;
@@ -938,7 +1078,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     @Override
     public void setInstances(Instances insts) {
       // nothing to do as we don't process externally supplied instances
-
+    }
+    
+    @Override
+    public boolean acceptsInstances() {
+      // not needed
+      
+      return false;
     }
 
     /**
@@ -1318,6 +1464,30 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             m_firstUserComponentOpp = false;
           }
           
+          if (!Utils.getDontShowDialog("weka.gui.beans.KnowledgeFlow.PerspectiveInfo")) {
+            JCheckBox dontShow = new JCheckBox("Do not show this message again");
+            Object[] stuff = new Object[2];
+            stuff[0] = "Perspectives are environments that take over the\n" +
+            "Knowledge Flow UI and provide major additional functionality.\n" + 
+            "Many perspectives will operate on a set of instances. Instances\n" +
+            "Can be sent to a perspective by placing a DataSource on the\n" +
+            "layout canvas, configuring it and then selecting \"Send to perspective\"\n" +
+            "from the contextual popup menu that appears when you right-click on\n" +
+            "it.";
+            stuff[1] = dontShow;
+
+            JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff, 
+                "Perspective information", JOptionPane.OK_OPTION);
+
+            if (dontShow.isSelected()) {
+              try {
+                Utils.setDontShowDialog("weka.gui.beans.KnowledgeFlow.PerspectiveInfo");
+              } catch (Exception ex) {
+                // quietly ignore
+              }
+            }
+          }
+          
           if (m_configAndPerspectivesVisible) {
             KnowledgeFlowApp.this.remove(m_configAndPerspectives);
             m_configAndPerspectivesVisible = false;
@@ -1636,8 +1806,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             }
           }
         }
-        m_togglePerspectivesB.setEnabled(PLUGIN_PERSPECTIVES.keySet().size() > 0);
       }
+      
+      m_togglePerspectivesB.setEnabled(PLUGIN_PERSPECTIVES.keySet().size() > 0);
 
       //      toolBarPanel.add(m_toolBars, BorderLayout.CENTER);
 
@@ -1709,7 +1880,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               DefaultMutableTreeNode tNode = (DefaultMutableTreeNode)p.getLastPathComponent();
 
               if (tNode.isLeaf()) {
-                System.err.println("Selected : " + tNode.getUserObject().toString());
+//                System.err.println("Selected : " + tNode.getUserObject().toString());
                 Object userObject = tNode.getUserObject();
                 if (userObject instanceof JTreeLeafDetails) {
 
@@ -1720,7 +1891,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                       m_firstUserComponentOpp = false;
                     }
 
-                    StringBuffer toRemove = ((JTreeLeafDetails)userObject).getMetaBean();
+                    Vector toRemove = ((JTreeLeafDetails)userObject).getMetaBean();
                     DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
                     MutableTreeNode userRoot = (MutableTreeNode)tNode.getParent(); // The "User" folder
                     model.removeNodeFromParent(tNode);
@@ -2358,6 +2529,30 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       configB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
+          if (!Utils.getDontShowDialog("weka.gui.beans.KnowledgeFlow.PerspectiveInfo")) {
+            JCheckBox dontShow = new JCheckBox("Do not show this message again");
+            Object[] stuff = new Object[2];
+            stuff[0] = "Perspectives are environments that take over the\n" +
+            "Knowledge Flow UI and provide major additional functionality.\n" + 
+            "Many perspectives will operate on a set of instances. Instances\n" +
+            "Can be sent to a perspective by placing a DataSource on the\n" +
+            "layout canvas, configuring it and then selecting \"Send to perspective\"\n" +
+            "from the contextual popup menu that appears when you right-click on\n" +
+            "it.";
+            stuff[1] = dontShow;
+
+            JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff, 
+                "Perspective information", JOptionPane.OK_OPTION);
+
+            if (dontShow.isSelected()) {
+              try {
+                Utils.setDontShowDialog("weka.gui.beans.KnowledgeFlow.PerspectiveInfo");
+              } catch (Exception ex) {
+                // quietly ignore
+              }
+            }
+          }
+          
           popupPerspectiveConfigurer();
         }
       });
@@ -3506,14 +3701,17 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         menuItemCount++;
         for (int i = 1; i < m_perspectives.size(); i++) {
           final int pIndex = i;
-          String pName = m_perspectives.get(i).getPerspectiveTitle();
-          MenuItem pI = new MenuItem(pName);
-          pI.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              loadDataAndSendToPerspective(theLoader, pIndex, false);
-            }
-          });
-          sendToPerspective.add(pI);
+
+          if (m_perspectives.get(i).acceptsInstances()) {
+            String pName = m_perspectives.get(i).getPerspectiveTitle();
+            MenuItem pI = new MenuItem(pName);
+            pI.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                loadDataAndSendToPerspective(theLoader, pIndex, false);
+              }
+            });
+            sendToPerspective.add(pI);
+          }
         }
       }
     }
@@ -3543,7 +3741,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
               if (sendToAll) {
                 for (int i = 1; i < m_perspectives.size(); i++) {
-                  m_perspectives.get(i).setInstances(data);
+                  if (m_perspectives.get(i).acceptsInstances()) {
+                    m_perspectives.get(i).setInstances(data);
+                  }
                 }
               } else {
                 KFPerspective currentP = 
@@ -3838,7 +4038,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       SerializedObject so = new SerializedObject(metaDetails);
       Vector copy = (Vector)so.getObject();
 
-      JTreeLeafDetails metaLeaf = new JTreeLeafDetails(displayName, serialized, scaledIcon);
+      JTreeLeafDetails metaLeaf = new JTreeLeafDetails(displayName, copy, scaledIcon);
 
 
       DefaultMutableTreeNode newUserComp = new DefaultMutableTreeNode(metaLeaf);
@@ -5182,14 +5382,15 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   private void loadUserComponents() {
     Vector tempV = null;
-    String ext = "";
-    if (m_UserComponentsInXML)
-      ext = USERCOMPONENTS_XML_EXTENSION;
-    File sFile = 
-      new File(System.getProperty("user.home")
+    //String ext = "";
+    /*if (m_UserComponentsInXML)
+      ext = USERCOMPONENTS_XML_EXTENSION; */
+    File sFile = new File(weka.core.WekaPackageManager.WEKA_HOME.getPath()
+        + File.separator + "knowledgeFlow" + File.separator + "userComponents");
+/*      new File(System.getProperty("user.home")
           +File.separator + ".knowledgeFlow"
           +File.separator + "userComponents"
-          +ext);
+          +ext); */
     if (sFile.exists()) {
       try {
         /*if (m_UserComponentsInXML) {
@@ -5222,7 +5423,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           String displayName = (String)tempB.get(0);
           StringBuffer serialized = (StringBuffer)tempB.get(1);
           ImageIcon scaledIcon = (ImageIcon)tempB.get(2);
-          JTreeLeafDetails treeLeaf = new JTreeLeafDetails(displayName, serialized,
+          JTreeLeafDetails treeLeaf = new JTreeLeafDetails(displayName, tempB,
               scaledIcon);
           DefaultMutableTreeNode newUserComp = new DefaultMutableTreeNode(treeLeaf);
           model.insertNodeInto(newUserComp, m_userCompNode, 0);
@@ -5241,75 +5442,70 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     ((java.awt.Window)getTopLevelAncestor()).
     addWindowListener(new java.awt.event.WindowAdapter() {
       public void windowClosing(java.awt.event.WindowEvent e) {
-        if (m_userComponents.size() > 0) {
-          System.out.println("[KnowledgeFlow] Saving user components....");
-          File sFile = 
-            new File(System.getProperty("user.home")
-                +File.separator+".knowledgeFlow");
-          if (!sFile.exists()) {
-            if (!sFile.mkdir()) {
-              System.err.println("[KnowledgeFlow] Unable to create .knowledgeFlow "
-                  +"directory in your HOME.");
-            } else {
-              // make the plugins subdirectory for the user
-              sFile = new File(sFile.toString() + File.separator 
-                  + "plugins");
-              sFile.mkdir();
-            }
-          }
-          try {
-            String ext = "";
-            /*              if (m_UserComponentsInXML)
-                ext = USERCOMPONENTS_XML_EXTENSION; */
-            File sFile2 = new File(sFile.getAbsolutePath()
-                +File.separator
-                +"userComponents"
-                +ext);
 
-            /*if (m_UserComponentsInXML) {
+        System.out.println("[KnowledgeFlow] Saving user components....");
+        File sFile = new File(WekaPackageManager.WEKA_HOME.getPath() 
+            + File.separator + "knowledgeFlow");
+
+        if (!sFile.exists()) {
+          if (!sFile.mkdir()) {
+            System.err.println("[KnowledgeFlow] Unable to create \""
+                + sFile.getPath() + "\" directory");
+          }
+        }
+        try {
+          String ext = "";
+          /*              if (m_UserComponentsInXML)
+                ext = USERCOMPONENTS_XML_EXTENSION; */
+          File sFile2 = new File(sFile.getAbsolutePath()
+              +File.separator
+              +"userComponents"
+              +ext);
+
+          /*if (m_UserComponentsInXML) {
                 XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, XMLBeans.DATATYPE_USERCOMPONENTS,
                     m_mainKFPerspective.getCurrentTabIndex());
                 xml.write(sFile2, m_userComponents);
               }
               else { */
-            OutputStream os = new FileOutputStream(sFile2);
-            ObjectOutputStream oos = new ObjectOutputStream(os);
-            oos.writeObject(m_userComponents);
-            oos.flush();
-            oos.close();
-            //}
-          } catch (Exception ex) {
-            System.err.println("[KnowledgeFlow] Unable to save user components");
-            ex.printStackTrace();
-          }
+          OutputStream os = new FileOutputStream(sFile2);
+          ObjectOutputStream oos = new ObjectOutputStream(os);
+          oos.writeObject(m_userComponents);
+          oos.flush();
+          oos.close();
+          //}
+        } catch (Exception ex) {
+          System.err.println("[KnowledgeFlow] Unable to save user components");
+          ex.printStackTrace();
         }
 
-//        if (VISIBLE_PERSPECTIVES.size() > 0) {
-          System.out.println("Saving preferences for selected perspectives...");
-          File sFile = new File(weka.core.WekaPackageManager.PROPERTIES_DIR.toString() 
-              + File.separator + "VisiblePerspectives.props");
-          try {
-            FileWriter f = new FileWriter(sFile);
-            f.write("weka.gui.beans.KnowledgeFlow.SelectedPerspectives=");
-            int i = 0;
-            for (String p : VISIBLE_PERSPECTIVES) {
-              if (i > 0) {
-                f.write(",");
-              }
-              f.write(p);
-              i++;
+
+        //        if (VISIBLE_PERSPECTIVES.size() > 0) {
+        System.out.println("Saving preferences for selected perspectives...");
+        sFile = new File(weka.core.WekaPackageManager.PROPERTIES_DIR.toString() 
+            + File.separator + "VisiblePerspectives.props");
+        try {
+          FileWriter f = new FileWriter(sFile);
+          f.write("weka.gui.beans.KnowledgeFlow.SelectedPerspectives=");
+          int i = 0;
+          for (String p : VISIBLE_PERSPECTIVES) {
+            if (i > 0) {
+              f.write(",");
             }
-            f.write("\n");
-            
-            f.write("weka.gui.beans.KnowledgeFlow.PerspectiveToolBarVisisble=" 
-                + ((m_configAndPerspectivesVisible) ? "yes" : "no"));
-            f.write("\n");
-            f.close();
-          } catch (Exception ex) {
-            System.err.println("[KnowledgeFlow] Unable to save user perspectives preferences");
-            ex.printStackTrace();
+            f.write(p);
+            i++;
           }
-  //      }
+          f.write("\n");
+
+          f.write("weka.gui.beans.KnowledgeFlow.PerspectiveToolBarVisisble=" 
+              + ((m_configAndPerspectivesVisible) ? "yes" : "no"));
+          f.write("\n");
+          f.close();
+        } catch (Exception ex) {
+          System.err.println("[KnowledgeFlow] Unable to save user perspectives preferences");
+          ex.printStackTrace();
+        }
+        //      }
 
       }
     });
