@@ -3282,6 +3282,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       tempB.setEnabled(true);
     }
   }
+  
+  public void closeAllTabs() {
+    for (int i = m_mainKFPerspective.getNumTabs() - 1; i >= 0; i--) {
+      m_mainKFPerspective.removeTab(i);
+    }
+  }
 
   public void clearLayout() {
     stopFlow(); // try and stop any running components
