@@ -984,7 +984,8 @@ public class GUIChooser
               .add(kna, BorderLayout.CENTER);
             m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent w) {
-                  kna.clearLayout();
+                  kna.closeAllTabs();
+                  kna.clearLayout(); // add an initial "Untitled" tab for next time
                   m_KnowledgeFlowFrame.dispose();
                   m_KnowledgeFlowFrame = null;
                   m_KnowledgeFlowBut.setEnabled(true);
