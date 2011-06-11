@@ -4199,7 +4199,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     if (selectedBeans == null || selectedBeans.size() == 0) {
       return false;
     }
-    m_mainKFPerspective.setSelectedBeans(new Vector());
+    //m_mainKFPerspective.setSelectedBeans(new Vector());
 
     try {
       m_pasteBuffer = copyToBuffer(selectedBeans);
