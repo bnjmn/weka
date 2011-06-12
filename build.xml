@@ -822,12 +822,12 @@
                 VMOptions="-Xmx256M"
                 shortname="Weka"
                 arguments=""
-                workingdirectory="$APP_PACKAGE/Contents/Resources"
-                jvmversion="1.5+">
+                workingdirectory="/Users"
+                jvmversion="1.6+">
       <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
       <jarfileset dir="weka-${release}/weka-${release}">
         <include name="weka.jar"/>
-      </jarfileset>
+      </jarfileset>      
     </jarbundler>
 
     <!-- Make a .dmg disk image -->
