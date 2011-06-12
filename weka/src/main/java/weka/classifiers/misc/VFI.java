@@ -106,10 +106,10 @@ import java.util.Vector;
  * Don't Weight voting intervals by confidence. <p>
  *
  * -B <bias> <br>
- * Set exponential bias towards confident intervals. default = 1.0 <p>
+ * Set exponential bias towards confident intervals. default = -0.6 <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class VFI extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -188,7 +188,7 @@ public class VFI extends Classifier
    * Don't weight voting intervals by confidence. <p>
    *
    * -B <bias> <br>
-   * Set exponential bias towards confident intervals. default = 1.0 <p>
+   * Set exponential bias towards confident intervals. default = -0.6 <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
