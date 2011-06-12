@@ -121,7 +121,7 @@ import java.util.Vector;
  * 
  * <pre> -B &lt;bias&gt;
  *  Set exponential bias towards confident intervals
- *  (default = 1.0)</pre>
+ *  (default = -0.6)</pre>
  * 
  <!-- options-end -->
  *
@@ -217,7 +217,7 @@ public class VFI
 	       "C", 0,"-C"));
     newVector.addElement(
     new Option("\tSet exponential bias towards confident intervals\n"
-	       +"\t(default = 1.0)",
+	       +"\t(default = -0.6)",
 	       "B", 1,"-B <bias>"));
 
     return newVector.elements();
