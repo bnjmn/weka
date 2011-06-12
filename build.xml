@@ -367,7 +367,7 @@
                 VMOptions="-Xmx256M"
                 shortname="Weka"
                 arguments=""
-                workingdirectory="$APP_PACKAGE/Contents/Resources"
+                workingdirectory="/Users"
                 jvmversion="1.5+">
       <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
       <jarfileset dir="weka-${release}/weka-${release}">
