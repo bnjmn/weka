@@ -549,7 +549,7 @@ public class Main
       // main window
       createTitle("");
       this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-      this.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("weka/gui/weka_icon.gif")).getImage());
+      this.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png")).getImage());
 
       // bits and pieces
       m_FileChooserGraphVisualizer.addChoosableFileFilter(
