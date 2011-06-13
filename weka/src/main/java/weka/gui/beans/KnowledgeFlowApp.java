@@ -4974,7 +4974,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
 
     if (!isUndo) {
-      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
+      File absolute = new File(oFile.getAbsolutePath());
+      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", absolute.getParent());
     }
 
     try {
@@ -5656,71 +5657,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     } else {
       System.err.println("[KnowledgeFlow] File '" + fileName + "' does not exists.");
     }
-
-    try {
-      Vector beans = new Vector();
-      Vector connections = new Vector();
-
-      // KOML?
-      if ((KOML.isPresent()) &&
-          (oFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION))) {
-        Vector v = (Vector) KOML.read(oFile.getAbsolutePath());
-        beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
-        connections = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-      } /* XML? */ else if (oFile.getAbsolutePath().toLowerCase()
-          .endsWith(FILE_EXTENSION_XML)) {
-        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
-            m_mainKFPerspective.getCurrentTabIndex());
-        Vector v = (Vector) xml.read(oFile);
-        beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
-        connections = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-
-        //connections  = new Vector();
-      } /* binary */ else {
-        InputStream is = new FileInputStream(oFile);
-        ObjectInputStream ois = new ObjectInputStream(is);
-        beans = (Vector) ois.readObject();
-        connections = (Vector) ois.readObject();
-        ois.close();
-      }
-
-      java.awt.Color bckC = getBackground();
-      m_bcSupport = new BeanContextSupport();
-      m_bcSupport.setDesignTime(true);
-
-      // register this panel as a property change listener with each
-      // bean
-      for (int i = 0; i < beans.size(); i++) {
-        BeanInstance tempB = (BeanInstance) beans.elementAt(i);
-
-        if (tempB.getBean() instanceof Visible) {
-          ((Visible) (tempB.getBean())).getVisual()
-          .addPropertyChangeListener(this);
-
-          // A workaround to account for JPanel's with their default
-          // background colour not being serializable in Apple's JRE
-          ((Visible) (tempB.getBean())).getVisual().setBackground(bckC);
-          ((JComponent) (tempB.getBean())).setBackground(bckC);
-        }
-
-        if (tempB.getBean() instanceof BeanCommon) {
-          ((BeanCommon) (tempB.getBean())).setLog(m_logPanel);
-        }
-
-        if (tempB.getBean() instanceof BeanContextChild) {
-          m_bcSupport.add(tempB.getBean());
-        }
-      }
-
-      BeanInstance.setBeanInstances(beans, m_beanLayout, 
-          m_mainKFPerspective.getCurrentTabIndex());
-      BeanConnection.setConnections(connections, 
-          m_mainKFPerspective.getCurrentTabIndex());
-      m_beanLayout.revalidate();
-      m_beanLayout.repaint();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
+    
+    loadLayout(oFile, true);
   }
 
   public void setAllowMultipleTabs(boolean multiple) {
@@ -5763,9 +5701,19 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
+
       //final KnowledgeFlowApp tm = new KnowledgeFlowApp();
-      m_knowledgeFlow = new KnowledgeFlowApp(true);
+//      m_knowledgeFlow = new KnowledgeFlowApp(true);
+
+      for (int i = 0; i < args.length; i++) {
+        if (args[i].toLowerCase().endsWith(".kf") || 
+            args[i].toLowerCase().endsWith(".kfml")) {
+          args[i] = "file=" + args[i];
+        }
+      }
       
+      KnowledgeFlowApp.createSingleton(args);
+
       Image icon = Toolkit.getDefaultToolkit().
         getImage(m_knowledgeFlow.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
