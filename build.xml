@@ -242,6 +242,7 @@
   <!-- Put everything in ${build}/classes into the weka.jar file -->
   <target name="exejar" depends="compile, init_dist"
    description="Create an executable jar file in ./dist">
+    <copy todir="${build}/classes/weka/gui" file="resources/MacArffOpenFilesHandler.class"/>
     <jar jarfile="${dist}/weka.jar" 
       basedir="${build}/classes">
      <manifest>
@@ -368,11 +369,15 @@
                 shortname="Weka"
                 arguments=""
                 workingdirectory="/Users"
-                jvmversion="1.5+">
+                jvmversion="1.6+">
       <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
       <jarfileset dir="weka-${release}/weka-${release}">
         <include name="weka.jar"/>
       </jarfileset>
+      <documenttype name="Attribute Relation File Format (ARFF)"
+                    extensions="arff xrff kf kfml"
+                    iconFile="${src}/weka/gui/weka_icon_new.icns"
+                    role="Editor"/>
     </jarbundler>
 
     <!-- Make a .dmg disk image -->
