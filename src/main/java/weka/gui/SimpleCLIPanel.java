@@ -643,7 +643,7 @@ public class SimpleCLIPanel
    * @return		the icon
    */
   public ImageIcon getIcon() {
-    return ComponentHelper.getImageIcon("weka_icon.gif");
+    return ComponentHelper.getImageIcon("weka_icon_new_48.png");
   }
 
   /**

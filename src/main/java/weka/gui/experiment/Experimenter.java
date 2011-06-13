@@ -27,6 +27,8 @@ import weka.experiment.Experiment;
 import weka.gui.LookAndFeel;
 
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
+import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
@@ -141,6 +143,10 @@ public class Experimenter
       jf.pack();
       jf.setSize(800, 600);
       jf.setVisible(true);
+
+      Image icon = Toolkit.getDefaultToolkit().
+        getImage(m_experimenter.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
+      jf.setIconImage(icon);
 
       Thread memMonitor = new Thread() {
         public void run() {
