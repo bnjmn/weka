@@ -377,8 +377,8 @@ public class Explorer
       jf.setSize(800, 600);
       jf.setVisible(true);
       Image icon = Toolkit.getDefaultToolkit().
-      getImage(ClassLoader.getSystemResource("weka/gui/weka_icon.gif"));
-      jf.setIconImage(icon);
+        getImage(m_explorer.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
+      jf.setIconImage(icon);      
 
       if (args.length == 1) {
         System.err.println("Loading instances from " + args[0]);
