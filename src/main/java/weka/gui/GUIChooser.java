@@ -71,6 +71,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -105,6 +106,27 @@ import javax.swing.KeyStroke;
  */
 public class GUIChooser
   extends JFrame {
+  
+  static {
+    try {
+      Object MacApp = Class.forName("com.apple.eawt.Application").newInstance();
+      
+      Object macArffHandler = Class.forName("weka.gui.MacArffOpenFilesHandler").newInstance();
+      
+      Class fileHandlerClass = Class.forName("com.apple.eawt.OpenFilesHandler");
+      Class[] paramClass = new Class[1];
+      paramClass[0] = fileHandlerClass;
+      Object[] args = new Object[1];
+      args[0] = macArffHandler;
+      
+      Method m = MacApp.getClass().getMethod("setOpenFileHandler", paramClass);
+      System.out.println("Trying to install a file handler for Mac...");
+      m.invoke(MacApp, macArffHandler);
+      
+    } catch (Exception ex) {
+      // quietly ignore...
+    }
+  }
 
   /** for serialization */
   private static final long serialVersionUID = 9001529425230247914L;
@@ -220,6 +242,24 @@ public class GUIChooser
   
   /** contains the child frames (title &lt;-&gt; object). */
   protected HashSet<Container> m_ChildFrames = new HashSet<Container>();
+
+  /**
+   * Create a singleton instance of the GUIChooser 
+   */
+  public static synchronized void createSingleton() {
+    if (m_chooser == null) {
+      m_chooser = new GUIChooser();
+    }
+  }
+
+  /**
+   * Get the singleton instance of the GUIChooser
+   *
+   * @return the singleton instance of the GUIChooser
+   */
+  public static GUIChooser getSingleton() {
+    return m_chooser;
+  }
   
   /**
    * Creates the experiment environment gui with no initial experiment
@@ -996,24 +1036,7 @@ public class GUIChooser
 
     m_ExplorerBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	if (m_ExplorerFrame == null) {
-	  m_ExplorerBut.setEnabled(false);
-	  m_ExplorerFrame = new JFrame("Weka Explorer");
-	  m_ExplorerFrame.setIconImage(m_Icon);
-	  m_ExplorerFrame.getContentPane().setLayout(new BorderLayout());
-	  m_ExplorerFrame.getContentPane().add(new Explorer(), BorderLayout.CENTER);
-	  m_ExplorerFrame.addWindowListener(new WindowAdapter() {
-	    public void windowClosing(WindowEvent w) {
-	      m_ExplorerFrame.dispose();
-	      m_ExplorerFrame = null;
-	      m_ExplorerBut.setEnabled(true);
-	      checkExit();
-	    }
-	  });
-	  m_ExplorerFrame.pack();
-	  m_ExplorerFrame.setSize(800, 600);
-	  m_ExplorerFrame.setVisible(true);
-	}
+        showExplorer(null);
       }
     });
 
@@ -1157,6 +1180,46 @@ public class GUIChooser
       };
       tipThread.setPriority(Thread.MIN_PRIORITY);
       tipThread.start();
+    }
+  }
+
+  public void showExplorer(String fileToLoad) {
+    Explorer expl = null;
+    if (m_ExplorerFrame == null) {
+      m_ExplorerBut.setEnabled(false);
+      m_ExplorerFrame = new JFrame("Weka Explorer");
+      m_ExplorerFrame.setIconImage(m_Icon);
+      m_ExplorerFrame.getContentPane().setLayout(new BorderLayout());
+      expl = new Explorer();
+
+      m_ExplorerFrame.getContentPane().add(expl, BorderLayout.CENTER);
+      m_ExplorerFrame.addWindowListener(new WindowAdapter() {
+          public void windowClosing(WindowEvent w) {
+            m_ExplorerFrame.dispose();
+            m_ExplorerFrame = null;
+            m_ExplorerBut.setEnabled(true);
+            checkExit();
+          }
+        });
+      m_ExplorerFrame.pack();
+      m_ExplorerFrame.setSize(800, 600);
+      m_ExplorerFrame.setVisible(true);
+    } else {
+      Object o = m_ExplorerFrame.getContentPane().getComponent(0);
+      if (o instanceof Explorer) {
+        expl = (Explorer)o;
+      }
+    }
+
+    if (fileToLoad != null) {
+      try {
+        weka.core.converters.AbstractFileLoader loader = 
+          weka.core.converters.ConverterUtils.getLoaderForFile(fileToLoad);
+        loader.setFile(new File(fileToLoad));
+        expl.getPreprocessPanel().setInstancesFromFile(loader);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
     }
   }
   
@@ -1420,9 +1483,13 @@ public class GUIChooser
 
       // uncomment to disable the memory management:
       //m_Memory.setEnabled(false);
-
-      m_chooser = new GUIChooser();
+      //      m_chooser = new GUIChooser();
+      GUIChooser.createSingleton();
       m_chooser.setVisible(true);
+
+      if (args != null && args.length > 0) {
+        m_chooser.showExplorer(args[0]);
+      }
 
       Thread memMonitor = new Thread() {
         public void run() {
