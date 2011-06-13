@@ -161,6 +161,7 @@ public class GUIChooser
   /** Click to open the KnowledgeFlow */
   protected JButton m_KnowledgeFlowBut = new JButton("KnowledgeFlow");
   
+  /** Pending file to load on startup of the KnowledgeFlow */
   protected String m_pendingKnowledgeFlowLoad = null;
 
   /** The frame containing the knowledge flow interface */
