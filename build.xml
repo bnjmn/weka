@@ -830,7 +830,7 @@
         <include name="weka.jar"/>
       </jarfileset>     
       <documenttype name="Attribute Relation File Format (ARFF)"
-                    extensions="arff xrff" 
+                    extensions="arff xrff kf kfml" 
               iconFile="${src}/weka/gui/weka_icon_new.icns"
               role="Editor"/> 
     </jarbundler>
