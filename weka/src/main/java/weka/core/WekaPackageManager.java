@@ -661,7 +661,12 @@ public class WekaPackageManager {
         new BufferedReader(new InputStreamReader(conn.getInputStream()));
       
       String n = bi.readLine();
-      numPackages = Integer.parseInt(n);
+      try {
+        numPackages = Integer.parseInt(n);
+      } catch (NumberFormatException ne) {
+        System.err.println("[WekaPackageManager] problem parsing number " +
+        		"of packages from server.");
+      }
       bi.close();
 
     } catch (Exception ex) {
