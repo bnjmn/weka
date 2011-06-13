@@ -159,6 +159,9 @@ public class GUIChooser
 
   /** The frame containing the knowledge flow interface */
   protected JFrame m_KnowledgeFlowFrame;
+  
+  /** Pending file to load on startup of the KnowledgeFlow */
+  protected String m_pendingKnowledgeFlowLoad = null;
 
   /** Click to open the simplecli */
   protected JButton m_SimpleBut = new JButton("Simple CLI");
@@ -1000,6 +1003,12 @@ public class GUIChooser
           if (m_KnowledgeFlowFrame == null) {
             final KnowledgeFlowApp kna = KnowledgeFlowApp.getSingleton();
             m_KnowledgeFlowBut.setEnabled(false);
+            if (m_pendingKnowledgeFlowLoad != null && 
+                m_pendingKnowledgeFlowLoad.length() > 0) {
+              KnowledgeFlowApp.getSingleton().
+                loadLayout(new File(m_pendingKnowledgeFlowLoad), true);
+              m_pendingKnowledgeFlowLoad = null;
+            }
             m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
             m_KnowledgeFlowFrame.setIconImage(m_Icon);
             m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
@@ -1024,7 +1033,7 @@ public class GUIChooser
 
     m_KnowledgeFlowBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        KnowledgeFlow.startApp();
+        showKnowledgeFlow(null);
       }
     });
 
@@ -1111,6 +1120,17 @@ public class GUIChooser
       };
       tipThread.setPriority(Thread.MIN_PRIORITY);
       tipThread.start();
+    }
+  }
+  
+  public void showKnowledgeFlow(String fileToLoad) {
+    if (m_KnowledgeFlowFrame == null) {
+      KnowledgeFlow.startApp();
+      m_pendingKnowledgeFlowLoad = fileToLoad;
+    } else {
+      if (fileToLoad != null) {
+        KnowledgeFlowApp.getSingleton().loadLayout(new File(fileToLoad), true);
+      }
     }
   }
   
