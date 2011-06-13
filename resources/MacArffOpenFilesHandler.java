@@ -43,7 +43,14 @@ public class MacArffOpenFilesHandler implements OpenFilesHandler {
     System.out.println( "Opening an arff/xrff file under Mac OS X..." );
     File toOpen = arg0.getFiles().get(0);
 
-    weka.gui.GUIChooser.createSingleton();
-    weka.gui.GUIChooser.getSingleton().showExplorer(toOpen.toString());    
+    if (toOpen.toString().toLowerCase().endsWith(".arff") || 
+        toOpen.toString().toLowerCase().endsWith(".xrff")) {
+      weka.gui.GUIChooser.createSingleton();
+      weka.gui.GUIChooser.getSingleton().showExplorer(toOpen.toString());    
+    } else if (toOpen.toString().toLowerCase().endsWith(".kf") ||
+               toOpen.toString().toLowerCase().endsWith(".kfml")) {
+      weka.gui.GUIChooser.createSingleton();
+      weka.gui.GUIChooser.getSingleton().showKnowledgeFlow(toOpen.toString());
+    }
   }
 }
