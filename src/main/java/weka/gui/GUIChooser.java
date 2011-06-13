@@ -289,7 +289,7 @@ public class GUIChooser
 
     // general layout
     m_Icon = Toolkit.getDefaultToolkit().
-      getImage(GUIChooser.class.getClassLoader().getResource("weka/gui/weka_icon.gif"));
+      getImage(GUIChooser.class.getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
     setIconImage(m_Icon);
     this.getContentPane().setLayout(new BorderLayout());
     
