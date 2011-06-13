@@ -3116,6 +3116,10 @@ public class KnowledgeFlowApp
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
       //final KnowledgeFlowApp tm = new KnowledgeFlowApp();
       m_knowledgeFlow = new KnowledgeFlowApp(true);
+      
+      Image icon = Toolkit.getDefaultToolkit().
+        getImage(m_knowledgeFlow.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
+      jf.setIconImage(icon);
 
       jf.getContentPane().add(m_knowledgeFlow, java.awt.BorderLayout.CENTER);
       jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
