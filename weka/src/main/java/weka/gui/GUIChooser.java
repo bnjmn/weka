@@ -156,6 +156,9 @@ public class GUIChooser
 
   /** Click to open the KnowledgeFlow */
   protected JButton m_KnowledgeFlowBut = new JButton(Messages.getInstance().getString("GUIChooser_KnowledgeFlow_Text"));
+  
+  /** Pending file to load on startup of the KnowledgeFlow */
+  protected String m_pendingKnowledgeFlowLoad = null;
 
   /** The frame containing the knowledge flow interface */
   protected JFrame m_KnowledgeFlowFrame;
@@ -298,7 +301,7 @@ public class GUIChooser
     ImageIcon wii = new ImageIcon(m_weka);
     JLabel wekaLab = new JLabel(wii);
     wekaPan.add(wekaLab, BorderLayout.CENTER);
-    String infoString = Messages.getInstance().getString("GUIChooser_Information_Text_Front") + Version.VERSION + "<br>"
+    String infoString = Messages.getInstance().getString("GUIChooser_Information_Text_Front") + " " + Version.VERSION + "<br>"
       + "(c) " + Copyright.getFromYear() + " - " + Copyright.getToYear() + "<br>" + Copyright.getOwner() + "<br>"
       + Copyright.getAddress() + Messages.getInstance().getString("GUIChooser_Information_Text_End");
 
@@ -957,6 +960,12 @@ public class GUIChooser
           if (m_KnowledgeFlowFrame == null) {
             final KnowledgeFlowApp kna = KnowledgeFlowApp.getSingleton();
             m_KnowledgeFlowBut.setEnabled(false);
+            if (m_pendingKnowledgeFlowLoad != null && 
+                m_pendingKnowledgeFlowLoad.length() > 0) {
+              KnowledgeFlowApp.getSingleton().
+                loadInitialLayout(m_pendingKnowledgeFlowLoad);
+              m_pendingKnowledgeFlowLoad = null;
+            }
             m_KnowledgeFlowFrame = new JFrame(Messages.getInstance().getString("GUIChooser_WekaKnowledgeFlowEnvironment_JFrame_Text"));
             m_KnowledgeFlowFrame.setIconImage(m_Icon);
             m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
@@ -980,7 +989,7 @@ public class GUIChooser
 
     m_KnowledgeFlowBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        KnowledgeFlow.startApp();
+        showKnowledgeFlow(null);
       }
     });
 
@@ -1042,6 +1051,17 @@ public class GUIChooser
       }
     });
     pack();
+  }
+  
+  public void showKnowledgeFlow(String fileToLoad) {
+    if (m_KnowledgeFlowFrame == null) {
+      KnowledgeFlow.startApp();
+      m_pendingKnowledgeFlowLoad = fileToLoad;
+    } else {
+      if (fileToLoad != null) {
+        KnowledgeFlowApp.getSingleton().loadInitialLayout(fileToLoad);
+      }
+    }
   }
   
   public void showExplorer(String fileToLoad) {
