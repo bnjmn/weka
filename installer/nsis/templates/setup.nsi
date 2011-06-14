@@ -69,6 +69,10 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE English
 
 # Installer attributes
+
+# required so that Vista/Win 7 uninstaller will remove start menu shortcuts
+RequestExecutionLevel admin
+
 OutFile "weka-${WEKA_VERSION_HYPHEN}${WEKA_JRE_SUFFIX}.exe"
 InstallDir $PROGRAMFILES\${WEKA_DIR}
 CRCCheck on
@@ -119,6 +123,18 @@ Section "Associate Files" SectionAssociations
     WriteRegStr HKCR "XRFFDataFile" "" "XRFF Data File"
     WriteRegStr HKCR "XRFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
     WriteRegStr HKCR "XRFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
+    # kf
+    WriteRegStr HKCR ".kf" "" "KFFlowFile"
+    WriteRegStr HKCR "KFFlowFile" "" "KF Flow File"
+    WriteRegStr HKCR "KFFlowFile\DefaultIcon" "" "$INSTDIR\weka.ico"
+    WriteRegStr HKCR "KFFlowFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "knowledgeFlow" "%1"'
+    # kfml
+    WriteRegStr HKCR ".kfml" "" "KFMLFlowFile"
+    WriteRegStr HKCR "KFMLFlowFile" "" "KFML Flow File"
+    WriteRegStr HKCR "KFMLFlowFile\DefaultIcon" "" "$INSTDIR\weka.ico"
+    WriteRegStr HKCR "KFMLFlowFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "knowledgeFlow" "%1"'
+
+Call RefreshShellIcons
 SectionEnd
 
 # Start: JRE
@@ -228,6 +244,12 @@ Function un.onInit
     ReadRegStr $INSTDIR HKLM "${REGKEY}" Path
     ReadRegStr $StartMenuGroup HKLM "${REGKEY}" StartMenuGroup
     !insertmacro SELECT_UNSECTION Main ${UNSEC0000}
+FunctionEnd
+
+Function RefreshShellIcons
+  !define SHCNE_ASSOCCHANGED 0x08000000
+  !define SHCNF_IDLIST 0
+  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (${SHCNE_ASSOCCHANGED}, ${SHCNF_IDLIST}, 0, 0)'
 FunctionEnd
 
 # launches program
