@@ -356,6 +356,10 @@
                     extensions="arff xrff"
                     iconFile="${src}/weka/gui/weka_icon_new.icns"
                     role="Editor"/>
+      <documenttype name="Knowledge Flow layout file"
+                    extensions="kf kfml"
+                    iconFile="${src}/weka/gui/weka_icon_new.icns"
+                    role="Editor"/>
     </jarbundler>
 
     <!-- Make a .dmg disk image -->
