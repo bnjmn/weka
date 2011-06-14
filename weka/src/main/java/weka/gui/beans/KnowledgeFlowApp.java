@@ -3003,7 +3003,9 @@ public class KnowledgeFlowApp
    * Added by Zerbetto
    */
   //modifications by Zerbetto 05-12-2007
-  private void loadInitialLayout(String fileName) {
+  public void loadInitialLayout(String fileName) {
+    stopFlow();
+    
     File oFile = new File(fileName);
 
     if (oFile.exists() && oFile.isFile()) {
@@ -3080,6 +3082,11 @@ public class KnowledgeFlowApp
 
       BeanInstance.setBeanInstances(beans, m_beanLayout);
       BeanConnection.setConnections(connections);
+      File fullPath = new File(oFile.getAbsolutePath().toString());
+      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", 
+          fullPath.getParent());
+      setEnvironment();
+      
       m_beanLayout.revalidate();
       m_beanLayout.repaint();
     } catch (Exception ex) {
@@ -3115,7 +3122,16 @@ public class KnowledgeFlowApp
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
       //final KnowledgeFlowApp tm = new KnowledgeFlowApp();
-      m_knowledgeFlow = new KnowledgeFlowApp(true);
+//      m_knowledgeFlow = new KnowledgeFlowApp(true);
+      
+      for (int i = 0; i < args.length; i++) {
+        if (args[i].toLowerCase().endsWith(".kf") || 
+            args[i].toLowerCase().endsWith(".kfml")) {
+          args[i] = "file=" + args[i];
+        }
+      }
+      
+      KnowledgeFlowApp.createSingleton(args);
       
       Image icon = Toolkit.getDefaultToolkit().
         getImage(m_knowledgeFlow.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
