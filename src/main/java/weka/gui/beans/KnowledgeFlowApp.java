@@ -3900,7 +3900,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       ((Customizer)customizer).setObject(bc);
       // final javax.swing.JFrame jf = new javax.swing.JFrame();
-      final JDialog d = new JDialog((JFrame)KnowledgeFlowApp.this.getTopLevelAncestor(), true);
+      final JDialog d = new JDialog((java.awt.Frame)KnowledgeFlowApp.this.getTopLevelAncestor(), true);
       d.setLayout(new BorderLayout());
       d.getContentPane().add((JComponent)customizer, BorderLayout.CENTER);
 
@@ -3920,6 +3920,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       //      jf.pack();
       //    jf.setVisible(true);
       d.pack();
+      d.setLocationRelativeTo(KnowledgeFlowApp.this);
       d.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -5666,7 +5667,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     if (!multiple) {
       m_newB.setEnabled(false);
-      remove(m_configAndPerspectives);
+      if (m_configAndPerspectives != null) {
+        remove(m_configAndPerspectives);
+      }
     }
   }
 
