@@ -532,6 +532,7 @@ public class LoaderCustomizer
     m_dsLoader = (weka.gui.beans.Loader)object;
     m_LoaderEditor.setTarget(m_dsLoader.getLoader());
     //    m_fileEditor.setValue(m_dsLoader.getDataSetFile());
+    m_LoaderEditor.setEnvironment(m_env);
     if (m_dsLoader.getLoader() instanceof FileSourcedConverter) {
       setUpFile();
     } else{ 
@@ -540,7 +541,7 @@ public class LoaderCustomizer
         }
         else
       setUpOther();
-    }
+    }    
   }
   
   public void setEnvironment(Environment env) {
