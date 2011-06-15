@@ -133,7 +133,9 @@ public class GenericArrayEditor
 	  m_Support.firePropertyChange("", null, null);
 	}
       } else if (e.getSource() == m_EditBut) {
-        ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
+        if (m_Editor instanceof GenericObjectEditor) {
+          ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
+        }
         m_Editor.setValue(m_ElementList.getSelectedValue());
         if (m_Editor.getValue() != null) {
           if (m_PD == null) {
@@ -360,7 +362,11 @@ public class GenericArrayEditor
 	    ((GenericObjectEditor)editor).setDefaultValue();
 	  } else {   
             try {
-	    editor.setValue(elementClass.newInstance());
+              if (editor instanceof FileEditor) {
+                editor.setValue(new java.io.File("-NONE-"));
+              } else {
+                editor.setValue(elementClass.newInstance());
+              }
             } catch(Exception ex) {
               m_ElementEditor=null;
               System.err.println(ex.getMessage());
@@ -385,7 +391,16 @@ public class GenericArrayEditor
 	System.err.println("No property editor for class: "
 			   + elementClass.getName());
       } else {
-	m_ElementEditor = editor;
+        m_ElementEditor = editor;
+        try {
+          m_Editor = editor.getClass().newInstance();
+        } catch (InstantiationException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        } catch (IllegalAccessException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
 
 	// Create the ListModel and populate it
 	m_ListModel = new DefaultListModel();
