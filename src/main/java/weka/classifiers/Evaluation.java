@@ -2959,7 +2959,7 @@ public class Evaluation
   }
 
   /**
-   * Calculates the weighted (by class size) false precision.
+   * Calculates the weighted (by class size) precision.
    *
    * @return the weighted precision.
    */
