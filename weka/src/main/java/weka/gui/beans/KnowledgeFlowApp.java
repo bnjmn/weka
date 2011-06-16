@@ -3740,6 +3740,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             loader.reset();
             Instances data = loader.getDataSet();
             if (data != null) {
+              // make sure the perspective toolbar is visible!!
+              if (!m_configAndPerspectivesVisible) {
+                KnowledgeFlowApp.this.add(m_configAndPerspectives, BorderLayout.NORTH);
+                m_configAndPerspectivesVisible = true;
+              }
+              
               // need to disable all the perspective buttons
               for (int i = 0; i < m_perspectives.size(); i++) {
                 m_perspectiveToolBar.getComponent(i).setEnabled(false);
