@@ -63,7 +63,10 @@ import java.util.Vector;
  *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
  *  Supported operators are +, -, *, /, pow, log,
  *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
- *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse</pre>
+ *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse. The 'A'
+ *  letter refers to the value of the attribute being processed.
+ *  Other attribute values (numeric only) can be accessed through
+ *  the variables A1, A2, A3, ...</pre>
  * 
  * <pre> -R &lt;index1,index2-index4,...&gt;
  *  Specify list of columns to ignore. First and last are valid
@@ -367,7 +370,10 @@ public class MathExpression
    *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
    *  Supported operators are +, -, *, /, pow, log,
    *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
-   *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse</pre>
+   *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse. The 'A'
+   *  letter refers to the value of the attribute being processed.
+   *  Other attribute values (numeric only) can be accessed through
+   *  the variables A1, A2, A3, ...</pre>
    * 
    * <pre> -R &lt;index1,index2-index4,...&gt;
    *  Specify list of columns to ignore. First and last are valid
@@ -444,7 +450,10 @@ public class MathExpression
 	"\tSpecify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)"
 	+"\n\tSupported operators are +, -, *, /, pow, log,"
 	+"\n\tabs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), "
-	+"\n\tMEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse",
+	+"\n\tMEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse. The 'A'"
+	+ "\n\tletter refers to the value of the attribute being processed."
+	+ "\n\tOther attribute values (numeric only) can be accessed through"
+	+ "\n\tthe variables A1, A2, A3, ...",
 	"E",1,"-E <expression>"));
     
     result.addElement(new Option(
@@ -586,3 +595,4 @@ public class MathExpression
     runFilter(new MathExpression(), argv);
   }
 }
+
