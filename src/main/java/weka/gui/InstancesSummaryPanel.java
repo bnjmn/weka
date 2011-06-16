@@ -95,7 +95,7 @@ public class InstancesSummaryPanel
     gbConstraints.anchor = GridBagConstraints.WEST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
     gbConstraints.gridy = 0;     gbConstraints.gridx = 1;
-    gbConstraints.weightx = 100; gbConstraints.gridwidth = 3;
+    gbConstraints.weightx = 100; //gbConstraints.gridwidth = GridBagConstraints.RELATIVE;
     gbLayout.setConstraints(m_RelationNameLab, gbConstraints);
     add(m_RelationNameLab);
     m_RelationNameLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
@@ -129,7 +129,7 @@ public class InstancesSummaryPanel
     gbConstraints.anchor = GridBagConstraints.WEST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
     gbConstraints.gridy = 0;     gbConstraints.gridx = 3;
-    gbConstraints.weightx = 100;
+    //gbConstraints.weightx = 100;
     gbLayout.setConstraints(m_NumAttributesLab, gbConstraints);
     add(m_NumAttributesLab);
     m_NumAttributesLab.setBorder(BorderFactory.createEmptyBorder(0, 5,
@@ -147,7 +147,7 @@ public class InstancesSummaryPanel
     gbConstraints.anchor = GridBagConstraints.WEST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
     gbConstraints.gridy = 1;     gbConstraints.gridx = 3;
-    gbConstraints.weightx = 100;
+    //gbConstraints.weightx = 100;
     gbLayout.setConstraints(m_sumOfWeightsLab, gbConstraints);
     add(m_sumOfWeightsLab);
     m_sumOfWeightsLab.setBorder(BorderFactory.createEmptyBorder(0, 5,
@@ -171,6 +171,7 @@ public class InstancesSummaryPanel
   public void setInstances(Instances inst) {
     m_Instances = inst;
     m_RelationNameLab.setText(m_Instances.relationName());
+    m_RelationNameLab.setToolTipText(m_Instances.relationName());
     m_NumInstancesLab.setText("" + 
         ((m_showZeroInstancesAsUnknown && m_Instances.numInstances() == 0) 
             ? "?" 
