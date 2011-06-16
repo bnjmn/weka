@@ -130,6 +130,7 @@ public class InstancesSummaryPanel
     
     m_Instances = inst;
     m_RelationNameLab.setText(m_Instances.relationName());
+    m_RelationNameLab.setToolTipText(m_Instances.relationName());
     m_NumInstancesLab.setText("" + m_Instances.numInstances());
     m_NumAttributesLab.setText("" + m_Instances.numAttributes());
   }
