@@ -1,3 +1,8 @@
 # List of available template flows
-weka.gui.beans.KnowledgeFlow.templates=weka/gui/beans/templates/cvTemplate.kfml,weka/gui/beans/templates/learnAndSaveModel.kfml
-weka.gui.beans.KnowledgeFlow.templates.desc=Cross validation,Learn and save a model
+weka.gui.beans.KnowledgeFlow.templates=weka/gui/beans/templates/cvTemplate.kfml,\
+ weka/gui/beans/templates/learnAndSaveModel.kfml,\
+ weka/gui/beans/templates/ROCcurves.kfml
+
+weka.gui.beans.KnowledgeFlow.templates.desc=Cross validation,\
+ Learn and save a model,\
+ ROC curves for two classifiers
