@@ -166,13 +166,27 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * Location of the property file for the KnowledgeFlowApp
    */
   protected static final String PROPERTY_FILE = "weka/gui/beans/Beans.props";
+  
+  /** Location of the property file listing available templates */
+  protected static final String TEMPLATE_PROPERTY_FILE = 
+    "weka/gui/beans/templates/templates.props";
+  
+  /** The paths to template resources */
+  private static List<String> TEMPLATE_PATHS;
+  /** Short descriptions for templates suitable for displaying in a menu */
+  private static List<String> TEMPLATE_DESCRIPTIONS;
 
   /** Contains the editor properties */
   protected static Properties BEAN_PROPERTIES;
 
+  /** Contains the plugin components properties */
   private static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES = 
     new ArrayList<Properties>();
 
+  /**
+   * Contains the user's selection of available perspectives to be visible in
+   * the perspectives toolbar
+   */
   protected static String VISIBLE_PERSPECTIVES_PROPERTIES_FILE = 
     "weka/gui/beans/VisiblePerspectives.props";
 
@@ -264,6 +278,38 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
       }
 
+    }
+    
+    if (TEMPLATE_PATHS == null) {
+      TEMPLATE_PATHS = new ArrayList<String>();
+      TEMPLATE_DESCRIPTIONS = new ArrayList<String>();
+
+      try {
+        Properties templateProps = Utils.readProperties(TEMPLATE_PROPERTY_FILE);
+        String paths = templateProps.getProperty("weka.gui.beans.KnowledgeFlow.templates");
+        String descriptions = templateProps.getProperty("weka.gui.beans.KnowledgeFlow.templates.desc");
+        if (paths == null || paths.length() == 0) {
+          System.err.println("[KnowledgeFlow] WARNING: no templates found in classpath");
+        } else {
+          String[] templates = paths.split(",");
+          String[] desc = descriptions.split(",");
+          if (templates.length != desc.length) {
+            throw new Exception("Number of template descriptions does " +
+            		"not match number of templates.");
+          }
+          for (String template : templates) {
+            TEMPLATE_PATHS.add(template.trim());
+          }
+          for (String d : desc) {
+            TEMPLATE_DESCRIPTIONS.add(d.trim());
+          }
+        }
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(null,
+            ex.getMessage(),
+            "KnowledgeFlow",
+            JOptionPane.ERROR_MESSAGE);
+      }
     }
   }
 
@@ -1178,9 +1224,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_helpB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_helpB.setToolTipText("Display help");
         m_togglePerspectivesB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-        "cog_go.png"))); 
+          "cog_go.png"))); 
         m_togglePerspectivesB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_togglePerspectivesB.setToolTipText("Show/hide perspectives toolbar");
+        
+        m_templatesB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
+          "application_view_tile.png"))); 
+        m_templatesB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+        m_templatesB.setToolTipText("Load a template layout");
 
         m_noteB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
         "note_add.png")));
@@ -1212,6 +1263,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         fixedTools.add(m_saveB);
         fixedTools.add(m_saveBB);
         fixedTools.add(m_loadB);
+        fixedTools.add(m_templatesB);
         fixedTools.addSeparator();
         fixedTools.add(m_togglePerspectivesB);
 
@@ -1456,6 +1508,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           popupHelp();
         }
       });
+      
+      m_templatesB.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          createTemplateMenuPopup();
+        }
+      });
+      
+      m_templatesB.setEnabled(TEMPLATE_PATHS.size() > 0);
 
       m_togglePerspectivesB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -2209,6 +2269,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   private JButton m_helpB;
   private JButton m_newB;
   private JButton m_togglePerspectivesB;
+  private JButton m_templatesB;
 
   private JButton m_cutB;
   private JButton m_copyB;
@@ -3249,7 +3310,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       //	ClassLoader.
       //        getSystemResourceAsStream("weka/gui/beans/README_KnowledgeFlow");
       InputStream inR = this.getClass().getClassLoader()
-      .getResourceAsStream("weka/gui/beans/README_KnowledgeFlow");
+        .getResourceAsStream("weka/gui/beans/README_KnowledgeFlow");
 
       // end modifications
       StringBuffer helpHolder = new StringBuffer();
@@ -3310,6 +3371,48 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     m_beanLayout.repaint();
     m_logPanel.clearStatus();
     m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow"); */
+  }
+  
+  /**
+   * Pops up the menu for selecting template layouts
+   */
+  private void createTemplateMenuPopup() {
+    PopupMenu templatesMenu = new PopupMenu();
+    //MenuItem addToUserTabItem = new MenuItem("Add to user tab");
+    for (int i = 0; i < TEMPLATE_PATHS.size(); i++) {
+      String mE = TEMPLATE_DESCRIPTIONS.get(i);
+      final String path = TEMPLATE_PATHS.get(i);
+      
+      MenuItem m = new MenuItem(mE);
+      m.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ee) {
+          try {
+            InputStream inR = this.getClass().getClassLoader()
+            .getResourceAsStream(path);
+            m_mainKFPerspective.addTab("Untitled");
+            XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+                m_mainKFPerspective.getCurrentTabIndex());
+            InputStreamReader isr = new InputStreamReader(inR);
+
+            Vector v     = (Vector) xml.read(isr);
+            Vector beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+            Vector connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
+            isr.close();
+
+            integrateFlow(beans, connections, false, false);
+            notifyIsDirty();
+            revalidate();
+          } catch (Exception ex) {
+            m_mainKFPerspective.getCurrentLogPanel().
+              logMessage("Problem loading template: " + ex.getMessage());
+          }
+        }
+      });            
+      templatesMenu.add(m);            
+    }
+    
+    m_templatesB.add(templatesMenu);
+    templatesMenu.show(m_templatesB, 0, 0);
   }
 
   /**
@@ -5283,6 +5386,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         Environment e = m_mainKFPerspective.getEnvironmentSettings();
         e.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
         m_mainKFPerspective.setEditedStatus(tabIndex, false);
+        String tabTitle = sFile.getName();
+        tabTitle = tabTitle.substring(0, tabTitle.lastIndexOf('.'));
+        m_mainKFPerspective.setTabTitle(tabIndex, tabTitle);
       }
     }
     return true;
