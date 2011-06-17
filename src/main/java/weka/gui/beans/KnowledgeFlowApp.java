@@ -5444,6 +5444,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
 
       saveLayout(sFile, m_mainKFPerspective.getCurrentTabIndex(), false);
+      m_mainKFPerspective.setFlowFile(tabIndex, sFile);
     } 
   }
 
