@@ -3804,6 +3804,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               loadDataAndSendToPerspective(theLoader, 0, true);
             }
           });
+          beanContextMenu.add(sendToAllPerspectives);
         }
         Menu sendToPerspective = new Menu("Send to perspective...");
         beanContextMenu.add(sendToPerspective);
