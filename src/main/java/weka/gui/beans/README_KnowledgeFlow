@@ -20,7 +20,8 @@ features include:
 * New buttons to run flow in parallel mode (all data sources launched simultaneously) 
   and sequential mode (data sources launched one after the other in an order 
   specified by the user)
-* Plugin "perspectives" that allows additional functionality to take over
+* Template flows demonstrating example learning processes
+* Plugin "perspectives" that allow additional functionality to take over
   the main UI
 
 Introduction:
@@ -46,12 +47,15 @@ Features of the KnowledgeFlow:
 * intuitive data flow style layout
 * process data in batches or incrementally 
 * process multiple batches or streams in parallel! (each separate flow 
-  executes in its own thread)
+  executes in its own thread). Alternatively, multiple streams can be
+  executed sequentially, in a user-specified order
 * chain filters together
 * view models produced by classifiers for each fold in a cross validation
 * visualize performance of incremental classifiers during 
   processing (scrolling plots of classification accuracy, RMS error, 
   predictions etc)
+* access additional non flow-based functionality through plugin 
+  "perspectives"
 
 Components available in the KnowledgeFlow:
 
@@ -126,7 +130,10 @@ terminal window by typing "java weka.gui.beans.KnowledgeFlow".
 EXAMPLE:
 -----------------
 Setting up a flow to load an arff file (batch mode) and
-perform a cross validation using J48 (Weka's C4.5 implementation).
+perform a cross validation using J48 (Weka's C4.5 implementation). NOTE,
+this example ("Cross validation") can be accessed from the Templates 
+button (third in from the right in the toolbar) in the KnowledgeFlow
+UI.
 
 First start the KnowlegeFlow.
 
