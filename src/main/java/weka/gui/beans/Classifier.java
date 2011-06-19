@@ -1446,6 +1446,11 @@ public class Classifier
    * @param ce a <code>BatchClassifierEvent</code> value
    */
   private synchronized void notifyBatchClassifierListeners(BatchClassifierEvent ce) {
+    
+    // don't do anything if the thread that we've been running in has been interrupted
+    if (Thread.currentThread().isInterrupted()) {
+      return;
+    }
     Vector l;
     synchronized (this) {
       l = (Vector)m_batchClassifierListeners.clone();
@@ -1575,6 +1580,11 @@ public class Classifier
    */
   private void 
     notifyIncrementalClassifierListeners(IncrementalClassifierEvent ce) {
+    // don't do anything if the thread that we've been running in has been interrupted
+    if (Thread.currentThread().isInterrupted()) {
+      return;
+    }
+    
     Vector l;
     synchronized (this) {
       l = (Vector)m_incrementalClassifierListeners.clone();
