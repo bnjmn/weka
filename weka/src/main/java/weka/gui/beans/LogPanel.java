@@ -55,7 +55,7 @@ public class LogPanel extends JPanel implements Logger {
    * Holds the index (line number) in the JTable of each component
    * being tracked. 
    */
-  private HashMap<String,Integer> m_tableIndexes = 
+  protected HashMap<String,Integer> m_tableIndexes = 
     new HashMap<String, Integer>();
   
   /**
@@ -297,7 +297,9 @@ public class LogPanel extends JPanel implements Logger {
             stepStatus.equalsIgnoreCase("finished") ||
             stepStatus.equalsIgnoreCase("finished.") ||
             stepStatus.equalsIgnoreCase("done") ||
-            stepStatus.equalsIgnoreCase("done.")) {
+            stepStatus.equalsIgnoreCase("done.") ||
+            stepStatus.equalsIgnoreCase("stopped") ||
+            stepStatus.equalsIgnoreCase("stopped.")) {
           // stop the timer.
           m_timers.get(stepHash).stop();
         } else if (!m_timers.get(stepHash).isRunning()) {
