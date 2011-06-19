@@ -807,7 +807,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     protected List<BeanLayout> m_beanLayouts = new ArrayList<BeanLayout>();
 
     /** List of log panels - one for each tab */
-    protected List<LogPanel> m_logPanels = new ArrayList<LogPanel>();
+    protected List<KFLogPanel> m_logPanels = new ArrayList<KFLogPanel>();
 
     /** List of environment variable settings - one for each tab */
     protected List<Environment> m_environmentSettings = new ArrayList<Environment>();
@@ -820,6 +820,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /** Keeps track of which tabs have flows that are executing */
     protected List<Boolean> m_executingList = new ArrayList<Boolean>();
+    
+    /** Keeps track of the threads used for execution */
+    protected List<RunThread> m_executionThreads = new ArrayList<RunThread>();
 
     /** Keeps track of any highlighted beans on the canvas for a tab */
     protected List<Vector> m_selectedBeans = new ArrayList<Vector>();
@@ -853,14 +856,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       return m_flowTabs.getSelectedIndex();
     }
 
-    public synchronized LogPanel getCurrentLogPanel() {
+    public synchronized KFLogPanel getCurrentLogPanel() {
       if (getCurrentTabIndex() >= 0) {
         return m_logPanels.get(getCurrentTabIndex());
       }
       return null;
     }
 
-    public synchronized LogPanel getLogPanel(int index) {
+    public synchronized KFLogPanel getLogPanel(int index) {
       if (index >= 0 && index < m_logPanels.size()) {
         return m_logPanels.get(index);
       }      
@@ -933,7 +936,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             && !getExecuting());
         m_undoB.setEnabled(!getExecuting() && getUndoBuffer().size() > 0);
       }
-    }
+    }        
 
     public synchronized boolean getExecuting() {
       return getExecuting(getCurrentTabIndex());
@@ -944,6 +947,29 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         return m_executingList.get(index);
       }
       return false;
+    }
+    
+    public synchronized void setExecutionThread(RunThread execution) {
+      if (getNumTabs() > 0) {
+        setExecutionThread(getCurrentTabIndex(), execution);
+      }
+    }
+    
+    public synchronized void setExecutionThread(int index, RunThread execution) {
+      if (index < getNumTabs() && index >= 0) {
+        m_executionThreads.set(index, execution);
+      }
+    }
+    
+    public synchronized RunThread getExecutionThread() {
+      return getExecutionThread(getCurrentTabIndex());
+    }
+    
+    public synchronized RunThread getExecutionThread(int index) {
+      if (index < getNumTabs() && index >= 0) {
+        return m_executionThreads.get(index);
+      }
+      return null;
     }
 
     public synchronized File getFlowFile() {
@@ -2075,7 +2101,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       //tabBeanLayout.setMaximumSize(d);
       tabBeanLayout.setPreferredSize(d);
 
-      LogPanel tabLogPanel = new LogPanel();
+      KFLogPanel tabLogPanel = new KFLogPanel();
       setUpLogPanel(tabLogPanel);
       Dimension d2 = new Dimension(100, 170);
       tabLogPanel.setPreferredSize(d2);
@@ -2098,6 +2124,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       m_editedList.add(new Boolean(false));
       m_executingList.add(new Boolean(false));
+      m_executionThreads.add((RunThread)null);
       m_selectedBeans.add(new Vector());
       m_undoBufferList.add(new Stack<File>());
 
@@ -2302,8 +2329,22 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   /** The file chooser for selecting layout files */
   protected JFileChooser m_FileChooser 
   = new JFileChooser(new File(System.getProperty("user.dir")));
+  
+  protected class KFLogPanel extends LogPanel {
+    public synchronized void setMessageOnAll(boolean mainKFLine, String message) {
+      for (String key : m_tableIndexes.keySet()) {
+        if (!mainKFLine && key.equals("[KnowledgeFlow]")) {
+          continue;
+        }
+        
+        String tm = key + "|" + message;
+        System.out.println(key);
+        statusMessage(tm);
+      }
+    }
+  }
 
-  protected LogPanel m_logPanel = null; //new LogPanel();//new LogPanel(null, true);
+  protected KFLogPanel m_logPanel = null; //new LogPanel();//new LogPanel(null, true);
 
   /** Toolbar to hold the perspective buttons */
   protected JToolBar m_perspectiveToolBar = new JToolBar(JToolBar.HORIZONTAL);
@@ -3134,6 +3175,63 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
     return pic;
   }
+  
+  protected class RunThread extends Thread {
+    int m_flowIndex;
+    boolean m_sequential;
+    boolean m_wasUserStopped = false;
+    
+    public RunThread(boolean sequential) {
+      m_sequential = sequential;
+    }
+    
+    public void run() {
+      m_flowIndex = m_mainKFPerspective.getCurrentTabIndex();
+      m_mainKFPerspective.setExecuting(true);
+
+      FlowRunner runner = new FlowRunner(false, false);
+      runner.setStartSequentially(m_sequential);
+      runner.setEnvironment(m_flowEnvironment);
+      runner.setLog(m_logPanel);
+      Vector comps = BeanInstance.getBeanInstances(m_flowIndex);
+
+      runner.setFlows(comps);
+      try {
+        runner.run();
+        runner.waitUntilFinished();
+      } catch (InterruptedException ie) {
+        
+      } catch (Exception ex) {
+        m_logPanel.logMessage("An error occurred while running the flow: " +
+            ex.getMessage());
+      } finally {
+        m_mainKFPerspective.setExecuting(m_flowIndex, false);
+        m_mainKFPerspective.setExecutionThread(m_flowIndex, null);
+        if (m_wasUserStopped) {
+          // TODO global Stop message to the status area
+          KFLogPanel lp = m_mainKFPerspective.getLogPanel(m_flowIndex);
+          lp.setMessageOnAll(false, "Stopped.");
+        }
+      }
+    }
+    
+    public void stopAllFlows() {
+      Vector components = 
+        BeanInstance.getBeanInstances(m_flowIndex);
+
+      if (components != null) {
+        for (int i = 0; i < components.size(); i++) {
+          Object temp = ((BeanInstance) components.elementAt(i)).getBean();
+
+          if (temp instanceof BeanCommon) {
+            ((BeanCommon) temp).stop();
+          }
+        }
+        m_wasUserStopped = true;
+        
+      }
+    }
+  }
 
   /**
    * Run all start-points in a layout in parallel or sequentially. Order
@@ -3148,32 +3246,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    */
   private void runFlow(final boolean sequential) {
     if (m_mainKFPerspective.getNumTabs() > 0) {      
-      Thread runThread = new Thread() {
-
-        int m_flowIndex;
-
-        public void run() {
-          m_flowIndex = m_mainKFPerspective.getCurrentTabIndex();
-          m_mainKFPerspective.setExecuting(true);
-
-          FlowRunner runner = new FlowRunner(false, false);
-          runner.setStartSequentially(sequential);
-          runner.setEnvironment(m_flowEnvironment);
-          runner.setLog(m_logPanel);
-          Vector comps = BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
-
-          runner.setFlows(comps);
-          try {
-            runner.run();
-            runner.waitUntilFinished();
-          } catch (Exception ex) {
-            m_logPanel.logMessage("An error occurred while running the flow: " +
-                ex.getMessage());
-          } finally {
-            m_mainKFPerspective.setExecuting(m_flowIndex, false);
-          }
-        }
-      };
+      RunThread runThread = new RunThread(sequential);
+      m_mainKFPerspective.setExecutionThread(runThread);
 
       runThread.start();
     }    
@@ -3181,7 +3255,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   private void stopFlow() {
     if (m_mainKFPerspective.getCurrentTabIndex() >= 0) {
-      Vector components = 
+      RunThread running = m_mainKFPerspective.getExecutionThread();
+      
+      if (running != null) {
+        running.stopAllFlows();
+      }
+      
+/*      Vector components = 
         BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
 
       if (components != null) {
@@ -3192,7 +3272,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             ((BeanCommon) temp).stop();
           }
         }
-      }
+      } */
     }
   }
 
@@ -5067,7 +5147,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * @param isUndo is this file an "undo" file?
    */
   protected void loadLayout(File oFile, boolean newTab, boolean isUndo) {
+    
+    // stop any running flow first!
     stopFlow();
+    
     m_loadB.setEnabled(false);
     m_saveB.setEnabled(false);
     m_playB.setEnabled(false);
