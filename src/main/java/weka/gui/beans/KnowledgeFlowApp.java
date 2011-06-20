@@ -71,6 +71,7 @@ import java.io.LineNumberReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -5042,7 +5043,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   }
 
   /**
-   * Load a layout from a file
+   * Load a layout from a file. Supports loading binary and XML serialized
+   * flow files
    * 
    * @param oFile the file to load from
    * @param newTab true if the loaded layout should be displayed in a new tab
@@ -5060,8 +5062,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    */
   protected void loadLayout(File oFile, boolean newTab, boolean isUndo) {
     
-    // stop any running flow first!
-    stopFlow();
+    // stop any running flow first (if we are loading into this tab)
+    if (!newTab) {
+      stopFlow();
+    }
     
     m_loadB.setEnabled(false);
     m_saveB.setEnabled(false);
@@ -5133,6 +5137,66 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     m_saveB.setEnabled(true);
     m_playB.setEnabled(true);
     m_playBB.setEnabled(true);
+  }
+  
+  /**
+   * Load a flow file from an input stream. Only supports XML serialized flows.
+   * 
+   * @param is the input stream to laod from
+   * @param newTab whether to open a new tab in the UI for the flow
+   * @param flowName the name of the flow
+   * @throws Exception if a problem occurs during de-serialization
+   */
+  public void loadLayout(InputStream is, boolean newTab, 
+      String flowName) throws Exception {
+    InputStreamReader isr = new InputStreamReader(is);
+    loadLayout(isr, newTab, flowName);
+  }
+  
+  /**
+   * Load a flow file from a reader. Only supports XML serialized flows.
+   * 
+   * @param reader the reader to load from
+   * @param newTab whether to open a new tab in the UI for the flow
+   * @param flowName the name of the flow
+   * @throws Exception if a problem occurs during de-serialization
+   */
+  public void loadLayout(Reader reader, boolean newTab,
+      String flowName) throws Exception {
+    // TODO
+    
+    // stop any running flow first (if we are loading into this tab)
+    if (!newTab) {
+      stopFlow();
+    }
+    
+    m_loadB.setEnabled(false);
+    m_saveB.setEnabled(false);
+    m_playB.setEnabled(false);
+    m_playBB.setEnabled(false);
+    
+    if (newTab) {
+      m_mainKFPerspective.addTab(flowName);
+      m_mainKFPerspective.setEditedStatus(false);
+    }
+    
+    XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+        m_mainKFPerspective.getCurrentTabIndex());
+    Vector v = (Vector) xml.read(reader);
+    Vector beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+    Vector connections = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
+    
+    integrateFlow(beans, connections, true, false);
+    setEnvironment();
+    if (newTab) {
+      m_logPanel.clearStatus();
+      m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
+    }
+    
+    m_loadB.setEnabled(true);
+    m_saveB.setEnabled(true);
+    m_playB.setEnabled(true);
+    m_playBB.setEnabled(true);    
   }
 
   // Link the supplied beans into the KnowledgeFlow gui
