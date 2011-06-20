@@ -475,6 +475,7 @@ public class StripChart
       m_outputFrame.setSize(600,150);
       m_outputFrame.setResizable(false);
       m_outputFrame.setVisible(true);
+      m_outputFrame.setAlwaysOnTop(true);
       int iwidth = m_plotPanel.getWidth();
       int iheight = m_plotPanel.getHeight();
       m_osi = m_plotPanel.createImage(iwidth, iheight);
