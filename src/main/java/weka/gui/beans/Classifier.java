@@ -375,7 +375,9 @@ public class Classifier
     m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_ClassifierTemplate);
     
     try {
-      m_Classifier = weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
+      if (m_ClassifierTemplate instanceof weka.classifiers.misc.InputMappedClassifier) {
+        m_Classifier = weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
+      }
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -392,7 +394,6 @@ public class Classifier
   }
   
   private void setTrainedClassifier(weka.classifiers.Classifier tc) {
-    m_Classifier = tc;
     
     // set the template
     weka.classifiers.Classifier newTemplate = null;
@@ -409,7 +410,8 @@ public class Classifier
       } else {
         ex.printStackTrace();
       }
-    }    
+    }
+    m_Classifier = tc;
   }
 
   /**
@@ -559,7 +561,9 @@ public class Classifier
 	// mode, *if* headers match
 	if (m_trainingSet == null || !m_trainingSet.equalHeaders(dataset)) {
 	  if (!(m_ClassifierTemplate instanceof 
-		weka.classifiers.UpdateableClassifier)) {
+		weka.classifiers.UpdateableClassifier) &&
+		!(m_ClassifierTemplate instanceof 
+		    weka.classifiers.misc.InputMappedClassifier)) {
 	    stop(); // stop all processing
 	    if (m_log != null) {
 	      String msg = (m_trainingSet == null)
@@ -574,6 +578,19 @@ public class Classifier
 	      m_log.statusMessage(msg);
 	    }
 	    return;
+	  }
+	  
+	  if (m_ClassifierTemplate instanceof 
+	      weka.classifiers.misc.InputMappedClassifier) {
+	    m_trainingSet = ((weka.classifiers.misc.InputMappedClassifier)m_Classifier).
+	      getModelHeader(m_trainingSet);
+	    
+/*	    // check to see if the classifier that gets loaded is updateable
+	    weka.classifiers.Classifier tempC = 
+	      ((weka.classifiers.misc.InputMappedClassifier)m_Classifier).getClassifier();
+	    if (!(tempC instanceof weka.classifiers.UpdateableClassifier)) {
+	      
+	    } */
 	  }
 	  
 	  if (m_trainingSet != null && 
@@ -1801,7 +1818,7 @@ public class Classifier
             // quietly ignore
           }
           is.close();
-        }
+        }        
 
         // Update name and icon
         setTrainedClassifier(temp);
