@@ -475,6 +475,8 @@ public class StripChart
       m_outputFrame.setSize(600,150);
       m_outputFrame.setResizable(false);
       m_outputFrame.setVisible(true);
+      m_outputFrame.setAlwaysOnTop(true);
+      //m_outputFrame.setLocationByPlatform(true);
       int iwidth = m_plotPanel.getWidth();
       int iheight = m_plotPanel.getHeight();
       m_osi = m_plotPanel.createImage(iwidth, iheight);
@@ -766,7 +768,8 @@ public class StripChart
    * @return true if the bean is busy.
    */
   public boolean isBusy() {
-    return (m_updateHandler != null);
+    //return (m_updateHandler != null);
+    return false;
   }
 
   /**
