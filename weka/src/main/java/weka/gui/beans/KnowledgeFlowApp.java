@@ -2339,7 +2339,6 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
         
         String tm = key + "|" + message;
-        System.out.println(key);
         statusMessage(tm);
       }
     }
@@ -5163,7 +5162,6 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    */
   public void loadLayout(Reader reader, boolean newTab,
       String flowName) throws Exception {
-    // TODO
     
     // stop any running flow first (if we are loading into this tab)
     if (!newTab) {
