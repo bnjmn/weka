@@ -69,7 +69,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class GreedyStepwise 
   extends ASSearch 
@@ -548,6 +548,19 @@ public class GreedyStepwise
     if (!m_doneRanking) {
       FString.append("\tMerit of best subset found: "
 		     +Utils.doubleToString(Math.abs(m_bestMerit),8,3)+"\n");
+    } else {
+      if (m_backward) {
+        FString.append("\n\tRanking is the order that attributes were removed, " +
+        		"starting \n\twith all attributes. The merit scores in the left" +
+        		"\n\tcolumn are the goodness of the remaining attributes in the" +
+        		"\n\tsubset after removing the corresponding in the right column" +
+        		"\n\tattribute from the subset.\n");
+      } else {
+        FString.append("\n\tRanking is the order that attributes were added, starting " +
+        		"\n\twith no attributes. The merit scores in the left column" +
+        		"\n\tare the goodness of the subset after the adding the" +
+        		"\n\tcorresponding attribute in the right column to the subset.\n");
+      }
     }
     
     if ((m_threshold != -Double.MAX_VALUE) && (m_doneRanking)) {
@@ -808,6 +821,6 @@ public class GreedyStepwise
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
