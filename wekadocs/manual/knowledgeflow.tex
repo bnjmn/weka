@@ -23,21 +23,19 @@
 \section{Introduction}
 
 The KnowledgeFlow provides an alternative to the Explorer as a
-graphical front end to WEKA's core algorithms. The KnowledgeFlow is a
-work in progress so some of the functionality from the Explorer is not
-yet available. On the other hand, there are things that can be done in
-the KnowledgeFlow but not in the Explorer.
+graphical front end to WEKA's core algorithms. 
 
 \begin{center}
   \includegraphics[angle=270,width=10cm]{images/knowledgeflow/knowledgeflow.eps}
 \end{center}
 
 The KnowledgeFlow presents a \textit{data-flow} inspired interface to
-WEKA. The user can select WEKA components from a tool bar, place them
+WEKA. The user can select WEKA components from a palette, place them
 on a layout canvas and connect them together in order to form a
-\textit{knowledge flow} for processing and analyzing data. At present, all of
-WEKA's classifiers, filters, clusterers, loaders and savers are
-available in the KnowledgeFlow along with some extra tools.
+\textit{knowledge flow} for processing and analyzing data. At present,
+all of WEKA's classifiers, filters, clusterers, associators, loaders
+and savers are available in the KnowledgeFlow along with some extra
+tools.
 
 The KnowledgeFlow can handle data either incrementally or in batches
 (the Explorer handles batch data only). Of course learning from data
@@ -53,14 +51,20 @@ can handle data incrementally:
 	\item NaiveBayesUpdateable
 	\item NNge
 	\item Winnow
+        \item SGD
+        \item SPegasos
 \end{tight_itemize}
 
-\noindent And two of them are meta classifiers:
+\noindent A further two classifiers are meta classifiers:
 \begin{tight_itemize}
 	\item \textit{RacedIncrementalLogitBoost} - that can use of any regression base
 learner to learn from discrete class data incrementally.
 	\item \textit{LWL} - locally weighted learning.
 \end{tight_itemize}
+
+Furthermore, other incremental streaming classifiers from the MOA
+project are accessible through the ``massiveOnlineAnalysis'' package
+(available for installation via the package manager).
 
 %%%%%%%%%%%%
 % Features %
@@ -75,13 +79,15 @@ The KnowledgeFlow offers the following features:
 	\item process data in batches or incrementally 
 	\item process multiple batches or streams in parallel (each separate flow 
   	executes in its own thread)
+        \item process multiple streams sequentially via a user-specified order of
+          execution
 	\item chain filters together
 	\item view models produced by classifiers for each fold in a cross validation
 	\item visualize performance of incremental classifiers during 
   	processing (scrolling plots of classification accuracy, RMS error, 
   	predictions etc.)
-        \item plugin facility for allowing easy addition of new components
-        to the KnowledgeFlow
+        \item plugin ``perspectives'' that add major new functionality (e.g. 3D data visualization, 
+          time series forecasting environment etc.)
 \end{itemize}
 
 \newpage
@@ -89,34 +95,34 @@ The KnowledgeFlow offers the following features:
 Components available in the KnowledgeFlow:
 
 \subsection{DataSources} All of WEKA's loaders are available.
-\begin{center}
-	\epsfig{file=images/knowledgeflow/components_datasources.eps,height=2cm}
-\end{center}
+%\begin{center}
+	%\epsfig{file=images/knowledgeflow/components_datasources.eps,height=2cm}
+%\end{center}
 
 \subsection{DataSinks} All of WEKA's savers are available.
-\begin{center}
-	\epsfig{file=images/knowledgeflow/components_datasinks.eps,height=2cm}
-\end{center}
+%\begin{center}
+%	\epsfig{file=images/knowledgeflow/components_datasinks.eps,height=2cm}
+%\end{center}
 
 \subsection{Filters} All of WEKA's filters are available.
-\begin{center}
-	\epsfig{file=images/knowledgeflow/components_filters.eps,height=2cm}
-\end{center}
+%\begin{center}
+%	\epsfig{file=images/knowledgeflow/components_filters.eps,height=2cm}
+%\end{center}
 
 \subsection{Classifiers} All of WEKA's classifiers are available.
-\begin{center}
-	\epsfig{file=images/knowledgeflow/components_classifiers.eps,height=2cm}
-\end{center}
+%\begin{center}
+%	\epsfig{file=images/knowledgeflow/components_classifiers.eps,height=2cm}
+%\end{center}
 
 \subsection{Clusterers} All of WEKA's clusterers are available.
-\begin{center}
-	\epsfig{file=images/knowledgeflow/components_clusterers.eps,height=2cm}
-\end{center}
+%\begin{center}
+%	\epsfig{file=images/knowledgeflow/components_clusterers.eps,height=2cm}
+%\end{center}
 
 \subsection{Evaluation}
-\begin{center}
-	\epsfig{file=images/knowledgeflow/components_evaluation.eps,height=2cm}
-\end{center}
+%\begin{center}
+%	\epsfig{file=images/knowledgeflow/components_evaluation.eps,height=2cm}
+%\end{center}
 
 \begin{itemize}
 	\item \textit{TrainingSetMaker} - make a data set into a training set.
@@ -125,6 +131,8 @@ Components available in the KnowledgeFlow:
 	set or test set into folds.
 	\item \textit{TrainTestSplitMaker} - split any data set, training set 
 	or test set into a training set and a test set.
+        \item \textit{InstanceStreamToBatchMaker} - collects the instances in
+          an incoming instance stream and outputs them as a batch set of Instances.
 	\item \textit{ClassAssigner} - assign a column to be the class for any 
 	data set, training set or test set.
 	\item \textit{ClassValuePicker} - choose a class value to be considered 
@@ -139,13 +147,16 @@ Components available in the KnowledgeFlow:
 	\item \textit{PredictionAppender} - append classifier predictions to a test 
 	set. For discrete class problems, can either append predicted class labels or
 	probability distributions.
+        \item \textit{SerializedModelSaver} - save the classifier or clusterer
+          encapsulated in a batchClassifier, incrementalClassifier or batchClusterer
+          connection/event out to a file.
 \end{itemize}
 
 \newpage
 \subsection{Visualization}
-\begin{center}
-	\epsfig{file=images/knowledgeflow/components_visualization.eps,height=2cm}
-\end{center}
+%\begin{center}
+%	\epsfig{file=images/knowledgeflow/components_visualization.eps,height=2cm}
+%\end{center}
 
 \begin{itemize}
 	\item \textit{DataVisualizer} - component that can pop up a panel for 
@@ -158,6 +169,11 @@ Components available in the KnowledgeFlow:
 	in the input data.
 	\item \textit{ModelPerformanceChart} - component that can pop up a 
 	panel for visualizing threshold (i.e. ROC style) curves.
+        \item \textit{CostBenefitAnalysis} - component that can popup a graphical
+          tool for exploring cost/benefit tradeoffs by interactively selecting
+          different population sizes from a ranked list of prospects or by 
+          varying the threshold on the predicted probability of the positive class. It
+          displays both a cumulative gains chart and a cost/benefit plot.
 	\item \textit{TextViewer} - component for showing textual data. Can show 
 	data sets, classification performance statistics etc.
 	\item \textit{GraphViewer} - component that can pop up a panel for 
@@ -180,15 +196,19 @@ Components available in the KnowledgeFlow:
 
 \subsection{Cross-validated J48}
 Setting up a flow to load an ARFF file (batch mode) and
-perform a cross-validation using J48 (WEKA's C4.5 implementation).
+perform a cross-validation using J48 (WEKA's C4.5 implementation). This example
+can be accessed from the ``Cross validation'' entry of the popup menu that
+appears when the ``templates'' button in the toolbar is clicked.
 
 \begin{center}
-	\epsfig{file=images/knowledgeflow/example_j48.eps,height=4.5cm}
+  \includegraphics[angle=270,width=10cm]{images/knowledgeflow/example_j48.eps}
+	%\epsfig{file=images/knowledgeflow/example_j48.eps,height=4.5cm}
 \end{center}
 
 \begin{itemize}
-	\item Click on the DataSources tab and choose \textit{ArffLoader} from the
-	toolbar (the mouse pointer will change to a \textit{cross hairs}).
+	\item Expand the DataSources entry in the \textit{Design} panel and
+          choose \textit{ArffLoader} (the mouse pointer will change to
+          a \textit{cross hairs}).
 
 	\item Next place the ArffLoader component on the layout area by clicking
 	somewhere on the layout (a copy of the ArffLoader icon will appear on
@@ -199,9 +219,10 @@ perform a cross-validation using J48 (WEKA's C4.5 implementation).
 	appear. Select \textit{Configure} under \textit{Edit} in the list from this menu and
 	browse to the location of your ARFF file.
 
-	\item Next click the \textit{Evaluation} tab at the top of the window and choose the
-	\textit{ClassAssigner} (allows you to choose which column to be the class)
-	component from the toolbar. Place this on the layout.
+	\item Next click expand the \textit{Evaluation} entry in the
+          \textit{Design} panel and choose the \textit{ClassAssigner}
+          (allows you to choose which column to be the class)
+          component from the toolbar. Place this on the layout.
 
 	\item Now connect the ArffLoader to the ClassAssigner: first right click
 	over the ArffLoader and select the \textit{dataSet} under \textit{Connections} in
@@ -213,36 +234,37 @@ perform a cross-validation using J48 (WEKA's C4.5 implementation).
 	the menu. This will pop up a window from which you can specify which
 	column is the class in your data (last is the default).
 
-	\item Next grab a \textit{CrossValidationFoldMaker} component from the Evaluation
-	toolbar and place it on the layout. Connect the ClassAssigner to the
-	CrossValidationFoldMaker by right clicking over \textit{ClassAssigner} and
-	selecting \textit{dataSet} from under \textit{Connections} in the menu.
+	\item Next grab a \textit{CrossValidationFoldMaker} component
+          from the Evaluation entry in the \textit{Design} panel and
+          place it on the layout. Connect the ClassAssigner to the
+          CrossValidationFoldMaker by right clicking over
+          \textit{ClassAssigner} and selecting \textit{dataSet} from
+          under \textit{Connections} in the menu.
 
-	\item Next click on the \textit{Classifiers} tab at the top of the window and
-	scroll along the toolbar until you reach the \textit{J48} component in the
-	\textit{trees} section. Place a J48 component on the layout.
+	\item Next expand the \textit{Classifiers} entry and then the
+          \textit{trees} sub-entry in the \textit{Design} panel and
+          choose the \textit{J48} component. Place a J48 component on
+          the layout.
 
 	\item Connect the CrossValidationFoldMaker to J48 TWICE by first choosing
 	\textit{trainingSet} and then \textit{testSet} from the pop-up menu for the
 	CrossValidationFoldMaker.
 
-	\item Next go back to the \textit{Evaluation} tab and place a
-	\textit{ClassifierPerformanceEvaluator} component on the layout. Connect J48
-	to this component by selecting the \textit{batchClassifier} entry from the
-	pop-up menu for J48.
+	\item Next go back to the \textit{Evaluation} entry and place
+          a \textit{ClassifierPerformanceEvaluator} component on the
+          layout. Connect J48 to this component by selecting the
+          \textit{batchClassifier} entry from the pop-up menu for J48.
 
-	\item Next go to the \textit{Visualization} toolbar and place a \textit{TextViewer}
+	\item Next go to the \textit{Visualization} entry and place a \textit{TextViewer}
 	component on the layout. Connect the ClassifierPerformanceEvaluator to
 	the TextViewer by selecting the \textit{text} entry from the pop-up menu for
 	ClassifierPerformanceEvaluator.
 
-	\item Now start the flow executing by selecting \textit{Start loading} from the
-	pop-up menu for ArffLoader. Depending on how big the data set is and
-	how long cross-validation takes you will see some animation from some
-	of the icons in the layout (J48's tree will \textit{grow} in the icon and the
-	ticks will animate on the ClassifierPerformanceEvaluator). You will
-	also see some progress information in the \textit{Status} bar and \textit{Log} at
-	the bottom of the window.
+	\item Now start the flow executing by pressing the
+          \textit{play} button on the toolbar at the top of the
+          window. Progress information for each component in the flow
+          will appear in the \textit{Status} area and \textit{Log} at
+          the bottom of the window.
 \end{itemize}
 
 When finished you can view the results by choosing \textit{Show results} from
@@ -260,17 +282,23 @@ validation (this is something that is not possible in the Explorer).
 \newpage
 \subsection{Plotting multiple ROC curves}
 \label{exampleroc}
-The KnowledgeFlow can draw multiple ROC curves in the same plot window, something that the 
-Explorer cannot do. In this example we use \textit{J48} and \textit{RandomForest}
-as classifiers. This example can be found on the \textit{WekaWiki} as well \cite{multipleroc}.
+The KnowledgeFlow can draw multiple ROC curves in the same plot
+window, something that the Explorer cannot do. In this example we use
+\textit{J48} and \textit{RandomForest} as classifiers. This example
+can be accessed from the ``ROC curves for two classifiers'' entry of
+the popup menu that appears when the ``templates'' button in the
+toolbar is clicked. It can also be found on the \textit{WekaWiki}
+as well \cite{multipleroc}.
 
 \begin{center}
-	\epsfig{file=images/knowledgeflow/example_multiple_roc.eps,height=4cm}
+  \includegraphics[angle=270,width=10cm]{images/knowledgeflow/example_multiple_roc.eps}
+%	\epsfig{file=images/knowledgeflow/example_multiple_roc.eps,height=4cm}
 \end{center}
 
 \begin{itemize}
-	\item Click on the DataSources tab and choose \textit{ArffLoader} from the
-	toolbar (the mouse pointer will change to a \textit{cross hairs}).
+	\item Click on the DataSources entry in the \textit{Design}
+          panel and choose \textit{ArffLoader} (the mouse pointer will
+          change to a \textit{cross hairs}).
 
 	\item Next place the ArffLoader component on the layout area by clicking
 	somewhere on the layout (a copy of the ArffLoader icon will appear on
@@ -281,9 +309,10 @@ as classifiers. This example can be found on the \textit{WekaWiki} as well \cite
 	appear. Select \textit{Configure} under \textit{Edit} in the list from this menu and
 	browse to the location of your ARFF file.
 
-	\item Next click the \textit{Evaluation} tab at the top of the window and choose the
-	\textit{ClassAssigner} (allows you to choose which column to be the class)
-	component from the toolbar. Place this on the layout.
+	\item Next click the \textit{Evaluation} entry in the
+          \textit{Design} panel and choose the \textit{ClassAssigner}
+          (allows you to choose which column to be the class)
+          component from the toolbar. Place this on the layout.
 
 	\item Now connect the ArffLoader to the ClassAssigner: first right click
 	over the ArffLoader and select the \textit{dataSet} under \textit{Connections} in
@@ -295,19 +324,24 @@ as classifiers. This example can be found on the \textit{WekaWiki} as well \cite
 	the menu. This will pop up a window from which you can specify which
 	column is the class in your data (last is the default).
 
-	\item Next choose the \textit{ClassValuePicker} (allows you to choose which class 
-	label to be evaluated in the ROC) component from the toolbar. Place this on the layout
-	and right click over \textit{ClassAssigner} and select \textit{dataSet} from under
-	\textit{Connections} in the menu and connect it with the \textit{ClassValuePicker}.
+	\item Next choose the \textit{ClassValuePicker} (allows you to
+          choose which class label to be evaluated in the ROC)
+          component from \textit{Evaluation}. Place this on
+          the layout and right click over \textit{ClassAssigner} and
+          select \textit{dataSet} from under \textit{Connections} in
+          the menu and connect it with the \textit{ClassValuePicker}.
 
-	\item Next grab a \textit{CrossValidationFoldMaker} component from the Evaluation
-	toolbar and place it on the layout. Connect the ClassAssigner to the
-	CrossValidationFoldMaker by right clicking over \textit{ClassAssigner} and
-	selecting \textit{dataSet} from under \textit{Connections} in the menu.
+	\item Next grab a \textit{CrossValidationFoldMaker} component
+          from \textit{Evaluation} and place it on the layout. Connect
+          the ClassAssigner to the CrossValidationFoldMaker by right
+          clicking over \textit{ClassAssigner} and selecting
+          \textit{dataSet} from under \textit{Connections} in the
+          menu.
 
-	\item Next click on the \textit{Classifiers} tab at the top of the window and
-	scroll along the toolbar until you reach the \textit{J48} component in the
-	\textit{trees} section. Place a J48 component on the layout.
+	\item Next click on the \textit{Classifiers} entry in the
+          \textit{Design} panel and choose the \textit{J48} component
+          from the \textit{trees} sub-entry. Place a J48 component on
+          the layout.
 
 	\item Connect the CrossValidationFoldMaker to J48 TWICE by first choosing
 	\textit{trainingSet} and then \textit{testSet} from the pop-up menu for the
@@ -315,22 +349,22 @@ as classifiers. This example can be found on the \textit{WekaWiki} as well \cite
 
 	\item Repeat these two steps with the RandomForest classifier.
 
-	\item Next go back to the \textit{Evaluation} tab and place a
+	\item Next go back to \textit{Evaluation} and place a
 	\textit{ClassifierPerformanceEvaluator} component on the layout. Connect J48
 	to this component by selecting the \textit{batchClassifier} entry from the
 	pop-up menu for J48. Add another \textit{ClassifierPerformanceEvaluator} for
 	RandomForest and connect them via \textit{batchClassifier} as well.
 
-	\item Next go to the \textit{Visualization} toolbar and place a 
+	\item Next go to the \textit{Visualization} entry and place a 
 	\textit{ModelPerformanceChart} component on the layout. Connect both 
 	ClassifierPerformanceEvaluators to the ModelPerformanceChart by selecting 
 	the \textit{thresholdData} entry from the pop-up menu for ClassifierPerformanceEvaluator.
 
-	\item Now start the flow executing by selecting \textit{Start loading} from the
-	pop-up menu for ArffLoader. Depending on how big the data set is and
-	how long cross validation takes you will see some animation from some
-	of the icons in the layout. You will also see some progress information in the 
-	\textit{Status} bar and \textit{Log} at the bottom of the window.
+	\item Now start the flow executing by pressing the
+          \textit{play} button on the toolbar at the top of the
+          window. Progress information for each component in the flow
+          will appear in the \textit{Status} bar and \textit{Log} at
+          the bottom of the window.
 	
 	\item Select \textit{Show plot} from the popup-menu of the 
 	\textit{ModelPerformanceChart} under the \textit{Actions} section.
@@ -350,18 +384,22 @@ evaluated on the class label \textit{good}:
 \newpage
 \subsection{Processing data incrementally}
 
-Some classifiers, clusterers and filters in Weka can handle data incrementally
-in a streaming fashion. Here is an example of training and testing \textit{naive Bayes}
-incrementally. The results are sent to a \textit{TextViewer} and predictions are plotted
-by a \textit{StripChart} component.
+Some classifiers, clusterers and filters in Weka can handle data
+incrementally in a streaming fashion. Here is an example of training
+and testing \textit{naive Bayes} incrementally. The results are sent
+to a \textit{TextViewer} and predictions are plotted by a
+\textit{StripChart} component. This example can be accessed from the
+``Learn and evaluate naive Bayes incrementally'' entry of the popup menu that
+appears when the ``templates'' button in the toolbar is clicked.
 
 \begin{center}
-  \includegraphics[angle=270,width=13cm]{images/knowledgeflow/IncrementalFlow.eps}
+  \includegraphics[angle=270,width=10cm]{images/knowledgeflow/IncrementalFlow.eps}
 \end{center}
 
 \begin{itemize}
-        \item Click on the DataSources tab and choose \textit{ArffLoader} from the
-	toolbar (the mouse pointer will change to a \textit{cross hairs}).
+        \item Expand the DataSources entry in the \textit{Design}
+          panel and choose \textit{ArffLoader} (the mouse pointer will
+          change to a \textit{cross hairs}).
 
 	\item Next place the ArffLoader component on the layout area by clicking
 	somewhere on the layout (a copy of the ArffLoader icon will appear on
@@ -372,9 +410,10 @@ by a \textit{StripChart} component.
 	appear. Select \textit{Configure} under \textit{Edit} in the list from this menu and
 	browse to the location of your ARFF file.
 
-	\item Next click the \textit{Evaluation} tab at the top of the window and choose the
-	\textit{ClassAssigner} (allows you to choose which column to be the class)
-	component from the toolbar. Place this on the layout.
+	\item Next expand the \textit{Evaluation} entry in the
+          \textit{Design} panel and choose the \textit{ClassAssigner}
+          (allows you to choose which column to be the class). Place
+          this on the layout.
 
 	\item Now connect the ArffLoader to the ClassAssigner: first right click
 	over the ArffLoader and select the \textit{dataSet} under \textit{Connections} in
@@ -387,29 +426,28 @@ by a \textit{StripChart} component.
 	column is the class in your data (last is the default).
 
         \item Now grab a \textit{NaiveBayesUpdateable} component from the \textit{bayes}
-        section of the \textit{Classifiers} panel and place it on the layout.
+        section of the \textit{Classifiers} entry and place it on the layout.
 
         \item Next connect the \textit{ClassAssigner} to \textit{NaiveBayesUpdateable}
         using a \textit{instance} connection.
 
         \item Next place an \textit{IncrementalClassiferEvaluator} from the \textit{Evaluation}
-        panel onto the layout and connect \textit{NaiveBayesUpdateable} to it using a
+        entry onto the layout and connect \textit{NaiveBayesUpdateable} to it using a
         \textit{incrementalClassifier} connection.
 
         \item Next place a \textit{TextViewer} component from the \textit{Visualization}
-        panel on the Layout. Connect the \textit{IncrementalClassifierEvaluator} to
+        entry on the Layout. Connect the \textit{IncrementalClassifierEvaluator} to
         it using a \textit{text} connection.
 
         \item Next place a \textit{StripChart} component from the \textit{Visualization}
-        panel on the layout and connect \textit{IncrementalClassifierEvaluator} to it
+        entry on the layout and connect \textit{IncrementalClassifierEvaluator} to it
         using a \textit{chart} connection.
 
         \item Display the \textit{StripChart's} chart by right-clicking over it and choosing
         \textit{Show chart} from the pop-up menu. Note: the \textit{StripChart} can be configured
         with options that control how often data points and labels are displayed.
 
-        \item Finally, start the flow by right-clicking over the \textit{ArffLoader} and
-        selecting \textit{Start loading} from the pop-up menu.        
+        \item Finally, start the flow by pressing the \textit{play} button on the toolbar at the top of the window.        
 \end{itemize}
 
 \begin{center}
@@ -430,8 +468,9 @@ will only be able to test it in an incremental fashion.
 \end{center}
 
 \newpage
-\section{Plugin Facility}
+\section{Plugins}
 
+\subsection{Flow components}
 The KnowledgeFlow offers the ability to easily add new components via
 a plugin mechanism. From Weka 3.7.2 this plugin mechanism has been
 subsumed by the package management system and KnowledgeFlow plugins
@@ -467,3 +506,23 @@ cygnus:~ mhall$ more Beans.props
 # Specifies the tools to go into the Plugins toolbar
 weka.gui.beans.KnowledgeFlow.Plugins=weka.gui.beans.KettleInput
 \end{verbatim}
+
+\subsection{Perspectives}
+From Weka 3.7.4, the KnowledgeFlow offers a new type of plugin, called
+a ``perspective'', that can take over the main UI and add major new
+functionality. One example is the \textit{timeSeriesForecasting}
+package. This package offer not only a plugin tab for the Explorer,
+but also a plugin perspective for the KnowledgeFlow as well. Another
+example is the \textit{scatterPlot3D} package which adds a 3D
+visualization facility for datasets. Both these perspectives operate
+on a set of instances. Instances can be sent to a perspective by
+right-clicking over a configured \textit{DataSource} component and
+choosing \textit{Send to perspective} from the popup menu.
+
+\begin{center}
+  \includegraphics[angle=270,width=12cm]{images/knowledgeflow/sendToPerspective.eps}
+\end{center}
+
+\begin{center}
+  \includegraphics[angle=270,width=12cm]{images/knowledgeflow/scatterPlot3DPerspective.eps}
+\end{center}
