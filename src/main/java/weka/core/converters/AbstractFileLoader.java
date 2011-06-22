@@ -148,7 +148,7 @@ public abstract class AbstractFileLoader
       }
       file = new File(fName);
       // set the source only if the file exists
-      if (file.exists()) {
+      if (file.exists() && file.isFile()) {
         if (file.getName().endsWith(getFileExtension() + FILE_EXTENSION_COMPRESSED)) {
           setSource(new GZIPInputStream(new FileInputStream(file)));
         } else {
