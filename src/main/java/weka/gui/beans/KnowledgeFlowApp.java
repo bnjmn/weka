@@ -249,6 +249,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             "KnowledgeFlow",
             JOptionPane.ERROR_MESSAGE);
       }
+      
+      // set up built-in perspectives
+      Properties pp = new Properties();
+      pp.setProperty("weka.gui.beans.KnowledgeFlow.Perspectives", 
+          "weka.gui.beans.ScatterPlotMatrix");
+      BEAN_PLUGINS_PROPERTIES.add(pp);
 
       if (VISIBLE_PERSPECTIVES == null) {
         VISIBLE_PERSPECTIVES = new TreeSet<String>();
@@ -734,7 +740,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
      * 
      * @param insts the instances
      */
-    void setInstances(Instances insts);
+    void setInstances(Instances insts) throws Exception;
     
     /**
      * Returns true if this perspective accepts instances
