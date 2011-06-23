@@ -751,7 +751,7 @@ public class SimpleKMeans
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String initializeUsingKMeansPlusPlusTipText() {
+  public String initializeUsingKMeansPlusPlusMethodTipText() {
     return "Initialize cluster centers using the probabilistic "
       + " farthest first method of the k-means++ algorithm";
   }
