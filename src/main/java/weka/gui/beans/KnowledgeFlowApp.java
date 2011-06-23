@@ -224,7 +224,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * Loads KnowledgeFlow properties and any plugins (adds jars to
    * the classpath)
    */
-  public static void loadProperties() {
+  public static synchronized void loadProperties() {
     if (BEAN_PROPERTIES == null) {
       weka.core.WekaPackageManager.loadPackages(false);
       System.out.println("[KnowledgeFlow] Loading properties and plugins...");
@@ -250,13 +250,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             JOptionPane.ERROR_MESSAGE);
       }
       
-      // set up built-in perspectives
-      Properties pp = new Properties();
-      pp.setProperty("weka.gui.beans.KnowledgeFlow.Perspectives", 
-          "weka.gui.beans.ScatterPlotMatrix");
-      BEAN_PLUGINS_PROPERTIES.add(pp);
 
       if (VISIBLE_PERSPECTIVES == null) {
+        // set up built-in perspectives
+        Properties pp = new Properties();
+        pp.setProperty("weka.gui.beans.KnowledgeFlow.Perspectives", 
+            "weka.gui.beans.ScatterPlotMatrix,weka.gui.beans.AttributeSummarizer");
+        BEAN_PLUGINS_PROPERTIES.add(pp);
+        
         VISIBLE_PERSPECTIVES = new TreeSet<String>();
         try {
 
@@ -1566,7 +1567,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             "Can be sent to a perspective by placing a DataSource on the\n" +
             "layout canvas, configuring it and then selecting \"Send to perspective\"\n" +
             "from the contextual popup menu that appears when you right-click on\n" +
-            "it.";
+            "it. Several perspectives are built in to the Knowledge Flow, others\n" +
+            "can be installed via the package manager.\n";
             stuff[1] = dontShow;
 
             JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff, 
@@ -1882,7 +1884,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                     // all plugins we will iterate over the sorted
                     // VISIBLE_PERSPECTIVES in order to add them
                     // to the toolbar in consistent sorted order
-                    PERSPECTIVE_CACHE.put(className, (KFPerspective)p);
+                    
+                    ((KFPerspective)p).setMainKFPerspective(m_mainKFPerspective);
+                    PERSPECTIVE_CACHE.put(className, (KFPerspective)p);                    
                   }
                 }
               } catch (Exception ex) {
@@ -2646,7 +2650,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             "Can be sent to a perspective by placing a DataSource on the\n" +
             "layout canvas, configuring it and then selecting \"Send to perspective\"\n" +
             "from the contextual popup menu that appears when you right-click on\n" +
-            "it.";
+            "it. Several perspectives are built in to the Knowledge Flow, others\n" +
+            "can be installed via the package manager.\n";
             stuff[1] = dontShow;
 
             JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff, 
@@ -2747,6 +2752,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 System.out.println("[KnowledgeFlow] loaded perspective: " + title);
 
                 ((KFPerspective)p).setLoaded(true);
+                ((KFPerspective)p).setMainKFPerspective(m_mainKFPerspective);
                 PERSPECTIVE_CACHE.put(selectedClassName, (KFPerspective)p);
               }
             } catch (Exception ex) {
