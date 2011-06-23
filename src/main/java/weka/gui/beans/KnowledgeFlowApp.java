@@ -2713,7 +2713,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       return;
     }
 
-    final JDialog d = new JDialog((JFrame)KnowledgeFlowApp.this.getTopLevelAncestor(), true);
+    final JDialog d = new JDialog((JFrame)KnowledgeFlowApp.this.getTopLevelAncestor(), 
+        "Manage Perspectives", true);
     d.setLayout(new BorderLayout());
 
     JPanel holder = new JPanel();
