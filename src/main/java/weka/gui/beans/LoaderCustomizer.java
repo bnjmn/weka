@@ -22,6 +22,29 @@
 
 package weka.gui.beans;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.File;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.converters.DatabaseConverter;
@@ -30,35 +53,6 @@ import weka.core.converters.FileSourcedConverter;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
-
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
-import java.util.ArrayList;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.JCheckBox;
 
 /**
  * GUI Customizer for the loader bean
@@ -111,6 +105,8 @@ public class LoaderCustomizer
   private Environment m_env = Environment.getSystemWide();
   
   private ModifyListener m_modifyListener;
+  
+  private weka.core.converters.Loader m_backup = null;
 
   public LoaderCustomizer() {
     /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -329,6 +325,10 @@ public class LoaderCustomizer
     });
     cancel.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
+        if (m_backup != null) {
+          m_dsLoader.setLoader(m_backup);
+        }
+        
         if (m_parentWindow != null) {
           m_parentWindow.dispose();
         }
@@ -390,6 +390,7 @@ public class LoaderCustomizer
       northPanel.add(about, BorderLayout.NORTH);
     }
     add(northPanel, BorderLayout.NORTH);
+    
     final EnvironmentField ef = new EnvironmentField();
     JPanel efHolder = new JPanel();
     efHolder.setLayout(new BorderLayout());
@@ -431,58 +432,14 @@ public class LoaderCustomizer
     bP.add(browseBut, BorderLayout.CENTER);
     efHolder.add(bP, BorderLayout.EAST);
     JPanel alignedP = new JPanel();
-    GridBagLayout gbLayout = new GridBagLayout();
-    alignedP.setLayout(gbLayout);
+    alignedP.setBorder(BorderFactory.createTitledBorder("File"));
+    alignedP.setLayout(new BorderLayout());
     JLabel efLab = new JLabel("Filename", SwingConstants.RIGHT);
     efLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    GridBagConstraints gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(efLab, gbConstraints);    
-    alignedP.add(efLab);
-    
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0; gbConstraints.gridx = 1;
-    gbConstraints.weightx = 5;
-    gbLayout.setConstraints(efHolder, gbConstraints);
-    alignedP.add(efHolder);
-    
+    alignedP.add(efLab, BorderLayout.WEST);    
+    alignedP.add(efHolder, BorderLayout.CENTER);
     
     northPanel.add(alignedP, BorderLayout.SOUTH);
-    
-    // add(m_fileChooser, BorderLayout.CENTER);
-
-    // m_relativeFilePath = new JCheckBox("Use relative file paths");
-    m_relativeFilePath = new JCheckBox();
-    m_relativeFilePath.
-      setSelected(((FileSourcedConverter)m_dsLoader.getLoader()).getUseRelativePath());
-
-    m_relativeFilePath.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          ((FileSourcedConverter)m_dsLoader.getLoader()).
-            setUseRelativePath(m_relativeFilePath.isSelected());
-        }
-      });
-    
-    JLabel relativeLab = new JLabel("Use relative file paths", SwingConstants.RIGHT);
-    relativeLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(relativeLab, gbConstraints);
-    alignedP.add(relativeLab);
-    
-    
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1; gbConstraints.gridx = 1;
-    gbLayout.setConstraints(m_relativeFilePath, gbConstraints);
-    alignedP.add(m_relativeFilePath);
         
     JPanel butHolder = new JPanel();
     //butHolder.setLayout(new GridLayout(1,2));
@@ -509,16 +466,30 @@ public class LoaderCustomizer
 
     JButton CancelBut = new JButton("Cancel");
     CancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed(ActionEvent e) {                
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(LoaderCustomizer.this, false);
         }
+        
+        if (m_backup != null) {
+          m_dsLoader.setLoader(m_backup);
+        }
+        
         m_parentWindow.dispose();
       }
     });
     
     butHolder.add(OKBut);
     butHolder.add(CancelBut);
+    
+    JPanel optionsHolder = new JPanel();
+    optionsHolder.setLayout(new BorderLayout());
+    optionsHolder.setBorder(BorderFactory.createTitledBorder("Other options"));
+
+    optionsHolder.add(m_LoaderEditor, BorderLayout.SOUTH);
+    JScrollPane scroller = new JScrollPane(optionsHolder);
+    
+    add(scroller, BorderLayout.CENTER);
     
     add(butHolder, BorderLayout.SOUTH);
   }
@@ -530,6 +501,14 @@ public class LoaderCustomizer
    */
   public void setObject(Object object) {
     m_dsLoader = (weka.gui.beans.Loader)object;
+    
+    try {
+      m_backup = 
+        (weka.core.converters.Loader)GenericObjectEditor.makeCopy(m_dsLoader.getLoader());
+    } catch (Exception ex) {
+      // ignore
+    }
+    
     m_LoaderEditor.setTarget(m_dsLoader.getLoader());
     //    m_fileEditor.setValue(m_dsLoader.getDataSetFile());
     m_LoaderEditor.setEnvironment(m_env);
