@@ -198,7 +198,8 @@ public class AttributeSummarizer
       }
       
       final JComboBox classCombo = new JComboBox();
-      classCombo.setModel(new DefaultComboBoxModel(atts));
+      classCombo.setModel(new DefaultComboBoxModel(atts));      
+      
       if (atts.size() > 0) {
         if (m_visualizeDataSet.classIndex() < 0) {
           classCombo.setSelectedIndex(atts.size() - 1);
@@ -219,14 +220,13 @@ public class AttributeSummarizer
       tempHolder.add(classCombo, BorderLayout.EAST);
       comboHolder.add(tempHolder, BorderLayout.WEST);
       add(comboHolder, BorderLayout.NORTH);
-      
+            
       classCombo.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           int selected = classCombo.getSelectedIndex();
           if (selected >= 0) {
-            m_coloringIndex = selected;
             for (int i = 0; i < m_plots.size(); i++) {
-              m_plots.get(i).setColoringIndex(m_coloringIndex);
+              m_plots.get(i).setColoringIndex(selected);
             }
           }
         }
