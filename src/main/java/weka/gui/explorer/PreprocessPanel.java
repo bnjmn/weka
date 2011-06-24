@@ -215,7 +215,7 @@ public class PreprocessPanel
     
     m_FilterEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
-        m_ApplyFilterBut.setEnabled(true);
+        m_ApplyFilterBut.setEnabled(getInstances() != null);
         Capabilities currentCapabilitiesFilter = m_FilterEditor.getCapabilitiesFilter();
         Filter filter = (Filter) m_FilterEditor.getValue();
         Capabilities currentFilterCapabilities = null;
