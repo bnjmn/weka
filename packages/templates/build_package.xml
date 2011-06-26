@@ -157,7 +157,7 @@
     </jar>
   </target>
 
-  <target name="make_package" depends="exejar" description="Make the package zip file. Run with -Dpackage=[package name]">
+  <target name="make_package" depends="clean, exejar" description="Make the package zip file. Run with -Dpackage=[package name]">
     <mkdir dir="${dist}/${package}"/>
     <copy todir="${dist}/${package}">
       <fileset dir="${dist}">
