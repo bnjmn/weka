@@ -355,7 +355,8 @@ public class Loader
   
   protected void newFileSelected() throws Exception {
     if(! (m_Loader instanceof DatabaseLoader)) {
-      // try to load structure (if possible) and notify any listeners
+      newStructure();
+/*      // try to load structure (if possible) and notify any listeners
 
       // Set environment variables
       if (m_Loader instanceof EnvironmentHandler && m_env != null) {
@@ -367,9 +368,22 @@ public class Loader
       m_dataFormat = m_Loader.getStructure();
       //      System.err.println(m_dataFormat);
       System.out.println("[Loader] Notifying listeners of instance structure avail.");
-      notifyStructureAvailable(m_dataFormat);
+      notifyStructureAvailable(m_dataFormat); */
     }
   }
+  
+  protected void newStructure() throws Exception {
+    // Set environment variables
+    if (m_Loader instanceof EnvironmentHandler && m_env != null) {
+      try {
+        ((EnvironmentHandler)m_Loader).setEnvironment(m_env);
+      }catch (Exception ex) {
+      }
+    }
+    m_dataFormat = m_Loader.getStructure();
+    System.out.println("[Loader] Notifying listeners of instance structure avail.");
+    notifyStructureAvailable(m_dataFormat);
+  }  
   
   /**
    * Get the structure of the output encapsulated in the named
@@ -397,9 +411,10 @@ public class Loader
     }
     
     try {
-      newFileSelected();
+      newStructure();
       
     } catch (Exception ex) {
+      ex.printStackTrace();
       m_dataFormat = null;
     }
     return m_dataFormat;
