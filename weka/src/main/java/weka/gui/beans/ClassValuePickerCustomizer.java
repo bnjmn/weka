@@ -102,7 +102,11 @@ public class ClassValuePickerCustomizer
     add(butHolder, BorderLayout.SOUTH);
     
     okBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
+      public void actionPerformed(ActionEvent e) {        
+        if (m_modifyListener != null) {
+          m_modifyListener.setModifiedStatus(this, m_modified);
+        }
+        
         if (m_parent != null) {
           m_parent.dispose();
         }
@@ -113,6 +117,7 @@ public class ClassValuePickerCustomizer
       public void actionPerformed(ActionEvent e) {
         m_classValuePicker.setClassValueIndex(m_backup);
         
+        customizerClosing();
         if (m_parent != null) {
           m_parent.dispose();
         }
@@ -180,13 +185,10 @@ public class ClassValuePickerCustomizer
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassValuePicker (if necessary)
     if (m_classValuePicker != null) {
-      System.out.println("Customizer deregistering with class value picker");
+//      System.out.println("Customizer deregistering with class value picker");
       m_classValuePicker.removeDataFormatListener(this);
-    }
-    
-    if (m_modifyListener != null) {
-      m_modifyListener.setModifiedStatus(this, m_modified);
-    }
+    }    
+    m_classValuePicker.setClassValueIndex(m_backup);
   }
 
   public void newDataFormat(DataSetEvent dse) {
