@@ -104,7 +104,7 @@ public class ClassValuePickerCustomizer
     okBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {        
         if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(this, m_modified);
+          m_modifyListener.setModifiedStatus(ClassValuePickerCustomizer.this, m_modified);
         }
         
         if (m_parent != null) {
