@@ -114,10 +114,7 @@ public class ClassAssignerCustomizer
     
     cancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (m_backup != null) {
-          m_classAssigner.setClassColumn(m_backup);
-        }
-        
+        customizerClosing();
         if (m_parent != null) {
           m_parent.dispose();
         }
