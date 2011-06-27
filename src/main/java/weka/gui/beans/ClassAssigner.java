@@ -177,24 +177,7 @@ public class ClassAssigner
       // are not producing at the moment
       return null;
     }
-    
     return getUpstreamStructure();
-  }
-  
-  protected Instances getStructure() {
-    if (m_trainingProvider != null) {
-      return getStructure("trainingSet");
-    }
-    if (m_testProvider != null) {
-      return getStructure("testSet");
-    }
-    if (m_dataProvider != null) {
-      return getStructure("dataSet");
-    }
-    if (m_instanceProvider != null) {
-      return getStructure("instance");
-    }
-    return null;
   }
 
   /**
@@ -215,7 +198,7 @@ public class ClassAssigner
     if (m_connectedFormat == null) {
       // try and pull the incoming structure
       // from the upstream step (if possible)
-      m_connectedFormat = getStructure();
+      m_connectedFormat = getUpstreamStructure();
     }
     
     return m_connectedFormat;
