@@ -23,23 +23,30 @@
 package weka.gui.beans;
 
 import weka.gui.PropertySheetPanel;
+import weka.gui.beans.BeanCustomizer.ModifyListener;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 /**
  * GUI Customizer for the cross validation fold maker bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class CrossValidationFoldMakerCustomizer
   extends JPanel
-  implements Customizer {
+  implements BeanCustomizer, CustomizerCloseRequester, 
+  CustomizerClosingListener {
 
   /** for serialization */
   private static final long serialVersionUID = 1229878140258668581L;
@@ -49,6 +56,14 @@ public class CrossValidationFoldMakerCustomizer
 
   private PropertySheetPanel m_cvEditor = 
     new PropertySheetPanel();
+  
+  private CrossValidationFoldMaker m_cvMaker;
+  private ModifyListener m_modifyListener;
+  private int m_foldsBackup;
+  private boolean m_orderBackup;
+  private int m_seedBackup;
+  
+  private Window m_parent;
 
   public CrossValidationFoldMakerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
@@ -57,6 +72,39 @@ public class CrossValidationFoldMakerCustomizer
     add(m_cvEditor, BorderLayout.CENTER);
     add(new javax.swing.JLabel("CrossValidationFoldMakerCustomizer"), 
 	BorderLayout.NORTH);
+    addButtons();
+  }
+  
+  private void addButtons() {
+    JButton okBut = new JButton("OK");
+    JButton cancelBut = new JButton("Cancel");
+    
+    JPanel butHolder = new JPanel();
+    butHolder.setLayout(new GridLayout(1, 2));
+    butHolder.add(okBut); butHolder.add(cancelBut);
+    add(butHolder, BorderLayout.SOUTH);        
+    
+    okBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_modifyListener != null) {
+          m_modifyListener.
+            setModifiedStatus(CrossValidationFoldMakerCustomizer.this, true);
+        }
+        if (m_parent != null) {
+          m_parent.dispose();
+        }
+      }
+    });
+    
+    cancelBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+
+        customizerClosing();
+        if (m_parent != null) {
+          m_parent.dispose();
+        }
+      }
+    });
   }
   
   /**
@@ -65,7 +113,12 @@ public class CrossValidationFoldMakerCustomizer
    * @param object a CrossValidationFoldMaker object
    */
   public void setObject(Object object) {
-    m_cvEditor.setTarget((CrossValidationFoldMaker)object);
+    m_cvMaker = ((CrossValidationFoldMaker)object);
+    m_foldsBackup = m_cvMaker.getFolds();
+    m_orderBackup = m_cvMaker.getPreserveOrder();
+    m_seedBackup = m_cvMaker.getSeed();
+    
+    m_cvEditor.setTarget(m_cvMaker);
   }
 
   /**
@@ -84,5 +137,25 @@ public class CrossValidationFoldMakerCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+  
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
+  }
+  
+  @Override
+  public void setParentWindow(Window parent) {
+    m_parent = parent;
+  }
+
+  @Override
+  public void customizerClosing() {
+    
+    // restore the backup
+    m_cvMaker.setSeed(m_seedBackup);
+    m_cvMaker.setFolds(m_foldsBackup);
+    m_cvMaker.setPreserveOrder(m_orderBackup);
+    
   }
 }
