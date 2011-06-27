@@ -40,7 +40,7 @@ import javax.swing.JPanel;
 public class ClassValuePicker
   extends JPanel
   implements Visible, DataSourceListener, BeanCommon,
-	     EventConstraints, Serializable {
+	     EventConstraints, Serializable, StructureProducer {
 
   /** for serialization */
   private static final long serialVersionUID = -1196143276710882989L;
@@ -95,6 +95,28 @@ public class ClassValuePicker
   public String getCustomName() {
     return m_visual.getText();
   }
+  
+  public Instances getStructure(String eventName) {
+    if (!eventName.endsWith("dataSet")) {
+      return null;
+    }
+    if (m_dataProvider == null) {
+      return null;
+    }
+    if (m_dataProvider != null && m_dataProvider instanceof StructureProducer) {
+      return ((StructureProducer)m_dataProvider).getStructure("dataSet");
+    }
+    
+    return null;
+  }
+  
+  protected Instances getStructure() {
+    if (m_dataProvider != null) {
+      return getStructure("dataSet");
+    }
+    
+    return null;
+  }
 
   /**
    * Returns the structure of the incoming instances (if any)
@@ -102,8 +124,19 @@ public class ClassValuePicker
    * @return an <code>Instances</code> value
    */
   public Instances getConnectedFormat() {
-    if (m_connectedFormat ==null) {
-      System.err.println("Is null!!!!!!");
+    // loaders will push instances format to us
+    // when the user makes configuration changes
+    // to the loader in the gui. However, if a fully
+    // configured flow is loaded then we won't get
+    // this information pushed to us until the
+    // flow is run. In this case we want to pull
+    // it (if possible) from upstream steps so
+    // that our customizer can provide the nice
+    // UI with the drop down box of class names.
+    if (m_connectedFormat == null) {
+      // try and pull the incoming structure
+      // from the upstream step (if possible)
+      m_connectedFormat = getStructure();
     }
     return m_connectedFormat;
   }
@@ -162,7 +195,7 @@ public class ClassValuePicker
     if (dataSet.classAttribute().isNumeric()) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("ClassValuePicker] "
+	  logMessage("[ClassValuePicker] "
 	      + statusMessagePrefix()
 	      + " Class attribute must be nominal (ClassValuePicker)");
 	m_logger.statusMessage(statusMessagePrefix()
