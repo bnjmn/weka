@@ -105,7 +105,7 @@ public class ClassAssignerCustomizer
     
     okBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_modifyListener.setModifiedStatus(this, true);
+        m_modifyListener.setModifiedStatus(ClassAssignerCustomizer.this, true);
         if (m_parent != null) {
           m_parent.dispose();
         }
