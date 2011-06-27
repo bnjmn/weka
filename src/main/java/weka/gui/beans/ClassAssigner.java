@@ -113,6 +113,24 @@ public class ClassAssigner
     return "Specify the number of the column that contains the class attribute";
   }
   
+  private Instances getUpstreamStructure() {
+    if (m_dataProvider != null && m_dataProvider instanceof StructureProducer) {
+      return ((StructureProducer)m_dataProvider).getStructure("dataSet");
+    }
+    if (m_trainingProvider != null && 
+        m_trainingProvider instanceof StructureProducer) {
+      return ((StructureProducer)m_trainingProvider).getStructure("trainingSet");
+    }
+    if (m_testProvider != null && m_testProvider instanceof StructureProducer) {
+      return ((StructureProducer)m_testProvider).getStructure("testSet");
+    }
+    if (m_instanceProvider != null && 
+        m_instanceProvider instanceof StructureProducer) {
+      return ((StructureProducer)m_instanceProvider).getStructure("instance");
+    }
+    return null;
+  }
+  
   /**
    * Get the structure of the output encapsulated in the named
    * event. If the structure can't be determined in advance of
@@ -135,40 +153,32 @@ public class ClassAssigner
         m_dataProvider == null && m_instanceProvider == null) {
       return null;
     }
-    if (m_trainingProvider != null && !eventName.equals("trainingSet")) {
-      return null;
-    }
-    if (m_testProvider != null && !eventName.equals("testSet")) {
-      return null;
-    }
-    if (m_dataProvider == null && !eventName.equals("dataSet")) {
-      return null;
-    }
-    if (m_instanceProvider != null && !eventName.equals("instance")) {
+    
+    if (eventName.equals("dataSet") && m_dataListeners.size() == 0) {    
+      // downstream has asked for the structure of something that we
+      // are not producing at the moment
       return null;
     }
     
-    if (m_trainingProvider != null && 
-        m_trainingProvider instanceof StructureProducer) {
-      return ((StructureProducer)m_trainingProvider).getStructure("trainingSet");
+    if (eventName.equals("trainingSet") && m_trainingListeners.size() == 0) {    
+      // downstream has asked for the structure of something that we
+      // are not producing at the moment
+      return null;
     }
     
-    if (m_testProvider != null &&
-        m_testProvider instanceof StructureProducer) {
-      return ((StructureProducer)m_testProvider).getStructure("testSet");
+    if (eventName.equals("testSet") && m_testListeners.size() == 0) {    
+      // downstream has asked for the structure of something that we
+      // are not producing at the moment
+      return null;
     }
     
-    if (m_dataProvider != null &&
-        m_dataProvider instanceof StructureProducer) {
-      return ((StructureProducer)m_dataProvider).getStructure("dataSet");
+    if (eventName.equals("instance") && m_instanceListeners.size() == 0) {    
+      // downstream has asked for the structure of something that we
+      // are not producing at the moment
+      return null;
     }
     
-    if (m_instanceProvider != null &&
-        m_instanceProvider instanceof StructureProducer) {
-      return ((StructureProducer)m_instanceProvider).getStructure("instance");
-    }
-    
-    return null;
+    return getUpstreamStructure();
   }
   
   protected Instances getStructure() {
