@@ -97,7 +97,7 @@ public class ClassValuePicker
   }
   
   public Instances getStructure(String eventName) {
-    if (!eventName.endsWith("dataSet")) {
+    if (!eventName.equals("dataSet")) {
       return null;
     }
     if (m_dataProvider == null) {
