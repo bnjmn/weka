@@ -105,6 +105,7 @@ public class ClassAssignerCustomizer
     
     okBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        m_modifyListener.setModifiedStatus(this, true);
         if (m_parent != null) {
           m_parent.dispose();
         }
@@ -184,12 +185,12 @@ public class ClassAssignerCustomizer
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassAssigner (if necessary)
     if (m_classAssigner != null) {
-      System.out.println("Customizer deregistering with class assigner");
+      //System.out.println("Customizer deregistering with class assigner");
       m_classAssigner.removeDataFormatListener(this);
     }
     
-    if (m_modifyListener != null) {
-      m_modifyListener.setModifiedStatus(this, true);
+    if (m_backup != null) {
+      m_classAssigner.setClassColumn(m_backup);
     }
   }
 
