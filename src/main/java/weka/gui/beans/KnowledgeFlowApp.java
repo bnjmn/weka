@@ -4720,6 +4720,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       BeanInstance bi,
       int x,
       int y) {
+    // unselect any selected beans on the canvas
+    if (m_mainKFPerspective.
+        getSelectedBeans(m_mainKFPerspective.getCurrentTabIndex()).size() > 0) {
+      m_mainKFPerspective.
+        setSelectedBeans(m_mainKFPerspective.getCurrentTabIndex(), 
+            new Vector());
+    }
+    
     // record the event set descriptior for this event
     m_sourceEventSetDescriptor = esd;
 
@@ -4768,7 +4776,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     // have some possible beans to connect to?
     if (targetCount > 0) {
       //      System.err.println("target count "+targetCount);
-      if (source instanceof Visible) {
+      if (source instanceof Visible) {        
         ((Visible)source).getVisual().setDisplayConnectors(true);
 
 
