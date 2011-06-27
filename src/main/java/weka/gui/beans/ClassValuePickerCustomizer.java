@@ -25,6 +25,8 @@ package weka.gui.beans;
 import weka.core.Instances;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -33,6 +35,7 @@ import java.beans.PropertyChangeSupport;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,7 +46,8 @@ import javax.swing.JPanel;
  */
 public class ClassValuePickerCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerClosingListener, DataFormatListener {
+  implements BeanCustomizer, CustomizerClosingListener, 
+  CustomizerCloseRequester, DataFormatListener {
 
   /** for serialization */
   private static final long serialVersionUID = 8213423053861600469L;
@@ -62,6 +66,9 @@ public class ClassValuePickerCustomizer
   
   private ModifyListener m_modifyListener;
   private boolean m_modified = false;
+  
+  private Window m_parent;
+  private int m_backup;
 
   public ClassValuePickerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
@@ -82,6 +89,35 @@ public class ClassValuePickerCustomizer
       });
 
     add(m_messageLabel, BorderLayout.CENTER);
+    addButtons();
+  }
+  
+  private void addButtons() {
+    JButton okBut = new JButton("OK");
+    JButton cancelBut = new JButton("Cancel");
+    
+    JPanel butHolder = new JPanel();
+    butHolder.setLayout(new GridLayout(1, 2));
+    butHolder.add(okBut); butHolder.add(cancelBut);
+    add(butHolder, BorderLayout.SOUTH);
+    
+    okBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_parent != null) {
+          m_parent.dispose();
+        }
+      }
+    });
+    
+    cancelBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        m_classValuePicker.setClassValueIndex(m_backup);
+        
+        if (m_parent != null) {
+          m_parent.dispose();
+        }
+      }
+    });
   }
 
   private void setUpNoCustPossible() {
@@ -137,6 +173,7 @@ public class ClassValuePickerCustomizer
       if (m_classValuePicker.getConnectedFormat() != null) {
 	setUpValueSelection(m_classValuePicker.getConnectedFormat());	
       }
+      m_backup = m_classValuePicker.getClassValueIndex();
     }
   }
   
@@ -181,5 +218,10 @@ public class ClassValuePickerCustomizer
   @Override
   public void setModifiedListener(ModifyListener l) {
     m_modifyListener = l;
+  }
+  
+  @Override
+  public void setParentWindow(Window parent) {
+    m_parent = parent;
   }
 }
