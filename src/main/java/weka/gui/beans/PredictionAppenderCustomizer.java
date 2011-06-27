@@ -25,22 +25,28 @@ package weka.gui.beans;
 import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 /**
  * GUI Customizer for the prediction appender bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 
 public class PredictionAppenderCustomizer
   extends JPanel
-  implements Customizer {
+  implements BeanCustomizer, CustomizerCloseRequester, 
+  CustomizerClosingListener {
 
   /** for serialization */
   private static final long serialVersionUID = 6884933202506331888L;
@@ -50,6 +56,12 @@ public class PredictionAppenderCustomizer
   
   private PropertySheetPanel m_paEditor = 
     new PropertySheetPanel();
+  
+  private PredictionAppender m_appender;
+  private boolean m_appendProbsBackup;
+  
+  private ModifyListener m_modifyListener;
+  private Window m_parent;
 
   public PredictionAppenderCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
@@ -58,6 +70,35 @@ public class PredictionAppenderCustomizer
     add(m_paEditor, BorderLayout.CENTER);
     add(new javax.swing.JLabel("PredcitionAppenderCustomizer"), 
 	BorderLayout.NORTH);
+    addButtons();
+  }
+  
+  private void addButtons() {
+    JButton okBut = new JButton("OK");
+    JButton cancelBut = new JButton("Cancel");
+    
+    JPanel butHolder = new JPanel();
+    butHolder.setLayout(new GridLayout(1, 2));
+    butHolder.add(okBut); butHolder.add(cancelBut);
+    add(butHolder, BorderLayout.SOUTH);
+    
+    okBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        m_modifyListener.setModifiedStatus(PredictionAppenderCustomizer.this, true);
+        if (m_parent != null) {
+          m_parent.dispose();
+        }
+      }
+    });
+    
+    cancelBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        customizerClosing();
+        if (m_parent != null) {
+          m_parent.dispose();
+        }
+      }
+    });
   }
 
   /**
@@ -66,7 +107,8 @@ public class PredictionAppenderCustomizer
    * @param object a PredictionAppender object
    */
   public void setObject(Object object) {
-    m_paEditor.setTarget((PredictionAppender)object);
+    m_appender = ((PredictionAppender)object);
+    m_paEditor.setTarget(m_appender);
   }
 
   /**
@@ -85,5 +127,22 @@ public class PredictionAppenderCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+
+  @Override
+  public void setModifiedListener(ModifyListener l) {
+    m_modifyListener = l;
+  }
+
+  @Override
+  public void setParentWindow(Window parent) {
+    m_parent = parent;
+  }
+
+  @Override
+  public void customizerClosing() {
+    // restore the backup value
+    m_appender.setAppendPredictedProbabilities(m_appendProbsBackup);
+    
   }
 }
