@@ -414,7 +414,8 @@ public class Loader
       newStructure();
       
     } catch (Exception ex) {
-      ex.printStackTrace();
+      //ex.printStackTrace();
+      System.err.println("[KnowledgeFlow/Loader] Warning: " + ex.getMessage());
       m_dataFormat = null;
     }
     return m_dataFormat;
