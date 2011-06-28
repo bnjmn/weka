@@ -255,7 +255,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         // set up built-in perspectives
         Properties pp = new Properties();
         pp.setProperty("weka.gui.beans.KnowledgeFlow.Perspectives", 
-            "weka.gui.beans.ScatterPlotMatrix,weka.gui.beans.AttributeSummarizer");
+            "weka.gui.beans.ScatterPlotMatrix,weka.gui.beans.AttributeSummarizer," +
+            "weka.gui.beans.SQLViewerPerspective");
         BEAN_PLUGINS_PROPERTIES.add(pp);
         
         VISIBLE_PERSPECTIVES = new TreeSet<String>();
@@ -1885,7 +1886,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                     // VISIBLE_PERSPECTIVES in order to add them
                     // to the toolbar in consistent sorted order
                     
-                    ((KFPerspective)p).setMainKFPerspective(m_mainKFPerspective);
+                    //((KFPerspective)p).setMainKFPerspective(m_mainKFPerspective);
                     PERSPECTIVE_CACHE.put(className, (KFPerspective)p);                    
                   }
                 }
@@ -2669,7 +2670,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           popupPerspectiveConfigurer();
         }
       });
-    }     
+    }
+    
+    // set main perspective on all cached perspectives
+    for (String pName : PERSPECTIVE_CACHE.keySet()) {
+      PERSPECTIVE_CACHE.get(pName).setMainKFPerspective(m_mainKFPerspective);
+    }
 
     loadUserComponents();
     clearLayout(); // add an initial "Untitled" tab
@@ -2811,16 +2817,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         final int theIndex = index;
         tBut.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            KFPerspective current = (KFPerspective)m_perspectiveHolder.getComponent(0);
-            current.setActive(false);
-            m_perspectiveHolder.remove(0);
-            m_perspectiveHolder.add((JComponent)m_perspectives.get(theIndex), 
-                BorderLayout.CENTER);
-            m_perspectives.get(theIndex).setActive(true);
-            //KnowledgeFlowApp.this.invalidate();
-            KnowledgeFlowApp.this.revalidate();
-            KnowledgeFlowApp.this.repaint();
-            notifyIsDirty();
+            setActivePerspective(theIndex);
           }
         });
         m_perspectiveToolBar.add(tBut);
@@ -2840,6 +2837,25 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     revalidate();
     repaint();
+    notifyIsDirty();
+  }
+  
+  protected void setActivePerspective(int theIndex) {
+    if (theIndex < 0 || theIndex > m_perspectives.size() - 1) {
+      return;
+    }
+    
+    KFPerspective current = (KFPerspective)m_perspectiveHolder.getComponent(0);
+    current.setActive(false);
+    m_perspectiveHolder.remove(0);
+    m_perspectiveHolder.add((JComponent)m_perspectives.get(theIndex), 
+        BorderLayout.CENTER);
+    m_perspectives.get(theIndex).setActive(true);
+    ((JToggleButton)m_perspectiveToolBar.getComponent(theIndex)).setSelected(true);
+    
+    //KnowledgeFlowApp.this.invalidate();
+    KnowledgeFlowApp.this.revalidate();
+    KnowledgeFlowApp.this.repaint();
     notifyIsDirty();
   }
 
@@ -4285,8 +4301,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }*/
   }
 
-  private StringBuffer copyToBuffer(Vector selectedBeans) 
-  throws Exception {
+  protected StringBuffer copyToBuffer(Vector selectedBeans) 
+    throws Exception {
 
     Vector associatedConnections = 
       BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
@@ -4329,10 +4345,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     m_pasteB.setEnabled(true);
     return true;
   }
-
-  private boolean pasteFromClipboard(int x, int y, 
+  
+  protected boolean pasteFromBuffer(int x, int y, 
       StringBuffer pasteBuffer, boolean addUndoPoint) {
-
+    
     if (addUndoPoint) {
       addUndoPoint();
     }
@@ -4403,6 +4419,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     notifyIsDirty();
 
     return true;
+  }
+
+  private boolean pasteFromClipboard(int x, int y, 
+      StringBuffer pasteBuffer, boolean addUndoPoint) {
+
+    return pasteFromBuffer(x, y, pasteBuffer, addUndoPoint);
   }
 
   private void deleteSelectedBeans() {
@@ -5219,7 +5241,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   }
 
   // Link the supplied beans into the KnowledgeFlow gui
-  private void integrateFlow(Vector beans, Vector connections, boolean replace,
+  protected void integrateFlow(Vector beans, Vector connections, boolean replace,
       boolean notReplaceAndSourcedFromBinary) {
     java.awt.Color bckC = getBackground();
     m_bcSupport = new BeanContextSupport();
