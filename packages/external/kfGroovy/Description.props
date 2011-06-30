@@ -9,7 +9,7 @@ PackageName=kfGroovy
 Version=1.0.1
 
 #Date
-Date=2011-05-30
+Date=2011-06-30
 
 # Title (required)
 Title=A Knowledge Flow plugin that provides a Knowledge Flow step that wraps around a Groovy script.
