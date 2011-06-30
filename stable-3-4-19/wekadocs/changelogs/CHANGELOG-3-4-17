@@ -1,0 +1,105 @@
+------------------------------------------------------------------------
+r6210 | mhall | 2010-01-11 20:33:52 +1300 (Mon, 11 Jan 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Updated copyright notice to 2010.
+------------------------------------------------------------------------
+r6224 | mhall | 2010-01-12 14:43:07 +1300 (Tue, 12 Jan 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/version.txt
+
+Updated for 3.4.16
+------------------------------------------------------------------------
+r6236 | mhall | 2010-01-15 10:17:42 +1300 (Fri, 15 Jan 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net/search/local/TAN.java
+
+buildStructure now no longer throws an exception if there is one or no attributes (aside from the class) in the data.
+------------------------------------------------------------------------
+r6239 | mhall | 2010-01-19 14:20:53 +1300 (Tue, 19 Jan 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees/m5/M5Base.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees/m5/Rule.java
+
+Fixed a memory leak for M5Rules.
+------------------------------------------------------------------------
+r6301 | mhall | 2010-02-20 20:36:27 +1300 (Sat, 20 Feb 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/clusterers/EM.java
+
+Cluster priors were wrong when iteration terminates due to non-improvement of log likelihood. This is because the E step is used to compute the likelihood *and* to also update the weights and recompute the priors. When iterate exits at iteration i because the likelihood doesn't increase, then the E step has actually advanced the priors to iteration i+1. Fixed.
+------------------------------------------------------------------------
+r6304 | mhall | 2010-02-24 09:44:55 +1300 (Wed, 24 Feb 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/NaiveBayesMultinomial.java
+
+toString() was printing out the class attribute in the conditional probability section of the output - fixed.
+------------------------------------------------------------------------
+r6319 | fracpete | 2010-02-26 15:26:40 +1300 (Fri, 26 Feb 2010) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/Instances.java
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/AllTests.java
+   A /branches/book2ndEd-branch/weka/src/test/java/weka/core
+   A /branches/book2ndEd-branch/weka/src/test/java/weka/core/AllTests.java
+   A /branches/book2ndEd-branch/weka/src/test/java/weka/core/InstancesTest.java
+   A /branches/book2ndEd-branch/weka/src/test/java/weka/core/RangeTest.java
+   A /branches/book2ndEd-branch/weka/src/test/java/weka/core/SingleIndexTest.java
+   A /branches/book2ndEd-branch/weka/src/test/java/weka/core/data
+   A /branches/book2ndEd-branch/weka/src/test/java/weka/core/data/InstancesTest.arff
+
+the weka.core.Instances class no longer allows the creation of datasets with duplicate attribute names
+added junit tests for: Instances, Range, SingleIndex
+------------------------------------------------------------------------
+r6503 | mhall | 2010-04-30 15:25:55 +1200 (Fri, 30 Apr 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/meta/Bagging.java
+
+The out-of-bag error computation was using voting for classification instead of averaging the probability estimates (as is done in distributionForInstance). Changed to make it consistent.
+------------------------------------------------------------------------
+r6558 | mhall | 2010-05-20 21:09:47 +1200 (Thu, 20 May 2010) | 4 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+MLP was returning null from distributionForInstance when the array of probabilities contained a
+ll zeros! Fixed - now uses the ZeroR model in this case. This bug manifested itself on the lett
+er recognition data when the network was trained with -M 0.8 and -L 0.5 using a 2/3 1/3 split (
+one instance resulted in an array of all zeros).
+------------------------------------------------------------------------
+r6575 | mhall | 2010-05-24 11:40:15 +1200 (Mon, 24 May 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/lazy/IBk.java
+
+Now uses a ZeroR model if there are no training instances.
+------------------------------------------------------------------------
+r6594 | fracpete | 2010-06-02 09:55:45 +1200 (Wed, 02 Jun 2010) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/PropertyDialog.java
+
+PropertyDialog now adjusts the height of the dialog if more than 95% of the screen height
+position of the dialog gets adjusted to be fully displayed on screen (unfortunately, the buttons might still get hidden by the Windows taskbar)
+------------------------------------------------------------------------
+r6604 | mhall | 2010-06-11 09:49:27 +1200 (Fri, 11 Jun 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+Made the cluster labels in the legend 0-based instead of 1-based in order to match the textual output.
+------------------------------------------------------------------------
+r6609 | mhall | 2010-06-11 10:41:31 +1200 (Fri, 11 Jun 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/clusterers/Cobweb.java
+
+The clusterInstance method was downdating node stats using the instance to be clustered before finding the best host and then restoring the status quo. This probably makes sense for clustering the same data that was used to generate the tree, but doesn't really make sense for clustering new data.
+------------------------------------------------------------------------
+r6633 | mhall | 2010-07-06 09:43:51 +1200 (Tue, 06 Jul 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+One change from the development version was not propagated - fixed.
+------------------------------------------------------------------------
+r6691 | mhall | 2010-07-26 14:13:45 +1200 (Mon, 26 Jul 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/attributeSelection/PrincipalComponents.java
+
+Was using the normalize filter, but should have been standardizing the data (for PCs computed from the correlation matrix) - fixed. Now also has an option to center the data and compute PCs from the covariance matrix. Transforming back to the original space now correctly reverses standardization/centering.
+------------------------------------------------------------------------

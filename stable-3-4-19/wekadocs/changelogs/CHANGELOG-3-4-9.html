@@ -1,0 +1,644 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-4-9 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-4-9 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://ant.apache.org/">Apache Ant</a>.</p>
+<hr>
+<table border="0" width="100%" cellspacing="1">
+<tr>
+<td class="dateAndAuthor">2006-12-18 01:51 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed copyright year</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GUIChooser.html?r1=1.14.2.11&r2=1.14.2.10">gui/GUIChooser.html (1.14.2.11)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-12-15 03:30 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added remote.policy.example file to the remoteExperimentServer.jar</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.10&r2=1.19.2.9">build.xml (1.19.2.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-12-15 03:24 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>updated policy file
+added example setup</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/remote.policy?rev=1.4.2.3&content-type=text/x-cvsweb-markup">experiment/remote.policy (1.4.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/remote.policy.example?rev=1.1.2.1&content-type=text/x-cvsweb-markup">experiment/remote.policy.example (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-11-24 00:41 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug that caused array out of bounds when producing a ranked list of attributes from a backwards search.</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/GreedyStepwise.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">attributeSelection/GreedyStepwise.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-11-21 01:47 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Default clusterer icons courtesy of Jeffrey (they were on his CD but I didn't realize it :-))</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultClusterer.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DefaultClusterer.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultClusterer_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DefaultClusterer_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-11-17 00:27 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed ignoring of randomizing of subsample (subsample was incorrectly generated from original, un-randomized data). thanks to Gabi Schmidberger</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/visualize/MatrixPanel.html?rev=1.11.2.3&content-type=text/x-cvsweb-markup">gui/visualize/MatrixPanel.html (1.11.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-11-16 22:25 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>backup object was not properly initialized (pressing "cancel" in the property dialog changes back to an even older object)??? calling setValue a second time fixes that.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/PropertyPanel.html?rev=1.8.2.1&content-type=text/x-cvsweb-markup">gui/PropertyPanel.html (1.8.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-11-16 22:25 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>resampling is now allowed with weight pruning</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/AdaBoostM1.html?rev=1.24.2.4&content-type=text/x-cvsweb-markup">classifiers/meta/AdaBoostM1.html (1.24.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-11-16 22:25 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>moved output in setWeights method to debug mode</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiBoostAB.html?rev=1.6.2.3&content-type=text/x-cvsweb-markup">classifiers/meta/MultiBoostAB.html (1.6.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-11-15 21:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Made the clearLayout method public so that it can be called by the GUIChooser.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/KnowledgeFlowApp.html?rev=1.1.2.11&content-type=text/x-cvsweb-markup">gui/beans/KnowledgeFlowApp.html (1.1.2.11)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-11-15 21:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed a bug where icons would stay on the KnowledgeFlow layout after the window was closed and then re-opened from the GUIChooser.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GUIChooser.html?rev=1.14.2.10&content-type=text/x-cvsweb-markup">gui/GUIChooser.html (1.14.2.10)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-10-27 03:02 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed filters for use in the FilteredClassifier</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/FilteredClassifier.html?rev=1.20.2.3&content-type=text/x-cvsweb-markup">classifiers/meta/FilteredClassifier.html (1.20.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/Filter.html?rev=1.24.2.1&content-type=text/x-cvsweb-markup">filters/Filter.html (1.24.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/instance/Resample.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">filters/supervised/instance/Resample.html (1.4.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/instance/SpreadSubsample.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">filters/supervised/instance/SpreadSubsample.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/supervised/instance/StratifiedRemoveFolds.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">filters/supervised/instance/StratifiedRemoveFolds.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AbstractTimeSeries.html?rev=1.3.2.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AbstractTimeSeries.html (1.3.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddCluster.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddCluster.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddNoise.html?rev=1.2.2.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddNoise.html (1.2.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Obfuscate.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Obfuscate.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/RandomProjection.html?rev=1.3.2.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/RandomProjection.html (1.3.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Remove.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Remove.html (1.4.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/StringToWordVector.html?rev=1.8.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/StringToWordVector.html (1.8.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/TimeSeriesDelta.html?rev=1.2.2.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/TimeSeriesDelta.html (1.2.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/TimeSeriesTranslate.html?rev=1.3.2.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/TimeSeriesTranslate.html (1.3.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/Randomize.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/Randomize.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemoveFolds.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemoveFolds.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemovePercentage.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemovePercentage.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/RemoveRange.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/RemoveRange.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/instance/Resample.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/instance/Resample.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-10-24 00:49 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed misleading text in JFileChooser, uses now "Classifier options" instead of "Experiment configuration files"</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/AlgorithmListPanel.html?rev=1.7.2.7&content-type=text/x-cvsweb-markup">gui/experiment/AlgorithmListPanel.html (1.7.2.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-10-16 01:41 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>reverted members DRIVERS and PROPERTIES to be non-static again (problem with RMI and remote experiments)</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.html?r1=1.18.2.7&r2=1.18.2.6">experiment/DatabaseUtils.html (1.18.2.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-10-13 00:33 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>no longer loses user-provided URL/User/Password/Key columns in KnowledgeFlow (due to calling the reset() method) by defaulting back to values from DatabaseUtils.props</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/DatabaseLoader.html?rev=1.1.2.3&content-type=text/x-cvsweb-markup">core/converters/DatabaseLoader.html (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-09-10 23:03 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>by default, Linux installs no system theme anymore, to avoid crashes with Java 1.5 under Gnome</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/LookAndFeel.html?rev=1.1.2.3&content-type=text/x-cvsweb-markup">gui/LookAndFeel.html (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-09-04 00:36 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>re-evaluating the model doesn't use (incorrect) priors anymore</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/ClassifierPanel.html?rev=1.79.2.6&content-type=text/x-cvsweb-markup">gui/explorer/ClassifierPanel.html (1.79.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-09-04 00:35 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>backported the m_NoPriors flag from the developer branch (de-serialized models have no access to the priors from the training set, hence the output of measures relying on those is suppressed, the corresponding methods return NaN)
+updated Javadoc</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/Evaluation.html?rev=1.53.2.5&content-type=text/x-cvsweb-markup">classifiers/Evaluation.html (1.53.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-24 23:39 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>types can now either contain blanks (must be escaped with backslashes in DatabaseUtils.props file!) or underscores instead of blanks, e.g.,
+DOUBLE\ PRECISION=2
+or
+DOUBLE_PRECISION=2</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.html?r1=1.18.2.6&r2=1.18.2.5">experiment/DatabaseUtils.html (1.18.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-24 21:20 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>now includes the example DatabaseUtils.props files in the jars</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.9&r2=1.19.2.8">build.xml (1.19.2.9)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-24 21:04 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>setInstances now prints the stacktrace to the console as well as a more informative error message in the popup dialog</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/PreprocessPanel.html?rev=1.50.2.6&content-type=text/x-cvsweb-markup">gui/explorer/PreprocessPanel.html (1.50.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-24 21:04 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>now derived from weka.experiment.DatabaseUtils to avoid duplicate code</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/DatabaseConnection.html?rev=1.1.2.2&content-type=text/x-cvsweb-markup">core/converters/DatabaseConnection.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-24 21:03 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>upgraded DatabaseUtils to the latest developer version</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.html?rev=1.18.2.5&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.html (1.18.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-24 20:51 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>example DatabaseUtils.props files</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.oracle?r1=1.2.2.2&r2=1.2.2.1">experiment/DatabaseUtils.props.oracle (1.2.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.postgresql?r1=1.2.2.2&r2=1.2.2.1">experiment/DatabaseUtils.props.postgresql (1.2.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-24 20:51 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>example DatabaseUtils.props files</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.hsql?rev=1.1.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.hsql (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.mssqlserver?r1=1.2.2.2&r2=1.2.2.1">experiment/DatabaseUtils.props.mssqlserver (1.2.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.mysql?r1=1.2.2.2&r2=1.2.2.1">experiment/DatabaseUtils.props.mysql (1.2.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.odbc?r1=1.3.2.2&r2=1.3.2.1">experiment/DatabaseUtils.props.odbc (1.3.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-23 22:31 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed typo in fillCorrelation, which filled only the upper triangle of the matrix (thanks to Paul Examsaro)</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/PrincipalComponents.html?rev=1.25.2.4&content-type=text/x-cvsweb-markup">attributeSelection/PrincipalComponents.html (1.25.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-07-04 21:57 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in globalInfo</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/SymmetricalUncertAttributeEval.html?rev=1.15.2.1&content-type=text/x-cvsweb-markup">attributeSelection/SymmetricalUncertAttributeEval.html (1.15.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-30 05:33 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>file DatabaseUtils.props.postgresql was added on branch book2ndEd-branch on 2006-07-24 20:51:32 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.postgresql?rev=1.2.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.postgresql (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-30 05:33 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>file DatabaseUtils.props.odbc was added on branch book2ndEd-branch on 2006-07-24 20:51:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.odbc?rev=1.3.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.odbc (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-30 05:33 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>file DatabaseUtils.props.oracle was added on branch book2ndEd-branch on 2006-07-24 20:51:32 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.oracle?rev=1.2.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.oracle (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-30 05:33 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>file DatabaseUtils.props.mysql was added on branch book2ndEd-branch on 2006-07-24 20:51:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.mysql?rev=1.2.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.mysql (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-30 05:33 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>file DatabaseUtils.props.mssqlserver was added on branch book2ndEd-branch on 2006-07-24 20:51:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.mssqlserver?rev=1.2.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.mssqlserver (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-22 02:52 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>due to problems in the past with XML (according to Eibe), switched from 1.3 to 1.4 for compiling (source/target)</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.8&r2=1.19.2.7">build.xml (1.19.2.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-21 22:03 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>input files and output files of javac are now fixed to JDK 1.3 (even if it's compiled with 1.5)</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?rev=1.19.2.7&content-type=text/x-cvsweb-markup">build.xml (1.19.2.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-20 22:57 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now uses less memory. A copy of the edited object is now returned (rather than the object itself) when getValue() is called. Previously, for example, fully built classifiers were copied to a backup variable when the OK button was pressed. This can quickly gobble up lots of memory when large data sets are being used.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericObjectEditor.html?rev=1.38.2.8&content-type=text/x-cvsweb-markup">gui/GenericObjectEditor.html (1.38.2.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-09 04:43 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>updated version number</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/version.txt?rev=1.1.2.3&content-type=text/x-cvsweb-markup">core/version.txt (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-09 03:53 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed some Javadoc
+added exception to buildClassifier if missing values are encountered</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayesMultinomial.html?rev=1.9.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayesMultinomial.html (1.9.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-09 03:52 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added exception to buildClassifier if there are 0 instances in the dataset</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/ComplementNaiveBayes.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/ComplementNaiveBayes.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-09 03:51 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added post-processing support for generated data (class PostProcessor and process-method)
+if a classifier performs worse than ZeroR it's no longer considered "failed"</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/CheckClassifier.html?rev=1.16.2.2&content-type=text/x-cvsweb-markup">classifiers/CheckClassifier.html (1.16.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-06-07 22:48 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>cleaned up imports
+removed custom splitOptions method with the one from the Utils class</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/SimpleCLI.html?rev=1.6.2.2&content-type=text/x-cvsweb-markup">gui/SimpleCLI.html (1.6.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>
