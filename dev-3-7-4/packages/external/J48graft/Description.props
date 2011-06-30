@@ -1,0 +1,41 @@
+# Description file for J48graft
+#
+# 
+
+# Package name (required)
+PackageName=J48graft
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Class for generating a grafted (pruned or unpruned) C4.5 decision tree
+
+Category=Classification
+
+# Author (required)
+Author=Janice Boughton <jrbought@csse.monash.edu.au>
+
+# Maintainer (required)
+Maintainer=Janice Boughton <jrbought@csse.monash.edu.au>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Class for generating a grafted (pruned or unpruned) C4.5 decision tree. For more information, see Geoff Webb: Decision Tree Grafting From the All-Tests-But-One Partition.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/J48graft1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/J48graft
+
+# Related to other packages?
+#Related=J48
+
+# Dependencies
+Depends=weka (>=3.7.1)
