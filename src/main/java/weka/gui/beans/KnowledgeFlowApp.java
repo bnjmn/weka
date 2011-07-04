@@ -2298,28 +2298,27 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   private boolean m_firstUserComponentOpp = true;
 
-  private JButton m_pointerB;
-  private JButton m_saveB;
-  private JButton m_saveBB;
-  private JButton m_loadB;
-  private JButton m_stopB;
-  private JButton m_playB;
-  private JButton m_playBB;
-  private JButton m_helpB;
-  private JButton m_newB;
-  private JButton m_togglePerspectivesB;
-  private JButton m_templatesB;
+  protected JButton m_pointerB;
+  protected JButton m_saveB;
+  protected JButton m_saveBB;
+  protected JButton m_loadB;
+  protected JButton m_stopB;
+  protected JButton m_playB;
+  protected JButton m_playBB;
+  protected JButton m_helpB;
+  protected JButton m_newB;
+  protected JButton m_togglePerspectivesB;
+  protected JButton m_templatesB;
 
-  private JButton m_cutB;
-  private JButton m_copyB;
-  private JButton m_pasteB;
-  private JButton m_deleteB;
-  private JButton m_noteB;
-  private JButton m_selectAllB;
-  private JButton m_undoB;
+  protected JButton m_cutB;
+  protected JButton m_copyB;
+  protected JButton m_pasteB;
+  protected JButton m_deleteB;
+  protected JButton m_noteB;
+  protected JButton m_selectAllB;
+  protected JButton m_undoB;
 
-  private JToggleButton m_snapToGridB;
-  // private JButton m_deleteB;
+  protected JToggleButton m_snapToGridB;
 
   /**
    * Reference to bean being manipulated
@@ -2679,6 +2678,15 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     loadUserComponents();
     clearLayout(); // add an initial "Untitled" tab
+  }
+  
+  /**
+   * Gets the main knowledge flow perspective
+   * 
+   * @return the main knowledge flow perspective
+   */
+  public MainKFPerspective getMainPerspective() {
+    return m_mainKFPerspective;
   }
 
   private void popupPerspectiveConfigurer() {
@@ -4300,8 +4308,39 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
     }*/
   }
+  
+  /**
+   * Set the contents of the "paste" buffer and enable the paste
+   * from cliboard toolbar button
+   * 
+   * @param b the buffer to use
+   */
+  public void setPasteBuffer(StringBuffer b) {
+    m_pasteBuffer = b;
+    
+    if (m_pasteBuffer != null && m_pasteBuffer.length() > 0) {
+      m_pasteB.setEnabled(true);
+    }
+  }
+  
+  /**
+   * Get the contents of the paste buffer
+   * 
+   * @return the contents of the paste buffer
+   */
+  public StringBuffer getPasteBuffer() {
+    return m_pasteBuffer;
+  }
 
-  protected StringBuffer copyToBuffer(Vector selectedBeans) 
+  /**
+   * Utility routine that serializes the supplied Vector of BeanInstances
+   * to XML
+   * 
+   * @param selectedBeans the vector of BeanInstances to serialize
+   * @return a StringBuffer containing the serialized vector
+   * @throws Exception if a problem occurs
+   */
+  public StringBuffer copyToBuffer(Vector selectedBeans) 
     throws Exception {
 
     Vector associatedConnections = 
