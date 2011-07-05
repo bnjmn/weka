@@ -734,6 +734,7 @@
       <include name="src/**/*.arff"/>
       <include name="src/**/*.matrix"/>
       <include name="lib/**/*.jar"/>
+      <include name="resources/**/*"/>
     </jar>
   </target>
 
