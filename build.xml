@@ -717,6 +717,7 @@
       <include name="*.xml"/>
       <include name="src/**/*.excludes"/>
       <include name="src/**/*.gif"/>
+      <include name="src/**/*.png"/>
       <include name="src/**/*.java"/>
       <include name="src/**/*.jpeg"/>
       <include name="src/**/*.jpg"/>
