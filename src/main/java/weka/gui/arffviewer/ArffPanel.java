@@ -642,6 +642,7 @@ public class ArffPanel
     addUndoPoint();
     model.setUndoEnabled(false);
     String valueCopy = value;
+    String valueNewCopy = valueNew;
     // set value
     for (i = 0; i < m_TableArff.getRowCount(); i++) {
       if (o == menuItemSetAllValues) {
@@ -654,9 +655,13 @@ public class ArffPanel
         if ( (o == menuItemSetMissingValues) 
             && model.isMissingAt(i, m_CurrentCol) )
           model.setValueAt(value, i, m_CurrentCol);
-        else if ( (o == menuItemReplaceValues) 
-            && model.getValueAt(i, m_CurrentCol).toString().equals(value) )
+        else if ( (o == menuItemReplaceValues)  
+            && model.getValueAt(i, m_CurrentCol).toString().equals(value) ) {
+          if (valueNewCopy.equals("NaN") || valueNewCopy.equals("?")) {
+            valueNew = null;
+          }
           model.setValueAt(valueNew, i, m_CurrentCol);
+        }
     }
     model.setUndoEnabled(true);
     model.setNotificationEnabled(true);
