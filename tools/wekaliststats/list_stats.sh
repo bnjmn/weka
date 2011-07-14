@@ -86,9 +86,15 @@ echo "Year,Month,\"Size in KB\",Posts" > "$OUTPUT"
 for ym in $YEAR_MONTHS
 do
   echo -n "."
+
   YEAR=`echo $ym | sed s/"-.*"//g`
   MONTH=`echo $ym | sed s/".*-"//g`
-  SIZE=`cat "$INDEX" | grep "$ym" | grep "\[ Text" | sed s/".*\[ Text "//g | sed s/" KB.*"//g`
+
+  SIZE_FILE=$OUTPUT.tmp.size
+  SIZE_URL="$URL/$ym.txt"
+  $WGET --output-document=$SIZE_FILE $SIZE_URL 
+  SIZE=$(stat -c%s "$SIZE_FILE")
+  SIZE=$((SIZE / 1024))
 
   POSTS_INDEX=$OUTPUT.tmp.posts
   POSTS_URL="$URL/$ym/date.html"
