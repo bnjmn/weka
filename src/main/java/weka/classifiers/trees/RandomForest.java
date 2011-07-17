@@ -86,6 +86,10 @@ import java.util.Vector;
  *  The maximum depth of the trees, 0 for unlimited.
  *  (default 0)</pre>
  * 
+ * <pre> -num-slots &lt;num&gt;
+ *  Number of execution slots.
+ *  (default 1 - i.e. no parallelism)</pre>
+ * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
@@ -121,6 +125,9 @@ public class RandomForest
   
   /** The maximum depth of the trees (0 = unlimited) */
   protected int m_MaxDepth = 0;
+  
+  /** The number of threads to have executing at any one time */
+  protected int m_numExecutionSlots = 1;
 
   /**
    * Returns a string describing classifier
@@ -285,6 +292,36 @@ public class RandomForest
   }
   
   /**
+   * Set the number of execution slots (threads) to use for building the
+   * members of the ensemble.
+   *
+   * @param numSlots the number of slots to use.
+   */
+  public void setNumExecutionSlots(int numSlots) {
+    m_numExecutionSlots = numSlots;
+  }
+
+  /**
+   * Get the number of execution slots (threads) to use for building
+   * the members of the ensemble.
+   *
+   * @return the number of slots to use
+   */
+  public int getNumExecutionSlots() {
+    return m_numExecutionSlots;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numExecutionSlotsTipText() {
+    return "The number of execution slots (threads) to use for " +
+      "constructing the ensemble.";
+  }
+  
+  /**
    * Returns an enumeration of the additional measure names.
    *
    * @return an enumeration of the measure names
@@ -339,6 +376,11 @@ public class RandomForest
 	"\tThe maximum depth of the trees, 0 for unlimited.\n"
 	+ "\t(default 0)",
 	"depth", 1, "-depth <num>"));
+    
+    newVector.addElement(new Option(
+        "\tNumber of execution slots.\n"
+        + "\t(default 1 - i.e. no parallelism)",
+        "num-slots", 1, "-num-slots <num>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -374,6 +416,9 @@ public class RandomForest
       result.add("" + getMaxDepth());
     }
     
+    result.add("-num-slots");
+    result.add("" + getNumExecutionSlots());
+    
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
       result.add(options[i]);
@@ -400,6 +445,10 @@ public class RandomForest
    * <pre> -depth &lt;num&gt;
    *  The maximum depth of the trees, 0 for unlimited.
    *  (default 0)</pre>
+   * 
+   * <pre> -num-slots &lt;num&gt;
+   *  Number of execution slots.
+   *  (default 1 - i.e. no parallelism)</pre>
    * 
    * <pre> -D
    *  If set, classifier is run in debug mode and
@@ -439,6 +488,13 @@ public class RandomForest
       setMaxDepth(Integer.parseInt(tmpStr));
     } else {
       setMaxDepth(0);
+    }
+    
+    tmpStr = Utils.getOption("num-slots", options);
+    if (tmpStr.length() > 0) {
+      setNumExecutionSlots(Integer.parseInt(tmpStr));
+    } else {
+      setNumExecutionSlots(1);
     }
     
     super.setOptions(options);
@@ -484,6 +540,7 @@ public class RandomForest
     m_bagger.setSeed(m_randomSeed);
     m_bagger.setNumIterations(m_numTrees);
     m_bagger.setCalcOutOfBag(true);
+    m_bagger.setNumExecutionSlots(m_numExecutionSlots);
     m_bagger.buildClassifier(data);
   }
 
@@ -536,3 +593,4 @@ public class RandomForest
     runClassifier(new RandomForest(), argv);
   }
 }
+
