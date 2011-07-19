@@ -182,7 +182,7 @@ import java.util.Vector;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (code for adapting to MI data)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class MISMO 
   extends Classifier 
@@ -968,7 +968,7 @@ public class MISMO
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.6 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -1284,7 +1284,11 @@ public class MISMO
 
     // Filter instances 
     if (m_Missing!=null) 
-      insts = Filter.useFilter(insts, m_Missing); 
+      insts = Filter.useFilter(insts, m_Missing);
+    
+    if (m_NominalToBinary != null) { 
+      insts = Filter.useFilter(insts, m_NominalToBinary); 
+    }
 
     if (m_Filter!=null)
       insts = Filter.useFilter(insts, m_Filter);     
@@ -2115,7 +2119,7 @@ public class MISMO
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
