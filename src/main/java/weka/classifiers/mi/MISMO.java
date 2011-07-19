@@ -1288,6 +1288,10 @@ public class MISMO
     if (m_Missing!=null) 
       insts = Filter.useFilter(insts, m_Missing); 
 
+    if (m_NominalToBinary != null) { 
+      insts = Filter.useFilter(insts, m_NominalToBinary); 
+    }
+
     if (m_Filter!=null)
       insts = Filter.useFilter(insts, m_Filter);     
 
