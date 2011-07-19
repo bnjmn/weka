@@ -202,7 +202,7 @@ public class HotSpot
   /**
    * Hash key class for sets of attribute, value tests
    */
-  protected class HotSpotHashKey {
+  protected class HotSpotHashKey implements Serializable {
     // split values, one for each attribute (0 indicates att not used).
     // for nominal indexes, 1 is added so that 0 can indicate not used.
     protected double[] m_splitValues;
