@@ -690,40 +690,40 @@ public class WekaPackageManager {
    */
   public static Map<String, String> getPackageList(boolean local) {
     Map<String, String> result = new HashMap<String, String>();
-    
-    try {
-    useCacheOrOnlineRepository();
-    
-    if (!local) {
-      PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
-    }
-    
-    String packageListS = PACKAGE_MANAGER.getPackageRepositoryURL().toString()
-    + "/packageList.txt";
-    URLConnection conn = null;
-    URL connURL = new URL(packageListS);
 
-    if (PACKAGE_MANAGER.setProxyAuthentication()) {
-      conn = connURL.openConnection(PACKAGE_MANAGER.getProxy());
-    } else {
-      conn = connURL.openConnection();
-    }
-    
-    conn.setConnectTimeout(30000); // timeout after 30 seconds
-    
-    BufferedReader bi = 
-      new BufferedReader(new InputStreamReader(conn.getInputStream()));
-    String l = null;
-    while ((l = bi.readLine()) != null) {
-      result.put(l,l);
-    }
-    bi.close();
-    
+    try {
+      useCacheOrOnlineRepository();
+
+      if (!local) {
+        PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
+      }
+
+      String packageListS = PACKAGE_MANAGER.getPackageRepositoryURL().toString()
+        + "/packageList.txt";
+      URLConnection conn = null;
+      URL connURL = new URL(packageListS);
+
+      if (PACKAGE_MANAGER.setProxyAuthentication()) {
+        conn = connURL.openConnection(PACKAGE_MANAGER.getProxy());
+      } else {
+        conn = connURL.openConnection();
+      }
+
+      conn.setConnectTimeout(30000); // timeout after 30 seconds
+
+      BufferedReader bi = 
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
+      String l = null;
+      while ((l = bi.readLine()) != null) {
+        result.put(l,l);
+      }
+      bi.close();
+
     } catch (Exception ex) {
-      ex.printStackTrace();
+//      ex.printStackTrace();
       result = null;
     } 
-    
+
     return result;
   }
   
@@ -747,8 +747,15 @@ public class WekaPackageManager {
     Map<String, String> localPackageNameList = getPackageList(true);
     
     if (localPackageNameList == null) {
-      // quietly return and see if we can continue anyway
-      return null;
+
+      System.err.println("Local package list is missing, trying a " +
+      		"cache refresh to restore...");
+      refreshCache(progress);
+      localPackageNameList = getPackageList(true);
+      if (localPackageNameList == null) {
+        // quietly return and see if we can continue anyway
+        return null;
+      }
     }
     
     Map<String, String> repositoryPackageNameList = getPackageList(false);
