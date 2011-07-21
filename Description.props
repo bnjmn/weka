@@ -1,0 +1,41 @@
+# Description file for prefuseTree
+#
+# 
+
+# Package name (required)
+PackageName=prefuseGraphViewer
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2011-07-22
+
+# Title (required)
+Title=A Knowledge Flow visualization component for displaying trees and graphs that uses the prefuse visualization toolkit.
+
+Category=KnowledgeFlow
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=A Knowledge Flow visualization component for displaying tree and graph structures from those schemes that can output them. This component is an alternative to the Knowledge Flow's built-in GraphViewer and uses the PrefuseTree and PrefuseGraph packages which, in turn, use the prefuse visualization library.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/prefuseGraphViewer1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.wikispaces.com/Explorer+tree+visualization+plugins
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.4), prefuseTree (>=1.0.1), prefuseGraph (>=1.0.1)
