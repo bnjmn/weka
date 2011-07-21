@@ -542,4 +542,34 @@ public class PrefuseGraph
     frame.setContentPane(panel);
     frame.setVisible(true);
   }
+
+  /**
+   * Get a panel for displaying the graph
+   * 
+   * @param bif		the graph in XML BIF format
+   * @return a javax.swing.JComponent for displaying the graph
+   */
+  public javax.swing.JComponent  getDisplay(String bif) 
+    throws Exception {
+    String	graphml;
+    Graph	graph;
+    JPanel	panel;
+    JFrame	frame;
+
+    // convert bif graph
+    graphml = convert(bif);
+    if (graphml == null) {
+      throw new Exception("Unable to convert bif");
+    }
+    
+    // parse graph
+    graph = parse(graphml);
+    if (graph == null) {
+      throw new Exception("Problem parsing graph");
+    }
+    
+    // display graph
+    panel = new GraphPanel(graph);
+    return panel;
+  }
 }
