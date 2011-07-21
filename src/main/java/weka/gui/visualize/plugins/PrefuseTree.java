@@ -672,4 +672,35 @@ public class PrefuseTree
     frame.setContentPane(panel);
     frame.setVisible(true);
   }
+
+  /**
+   * Gets a container for displaying the graph.
+   * 
+   * @param dotty	the graph in dotty format
+   * @return a java.awt.Container that can be shown in a JFrame
+   * for example.
+   */
+  public javax.swing.JComponent getDisplay(String dotty) 
+    throws Exception {
+    String	treeml;
+    Tree	tree;
+    TreePanel	panel;
+
+    // convert dotty graph
+    treeml = convert(dotty);
+    if (treeml == null) {
+      throw new Exception("Problem parsing dotty.");
+    }
+    
+    // parse graph
+    tree = parse(treeml);
+    if (tree == null) {
+      throw new Exception("Problem constructing visualization");
+    }
+    
+    // display graph
+    panel = new TreePanel(tree);
+
+    return panel;
+  }
 }
