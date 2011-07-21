@@ -808,11 +808,12 @@ public class BoundaryVisualizer
     if (xName == null) {
       return;
     }
-    xName = Utils.removeSubstring(xName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_First"));
-    xName = Utils.removeSubstring(xName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_Second"));
+    xName = Utils.removeSubstring(xName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_First") + " ");
+    xName = Utils.removeSubstring(xName, " " + Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_Second"));
+
     String yName = (String)m_yAttBox.getSelectedItem();
-    yName = Utils.removeSubstring(yName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_First"));
-    yName = Utils.removeSubstring(yName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XName_Substring_Text_Second"));
+    yName = Utils.removeSubstring(yName, Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_YName_Substring_Text_First") + " ");
+    yName = Utils.removeSubstring(yName, " " + Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_YName_Substring_Text_Second"));
 
     m_xIndex = -1;
     m_yIndex = -1;
@@ -897,7 +898,7 @@ public class BoundaryVisualizer
 	default:
 	  type = Messages.getInstance().getString("BoundaryVisualizer_SetInstances_AttributeDEFAULT_Text");
       }
-      classAttNames[i] += type;
+      classAttNames[i] += " " + type;
       if (m_trainingInstances.attribute(i).isNumeric()) {
 	xAttNames.addElement(Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_XAttNames_Text") + classAttNames[i]);
 	yAttNames.addElement(Messages.getInstance().getString("BoundaryVisualizer_ComputeBounds_YAttNames_Text") + classAttNames[i]);
