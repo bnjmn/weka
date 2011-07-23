@@ -379,32 +379,32 @@ public class TreeVisualizer
     m_autoScale.addActionListener(this);
     m_accept.addActionListener(this);
         
-    m_size24 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size24_Text_First"),false);//,select_font_group);
-    m_size22 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size22_Text_First"),false);//,select_font_group);
-    m_size20 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size20_Text_First"),false);//,select_font_group);
-    m_size18 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size18_Text_First"),false);//,select_font_group);
-    m_size16 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size16_Text_First"),false);//,select_font_group);
-    m_size14 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size14_Text_First"),false);//,select_font_group);
-    m_size12 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size12_Text_First"),true);//,select_font_group);
-    m_size10 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size10_Text_First"),false);//,select_font_group);
-    m_size8 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size8_Text_First"),false);//,select_font_group);
-    m_size6 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size6_Text_First"),false);//,select_font_group);
-    m_size4 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size4_Text_First"),false);//,select_font_group);
-    m_size2 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size2_Text_First"),false);//,select_font_group);
+    m_size24 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_Size24_Text_First"),false);//,select_font_group);
+    m_size22 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size22_JRadioButtonMenuItem_Size22_Text_First"),false);//,select_font_group);
+    m_size20 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size20_JRadioButtonMenuItem_Size20_Text_First"),false);//,select_font_group);
+    m_size18 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size18_JRadioButtonMenuItem_Size18_Text_First"),false);//,select_font_group);
+    m_size16 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size16_JRadioButtonMenuItem_Size16_Text_First"),false);//,select_font_group);
+    m_size14 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size14_JRadioButtonMenuItem_Size14_Text_First"),false);//,select_font_group);
+    m_size12 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size12_JRadioButtonMenuItem_Size12_Text_First"),true);//,select_font_group);
+    m_size10 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size10_JRadioButtonMenuItem_Size10_Text_First"),false);//,select_font_group);
+    m_size8 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size8_JRadioButtonMenuItem_Size8_Text_First"),false);//,select_font_group);
+    m_size6 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size6_JRadioButtonMenuItem_Size6_Text_First"),false);//,select_font_group);
+    m_size4 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size4_JRadioButtonMenuItem_Size4_Text_First"),false);//,select_font_group);
+    m_size2 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size2_JRadioButtonMenuItem_Size2_Text_First"),false);//,select_font_group);
     m_size1 = new JRadioButtonMenuItem(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_Size1_Text_First"),false);//,select_font_group);
 
-    m_size24.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size24_Text_First"));//,select_font_group);
-    m_size22.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size22_Text_First"));//,select_font_group);
-    m_size20.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size20_Text_First"));//,select_font_group);
-    m_size18.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size18_Text_First"));//,select_font_group);
-    m_size16.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size16_Text_First"));//,select_font_group);
-    m_size14.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size14_Text_First"));//,select_font_group);
-    m_size12.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size12_Text_First"));//,select_font_group);
-    m_size10.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size10_Text_First"));//,select_font_group);
-    m_size8.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size8_Text_First"));//,select_font_group);
-    m_size6.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size6_Text_First"));//,select_font_group);
-    m_size4.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size4_Text_First"));//,select_font_group);
-    m_size2.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size2_Text_First"));//,select_font_group);
+    m_size24.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size24_JRadioButtonMenuItem_SetActionCommand_Size24_Text_First"));//,select_font_group);
+    m_size22.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size22_JRadioButtonMenuItem_SetActionCommand_Size22_Text_First"));//,select_font_group);
+    m_size20.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size20_JRadioButtonMenuItem_SetActionCommand_Size20_Text_First"));//,select_font_group);
+    m_size18.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size18_JRadioButtonMenuItem_SetActionCommand_Size18_Text_First"));//,select_font_group);
+    m_size16.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size16_JRadioButtonMenuItem_SetActionCommand_Size16_Text_First"));//,select_font_group);
+    m_size14.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size14_JRadioButtonMenuItem_SetActionCommand_Size14_Text_First"));//,select_font_group);
+    m_size12.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size12_JRadioButtonMenuItem_SetActionCommand_Size12_Text_First"));//,select_font_group);
+    m_size10.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size10_JRadioButtonMenuItem_SetActionCommand_Size10_Text_First"));//,select_font_group);
+    m_size8.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size8_JRadioButtonMenuItem_SetActionCommand_Size8_Text_First"));//,select_font_group);
+    m_size6.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size6_JRadioButtonMenuItem_SetActionCommand_Size6_Text_First"));//,select_font_group);
+    m_size4.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size4_JRadioButtonMenuItem_SetActionCommand_Size4_Text_First"));//,select_font_group);
+    m_size2.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size2_JRadioButtonMenuItem_SetActionCommand_Size2_Text_First"));//,select_font_group);
     m_size1.setActionCommand(Messages.getInstance().getString("TreeVisualizer_Size1_JRadioButtonMenuItem_SetActionCommand_Size1_Text_First"));//,select_font_group);
     
     
@@ -887,7 +887,7 @@ public class TreeVisualizer
       animateScaling(np, m_viewSize, 10);
       
     }
-    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_ActionPerformed_AutoScale_Text"))) {
+    else if (e.getActionCommand().equals(Messages.getInstance().getString("TreeVisualizer_AutoScale_JMenuItem_SetActionCommand_Text_Second"))) {
       autoScale();  //this will figure the best scale value 
       //keep the focus on the middle of the screen and call animate
     }
