@@ -710,7 +710,7 @@ public class Classifier
             // Save the last classifier (might be used later on for
             // classifying further test sets.
             m_Classifier = classifierCopy;
-            m_trainingSet = m_train;
+            m_trainingSet = new Instances(m_train, 0);
           }
                               
           //if (m_batchClassifierListeners.size() > 0) {
