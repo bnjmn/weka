@@ -3959,6 +3959,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         public void run() {
           try {
             loader.reset();
+            m_logPanel.statusMessage("[KnowledgeFlow]|Sending data to perspective(s)...");
             Instances data = loader.getDataSet();
             if (data != null) {
               // make sure the perspective toolbar is visible!!
@@ -4007,6 +4008,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               m_perspectiveToolBar.getComponent(i).setEnabled(true);
             }
             m_perspectiveDataLoadThread = null;
+            m_logPanel.statusMessage("[KnowledgeFlow]|OK");
           }
         }
       };
