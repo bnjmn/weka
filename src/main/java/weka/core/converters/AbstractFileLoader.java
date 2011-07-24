@@ -51,7 +51,7 @@ public abstract class AbstractFileLoader
   protected String m_File = (new File(System.getProperty("user.dir"))).getAbsolutePath();
 
   /** Holds the determined structure (header) of the data set. */
-  protected Instances m_structure = null;
+  protected transient Instances m_structure = null;
 
   /** Holds the source of the data set. */
   protected File m_sourceFile = null;
