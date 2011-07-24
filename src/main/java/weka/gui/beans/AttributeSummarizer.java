@@ -74,6 +74,8 @@ public class AttributeSummarizer
   protected int m_coloringIndex = -1;
   
   protected boolean m_showClassCombo = false;
+  protected boolean m_runningAsPerspective = false;
+  protected boolean m_activePerspective = false;
   
   protected transient List<AttributeVisualizationPanel> m_plots;
 
@@ -187,6 +189,8 @@ public class AttributeSummarizer
 
   protected void setUpFinal() {
     removeAll();
+    
+    if (!m_runningAsPerspective || m_activePerspective) {
     final JScrollPane hp = makePanel();
     add(hp, BorderLayout.CENTER);
     
@@ -231,6 +235,7 @@ public class AttributeSummarizer
           }
         }
       });
+    }
     }
   }
 
@@ -385,7 +390,9 @@ public class AttributeSummarizer
    * @param active true if this perspective is the active one
    */
   public void setActive(boolean active) {
-    
+    m_activePerspective = active;
+    m_plots = null;
+    setUpFinal();
   }
   
   /**
@@ -409,6 +416,7 @@ public class AttributeSummarizer
    */
   public void setMainKFPerspective(KnowledgeFlowApp.MainKFPerspective main) {
     m_showClassCombo = true;
+    m_runningAsPerspective = true;
   }
 
   /**
