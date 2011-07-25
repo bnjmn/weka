@@ -2384,29 +2384,29 @@ public class VisualizePanel
     String [] YNames = new String [inst.numAttributes()];
     String [] CNames = new String [inst.numAttributes()];
     for (int i = 0; i < XNames.length; i++) {
-      String type = "";
+      String type = " ";
       switch (inst.attribute(i).type()) {
       case Attribute.NOMINAL:
-	type = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeNOMINAL_Text");
+	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeNOMINAL_Text");
 	break;
       case Attribute.NUMERIC:
-	type = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeNUMERIC_Text");
+	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeNUMERIC_Text");
 	break;
       case Attribute.STRING:
-	type = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeSTRING_Text");
+	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeSTRING_Text");
 	break;
       case Attribute.DATE:
-	type = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeDATE_Text");
+	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeDATE_Text");
 	break;
       case Attribute.RELATIONAL:
-	type = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeRELATIONAL_Text");
+	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeRELATIONAL_Text");
 	break;
       default:
-	type = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeDEFAULT_Text");
+	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeDEFAULT_Text");
       }
-      XNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_XNames_Text") + inst.attribute(i).name()+type;
-      YNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_YNames_Text") + inst.attribute(i).name()+type;
-      CNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_CNames_Text") + inst.attribute(i).name()+type;
+      XNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_XNames_Text") + " " + inst.attribute(i).name()+type;
+      YNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_YNames_Text") + " " + inst.attribute(i).name()+type;
+      CNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_CNames_Text") + " " + inst.attribute(i).name()+type;
       if (m_preferredXDimension != null) {
 	if (m_preferredXDimension.compareTo(inst.attribute(i).name()) == 0) {
 	  prefX = i;
