@@ -190,6 +190,10 @@ public class AttributeSummarizer
   protected void setUpFinal() {
     removeAll();
     
+    if  (m_visualizeDataSet == null) {
+      return;
+    }
+    
     if (!m_runningAsPerspective || m_activePerspective) {
     final JScrollPane hp = makePanel();
     add(hp, BorderLayout.CENTER);
