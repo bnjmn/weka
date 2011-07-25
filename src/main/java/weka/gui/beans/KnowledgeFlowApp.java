@@ -3225,6 +3225,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     public void run() {
       m_flowIndex = m_mainKFPerspective.getCurrentTabIndex();
       m_mainKFPerspective.setExecuting(true);
+      m_mainKFPerspective.getLogPanel(m_flowIndex).clearStatus();
+      m_mainKFPerspective.getLogPanel(m_flowIndex).
+        statusMessage("[KnowledgeFlow]|Executing...");
 
       FlowRunner runner = new FlowRunner(false, false);
       runner.setStartSequentially(m_sequential);
@@ -3248,6 +3251,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           // TODO global Stop message to the status area
           KFLogPanel lp = m_mainKFPerspective.getLogPanel(m_flowIndex);
           lp.setMessageOnAll(false, "Stopped.");
+        } else {
+          m_mainKFPerspective.getLogPanel(m_flowIndex).
+            statusMessage("[KnowledgeFlow]|OK.");
         }
       }
     }
