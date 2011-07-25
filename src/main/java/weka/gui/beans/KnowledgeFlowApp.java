@@ -2974,7 +2974,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 if (custClass != null) {
                   if (bc instanceof BeanCommon) {
                     if (!((BeanCommon)bc).
-                        isBusy()) {
+                        isBusy() && !m_mainKFPerspective.getExecuting()) {
                       popupCustomizer(custClass, bc);
                     }
                   } else {
@@ -2986,9 +2986,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               }
             } else if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
                 != InputEvent.BUTTON1_MASK) || me.isAltDown()) {
-              if (!m_mainKFPerspective.getExecuting()) {
+              //if (!m_mainKFPerspective.getExecuting()) {
                 doPopup(me.getPoint(), bi, me.getX(), me.getY());
-              }
+              //}
               return;
             } else {
               // just select this bean
@@ -3563,6 +3563,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     //    beanContextMenu.insert(new JLabel("Edit", 
     //				      SwingConstants.CENTER), 
     //			   menuItemCount);
+    boolean executing = m_mainKFPerspective.getExecuting();
+    
     MenuItem edit = new MenuItem("Edit:");
     edit.setEnabled(false);
     beanContextMenu.insert(edit, menuItemCount);
@@ -3577,6 +3579,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
       });
       beanContextMenu.add(copyItem);
+      copyItem.setEnabled(!executing);
       menuItemCount++;
     }
 
@@ -3609,6 +3612,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           notifyIsDirty();            
         }
       });
+      ungroupItem.setEnabled(!executing);
+      
       beanContextMenu.add(ungroupItem);
       menuItemCount++;
 
@@ -3623,6 +3628,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           notifyIsDirty();
         }
       });
+      addToUserTabItem.setEnabled(!executing);
       beanContextMenu.add(addToUserTabItem);
       menuItemCount++;
     }
@@ -3651,11 +3657,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);
       }
     });
+    
+    deleteItem.setEnabled(!executing);
     if (bc instanceof BeanCommon) {
       if (((BeanCommon)bc).isBusy()) {
         deleteItem.setEnabled(false);
       }
     }
+
     beanContextMenu.add(deleteItem);
     menuItemCount++;
 
@@ -3678,6 +3687,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           nameItem.setEnabled(false);
         }
       }
+      nameItem.setEnabled(!executing);
       beanContextMenu.add(nameItem);
       menuItemCount++;
     }
@@ -3717,14 +3727,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             //	  popupCustomizer(custClass, bc);
             //JMenuItem custItem = null;
             MenuItem custItem = null;
-            boolean customizationEnabled = true;
+            boolean customizationEnabled = !executing;
 
             if (!(bc instanceof MetaBean)) {
               //custItem = new JMenuItem("Configure...");
               custItem = new MenuItem("Configure...");
               if (bc instanceof BeanCommon) {
-                customizationEnabled = 
-                  !((BeanCommon)bc).isBusy();
+                customizationEnabled = (!executing &&
+                  !((BeanCommon)bc).isBusy());
               }
             } else {
               String custName = custClass.getName();
@@ -3745,8 +3755,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               //custItem = new JMenuItem("Configure: "+ custName);
               custItem = new MenuItem("Configure: " + custName);
               if (tbi.getBean() instanceof BeanCommon) {
-                customizationEnabled = 
-                  !((BeanCommon)tbi.getBean()).isBusy();
+                customizationEnabled = (!executing &&
+                  !((BeanCommon)tbi.getBean()).isBusy());
               }
             }
 
@@ -3836,6 +3846,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
             // Check EventConstraints (if any) here
             boolean ok = true;
+            evntItem.setEnabled(!executing);
 
             if (bc instanceof EventConstraints) {
               ok = ((EventConstraints) bc).eventGeneratable(esd.getName());
