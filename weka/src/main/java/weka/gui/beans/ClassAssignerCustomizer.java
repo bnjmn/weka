@@ -57,22 +57,22 @@ public class ClassAssignerCustomizer
 
   private boolean m_displayColNames = false;
 
-  private ClassAssigner m_classAssigner;
+  private transient ClassAssigner m_classAssigner;
 
-  private PropertyChangeSupport m_pcSupport = 
+  private transient PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);
 
-  private PropertySheetPanel m_caEditor = 
+  private transient PropertySheetPanel m_caEditor = 
     new PropertySheetPanel();
 
-  private JComboBox m_ClassCombo = new JComboBox();
-  private JPanel m_holderP = new JPanel();
+  private transient JComboBox m_ClassCombo = new JComboBox();
+  private transient JPanel m_holderP = new JPanel();
   
-  private ModifyListener m_modifyListener;
+  private transient ModifyListener m_modifyListener;
   
-  private Window m_parent;
+  private transient Window m_parent;
   
-  private String m_backup;
+  private transient String m_backup;
 
   public ClassAssignerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
@@ -164,13 +164,14 @@ public class ClassAssignerCustomizer
    */
   public void setObject(Object object) {
     if (m_classAssigner != (ClassAssigner)object) {
+      m_classAssigner = (ClassAssigner)object;
       // remove ourselves as a listener from the old ClassAssigner (if necessary)
-      if (m_classAssigner != null) {
+/*      if (m_classAssigner != null) {
 	m_classAssigner.removeDataFormatListener(this);
       }
-      m_classAssigner = (ClassAssigner)object;
+
       // add ourselves as a data format listener
-      m_classAssigner.addDataFormatListener(this);
+      m_classAssigner.addDataFormatListener(this); */
       m_caEditor.setTarget(m_classAssigner);
       if (m_classAssigner.getConnectedFormat() != null) {
 	setUpColumnSelection(m_classAssigner.getConnectedFormat());
