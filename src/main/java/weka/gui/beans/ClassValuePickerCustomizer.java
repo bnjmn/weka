@@ -169,15 +169,15 @@ public class ClassValuePickerCustomizer
   public void setObject(Object object) {
     if (m_classValuePicker != (ClassValuePicker)object) {
       // remove ourselves as a listener from the old ClassvaluePicker (if necessary)
-      if (m_classValuePicker != null) {
+/*      if (m_classValuePicker != null) {
 	m_classValuePicker.removeDataFormatListener(this);
-      }
+      } */
       m_classValuePicker = (ClassValuePicker)object;
       // add ourselves as a data format listener
-      m_classValuePicker.addDataFormatListener(this);
+//      m_classValuePicker.addDataFormatListener(this);
       if (m_classValuePicker.getConnectedFormat() != null) {
 	setUpValueSelection(m_classValuePicker.getConnectedFormat());	
-      }
+      } 
       m_backup = m_classValuePicker.getClassValueIndex();
     }
   }
