@@ -5185,7 +5185,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     if (!isUndo) {
       File absolute = new File(oFile.getAbsolutePath());
-      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", absolute.getParent());
+      //m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", absolute.getParent());
+      m_mainKFPerspective.getEnvironmentSettings().addVariable("Internal.knowledgeflow.directory", absolute.getParent());
     }
 
     try {
@@ -5542,8 +5543,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
 
       if (!isUndoPoint) {
-        Environment e = m_mainKFPerspective.getEnvironmentSettings();
-        e.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
+        Environment e = m_mainKFPerspective.getEnvironmentSettings(tabIndex);
+
+        e.addVariable("Internal.knowledgeflow.directory", 
+            new File(sFile.getAbsolutePath()).getParent());
         m_mainKFPerspective.setEditedStatus(tabIndex, false);
         String tabTitle = sFile.getName();
         tabTitle = tabTitle.substring(0, tabTitle.lastIndexOf('.'));
