@@ -507,6 +507,9 @@ public class Classifier
    * @param e an <code>InstanceEvent</code> value
    */
   public void acceptInstance(InstanceEvent e) {
+    if (m_log == null) {
+      System.err.println("Log is null");
+    }
     m_incrementalEvent = e;
     handleIncrementalEvent();
   }
@@ -611,7 +614,7 @@ public class Classifier
 	    m_Classifier = weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
 	    if (m_Classifier instanceof EnvironmentHandler && m_env != null) {
 	      ((EnvironmentHandler)m_Classifier).setEnvironment(m_env);
-	    }
+	    }	    
 	    m_Classifier.buildClassifier(m_trainingSet);
 	  }
 	}
@@ -625,6 +628,11 @@ public class Classifier
               + ex.getMessage());
         }
 	ex.printStackTrace();
+      }
+      
+      String msg = statusMessagePrefix() + "Training incrementally...";
+      if (m_log != null) {
+        m_log.statusMessage(msg);
       }
       // Notify incremental classifier listeners of new batch
       System.err.println("NOTIFYING NEW BATCH");
@@ -692,8 +700,12 @@ public class Classifier
 	  TextEvent nt = new TextEvent(this,
 				       modelString,
 				       titleString);
-	  notifyTextListeners(nt);
+	  notifyTextListeners(nt);	  	  
 	}
+        String msg = statusMessagePrefix() + "Finished.";
+        if (m_log != null) {
+          m_log.statusMessage(msg);
+        }
       }
     } catch (Exception ex) {
       stop();
