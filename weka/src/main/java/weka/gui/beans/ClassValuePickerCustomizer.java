@@ -39,6 +39,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 /**
  * @author Mark Hall
@@ -47,7 +49,7 @@ import javax.swing.JPanel;
 public class ClassValuePickerCustomizer
   extends JPanel
   implements BeanCustomizer, CustomizerClosingListener, 
-  CustomizerCloseRequester, DataFormatListener {
+  CustomizerCloseRequester /*, DataFormatListener*/ {
 
   /** for serialization */
   private static final long serialVersionUID = 8213423053861600469L;
@@ -68,7 +70,11 @@ public class ClassValuePickerCustomizer
   private boolean m_modified = false;
   
   private Window m_parent;
-  private int m_backup;
+  private String m_backup;
+  
+  private boolean m_textBoxEntryMode = false;
+  
+  private JTextField m_valueTextBox;
 
   public ClassValuePickerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
@@ -82,7 +88,8 @@ public class ClassValuePickerCustomizer
     m_ClassValueCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  if (m_classValuePicker != null) {
-	    m_classValuePicker.setClassValueIndex(m_ClassValueCombo.getSelectedIndex());
+	    m_classValuePicker.
+	      setClassValue(m_ClassValueCombo.getSelectedItem().toString());
 	    m_modified = true;
 	  }
 	}
@@ -107,6 +114,10 @@ public class ClassValuePickerCustomizer
           m_modifyListener.setModifiedStatus(ClassValuePickerCustomizer.this, m_modified);
         }
         
+        if (m_textBoxEntryMode) {
+          // m_classValuePicker.setClassValue(m_valueTextBox.getText().trim());
+        }
+        
         if (m_parent != null) {
           m_parent.dispose();
         }
@@ -115,7 +126,7 @@ public class ClassValuePickerCustomizer
     
     cancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_classValuePicker.setClassValueIndex(m_backup);
+        m_classValuePicker.setClassValue(m_backup);
         
         customizerClosing();
         if (m_parent != null) {
@@ -124,35 +135,66 @@ public class ClassValuePickerCustomizer
       }
     });
   }
+  
+  private void setupTextBoxSelection() {
+    m_textBoxEntryMode = true;
+    
+    JPanel holderPanel = new JPanel();
+    holderPanel.setLayout(new BorderLayout());
+    holderPanel.setBorder(BorderFactory.createTitledBorder("Specify class label"));
+    JLabel label = new JLabel("Class label ", SwingConstants.RIGHT);
+    holderPanel.add(label, BorderLayout.WEST);
+    m_valueTextBox = new JTextField(15);
 
-  private void setUpNoCustPossible() {
-    if (m_displayValNames == true) {
-      remove(m_holderP);
-      add(m_messageLabel, BorderLayout.CENTER);
-      m_displayValNames = false;
-    }
-    validate(); repaint();
+    holderPanel.add(m_valueTextBox, BorderLayout.CENTER);
+    JPanel holder2 = new JPanel();
+    holder2.setLayout(new BorderLayout());
+    holder2.add(holderPanel, BorderLayout.NORTH);
+    add(holder2, BorderLayout.CENTER);
   }
 
   private void setUpValueSelection(Instances format) {
     if (format.classIndex() < 0 || format.classAttribute().isNumeric()) {
       // cant do anything in this case
+      m_messageLabel.setText((format.classIndex() < 0) ?
+          "EROR: no class attribute set" : "ERROR: class is numeric");
       return;
     }
+    
     if (m_displayValNames == false) {
       remove(m_messageLabel);
     }
     
-    int existingClassVal = m_classValuePicker.getClassValueIndex();
+    m_textBoxEntryMode = false;
+    
+    if (format.classAttribute().numValues() == 0) {
+      // loader may not be able to give us the set of legal
+      // values for a nominal attribute until it has read
+      // the data (e.g. database loader or csv loader).
+      // In this case we'll use a text box and the user
+      // can enter the class value.
+      setupTextBoxSelection();
+      validate(); repaint();
+      return;
+    }    
+    
+    String existingClassVal = m_classValuePicker.getClassValue();
+    if (existingClassVal == null) {
+      existingClassVal = "";
+    }
+    int classValIndex = format.classAttribute().indexOfValue(existingClassVal);
+    if (classValIndex < 0) {
+      classValIndex = 0;
+    }
     String [] attribValNames = new String [format.classAttribute().numValues()];
     for (int i = 0; i < attribValNames.length; i++) {
       attribValNames[i] = format.classAttribute().value(i);
     }
     m_ClassValueCombo.setModel(new DefaultComboBoxModel(attribValNames));
     if (attribValNames.length > 0) {
-      if (existingClassVal < attribValNames.length) {
-	m_ClassValueCombo.setSelectedIndex(existingClassVal);
-      }
+//      if (existingClassVal < attribValNames.length) {
+      m_ClassValueCombo.setSelectedIndex(classValIndex);
+//      }
     }
     if (m_displayValNames == false) {
       add(m_holderP, BorderLayout.CENTER);
@@ -178,26 +220,26 @@ public class ClassValuePickerCustomizer
       if (m_classValuePicker.getConnectedFormat() != null) {
 	setUpValueSelection(m_classValuePicker.getConnectedFormat());	
       } 
-      m_backup = m_classValuePicker.getClassValueIndex();
+      m_backup = m_classValuePicker.getClassValue();
     }
   }
   
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassValuePicker (if necessary)
-    if (m_classValuePicker != null) {
+  //  if (m_classValuePicker != null) {
 //      System.out.println("Customizer deregistering with class value picker");
-      m_classValuePicker.removeDataFormatListener(this);
-    }    
-    m_classValuePicker.setClassValueIndex(m_backup);
+//      m_classValuePicker.removeDataFormatListener(this);
+    //}    
+    m_classValuePicker.setClassValue(m_backup);
   }
 
-  public void newDataFormat(DataSetEvent dse) {
+/*  public void newDataFormat(DataSetEvent dse) {
     if (dse.getDataSet() != null) {
       setUpValueSelection(m_classValuePicker.getConnectedFormat());
     } else {
       setUpNoCustPossible();
     }
-  }
+  } */
   
   /**
    * Add a property change listener

@@ -22,6 +22,7 @@
 
 package weka.gui.beans;
 
+import weka.core.Attribute;
 import weka.core.Instances;
 
 import java.awt.BorderLayout;
@@ -177,7 +178,13 @@ public class ClassAssigner
       // are not producing at the moment
       return null;
     }
-    return getUpstreamStructure();
+    
+    if (m_connectedFormat == null) {
+      m_connectedFormat = getUpstreamStructure();
+    }
+    
+    assignClass(m_connectedFormat);
+    return m_connectedFormat;
   }
 
   /**
@@ -270,19 +277,29 @@ public class ClassAssigner
 
   private void assignClass(Instances dataSet) {
     int classCol = -1;
-    if (m_classColumn.toLowerCase().compareTo("last") == 0) {
+
+    if (m_classColumn.trim().toLowerCase().compareTo("last") == 0 ||
+        m_classColumn.equalsIgnoreCase("/last")) {
       dataSet.setClassIndex(dataSet.numAttributes()-1);
-    } else if (m_classColumn.toLowerCase().compareTo("first") == 0) {
+    } else if (m_classColumn.trim().toLowerCase().compareTo("first") == 0 ||
+        m_classColumn.equalsIgnoreCase("/first")) {
       dataSet.setClassIndex(0);
     } else {
-      classCol = Integer.parseInt(m_classColumn) - 1;
-      if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
-	if (m_logger != null) {
-	  m_logger.logMessage("Class column outside range of data "
-			      +"(ClassAssigner)");
-	}
+      // try to look up the class attribute as a string
+      Attribute classAtt = dataSet.attribute(m_classColumn.trim());
+      if (classAtt != null) {
+        dataSet.setClass(classAtt);
       } else {
-	dataSet.setClassIndex(classCol);
+        // parse it as a number
+        classCol = Integer.parseInt(m_classColumn.trim()) - 1;
+        if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
+          if (m_logger != null) {
+            m_logger.logMessage("Class column outside range of data "
+                +"(ClassAssigner)");
+          }
+        } else {
+          dataSet.setClassIndex(classCol);
+        }
       }
     }
   }
@@ -491,6 +508,7 @@ public class ClassAssigner
       } else if (eventName.compareTo("instance") == 0) {
 	m_instanceProvider = source;
       }
+      m_connectedFormat = null;
     }
   }
 
@@ -526,6 +544,7 @@ public class ClassAssigner
 	m_instanceProvider = null;
       }
     }
+    m_connectedFormat = null;
   }
   
   public void setLog(weka.gui.Logger logger) {
