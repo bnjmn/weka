@@ -215,8 +215,7 @@ public class ClassValuePicker
     
     if ((m_classValue == null || m_classValue.length() == 0) && 
         dataSet.numInstances() > 0) {
-      System.err.println(dataSet);
-      System.err.println("Num instances " + dataSet.numInstances());
+
       if (m_logger != null) {
         m_logger.
           logMessage("[ClassValuePicker] "
