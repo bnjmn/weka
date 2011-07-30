@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the class value picker bean
  *
  * @author Mark Hall
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class ClassValuePickerBeanInfo 
   extends SimpleBeanInfo {
@@ -60,7 +60,7 @@ public class ClassValuePickerBeanInfo
   public PropertyDescriptor[] getPropertyDescriptors() {
     try {
       PropertyDescriptor p1;
-      p1 = new PropertyDescriptor("classValueIndex", ClassValuePicker.class);
+      p1 = new PropertyDescriptor("classValue", ClassValuePicker.class);
       PropertyDescriptor [] pds = { p1 };
       return pds;
     } catch (Exception ex) {
