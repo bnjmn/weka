@@ -115,7 +115,7 @@ public class ClassValuePickerCustomizer
         }
         
         if (m_textBoxEntryMode) {
-          // m_classValuePicker.setClassValue(m_valueTextBox.getText().trim());
+          m_classValuePicker.setClassValue(m_valueTextBox.getText().trim());
         }
         
         if (m_parent != null) {
