@@ -146,14 +146,18 @@ public class ClassValuePickerCustomizer
     holderPanel.add(label, BorderLayout.WEST);
     m_valueTextBox = new JTextField(15);
     m_valueTextBox.setToolTipText("Class label. /first, /last and /<num> " +
-        "can be used to specify the first, last or specific index " +
-        "of the label to use respectively.");
+    		"can be used to specify the first, last or specific index " +
+    		"of the label to use respectively.");
 
     holderPanel.add(m_valueTextBox, BorderLayout.CENTER);
     JPanel holder2 = new JPanel();
     holder2.setLayout(new BorderLayout());
     holder2.add(holderPanel, BorderLayout.NORTH);
     add(holder2, BorderLayout.CENTER);
+    String existingClassVal = m_classValuePicker.getClassValue();
+    if (existingClassVal != null) {
+      m_valueTextBox.setText(existingClassVal);
+    }
   }
 
   private void setUpValueSelection(Instances format) {

@@ -183,7 +183,10 @@ public class ClassAssigner
       m_connectedFormat = getUpstreamStructure();
     }
     
-    assignClass(m_connectedFormat);
+    if (m_connectedFormat != null) {
+      assignClass(m_connectedFormat);
+    }
+    
     return m_connectedFormat;
   }
 
