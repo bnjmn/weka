@@ -154,6 +154,10 @@ public class ClassValuePickerCustomizer
     holder2.setLayout(new BorderLayout());
     holder2.add(holderPanel, BorderLayout.NORTH);
     add(holder2, BorderLayout.CENTER);
+    String existingClassVal = m_classValuePicker.getClassValue();
+    if (existingClassVal != null) {
+      m_valueTextBox.setText(existingClassVal);
+    }
   }
 
   private void setUpValueSelection(Instances format) {
