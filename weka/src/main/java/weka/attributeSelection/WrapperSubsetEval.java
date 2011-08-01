@@ -635,6 +635,12 @@ public class WrapperSubsetEval
     int i;
     double mean = 0;
     double variance = 0;
+    
+    // setting a threshold less than zero allows for "manual" exploration
+    // and prevents multiple xval for each subset
+    if (m_threshold < 0) { 
+      return false; 
+    }
 
     if (entries == 1) {
       return  true;
