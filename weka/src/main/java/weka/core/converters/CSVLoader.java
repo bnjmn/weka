@@ -858,7 +858,7 @@ public class CSVLoader
 
   /**
    * Assumes the first line of the file contains the attribute names.
-   * Assumes all attributes are real (Reading the full data set with
+   * Assumes all attributes are String attributes (Reading the full data set with
    * getDataSet will establish the true structure).
    *
    * @param tokenizer a <code>StreamTokenizer</code> value
@@ -885,7 +885,8 @@ public class CSVLoader
     }
 
     while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
-      attribNames.addElement(new Attribute(tokenizer.sval));
+      attribNames.addElement(new Attribute(tokenizer.sval,
+          (FastVector)null));
       ConverterUtils.getToken(tokenizer);
     }
     String relationName;
