@@ -190,6 +190,20 @@ public class ClassValuePickerCustomizer
       existingClassVal = "";
     }
     int classValIndex = format.classAttribute().indexOfValue(existingClassVal);
+    
+    // do we have a special (last, first or number)
+    if (existingClassVal.startsWith("/")) {
+      existingClassVal = existingClassVal.substring(1);
+      if (existingClassVal.equalsIgnoreCase("first")) {
+        classValIndex = 0;
+      } else if (existingClassVal.equalsIgnoreCase("last")) {
+        classValIndex = format.classAttribute().numValues() - 1;
+      } else {
+        // try and parse as a number
+        classValIndex = Integer.parseInt(existingClassVal);
+      }
+    }
+    
     if (classValIndex < 0) {
       classValIndex = 0;
     }
