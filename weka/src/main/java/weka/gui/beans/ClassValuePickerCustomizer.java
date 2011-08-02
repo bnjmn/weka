@@ -201,6 +201,7 @@ public class ClassValuePickerCustomizer
       } else {
         // try and parse as a number
         classValIndex = Integer.parseInt(existingClassVal);
+        classValIndex--;
       }
     }
     
