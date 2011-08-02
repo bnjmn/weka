@@ -136,10 +136,39 @@ public class ClassAssignerCustomizer
     if (m_displayColNames == false) {
       remove(m_caEditor);
     }
-    int existingClassCol = format.classIndex();
-    if (existingClassCol < 0) {
-      existingClassCol = 0;
+
+    int existingClassCol = 0;
+    
+    String classColString = m_classAssigner.getClassColumn();
+    if (classColString.trim().toLowerCase().compareTo("last") == 0 ||
+        classColString.equalsIgnoreCase("/last")) {
+      existingClassCol = format.numAttributes() - 1;
+    } else if (classColString.trim().toLowerCase().compareTo("first") == 0 ||
+        classColString.equalsIgnoreCase("/first")) {
+      // nothing to do
+    } else {
+      // try to look up class attribute as a label
+      Attribute classAtt = format.attribute(classColString);
+      if (classAtt != null) {
+        existingClassCol = classAtt.index();
+      } else {
+        // parse it as a number
+        existingClassCol = Integer.parseInt(classColString);
+        if (existingClassCol < 0) {
+          existingClassCol = -1; // no class
+        } else if (existingClassCol > format.numAttributes() - 1) {
+          existingClassCol = format.numAttributes() - 1;
+        } else {
+          existingClassCol--; // make it zero-based (rather than 1-based)
+        }
+      }
     }
+    
+    //int existingClassCol = format.classIndex();
+
+/*    if (existingClassCol < 0) {
+      existingClassCol = 0;
+    } */
     String [] attribNames = new String [format.numAttributes()+1];
     attribNames[0] = "NO CLASS";
     for (int i = 1; i < attribNames.length; i++) {
