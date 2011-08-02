@@ -22,6 +22,7 @@
 
 package weka.gui.beans;
 
+import weka.core.Attribute;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.SwapValues;
@@ -40,13 +41,13 @@ import javax.swing.JPanel;
 public class ClassValuePicker
   extends JPanel
   implements Visible, DataSourceListener, BeanCommon,
-	     EventConstraints, Serializable {
+	     EventConstraints, Serializable, StructureProducer {
 
   /** for serialization */
   private static final long serialVersionUID = -1196143276710882989L;
 
-  /** the class value index considered to be the positive class */
-  private int m_classValueIndex = 0;
+  /** the class value considered to be the positive class */
+  private String m_classValue;
 
   /** format of instances for the current incoming connection (if any) */
   private Instances m_connectedFormat;
@@ -94,6 +95,29 @@ public class ClassValuePicker
   public String getCustomName() {
     return m_visual.getText();
   }
+  
+  public Instances getStructure(String eventName) {
+    if (!eventName.equals("dataSet")) {
+      return null;
+    }
+    if (m_dataProvider == null) {
+      return null;
+    }
+    
+    if (m_dataProvider != null && m_dataProvider instanceof StructureProducer) {
+      m_connectedFormat =  ((StructureProducer)m_dataProvider).getStructure("dataSet");
+    }
+    
+    return m_connectedFormat;
+  }
+  
+  protected Instances getStructure() {
+    if (m_dataProvider != null) {
+      return getStructure("dataSet");
+    }
+    
+    return null;
+  }
 
   /**
    * Returns the structure of the incoming instances (if any)
@@ -101,10 +125,11 @@ public class ClassValuePicker
    * @return an <code>Instances</code> value
    */
   public Instances getConnectedFormat() {
-    if (m_connectedFormat ==null) {
+    /*if (m_connectedFormat ==null) {
       System.err.println(Messages.getInstance().getString("ClassValuePicker_GetConnectedFormat_Error_Text"));
     }
-    return m_connectedFormat;
+    return m_connectedFormat;*/
+    return getStructure();
   }
 
   /**
@@ -113,21 +138,21 @@ public class ClassValuePicker
    *
    * @param index the class value index to use
    */
-  public void setClassValueIndex(int index) {
-    m_classValueIndex = index;
+  public void setClassValue(String value) {
+    m_classValue = value;
     if (m_connectedFormat != null) {
       notifyDataFormatListeners();
     }
   }
 
   /**
-   * Gets the class value index considered to be the "positive"
+   * Gets the class value considered to be the "positive"
    * class value.
    *
    * @return the class value index
    */
-  public int getClassValueIndex() {
-    return m_classValueIndex;
+  public String getClassValue() {
+    return m_classValue;
   }
 
   public void acceptDataSet(DataSetEvent e) {
@@ -141,8 +166,11 @@ public class ClassValuePicker
     }
     Instances dataSet = e.getDataSet();
     Instances newDataSet = assignClassValue(dataSet);
-    e = new DataSetEvent(this, newDataSet);
-    notifyDataListeners(e);
+    
+    if (newDataSet != null) {
+      e = new DataSetEvent(this, newDataSet);
+      notifyDataListeners(e);
+    }
   }
 
   private Instances assignClassValue(Instances dataSet) {
@@ -174,27 +202,103 @@ public class ClassValuePicker
         m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_Third"));
       }
     }
+    
+    if ((m_classValue == null || m_classValue.length() == 0) && 
+        dataSet.numInstances() > 0) {
 
-    if (m_classValueIndex != 0) { // nothing to do if == 0
+      if (m_logger != null) {
+        m_logger.
+          logMessage("[ClassValuePicker] "
+              + statusMessagePrefix()
+              + " Class value to consider as positive has not been set" +
+                        " (ClassValuePicker)");
+        m_logger.statusMessage(statusMessagePrefix()
+            + "WARNING: Class value to consider as positive has not been set.");
+      }
+      return dataSet;
+    }
+    
+    if (m_classValue == null) {
+      // in this case we must just have a structure only
+      // dataset, so don't fuss about it and return the
+      // exsting structure so that it can get pushed downstream
+      return dataSet;
+    }
+
+    Attribute classAtt = dataSet.classAttribute();
+    int classValueIndex = -1;
+    
+    // if first char is "/" then see if we have "first" or "last"
+    // or if the remainder can be parsed as a number
+    if (m_classValue.startsWith("/") && m_classValue.length() > 1) {
+      String remainder = m_classValue.substring(1);
+      remainder = remainder.trim();
+      if (remainder.equalsIgnoreCase("first")) {
+        classValueIndex = 0;
+      } else if (remainder.equalsIgnoreCase("last")) {
+        classValueIndex = classAtt.numValues() - 1;
+      } else {
+        // try and parse as a number
+        try {
+          classValueIndex = Integer.parseInt(remainder);
+          classValueIndex--; // 0-based index
+          
+          if (classValueIndex < 0 || 
+              classValueIndex > classAtt.numValues() - 1) {
+            if (m_logger != null) {
+              m_logger.
+                logMessage("[ClassValuePicker] "
+                    + statusMessagePrefix()
+                    + " Class value index is out of range!" +
+                              " (ClassValuePicker)");
+              m_logger.statusMessage(statusMessagePrefix()
+                  + "ERROR: Class value index is out of range!.");
+            }
+          }
+        } catch (NumberFormatException n) {
+          if (m_logger != null) {
+            m_logger.
+              logMessage("[ClassValuePicker] "
+                  + statusMessagePrefix()
+                  + " Unable to parse supplied class value index as an integer" +
+                            " (ClassValuePicker)");
+            m_logger.statusMessage(statusMessagePrefix()
+                + "WARNING: Unable to parse supplied class value index " +
+                                "as an integer.");
+            return dataSet;
+          }
+        }
+      }
+    } else {
+      // treat the string as the label to look for
+      classValueIndex = classAtt.indexOfValue(m_classValue.trim());
+    }
+    
+    if (classValueIndex < 0) {
+      return null; // error
+    }
+
+    if (classValueIndex != 0) { // nothing to do if == 0
       // swap selected index with index 0
       try {
-	SwapValues sv = new SwapValues();
-	sv.setAttributeIndex(""+(dataSet.classIndex()+1));
-	sv.setFirstValueIndex("first");
-	sv.setSecondValueIndex(""+(m_classValueIndex+1));
-	sv.setInputFormat(dataSet);
-	Instances newDataSet = Filter.useFilter(dataSet, sv);
-	newDataSet.setRelationName(dataSet.relationName());
-	return newDataSet;
+        SwapValues sv = new SwapValues();
+        sv.setAttributeIndex(""+(dataSet.classIndex()+1));
+        sv.setFirstValueIndex("first");
+        sv.setSecondValueIndex(""+(classValueIndex+1));
+        sv.setInputFormat(dataSet);
+        Instances newDataSet = Filter.useFilter(dataSet, sv);
+        newDataSet.setRelationName(dataSet.relationName());
+        return newDataSet;
       } catch (Exception ex) {
-	if (m_logger != null) {
-	  m_logger.
-	    logMessage(Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Fifth")
-	        +statusMessagePrefix()
-	        + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Sixth"));
-	  m_logger.statusMessage(statusMessagePrefix()
-	      + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_Fourth"));
-	}
+        if (m_logger != null) {
+          m_logger.
+            logMessage("[ClassValuePicker] "
+                +statusMessagePrefix()
+                + " Unable to swap class attibute values.");
+          m_logger.statusMessage(statusMessagePrefix()
+              + "ERROR: (See log for details)");
+          return null;
+        }
       }
     }
     return dataSet;
@@ -299,6 +403,7 @@ public class ClassValuePicker
 	m_dataProvider = source;
       }
     }
+    m_connectedFormat = null;
   }
 
   /**
@@ -317,6 +422,7 @@ public class ClassValuePicker
 	m_dataProvider = null;
       }
     }
+    m_connectedFormat = null;
   }
 
   public void setLog(weka.gui.Logger logger) {
