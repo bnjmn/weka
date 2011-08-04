@@ -30,6 +30,8 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Option;
+import weka.experiment.InstanceQuery;
+
 import java.io.IOException;
 import java.sql.*;
 import java.util.Hashtable;
@@ -734,6 +736,14 @@ public class DatabaseLoader
                         columnName = columnName.toUpperCase();
                     m_nominalIndexes[i - 1] = new Hashtable();
                     m_nominalStrings[i - 1] = new FastVector();
+                    
+                    // fast incomplete structure for batch mode - actual 
+                    // structure is determined by InstanceQuery in getDataSet()
+                    if (getRetrieval() != INCREMENTAL) {
+                      attributeTypes[i - 1] = Attribute.STRING;
+                      break;
+                    }                    
+                    
                     String query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
                     if (m_DataBaseConnection.execute(query) == true){
                         rs1 = m_DataBaseConnection.getResultSet();
@@ -769,6 +779,14 @@ public class DatabaseLoader
                       columnName = columnName.toUpperCase();
                     m_nominalIndexes[i - 1] = new Hashtable();
                     m_nominalStrings[i - 1] = new FastVector();
+                    
+                    // fast incomplete structure for batch mode - actual 
+                    // structure is determined by InstanceQuery in getDataSet()
+                    if (getRetrieval() != INCREMENTAL) {
+                      attributeTypes[i - 1] = Attribute.STRING;
+                      break;
+                    }
+                    
                     query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
                     if (m_DataBaseConnection.execute(query) == true){
                       rs1 = m_DataBaseConnection.getResultSet();
@@ -861,8 +879,9 @@ public class DatabaseLoader
         else
             m_oldStructure = new Instances(m_structure,0);
         
-
-        rs.close();
+        if (m_DataBaseConnection.getResultSet() != null) {
+          rs.close();
+        }
 
     }
     else{
@@ -880,8 +899,6 @@ public class DatabaseLoader
     
   }
   
-  
-
   /**
    * Return the full data set in batch mode (header and all intances at once).
    *
@@ -897,293 +914,48 @@ public class DatabaseLoader
       throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
     }
     setRetrieval(BATCH);
-    connectToDatabase();
-    
+   
     
     Instances result = null;
-    try{
-    if (m_DataBaseConnection.execute(m_query) == false) 
-      throw new Exception("Query didn't produce results");
-    ResultSet rs = m_DataBaseConnection.getResultSet();
-    ResultSetMetaData md = rs.getMetaData();
-
-    // Determine structure of the instances
-    int numAttributes = md.getColumnCount();
-    int [] attributeTypes = new int [numAttributes];
-    m_nominalIndexes = new Hashtable [numAttributes];
-    m_nominalStrings = new FastVector [numAttributes];
-    for (int i = 1; i <= numAttributes; i++) {
-      switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
-	
-      case DatabaseConnection.STRING :
-        ResultSet rs1;
-        String columnName = md.getColumnLabel(i);
-        if(m_DataBaseConnection.getUpperCase())
-            columnName = columnName.toUpperCase();
-        String end = endOfQuery(false);
-        m_nominalIndexes[i - 1] = new Hashtable();
-        m_nominalStrings[i - 1] = new FastVector();
-        if(m_DataBaseConnection.execute("SELECT DISTINCT ( "
-                                        + columnName+" ) FROM "
-                                        + end
-                                        + " ORDER BY "
-                                        + columnName) == false){
-            throw new Exception("Nominal values cannot be retrieved");
-        }
-        rs1 = m_DataBaseConnection.getResultSet();
-        attributeTypes[i - 1] = Attribute.NOMINAL;
-        stringToNominal(rs1,i);
-
-	break;
-      case DatabaseConnection.TEXT:
-        columnName = md.getColumnLabel(i);
-        if(m_DataBaseConnection.getUpperCase())
-            columnName = columnName.toUpperCase();
-        end = endOfQuery(false);
-        m_nominalIndexes[i - 1] = new Hashtable();
-        m_nominalStrings[i - 1] = new FastVector();
-        if(m_DataBaseConnection.execute("SELECT DISTINCT ( "+columnName+" ) FROM "+ end) == false){
-            throw new Exception("Nominal values cannot be retrieved");
-        }
-        rs1 = m_DataBaseConnection.getResultSet();
-        attributeTypes[i - 1] = Attribute.STRING;
-        stringToNominal(rs1,i);
-//        rs1.close();  
-	break;
-      case DatabaseConnection.BOOL:
-	//System.err.println("boolean --> nominal");
-	attributeTypes[i - 1] = Attribute.NOMINAL;
-	m_nominalIndexes[i - 1] = new Hashtable();
-	m_nominalIndexes[i - 1].put("false", new Double(0));
-	m_nominalIndexes[i - 1].put("true", new Double(1));
-	m_nominalStrings[i - 1] = new FastVector();
-	m_nominalStrings[i - 1].addElement("false");
-	m_nominalStrings[i - 1].addElement("true");
-	break;
-      case DatabaseConnection.DOUBLE:
-	//System.err.println("BigDecimal --> numeric");
-	attributeTypes[i - 1] = Attribute.NUMERIC;
-	break;
-      case DatabaseConnection.BYTE:
-	//System.err.println("byte --> numeric");
-	attributeTypes[i - 1] = Attribute.NUMERIC;
-	break;
-      case DatabaseConnection.SHORT:
-	//System.err.println("short --> numeric");
-	attributeTypes[i - 1] = Attribute.NUMERIC;
-	break;
-      case DatabaseConnection.INTEGER:
-	//System.err.println("int --> numeric");
-	attributeTypes[i - 1] = Attribute.NUMERIC;
-	break;
-      case DatabaseConnection.LONG:
-	//System.err.println("long --> numeric");
-	attributeTypes[i - 1] = Attribute.NUMERIC;
-	break;
-      case DatabaseConnection.FLOAT:
-	//System.err.println("float --> numeric");
-	attributeTypes[i - 1] = Attribute.NUMERIC;
-	break;
-      case DatabaseConnection.DATE:
-	attributeTypes[i - 1] = Attribute.DATE;
-	break;
-      case DatabaseConnection.TIME:
-	attributeTypes[i - 1] = Attribute.DATE;
-	break;
-      default:
-	//System.err.println("Unknown column type");
-	attributeTypes[i - 1] = Attribute.STRING;
-      }
-    }
     
-    // For sqlite
-    // cache column names because the last while(rs.next()) { iteration for
-    // the tuples below will close the md object:  
-    Vector<String> columnNames = new Vector<String>(); 
-    for (int i = 0; i < numAttributes; i++) {
-      columnNames.add(md.getColumnLabel(i + 1));
-    }
-
-    // Step through the tuples
-    //System.err.println("Creating instances...");
-    FastVector instances = new FastVector();
-    while(rs.next()) {
-      double[] vals = new double[numAttributes];
-      for(int i = 1; i <= numAttributes; i++) {
-	switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
-	case DatabaseConnection.STRING :
-	  String str = rs.getString(i);
-	  
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-            } else {
-                Double index = (Double)m_nominalIndexes[i - 1].get(str);
-                if (index == null) {
-                    index = new Double(m_structure.attribute(i-1).addStringValue(str));
-                }
-                vals[i - 1] = index.doubleValue();
-            }
-	  break;
-	case DatabaseConnection.TEXT:
-	  str = rs.getString(i);
-
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  }
-	  else {
-	    Double index = (Double)m_nominalIndexes[i - 1].get(str);
-	    if (index == null) {
-	      index = new Double(m_structure.attribute(i-1).addStringValue(str));
-	    }
-	    vals[i - 1] = index.doubleValue();
-	  }
-	  break;
-	case DatabaseConnection.BOOL:
-	  boolean boo = rs.getBoolean(i);
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-	    vals[i - 1] = (boo ? 1.0 : 0.0);
-	  }
-	  break;
-	case DatabaseConnection.DOUBLE:
-	  double dd = rs.getDouble(i);
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-	    vals[i - 1] =  dd;
-	  }
-	  break;
-	case DatabaseConnection.BYTE:
-	  byte by = rs.getByte(i);
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-	    vals[i - 1] = (double)by;
-	  }
-	  break;
-	case DatabaseConnection.SHORT:
-	  short sh = rs.getShort(i);
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-	    vals[i - 1] = (double)sh;
-	  }
-	  break;
-	case DatabaseConnection.INTEGER:
-	  int in = rs.getInt(i);
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-	    vals[i - 1] = (double)in;
-	  }
-	  break;
-	case DatabaseConnection.LONG:
-	  long lo = rs.getLong(i);
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-	    vals[i - 1] = (double)lo;
-	  }
-	  break;
-	case DatabaseConnection.FLOAT:
-	  float fl = rs.getFloat(i);
-	  if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-	    vals[i - 1] = (double)fl;
-	  }
-	  break;
-	case DatabaseConnection.DATE:
-          Date date = rs.getDate(i);
-          if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-            // TODO: Do a value check here.
-            vals[i - 1] = (double)date.getTime();
-          }
-          break;
-	case DatabaseConnection.TIME:
-          Time time = rs.getTime(i);
-          if (rs.wasNull()) {
-	    vals[i - 1] = Instance.missingValue();
-	  } else {
-            // TODO: Do a value check here.
-            vals[i - 1] = (double) time.getTime();
-          }
-          break;
-	default:
-	  vals[i - 1] = Instance.missingValue();
-	}
-      }
-      Instance newInst;
-      newInst = new Instance(1.0, vals);
-      instances.addElement(newInst);
-    }
-    
-    // Create the header and add the instances to the dataset
-    //System.err.println("Creating header...");
-    FastVector attribInfo = new FastVector();
-    for (int i = 0; i < numAttributes; i++) {
-      /* Fix for databases that uppercase column names */
-      //String attribName = attributeCaseFix(md.getColumnName(i + 1));
-      //String attribName = md.getColumnName(i + 1);
-      String attribName = columnNames.get(i);
-      switch (attributeTypes[i]) {
-      case Attribute.NOMINAL:
-	attribInfo.addElement(new Attribute(attribName, m_nominalStrings[i]));
-	break;
-      case Attribute.NUMERIC:
-	attribInfo.addElement(new Attribute(attribName));
-	break;
-      case Attribute.STRING:
-	Attribute att = new Attribute(attribName, (FastVector) null);
-	attribInfo.addElement(att);
-	for (int n = 0; n < m_nominalStrings[i].size(); n++) {
-	  att.addStringValue((String) m_nominalStrings[i].elementAt(n));
-	}
-	break;
-      case Attribute.DATE:
-	attribInfo.addElement(new Attribute(attribName, (String)null));
-	break;
-      default:
-	throw new IOException("Unknown attribute type");
-      }
-    }
-    result = new Instances(endOfQuery(true), attribInfo, 
-				     instances.size());
-    for (int i = 0; i < instances.size(); i++) {
-      result.add((Instance)instances.elementAt(i));
-    }
-
-    rs.close();
-
-    m_DataBaseConnection.disconnectFromDatabase();
-    //get rid of m_idColumn
-    if(m_DataBaseConnection.getUpperCase())
+    // TODO perhaps add option for sparse data
+    try {
+      InstanceQuery iq = new InstanceQuery();
+      iq.setUsername(m_User);
+      iq.setPassword(m_Password);
+      iq.setQuery(m_query);
+      
+      result = iq.retrieveInstances();
+      
+      if(m_DataBaseConnection.getUpperCase()) {
         m_idColumn = m_idColumn.toUpperCase();
-    if(result.attribute(0).name().equals(m_idColumn)){
+      }
+      
+      if(result.attribute(0).name().equals(m_idColumn)){
         result.deleteAttributeAt(0);
-    }
-    m_structure = new Instances(result,0);
-    }
-    catch(Exception ex) {
-	printException(ex);
-        StringBuffer text = new StringBuffer();
-        if(m_query.equals("Select * from Results0")){
-            text.append("\n\nDatabaseLoader options:\n");
-            Enumeration enumi = listOptions();
-            while (enumi.hasMoreElements()) {
-                Option option = (Option)enumi.nextElement();
-                text.append(option.synopsis()+'\n');
-                text.append(option.description()+'\n');
-            }
-            System.out.println(text);
+      }
+      
+      m_structure = new Instances(result,0);
+      
+    } catch (Exception ex) {
+      printException(ex);
+      StringBuffer text = new StringBuffer();
+      if(m_query.equals("Select * from Results0")){
+        text.append("\n\nDatabaseLoader options:\n");
+        Enumeration enumi = listOptions();
+        
+        while (enumi.hasMoreElements()) {
+          Option option = (Option)enumi.nextElement();
+          text.append(option.synopsis()+'\n');
+          text.append(option.description()+'\n');
         }
+        System.out.println(text);
+      }
     }
-    //System.out.println(result);
+    
     return result;
   }
+
   
   /** 
    * Reads an instance from a database.
