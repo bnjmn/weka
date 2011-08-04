@@ -306,17 +306,20 @@ public class LoaderCustomizer
     buttonsP.add(cancel=new JButton("Cancel"));
     ok.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        ((DatabaseLoader)m_dsLoader.getLoader()).resetStructure();  
+        /*((DatabaseLoader)m_dsLoader.getLoader()).resetStructure();  
         ((DatabaseConverter)m_dsLoader.getLoader()).setUrl(m_dbaseURLText.getText());
         ((DatabaseConverter)m_dsLoader.getLoader()).setUser(m_userNameText.getText());
         ((DatabaseConverter)m_dsLoader.getLoader()).setPassword(new String(m_passwordText.getPassword()));
         ((DatabaseLoader)m_dsLoader.getLoader()).setQuery(m_queryText.getText());
-        ((DatabaseLoader)m_dsLoader.getLoader()).setKeys(m_keyText.getText());
-        try{
-          m_dsLoader.notifyStructureAvailable(((DatabaseLoader)m_dsLoader.getLoader()).getStructure());
-          //database connection has been configured
-          m_dsLoader.setDB(true);
-        }catch (Exception ex){
+        ((DatabaseLoader)m_dsLoader.getLoader()).setKeys(m_keyText.getText()); */
+        
+        if (resetAndUpdateDatabaseLoaderIfChanged()) {
+          try{
+            //m_dsLoader.notifyStructureAvailable(((DatabaseLoader)m_dsLoader.getLoader()).getStructure());
+            //database connection has been configured
+            m_dsLoader.setDB(true);
+          }catch (Exception ex){
+          }
         }
         if (m_parentWindow != null) {
           m_parentWindow.dispose();
@@ -346,6 +349,32 @@ public class LoaderCustomizer
       add(about, BorderLayout.NORTH);
     }
     add(holderP, BorderLayout.SOUTH);
+  }
+  
+  private boolean resetAndUpdateDatabaseLoaderIfChanged() {
+    DatabaseLoader dbl = (DatabaseLoader)m_dsLoader.getLoader();
+    String url = dbl.getUrl();
+    String user = dbl.getUser();
+    String password = dbl.getPassword();
+    String query = dbl.getQuery();
+    String keys = dbl.getKeys();
+    
+    boolean update = (!url.equals(m_dbaseURLText.getText()) || 
+        !user.equals(m_userNameText.getText()) ||
+        !password.equals(m_passwordText.getText()) ||
+        !query.equalsIgnoreCase(m_queryText.getText())||
+        !keys.equals(m_keyText.getText()));
+    
+    if (update) {
+      dbl.resetStructure();  
+      dbl.setUrl(m_dbaseURLText.getText());
+      dbl.setUser(m_userNameText.getText());
+      dbl.setPassword(new String(m_passwordText.getPassword()));
+      dbl.setQuery(m_queryText.getText());
+      dbl.setKeys(m_keyText.getText());
+    }
+    
+    return update;
   }
 
   public void setUpFile() {
