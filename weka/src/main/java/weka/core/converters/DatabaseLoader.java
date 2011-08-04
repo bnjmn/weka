@@ -30,6 +30,8 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Option;
+import weka.experiment.InstanceQuery;
+
 import java.io.IOException;
 import java.sql.*;
 import java.util.Hashtable;
@@ -677,6 +679,7 @@ public class DatabaseLoader
     if (m_DataBaseConnection == null) {
       throw new IOException("No source database has been specified");
     }
+
     connectToDatabase();
   pseudo:
       try{
@@ -698,30 +701,34 @@ public class DatabaseLoader
               + "If you are convinced the table exists, set 'checkForTable' "
               + "to 'False' in your DatabaseUtils.props file and try again.");
       }
-        //finds out which SQL statement to use for the DBMS to limit the number of resulting rows to one
-        int choice = 0;
-        boolean rightChoice = false;
-        while (!rightChoice){
-            try{
-                if (m_DataBaseConnection.execute(limitQuery(m_query,0,choice)) == false) {
-                    throw new IOException("Query didn't produce results");
-                }
-                m_choice = choice;
-                rightChoice = true;
-            }
-            catch (SQLException ex) {
-                choice++;
-                if(choice == 3){
-                    System.out.println("Incremental loading not supported for that DBMS. Pseudoincremental mode is used if you use incremental loading.\nAll rows are loaded into memory once and retrieved incrementally from memory instead of from the database.");
-                    m_pseudoIncremental = true;
-                    break pseudo;
-                }
-            }
+
+      //finds out which SQL statement to use for the DBMS to limit the number of resulting rows to one
+      int choice = 0;
+      boolean rightChoice = false;
+      while (!rightChoice){
+        try{
+          String limitQ = limitQuery(m_query,0,choice);
+          if (m_DataBaseConnection.execute(limitQ) == false) {
+            throw new IOException("Query didn't produce results");
+          }
+          m_choice = choice;
+          rightChoice = true;
         }
+        catch (SQLException ex) {
+          choice++;
+          if(choice == 3){
+            System.out.println("Incremental loading not supported for that DBMS. Pseudoincremental mode is used if you use incremental loading.\nAll rows are loaded into memory once and retrieved incrementally from memory instead of from the database.");
+            m_pseudoIncremental = true;
+            break pseudo;
+          }
+        }
+      }
+
         String end = endOfQuery(false);
         ResultSet rs = m_DataBaseConnection.getResultSet();
+
         ResultSetMetaData md = rs.getMetaData();
-//        rs.close();
+        rs.close();
         int numAttributes = md.getColumnCount();
         int [] attributeTypes = new int [numAttributes];
         m_nominalIndexes = Utils.cast(new Hashtable [numAttributes]);
@@ -729,13 +736,23 @@ public class DatabaseLoader
         for (int i = 1; i <= numAttributes; i++) {
             switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
                 case DatabaseConnection.STRING :
+
+                  String columnName = md.getColumnLabel(i);
+                  if(m_DataBaseConnection.getUpperCase())
+                      columnName = columnName.toUpperCase();
+                  
+                  m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+                  m_nominalStrings[i - 1] = new ArrayList<String>();
+                  
+                    // fast incomplete structure for batch mode - actual 
+                    // structure is determined by InstanceQuery in getDataSet()
+                    if (getRetrieval() != INCREMENTAL) {
+                      attributeTypes[i - 1] = Attribute.STRING;
+                      break;
+                    }
                     //System.err.println("String --> nominal");
                     ResultSet rs1;
-                    String columnName = md.getColumnLabel(i);
-                    if(m_DataBaseConnection.getUpperCase())
-                        columnName = columnName.toUpperCase();
-                    m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
-                    m_nominalStrings[i - 1] = new ArrayList<String>();
+
                     String query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
                     if (m_DataBaseConnection.execute(query) == true){
                         rs1 = m_DataBaseConnection.getResultSet();
@@ -766,11 +783,21 @@ public class DatabaseLoader
                     break;
                 case DatabaseConnection.TEXT:
                     //System.err.println("boolean --> string");
-                    columnName = md.getColumnLabel(i);
-                    if(m_DataBaseConnection.getUpperCase())
-                      columnName = columnName.toUpperCase();
-                    m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
-                    m_nominalStrings[i - 1] = new ArrayList<String>();
+                  
+                  columnName = md.getColumnLabel(i);
+                  if(m_DataBaseConnection.getUpperCase())
+                    columnName = columnName.toUpperCase();
+                  
+                  m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+                  m_nominalStrings[i - 1] = new ArrayList<String>();
+                  
+                  // fast incomplete structure for batch mode - actual 
+                  // structure is determined by InstanceQuery in getDataSet()
+                  if (getRetrieval() != INCREMENTAL) {
+                    attributeTypes[i - 1] = Attribute.STRING;
+                    break;
+                  }
+                                    
                     query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
                     if (m_DataBaseConnection.execute(query) == true){
                       rs1 = m_DataBaseConnection.getResultSet();
@@ -864,7 +891,7 @@ public class DatabaseLoader
             m_oldStructure = new Instances(m_structure,0);
         
         if (m_DataBaseConnection.getResultSet() != null) {
-          rs.close();
+//          rs.close();
         }
     }
     else{
@@ -898,10 +925,53 @@ public class DatabaseLoader
       throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
     }
     setRetrieval(BATCH);
-    connectToDatabase();
-    
+   
     
     Instances result = null;
+    
+    // TODO perhaps add option for sparse data
+    try {
+      InstanceQuery iq = new InstanceQuery();
+      iq.setUsername(m_User);
+      iq.setPassword(m_Password);
+      iq.setQuery(m_query);
+      
+      result = iq.retrieveInstances();
+      
+      if(m_DataBaseConnection.getUpperCase()) {
+        m_idColumn = m_idColumn.toUpperCase();
+      }
+      
+      if(result.attribute(0).name().equals(m_idColumn)){
+        result.deleteAttributeAt(0);
+      }
+      
+      m_structure = new Instances(result,0);
+      
+    } catch (Exception ex) {
+      printException(ex);
+      StringBuffer text = new StringBuffer();
+      if(m_query.equals("Select * from Results0")){
+        text.append("\n\nDatabaseLoader options:\n");
+        Enumeration enumi = listOptions();
+        
+        while (enumi.hasMoreElements()) {
+          Option option = (Option)enumi.nextElement();
+          text.append(option.synopsis()+'\n');
+          text.append(option.description()+'\n');
+        }
+        System.out.println(text);
+      }
+    }
+    
+    return result;
+    
+    
+    
+    /*connectToDatabase();
+    
+    
+
     try{
     if (m_DataBaseConnection.execute(m_query) == false) 
       throw new Exception("Query didn't produce results");
@@ -1124,9 +1194,9 @@ public class DatabaseLoader
     // Create the header and add the instances to the dataset
     //System.err.println("Creating header...");
     ArrayList<Attribute> attribInfo = new ArrayList<Attribute>();
-    for (int i = 0; i < numAttributes; i++) {
+    for (int i = 0; i < numAttributes; i++) { */
       /* Fix for databases that uppercase column names */
-      //String attribName = attributeCaseFix(md.getColumnName(i + 1));
+/*      //String attribName = attributeCaseFix(md.getColumnName(i + 1));
 //      String attribName = md.getColumnName(i + 1);
       String attribName = columnNames.get(i);
       switch (attributeTypes[i]) {
@@ -1182,7 +1252,7 @@ public class DatabaseLoader
         }
     }
     //System.out.println(result);
-    return result;
+    return result; */
   }
   
   /** 
