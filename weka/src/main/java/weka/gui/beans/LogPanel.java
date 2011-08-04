@@ -225,8 +225,8 @@ public class LogPanel extends JPanel implements Logger {
     if (m_tableIndexes.containsKey(stepHash)) {
       // Get the row number and update the table model...
       final Integer rowNum = m_tableIndexes.get(stepHash);
-      if (stepStatus.equalsIgnoreCase("remove") ||
-          stepStatus.equalsIgnoreCase("remove.")) {
+      if (stepStatus.trim().equalsIgnoreCase("remove") ||
+          stepStatus.trim().equalsIgnoreCase("remove.")) {
         
         //m_tableModel.fireTableDataChanged();
         m_tableIndexes.remove(stepHash);
@@ -294,10 +294,10 @@ public class LogPanel extends JPanel implements Logger {
         }
         if (stepStatus.startsWith("ERROR") ||
             stepStatus.startsWith("INTERRUPTED") ||
-            stepStatus.equalsIgnoreCase("finished") ||
-            stepStatus.equalsIgnoreCase("finished.") ||
-            stepStatus.equalsIgnoreCase("done") ||
-            stepStatus.equalsIgnoreCase("done.")) {
+            stepStatus.trim().equalsIgnoreCase("finished") ||
+            stepStatus.trim().equalsIgnoreCase("finished.") ||
+            stepStatus.trim().equalsIgnoreCase("done") ||
+            stepStatus.trim().equalsIgnoreCase("done.")) {
           // stop the timer.
           m_timers.get(stepHash).stop();
         } else if (!m_timers.get(stepHash).isRunning()) {
@@ -307,8 +307,8 @@ public class LogPanel extends JPanel implements Logger {
         }
       //  m_tableModel.fireTableCellUpdated(rowNum.intValue(), 3);
       }
-    } else if (!stepStatus.equalsIgnoreCase("Remove") &&
-        !stepStatus.equalsIgnoreCase("Remove.")) {
+    } else if (!stepStatus.trim().equalsIgnoreCase("Remove") &&
+        !stepStatus.trim().equalsIgnoreCase("Remove.")) {
       // Add this one to the hash map
       int numKeys = m_tableIndexes.keySet().size();
       m_tableIndexes.put(stepHash, numKeys);
