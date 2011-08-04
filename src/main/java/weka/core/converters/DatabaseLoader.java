@@ -728,7 +728,7 @@ public class DatabaseLoader
         ResultSet rs = m_DataBaseConnection.getResultSet();
 
         ResultSetMetaData md = rs.getMetaData();
-        rs.close();
+//        rs.close();
         int numAttributes = md.getColumnCount();
         int [] attributeTypes = new int [numAttributes];
         m_nominalIndexes = Utils.cast(new Hashtable [numAttributes]);
@@ -891,7 +891,7 @@ public class DatabaseLoader
             m_oldStructure = new Instances(m_structure,0);
         
         if (m_DataBaseConnection.getResultSet() != null) {
-//          rs.close();
+          rs.close();
         }
     }
     else{
