@@ -31,14 +31,9 @@ import java.io.*;
  * methods. All other methods must be overridden.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public abstract class AbstractLoader implements Loader {
-  
-  /** The retrieval modes */
-  protected static final int NONE = 0;
-  protected static final int BATCH = 1;
-  protected static final int INCREMENTAL = 2;
 
   /** The current retrieval mode */
   protected int m_retrieval;
@@ -48,7 +43,7 @@ public abstract class AbstractLoader implements Loader {
    *
    * @param mode the retrieval mode
    */
-  protected void setRetrieval(int mode) {
+  public void setRetrieval(int mode) {
 
     m_retrieval = mode;
   }
