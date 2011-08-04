@@ -36,10 +36,23 @@ import java.io.Serializable;
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision$
  */
 public interface Loader
   extends Serializable, RevisionHandler {
+  
+  /** The retrieval modes */
+  public static final int NONE = 0;
+  public static final int BATCH = 1;
+  public static final int INCREMENTAL = 2;
+  
+  /**
+   * Sets the retrieval mode. Note: Some loaders may not be
+   * able to implement incremental loading.
+   *
+   * @param mode the retrieval mode
+   */
+  void setRetrieval(int mode);
 
   /**
    * Resets the Loader object ready to begin loading.
