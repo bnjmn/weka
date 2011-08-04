@@ -169,6 +169,7 @@ public class Loader
 	  Instances structure = null;
 	  try {
             m_Loader.reset();
+            m_Loader.setRetrieval(weka.core.converters.Loader.INCREMENTAL);
             //	    System.err.println("NOTIFYING STRUCTURE AVAIL");
 	    structure = m_Loader.getStructure();
 	    notifyStructureAvailable(structure);
@@ -230,6 +231,7 @@ public class Loader
 //	  m_visual.setText(structure.relationName());
 	} else {
           m_Loader.reset();
+          m_Loader.setRetrieval(weka.core.converters.Loader.BATCH);
 	  m_dataSet = m_Loader.getDataSet();
 	  m_visual.setStatic();
 	  if (m_log != null) {
@@ -373,6 +375,9 @@ public class Loader
   }
   
   protected void newStructure() throws Exception {
+    
+    m_Loader.reset();
+    
     // Set environment variables
     if (m_Loader instanceof EnvironmentHandler && m_env != null) {
       try {
@@ -381,8 +386,8 @@ public class Loader
       }
     }
     m_dataFormat = m_Loader.getStructure();
-    System.out.println("[Loader] Notifying listeners of instance structure avail.");
-    notifyStructureAvailable(m_dataFormat);
+//    System.out.println("[Loader] Notifying listeners of instance structure avail.");
+//    notifyStructureAvailable(m_dataFormat);
   }  
   
   /**
