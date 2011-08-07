@@ -28,6 +28,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Date;
+import java.util.regex.Matcher;
 
 /**
  * A simple file logger, that just logs to a single file. Deletes the file
@@ -75,12 +76,14 @@ public class FileLogger
     String	filename;
     File	result;
     
-    filename = m_Properties.getProperty("LogFile", "%w/weka.log");
-    filename = filename.replaceAll("%t", System.getProperty("java.io.tmpdir"));
-    filename = filename.replaceAll("%h", System.getProperty("user.home"));
-    filename = filename.replaceAll("%c", System.getProperty("user.dir"));
-    filename = filename.replaceAll("%w", WekaPackageManager.WEKA_HOME.toString());
-    filename = filename.replaceAll("%%", System.getProperty("%"));
+    filename = m_Properties.getProperty("LogFile", "%w" + File.separator + "weka.log");
+    filename = filename.replaceAll("%t", Matcher.quoteReplacement(System.getProperty("java.io.tmpdir")));
+    filename = filename.replaceAll("%h", Matcher.quoteReplacement(System.getProperty("user.home")));
+    filename = filename.replaceAll("%c", Matcher.quoteReplacement(System.getProperty("user.dir")));
+    filename = filename.replaceAll("%w", Matcher.quoteReplacement(WekaPackageManager.WEKA_HOME.toString()));
+    if (System.getProperty("%") != null && System.getProperty("%").length() > 0) {
+      filename = filename.replaceAll("%%", Matcher.quoteReplacement(System.getProperty("%")));
+    }
     
     result = new File(filename);
     
