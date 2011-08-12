@@ -28,6 +28,7 @@ import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Capabilities.Capability;
+import weka.core.Utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -240,7 +241,7 @@ public class CSVSaver
       PrintWriter outW = new PrintWriter(getWriter());
       // print out attribute names as first row
       for (int i = 0; i < getInstances().numAttributes(); i++) {
-	outW.print(getInstances().attribute(i).name());
+	outW.print(Utils.quote(getInstances().attribute(i).name()));
 	if (i < getInstances().numAttributes()-1) {
 	  outW.print(",");
 	} else {
