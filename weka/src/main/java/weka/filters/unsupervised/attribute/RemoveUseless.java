@@ -157,7 +157,9 @@ public class RemoveUseless
       for(int i = 0; i < toFilter.numAttributes(); i++) {
 	if (i==toFilter.classIndex()) continue; // skip class
 	AttributeStats stats = toFilter.attributeStats(i);
-	if (stats.distinctCount < 2) {
+	if (stats.missingCount == toFilter.numInstances()) {
+          attsToDelete[numToDelete++] = i;
+        } else if (stats.distinctCount < 2) {
 	  // remove constant attributes
 	  attsToDelete[numToDelete++] = i;
 	} else if (toFilter.attribute(i).isNominal()) {
