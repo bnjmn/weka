@@ -537,7 +537,7 @@ public class ConverterFileChooser
 	 && (getSelectedFile().exists()) ) {
       int retVal = JOptionPane.showConfirmDialog(
 	  	  parent, 
-	  	Messages.getInstance().getString("")
+	  	Messages.getInstance().getString("ConverterFileChooser_ShowOpenDialog_RetVal_JOptionPaneShowConfirmDialog_Text_First")
 	  	  + getSelectedFile() 
 	  	  + Messages.getInstance().getString("ConverterFileChooser_ShowSaveDialog_RetVal_JOptionPaneShowConfirmDialog_Text_Second"));
       if (retVal == JOptionPane.OK_OPTION)
