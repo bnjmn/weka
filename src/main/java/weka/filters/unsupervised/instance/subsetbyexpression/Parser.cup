@@ -1,8 +1,8 @@
 /*
  * STANDARD ML OF NEW JERSEY COPYRIGHT NOTICE, LICENSE AND DISCLAIMER.
- * 
+ *
  * Copyright (c) 1989-1998 by Lucent Technologies
- * 
+ *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
  * that the above copyright notice appear in all copies and that both the
@@ -16,11 +16,11 @@
  * be liable for any special, indirect or consequential damages or any damages
  * whatsoever resulting from loss of use, data or profits, whether in an action
  * of contract, negligence or other tortious action, arising out of or in
- * connection with the use or performance of this software. 
+ * connection with the use or performance of this software.
  *
  * Taken from this URL:
  * http://www.smlnj.org/license.html
- * 
+ *
  * This license is compatible with the GNU GPL (see section "Standard ML of New
  * Jersey Copyright License"):
  * http://www.gnu.org/licenses/license-list.html#StandardMLofNJ
@@ -39,7 +39,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * A parser for evaluating whether an Instance complies to a boolean expression 
+ * A parser for evaluating whether an Instance complies to a boolean expression
  * or not.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
@@ -58,7 +58,7 @@ parser code {:
 
   /**
    * Sets the variable - value relation to use.
-   * 
+   *
    * @param value the variable-value relation
    */
   public void setSymbols(HashMap value) {
@@ -67,7 +67,7 @@ parser code {:
 
   /**
    * Returns the current variable - value relation in use.
-   * 
+   *
    * @return the variable-value relation
    */
   public HashMap getSymbols() {
@@ -76,7 +76,7 @@ parser code {:
 
   /**
    * Sets the attribute - attribute-type relation to use.
-   * 
+   *
    * @param value the att - att-type relation
    */
   public void setAttributeTypes(Hashtable value) {
@@ -85,7 +85,7 @@ parser code {:
 
   /**
    * Returns the current attribute - attribute-type relation in use.
-   * 
+   *
    * @return the att - att-type relation
    */
   public Hashtable getAttributeTypes() {
@@ -94,7 +94,7 @@ parser code {:
 
   /**
    * Sets the result of the evaluation.
-   * 
+   *
    * @param value the result
    */
   public void setResult(Boolean value) {
@@ -103,7 +103,7 @@ parser code {:
 
   /**
    * Returns the result of the evaluation.
-   * 
+   *
    * @return the result
    */
   public Boolean getResult() {
@@ -115,7 +115,7 @@ parser code {:
    * ones. For all other attribute types this method throws an Exception.
    * It also returns a Double object in case of a missing value (for all
    * attribute types!).
-   * 
+   *
    * @param instance the instance to work on
    * @param index the index of the attribute to return
    * @return the converted value
@@ -143,14 +143,14 @@ parser code {:
   public static Instances filter(String expression, Instances input) throws Exception {
     // setup output
     Instances output = new Instances(input, 0);
-    
+
     // setup attribute - attribute-type relation
     Hashtable<String,Integer> attTypes = new Hashtable<String,Integer>();
     for (int i = 0; i < input.numAttributes(); i++)
        attTypes.put("ATT" + (i+1), input.attribute(i).type());
     if (input.classIndex() > -1)
       attTypes.put("CLASS", input.classAttribute().type());
-    
+
     // filter dataset
     SymbolFactory sf = new DefaultSymbolFactory();
     HashMap symbols = new HashMap();
@@ -185,7 +185,7 @@ parser code {:
    *   <li>class index (first|last|num), use 0 to ignore</li>
    *   <li>output file</li>
    * </ol>
-   * 
+   *
    * @param args the commandline arguments
    * @throws Exception if something goes wrong
    */
@@ -243,7 +243,7 @@ precedence left NOT;
 
 boolexpr_list ::= boolexpr_list boolexpr_part | boolexpr_part;
 boolexpr_part ::= boolexpr:e {: parser.setResult(e); :} ;
-boolexpr ::=    BOOLEAN:b 
+boolexpr ::=    BOOLEAN:b
                 {: RESULT = b; :}
               | TRUE
                 {: RESULT = new Boolean(true); :}
@@ -268,26 +268,26 @@ boolexpr ::=    BOOLEAN:b
               | boolexpr:l OR boolexpr:r
                 {: RESULT = l || r; :}
               | ATTRIBUTE:a IS STRING:s
-                {: if (parser.getSymbols().containsKey(a)) 
+                {: if (parser.getSymbols().containsKey(a))
                      RESULT = (parser.getSymbols().get(a) instanceof String) && ((String) parser.getSymbols().get(a)).equals(s);
-                   else 
-                     throw new IllegalStateException("Unknown symbol '" + a + "'!"); 
+                   else
+                     throw new IllegalStateException("Unknown symbol '" + a + "'!");
                 :}
               | ISMISSING LPAREN ATTRIBUTE:a RPAREN
-                {: if (parser.getSymbols().containsKey(a)) 
-                     RESULT = (parser.getSymbols().get(a) instanceof Double) && Instance.isMissingValue((Double) parser.getSymbols().get(a));
-                   else 
-                     throw new IllegalStateException("Unknown symbol '" + a + "'!"); 
+                {: if (parser.getSymbols().containsKey(a))
+                     RESULT = (parser.getSymbols().get(a) instanceof Double) && Utils.isMissingValue((Double) parser.getSymbols().get(a));
+                   else
+                     throw new IllegalStateException("Unknown symbol '" + a + "'!");
                 :}
               ;
 
 expr      ::=   NUMBER:n
                 {: RESULT = n; :}
               | ATTRIBUTE:a
-                {: if (parser.getSymbols().containsKey(a)) 
-                     RESULT = (Double) parser.getSymbols().get(a); 
-                   else 
-                     throw new IllegalStateException("Unknown symbol '" + a + "'!"); 
+                {: if (parser.getSymbols().containsKey(a))
+                     RESULT = (Double) parser.getSymbols().get(a);
+                   else
+                     throw new IllegalStateException("Unknown symbol '" + a + "'!");
                 :}
               | LPAREN expr:e RPAREN
                 {: RESULT = e; :}
