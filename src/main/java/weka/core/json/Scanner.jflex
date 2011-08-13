@@ -33,6 +33,7 @@ import java.io.*;
 %%
 %cup
 %public
+%unicode
 %class Scanner
 %{
   // Author: FracPete (fracpete at waikato dot ac dot nz)
