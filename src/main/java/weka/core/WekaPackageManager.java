@@ -94,6 +94,7 @@ public class WekaPackageManager {
     if (wh != null) {
       WEKA_HOME = new File(wh);
       PACKAGES_DIR = new File(wh + File.separator + "packages");
+      PROPERTIES_DIR = new File(wh + File.separator + PROPERTIES_DIR_NAME);
     } else {      
       env.addVariableSystemWide("WEKA_HOME", WEKA_HOME.toString());
     }
