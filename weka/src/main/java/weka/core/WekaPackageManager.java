@@ -59,6 +59,13 @@ import weka.gui.GenericPropertiesCreator;
 import weka.gui.beans.KnowledgeFlowApp;
 import weka.gui.explorer.ExplorerDefaults;
 
+/**
+ * Class providing package management and manipulation routines. Also provides
+ * a command line interface for package management.
+ * 
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision$
+ */
 public class WekaPackageManager {
   
   private static String WEKAFILES_DIR_NAME = "wekafiles";
