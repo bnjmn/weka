@@ -1104,7 +1104,7 @@ public class Apriori
       +"number of examples that this represents is presented in brackets "
       +"following the leverage. Conviction is "
       +"another measure of departure from independence. Conviction is given "
-      +"by ";
+      +"by P(premise)P(!consequence) / P(premise, !consequence).";
   }
 
   /**
