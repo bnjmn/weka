@@ -22,17 +22,7 @@
 
 package weka.experiment;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Time;
@@ -40,6 +30,17 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 
 /**
  * Convert the results of a database query into instances. The jdbc
@@ -86,10 +87,13 @@ public class InstanceQuery
   static final long serialVersionUID = 718158370917782584L;
 
   /** Determines whether sparse data is created */
-  boolean m_CreateSparseData = false;
+  protected boolean m_CreateSparseData = false;
   
   /** Query to execute */
-  String m_Query = "SELECT * from ?";
+  protected String m_Query = "SELECT * from ?";
+  
+  /** the custom props file to use instead of default one. */
+  protected File m_CustomPropsFile = null;
 
   /**
    * Sets up the database drivers
@@ -124,6 +128,13 @@ public class InstanceQuery
      result.addElement(
          new Option("\tThe password to use for connecting.", 
                     "P", 1, "-P <password>"));
+     
+     result.add(
+	 new Option(
+             "\tThe custom properties file to use instead of default ones,\n"
+           + "\tcontaining the database parameters.\n"
+           + "\t(default: none)",
+           "custom-props", 1, "-custom-props <file>"));
      
      result.addElement(
          new Option("\tEnables debug output.", 
@@ -176,6 +187,12 @@ public class InstanceQuery
     tmpStr = Utils.getOption('P',options);
     if (tmpStr.length() != 0)
       setPassword(tmpStr);
+    
+    tmpStr = Utils.getOption("custom-props", options);
+    if (tmpStr.length() == 0)
+      setCustomPropsFile(null);
+    else
+      setCustomPropsFile(new File(tmpStr));
 
     setDebug(Utils.getFlag('D',options));
   }
@@ -229,6 +246,36 @@ public class InstanceQuery
   public boolean getSparseData() {
     return m_CreateSparseData;
   }
+  
+  /**
+   * Sets the custom properties file to use.
+   * 
+   * @param value 	the custom props file to load database parameters from,
+   * 			use null or directory to disable custom properties.
+   * @see		#initialize(File)
+   */
+  public void setCustomPropsFile(File value) {
+    m_CustomPropsFile = value;
+    initialize(m_CustomPropsFile);
+  }
+  
+   /**
+   * Returns the custom properties file in use, if any.
+   * 
+   * @return 		the custom props file, null if none used
+   */
+  public File getCustomPropsFile() {
+    return m_CustomPropsFile;
+  }
+  
+  /**
+   * The tip text for this property.
+   * 
+   * @return 		the tip text
+   */
+  public String customPropsFileTipText(){
+    return "The custom properties that the user can use to override the default ones.";
+  }
 
   /**
    * Gets the current settings of InstanceQuery
@@ -253,6 +300,11 @@ public class InstanceQuery
     if (!getPassword().equals("")) {
       options.add("-P");
       options.add(getPassword());
+    }
+    
+    if ((m_CustomPropsFile != null) && !m_CustomPropsFile.isDirectory()) {
+      options.add("-custom-props");
+      options.add(m_CustomPropsFile.toString());
     }
 
     if (getDebug())
