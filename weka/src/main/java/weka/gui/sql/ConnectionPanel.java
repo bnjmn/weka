@@ -23,13 +23,6 @@
 
 package weka.gui.sql;
 
-import weka.gui.DatabaseConnectionDialog;
-import weka.gui.ListSelectorDialog;
-import weka.gui.sql.event.ConnectionEvent;
-import weka.gui.sql.event.ConnectionListener;
-import weka.gui.sql.event.HistoryChangedEvent;
-import weka.gui.sql.event.HistoryChangedListener;
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -39,21 +32,31 @@ import java.util.Iterator;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.CaretListener;
 import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+
+import weka.gui.ComponentHelper;
+import weka.gui.DatabaseConnectionDialog;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.ListSelectorDialog;
+import weka.gui.sql.event.ConnectionEvent;
+import weka.gui.sql.event.ConnectionListener;
+import weka.gui.sql.event.HistoryChangedEvent;
+import weka.gui.sql.event.HistoryChangedListener;
 
 /**
  * Enables the user to insert a database URL, plus user/password to connect
  * to this database.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.3 $
+ * @version     $Revision$
  */
 public class ConnectionPanel 
   extends JPanel 
@@ -87,13 +90,16 @@ public class ConnectionPanel
   protected JTextField m_TextURL = new JTextField(40);
 
   /** the button for the DB-Dialog. */
-  protected JButton m_ButtonDatabase = new JButton("User...");
+  protected JButton m_ButtonDatabase = new JButton(ComponentHelper.getImageIcon("user.png"));
 
   /** the button for connecting to the database. */
-  protected JButton m_ButtonConnect = new JButton("Connect");
+  protected JButton m_ButtonConnect = new JButton(ComponentHelper.getImageIcon("connect.png"));
 
   /** the button for the history. */
-  protected JButton m_ButtonHistory = new JButton("History...");
+  protected JButton m_ButtonHistory = new JButton(ComponentHelper.getImageIcon("history.png"));
+
+  /** the button for the setup. */
+  protected JButton m_ButtonSetup = new JButton(ComponentHelper.getImageIcon("properties.gif"));
 
   /** the connection listeners. */
   protected HashSet m_ConnectionListeners;
@@ -107,6 +113,9 @@ public class ConnectionPanel
   /** the history of connections. */
   protected DefaultListModel m_History = new DefaultListModel();
 
+  /** the file chooser for the setup files. */
+  protected JFileChooser m_SetupFileChooser;
+  
   /**
    * initializes the panel.
    * 
@@ -118,6 +127,14 @@ public class ConnectionPanel
     m_Parent                  = parent;
     m_ConnectionListeners     = new HashSet();
     m_HistoryChangedListeners = new HashSet();
+    m_SetupFileChooser        = new JFileChooser();
+    m_SetupFileChooser.setDialogTitle("Switch database setup");
+    m_SetupFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    m_SetupFileChooser.setMultiSelectionEnabled(false);
+    m_SetupFileChooser.setAcceptAllFileFilterUsed(true);
+    ExtensionFileFilter filter = new ExtensionFileFilter(".props", "Properties file");
+    m_SetupFileChooser.addChoosableFileFilter(filter);
+    m_SetupFileChooser.setFileFilter(filter);
     
     try {
       m_DbUtils   = new DbUtils();
@@ -160,7 +177,7 @@ public class ConnectionPanel
     panel = new JPanel(new FlowLayout());
     panel2.add(panel);
     
-    m_ButtonDatabase.setMnemonic('s');
+    m_ButtonDatabase.setToolTipText("Set user and password");
     m_ButtonDatabase.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  showDialog();
@@ -168,20 +185,29 @@ public class ConnectionPanel
       });
     panel.add(m_ButtonDatabase);
     
-    m_ButtonConnect.setMnemonic('n');
+    m_ButtonConnect.setToolTipText("Connect to the database");
     m_ButtonConnect.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  connect();
 	}
       });
     panel.add(m_ButtonConnect);
-
+    
+    m_ButtonHistory.setToolTipText("Select a previously used connection");
     m_ButtonHistory.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  showHistory();
 	}
       });
     panel.add(m_ButtonHistory);
+
+    m_ButtonSetup.setToolTipText("Switch database setup");
+    m_ButtonSetup.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  switchSetup();
+	}
+    });
+    panel.add(m_ButtonSetup);
 
     setButtons();
   }
@@ -197,6 +223,7 @@ public class ConnectionPanel
     m_ButtonConnect.setEnabled(!isEmpty);
     m_ButtonDatabase.setEnabled(!isEmpty);
     m_ButtonHistory.setEnabled(m_History.size() > 0);
+    m_ButtonSetup.setEnabled(true);
   }
 
   /**
@@ -392,6 +419,26 @@ public class ConnectionPanel
     setButtons();
   }
 
+  /**
+   * Lets the user select a props file for changing the database connection
+   * parameters.
+   */
+  public void switchSetup() {
+    int		retVal;
+    
+    retVal = m_SetupFileChooser.showOpenDialog(this);
+    if (retVal != JFileChooser.APPROVE_OPTION)
+      return;
+    
+    m_DbUtils.initialize(m_SetupFileChooser.getSelectedFile());
+    
+    m_URL      = m_DbUtils.getDatabaseURL();
+    m_User     = m_DbUtils.getUsername();
+    m_Password = m_DbUtils.getPassword();
+    
+    m_TextURL.setText(m_URL);
+  }
+  
   /**
    * adds the given listener to the list of listeners.
    * 
