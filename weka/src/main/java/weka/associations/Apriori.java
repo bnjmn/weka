@@ -1127,7 +1127,7 @@ public class Apriori
   public String metricTypeTipText() {
     return "Set the type of metric by which to rank rules. Confidence is "
       +"the proportion of the examples covered by the premise that are also "
-      +"covered by the consequence(Class association rules can only be mined using confidence). Lift is confidence divided by the "
+      +"covered by the consequence (Class association rules can only be mined using confidence). Lift is confidence divided by the "
       +"proportion of all examples that are covered by the consequence. This "
       +"is a measure of the importance of the association that is independent "
       +"of support. Leverage is the proportion of additional examples covered "
@@ -1136,7 +1136,7 @@ public class Apriori
       +"number of examples that this represents is presented in brackets "
       +"following the leverage. Conviction is "
       +"another measure of departure from independence. Conviction is given "
-      +"by ";
+      +"by P(premise)P(!consequence) / P(premise, !consequence).";
   }
 
   /**
