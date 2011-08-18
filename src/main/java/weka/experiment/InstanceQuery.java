@@ -22,17 +22,7 @@
 
 package weka.experiment;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Time;
@@ -40,6 +30,17 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 
 /**
  * Convert the results of a database query into instances. The jdbc
@@ -57,39 +58,42 @@ import java.util.Vector;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -Q &lt;query&gt;
  *  SQL query to execute.</pre>
- * 
+ *
  * <pre> -S
  *  Return sparse rather than normal instances.</pre>
- * 
+ *
  * <pre> -U &lt;username&gt;
  *  The username to use for connecting.</pre>
- * 
+ *
  * <pre> -P &lt;password&gt;
  *  The password to use for connecting.</pre>
- * 
+ *
  * <pre> -D
  *  Enables debug output.</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class InstanceQuery 
-  extends DatabaseUtils 
+public class InstanceQuery
+  extends DatabaseUtils
   implements OptionHandler {
-  
+
   /** for serialization */
   static final long serialVersionUID = 718158370917782584L;
 
   /** Determines whether sparse data is created */
-  boolean m_CreateSparseData = false;
-  
+  protected boolean m_CreateSparseData = false;
+
   /** Query to execute */
-  String m_Query = "SELECT * from ?";
+  protected String m_Query = "SELECT * from ?";
+
+  /** the custom props file to use instead of default one. */
+  protected File m_CustomPropsFile = null;
 
   /**
    * Sets up the database drivers
@@ -112,23 +116,30 @@ public class InstanceQuery
      result.addElement(
          new Option("\tSQL query to execute.",
                     "Q",1,"-Q <query>"));
-     
+
      result.addElement(
-         new Option("\tReturn sparse rather than normal instances.", 
+         new Option("\tReturn sparse rather than normal instances.",
                     "S", 0, "-S"));
-     
+
      result.addElement(
-         new Option("\tThe username to use for connecting.", 
+         new Option("\tThe username to use for connecting.",
                     "U", 1, "-U <username>"));
-     
+
      result.addElement(
-         new Option("\tThe password to use for connecting.", 
+         new Option("\tThe password to use for connecting.",
                     "P", 1, "-P <password>"));
-     
+
+     result.add(
+	 new Option(
+             "\tThe custom properties file to use instead of default ones,\n"
+           + "\tcontaining the database parameters.\n"
+           + "\t(default: none)",
+           "custom-props", 1, "-custom-props <file>"));
+
      result.addElement(
-         new Option("\tEnables debug output.", 
+         new Option("\tEnables debug output.",
                     "D", 0, "-D"));
-     
+
      return result.elements();
    }
 
@@ -137,22 +148,22 @@ public class InstanceQuery
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -Q &lt;query&gt;
    *  SQL query to execute.</pre>
-   * 
+   *
    * <pre> -S
    *  Return sparse rather than normal instances.</pre>
-   * 
+   *
    * <pre> -U &lt;username&gt;
    *  The username to use for connecting.</pre>
-   * 
+   *
    * <pre> -P &lt;password&gt;
    *  The password to use for connecting.</pre>
-   * 
+   *
    * <pre> -D
    *  Enables debug output.</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -162,7 +173,7 @@ public class InstanceQuery
     throws Exception {
 
     String      tmpStr;
-    
+
     setSparseData(Utils.getFlag('S',options));
 
     tmpStr = Utils.getOption('Q',options);
@@ -177,6 +188,12 @@ public class InstanceQuery
     if (tmpStr.length() != 0)
       setPassword(tmpStr);
 
+    tmpStr = Utils.getOption("custom-props", options);
+    if (tmpStr.length() == 0)
+      setCustomPropsFile(null);
+    else
+      setCustomPropsFile(new File(tmpStr));
+
     setDebug(Utils.getFlag('D',options));
   }
 
@@ -188,7 +205,7 @@ public class InstanceQuery
   public String queryTipText() {
     return "The SQL query to execute against the database.";
   }
-  
+
   /**
    * Set the query to execute against the database
    * @param q the query to execute
@@ -231,6 +248,36 @@ public class InstanceQuery
   }
 
   /**
+   * Sets the custom properties file to use.
+   *
+   * @param value 	the custom props file to load database parameters from,
+   * 			use null or directory to disable custom properties.
+   * @see		#initialize(File)
+   */
+  public void setCustomPropsFile(File value) {
+    m_CustomPropsFile = value;
+    initialize(m_CustomPropsFile);
+  }
+
+   /**
+   * Returns the custom properties file in use, if any.
+   *
+   * @return 		the custom props file, null if none used
+   */
+  public File getCustomPropsFile() {
+    return m_CustomPropsFile;
+  }
+
+  /**
+   * The tip text for this property.
+   *
+   * @return 		the tip text
+   */
+  public String customPropsFileTipText(){
+    return "The custom properties that the user can use to override the default ones.";
+  }
+
+  /**
    * Gets the current settings of InstanceQuery
    *
    * @return an array of strings suitable for passing to setOptions()
@@ -239,9 +286,9 @@ public class InstanceQuery
 
     Vector options = new Vector();
 
-    options.add("-Q"); 
+    options.add("-Q");
     options.add(getQuery());
- 
+
     if (getSparseData())
       options.add("-S");
 
@@ -255,6 +302,11 @@ public class InstanceQuery
       options.add(getPassword());
     }
 
+    if ((m_CustomPropsFile != null) && !m_CustomPropsFile.isDirectory()) {
+      options.add("-custom-props");
+      options.add(m_CustomPropsFile.toString());
+    }
+
     if (getDebug())
       options.add("-D");
 
@@ -262,7 +314,7 @@ public class InstanceQuery
   }
 
   /**
-   * Makes a database query using the query set through the -Q option 
+   * Makes a database query using the query set through the -Q option
    * to convert a table into a set of instances
    *
    * @return the instances contained in the result of the query
@@ -282,7 +334,7 @@ public class InstanceQuery
    */
   public Instances retrieveInstances(String query) throws Exception {
 
-    if (m_Debug) 
+    if (m_Debug)
       System.err.println("Executing query: " + query);
     connectToDatabase();
     if (execute(query) == false) {
@@ -290,21 +342,21 @@ public class InstanceQuery
         throw new Exception("Query didn't produce results");
       }
       else {
-        if (m_Debug) 
-          System.err.println(m_PreparedStatement.getUpdateCount() 
+        if (m_Debug)
+          System.err.println(m_PreparedStatement.getUpdateCount()
               + " rows affected.");
         close();
         return null;
       }
     }
     ResultSet rs = getResultSet();
-    if (m_Debug) 
+    if (m_Debug)
       System.err.println("Getting metadata...");
     ResultSetMetaData md = rs.getMetaData();
-    if (m_Debug) 
+    if (m_Debug)
       System.err.println("Completed getting metadata...");
-    
-    
+
+
     // Determine structure of the instances
     int numAttributes = md.getColumnCount();
     int [] attributeTypes = new int [numAttributes];
@@ -318,9 +370,9 @@ public class InstanceQuery
       case Types.BINARY:
       case Types.VARBINARY:
       case Types.LONGVARBINARY:*/
-      
+
       switch (translateDBColumnType(md.getColumnTypeName(i))) {
-	
+
       case STRING :
 	//System.err.println("String --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
@@ -381,14 +433,14 @@ public class InstanceQuery
 
     // For sqlite
     // cache column names because the last while(rs.next()) { iteration for
-    // the tuples below will close the md object:  
-    Vector<String> columnNames = new Vector<String>(); 
+    // the tuples below will close the md object:
+    Vector<String> columnNames = new Vector<String>();
     for (int i = 0; i < numAttributes; i++) {
       columnNames.add(md.getColumnLabel(i + 1));
     }
 
     // Step through the tuples
-    if (m_Debug) 
+    if (m_Debug)
       System.err.println("Creating instances...");
     FastVector instances = new FastVector();
     int rowCount = 0;
@@ -411,7 +463,7 @@ public class InstanceQuery
 	switch (translateDBColumnType(md.getColumnTypeName(i))) {
 	case STRING :
 	  String str = rs.getString(i);
-	  
+
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Utils.missingValue();
 	  } else {
@@ -426,7 +478,7 @@ public class InstanceQuery
 	  break;
 	case TEXT:
 	  String txt = rs.getString(i);
-	  
+
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Utils.missingValue();
 	  } else {
@@ -448,7 +500,7 @@ public class InstanceQuery
 	  }
 	  break;
 	case DOUBLE:
-	  //	  BigDecimal bd = rs.getBigDecimal(i, 4); 
+	  //	  BigDecimal bd = rs.getBigDecimal(i, 4);
 	  double dd = rs.getDouble(i);
 	  // Use the column precision instead of 4?
 	  if (rs.wasNull()) {
@@ -530,9 +582,9 @@ public class InstanceQuery
       rowCount++;
     }
     //disconnectFromDatabase();  (perhaps other queries might be made)
-    
+
     // Create the header and add the instances to the dataset
-    if (m_Debug) 
+    if (m_Debug)
       System.err.println("Creating header...");
     FastVector attribInfo = new FastVector();
     for (int i = 0; i < numAttributes; i++) {
@@ -560,13 +612,13 @@ public class InstanceQuery
 	throw new Exception("Unknown attribute type");
       }
     }
-    Instances result = new Instances("QueryResult", attribInfo, 
+    Instances result = new Instances("QueryResult", attribInfo,
 				     instances.size());
     for (int i = 0; i < instances.size(); i++) {
       result.add((Instance)instances.elementAt(i));
     }
     close(rs);
-   
+
     return result;
   }
 
@@ -598,7 +650,7 @@ public class InstanceQuery
 	}
 	System.exit(1);
       }
-     
+
       Instances aha = iq.retrieveInstances();
       iq.disconnectFromDatabase();
       // query returned no result -> exit
@@ -616,10 +668,10 @@ public class InstanceQuery
       System.err.println(e.getMessage());
     }
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
