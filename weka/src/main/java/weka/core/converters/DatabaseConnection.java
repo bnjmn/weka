@@ -25,8 +25,10 @@ package weka.core.converters;
 import weka.core.RevisionUtils;
 import weka.experiment.DatabaseUtils;
 
+import java.io.File;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * Connects to a database.
@@ -42,14 +44,44 @@ public class DatabaseConnection
   static final long serialVersionUID = 1673169848863178695L;
   
   /**
-   * Sets up the database drivers
+   * Sets up the database drivers.
    *
    * @throws Exception if an error occurs
    */
   public DatabaseConnection() throws Exception {
     super();
   }
+  
+  /**
+   * Reads the properties from the specified file and sets up the database drivers.
+   *
+   * @param propsFile	the props file to load, ignored if null or pointing 
+   * 			to a directory
+   * @throws Exception 	if an error occurs
+   */
+  public DatabaseConnection(File propsFile) throws Exception {
+    super(propsFile);
+  }
+  
+  /**
+   * Uses the specified properties to set up the database drivers.
+   *
+   * @param props	the properties to use, ignored if null
+   * @throws Exception 	if an error occurs
+   */
+  public DatabaseConnection(Properties props) throws Exception {
+    super(props);
+  }
 
+  /**
+   * Returns the underlying properties object.
+   * 
+   * @return		the properties object
+   */
+  public Properties getProperties() {
+    return PROPERTIES;
+  }
+  
   /** 
    * Check if the property checkUpperCaseNames in the DatabaseUtils file is 
    * set to true or false.

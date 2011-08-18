@@ -22,23 +22,22 @@
 
 package weka.core.converters;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -86,64 +85,52 @@ public class DatabaseSaver
   static final long serialVersionUID = 863971733782624956L;
   
   /** The database connection. */
-  private DatabaseConnection m_DataBaseConnection;
+  protected DatabaseConnection m_DataBaseConnection;
   
   /** The name of the table in which the instances should be stored. */
-  private String m_tableName;
+  protected String m_tableName;
   
   /** An input arff file (for command line use). */
-  private String m_inputFile;
+  protected String m_inputFile;
   
   /** The database specific type for a string (read in from the properties file). */
-  private String m_createText;
+  protected String m_createText;
   
   /** The database specific type for a double (read in from the properties file). */
-  private String m_createDouble;
+  protected String m_createDouble;
   
   /** The database specific type for an int (read in from the properties file). */
-  private String m_createInt;
+  protected String m_createInt;
   
   /** The database specific type for a date (read in from the properties file). */
-  private String m_createDate;
+  protected String m_createDate;
   
   /** For converting the date value into a database string. */
-  private SimpleDateFormat m_DateFormat;
+  protected SimpleDateFormat m_DateFormat;
   
   /** The name of the primary key column that will be automatically generated (if enabled). The name is read from DatabaseUtils.*/
-  private String m_idColumn;
+  protected String m_idColumn;
   
   /** counts the rows and used as a primary key value. */
-  private int m_count;
+  protected int m_count;
   
   /** Flag indicating if a primary key column should be added. */
-  private boolean m_id;
+  protected boolean m_id;
   
   /** Flag indicating whether the default name of the table is the relaion name or not.*/
-  private boolean m_tabName;
+  protected boolean m_tabName;
+  
+  /** the database URL. */
+  protected String m_URL;
   
   /** the user name for the database. */
-  private String m_Username;
+  protected String m_Username;
   
   /** the password for the database. */
-  private String m_Password;
+  protected String m_Password;
   
-  /** The property file for the database connection. */
-  protected static String PROPERTY_FILE = DatabaseConnection.PROPERTY_FILE;
-  
-  /** Properties associated with the database connection. */
-  protected static Properties PROPERTIES;
-
-  /** reads the property file */
-  static {
-
-    try {
-      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-   
-    } catch (Exception ex) {
-      System.err.println("Problem reading properties. Fix before continuing.");
-      System.err.println(ex);
-    }
-  }
+  /** the custom props file to use instead of default one. */
+  protected File m_CustomPropsFile = null;
   
    /** 
     * Constructor.
@@ -153,12 +140,30 @@ public class DatabaseSaver
   public DatabaseSaver() throws Exception{
   
       resetOptions();
-      m_createText = PROPERTIES.getProperty("CREATE_STRING");
-      m_createDouble = PROPERTIES.getProperty("CREATE_DOUBLE");
-      m_createInt = PROPERTIES.getProperty("CREATE_INT");
-      m_createDate = PROPERTIES.getProperty("CREATE_DATE", "DATETIME");
-      m_DateFormat = new SimpleDateFormat(PROPERTIES.getProperty("DateFormat", "yyyy-MM-dd HH:mm:ss"));
-      m_idColumn = PROPERTIES.getProperty("idColumn");
+      m_createText   = m_DataBaseConnection.getProperties().getProperty("CREATE_STRING");
+      m_createDouble = m_DataBaseConnection.getProperties().getProperty("CREATE_DOUBLE");
+      m_createInt    = m_DataBaseConnection.getProperties().getProperty("CREATE_INT");
+      m_createDate   = m_DataBaseConnection.getProperties().getProperty("CREATE_DATE", "DATETIME");
+      m_DateFormat   = new SimpleDateFormat(m_DataBaseConnection.getProperties().getProperty("DateFormat", "yyyy-MM-dd HH:mm:ss"));
+      m_idColumn     = m_DataBaseConnection.getProperties().getProperty("idColumn");
+  }
+
+  /**
+   * Initializes a new DatabaseConnection object, either default one or from
+   * custom props file.
+   * 
+   * @return		the DatabaseConnection object
+   * @see		#m_CustomPropsFile
+   */
+  protected DatabaseConnection newDatabaseConnection() throws Exception {
+    DatabaseConnection	result;
+    
+    if (m_CustomPropsFile != null)
+      result = new DatabaseConnection(m_CustomPropsFile);
+    else
+      result = new DatabaseConnection();
+    
+    return result;
   }
   
   /** 
@@ -167,20 +172,25 @@ public class DatabaseSaver
   public void resetOptions(){
 
     super.resetOptions();
+
     setRetrieval(NONE);
-    m_tableName = "";
-    m_Username = "";
-    m_Password = "";
-    m_count = 1;
-    m_id = false;
-    m_tabName = true;
+    
     try{
-        if(m_DataBaseConnection != null && m_DataBaseConnection.isConnected())
-            m_DataBaseConnection.disconnectFromDatabase();
-        m_DataBaseConnection = new DatabaseConnection();
-    }catch(Exception ex) {
-        printException(ex);
+      if (m_DataBaseConnection != null && m_DataBaseConnection.isConnected())
+	m_DataBaseConnection.disconnectFromDatabase();
+      m_DataBaseConnection = newDatabaseConnection();
+    }
+    catch(Exception ex) {
+      printException(ex);
     }    
+
+    m_URL       = m_DataBaseConnection.getDatabaseURL();
+    m_tableName = "";
+    m_Username  = "";
+    m_Password  = "";
+    m_count     = 1;
+    m_id        = false;
+    m_tabName   = true;
   }
   
   /** 
@@ -310,8 +320,8 @@ public class DatabaseSaver
    */  
   public void setUrl(String url){
       
+      m_URL = url;
       m_DataBaseConnection.setDatabaseURL(url);
-    
   }
   
   /** 
@@ -321,7 +331,7 @@ public class DatabaseSaver
    */  
   public String getUrl(){
   
-      return m_DataBaseConnection.getDatabaseURL();
+      return m_URL;
   }
   
   /** 
@@ -392,6 +402,34 @@ public class DatabaseSaver
   
       return "The database password";
   }
+  
+  /**
+   * Sets the custom properties file to use.
+   * 
+   * @param value 	the custom props file to load database parameters from,
+   * 			use null or directory to disable custom properties.
+   */
+  public void setCustomPropsFile(File value) {
+    m_CustomPropsFile = value;
+  }
+  
+   /**
+   * Returns the custom properties file in use, if any.
+   * 
+   * @return 		the custom props file, null if none used
+   */
+  public File getCustomPropsFile() {
+    return m_CustomPropsFile;
+  }
+  
+  /**
+   * The tip text for this property.
+   * 
+   * @return 		the tip text
+   */
+  public String customPropsFileTipText(){
+    return "The custom properties that the user can use to override the default ones.";
+  }
       
   /** 
    * Sets the database url.
@@ -403,7 +441,7 @@ public class DatabaseSaver
   public void setDestination(String url, String userName, String password){
   
       try{
-        m_DataBaseConnection = new DatabaseConnection();
+        m_DataBaseConnection = newDatabaseConnection();
         m_DataBaseConnection.setDatabaseURL(url);
         m_DataBaseConnection.setUsername(userName);
         m_DataBaseConnection.setPassword(password);
@@ -420,7 +458,7 @@ public class DatabaseSaver
   public void setDestination(String url){
   
       try{
-        m_DataBaseConnection = new DatabaseConnection();
+        m_DataBaseConnection = newDatabaseConnection();
         m_DataBaseConnection.setDatabaseURL(url);
         m_DataBaseConnection.setUsername(m_Username);
         m_DataBaseConnection.setPassword(m_Password);
@@ -433,7 +471,7 @@ public class DatabaseSaver
   public void setDestination(){
   
       try{
-        m_DataBaseConnection = new DatabaseConnection();
+        m_DataBaseConnection = newDatabaseConnection();
         m_DataBaseConnection.setUsername(m_Username);
         m_DataBaseConnection.setPassword(m_Password);
       } catch(Exception ex) {
@@ -738,6 +776,11 @@ public class DatabaseSaver
       options.add(m_inputFile);
     }
     
+    if ((m_CustomPropsFile != null) && !m_CustomPropsFile.isDirectory()) {
+      options.add("-custom-props");
+      options.add(m_CustomPropsFile.toString());
+    }
+    
     return (String[]) options.toArray(new String[options.size()]);
   }
   
@@ -775,6 +818,12 @@ public class DatabaseSaver
            + "\tin the DatabaseUtils file ('idColumn'). The DatabaseLoader\n"
            + "\twon't load this column.",
            "P", 0, "-P"));
+     
+     newVector.add(new Option(
+             "\tThe custom properties file to use instead of default ones,\n"
+           + "\tcontaining the database parameters.\n"
+           + "\t(default: none)",
+           "custom-props", 1, "-custom-props <file>"));
      
      newVector.addElement(new Option(
            "\tInput file in arff format that should be saved in database.",
@@ -862,6 +911,12 @@ public class DatabaseSaver
             ex.printStackTrace();
       }    
     }
+    
+    tmpStr = Utils.getOption("custom-props", options);
+    if (tmpStr.length() == 0)
+      setCustomPropsFile(null);
+    else
+      setCustomPropsFile(new File(tmpStr));
   }
   
   /**
@@ -892,7 +947,7 @@ public class DatabaseSaver
             text.append(option.description()+'\n');
         }  
           asv.setOptions(options);
-          asv.setDestination();
+          asv.setDestination(asv.getUrl());
         } catch (Exception ex) {
             ex.printStackTrace();
 	}
