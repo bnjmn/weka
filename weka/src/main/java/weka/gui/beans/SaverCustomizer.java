@@ -54,6 +54,7 @@ import weka.core.EnvironmentHandler;
 import weka.core.converters.DatabaseConverter;
 import weka.core.converters.DatabaseSaver;
 import weka.core.converters.FileSourcedConverter;
+import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 
@@ -111,6 +112,8 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   private Environment m_env = Environment.getSystemWide();
   
   private EnvironmentField m_directoryText;
+  
+  private FileEnvironmentField m_dbProps;
   
   private ModifyListener m_modifyListener;
 
@@ -313,6 +316,57 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 5; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_idBox, gbConstraints);
     db.add(m_idBox);
+    
+    JLabel propsLab = new JLabel("DB config props", SwingConstants.RIGHT);
+    propsLab.setToolTipText("The custom properties that the user can use to override the default ones.");
+    propsLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 6; gbConstraints.gridx = 0;
+    gbLayout.setConstraints(propsLab, gbConstraints);
+    db.add(propsLab);
+    
+    m_dbProps = new FileEnvironmentField();
+    m_dbProps.setEnvironment(m_env);
+    m_dbProps.resetFileFilters();
+    m_dbProps.addFileFilter(new ExtensionFileFilter(".props" , 
+        "DatabaseUtils property file (*.props)"));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 6; gbConstraints.gridx = 1;
+    gbLayout.setConstraints(m_dbProps, gbConstraints);
+    db.add(m_dbProps);
+    File toSet = ((DatabaseSaver)m_dsSaver.getSaverTemplate()).getCustomPropsFile();
+    if (toSet != null) {
+      m_dbProps.setText(toSet.getPath());
+    }
+    JButton loadPropsBut = new JButton("Load");
+    loadPropsBut.setToolTipText("Load config");
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 6; gbConstraints.gridx = 2;
+    gbLayout.setConstraints(loadPropsBut, gbConstraints);
+    db.add(loadPropsBut);
+    loadPropsBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_dbProps.getText() != null &&
+            m_dbProps.getText().length() > 0) {
+          String propsS = m_dbProps.getText();
+          try {
+            propsS = m_env.substitute(propsS);
+          } catch (Exception ex) { }
+          File propsFile = new File(propsS);
+          if (propsFile.exists()) {
+            ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setCustomPropsFile(propsFile);
+            ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetOptions();
+            m_dbaseURLText.setText(((DatabaseConverter)m_dsSaver.getSaverTemplate()).getUrl());
+          }
+        }
+      }
+    });
 
     JPanel buttonsP = new JPanel();
     buttonsP.setLayout(new FlowLayout());
@@ -321,7 +375,12 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     buttonsP.add(cancel=new JButton("Cancel"));
     ok.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetStructure();  
+        if (m_dbProps.getText().length() > 0) {
+          ((DatabaseSaver)m_dsSaver.getSaverTemplate()).
+            setCustomPropsFile(new File(m_dbProps.getText()));
+        }
+        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetStructure();
+        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetOptions();  
         ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setUrl(m_dbaseURLText.getText());
         ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setUser(m_userNameText.getText());
         ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setPassword(new String(m_passwordText.getPassword()));
@@ -330,6 +389,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
         }
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setAutoKeyGeneration(m_idBox.isSelected());
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setRelationForTableName(m_tabBox.isSelected());
+        
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(SaverCustomizer.this, true);
         }
