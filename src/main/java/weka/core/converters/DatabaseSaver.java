@@ -578,11 +578,13 @@ public class DatabaseSaver
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
+    result.enable(Capability.STRING_ATTRIBUTES);
     
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.STRING_CLASS);
     result.enable(Capability.NO_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     
