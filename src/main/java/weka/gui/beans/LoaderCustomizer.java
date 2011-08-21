@@ -104,6 +104,8 @@ public class LoaderCustomizer
   
   private Environment m_env = Environment.getSystemWide();
   
+  private FileEnvironmentField m_dbProps;
+  
   private ModifyListener m_modifyListener;
   
   private weka.core.converters.Loader m_backup = null;
@@ -298,6 +300,58 @@ public class LoaderCustomizer
     gbConstraints.gridy = 4; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_keyText, gbConstraints);
     db.add(m_keyText);
+    
+    JLabel propsLab = new JLabel("DB config props", SwingConstants.RIGHT);
+    propsLab.setToolTipText("The custom properties that the user can use to override the default ones.");
+    propsLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 5; gbConstraints.gridx = 0;
+    gbLayout.setConstraints(propsLab, gbConstraints);
+    db.add(propsLab);
+    
+    m_dbProps = new FileEnvironmentField();
+    m_dbProps.setEnvironment(m_env);
+    m_dbProps.resetFileFilters();
+    m_dbProps.addFileFilter(new ExtensionFileFilter(".props" , 
+        "DatabaseUtils property file (*.props)"));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 5; gbConstraints.gridx = 1;
+    gbLayout.setConstraints(m_dbProps, gbConstraints);
+    db.add(m_dbProps);
+    File toSet = ((DatabaseLoader)m_dsLoader.getLoader()).getCustomPropsFile();
+    if (toSet != null) {
+      m_dbProps.setText(toSet.getPath());
+    }
+    
+    JButton loadPropsBut = new JButton("Load");
+    loadPropsBut.setToolTipText("Load config");
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 5; gbConstraints.gridx = 2;
+    gbLayout.setConstraints(loadPropsBut, gbConstraints);
+    db.add(loadPropsBut);
+    loadPropsBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_dbProps.getText() != null &&
+            m_dbProps.getText().length() > 0) {
+          String propsS = m_dbProps.getText();
+          try {
+            propsS = m_env.substitute(propsS);
+          } catch (Exception ex) { }
+          File propsFile = new File(propsS);
+          if (propsFile.exists()) {
+            ((DatabaseLoader)m_dsLoader.getLoader()).setCustomPropsFile(propsFile);
+            ((DatabaseLoader)m_dsLoader.getLoader()).resetOptions();
+            m_dbaseURLText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getUrl());
+          }
+        }
+      }
+    });
 
     JPanel buttonsP = new JPanel();
     buttonsP.setLayout(new FlowLayout());
@@ -358,12 +412,19 @@ public class LoaderCustomizer
     String password = dbl.getPassword();
     String query = dbl.getQuery();
     String keys = dbl.getKeys();
+    File propsFile = dbl.getCustomPropsFile();
     
     boolean update = (!url.equals(m_dbaseURLText.getText()) || 
         !user.equals(m_userNameText.getText()) ||
         !password.equals(m_passwordText.getText()) ||
         !query.equalsIgnoreCase(m_queryText.getText())||
         !keys.equals(m_keyText.getText()));
+    
+    if (propsFile != null && m_dbProps.getText().length() > 0) {
+       update = (update || !propsFile.toString().equals(m_dbProps.getText()));        
+    } else {
+      update = (update || m_dbProps.getText().length() > 0);
+    }
     
     if (update) {
       dbl.resetStructure();  
@@ -372,6 +433,9 @@ public class LoaderCustomizer
       dbl.setPassword(new String(m_passwordText.getPassword()));
       dbl.setQuery(m_queryText.getText());
       dbl.setKeys(m_keyText.getText());
+      if (m_dbProps.getText() != null && m_dbProps.getText().length() > 0) {
+        dbl.setCustomPropsFile(new File(m_dbProps.getText()));
+      }
     }
     
     return update;
