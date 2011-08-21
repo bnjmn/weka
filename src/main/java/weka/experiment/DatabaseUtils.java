@@ -25,6 +25,7 @@ package weka.experiment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -35,6 +36,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -1448,19 +1450,29 @@ public class DatabaseUtils
    */
   private static Properties loadProperties(File propsFile) {
     Properties	result;
+        
+    Properties defaultProps = null;
+    try {
+      defaultProps = Utils.readProperties(PROPERTY_FILE);
+    } catch (Exception ex) {
+      System.err.println("Warning, unable to read default properties file(s).");
+      ex.printStackTrace();
+    }
+
     
     if (propsFile == null)
-      return null;
-    if (propsFile.isDirectory())
-      return null;
+      return defaultProps;
+    if (!propsFile.exists() || propsFile.isDirectory())
+      return defaultProps;
     
     try {
-      result = new Properties();
+      result = new Properties(defaultProps);
       result.load(new FileInputStream(propsFile));
     }
     catch (Exception e) {
       result = null;
-      System.err.println("Failed to load properties file '" + propsFile + "':");
+      System.err.println("Failed to load properties file (DatabaseUtils.java) '" 
+          + propsFile + "':");
       e.printStackTrace();
     }
     
