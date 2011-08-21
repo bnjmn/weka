@@ -32,6 +32,8 @@ import java.util.Vector;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -79,7 +81,8 @@ import weka.core.Utils;
  */
 public class DatabaseSaver 
   extends AbstractSaver 
-  implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
+  implements BatchConverter, IncrementalConverter, DatabaseConverter, 
+  OptionHandler, EnvironmentHandler {
   
   /** for serialization. */
   static final long serialVersionUID = 863971733782624956L;
@@ -89,6 +92,9 @@ public class DatabaseSaver
   
   /** The name of the table in which the instances should be stored. */
   protected String m_tableName;
+  
+  /** Table name with any environment variables resolved */
+  protected String m_resolvedTableName;
   
   /** An input arff file (for command line use). */
   protected String m_inputFile;
@@ -132,6 +138,9 @@ public class DatabaseSaver
   /** the custom props file to use instead of default one. */
   protected File m_CustomPropsFile = null;
   
+  /** Environment variables to use */
+  protected transient Environment m_env;
+  
    /** 
     * Constructor.
     * 
@@ -140,12 +149,31 @@ public class DatabaseSaver
   public DatabaseSaver() throws Exception{
   
       resetOptions();
-      m_createText   = m_DataBaseConnection.getProperties().getProperty("CREATE_STRING");
-      m_createDouble = m_DataBaseConnection.getProperties().getProperty("CREATE_DOUBLE");
-      m_createInt    = m_DataBaseConnection.getProperties().getProperty("CREATE_INT");
-      m_createDate   = m_DataBaseConnection.getProperties().getProperty("CREATE_DATE", "DATETIME");
-      m_DateFormat   = new SimpleDateFormat(m_DataBaseConnection.getProperties().getProperty("DateFormat", "yyyy-MM-dd HH:mm:ss"));
-      m_idColumn     = m_DataBaseConnection.getProperties().getProperty("idColumn");
+  }
+  
+  private void checkEnv() {
+    if (m_env == null) {
+      m_env = Environment.getSystemWide();
+    }
+  }
+  
+  /**
+   * Set the environment variables to use.
+   * 
+   * @param env the environment variables to use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
+    try {
+      // force a new connection and setting of all parameters
+      // with environment variables resolved
+      m_DataBaseConnection = newDatabaseConnection();
+      setUrl(m_URL);
+      setUser(m_Username);
+      setPassword(m_Password);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 
   /**
@@ -157,11 +185,27 @@ public class DatabaseSaver
    */
   protected DatabaseConnection newDatabaseConnection() throws Exception {
     DatabaseConnection	result;
+    checkEnv();
     
-    if (m_CustomPropsFile != null)
-      result = new DatabaseConnection(m_CustomPropsFile);
-    else
+    if (m_CustomPropsFile != null) {
+      File pFile = new File(m_CustomPropsFile.getPath());
+      String pPath = m_CustomPropsFile.getPath();
+      
+      try {
+        pPath = m_env.substitute(pPath);
+        pFile = new File(pPath);
+      } catch (Exception ex) { }
+      result = new DatabaseConnection(pFile);
+    } else {
       result = new DatabaseConnection();
+    }
+    
+    m_createText   = result.getProperties().getProperty("CREATE_STRING");
+    m_createDouble = result.getProperties().getProperty("CREATE_DOUBLE");
+    m_createInt    = result.getProperties().getProperty("CREATE_INT");
+    m_createDate   = result.getProperties().getProperty("CREATE_DATE", "DATETIME");
+    m_DateFormat   = new SimpleDateFormat(result.getProperties().getProperty("DateFormat", "yyyy-MM-dd HH:mm:ss"));
+    m_idColumn     = result.getProperties().getProperty("idColumn");
     
     return result;
   }
@@ -186,11 +230,18 @@ public class DatabaseSaver
 
     m_URL       = m_DataBaseConnection.getDatabaseURL();
     m_tableName = "";
-    m_Username  = "";
-    m_Password  = "";
+    m_Username  = m_DataBaseConnection.getUsername();
+    m_Password  = m_DataBaseConnection.getPassword();
     m_count     = 1;
     m_id        = false;
     m_tabName   = true;
+    
+/*    m_createText   = m_DataBaseConnection.getProperties().getProperty("CREATE_STRING");
+    m_createDouble = m_DataBaseConnection.getProperties().getProperty("CREATE_DOUBLE");
+    m_createInt    = m_DataBaseConnection.getProperties().getProperty("CREATE_INT");
+    m_createDate   = m_DataBaseConnection.getProperties().getProperty("CREATE_DATE", "DATETIME");
+    m_DateFormat   = new SimpleDateFormat(m_DataBaseConnection.getProperties().getProperty("DateFormat", "yyyy-MM-dd HH:mm:ss"));
+    m_idColumn     = m_DataBaseConnection.getProperties().getProperty("idColumn"); */
   }
   
   /** 
@@ -201,8 +252,8 @@ public class DatabaseSaver
   
       if(getWriteMode() == CANCEL){
           try{
-              m_DataBaseConnection.update("DROP TABLE "+m_tableName);
-              if(m_DataBaseConnection.tableExists(m_tableName))
+              m_DataBaseConnection.update("DROP TABLE "+m_resolvedTableName);
+              if(m_DataBaseConnection.tableExists(m_resolvedTableName))
                 System.err.println("Table cannot be dropped.");
           }catch(Exception ex) {
               printException(ex);
@@ -319,9 +370,15 @@ public class DatabaseSaver
    * @param url the URL
    */  
   public void setUrl(String url){
+    checkEnv();
       
       m_URL = url;
-      m_DataBaseConnection.setDatabaseURL(url);
+      String uCopy = m_URL;
+      try {
+        uCopy = m_env.substitute(uCopy);
+      } catch (Exception ex) {        
+      }
+      m_DataBaseConnection.setDatabaseURL(uCopy);
   }
   
   /** 
@@ -350,8 +407,15 @@ public class DatabaseSaver
    * @param user the user name
    */  
   public void setUser(String user){
+    checkEnv();
       m_Username = user;
-      m_DataBaseConnection.setUsername(user);
+      String userCopy = user;
+      try {
+        userCopy = m_env.substitute(userCopy);
+      } catch (Exception ex) {        
+      }
+      
+      m_DataBaseConnection.setUsername(userCopy);
   }
   
   /** 
@@ -361,7 +425,8 @@ public class DatabaseSaver
    */  
   public String getUser(){
    
-      return m_DataBaseConnection.getUsername();
+      //return m_DataBaseConnection.getUsername();
+    return m_Username;
   }
   
   /** 
@@ -380,7 +445,12 @@ public class DatabaseSaver
    * @param password the password
    */  
   public void setPassword(String password){
+    checkEnv();
       m_Password = password;
+      String passCopy = password;
+      try {
+        passCopy = m_env.substitute(passCopy);
+      } catch (Exception ex) { }
       m_DataBaseConnection.setPassword(password);
   }
 
@@ -390,7 +460,8 @@ public class DatabaseSaver
    * @return the database password
    */
   public String getPassword() {
-    return m_DataBaseConnection.getPassword();
+    //return m_DataBaseConnection.getPassword();
+    return m_Password;
   }
   
   /** 
@@ -441,10 +512,15 @@ public class DatabaseSaver
   public void setDestination(String url, String userName, String password){
   
       try{
+        checkEnv();
+        
         m_DataBaseConnection = newDatabaseConnection();
-        m_DataBaseConnection.setDatabaseURL(url);
-        m_DataBaseConnection.setUsername(userName);
-        m_DataBaseConnection.setPassword(password);
+        setUrl(url);
+        setUser(userName);
+        setPassword(password);
+        //m_DataBaseConnection.setDatabaseURL(url);
+        //m_DataBaseConnection.setUsername(userName);
+        //m_DataBaseConnection.setPassword(password);
       } catch(Exception ex) {
             printException(ex);
       }    
@@ -458,10 +534,15 @@ public class DatabaseSaver
   public void setDestination(String url){
   
       try{
+        checkEnv();
+        
         m_DataBaseConnection = newDatabaseConnection();
-        m_DataBaseConnection.setDatabaseURL(url);
-        m_DataBaseConnection.setUsername(m_Username);
-        m_DataBaseConnection.setPassword(m_Password);
+        //m_DataBaseConnection.setDatabaseURL(url);
+        setUrl(url);
+        setUser(m_Username);
+        setPassword(m_Password);
+        //m_DataBaseConnection.setUsername(m_Username);
+        //m_DataBaseConnection.setPassword(m_Password);
       } catch(Exception ex) {
             printException(ex);
        }    
@@ -471,9 +552,13 @@ public class DatabaseSaver
   public void setDestination(){
   
       try{
+        checkEnv();
+        
         m_DataBaseConnection = newDatabaseConnection();
-        m_DataBaseConnection.setUsername(m_Username);
-        m_DataBaseConnection.setPassword(m_Password);
+        setUser(m_Username);
+        setPassword(m_Password);
+        //m_DataBaseConnection.setUsername(m_Username);
+        //m_DataBaseConnection.setPassword(m_Password);
       } catch(Exception ex) {
             printException(ex);
        }    
@@ -528,18 +613,19 @@ public class DatabaseSaver
       StringBuffer query = new StringBuffer();
       Instances structure = getInstances();
       query.append("CREATE TABLE ");
-      if(m_tabName || m_tableName.equals(""))
-        m_tableName = m_DataBaseConnection.maskKeyword(structure.relationName());
+      m_resolvedTableName = m_env.substitute(m_tableName);
+      if(m_tabName || m_resolvedTableName.equals(""))
+        m_resolvedTableName = m_DataBaseConnection.maskKeyword(structure.relationName());
       if(m_DataBaseConnection.getUpperCase()){
-        m_tableName = m_tableName.toUpperCase();
+        m_resolvedTableName = m_resolvedTableName.toUpperCase();
         m_createInt = m_createInt.toUpperCase(); 
         m_createDouble = m_createDouble.toUpperCase(); 
         m_createText = m_createText.toUpperCase(); 
         m_createDate = m_createDate.toUpperCase(); 
       }
-      m_tableName = m_tableName.replaceAll("[^\\w]","_");
-      m_tableName = m_DataBaseConnection.maskKeyword(m_tableName);
-      query.append(m_tableName);
+      m_resolvedTableName = m_resolvedTableName.replaceAll("[^\\w]","_");
+      m_resolvedTableName = m_DataBaseConnection.maskKeyword(m_resolvedTableName);
+      query.append(m_resolvedTableName);
       if(structure.numAttributes() == 0)
           throw new Exception("Instances have no attribute.");
       query.append(" ( ");
@@ -575,7 +661,7 @@ public class DatabaseSaver
       //System.out.println(query.toString());
       m_DataBaseConnection.update(query.toString());
       m_DataBaseConnection.close();
-      if(!m_DataBaseConnection.tableExists(m_tableName)){
+      if(!m_DataBaseConnection.tableExists(m_resolvedTableName)){
           throw new IOException("Table cannot be built.");
       }
   }
@@ -588,9 +674,9 @@ public class DatabaseSaver
    */
   private void writeInstance(Instance inst) throws Exception{
   
-      StringBuffer insert = new StringBuffer();
+      StringBuffer insert = new StringBuffer();      
       insert.append("INSERT INTO ");
-      insert.append(m_tableName);
+      insert.append(m_resolvedTableName);
       insert.append(" VALUES ( ");
       if(m_id){
         insert.append(m_count);
