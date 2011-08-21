@@ -38,6 +38,8 @@ import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -103,7 +105,8 @@ import weka.experiment.InstanceQuery;
  */
 public class DatabaseLoader 
   extends AbstractLoader 
-  implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
+  implements BatchConverter, IncrementalConverter, DatabaseConverter, 
+  OptionHandler, EnvironmentHandler {
 
   /** for serialization */
   static final long serialVersionUID = -7936159015338318659L;
@@ -164,19 +167,22 @@ public class DatabaseLoader
   protected String m_URL = null;
 
   /** the database user to use */
-  protected String m_User = null;
+  protected String m_User = "";
 
   /** the database password to use */
-  protected String m_Password = null;
+  protected String m_Password = "";
   
   /** the keys for unique ordering */
-  protected String m_Keys = null;
+  protected String m_Keys = "";
   
   /** the custom props file to use instead of default one. */
   protected File m_CustomPropsFile = null;
 
   /** Determines whether sparse data is created */
   protected boolean m_CreateSparseData = false;
+  
+  /** Environment variables */
+  protected transient Environment m_env;
   
   /**
    * Constructor
@@ -185,14 +191,7 @@ public class DatabaseLoader
    */
   public DatabaseLoader() throws Exception{
   
-      reset();
-      m_pseudoIncremental    = false;
-      m_checkForTable        = true;
-      String props           = m_DataBaseConnection.getProperties().getProperty("nominalToStringLimit");
-      m_nominalToStringLimit = Integer.parseInt(props);
-      m_idColumn             = m_DataBaseConnection.getProperties().getProperty("idColumn");
-      if (m_DataBaseConnection.getProperties().getProperty("checkForTable", "").equalsIgnoreCase("FALSE"))
-	m_checkForTable = false;
+      resetOptions();
   }
 
   /**
@@ -217,6 +216,31 @@ public class DatabaseLoader
       + "In addition, for incremental loading,  you can define in the DatabaseUtils file how many distinct values a nominal attribute is allowed to have. If this number is exceeded, the column will become a string attribute.\n"
       + "In batch mode no string attributes will be created.";
   }
+  
+  /**
+   * Set the environment variables to use.
+   * 
+   * @param env the environment variables to use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
+    try {
+      // force a new connection and setting of all parameters
+      // with environment variables resolved
+      m_DataBaseConnection = newDatabaseConnection();
+      setUrl(m_URL);
+      setUser(m_User);
+      setPassword(m_Password);
+    } catch (Exception ex) {
+      // we won't complain about it here...
+    }
+  }
+  
+  private void checkEnv() {
+    if (m_env == null) {
+      m_env = Environment.getSystemWide();
+    }
+  }
 
   /**
    * Initializes a new DatabaseConnection object, either default one or from
@@ -228,39 +252,98 @@ public class DatabaseLoader
   protected DatabaseConnection newDatabaseConnection() throws Exception {
     DatabaseConnection	result;
     
-    if (m_CustomPropsFile != null)
-      result = new DatabaseConnection(m_CustomPropsFile);
-    else
+    checkEnv();
+    
+    if (m_CustomPropsFile != null) {
+      File pFile = new File(m_CustomPropsFile.getPath());
+      String pPath = m_CustomPropsFile.getPath();      
+      try {
+        pPath = m_env.substitute(pPath);
+        pFile = new File(pPath);
+      } catch (Exception ex) { }
+      result = new DatabaseConnection(pFile);
+    } else {
       result = new DatabaseConnection();
+    }
+    
+    m_pseudoIncremental    = false;
+    m_checkForTable        = true;
+    String props           = result.getProperties().getProperty("nominalToStringLimit");
+    m_nominalToStringLimit = Integer.parseInt(props);
+    m_idColumn             = result.getProperties().getProperty("idColumn");
+    if (result.getProperties().getProperty("checkForTable", "").equalsIgnoreCase("FALSE"))
+      m_checkForTable = false;
     
     return result;
   }
+  
+  /**
+   * Resets the Loader to the settings in either the default DatabaseUtils.props
+   * or any property file that the user has specified via setCustomPropsFile().
+   */
+  public void resetOptions() {
+    resetStructure();
+    try {
+      if(m_DataBaseConnection != null && m_DataBaseConnection.isConnected())
+        m_DataBaseConnection.disconnectFromDatabase();
+      m_DataBaseConnection = newDatabaseConnection();
+    } catch (Exception ex) {
+      printException(ex);
+    }
+    
+    m_URL       = m_DataBaseConnection.getDatabaseURL();
+    if (m_URL == null) {
+      m_URL = "none set!";
+    }
+    m_User  = m_DataBaseConnection.getUsername();
+    if (m_User == null) {
+      m_User = "";
+    }
+    m_Password  = m_DataBaseConnection.getPassword();
+    if (m_Password == null) {
+      m_Password = "";
+    }
+    m_orderBy = new ArrayList<String>();
+  }
 
-  /** Resets the Loader ready to read a new data set
+  /** Resets the Loader ready to read a new data set using set options
    * @throws Exception if an error occurs while disconnecting from the database
    */
-  public void reset() throws Exception{
+  public void reset() {
 
     resetStructure();
+    try {
     if(m_DataBaseConnection != null && m_DataBaseConnection.isConnected())
         m_DataBaseConnection.disconnectFromDatabase();
     m_DataBaseConnection = newDatabaseConnection();
+    } catch (Exception ex) {
+      printException(ex);
+    }
 
     // don't lose previously set connection data!
-    if (m_URL != null)
-      m_DataBaseConnection.setDatabaseURL(m_URL);
-    if (m_User != null)
-      m_DataBaseConnection.setUsername(m_User);
-    if (m_Password != null)
-      m_DataBaseConnection.setPassword(m_Password);
+    if (m_URL != null) {
+      setUrl(m_URL);
+    }
+    
+    if (m_User != null) {
+      setUser(m_User);
+    }
+    
+    if (m_Password != null) {
+      setPassword(m_Password);
+    }
 
     m_orderBy = new ArrayList<String>();
     // don't lose previously set key columns!
-    if (m_Keys != null)
-      setKeys(m_Keys);
+    if (m_Keys != null) {
+      String k = m_Keys;
+      try {
+        k = m_env.substitute(k);
+      } catch (Exception ex) { }
+      setKeys(k);
+    }
       
-    m_inc = false;
-    
+    m_inc = false;        
   }
   
   
@@ -390,11 +473,16 @@ public class DatabaseLoader
    * 
    * @param url string with the database URL
    */
-  public void setUrl(String url){
+  public void setUrl(String url) {
+      checkEnv();
       
       m_URL = url;
-      m_DataBaseConnection.setDatabaseURL(url);
-    
+      String dbU = m_URL;
+      try {
+        dbU = m_env.substitute(dbU);
+      } catch (Exception ex) { }
+      
+      m_DataBaseConnection.setDatabaseURL(dbU);    
   }
   
   /**
@@ -404,7 +492,8 @@ public class DatabaseLoader
    */
   public String getUrl(){
   
-      return m_DataBaseConnection.getDatabaseURL();
+      //return m_DataBaseConnection.getDatabaseURL();
+    return m_URL;
   }
   
   /**
@@ -423,9 +512,15 @@ public class DatabaseLoader
    * @param user the database user name
    */
   public void setUser(String user){
+    checkEnv();
    
       m_User = user;
-      m_DataBaseConnection.setUsername(user);
+      String userCopy = user;
+      try {
+        userCopy = m_env.substitute(userCopy);
+      } catch (Exception ex) {        
+      }
+      m_DataBaseConnection.setUsername(userCopy);
   }
   
   /**
@@ -435,7 +530,8 @@ public class DatabaseLoader
    */
   public String getUser(){
    
-      return m_DataBaseConnection.getUsername();
+      //return m_DataBaseConnection.getUsername();
+    return m_User;
   }
   
   /**
@@ -453,10 +549,15 @@ public class DatabaseLoader
    * 
    * @param password the password
    */
-  public void setPassword(String password){
-   
-      m_Password = password;
-      m_DataBaseConnection.setPassword(password);
+  public void setPassword(String password) {
+    checkEnv();
+    
+    m_Password = password;
+    String passCopy = password;
+    try {
+      passCopy = m_env.substitute(passCopy);
+    } catch (Exception ex) { }
+    m_DataBaseConnection.setPassword(password);   
   }
 
   /**
@@ -465,7 +566,8 @@ public class DatabaseLoader
    * @return the database password
    */
   public String getPassword() {
-    return m_DataBaseConnection.getPassword();
+//    return m_DataBaseConnection.getPassword();
+    return m_Password;
   }
   
   /**
@@ -990,14 +1092,30 @@ public class DatabaseLoader
    
     
     Instances result = null;
-    
+    checkEnv();
     try {
       InstanceQuery iq = new InstanceQuery();
       iq.initialize(m_CustomPropsFile);
-      iq.setDatabaseURL(m_URL);
-      iq.setUsername(m_User);
-      iq.setPassword(m_Password);
-      iq.setQuery(m_query);
+      String realURL = m_URL;
+      try {
+        realURL = m_env.substitute(realURL);
+      } catch (Exception ex) { }
+      iq.setDatabaseURL(realURL);
+      String realUser = m_User;
+      try {
+        realUser = m_env.substitute(realUser);
+      } catch (Exception ex) { }
+      iq.setUsername(realUser);
+      String realPass = m_Password;
+      try {
+        realPass = m_env.substitute(realPass);
+      } catch (Exception ex) { }
+      iq.setPassword(realPass);      
+      String realQuery = m_query;
+      try {
+        realQuery = m_env.substitute(realQuery);
+      } catch (Exception ex) { }
+      iq.setQuery(realQuery);
       iq.setSparseData(m_CreateSparseData);
       
       result = iq.retrieveInstances();
