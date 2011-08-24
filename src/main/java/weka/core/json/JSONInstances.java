@@ -167,6 +167,9 @@ public class JSONInstances {
 	  vals[index] = data.attribute(index).indexOfValue(value);
 	  if ((vals[index] == -1) && value.startsWith("'") && value.endsWith("'"))
 	    vals[index] = data.attribute(index).indexOfValue(Utils.unquote(value));
+	  // FIXME backslashes seem to get escaped twice when creating a JSON file?
+	  if ((vals[index] == -1) && value.startsWith("'") && value.endsWith("'"))
+	    vals[index] = data.attribute(index).indexOfValue(Utils.unbackQuoteChars(Utils.unquote(value)));
 	  if (vals[index] == -1) {
 	    System.err.println("Unknown label '" + value + "' for attribute #" + (index+1) + "!");
 	    return null;
