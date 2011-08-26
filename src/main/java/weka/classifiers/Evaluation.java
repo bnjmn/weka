@@ -22,6 +22,27 @@
 
 package weka.classifiers;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.lang.reflect.Method;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
 import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.evaluation.ThresholdCurve;
@@ -48,27 +69,6 @@ import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
 import weka.core.xml.XMLSerialization;
 import weka.estimators.UnivariateKernelEstimator;
-
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Class for evaluating machine learning models. <p/>
@@ -143,6 +143,10 @@ import java.util.zip.GZIPOutputStream;
  * Outputs the distribution instead of only the prediction
  * in conjunction with the '-p' option (only nominal classes). <p/>
  * Deprecated: use "-classifications ..." instead. <p/>
+ *
+ * -no-predictions <br/>
+ * Turns off the collection of predictions in order to conserve
+ * memory. <p/>
  *
  * -r <br/>
  * Outputs cumulative margin distribution (and nothing else). <p/>
@@ -331,6 +335,9 @@ public class Evaluation
   /** The header of the training set. */
   protected Instances m_Header;
 
+  /** whether to discard predictions (and save memory). */
+  protected boolean m_DiscardPredictions;
+
   /**
    * Initializes all the counters for the evaluation.
    * Use <code>useNoPriors()</code> if the dataset is the test set and you
@@ -399,6 +406,30 @@ public class Evaluation
    */
   public Instances getHeader() {
     return m_Header;
+  }
+
+  /**
+   * Sets whether to discard predictions, ie, not storing them for future
+   * reference via predictions() method in order to conserve memory.
+   *
+   * @param value	true if to discard the predictions
+   * @see		#predictions()
+   */
+  public void setDiscardPredictions(boolean value) {
+    m_DiscardPredictions = value;
+    if (m_DiscardPredictions)
+      m_Predictions = null;
+  }
+
+  /**
+   * Returns whether predictions are not recorded at all, in order to
+   * conserve memory.
+   *
+   * @return		true if predictions are not recorded
+   * @see		#predictions()
+   */
+  public boolean getDiscardPredictions() {
+    return m_DiscardPredictions;
   }
 
   /**
@@ -616,6 +647,10 @@ public class Evaluation
    * in conjunction with the '-p' option (only nominal classes). <p/>
    * Deprecated: use "-classifications ..." instead. <p/>
    *
+   * -no-predictions <br/>
+   * Turns off the collection of predictions in order to conserve
+   * memory. <p/>
+   *
    * -r <br/>
    * Outputs cumulative margin distribution (and nothing else). <p/>
    *
@@ -753,6 +788,10 @@ public class Evaluation
    * in conjunction with the '-p' option (only nominal classes). <p/>
    * Deprecated: use "-classifications ..." instead. <p/>
    *
+   * -no-predictions <br/>
+   * Turns off the collection of predictions in order to conserve
+   * memory. <p/>
+   *
    * -r <br/>
    * Outputs cumulative margin distribution (and nothing else). <p/>
    *
@@ -800,6 +839,7 @@ public class Evaluation
     boolean preserveOrder = false;
     boolean trainSetPresent = false;
     boolean testSetPresent = false;
+    boolean discardPredictions = false;
     String thresholdFile;
     String thresholdLabel;
     StringBuffer predsBuff = null; // predictions from cross-validation
@@ -961,7 +1001,7 @@ public class Evaluation
           Instances tmpInst = trainSource.getDataSet(actualClassIndex);
           if (!preserveOrder)
             tmpInst.randomize(new Random(seed));
-          int trainSize = 
+          int trainSize =
             (int) Math.round(tmpInst.numInstances() * splitPercentage / 100);
           int testSize  = tmpInst.numInstances() - trainSize;
           Instances trainInst = new Instances(tmpInst, 0, trainSize);
@@ -1015,6 +1055,8 @@ public class Evaluation
       if (classifications.length() > 0) {
         noOutput = true;
         classificationOutput = AbstractOutput.fromCommandline(classifications);
+        if (classificationOutput == null)
+          throw new Exception("Failed to instantiate class for classification output: " + classifications);
         classificationOutput.setHeader(template);
       }
       // backwards compatible with old "-p range" and "-distribution" options
@@ -1031,6 +1073,9 @@ public class Evaluation
         if (Utils.getFlag("distribution", options))
           throw new Exception("Cannot print distribution without '-p' option!");
       }
+      discardPredictions = Utils.getFlag("no-predictions", options);
+      if (discardPredictions && (classificationOutput != null))
+	throw new Exception("Cannot discard predictions ('-no-predictions') and output predictions at the same time ('-classifications/-p')!");
 
       // if no training file given, we don't have any priors
       if ( (!trainSetPresent) && (printComplexityStatistics) )
@@ -1091,18 +1136,20 @@ public class Evaluation
         xmlInputStream.close();
       }
     }
-    
+
     // Setup up evaluation objects
     Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
     Evaluation testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      Instances mappedClassifierHeader = 
+      Instances mappedClassifierHeader =
         ((weka.classifiers.misc.InputMappedClassifier)classifier).
           getModelHeader(new Instances(template, 0));
-            
+
       trainingEvaluation = new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
       testingEvaluation = new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
     }
+    trainingEvaluation.setDiscardPredictions(discardPredictions);
+    testingEvaluation.setDiscardPredictions(discardPredictions);
 
     // disable use of priors if no training file given
     if (!trainSetPresent)
@@ -1134,14 +1181,14 @@ public class Evaluation
     } else if (objectInputFileName.length() == 0) {
       // Build classifier in one go
       tempTrain = trainSource.getDataSet(actualClassIndex);
-      
+
       if (classifier instanceof weka.classifiers.misc.InputMappedClassifier &&
           !trainingEvaluation.getHeader().equalHeaders(tempTrain)) {
         // we need to make a new dataset that maps the training instances to
         // the structure expected by the mapped classifier - this is only
         // to ensure that the structure and priors computed by the *testing*
         // evaluation object is correct with respect to the mapped classifier
-        Instances mappedClassifierDataset = 
+        Instances mappedClassifierDataset =
           ((weka.classifiers.misc.InputMappedClassifier)classifier).
             getModelHeader(new Instances(template, 0));
         for (int zz = 0; zz < tempTrain.numInstances(); zz++) {
@@ -1151,7 +1198,7 @@ public class Evaluation
         }
         tempTrain = mappedClassifierDataset;
       }
-      
+
       trainingEvaluation.setPriors(tempTrain);
       testingEvaluation.setPriors(tempTrain);
       trainTimeStart = System.currentTimeMillis();
@@ -1308,7 +1355,7 @@ public class Evaluation
       testSource.reset();
       test = testSource.getStructure(test.classIndex());
       Instance testInst;
-      while (testSource.hasMoreElements(test)) {        
+      while (testSource.hasMoreElements(test)) {
         testInst = testSource.nextElement(test);
         testingEvaluation.evaluateModelOnceAndRecordPrediction(
             (Classifier)classifier, testInst);
@@ -1503,7 +1550,7 @@ public class Evaluation
         pred = Utils.missingValue();
       }
       updateStatsForClassifier(dist, instance);
-      if (storePredictions) {
+      if (storePredictions && !m_DiscardPredictions) {
         if (m_Predictions == null)
           m_Predictions = new FastVector();
         m_Predictions.addElement(new NominalPrediction(instance.classValue(), dist,
@@ -1512,7 +1559,7 @@ public class Evaluation
     } else {
       pred = dist[0];
       updateStatsForPredictor(pred, instance);
-      if (storePredictions) {
+      if (storePredictions && !m_DiscardPredictions) {
         if (m_Predictions == null)
           m_Predictions = new FastVector();
         m_Predictions.addElement(new NumericPrediction(instance.classValue(), pred,
@@ -1537,25 +1584,25 @@ public class Evaluation
   protected double evaluationForSingleInstance(Classifier classifier,
                                                Instance instance,
                                                boolean storePredictions) throws Exception {
-        
-        
-    
+
+
+
     Instance classMissing = (Instance)instance.copy();
     classMissing.setDataset(instance.dataset());
-    
+
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
       instance = (Instance)instance.copy();
-      instance = 
+      instance =
         ((weka.classifiers.misc.InputMappedClassifier)classifier).
           constructMappedInstance(instance);
 //      System.out.println("Mapped instance " + instance);
-      int mappedClass = 
+      int mappedClass =
         ((weka.classifiers.misc.InputMappedClassifier)classifier).getMappedClassIndex();
       classMissing.setMissing(mappedClass);
     } else {
       classMissing.setClassMissing();
     }
-    
+
 //    System.out.println("instance (to predict)" + classMissing);
     double pred = evaluationForSingleInstance(classifier.distributionForInstance(classMissing),
                                               instance, storePredictions);
@@ -1662,7 +1709,10 @@ public class Evaluation
    * have been collected.
    */
   public FastVector predictions() {
-    return m_Predictions;
+    if (m_DiscardPredictions)
+      return null;
+    else
+      return m_Predictions;
   }
 
   /**
@@ -3413,7 +3463,7 @@ public class Evaluation
   throws Exception {
 
     int actualClass = (int)instance.classValue();
-    
+
     if (!instance.classIsMissing()) {
       updateMargins(predictedDistribution, actualClass, instance.weight());
 
