@@ -54,9 +54,15 @@ import weka.filters.SimpleStreamFilter;
  *  The regular expression that the attribute names must match.
  *  (default: ([\s\S]+))</pre>
  * 
- * <pre> -replace &lt;regexp&gt;
- *  The regular expression to replace matching attributes with.
+ * <pre> -replace &lt;string&gt;
+ *  The string to replace the regular expression of matching attributes with.
+ *  Cannot be used in conjunction with '-remove'.
  *  (default: $0)</pre>
+ * 
+ * <pre> -remove
+ *  In case the matching string needs to be removed instead of replaced.
+ *  Cannot be used in conjunction with '-replace &lt;string&gt;'.
+ *  (default: off)</pre>
  * 
  * <pre> -all
  *  Replaces all occurrences instead of just the first.
@@ -126,9 +132,16 @@ public class RenameAttribute
 	"find", 1, "-find <regexp>"));
 
     result.addElement(new Option(
-	"\tThe regular expression to replace matching attributes with.\n"
+	"\tThe string to replace the regular expression of matching attributes with.\n"
+	+ "\tCannot be used in conjunction with '-remove'.\n"
 	+ "\t(default: $0)",
-	"replace", 1, "-replace <regexp>"));
+	"replace", 1, "-replace <string>"));
+
+    result.addElement(new Option(
+	"\tIn case the matching string needs to be removed instead of replaced.\n"
+	+ "\tCannot be used in conjunction with '-replace <string>'.\n"
+	+ "\t(default: off)",
+	"remove", 0, "-remove"));
 
     result.addElement(new Option(
 	"\tReplaces all occurrences instead of just the first.\n"
@@ -162,9 +175,15 @@ public class RenameAttribute
    *  The regular expression that the attribute names must match.
    *  (default: ([\s\S]+))</pre>
    * 
-   * <pre> -replace &lt;regexp&gt;
-   *  The regular expression to replace matching attributes with.
+   * <pre> -replace &lt;string&gt;
+   *  The string to replace the regular expression of matching attributes with.
+   *  Cannot be used in conjunction with '-remove'.
    *  (default: $0)</pre>
+   * 
+   * <pre> -remove
+   *  In case the matching string needs to be removed instead of replaced.
+   *  Cannot be used in conjunction with '-replace &lt;string&gt;'.
+   *  (default: off)</pre>
    * 
    * <pre> -all
    *  Replaces all occurrences instead of just the first.
@@ -195,11 +214,16 @@ public class RenameAttribute
     else
       setFind("([\\s\\S]+)");
     
-    tmpStr = Utils.getOption("replace", options);
-    if (tmpStr.length() != 0)
-      setReplace(tmpStr);
-    else
-      setReplace("$0");
+    if (Utils.getFlag("remove", options)) {
+      setReplace("");
+    }
+    else {
+      tmpStr = Utils.getOption("replace", options);
+      if (tmpStr.length() > 0)
+	setReplace(tmpStr);
+      else
+	setReplace("$0");
+    }
 
     setReplaceAll(Utils.getFlag("all", options));
     
@@ -228,8 +252,13 @@ public class RenameAttribute
     result.add("-find");
     result.add(getFind());
     
-    result.add("-replace");
-    result.add(getReplace());
+    if (getReplace().length() > 0) {
+      result.add("-replace");
+      result.add(getReplace());
+    }
+    else {
+      result.add("-remove");
+    }
     
     if (getReplaceAll())
       result.add("-all");
