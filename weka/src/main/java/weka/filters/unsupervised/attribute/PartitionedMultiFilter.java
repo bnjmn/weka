@@ -675,7 +675,12 @@ public class PartitionedMultiFilter
 	for (m = 0; m < processed[n].numAttributes(); m++) {
 	  if (m == processed[n].classIndex())
 	    continue;
-	  values[index] = processed[n].instance(i).value(m);
+	  if (result.attribute(index).isString())
+	    values[index] = result.attribute(index).addStringValue(processed[n].instance(i).stringValue(m));
+	  else if (result.attribute(index).isRelationValued())
+	    values[index] = result.attribute(index).addRelation(processed[n].instance(i).relationalValue(m));
+	  else
+	    values[index] = processed[n].instance(i).value(m);
 	  index++;
 	}
       }
@@ -683,7 +688,12 @@ public class PartitionedMultiFilter
       // unused attributes
       if (!getRemoveUnused()) {
 	for (n = 0; n < m_IndicesUnused.length; n++) {
-	  values[index] = inst.value(m_IndicesUnused[n]);
+	  if (result.attribute(index).isString())
+	    values[index] = result.attribute(index).addStringValue(inst.stringValue(m_IndicesUnused[n]));
+	  else if (result.attribute(index).isRelationValued())
+	    values[index] = result.attribute(index).addRelation(inst.relationalValue(m_IndicesUnused[n]));
+	  else
+	    values[index] = inst.value(m_IndicesUnused[n]);
 	  index++;
 	}
       }
