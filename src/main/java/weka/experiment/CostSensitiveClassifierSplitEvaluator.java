@@ -90,7 +90,7 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator {
@@ -408,7 +408,7 @@ public class CostSensitiveClassifierSplitEvaluator
     }
     ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
     boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
-    if(!thMonitor.isThreadCpuTimeEnabled())
+    if(canMeasureCPUTime && !thMonitor.isThreadCpuTimeEnabled())
       thMonitor.setThreadCpuTimeEnabled(true);
     
     int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
@@ -555,6 +555,6 @@ public class CostSensitiveClassifierSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // CostSensitiveClassifierSplitEvaluator
