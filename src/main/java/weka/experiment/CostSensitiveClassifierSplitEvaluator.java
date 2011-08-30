@@ -409,7 +409,7 @@ public class CostSensitiveClassifierSplitEvaluator
     }
     ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
     boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
-    if(!thMonitor.isThreadCpuTimeEnabled())
+    if(canMeasureCPUTime && !thMonitor.isThreadCpuTimeEnabled())
       thMonitor.setThreadCpuTimeEnabled(true);
     
     int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
