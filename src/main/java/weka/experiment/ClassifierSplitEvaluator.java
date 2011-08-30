@@ -682,7 +682,7 @@ public class ClassifierSplitEvaluator
     
     ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
     boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
-    if(!thMonitor.isThreadCpuTimeEnabled())
+    if(canMeasureCPUTime && !thMonitor.isThreadCpuTimeEnabled())
       thMonitor.setThreadCpuTimeEnabled(true);
     
     Object [] result = new Object[overall_length];
