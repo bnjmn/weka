@@ -70,7 +70,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision$
  */
 public class RegressionSplitEvaluator 
   implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer,
@@ -483,7 +483,7 @@ public class RegressionSplitEvaluator
     }
     ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
     boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
-    if(!thMonitor.isThreadCpuTimeEnabled())
+    if(canMeasureCPUTime && !thMonitor.isThreadCpuTimeEnabled())
       thMonitor.setThreadCpuTimeEnabled(true);
     
     int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
@@ -717,6 +717,6 @@ public class RegressionSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // RegressionSplitEvaluator
