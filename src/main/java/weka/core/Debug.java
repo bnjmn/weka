@@ -248,7 +248,7 @@ public class Debug
     protected ThreadMXBean getThreadMonitor() {
       if (m_ThreadMonitor == null) {
 	m_ThreadMonitor = ManagementFactory.getThreadMXBean();
-	if (!m_ThreadMonitor.isThreadCpuTimeEnabled())
+	if (m_CanMeasureCpuTime && !m_ThreadMonitor.isThreadCpuTimeEnabled())
 	  m_ThreadMonitor.setThreadCpuTimeEnabled(true);
 	m_ThreadID = Thread.currentThread().getId();
       }
