@@ -235,6 +235,11 @@ public class PreprocessPanel
     m_OpenDBBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_OpenDBBut_SetToolTipText_Text"));
     m_GenerateBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_GenerateBut_SetToolTipText_Text"));
     m_UndoBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_UndoBut_SetToolTipText_Text"));
+    m_UndoBut.setEnabled(ExplorerDefaults.get("enableUndo", "true").equalsIgnoreCase("true"));
+    if (!m_UndoBut.isEnabled()) {
+      m_UndoBut.setToolTipText("Undo is disabled - " +
+                "see weka.gui.explorer.Explorer.props to enable");
+    }
     m_EditBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_EditBut_SetToolTipText_Text"));
     m_SaveBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_SaveBut_SetToolTipText_Text"));
     m_ApplyFilterBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_ApplyFilterBut_SetToolTipText_Text"));
@@ -1178,11 +1183,34 @@ public class PreprocessPanel
    * @throws Exception 	if an error occurs
    */
   public void addUndoPoint() throws Exception {
+    if (!ExplorerDefaults.get("enableUndo", "true").equalsIgnoreCase("true")) {
+      return;
+    }
     
     if (m_Instances != null) {
       // create temporary file
       File tempFile = File.createTempFile("weka", SerializedInstancesLoader.FILE_EXTENSION);
       tempFile.deleteOnExit();
+      
+      if (!ExplorerDefaults.get("undoDirectory", "%t").equalsIgnoreCase("%t")) {
+        String dir = ExplorerDefaults.get("undoDirectory", "%t");
+        File undoDir = new File(dir);
+        if (undoDir.exists()) {
+          String fileName = tempFile.getName();
+          File newFile = new File(dir + File.separator + fileName);
+          if (undoDir.canWrite()) {
+            newFile.deleteOnExit();
+            tempFile = newFile;
+          } else {
+            System.err.println("Explorer: it doesn't look like we have permission" +
+                        " to write to the user-specified undo directory " +
+                        "'" + dir + "'");
+          }
+        } else {
+          System.err.println("Explorer: user-specified undo directory '" +
+              dir + "' does not exist!");
+        }
+      }
 
       ObjectOutputStream oos = 
 	new ObjectOutputStream(
