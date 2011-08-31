@@ -276,7 +276,7 @@ public class DatabaseUtils
    * @param columnName	the column to retrieve the original case for
    * @return		the original case
    */
-  protected String attributeCaseFix(String columnName){
+  public String attributeCaseFix(String columnName){
     if (m_checkForUpperCaseNames) {
       String ucname = columnName.toUpperCase();
       if (ucname.equals(EXP_TYPE_COL.toUpperCase())) {
