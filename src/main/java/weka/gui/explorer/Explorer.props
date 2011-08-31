@@ -43,7 +43,14 @@ Tabs=weka.gui.explorer.ClassifierPanel,\
 #   %h - the user's home directory
 #   %c - the current directory
 #   %% - gets replaced by a single percentage sign
-InitialDirectory=%c
+InitialDirectory=%
+
+# whether to create undo points
+enableUndo=true
+
+# the directory in which to create undo files
+# %t is a placeholder for the standard system temp directory
+undoDirectory=%t
 
 # the default filter, including options (can be left empty)
 Filter=
