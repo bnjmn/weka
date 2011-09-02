@@ -1895,10 +1895,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   m_logPanel.logMessage("[KnowledgeFlow] WARNING: " +
                       "unable to instantiate perspective \""
                       + className + "\"");
+                  ex.printStackTrace();
                 } else {
                   System.err.println("[KnowledgeFlow] WARNING: " +
                       "unable to instantiate perspective \""
                       + className + "\"");
+                  ex.printStackTrace();
                 }
               }
             }
@@ -2702,7 +2704,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     ArrayList<Attribute> atts = new ArrayList<Attribute>();
     final ArrayList<String> pClasses = new ArrayList<String>();
+    SortedSet<String> sortedPerspectives = new TreeSet<String>();
     for (String clName : PLUGIN_PERSPECTIVES.keySet()) {
+      sortedPerspectives.add(clName);
+    }
+    for (String clName : sortedPerspectives) {
       pClasses.add(clName);
       String pName = PLUGIN_PERSPECTIVES.get(clName);
       atts.add(new Attribute(pName));
@@ -2752,7 +2758,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
         int[] selected = m_perspectiveConfigurer.getSelectedAttributes();
         for (int i = 0; i < selected.length; i++) {
-          String selectedClassName = pClasses.get(i);
+          String selectedClassName = pClasses.get(selected[i]);
 
           // first check to see if it's in the cache already
           if (PERSPECTIVE_CACHE.get(selectedClassName) == null) {
