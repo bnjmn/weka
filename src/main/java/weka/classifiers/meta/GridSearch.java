@@ -85,7 +85,7 @@ import weka.filters.unsupervised.instance.Resample;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|KAP&gt;
+ * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|KAP|WAUC&gt;
  *  Determines the parameter used for evaluation:
  *  CC = Correlation coefficient
  *  RMSE = Root mean squared error
@@ -94,6 +94,7 @@ import weka.filters.unsupervised.instance.Resample;
  *  RAE = Root absolute error
  *  COMB = Combined = (1-abs(CC)) + RRSE + RAE
  *  ACC = Accuracy
+ *  WAUC = Weighted AUC
  *  KAP = Kappa
  *  (default: CC)</pre>
  * 
@@ -912,6 +913,9 @@ public class GridSearch
     
     /** the Accuracy. */
     protected double m_ACC;
+
+    /** The weighted AUC value. */
+    protected double m_wAUC;
     
     /** the kappa value. */
     protected double m_Kappa;
@@ -933,6 +937,7 @@ public class GridSearch
       m_RRSE  = evaluation.rootRelativeSquaredError();
       m_MAE   = evaluation.meanAbsoluteError();
       m_RAE   = evaluation.relativeAbsoluteError();
+      m_wAUC  = evaluation.weightedAreaUnderROC();
 
       try {
 	m_CC = evaluation.correlationCoefficient();
@@ -990,6 +995,9 @@ public class GridSearch
 	case EVALUATION_KAPPA:
 	  result = m_Kappa;
 	  break;
+      case EVALUATION_WAUC:
+          result = m_wAUC;
+          break;
 	default:
 	  throw new IllegalArgumentException("Evaluation type '" + evaluation + "' not supported!");
       }
@@ -1135,6 +1143,7 @@ public class GridSearch
       // better -> hence invert them
       if (    (getEvaluation() != EVALUATION_CC) 
            && (getEvaluation() != EVALUATION_ACC) 
+           && (getEvaluation() != EVALUATION_WAUC) 
            && (getEvaluation() != EVALUATION_KAPPA) )
 	result = -result;
 	
@@ -1835,6 +1844,8 @@ public class GridSearch
   public static final int EVALUATION_ACC = 6;
   /** evaluation via: kappa statistic. */
   public static final int EVALUATION_KAPPA = 7;
+  /** evaluation via: weighted AUC */
+  public static final int EVALUATION_WAUC = 8;
   /** evaluation. */
   public static final Tag[] TAGS_EVALUATION = {
     new Tag(EVALUATION_CC, "CC", "Correlation coefficient"),
@@ -1844,6 +1855,7 @@ public class GridSearch
     new Tag(EVALUATION_RAE, "RAE", "Root absolute error"),
     new Tag(EVALUATION_COMBINED, "COMB", "Combined = (1-abs(CC)) + RRSE + RAE"),
     new Tag(EVALUATION_ACC, "ACC", "Accuracy"),
+    new Tag(EVALUATION_WAUC, "WAUC", "Weighted AUC"),
     new Tag(EVALUATION_KAPPA, "KAP", "Kappa")
   };
   
@@ -2315,7 +2327,7 @@ public class GridSearch
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|KAP&gt;
+   * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|WAUC|KAP&gt;
    *  Determines the parameter used for evaluation:
    *  CC = Correlation coefficient
    *  RMSE = Root mean squared error
@@ -2324,6 +2336,7 @@ public class GridSearch
    *  RAE = Root absolute error
    *  COMB = Combined = (1-abs(CC)) + RRSE + RAE
    *  ACC = Accuracy
+   *  WAUC = Weighted AUC
    *  KAP = Kappa
    *  (default: CC)</pre>
    * 
@@ -2633,7 +2646,8 @@ public class GridSearch
       throw new IllegalArgumentException(
 	  "Classifier needs to handle numeric class for chosen type of evaluation!");
 
-    if (((m_Evaluation == EVALUATION_ACC) || (m_Evaluation == EVALUATION_KAPPA)) && !nominal)
+    if (((m_Evaluation == EVALUATION_ACC) || (m_Evaluation == EVALUATION_KAPPA) 
+         || (m_Evaluation == EVALUATION_WAUC)) && !nominal)
       throw new IllegalArgumentException(
 	  "Classifier needs to handle nominal class for chosen type of evaluation!");
     
