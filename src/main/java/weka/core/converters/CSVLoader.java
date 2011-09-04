@@ -55,6 +55,9 @@ import java.util.ArrayList;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -H
+ *  No header row present in the data.</pre>
+ * 
  * <pre> -N &lt;range&gt;
  *  The range of attributes to force type to be NOMINAL.
  *  'first' and 'last' are accepted as well.
@@ -142,6 +145,17 @@ public class CSVLoader
   /** whether the first row has been read. */
   protected boolean m_FirstCheck;
   
+  /** whether the csv file contains a header row with att names */
+  protected boolean m_noHeaderRow = false;
+  
+  /** 
+   * holds the first row that we read when the data does not
+   * have a header row. This row gets used to determine how
+   * many attributes the data has in getStructure(), but we 
+   * still need to process its values as the first instance 
+   */
+  protected ArrayList<Object> m_firstRow;
+  
   /**
    * default constructor.
    */
@@ -201,6 +215,8 @@ public class CSVLoader
     Vector<Option> result = new Vector<Option>();
     
     result.add(new Option(
+        "\tNo header row present in the data.", "H", 0, "-H"));
+    result.add(new Option(
         "\tThe range of attributes to force type to be NOMINAL.\n"
         + "\t'first' and 'last' are accepted as well.\n"
         + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
@@ -246,6 +262,9 @@ public class CSVLoader
    <!-- options-start -->
    * Valid options are: <p/>
    * 
+   * <pre> -H
+   *  No header row present in the data.</pre>
+   * 
    * <pre> -N &lt;range&gt;
    *  The range of attributes to force type to be NOMINAL.
    *  'first' and 'last' are accepted as well.
@@ -285,6 +304,8 @@ public class CSVLoader
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
 
+    setNoHeaderRowPresent(Utils.getFlag('H', options));
+    
     tmpStr = Utils.getOption('N', options);
     if (tmpStr.length() != 0)
       setNominalAttributes(tmpStr);
@@ -328,6 +349,10 @@ public class CSVLoader
     Vector<String>	result;
     
     result  = new Vector<String>();
+    
+    if (getNoHeaderRowPresent()) {
+      result.add("-H");
+    }
 
     if (getNominalAttributes().length() > 0) {
       result.add("-N");
@@ -350,6 +375,34 @@ public class CSVLoader
     result.add(getMissingValue());
     
     return result.toArray(new String[result.size()]);
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String noHeaderRowPresentTipText() {
+    return "First row of data does not contain attribute names";
+  }
+  
+  /**
+   * Set whether there is no header row in the data.
+   * 
+   * @param b true if there is no header row in the data
+   */
+  public void setNoHeaderRowPresent(boolean b) {
+    m_noHeaderRow = b;
+  }
+  
+  /**
+   * Get whether there is no header row in the data.
+   * 
+   * @return true if there is no header row in the data
+   */
+  public boolean getNoHeaderRowPresent() {
+    return m_noHeaderRow;
   }
   
   /**
@@ -628,6 +681,11 @@ public class CSVLoader
     }
     
     m_cumulativeInstances = new ArrayList<ArrayList<Object>>();
+    if (m_noHeaderRow && m_firstRow != null) {
+      // add the first row that was read in readHeader() in order
+      // to determine how many attributes the data has
+      m_cumulativeInstances.add(m_firstRow);
+    }
     ArrayList<Object> current;
     while ((current = getInstance(m_st)) != null) {
       m_cumulativeInstances.add(current);
@@ -736,6 +794,11 @@ public class CSVLoader
   public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("CSVLoader can't read data sets incrementally.");
   }
+  
+  private ArrayList<Object> getInstance(StreamTokenizer tokenizer)
+    throws IOException {
+    return getInstance(tokenizer, false);
+  }
 
   /**
    * Attempts to parse a line of the data set.
@@ -756,7 +819,8 @@ public class CSVLoader
    *      signals: (IOException);
    * </jml></pre>
    */
-  private ArrayList<Object> getInstance(StreamTokenizer tokenizer) 
+  private ArrayList<Object> getInstance(StreamTokenizer tokenizer,
+      boolean readingFirstRow)
     throws IOException {
 
     ArrayList<Object> current = new ArrayList<Object>();
@@ -804,18 +868,20 @@ public class CSVLoader
       first = false;
     }
     
-    // check number of values read
-    if (current.size() != m_structure.numAttributes()) {
-      ConverterUtils.errms(tokenizer, 
-			   "wrong number of values. Read "+current.size()
-			   +", expected "+m_structure.numAttributes());
-    }
+    if (!readingFirstRow) {
+      // check number of values read
+      if (current.size() != m_structure.numAttributes()) {
+        ConverterUtils.errms(tokenizer, 
+            "wrong number of values. Read "+current.size()
+            +", expected "+m_structure.numAttributes());
+      }
 
-    // check for structure update
-    try {
-      checkStructure(current);
-    } catch (Exception ex) {
-      ex.printStackTrace();
+      // check for structure update
+      try {
+        checkStructure(current);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
     }
 
     return current;
@@ -941,15 +1007,26 @@ public class CSVLoader
   private void readHeader(StreamTokenizer tokenizer) throws IOException {
    
     ArrayList<Attribute> attribNames = new ArrayList<Attribute>();
-    ConverterUtils.getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      ConverterUtils.errms(tokenizer,"premature end of file");
-    }
+    m_firstRow = null;
+    if (m_noHeaderRow) {
+      tokenizer.ordinaryChar(m_FieldSeparator.charAt(0));
+      ArrayList<Object> firstRow = getInstance(tokenizer, true);
+      for (int i = 0; i < firstRow.size(); i++) {
+        attribNames.add(new Attribute("att" + (i + 1),
+            (java.util.List<String>)null));
+      }
+      m_firstRow = firstRow;
+    } else {
+      ConverterUtils.getFirstToken(tokenizer);
+      if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
+        ConverterUtils.errms(tokenizer,"premature end of file");
+      }
 
-    while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
-      attribNames.add(new Attribute(tokenizer.sval, 
-          (java.util.List<String>)null));
-      ConverterUtils.getToken(tokenizer);
+      while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
+        attribNames.add(new Attribute(tokenizer.sval, 
+            (java.util.List<String>)null));
+        ConverterUtils.getToken(tokenizer);
+      }
     }
     String relationName;
     if (m_sourceFile != null)
