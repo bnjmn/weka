@@ -172,8 +172,11 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       // make sure we load all packages first!!!
       WekaPackageManager.loadPackages(false);
 
+      // Don't do anything else until all initial packages are loaded...
+      if (WekaPackageManager.m_initialPackageLoadingInProcess) {
+        return;
+      }
 
-        
       EDITOR_PROPERTIES = GenericPropertiesCreator.getGlobalOutputProperties();
       if (EDITOR_PROPERTIES == null) {
         // try creating a new one from scratch
