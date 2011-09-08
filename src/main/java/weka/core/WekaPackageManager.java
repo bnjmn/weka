@@ -89,6 +89,7 @@ public class WekaPackageManager {
   
   protected static boolean m_wekaHomeEstablished;
   protected static boolean m_packagesLoaded;
+  public static boolean m_initialPackageLoadingInProcess = false;
   
   protected static boolean establishWekaHome() {
     if (m_wekaHomeEstablished) {
@@ -585,6 +586,7 @@ public class WekaPackageManager {
     }
     
     m_packagesLoaded = true;
+    m_initialPackageLoadingInProcess = true;
     if (establishWekaHome()) {
       // try and load any jar files and add to the classpath
       File[] contents = PACKAGES_DIR.listFiles();
@@ -620,11 +622,13 @@ public class WekaPackageManager {
         }
       }
     }
+    m_initialPackageLoadingInProcess = false;
     
     // do we need to regenerate the list of available schemes for
     // the GUIs (this is not necessary when executing stuff from
     // the command line
     if (refreshGOEProperties) {
+      System.err.println("Refreshing GOE props...");
       refreshGOEProperties();
     }
   }
