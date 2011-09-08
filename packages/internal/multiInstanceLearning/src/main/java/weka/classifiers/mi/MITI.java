@@ -36,6 +36,7 @@ import weka.classifiers.RandomizableClassifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
@@ -131,7 +132,8 @@ import weka.core.TechnicalInformation.Type;
  */
 public class MITI extends RandomizableClassifier implements OptionHandler,
                                                             AdditionalMeasureProducer,
-                                                            TechnicalInformationHandler {
+                                                            TechnicalInformationHandler,
+                                                            MultiInstanceCapabilitiesHandler {
   
   /** for serialization */
   static final long serialVersionUID = -217735168397644244L;
@@ -224,11 +226,35 @@ public class MITI extends RandomizableClassifier implements OptionHandler,
     public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.RELATIONAL_ATTRIBUTES);
+    result.disable(Capability.MISSING_VALUES);
+
+    // class
+    result.disableAllClasses();
+    result.disableAllClassDependencies();
+    result.enable(Capability.BINARY_CLASS);
+
     // Only multi instance data
     result.enable(Capability.ONLY_MULTIINSTANCE);
     
-    // Can't handle missing data
-    result.disable(Capability.MISSING_VALUES);
+    return result;
+  }
+
+  /**
+   * Returns the capabilities of this multi-instance classifier for the
+   * relational data.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getMultiInstanceCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NO_CLASS);
     
     return result;
   }
