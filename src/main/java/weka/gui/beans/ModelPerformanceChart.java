@@ -27,6 +27,7 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
 
 import java.awt.BorderLayout;
+import java.awt.GraphicsEnvironment;
 import java.beans.PropertyChangeListener;
 import java.beans.VetoableChangeListener;
 import java.beans.beancontext.BeanContext;
@@ -127,30 +128,32 @@ public class ModelPerformanceChart
    * @param e a ThresholdDataEvent
    */
   public synchronized void acceptDataSet(ThresholdDataEvent e) {
-    if (m_visPanel == null) {
-      m_visPanel = new VisualizePanel();
-    }
-    if (m_masterPlot == null) {
-      m_masterPlot = e.getDataSet();
-    }
-    try {
-    // check for compatable data sets
-      if (!m_masterPlot.getPlotInstances().relationName().
-	  equals(e.getDataSet().getPlotInstances().relationName())) {
-	
-	// if not equal then remove all plots and set as new master plot
-	m_masterPlot = e.getDataSet();
-	m_visPanel.setMasterPlot(m_masterPlot);
-	m_visPanel.validate(); m_visPanel.repaint();
-      } else {
-	// add as new plot
-	m_visPanel.addPlot(e.getDataSet());
-	m_visPanel.validate(); m_visPanel.repaint();
+    if (!GraphicsEnvironment.isHeadless()) {
+      if (m_visPanel == null) {
+        m_visPanel = new VisualizePanel();
       }
-      m_visPanel.setXIndex(4); m_visPanel.setYIndex(5);
-    } catch (Exception ex) {
-      System.err.println("Problem setting up visualization (ModelPerformanceChart)");
-      ex.printStackTrace();
+      if (m_masterPlot == null) {
+        m_masterPlot = e.getDataSet();
+      }
+      try {
+        // check for compatable data sets
+        if (!m_masterPlot.getPlotInstances().relationName().
+            equals(e.getDataSet().getPlotInstances().relationName())) {
+
+          // if not equal then remove all plots and set as new master plot
+          m_masterPlot = e.getDataSet();
+          m_visPanel.setMasterPlot(m_masterPlot);
+          m_visPanel.validate(); m_visPanel.repaint();
+        } else {
+          // add as new plot
+          m_visPanel.addPlot(e.getDataSet());
+          m_visPanel.validate(); m_visPanel.repaint();
+        }
+        m_visPanel.setXIndex(4); m_visPanel.setYIndex(5);
+      } catch (Exception ex) {
+        System.err.println("Problem setting up visualization (ModelPerformanceChart)");
+        ex.printStackTrace();
+      }
     }
   }
 
@@ -160,20 +163,22 @@ public class ModelPerformanceChart
    * @param e a VisualizableErrorEvent
    */
   public synchronized void acceptDataSet(VisualizableErrorEvent e) {
-    if (m_visPanel == null) {
-      m_visPanel = new VisualizePanel();
+    if (!GraphicsEnvironment.isHeadless()) {
+      if (m_visPanel == null) {
+        m_visPanel = new VisualizePanel();
+      }
+      if (m_masterPlot == null) {
+        m_masterPlot = e.getDataSet();
+      }
+      try {
+        m_visPanel.setMasterPlot(m_masterPlot);
+      } catch (Exception ex) {
+        System.err.println("Problem setting up visualization (ModelPerformanceChart)");
+        ex.printStackTrace();
+      }
+      m_visPanel.validate();
+      m_visPanel.repaint();
     }
-    if (m_masterPlot == null) {
-      m_masterPlot = e.getDataSet();
-    }
-    try {
-      m_visPanel.setMasterPlot(m_masterPlot);
-    } catch (Exception ex) {
-      System.err.println("Problem setting up visualization (ModelPerformanceChart)");
-      ex.printStackTrace();
-    }
-    m_visPanel.validate();
-    m_visPanel.repaint();
   }
 
   /**
