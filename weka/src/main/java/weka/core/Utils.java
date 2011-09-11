@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.60 $
+ * @version $Revision$
  */
 public final class Utils
   implements RevisionHandler {
@@ -641,7 +641,8 @@ public final class Utils
       if ((string.indexOf('\n') != -1) || (string.indexOf('\r') != -1) || 
 	  (string.indexOf('\'') != -1) || (string.indexOf('"') != -1) || 
 	  (string.indexOf('\\') != -1) || 
-	  (string.indexOf('\t') != -1) || (string.indexOf('%') != -1)) {
+	  (string.indexOf('\t') != -1) || (string.indexOf('%') != -1) ||
+	  (string.indexOf('\u001E') != -1)) {
 	  string = backQuoteChars(string);
 	  quote = true;
       }
@@ -673,7 +674,8 @@ public final class Utils
       if ((string.indexOf("\\n") != -1) || (string.indexOf("\\r") != -1) || 
 	  (string.indexOf("\\'") != -1) || (string.indexOf("\\\"") != -1) || 
 	  (string.indexOf("\\\\") != -1) || 
-	  (string.indexOf("\\t") != -1) || (string.indexOf("\\%") != -1)) {
+	  (string.indexOf("\\t") != -1) || (string.indexOf("\\%") != -1) ||
+	  (string.indexOf("\\u001E") != -1)) {
 	string = unbackQuoteChars(string);
       }
     }
@@ -695,8 +697,10 @@ public final class Utils
     StringBuffer newStringBuffer;
 
     // replace each of the following characters with the backquoted version
-    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%'};
-    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%"};
+    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%',
+        '\u001E'};
+    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%",
+        "\\u001E"};
     for (int i = 0; i < charsFind.length; i++) {
       if (string.indexOf(charsFind[i]) != -1 ) {
 	newStringBuffer = new StringBuffer();
@@ -847,8 +851,10 @@ public final class Utils
     StringBuffer newStringBuffer;
     
     // replace each of the following characters with the backquoted version
-    String charsFind[]    = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%"};
-    char   charsReplace[] = {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%'};
+    String charsFind[]    = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%",
+        "\\u001E"};
+    char   charsReplace[] = {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%',
+        '\u001E'};
     int pos[] = new int[charsFind.length];
     int	curPos;
     
@@ -1875,7 +1881,7 @@ public final class Utils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.60 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
