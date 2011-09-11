@@ -693,7 +693,8 @@ public final class Utils
       if ((string.indexOf('\n') != -1) || (string.indexOf('\r') != -1) || 
 	  (string.indexOf('\'') != -1) || (string.indexOf('"') != -1) || 
 	  (string.indexOf('\\') != -1) || 
-	  (string.indexOf('\t') != -1) || (string.indexOf('%') != -1)) {
+	  (string.indexOf('\t') != -1) || (string.indexOf('%') != -1) ||
+	  (string.indexOf('\u001E') != -1)) {
 	  string = backQuoteChars(string);
 	  quote = true;
       }
@@ -747,8 +748,10 @@ public final class Utils
     StringBuffer newStringBuffer;
 
     // replace each of the following characters with the backquoted version
-    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%'};
-    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%"};
+    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%', 
+        '\u001E'};
+    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%",
+        "\\u001E"};
     for (int i = 0; i < charsFind.length; i++) {
       if (string.indexOf(charsFind[i]) != -1 ) {
 	newStringBuffer = new StringBuffer();
