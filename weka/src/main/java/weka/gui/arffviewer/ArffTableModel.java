@@ -31,6 +31,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -63,22 +64,33 @@ public class ArffTableModel
   
   /** for serialization. */
   private static final long serialVersionUID = 3411795562305994946L;
+  
   /** the listeners */
-  private HashSet m_Listeners;
+  protected HashSet m_Listeners;
+  
   /** the data */
-  private Instances m_Data;
+  protected Instances m_Data;
+  
   /** whether notfication is enabled */
-  private boolean m_NotificationEnabled;
+  protected boolean m_NotificationEnabled;
+  
   /** whether undo is active */
-  private boolean m_UndoEnabled;
+  protected boolean m_UndoEnabled;
+  
   /** whether to ignore changes, i.e. not adding to undo history */
-  private boolean m_IgnoreChanges;
+  protected boolean m_IgnoreChanges;
+  
   /** the undo list (contains temp. filenames) */
-  private Vector m_UndoList;
+  protected Vector m_UndoList;
+  
   /** whether the table is read-only */
-  private boolean m_ReadOnly;
+  protected boolean m_ReadOnly;
+  
   /** whether to display the attribute index in the table header. */
-  private boolean m_ShowAttributeIndex;
+  protected boolean m_ShowAttributeIndex;
+  
+  /** for caching long relational and string values that get processed for display. */
+  protected Hashtable<String,String> m_Cache;
   
   /**
    * performs some initialization
@@ -94,6 +106,7 @@ public class ArffTableModel
     m_UndoEnabled         = true;
     m_ReadOnly            = false;
     m_ShowAttributeIndex  = false;
+    m_Cache               = new Hashtable<String,String>();
   }
   
   /**
@@ -178,7 +191,7 @@ public class ArffTableModel
    * 
    * @param filename	the file to load
    */
-  private void loadFile(String filename) {
+  protected void loadFile(String filename) {
     AbstractFileLoader          loader;
     
     loader = ConverterUtils.getLoaderForFile(filename);
@@ -186,7 +199,7 @@ public class ArffTableModel
     if (loader != null) {
       try {
         loader.setFile(new File(filename));
-        m_Data = loader.getDataSet();
+        setInstances(loader.getDataSet());
       }
       catch (Exception e) {
         ComponentHelper.showMessageBox(
@@ -196,7 +209,7 @@ public class ArffTableModel
             JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.ERROR_MESSAGE );
         System.out.println(e);
-        m_Data = null;
+        setInstances(null);
       }
     }
   }
@@ -208,6 +221,8 @@ public class ArffTableModel
    */
   public void setInstances(Instances data) {
     m_Data = data;
+    m_Cache.clear();
+    fireTableDataChanged();
   }
   
   /**
@@ -500,7 +515,7 @@ public class ArffTableModel
    * @param columnIndex		the index of the column
    * @return			true if the column is the class attribute
    */
-  private boolean isClassIndex(int columnIndex) {
+  protected boolean isClassIndex(int columnIndex) {
     boolean        result;
     int            index;
     
@@ -632,10 +647,13 @@ public class ArffTableModel
    * @return 			the value at the position
    */
   public Object getValueAt(int rowIndex, int columnIndex) {
-    Object            result;
-    String            tmp;
+    Object	result;
+    String	tmp;
+    String	key;
+    boolean	modified;
     
     result = null;
+    key    = rowIndex + "-" + columnIndex;
     
     if (    (rowIndex >= 0) && (rowIndex < getRowCount())
         && (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
@@ -647,32 +665,48 @@ public class ArffTableModel
           result = null;
         }
         else {
-          switch (getType(columnIndex)) {
-            case Attribute.DATE: 
-            case Attribute.NOMINAL:
-            case Attribute.STRING:
-            case Attribute.RELATIONAL:
-              result = m_Data.instance(rowIndex).stringValue(columnIndex - 1);
-              break;
-            case Attribute.NUMERIC:
-              result = new Double(m_Data.instance(rowIndex).value(columnIndex - 1));
-              break;
-            default:
-              result = "-can't display-";
+          if (m_Cache.containsKey(key)) {
+            result = m_Cache.get(key);
           }
-        }
-      }
-    }
-    
-    if (getType(columnIndex) != Attribute.NUMERIC) {
-      if (result != null) {
-        // does it contain "\n" or "\r"? -> replace with red html tag
-        tmp = result.toString();
-        if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
-          tmp    = tmp.replaceAll("\\r\\n", "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
-          tmp    = tmp.replaceAll("\\r", "<font color=\"red\"><b>\\\\r</b></font>");
-          tmp    = tmp.replaceAll("\\n", "<font color=\"red\"><b>\\\\n</b></font>");
-          result = "<html>" + tmp + "</html>";
+          else {
+            switch (getType(columnIndex)) {
+              case Attribute.DATE: 
+              case Attribute.NOMINAL:
+              case Attribute.STRING:
+              case Attribute.RELATIONAL:
+        	result = m_Data.instance(rowIndex).stringValue(columnIndex - 1);
+        	break;
+              case Attribute.NUMERIC:
+        	result = new Double(m_Data.instance(rowIndex).value(columnIndex - 1));
+        	break;
+              default:
+        	result = "-can't display-";
+            }
+            
+            if (getType(columnIndex) != Attribute.NUMERIC) {
+              if (result != null) {
+                tmp      = result.toString();
+                modified = false;
+                // fix html tags, otherwise Java parser hangs
+                if ((tmp.indexOf('<') > -1) || (tmp.indexOf('>') > -1)) {
+                  tmp = tmp.replace("<", "(");
+                  tmp = tmp.replace(">", ")");
+                  modified = true;
+                }
+                // does it contain "\n" or "\r"? -> replace with red html tag
+                if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
+                  tmp = tmp.replaceAll("\\r\\n", "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
+                  tmp = tmp.replaceAll("\\r", "<font color=\"red\"><b>\\\\r</b></font>");
+                  tmp = tmp.replaceAll("\\n", "<font color=\"red\"><b>\\\\n</b></font>");
+                  tmp = "<html>" + tmp + "</html>";
+                  modified = true;
+                }
+                result = tmp;
+                if (modified)
+                  m_Cache.put(key, tmp);
+              }
+            }
+          }
         }
       }
     }
