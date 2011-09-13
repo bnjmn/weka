@@ -1535,7 +1535,9 @@ public class LibSVM
 	  if (v > 0)
 	    result[0] = 1;
 	  else
-	    result[0] = Double.NaN;  // outlier
+            // outlier (interface for Classifier specifies that unclassified instances
+            // should return a distribution of all zeros)
+	    result[0] = 0;  
 	}
 	else {
 	  result[(int) v] = 1;
