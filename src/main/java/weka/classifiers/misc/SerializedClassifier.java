@@ -241,11 +241,13 @@ public class SerializedClassifier
     Capabilities        result;
 
     // init model if necessary
-    try {
-      initModel();
-    }
-    catch (Exception e) {
-      System.err.println(e);
+    if (m_ModelFile != null && m_ModelFile.exists() && m_ModelFile.isFile()) {
+      try {
+        initModel();
+      }
+      catch (Exception e) {
+        System.err.println(e);
+      }
     }
 
     if (m_Model != null) {
