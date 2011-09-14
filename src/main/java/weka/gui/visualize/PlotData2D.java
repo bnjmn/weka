@@ -29,6 +29,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
 
 import java.awt.Color;
+import java.io.Serializable;
 
 /**
  * This class is a container for plottable data. Instances form the
@@ -38,7 +39,12 @@ import java.awt.Color;
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class PlotData2D {
+public class PlotData2D implements Serializable {
+
+  /**
+   * For serialization
+   */
+  private static final long serialVersionUID = -3979972167982697979L;
 
   /** The instances */
   protected Instances m_plotInstances = null;
