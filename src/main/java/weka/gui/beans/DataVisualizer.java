@@ -33,7 +33,10 @@ import java.beans.beancontext.BeanContext;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextChildSupport;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -48,7 +51,7 @@ import javax.swing.JPanel;
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
 	     TestSetListener, Visible, UserRequestAcceptor, Serializable,
-	     BeanContextChild {
+	     BeanContextChild, HeadlessEventCollector {
 
   /** for serialization */
   private static final long serialVersionUID = 1949062132560159028L;
@@ -72,6 +75,8 @@ public class DataVisualizer extends JPanel
   protected transient BeanContext m_beanContext = null;
 
   private VisualizePanel m_visPanel;
+  
+  protected List<EventObject> m_headlessEvents;
 
   /**
    * Objects listening for data set events
@@ -89,6 +94,8 @@ public class DataVisualizer extends JPanel
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
       appearanceFinal();
+    } else {
+      m_headlessEvents = new ArrayList<EventObject>();
     }
   }
 
@@ -172,10 +179,43 @@ public class DataVisualizer extends JPanel
       } catch (Exception ex) {
 	ex.printStackTrace();
       }
+    } else {
+      if (m_headlessEvents != null) {
+        m_headlessEvents = new ArrayList<EventObject>();
+        m_headlessEvents.add(e);
+      }
     }
 
     // pass on the event to any listeners
     notifyDataSetListeners(e);
+  }
+  
+  /**
+   * Get the list of events processed in headless mode. May return
+   * null or an empty list if not running in headless mode or no
+   * events were processed
+   * 
+   * @return a list of EventObjects or null.
+   */
+  public List<EventObject> retrieveHeadlessEvents() {
+    return m_headlessEvents;
+  }
+  
+  /**
+   * Process a list of events that have been collected earlier. Has
+   * no affect if the component is running in headless mode.
+   * 
+   * @param headless a list of EventObjects to process.
+   */
+  public void processHeadlessEvents(List<EventObject> headless) {
+    // only process if we're not headless
+    if (!java.awt.GraphicsEnvironment.isHeadless()) {
+      for (EventObject e : headless) {
+        if (e instanceof DataSetEvent) {
+          acceptDataSet((DataSetEvent)e);
+        }
+      }
+    }
   }
 
   /**
