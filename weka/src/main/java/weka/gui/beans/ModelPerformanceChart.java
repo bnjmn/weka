@@ -23,18 +23,23 @@
 package weka.gui.beans;
 
 import weka.core.Instances;
+import weka.gui.Logger;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
 
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
+import java.beans.EventSetDescriptor;
 import java.beans.PropertyChangeListener;
 import java.beans.VetoableChangeListener;
 import java.beans.beancontext.BeanContext;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextChildSupport;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -51,7 +56,8 @@ public class ModelPerformanceChart
   extends JPanel
   implements ThresholdDataListener, VisualizableErrorListener, 
              Visible, UserRequestAcceptor,
-	     Serializable, BeanContextChild {
+	     Serializable, BeanContextChild, HeadlessEventCollector,
+	     BeanCommon {
 
   /** for serialization */
   private static final long serialVersionUID = -4602034200071195924L;
@@ -63,6 +69,8 @@ public class ModelPerformanceChart
   protected transient JFrame m_popupFrame;
 
   protected boolean m_framePoppedUp = false;
+  
+  protected List<EventObject> m_headlessEvents;
 
   /**
    * True if this bean's appearance is the design mode appearance
@@ -87,6 +95,8 @@ public class ModelPerformanceChart
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
       appearanceFinal();
+    } else {
+      m_headlessEvents = new ArrayList<EventObject>();
     }
   }
 
@@ -154,6 +164,8 @@ public class ModelPerformanceChart
         System.err.println("Problem setting up visualization (ModelPerformanceChart)");
         ex.printStackTrace();
       }
+    } else {
+      m_headlessEvents.add(e);
     }
   }
 
@@ -178,6 +190,27 @@ public class ModelPerformanceChart
       }
       m_visPanel.validate();
       m_visPanel.repaint();
+    } else {
+      m_headlessEvents = new ArrayList<EventObject>();
+      m_headlessEvents.add(e);
+    }
+  }
+  
+  public List<EventObject> retrieveHeadlessEvents() {
+    return m_headlessEvents;
+  }
+  
+  public void processHeadlessEvents(List<EventObject> headless) {
+    
+    // only process if we're not headless
+    if (!GraphicsEnvironment.isHeadless()) {
+      for (EventObject e : headless) {
+        if (e instanceof ThresholdDataEvent) {
+          acceptDataSet((ThresholdDataEvent)e);
+        } else if (e instanceof VisualizableErrorEvent) {
+          acceptDataSet((VisualizableErrorEvent)e);
+        }
+      }
     }
   }
 
@@ -365,5 +398,94 @@ public class ModelPerformanceChart
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
+  }
+
+  /**
+   * Stop any processing that the bean might be doing.
+   */
+  public void stop() {
+  }
+
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return false;
+  }
+
+  /**
+   * Set a logger
+   *
+   * @param logger a <code>Logger</code> value
+   */
+  public void setLog(Logger logger) {
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return true;
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the named event
+   *
+   * @param eventName the name of the event
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(String eventName) {
+    return true;
+  }
+
+  /**
+   * Notify this object that it has been registered as a listener with
+   * a source for recieving events described by the named event
+   * This object is responsible for recording this fact.
+   *
+   * @param eventName the event
+   * @param source the source with which this object has been registered as
+   * a listener
+   */
+  public void connectionNotification(String eventName, Object source) {    
+  }
+
+  /**
+   * Notify this object that it has been deregistered as a listener with
+   * a source for named event. This object is responsible
+   * for recording this fact.
+   *
+   * @param eventName the event
+   * @param source the source with which this object has been registered as
+   * a listener
+   */
+  public void disconnectionNotification(String eventName, Object source) {    
   }
 }
