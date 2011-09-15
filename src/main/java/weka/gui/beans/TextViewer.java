@@ -40,8 +40,11 @@ import java.beans.beancontext.BeanContext;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextChildSupport;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -65,7 +68,7 @@ public class TextViewer
 	     Visible, UserRequestAcceptor, 
 	     BeanContextChild,
              BeanCommon,
-             EventConstraints {
+             EventConstraints, HeadlessEventCollector {
 
   /** for serialization */
   private static final long serialVersionUID = 104838186352536832L;
@@ -74,6 +77,8 @@ public class TextViewer
 
 
   private transient JFrame m_resultsFrame = null;
+  
+  protected List<EventObject> m_headlessEvents;
 
   /**
    * Output area for a piece of text
@@ -117,6 +122,8 @@ public class TextViewer
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
     if (!ge.isHeadless()) {
       appearanceFinal();
+    } else {
+      m_headlessEvents = new ArrayList<EventObject>();
     }
   }
 
@@ -323,9 +330,41 @@ public class TextViewer
       m_history.addResult(name, result);
       m_history.setSingle(name);
     }
+    
+    if (m_headlessEvents != null) {
+      m_headlessEvents.add(e);
+    }
 
     // pass on the event to any listeners
     notifyTextListeners(e);
+  }
+  
+  /**
+   * Get the list of events processed in headless mode. May return
+   * null or an empty list if not running in headless mode or no
+   * events were processed
+   * 
+   * @return a list of EventObjects or null.
+   */
+  public List<EventObject> retrieveHeadlessEvents() {
+    return m_headlessEvents;
+  }
+  
+  /**
+   * Process a list of events that have been collected earlier. Has
+   * no affect if the component is running in headless mode.
+   * 
+   * @param headless a list of EventObjects to process.
+   */
+  public void processHeadlessEvents(List<EventObject> headless) {
+    // only process if we're not headless
+    if (!java.awt.GraphicsEnvironment.isHeadless()) {
+      for (EventObject e : headless) {
+        if (e instanceof TextEvent) {
+          acceptText((TextEvent)e);
+        }
+      }
+    }
   }
 
   /**
