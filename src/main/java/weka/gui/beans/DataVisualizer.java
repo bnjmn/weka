@@ -33,7 +33,10 @@ import java.beans.beancontext.BeanContext;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextChildSupport;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -43,12 +46,12 @@ import javax.swing.JPanel;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11.2.3 $
+ * @version $Revision$
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
 	     TestSetListener, Visible, UserRequestAcceptor, Serializable,
-	     BeanContextChild {
+	     BeanContextChild, HeadlessEventCollector {
 
   /** for serialization */
   private static final long serialVersionUID = 1949062132560159028L;
@@ -72,6 +75,8 @@ public class DataVisualizer extends JPanel
   protected transient BeanContext m_beanContext = null;
 
   private VisualizePanel m_visPanel;
+  
+  protected List<EventObject> m_headlessEvents;
 
   /**
    * Objects listening for data set events
@@ -89,6 +94,8 @@ public class DataVisualizer extends JPanel
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
       appearanceFinal();
+    } else {
+      m_headlessEvents = new ArrayList<EventObject>();
     }
   }
 
@@ -172,10 +179,43 @@ public class DataVisualizer extends JPanel
       } catch (Exception ex) {
 	ex.printStackTrace();
       }
+    } else {
+      if (m_headlessEvents != null) {
+        m_headlessEvents = new ArrayList<EventObject>();
+        m_headlessEvents.add(e);
+      }
     }
 
     // pass on the event to any listeners
     notifyDataSetListeners(e);
+  }
+  
+  /**
+   * Get the list of events processed in headless mode. May return
+   * null or an empty list if not running in headless mode or no
+   * events were processed
+   * 
+   * @return a list of EventObjects or null.
+   */
+  public List<EventObject> retrieveHeadlessEvents() {
+    return m_headlessEvents;
+  }
+  
+  /**
+   * Process a list of events that have been collected earlier. Has
+   * no affect if the component is running in headless mode.
+   * 
+   * @param headless a list of EventObjects to process.
+   */
+  public void processHeadlessEvents(List<EventObject> headless) {
+    // only process if we're not headless
+    if (!java.awt.GraphicsEnvironment.isHeadless()) {
+      for (EventObject e : headless) {
+        if (e instanceof DataSetEvent) {
+          acceptDataSet((DataSetEvent)e);
+        }
+      }
+    }
   }
 
   /**
@@ -303,7 +343,8 @@ public class DataVisualizer extends JPanel
     }
     m_visualizeDataSet = inst;
     PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
-    pd1.setPlotName(m_visualizeDataSet.relationName());
+    String relationName = m_visualizeDataSet.relationName();
+    pd1.setPlotName(relationName);
     try {
       m_visPanel.setMasterPlot(pd1);
     } catch (Exception ex) {
@@ -344,7 +385,18 @@ public class DataVisualizer extends JPanel
 	  m_framePoppedUp = true;
 	  final VisualizePanel vis = new VisualizePanel();
 	  PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
-	  pd1.setPlotName(m_visualizeDataSet.relationName());
+	  
+	  String relationName = m_visualizeDataSet.relationName();
+	  
+	  // A bit of a nasty hack. Allows producers of instances-based
+	  // events to specify that the points should be connected
+	  if (relationName.startsWith("__")) {
+	    boolean[] connect = new boolean[m_visualizeDataSet.numInstances()];
+	    for (int i = 1; i < connect.length; i++) { connect[i] = true; }
+	    pd1.setConnectPoints(connect);
+	    relationName = relationName.substring(2);
+	  }
+	  pd1.setPlotName(relationName);
 	  try {
 	    vis.setMasterPlot(pd1);
 	  } catch (Exception ex) {
