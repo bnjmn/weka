@@ -196,10 +196,23 @@ public class ModelPerformanceChart
     }
   }
   
+  /**
+   * Get the list of events processed in headless mode. May return
+   * null or an empty list if not running in headless mode or no
+   * events were processed
+   * 
+   * @return a list of EventObjects or null.
+   */
   public List<EventObject> retrieveHeadlessEvents() {
     return m_headlessEvents;
   }
   
+  /**
+   * Process a list of events that have been collected earlier. Has
+   * no affect if the component is running in headless mode.
+   * 
+   * @param headless a list of EventObjects to process.
+   */
   public void processHeadlessEvents(List<EventObject> headless) {
     
     // only process if we're not headless
