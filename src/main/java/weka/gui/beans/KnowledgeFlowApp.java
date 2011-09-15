@@ -860,6 +860,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     public synchronized int getNumTabs() {
       return m_flowTabs.getTabCount();
     }
+    
+    public synchronized String getTabTitle(int index) {
+      if (index < getNumTabs() && index >= 0) {
+        return m_flowTabs.getTitleAt(index);
+      }
+      return null;
+    }
 
     public synchronized int getCurrentTabIndex() {
       return m_flowTabs.getSelectedIndex();
@@ -2287,6 +2294,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   /** Snap-to-grid spacing */
   private int m_gridSpacing = 40;
+  
+  /** Number of untitled tabs so far */
+  protected int m_untitledCount = 1;
 
   /**
    * The layout area
@@ -3483,7 +3493,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     stopFlow(); // try and stop any running components
 
     if (m_mainKFPerspective.getNumTabs() == 0 || getAllowMultipleTabs()) {
-      m_mainKFPerspective.addTab("Untitled");
+      m_mainKFPerspective.addTab("Untitled" + m_untitledCount++);
     }
 
     if (!getAllowMultipleTabs()) {
@@ -3518,7 +3528,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           try {
             InputStream inR = this.getClass().getClassLoader()
             .getResourceAsStream(path);
-            m_mainKFPerspective.addTab("Untitled");
+            m_mainKFPerspective.addTab("Untitled" + m_untitledCount++);
             XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
                 m_mainKFPerspective.getCurrentTabIndex());
             InputStreamReader isr = new InputStreamReader(inR);
@@ -4470,6 +4480,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       // integrate these beans
       integrateFlow(beans, connections, false, false);
+      for (int i = 0; i < beans.size(); i++) {
+        checkForDuplicateName((BeanInstance)beans.get(i));
+      }
       setEnvironment();
       notifyIsDirty();
       m_mainKFPerspective.setSelectedBeans(beans);
@@ -4883,6 +4896,46 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
     }
   }
+  
+  private void checkForDuplicateName(BeanInstance comp) {
+    if (comp.getBean() instanceof BeanCommon) {
+      String currentName = ((BeanCommon)comp.getBean()).getCustomName();
+      if (currentName != null && currentName.length() > 0) {
+        Vector layoutBeans = BeanInstance.
+          getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
+        
+        boolean exactMatch = false;
+        int maxCopyNum = 1;
+        for (int i = 0; i < layoutBeans.size(); i++) {
+          BeanInstance b = (BeanInstance)layoutBeans.get(i);
+          if (b.getBean() instanceof BeanCommon) {
+            String compName = ((BeanCommon)b.getBean()).getCustomName();
+            if (currentName.equals(compName) && (b.getBean() !=  comp.getBean())) {
+              exactMatch = true;
+            } else {
+              if (compName.startsWith(currentName)) {
+                // see if the comparison bean has a number at the end
+                String num = compName.replace(currentName, "");
+                try {
+                  int compNum = Integer.parseInt(num);
+                  if (compNum > maxCopyNum) {
+                    maxCopyNum = compNum;
+                  }
+                } catch (NumberFormatException e) {                    
+                }
+              }
+            }
+          }
+        }
+        
+        if (exactMatch) {
+          maxCopyNum++;
+          currentName += "" + maxCopyNum;
+          ((BeanCommon)comp.getBean()).setCustomName(currentName);
+        }
+      }
+    }
+  }
 
   private void addComponent(BeanInstance comp, boolean repaint) {
     if (comp.getBean() instanceof Visible) {
@@ -4905,8 +4958,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       for (int i = 0; i < list.size(); i++) {
         ((BeanInstance) list.get(i)).setX(comp.getX());
         ((BeanInstance) list.get(i)).setY(comp.getY());
-      }      
+      }            
     }
+    
+    // check for a duplicate name
+    checkForDuplicateName(comp);
     
     KnowledgeFlowApp.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     if (repaint) {
