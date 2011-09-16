@@ -698,15 +698,88 @@ public class ClassifierPanel
     gbL.setConstraints(m_MoreOptions, gbC);
     p2.add(m_MoreOptions);
 
+    // Any launcher plugins?
+    Vector pluginsVector = GenericObjectEditor.
+      getClassnames(ClassifierPanelLaunchHandlerPlugin.class.getName());
+    JButton pluginBut = null;
+    if (pluginsVector.size() == 1) {
+      try {
+        // Display as a single button
+        String className = (String) pluginsVector.elementAt(0);
+        final ClassifierPanelLaunchHandlerPlugin plugin = 
+          (ClassifierPanelLaunchHandlerPlugin) Class.forName(className).newInstance();
+        if (plugin != null) {
+          plugin.setClassifierPanel(this);
+          pluginBut = new JButton(plugin.getLaunchCommand());
+          pluginBut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              plugin.launch();
+            }
+          });
+        }
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    } else if (pluginsVector.size() > 1) {
+    // make a popu menu
+      int okPluginCount = 0;
+      final java.awt.PopupMenu pluginPopup = new java.awt.PopupMenu();
+
+      for (int i = 0; i < pluginsVector.size(); i++) {
+        String className = (String) (pluginsVector.elementAt(i));
+        try {
+          final ClassifierPanelLaunchHandlerPlugin plugin = 
+            (ClassifierPanelLaunchHandlerPlugin) Class.forName(className).newInstance();
+
+          if (plugin == null) {
+            continue;
+          }
+          okPluginCount++;
+          plugin.setClassifierPanel(this);
+          java.awt.MenuItem popI = new java.awt.MenuItem(plugin.getLaunchCommand());
+          popI.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              //pluginPopup.setVisible(false);
+              plugin.launch();
+            }
+          });
+          pluginPopup.add(popI);
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+      
+
+      if (okPluginCount > 0) {
+        pluginBut = new JButton("Launchers...");
+        final JButton copyB = pluginBut; 
+        copyB.add(pluginPopup);
+        pluginBut.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            pluginPopup.show(copyB, 0, 0);
+          }
+        });
+      } else {
+        pluginBut = null;
+      }
+    }
+    
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(2, 2));
     buttons.add(m_ClassCombo);
     m_ClassCombo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    ssButs.setLayout(new GridLayout(1, 2, 5, 5));
+    if (pluginBut == null) {
+      ssButs.setLayout(new GridLayout(1, 2, 5, 5));
+    } else {
+     ssButs.setLayout(new FlowLayout(FlowLayout.LEFT));
+    }
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
+    if (pluginBut != null) {
+      ssButs.add(pluginBut);
+    }
 
     buttons.add(ssButs);
     
