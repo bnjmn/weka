@@ -36,6 +36,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Enumeration;
@@ -197,7 +198,10 @@ import weka.estimators.UnivariateKernelEstimator;
  * @version  $Revision$
  */
 public class Evaluation
-  implements Summarizable, RevisionHandler {
+  implements Summarizable, RevisionHandler, Serializable {
+
+  /** For serialization */
+  private static final long serialVersionUID = -7010314486866816271L;
 
   /** The number of classes. */
   protected int m_NumClasses;
