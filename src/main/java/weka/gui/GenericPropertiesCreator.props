@@ -162,6 +162,10 @@ weka.gui.visualize.plugins.ErrorVisualizePlugin=\
 weka.gui.visualize.plugins.AssociationRuleVisualizePlugin=\
  weka.gui.visualize.plugins
 
+#List of Explorer classifier panel launch handler plugins
+weka.gui.explorer.ClassifierPanelLaunchHandlerPlugin=\
+ weka.gui.explorer
+
 # List of writers for outputting graphics
 weka.gui.visualize.JComponentWriter=\
  weka.gui.visualize
