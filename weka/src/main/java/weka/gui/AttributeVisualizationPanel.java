@@ -43,9 +43,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.io.FileReader;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 /**
  * Creates a panel that shows a visualization of an
@@ -79,6 +81,8 @@ public class AttributeVisualizationPanel
    * attribute index.
    */
   protected AttributeStats m_as;
+  
+  protected AttributeStats[] m_asCache;
   
   /** This holds the index of the current attribute on display and should be
    *  set through setAttribute(int idx).
@@ -249,6 +253,7 @@ public class AttributeVisualizationPanel
    * @param newins a set of Instances
    */
   public void setInstances(Instances newins) {
+    
     m_attribIndex = 0;
     m_as = null;
     m_data = new Instances(newins);
@@ -274,6 +279,7 @@ public class AttributeVisualizationPanel
       m_classIndex = m_data.numAttributes()-1;
     }
     
+    m_asCache = new AttributeStats[m_data.numAttributes()];
   }
   
   /**
@@ -311,7 +317,7 @@ public class AttributeVisualizationPanel
    *
    * @param index The index of the attribute
    */
-  public void setAttribute(int index) {
+  public void setAttribute(int index) {    
     
     synchronized (m_locker) {
       //m_threadRun = true;
@@ -320,9 +326,16 @@ public class AttributeVisualizationPanel
       m_displayCurrentAttribute = true;
       //if(m_hc!=null && m_hc.isAlive()) m_hc.stop();
       m_attribIndex = index;
-      m_as = m_data.attributeStats(m_attribIndex);
+      if (m_asCache[index] != null) {
+        m_as = m_asCache[index];
+      } else {
+        m_asCache[index] = m_data.attributeStats(index);
+        m_as = m_asCache[index];
+      }
+      // m_as = m_data.attributeStats(m_attribIndex);
       //m_classIndex = m_colorAttrib.getSelectedIndex();
     }
+    
     this.repaint();
     // calcGraph();
   }
