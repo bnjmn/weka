@@ -80,6 +80,9 @@ public class AttributeVisualizationPanel
    */
   protected AttributeStats m_as;
   
+  /** Cache of attribute stats info for the current data set */
+  protected AttributeStats[] m_asCache;
+  
   /** This holds the index of the current attribute on display and should be
    *  set through setAttribute(int idx).
    */
@@ -295,6 +298,7 @@ public class AttributeVisualizationPanel
       m_classIndex = m_data.numAttributes()-1;
     }
     
+    m_asCache = new AttributeStats[m_data.numAttributes()];
   }
   
   /**
@@ -341,7 +345,13 @@ public class AttributeVisualizationPanel
       m_displayCurrentAttribute = true;
       //if(m_hc!=null && m_hc.isAlive()) m_hc.stop();
       m_attribIndex = index;
-      m_as = m_data.attributeStats(m_attribIndex);
+      if (m_asCache[index] != null) {
+        m_as = m_asCache[index];
+      } else {
+        m_asCache[index] = m_data.attributeStats(index);
+        m_as = m_asCache[index];
+      }
+//      m_as = m_data.attributeStats(m_attribIndex);
       //m_classIndex = m_colorAttrib.getSelectedIndex();
     }
     this.repaint();
