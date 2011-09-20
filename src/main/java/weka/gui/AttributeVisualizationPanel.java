@@ -22,15 +22,6 @@
 
 package weka.gui;
 
-import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.gui.visualize.PrintableComponent;
-import weka.gui.visualize.PrintablePanel;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -43,11 +34,18 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.io.FileReader;
-import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+
+import weka.core.Attribute;
+import weka.core.AttributeStats;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.gui.visualize.PrintableComponent;
+import weka.gui.visualize.PrintablePanel;
 
 /**
  * Creates a panel that shows a visualization of an
@@ -82,6 +80,7 @@ public class AttributeVisualizationPanel
    */
   protected AttributeStats m_as;
   
+  /** Cache of attribute stats info for the current data set */
   protected AttributeStats[] m_asCache;
   
   /** This holds the index of the current attribute on display and should be
