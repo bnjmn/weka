@@ -1318,7 +1318,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
         m_saveB.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
-            saveLayout(m_mainKFPerspective.getCurrentTabIndex(), false);
+            if (m_mainKFPerspective.getCurrentTabIndex() >= 0) {
+              saveLayout(m_mainKFPerspective.getCurrentTabIndex(), false);
+            }
           }
         });
 
@@ -2089,7 +2091,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       if (getCurrentTabIndex() < 0) {
         m_beanLayout = null;
         m_logPanel = null;
-      }
+        m_saveB.setEnabled(false);
+      }      
     }
 
     public synchronized void addTab(String tabTitle) {
@@ -2152,7 +2155,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       m_flowTabs.addTab(tabTitle, splitHolder);
       int tabIndex = getNumTabs() - 1;
       m_flowTabs.setTabComponentAt(tabIndex, new CloseableTabTitle(m_flowTabs));
-      setActiveTab(getNumTabs() - 1);      
+      setActiveTab(getNumTabs() - 1);
+      m_saveB.setEnabled(true);
     }
   }
 
