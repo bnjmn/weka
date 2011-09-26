@@ -413,7 +413,7 @@ public class SubsetByExpression
    * does not get "consumed" by the filter and a prediction is always
    * generated.
    * 
-   * @param b true if the filter should be applied to instances that
+   * @return true if the filter should be applied to instances that
    * arrive after the first (training) batch has been processed.
    */
   public boolean getFilterAfterFirstBatch() {
