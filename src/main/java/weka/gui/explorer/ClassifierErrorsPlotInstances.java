@@ -112,6 +112,24 @@ public class ClassifierErrorsPlotInstances
   }
   
   /**
+   * Get the vector of plot shapes (see weka.gui.visualize.Plot2D).
+   * 
+   * @return the vector of plot shapes.
+   */
+  public FastVector getPlotShapes() {
+    return m_PlotShapes;
+  }
+  
+  /**
+   * Get the vector of plot sizes (see weka.gui.visualize.Plot2D).
+   * 
+   * @return the vector of plot sizes.
+   */
+  public FastVector getPlotSizes() {
+    return m_PlotSizes;
+  }
+  
+  /**
    * Sets the classifier used for making the predictions.
    * 
    * @param value	the classifier to use
