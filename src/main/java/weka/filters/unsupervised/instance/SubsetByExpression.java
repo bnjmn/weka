@@ -22,6 +22,7 @@
 package weka.filters.unsupervised.instance;
 
 import weka.core.Capabilities;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -108,14 +109,14 @@ import java.util.Vector;
  *   not ismissing(ATT3)<br/>
  * <p/>
  <!-- globalinfo-end -->
- *
+ * 
  <!-- options-start -->
  * Valid options are: <p/>
- *
+ * 
  * <pre> -E &lt;expr&gt;
  *  The expression to use for filtering
  *  (default: true).</pre>
- *
+ * 
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
@@ -126,10 +127,13 @@ public class SubsetByExpression
 
   /** for serialization. */
   private static final long serialVersionUID = 5628686110979589602L;
-
+  
   /** the expresion to use for filtering. */
   protected String m_Expression = "true";
-
+  
+  /** Whether to filter instances after the first batch has been processed */
+  protected boolean m_filterAfterFirstBatch = false;
+  
   /**
    * Returns a string describing this filter.
    *
@@ -137,7 +141,7 @@ public class SubsetByExpression
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return
+    return 
         "Filters instances according to a user-specified expression.\n\n"
       + "Grammar:\n\n"
       + "boolexpr_list ::= boolexpr_list boolexpr_part | boolexpr_part;\n"
@@ -208,6 +212,43 @@ public class SubsetByExpression
       + "  from the 'labor' UCI dataset:\n"
       + "  not ismissing(ATT3)\n"
       ;
+  }  
+  
+  /**
+   * Input an instance for filtering. Filter requires all
+   * training instances be read before producing output (calling the method
+   * batchFinished() makes the data available). If this instance is part of
+   * a new batch, m_NewBatch is set to false.
+   *
+   * @param instance    the input instance
+   * @return            true if the filtered instance may now be
+   *                    collected with output().
+   * @throws  IllegalStateException if no input structure has been defined
+   * @throws Exception  if something goes wrong
+   * @see               #batchFinished()
+   */
+  public boolean input(Instance instance) throws Exception {
+    if (getInputFormat() == null)
+      throw new IllegalStateException("No input instance format defined");
+    
+    if (m_NewBatch) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+
+    bufferInput(instance);
+    
+    int numReturnedFromParser = 0;
+    if (isFirstBatchDone()) {
+      Instances inst = new Instances(getInputFormat());
+      inst = process(inst);
+      numReturnedFromParser = inst.numInstances();
+      for (int i = 0; i < inst.numInstances(); i++)
+        push(inst.instance(i));
+      flushInput();
+    }
+    
+    return (numReturnedFromParser > 0);
   }
 
   /**
@@ -217,13 +258,19 @@ public class SubsetByExpression
    */
   public Enumeration listOptions() {
     Vector	result;
-
+    
     result = new Vector();
 
     result.addElement(new Option(
 	"\tThe expression to use for filtering\n"
 	+ "\t(default: true).",
 	"E", 1, "-E <expr>"));
+    
+    result.addElement(new Option(
+        "\tApply the filter to instances that arrive after the first\n" +
+        "\t(training) batch. The default is to not apply the filter (i.e.\n" +
+        "\talways return the instance)",
+        "F", 0, "-F"));
 
     return result.elements();
   }
@@ -231,14 +278,14 @@ public class SubsetByExpression
 
   /**
    * Parses a given list of options. <p/>
-   *
+   * 
    <!-- options-start -->
    * Valid options are: <p/>
-   *
+   * 
    * <pre> -E &lt;expr&gt;
    *  The expression to use for filtering
    *  (default: true).</pre>
-   *
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -246,13 +293,15 @@ public class SubsetByExpression
    */
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
-
+    
     tmpStr = Utils.getOption('E', options);
     if (tmpStr.length() != 0)
       setExpression(tmpStr);
     else
       setExpression("true");
-
+    
+    m_filterAfterFirstBatch = Utils.getFlag('F', options);
+   
     if (getInputFormat() != null)
       setInputFormat(getInputFormat());
   }
@@ -264,16 +313,20 @@ public class SubsetByExpression
    */
   public String[] getOptions() {
     Vector<String>	result;
-
+    
     result = new Vector();
 
     result.add("-E");
     result.add("" + getExpression());
+    
+    if (m_filterAfterFirstBatch) {
+      result.add("-F");
+    }
 
     return result.toArray(new String[result.size()]);
   }
 
-  /**
+  /** 
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -288,14 +341,14 @@ public class SubsetByExpression
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
-
+    
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-
+    
     return result;
   }
 
@@ -319,16 +372,60 @@ public class SubsetByExpression
 
   /**
    * Returns the tip text for this property.
-   *
+   * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
   public String expressionTipText() {
     return "The expression to used for filtering the dataset.";
   }
+  
+  /**
+   * Set whether to apply the filter to instances that arrive once
+   * the first (training) batch has been seen. The default is to
+   * not apply the filter and just return each instance input. This
+   * is so that, when used in the FilteredClassifier, a test instance
+   * does not get "consumed" by the filter and a prediction is always
+   * generated.
+   * 
+   * @param b true if the filter should be applied to instances that
+   * arrive after the first (training) batch has been processed.
+   */
+  public void setFilterAfterFirstBatch(boolean b) {
+    m_filterAfterFirstBatch = b;
+  }
+  
+  /**
+   * Get whether to apply the filter to instances that arrive once
+   * the first (training) batch has been seen. The default is to
+   * not apply the filter and just return each instance input. This
+   * is so that, when used in the FilteredClassifier, a test instance
+   * does not get "consumed" by the filter and a prediction is always
+   * generated.
+   * 
+   * @param b true if the filter should be applied to instances that
+   * arrive after the first (training) batch has been processed.
+   */
+  public boolean getFilterAfterFirstBatch() {
+    return m_filterAfterFirstBatch;
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String filterAfterFirstBatchTipText() {
+    return "Whether to apply the filtering process to instances that " +
+    		"are input after the first (training) batch. The default " +
+    		"is false so that, when used in a FilteredClassifier, test" +
+    		" instances do not potentially get 'consumed' by the filter " +
+    		"an a prediction is always made.";
+  }
 
   /**
-   * Determines the output format based on the input format and returns
+   * Determines the output format based on the input format and returns 
    * this.
    *
    * @param inputFormat     the input format to base the output format on
@@ -337,7 +434,7 @@ public class SubsetByExpression
    */
   protected Instances determineOutputFormat(Instances inputFormat)
       throws Exception {
-
+    
     return new Instances(inputFormat, 0);
   }
 
@@ -351,15 +448,16 @@ public class SubsetByExpression
    * @see               #batchFinished()
    */
   protected Instances process(Instances instances) throws Exception {
-    if (!isFirstBatchDone())
+    if (!isFirstBatchDone() || m_filterAfterFirstBatch) {
       return Parser.filter(m_Expression, instances);
-    else
+    } else {
       return instances;
+    }
   }
 
   /**
    * Returns the revision string.
-   *
+   * 
    * @return		the revision
    */
   public String getRevision() {
