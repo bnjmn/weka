@@ -117,6 +117,11 @@ import java.util.Vector;
  *  The expression to use for filtering
  *  (default: true).</pre>
  * 
+ * <pre> -F
+ *  Apply the filter to instances that arrive after the first
+ *  (training) batch. The default is to not apply the filter (i.e.
+ *  always return the instance)</pre>
+ * 
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
@@ -299,6 +304,11 @@ public class SubsetByExpression
    * <pre> -E &lt;expr&gt;
    *  The expression to use for filtering
    *  (default: true).</pre>
+   * 
+   * <pre> -F
+   *  Apply the filter to instances that arrive after the first
+   *  (training) batch. The default is to not apply the filter (i.e.
+   *  always return the instance)</pre>
    * 
    <!-- options-end -->
    *
@@ -487,3 +497,4 @@ public class SubsetByExpression
     runFilter(new SubsetByExpression(), args);
   }
 }
+
