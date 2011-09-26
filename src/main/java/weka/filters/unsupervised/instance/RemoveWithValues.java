@@ -78,6 +78,11 @@ import java.util.Vector;
  *  When selecting on nominal attributes, removes header
  *  references to excluded values.</pre>
  * 
+ * <pre> -F
+ *  Do not apply the filter to instances that arrive after the first
+ *  (training) batch. The default is to apply the filter (i.e.
+ *  the filter may not return an instance if it matches the remove criteria)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -107,6 +112,9 @@ public class RemoveWithValues
 
   /** If m_ModifyHeader, stores a mapping from old to new indexes */
   protected int [] m_NominalMapping;
+  
+  /** Whether to filter instances after the first batch has been processed */
+  protected boolean m_dontFilterAfterFirstBatch = false;
 
   /**
    * Returns a string describing this classifier
@@ -159,6 +167,11 @@ public class RemoveWithValues
 	      "\tWhen selecting on nominal attributes, removes header\n"
 	      + "\treferences to excluded values.",
               "H", 0, "-H"));
+    newVector.addElement(new Option(
+        "\tDo not apply the filter to instances that arrive after the first\n" +
+        "\t(training) batch. The default is to apply the filter (i.e.\n" +
+        "\tthe filter may not return an instance if it matches the remove criteria)",
+        "F", 0, "-F"));
 
     return newVector.elements();
   }
@@ -196,6 +209,11 @@ public class RemoveWithValues
    *  When selecting on nominal attributes, removes header
    *  references to excluded values.</pre>
    * 
+   * <pre> -F
+   *  Do not apply the filter to instances that arrive after the first
+   *  (training) batch. The default is to apply the filter (i.e.
+   *  the filter may not return an instance if it matches the remove criteria)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -226,6 +244,7 @@ public class RemoveWithValues
     setInvertSelection(Utils.getFlag('V', options));
     setMatchMissingValues(Utils.getFlag('M', options));
     setModifyHeader(Utils.getFlag('H', options));
+    setDontFilterAfterFirstBatch(Utils.getFlag('F', options));
     // Re-initialize output format according to new options
     
     if (getInputFormat() != null) {
@@ -240,7 +259,7 @@ public class RemoveWithValues
    */
   public String [] getOptions() {
 
-    String [] options = new String [9];
+    String [] options = new String [10];
     int current = 0;
 
     options[current++] = "-S"; options[current++] = "" + getSplitPoint();
@@ -257,6 +276,9 @@ public class RemoveWithValues
     }
     if (getModifyHeader()) {
       options[current++] = "-H";
+    }
+    if (getDontFilterAfterFirstBatch()) {
+      options[current++] = "-F";
     }
     while (current < options.length) {
       options[current++] = "";
@@ -355,6 +377,12 @@ public class RemoveWithValues
       resetQueue();
       m_NewBatch = false;
     }
+    
+    if (isFirstBatchDone() && m_dontFilterAfterFirstBatch) {
+      push((Instance)instance.copy());
+      return true;
+    }
+    
     if (instance.isMissing(m_AttIndex.getIndex())) {
       if (!getMatchMissingValues()) {
         push((Instance)instance.copy());
@@ -600,6 +628,49 @@ public class RemoveWithValues
     
     m_Values.setRanges(rangeList);
   }
+  
+  /**
+   * Set whether to apply the filter to instances that arrive once
+   * the first (training) batch has been seen. The default is to
+   * not apply the filter and just return each instance input. This
+   * is so that, when used in the FilteredClassifier, a test instance
+   * does not get "consumed" by the filter and a prediction is always
+   * generated.
+   * 
+   * @param b true if the filter should *not* be applied to instances that
+   * arrive after the first (training) batch has been processed.
+   */
+  public void setDontFilterAfterFirstBatch(boolean b) {
+    m_dontFilterAfterFirstBatch = b;
+  }
+  
+  /**
+   * Get whether to apply the filter to instances that arrive once
+   * the first (training) batch has been seen. The default is to
+   * not apply the filter and just return each instance input. This
+   * is so that, when used in the FilteredClassifier, a test instance
+   * does not get "consumed" by the filter and a prediction is always
+   * generated.
+   * 
+   * @return true if the filter should *not* be applied to instances that
+   * arrive after the first (training) batch has been processed.
+   */
+  public boolean getDontFilterAfterFirstBatch() {
+    return m_dontFilterAfterFirstBatch;
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String dontFilterAfterFirstBatchTipText() {
+    return "Whether to apply the filtering process to instances that " +
+                "are input after the first (training) batch. The default " +
+                "is false so instances in subsequent batches can potentially " +
+                "get 'consumed' by the filter.";
+  }
 
   /**
    * Set which values of a nominal attribute are to be used for
@@ -641,3 +712,4 @@ public class RemoveWithValues
     runFilter(new RemoveWithValues(), argv);
   }
 }
+
