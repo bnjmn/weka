@@ -94,11 +94,14 @@ public class AggregateableEvaluation extends Evaluation {
     m_Unclassified += evaluation.unclassified();
     m_MissingClass += evaluation.m_MissingClass;
     m_WithClass += evaluation.m_WithClass;
-    double [][] newMatrix = evaluation.confusionMatrix();
-    if (newMatrix != null) {
-      for(int i = 0; i < m_ConfusionMatrix.length; i++) {
-        for(int j = 0; j < m_ConfusionMatrix[i].length; j++) {
-          m_ConfusionMatrix[i][j] += newMatrix[i][j];
+    
+    if (evaluation.m_ConfusionMatrix != null) {
+      double [][] newMatrix = evaluation.confusionMatrix();
+      if (newMatrix != null) {
+        for(int i = 0; i < m_ConfusionMatrix.length; i++) {
+          for(int j = 0; j < m_ConfusionMatrix[i].length; j++) {
+            m_ConfusionMatrix[i][j] += newMatrix[i][j];
+          }
         }
       }
     }
