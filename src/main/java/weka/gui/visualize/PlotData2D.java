@@ -217,6 +217,15 @@ public class PlotData2D implements Serializable {
       }
     }
   }
+  
+  /**
+   * Get the shape types for the plot data
+   * 
+   * @return the shape types for the plot data
+   */
+  public int[] getShapeType() {
+    return m_shapeType;
+  }
 
   /**
    * Set the shape type for the plot data
@@ -247,6 +256,15 @@ public class PlotData2D implements Serializable {
       throw new Exception("PlotData2D: Shape size array must have the same "
 			  +"number of entries as number of data points!");
     }
+  }
+  
+  /**
+   * Get the shape sizes for the plot data
+   * 
+   * @return the shape sizes for the plot data
+   */
+  public int[] getShapeSize() {
+    return m_shapeSize;
   }
   
   /**
