@@ -22,13 +22,9 @@
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-import weka.gui.Logger;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.VisualizePanel;
-
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
+import java.awt.image.BufferedImage;
 import java.beans.EventSetDescriptor;
 import java.beans.PropertyChangeListener;
 import java.beans.VetoableChangeListener;
@@ -45,6 +41,18 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.gui.Logger;
+import weka.gui.visualize.Plot2D;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.VisualizePanel;
+
 /**
  * Bean that can be used for displaying threshold curves (e.g. ROC
  * curves) and scheme error plots
@@ -55,9 +63,9 @@ import javax.swing.JPanel;
 public class ModelPerformanceChart
   extends JPanel
   implements ThresholdDataListener, VisualizableErrorListener, 
-             Visible, UserRequestAcceptor,
+             Visible, UserRequestAcceptor, EventConstraints,
 	     Serializable, BeanContextChild, HeadlessEventCollector,
-	     BeanCommon {
+	     BeanCommon, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4602034200071195924L;
@@ -66,11 +74,46 @@ public class ModelPerformanceChart
 
   protected transient PlotData2D m_masterPlot;
   
+  /** For rendering plots to encapsulate in ImageEvents */
+  protected transient Plot2D m_offScreenPlot;
+  protected transient List<Instances> m_offscreenPlotData;
+  protected transient OffscreenChartRenderer m_offscreenRenderer;
+  
+  /** Name of the renderer to use for offscreen chart rendering */
+  protected String m_offscreenRendererName = "Weka Chart Renderer";
+  
+  /** 
+   * The name of the attribute to use for the x-axis of offscreen plots. 
+   * If left empty, False Positive Rate is used for threshold curves 
+   */
+  protected String m_xAxis = "";
+  
+  /** 
+   * The name of the attribute to use for the y-axis of offscreen plots. 
+   * If left empty, True Positive Rate is used for threshold curves 
+   */
+  protected String m_yAxis = "";
+  
+  /**
+   * Additional options for the offscreen renderer
+   */
+  protected String m_additionalOptions = "";
+  
+  /** Width of offscreen plots */
+  protected String m_width = "500";
+  
+  /** Height of offscreen plots */
+  protected String m_height = "400";
+  
   protected transient JFrame m_popupFrame;
 
   protected boolean m_framePoppedUp = false;
   
   protected List<EventObject> m_headlessEvents;
+  
+  protected ArrayList<ImageListener> m_imageListeners = new ArrayList<ImageListener>();
+  
+  protected List<Object> m_listenees = new ArrayList<Object>();
 
   /**
    * True if this bean's appearance is the design mode appearance
@@ -85,12 +128,17 @@ public class ModelPerformanceChart
   private transient VisualizePanel m_visPanel;
   
   /**
+   * The environment variables.
+   */
+  protected transient Environment m_env;
+  
+  /**
    * BeanContextChild support
    */
   protected BeanContextChildSupport m_bcSupport = 
     new BeanContextChildSupport(this);
 
-  public ModelPerformanceChart() {
+  public ModelPerformanceChart() { 
     java.awt.GraphicsEnvironment ge = 
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
@@ -100,7 +148,7 @@ public class ModelPerformanceChart
     }
   }
 
-    /**
+  /**
    * Global info for this bean
    *
    * @return a <code>String</code> value
@@ -131,6 +179,33 @@ public class ModelPerformanceChart
     }
     add(m_visPanel, BorderLayout.CENTER);
   }
+  
+  protected void setupOffscreenRenderer() {
+    if (m_offscreenRenderer == null) {
+      if (m_offscreenRendererName == null || m_offscreenRendererName.length() == 0) {
+        m_offscreenRenderer = new WekaOffscreenChartRenderer();
+        return;
+      }
+      
+      if (m_offscreenRendererName.equalsIgnoreCase("weka chart renderer")) {
+        m_offscreenRenderer = new WekaOffscreenChartRenderer();
+      } else {
+        try {
+          Object r = PluginManager.getPluginInstance("weka.gui.beans.OffscreenChartRender", 
+              m_offscreenRendererName);
+          if (r != null && r instanceof weka.gui.beans.OffscreenChartRenderer) {
+            m_offscreenRenderer = (OffscreenChartRenderer)r;
+          } else {
+            // use built-in default
+            m_offscreenRenderer = new WekaOffscreenChartRenderer();
+          }
+        } catch (Exception ex) {
+          // use built-in default
+          m_offscreenRenderer = new WekaOffscreenChartRenderer();
+        }
+      }
+    }
+  }
 
   /**
    * Display a threshold curve.
@@ -138,6 +213,10 @@ public class ModelPerformanceChart
    * @param e a ThresholdDataEvent
    */
   public synchronized void acceptDataSet(ThresholdDataEvent e) {
+    if (m_env == null) {
+      m_env = Environment.getSystemWide();
+    }
+    
     if (!GraphicsEnvironment.isHeadless()) {
       if (m_visPanel == null) {
         m_visPanel = new VisualizePanel();
@@ -153,20 +232,79 @@ public class ModelPerformanceChart
           // if not equal then remove all plots and set as new master plot
           m_masterPlot = e.getDataSet();
           m_visPanel.setMasterPlot(m_masterPlot);
-          m_visPanel.validate(); m_visPanel.repaint();
+          m_visPanel.validate(); m_visPanel.repaint();          
         } else {
           // add as new plot
           m_visPanel.addPlot(e.getDataSet());
           m_visPanel.validate(); m_visPanel.repaint();
         }
-        m_visPanel.setXIndex(4); m_visPanel.setYIndex(5);
+        m_visPanel.setXIndex(4); m_visPanel.setYIndex(5);        
       } catch (Exception ex) {
         System.err.println("Problem setting up visualization (ModelPerformanceChart)");
         ex.printStackTrace();
-      }
+      }      
     } else {
-      m_headlessEvents.add(e);
+      m_headlessEvents.add(e);      
     }
+
+    if (m_imageListeners.size() > 0) {
+      // configure the renderer (if necessary)
+      setupOffscreenRenderer();
+
+      if (m_offscreenPlotData == null || 
+          !m_offscreenPlotData.get(0).relationName().
+          equals(e.getDataSet().getPlotInstances().relationName())) {
+        m_offscreenPlotData = new ArrayList<Instances>();      
+      }
+      m_offscreenPlotData.add(e.getDataSet().getPlotInstances());
+      List<String> options = new ArrayList<String>();
+      
+      String additional = "-color=/last";
+      if (m_additionalOptions != null && m_additionalOptions.length() > 0) {
+        additional = m_additionalOptions;
+        try {
+          additional = m_env.substitute(additional);
+        } catch (Exception ex) { }
+      }
+      options.add(additional);
+      
+      String xAxis = "False Positive Rate";
+      if (m_xAxis != null && m_xAxis.length() > 0) {
+        xAxis = m_xAxis;
+        try {
+          xAxis = m_env.substitute(xAxis);
+        } catch (Exception ex) { }
+      }
+      String yAxis = "True Positive Rate";
+      if (m_yAxis != null && m_yAxis.length() > 0) {
+        yAxis = m_yAxis;
+        try {
+          yAxis = m_env.substitute(yAxis);
+        } catch (Exception ex) { }
+      }
+      
+      String width = m_width;
+      String height = m_height;
+      int defWidth = 500;
+      int defHeight = 400;
+      try {
+        width = m_env.substitute(width);
+        height = m_env.substitute(height);
+        
+        defWidth = Integer.parseInt(width);
+        defHeight = Integer.parseInt(height);
+      } catch (Exception ex) { }
+     
+      try {
+        BufferedImage osi = m_offscreenRenderer.renderXYLineChart(defWidth, defHeight, 
+            m_offscreenPlotData, xAxis, yAxis, options);
+
+        ImageEvent ie = new ImageEvent(this, osi);
+        notifyImageListeners(ie);
+      } catch (Exception e1) {
+        e1.printStackTrace();
+      }
+    }    
   }
 
   /**
@@ -175,6 +313,10 @@ public class ModelPerformanceChart
    * @param e a VisualizableErrorEvent
    */
   public synchronized void acceptDataSet(VisualizableErrorEvent e) {
+    if (m_env == null) {
+      m_env = Environment.getSystemWide();
+    }
+
     if (!GraphicsEnvironment.isHeadless()) {
       if (m_visPanel == null) {
         m_visPanel = new VisualizePanel();
@@ -193,6 +335,118 @@ public class ModelPerformanceChart
     } else {
       m_headlessEvents = new ArrayList<EventObject>();
       m_headlessEvents.add(e);
+    }
+    
+    if (m_imageListeners.size() > 0) {
+      // configure the renderer (if necessary)
+      setupOffscreenRenderer();
+     
+      m_offscreenPlotData = new ArrayList<Instances>();      
+      Instances predictedI = e.getDataSet().getPlotInstances();
+      if (predictedI.classAttribute().isNominal()) {
+        // predicted class attribute is always actualClassIndex - 1
+        Instances correct = new Instances(predictedI, 0);
+        Instances errors = new Instances(predictedI, 0);
+        int actualClass = predictedI.classIndex();
+        for (int i = 0; i < predictedI.numInstances(); i++) {
+          Instance current = predictedI.instance(i);
+          if (current.value(actualClass) == current.value(actualClass - 1)) {
+            correct.add(current);
+          } else {
+            errors.add(current);
+          }
+        }
+        m_offscreenPlotData.add(correct);
+        m_offscreenPlotData.add(errors);
+      } else {
+        // numeric class - have to make a new set of instances
+        // with the point sizes added as an additional attribute
+        FastVector atts = new FastVector();
+        for (int i = 0; i < predictedI.numAttributes(); i++) {
+          atts.add(predictedI.attribute(i).copy());
+        }
+        atts.add(new Attribute("@@error@@"));
+        Instances newInsts = new Instances(predictedI.relationName(),
+            atts, predictedI.numInstances());
+
+        int[] shapeSizes = e.getDataSet().getShapeSize();
+
+        for (int i = 0; i < predictedI.numInstances(); i++) {
+          double[] vals = new double[newInsts.numAttributes()];
+          for (int j = 0; j < predictedI.numAttributes(); j++) {
+            vals[j] = predictedI.instance(i).value(j);
+          }
+          vals[vals.length - 1] = shapeSizes[i];
+          Instance ni = new DenseInstance(1.0, vals);
+          newInsts.add(ni);
+        }
+        m_offscreenPlotData.add(newInsts);
+      }
+      
+      List<String> options = new ArrayList<String>();
+      
+      String additional = "-color=" + predictedI.classAttribute().name();
+      if (m_additionalOptions != null && m_additionalOptions.length() > 0) {
+        additional = m_additionalOptions;
+        try {
+          additional = m_env.substitute(additional);
+        } catch (Exception ex) { }
+      }            
+      options.add(additional);
+      
+      if (predictedI.classAttribute().isNumeric()) {
+        options.add("-numericError=@@error@@");
+      }
+      
+      String xAxis = m_xAxis;
+      try {
+        xAxis = m_env.substitute(xAxis);
+      } catch (Exception ex) { }
+      
+      String yAxis = m_yAxis;
+      try {
+        yAxis = m_env.substitute(yAxis);
+      } catch (Exception ex) { }
+      
+      String width = m_width;
+      String height = m_height;
+      int defWidth = 500;
+      int defHeight = 400;
+      try {
+        width = m_env.substitute(width);
+        height = m_env.substitute(height);
+        
+        defWidth = Integer.parseInt(width);
+        defHeight = Integer.parseInt(height);
+      } catch (Exception ex) { }
+      
+      try {
+        BufferedImage osi = m_offscreenRenderer.renderXYScatterPlot(defWidth, defHeight, 
+            m_offscreenPlotData, xAxis, yAxis, options);
+
+        ImageEvent ie = new ImageEvent(this, osi);
+        notifyImageListeners(ie);
+      } catch (Exception e1) {
+        e1.printStackTrace();
+      }      
+    }
+  }
+
+  /**
+   * Notify all text listeners of a TextEvent
+   *
+   * @param te a <code>ImageEvent</code> value
+   */
+  @SuppressWarnings("unchecked")
+  private void notifyImageListeners(ImageEvent te) {
+    ArrayList<ImageListener> l;
+    synchronized (this) {
+      l = (ArrayList<ImageListener>)m_imageListeners.clone();
+    }
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+        l.get(i).acceptImage(te);
+      }
     }
   }
   
@@ -375,6 +629,7 @@ public class ModelPerformanceChart
         m_visPanel.validate(); m_visPanel.repaint();
         m_visPanel = null;
         m_masterPlot = null;
+        m_offScreenPlot = null;
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (Model Performance Chart)");
@@ -446,6 +701,24 @@ public class ModelPerformanceChart
   public boolean isBusy() {
     return false;
   }
+  
+  /**
+   * Add an image listener
+   *
+   * @param cl a <code>ImageListener</code> value
+   */
+  public synchronized void addImageListener(ImageListener cl) {
+    m_imageListeners.add(cl);
+  }
+
+  /**
+   * Remove an image listener
+   *
+   * @param cl a <code>ImageListener</code> value
+   */
+  public synchronized void removeImageListener(ImageListener cl) {
+    m_imageListeners.remove(cl);
+  }
 
   /**
    * Set a logger
@@ -464,7 +737,7 @@ public class ModelPerformanceChart
    * @return true if the object will accept a connection
    */
   public boolean connectionAllowed(EventSetDescriptor esd) {
-    return true;
+    return connectionAllowed(esd.getName());
   }
 
   /**
@@ -475,7 +748,7 @@ public class ModelPerformanceChart
    * @return true if the object will accept a connection
    */
   public boolean connectionAllowed(String eventName) {
-    return true;
+    return eventName.equals("thresholdData") || eventName.equals("visualizableError");
   }
 
   /**
@@ -487,7 +760,10 @@ public class ModelPerformanceChart
    * @param source the source with which this object has been registered as
    * a listener
    */
-  public void connectionNotification(String eventName, Object source) {    
+  public void connectionNotification(String eventName, Object source) {
+    if (connectionAllowed(eventName)) {
+      m_listenees.add(source);
+    }
   }
 
   /**
@@ -499,6 +775,152 @@ public class ModelPerformanceChart
    * @param source the source with which this object has been registered as
    * a listener
    */
-  public void disconnectionNotification(String eventName, Object source) {    
+  public void disconnectionNotification(String eventName, Object source) {
+    m_listenees.remove(source);
+  }
+
+  /**
+   * Returns true, if at the current time, the named event could
+   * be generated. Assumes that supplied event names are names of
+   * events that could be generated by this bean.
+   *
+   * @param eventName the name of the event in question
+   * @return true if the named event could be generated at this point in
+   * time
+   */
+  public boolean eventGeneratable(String eventName) {
+    if (m_listenees.size() == 0) {
+      return false;
+    }
+    
+    boolean ok = false;
+    for (Object o : m_listenees) {
+      if (o instanceof EventConstraints) {
+        if (((EventConstraints)o).eventGeneratable("thresholdData") ||
+            ((EventConstraints)o).eventGeneratable("visualizableError")) {
+          ok = true;
+          break;
+        }
+      }
+    }
+    
+    return ok;
+  }
+
+  @Override
+  public void setEnvironment(Environment env) {
+    m_env = env;
+  }
+  
+  /**
+   * Set the name of the attribute for the x-axis in offscreen plots. This defaults
+   * to "False Positive Rate" for threshold curves if not specified.
+   * 
+   * @param xAxis the name of the xAxis
+   */
+  public void setOffscreenXAxis(String xAxis) {
+    m_xAxis = xAxis;
+  }
+  
+  /**
+   * Get the name of the attribute for the x-axis in offscreen plots
+   * 
+   * @return the name of the xAxis
+   */
+  public String getOffscreenXAxis() {
+    return m_xAxis;
+  }
+  
+  /**
+   * Set the name of the attribute for the y-axis in offscreen plots. This defaults
+   * to "True Positive Rate" for threshold curves if not specified.
+   * 
+   * @param yAxis the name of the xAxis
+   */
+  public void setOffscreenYAxis(String yAxis) {
+    m_yAxis = yAxis;
+  }
+  
+  /**
+   * Get the name of the attribute for the y-axix of offscreen plots.
+   * 
+   * @return the name of the yAxis.
+   */
+  public String getOffscreenYAxis() {
+    return m_yAxis;
+  }
+  
+  /**
+   * Set the width (in pixels) of the offscreen image to generate. 
+   * 
+   * @param width the width in pixels.
+   */
+  public void setOffscreenWidth(String width) {
+    m_width = width;
+  }
+  
+  /**
+   * Get the width (in pixels) of the offscreen image to generate.
+   * 
+   * @return the width in pixels.
+   */
+  public String getOffscreenWidth() {
+    return m_width;
+  }
+  
+  /**
+   * Set the height (in pixels) of the offscreen image to generate
+   * 
+   * @param height the height in pixels
+   */
+  public void setOffscreenHeight(String height) {
+    m_height = height;
+  }
+  
+  /**
+   * Get the height (in pixels) of the offscreen image to generate
+   * @return the height in pixels
+   */
+  public String getOffscreenHeight() {
+    return m_height;
+  }
+  
+  /**
+   * Set the name of the renderer to use for offscreen chart
+   * rendering operations
+   * 
+   * @param rendererName the name of the renderer to use
+   */
+  public void setOffscreenRendererName(String rendererName) {
+    m_offscreenRendererName = rendererName;
+    m_offscreenRenderer = null;
+  }
+  
+  /**
+   * Get the name of the renderer to use for offscreen chart
+   * rendering operations
+   * 
+   * @return the name of the renderer to use
+   */
+  public String getOffscreenRendererName() {
+    return m_offscreenRendererName;
+  }
+  
+  /**
+   * Set the additional options for the offscreen renderer
+   * 
+   * @param additional additional options
+   */
+  public void setOffscreenAdditionalOpts(String additional) {
+    m_additionalOptions = additional;
+  }
+  
+  /**
+   * Get the additional options for the offscreen renderer
+   * 
+   * @return the additional options
+   */
+  public String getOffscreenAdditionalOpts() {
+    return m_additionalOptions;
   }
 }

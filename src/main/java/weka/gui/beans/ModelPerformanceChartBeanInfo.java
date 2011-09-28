@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the model performance chart
  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class ModelPerformanceChartBeanInfo extends SimpleBeanInfo {
   
@@ -39,8 +39,28 @@ public class ModelPerformanceChartBeanInfo extends SimpleBeanInfo {
    */
   public EventSetDescriptor [] getEventSetDescriptors() {
     // hide all gui events
-    EventSetDescriptor [] esds = { };
-    return esds;
+    try {
+      EventSetDescriptor [] esds = { 
+          new EventSetDescriptor(ModelPerformanceChart.class, 
+              "image", 
+              ImageListener.class, 
+          "acceptImage")
+      };
+      return esds;
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      return null;
+    }
+  }
+  
+  /**
+   * Get the bean descriptor for this bean
+   *
+   * @return a <code>BeanDescriptor</code> value
+   */
+  public BeanDescriptor getBeanDescriptor() {
+    return new BeanDescriptor(weka.gui.beans.ModelPerformanceChart.class,
+                              ModelPerformanceChartCustomizer.class);
   }
 }
 
