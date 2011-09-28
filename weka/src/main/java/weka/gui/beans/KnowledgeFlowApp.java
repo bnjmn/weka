@@ -190,10 +190,15 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    */
   protected static String VISIBLE_PERSPECTIVES_PROPERTIES_FILE = 
     "weka/gui/beans/VisiblePerspectives.props";
-
-  protected static Map<String, String> PLUGIN_PERSPECTIVES = new HashMap<String, String>();
+  
+  /** Those perspectives that the user has opted to have visible in the toolbar */
   protected static SortedSet<String> VISIBLE_PERSPECTIVES;
-  protected static Map<String, KFPerspective> PERSPECTIVE_CACHE = 
+
+  /** Map of all plugin perspectives */
+  protected Map<String, String> m_pluginPerspectiveLookup = new HashMap<String, String>();
+  
+  /** Those perspectives that have been instantiated */
+  protected Map<String, KFPerspective> m_perspectiveCache = 
     new HashMap<String, KFPerspective>();
 
   /**
@@ -1883,7 +1888,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                     p instanceof JPanel) {
                   String title = ((KFPerspective)p).getPerspectiveTitle();
                   System.out.println("[KnowledgeFlow] loaded perspective: " + title);
-                  PLUGIN_PERSPECTIVES.put(className, title);
+                  m_pluginPerspectiveLookup.put(className, title);
 
                   // not selected as part of the users set of perspectives yet...
                   ((KFPerspective)p).setLoaded(false);
@@ -1896,7 +1901,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                     // to the toolbar in consistent sorted order
                     
                     //((KFPerspective)p).setMainKFPerspective(m_mainKFPerspective);
-                    PERSPECTIVE_CACHE.put(className, (KFPerspective)p);                    
+                    m_perspectiveCache.put(className, (KFPerspective)p);                    
                   }
                 }
               } catch (Exception ex) {
@@ -1914,10 +1919,43 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               }
             }
           }
+          
+          // Check for OffScreenChartRenderers
+          String offscreenRenderers = 
+            tempP.getProperty("weka.gui.beans.OffscreenChartRenderer");
+          if (offscreenRenderers != null && offscreenRenderers.length() > 0) {
+            String[] parts = offscreenRenderers.split(",");
+            for (String renderer : parts) {
+              renderer = renderer.trim();
+              // Check that we can instantiate it successfully
+              try {
+                Object p = Class.forName(renderer).newInstance();
+                if (p instanceof OffscreenChartRenderer) {
+                  String name = ((OffscreenChartRenderer)p).rendererName();
+                  PluginManager.addPlugin("weka.gui.beans.OffscreenChartRenderer", 
+                      name, renderer);
+                  System.out.println("[KnowledgeFlow] registering chart rendering " +
+                  		"plugin: " + renderer);
+                }
+              } catch (Exception ex) {
+                if (m_logPanel != null) {
+                  m_logPanel.logMessage("[KnowledgeFlow] WARNING: " +
+                      "unable to instantiate chart renderer \""
+                      + renderer + "\"");
+                  ex.printStackTrace();
+                } else {
+                  System.err.println("[KnowledgeFlow] WARNING: " +
+                      "unable to instantiate chart renderer \""
+                      + renderer + "\"");
+                  ex.printStackTrace();
+                }
+              }
+            }
+          }
         }
       }
       
-      m_togglePerspectivesB.setEnabled(PLUGIN_PERSPECTIVES.keySet().size() > 0);
+      m_togglePerspectivesB.setEnabled(m_pluginPerspectiveLookup.keySet().size() > 0);
 
       //      toolBarPanel.add(m_toolBars, BorderLayout.CENTER);
 
@@ -2593,7 +2631,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     m_perspectiveHolder.add(m_mainKFPerspective, BorderLayout.CENTER);
 
-    if (PLUGIN_PERSPECTIVES.size() > 0) {
+    if (m_pluginPerspectiveLookup.size() > 0) {
 
       // add the main perspective first
       String titleM = m_mainKFPerspective.getPerspectiveTitle();
@@ -2622,7 +2660,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       setupUserPerspectives();
     }
 
-    if (PLUGIN_PERSPECTIVES.size() > 0) {
+    if (m_pluginPerspectiveLookup.size() > 0) {
       m_configAndPerspectives = new JPanel();
       m_configAndPerspectives.setLayout(new BorderLayout());
       m_configAndPerspectives.add(m_perspectiveToolBar, BorderLayout.CENTER);
@@ -2688,8 +2726,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
     
     // set main perspective on all cached perspectives
-    for (String pName : PERSPECTIVE_CACHE.keySet()) {
-      PERSPECTIVE_CACHE.get(pName).setMainKFPerspective(m_mainKFPerspective);
+    for (String pName : m_perspectiveCache.keySet()) {
+      m_perspectiveCache.get(pName).setMainKFPerspective(m_mainKFPerspective);
     }
 
     loadUserComponents();
@@ -2719,12 +2757,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     ArrayList<Attribute> atts = new ArrayList<Attribute>();
     final ArrayList<String> pClasses = new ArrayList<String>();
     SortedSet<String> sortedPerspectives = new TreeSet<String>();
-    for (String clName : PLUGIN_PERSPECTIVES.keySet()) {
+    for (String clName : m_pluginPerspectiveLookup.keySet()) {
       sortedPerspectives.add(clName);
     }
     for (String clName : sortedPerspectives) {
       pClasses.add(clName);
-      String pName = PLUGIN_PERSPECTIVES.get(clName);
+      String pName = m_pluginPerspectiveLookup.get(clName);
       atts.add(new Attribute(pName));
     }
     Instances perspectiveInstances = 
@@ -2733,7 +2771,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     boolean[] selectedPerspectives = 
       new boolean[perspectiveInstances.numAttributes()];
     for (String selected : VISIBLE_PERSPECTIVES) {
-      String pName = PLUGIN_PERSPECTIVES.get(selected);
+      String pName = m_pluginPerspectiveLookup.get(selected);
       
       // check here - just in case the user has uninstalled/deleted a plugin
       // perspective since the last time that the user-selected visible perspectives
@@ -2775,7 +2813,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           String selectedClassName = pClasses.get(selected[i]);
 
           // first check to see if it's in the cache already
-          if (PERSPECTIVE_CACHE.get(selectedClassName) == null) {
+          if (m_perspectiveCache.get(selectedClassName) == null) {
             // need to instantiate and add to the cache
 
             try {
@@ -2787,7 +2825,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
                 ((KFPerspective)p).setLoaded(true);
                 ((KFPerspective)p).setMainKFPerspective(m_mainKFPerspective);
-                PERSPECTIVE_CACHE.put(selectedClassName, (KFPerspective)p);
+                m_perspectiveCache.put(selectedClassName, (KFPerspective)p);
               }
             } catch (Exception ex) {
               ex.printStackTrace();
@@ -2829,7 +2867,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     int index = 1;
     for (String c : VISIBLE_PERSPECTIVES) {
-      KFPerspective toAdd = PERSPECTIVE_CACHE.get(c);
+      KFPerspective toAdd = m_perspectiveCache.get(c);
       if (toAdd instanceof JComponent) {
         toAdd.setLoaded(true);
         m_perspectives.add(toAdd);
