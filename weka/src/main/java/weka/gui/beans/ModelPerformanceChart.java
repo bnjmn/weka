@@ -75,7 +75,6 @@ public class ModelPerformanceChart
   protected transient PlotData2D m_masterPlot;
   
   /** For rendering plots to encapsulate in ImageEvents */
-  protected transient Plot2D m_offScreenPlot;
   protected transient List<Instances> m_offscreenPlotData;
   protected transient OffscreenChartRenderer m_offscreenRenderer;
   
@@ -629,7 +628,7 @@ public class ModelPerformanceChart
         m_visPanel.validate(); m_visPanel.repaint();
         m_visPanel = null;
         m_masterPlot = null;
-        m_offScreenPlot = null;
+        m_offscreenPlotData = null;
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (Model Performance Chart)");
