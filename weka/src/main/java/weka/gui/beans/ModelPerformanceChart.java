@@ -343,20 +343,68 @@ public class ModelPerformanceChart
       m_offscreenPlotData = new ArrayList<Instances>();      
       Instances predictedI = e.getDataSet().getPlotInstances();
       if (predictedI.classAttribute().isNominal()) {
-        // predicted class attribute is always actualClassIndex - 1
-        Instances correct = new Instances(predictedI, 0);
-        Instances errors = new Instances(predictedI, 0);
-        int actualClass = predictedI.classIndex();
+        
+        // split the classes out into individual series.
+        // add a new attribute to hold point sizes - correctly
+        // classified instances get default point size (2); 
+        // misclassified instances get point size (5).
+        // WekaOffscreenChartRenderer can take advantage of this
+        // information - other plugin renderers may or may not
+        // be able to use it
+        FastVector atts = new FastVector();
+        for (int i = 0; i < predictedI.numAttributes(); i++) {
+          atts.add(predictedI.attribute(i).copy());
+        }
+        atts.add(new Attribute("@@size@@"));
+        Instances newInsts = new Instances(predictedI.relationName(),
+            atts, predictedI.numInstances());
+        newInsts.setClassIndex(predictedI.classIndex());
+        
         for (int i = 0; i < predictedI.numInstances(); i++) {
-          Instance current = predictedI.instance(i);
-          if (current.value(actualClass) == current.value(actualClass - 1)) {
-            correct.add(current);
-          } else {
-            errors.add(current);
+          double[] vals = new double[newInsts.numAttributes()];
+          for (int j = 0; j < predictedI.numAttributes(); j++) {
+            vals[j] = predictedI.instance(i).value(j);
+          }
+          vals[vals.length - 1] = 2; // default shape size
+          Instance ni = new DenseInstance(1.0, vals);
+          newInsts.add(ni);
+        }
+        
+        // predicted class attribute is always actualClassIndex - 1
+        Instances[] classes = new Instances[newInsts.numClasses()];
+        for (int i = 0; i < newInsts.numClasses(); i++) {
+          classes[i] = new Instances(newInsts, 0);
+        }
+        Instances errors = new Instances(newInsts, 0);
+        int actualClass = newInsts.classIndex();
+        for (int i = 0; i < newInsts.numInstances(); i++) {
+          Instance current = newInsts.instance(i);
+          classes[(int)current.classValue()].add((Instance)current.copy());
+          
+          if (current.value(actualClass) != current.value(actualClass - 1)) {
+            Instance toAdd = (Instance)current.copy();
+            
+            // larger shape for an error
+            toAdd.setValue(toAdd.numAttributes() - 1, 5);
+            
+            // swap predicted and actual class value so
+            // that the color plotted for the error series
+            // is that of the predicted class
+            double actualClassV = toAdd.value(actualClass);
+            double predictedClassV = toAdd.value(actualClass - 1);
+            toAdd.setValue(actualClass, predictedClassV);
+            toAdd.setValue(actualClass - 1, actualClassV);
+              
+            errors.add(toAdd);            
           }
         }
-        m_offscreenPlotData.add(correct);
+        
         m_offscreenPlotData.add(errors);
+        
+        for (int i = 0; i < classes.length; i++) {
+          m_offscreenPlotData.add(classes[i]);
+        }
+  
       } else {
         // numeric class - have to make a new set of instances
         // with the point sizes added as an additional attribute
@@ -364,7 +412,7 @@ public class ModelPerformanceChart
         for (int i = 0; i < predictedI.numAttributes(); i++) {
           atts.add(predictedI.attribute(i).copy());
         }
-        atts.add(new Attribute("@@error@@"));
+        atts.add(new Attribute("@@size@@"));
         Instances newInsts = new Instances(predictedI.relationName(),
             atts, predictedI.numInstances());
 
@@ -384,18 +432,22 @@ public class ModelPerformanceChart
       
       List<String> options = new ArrayList<String>();
       
-      String additional = "-color=" + predictedI.classAttribute().name();
+      String additional = "-color=" + predictedI.classAttribute().name()
+        + " -hasErrors";
       if (m_additionalOptions != null && m_additionalOptions.length() > 0) {
-        additional = m_additionalOptions;
+        additional += " " + m_additionalOptions;
         try {
           additional = m_env.substitute(additional);
         } catch (Exception ex) { }
       }            
-      options.add(additional);
-      
-      if (predictedI.classAttribute().isNumeric()) {
-        options.add("-numericError=@@error@@");
+      String[] optionsParts = additional.split(" ");
+      for (String p : optionsParts) {
+        options.add(p);
       }
+      
+//      if (predictedI.classAttribute().isNumeric()) {
+      options.add("-shapeSize=@@size@@");
+//      }
       
       String xAxis = m_xAxis;
       try {
