@@ -169,6 +169,7 @@ public class WekaOffscreenChartRenderer extends AbstractOffscreenChartRenderer {
     // master plot
     PlotData2D master = new PlotData2D(series.get(0));
     master.setPlotName(plotTitle);
+    master.m_displayAllPoints = true;
     
     offScreenPlot.setMasterPlot(master);
     
@@ -192,26 +193,58 @@ public class WekaOffscreenChartRenderer extends AbstractOffscreenChartRenderer {
       offScreenPlot.setCindex(tempC);
     }
     
-    // does this set of instances have a predicted numeric class? In
-    // which case there is an additional attribute that stores the
-    // relative size of errors.
-    String numericError = getOption(optionalArgs, "-numericError");
-    if (numericError != null && numericError.length() > 0) {
-      int numericErrorI = getIndexOfAttribute(masterInstances, numericError);
-      
-      int[] plotSizes = new int[masterInstances.numInstances()];
-      for (int i = 0; i < masterInstances.numInstances(); i++) {
-        plotSizes[i] = (int)masterInstances.instance(i).value(numericErrorI);
+    String hasErrors = getOption(optionalArgs, "-hasErrors");
+    // master plot is the error cases
+    if (hasErrors != null) {
+      int[] plotShapes = new int[masterInstances.numInstances()];
+      for (int i = 0; i < plotShapes.length; i++) {
+        plotShapes[i] = Plot2D.ERROR_SHAPE;
       }
-      master.setShapeSize(plotSizes);
+      master.setShapeType(plotShapes);
+    }
+    
+    // look for  an additional attribute that stores the
+    // shape sizes
+    String shapeSize = getOption(optionalArgs, "-shapeSize");
+    if (shapeSize != null && shapeSize.length() > 0) {
+      int shapeSizeI = getIndexOfAttribute(masterInstances, shapeSize);
+      
+      if (shapeSizeI >= 0) {
+        int[] plotSizes = new int[masterInstances.numInstances()];
+        for (int i = 0; i < masterInstances.numInstances(); i++) {
+          plotSizes[i] = (int)masterInstances.instance(i).value(shapeSizeI);
+        }
+        master.setShapeSize(plotSizes);
+      }
     }        
     
     // additional plots
     if (series.size() > 1) {
       for (Instances plotI : series) {
         PlotData2D plotD = new PlotData2D(plotI);
+        plotD.m_displayAllPoints = true;
 
         offScreenPlot.addPlot(plotD);
+
+        if (shapeSize != null && shapeSize.length() > 0) {
+          int shapeSizeI = getIndexOfAttribute(plotI, shapeSize);
+          if (shapeSizeI >= 0) {
+            int[] plotSizes = new int[plotI.numInstances()];
+            for (int i = 0; i < plotI.numInstances(); i++) {
+              plotSizes[i] = (int)plotI.instance(i).value(shapeSizeI);
+            }
+            plotD.setShapeSize(plotSizes);
+          }
+        }
+        
+        // all other plots will have x shape if master plot are errors
+        if (hasErrors != null) {
+          int[] plotShapes = new int[plotI.numInstances()];
+          for (int i = 0; i < plotShapes.length; i++) {
+            plotShapes[i] = Plot2D.X_SHAPE;
+          }
+          plotD.setShapeType(plotShapes);
+        }
       }
     }
     
