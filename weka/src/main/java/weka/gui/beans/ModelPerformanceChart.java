@@ -76,6 +76,7 @@ public class ModelPerformanceChart
   
   /** For rendering plots to encapsulate in ImageEvents */
   protected transient List<Instances> m_offscreenPlotData;
+  protected transient List<String> m_thresholdSeriesTitles;
   protected transient OffscreenChartRenderer m_offscreenRenderer;
   
   /** Name of the renderer to use for offscreen chart rendering */
@@ -253,9 +254,11 @@ public class ModelPerformanceChart
       if (m_offscreenPlotData == null || 
           !m_offscreenPlotData.get(0).relationName().
           equals(e.getDataSet().getPlotInstances().relationName())) {
-        m_offscreenPlotData = new ArrayList<Instances>();      
+        m_offscreenPlotData = new ArrayList<Instances>();
+        m_thresholdSeriesTitles = new ArrayList<String>();
       }
       m_offscreenPlotData.add(e.getDataSet().getPlotInstances());
+      m_thresholdSeriesTitles.add(e.getDataSet().getPlotName());
       List<String> options = new ArrayList<String>();
       
       String additional = "-color=/last";
@@ -295,8 +298,16 @@ public class ModelPerformanceChart
       } catch (Exception ex) { }
      
       try {
+        List<Instances> series = new ArrayList<Instances>();
+        for (int i = 0; i < m_offscreenPlotData.size(); i++) {
+          Instances temp = new Instances(m_offscreenPlotData.get(i));
+          
+          // set relation name to scheme name
+          temp.setRelationName(m_thresholdSeriesTitles.get(i));
+          series.add(temp);
+        }
         BufferedImage osi = m_offscreenRenderer.renderXYLineChart(defWidth, defHeight, 
-            m_offscreenPlotData, xAxis, yAxis, options);
+            series, xAxis, yAxis, options);
 
         ImageEvent ie = new ImageEvent(this, osi);
         notifyImageListeners(ie);
