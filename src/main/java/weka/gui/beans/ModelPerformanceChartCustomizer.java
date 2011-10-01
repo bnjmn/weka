@@ -114,7 +114,7 @@ public class ModelPerformanceChartCustomizer extends JPanel implements
     Vector<String> comboItems = new Vector<String>();
     comboItems.add("Weka Chart Renderer");
     Set<String> pluginRenderers = 
-      PluginManager.getPluginNamesOfType("weka.gui.beans.OffscreenChartRender");
+      PluginManager.getPluginNamesOfType("weka.gui.beans.OffscreenChartRenderer");
     if (pluginRenderers != null) {
       for (String plugin : pluginRenderers) {
         comboItems.add(plugin);      
