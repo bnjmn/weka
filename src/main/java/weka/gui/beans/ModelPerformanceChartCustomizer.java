@@ -181,30 +181,37 @@ public class ModelPerformanceChartCustomizer extends JPanel implements
     
     m_rendererCombo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String renderer = m_rendererCombo.getSelectedItem().toString();
-        if (renderer.equalsIgnoreCase("weka chart renderer")) {
-          // built-in renderer
-          WekaOffscreenChartRenderer rcr = new WekaOffscreenChartRenderer();
-          String tipText = rcr.optionsTipTextHTML();
-          optsLab.setToolTipText(tipText);
-        } else {
-          try {
-            Object rendererO = PluginManager.getPluginInstance("weka.gui.beans.OffscreenChartRender",
-                renderer);
-
-            if (rendererO != null) {
-              String tipText = ((OffscreenChartRenderer)rendererO).optionsTipTextHTML();
-              if (tipText != null && tipText.length() > 0) {
-                optsLab.setToolTipText(tipText);
-              }
-            }
-          } catch (Exception ex) {
-
-          }
-        }
+        setupRendererOptsTipText(optsLab);
       }
     });
     m_rendererCombo.setSelectedItem(m_rendererNameBack);    
+    
+    setupRendererOptsTipText(optsLab);
+  }
+  
+  private void setupRendererOptsTipText(JLabel optsLab) {
+    String renderer = m_rendererCombo.getSelectedItem().toString();
+    if (renderer.equalsIgnoreCase("weka chart renderer")) {
+      // built-in renderer
+      WekaOffscreenChartRenderer rcr = new WekaOffscreenChartRenderer();
+      String tipText = rcr.optionsTipTextHTML();
+      tipText = tipText.replace("<html>", "<html>Comma separate list of options:<br>");
+      optsLab.setToolTipText(tipText);
+    } else {
+      try {
+        Object rendererO = PluginManager.getPluginInstance("weka.gui.beans.OffscreenChartRender",
+            renderer);
+
+        if (rendererO != null) {
+          String tipText = ((OffscreenChartRenderer)rendererO).optionsTipTextHTML();
+          if (tipText != null && tipText.length() > 0) {
+            optsLab.setToolTipText(tipText);
+          }
+        }
+      } catch (Exception ex) {
+
+      }
+    }
   }
   
   private void addButtons() {
