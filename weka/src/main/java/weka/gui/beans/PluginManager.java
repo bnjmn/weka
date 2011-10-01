@@ -62,6 +62,7 @@ public class PluginManager {
       Map<String, String> pluginsOfInterfaceType = 
         new TreeMap<String, String>();
       pluginsOfInterfaceType.put(name, concreteType);
+      PLUGINS.put(interfaceName, pluginsOfInterfaceType);      
     } else {
       PLUGINS.get(interfaceName).put(name, concreteType);
     }
