@@ -195,7 +195,7 @@ public class ModelPerformanceChartCustomizer extends JPanel implements
       // built-in renderer
       WekaOffscreenChartRenderer rcr = new WekaOffscreenChartRenderer();
       String tipText = rcr.optionsTipTextHTML();
-      tipText = tipText.replace("<html>", "<html>Comma separate list of options:<br>");
+      tipText = tipText.replace("<html>", "<html>Comma separated list of options:<br>");
       optsLab.setToolTipText(tipText);
     } else {
       try {
