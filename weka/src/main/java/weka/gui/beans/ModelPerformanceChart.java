@@ -388,6 +388,7 @@ public class ModelPerformanceChart
         Instances[] classes = new Instances[newInsts.numClasses()];
         for (int i = 0; i < newInsts.numClasses(); i++) {
           classes[i] = new Instances(newInsts, 0);
+          classes[i].setRelationName(newInsts.classAttribute().value(i));
         }
         Instances errors = new Instances(newInsts, 0);
         int actualClass = newInsts.classIndex();
@@ -413,6 +414,7 @@ public class ModelPerformanceChart
           }
         }
         
+        errors.setRelationName("Errors");
         m_offscreenPlotData.add(errors);
         
         for (int i = 0; i < classes.length; i++) {
@@ -441,6 +443,7 @@ public class ModelPerformanceChart
           Instance ni = new DenseInstance(1.0, vals);
           newInsts.add(ni);
         }
+        newInsts.setRelationName(predictedI.classAttribute().name());
         m_offscreenPlotData.add(newInsts);
       }
       
