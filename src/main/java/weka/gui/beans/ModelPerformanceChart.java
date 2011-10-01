@@ -191,7 +191,7 @@ public class ModelPerformanceChart
         m_offscreenRenderer = new WekaOffscreenChartRenderer();
       } else {
         try {
-          Object r = PluginManager.getPluginInstance("weka.gui.beans.OffscreenChartRender", 
+          Object r = PluginManager.getPluginInstance("weka.gui.beans.OffscreenChartRenderer", 
               m_offscreenRendererName);
           if (r != null && r instanceof weka.gui.beans.OffscreenChartRenderer) {
             m_offscreenRenderer = (OffscreenChartRenderer)r;
@@ -268,7 +268,10 @@ public class ModelPerformanceChart
           additional = m_env.substitute(additional);
         } catch (Exception ex) { }
       }
-      options.add(additional);
+      String[] optsParts = additional.split(",");
+      for (String p : optsParts) {
+        options.add(p.trim());
+      }
       
       String xAxis = "False Positive Rate";
       if (m_xAxis != null && m_xAxis.length() > 0) {
@@ -446,14 +449,14 @@ public class ModelPerformanceChart
       String additional = "-color=" + predictedI.classAttribute().name()
         + " -hasErrors";
       if (m_additionalOptions != null && m_additionalOptions.length() > 0) {
-        additional += " " + m_additionalOptions;
+        additional += "," + m_additionalOptions;
         try {
           additional = m_env.substitute(additional);
         } catch (Exception ex) { }
       }            
-      String[] optionsParts = additional.split(" ");
+      String[] optionsParts = additional.split(",");
       for (String p : optionsParts) {
-        options.add(p);
+        options.add(p.trim());
       }
       
 //      if (predictedI.classAttribute().isNumeric()) {
