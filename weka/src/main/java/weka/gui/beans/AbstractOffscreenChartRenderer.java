@@ -95,6 +95,10 @@ public abstract class AbstractOffscreenChartRenderer implements OffscreenChartRe
    */
   protected int getIndexOfAttribute(Instances insts, String attName) {
     
+    if (attName == null) {
+      return -1;
+    }
+    
     // special first and last strings
     if (attName.equalsIgnoreCase("/last")) {
       return insts.numAttributes() - 1;
