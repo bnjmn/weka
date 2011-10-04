@@ -26,6 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -39,7 +40,10 @@ import java.beans.beancontext.BeanContext;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextChildSupport;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -76,7 +80,7 @@ import weka.gui.visualize.PlotData2D;
  */
 public class CostBenefitAnalysis extends JPanel 
   implements BeanCommon, ThresholdDataListener, Visible, UserRequestAcceptor,
-  Serializable, BeanContextChild {
+  Serializable, BeanContextChild, HeadlessEventCollector {
   
   /** For serialization */
   private static final long serialVersionUID = 8647471654613320469L;
@@ -109,6 +113,8 @@ public class CostBenefitAnalysis extends JPanel
    * The object sending us data (we allow only one connection at any one time)
    */
   protected Object m_listenee;
+  
+  protected List<EventObject> m_headlessEvents;
   
   /**
    * Inner class for displaying the plots and all control widgets.
@@ -958,6 +964,8 @@ public class CostBenefitAnalysis extends JPanel
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
       appearanceFinal();
+    } else {
+      m_headlessEvents = new ArrayList<EventObject>();
     }
   }
   
@@ -975,11 +983,16 @@ public class CostBenefitAnalysis extends JPanel
    * @param e a threshold data event
    */
   public void acceptDataSet(ThresholdDataEvent e) {
-    try {
-      setCurveData(e.getDataSet(), e.getClassAttribute());
-    } catch (Exception ex) {
-      System.err.println("[CostBenefitAnalysis] Problem setting up visualization.");
-      ex.printStackTrace();
+    if (!GraphicsEnvironment.isHeadless()) {  
+      try {
+        setCurveData(e.getDataSet(), e.getClassAttribute());
+      } catch (Exception ex) {
+        System.err.println("[CostBenefitAnalysis] Problem setting up visualization.");
+        ex.printStackTrace();
+      }
+    } else {
+      m_headlessEvents = new ArrayList<EventObject>();
+      m_headlessEvents.add(e);
     }
   }
   
@@ -993,6 +1006,7 @@ public class CostBenefitAnalysis extends JPanel
    */
   public void setCurveData(PlotData2D curveData, Attribute origClassAtt) 
     throws Exception {
+
     if (m_analysisPanel == null) {
       m_analysisPanel = new AnalysisPanel();
     }
@@ -1249,5 +1263,33 @@ public class CostBenefitAnalysis extends JPanel
       ex.printStackTrace();
     }
  
+  }
+
+  /**
+   * Get the list of events processed in headless mode. May return
+   * null or an empty list if not running in headless mode or no
+   * events were processed
+   * 
+   * @return a list of EventObjects or null.
+   */
+  public List<EventObject> retrieveHeadlessEvents() {
+    return m_headlessEvents;
+  }
+
+  /**
+   * Process a list of events that have been collected earlier. Has
+   * no affect if the component is running in headless mode.
+   * 
+   * @param headless a list of EventObjects to process.
+   */
+  public void processHeadlessEvents(List<EventObject> headless) {
+    // only process if we're not headless
+    if (!GraphicsEnvironment.isHeadless()) {
+      for (EventObject e : headless) {
+        if (e instanceof ThresholdDataEvent) {
+          acceptDataSet((ThresholdDataEvent)e);
+        }
+      }
+    }    
   }
 }
