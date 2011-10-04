@@ -26,6 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -974,11 +975,13 @@ public class CostBenefitAnalysis extends JPanel
    * @param e a threshold data event
    */
   public void acceptDataSet(ThresholdDataEvent e) {
-    try {
-      setCurveData(e.getDataSet(), e.getClassAttribute());
-    } catch (Exception ex) {
-      System.err.println(Messages.getInstance().getString("CostBenefitAnalysis_AcceptDataSet_Error_Text"));
-      ex.printStackTrace();
+    if (!GraphicsEnvironment.isHeadless()) {
+      try {
+        setCurveData(e.getDataSet(), e.getClassAttribute());
+      } catch (Exception ex) {
+        System.err.println(Messages.getInstance().getString("CostBenefitAnalysis_AcceptDataSet_Error_Text"));
+        ex.printStackTrace();
+      }
     }
   }
   
