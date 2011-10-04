@@ -48,6 +48,14 @@ public class PluginManager {
   protected static Map<String, Map<String, String>> PLUGINS = 
     new HashMap<String, Map<String, String>>();
   
+  /**
+   * Get a set of names of plugins that implement the supplied interface.
+   * 
+   * @param interfaceName the fully qualified name of the interface to list
+   * plugins for
+   * 
+   * @return a set of names of plugins
+   */
   public static Set<String> getPluginNamesOfType(String interfaceName) {        
     if (PLUGINS.get(interfaceName) != null) {
       return PLUGINS.get(interfaceName).keySet();
@@ -56,6 +64,16 @@ public class PluginManager {
     return null;
   }
   
+  /**
+   * Add a plugin.
+   * 
+   * @param interfaceName the fully qualified interface name that the
+   * plugin implements
+   * 
+   * @param name the name/short description of the plugin
+   * @param concreteType the fully qualified class name of the actual
+   * concrete implementation
+   */
   public static void addPlugin(String interfaceName, String name, 
       String concreteType) {
     if (PLUGINS.get(interfaceName) == null) {
@@ -68,6 +86,15 @@ public class PluginManager {
     }
   }
   
+  /**
+   * Get an instance of a concrete implementation of a plugin type
+   * 
+   * @param interfaceType the fully qualified interface name of the
+   * plugin type
+   * @param name the name/short description of the plugin to get
+   * @return the concrete plugin
+   * @throws Exception if the plugin can't be found or instantiated
+   */
   public static Object getPluginInstance(String interfaceType, String name) 
     throws Exception {
     if (PLUGINS.get(interfaceType) == null ||
@@ -88,5 +115,4 @@ public class PluginManager {
     
     return plugin;
   }
-
 }
