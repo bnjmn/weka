@@ -4033,6 +4033,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       m_perspectiveDataLoadThread = new Thread() {
         public void run() {
           try {
+            Environment env = m_mainKFPerspective.getEnvironmentSettings();
+            if (loader instanceof EnvironmentHandler) {
+              ((EnvironmentHandler)loader).setEnvironment(env);
+            }
+            
             loader.reset();
             m_logPanel.statusMessage("[KnowledgeFlow]|Sending data to perspective(s)...");
             Instances data = loader.getDataSet();
