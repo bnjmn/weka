@@ -22,8 +22,6 @@
 
 package weka.gui;
 
-import weka.core.SerializedObject;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -60,6 +58,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import weka.core.SerializedObject;
 
 /** 
  * A PropertyEditor for arrays of objects that themselves have
@@ -136,24 +136,25 @@ public class GenericArrayEditor
         if (m_Editor instanceof GenericObjectEditor) {
           ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
         }
-        m_Editor.setValue(m_ElementList.getSelectedValue());
+        try {
+          m_Editor.setValue(GenericObjectEditor.makeCopy(m_ElementList.getSelectedValue()));
+        }
+        catch (Exception ex) {
+          // not possible to serialize?
+          m_Editor.setValue(m_ElementList.getSelectedValue());
+        }
         if (m_Editor.getValue() != null) {
-          if (m_PD == null) {
-            int x = getLocationOnScreen().x;
-            int y = getLocationOnScreen().y;
-            if (PropertyDialog.getParentDialog(GenericArrayEditor.this) != null)
-              m_PD = new PropertyDialog(
-        	  PropertyDialog.getParentDialog(GenericArrayEditor.this), 
-        	  m_Editor, x, y);
-            else
-              m_PD = new PropertyDialog(
-        	  PropertyDialog.getParentFrame(GenericArrayEditor.this), 
-        	  m_Editor, x, y);
-            m_PD.setVisible(true);
-          } 
-          else {
-            m_PD.setVisible(true);
-          }
+          int x = getLocationOnScreen().x;
+          int y = getLocationOnScreen().y;
+          if (PropertyDialog.getParentDialog(GenericArrayEditor.this) != null)
+            m_PD = new PropertyDialog(
+        	PropertyDialog.getParentDialog(GenericArrayEditor.this), 
+        	m_Editor, x, y);
+          else
+            m_PD = new PropertyDialog(
+        	PropertyDialog.getParentFrame(GenericArrayEditor.this), 
+        	m_Editor, x, y);
+          m_PD.setVisible(true);
           m_Support.firePropertyChange("", null, null);
         }
       } else if (e.getSource() == m_UpBut) {
