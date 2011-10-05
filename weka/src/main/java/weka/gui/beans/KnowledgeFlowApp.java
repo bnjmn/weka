@@ -224,6 +224,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       BEAN_PLUGINS_PROPERTIES.remove(tempP);
     }
   }
+  
+  private static boolean s_pluginManagerIntialized = false;
 
   /**
    * Loads KnowledgeFlow properties and any plugins (adds jars to
@@ -325,12 +327,47 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             JOptionPane.ERROR_MESSAGE);
       }
     }
+
+    if (!s_pluginManagerIntialized && BEAN_PLUGINS_PROPERTIES != null && 
+        BEAN_PLUGINS_PROPERTIES.size() > 0) {
+      for (int i = 0; i < BEAN_PLUGINS_PROPERTIES.size(); i++) {
+        Properties tempP = BEAN_PLUGINS_PROPERTIES.get(i);
+        // Check for OffScreenChartRenderers
+        String offscreenRenderers = 
+          tempP.getProperty("weka.gui.beans.OffscreenChartRenderer");
+        if (offscreenRenderers != null && offscreenRenderers.length() > 0) {
+          String[] parts = offscreenRenderers.split(",");
+          for (String renderer : parts) {
+            renderer = renderer.trim();
+            // Check that we can instantiate it successfully
+            try {
+              Object p = Class.forName(renderer).newInstance();
+              if (p instanceof OffscreenChartRenderer) {
+                String name = ((OffscreenChartRenderer)p).rendererName();
+                PluginManager.addPlugin("weka.gui.beans.OffscreenChartRenderer", 
+                    name, renderer);
+                System.out.println("[KnowledgeFlow] registering chart rendering " +
+                    "plugin: " + renderer);
+              }
+            } catch (Exception ex) {
+
+              System.err.println("[KnowledgeFlow] WARNING: " +
+                  "unable to instantiate chart renderer \""
+                  + renderer + "\"");
+              ex.printStackTrace();
+
+            }
+          }
+        }
+      }
+      s_pluginManagerIntialized = true;
+    }
   }
 
   public static void reInitialize() {
-    if (BEAN_PROPERTIES == null) {
-      loadProperties();
-    }
+    s_pluginManagerIntialized = false;
+    
+    loadProperties();
     init();
   }  
 
@@ -1918,40 +1955,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 }
               }
             }
-          }
-          
-          // Check for OffScreenChartRenderers
-          String offscreenRenderers = 
-            tempP.getProperty("weka.gui.beans.OffscreenChartRenderer");
-          if (offscreenRenderers != null && offscreenRenderers.length() > 0) {
-            String[] parts = offscreenRenderers.split(",");
-            for (String renderer : parts) {
-              renderer = renderer.trim();
-              // Check that we can instantiate it successfully
-              try {
-                Object p = Class.forName(renderer).newInstance();
-                if (p instanceof OffscreenChartRenderer) {
-                  String name = ((OffscreenChartRenderer)p).rendererName();
-                  PluginManager.addPlugin("weka.gui.beans.OffscreenChartRenderer", 
-                      name, renderer);
-                  System.out.println("[KnowledgeFlow] registering chart rendering " +
-                  		"plugin: " + renderer);
-                }
-              } catch (Exception ex) {
-                if (m_logPanel != null) {
-                  m_logPanel.logMessage("[KnowledgeFlow] WARNING: " +
-                      "unable to instantiate chart renderer \""
-                      + renderer + "\"");
-                  ex.printStackTrace();
-                } else {
-                  System.err.println("[KnowledgeFlow] WARNING: " +
-                      "unable to instantiate chart renderer \""
-                      + renderer + "\"");
-                  ex.printStackTrace();
-                }
-              }
-            }
-          }
+          }          
         }
       }
       
