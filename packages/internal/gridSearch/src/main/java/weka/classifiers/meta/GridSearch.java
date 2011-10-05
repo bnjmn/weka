@@ -937,8 +937,13 @@ public class GridSearch
       m_RRSE  = evaluation.rootRelativeSquaredError();
       m_MAE   = evaluation.meanAbsoluteError();
       m_RAE   = evaluation.relativeAbsoluteError();
-      m_wAUC  = evaluation.weightedAreaUnderROC();
 
+      try {
+        m_wAUC = evaluation.weightedAreaUnderROC();
+      }
+      catch (Exception e) {
+        m_wAUC = Double.NaN;
+      }
       try {
 	m_CC = evaluation.correlationCoefficient();
       }
