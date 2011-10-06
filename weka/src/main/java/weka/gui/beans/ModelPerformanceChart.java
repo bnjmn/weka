@@ -70,7 +70,10 @@ public class ModelPerformanceChart
   /** for serialization */
   private static final long serialVersionUID = -4602034200071195924L;
   
-  protected BeanVisual m_visual;
+  protected BeanVisual m_visual = new BeanVisual("ModelPerformanceChart", 
+      BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
+      BeanVisual.ICON_PATH
+      +"ModelPerformanceChart_animated.gif");
 
   protected transient PlotData2D m_masterPlot;
   
@@ -138,7 +141,9 @@ public class ModelPerformanceChart
   protected BeanContextChildSupport m_bcSupport = 
     new BeanContextChildSupport(this);
 
-  public ModelPerformanceChart() { 
+  public ModelPerformanceChart() {
+    useDefaultVisual();
+    
     java.awt.GraphicsEnvironment ge = 
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
@@ -159,10 +164,7 @@ public class ModelPerformanceChart
 
   protected void appearanceDesign() {
     removeAll();
-    m_visual = new BeanVisual("ModelPerformanceChart", 
-			      BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
-			      BeanVisual.ICON_PATH
-			      +"ModelPerformanceChart_animated.gif");
+
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
