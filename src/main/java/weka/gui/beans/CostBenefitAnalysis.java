@@ -85,7 +85,10 @@ public class CostBenefitAnalysis extends JPanel
   /** For serialization */
   private static final long serialVersionUID = 8647471654613320469L;
 
-  protected BeanVisual m_visual;
+  protected BeanVisual m_visual = new BeanVisual("CostBenefitAnalysis", 
+      BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
+      BeanVisual.ICON_PATH
+      +"ModelPerformanceChart_animated.gif");
   
   protected transient JFrame m_popupFrame;
 
@@ -1097,10 +1100,7 @@ public class CostBenefitAnalysis extends JPanel
   
   protected void appearanceDesign() {
     removeAll();
-    m_visual = new BeanVisual("CostBenefitAnalysis", 
-                              BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
-                              BeanVisual.ICON_PATH
-                              +"ModelPerformanceChart_animated.gif");
+    useDefaultVisual();
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
