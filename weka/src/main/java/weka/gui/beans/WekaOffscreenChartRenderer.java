@@ -25,6 +25,7 @@ package weka.gui.beans;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.gui.AttributeVisualizationPanel;
 import weka.gui.visualize.Plot2D;
@@ -268,7 +269,7 @@ public class WekaOffscreenChartRenderer extends AbstractOffscreenChartRenderer {
    * @param width the width of the resulting chart in pixels
    * @param height the height of the resulting chart in pixels
    * @param series a list of Instances - one for each series to be plotted
-   * @param attsToPlot a list of attribute names, to plot histograms/pie charts for,
+   * @param attsToPlot the attribute to plot
    * corresponding to the Instances in the series list
    * @param optionalArgs optional arguments to the renderer (may be null)
    * 
@@ -276,15 +277,20 @@ public class WekaOffscreenChartRenderer extends AbstractOffscreenChartRenderer {
    * @throws Exception if there is a problem rendering the chart
    */
   public BufferedImage renderHistogram(int width, int height,
-      List<Instances> series, List<String> attsToPlot,
+      List<Instances> series, String attToPlot,
       List<String> optionalArgs) throws Exception {
     
     BufferedImage osi = new BufferedImage(width, height, 
         BufferedImage.TYPE_INT_RGB);
     
-    // we can only handle one histogram per plot
-    Instances toPlot = series.get(0);
-    String attToPlot = attsToPlot.get(0);
+    // we can only handle one series per plot so merge all series together
+    Instances toPlot = new Instances(series.get(0));
+    for (int i = 1; i < series.size(); i++) {
+      Instances additional = series.get(i);
+      for (Instance temp : additional) {
+        toPlot.add(temp);
+      }
+    }
     
     int attIndex = getIndexOfAttribute(toPlot, attToPlot);
     if (attIndex < 0) {
@@ -296,15 +302,21 @@ public class WekaOffscreenChartRenderer extends AbstractOffscreenChartRenderer {
     
     AttributeVisualizationPanel offScreenPlot = 
       new AttributeVisualizationPanel();
+    offScreenPlot.setSize(width, height);
     offScreenPlot.setInstances(toPlot);
     offScreenPlot.setAttribute(attIndex);
     if (tempC >= 0) {
       offScreenPlot.setColoringIndex(tempC);
-    }
+    }        
     
     // render
     java.awt.Graphics g = osi.getGraphics();
     offScreenPlot.paintComponent(g);
+    // wait a little while so that the calculation thread can complete
+    Thread.sleep(2000);
+    offScreenPlot.paintComponent(g);
+    
+//    offScreenPlot.setAttribute(attIndex);
     
     return osi;
   }
