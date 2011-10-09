@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the data visualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class DataVisualizerBeanInfo extends SimpleBeanInfo {
   
@@ -43,12 +43,26 @@ public class DataVisualizerBeanInfo extends SimpleBeanInfo {
         new EventSetDescriptor(DataVisualizer.class,
                                "dataSet",
                                DataSourceListener.class,
-                               "acceptDataSet")
+                               "acceptDataSet"),
+        new EventSetDescriptor(DataVisualizer.class, 
+            "image", 
+            ImageListener.class, 
+        "acceptImage")
       };      
       return esds;
     } catch (Exception ex) {
       ex.printStackTrace();
     }
     return null;
+  }
+  
+  /**
+   * Get the bean descriptor for this bean
+   *
+   * @return a <code>BeanDescriptor</code> value
+   */
+  public BeanDescriptor getBeanDescriptor() {
+    return new BeanDescriptor(weka.gui.beans.DataVisualizer.class,
+                              DataVisualizerCustomizer.class);
   }
 }
