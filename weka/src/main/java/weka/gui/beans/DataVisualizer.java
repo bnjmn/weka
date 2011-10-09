@@ -22,11 +22,17 @@
 
 package weka.gui.beans;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
 import weka.core.Instances;
+import weka.gui.Logger;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
 
 import java.awt.BorderLayout;
+import java.awt.image.BufferedImage;
+import java.beans.EventSetDescriptor;
 import java.beans.PropertyChangeListener;
 import java.beans.VetoableChangeListener;
 import java.beans.beancontext.BeanContext;
@@ -51,12 +57,16 @@ import javax.swing.JPanel;
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
 	     TestSetListener, Visible, UserRequestAcceptor, Serializable,
-	     BeanContextChild, HeadlessEventCollector {
+	     BeanContextChild, HeadlessEventCollector, EnvironmentHandler,
+	     BeanCommon, EventConstraints {
 
   /** for serialization */
   private static final long serialVersionUID = 1949062132560159028L;
 
-  protected BeanVisual m_visual;
+  protected BeanVisual m_visual = new BeanVisual("DataVisualizer", 
+      BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
+      BeanVisual.ICON_PATH
+      +"DefaultDataVisualizer_animated.gif");
 
   protected transient Instances m_visualizeDataSet;
 
@@ -77,11 +87,50 @@ public class DataVisualizer extends JPanel
   private VisualizePanel m_visPanel;
   
   protected List<EventObject> m_headlessEvents;
+  
+  protected ArrayList<ImageListener> m_imageListeners = new ArrayList<ImageListener>();
+  
+  protected List<Object> m_listenees = new ArrayList<Object>();
 
   /**
    * Objects listening for data set events
    */
   private Vector m_dataSetListeners = new Vector();
+  
+  /** For rendering plots to encapsulate in ImageEvents */
+  protected transient List<Instances> m_offscreenPlotData;
+  protected transient OffscreenChartRenderer m_offscreenRenderer;
+  
+  /** Name of the renderer to use for offscreen chart rendering */
+  protected String m_offscreenRendererName = "Weka Chart Renderer";
+  
+  /** 
+   * The name of the attribute to use for the x-axis of offscreen plots. 
+   * If left empty, False Positive Rate is used for threshold curves 
+   */
+  protected String m_xAxis = "";
+  
+  /** 
+   * The name of the attribute to use for the y-axis of offscreen plots. 
+   * If left empty, True Positive Rate is used for threshold curves 
+   */
+  protected String m_yAxis = "";
+  
+  /**
+   * Additional options for the offscreen renderer
+   */
+  protected String m_additionalOptions = "";
+  
+  /** Width of offscreen plots */
+  protected String m_width = "500";
+  
+  /** Height of offscreen plots */
+  protected String m_height = "400";
+  
+  /**
+   * The environment variables.
+   */
+  protected transient Environment m_env;
   
   /**
    * BeanContextChild support
@@ -111,10 +160,7 @@ public class DataVisualizer extends JPanel
   protected void appearanceDesign() {
     m_visPanel = null;
     removeAll();
-    m_visual = new BeanVisual("DataVisualizer", 
-			      BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
-			      BeanVisual.ICON_PATH
-			      +"DefaultDataVisualizer_animated.gif");
+    useDefaultVisual();
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
@@ -188,6 +234,112 @@ public class DataVisualizer extends JPanel
 
     // pass on the event to any listeners
     notifyDataSetListeners(e);
+    
+    renderOffscreenImage(e);
+  }
+  
+  protected void renderOffscreenImage(DataSetEvent e) {
+    if (m_env == null) {
+      m_env = Environment.getSystemWide();
+    }
+    
+    if (m_imageListeners.size() > 0) {
+      // configure the renderer (if necessary)
+      setupOffscreenRenderer();
+     
+      m_offscreenPlotData = new ArrayList<Instances>();      
+      Instances predictedI = e.getDataSet();
+      if (predictedI.classIndex() >= 0 && predictedI.classAttribute().isNominal()) {
+        // set up multiple series - one for each class
+        Instances[] classes = new Instances[predictedI.numClasses()];
+        for (int i = 0; i < predictedI.numClasses(); i++) {
+          classes[i] = new Instances(predictedI, 0);
+          classes[i].setRelationName(predictedI.classAttribute().value(i));
+        }
+        for (int i = 0; i < predictedI.numInstances(); i++) {
+          Instance current = predictedI.instance(i);
+          classes[(int)current.classValue()].add((Instance)current.copy());
+        }
+        for (int i = 0; i < classes.length; i++) {
+          m_offscreenPlotData.add(classes[i]);
+        }
+      } else {
+        m_offscreenPlotData.add(new Instances(predictedI));
+      }
+      
+      List<String> options = new ArrayList<String>();
+      String additional = m_additionalOptions;
+      if (m_additionalOptions != null && m_additionalOptions.length() > 0) {
+        try {
+          additional = m_env.substitute(additional);
+        } catch (Exception ex) { }
+      }          
+      if (additional != null && additional.indexOf("-color") < 0) {
+        // for WekaOffscreenChartRenderer only
+        if (additional.length() > 0) {
+          additional += ",";
+        }
+        if (predictedI.classIndex() >= 0) {
+          additional += "-color=" + predictedI.classAttribute().name();
+        } else {
+          additional += "-color=/last";
+        }
+      }
+      String[] optionsParts = additional.split(",");
+      for (String p : optionsParts) {
+        options.add(p.trim());
+      }
+      
+      String xAxis = m_xAxis;
+      try {
+        xAxis = m_env.substitute(xAxis);
+      } catch (Exception ex) { }
+      
+      String yAxis = m_yAxis;
+      try {
+        yAxis = m_env.substitute(yAxis);
+      } catch (Exception ex) { }
+      
+      String width = m_width;
+      String height = m_height;
+      int defWidth = 500;
+      int defHeight = 400;
+      try {
+        width = m_env.substitute(width);
+        height = m_env.substitute(height);
+        
+        defWidth = Integer.parseInt(width);
+        defHeight = Integer.parseInt(height);
+      } catch (Exception ex) { }
+      
+      try {
+        BufferedImage osi = m_offscreenRenderer.renderXYScatterPlot(defWidth, defHeight, 
+            m_offscreenPlotData, xAxis, yAxis, options);
+
+        ImageEvent ie = new ImageEvent(this, osi);
+        notifyImageListeners(ie);
+      } catch (Exception e1) {
+        e1.printStackTrace();
+      }
+    }        
+  }
+  
+  /**
+   * Notify all image listeners of a ImageEvent
+   *
+   * @param te a <code>ImageEvent</code> value
+   */
+  @SuppressWarnings("unchecked")
+  protected void notifyImageListeners(ImageEvent te) {
+    ArrayList<ImageListener> l;
+    synchronized (this) {
+      l = (ArrayList<ImageListener>)m_imageListeners.clone();
+    }
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+        l.get(i).acceptImage(te);
+      }
+    }
   }
   
   /**
@@ -428,6 +580,33 @@ public class DataVisualizer extends JPanel
 					 + " not supported (DataVisualizer)");
     }
   }
+  
+  protected void setupOffscreenRenderer() {
+    if (m_offscreenRenderer == null) {
+      if (m_offscreenRendererName == null || m_offscreenRendererName.length() == 0) {
+        m_offscreenRenderer = new WekaOffscreenChartRenderer();
+        return;
+      }
+      
+      if (m_offscreenRendererName.equalsIgnoreCase("weka chart renderer")) {
+        m_offscreenRenderer = new WekaOffscreenChartRenderer();
+      } else {
+        try {
+          Object r = PluginManager.getPluginInstance("weka.gui.beans.OffscreenChartRenderer", 
+              m_offscreenRendererName);
+          if (r != null && r instanceof weka.gui.beans.OffscreenChartRenderer) {
+            m_offscreenRenderer = (OffscreenChartRenderer)r;
+          } else {
+            // use built-in default
+            m_offscreenRenderer = new WekaOffscreenChartRenderer();
+          }
+        } catch (Exception ex) {
+          // use built-in default
+          m_offscreenRenderer = new WekaOffscreenChartRenderer();
+        }
+      }
+    }
+  }
 
   /**
    * Add a listener
@@ -474,5 +653,263 @@ public class DataVisualizer extends JPanel
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
+  }
+
+  @Override
+  public void setEnvironment(Environment env) {
+    m_env = env;
+  }
+  
+  /**
+   * Set the name of the attribute for the x-axis in offscreen plots. This defaults
+   * to "False Positive Rate" for threshold curves if not specified.
+   * 
+   * @param xAxis the name of the xAxis
+   */
+  public void setOffscreenXAxis(String xAxis) {
+    m_xAxis = xAxis;
+  }
+  
+  /**
+   * Get the name of the attribute for the x-axis in offscreen plots
+   * 
+   * @return the name of the xAxis
+   */
+  public String getOffscreenXAxis() {
+    return m_xAxis;
+  }
+  
+  /**
+   * Set the name of the attribute for the y-axis in offscreen plots. This defaults
+   * to "True Positive Rate" for threshold curves if not specified.
+   * 
+   * @param yAxis the name of the xAxis
+   */
+  public void setOffscreenYAxis(String yAxis) {
+    m_yAxis = yAxis;
+  }
+  
+  /**
+   * Get the name of the attribute for the y-axix of offscreen plots.
+   * 
+   * @return the name of the yAxis.
+   */
+  public String getOffscreenYAxis() {
+    return m_yAxis;
+  }
+  
+  /**
+   * Set the width (in pixels) of the offscreen image to generate. 
+   * 
+   * @param width the width in pixels.
+   */
+  public void setOffscreenWidth(String width) {
+    m_width = width;
+  }
+  
+  /**
+   * Get the width (in pixels) of the offscreen image to generate.
+   * 
+   * @return the width in pixels.
+   */
+  public String getOffscreenWidth() {
+    return m_width;
+  }
+  
+  /**
+   * Set the height (in pixels) of the offscreen image to generate
+   * 
+   * @param height the height in pixels
+   */
+  public void setOffscreenHeight(String height) {
+    m_height = height;
+  }
+  
+  /**
+   * Get the height (in pixels) of the offscreen image to generate
+   * @return the height in pixels
+   */
+  public String getOffscreenHeight() {
+    return m_height;
+  }
+  
+  /**
+   * Set the name of the renderer to use for offscreen chart
+   * rendering operations
+   * 
+   * @param rendererName the name of the renderer to use
+   */
+  public void setOffscreenRendererName(String rendererName) {
+    m_offscreenRendererName = rendererName;
+    m_offscreenRenderer = null;
+  }
+  
+  /**
+   * Get the name of the renderer to use for offscreen chart
+   * rendering operations
+   * 
+   * @return the name of the renderer to use
+   */
+  public String getOffscreenRendererName() {
+    return m_offscreenRendererName;
+  }
+  
+  /**
+   * Set the additional options for the offscreen renderer
+   * 
+   * @param additional additional options
+   */
+  public void setOffscreenAdditionalOpts(String additional) {
+    m_additionalOptions = additional;
+  }
+  
+  /**
+   * Get the additional options for the offscreen renderer
+   * 
+   * @return the additional options
+   */
+  public String getOffscreenAdditionalOpts() {
+    return m_additionalOptions;
+  }
+  
+  /**
+   * Add an image listener
+   *
+   * @param cl a <code>ImageListener</code> value
+   */
+  public synchronized void addImageListener(ImageListener cl) {
+    m_imageListeners.add(cl);
+  }
+
+  /**
+   * Remove an image listener
+   *
+   * @param cl a <code>ImageListener</code> value
+   */
+  public synchronized void removeImageListener(ImageListener cl) {
+    m_imageListeners.remove(cl);
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    // TODO Auto-generated method stub
+    return m_visual.getText();
+  }
+
+  /**
+   * Stop any processing that the bean might be doing.
+   */
+  public void stop() {    
+  }
+
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return false;
+  }
+
+  /**
+   * Set a logger
+   *
+   * @param logger a <code>Logger</code> value
+   */
+  public void setLog(Logger logger) {    
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return connectionAllowed(esd.getName());
+  }
+
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the named event
+   *
+   * @param eventName the name of the event
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(String eventName) {
+    return eventName.equals("dataSet") || eventName.equals("trainingSet") || 
+      eventName.equals("testSet");
+  }
+
+  /**
+   * Notify this object that it has been registered as a listener with
+   * a source for recieving events described by the named event
+   * This object is responsible for recording this fact.
+   *
+   * @param eventName the event
+   * @param source the source with which this object has been registered as
+   * a listener
+   */
+  public void connectionNotification(String eventName, Object source) {
+    if (connectionAllowed(eventName)) {
+      m_listenees.add(source);
+    }    
+  }
+
+  /**
+   * Notify this object that it has been deregistered as a listener with
+   * a source for named event. This object is responsible
+   * for recording this fact.
+   *
+   * @param eventName the event
+   * @param source the source with which this object has been registered as
+   * a listener
+   */
+  public void disconnectionNotification(String eventName, Object source) {
+    m_listenees.remove(source);
+  }
+
+  /**
+   * Returns true, if at the current time, the named event could
+   * be generated. Assumes that supplied event names are names of
+   * events that could be generated by this bean.
+   *
+   * @param eventName the name of the event in question
+   * @return true if the named event could be generated at this point in
+   * time
+   */
+  public boolean eventGeneratable(String eventName) {
+    if (m_listenees.size() == 0) {
+      return false;
+    }
+    
+    boolean ok = false;
+    for (Object o : m_listenees) {
+      if (o instanceof EventConstraints) {
+        if (((EventConstraints)o).eventGeneratable("dataSet") ||
+            ((EventConstraints)o).eventGeneratable("trainingSet") ||
+            ((EventConstraints)o).eventGeneratable("testSet")) {
+          ok = true;
+          break;
+        }
+      }
+    }
+    return ok;
   }
 }
