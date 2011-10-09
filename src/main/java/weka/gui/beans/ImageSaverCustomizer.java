@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
@@ -88,7 +89,8 @@ public class ImageSaverCustomizer extends JPanel implements BeanCustomizer,
     JPanel holder = new JPanel();
     holder.setLayout(new BorderLayout());
     
-    m_fileEditor = new FileEnvironmentField("Filename", m_env);
+    m_fileEditor = new FileEnvironmentField("Filename", m_env,
+        JFileChooser.SAVE_DIALOG);
     m_fileEditor.resetFileFilters();
     holder.add(m_fileEditor, BorderLayout.SOUTH);   
     
