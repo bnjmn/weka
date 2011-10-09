@@ -56,7 +56,7 @@ public class FileEnvironmentField extends EnvironmentField {
   private static final long serialVersionUID = -233731548086207652L;
   
   /** File editor component */
-  protected FileEditor m_fileEditor = new FileEditor();
+  protected FileEditor m_fileEditor = new FileEditor();  
   
   /** Dialog to hold the file editor */
   protected PropertyDialog m_fileEditorDialog;
@@ -68,7 +68,7 @@ public class FileEnvironmentField extends EnvironmentField {
    * Constructor
    */
   public FileEnvironmentField() {
-    this("");
+    this("", JFileChooser.OPEN_DIALOG);
     setEnvironment(Environment.getSystemWide());
   }
   
@@ -78,7 +78,12 @@ public class FileEnvironmentField extends EnvironmentField {
    * @param env an Environment object to use
    */
   public FileEnvironmentField(Environment env) {
-    this("");
+    this("", JFileChooser.OPEN_DIALOG);
+    setEnvironment(env);
+  }
+  
+  public FileEnvironmentField(String label, Environment env) {
+    this(label, JFileChooser.OPEN_DIALOG);
     setEnvironment(env);
   }
   
@@ -87,18 +92,24 @@ public class FileEnvironmentField extends EnvironmentField {
    * 
    * @param label a label to display alongside the field.
    * @param env an Environment object to use.
+   * @param fileChooserType the type of file chooser to use (either JFileChooser.OPEN_DIALOG
+   * or JFileChooser.SAVE_DIALOG)
+   * @param 
    */
-  public FileEnvironmentField(String label, Environment env) {
-    this(label);
+  public FileEnvironmentField(String label, Environment env, 
+      int fileChooserType) {
+    this(label, fileChooserType);
     setEnvironment(env);
-  }
+  }  
   
   /**
    * Constructor
    * 
    * @param label a label to display alongside the field.
+   * @param fileChooserType the type of file chooser to use (either JFileChooser.OPEN_DIALOG
+   * or JFileChooser.SAVE_DIALOG)
    */
-  public FileEnvironmentField(String label) {
+  public FileEnvironmentField(String label, int fileChooserType) {
     super(label);
     
     m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -112,6 +123,7 @@ public class FileEnvironmentField extends EnvironmentField {
     
     final JFileChooser embeddedEditor = (JFileChooser)m_fileEditor.getCustomEditor();
     embeddedEditor.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    embeddedEditor.setDialogType(fileChooserType);
     ExtensionFileFilter ff =
       new ExtensionFileFilter(".model", "Serialized Weka classifier (*.model)");
     embeddedEditor.addChoosableFileFilter(ff);    
@@ -149,7 +161,7 @@ public class FileEnvironmentField extends EnvironmentField {
     bP.add(m_browseBut, BorderLayout.CENTER);
     
     add(bP, BorderLayout.EAST);    
-  }
+  }  
   
   /**
    * Add a file filter to use
