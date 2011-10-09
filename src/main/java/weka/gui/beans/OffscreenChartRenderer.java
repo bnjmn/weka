@@ -88,7 +88,7 @@ public interface OffscreenChartRenderer {
       String xAxis, String yAxis, List<String> optionalArgs) throws Exception;
   
   /**
-   * Render histogram(s) (numeric attribute) or pie chart (nominal attribute).
+   * Render histogram(s) (numeric attribute) or bar chart(s) (nominal attribute).
    * Some implementations may not be able to render more than one histogram/pie
    * on the same chart - the implementation can either throw an exception or
    * just process the first series in this case. 
@@ -96,14 +96,14 @@ public interface OffscreenChartRenderer {
    * @param width the width of the resulting chart in pixels
    * @param height the height of the resulting chart in pixels
    * @param series a list of Instances - one for each series to be plotted
-   * @param attsToPlot a list of attribute names, to plot histograms/pie charts for,
-   * corresponding to the Instances in the series list
+   * @param attToPlot the name of the attribute to plot (the attribute, with the,
+   * same type, must be present in each series) 
    * @param optionalArgs optional arguments to the renderer (may be null)
    * 
    * @return a BufferedImage containing the chart
    * @throws Exception if there is a problem rendering the chart
    */
   BufferedImage renderHistogram(int width, int height, List<Instances> series, 
-      List<String> attsToPlot, List<String> optionalArgs)
+      String attsToPlot, List<String> optionalArgs)
     throws Exception;
 }
