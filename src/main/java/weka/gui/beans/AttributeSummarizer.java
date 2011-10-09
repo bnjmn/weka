@@ -28,6 +28,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -42,6 +43,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import weka.core.Attribute;
+import weka.core.Environment;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.gui.AttributeVisualizationPanel;
 
@@ -83,6 +86,9 @@ public class AttributeSummarizer
    * Creates a new <code>AttributeSummarizer</code> instance.
    */
   public AttributeSummarizer() {
+    useDefaultVisual();
+    m_visual.setText("AttributeSummarizer");
+    
     java.awt.GraphicsEnvironment ge = 
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
     if (!ge.isHeadless()) {
@@ -174,10 +180,6 @@ public class AttributeSummarizer
 
   protected void appearanceDesign() {
     removeAll();
-    m_visual = 
-      new BeanVisual("AttributeSummarizer", 
-		     BeanVisual.ICON_PATH+"AttributeSummarizer.gif",
-		     BeanVisual.ICON_PATH+"AttributeSummarizer_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
@@ -190,56 +192,56 @@ public class AttributeSummarizer
   protected void setUpFinal() {
     removeAll();
     
-    if  (m_visualizeDataSet == null) {
+    if (m_visualizeDataSet == null) {
       return;
     }
-    
+
     if (!m_runningAsPerspective || m_activePerspective) {
-    final JScrollPane hp = makePanel();
-    add(hp, BorderLayout.CENTER);
-    
-    if (m_showClassCombo) {
-      Vector<String> atts = new Vector<String>();
-      for (int i = 0; i < m_visualizeDataSet.numAttributes(); i++) {
-        atts.add("(" + Attribute.typeToStringShort(m_visualizeDataSet.attribute(i)) + ") "
-            + m_visualizeDataSet.attribute(i).name());
-      }
-      
-      final JComboBox classCombo = new JComboBox();
-      classCombo.setModel(new DefaultComboBoxModel(atts));      
-      
-      if (atts.size() > 0) {
-        if (m_visualizeDataSet.classIndex() < 0) {
-          classCombo.setSelectedIndex(atts.size() - 1);
-        } else {
-          classCombo.setSelectedIndex(m_visualizeDataSet.classIndex());
+      final JScrollPane hp = makePanel();
+      add(hp, BorderLayout.CENTER);
+
+      if (m_showClassCombo) {
+        Vector<String> atts = new Vector<String>();
+        for (int i = 0; i < m_visualizeDataSet.numAttributes(); i++) {
+          atts.add("(" + Attribute.typeToStringShort(m_visualizeDataSet.attribute(i)) + ") "
+              + m_visualizeDataSet.attribute(i).name());
         }
-        classCombo.setEnabled(true);
-        for (int i = 0; i < m_plots.size(); i++) {
-          m_plots.get(i).setColoringIndex(classCombo.getSelectedIndex());
-        }
-      }
-      
-      JPanel comboHolder = new JPanel();
-      comboHolder.setLayout(new BorderLayout());
-      JPanel tempHolder = new JPanel();
-      tempHolder.setLayout(new BorderLayout());
-      tempHolder.add(new JLabel("Class: "), BorderLayout.WEST);
-      tempHolder.add(classCombo, BorderLayout.EAST);
-      comboHolder.add(tempHolder, BorderLayout.WEST);
-      add(comboHolder, BorderLayout.NORTH);
-            
-      classCombo.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          int selected = classCombo.getSelectedIndex();
-          if (selected >= 0) {
-            for (int i = 0; i < m_plots.size(); i++) {
-              m_plots.get(i).setColoringIndex(selected);
-            }
+
+        final JComboBox classCombo = new JComboBox();
+        classCombo.setModel(new DefaultComboBoxModel(atts));      
+
+        if (atts.size() > 0) {
+          if (m_visualizeDataSet.classIndex() < 0) {
+            classCombo.setSelectedIndex(atts.size() - 1);
+          } else {
+            classCombo.setSelectedIndex(m_visualizeDataSet.classIndex());
+          }
+          classCombo.setEnabled(true);
+          for (int i = 0; i < m_plots.size(); i++) {
+            m_plots.get(i).setColoringIndex(classCombo.getSelectedIndex());
           }
         }
-      });
-    }
+
+        JPanel comboHolder = new JPanel();
+        comboHolder.setLayout(new BorderLayout());
+        JPanel tempHolder = new JPanel();
+        tempHolder.setLayout(new BorderLayout());
+        tempHolder.add(new JLabel("Class: "), BorderLayout.WEST);
+        tempHolder.add(classCombo, BorderLayout.EAST);
+        comboHolder.add(tempHolder, BorderLayout.WEST);
+        add(comboHolder, BorderLayout.NORTH);
+
+        classCombo.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            int selected = classCombo.getSelectedIndex();
+            if (selected >= 0) {
+              for (int i = 0; i < m_plots.size(); i++) {
+                m_plots.get(i).setColoringIndex(selected);
+              }
+            }
+          }
+        });
+      }
     }
   }
 
@@ -247,8 +249,9 @@ public class AttributeSummarizer
    * Use the default appearance for this bean
    */
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
-		       BeanVisual.ICON_PATH+"DefaultDataVisualizer_animated.gif");
+    
+    m_visual.loadIcons(BeanVisual.ICON_PATH+"AttributeSummarizer.gif",
+		       BeanVisual.ICON_PATH+"AttributeSummarizer_animated.gif");
   }
 
   /**
@@ -465,6 +468,91 @@ public class AttributeSummarizer
       throw new IllegalArgumentException(request
 		+ " not supported (AttributeSummarizer)");
     }
+  }
+  
+  protected void renderOffscreenImage(DataSetEvent e) {
+    if (m_env == null) {
+      m_env = Environment.getSystemWide();
+    }
+    
+    if (m_imageListeners.size() > 0) {
+      // configure the renderer (if necessary)
+      setupOffscreenRenderer();
+     
+      m_offscreenPlotData = new ArrayList<Instances>();      
+      Instances predictedI = e.getDataSet();
+      if (predictedI.classIndex() >= 0 && predictedI.classAttribute().isNominal()) {
+        // set up multiple series - one for each class
+        Instances[] classes = new Instances[predictedI.numClasses()];
+        for (int i = 0; i < predictedI.numClasses(); i++) {
+          classes[i] = new Instances(predictedI, 0);
+          classes[i].setRelationName(predictedI.classAttribute().value(i));
+        }
+        for (int i = 0; i < predictedI.numInstances(); i++) {
+          Instance current = predictedI.instance(i);
+          classes[(int)current.classValue()].add((Instance)current.copy());
+        }
+        for (int i = 0; i < classes.length; i++) {
+          m_offscreenPlotData.add(classes[i]);
+        }
+      } else {
+        m_offscreenPlotData.add(new Instances(predictedI));
+      }
+        
+      List<String> options = new ArrayList<String>();
+      String additional = m_additionalOptions;
+      if (m_additionalOptions != null && m_additionalOptions.length() > 0) {
+        try {
+          additional = m_env.substitute(additional);
+        } catch (Exception ex) { }
+      }          
+      
+      if (additional != null && additional.indexOf("-color") < 0) {
+        // for WekaOffscreenChartRenderer only
+        if (additional.length() > 0) {
+          additional += ",";
+        }
+        if (predictedI.classIndex() >= 0) {
+          additional += "-color=" + predictedI.classAttribute().name();
+        } else {
+          additional += "-color=/last";
+        }
+      }
+      
+      String[] optionsParts = additional.split(",");
+      for (String p : optionsParts) {
+        options.add(p.trim());
+      }
+      
+      // only need the x-axis (used to specify the attribute to plot)
+      String xAxis = m_xAxis;
+      try {
+        xAxis = m_env.substitute(xAxis);
+      } catch (Exception ex) { }
+      
+      String width = m_width;
+      String height = m_height;
+      int defWidth = 500;
+      int defHeight = 400;
+      try {
+        width = m_env.substitute(width);
+        height = m_env.substitute(height);
+        
+        defWidth = Integer.parseInt(width);
+        defHeight = Integer.parseInt(height);
+      } catch (Exception ex) { }
+     
+      try {
+        BufferedImage osi = m_offscreenRenderer.renderHistogram(defWidth, defHeight, 
+            m_offscreenPlotData, xAxis, options);
+
+        ImageEvent ie = new ImageEvent(this, osi);
+        notifyImageListeners(ie);
+      } catch (Exception e1) {
+        e1.printStackTrace();
+      }
+      
+    }    
   }
 
   public static void main(String [] args) {
