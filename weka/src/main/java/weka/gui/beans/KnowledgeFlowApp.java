@@ -73,6 +73,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1867,13 +1868,6 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           String components = 
             tempP.getProperty("weka.gui.beans.KnowledgeFlow.Plugins");
           if (components != null && components.length() > 0) {
-            if (!pluginBeans) {
-              // make the Plugins tree node entry
-              userSubTree = new DefaultMutableTreeNode("Plugins");
-              jtreeRoot.add(userSubTree);
-              pluginBeans = true;
-            }
-
             StringTokenizer st2 = new StringTokenizer(components, ", ");
 
             while (st2.hasMoreTokens()) {
@@ -1905,10 +1899,56 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   //m_iconLookup.put(tempBeanCompName, scaledForTree);
                 }
               }
+              
+              // check for annotation
+              Class compClass = visibleCheck.getClass();
+              Annotation[] annotations = 
+                compClass.getDeclaredAnnotations();
+              DefaultMutableTreeNode targetFolder = null;
+              String category = null;
+              for (Annotation ann : annotations) {
+                if (ann instanceof KFStep) {
+                  category = ((KFStep)ann).category();
+                  
+                  // Does this category already exist?
+                  Enumeration children = 
+                    jtreeRoot.children();
+                  
+                  while (children.hasMoreElements()) {
+                    Object child = children.nextElement();
+                    if (child instanceof DefaultMutableTreeNode) {
+                      targetFolder = (DefaultMutableTreeNode)child;
+                      if (targetFolder.getUserObject().toString().equals(category)) {
+                        break;
+                      }
+                    }
+                  }
+                  break;
+                }
+              }
+              
+              
               JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "", 
                   scaledForTree);
               DefaultMutableTreeNode pluginLeaf = new DefaultMutableTreeNode(leafData);
-              userSubTree.add(pluginLeaf);
+              if (targetFolder != null) {
+                targetFolder.add(pluginLeaf);
+              } else if (category != null) {
+                // make a new category folder
+                DefaultMutableTreeNode newCategoryNode = 
+                  new DefaultMutableTreeNode(category);
+                jtreeRoot.add(newCategoryNode);
+                newCategoryNode.add(pluginLeaf);
+              } else {
+                // add to the default "Plugins" folder
+                if (!pluginBeans) {
+                  // make the Plugins tree node entry
+                  userSubTree = new DefaultMutableTreeNode("Plugins");
+                  jtreeRoot.add(userSubTree);
+                  pluginBeans = true;
+                }
+                userSubTree.add(pluginLeaf);
+              }
             }
           }
 
