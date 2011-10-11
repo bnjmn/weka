@@ -111,8 +111,17 @@ public class ModelPerformanceChart
   protected transient JFrame m_popupFrame;
 
   protected boolean m_framePoppedUp = false;
-  
+
+  /** Events received and stored during headless execution */
   protected List<EventObject> m_headlessEvents;
+  
+  /** 
+   * Set to true when processing events stored during headless
+   * execution. Used to prevent sending ImageEvents to listeners
+   * a second time (since these will have been passed on during
+   * headless execution).
+   */
+  protected transient boolean m_processingHeadlessEvents = false;
   
   protected ArrayList<ImageListener> m_imageListeners = new ArrayList<ImageListener>();
   
@@ -249,7 +258,7 @@ public class ModelPerformanceChart
       m_headlessEvents.add(e);      
     }
 
-    if (m_imageListeners.size() > 0) {
+    if (m_imageListeners.size() > 0 && !m_processingHeadlessEvents) {
       // configure the renderer (if necessary)
       setupOffscreenRenderer();
 
@@ -352,7 +361,7 @@ public class ModelPerformanceChart
       m_headlessEvents.add(e);
     }
     
-    if (m_imageListeners.size() > 0) {
+    if (m_imageListeners.size() > 0 && !m_processingHeadlessEvents) {
       // configure the renderer (if necessary)
       setupOffscreenRenderer();
      
@@ -452,7 +461,7 @@ public class ModelPerformanceChart
       List<String> options = new ArrayList<String>();
       
       String additional = "-color=" + predictedI.classAttribute().name()
-        + " -hasErrors";
+        + ",-hasErrors";
       if (m_additionalOptions != null && m_additionalOptions.length() > 0) {
         additional += "," + m_additionalOptions;
         try {
@@ -541,6 +550,7 @@ public class ModelPerformanceChart
     
     // only process if we're not headless
     if (!GraphicsEnvironment.isHeadless()) {
+      m_processingHeadlessEvents = true;
       for (EventObject e : headless) {
         if (e instanceof ThresholdDataEvent) {
           acceptDataSet((ThresholdDataEvent)e);
@@ -549,6 +559,7 @@ public class ModelPerformanceChart
         }
       }
     }
+    m_processingHeadlessEvents = false;
   }
 
   /**
