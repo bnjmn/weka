@@ -86,7 +86,16 @@ public class DataVisualizer extends JPanel
 
   private VisualizePanel m_visPanel;
   
+  /** Events received and stored during headless execution */
   protected List<EventObject> m_headlessEvents;
+  
+  /** 
+   * Set to true when processing events stored during headless
+   * execution. Used to prevent sending ImageEvents to listeners
+   * a second time (since these will have been passed on during
+   * headless execution).
+   */
+  protected transient boolean m_processingHeadlessEvents = false;
   
   protected ArrayList<ImageListener> m_imageListeners = new ArrayList<ImageListener>();
   
@@ -243,7 +252,7 @@ public class DataVisualizer extends JPanel
       m_env = Environment.getSystemWide();
     }
     
-    if (m_imageListeners.size() > 0) {
+    if (m_imageListeners.size() > 0 && !m_processingHeadlessEvents) {
       // configure the renderer (if necessary)
       setupOffscreenRenderer();
      
@@ -362,12 +371,14 @@ public class DataVisualizer extends JPanel
   public void processHeadlessEvents(List<EventObject> headless) {
     // only process if we're not headless
     if (!java.awt.GraphicsEnvironment.isHeadless()) {
+      m_processingHeadlessEvents = true;
       for (EventObject e : headless) {
         if (e instanceof DataSetEvent) {
           acceptDataSet((DataSetEvent)e);
         }
       }
     }
+    m_processingHeadlessEvents = false;
   }
 
   /**
