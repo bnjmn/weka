@@ -475,7 +475,7 @@ public class AttributeSummarizer
       m_env = Environment.getSystemWide();
     }
     
-    if (m_imageListeners.size() > 0) {
+    if (m_imageListeners.size() > 0 && !m_processingHeadlessEvents) {
       // configure the renderer (if necessary)
       setupOffscreenRenderer();
      
