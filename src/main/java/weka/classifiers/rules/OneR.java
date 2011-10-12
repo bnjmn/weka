@@ -416,7 +416,11 @@ public class OneR
   public OneRRule newNumericRule(Attribute attr, Instances data,
                              int[] missingValueCounts) throws Exception {
 
-
+    // make a copy before sorting so that ties are treated consistently
+    // and aren't affected by sorting performed for any numeric
+    // attributes processed before this one
+    data = new Instances(data);
+    
     // ... can't be more than numInstances buckets
     int [] classifications = new int[data.numInstances()];
     double [] breakpoints = new double[data.numInstances()];
