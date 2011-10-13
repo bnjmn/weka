@@ -58,6 +58,7 @@ import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -451,15 +452,87 @@ public class ClustererPanel
     gbC.gridy = 5;     gbC.gridx = 0;  gbC.gridwidth = 2;
     gbL.setConstraints(m_StorePredictionsBut, gbC);
     p2.add(m_StorePredictionsBut);
+    
+    // Any launcher plugins
+    Vector pluginsVector = GenericObjectEditor.
+    getClassnames(ClustererPanelLaunchHandlerPlugin.class.getName());
+    JButton pluginBut = null;
+    if (pluginsVector.size() == 1) {
+      try {
+        // display a single button
+        String className = (String) pluginsVector.elementAt(0);
+        final ClustererPanelLaunchHandlerPlugin plugin = 
+          (ClustererPanelLaunchHandlerPlugin) Class.forName(className).newInstance();
+        if (plugin != null) {
+          plugin.setClustererPanel(this);
+          pluginBut = new JButton(plugin.getLaunchCommand());
+          pluginBut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              plugin.launch();
+            }
+          });
+        }
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    } else if (pluginsVector.size() > 1) {
+      // make a popup menu
+      int okPluginCount = 0;
+      final java.awt.PopupMenu pluginPopup = new java.awt.PopupMenu();
+
+      for (int i = 0; i < pluginsVector.size(); i++) {
+        String className = (String) (pluginsVector.elementAt(i));
+        try {
+          final ClustererPanelLaunchHandlerPlugin plugin = 
+            (ClustererPanelLaunchHandlerPlugin) Class.forName(className).newInstance();
+          
+          if (plugin == null) {
+            continue;
+          }
+          okPluginCount++;
+          plugin.setClustererPanel(this);
+          java.awt.MenuItem popI = new java.awt.MenuItem(plugin.getLaunchCommand());
+          popI.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              //pluginPopup.setVisible(false);
+              plugin.launch();
+            }
+          });
+          pluginPopup.add(popI);          
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+      
+      if (okPluginCount > 0) {
+        pluginBut = new JButton("Launchers...");
+        final JButton copyB = pluginBut;
+        copyB.add(pluginPopup);
+        pluginBut.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            pluginPopup.show(copyB, 0, 0);
+          }
+        });
+      } else {
+        pluginBut = null;
+      }
+    }
 
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(2, 1));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    ssButs.setLayout(new GridLayout(1, 2, 5, 5));
+    if (pluginBut == null) {
+      ssButs.setLayout(new GridLayout(1, 2, 5, 5));
+    } else {
+      ssButs.setLayout(new FlowLayout(FlowLayout.LEFT));
+    }
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
-
+    if (pluginBut != null) {
+      ssButs.add(pluginBut);
+    }
+    
     JPanel ib = new JPanel();
     ib.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ib.setLayout(new GridLayout(1, 1, 5, 5));
