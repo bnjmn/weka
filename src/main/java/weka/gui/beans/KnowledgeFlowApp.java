@@ -636,6 +636,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     protected String getToolTipText() {
       return m_toolTipText;
     }
+    
+    protected void setToolTipText(String tipText) {
+      m_toolTipText = tipText;
+    }
 
     /**
      * Returns the leaf label
@@ -1906,9 +1910,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 compClass.getDeclaredAnnotations();
               DefaultMutableTreeNode targetFolder = null;
               String category = null;
+              String tipText = null;
               for (Annotation ann : annotations) {
                 if (ann instanceof KFStep) {
                   category = ((KFStep)ann).category();
+                  tipText = ((KFStep)ann).toolTipText();
                   
                   // Does this category already exist?
                   Enumeration children = 
@@ -1930,6 +1936,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               
               JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "", 
                   scaledForTree);
+              if (tipText != null) {
+                leafData.setToolTipText(tipText);
+              }
               DefaultMutableTreeNode pluginLeaf = new DefaultMutableTreeNode(leafData);
               if (targetFolder != null) {
                 targetFolder.add(pluginLeaf);
