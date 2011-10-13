@@ -23,8 +23,10 @@
 package weka.gui.beans;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import weka.core.Attribute;
+import weka.core.Instance;
 import weka.core.Instances;
 
 /**
@@ -36,6 +38,37 @@ import weka.core.Instances;
  * @version $Revision$
  */
 public abstract class AbstractOffscreenChartRenderer implements OffscreenChartRenderer {
+  
+  /**
+   * Utility method that splits the supplied Instances out to a list
+   * of Instances, where each Instances object contains just the instances
+   * of one nominal class value. Does not check whether the supplied class
+   * index is a nominal attribute.
+   * 
+   * @param insts the instances to split
+   * @param classIndex the index of the nominal class attribute
+   * @return a list of instances
+   */
+  protected List<Instances> splitToClasses(Instances insts, int classIndex) {
+    List<Instances> newSeries = new ArrayList<Instances>();
+    
+    Instances[] classes = new Instances[insts.attribute(classIndex).numValues()];
+    for (int i = 0; i < classes.length; i++) {
+      classes[i] = new Instances(insts, 0);
+      classes[i].setRelationName(insts.attribute(classIndex).value(i));
+    }
+    
+    for (int i = 0; i < insts.numInstances(); i++) {
+      Instance current = insts.instance(i);
+      classes[(int)current.value(classIndex)].add((Instance)current.copy());
+    }
+    
+    for (int i = 0; i < classes.length; i++) {
+      newSeries.add(classes[i]);
+    }
+    
+    return newSeries;
+  }
     
   /**
    * Gets a short list of additional options (if any),
