@@ -199,7 +199,7 @@ public class ModelPerformanceChartCustomizer extends JPanel implements
       optsLab.setToolTipText(tipText);
     } else {
       try {
-        Object rendererO = PluginManager.getPluginInstance("weka.gui.beans.OffscreenChartRender",
+        Object rendererO = PluginManager.getPluginInstance("weka.gui.beans.OffscreenChartRenderer",
             renderer);
 
         if (rendererO != null) {
