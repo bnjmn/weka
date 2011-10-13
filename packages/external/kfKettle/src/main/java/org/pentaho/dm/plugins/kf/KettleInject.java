@@ -38,6 +38,7 @@ import weka.gui.beans.DataSourceListener;
 import weka.gui.beans.EventConstraints;
 import weka.gui.beans.InstanceEvent;
 import weka.gui.beans.InstanceListener;
+import weka.gui.beans.KFStep;
 import weka.gui.beans.TestSetEvent;
 import weka.gui.beans.TestSetListener;
 import weka.gui.beans.TestSetProducer;
@@ -52,6 +53,7 @@ import weka.gui.beans.TrainingSetProducer;
  * @see AbstractDataSource
  * @version $Revision$
  */
+@KFStep(category = "DataSources", toolTipText = "Accept input from Kettle")
 public class KettleInject 
   extends AbstractDataSource
   implements BeanCommon, 
