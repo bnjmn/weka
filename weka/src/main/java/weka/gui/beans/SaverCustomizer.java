@@ -464,7 +464,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     GridBagLayout gbLayout = new GridBagLayout();
     alignedP.setLayout(gbLayout);
     
-    JLabel prefixLab = new JLabel("Prefix for file name", SwingConstants.RIGHT);
+    final JLabel prefixLab = new JLabel("Prefix for file name", SwingConstants.RIGHT);
     prefixLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     GridBagConstraints gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -507,14 +507,19 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
       
       m_relationNameForFilename = new JCheckBox();
       m_relationNameForFilename.setSelected(m_dsSaver.getRelationNameForFilename());
+      if (m_dsSaver.getRelationNameForFilename()) {
+        prefixLab.setText("Prefix for file name");
+      } else {
+        prefixLab.setText("File name");
+      }
       m_relationNameForFilename.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if (m_relationNameForFilename.isSelected()) {
-            m_prefixText.setLabel("Prefix for file name");
-            m_fileChooser.setApproveButtonText("Select directory and prefix");
+            prefixLab.setText("Prefix for file name");
+//            m_fileChooser.setApproveButtonText("Select directory and prefix");
           } else {
-            m_prefixText.setLabel("File name");
-            m_fileChooser.setApproveButtonText("Select directory and filename");
+            prefixLab.setText("File name");
+  //          m_fileChooser.setApproveButtonText("Select directory and filename");
           }
         }
       });
