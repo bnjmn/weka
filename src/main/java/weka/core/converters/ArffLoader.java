@@ -878,6 +878,7 @@ public class ArffLoader
    */
   public void reset() throws IOException {
     m_structure = null;
+    m_ArffReader = null;
     setRetrieval(NONE);
     
     if (m_File != null && !(new File(m_File).isDirectory())) {
