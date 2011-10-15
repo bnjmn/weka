@@ -25,11 +25,18 @@ package weka.core.converters;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
 import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.Vector;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Writes to a destination in arff text format. <p/>
@@ -54,12 +61,125 @@ public class ArffSaver
   implements BatchConverter, IncrementalConverter {
 
   /** for serialization */
-  static final long serialVersionUID = 2223634248900042228L;    
+  static final long serialVersionUID = 2223634248900042228L;
+  
+  /** whether to compress the output */
+  protected boolean m_CompressOutput = false;
   
   /** Constructor */  
   public ArffSaver(){
   
       resetOptions();
+  }
+  
+  /**
+   * Returns an enumeration describing the available options.
+   * 
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector<Option>      result;
+    
+    result = new Vector<Option>();
+    
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement((Option)en.nextElement());
+    
+    result.addElement(
+        new Option(
+            "\tThe class index (first and last are valid as well).\n"
+            + "\t(default: last)",
+            "C", 1, "-C <class index>"));
+    
+    result.addElement(
+        new Option(
+            "\tCompresses the data (uses '" 
+            + XRFFLoader.FILE_EXTENSION_COMPRESSED 
+            + "' as extension instead of '" 
+            + XRFFLoader.FILE_EXTENSION + "')\n"
+            + "\t(default: off)",
+            "compress", 0, "-compress"));
+    
+    return result.elements();
+  }
+  
+  /**
+   * returns the options of the current setup
+   *
+   * @return            the current options
+   */
+  public String[] getOptions(){
+    int         i;
+    Vector<String>      result;
+    String[]    options;
+
+    result = new Vector<String>();
+
+    if (getCompressOutput())
+      result.add("-compress");
+    
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+
+    return (String[]) result.toArray(new String[result.size()]);          
+  }
+
+  /**
+   * Parses the options for this object. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -i &lt;the input file&gt;
+   *  The input file</pre>
+   * 
+   * <pre> -o &lt;the output file&gt;
+   *  The output file</pre>
+   *  
+   * <pre> -compress
+   *  Compresses the data (uses '.xrff.gz' as extension instead of '.xrff')
+   *  (default: off)</pre>
+   * 
+   <!-- options-end -->
+   *
+   * @param options     the options to use
+   * @throws Exception  if setting of options fails
+   */
+  public void setOptions(String[] options) throws Exception {
+
+    setCompressOutput(Utils.getFlag("compress", options));
+    
+    super.setOptions(options);
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String compressOutputTipText() {
+    return "Optional compression of the output data";
+  }
+  
+  /**
+   * Gets whether the output data is compressed.
+   *
+   * @return            true if the output data is compressed
+   */
+  public boolean getCompressOutput() {
+    return m_CompressOutput;
+  }
+
+  /**
+   * Sets whether to compress the output.
+   *
+   * @param value       if truee the output will be compressed
+   */
+  public void setCompressOutput(boolean value) {
+    m_CompressOutput = value;
   }
    
    
@@ -70,7 +190,7 @@ public class ArffSaver
    */
   public String globalInfo() {
     return "Writes to a destination that is in arff (attribute relation file format) "
-      +"format. ";
+      +"format. The data can be compressed with gzip in order to save space.";
   }
 
   
@@ -81,6 +201,41 @@ public class ArffSaver
    */
   public String getFileDescription() {
     return "Arff data files";
+  }
+  
+  /**
+   * Gets all the file extensions used for this type of file
+   *
+   * @return the file extensions
+   */
+  public String[] getFileExtensions() {
+    return new String[]{ArffLoader.FILE_EXTENSION, ArffLoader.FILE_EXTENSION_COMPRESSED};
+  }
+  
+  /** 
+   * Sets the destination file.
+   * 
+   * @param outputFile the destination file.
+   * @throws IOException throws an IOException if file cannot be set
+   */
+  public void setFile(File outputFile) throws IOException  {
+    if (outputFile.getAbsolutePath().endsWith(ArffLoader.FILE_EXTENSION_COMPRESSED))
+      setCompressOutput(true);
+    
+    super.setFile(outputFile);
+  }
+  
+  /** 
+   * Sets the destination output stream.
+   * 
+   * @param output              the output stream.
+   * @throws IOException        throws an IOException if destination cannot be set
+   */
+  public void setDestination(OutputStream output) throws IOException {
+    if (getCompressOutput())
+      super.setDestination(new GZIPOutputStream(output));
+    else
+      super.setDestination(output);
   }
 
   /**
