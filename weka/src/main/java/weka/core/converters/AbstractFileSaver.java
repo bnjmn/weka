@@ -66,7 +66,9 @@ public abstract class AbstractFileSaver
 
   /** The file extension of the destination file. */
   private String FILE_EXTENSION;
-
+  
+  /** the extension for compressed files */
+  private String FILE_EXTENSION_COMPRESSED = ".gz";
 
   /** The prefix for the filename (chosen in the GUI). */
   private String m_prefix;
@@ -420,12 +422,22 @@ public abstract class AbstractFileSaver
           if (relationName.length() == 0) {
             throw new IOException("[Saver] Empty filename!!");
           }
-            setFile(new File(m_dir + File.separator + relationName+ add + FILE_EXTENSION));
+          String concat = (m_dir + File.separator + relationName+ add + FILE_EXTENSION);
+          if (!concat.toLowerCase().endsWith(FILE_EXTENSION) && 
+              !concat.toLowerCase().endsWith(FILE_EXTENSION + FILE_EXTENSION_COMPRESSED)) {
+            concat += FILE_EXTENSION;
+          }
+          setFile(new File(concat));
         } else {
           if (relationName.length() > 0) {
             relationName = "_" + relationName;
           }
-           setFile(new File(m_dir + File.separator + m_prefix + relationName+ add + FILE_EXTENSION));
+          String concat = (m_dir + File.separator + m_prefix + relationName+ add);
+          if (!concat.toLowerCase().endsWith(FILE_EXTENSION) && 
+              !concat.toLowerCase().endsWith(FILE_EXTENSION + FILE_EXTENSION_COMPRESSED)) {
+            concat += FILE_EXTENSION;
+          }
+           setFile(new File(concat));
         }
       }catch(Exception ex){
         System.err.println("File prefix and/or directory could not have been set.");
