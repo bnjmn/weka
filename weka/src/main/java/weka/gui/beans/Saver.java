@@ -632,8 +632,8 @@ public class Saver
   
   private String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|"
-    + ((m_SaverTemplate instanceof OptionHandler) 
-        ? Utils.joinOptions(((OptionHandler)m_SaverTemplate).getOptions()) + "|"
+    + ((m_Saver instanceof OptionHandler) 
+        ? Utils.joinOptions(((OptionHandler)m_Saver).getOptions()) + "|"
             : "");
   }
   
