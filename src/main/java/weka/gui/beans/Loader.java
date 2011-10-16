@@ -605,7 +605,12 @@ public class Loader
           temp = env.substitute(temp);
         } catch (Exception ex) {}
         File tempF = new File(temp);
-        if (!tempF.isFile() && this.getClass().getClassLoader().getResource(temp) == null) {
+        
+        // forward slashes are platform independent for resources read from the
+        // classpath
+        String tempFixedPathSepForResource = temp.replace(File.separatorChar, '/');
+        if (!tempF.isFile() && 
+            this.getClass().getClassLoader().getResource(tempFixedPathSepForResource) == null) {
           ok = false;
         }
       }
