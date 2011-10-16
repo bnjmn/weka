@@ -16,12 +16,12 @@
    <object class="java.util.Vector" name="0">
       <object class="weka.gui.beans.BeanInstance" name="0">
          <object class="int" name="id" primitive="yes">0</object>
-         <object class="int" name="x" primitive="yes">73</object>
-         <object class="int" name="y" primitive="yes">194</object>
+         <object class="int" name="x" primitive="yes">69</object>
+         <object class="int" name="y" primitive="yes">314</object>
          <object class="java.lang.String" name="custom_name">ArffLoader</object>
          <object class="weka.gui.beans.Loader" name="bean">
             <object class="weka.core.converters.ArffLoader" name="wrappedAlgorithm">
-               <object class="java.lang.String" name="file"/>
+               <object class="java.lang.String" name="file">weka/gui/beans/templates/iris.arff</object>
                <object class="boolean" name="useRelativePath" primitive="yes">false</object>
             </object>
             <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
@@ -32,14 +32,11 @@
       </object>
       <object class="weka.gui.beans.BeanInstance" name="1">
          <object class="int" name="id" primitive="yes">1</object>
-         <object class="int" name="x" primitive="yes">393</object>
-         <object class="int" name="y" primitive="yes">74</object>
+         <object class="int" name="x" primitive="yes">391</object>
+         <object class="int" name="y" primitive="yes">91</object>
          <object class="java.lang.String" name="custom_name">EM</object>
          <object class="weka.gui.beans.Clusterer" name="bean">
             <object class="weka.clusterers.EM" name="wrappedAlgorithm">
-               <object class="int" name="seed" primitive="yes">100</object>
-               <object class="boolean" name="displayModelInOldFormat" primitive="yes">false</object>
-               <object class="boolean" name="debug" primitive="yes">false</object>
                <object array="yes" class="java.lang.String" name="options">
                   <object class="java.lang.String" name="0">-I</object>
                   <object class="java.lang.String" name="1">100</object>
@@ -50,16 +47,13 @@
                   <object class="java.lang.String" name="6">-S</object>
                   <object class="java.lang.String" name="7">100</object>
                </object>
-               <object class="double" name="minStdDev" primitive="yes">1.0E-6</object>
-               <object class="int" name="maxIterations" primitive="yes">100</object>
-               <object class="int" name="numClusters" primitive="yes">-1</object>
             </object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="2">
          <object class="int" name="id" primitive="yes">2</object>
-         <object class="int" name="x" primitive="yes">593</object>
-         <object class="int" name="y" primitive="yes">74</object>
+         <object class="int" name="x" primitive="yes">591</object>
+         <object class="int" name="y" primitive="yes">91</object>
          <object class="java.lang.String" name="custom_name">ClustererPerformanceEvaluator</object>
          <object class="weka.gui.beans.ClustererPerformanceEvaluator" name="bean">
             <object class="null" name="name" null="yes"/>
@@ -109,36 +103,6 @@
          <object class="java.lang.String" name="custom_name">MakeDensityBasedClusterer</object>
          <object class="weka.gui.beans.Clusterer" name="bean">
             <object class="weka.clusterers.MakeDensityBasedClusterer" name="wrappedAlgorithm">
-               <object class="weka.clusterers.SimpleKMeans" name="clusterer">
-                  <object class="int" name="numClusters" primitive="yes">3</object>
-                  <object class="weka.core.EuclideanDistance" name="distanceFunction">
-                     <object array="yes" class="java.lang.String" name="options">
-                        <object class="java.lang.String" name="0">-R</object>
-                        <object class="java.lang.String" name="1">first-last</object>
-                     </object>
-                     <object class="boolean" name="invertSelection" primitive="yes">false</object>
-                     <object class="java.lang.String" name="attributeIndices">first-last</object>
-                     <object class="null" name="instances" null="yes"/>
-                     <object class="boolean" name="dontNormalize" primitive="yes">false</object>
-                  </object>
-                  <object class="boolean" name="dontReplaceMissingValues" primitive="yes">false</object>
-                  <object class="boolean" name="preserveInstancesOrder" primitive="yes">false</object>
-                  <object class="int" name="seed" primitive="yes">10</object>
-                  <object class="boolean" name="fastDistanceCalc" primitive="yes">false</object>
-                  <object class="boolean" name="displayStdDevs" primitive="yes">false</object>
-                  <object class="int" name="maxIterations" primitive="yes">500</object>
-                  <object class="boolean" name="initializeUsingKMeansPlusPlusMethod" primitive="yes">false</object>
-                  <object array="yes" class="java.lang.String" name="options">
-                     <object class="java.lang.String" name="0">-N</object>
-                     <object class="java.lang.String" name="1">3</object>
-                     <object class="java.lang.String" name="2">-A</object>
-                     <object class="java.lang.String" name="3">weka.core.EuclideanDistance -R first-last</object>
-                     <object class="java.lang.String" name="4">-I</object>
-                     <object class="java.lang.String" name="5">500</object>
-                     <object class="java.lang.String" name="6">-S</object>
-                     <object class="java.lang.String" name="7">10</object>
-                  </object>
-               </object>
                <object array="yes" class="java.lang.String" name="options">
                   <object class="java.lang.String" name="0">-M</object>
                   <object class="java.lang.String" name="1">1.0E-6</object>
@@ -154,7 +118,6 @@
                   <object class="java.lang.String" name="11">-S</object>
                   <object class="java.lang.String" name="12">10</object>
                </object>
-               <object class="double" name="minStdDev" primitive="yes">1.0E-6</object>
             </object>
          </object>
       </object>
@@ -176,8 +139,8 @@
       </object>
       <object class="weka.gui.beans.BeanInstance" name="7">
          <object class="int" name="id" primitive="yes">7</object>
-         <object class="int" name="x" primitive="yes">68</object>
-         <object class="int" name="y" primitive="yes">280</object>
+         <object class="int" name="x" primitive="yes">64</object>
+         <object class="int" name="y" primitive="yes">400</object>
          <object class="weka.gui.beans.Note" name="bean">
             <object class="java.lang.String" name="noteText">Double click to &#10;configure with &#10;an ARFF dataset.</object>
             <object class="null" name="name" null="yes"/>
@@ -196,8 +159,8 @@
       </object>
       <object class="weka.gui.beans.BeanInstance" name="9">
          <object class="int" name="id" primitive="yes">9</object>
-         <object class="int" name="x" primitive="yes">420</object>
-         <object class="int" name="y" primitive="yes">164</object>
+         <object class="int" name="x" primitive="yes">418</object>
+         <object class="int" name="y" primitive="yes">181</object>
          <object class="weka.gui.beans.Note" name="bean">
             <object class="java.lang.String" name="noteText">EM clustering with&#10;cross-validation to&#10;choose the best&#10;number of clusters.</object>
             <object class="null" name="name" null="yes"/>
@@ -234,6 +197,41 @@
             <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
          </object>
       </object>
+      <object class="weka.gui.beans.BeanInstance" name="13">
+         <object class="int" name="id" primitive="yes">13</object>
+         <object class="int" name="x" primitive="yes">69</object>
+         <object class="int" name="y" primitive="yes">194</object>
+         <object class="java.lang.String" name="custom_name">Remove</object>
+         <object class="weka.gui.beans.Filter" name="bean">
+            <object class="weka.filters.unsupervised.attribute.Remove" name="filter">
+               <object array="yes" class="java.lang.String" name="options">
+                  <object class="java.lang.String" name="0">-R</object>
+                  <object class="java.lang.String" name="1">last</object>
+                  <object class="java.lang.String" name="2"/>
+               </object>
+            </object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="14">
+         <object class="int" name="id" primitive="yes">14</object>
+         <object class="int" name="x" primitive="yes">85</object>
+         <object class="int" name="y" primitive="yes">147</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Remove the class column</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="15">
+         <object class="int" name="id" primitive="yes">15</object>
+         <object class="int" name="x" primitive="yes">374</object>
+         <object class="int" name="y" primitive="yes">27</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">&lt;html&gt;&lt;b&gt;NOTE: this flow is configured to run out of the box.&lt;/b&gt; It loads an ARFF file as a resource from the classpath. If you want &#10;to use your own data, edit the ArffLoader.&lt;/html&gt;</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
    </object>
    <object class="java.util.Vector" name="1">
       <object class="weka.gui.beans.BeanConnection" name="0">
@@ -249,45 +247,51 @@
          <object class="boolean" name="hidden" primitive="yes">false</object>
       </object>
       <object class="weka.gui.beans.BeanConnection" name="2">
-         <object class="int" name="source_id" primitive="yes">0</object>
-         <object class="int" name="target_id" primitive="yes">4</object>
-         <object class="java.lang.String" name="eventname">dataSet</object>
+         <object class="int" name="source_id" primitive="yes">4</object>
+         <object class="int" name="target_id" primitive="yes">1</object>
+         <object class="java.lang.String" name="eventname">trainingSet</object>
          <object class="boolean" name="hidden" primitive="yes">false</object>
       </object>
       <object class="weka.gui.beans.BeanConnection" name="3">
          <object class="int" name="source_id" primitive="yes">4</object>
          <object class="int" name="target_id" primitive="yes">1</object>
-         <object class="java.lang.String" name="eventname">trainingSet</object>
+         <object class="java.lang.String" name="eventname">testSet</object>
          <object class="boolean" name="hidden" primitive="yes">false</object>
       </object>
       <object class="weka.gui.beans.BeanConnection" name="4">
          <object class="int" name="source_id" primitive="yes">4</object>
-         <object class="int" name="target_id" primitive="yes">1</object>
-         <object class="java.lang.String" name="eventname">testSet</object>
+         <object class="int" name="target_id" primitive="yes">5</object>
+         <object class="java.lang.String" name="eventname">trainingSet</object>
          <object class="boolean" name="hidden" primitive="yes">false</object>
       </object>
       <object class="weka.gui.beans.BeanConnection" name="5">
          <object class="int" name="source_id" primitive="yes">4</object>
          <object class="int" name="target_id" primitive="yes">5</object>
-         <object class="java.lang.String" name="eventname">trainingSet</object>
-         <object class="boolean" name="hidden" primitive="yes">false</object>
-      </object>
-      <object class="weka.gui.beans.BeanConnection" name="6">
-         <object class="int" name="source_id" primitive="yes">4</object>
-         <object class="int" name="target_id" primitive="yes">5</object>
          <object class="java.lang.String" name="eventname">testSet</object>
          <object class="boolean" name="hidden" primitive="yes">false</object>
       </object>
-      <object class="weka.gui.beans.BeanConnection" name="7">
+      <object class="weka.gui.beans.BeanConnection" name="6">
          <object class="int" name="source_id" primitive="yes">5</object>
          <object class="int" name="target_id" primitive="yes">6</object>
          <object class="java.lang.String" name="eventname">batchClusterer</object>
          <object class="boolean" name="hidden" primitive="yes">false</object>
       </object>
-      <object class="weka.gui.beans.BeanConnection" name="8">
+      <object class="weka.gui.beans.BeanConnection" name="7">
          <object class="int" name="source_id" primitive="yes">6</object>
          <object class="int" name="target_id" primitive="yes">3</object>
          <object class="java.lang.String" name="eventname">text</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="8">
+         <object class="int" name="source_id" primitive="yes">0</object>
+         <object class="int" name="target_id" primitive="yes">13</object>
+         <object class="java.lang.String" name="eventname">dataSet</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="9">
+         <object class="int" name="source_id" primitive="yes">13</object>
+         <object class="int" name="target_id" primitive="yes">4</object>
+         <object class="java.lang.String" name="eventname">dataSet</object>
          <object class="boolean" name="hidden" primitive="yes">false</object>
       </object>
    </object>

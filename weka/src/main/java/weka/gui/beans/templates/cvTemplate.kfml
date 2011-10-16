@@ -21,7 +21,7 @@
          <object class="java.lang.String" name="custom_name">ArffLoader</object>
          <object class="weka.gui.beans.Loader" name="bean">
             <object class="weka.core.converters.ArffLoader" name="wrappedAlgorithm">
-               <object class="java.lang.String" name="file"/>
+               <object class="java.lang.String" name="file">weka/gui/beans/templates/iris.arff</object>
                <object class="boolean" name="useRelativePath" primitive="yes">false</object>
             </object>
             <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
@@ -56,14 +56,7 @@
          <object class="int" name="y" primitive="yes">314</object>
          <object class="java.lang.String" name="custom_name">ClassifierPerformanceEvaluator</object>
          <object class="weka.gui.beans.ClassifierPerformanceEvaluator" name="bean">
-            <object class="null" name="name" null="yes"/>
-            <object class="weka.gui.beans.BeanVisual" name="visual">
-               <object class="null" name="name" null="yes"/>
-               <object class="java.lang.String" name="text">ClassifierPerformanceEvaluator</object>
-               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/ClassifierPerformanceEvaluator.gif</object>
-               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/ClassifierPerformanceEvaluator_animated.gif</object>
-            </object>
-            <object class="java.lang.String" name="customName">ClassifierPerformanceEvaluator</object>
+            <object class="int" name="executionSlots" primitive="yes">2</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="4">
@@ -90,18 +83,26 @@
          <object class="int" name="id" primitive="yes">5</object>
          <object class="int" name="x" primitive="yes">153</object>
          <object class="int" name="y" primitive="yes">314</object>
+         <object class="java.lang.String" name="custom_name">ModelPerformanceChart</object>
          <object class="weka.gui.beans.ModelPerformanceChart" name="bean">
-            <object class="null" name="name" null="yes"/>
-            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
-               <object class="boolean" name="designTime" primitive="yes">true</object>
-               <object class="null" name="beanContext" null="yes"/>
-            </object>
             <object class="weka.gui.beans.BeanVisual" name="visual">
                <object class="null" name="name" null="yes"/>
                <object class="java.lang.String" name="text">ModelPerformanceChart</object>
                <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/ModelPerformanceChart.gif</object>
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/ModelPerformanceChart_animated.gif</object>
             </object>
+            <object class="null" name="name" null="yes"/>
+            <object class="java.lang.String" name="offscreenRendererName">Weka Chart Renderer</object>
+            <object class="java.lang.String" name="offscreenHeight">400</object>
+            <object class="java.lang.String" name="customName">ModelPerformanceChart</object>
+            <object class="java.lang.String" name="offscreenYAxis"/>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+            <object class="java.lang.String" name="offscreenWidth">500</object>
+            <object class="java.lang.String" name="offscreenAdditionalOpts"/>
+            <object class="java.lang.String" name="offscreenXAxis"/>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="6">
@@ -126,8 +127,8 @@
       </object>
       <object class="weka.gui.beans.BeanInstance" name="8">
          <object class="int" name="id" primitive="yes">8</object>
-         <object class="int" name="x" primitive="yes">474</object>
-         <object class="int" name="y" primitive="yes">47</object>
+         <object class="int" name="x" primitive="yes">441</object>
+         <object class="int" name="y" primitive="yes">197</object>
          <object class="weka.gui.beans.Note" name="bean">
             <object class="java.lang.String" name="noteText">10-fold CV by default.&#10;Double click to alter&#10;the number of folds.</object>
             <object class="null" name="name" null="yes"/>
@@ -183,6 +184,16 @@
             </object>
             <object class="boolean" name="blockOnLastFold" primitive="yes">false</object>
             <object class="int" name="executionSlots" primitive="yes">2</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="12">
+         <object class="int" name="id" primitive="yes">12</object>
+         <object class="int" name="x" primitive="yes">377</object>
+         <object class="int" name="y" primitive="yes">30</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">&lt;html&gt;&lt;b&gt;NOTE: this flow is configured to run out of the box.&lt;/b&gt; It loads an ARFF file as a resource from the classpath. If you want &#10;to use your own data, edit the ArffLoader.&lt;/html&gt;</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
          </object>
       </object>
    </object>

@@ -605,7 +605,7 @@ public class Loader
           temp = env.substitute(temp);
         } catch (Exception ex) {}
         File tempF = new File(temp);
-        if (!tempF.isFile()) {
+        if (!tempF.isFile() && this.getClass().getClassLoader().getResource(temp) == null) {
           ok = false;
         }
       }
@@ -613,7 +613,6 @@ public class Loader
         entry = "$"+entry;
       }
     }
-    
     return entry;
   }
   
