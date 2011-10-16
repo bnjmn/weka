@@ -4033,7 +4033,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
 
         File tempF = new File(fileName);
-        if (!tempF.isFile()) {
+        if (!tempF.isFile() && 
+            this.getClass().getClassLoader().getResource(fileName) == null) {
           ok = false;
         }
       }
