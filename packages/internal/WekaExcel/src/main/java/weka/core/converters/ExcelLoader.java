@@ -16,7 +16,7 @@
 
 /*
  * ExcelLoader.java
- * Copyright (C) 2010 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2010-2011 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -361,11 +361,11 @@ public class ExcelLoader
 	m_Workbook = WorkbookFactory.create(m_sourceStream);
 	m_SheetIndex.setUpper(m_Workbook.getNumberOfSheets() - 1);
 	Sheet sheet = m_Workbook.getSheetAt(m_SheetIndex.getIndex());
-	if (sheet.getPhysicalNumberOfRows() == 0)
+	if (sheet.getLastRowNum() == 0)
 	  throw new IllegalStateException("No rows in sheet #" + m_SheetIndex.getSingleIndex());
 	ArrayList<Attribute> atts = new ArrayList<Attribute>();
 	Row row = sheet.getRow(0);
-	for (int i = 0; i < row.getPhysicalNumberOfCells(); i++) {
+	for (int i = 0; i < row.getLastCellNum(); i++) {
 	  Cell cell = row.getCell(i);
 	  switch (cell.getCellType()) {
 	    case Cell.CELL_TYPE_BLANK:
@@ -421,11 +421,11 @@ public class ExcelLoader
       boolean newHeader = false;
       int[] attType = new int[m_structure.numAttributes()];
       Sheet sheet = m_Workbook.getSheetAt(m_SheetIndex.getIndex());
-      for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+      for (int i = 1; i < sheet.getLastRowNum(); i++) {
 	Object[] dataRow = new Object[m_structure.numAttributes()];
 	data.add(dataRow);
 	Row row = sheet.getRow(i);
-	for (int n = 0; n < row.getPhysicalNumberOfCells(); n++) {
+	for (int n = 0; n < row.getLastCellNum(); n++) {
 	  Cell cell = row.getCell(n);
 	  switch (cell.getCellType()) {
 	    case Cell.CELL_TYPE_BLANK:
