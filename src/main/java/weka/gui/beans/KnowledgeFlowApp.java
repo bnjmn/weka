@@ -4033,8 +4033,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
 
         File tempF = new File(fileName);
+        String fileNameFixedPathSep = fileName.replace(File.separatorChar, '/');
         if (!tempF.isFile() && 
-            this.getClass().getClassLoader().getResource(fileName) == null) {
+            this.getClass().getClassLoader().getResource(fileNameFixedPathSep) == null) {
           ok = false;
         }
       }
