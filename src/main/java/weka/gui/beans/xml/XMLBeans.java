@@ -1602,10 +1602,12 @@ public class XMLBeans
     if ( (file == null) || (file.isDirectory()) ) {
       invokeWriteToXML(node, "", VAL_FILE);
     } else {
+      String withResourceSeparators = file.getPath().replace(File.pathSeparatorChar, '/');
       boolean notAbsolute = 
         (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath() ||
         (loader instanceof EnvironmentHandler 
-            && Environment.containsEnvVariables(file.getPath())));
+            && Environment.containsEnvVariables(file.getPath())) ||
+            this.getClass().getClassLoader().getResource(withResourceSeparators) != null);
       
       String path = (notAbsolute)
         ? file.getPath()
@@ -1682,8 +1684,10 @@ public class XMLBeans
       
       fl = new File(file);      
       // only test for existence if the path does not contain environment vars
-      // (trust that after they are resolved that everything is hunky dory)
-      if (containsEnv || fl.exists()) {
+      // (trust that after they are resolved that everything is hunky dory). Also 
+      // don't test if the file can be found as a resource in the classath
+      if (containsEnv || fl.exists() || 
+          this.getClass().getClassLoader().getResource(file) != null) {
         ((weka.core.converters.AbstractFileLoader) result).setSource(new File(file));
       } else {
         System.out.println("WARNING: The file '" + tempFile + "' does not exist!");
