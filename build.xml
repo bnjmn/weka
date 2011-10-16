@@ -101,6 +101,7 @@
          <include name="weka/**/*.txt"/>
          <include name="weka/**/*.xml"/>
          <include name="weka/**/*.kfml"/>
+         <include name="weka/**/*.arff"/>
          <include name="weka/**/DatabaseUtils.props.*"/>
          <include name="weka/gui/beans/README*"/>
          <include name="**/*.cup"/>
@@ -259,6 +260,8 @@
     <jar jarfile="${dist}/weka-src.jar" 
       basedir=".">
       <include name="*.xml"/>
+      <include name=".project.default"/>
+      <include name=".classpath.default"/>
       <include name="src/**/*.excludes"/>
       <include name="src/**/*.gif"/>
       <include name="src/**/*.png"/>
@@ -278,6 +281,7 @@
       <include name="src/**/*.default"/>
       <include name="src/**/*.cost"/>
       <include name="src/**/*.arff"/>
+      <include name="src/**/*.kfml"/>
       <include name="src/**/*.matrix"/>
       <include name="lib/**/*.jar"/>
       <include name="resources/**/*"/>
