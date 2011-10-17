@@ -190,7 +190,9 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
   private synchronized void block(boolean tf) {
     if (tf) {
       try {
-        wait();
+        if (m_numExecutionSlots > 1 && m_completed + m_failed < m_Classifiers.length) {
+          wait();
+        }
       } catch (InterruptedException ex) {
       }
     } else {
