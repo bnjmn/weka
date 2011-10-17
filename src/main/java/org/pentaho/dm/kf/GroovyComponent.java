@@ -55,6 +55,7 @@ import weka.gui.beans.IncrementalClassifierEvent;
 import weka.gui.beans.IncrementalClassifierListener;
 import weka.gui.beans.InstanceEvent;
 import weka.gui.beans.InstanceListener;
+import weka.gui.beans.KFStep;
 import weka.gui.beans.Startable;
 import weka.gui.beans.TestSetEvent;
 import weka.gui.beans.TestSetListener;
@@ -77,6 +78,7 @@ import weka.gui.beans.VisualizableErrorListener;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision $
  */
+@KFStep(category = "Scripting", toolTipText = "Implement a knowledge flow component using Groovy")
 public class GroovyComponent 
   extends JPanel 
   implements EnvironmentHandler, BeanCommon, Visible, EventConstraints,
