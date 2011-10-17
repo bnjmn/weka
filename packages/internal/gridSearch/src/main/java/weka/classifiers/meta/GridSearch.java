@@ -3481,7 +3481,9 @@ public class GridSearch
   protected synchronized void block(boolean doBlock) {
     if (doBlock) {
       try {
-        wait();
+        if (m_Completed + m_Failed < m_NumSetups && m_Failed == 0) {
+          wait();
+        }
       }
       catch (InterruptedException ex) {
 	// ignored
@@ -3583,7 +3585,12 @@ public class GridSearch
 	  allCached = false;
 	  newTask   = new EvaluationTask(
 	      this, m_Generator, inst, values, cv, m_Evaluation);
-	  m_ExecutorPool.execute(newTask);
+
+          // executor pool gets shut down and m_ExcecutorPool set to null as soon
+          // as a task fails, so only launch if there are no errors at this point.
+          if (m_Failed == 0) {
+            m_ExecutorPool.execute(newTask);
+          }
 	}
 	
 	// error encountered?
@@ -3593,8 +3600,9 @@ public class GridSearch
     }
 
     // wait for execution to finish
-    if (m_Completed + m_Failed < m_NumSetups)
+    //    if (m_Completed + m_Failed < m_NumSetups && m_Failed == 0) {
       block(true);
+      // }
 
     if (allCached) {
       log("All points were already cached - abnormal state!");
