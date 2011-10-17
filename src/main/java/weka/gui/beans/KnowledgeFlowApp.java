@@ -1922,9 +1922,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   
                   while (children.hasMoreElements()) {
                     Object child = children.nextElement();
-                    if (child instanceof DefaultMutableTreeNode) {
-                      targetFolder = (DefaultMutableTreeNode)child;
-                      if (targetFolder.getUserObject().toString().equals(category)) {
+                    if (child instanceof DefaultMutableTreeNode) {                      
+                      if (((DefaultMutableTreeNode)child).getUserObject().toString().equals(category)) {
+                        targetFolder = (DefaultMutableTreeNode)child;
                         break;
                       }
                     }
