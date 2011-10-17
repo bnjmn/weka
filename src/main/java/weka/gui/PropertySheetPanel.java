@@ -691,10 +691,13 @@ public class PropertySheetPanel extends JPanel
     ta.setText(m_HelpText.toString());
     ta.setCaretPosition(0);
     JDialog jdtmp;
-    if (PropertyDialog.getParentDialog(this) != null)
+    if (PropertyDialog.getParentDialog(this) != null) {
       jdtmp = new JDialog(PropertyDialog.getParentDialog(this), "Information");
-    else
+    } else if (PropertyDialog.getParentDialog(this) != null) {
       jdtmp = new JDialog(PropertyDialog.getParentFrame(this), "Information");
+    } else {
+      jdtmp = new JDialog(PropertyDialog.getParentDialog(m_aboutPanel), "Information");
+    }
     final JDialog jd = jdtmp;
     jd.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
