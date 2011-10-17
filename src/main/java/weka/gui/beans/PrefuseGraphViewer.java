@@ -52,6 +52,7 @@ import javax.swing.JPanel;
  * @author Mark Hall
  * @version $Revision$
  */
+@KFStep(category = "Visualization", toolTipText = "Visualize trees and graphs using the prefuse tool")
 public class PrefuseGraphViewer 
   extends JPanel
   implements Visible, GraphListener,
