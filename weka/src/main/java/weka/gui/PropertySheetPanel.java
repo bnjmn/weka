@@ -693,7 +693,7 @@ public class PropertySheetPanel extends JPanel
     JDialog jdtmp;
     if (PropertyDialog.getParentDialog(this) != null) {
       jdtmp = new JDialog(PropertyDialog.getParentDialog(this), "Information");
-    } else if (PropertyDialog.getParentDialog(this) != null) {
+    } else if (PropertyDialog.getParentFrame(this) != null) {
       jdtmp = new JDialog(PropertyDialog.getParentFrame(this), "Information");
     } else {
       jdtmp = new JDialog(PropertyDialog.getParentDialog(m_aboutPanel), "Information");
