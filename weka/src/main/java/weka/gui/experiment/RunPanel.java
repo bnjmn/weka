@@ -199,9 +199,9 @@ public class RunPanel
 	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Fourth"));
 	  }
 	  if (errors == 1) {
-	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Fifth_Front") + errors + Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Fifth_End"));
+	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Fifth_Front") + errors + " " + Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Fifth_End"));
 	  } else {
-	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Sixth_Front") + errors + Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Sixth_End"));
+	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Sixth_Front") + errors + " " + Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Sixth_End"));
 	  }
 	  statusMessage(NOT_RUNNING);
 	} else {
