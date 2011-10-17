@@ -6,10 +6,10 @@
 PackageName=WekaExcel
 
 # Version (required)
-Version=1.0.1
+Version=1.0.2
 
 #Date (year-month-day)
-Date=2010-12-13
+Date=2011-10-18
 
 # Title (required)
 Title=WEKA MS Excel loader/saver
@@ -30,10 +30,10 @@ License=GPL 2.0
 Description=WekaExcel adds support to directory read from and write to spreadsheets in Microsoft Excel 97-2007 format. It uses Apache POI (http://poi.apache.org/), specifically POI-HSSF and POI-XSSF (http://poi.apache.org/spreadsheet/), in order to read/write Excel spreadsheets.
 
 # Changes in this release
-Changes=This release fixes a bug that affected the loading of .xlsx files
+Changes=This release fixes a bug where not all the rows in a spreadsheet were getting read.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/WekaExcel1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/WekaExcel1.0.2.zip?download
 
 # URL for further information
 URL=http://poi.apache.org/spreadsheet/how-to.html
