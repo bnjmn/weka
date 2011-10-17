@@ -44,6 +44,7 @@ import javax.swing.JPanel;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision 1.0 $
  */
+@KFStep(category = "PMML", toolTipText = "Scoring using a PMML model")
 public class PMMLClassifierScoring extends JPanel 
   implements BeanCommon, EventConstraints, 
   InstanceListener, TestSetListener, Serializable, 
