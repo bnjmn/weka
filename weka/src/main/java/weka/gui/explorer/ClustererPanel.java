@@ -710,6 +710,9 @@ public class ClustererPanel
       m_ignoreBut.setEnabled(false);
       m_RunThread = new Thread() {
 	public void run() {
+	  // for timing
+          long trainTimeStart = 0, trainTimeElapsed = 0;
+	  
 	  // Copy the current state of things
 	  m_Log.statusMessage(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_Log_StatusMessage_Text_First"));
 	  Instances inst = new Instances(m_Instances);
@@ -869,14 +872,19 @@ public class ClustererPanel
 	    // Build the model and output it.
 	    m_Log.statusMessage(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_Log_StatusMessage_Second"));
 
+	    trainTimeStart = System.currentTimeMillis();
 	    // remove the class attribute (if set) and build the clusterer
 	    clusterer.buildClusterer(removeClass(trainInst));
+	    trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
 	    
-	    if (testMode == 2) {
+//	    if (testMode == 2) {
 	      outBuff.append(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_OutBuffer_Text_TwentySecond"));
 	    
 	      outBuff.append(clusterer.toString() + '\n');
-	    }
+	      outBuff.append(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_OutBuffer_Text_TimeTakenFull") +
+                  Utils.doubleToString(trainTimeElapsed / 1000.0,2)
+                  + " " + Messages.getInstance().getString("ClassifierPanel_StartClassifier_OutBuffer_Text_TwentyNineth"));
+//	    }
 	    m_History.updateResult(name);
 	    if (clusterer instanceof Drawable) {
 	      try {
@@ -893,7 +901,7 @@ public class ClustererPanel
 	    switch (testMode) {
 	      case 3: case 5: // Test on training
 	      m_Log.statusMessage(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_Log_StatusMessage_Third"));
-	      eval.evaluateClusterer(trainInst);
+	      eval.evaluateClusterer(trainInst, "", false);
 	      predData = setUpVisualizableInstances(inst,eval);
 	      outBuff.append(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_OutBuffer_Text_TwentySecond"));
 	      break;
@@ -908,11 +916,18 @@ public class ClustererPanel
 	      Instances test = new Instances(trainInst, trainSize, testSize);
 	      Instances testVis = new Instances(inst, trainSize, testSize);
 	      m_Log.statusMessage(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_Log_StatusMessage_Fifth"));
+	      trainTimeStart = System.currentTimeMillis();
 	      clusterer.buildClusterer(train);
+	      trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
+	      
 	      m_Log.statusMessage(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_Log_StatusMessage_Sixth"));
-	      eval.evaluateClusterer(test);
+	      eval.evaluateClusterer(test, "", false);
 	      predData = setUpVisualizableInstances(testVis, eval);
 	      outBuff.append(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_OutBuffer_Text_TwentyThird"));
+	      outBuff.append(clusterer.toString() + '\n');
+              outBuff.append(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_OutBuffer_Text_TimeTakenPercentage") +
+                  Utils.doubleToString(trainTimeElapsed / 1000.0,2)
+                  + " " + Messages.getInstance().getString("ClassifierPanel_StartClassifier_OutBuffer_Text_TwentyNineth"));
 	      break;
 		
 	      case 4: // Test on user split
@@ -921,7 +936,7 @@ public class ClustererPanel
 	      if (!m_ignoreKeyList.isSelectionEmpty()) {
 		userTestT = removeIgnoreCols(userTestT);
 	      }
-	      eval.evaluateClusterer(userTestT);
+	      eval.evaluateClusterer(userTestT, "", false);
 	      predData = setUpVisualizableInstances(userTest, eval);
 	      outBuff.append(Messages.getInstance().getString("ClustererPanel_StartClusterer_Run_OutBuffer_Text_TwentyFourth"));
 	      break;
