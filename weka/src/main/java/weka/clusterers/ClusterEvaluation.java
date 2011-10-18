@@ -191,6 +191,22 @@ public class ClusterEvaluation
   public void evaluateClusterer(Instances test) throws Exception {
     evaluateClusterer(test, "");
   }
+  
+  /**
+   * Evaluate the clusterer on a set of instances. Calculates clustering
+   * statistics and stores cluster assigments for the instances in
+   * m_clusterAssignments
+   * 
+   * @param test the set of instances to cluster
+   * @param testFileName the name of the test file for incremental testing, 
+   * if "" or null then not used
+   * 
+   * @throws Exception if something goes wrong
+   */
+  public void evaluateClusterer(Instances test, String testFileName) 
+    throws Exception {
+    evaluateClusterer(test, testFileName, true);
+  }
 
   /**
    * Evaluate the clusterer on a set of instances. Calculates clustering
@@ -200,9 +216,13 @@ public class ClusterEvaluation
    * @param test the set of instances to cluster
    * @param testFileName the name of the test file for incremental testing, 
    * if "" or null then not used
+   * @param outputModel true if the clustering model is to be output as well
+   * as the stats
+   * 
    * @throws Exception if something goes wrong
    */
-  public void evaluateClusterer(Instances test, String testFileName) throws Exception {
+  public void evaluateClusterer(Instances test, String testFileName, 
+      boolean outputModel) throws Exception {
     int i = 0;
     int cnum;
     double loglk = 0.0;
@@ -280,7 +300,9 @@ public class ClusterEvaluation
     }
     int numInstFieldWidth = (int)((Math.log(clusterAssignments.size())/Math.log(10))+1);
     
-    m_clusteringResults.append(m_Clusterer.toString());
+    if (outputModel) {
+      m_clusteringResults.append(m_Clusterer.toString());
+    }
     m_clusteringResults.append("Clustered Instances\n\n");
     int clustFieldWidth = (int)((Math.log(cc)/Math.log(10))+1);
     for (i = 0; i < cc; i++) {
