@@ -582,8 +582,8 @@ public class ModelPerformanceChart
    * Use the default appearance for this bean
    */
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
-		       BeanVisual.ICON_PATH+"DefaultDataVisualizer_animated.gif");
+    m_visual.loadIcons(BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
+        BeanVisual.ICON_PATH+"ModelPerformanceChart_animated.gif");
   }
 
   /**
