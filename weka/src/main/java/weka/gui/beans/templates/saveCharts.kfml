@@ -184,8 +184,8 @@
             <object class="weka.gui.beans.BeanVisual" name="visual">
                <object class="null" name="name" null="yes"/>
                <object class="java.lang.String" name="text">ModelPerformanceChart</object>
-               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/DefaultDataVisualizer.gif</object>
-               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/DefaultDataVisualizer_animated.gif</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/ModelPerformanceChart.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/ModelPerformanceChart_animated.gif</object>
             </object>
             <object class="null" name="name" null="yes"/>
             <object class="java.lang.String" name="offscreenRendererName">Weka Chart Renderer</object>
@@ -210,8 +210,8 @@
             <object class="weka.gui.beans.BeanVisual" name="visual">
                <object class="null" name="name" null="yes"/>
                <object class="java.lang.String" name="text">ModelPerformanceChart2</object>
-               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/DefaultDataVisualizer.gif</object>
-               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/DefaultDataVisualizer_animated.gif</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/ModelPerformanceChart.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/ModelPerformanceChart_animated.gif</object>
             </object>
             <object class="null" name="name" null="yes"/>
             <object class="java.lang.String" name="offscreenRendererName">Weka Chart Renderer</object>
