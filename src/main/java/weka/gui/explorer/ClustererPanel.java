@@ -694,6 +694,9 @@ public class ClustererPanel
       m_ignoreBut.setEnabled(false);
       m_RunThread = new Thread() {
 	public void run() {
+	  // for timing
+          long trainTimeStart = 0, trainTimeElapsed = 0;
+          
 	  // Copy the current state of things
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);
@@ -855,13 +858,18 @@ public class ClustererPanel
 	    m_Log.statusMessage("Building model on training data...");
 
 	    // remove the class attribute (if set) and build the clusterer
+	    trainTimeStart = System.currentTimeMillis();
 	    clusterer.buildClusterer(removeClass(trainInst));
+	    trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
 	    
-	    if (testMode == 2) {
+//	    if (testMode == 2) {
 	      outBuff.append("\n=== Clustering model (full training set) ===\n\n");
 	    
 	      outBuff.append(clusterer.toString() + '\n');
-	    }
+	      outBuff.append("\nTime taken to build model (full training data) : "
+	          + Utils.doubleToString(trainTimeElapsed / 1000.0,2)
+	          + " seconds\n\n");
+//	    }
 	    m_History.updateResult(name);
 	    if (clusterer instanceof Drawable) {
 	      try {
@@ -878,7 +886,7 @@ public class ClustererPanel
 	    switch (testMode) {
 	      case 3: case 5: // Test on training
 	      m_Log.statusMessage("Clustering training data...");
-	      eval.evaluateClusterer(trainInst);
+	      eval.evaluateClusterer(trainInst, "", false);
 	      plotInstances.setInstances(inst);
 	      plotInstances.setClusterEvaluation(eval);
 	      outBuff.append("=== Model and evaluation on training set ===\n\n");
@@ -894,12 +902,18 @@ public class ClustererPanel
 	      Instances test = new Instances(trainInst, trainSize, testSize);
 	      Instances testVis = new Instances(inst, trainSize, testSize);
 	      m_Log.statusMessage("Building model on training split...");
+	      trainTimeStart = System.currentTimeMillis();
 	      clusterer.buildClusterer(train);
+	      trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
 	      m_Log.statusMessage("Evaluating on test split...");
-	      eval.evaluateClusterer(test);
+	      eval.evaluateClusterer(test, "", false);
 	      plotInstances.setInstances(testVis);
 	      plotInstances.setClusterEvaluation(eval);
 	      outBuff.append("=== Model and evaluation on test split ===\n");
+	      outBuff.append(clusterer.toString() + "\n");
+	      outBuff.append("\nTime taken to build model (percentage split) : "
+                  + Utils.doubleToString(trainTimeElapsed / 1000.0,2)
+                  + " seconds\n\n");
 	      break;
 		
 	      case 4: // Test on user split
@@ -908,10 +922,10 @@ public class ClustererPanel
 	      if (!m_ignoreKeyList.isSelectionEmpty()) {
 		userTestT = removeIgnoreCols(userTestT);
 	      }
-	      eval.evaluateClusterer(userTestT);
+	      eval.evaluateClusterer(userTestT, "", false);
 	      plotInstances.setInstances(userTest);
 	      plotInstances.setClusterEvaluation(eval);
-	      outBuff.append("=== Model and evaluation on test set ===\n");
+	      outBuff.append("=== Evaluation on test set ===\n");
 	      break;
 
 	      default:
