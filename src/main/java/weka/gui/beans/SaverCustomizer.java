@@ -122,21 +122,6 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   /** Constructor */  
   public SaverCustomizer() {
 
-    try {
-      m_SaverEditor.addPropertyChangeListener(
-          new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent e) {
-              repaint();
-              if (m_dsSaver != null) {
-                System.err.println("Property change!!");
-                m_dsSaver.setSaverTemplate(m_dsSaver.getSaverTemplate());
-              }
-            }
-          });
-      repaint();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
     setLayout(new BorderLayout());
     m_fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
     m_fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
