@@ -1621,6 +1621,11 @@ public class XMLBeans
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
     }
     
+    if (loader instanceof weka.core.OptionHandler) {
+      String[] opts = ((weka.core.OptionHandler)loader).getOptions();
+      invokeWriteToXML(node, opts, VAL_OPTIONS);
+    }
+    
     return node;
   }
 
