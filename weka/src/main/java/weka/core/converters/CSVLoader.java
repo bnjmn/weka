@@ -341,7 +341,7 @@ public class CSVLoader
   }
 
   /**
-   * Gets the current settings of the Classifier.
+   * Gets the current settings of the Loader.
    *
    * @return an array of strings suitable for passing to setOptions
    */
@@ -373,6 +373,9 @@ public class CSVLoader
 
     result.add("-M");
     result.add(getMissingValue());
+    
+    result.add("-F");
+    result.add(getFieldSeparator());
     
     return result.toArray(new String[result.size()]);
   }
