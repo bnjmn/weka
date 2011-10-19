@@ -1778,6 +1778,11 @@ public class XMLBeans
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
     }
     
+    if (saver instanceof weka.core.OptionHandler) {
+      String[] opts = ((weka.core.OptionHandler)saver).getOptions();
+      invokeWriteToXML(node, opts, VAL_OPTIONS);
+    }
+    
     return node;
   }
 
