@@ -119,15 +119,13 @@ public class LoaderCustomizer
 	}
 	}); */
 
-    try {
-      /*      m_LoaderEditor.setClassType(weka.core.converters.Loader.class);
-	      m_LoaderEditor.setValue(new weka.core.converters.ArffLoader()); */
+    /*try {
       m_LoaderEditor.addPropertyChangeListener(
 	  new PropertyChangeListener() {
 	      public void propertyChange(PropertyChangeEvent e) {
 		repaint();
 		if (m_dsLoader != null) {
-		  System.err.println("Property change!!");
+		  //System.err.println("Property change!!");
 		  m_dsLoader.setLoader(m_dsLoader.getLoader());
 		}
 	      }
@@ -135,7 +133,7 @@ public class LoaderCustomizer
       repaint();
     } catch (Exception ex) {
       ex.printStackTrace();
-    }
+    }*/
 
     setLayout(new BorderLayout());
     //    add(m_fileEditor.getCustomEditor(), BorderLayout.CENTER);
