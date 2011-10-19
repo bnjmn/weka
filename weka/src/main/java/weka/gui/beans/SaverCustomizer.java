@@ -46,6 +46,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 
@@ -662,9 +663,19 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     JPanel holder2 = new JPanel();
     holder2.setLayout(new BorderLayout());
     holder2.add(alignedP, BorderLayout.NORTH);
-    holder2.add(butHolder, BorderLayout.SOUTH);
     
-    add(holder2, BorderLayout.SOUTH);
+    JPanel optionsHolder = new JPanel();
+    optionsHolder.setLayout(new BorderLayout());
+    optionsHolder.setBorder(BorderFactory.createTitledBorder("Other options"));
+
+    optionsHolder.add(m_SaverEditor, BorderLayout.SOUTH);
+    JScrollPane scroller = new JScrollPane(optionsHolder);
+    //holder2.add(scroller, BorderLayout.CENTER);
+    
+    //holder2.add(butHolder, BorderLayout.SOUTH);
+    innerPanel.add(holder2, BorderLayout.SOUTH);
+    add(scroller, BorderLayout.CENTER);
+    add(butHolder, BorderLayout.SOUTH);
   }
 
   /**
