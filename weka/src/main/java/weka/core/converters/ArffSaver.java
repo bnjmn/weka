@@ -95,9 +95,9 @@ public class ArffSaver
     result.addElement(
         new Option(
             "\tCompresses the data (uses '" 
-            + XRFFLoader.FILE_EXTENSION_COMPRESSED 
+            + ArffLoader.FILE_EXTENSION_COMPRESSED 
             + "' as extension instead of '" 
-            + XRFFLoader.FILE_EXTENSION + "')\n"
+            + ArffLoader.FILE_EXTENSION + "')\n"
             + "\t(default: off)",
             "compress", 0, "-compress"));
     
