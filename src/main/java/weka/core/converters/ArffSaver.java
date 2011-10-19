@@ -84,13 +84,7 @@ public class ArffSaver
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
-    
-    result.addElement(
-        new Option(
-            "\tThe class index (first and last are valid as well).\n"
-            + "\t(default: last)",
-            "C", 1, "-C <class index>"));
+      result.addElement((Option)en.nextElement());    
     
     result.addElement(
         new Option(
