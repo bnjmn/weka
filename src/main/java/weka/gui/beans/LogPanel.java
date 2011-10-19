@@ -211,7 +211,7 @@ public class LogPanel extends JPanel implements Logger {
       }
       
       // See if there are any step parameters to extract
-      if (message.indexOf('|') > 0) {
+      if (message.indexOf('|') >= 0) {
         stepParameters = message.substring(0, message.indexOf('|'));
         stepStatus = message.substring(message.indexOf('|') + 1, 
             message.length());
