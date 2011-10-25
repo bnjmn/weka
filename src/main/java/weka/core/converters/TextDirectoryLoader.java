@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.LinkedList;
 import java.util.Vector;
 
 import weka.core.Attribute;
@@ -61,6 +63,13 @@ import weka.core.Utils;
  *  The directory to work on.
  *  (default: current directory)</pre>
  * 
+ * <pre> -charset &lt;charset name&gt;
+ *  The character set to use, e.g UTF-8.
+ *  (default: use the default character set)</pre>
+ * 
+ * <pre> -R
+ *  Retain all string attribute values when reading incrementally.</pre>
+ * 
  <!-- options-end -->
  *
  * Based on code from the TextDirectoryToArff tool:
@@ -78,7 +87,8 @@ import weka.core.Utils;
  */
 public class TextDirectoryLoader
   extends AbstractLoader
-  implements BatchConverter, OptionHandler {
+  implements BatchConverter, IncrementalConverter, 
+    OptionHandler {
   
   /** for serialization */
   private static final long serialVersionUID = 2592118773712247647L;
@@ -100,6 +110,12 @@ public class TextDirectoryLoader
    * default charset). 
    */
   protected String m_charSet = "";
+  
+  /**
+   * If false, and reading incrementally, then only one string value (the current
+   * one) will be available in the header for each String attribute
+   */
+  protected boolean m_retainStringValues = false;
   
   /**
    * default constructor
@@ -150,6 +166,10 @@ public class TextDirectoryLoader
     		"(default: use the default character set)", "charset", 1, 
     		"-charset <charset name>"));
     
+    result.add(new Option(
+        "\tRetain all string attribute values when reading " +
+        "incrementally.", "R", 0, "-R"));
+    
     return  result.elements();
   }
   
@@ -171,6 +191,13 @@ public class TextDirectoryLoader
    *  The directory to work on.
    *  (default: current directory)</pre>
    * 
+   * <pre> -charset &lt;charset name&gt;
+   *  The character set to use, e.g UTF-8.
+   *  (default: use the default character set)</pre>
+   * 
+   * <pre> -R
+   *  Retain all string attribute values when reading incrementally.</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the options
@@ -188,6 +215,8 @@ public class TextDirectoryLoader
     if (charSet.length() > 0) {
       m_charSet = charSet;
     }
+    
+    setRetainStringValues(Utils.getFlag('R', options));
   }
   
   /** 
@@ -210,6 +239,10 @@ public class TextDirectoryLoader
     if (m_charSet != null && m_charSet.length() > 0) {
       options.add("-charset");
       options.add(m_charSet);
+    }
+    
+    if (getRetainStringValues()) {
+      options.add("-R");
     }
     
     return (String[]) options.toArray(new String[options.size()]);
@@ -331,10 +364,46 @@ public class TextDirectoryLoader
   }
   
   /**
+   * Set whether to retain all string values for string in the header
+   * when reading incrementally
+   * 
+   * @param r true if all string values are to be stored (as opposed to
+   * just the current one).
+   */
+  public void setRetainStringValues(boolean r) {
+    m_retainStringValues = r;
+  }
+  
+  /**
+   * Get whether to retain all string values for string in the header
+   * when reading incrementally
+   * 
+   * @return true if all string values are to be stored (as opposed to
+   * just the current one).
+   */
+  public boolean getRetainStringValues() {
+    return m_retainStringValues;
+  }
+  
+  /**
+   * the tip text for this property
+   * 
+   * @return            the tip text
+   */
+  public String retainStringValuesTipText() {
+    return "When reading incrementally, whether to retain all " +
+                "values for string attributes. When set to false " +
+                "only the values for string attributes in the currently " +
+                "read instance will be held in memory.";
+  }
+  
+  /**
    * Resets the loader ready to read a new data set
    */
   public void reset() {
     m_structure = null;
+    m_filesByClass = null;
+    m_lastClassDir = 0;
     setRetrieval(NONE);
   }
   
@@ -466,6 +535,9 @@ public class TextDirectoryLoader
     return data;
   }
   
+  protected List<LinkedList<String>> m_filesByClass;
+  protected int m_lastClassDir = 0;
+  
   /**
    * TextDirectoryLoader is unable to process a data set incrementally.
    *
@@ -475,7 +547,101 @@ public class TextDirectoryLoader
    * set incrementally.
    */
   public Instance getNextInstance(Instances structure) throws IOException {
-    throw new IOException("TextDirectoryLoader can't read data sets incrementally.");
+    //throw new IOException("TextDirectoryLoader can't read data sets incrementally.");
+
+    String directoryPath = getDirectory().getAbsolutePath();
+    Attribute classAtt = structure.classAttribute();
+    if (m_filesByClass == null) {
+      m_filesByClass = new ArrayList<LinkedList<String>>();
+      for (int i = 0; i < classAtt.numValues(); i++) {
+        File classDir = new File(directoryPath + File.separator 
+            + classAtt.value(i));
+        String[] files = classDir.list();
+        LinkedList<String> classDocs = new LinkedList<String>();
+        for (String cd : files) {
+          File txt = new File(directoryPath + File.separator + 
+              classAtt.value(i) + File.separator + cd);
+          if (txt.isFile()) {
+            classDocs.add(cd);
+          }
+        }
+        m_filesByClass.add(classDocs);
+      }
+    }
+
+    // cycle through the classes    
+    int count = 0;
+    LinkedList<String> classContents = m_filesByClass.get(m_lastClassDir);
+    boolean found = (classContents.size() > 0);
+    while (classContents.size() == 0) {
+      m_lastClassDir++;
+      count++;
+      if (m_lastClassDir == structure.classAttribute().numValues()) {
+        m_lastClassDir = 0;
+      }
+      classContents = m_filesByClass.get(m_lastClassDir);
+      if (classContents.size() > 0) {
+        found = true; // we have an instance we can create
+        break;
+      }
+      if (count == structure.classAttribute().numValues()) {
+        break; // must be finished
+      }        
+    }       
+
+    if (found) {
+      String nextDoc = classContents.poll();
+      File txt = new File(directoryPath + File.separator + 
+          classAtt.value(m_lastClassDir) + File.separator + nextDoc);
+
+      BufferedReader is;
+      if (m_charSet == null || m_charSet.length() == 0) {
+        is = new BufferedReader(new InputStreamReader(new FileInputStream(txt)));
+      } else {
+        is = new BufferedReader(new InputStreamReader(new FileInputStream(txt), m_charSet));
+      }
+      StringBuffer txtStr = new StringBuffer();
+      int c;
+      while ((c = is.read()) != -1) {
+        txtStr.append((char) c);
+      }
+
+      double[] newInst = null;
+      if (m_OutputFilename)
+        newInst = new double[3];
+      else
+        newInst = new double[2];
+
+      if (getRetainStringValues()) {
+        newInst[0] = (double) structure.attribute(0).
+          addStringValue(txtStr.toString());
+      } else {
+        newInst[0] = 0;
+        structure.attribute(0).setStringValue(txtStr.toString());
+      }
+      if (m_OutputFilename) {
+        if (getRetainStringValues()) {
+          newInst[1] = (double) structure.attribute(1).
+            addStringValue(txt.getAbsolutePath());
+        } else {
+          newInst[1] = 0;
+          structure.attribute(1).setStringValue(txt.getAbsolutePath());
+        }
+      }
+      newInst[structure.classIndex()] = (double) m_lastClassDir;
+      Instance inst = new DenseInstance(1.0, newInst);
+      inst.setDataset(structure);
+      is.close();
+      
+      m_lastClassDir++;
+      if (m_lastClassDir == structure.classAttribute().numValues()) {
+        m_lastClassDir = 0;
+      }
+
+      return inst;
+    } else {        
+      return null; // done!
+    }
   }
   
   /**
@@ -497,7 +663,16 @@ public class TextDirectoryLoader
       try {
 	TextDirectoryLoader loader = new TextDirectoryLoader();
 	loader.setOptions(args);
-	System.out.println(loader.getDataSet());
+	//System.out.println(loader.getDataSet());
+	Instances structure = loader.getStructure();
+	System.out.println(structure);
+	Instance temp;
+	do {
+	  temp = loader.getNextInstance(structure);
+	  if (temp != null) {
+	    System.out.println(temp);
+	  }
+	} while (temp != null);
       } 
       catch (Exception e) {
 	e.printStackTrace();
@@ -521,3 +696,4 @@ public class TextDirectoryLoader
     }
   }
 }
+
