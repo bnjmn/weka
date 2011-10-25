@@ -35,7 +35,7 @@ import java.util.Properties;
 import java.util.List;
 import java.util.ArrayList;
 
-/**
+/** 
  * Class for handling an attribute. Once an attribute has been created,
  * it can't be changed. <p>
  *
@@ -52,21 +52,21 @@ import java.util.ArrayList;
  *         nominal values. Usually used in text classification.
  *    </li>
  *    <li> date: <br/>
- *         This type of attribute represents a date, internally represented as
- *         floating-point number storing the milliseconds since January 1,
+ *         This type of attribute represents a date, internally represented as 
+ *         floating-point number storing the milliseconds since January 1, 
  *         1970, 00:00:00 GMT. The string representation of the date must be
  *         <a href="http://www.iso.org/iso/en/prods-services/popstds/datesandtime.html" target="_blank">
  *         ISO-8601</a> compliant, the default is <code>yyyy-MM-dd'T'HH:mm:ss</code>.
  *    </li>
  *    <li> relational: <br/>
- *         This type of attribute can contain other attributes and is, e.g.,
+ *         This type of attribute can contain other attributes and is, e.g., 
  *         used for representing Multi-Instance data. (Multi-Instance data
- *         consists of a nominal attribute containing the bag-id, then a
- *         relational attribute with all the attributes of the bag, and
+ *         consists of a nominal attribute containing the bag-id, then a 
+ *         relational attribute with all the attributes of the bag, and 
  *         finally the class attribute.)
  *    </li>
  * </ul>
- *
+ * 
  * Typical usage (code from the main() method of this class): <p>
  *
  * <code>
@@ -75,7 +75,7 @@ import java.util.ArrayList;
  * // Create numeric attributes "length" and "weight" <br>
  * Attribute length = new Attribute("length"); <br>
  * Attribute weight = new Attribute("weight"); <br><br>
- *
+ * 
  * // Create list to hold nominal values "first", "second", "third" <br>
  * List<String> my_nominal_values = new ArrayList<String>(3); <br>
  * my_nominal_values.add("first"); <br>
@@ -96,7 +96,7 @@ public class Attribute
 
   /** for serialization */
   static final long serialVersionUID = -742180568732916383L;
-
+  
   /** Constant set for numeric attributes. */
   public static final int NUMERIC = 0;
 
@@ -153,9 +153,9 @@ public class Attribute
 
   /** The attribute's type. */
   private /*@ spec_public @*/ int m_Type;
-  /*@ invariant m_Type == NUMERIC ||
-                m_Type == DATE ||
-                m_Type == STRING ||
+  /*@ invariant m_Type == NUMERIC || 
+                m_Type == DATE || 
+                m_Type == STRING || 
                 m_Type == NOMINAL ||
                 m_Type == RELATIONAL;
   */
@@ -289,12 +289,12 @@ public class Attribute
    * the attribute is assumed to be a string.
    *
    * @param attributeName the name for the attribute
-   * @param attributeValues a vector of strings denoting the
+   * @param attributeValues a vector of strings denoting the 
    * attribute values. Null if the attribute is a string attribute.
    */
   //@ requires attributeName != null;
   //@ ensures  m_Name == attributeName;
-  public Attribute(String attributeName,
+  public Attribute(String attributeName, 
 		   List<String> attributeValues) {
 
     this(attributeName, attributeValues,
@@ -307,7 +307,7 @@ public class Attribute
    * to the method, the attribute is assumed to be a string.
    *
    * @param attributeName the name for the attribute
-   * @param attributeValues a vector of strings denoting the
+   * @param attributeValues a vector of strings denoting the 
    * attribute values. Null if the attribute is a string attribute.
    * @param metadata the attribute's properties
    */
@@ -316,12 +316,12 @@ public class Attribute
   /*@ ensures  m_Name == attributeName;
       ensures  m_Index == -1;
       ensures  attributeValues == null && m_Type == STRING
-            || attributeValues != null && m_Type == NOMINAL
+            || attributeValues != null && m_Type == NOMINAL 
                   && m_Values.size() == attributeValues.size();
-      signals (IllegalArgumentException ex)
+      signals (IllegalArgumentException ex) 
                  (* if duplicate strings in attributeValues *);
   */
-  public Attribute(String attributeName,
+  public Attribute(String attributeName, 
 		   List<String> attributeValues,
 		   ProtectedProperties metadata) {
 
@@ -378,7 +378,7 @@ public class Attribute
    * @param header an Instances object specifying the header of the relation.
    * @param metadata the attribute's properties
    */
-  public Attribute(String attributeName,
+  public Attribute(String attributeName, 
 		   Instances header,
 		   ProtectedProperties metadata) {
 
@@ -413,7 +413,7 @@ public class Attribute
     copy.m_DateFormat = m_DateFormat;
     copy.m_Header = m_Header;
     copy.setMetadata(m_Metadata);
-
+ 
     return copy;
   }
 
@@ -465,10 +465,10 @@ public class Attribute
   public final String equalsMsg(Object other) {
     if (other == null)
       return "Comparing with null object";
-
+    
     if (!(other.getClass().equals(this.getClass())))
       return "Object has wrong class";
-
+    
     Attribute att = (Attribute) other;
     if (!m_Name.equals(att.m_Name))
       return "Names differ: " + m_Name + " != " + att.m_Name;
@@ -476,115 +476,115 @@ public class Attribute
     if (isNominal() && att.isNominal()) {
       if (m_Values.size() != att.m_Values.size())
         return "Different number of labels: " + m_Values.size() + " != " + att.m_Values.size();
-
+      
       for (int i = 0; i < m_Values.size(); i++) {
         if (!m_Values.get(i).equals(att.m_Values.get(i)))
           return "Labels differ at position " + (i+1) + ": " + m_Values.get(i) + " != " + att.m_Values.get(i);
       }
-
+      
       return null;
-    }
-
+    } 
+    
     if (isRelationValued() && att.isRelationValued())
       return m_Header.equalHeadersMsg(att.m_Header);
-
+    
     if ((type() != att.type()))
       return "Types differ: " + typeToString(this) + " != " + typeToString(att);
-
+    
     return null;
   }
-
+  
   /**
    * Returns a string representation of the attribute type.
-   *
+   * 
    * @param att		the attribute to return the type string for
    * @return		the string representation of the attribute type
    */
   public static String typeToString(Attribute att) {
     return typeToString(att.type());
   }
-
+  
   /**
    * Returns a string representation of the attribute type.
-   *
+   * 
    * @param type	the type of the attribute
    * @return		the string representation of the attribute type
    */
   public static String typeToString(int type) {
     String	result;
-
+    
     switch(type) {
       case NUMERIC:
 	result = "numeric";
 	break;
-
+	
       case NOMINAL:
 	result = "nominal";
 	break;
-
+	
       case STRING:
 	result = "string";
 	break;
-
+	
       case DATE:
 	result = "date";
 	break;
-
+	
       case RELATIONAL:
 	result = "relational";
 	break;
-
+	
       default:
 	result = "unknown(" + type + ")";
     }
-
+    
     return result;
   }
-
+  
   /**
    * Returns a short string representation of the attribute type.
-   *
+   * 
    * @param att		the attribute to return the type string for
    * @return		the string representation of the attribute type
    */
   public static String typeToStringShort(Attribute att) {
     return typeToStringShort(att.type());
   }
-
+  
   /**
    * Returns a short string representation of the attribute type.
-   *
+   * 
    * @param type	the type of the attribute
    * @return		the string representation of the attribute type
    */
   public static String typeToStringShort(int type) {
     String	result;
-
+    
     switch(type) {
       case NUMERIC:
 	result = "Num";
 	break;
-
+	
       case NOMINAL:
 	result = "Nom";
 	break;
-
+	
       case STRING:
 	result = "Str";
 	break;
-
+	
       case DATE:
 	result = "Dat";
 	break;
-
+	
       case RELATIONAL:
 	result = "Rel";
 	break;
-
+	
       default:
 	result = "???";
     }
-
+    
     return result;
   }
 
@@ -605,7 +605,7 @@ public class Attribute
    *
    * @param value the value for which the index is to be returned
    * @return the index of the given attribute value if attribute
-   * is nominal or a string, -1 if it is not or the value
+   * is nominal or a string, -1 if it is not or the value 
    * can't be found
    */
   public final int indexOfValue(String value) {
@@ -691,9 +691,9 @@ public class Attribute
 
     return m_Name;
   }
-
+  
   /**
-   * Returns the number of attribute values. Returns 0 for
+   * Returns the number of attribute values. Returns 0 for 
    * attributes that are not either nominal, string, or
    * relation-valued.
    *
@@ -716,9 +716,9 @@ public class Attribute
    * @return a description of this attribute as a string
    */
   public final String toString() {
-
+    
     StringBuffer text = new StringBuffer();
-
+    
     text.append(ARFF_ATTRIBUTE).append(" ").append(Utils.quote(m_Name)).append(" ");
     switch (m_Type) {
     case NOMINAL:
@@ -765,11 +765,11 @@ public class Attribute
 
     return m_Type;
   }
-
+  
   /**
    * Returns the Date format pattern in case this attribute is of type DATE,
    * otherwise an empty string.
-   *
+   * 
    * @return the date format pattern
    * @see SimpleDateFormat
    */
@@ -789,12 +789,12 @@ public class Attribute
    * @return the attribute's value as a string
    */
   public final /*@ non_null pure @*/ String value(int valIndex) {
-
+    
     if (!isNominal() && !isString()) {
       return "";
     } else {
       Object val = m_Values.get(valIndex);
-
+      
       // If we're storing strings compressed, uncompress it.
       if (val instanceof SerializedObject) {
         val = ((SerializedObject)val).getObject();
@@ -810,7 +810,7 @@ public class Attribute
    * @return the attribute's value as an Instances object
    */
   public final /*@ non_null pure @*/ Instances relation() {
-
+    
     if (!isRelationValued()) {
       return null;
     } else {
@@ -826,7 +826,7 @@ public class Attribute
    * @return the attribute's value as an Instances object
    */
   public final /*@ non_null pure @*/ Instances relation(int valIndex) {
-
+    
     if (!isRelationValued()) {
       return null;
     } else {
@@ -863,7 +863,7 @@ public class Attribute
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  public Attribute(String attributeName, String dateFormat,
+  public Attribute(String attributeName, String dateFormat, 
 	    int index) {
 
     this(attributeName, dateFormat);
@@ -885,7 +885,7 @@ public class Attribute
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  public Attribute(String attributeName, List<String> attributeValues,
+  public Attribute(String attributeName, List<String> attributeValues, 
 	    int index) {
 
     this(attributeName, attributeValues);
@@ -916,7 +916,7 @@ public class Attribute
    *
    * @param value The string value to add
    * @return the index assigned to the string, or -1 if the attribute is not
-   * of type Attribute.STRING
+   * of type Attribute.STRING 
    */
   /*@ requires value != null;
       ensures  isString() && 0 <= \result && \result < m_Values.size() ||
@@ -947,6 +947,22 @@ public class Attribute
       return intIndex;
     }
   }
+  
+  /**
+   * Clear the map and list of values and set them to contain
+   * just the supplied value
+   * 
+   * @param value the current (and only) value of this String attribute
+   */
+  public void setStringValue(String value) {
+    if (!isString()) {
+      return;
+    }
+    
+    m_Hashtable.clear();
+    m_Values.clear();
+    addStringValue(value);
+  }
 
   /**
    * Adds a string value to the list of valid strings for attributes
@@ -956,7 +972,7 @@ public class Attribute
    * @param src The Attribute containing the string value to add.
    * @param index the index of the string value in the source attribute.
    * @return the index assigned to the string, or -1 if the attribute is not
-   * of type Attribute.STRING
+   * of type Attribute.STRING 
    */
   /*@ requires src != null;
       requires 0 <= index && index < src.m_Values.size();
@@ -985,7 +1001,7 @@ public class Attribute
    *
    * @param value The value to add
    * @return the index assigned to the value, or -1 if the attribute is not
-   * of type Attribute.RELATIONAL
+   * of type Attribute.RELATIONAL 
    */
   public int addRelation(Instances value) {
 
@@ -994,7 +1010,7 @@ public class Attribute
     }
     if (!m_Header.equalHeaders(value)) {
       throw new IllegalArgumentException("Incompatible value for " +
-                                         "relation-valued attribute.\n" +
+                                         "relation-valued attribute.\n" + 
                                          m_Header.equalHeadersMsg(value));
     }
     Integer index = (Integer)m_Hashtable.get(value);
@@ -1042,7 +1058,7 @@ public class Attribute
     copy.m_Hashtable = m_Hashtable;
     copy.m_Header = m_Header;
     copy.setMetadata(m_Metadata);
-
+ 
     return copy;
   }
 
@@ -1052,14 +1068,14 @@ public class Attribute
    * removing it.
    *
    * @param index the value's index
-   * @throws IllegalArgumentException if the attribute is not
+   * @throws IllegalArgumentException if the attribute is not 
    * of the correct type
    */
   //@ requires isNominal() || isString() || isRelationValued();
   //@ requires 0 <= index && index < m_Values.size();
   final void delete(int index) {
-
-    if (!isNominal() && !isString() && !isRelationValued())
+    
+    if (!isNominal() && !isString() && !isRelationValued()) 
       throw new IllegalArgumentException("Can only remove value of " +
                                          "nominal, string or relation-" +
                                          " valued attribute!");
@@ -1125,14 +1141,14 @@ public class Attribute
    *
    * @param index the value's index
    * @param string the value
-   * @throws IllegalArgumentException if the attribute is not nominal or
+   * @throws IllegalArgumentException if the attribute is not nominal or 
    * string.
    */
   //@ requires string != null;
   //@ requires isNominal() || isString();
   //@ requires 0 <= index && index < m_Values.size();
   final void setValue(int index, String string) {
-
+    
     switch (m_Type) {
     case NOMINAL:
     case STRING:
@@ -1163,12 +1179,12 @@ public class Attribute
    *
    * @param index the value's index
    * @param data the value
-   * @throws IllegalArgumentException if the attribute is not
+   * @throws IllegalArgumentException if the attribute is not 
    * relation-valued.
    */
   final void setValue(int index, Instances data) {
-
-    if (isRelationValued()) {
+    
+    if (isRelationValued()) { 
       if (!data.equalHeaders(m_Header)) {
         throw new IllegalArgumentException("Can't set relational value. " +
                                            "Headers not compatible.\n" +
@@ -1185,8 +1201,8 @@ public class Attribute
   /**
    * Returns the given amount of milliseconds formatted according to the
    * current Date format.
-   *
-   * @param date 	the date, represented in milliseconds since
+   * 
+   * @param date 	the date, represented in milliseconds since 
    * 			January 1, 1970, 00:00:00 GMT, to return as string
    * @return 		the formatted date
    */
@@ -1204,7 +1220,7 @@ public class Attribute
   /**
    * Parses the given String as Date, according to the current format and
    * returns the corresponding amount of milliseconds.
-   *
+   * 
    * @param string the date to parse
    * @return the date in milliseconds since January 1, 1970, 00:00:00 GMT
    * @throws ParseException if parsing fails
@@ -1227,7 +1243,7 @@ public class Attribute
    * Returns the properties supplied for this attribute.
    *
    * @return metadata for this attribute
-   */
+   */  
   public final /*@ pure @*/ ProtectedProperties getMetadata() {
 
     return m_Metadata;
@@ -1235,7 +1251,7 @@ public class Attribute
 
   /**
    * Returns the ordering of the attribute. One of the following:
-   *
+   * 
    * ORDERING_SYMBOLIC - attribute values should be treated as symbols.
    * ORDERING_ORDERED  - attribute values have a global ordering.
    * ORDERING_MODULO   - attribute values have an ordering which wraps.
@@ -1290,14 +1306,14 @@ public class Attribute
 
   /**
    * Sets the new attribute's weight
-   *
+   * 
    * @param value	the new weight
    */
   public void setWeight(double value) {
     Properties	props;
     Enumeration names;
     String	name;
-
+    
     m_Weight = value;
 
     // generate new metadata object
@@ -1311,7 +1327,7 @@ public class Attribute
     props.setProperty("weight", "" + m_Weight);
     m_Metadata = new ProtectedProperties(props);
   }
-
+  
   /**
    * Returns the lower bound of a numeric attribute.
    *
@@ -1360,7 +1376,7 @@ public class Attribute
    */
   public final /*@ pure @*/ boolean isInRange(double value) {
 
-    // dates and missing values are a special case
+    // dates and missing values are a special case 
     if (m_Type == DATE || Utils.isMissingValue(value)) return true;
     if (m_Type != NUMERIC) {
       // do label range check
@@ -1387,7 +1403,7 @@ public class Attribute
    * metadata of the attribute so that the properties can be set up for the
    * easy-access metadata methods. Any strings sought that are omitted will
    * cause default values to be set.
-   *
+   * 
    * The following properties are recognised:
    * ordering, averageable, zeropoint, regular, weight, and range.
    *
@@ -1399,7 +1415,7 @@ public class Attribute
    */
   //@ requires metadata != null;
   private void setMetadata(ProtectedProperties metadata) {
-
+    
     m_Metadata = metadata;
 
     if (m_Type == DATE) {
@@ -1411,7 +1427,7 @@ public class Attribute
 
       // get ordering
       String orderString = m_Metadata.getProperty("ordering","");
-
+      
       // numeric ordered attributes are averagable and zeropoint by default
       String def;
       if (m_Type == NUMERIC
@@ -1419,7 +1435,7 @@ public class Attribute
 	  && orderString.compareTo("symbolic") != 0)
 	def = "true";
       else def = "false";
-
+      
       // determine boolean states
       m_IsAveragable =
 	(m_Metadata.getProperty("averageable",def).compareTo("true") == 0);
@@ -1429,7 +1445,7 @@ public class Attribute
       if (m_IsAveragable || m_HasZeropoint) def = "true";
       m_IsRegular =
 	(m_Metadata.getProperty("regular",def).compareTo("true") == 0);
-
+      
       // determine ordering
       if (orderString.compareTo("symbolic") == 0)
 	m_Ordering = ORDERING_SYMBOLIC;
@@ -1469,7 +1485,7 @@ public class Attribute
 	m_Weight = Double.valueOf(weightString).doubleValue();
       } catch (NumberFormatException e) {
 	// Check if value is really a number
-	throw new IllegalArgumentException("Not a valid attribute weight: '"
+	throw new IllegalArgumentException("Not a valid attribute weight: '" 
 					   + weightString + "'");
       }
     }
@@ -1501,8 +1517,8 @@ public class Attribute
     // set up a tokenzier to parse the string
     StreamTokenizer tokenizer =
       new StreamTokenizer(new StringReader(rangeString));
-    tokenizer.resetSyntax();
-    tokenizer.whitespaceChars(0, ' ');
+    tokenizer.resetSyntax();         
+    tokenizer.whitespaceChars(0, ' ');    
     tokenizer.wordChars(' '+1,'\u00FF');
     tokenizer.ordinaryChar('[');
     tokenizer.ordinaryChar('(');
@@ -1514,7 +1530,7 @@ public class Attribute
 
       // get opening brace
       tokenizer.nextToken();
-
+    
       if (tokenizer.ttype == '[') m_LowerBoundIsOpen = false;
       else if (tokenizer.ttype == '(') m_LowerBoundIsOpen = true;
       else throw new IllegalArgumentException("Expected opening brace on range,"
@@ -1567,7 +1583,7 @@ public class Attribute
 
       // get closing brace
       tokenizer.nextToken();
-
+    
       if (tokenizer.ttype == ']') m_UpperBoundIsOpen = false;
       else if (tokenizer.ttype == ')') m_UpperBoundIsOpen = true;
       else throw new IllegalArgumentException("Expected closing brace on range,"
@@ -1591,10 +1607,10 @@ public class Attribute
 					 + " less than lower bound ("
 					 + m_LowerBound + ")!");
   }
-
+  
   /**
    * Returns the revision string.
-   *
+   * 
    * @return		the revision
    */
   public String getRevision() {
@@ -1603,7 +1619,7 @@ public class Attribute
 
   /**
    * Simple main method for testing this class.
-   *
+   * 
    * @param ops the commandline options
    */
   //@ requires ops != null;
@@ -1611,7 +1627,7 @@ public class Attribute
   public static void main(String[] ops) {
 
     try {
-
+      
       // Create numeric attributes "length" and "weight"
       Attribute length = new Attribute("length");
       Attribute weight = new Attribute("weight");
@@ -1627,14 +1643,14 @@ public class Attribute
       dd = new Date().getTime();
       System.out.println("Date now = " + dd);
       System.out.println(date.formatDate(dd));
-
-      // Create vector to hold nominal values "first", "second", "third"
-      List<String> my_nominal_values = new ArrayList<String>(3);
-      my_nominal_values.add("first");
-      my_nominal_values.add("second");
-      my_nominal_values.add("third");
-
-      // Create nominal attribute "position"
+      
+      // Create vector to hold nominal values "first", "second", "third" 
+      List<String> my_nominal_values = new ArrayList<String>(3); 
+      my_nominal_values.add("first"); 
+      my_nominal_values.add("second"); 
+      my_nominal_values.add("third"); 
+      
+      // Create nominal attribute "position" 
       Attribute position = new Attribute("position", my_nominal_values);
 
       // Print the name of "position"
@@ -1654,7 +1670,7 @@ public class Attribute
       System.out.println("Copy is the same as original: " + copy.equals(position));
 
       // Print index of attribute "weight" (should be unset: -1)
-      System.out.println("Index of attribute \"weight\" (should be -1): " +
+      System.out.println("Index of attribute \"weight\" (should be -1): " + 
 			 weight.index());
 
       // Print index of value "first" of attribute "position"
@@ -1668,7 +1684,7 @@ public class Attribute
 
       // Prints name of attribute "position"
       System.out.println("Name of \"position\": " + position.name());
-
+    
       // Prints number of values of attribute "position"
       System.out.println("Number of values for \"position\": " + position.numValues());
 
@@ -1711,4 +1727,4 @@ public class Attribute
     }
   }
 }
-
+  
