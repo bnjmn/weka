@@ -60,7 +60,7 @@ ScrollBarIncrementLayout=20
 ScrollBarIncrementComponents=50
 FlowWidth=2560
 FlowHeight=1440
-PreferredExtension=.kf
+PreferredExtension=.kfml
 UserComponentsInXML=false
 
 # colours
