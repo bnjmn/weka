@@ -235,7 +235,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   public static synchronized void loadProperties() {
     if (BEAN_PROPERTIES == null) {
       weka.core.WekaPackageManager.loadPackages(false);
-      System.out.println("[KnowledgeFlow] Loading properties and plugins...");
+      System.err.println("[KnowledgeFlow] Loading properties and plugins...");
       /** Loads the configuration property file */
       //  static {
       // Allow a properties file in the current directory to override
@@ -282,7 +282,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
               while (st.hasMoreTokens()) {
                 String perspectiveName = st.nextToken().trim();
-                System.out.println("Adding perspective " + perspectiveName + " to visible list");
+                System.err.println("Adding perspective " + perspectiveName + " to visible list");
                 VISIBLE_PERSPECTIVES.add(perspectiveName);
               }
             }            
@@ -347,7 +347,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 String name = ((OffscreenChartRenderer)p).rendererName();
                 PluginManager.addPlugin("weka.gui.beans.OffscreenChartRenderer", 
                     name, renderer);
-                System.out.println("[KnowledgeFlow] registering chart rendering " +
+                System.err.println("[KnowledgeFlow] registering chart rendering " +
                     "plugin: " + renderer);
               }
             } catch (Exception ex) {
@@ -377,7 +377,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * from.
    */
   private static void init() {
-    System.out.println("[KnowledgeFlow] Initializing KF...");
+    System.err.println("[KnowledgeFlow] Initializing KF...");
 
     try {
       TOOLBARS = new Vector();
