@@ -947,6 +947,22 @@ public class Attribute
       return intIndex;
     }
   }
+  
+  /**
+   * Clear the map and list of values and set them to contain
+   * just the supplied value
+   * 
+   * @param value the current (and only) value of this String attribute
+   */
+  public void setStringValue(String value) {
+    if (!isString()) {
+      return;
+    }
+    
+    m_Hashtable.clear();
+    m_Values.clear();
+    addStringValue(value);
+  }
 
   /**
    * Adds a string value to the list of valid strings for attributes
