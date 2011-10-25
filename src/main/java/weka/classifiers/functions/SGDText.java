@@ -40,6 +40,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Stopwords;
 import weka.core.Tag;
@@ -1218,6 +1219,15 @@ public class SGDText extends RandomizableClassifier
     }
     
     return buff.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return            the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
