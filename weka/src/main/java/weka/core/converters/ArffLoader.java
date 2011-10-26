@@ -26,6 +26,8 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.DenseInstance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
@@ -42,6 +44,8 @@ import java.io.StringReader;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -56,7 +60,8 @@ import java.util.ArrayList;
  */
 public class ArffLoader 
   extends AbstractFileLoader 
-  implements BatchConverter, IncrementalConverter, URLSourcedLoader {
+  implements OptionHandler, BatchConverter, IncrementalConverter, 
+  URLSourcedLoader {
 
   /** for serialization */
   static final long serialVersionUID = 2726929550544048587L;
@@ -73,6 +78,12 @@ public class ArffLoader
 
   /** The parser for the ARFF file */
   protected transient ArffReader m_ArffReader = null;
+  
+  /**
+   * If false, and reading incrementally, then only one string value (the current
+   * one) will be available in the header for each String attribute
+   */
+  protected boolean m_retainStringValues = false;
   
   /**
    * Reads data from an ARFF file, either in incremental or batch mode. <p/>
@@ -120,6 +131,10 @@ public class ArffLoader
     /** the number of lines read so far */
     protected int m_Lines;
     
+    protected boolean m_batchMode = true;
+    
+    protected boolean m_retainStringValues = true;
+    
     /**
      * Reads the data completely from the reader. The data can be accessed
      * via the <code>getData()</code> method.
@@ -143,6 +158,10 @@ public class ArffLoader
       compactify();
     }
     
+    public ArffReader(Reader reader, int capacity) throws IOException {
+      this(reader, capacity, true, true);
+    }
+    
     /**
      * Reads only the header and reserves the specified space for instances.
      * Further instances can be read via <code>readInstance()</code>.
@@ -154,7 +173,16 @@ public class ArffLoader
      * @see				#getStructure()
      * @see				#readInstance(Instances)
      */
-    public ArffReader(Reader reader, int capacity) throws IOException {
+    public ArffReader(Reader reader, int capacity, boolean batch, boolean retainStringVals) 
+      throws IOException {
+      
+      m_batchMode = batch;
+      if (batch) {
+        m_retainStringValues = true;
+      } else {
+        m_retainStringValues = retainStringVals;
+      }
+      
       if (capacity < 0)
 	throw new IllegalArgumentException("Capacity has to be positive!");
 
@@ -492,8 +520,13 @@ public class ArffLoader
   	  }
             break;
   	case Attribute.STRING:
+  	  if (m_batchMode || m_retainStringValues) {
   	  m_ValueBuffer[numValues] = 
   	    m_Data.attribute(m_IndicesBuffer[numValues]).addStringValue(m_Tokenizer.sval);
+  	  } else {
+  	    m_ValueBuffer[numValues] = 0; 
+            m_Data.attribute(m_IndicesBuffer[numValues]).setStringValue(m_Tokenizer.sval);
+  	  }
             break;
           case Attribute.DATE:
             try {
@@ -590,7 +623,12 @@ public class ArffLoader
   	  }
             break;
   	case Attribute.STRING:
-  	  instance[i] = m_Data.attribute(i).addStringValue(m_Tokenizer.sval);
+  	  if (m_batchMode || m_retainStringValues) {
+  	    instance[i] = m_Data.attribute(i).addStringValue(m_Tokenizer.sval);
+  	  } else {
+  	    instance[i] = 0;
+  	    m_Data.attribute(i).setStringValue(m_Tokenizer.sval);
+  	  }
             break;
           case Attribute.DATE:
             try {
@@ -947,6 +985,91 @@ public class ArffLoader
   public String retrieveURL() {
     return m_URL;
   }
+  
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector<Option> result = new Vector<Option>();
+    
+    result.add(new Option(
+        "\tRetain all string attribute values when reading " +
+        "incrementally.", "R", 0, "-R"));
+    
+    return result.elements();
+  }
+  
+  /**
+   * Parses a given list of options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R
+   *  Retain all string attribute values when reading incrementally.</pre>
+   *  
+   <!-- options-end -->
+   *
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+
+    setRetainStringValues(Utils.getFlag('R', options));
+  }
+  
+  /**
+   * Set whether to retain all string values for string in the header
+   * when reading incrementally
+   * 
+   * @param r true if all string values are to be stored (as opposed to
+   * just the current one).
+   */
+  public void setRetainStringValues(boolean r) {
+    m_retainStringValues = r;
+  }
+  
+  /**
+   * Get whether to retain all string values for string in the header
+   * when reading incrementally
+   * 
+   * @return true if all string values are to be stored (as opposed to
+   * just the current one).
+   */
+  public boolean getRetainStringValues() {
+    return m_retainStringValues;
+  }
+  
+  /**
+   * the tip text for this property
+   * 
+   * @return            the tip text
+   */
+  public String retainStringValuesTipText() {
+    return "When reading incrementally, whether to retain all " +
+    		"values for string attributes. When set to false " +
+    		"only the values for string attributes in the currently " +
+    		"read instance will be held in memory.";
+  }
+  
+  /**
+   * Gets the current settings of the Classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    Vector<String>      result;
+    
+    result  = new Vector<String>();
+    
+    if (getRetainStringValues()) {
+      result.add("-R");
+    }
+    
+    return result.toArray(new String[result.size()]);
+  }
 
   /**
    * Resets the Loader object and sets the source of the data set to be 
@@ -976,8 +1099,9 @@ public class ArffLoader
         throw new IOException("No source has been specified");
       }
       
-      try {
-	m_ArffReader = new ArffReader(m_sourceReader, 1);
+      try {       
+        m_ArffReader = new ArffReader(m_sourceReader, 1, (getRetrieval() == BATCH), 
+            m_retainStringValues);       
 	m_structure  = m_ArffReader.getStructure();
       } catch (Exception ex) {
 	throw new IOException("Unable to determine structure as arff (Reason: " + ex.toString() + ").");
