@@ -26,7 +26,10 @@ import weka.classifiers.UpdateableClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.Range;
 import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.filters.unsupervised.instance.RemoveWithValues;
 
 /**
  <!-- globalinfo-start -->
@@ -87,7 +90,7 @@ public class MultiClassClassifierUpdateable
   implements OptionHandler, UpdateableClassifier {
   
   /** For serialization */
-  private static final long serialVersionUID = -1619685269774366430L;
+  private static final long serialVersionUID = -1619685269774366430L;  
 
   /**
    * @return a description of the classifier suitable for
@@ -110,7 +113,7 @@ public class MultiClassClassifierUpdateable
       throw new Exception("Base classifier must be updateable!");
     }
     
-    super.buildClassifier(insts);        
+    super.buildClassifier(insts);                
   }
   
   /**
@@ -132,8 +135,15 @@ public class MultiClassClassifierUpdateable
         if (m_Classifiers[i] != null) {
           m_ClassFilters[i].input(instance);
           Instance converted = m_ClassFilters[i].output();
-          ((UpdateableClassifier)m_Classifiers[i]).
+          if (converted != null) {
+            converted.dataset().setClassIndex(m_ClassAttribute.index());
+            ((UpdateableClassifier)m_Classifiers[i]).
             updateClassifier(converted);
+            
+            if (m_Method == METHOD_1_AGAINST_1) {
+              m_SumOfWeights[i] += converted.weight();
+            }
+          }
         }
       }
     }
@@ -147,14 +157,47 @@ public class MultiClassClassifierUpdateable
    * @throws Exception if the distribution can't be computed successfully
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
-    double[] result = super.distributionForInstance(inst);
     
-    if (result.length == 1) {
+    double[] probs = new double[inst.numClasses()];
+    if (m_Method == METHOD_1_AGAINST_1) {
+      double[][] r = new double[inst.numClasses()][inst.numClasses()];
+      double[][] n = new double[inst.numClasses()][inst.numClasses()];
+
+      for(int i = 0; i < m_ClassFilters.length; i++) {
+        if (m_Classifiers[i] != null && m_SumOfWeights[i] > 0) {
+          Instance tempInst = (Instance)inst.copy(); 
+          tempInst.setDataset(m_TwoClassDataset);
+          double [] current = m_Classifiers[i].distributionForInstance(tempInst);  
+          Range range = new Range(((RemoveWithValues)m_ClassFilters[i])
+                                  .getNominalIndices());
+          range.setUpper(m_ClassAttribute.numValues());
+          int[] pair = range.getSelection();
+          if (m_pairwiseCoupling && inst.numClasses() > 2) {
+            r[pair[0]][pair[1]] = current[0];
+            n[pair[0]][pair[1]] = m_SumOfWeights[i];
+          } else {
+            if (current[0] > current[1]) {
+              probs[pair[0]] += 1.0;
+            } else {
+              probs[pair[1]] += 1.0;
+            }
+          }
+        }
+      }
+      if (m_pairwiseCoupling && inst.numClasses() > 2) {
+        return pairwiseCoupling(n, r);
+      }
+      Utils.normalize(probs);
+    } else {    
+      probs = super.distributionForInstance(inst);
+    }
+    
+    if (probs.length == 1) {
       // ZeroR made the prediction
       return new double[m_ClassAttribute.numValues()];
     }
     
-    return result;
+    return probs;
   }
   
   /**
