@@ -176,9 +176,11 @@ public class WekaPackageManager {
 //      System.err.println(" -- " + tempURI.toString());
       CACHE_URL = tempURI.toURL();
     } catch (Exception e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
+    
+    File packagesList = new File(cacheDir.getAbsolutePath() + File.separator 
+        + "packageList.txt");
     if (!cacheDir.exists()) {
       if (!cacheDir.mkdir()) {
         System.err.println("Unable to create repository cache directory ("
@@ -187,7 +189,11 @@ public class WekaPackageManager {
       } else {
         // refreshCache();
         INITIAL_CACHE_BUILD_NEEDED = true;
-      }
+      }      
+    }
+    
+    if (!packagesList.exists()) {
+      INITIAL_CACHE_BUILD_NEEDED = true;
     }
     
     return ok;
