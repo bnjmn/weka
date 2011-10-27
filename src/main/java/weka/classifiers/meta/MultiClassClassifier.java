@@ -62,13 +62,12 @@ import java.util.Vector;
  *  Sets the method to use. Valid values are 0 (1-against-all),
  *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
  * </pre>
- *
- * <pre> -P
- *  Use pairwise coupling (only has an effect for 1-against-1)
- * </pre>
  * 
  * <pre> -R &lt;num&gt;
  *  Sets the multiplier when using random codes. (default 2.0)</pre>
+ * 
+ * <pre> -P
+ *  Use pairwise coupling (only has an effect for 1-against1)</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
@@ -110,7 +109,7 @@ public class MultiClassClassifier
   static final long serialVersionUID = -3879602011542849141L;
   
   /** The classifiers. */
-  private Classifier [] m_Classifiers;
+  protected Classifier [] m_Classifiers;
 
   /** Use pairwise coupling with 1-vs-1 */
   private boolean m_pairwiseCoupling = false;
@@ -119,13 +118,13 @@ public class MultiClassClassifier
   private double [] m_SumOfWeights;
 
   /** The filters used to transform the class. */
-  private Filter[] m_ClassFilters;
+  protected Filter[] m_ClassFilters;
 
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
 
   /** Internal copy of the class attribute for output purposes */
-  private Attribute m_ClassAttribute;
+  protected Attribute m_ClassAttribute;
   
   /** A transformed dataset header used by the  1-against-1 method */
   private Instances m_TwoClassDataset;
@@ -137,7 +136,7 @@ public class MultiClassClassifier
   private double m_RandomWidthFactor = 2.0;
 
   /** The multiclass method to use */
-  private int m_Method = METHOD_1_AGAINST_ALL;
+  protected int m_Method = METHOD_1_AGAINST_ALL;
 
   /** 1-against-all */
   public static final int METHOD_1_AGAINST_ALL    = 0;
@@ -714,13 +713,12 @@ public class MultiClassClassifier
    *  Sets the method to use. Valid values are 0 (1-against-all),
    *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
    * </pre>
-   *
-   * <pre> -P
-   *  Use pairwise coupling (only has an effect for 1-against-1)
-   * </pre>
    * 
    * <pre> -R &lt;num&gt;
    *  Sets the multiplier when using random codes. (default 2.0)</pre>
+   * 
+   * <pre> -P
+   *  Use pairwise coupling (only has an effect for 1-against1)</pre>
    * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
@@ -996,3 +994,4 @@ public class MultiClassClassifier
     runClassifier(new MultiClassClassifier(), argv);
   }
 }
+
