@@ -709,6 +709,33 @@
     </jar>
   </target>
 
+  <!-- Put everything in ${build}/classes into the weka.jar file -->
+  <target name="exejar-monolithic" depends="compile, init_dist"
+   description="Create an executable jar file containing core classes and all classes from internal packages in ./dist">
+    <antcall target="apply_all_internal">
+      <param name="packageCommand" value="make"/>
+    </antcall>
+    <mkdir dir="${build}/classes-monolithic"/>
+    <copy todir="${build}/classes-monolithic" >
+       <fileset dir="${build}/classes">
+         <include name="**/*"/>
+       </fileset>
+    </copy>
+
+    <unzip dest="${build}/classes-monolithic">
+    <fileset dir="${packages_internal}">
+        <include name="**/dist/**/*.jar"/>
+    </fileset>
+    </unzip>
+
+    <jar jarfile="${dist}/weka-monolithic.jar" 
+      basedir="${build}/classes-monolithic">
+     <manifest>
+       <attribute name="Main-Class" value="weka.gui.GUIChooser"/>
+     </manifest>
+    </jar>
+  </target>
+
   <!-- Put all .java, and .props files into ${dist}/weka-src.jar-->
   <target name="srcjar" depends="init_dist, init_all"
    description="Create a jar file containing weka source in ./dist">  
@@ -807,6 +834,7 @@
          <include name="weka.ico"/>
        </fileset>
     </copy>
+    <copy file="resources/packageManager-source.jar" todir="weka-${release}/weka-${release}"/>
     <zip destfile="weka-${release}.zip" 
      basedir="weka-${release}"/>
   </target>
