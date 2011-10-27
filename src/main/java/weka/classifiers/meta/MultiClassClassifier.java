@@ -112,10 +112,10 @@ public class MultiClassClassifier
   protected Classifier [] m_Classifiers;
 
   /** Use pairwise coupling with 1-vs-1 */
-  private boolean m_pairwiseCoupling = false;
+  protected boolean m_pairwiseCoupling = false;
 
   /** Needed for pairwise coupling */
-  private double [] m_SumOfWeights;
+  protected double [] m_SumOfWeights;
 
   /** The filters used to transform the class. */
   protected Filter[] m_ClassFilters;
@@ -127,7 +127,7 @@ public class MultiClassClassifier
   protected Attribute m_ClassAttribute;
   
   /** A transformed dataset header used by the  1-against-1 method */
-  private Instances m_TwoClassDataset;
+  protected Instances m_TwoClassDataset;
 
   /** 
    * The multiplier when generating random codes. Will generate
@@ -428,6 +428,9 @@ public class MultiClassClassifier
 
     // can classifier handle the data?
     getCapabilities().testWithFail(insts);
+    
+    // zero training instances - could be incremental 
+    boolean zeroTrainingInstances = insts.numInstances() == 0;
 
     // remove instances with missing class
     insts = new Instances(insts);
@@ -477,7 +480,7 @@ public class MultiClassClassifier
 	tempInstances.setClassIndex(-1);
 	classFilter.setInputFormat(tempInstances);
 	newInsts = Filter.useFilter(insts, classFilter);
-	if (newInsts.numInstances() > 0) {
+	if (newInsts.numInstances() > 0 || zeroTrainingInstances) {
 	  newInsts.setClassIndex(insts.classIndex());
 	  m_Classifiers[i].buildClassifier(newInsts);
 	  m_ClassFilters[i] = classFilter;
