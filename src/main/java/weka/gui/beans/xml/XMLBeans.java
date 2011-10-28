@@ -1607,7 +1607,8 @@ public class XMLBeans
         (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath() ||
         (loader instanceof EnvironmentHandler 
             && Environment.containsEnvVariables(file.getPath())) ||
-            this.getClass().getClassLoader().getResource(withResourceSeparators) != null);
+            this.getClass().getClassLoader().getResource(withResourceSeparators) != null ||
+            !file.exists());
       
       String path = (notAbsolute)
         ? file.getPath()
