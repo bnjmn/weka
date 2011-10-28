@@ -1301,7 +1301,7 @@ public class ClassifierPanel
 		Instances train = inst.trainCV(numFolds, fold, random);
 		eval.setPriors(train);
 		m_Log.statusMessage(Messages.getInstance().getString("ClassifierPanel_StartClassifier_Log_StatusMessage_Text_Tenth")
-				    + (fold + 1) + Messages.getInstance().getString("ClassifierPanel_StartClassifier_Log_StatusMessage_Text_Tenth"));
+				    + (fold + 1) + Messages.getInstance().getString("ClassifierPanel_StartClassifier_Log_StatusMessage_Text_Twelveth"));
 		Classifier current = null;
 		try {
 		  current = Classifier.makeCopy(template);
