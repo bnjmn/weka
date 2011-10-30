@@ -1,0 +1,403 @@
+%
+%    This program is free software; you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation; either version 2 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program; if not, write to the Free Software
+%    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+%
+
+% Version: $Revision$
+
+The ``work horses'' of preprocessing in WEKA are \textit{filters}. They perform
+many tasks, from resampling data, to deleting and standardizing attributes. In
+the following are two different approaches covered that explain in detail how
+to implement a new filter:
+\begin{tight_itemize}
+  \item \textbf{default} -- this is how filters had to be implemented in the
+past.
+  \item \textbf{simple }-- since there are mainly two types of filters, batch or
+stream, additional abstract classes were introduced to speed up
+the implementation process.
+\end{tight_itemize}
+
+\subsection{Default approach}
+The \textit{default} approach is the most flexible, but also the most 
+complicated one for writing a new filter. This approach has to be used, if the
+filter cannot be written using the \textit{simple} approach described further
+below.
+
+\subsubsection{Implementation}
+The following methods are of importance for the implementation of a filter and
+explained in detail further down. It is also a good idea studying the Javadoc
+of these methods as declared in the \texttt{weka.filters.Filter} class:
+\begin{tight_itemize}
+  \item \texttt{getCapabilities()}
+  \item \texttt{setInputFormat(Instances)}
+  \item \texttt{getInputFormat()}
+  \item \texttt{setOutputFormat(Instances)}
+  \item \texttt{getOutputFormat()}
+  \item \texttt{input(Instance)}
+  \item \texttt{bufferInput(Instance)}
+  \item \texttt{push(Instance)}
+  \item \texttt{output()}
+  \item \texttt{batchFinished()}
+  \item \texttt{flushInput()}
+  \item \texttt{getRevision()}
+\end{tight_itemize}
+But only the following ones normally need to be modified:
+\begin{tight_itemize}
+  \item \texttt{getCapabilities()}
+  \item \texttt{setInputFormat(Instances)}
+  \item \texttt{input(Instance)}
+  \item \texttt{batchFinished()}
+  \item \texttt{getRevision()}
+\end{tight_itemize}
+For more information on ``Capabilities'' see section \ref{filter_capabilities}.
+Please note, that the \texttt{weka.filters.Filter} superclass does not
+implement the \texttt{weka.core.OptionHandler} interface. See section ``Option
+handling'' on page \pageref{filter_optionhandling}.
+
+\newpage
+\heading{setInputFormat(Instances)}
+With this call, the user tells the filter what structure, i.e., attributes, the
+input data has. This method also tests, whether the filter can actually process
+this data, according to the capabilities specified in the
+\texttt{getCapabilities()} method.
+
+If the output format of the filter, i.e., the new \texttt{Instances} header, can
+be determined based alone on this information, then the method should set the
+output format via \texttt{setOutputFormat(Instances)} and return \texttt{true},
+otherwise it has to return \texttt{false}.
+
+\heading{getInputFormat()}
+This method returns an \texttt{Instances} object containing all currently
+buffered \texttt{Instance} objects from the input queue.
+
+\heading{setOutputFormat(Instances)}
+\texttt{setOutputFormat(Instances)} defines the new \texttt{Instances} header
+for the output data. For filters that work on a row-basis, there should not be
+any changes between the input and output format. But filters that work on
+attributes, e.g., removing, adding, modifying, will affect this format. This
+method must be called with the appropriate \texttt{Instances} object as
+parameter, since all \texttt{Instance} objects being processed will rely on the
+output format (they use it as dataset that they belong to).
+
+\heading{getOutputFormat()}
+This method returns the currently set \texttt{Instances} object that defines the
+output format. In case \texttt{setOutputFormat(Instances)} has not been called
+yet, this method will return \texttt{null}.
+
+\heading{input(Instance)} returns \texttt{true} if the given
+\texttt{Instance} can be processed straight away and can be collected
+immediately via the \texttt{output()} method (after adding it to the output
+queue via \texttt{push(Instance)}, of course). This is also the case if the
+first batch of data has been processed and the \texttt{Instance }belongs to the
+second batch. Via \texttt{isFirstBatchDone()} one can query whether this
+\texttt{Instance} is still part of the first batch or of the second.
+
+If the \texttt{Instance} cannot be processed immediately, e.g., the filter needs
+to collect all the data first before doing some calculations, then it needs to
+be buffered with \texttt{bufferInput(Instance)} until \texttt{batchFinished()}
+is called. In this case, the method needs to return \texttt{false}.
+
+\heading{bufferInput(Instance)}
+In case an \texttt{Instance} cannot be processed immediately, one can use this
+method to buffer them in the input queue. All buffered \texttt{Instance} objects
+are available via the \texttt{getInputFormat()} method.
+
+\heading{push(Instance)}
+adds the given \texttt{Instance} to the output queue.
+
+\heading{output()}
+Returns the next \texttt{Instance} object from the output queue and removes it
+from there. In case there is no \texttt{Instance} available this method returns
+\texttt{null}.
+
+\newpage
+\heading{batchFinished()} signals the end of a dataset being pushed
+through the filter. In case of a filter that could not process the data of the
+first batch immediately, this is the place to determine what the output format
+will be (and set if via \texttt{setOutputFormat(Instances)}) and finally process
+the input data. The currently available data can be retrieved with the
+\texttt{getInputFormat()} method. After processing the data, one needs to call
+\texttt{flushInput()} to remove all the pending input data.
+
+\heading{flushInput()}
+\texttt{flushInput()} removes all buffered \texttt{Instance} objects from the
+input queue. This method must be called after all the \texttt{Instance} objects
+have been processed in the \texttt{batchFinished()} method.
+
+\subsubsection*{Option handling}
+\label{filter_optionhandling}
+If the filter should be able to handle command-line options, then the interface
+\texttt{weka.core.OptionHandler} needs to be implemented. In addition
+to that, the following code should be added at the end of the
+\texttt{setOptions(String[])} method:
+\begin{verbatim}
+if (getInputFormat() != null) {
+    setInputFormat(getInputFormat());
+}
+\end{verbatim}
+This will inform the filter about changes in the options and therefore reset it.
+
+\newpage
+\subsubsection{Examples}
+The following examples, covering batch and stream filters, illustrate the
+filter framework and how to use it.
+
+Unseeded random number generators like \texttt{Math.random()} should
+\textbf{never} be used since they will produce different results in each run and
+repeatable experiments are essential in machine learning.
+
+\subsubsection*{BatchFilter}
+This simple batch filter adds a new attribute called \textit{blah} at the end of
+the dataset. The rows of this attribute contain only the row's index in the
+data. Since the batch-filter does not have to see all the data before creating
+the output format, the \texttt{setInputFormat(Instances)} sets the output format
+and returns \texttt{true} (indicating that the output format can be queried
+immediately). The \texttt{batchFinished()} method performs the processing of all
+the data.
+
+{\scriptsize \input{includes/BatchFilter}}
+
+\newpage
+\subsubsection*{BatchFilter2}
+In contrast to the first batch filter, this one here cannot determine the output
+format immediately (the number of instances in the first batch is part of the
+attribute name now). This is done in the \texttt{batchFinished()} method.
+
+{\scriptsize \input{includes/BatchFilter2}}
+
+\newpage
+\subsubsection*{BatchFilter3}
+As soon as this batch filter's first batch is done, it can process
+\texttt{Instance} objects immediately in the \texttt{input(Instance)} method. It
+adds a new attribute which contains just a random number, but the random number
+generator being used is seeded with the number of instances from the first
+batch.
+
+{\scriptsize \input{includes/BatchFilter3}}
+
+\newpage
+\subsubsection*{StreamFilter}
+This stream filter adds a random number (the seed value is hard-coded) at the
+end of each \texttt{Instance} of the input data. Since this does not rely on
+having access to the full data of the first batch, the output format is
+accessible immediately after using \texttt{setInputFormat(Instances)}. All the
+\texttt{Instance} objects are immediately processed in \texttt{input(Instance)}
+via the \texttt{convertInstance(Instance)} method, which pushes them immediately
+to the output queue.
+
+{\scriptsize \input{includes/StreamFilter}}
+
+\newpage
+\subsection{Simple approach}
+The base filters and interfaces are all located in the following package:
+\begin{verbatim}
+ weka.filters
+\end{verbatim}
+One can basically divide filters roughly into two different kinds of
+filters:
+\begin{tight_itemize}
+  \item \textbf{batch filters} -- they need to see the whole dataset before they
+can start processing it, which they do in one go
+  \item \textbf{stream filters} -- they can start producing output right away
+and the data just passes through while being modified
+\end{tight_itemize}
+You can subclass one of the following abstract filters, depending on the kind of
+classifier you want to implement:
+\begin{tight_itemize}
+  \item \texttt{weka.filters.SimpleBatchFilter}
+  \item \texttt{weka.filters.SimpleStreamFilter}
+\end{tight_itemize}
+These filters simplify the rather general and complex framework introduced by
+the abstract superclass \texttt{weka.filters.Filter}. One only needs to
+implement a couple of abstract methods that will process the actual data and
+override, if necessary, a few existing methods for option handling.
+
+\subsubsection{SimpleBatchFilter}
+Only the following abstract methods need to be implemented:
+\begin{tight_itemize}
+  \item \texttt{globalInfo()} -- returns a short description of what the
+filter does; will be displayed in the GUI
+  \item \texttt{determineOutputFormat(Instances)} -- generates the new
+format, based on the input data
+  \item \texttt{process(Instances)} -- processes the whole dataset in one
+go
+  \item \texttt{getRevision()} -- returns the Subversion revision information,
+see section ``Revisions'' on page \pageref{filter_revisions}
+\end{tight_itemize}
+If more options are necessary, then the following methods need to be overridden:
+\begin{tight_itemize}
+  \item \texttt{listOptions()} -- returns an enumeration of the available
+options; these are printed if one calls the filter with the -h option
+  \item \texttt{setOptions(String[])} -- parses the given option array,
+that were passed from command-line
+  \item \texttt{getOptions()} -- returns an array of options, resembling
+the current setup of the filter
+\end{tight_itemize}
+See section ``Methods'' on page \pageref{classifier_methods} and section
+``Parameters'' on page \pageref{classifier_parameters} for more information.
+
+\newpage
+In the following an example implementation that adds an additional attribute at
+the end, containing the index of the processed instance:
+
+{\footnotesize \input{includes/SimpleBatch}}
+
+\newpage
+\subsubsection{SimpleStreamFilter}
+Only the following abstract methods need to be implemented for a stream filter:
+\begin{tight_itemize}
+  \item \texttt{globalInfo()} -- returns a short description of what the filter
+does; will be displayed in the GUI
+  \item \texttt{determineOutputFormat(Instances)} -- generates the new
+format, based on the input data
+  \item \texttt{process(Instance)} -- processes a single instance and turns it
+from the old format into the new one
+  \item \texttt{getRevision()} -- returns the Subversion revision
+information, see section ``Revisions'' on page \pageref{filter_revisions}
+\end{tight_itemize}
+If more options are necessary, then the following methods need to be overridden:
+\begin{tight_itemize}
+  \item \texttt{listOptions()} -- returns an enumeration of the available
+options; these are printed if one calls the filter with the -h option
+  \item \texttt{setOptions(String[])} -- parses the given option array,
+that were passed from command-line
+  \item \texttt{getOptions()} -- returns an array of options, resembling the
+current setup of the filter
+\end{tight_itemize}
+See also section \ref{classifier_methods}, covering ``Methods'' for classifiers.
+
+\newpage
+In the following an example implementation of a stream filter that adds an extra
+attribute at the end, which is filled with random numbers. The \texttt{reset()}
+method is only used in this example, since the random number generator needs to
+be re-initialized in order to obtain repeatable results.
+
+{\footnotesize \input{includes/SimpleStream}}
+
+\noindent A real-world implementation of a stream filter is the
+\texttt{MultiFilter} class (package \texttt{weka.filters}), which passes the
+data through all the filters it contains. Depending on whether all the used
+filters are streamable or not, it acts either as \textit{stream} filter or as
+\textit{batch} filter.
+
+\newpage
+\subsubsection{Internals}
+Some useful methods of the filter classes:
+\begin{tight_itemize}
+  \item \texttt{isNewBatch()} -- returns \texttt{true} if an instance of the
+filter was just instantiated or a new batch was started via the
+\texttt{batchFinished()} method.
+  \item \texttt{isFirstBatchDone()} -- returns \texttt{true} as soon as the
+first batch was finished via the \texttt{batchFinished()} method. Useful for
+supervised filters, which should not be altered after being trained with the
+first batch of instances.
+\end{tight_itemize}
+
+\subsection{Capabilities}
+\label{filter_capabilities}
+Filters implement the \texttt{weka.core.CapabilitiesHandler} interface like the
+classifiers. This method returns what kind of data the filter is able to
+process. Needs to be adapted for each individual filter, since the default
+implementation allows the processing of all kinds of attributes and classes.
+Otherwise correct functioning of the filter cannot be guaranteed. See section
+``Capabilities'' on page \pageref{classifier_capabilities} for more information.
+
+\subsection{Packages}
+A few comments about the different filter sub-packages:
+\begin{tight_itemize}
+  \item \textbf{supervised} -- contains supervised filters, i.e., filters that
+take class distributions into account. Must implement the
+\texttt{weka.filters.SupervisedFilter} interface.
+  \begin{tight_itemize}
+	\item \textbf{attribute} -- filters that work column-wise.
+	\item \textbf{instance} -- filters that work row-wise.
+  \end{tight_itemize}
+  \item \textbf{unsupervised} -- contains unsupervised filters, i.e., they work
+without taking any class distributions into account. The filter must implement
+the \texttt{weka.filters.UnsupervisedFilter} interface.
+  \begin{tight_itemize}
+	\item \textbf{attribute} -- filters that work column-wise.
+	\item \textbf{instance} -- filters that work row-wise.
+  \end{tight_itemize}
+\end{tight_itemize}
+
+\subsubsection*{Javadoc}
+The Javadoc generation works the same as with classifiers. See section
+``Javadoc'' on page \pageref{classifier_javadoc} for more information.
+
+\subsection{Revisions}
+\label{filter_revisions}
+Filters, like classifiers, implement the \texttt{weka.core.RevisionHandler}
+interface. This provides the functionality of obtaining the Subversion revision
+from within Java. Filters that are not part of the official WEKA distribution
+do not have to implement the method \texttt{getRevision()} as the
+\texttt{weka.filters.Filter} class already implements this method.
+Contributions, on the other hand, need to implement it, in order to
+obtain the revision of this particular source file. See section ``Revisions''
+on page \pageref{classifier_revisions}.
+
+\newpage
+\subsection{Testing}
+WEKA provides already a test framework to ensure correct basic functionality of
+a filter. It is essential for the filter to pass these tests.
+
+\subsubsection{Option handling}
+You can check the option handling of your filter with the following tool from
+command-line:
+\begin{verbatim}
+ weka.core.CheckOptionHandler -W classname [-- additional parameters]
+\end{verbatim}
+All tests need to return \textit{yes}.
+
+\subsubsection{GenericObjectEditor}
+The \texttt{CheckGOE} class checks whether all the properties available in the
+GUI have a tooltip accompanying them and whether the \texttt{globalInfo()}
+method is declared:
+\begin{verbatim}
+ weka.core.CheckGOE -W classname [-- additional parameters]
+\end{verbatim}
+All tests, once again, need to return \textit{yes}.
+
+\subsubsection{Source code}
+Filters that implement the \texttt{weka.filters.Sourcable} interface can output
+Java code of their internal representation. In order to check the generated
+code, one should not only compile the code, but also test it with the following
+test class:
+\begin{verbatim}
+ weka.filters.CheckSource
+\end{verbatim}
+This class takes the original WEKA filter, the generated code and the dataset
+used for generating the source code (and an optional class index) as parameters.
+It builds the WEKA filter on the dataset and compares the output, the one from
+the WEKA filter and the one from the generated source code, whether they are the
+same.
+
+Here is an example call for
+\texttt{weka.filters.unsupervised.attribute.ReplaceMissingValues} and the
+generated class \texttt{weka.filters.WEKAWrapper} (it wraps the actual generated
+code in a pseudo-filter):
+\begin{verbatim}
+ java weka.filters.CheckSource \
+    -W weka.filters.unsupervised.attribute.ReplaceMissingValues \
+    -S weka.filters.WEKAWrapper \
+    -t data.arff
+\end{verbatim}
+It needs to return \textit{Tests OK!}.
+
+\subsubsection{Unit tests}
+In order to make sure that your filter applies to the WEKA criteria, you
+should add your filter to the junit unit test framework, i.e., by creating a
+Test class. The superclass for filter unit tests is
+\texttt{weka.filters.AbstractFilterTest}.
+
