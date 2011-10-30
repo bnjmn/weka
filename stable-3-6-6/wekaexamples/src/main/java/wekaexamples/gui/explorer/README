@@ -1,0 +1,30 @@
+For the SqlPanel, the Explorer.props file must contain the following
+lines:
+
+Tabs=wekaexamples.gui.explorer.SqlPanel,\
+      weka.gui.explorer.ClassifierPanel,\
+      weka.gui.explorer.ClustererPanel,\
+      weka.gui.explorer.AssociationsPanel,\
+      weka.gui.explorer.AttributeSelectionPanel,\
+      weka.gui.explorer.VisualizePanel
+      
+For the GeneratorPanel, the following lines:
+
+Tabs=wekaexamples.gui.explorer.GeneratorPanel:standalone,\
+     weka.gui.explorer.ClassifierPanel,\
+     weka.gui.explorer.ClustererPanel,\
+     weka.gui.explorer.AssociationsPanel,\
+     weka.gui.explorer.AttributeSelectionPanel,\
+     weka.gui.explorer.VisualizePanel
+
+And for the ExperimentPanel, the following lines:
+
+Tabs=weka.gui.explorer.ClassifierPanel,\
+     wekaexamples.gui.explorer.ExperimentPanel,\
+     weka.gui.explorer.ClustererPanel,\
+     weka.gui.explorer.AssociationsPanel,\
+     weka.gui.explorer.AttributeSelectionPanel,\
+     weka.gui.explorer.VisualizePanel
+
+See also wiki article "Adding tabs in the Explorer":
+  http://weka.wiki.sourceforge.net/Adding+tabs+in+the+Explorer
