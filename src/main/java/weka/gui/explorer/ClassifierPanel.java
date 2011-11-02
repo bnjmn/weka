@@ -1020,7 +1020,8 @@ public class ClassifierPanel
    * @param title	the title to print
    */
   protected void printPredictionsHeader(StringBuffer outBuff, Instances inst, String title) {
-    outBuff.append(Messages.getInstance().getString("ClassifierPanel_PrintPredictionsHeader_OutBuffer_Text_First") + title + Messages.getInstance().getString("ClassifierPanel_PrintPredictionsHeader_OutBuffer_Text_First_Alpha"));
+    outBuff.append(Messages.getInstance().getString("ClassifierPanel_PrintPredictionsHeader_OutBuffer_Text_First") + title 
+        + " " +Messages.getInstance().getString("ClassifierPanel_PrintPredictionsHeader_OutBuffer_Text_First_Alpha"));
     outBuff.append(Messages.getInstance().getString("ClassifierPanel_PrintPredictionsHeader_OutBuffer_Text_Second"));
     if (inst.classAttribute().isNominal()) {
       outBuff.append(Messages.getInstance().getString("ClassifierPanel_PrintPredictionsHeader_OutBuffer_Text_Third"));
