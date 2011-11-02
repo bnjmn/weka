@@ -899,10 +899,12 @@ public class Classifier
       } else {
         System.err.println(msg);
       }
-      // start the execution pool
-      if (m_executorPool == null) {
+      
+      // start the execution pool (always re-create the executor because the user
+      // might have changed the number of execution slots since the last time)
+//      if (m_executorPool == null) {
         startExecutorPool();
-      }
+//      }
             
       // setup output queues
       msg = Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Fourth") + statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Fifth");
@@ -1903,8 +1905,8 @@ public class Classifier
   private String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|"
     + ((m_Classifier instanceof OptionHandler &&
-        Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()).length() > 0) 
-        ? Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()) + "|"
+        Utils.joinOptions(((OptionHandler)m_ClassifierTemplate).getOptions()).length() > 0) 
+        ? Utils.joinOptions(((OptionHandler)m_ClassifierTemplate).getOptions()) + "|"
             : "");
   }
 }
