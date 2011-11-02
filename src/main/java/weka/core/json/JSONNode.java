@@ -282,6 +282,15 @@ public class JSONNode
   }
   
   /**
+   * Adds a null array element child to the array.
+   * 
+   * @return		the new node, or null if none added
+   */
+  public JSONNode addNullArrayElement() {
+    return add(null, null, NodeType.PRIMITIVE);
+  }
+  
+  /**
    * Adds an array element child to the array.
    * 
    * @param value	the value of the element array
