@@ -3335,6 +3335,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     
     public void run() {
       m_flowIndex = m_mainKFPerspective.getCurrentTabIndex();
+      String flowName = m_mainKFPerspective.getTabTitle(m_flowIndex);
       m_mainKFPerspective.setExecuting(true);
       m_mainKFPerspective.getLogPanel(m_flowIndex).clearStatus();
       m_mainKFPerspective.getLogPanel(m_flowIndex).
@@ -3356,6 +3357,19 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_logPanel.logMessage("An error occurred while running the flow: " +
             ex.getMessage());
       } finally {
+        if (m_flowIndex >= m_mainKFPerspective.getNumTabs() - 1 || 
+            !m_mainKFPerspective.getTabTitle(m_flowIndex).equals(flowName)) {
+          // try and find which index our flow is at (user must have closed some
+          // other tabs at lower indexes than us)!
+          for (int i = 0; i < m_mainKFPerspective.getNumTabs(); i++) {
+            String tabT = m_mainKFPerspective.getTabTitle(i);
+            if (tabT != null && tabT.equals(flowName)) {
+              m_flowIndex = i;
+              break;
+            }
+          }
+        }
+        
         m_mainKFPerspective.setExecuting(m_flowIndex, false);
         m_mainKFPerspective.setExecutionThread(m_flowIndex, null);
         if (m_wasUserStopped) {
