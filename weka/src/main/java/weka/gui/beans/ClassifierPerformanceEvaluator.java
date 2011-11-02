@@ -239,7 +239,6 @@ public class ClassifierPerformanceEvaluator
         m_logger.statusMessage(statusMessagePrefix()
             +"Evaluating (" + m_setNum
             +")...");
-        m_visual.setAnimated();
       }
       try {
 
@@ -333,7 +332,14 @@ public class ClassifierPerformanceEvaluator
         m_aggregatedPlotSizes.addElement(plotInstances.getPlotSizes().get(i));
       }
     }        
-    m_setsComplete++;    
+    m_setsComplete++;
+    
+    if (m_logger != null) {
+      if (m_setsComplete < maxSetNum) {
+        m_logger.statusMessage(statusMessagePrefix() + "Finished (" + 
+            m_setsComplete + ").");
+      }
+    }
     
 //  if (ce.getSetNumber() == ce.getMaxSetNumber()) {
     if (m_setsComplete == maxSetNum) {
@@ -514,9 +520,9 @@ public class ClassifierPerformanceEvaluator
         + " starting executor pool ("
         + getExecutionSlots() + " slots)...";
         // start the execution pool
-        if (m_executorPool == null) {
+       // if (m_executorPool == null) {
           startExecutorPool();
-        }
+        //}
         m_tasks = new ArrayList<EvaluationTask>();
 
         if (m_logger != null) {
