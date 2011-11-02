@@ -16,7 +16,7 @@
 
 /*
  * JSONInstances.java
- * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009-2011 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.json;
@@ -33,10 +33,11 @@ import java.util.ArrayList;
 
 /**
  * Class for transforming Instances objects into <a href="http://www.json.org/" target="_blank">JSON</a>
- * objects and vice versa.
+ * objects and vice versa. Missing values get stored as "?".
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
+ * @see #MISSING_VALUE
  */
 public class JSONInstances {
 
@@ -78,6 +79,9 @@ public class JSONInstances {
 
   /** the separator for index/value in case of sparse instances. */
   public final static String SPARSE_SEPARATOR = ":";
+
+  /** the missing value indicator. */
+  public final static String MISSING_VALUE = "?";
   
   /**
    * Turns the JSON object into an Attribute, if possible.
@@ -87,14 +91,15 @@ public class JSONInstances {
    * @return		the Attribute, null in case of an error
    */
   protected static Attribute toAttribute(JSONNode att, boolean[] classAtt) {
-    Attribute	result;
-    String	name;
-    String	type;
-    String	dateformat;
-    JSONNode	labels;
+    Attribute		result;
+    String		name;
+    String		type;
+    String		dateformat;
+    JSONNode		labels;
     ArrayList<String>	values;
-    int		i;
-    double	weight;
+    String		label;
+    int			i;
+    double		weight;
     
     name   = (String) att.getChild(NAME).getValue("noname");
     type   = (String) att.getChild(TYPE).getValue("");
@@ -105,8 +110,13 @@ public class JSONInstances {
     else if (type.equals(Attribute.typeToString(Attribute.NOMINAL))) {
       labels = att.getChild(LABELS);
       values = new ArrayList<String>();
-      for (i = 0; i < labels.getChildCount(); i++)
-	values.add((String)((JSONNode) labels.getChildAt(i)).getValue());
+      for (i = 0; i < labels.getChildCount(); i++) {
+	label = (String)((JSONNode) labels.getChildAt(i)).getValue();
+	if (label.equals("'" + MISSING_VALUE + "'"))
+	  values.add(MISSING_VALUE);
+	else
+	  values.add(label);
+      }
       result = new Attribute(name, values);
     }
     else if (type.equals(Attribute.typeToString(Attribute.DATE))) {
@@ -160,30 +170,38 @@ public class JSONInstances {
       }
       
       try {
-	if (data.attribute(index).isNumeric()) {
-	  vals[index] = Double.parseDouble(value);
-	}
-	else if (data.attribute(index).isNominal()) {
-	  vals[index] = data.attribute(index).indexOfValue(value);
-	  if ((vals[index] == -1) && value.startsWith("'") && value.endsWith("'"))
-	    vals[index] = data.attribute(index).indexOfValue(Utils.unquote(value));
-	  // FIXME backslashes seem to get escaped twice when creating a JSON file?
-	  if ((vals[index] == -1) && value.startsWith("'") && value.endsWith("'"))
-	    vals[index] = data.attribute(index).indexOfValue(Utils.unbackQuoteChars(Utils.unquote(value)));
-	  if (vals[index] == -1) {
-	    System.err.println("Unknown label '" + value + "' for attribute #" + (index+1) + "!");
-	    return null;
-	  }
-	}
-	else if (data.attribute(index).isDate()) {
-	  vals[index] = data.attribute(index).parseDate(value);
-	}
-	else if (data.attribute(index).isString()) {
-	  vals[index] = data.attribute(index).addStringValue(value);
+	if (value.equals(MISSING_VALUE)) {
+	  vals[index] = Utils.missingValue();
 	}
 	else {
-	  System.err.println("Unhandled attribute type '" + Attribute.typeToString(data.attribute(index).type()) + "'!");
-	  return null;
+	  // unescape '?' labels 
+	  if (value.equals("'" + MISSING_VALUE + "'"))
+	    value = MISSING_VALUE;
+	  if (data.attribute(index).isNumeric()) {
+	    vals[index] = Double.parseDouble(value);
+	  }
+	  else if (data.attribute(index).isNominal()) {
+	    vals[index] = data.attribute(index).indexOfValue(value);
+	    if ((vals[index] == -1) && value.startsWith("'") && value.endsWith("'"))
+	      vals[index] = data.attribute(index).indexOfValue(Utils.unquote(value));
+	    // FIXME backslashes seem to get escaped twice when creating a JSON file?
+	    if ((vals[index] == -1) && value.startsWith("'") && value.endsWith("'"))
+	      vals[index] = data.attribute(index).indexOfValue(Utils.unbackQuoteChars(Utils.unquote(value)));
+	    if (vals[index] == -1) {
+	      System.err.println("Unknown label '" + value + "' for attribute #" + (index+1) + "!");
+	      return null;
+	    }
+	  }
+	  else if (data.attribute(index).isDate()) {
+	    vals[index] = data.attribute(index).parseDate(value);
+	  }
+	  else if (data.attribute(index).isString()) {
+	    vals[index] = data.attribute(index).addStringValue(value);
+	  }
+	  else {
+	    System.err.println("Unhandled attribute type '" + Attribute.typeToString(data.attribute(index).type()) + "'!");
+	    return null;
+	  }
 	}
       }
       catch (Exception e) {
@@ -192,7 +210,10 @@ public class JSONInstances {
       }
     }
 
-    result = new DenseInstance(weight, vals);
+    if (sparse)
+      result = new SparseInstance(weight, vals);
+    else
+      result = new DenseInstance(weight, vals);
     result.setDataset(data);
       
     return result;
@@ -308,8 +329,12 @@ public class JSONInstances {
     result.addPrimitive(WEIGHT, att.weight());
     if (att.isNominal()) {
       labels = result.addArray(LABELS);
-      for (i = 0; i < att.numValues(); i++)
-	labels.addArrayElement(att.value(i));
+      for (i = 0; i < att.numValues(); i++) {
+	if (att.value(i).equals(MISSING_VALUE))
+	  labels.addArrayElement("'" + att.value(i) + "'");
+	else
+	  labels.addArrayElement(att.value(i));
+      }
     }
     if (att.isDate())
       result.addPrimitive(DATEFORMAT, att.getDateFormat());
@@ -336,12 +361,24 @@ public class JSONInstances {
     result.addPrimitive(WEIGHT, inst.weight());
     values = result.addArray(VALUES);
     if (sparse) {
-      for (i = 0; i < inst.numValues(); i++)
-	values.addArrayElement(inst.index(i) + SPARSE_SEPARATOR + inst.toString(inst.index(i)));
+      for (i = 0; i < inst.numValues(); i++) {
+	if (inst.isMissing(inst.index(i)))
+	  values.addArrayElement(inst.index(i) + SPARSE_SEPARATOR + MISSING_VALUE);
+	else if (inst.toString(inst.index(i)).equals("'" + MISSING_VALUE + "'"))
+	  values.addArrayElement(inst.index(i) + SPARSE_SEPARATOR + "'" + MISSING_VALUE + "'");  // escape '?' labels
+	else
+	  values.addArrayElement(inst.index(i) + SPARSE_SEPARATOR + inst.toString(inst.index(i)));
+      }
     }
     else {
-      for (i = 0; i < inst.numAttributes(); i++)
-	values.addArrayElement(inst.toString(i));
+      for (i = 0; i < inst.numAttributes(); i++) {
+	if (inst.isMissing(i))
+	  values.addArrayElement(MISSING_VALUE);
+	else if (inst.toString(i).equals("'" + MISSING_VALUE + "'"))
+	  values.addArrayElement("'" + MISSING_VALUE + "'");  // escape '?' labels
+	else
+	  values.addArrayElement(inst.toString(i));
+      }
     }
     
     return result;
