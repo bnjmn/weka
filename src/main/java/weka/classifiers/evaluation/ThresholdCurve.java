@@ -199,6 +199,14 @@ public class ThresholdCurve
         insts.add(makeInstance(tc, probs[sorted[i]]));
 	}*/
     }
+    
+    // make sure a zero point gets into the curve
+    if (tc.getFalseNegative() != totPos || tc.getTrueNegative() != totNeg) {
+      tc = new TwoClassStats(0, 0, totNeg, totPos);
+      threshold = probs[sorted[sorted.length - 1]] + 10e-6;
+      insts.add(makeInstance(tc, threshold));
+    }
+        
     return insts;
   }
 
