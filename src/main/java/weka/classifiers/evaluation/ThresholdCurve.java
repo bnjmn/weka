@@ -157,6 +157,7 @@ public class ThresholdCurve
     double threshold = 0;
     double cumulativePos = 0;
     double cumulativeNeg = 0;
+    
     for (int i = 0; i < sorted.length; i++) {
 
       if ((i == 0) || (probs[sorted[i]] > threshold)) {
@@ -201,6 +202,14 @@ public class ThresholdCurve
         insts.add(makeInstance(tc, probs[sorted[i]]));
 	}*/
     }
+    
+    // make sure a zero point gets into the curve
+    if (tc.getFalseNegative() != totPos || tc.getTrueNegative() != totNeg) {
+      tc = new TwoClassStats(0, 0, totNeg, totPos);
+      threshold = probs[sorted[sorted.length - 1]] + 10e-6;
+      insts.add(makeInstance(tc, threshold));
+    }
+    
     return insts;
   }
 
