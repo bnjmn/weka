@@ -1396,12 +1396,18 @@ public class EditableBayesNet extends BayesNet {
 		Attribute newAtt = new Attribute(sName, values);
 		if (m_Instances.classIndex() == nTargetNode) {
 			m_Instances.setClassIndex(-1);
-			m_Instances.insertAttributeAt(newAtt, nTargetNode);
+			/*m_Instances.insertAttributeAt(newAtt, nTargetNode);
 			m_Instances.deleteAttributeAt(nTargetNode + 1);
+			m_Instances.setClassIndex(nTargetNode); */
+			
+			m_Instances.deleteAttributeAt(nTargetNode);
+			m_Instances.insertAttributeAt(newAtt, nTargetNode);
 			m_Instances.setClassIndex(nTargetNode);
 		} else {
-			m_Instances.insertAttributeAt(newAtt, nTargetNode);
-			m_Instances.deleteAttributeAt(nTargetNode + 1);
+			/*m_Instances.insertAttributeAt(newAtt, nTargetNode);
+			m_Instances.deleteAttributeAt(nTargetNode + 1); */
+		        m_Instances.deleteAttributeAt(nTargetNode);
+		        m_Instances.insertAttributeAt(newAtt, nTargetNode);
 		}
 	} // replaceAtt
 
