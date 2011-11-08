@@ -77,7 +77,7 @@ import weka.filters.unsupervised.attribute.Reorder;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 
 public class EditableBayesNet extends BayesNet {
@@ -1396,12 +1396,18 @@ public class EditableBayesNet extends BayesNet {
 		Attribute newAtt = new Attribute(sName, values);
 		if (m_Instances.classIndex() == nTargetNode) {
 			m_Instances.setClassIndex(-1);
-			m_Instances.insertAttributeAt(newAtt, nTargetNode);
+			/*m_Instances.insertAttributeAt(newAtt, nTargetNode);
 			m_Instances.deleteAttributeAt(nTargetNode + 1);
-			m_Instances.setClassIndex(nTargetNode);
+			m_Instances.setClassIndex(nTargetNode); */
+			
+			m_Instances.deleteAttributeAt(nTargetNode);
+                        m_Instances.insertAttributeAt(newAtt, nTargetNode);
+                        m_Instances.setClassIndex(nTargetNode);
 		} else {
-			m_Instances.insertAttributeAt(newAtt, nTargetNode);
-			m_Instances.deleteAttributeAt(nTargetNode + 1);
+			/*m_Instances.insertAttributeAt(newAtt, nTargetNode);
+			m_Instances.deleteAttributeAt(nTargetNode + 1); */
+		        m_Instances.deleteAttributeAt(nTargetNode);
+                        m_Instances.insertAttributeAt(newAtt, nTargetNode);
 		}
 	} // replaceAtt
 
@@ -2658,7 +2664,7 @@ public class EditableBayesNet extends BayesNet {
 	   * @return		the revision
 	   */
 	  public String getRevision() {
-	    return RevisionUtils.extract("$Revision: 1.4 $");
+	    return RevisionUtils.extract("$Revision$");
 	  }
 
 	/**
