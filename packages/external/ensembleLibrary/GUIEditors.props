@@ -1,0 +1,4 @@
+# Mappings for classes to be handled in the GenericObjectEditor
+# Specify the EnsembleSelectionLibrary editor
+
+weka.classifiers.meta.ensembleSelection.EnsembleSelectionLibrary=weka.gui.EnsembleSelectionLibraryEditor
