@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Enumeration;
@@ -66,10 +67,18 @@ import weka.core.Utils;
  *  The name of the table.
  *  (default: the relation name)</pre>
  * 
+ * <pre> -truncate
+ *  Truncate (i.e. delete any data) in table before inserting</pre>
+ * 
  * <pre> -P
  *  Add an ID column as primary key. The name is specified
  *  in the DatabaseUtils file ('idColumn'). The DatabaseLoader
  *  won't load this column.</pre>
+ * 
+ * <pre> -custom-props &lt;file&gt;
+ *  The custom properties file to use instead of default ones,
+ *  containing the database parameters.
+ *  (default: none)</pre>
  * 
  * <pre> -i &lt;input file name&gt;
  *  Input file in arff format that should be saved in database.</pre>
@@ -137,6 +146,9 @@ public class DatabaseSaver
   
   /** the custom props file to use instead of default one. */
   protected File m_CustomPropsFile = null;
+  
+  /** Whether to truncate (i.e. drop and then recreate) the table if it already exists */
+  protected boolean m_truncate;
   
   /** Environment variables to use */
   protected transient Environment m_env;
@@ -301,6 +313,37 @@ public class DatabaseSaver
   public String tableNameTipText(){
   
       return "Sets the name of the table.";
+  }
+  
+  /**
+   * Set whether to truncate (i.e. drop and recreate) the
+   * table if it already exits. If false, then new data is appended
+   * to the table.
+   * 
+   * @param t true if the table should be truncated first (if it exists).
+   */
+  public void setTruncate(boolean t) {
+    m_truncate = t;
+  }
+  
+  /**
+   * Get whether to truncate (i.e. drop and recreate) the
+   * table if it already exits. If false, then new data is appended
+   * to the table.
+   * 
+   * @param t true if the table should be truncated first (if it exists).
+   */
+  public boolean getTruncate() {
+    return m_truncate;
+  }
+  
+  /** 
+   * Returns the tip text for this property.
+   * 
+   * @return the tip text for this property
+   */
+  public String truncateTipText() {
+    return "Truncate (i.e. drop and recreate) table if it already exists";
   }
   
   /** 
@@ -631,6 +674,30 @@ public class DatabaseSaver
       if(structure.numAttributes() == 0)
           throw new Exception("Instances have no attribute.");
       query.append(" ( ");
+      
+      if (m_DataBaseConnection.tableExists(m_resolvedTableName)) {
+        if (!m_truncate) {
+          System.err.println("[DatabaseSaver] Table '" 
+              + m_resolvedTableName + "' already exists - will append data...");
+          
+          // if incremental and using primary key set the correct start value
+          // for count
+          if (getRetrieval() == INCREMENTAL && m_id) {
+            String countS = "SELECT COUNT(*) FROM " + m_resolvedTableName;
+            m_DataBaseConnection.execute(countS);
+            ResultSet countRS = m_DataBaseConnection.getResultSet();
+            countRS.next();
+            m_count = countRS.getInt(1);
+            countRS.close();
+            m_count++;
+          }
+          
+          return;
+        }
+        String trunc = "DROP TABLE " + m_resolvedTableName;
+        m_DataBaseConnection.execute(trunc);
+      }
+      
       if(m_id){
         if(m_DataBaseConnection.getUpperCase())
               m_idColumn = m_idColumn.toUpperCase();
@@ -856,6 +923,10 @@ public class DatabaseSaver
       options.add(m_tableName);
     }
     
+    if (m_truncate) {
+      options.add("-truncate");
+    }
+    
     if (m_id)
         options.add("-P");
 
@@ -902,6 +973,10 @@ public class DatabaseSaver
            "T", 1, "-T <table name>"));
      
      newVector.addElement(new Option(
+         "\tTruncate (i.e. delete any data) in table before inserting",
+         "truncate", 0, "-truncate"));
+     
+     newVector.addElement(new Option(
            "\tAdd an ID column as primary key. The name is specified\n"
            + "\tin the DatabaseUtils file ('idColumn'). The DatabaseLoader\n"
            + "\twon't load this column.",
@@ -942,10 +1017,18 @@ public class DatabaseSaver
    *  The name of the table.
    *  (default: the relation name)</pre>
    * 
+   * <pre> -truncate
+   *  Truncate (i.e. delete any data) in table before inserting</pre>
+   * 
    * <pre> -P
    *  Add an ID column as primary key. The name is specified
    *  in the DatabaseUtils file ('idColumn'). The DatabaseLoader
    *  won't load this column.</pre>
+   * 
+   * <pre> -custom-props &lt;file&gt;
+   *  The custom properties file to use instead of default ones,
+   *  containing the database parameters.
+   *  (default: none)</pre>
    * 
    * <pre> -i &lt;input file name&gt;
    *  Input file in arff format that should be saved in database.</pre>
@@ -974,6 +1057,8 @@ public class DatabaseSaver
       setPassword(tmpStr);
     
     tableString = Utils.getOption('T', options);
+    
+    m_truncate = Utils.getFlag("truncate", options);
     
     inputString = Utils.getOption('i', options);
     
@@ -1059,3 +1144,4 @@ public class DatabaseSaver
       
     }
 }
+
