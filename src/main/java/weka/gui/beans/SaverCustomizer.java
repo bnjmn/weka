@@ -99,6 +99,8 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   private JPasswordField m_passwordText;
 
   private EnvironmentField m_tableText;
+  
+  private JCheckBox m_truncateBox;
 
   private JCheckBox m_idBox;
 
@@ -284,22 +286,40 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 4; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_tabBox, gbConstraints);
     db.add(m_tabBox);
+    
+    JLabel truncLab = new JLabel("Truncate table", SwingConstants.RIGHT);
+    truncLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 5; gbConstraints.gridx = 0;
+    gbLayout.setConstraints(truncLab, gbConstraints);
+    db.add(truncLab);
+    
+    m_truncateBox = new JCheckBox();
+    m_truncateBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getTruncate());
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 5; gbConstraints.gridx = 1;
+    gbLayout.setConstraints(m_truncateBox, gbConstraints);
+    db.add(m_truncateBox);
 
     JLabel idLab = new JLabel("Automatic primary key", SwingConstants.RIGHT);
     idLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 5; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 6; gbConstraints.gridx = 0;
     gbLayout.setConstraints(idLab, gbConstraints);
-    db.add(idLab);
+    db.add(idLab);        
     
     m_idBox = new JCheckBox();
     m_idBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getAutoKeyGeneration());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 5; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 6; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_idBox, gbConstraints);
     db.add(m_idBox);
     
@@ -309,7 +329,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 6; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 7; gbConstraints.gridx = 0;
     gbLayout.setConstraints(propsLab, gbConstraints);
     db.add(propsLab);
     
@@ -321,7 +341,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 6; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 7; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_dbProps, gbConstraints);
     db.add(m_dbProps);
     File toSet = ((DatabaseSaver)m_dsSaver.getSaverTemplate()).getCustomPropsFile();
@@ -333,7 +353,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 6; gbConstraints.gridx = 2;
+    gbConstraints.gridy = 7; gbConstraints.gridx = 2;
     gbLayout.setConstraints(loadPropsBut, gbConstraints);
     db.add(loadPropsBut);
     loadPropsBut.addActionListener(new ActionListener() {
@@ -373,6 +393,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
         if(!m_tabBox.isSelected()) {
           ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setTableName(m_tableText.getText());
         }
+        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setTruncate(m_truncateBox.isSelected());
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setAutoKeyGeneration(m_idBox.isSelected());
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setRelationForTableName(m_tabBox.isSelected());
         
