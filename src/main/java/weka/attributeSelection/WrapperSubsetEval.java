@@ -515,7 +515,7 @@ public class WrapperSubsetEval
       classifierOptions = ((OptionHandler)m_BaseClassifier).getOptions();
     }
 
-    String[] options = new String[9 + classifierOptions.length];
+    String[] options = new String[11 + classifierOptions.length];
     int current = 0;
 
     if (getClassifier() != null) {
@@ -529,6 +529,27 @@ public class WrapperSubsetEval
     options[current++] = "" + getThreshold();
     options[current++] = "-R";
     options[current++] = "" + getSeed();
+    
+    options[current++] = "-E";
+    switch (m_evaluationMeasure) {
+    case EVAL_DEFAULT:
+    case EVAL_ACCURACY:
+      options[current++] = "acc";
+      break;
+    case EVAL_RMSE:
+      options[current++] = "rmse";
+      break;
+    case EVAL_MAE:
+      options[current++] = "mae";
+      break;
+    case EVAL_FMEASURE:
+      options[current++] = "f-meas";
+      break;
+    case EVAL_AUC:
+      options[current++] = "auc";
+      break;
+    }
+    
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
 		     classifierOptions.length);
