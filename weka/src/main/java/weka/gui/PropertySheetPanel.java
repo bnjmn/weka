@@ -28,6 +28,7 @@ import weka.core.CapabilitiesHandler;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.MultiInstanceCapabilitiesHandler;
+import weka.gui.beans.GOECustomizer;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -44,6 +45,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.BeanInfo;
 import java.beans.Beans;
+import java.beans.Customizer;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
@@ -247,6 +249,9 @@ public class PropertySheetPanel extends JPanel
   
   /** The target object being edited. */
   private Object m_Target;
+  
+  /** Holds the customizer (if one exists) for the object being edited */
+  private GOECustomizer m_Customizer;
 
   /** Holds properties of the target. */
   private PropertyDescriptor m_Properties[];
@@ -380,10 +385,13 @@ public class PropertySheetPanel extends JPanel
     setVisible(false);
     m_NumEditable = 0;
     m_Target = targ;
+    Class custClass = null;
     try {
       BeanInfo bi = Introspector.getBeanInfo(m_Target.getClass());
       m_Properties = bi.getPropertyDescriptors();
       m_Methods = bi.getMethodDescriptors();
+      custClass = Introspector.
+        getBeanInfo(m_Target.getClass()).getBeanDescriptor().getCustomizerClass();            
     } catch (IntrospectionException ex) {
       System.err.println("PropertySheet: Couldn't introspect");
       return;
@@ -393,13 +401,40 @@ public class PropertySheetPanel extends JPanel
     m_HelpText = null;
     // Look for a globalInfo method that returns a string
     // describing the target
+    Object args[] = { };
+    boolean firstTip = true;
+    StringBuffer optionsBuff = new StringBuffer();
     for (int i = 0;i < m_Methods.length; i++) {
       String name = m_Methods[i].getDisplayName();
       Method meth = m_Methods[i].getMethod();
+      
+      if (name.endsWith("TipText")) {
+        if (meth.getReturnType().equals(String.class)) {
+          try {
+            String tempTip = (String)(meth.invoke(m_Target, args));
+//            int ci = tempTip.indexOf('.');
+
+              if (firstTip) {
+                optionsBuff.append("OPTIONS\n");
+                firstTip = false;
+              }
+              tempTip = tempTip.replace("<html>", "").
+                replace("</html>", "").replace("<br>", "\n").replace("<p>", "\n\n");
+              optionsBuff.append(name.replace("TipText", "")).append(" -- ");
+              optionsBuff.append(tempTip).append("\n\n");
+              //jt.setText(m_HelpText.toString());
+
+          } catch (Exception ex) {
+
+          }
+       //   break;
+        }
+      }      
+      
       if (name.equals("globalInfo")) {
 	if (meth.getReturnType().equals(String.class)) {
 	  try {
-	    Object args[] = { };
+//	    Object args[] = { };
 	    String globalInfo = (String)(meth.invoke(m_Target, args));
             String summary = globalInfo;
             int ci = globalInfo.indexOf('.');
@@ -471,20 +506,68 @@ public class PropertySheetPanel extends JPanel
 	    m_aboutPanel = jp;
 	    scrollablePanel.add(m_aboutPanel);
 	    componentOffset = 1;
-	    break;
+	    
+	    //break;
 	  } catch (Exception ex) {
 	    
 	  }
 	}
       }
     }
+    
+    if (m_HelpText != null) {
+      m_HelpText.append(optionsBuff.toString());
+    }
+    
+    if (custClass != null) {
+      // System.out.println("**** We've found a customizer for this object!");
+      try {
+        Object customizer = custClass.newInstance();
 
+        if (customizer instanceof JComponent && 
+            customizer instanceof GOECustomizer) {
+          m_Customizer = (GOECustomizer)customizer;
+
+          m_Customizer.dontShowOKCancelButtons();
+          m_Customizer.setObject(m_Target);
+
+          GridBagConstraints gbc = new GridBagConstraints();
+          gbc.fill = GridBagConstraints.BOTH;
+          gbc.gridwidth = 2;
+          gbc.gridy = componentOffset;     gbc.gridx = 0;
+          gbc.insets = new Insets(0,5,0,5);
+          gbLayout.setConstraints((JComponent)m_Customizer, gbc);
+          scrollablePanel.add((JComponent)m_Customizer);
+
+          validate();
+
+          // sometimes, the calculated dimensions seem to be too small and the
+          // scrollbars show up, though there is still plenty of space on the
+          // screen. hence we increase the dimensions a bit to fix this.
+          Dimension dim = scrollablePanel.getPreferredSize();
+          dim.height += 20;
+          dim.width  += 20;
+          scrollPane.setPreferredSize(dim);
+          validate();
+
+          setVisible(true);
+          return;
+        }
+      } catch (InstantiationException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IllegalAccessException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }   
+    }
+    
     m_Editors = new PropertyEditor[m_Properties.length];
     m_Values = new Object[m_Properties.length];
     m_Views = new JComponent[m_Properties.length];
     m_Labels = new JLabel[m_Properties.length];
     m_TipTexts = new String[m_Properties.length];
-    boolean firstTip = true;
+//    boolean firstTip = true;
     for (int i = 0; i < m_Properties.length; i++) {
 
       // Don't display hidden or expert properties.
@@ -505,7 +588,7 @@ public class PropertySheetPanel extends JPanel
       JComponent view = null;
 
       try {
-	Object args[] = { };
+//	Object args[] = { };
 	Object value = getter.invoke(m_Target, args);
 	m_Values[i] = value;
 
@@ -576,15 +659,15 @@ public class PropertySheetPanel extends JPanel
 		} else {
 		  m_TipTexts[i] = tempTip.substring(0, ci);
 		}
-                if (m_HelpText != null) {
+/*                if (m_HelpText != null) {
                   if (firstTip) {
                     m_HelpText.append("OPTIONS\n");
                     firstTip = false;
                   }
                   m_HelpText.append(name).append(" -- ");
-                  m_HelpText.append(tempTip).append("\n\n");
+                  m_HelpText.append(tempTip).append("\n\n"); 
                   //jt.setText(m_HelpText.toString());
-                }
+                } */
 	      } catch (Exception ex) {
 
 	      }
@@ -869,6 +952,32 @@ public class PropertySheetPanel extends JPanel
    */
   public void setEnvironment(Environment env) {
     m_env = env;
+  }
+  
+  /**
+   * Pass on an OK closing notification to the customizer (if 
+   * one is in use)
+   */
+  public void closingOK() {
+    if (m_Customizer != null) {
+      // pass on the notification to the customizer so that
+      // it can copy values out of its GUI widgets into the object
+      // being customized, if necessary
+      m_Customizer.closingOK();
+    }
+  }
+  
+  /**
+   * Pass on a CANCEL closing notificiation to the customizer (if 
+   * one is in use).
+   */
+  public void closingCancel() {
+    // pass on the notification to the customizer so that
+    // it can revert to previous settings for the object being
+    // edited, if neccessary
+    if (m_Customizer != null) {
+      m_Customizer.closingCancel();
+    }
   }
 }
 
