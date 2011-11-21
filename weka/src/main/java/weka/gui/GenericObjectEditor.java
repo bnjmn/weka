@@ -743,7 +743,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       m_okBut.setEnabled(true);
       m_okBut.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
-
+	    
+	    m_ChildPropertySheet.closingOK();	    
 	    m_Backup = copyObject(m_Object);
 	    if ((getTopLevelAncestor() != null)
 		&& (getTopLevelAncestor() instanceof Window)) {
@@ -756,7 +757,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       m_cancelBut = new JButton("Cancel");
       m_cancelBut.setEnabled(true);
       m_cancelBut.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {		 
+	  public void actionPerformed(ActionEvent e) {
+	    
+	    m_ChildPropertySheet.closingCancel();
 	    if (m_Backup != null) {
 	
 	      m_Object = copyObject(m_Backup);
