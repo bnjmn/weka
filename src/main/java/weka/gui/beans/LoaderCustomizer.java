@@ -173,6 +173,41 @@ public class LoaderCustomizer
   private void setUpOther() {
     removeAll();
     add(m_LoaderEditor, BorderLayout.CENTER);
+    
+    JPanel buttonsP = new JPanel();
+    buttonsP.setLayout(new FlowLayout());
+    JButton ok,cancel;
+    buttonsP.add(ok = new JButton("OK"));
+    buttonsP.add(cancel=new JButton("Cancel"));
+    ok.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent evt){
+        
+        // Tell the editor that we are closing under an OK condition
+        // so that it can pass on the message to any customizer that
+        // might be in use
+        m_LoaderEditor.closingOK();
+        
+        if (m_parentWindow != null) {
+          m_parentWindow.dispose();
+        }
+      }
+    });
+    cancel.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent evt){
+        
+        // Tell the editor that we are closing under a CANCEL condition
+        // so that it can pass on the message to any customizer that
+        // might be in use
+        m_LoaderEditor.closingCancel();
+        
+        if (m_parentWindow != null) {
+          m_parentWindow.dispose();
+        }
+      }
+    });
+    
+    add(buttonsP, BorderLayout.SOUTH);
+    
     validate();
     repaint();
   }

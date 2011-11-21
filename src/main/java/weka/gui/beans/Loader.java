@@ -288,6 +288,13 @@ public class Loader
   public void setDB(boolean flag){
   
       m_dbSet = flag;
+      if (m_dbSet) {
+        try {
+          newStructure();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
   }
 
   protected void appearanceFinal() {
@@ -386,8 +393,8 @@ public class Loader
       }
     }
     m_dataFormat = m_Loader.getStructure();
-//    System.out.println("[Loader] Notifying listeners of instance structure avail.");
-//    notifyStructureAvailable(m_dataFormat);
+    System.out.println("[Loader] Notifying listeners of instance structure avail.");
+    notifyStructureAvailable(m_dataFormat);
   }  
   
   /**
