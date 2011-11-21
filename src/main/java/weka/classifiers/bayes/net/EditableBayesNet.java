@@ -1400,7 +1400,7 @@ public class EditableBayesNet extends BayesNet {
 			m_Instances.deleteAttributeAt(nTargetNode + 1); */
 			
 			m_Instances.deleteAttributeAt(nTargetNode);
-                        m_Instances.insertAttributeAt(newAtt, nTargetNode);7
+                        m_Instances.insertAttributeAt(newAtt, nTargetNode);
 			m_Instances.setClassIndex(nTargetNode);
 		} else {
 			/*m_Instances.insertAttributeAt(newAtt, nTargetNode);
