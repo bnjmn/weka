@@ -187,6 +187,13 @@ public class LoaderCustomizer
         // might be in use
         m_LoaderEditor.closingOK();
         
+        // make sure that the beans.Loader passes any changed structure downstream
+        try {
+          m_dsLoader.newStructure();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        
         if (m_parentWindow != null) {
           m_parentWindow.dispose();
         }
