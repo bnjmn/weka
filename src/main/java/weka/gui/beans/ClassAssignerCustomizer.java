@@ -83,10 +83,22 @@ public class ClassAssignerCustomizer
     m_holderP.setLayout(new BorderLayout());
     m_holderP.setBorder(BorderFactory.createTitledBorder("Choose class attribute"));
     m_holderP.add(m_ClassCombo, BorderLayout.CENTER);
+    m_ClassCombo.setEditable(true);
     m_ClassCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  if (m_classAssigner != null && m_displayColNames == true) {
-	    m_classAssigner.setClassColumn(""+(m_ClassCombo.getSelectedIndex()));
+	    //m_classAssigner.setClassColumn(""+(m_ClassCombo.getSelectedIndex()));
+	    String selectedI = (String)m_ClassCombo.getSelectedItem();
+	    selectedI = selectedI.replace("(Num)", "").replace("(Nom)", "").
+	      replace("(Str)", "").replace("(Dat)", "").replace("(Rel)", "").
+	      replace("(???)", "").trim();
+	    if (selectedI.equals("NO CLASS")) {
+	      // this will be parsed as a number by ClassAssigner and get decremented
+	      // by 1 (zero-based indexing), thus unsetting the class
+	      selectedI = "0";
+	    }
+	    
+	    m_classAssigner.setClassColumn(selectedI);
 	  }
 	}
       });
@@ -153,7 +165,12 @@ public class ClassAssignerCustomizer
         existingClassCol = classAtt.index();
       } else {
         // parse it as a number
-        existingClassCol = Integer.parseInt(classColString);
+        try {
+          existingClassCol = Integer.parseInt(classColString);
+        } catch (NumberFormatException ex) {
+          System.err.println("Warning : can't parse '" + classColString + "' as a number "
+              +" or find it as an attribute in the incoming data (ClassAssigner)");
+        }
         if (existingClassCol < 0) {
           existingClassCol = -1; // no class
         } else if (existingClassCol > format.numAttributes() - 1) {

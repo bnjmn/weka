@@ -294,7 +294,14 @@ public class ClassAssigner
         dataSet.setClass(classAtt);
       } else {
         // parse it as a number
-        classCol = Integer.parseInt(m_classColumn.trim()) - 1;
+        try {
+          classCol = Integer.parseInt(m_classColumn.trim()) - 1;
+        } catch (NumberFormatException ex) {
+          if (m_logger != null) {
+            m_logger.logMessage("Warning : can't parse '" + m_classColumn.trim() + "' as a number "
+                +" or find it as an attribute in the incoming data (ClassAssigner)");
+          }
+        }
         if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
           if (m_logger != null) {
             m_logger.logMessage("Class column outside range of data "
