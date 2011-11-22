@@ -11,6 +11,7 @@ import weka.classifiers.bayes.NaiveBayes
 import weka.classifiers.functions.Logistic
 import weka.classifiers.Evaluation
 import weka.classifiers.Classifier
+import weka.classifiers.AbstractClassifier
 
 import groovy.swing.SwingBuilder
 import javax.swing.*
@@ -330,10 +331,10 @@ class LearningCurve
           return
         }
       }
-      classifierToUse = Classifier.forName(classifierName, splitOptions)
+      classifierToUse = AbstractClassifier.forName(classifierName, splitOptions)
     } else {
         classifierToUse = m_connectedConfigurable.getClassifierTemplate()
-        classifierToUse = weka.classifiers.Classifier.makeCopy(classifierToUse)
+        classifierToUse = weka.classifiers.AbstractClassifier.makeCopy(classifierToUse)
     }
 
     double hS = Double.parseDouble(hSize)
@@ -384,7 +385,7 @@ class LearningCurve
     
 
        // train on this set
-       Classifier newModel = Classifier.makeCopies(classifierToUse, 1)[0]
+       Classifier newModel = AbstractClassifier.makeCopies(classifierToUse, 1)[0]
        newModel.buildClassifier(training)
 
        Evaluation eval = new Evaluation(holdoutI)
@@ -393,7 +394,7 @@ class LearningCurve
        //double auc = 1.0 - eval.errorRate();
        buff.append(""+numInThisStep+","+pc+"\n")
        //System.err.println(""+numInThisStep+","+auc+"\n")
-       Instance newInst = new Instance(2)
+       Instance newInst = new DenseInstance(2)
        newInst.setValue(0, (double)numInThisStep)
        newInst.setValue(1, pc)
        learnCInstances.add(newInst)
