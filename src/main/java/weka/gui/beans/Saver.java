@@ -386,42 +386,42 @@ public class Saver
    * @param e test set event
    */  
   public synchronized void acceptTestSet(TestSetEvent e) {
-      if (e.isStructureOnly()) {
-        try {
-          m_Saver = makeCopy();
-        } catch (Exception ex) {
-          if (m_logger != null) {
-            m_logger.statusMessage(statusMessagePrefix()
-                + "ERROR (See log for details)");
-            m_logger.logMessage("[Saver] " + statusMessagePrefix()
-                + " unable to copy saver. " 
-                + ex.getMessage());
-          }
+
+    try {
+      m_Saver = makeCopy();
+    } catch (Exception ex) {
+      if (m_logger != null) {
+        m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
+        m_logger.logMessage("[Saver] " + statusMessagePrefix()
+            + " unable to copy saver. " 
+            + ex.getMessage());
+      }
+    }
+
+    passEnvOnToSaver();
+    m_fileName = sanitizeFilename(e.getTestSet().relationName());
+    m_dataSet = e.getTestSet();
+    if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_SaverTemplate).getRelationForTableName()){
+      ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+    }
+    if(!e.isStructureOnly()){
+      if(!m_isDBSaver){
+        try{
+          m_Saver.setDirAndPrefix(m_fileName,"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
+        }catch (Exception ex){
+          System.out.println(ex);
         }
       }
-      passEnvOnToSaver();
-      m_fileName = sanitizeFilename(e.getTestSet().relationName());
-      m_dataSet = e.getTestSet();
-      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_SaverTemplate).getRelationForTableName()){
-          ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+      else{
+        ((DatabaseSaver)m_Saver).setRelationForTableName(false);
+        String setName = ((DatabaseSaver)m_Saver).getTableName();
+        setName = setName.replaceFirst("_[tT][eE][sS][tT]_[0-9]+_[oO][fF]_[0-9]+","");
+        ((DatabaseSaver)m_Saver).setTableName(setName+"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
       }
-      if(!e.isStructureOnly()){
-          if(!m_isDBSaver){
-            try{
-                m_Saver.setDirAndPrefix(m_fileName,"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
-            }catch (Exception ex){
-                System.out.println(ex);
-            }
-          }
-          else{
-              ((DatabaseSaver)m_Saver).setRelationForTableName(false);
-              String setName = ((DatabaseSaver)m_Saver).getTableName();
-              setName = setName.replaceFirst("_[tT][eE][sS][tT]_[0-9]+_[oO][fF]_[0-9]+","");
-              ((DatabaseSaver)m_Saver).setTableName(setName+"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
-          }
-          saveBatch();
-          System.out.println("... test set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
-      }
+      saveBatch();
+      System.out.println("... test set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+    }
   }
   
   /** Method reacts to a training set event and starts the writing process in batch
@@ -429,43 +429,42 @@ public class Saver
    * @param e a training set event
    */  
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
-    if (e.isStructureOnly()) {
-      try {
-        m_Saver = makeCopy();
-      } catch (Exception ex) {
-        if (m_logger != null) {
-          m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
-          m_logger.logMessage("[Saver] " + statusMessagePrefix()
-              + " unable to copy saver. " 
-              + ex.getMessage());
-        }
+    try {
+      m_Saver = makeCopy();
+    } catch (Exception ex) {
+      if (m_logger != null) {
+        m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
+        m_logger.logMessage("[Saver] " + statusMessagePrefix()
+            + " unable to copy saver. " 
+            + ex.getMessage());
       }
     }
-  
-      passEnvOnToSaver();
-      m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
-      m_dataSet = e.getTrainingSet();
-      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_SaverTemplate).getRelationForTableName()){
-           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+
+
+    passEnvOnToSaver();
+    m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
+    m_dataSet = e.getTrainingSet();
+    if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_SaverTemplate).getRelationForTableName()){
+      ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+    }
+    if(!e.isStructureOnly()){
+      if(!m_isDBSaver){
+        try{
+          m_Saver.setDirAndPrefix(m_fileName,"_training_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
+        }catch (Exception ex){
+          System.out.println(ex);
+        }
       }
-      if(!e.isStructureOnly()){
-          if(!m_isDBSaver){
-            try{
-                m_Saver.setDirAndPrefix(m_fileName,"_training_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
-            }catch (Exception ex){
-                System.out.println(ex);
-            }
-          }
-          else{
-            ((DatabaseSaver)m_Saver).setRelationForTableName(false);
-              String setName = ((DatabaseSaver)m_Saver).getTableName();
-              setName = setName.replaceFirst("_[tT][rR][aA][iI][nN][iI][nN][gG]_[0-9]+_[oO][fF]_[0-9]+","");
-              ((DatabaseSaver)m_Saver).setTableName(setName+"_training_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
-          }
-          saveBatch();
-          System.out.println("... training set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+      else{
+        ((DatabaseSaver)m_Saver).setRelationForTableName(false);
+        String setName = ((DatabaseSaver)m_Saver).getTableName();
+        setName = setName.replaceFirst("_[tT][rR][aA][iI][nN][iI][nN][gG]_[0-9]+_[oO][fF]_[0-9]+","");
+        ((DatabaseSaver)m_Saver).setTableName(setName+"_training_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
       }
+      saveBatch();
+      System.out.println("... training set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+    }
   }
   
   /** Saves instances in batch mode */  
