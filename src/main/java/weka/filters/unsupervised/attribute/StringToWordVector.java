@@ -755,17 +755,7 @@ public class StringToWordVector
       // Push all instances into the output queue
       for(int i=0; i<fv.size(); i++) {
 	push((Instance) fv.elementAt(i));
-      }
-      
-      // save memory by clearing string values from the input structure.      
-      // mainly useful for preventing the entire training corpus
-      // from getting saved if this filter gets serialized.
-      Instances inputFormat = getInputFormat();
-      for (int i = 0; i < inputFormat.numAttributes(); i++) {
-        if (m_SelectedRange.isInRange(i)) {
-          inputFormat.attribute(i).setStringValue("");
-        }
-      }
+      }      
     }
 
     // Flush the input
