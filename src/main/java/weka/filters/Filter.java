@@ -417,6 +417,7 @@ public abstract class Filter
 	 || (m_InputRelAtts.getAttributeIndices().length > 0) ) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
       m_InputStringAtts = new StringLocator(m_InputFormat, m_InputStringAtts.getAllowedIndices());
+      m_InputRelAtts = new RelationalLocator(m_InputFormat, m_InputRelAtts.getAllowedIndices());
     } else {
       // This more efficient than new Instances(m_InputFormat, 0);
       m_InputFormat.delete();
