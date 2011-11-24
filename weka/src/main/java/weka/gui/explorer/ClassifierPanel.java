@@ -2157,6 +2157,7 @@ public class ClassifierPanel
 	}
 	ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
 	objectOutputStream.writeObject(classifier);
+	trainHeader = trainHeader.stringFreeStructure();
 	if (trainHeader != null) objectOutputStream.writeObject(trainHeader);
 	objectOutputStream.flush();
 	objectOutputStream.close();
