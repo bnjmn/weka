@@ -294,7 +294,7 @@ public class SerializedModelSaver
       return;
     }
 
-    Instances trainHeader = new Instances(ce.getTestSet().getDataSet(), 0);
+    Instances trainHeader = ce.getTestSet().getDataSet().stringFreeStructure();
     String titleString = ce.getClusterer().getClass().getName();		      
     titleString = titleString.
       substring(titleString.lastIndexOf('.') + 1,
