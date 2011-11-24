@@ -435,7 +435,7 @@ public class SerializedModelSaver
         ce.getTrainSet().isStructureOnly()) {
       return;
     }
-    Instances trainHeader = new Instances(ce.getTrainSet().getDataSet(), 0);
+    Instances trainHeader = ce.getTrainSet().getDataSet().stringFreeStructure();
     
     // adjust for InputMappedClassifier (if necessary)
     if (ce.getClassifier() instanceof weka.classifiers.misc.InputMappedClassifier) {
