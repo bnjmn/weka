@@ -350,7 +350,7 @@ public class BoundaryPanel
     if (m_maxY == Double.MIN_VALUE)
     	m_maxY = 1;
     if (allPointsLessThanOne) {
-    	m_minX = m_minY = 0.0;
+//    	m_minX = m_minY = 0.0;
     	m_maxX = m_maxY = 1.0;
     }
     
