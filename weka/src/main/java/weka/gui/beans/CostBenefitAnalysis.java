@@ -78,6 +78,7 @@ import weka.gui.visualize.PlotData2D;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
+@KFStep(category = "Visualize", toolTipText = "Interactive cost/benefit analysis")
 public class CostBenefitAnalysis extends JPanel 
   implements BeanCommon, ThresholdDataListener, Visible, UserRequestAcceptor,
   Serializable, BeanContextChild, HeadlessEventCollector {
