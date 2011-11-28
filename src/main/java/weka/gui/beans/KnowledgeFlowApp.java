@@ -1839,8 +1839,24 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   //m_iconLookup.put(treeName, scaledForTree);
                 }
               }
+              
+              // check for annotation
+              Class compClass = visibleCheck.getClass();
+              Annotation[] annotations = 
+                compClass.getDeclaredAnnotations();
+              String tipText = null;
+              for (Annotation ann : annotations) {
+                if (ann instanceof KFStep) {
+                  tipText = ((KFStep)ann).toolTipText();
+                  break;
+                }
+              }              
+              
               JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "", 
                   scaledForTree);
+              if (tipText != null) {
+                leafData.setToolTipText(tipText);
+              }
               DefaultMutableTreeNode fixedLeafNode = new DefaultMutableTreeNode(leafData);
               subTreeNode.add(fixedLeafNode);            
             }
