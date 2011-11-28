@@ -1767,8 +1767,20 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                       // m_iconLookup.put(algName, scaledForTree);
                     }
                   }
+                  
+                  // try and get a tool tip
+                  String toolTip = "";
+                  try {
+                    Object wrappedA = Class.forName(algName).newInstance();
+                    toolTip = getGlobalInfo(wrappedA);
+                  } catch (Exception ex) { }
+                  
                   JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, algName, 
                       scaledForTree);
+                  
+                  if (toolTip != null && toolTip.length() > 0) {
+                   leafData.setToolTipText(toolTip); 
+                  }
                   DefaultMutableTreeNode leafAlgo = 
                     new DefaultMutableTreeNode(leafData);
                   subTreeNode.add(leafAlgo);             
@@ -1840,14 +1852,19 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 }
               }
               
-              // check for annotation
+              String tipText = null;
+              tipText = getGlobalInfo(visibleCheck);
+              
+              // check for annotation and let this override any global info tool tip
               Class compClass = visibleCheck.getClass();
               Annotation[] annotations = 
                 compClass.getDeclaredAnnotations();
-              String tipText = null;
+
               for (Annotation ann : annotations) {
                 if (ann instanceof KFStep) {
-                  tipText = ((KFStep)ann).toolTipText();
+                  tipText = "<html><font color=blue>"
+                    + ((KFStep)ann).toolTipText()
+                    + "</font></html>";
                   break;
                 }
               }              
@@ -1920,17 +1937,22 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 }
               }
               
+              String tipText = null;
+              tipText = getGlobalInfo(visibleCheck);
+              
               // check for annotation
               Class compClass = visibleCheck.getClass();
               Annotation[] annotations = 
                 compClass.getDeclaredAnnotations();
               DefaultMutableTreeNode targetFolder = null;
               String category = null;
-              String tipText = null;
+
               for (Annotation ann : annotations) {
                 if (ann instanceof KFStep) {
                   category = ((KFStep)ann).category();
-                  tipText = ((KFStep)ann).toolTipText();
+                  tipText = "<html><font color=red>"
+                    + ((KFStep)ann).toolTipText()
+                    + "</font></html>";
                   
                   // Does this category already exist?
                   Enumeration children = 
@@ -3497,8 +3519,19 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             // m_iconLookup.put(algName, scaledForTree);
           }
         }
+        
+     // try and get a tool tip
+        String toolTip = "";
+        try {
+          Object wrappedA = Class.forName(algName).newInstance();
+          toolTip = getGlobalInfo(wrappedA);
+        } catch (Exception ex) { }
+        
         JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, algName, 
             scaledForTree);
+        if (toolTip != null && toolTip.length() > 0) {
+          leafData.setToolTipText(toolTip);
+        }
         child = new DefaultMutableTreeNode(leafData);        
       } else {
         child = new DefaultMutableTreeNode(children[i]);
@@ -6016,7 +6049,48 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     } catch (Exception ex) {
 
     }
-    return gi;
+
+    if (gi != null && gi.length() > 0) {
+      String firstLine = "";
+      boolean addFirstBreaks = true;
+      if (gi.indexOf(". ") > 0) {
+        firstLine = gi.substring(0, gi.indexOf(". "));
+        if (gi.length() - gi.indexOf(". ") < 3) {
+          addFirstBreaks = false;
+        }
+        gi = gi.substring(gi.indexOf(". ") + 1, gi.length());
+      } else if (gi.indexOf(".") > 0) {
+        firstLine = gi.substring(0, gi.indexOf("."));
+        if (gi.length() - gi.indexOf(".") < 3) {
+          addFirstBreaks = false;
+        }
+        gi = gi.substring(gi.indexOf(".") + 1, gi.length());
+      } else {
+        firstLine = gi;
+        gi = "";
+      }
+      firstLine = "<html>" + "<font color=blue>" + firstLine + "</font>";
+      if (addFirstBreaks) {
+        firstLine += "<br><br>";
+      }
+
+      String[] parts = gi.split("\n");
+      String remainder = "";
+      for (String p : parts) {
+        if (p.length() > 80) {
+          p = p.replace(". ", ".<br>");
+        }
+        remainder += p + "<br>";
+      }
+      
+      return firstLine + remainder + "</html>";
+    }
+    
+    // gi = gi.replaceFirst("[.] ", ".<br><br>");
+    /*gi = gi.replace("\n", "<br>");
+    gi = "<html>" + gi + "</html>"; */
+    
+    return null;
   }
 
   /** variable for the KnowLedgeFlow class which would be set to null by the 
