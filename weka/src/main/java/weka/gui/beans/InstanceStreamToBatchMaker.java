@@ -39,6 +39,7 @@ import weka.gui.Logger;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
+@KFStep(category = "Tools", toolTipText = "Converts an incoming instance stream into a data set batch")
 public class InstanceStreamToBatchMaker extends JPanel 
   implements BeanCommon, Visible, InstanceListener, 
   EventConstraints, DataSource {
