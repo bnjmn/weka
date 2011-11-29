@@ -100,7 +100,7 @@ import java.util.Vector;
  *  (standard deviation---expressed as a percentage of the mean).
  *  (default: 0.01 (1%))</pre>
  * 
- * <pre> -E &lt;acc | rmse | mae | f-meas | auc&gt;
+ * <pre> -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
  *  Performance evaluation measure to use for selecting attributes.
  *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
  * 
@@ -154,6 +154,7 @@ public class WrapperSubsetEval
   public static final int EVAL_MAE = 4;
   public static final int EVAL_FMEASURE = 5;
   public static final int EVAL_AUC = 6;
+  public static final int EVAL_AUPRC = 7;
   
   public static final Tag[] TAGS_EVALUATION = {
     new Tag(EVAL_DEFAULT, "Default: accuracy (discrete class); RMSE (numeric class)"),
@@ -161,7 +162,8 @@ public class WrapperSubsetEval
     new Tag(EVAL_RMSE, "RMSE (of the class probabilities for discrete class)"),
     new Tag(EVAL_MAE, "MAE (of the class probabilities for discrete class)"),
     new Tag(EVAL_FMEASURE, "F-measure (discrete class only)"),
-    new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)")
+    new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)"),
+    new Tag(EVAL_AUPRC, "AUPRC (area under the precision-recall curve - discrete class only)")
   };
   
   /** The evaluation measure to use */
@@ -246,7 +248,7 @@ public class WrapperSubsetEval
     newVector.addElement(new Option(
         "\tPerformance evaluation measure to use for selecting attributes.\n" +
         "\t(Default = accuracy for discrete class and rmse for numeric class)",
-        "E", 1, "-E <acc | rmse | mae | f-meas | auc>"));
+        "E", 1, "-E <acc | rmse | mae | f-meas | auc | auprc>"));
 
     if ((m_BaseClassifier != null) && 
 	(m_BaseClassifier instanceof OptionHandler)) {
@@ -290,7 +292,7 @@ public class WrapperSubsetEval
    *  (standard deviation---expressed as a percentage of the mean).
    *  (default: 0.01 (1%))</pre>
    * 
-   * <pre> -E &lt;acc | rmse | mae | f-meas | auc&gt;
+   * <pre> -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
    *  Performance evaluation measure to use for selecting attributes.
    *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
    * 
@@ -353,6 +355,8 @@ public class WrapperSubsetEval
         setEvaluationMeasure(new SelectedTag(EVAL_FMEASURE, TAGS_EVALUATION));
       } else if (optionString.equals("auc")) {
         setEvaluationMeasure(new SelectedTag(EVAL_AUC, TAGS_EVALUATION));
+      } else if (optionString.equals("auprc")) {
+        setEvaluationMeasure(new SelectedTag(EVAL_AUPRC, TAGS_EVALUATION));
       } else {
         throw new IllegalArgumentException("Invalid evaluation measure");
       }
@@ -548,6 +552,9 @@ public class WrapperSubsetEval
     case EVAL_AUC:
       options[current++] = "auc";
       break;
+    case EVAL_AUPRC:
+      options[current++] = "auprc";
+      break;
     }
     
     options[current++] = "--";
@@ -596,7 +603,7 @@ public class WrapperSubsetEval
     result.disable(Capability.NUMERIC_CLASS);
     result.disable(Capability.DATE_CLASS);
     if (m_evaluationMeasure != EVAL_ACCURACY && m_evaluationMeasure != EVAL_FMEASURE &&
-        m_evaluationMeasure != EVAL_AUC) {
+        m_evaluationMeasure != EVAL_AUC && m_evaluationMeasure != EVAL_AUPRC) {
       result.enable(Capability.NUMERIC_CLASS);
       result.enable(Capability.DATE_CLASS);
     }
@@ -692,6 +699,9 @@ public class WrapperSubsetEval
       case EVAL_AUC:
         repError[i] = m_Evaluation.weightedAreaUnderROC();
         break;
+      case EVAL_AUPRC:
+        repError[i] = m_Evaluation.weightedAreaUnderPRC();
+        break;
       }
 
       // check on the standard deviation
@@ -776,6 +786,9 @@ public class WrapperSubsetEval
         break;
       case EVAL_AUC:
         text.append("\tSubset evaluation: area under the ROC curve\n");
+        break;
+      case EVAL_AUPRC:
+        text.append("\tSubset evalation: area under the precision-recal curve\n");
         break;
       }
       
