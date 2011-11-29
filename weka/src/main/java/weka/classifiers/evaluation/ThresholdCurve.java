@@ -265,6 +265,42 @@ public class ThresholdCurve
       psum += precis;
     }
     return psum / n;
+  }  
+  
+  /**
+   * Calculates the area under the precision-recall curve (AUPRC).
+   *
+   * @param tcurve a previously extracted threshold curve Instances.
+   * @return the PRC area, or Double.NaN if you don't pass in 
+   * a ThresholdCurve generated Instances. 
+   */
+  public static double getPRCArea(Instances tcurve) {
+    final int n = tcurve.numInstances();
+    if (!RELATION_NAME.equals(tcurve.relationName()) 
+        || (n == 0)) {
+      return Double.NaN;
+    }
+    
+    final int pInd = tcurve.attribute(PRECISION_NAME).index();
+    final int rInd = tcurve.attribute(RECALL_NAME).index();
+    final double [] pVals = tcurve.attributeToDoubleArray(pInd);
+    final double [] rVals = tcurve.attributeToDoubleArray(rInd);
+    
+    double area = 0;
+    double xlast = rVals[n - 1];
+    
+    // start from the first real p/r pair (not the artificial zero point)
+    for (int i = n - 2; i >= 0; i--) {
+      double recallDelta = rVals[i] - xlast;
+      area += (pVals[i] * recallDelta);
+      
+      xlast = rVals[i];
+    }
+    
+    if (area == 0) {
+      return Utils.missingValue();
+    }
+    return area;
   }
 
   /**
