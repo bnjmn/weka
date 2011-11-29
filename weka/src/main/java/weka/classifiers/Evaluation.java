@@ -482,7 +482,54 @@ public class Evaluation
 
     return aucTotal / classCountSum;
   }
+  
+  /**
+   * Returns the area under precision-recall curve (AUPRC) for those 
+   * predictions that have been collected
+   * in the evaluateClassifier(Classifier, Instances) method. Returns
+   * Utils.missingValue() if the area is not available.
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the area under the precision-recall curve or not a number
+   */
+  public double areaUnderPRC(int classIndex) {
+    // Check if any predictions have been collected
+    if (m_Predictions == null) {
+      return Utils.missingValue();
+    } else {
+      ThresholdCurve tc = new ThresholdCurve();
+      Instances result = tc.getCurve(m_Predictions, classIndex);
+      return ThresholdCurve.getPRCArea(result);
+    }
+  }
+  
+  /**
+   * Calculates the weighted (by class size) AUPRC.
+   *
+   * @return the weighted AUPRC.
+   */
+  public double weightedAreaUnderPRC() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
 
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double auprcTotal = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      double temp = areaUnderPRC(i);
+      if (!Utils.isMissingValue(temp)) {
+        auprcTotal += (temp * classCounts[i]);
+      }
+    }
+
+    return auprcTotal / classCountSum;
+  }
+    
   /**
    * Returns a copy of the confusion matrix.
    *
@@ -2605,7 +2652,7 @@ public class Evaluation
     StringBuffer text = new StringBuffer(title
         + "\n               TP Rate   FP Rate"
         + "   Precision   Recall"
-        + "  F-Measure   ROC Area  Class\n");
+        + "  F-Measure   ROC Area   PRC Area  Class\n");
     for(int i = 0; i < m_NumClasses; i++) {
       text.append("               " + Utils.doubleToString(truePositiveRate(i), 7, 3))
         .append("   ");
@@ -2626,6 +2673,15 @@ public class Evaluation
         text.append(Utils.doubleToString(rocVal, 7, 3))
           .append("    ");
       }
+      double prcVal = areaUnderPRC(i);
+      if (Utils.isMissingValue(prcVal)) {
+        text.append("  ?    ")
+        .append("    ");
+      } else {
+        text.append(Utils.doubleToString(prcVal, 7, 3))
+        .append("    ");
+      }
+      
       text.append(m_ClassNames[i]).append('\n');
     }
 
@@ -2635,6 +2691,7 @@ public class Evaluation
     text.append("   " + Utils.doubleToString(weightedRecall(), 7 ,3));
     text.append("   " + Utils.doubleToString(weightedFMeasure(), 7 ,3));
     text.append("    " + Utils.doubleToString(weightedAreaUnderROC(), 7 ,3));
+    text.append("    " + Utils.doubleToString(weightedAreaUnderPRC(), 7 ,3));
     text.append("\n");
 
     return text.toString();
