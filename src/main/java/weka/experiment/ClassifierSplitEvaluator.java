@@ -133,10 +133,10 @@ public class ClassifierSplitEvaluator
   private static final int RESULT_SIZE = 30;
 
   /** The number of IR statistics */
-  private static final int NUM_IR_STATISTICS = 14;
+  private static final int NUM_IR_STATISTICS = 15;
   
   /** The number of averaged IR statistics */
-  private static final int NUM_WEIGHTED_IR_STATISTICS = 8;
+  private static final int NUM_WEIGHTED_IR_STATISTICS = 9;
   
   /** The number of unweighted averaged IR statistics */
   private static final int NUM_UNWEIGHTED_IR_STATISTICS = 2;
@@ -512,12 +512,14 @@ public class ClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
     
     // Unweighted IR stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     
     // Weighted IR stats
+    resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
@@ -626,6 +628,7 @@ public class ClassifierSplitEvaluator
     resultNames[current++] = "IR_recall";
     resultNames[current++] = "F_measure";
     resultNames[current++] = "Area_under_ROC";
+    resultNames[current++] = "Area_under_PRC";
     
     // Weighted IR stats
     resultNames[current++] = "Weighted_avg_true_positive_rate";
@@ -636,6 +639,7 @@ public class ClassifierSplitEvaluator
     resultNames[current++] = "Weighted_avg_IR_recall";
     resultNames[current++] = "Weighted_avg_F_measure";
     resultNames[current++] = "Weighted_avg_area_under_ROC";
+    resultNames[current++] = "Weighted_avg_area_under_PRC";
     
     // Unweighted IR stats
     resultNames[current++] = "Unweighted_macro_avg_F_measure";
@@ -779,6 +783,7 @@ public class ClassifierSplitEvaluator
     result[current++] = new Double(eval.recall(m_IRclass));
     result[current++] = new Double(eval.fMeasure(m_IRclass));
     result[current++] = new Double(eval.areaUnderROC(m_IRclass));
+    result[current++] = new Double(eval.areaUnderPRC(m_IRclass));
     
     // Weighted IR stats
     result[current++] = new Double(eval.weightedTruePositiveRate());
@@ -789,6 +794,7 @@ public class ClassifierSplitEvaluator
     result[current++] = new Double(eval.weightedRecall());
     result[current++] = new Double(eval.weightedFMeasure());
     result[current++] = new Double(eval.weightedAreaUnderROC());
+    result[current++] = new Double(eval.weightedAreaUnderPRC());
     
     // Unweighted IR stats
     result[current++] = new Double(eval.unweightedMacroFmeasure());
