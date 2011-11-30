@@ -361,6 +361,7 @@ public class ClassDiscovery
 	  }
 	}
 	catch (Exception e) {
+	  System.out.println("Accessing class '" + result.get(i) + "' resulted in error:");
 	  e.printStackTrace();
 	}
       }
