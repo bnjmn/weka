@@ -95,7 +95,7 @@ public class SqlViewerDialog
    * @param parent	the parent frame
    */
   public SqlViewerDialog(JFrame parent) {
-    super(parent, "SQL-Viewer", true);
+    super(parent, "SQL-Viewer", ModalityType.DOCUMENT_MODAL);
 
     m_Parent   = parent;
     m_URL      = "";

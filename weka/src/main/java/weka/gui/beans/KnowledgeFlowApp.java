@@ -42,6 +42,7 @@ import java.awt.PopupMenu;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -2882,7 +2883,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
 
     final JDialog d = new JDialog((JFrame)KnowledgeFlowApp.this.getTopLevelAncestor(), 
-        "Manage Perspectives", true);
+        "Manage Perspectives", ModalityType.DOCUMENT_MODAL);
     d.setLayout(new BorderLayout());
 
     JPanel holder = new JPanel();
@@ -4327,7 +4328,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       ((Customizer)customizer).setObject(bc);
       // final javax.swing.JFrame jf = new javax.swing.JFrame();
-      final JDialog d = new JDialog((java.awt.Frame)KnowledgeFlowApp.this.getTopLevelAncestor(), true);
+      final JDialog d = new JDialog((java.awt.Frame)KnowledgeFlowApp.this.getTopLevelAncestor(), ModalityType.DOCUMENT_MODAL);
       d.setLayout(new BorderLayout());
       d.getContentPane().add((JComponent)customizer, BorderLayout.CENTER);
 

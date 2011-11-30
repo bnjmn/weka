@@ -35,6 +35,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -224,7 +225,7 @@ public class MatrixPanel
 	public void actionPerformed(ActionEvent ae) {
 	  final JDialog jd = new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(), 
 					 "Attribute Selection Panel",
-					 true);
+					 ModalityType.DOCUMENT_MODAL);
 
 	  JPanel jp = new JPanel();
 	  JScrollPane js = new JScrollPane(m_attribList);
@@ -339,7 +340,7 @@ public class MatrixPanel
 
 	  final JDialog jd = new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(), 
 					 "Subsample % Panel",
-					 true) {
+					 ModalityType.DOCUMENT_MODAL) {
 	      private static final long serialVersionUID = -269823533147146296L;
 	      
 	      public void dispose() { 

@@ -27,6 +27,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -547,7 +548,7 @@ public class LoaderCustomizer
         try {
           //final JFrame jf = new JFrame("Choose file");
           final JDialog jf = new JDialog((JDialog)LoaderCustomizer.this.getTopLevelAncestor(), 
-              "Choose file", true);
+              "Choose file", ModalityType.DOCUMENT_MODAL);
           jf.setLayout(new BorderLayout());
           //jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
