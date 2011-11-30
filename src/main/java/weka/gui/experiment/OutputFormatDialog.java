@@ -134,7 +134,7 @@ public class OutputFormatDialog
    * @param parent the parent of this dialog
    */
   public OutputFormatDialog(Frame parent) {
-    super(parent, "Output Format...", true);
+    super(parent, "Output Format...", ModalityType.DOCUMENT_MODAL);
 
     m_IgnoreChanges = true;
     
