@@ -43,7 +43,7 @@ import javax.swing.event.ChangeListener;
  *
  * @see weka.gui.arffviewer.ArffViewer
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision$ 
  */
 public class ViewerDialog 
   extends JDialog 
@@ -79,7 +79,7 @@ public class ViewerDialog
    * @param parent the parent for this dialog
    */
   public ViewerDialog(Frame parent) {
-    super(parent, true);
+    super(parent, ModalityType.DOCUMENT_MODAL);
     createDialog();
   }
 
