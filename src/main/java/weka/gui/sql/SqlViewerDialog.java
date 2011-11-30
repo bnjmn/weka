@@ -45,16 +45,16 @@ import javax.swing.JPanel;
  * @author      FracPete (fracpete at waikato dot ac dot nz)
  * @version     $Revision$
  */
-public class SqlViewerDialog 
-  extends JDialog 
+public class SqlViewerDialog
+  extends JDialog
   implements ResultChangedListener {
 
   /** for serialization */
   private static final long serialVersionUID = -31619864037233099L;
-  
+
   /** the parent frame */
   protected JFrame m_Parent;
-  
+
   /** the SQL panel */
   protected SqlViewer m_Viewer;
 
@@ -84,19 +84,19 @@ public class SqlViewerDialog
 
   /** the currently selected query */
   protected String m_Query;
-  
+
   /**
    * initializes the dialog
    */
   public SqlViewerDialog(JFrame parent) {
-    super(parent, Messages.getInstance().getString("SqlViewerDialog_SQL_Viewer_Text"), true);
+    super(parent, Messages.getInstance().getString("SqlViewerDialog_SQL_Viewer_Text"), ModalityType.DOCUMENT_MODAL);
 
     m_Parent   = parent;
     m_URL      = "";
     m_User     = "";
     m_Password = "";
     m_Query    = "";
-    
+
     createDialog();
   }
 
@@ -107,17 +107,17 @@ public class SqlViewerDialog
     JPanel                    panel;
     JPanel                    panel2;
     final SqlViewerDialog     dialog;
-    
+
     dialog = this;
     setLayout(new BorderLayout());
 
     // sql panel
     m_Viewer = new SqlViewer(m_Parent);
     add(m_Viewer, BorderLayout.CENTER);
-    
+
     panel2 = new JPanel(new BorderLayout());
     add(panel2, BorderLayout.SOUTH);
-    
+
     // Buttons
     panel = new JPanel();
     panel.setLayout(new FlowLayout());
@@ -146,7 +146,7 @@ public class SqlViewerDialog
 	  dialog.dispose();
       }
     });
-    
+
     addWindowListener(new WindowAdapter() {
       /**
        * Invoked when a window is in the process of being closed.
@@ -155,12 +155,12 @@ public class SqlViewerDialog
 	m_Viewer.saveSize();
       }
     });
-   
+
     // current Query
     panel = new JPanel(new FlowLayout());
     panel2.add(panel, BorderLayout.CENTER);
     panel.add(m_LabelQuery);
-    
+
     pack();
     getRootPane().setDefaultButton(m_ButtonOK);
     setResizable(true);
@@ -177,7 +177,7 @@ public class SqlViewerDialog
       m_ReturnValue = JOptionPane.CANCEL_OPTION;
 
     super.setVisible(b);
-    
+
     // free up memory
     if (b)
       m_Viewer.clear();

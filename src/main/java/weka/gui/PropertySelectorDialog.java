@@ -48,7 +48,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-/** 
+/**
  * Allows the user to select any (supported) property of an object, including
  * properties that any of it's property values may have.
  *
@@ -60,7 +60,7 @@ public class PropertySelectorDialog
 
   /** for serialization */
   private static final long serialVersionUID = -3155058124137930518L;
-  
+
   /** Click to choose the currently selected property */
   protected JButton m_SelectBut = new JButton(Messages.getInstance().getString("PropertySelectorDialog_SelectBut_JButton_Text"));
 
@@ -87,7 +87,7 @@ public class PropertySelectorDialog
 
   /** Signifies a cancelled property selection */
   public static final int CANCEL_OPTION = 1;
-  
+
   /**
    * Create the property selection dialog.
    *
@@ -95,8 +95,8 @@ public class PropertySelectorDialog
    * @param rootObject the object containing properties to select from
    */
   public PropertySelectorDialog(Frame parentFrame, Object rootObject) {
-    
-    super(parentFrame, Messages.getInstance().getString("PropertySelectorDialog_Text"), true);
+
+    super(parentFrame, Messages.getInstance().getString("PropertySelectorDialog_Text"), ModalityType.DOCUMENT_MODAL);
     m_CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = CANCEL_OPTION;
@@ -116,7 +116,7 @@ public class PropertySelectorDialog
 	  } else {
 	    m_Result = APPROVE_OPTION;
 	  }
-	} 
+	}
 	setVisible(false);
       }
     });
@@ -124,7 +124,7 @@ public class PropertySelectorDialog
     m_Root = new DefaultMutableTreeNode(
 	     new PropertyNode(m_RootObject));
     createNodes(m_Root);
-    
+
     Container c = getContentPane();
     c.setLayout(new BorderLayout());
     //    setBorder(BorderFactory.createTitledBorder("Select a property"));
@@ -240,7 +240,7 @@ public class PropertySelectorDialog
     }
   }
 
-  
+
   /**
    * Tests out the property selector from the command line.
    *

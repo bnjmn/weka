@@ -43,7 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-/** 
+/**
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
@@ -63,13 +63,13 @@ public class OutputFormatDialog
 
   /** the result of the user's action, either OK or CANCEL. */
   protected int m_Result = CANCEL_OPTION;
-  
+
   /** the different classes for outputting the comparison tables. */
   protected static Vector m_OutputFormatClasses = null;
-  
+
   /** the different names of matrices for outputting the comparison tables. */
   protected static Vector m_OutputFormatNames = null;
-  
+
   /** determine all classes inheriting from the ResultMatrix (in the same
    * package!)
    * @see ResultMatrix
@@ -110,16 +110,16 @@ public class OutputFormatDialog
 
   /** the checkbox for the removing of filter classnames. */
   protected JCheckBox m_RemoveFilterNameCheckBox = new JCheckBox("");
-  
+
   /** Click to activate the current set parameters. */
   protected JButton m_OkButton = new JButton(Messages.getInstance().getString("OutputFormatDialog_OkButton_JButton_Text"));
 
   /** Click to cancel the dialog. */
   protected JButton m_CancelButton = new JButton(Messages.getInstance().getString("OutputFormatDialog_CancelButton_JButton_Text"));
-  
+
   /** the number of digits after the period (= precision) for printing the mean. */
   protected int m_MeanPrec = 2;
-  
+
   /** the number of digits after the period (= precision) for printing the std.
    * deviation */
   protected int m_StdDevPrec = 2;
@@ -132,14 +132,14 @@ public class OutputFormatDialog
 
   /**
    * initializes the dialog with the given parent frame.
-   * 
+   *
    * @param parent the parent of this dialog
    */
   public OutputFormatDialog(Frame parent) {
-    super(parent, Messages.getInstance().getString("OutputFormatDialog_Title_Text"), true);
+    super(parent, Messages.getInstance().getString("OutputFormatDialog_Title_Text"), ModalityType.DOCUMENT_MODAL);
     createDialog();
   }
-  
+
   /**
    * performs the creation of the dialog and all its components.
    */
@@ -147,12 +147,12 @@ public class OutputFormatDialog
     JPanel              panel;
     SpinnerNumberModel  model;
     JLabel              label;
-    
+
     getContentPane().setLayout(new BorderLayout());
-    
+
     panel = new JPanel(new GridLayout(5, 2));
     getContentPane().add(panel, BorderLayout.CENTER);
-    
+
     // Precision
     model = (SpinnerNumberModel) m_MeanPrecSpinner.getModel();
     model.setMaximum(new Integer(20));
@@ -170,7 +170,7 @@ public class OutputFormatDialog
     label.setLabelFor(m_StdDevPrecSpinner);
     panel.add(label);
     panel.add(m_StdDevPrecSpinner);
-    
+
     // Format
     label = new JLabel(Messages.getInstance().getString("OutputFormatDialog_CreateDialog_OutputFormat_JLabel_Text"));
     label.setDisplayedMnemonic('F');
@@ -196,7 +196,7 @@ public class OutputFormatDialog
     label.setLabelFor(m_RemoveFilterNameCheckBox);
     panel.add(label);
     panel.add(m_RemoveFilterNameCheckBox);
-    
+
     // Buttons
     panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     getContentPane().add(panel, BorderLayout.SOUTH);
@@ -223,7 +223,7 @@ public class OutputFormatDialog
 
     pack();
   }
-  
+
   /**
    * initializes the GUI components with the data.
    */
@@ -237,7 +237,7 @@ public class OutputFormatDialog
 
     // filter names
     m_RemoveFilterNameCheckBox.setSelected(m_RemoveFilterName);
-    
+
     // format (must be last, since getData() will be called!)
     for (int i = 0; i < m_OutputFormatClasses.size(); i++) {
       if (m_OutputFormatClasses.get(i).equals(m_ResultMatrix)) {
@@ -245,8 +245,8 @@ public class OutputFormatDialog
         break;
       }
     }
-  }    
-  
+  }
+
   /**
    *  gets the data from GUI components.
    */
@@ -260,15 +260,15 @@ public class OutputFormatDialog
 
     // filter names
     m_RemoveFilterName = m_RemoveFilterNameCheckBox.isSelected();
-    
+
     // format
     m_ResultMatrix = (Class) m_OutputFormatClasses.get(
                         m_OutputFormatComboBox.getSelectedIndex());
   }
-  
+
   /**
    * Sets the precision of the mean output.
-   * 
+   *
    * @param precision the number of digits used in printing the mean
    */
   public void setMeanPrec(int precision) {
@@ -277,7 +277,7 @@ public class OutputFormatDialog
 
   /**
    * Gets the precision used for printing the mean.
-   * 
+   *
    * @return the number of digits used in printing the mean
    */
   public int getMeanPrec() {
@@ -286,7 +286,7 @@ public class OutputFormatDialog
 
   /**
    * Sets the precision of the std. deviation output.
-   * 
+   *
    * @param precision the number of digits used in printing the std. deviation
    */
   public void setStdDevPrec(int precision) {
@@ -303,7 +303,7 @@ public class OutputFormatDialog
 
   /**
    * Sets the matrix to use as initial selected output format.
-   * 
+   *
    * @param matrix the matrix to use as initial selected output format
    */
   public void setResultMatrix(Class matrix) {
@@ -312,7 +312,7 @@ public class OutputFormatDialog
 
   /**
    * Gets the currently selected output format result matrix.
-   * 
+   *
    * @return the currently selected matrix to use as output
    */
   public Class getResultMatrix() {
@@ -321,7 +321,7 @@ public class OutputFormatDialog
 
   /**
    * sets whether to remove the filter classname from the dataset name.
-   * 
+   *
    * @param remove if true then the filter classname is removed
    */
   public void setRemoveFilterName(boolean remove) {
@@ -330,7 +330,7 @@ public class OutputFormatDialog
 
   /**
    * returns whether the filter classname is removed from the dataset name.
-   * 
+   *
    * @return true if the filter classname is removed
    */
   public boolean getRemoveFilterName() {
@@ -339,7 +339,7 @@ public class OutputFormatDialog
 
   /**
    * sets whether the average for each column is displayed.
-   * 
+   *
    * @param show if true then an additional row with the average is printed.
    */
   public void setShowAverage(boolean show) {
@@ -348,7 +348,7 @@ public class OutputFormatDialog
 
   /**
    * returns whether the average for each column is displayed.
-   * 
+   *
    * @return true if an additional row with the average is displayed
    */
   public boolean getShowAverage() {
@@ -367,12 +367,12 @@ public class OutputFormatDialog
       }
     }
   }
-  
+
   /**
    * the result from the last display of the dialog, the same is returned
    * from <code>showDialog</code>.
-   * 
-   * @return the result from the last display of the dialog; 
+   *
+   * @return the result from the last display of the dialog;
    *         either APPROVE_OPTION, or CANCEL_OPTION
    * @see #showDialog()
    */
@@ -394,12 +394,12 @@ public class OutputFormatDialog
 
   /**
    * for testing only.
-   * 
+   *
    * @param args ignored
    */
   public static void main(String[] args) {
     OutputFormatDialog      dialog;
-    
+
     dialog = new OutputFormatDialog(null);
     if (dialog.showDialog() == APPROVE_OPTION)
       System.out.println(Messages.getInstance().getString("OutputFormatDialog_Main_Accepted_Text"));
