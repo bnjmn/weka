@@ -312,7 +312,7 @@
          <object class="int" name="x" primitive="yes">290</object>
          <object class="int" name="y" primitive="yes">327</object>
          <object class="weka.gui.beans.Note" name="bean">
-            <object class="java.lang.String" name="noteText">Bar chart for &quot;age&quot;</object>
+            <object class="java.lang.String" name="noteText">Bar chart for &quot;employment&quot;</object>
             <object class="null" name="name" null="yes"/>
             <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
          </object>
