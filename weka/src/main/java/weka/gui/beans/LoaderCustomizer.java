@@ -177,7 +177,8 @@ public class LoaderCustomizer
       JLabel userNameLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_UserNameLab_JLabel_Text"), SwingConstants.LEFT);
       userNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-      m_passwordText = new JPasswordField(50); 
+      m_passwordText = new JPasswordField(50);
+      m_passwordText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getPassword());
       JLabel passwordLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_PasswordLab_JLabel_Text"), SwingConstants.LEFT);
       passwordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
       
