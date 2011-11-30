@@ -43,15 +43,15 @@ import javax.swing.event.ChangeListener;
  *
  * @see weka.gui.arffviewer.ArffViewer
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision$
  */
-public class ViewerDialog 
-  extends JDialog 
-  implements ChangeListener { 
+public class ViewerDialog
+  extends JDialog
+  implements ChangeListener {
 
   /** for serialization */
   private static final long serialVersionUID = 6747718484736047752L;
-  
+
   /** Signifies an OK property selection */
   public static final int APPROVE_OPTION = 0;
 
@@ -60,7 +60,7 @@ public class ViewerDialog
 
   /** the result of the user's action, either OK or CANCEL */
   protected int m_Result = CANCEL_OPTION;
-  
+
   /** Click to activate the current set parameters */
   protected JButton m_OkButton = new JButton(Messages.getInstance().getString("ViewerDialog_OkButton_JButton_Text"));
 
@@ -69,17 +69,17 @@ public class ViewerDialog
 
   /** Click to undo the last action */
   protected JButton m_UndoButton = new JButton(Messages.getInstance().getString("ViewerDialog_UndoButton_JButton_Text"));
-  
+
   /** the panel to display the Instances-object */
   protected ArffPanel m_ArffPanel = new ArffPanel();
-  
+
   /**
    * initializes the dialog with the given parent
-   * 
+   *
    * @param parent the parent for this dialog
    */
   public ViewerDialog(Frame parent) {
-    super(parent, true);
+    super(parent, ModalityType.DOCUMENT_MODAL);
     createDialog();
   }
 
@@ -90,13 +90,13 @@ public class ViewerDialog
     JPanel              panel;
 
     setTitle(Messages.getInstance().getString("ViewerDialog_CreateDialog_SetTitle_Text"));
-    
+
     getContentPane().setLayout(new BorderLayout());
-    
+
     // ArffPanel
     m_ArffPanel.addChangeListener(this);
     getContentPane().add(m_ArffPanel, BorderLayout.CENTER);
-    
+
     // Buttons
     panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     getContentPane().add(panel, BorderLayout.SOUTH);
@@ -124,41 +124,41 @@ public class ViewerDialog
 
     pack();
   }
-  
+
   /**
    * sets the instances to display
    */
   public void setInstances(Instances inst) {
     m_ArffPanel.setInstances(new Instances(inst));
   }
-  
+
   /**
    * returns the currently displayed instances
    */
   public Instances getInstances() {
     return m_ArffPanel.getInstances();
   }
-  
+
   /**
-   * sets the state of the buttons 
+   * sets the state of the buttons
    */
   protected void setButtons() {
-    m_OkButton.setEnabled(true); 
-    m_CancelButton.setEnabled(true); 
-    m_UndoButton.setEnabled(m_ArffPanel.canUndo()); 
+    m_OkButton.setEnabled(true);
+    m_CancelButton.setEnabled(true);
+    m_UndoButton.setEnabled(m_ArffPanel.canUndo());
   }
-  
+
   /**
    * returns whether the data has been changed
-   * 
+   *
    * @return true if the data has been changed
    */
   public boolean isChanged() {
     return m_ArffPanel.isChanged();
   }
-  
+
   /**
-   * undoes the last action 
+   * undoes the last action
    */
   private void undo() {
     m_ArffPanel.undo();
@@ -170,7 +170,7 @@ public class ViewerDialog
   public void stateChanged(ChangeEvent e) {
     setButtons();
   }
-  
+
   /**
    * Pops up the modal dialog and waits for Cancel or OK.
    *
