@@ -40,6 +40,7 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -1341,7 +1342,7 @@ public class GraphVisualizer
           
           JDialog jd = 
                 new JDialog((Frame)GraphVisualizer.this.getTopLevelAncestor(),
-                            "Probability Distribution Table For "+n.lbl, true);
+                            "Probability Distribution Table For "+n.lbl, ModalityType.DOCUMENT_MODAL);
           jd.setSize(500, 400);
           jd.setLocation(GraphVisualizer.this.getLocation().x+
                             GraphVisualizer.this.getWidth()/2-250,

@@ -53,7 +53,7 @@ import javax.swing.tree.TreeSelectionModel;
  * properties that any of it's property values may have.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class PropertySelectorDialog
   extends JDialog {
@@ -96,7 +96,7 @@ public class PropertySelectorDialog
    */
   public PropertySelectorDialog(Frame parentFrame, Object rootObject) {
     
-    super(parentFrame, "Select a property", true);
+    super(parentFrame, "Select a property", ModalityType.DOCUMENT_MODAL);
     m_CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = CANCEL_OPTION;

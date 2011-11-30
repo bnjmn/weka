@@ -91,7 +91,7 @@ public class PropertyDialog
    * @param y 		initial y coord for the dialog
    */
   public PropertyDialog(Dialog owner, PropertyEditor pe, int x, int y) {
-    super(owner, pe.getClass().getName(), true);
+    super(owner, pe.getClass().getName(), ModalityType.DOCUMENT_MODAL);
     initialize(pe, x, y);
   }
   
@@ -116,7 +116,7 @@ public class PropertyDialog
    * @param y 		initial y coord for the dialog
    */
   public PropertyDialog(Frame owner, PropertyEditor pe, int x, int y) {
-    super(owner, pe.getClass().getName(), true);
+    super(owner, pe.getClass().getName(), ModalityType.DOCUMENT_MODAL);
     
     initialize(pe, x, y);
   }

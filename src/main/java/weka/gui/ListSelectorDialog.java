@@ -45,7 +45,7 @@ import javax.swing.JScrollPane;
  * make a selection from, or cancel the selection.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class ListSelectorDialog
   extends JDialog {
@@ -85,7 +85,7 @@ public class ListSelectorDialog
    */
   public ListSelectorDialog(Frame parentFrame, JList userList) {
     
-    super(parentFrame, "Select items", true);
+    super(parentFrame, "Select items", ModalityType.DOCUMENT_MODAL);
     m_List = userList;
     m_CancelBut.setMnemonic('C');
     m_CancelBut.addActionListener(new ActionListener() {
