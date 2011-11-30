@@ -361,6 +361,7 @@ public class ClassDiscovery
 	  }
 	}
 	catch (Exception e) {
+	  System.out.println("Accessing class '" + result.get(i) + "' resulted in error:");
 	  e.printStackTrace();
 	}
       }
@@ -473,7 +474,7 @@ public class ClassDiscovery
     initCache();
     m_Cache.clear();
   }
-  
+
   /**
    * Calls clearCache() and resets the cache of classes on the classpath
    * (i.e. forces a rescan of the classpath).
