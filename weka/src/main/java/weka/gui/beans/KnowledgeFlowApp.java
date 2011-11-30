@@ -5127,6 +5127,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }            
     }
     
+    if (comp.getBean() instanceof EnvironmentHandler) {
+      ((EnvironmentHandler)comp.getBean()).setEnvironment(m_flowEnvironment);
+    }
+    
     // check for a duplicate name
     checkForDuplicateName(comp);
     
