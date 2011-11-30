@@ -178,6 +178,7 @@ public class SaverCustomizer
       userNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
       m_passwordText = new JPasswordField(50); 
+      m_passwordText.setText(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getPassword());
       JLabel passwordLab = new JLabel(Messages.getInstance().getString("SaverCustomizer_SetUpDatabase_PasswordLab_JLabel_Text"), SwingConstants.LEFT);
       passwordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
       
