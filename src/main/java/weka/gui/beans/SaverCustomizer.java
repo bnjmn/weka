@@ -230,6 +230,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     db.add(passwordLab);
 
     m_passwordText = new JPasswordField();
+    m_passwordText.setText(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getPassword());
     JPanel passwordHolder = new JPanel();
     passwordHolder.setLayout(new BorderLayout());
     passwordHolder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
