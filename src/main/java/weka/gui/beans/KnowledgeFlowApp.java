@@ -22,11 +22,33 @@
 
 package weka.gui.beans;
 
+import weka.core.Attribute;
+import weka.core.Copyright;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instances;
+import weka.core.Memory;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.WekaPackageManager;
+import weka.core.converters.FileSourcedConverter;
+import weka.core.xml.KOML;
+import weka.core.xml.XStream;
+import weka.gui.AttributeSelectionPanel;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.GenericPropertiesCreator;
+import weka.gui.HierarchyPropertyParser;
+import weka.gui.LookAndFeel;
+import weka.gui.beans.xml.XMLBeans;
+import weka.gui.visualize.PrintablePanel;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -126,27 +148,6 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import weka.core.Attribute;
-import weka.core.Copyright;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instances;
-import weka.core.Memory;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.WekaPackageManager;
-import weka.core.converters.FileSourcedConverter;
-import weka.core.xml.KOML;
-import weka.core.xml.XStream;
-import weka.gui.AttributeSelectionPanel;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.GenericPropertiesCreator;
-import weka.gui.HierarchyPropertyParser;
-import weka.gui.LookAndFeel;
-import weka.gui.beans.xml.XMLBeans;
-import weka.gui.visualize.PrintablePanel;
-
 /**
  * Main GUI class for the KnowledgeFlow. Modifications to allow interoperability
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
@@ -168,11 +169,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * Location of the property file for the KnowledgeFlowApp
    */
   protected static final String PROPERTY_FILE = "weka/gui/beans/Beans.props";
-  
+
   /** Location of the property file listing available templates */
-  protected static final String TEMPLATE_PROPERTY_FILE = 
+  protected static final String TEMPLATE_PROPERTY_FILE =
     "weka/gui/beans/templates/templates.props";
-  
+
   /** The paths to template resources */
   private static List<String> TEMPLATE_PATHS;
   /** Short descriptions for templates suitable for displaying in a menu */
@@ -182,29 +183,29 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   protected static Properties BEAN_PROPERTIES;
 
   /** Contains the plugin components properties */
-  private static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES = 
+  private static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES =
     new ArrayList<Properties>();
 
   /**
    * Contains the user's selection of available perspectives to be visible in
    * the perspectives toolbar
    */
-  protected static String VISIBLE_PERSPECTIVES_PROPERTIES_FILE = 
+  protected static String VISIBLE_PERSPECTIVES_PROPERTIES_FILE =
     "weka/gui/beans/VisiblePerspectives.props";
-  
+
   /** Those perspectives that the user has opted to have visible in the toolbar */
   protected static SortedSet<String> VISIBLE_PERSPECTIVES;
 
   /** Map of all plugin perspectives */
   protected Map<String, String> m_pluginPerspectiveLookup = new HashMap<String, String>();
-  
+
   /** Those perspectives that have been instantiated */
-  protected Map<String, KFPerspective> m_perspectiveCache = 
+  protected Map<String, KFPerspective> m_perspectiveCache =
     new HashMap<String, KFPerspective>();
 
   /**
    * Holds the details needed to construct button bars for various supported
-   * classes of weka algorithms/tools 
+   * classes of weka algorithms/tools
    */
   private static Vector TOOLBARS = new Vector();
 
@@ -225,7 +226,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       BEAN_PLUGINS_PROPERTIES.remove(tempP);
     }
   }
-  
+
   private static boolean s_pluginManagerIntialized = false;
 
   /**
@@ -257,23 +258,23 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             "KnowledgeFlow",
             JOptionPane.ERROR_MESSAGE);
       }
-      
+
 
       if (VISIBLE_PERSPECTIVES == null) {
         // set up built-in perspectives
         Properties pp = new Properties();
-        pp.setProperty("weka.gui.beans.KnowledgeFlow.Perspectives", 
+        pp.setProperty("weka.gui.beans.KnowledgeFlow.Perspectives",
             "weka.gui.beans.ScatterPlotMatrix,weka.gui.beans.AttributeSummarizer," +
             "weka.gui.beans.SQLViewerPerspective");
         BEAN_PLUGINS_PROPERTIES.add(pp);
-        
+
         VISIBLE_PERSPECTIVES = new TreeSet<String>();
         try {
 
           Properties visible = Utils.readProperties(VISIBLE_PERSPECTIVES_PROPERTIES_FILE);
           Enumeration keys = (java.util.Enumeration)visible.propertyNames();
           if (keys.hasMoreElements()) {
-            String listedPerspectives = 
+            String listedPerspectives =
               visible.getProperty("weka.gui.beans.KnowledgeFlow.SelectedPerspectives");
             if (listedPerspectives != null && listedPerspectives.length() > 0) {
               // split up the list of user selected perspectives and populate
@@ -285,7 +286,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 System.err.println("Adding perspective " + perspectiveName + " to visible list");
                 VISIBLE_PERSPECTIVES.add(perspectiveName);
               }
-            }            
+            }
           }
         } catch (Exception ex) {
           JOptionPane.showMessageDialog(null,
@@ -296,7 +297,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
 
     }
-    
+
     if (TEMPLATE_PATHS == null) {
       TEMPLATE_PATHS = new ArrayList<String>();
       TEMPLATE_DESCRIPTIONS = new ArrayList<String>();
@@ -329,12 +330,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
     }
 
-    if (!s_pluginManagerIntialized && BEAN_PLUGINS_PROPERTIES != null && 
+    if (!s_pluginManagerIntialized && BEAN_PLUGINS_PROPERTIES != null &&
         BEAN_PLUGINS_PROPERTIES.size() > 0) {
       for (int i = 0; i < BEAN_PLUGINS_PROPERTIES.size(); i++) {
         Properties tempP = BEAN_PLUGINS_PROPERTIES.get(i);
         // Check for OffScreenChartRenderers
-        String offscreenRenderers = 
+        String offscreenRenderers =
           tempP.getProperty("weka.gui.beans.OffscreenChartRenderer");
         if (offscreenRenderers != null && offscreenRenderers.length() > 0) {
           String[] parts = offscreenRenderers.split(",");
@@ -345,7 +346,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               Object p = Class.forName(renderer).newInstance();
               if (p instanceof OffscreenChartRenderer) {
                 String name = ((OffscreenChartRenderer)p).rendererName();
-                PluginManager.addPlugin("weka.gui.beans.OffscreenChartRenderer", 
+                PluginManager.addPlugin("weka.gui.beans.OffscreenChartRenderer",
                     name, renderer);
                 System.err.println("[KnowledgeFlow] registering chart rendering " +
                     "plugin: " + renderer);
@@ -367,10 +368,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   public static void reInitialize() {
     s_pluginManagerIntialized = false;
-    
+
     loadProperties();
     init();
-  }  
+  }
 
   /**
    * Initializes the temporary files necessary to construct the toolbars
@@ -412,14 +413,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           // of algorithms
           Vector newV = new Vector();
           // check for a naming alias for this toolbar
-          String toolBarNameAlias = 
+          String toolBarNameAlias =
             BEAN_PROPERTIES.getProperty(geoKey+".alias");
           String toolBarName = (toolBarNameAlias != null) ?
               toolBarNameAlias :
                 geoKey.substring(geoKey.lastIndexOf('.')+1, geoKey.length());
 
           // look for toolbar ordering information for this wrapper type
-          String order = 
+          String order =
             BEAN_PROPERTIES.getProperty(geoKey+".order");
           Integer intOrder = (order != null) ?
               new Integer(order) :
@@ -444,7 +445,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               while (enm.hasMoreElements()) {
                 String root = (String) enm.nextElement();
                 String classes = (String) roots.get(root);
-                weka.gui.HierarchyPropertyParser hpp = 
+                weka.gui.HierarchyPropertyParser hpp =
                   new weka.gui.HierarchyPropertyParser();
                 hpp.build(classes, ", ");
                 //            System.err.println(hpp.showTree());
@@ -452,7 +453,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               }
 
               //------ test the HierarchyPropertyParser
-              /*  weka.gui.HierarchyPropertyParser hpp = 
+              /*  weka.gui.HierarchyPropertyParser hpp =
 	    new weka.gui.HierarchyPropertyParser();
 	  hpp.build(wekaAlgs, ", ");
 
@@ -491,7 +492,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
 
     try {
-      String standardToolBarNames = 
+      String standardToolBarNames =
         BEAN_PROPERTIES.
         getProperty("weka.gui.beans.KnowledgeFlow.standardToolBars");
       StringTokenizer st = new StringTokenizer(standardToolBarNames, ", ");
@@ -504,7 +505,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
         // indicate that this is a standard toolbar (no wrapper bean)
         newV.addElement("null");
-        String toolBarContents = 
+        String toolBarContents =
           BEAN_PROPERTIES.
           getProperty("weka.gui.beans.KnowledgeFlow."+tempBarName);
         StringTokenizer st2 = new StringTokenizer(toolBarContents, ", ");
@@ -513,20 +514,20 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           newV.addElement(tempBeanName);
         }
         TOOLBARS.addElement(newV);
-      }       
+      }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
           ex.getMessage(),
           "KnowledgeFlow",
           JOptionPane.ERROR_MESSAGE);
     }
-  } 
+  }
 
   protected class BeanIconRenderer extends DefaultTreeCellRenderer {
-    public Component getTreeCellRendererComponent(JTree tree, Object value, 
-        boolean sel, boolean expanded, boolean leaf, int row, 
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+        boolean sel, boolean expanded, boolean leaf, int row,
         boolean hasFocus) {
-      super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, 
+      super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
           row, hasFocus);
 
       if (leaf) {
@@ -535,11 +536,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           Icon i = ((JTreeLeafDetails)userO).getIcon();
           if (i != null) {
             setIcon(i);
-          }        
+          }
         }
       }
       return this;
-    }    
+    }
   }
 
 
@@ -548,7 +549,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * is represented at a leaf in the JTree.
    */
   protected class JTreeLeafDetails implements Serializable {
-    
+
     /**
      * For serialization
      */
@@ -556,13 +557,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /** fully qualified bean name */
     protected String m_fullyQualifiedCompName = "";
-    
+
     /**
-     * the label (usually derived from the qualified name or wrapped 
-     * algorithm) for the leaf 
+     * the label (usually derived from the qualified name or wrapped
+     * algorithm) for the leaf
      */
     protected String m_leafLabel = "";
-    
+
     /** the fully qualified wrapped weka algorithm name */
     protected String m_wekaAlgoName = "";
 
@@ -572,7 +573,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     /** XML serialized MetaBean (if this is a user component) */
     //protected StringBuffer m_metaBean = null;
     protected Vector m_metaBean = null;
-    
+
     /** true if this is a MetaBean (user component) */
     protected boolean m_isMeta = false;
 
@@ -581,7 +582,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Constructor.
-     * 
+     *
      * @param fullName flully qualified name of the bean
      * @param icon icon for the bean
      */
@@ -591,14 +592,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Constructor
-     * 
+     *
      * @param name fully qualified name of the bean
      * @param serializedMeta empty string or XML serialized MetaBean if this
      * leaf represents a "user" component
-     * 
+     *
      * @param icon icon for the bean
      */
-    protected JTreeLeafDetails(String name, Vector serializedMeta, 
+    protected JTreeLeafDetails(String name, Vector serializedMeta,
         Icon icon) {
       this(name, "", icon);
 
@@ -610,11 +611,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Constructor
-     * 
+     *
      * @param fullName fully qualified name of the bean
      * @param wekaAlgoName fully qualified name of the encapsulated (wrapped)
      * weka algorithm, or null if this bean does not wrap a Weka algorithm
-     * 
+     *
      * @param icon icon for the bean
      */
     protected JTreeLeafDetails(String fullName, String wekaAlgoName, Icon icon) {
@@ -622,7 +623,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       m_wekaAlgoName = wekaAlgoName;
       m_leafLabel = (wekaAlgoName.length() > 0) ? wekaAlgoName : m_fullyQualifiedCompName;
       if (m_leafLabel.lastIndexOf('.') > 0) {
-        m_leafLabel = m_leafLabel.substring(m_leafLabel.lastIndexOf('.') + 1, 
+        m_leafLabel = m_leafLabel.substring(m_leafLabel.lastIndexOf('.') + 1,
             m_leafLabel.length());
       }
       m_scaledIcon = icon;
@@ -630,20 +631,20 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Get the tool tip for this leaf
-     * 
+     *
      * @return the tool tip
      */
     protected String getToolTipText() {
       return m_toolTipText;
     }
-    
+
     protected void setToolTipText(String tipText) {
       m_toolTipText = tipText;
     }
 
     /**
      * Returns the leaf label
-     * 
+     *
      * @return the leaf label
      */
     public String toString() {
@@ -652,7 +653,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Gets the icon for this bean
-     * 
+     *
      * @return the icon for this bean
      */
     protected Icon getIcon() {
@@ -661,7 +662,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Set the icon to use for this bean
-     * 
+     *
      * @param icon the icon to use
      */
     protected void setIcon(Icon icon) {
@@ -671,7 +672,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     /**
      * Returns true if this leaf represents a wrapped Weka algorithm (i.e.
      * filter, classifier, clusterer etc.).
-     * 
+     *
      * @return true if this leaf represents a wrapped algorithm
      */
     protected boolean isWrappedAlgorithm() {
@@ -680,7 +681,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Returns true if this leaf represents a MetaBean (i.e. "user" component)
-     * 
+     *
      * @return true if this leaf represents a MetaBean
      */
     protected boolean isMetaBean() {
@@ -691,8 +692,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Gets the XML serialized MetaBean and associated information (icon, displayname)
-     * 
-     * @return the XML serialized MetaBean as a 3-element Vector containing display name 
+     *
+     * @return the XML serialized MetaBean as a 3-element Vector containing display name
      * serialized bean and icon
      */
     protected Vector getMetaBean() {
@@ -703,13 +704,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
      * "Instantiates" the bean represented by this leaf.
      */
     protected void instantiateBean() {
-      try {        
+      try {
         if (isMetaBean()) {
           //    MetaBean copy = copyMetaBean(m_metaBean, false);
           //copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
           m_toolBarBean = m_metaBean.get(1);
         } else {
-          m_toolBarBean = Beans.instantiate(KnowledgeFlowApp.this.getClass().getClassLoader(), 
+          m_toolBarBean = Beans.instantiate(KnowledgeFlowApp.this.getClass().getClassLoader(),
               m_fullyQualifiedCompName);
           if (isWrappedAlgorithm()) {
             Object algo = Beans.instantiate(KnowledgeFlowApp.this.getClass().getClassLoader(),
@@ -724,10 +725,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_pasteB.setEnabled(false);
 
       } catch (Exception ex) {
-        System.err.println("Problem instantiating bean \"" 
+        System.err.println("Problem instantiating bean \""
             + m_fullyQualifiedCompName + "\" (JTreeLeafDetails.instantiateBean()");
         ex.printStackTrace();
-      }      
+      }
     }
   }
 
@@ -748,10 +749,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     public void paintComponent(Graphics gx) {
       super.paintComponent(gx);
 
-      ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+      ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
           RenderingHints.VALUE_ANTIALIAS_ON);
 
-      ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, 
+      ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
           RenderingHints.VALUE_TEXT_ANTIALIAS_GASP);
 
       BeanInstance.paintLabels(gx, m_mainKFPerspective.getCurrentTabIndex());
@@ -760,8 +761,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       if (m_mode == CONNECTING) {
         gx.drawLine(m_startX, m_startY, m_oldX, m_oldY);
       } else if (m_mode == SELECTING) {
-        gx.drawRect((m_startX < m_oldX) ? m_startX : m_oldX, 
-            (m_startY < m_oldY) ? m_startY : m_oldY, 
+        gx.drawRect((m_startX < m_oldX) ? m_startX : m_oldX,
+            (m_startY < m_oldY) ? m_startY : m_oldY,
                 Math.abs(m_oldX-m_startX), Math.abs(m_oldY-m_startY));
       }
     }
@@ -786,35 +787,35 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /**
      * Set instances (if the perspective accepts them)
-     * 
+     *
      * @param insts the instances
      */
     void setInstances(Instances insts) throws Exception;
-    
+
     /**
      * Returns true if this perspective accepts instances
-     * 
+     *
      * @return true if this perspective can accept instances
      */
     boolean acceptsInstances();
 
     /**
      * Get the title of this perspective
-     * 
+     *
      * @return the title of this perspective
      */
     String getPerspectiveTitle();
 
     /**
      * Get the tool tip text for this perspective.
-     * 
+     *
      * @return the tool tip text for this perspective
      */
     String getPerspectiveTipText();
 
     /**
      * Get the icon for this perspective.
-     * 
+     *
      * @return the Icon for this perspective (or null if the
      * perspective does not have an icon)
      */
@@ -824,7 +825,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
      * Set active status of this perspective. True indicates
      * that this perspective is the visible active perspective
      * in the KnowledgeFlow
-     * 
+     *
      * @param active true if this perspective is the active one
      */
     void setActive(boolean active);
@@ -834,16 +835,16 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
      * or not the user has opted to have it available in the
      * perspective toolbar. The perspective can make the decision
      * as to allocating or freeing resources on the basis of this.
-     * 
+     *
      * @param loaded true if the perspective is available in
      * the perspective toolbar of the KnowledgeFlow
      */
     void setLoaded(boolean loaded);
-    
+
     /**
      * Set a reference to the main KnowledgeFlow perspective - i.e.
      * the perspective that manages flow layouts.
-     * 
+     *
      * @param main the main KnowledgeFlow perspective.
      */
     void setMainKFPerspective(KnowledgeFlowApp.MainKFPerspective main);
@@ -876,7 +877,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     /** Keeps track of which tabs have flows that are executing */
     protected List<Boolean> m_executingList = new ArrayList<Boolean>();
-    
+
     /** Keeps track of the threads used for execution */
     protected List<RunThread> m_executionThreads = new ArrayList<RunThread>();
 
@@ -894,11 +895,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     public void setLoaded(boolean loaded) {
       // we are always loaded and part of the set of perspectives
     }
-    
+
     @Override
     public void setMainKFPerspective(MainKFPerspective main) {
       // we don't need this :-)
-    }    
+    }
 
     public JTabbedPane getTabbedPane() {
       return m_flowTabs;
@@ -907,7 +908,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     public synchronized int getNumTabs() {
       return m_flowTabs.getTabCount();
     }
-    
+
     public synchronized String getTabTitle(int index) {
       if (index < getNumTabs() && index >= 0) {
         return m_flowTabs.getTitleAt(index);
@@ -929,7 +930,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     public synchronized KFLogPanel getLogPanel(int index) {
       if (index >= 0 && index < m_logPanels.size()) {
         return m_logPanels.get(index);
-      }      
+      }
       return null;
     }
 
@@ -943,13 +944,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     public synchronized BeanLayout getBeanLayout(int index) {
       if (index >= 0 && index < m_logPanels.size()) {
         return m_beanLayouts.get(getCurrentTabIndex());
-      }      
+      }
       return null;
     }
 
     public synchronized void setActiveTab(int index) {
       if (index < getNumTabs() && index >= 0) {
-        m_flowTabs.setSelectedIndex(index);        
+        m_flowTabs.setSelectedIndex(index);
 
         // set the log and layout to the ones belonging to this tab
         m_logPanel = m_logPanels.get(index);
@@ -967,7 +968,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_selectAllB.setEnabled(BeanInstance.
             getBeanInstances(getCurrentTabIndex()).size() > 0 && !getExecuting());
-        m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0) 
+        m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0)
             && !getExecuting());
         m_stopB.setEnabled(getExecuting());
         m_undoB.setEnabled(!getExecuting() && getUndoBuffer().size() > 0);
@@ -995,11 +996,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_selectAllB.setEnabled(BeanInstance.
             getBeanInstances(getCurrentTabIndex()).size() > 0 && !getExecuting());
         m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
-        m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0) 
+        m_pasteB.setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0)
             && !getExecuting());
         m_undoB.setEnabled(!getExecuting() && getUndoBuffer().size() > 0);
       }
-    }        
+    }
 
     public synchronized boolean getExecuting() {
       return getExecuting(getCurrentTabIndex());
@@ -1011,23 +1012,23 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
       return false;
     }
-    
+
     public synchronized void setExecutionThread(RunThread execution) {
       if (getNumTabs() > 0) {
         setExecutionThread(getCurrentTabIndex(), execution);
       }
     }
-    
+
     public synchronized void setExecutionThread(int index, RunThread execution) {
       if (index < getNumTabs() && index >= 0) {
         m_executionThreads.set(index, execution);
       }
     }
-    
+
     public synchronized RunThread getExecutionThread() {
       return getExecutionThread(getCurrentTabIndex());
     }
-    
+
     public synchronized RunThread getExecutionThread(int index) {
       if (index < getNumTabs() && index >= 0) {
         return m_executionThreads.get(index);
@@ -1095,7 +1096,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     /**
      * Get the edited status of the currently selected tab. Returns
      * false if there are no tabs
-     * 
+     *
      * @return the edited status of the currently selected tab or
      * false if there are no tabs
      */
@@ -1110,7 +1111,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     /**
      * Get the edited status of the tab at the supplied index. Returns
      * false if the index is out of bounds or there are no tabs
-     * 
+     *
      * @param index the index of the tab to check
      * @return the edited status of the tab
      */
@@ -1214,11 +1215,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     public void setInstances(Instances insts) {
       // nothing to do as we don't process externally supplied instances
     }
-    
+
     @Override
     public boolean acceptsInstances() {
       // not needed
-      
+
       return false;
     }
 
@@ -1248,7 +1249,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       width *= 0.035;
       height *= 0.035;
 
-      wekaI = wekaI.getScaledInstance((int)width, (int)height, 
+      wekaI = wekaI.getScaledInstance((int)width, (int)height,
           Image.SCALE_SMOOTH);
       icon = new ImageIcon(wekaI);
 
@@ -1265,23 +1266,23 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         JToolBar fixedTools = new JToolBar();
         fixedTools.setOrientation(JToolBar.HORIZONTAL);
 
-        m_cutB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        m_cutB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
             "cut.png")));
         m_cutB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_cutB.setToolTipText("Cut selected");
-        m_copyB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        m_copyB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
         "page_copy.png")));
         m_copyB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_copyB.setToolTipText("Copy selected");
-        m_pasteB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        m_pasteB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
         "paste_plain.png")));
         m_pasteB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_pasteB.setToolTipText("Paste from clipboard");
-        m_deleteB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        m_deleteB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
         "delete.png")));
         m_deleteB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_deleteB.setToolTipText("Delete selected");
-        m_snapToGridB = new JToggleButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+        m_snapToGridB = new JToggleButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
         "shape_handles.png")));
         //m_snapToGridB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_snapToGridB.setToolTipText("Snap to grid");
@@ -1290,7 +1291,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_snapToGridB.setPreferredSize(d);*/
 
         m_saveB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-        "disk.png")));      
+        "disk.png")));
         m_saveB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_saveB.setToolTipText("Save layout");
         m_saveBB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
@@ -1313,12 +1314,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_helpB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_helpB.setToolTipText("Display help");
         m_togglePerspectivesB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-          "cog_go.png"))); 
+          "cog_go.png")));
         m_togglePerspectivesB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_togglePerspectivesB.setToolTipText("Show/hide perspectives toolbar");
-        
+
         m_templatesB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
-          "application_view_tile.png"))); 
+          "application_view_tile.png")));
         m_templatesB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_templatesB.setToolTipText("Load a template layout");
 
@@ -1346,7 +1347,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         fixedTools.add(m_undoB);
         fixedTools.add(m_noteB);
         fixedTools.addSeparator();
-        fixedTools.add(m_snapToGridB);      
+        fixedTools.add(m_snapToGridB);
         fixedTools.addSeparator();
         fixedTools.add(m_newB);
         fixedTools.add(m_saveB);
@@ -1403,13 +1404,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               }
 
               // toggle
-              if (newSelected.size() == 
+              if (newSelected.size() ==
                 m_mainKFPerspective.getSelectedBeans().size()) {
                 // unselect all beans
                 m_mainKFPerspective.setSelectedBeans(new Vector());
-              } else {              
+              } else {
                 // select all beans
-                m_mainKFPerspective.setSelectedBeans(newSelected);             
+                m_mainKFPerspective.setSelectedBeans(newSelected);
               }
             }
           }
@@ -1418,7 +1419,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_cutB.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             // only delete if our copy was successful!
-            if (copyToClipboard()) {              
+            if (copyToClipboard()) {
               deleteSelectedBeans();
             }
           }
@@ -1481,13 +1482,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             File undoF = undo.pop();
             if (undo.size() == 0) {
               m_undoB.setEnabled(false);
-            }          
-            loadLayout(undoF, false, true);          
-          }        
+            }
+            loadLayout(undoF, false, true);
+          }
         }
       });
 
-      m_playB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+      m_playB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
           "resultset_next.png")));
       m_playB.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
       m_playB.setToolTipText("Run this flow (all start points launched in parallel)");
@@ -1501,7 +1502,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
       });
 
-      m_playBB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+      m_playBB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
           "resultset_last.png")));
       m_playBB.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
       m_playBB.setToolTipText("Run this flow (start points launched sequentially)");
@@ -1515,7 +1516,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             JCheckBox dontShow = new JCheckBox("Do not show this message again");
             Object[] stuff = new Object[2];
             stuff[0] = "The order that data sources are launched in can be\n" +
-            "specified by setting a custom name for each data source that\n" + 
+            "specified by setting a custom name for each data source that\n" +
             "that includes a number. E.g. \"1:MyArffLoader\". To set a name,\n" +
             "right-click over a data source and select \"Set name\"\n\n" +
             "If the prefix is not specified, then the order of execution\n" +
@@ -1525,7 +1526,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             "\"!:MyArffLoader\"";
             stuff[1] = dontShow;
 
-            JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff, 
+            JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff,
                 "Sequential execution information", JOptionPane.OK_OPTION);
 
             if (dontShow.isSelected()) {
@@ -1599,13 +1600,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           popupHelp();
         }
       });
-      
+
       m_templatesB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           createTemplateMenuPopup();
         }
       });
-      
+
       m_templatesB.setEnabled(TEMPLATE_PATHS.size() > 0);
 
       m_togglePerspectivesB.addActionListener(new ActionListener() {
@@ -1614,12 +1615,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             installWindowListenerForSavingUserStuff();
             m_firstUserComponentOpp = false;
           }
-          
+
           if (!Utils.getDontShowDialog("weka.gui.beans.KnowledgeFlow.PerspectiveInfo")) {
             JCheckBox dontShow = new JCheckBox("Do not show this message again");
             Object[] stuff = new Object[2];
             stuff[0] = "Perspectives are environments that take over the\n" +
-            "Knowledge Flow UI and provide major additional functionality.\n" + 
+            "Knowledge Flow UI and provide major additional functionality.\n" +
             "Many perspectives will operate on a set of instances. Instances\n" +
             "Can be sent to a perspective by placing a DataSource on the\n" +
             "layout canvas, configuring it and then selecting \"Send to perspective\"\n" +
@@ -1628,7 +1629,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             "can be installed via the package manager.\n";
             stuff[1] = dontShow;
 
-            JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff, 
+            JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff,
                 "Perspective information", JOptionPane.OK_OPTION);
 
             if (dontShow.isSelected()) {
@@ -1639,7 +1640,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               }
             }
           }
-          
+
           if (m_configAndPerspectivesVisible) {
             KnowledgeFlowApp.this.remove(m_configAndPerspectives);
             m_configAndPerspectivesVisible = false;
@@ -1668,7 +1669,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         DefaultMutableTreeNode subTreeNode = new DefaultMutableTreeNode(tempToolSetName);
         jtreeRoot.add(subTreeNode);
 
-        // Used for weka leaf packages 
+        // Used for weka leaf packages
         //        Box singletonHolderPanel = null;
 
         // name of the bean component to handle this class of weka algorithms
@@ -1745,7 +1746,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
                 String algName = hpp.fullValue();
                 // -- tempBean = instantiateToolBarBean(true, tempBeanCompName, algName);
-                Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+                Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset),
                     tempBeanCompName, algName);
 
                 //if (tempBean != null) {
@@ -1754,7 +1755,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   //                  singletonHolderPanel.add(tempBean);
 
 
-                  /*Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+                  /*Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset),
                       tempBeanCompName, algName); */
                   if (visibleCheck instanceof BeanContextChild) {
                     m_bcSupport.add(visibleCheck);
@@ -1767,23 +1768,23 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                       // m_iconLookup.put(algName, scaledForTree);
                     }
                   }
-                  
+
                   // try and get a tool tip
                   String toolTip = "";
                   try {
                     Object wrappedA = Class.forName(algName).newInstance();
                     toolTip = getGlobalInfo(wrappedA);
                   } catch (Exception ex) { }
-                  
-                  JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, algName, 
+
+                  JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, algName,
                       scaledForTree);
-                  
+
                   if (toolTip != null && toolTip.length() > 0) {
-                   leafData.setToolTipText(toolTip); 
+                   leafData.setToolTipText(toolTip);
                   }
-                  DefaultMutableTreeNode leafAlgo = 
+                  DefaultMutableTreeNode leafAlgo =
                     new DefaultMutableTreeNode(leafData);
-                  subTreeNode.add(leafAlgo);             
+                  subTreeNode.add(leafAlgo);
                 }
 
                 hpp.goToParent();
@@ -1795,7 +1796,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 holderPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(userPrefix +
                     primaryPackages[kk])); */
 
-                DefaultMutableTreeNode firstLevelOfMainAlgoType = 
+                DefaultMutableTreeNode firstLevelOfMainAlgoType =
                   new DefaultMutableTreeNode(primaryPackages[kk]);
                 subTreeNode.add(firstLevelOfMainAlgoType);
 
@@ -1818,7 +1819,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           for (int j = z; j < tempBarSpecs.size(); j++) {
             tempBean = null;
             tempBeanCompName = (String) tempBarSpecs.elementAt(j);
-            Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+            Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset),
                 tempBeanCompName, "");
 
             /* --         tempBean = instantiateToolBarBean((toolBarType == wrapper_toolset),
@@ -1832,11 +1833,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
               String treeName = tempBeanCompName;
               if (treeName.lastIndexOf('.') > 0) {
-                treeName = treeName.substring(treeName.lastIndexOf('.') + 1, 
+                treeName = treeName.substring(treeName.lastIndexOf('.') + 1,
                     treeName.length());
               }
 
-              /*Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+              /*Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset),
                   tempBeanCompName, ""); */
               if (visibleCheck instanceof BeanContextChild) {
                 m_bcSupport.add(visibleCheck);
@@ -1851,13 +1852,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   //m_iconLookup.put(treeName, scaledForTree);
                 }
               }
-              
+
               String tipText = null;
               tipText = getGlobalInfo(visibleCheck);
-              
+
               // check for annotation and let this override any global info tool tip
               Class compClass = visibleCheck.getClass();
-              Annotation[] annotations = 
+              Annotation[] annotations =
                 compClass.getDeclaredAnnotations();
 
               for (Annotation ann : annotations) {
@@ -1867,15 +1868,15 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                     + "</font></html>";
                   break;
                 }
-              }              
-              
-              JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "", 
+              }
+
+              JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "",
                   scaledForTree);
               if (tipText != null) {
                 leafData.setToolTipText(tipText);
               }
               DefaultMutableTreeNode fixedLeafNode = new DefaultMutableTreeNode(leafData);
-              subTreeNode.add(fixedLeafNode);            
+              subTreeNode.add(fixedLeafNode);
             }
           }
 
@@ -1893,8 +1894,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       // are actually some beans (rather than just all perspectives)
 
       // Any plugin components to process?
-      if (BEAN_PLUGINS_PROPERTIES != null && 
-          BEAN_PLUGINS_PROPERTIES.size() > 0) {                
+      if (BEAN_PLUGINS_PROPERTIES != null &&
+          BEAN_PLUGINS_PROPERTIES.size() > 0) {
 
         boolean pluginBeans = false;
 
@@ -1902,7 +1903,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         for (int i = 0; i < BEAN_PLUGINS_PROPERTIES.size(); i++) {
           Properties tempP = BEAN_PLUGINS_PROPERTIES.get(i);
           JPanel tempBean = null;
-          String components = 
+          String components =
             tempP.getProperty("weka.gui.beans.KnowledgeFlow.Plugins");
           if (components != null && components.length() > 0) {
             StringTokenizer st2 = new StringTokenizer(components, ", ");
@@ -1912,7 +1913,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
               String treeName = tempBeanCompName;
               if (treeName.lastIndexOf('.') > 0) {
-                treeName = treeName.substring(treeName.lastIndexOf('.') + 1, 
+                treeName = treeName.substring(treeName.lastIndexOf('.') + 1,
                     treeName.length());
               }
 
@@ -1923,7 +1924,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             }
             m_pluginsBoxPanel.add(tempBean); */
 
-              Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset), 
+              Object visibleCheck = instantiateBean((toolBarType == wrapper_toolset),
                   tempBeanCompName, "");
               if (visibleCheck instanceof BeanContextChild) {
                 m_bcSupport.add(visibleCheck);
@@ -1936,13 +1937,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   //m_iconLookup.put(tempBeanCompName, scaledForTree);
                 }
               }
-              
+
               String tipText = null;
               tipText = getGlobalInfo(visibleCheck);
-              
+
               // check for annotation
               Class compClass = visibleCheck.getClass();
-              Annotation[] annotations = 
+              Annotation[] annotations =
                 compClass.getDeclaredAnnotations();
               DefaultMutableTreeNode targetFolder = null;
               String category = null;
@@ -1953,14 +1954,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   tipText = "<html><font color=red>"
                     + ((KFStep)ann).toolTipText()
                     + "</font></html>";
-                  
+
                   // Does this category already exist?
-                  Enumeration children = 
+                  Enumeration children =
                     jtreeRoot.children();
-                  
+
                   while (children.hasMoreElements()) {
                     Object child = children.nextElement();
-                    if (child instanceof DefaultMutableTreeNode) {                      
+                    if (child instanceof DefaultMutableTreeNode) {
                       if (((DefaultMutableTreeNode)child).getUserObject().toString().equals(category)) {
                         targetFolder = (DefaultMutableTreeNode)child;
                         break;
@@ -1970,9 +1971,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   break;
                 }
               }
-              
-              
-              JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "", 
+
+
+              JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, "",
                   scaledForTree);
               if (tipText != null) {
                 leafData.setToolTipText(tipText);
@@ -1982,7 +1983,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 targetFolder.add(pluginLeaf);
               } else if (category != null) {
                 // make a new category folder
-                DefaultMutableTreeNode newCategoryNode = 
+                DefaultMutableTreeNode newCategoryNode =
                   new DefaultMutableTreeNode(category);
                 jtreeRoot.add(newCategoryNode);
                 newCategoryNode.add(pluginLeaf);
@@ -2000,7 +2001,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           }
 
           // check for perspectives
-          String perspectives = 
+          String perspectives =
             tempP.getProperty(("weka.gui.beans.KnowledgeFlow.Perspectives"));
           if (perspectives != null && perspectives.length() > 0) {
             StringTokenizer st2 = new StringTokenizer(perspectives, ",");
@@ -2023,9 +2024,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                     // all plugins we will iterate over the sorted
                     // VISIBLE_PERSPECTIVES in order to add them
                     // to the toolbar in consistent sorted order
-                    
+
                     //((KFPerspective)p).setMainKFPerspective(m_mainKFPerspective);
-                    m_perspectiveCache.put(className, (KFPerspective)p);                    
+                    m_perspectiveCache.put(className, (KFPerspective)p);
                   }
                 }
               } catch (Exception ex) {
@@ -2042,10 +2043,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 }
               }
             }
-          }          
+          }
         }
       }
-      
+
       m_togglePerspectivesB.setEnabled(m_pluginPerspectiveLookup.keySet().size() > 0);
 
       //      toolBarPanel.add(m_toolBars, BorderLayout.CENTER);
@@ -2063,7 +2064,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           }
           TreePath currPath = getPathForLocation(e.getX(), e.getY());
           if (currPath.getLastPathComponent() instanceof DefaultMutableTreeNode) {
-            DefaultMutableTreeNode node = 
+            DefaultMutableTreeNode node =
               (DefaultMutableTreeNode)currPath.getLastPathComponent();
             if (node.isLeaf()) {
               JTreeLeafDetails leaf = (JTreeLeafDetails)node.getUserObject();
@@ -2071,7 +2072,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             }
           }
           return null;
-        }      
+        }
       };
 
       m_componentTree.setEnabled(true);
@@ -2089,10 +2090,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
               != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
             boolean clearSelection = true;
-            /*TreePath path = 
+            /*TreePath path =
                 m_componentTree.getPathForLocation(e.getX(), e.getY());
               if (path != null) {
-                DefaultMutableTreeNode tNode = 
+                DefaultMutableTreeNode tNode =
                   (DefaultMutableTreeNode)path.getLastPathComponent();
 
                 if (tNode.isLeaf()) {
@@ -2143,12 +2144,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   } else {
                     ((JTreeLeafDetails)userObject).instantiateBean();
                   }
-                }                
+                }
               }
             }
           }
         }
-      });      
+      });
     }
 
     public MainKFPerspective() {
@@ -2195,7 +2196,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         String tabTitle = m_flowTabs.getTitleAt(tabIndex);
         String message = "\"" + tabTitle + "\" has been modified. Save changes " +
         "before closing?";
-        int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this, message, 
+        int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this, message,
             "Save changes", JOptionPane.YES_NO_CANCEL_OPTION);
 
         if (result == JOptionPane.YES_OPTION) {
@@ -2205,7 +2206,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
       }
 
-      BeanLayout bl = m_beanLayouts.get(tabIndex);           
+      BeanLayout bl = m_beanLayouts.get(tabIndex);
       BeanInstance.removeBeanInstances(bl, tabIndex);
       BeanConnection.removeConnectionList(tabIndex);
       m_beanLayouts.remove(tabIndex);
@@ -2221,7 +2222,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         m_beanLayout = null;
         m_logPanel = null;
         m_saveB.setEnabled(false);
-      }      
+      }
     }
 
     public synchronized void addTab(String tabTitle) {
@@ -2427,7 +2428,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   /** Snap-to-grid spacing */
   private int m_gridSpacing = 40;
-  
+
   /** Number of untitled tabs so far */
   protected int m_untitledCount = 1;
 
@@ -2483,16 +2484,16 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   private int m_startX, m_startY;
 
   /** The file chooser for selecting layout files */
-  protected JFileChooser m_FileChooser 
+  protected JFileChooser m_FileChooser
   = new JFileChooser(new File(System.getProperty("user.dir")));
-  
+
   protected class KFLogPanel extends LogPanel {
     public synchronized void setMessageOnAll(boolean mainKFLine, String message) {
       for (String key : m_tableIndexes.keySet()) {
         if (!mainKFLine && key.equals("[KnowledgeFlow]")) {
           continue;
         }
-        
+
         String tm = key + "|" + message;
         statusMessage(tm);
       }
@@ -2506,10 +2507,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   /** Panel to hold the perspectives toolbar and config button */
   protected JPanel m_configAndPerspectives;
-  
-  /** 
+
+  /**
    * Whether the perspectives toolbar is visible at present (will never be visible
-   * if there are no plugin perspectives installed) 
+   * if there are no plugin perspectives installed)
    */
   protected boolean m_configAndPerspectivesVisible = true;
 
@@ -2521,7 +2522,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   /** Component that holds the currently visible perspective */
   protected JPanel m_perspectiveHolder;
 
-  /** 
+  /**
    * Holds the list of currently loaded perspectives. Element at 0 is always
    * the main KF data mining flow perspective
    */
@@ -2545,30 +2546,30 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   /** A filter to ensure only KnowledgeFlow files in binary format get shown in
       the chooser */
-  protected FileFilter m_KfFilter = 
-    new ExtensionFileFilter(FILE_EXTENSION, 
-        "Binary KnowledgeFlow configuration files (*" 
+  protected FileFilter m_KfFilter =
+    new ExtensionFileFilter(FILE_EXTENSION,
+        "Binary KnowledgeFlow configuration files (*"
         + FILE_EXTENSION + ")");
 
-  /** A filter to ensure only KnowledgeFlow files in KOML format 
+  /** A filter to ensure only KnowledgeFlow files in KOML format
       get shown in the chooser */
-  protected FileFilter m_KOMLFilter = 
-    new ExtensionFileFilter(KOML.FILE_EXTENSION + "kf", 
-        "XML KnowledgeFlow configuration files (*" 
+  protected FileFilter m_KOMLFilter =
+    new ExtensionFileFilter(KOML.FILE_EXTENSION + "kf",
+        "XML KnowledgeFlow configuration files (*"
         + KOML.FILE_EXTENSION + "kf)");
 
-  /** A filter to ensure only KnowledgeFlow files in XStream format 
+  /** A filter to ensure only KnowledgeFlow files in XStream format
       get shown in the chooser */
-  protected FileFilter m_XStreamFilter = 
-    new ExtensionFileFilter(XStream.FILE_EXTENSION + "kf", 
-        "XML KnowledgeFlow configuration files (*" 
+  protected FileFilter m_XStreamFilter =
+    new ExtensionFileFilter(XStream.FILE_EXTENSION + "kf",
+        "XML KnowledgeFlow configuration files (*"
         + XStream.FILE_EXTENSION + "kf)");
 
-  /** A filter to ensure only KnowledgeFlow layout files in XML format get 
+  /** A filter to ensure only KnowledgeFlow layout files in XML format get
       shown in the chooser */
-  protected FileFilter m_XMLFilter = 
-    new ExtensionFileFilter(FILE_EXTENSION_XML, 
-        "XML KnowledgeFlow layout files (*" 
+  protected FileFilter m_XMLFilter =
+    new ExtensionFileFilter(FILE_EXTENSION_XML,
+        "XML KnowledgeFlow layout files (*"
         + FILE_EXTENSION_XML + ")");
 
   /** the scrollbar increment of the layout scrollpane */
@@ -2604,7 +2605,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   /**
    * Set the environment variables to use. NOTE: loading a new layout
    * resets back to the default set of variables
-   * 
+   *
    * @param env
    */
   public void setEnvironment(Environment env) {
@@ -2733,7 +2734,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           KFPerspective current = (KFPerspective)m_perspectiveHolder.getComponent(0);
           current.setActive(false);
           m_perspectiveHolder.remove(0);
-          m_perspectiveHolder.add((JComponent)m_perspectives.get(0), 
+          m_perspectiveHolder.add((JComponent)m_perspectives.get(0),
               BorderLayout.CENTER);
           m_perspectives.get(0).setActive(true);
           //KnowledgeFlowApp.this.invalidate();
@@ -2755,13 +2756,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       m_configAndPerspectives = new JPanel();
       m_configAndPerspectives.setLayout(new BorderLayout());
       m_configAndPerspectives.add(m_perspectiveToolBar, BorderLayout.CENTER);
-      
+
       try {
         Properties visible = Utils.readProperties(VISIBLE_PERSPECTIVES_PROPERTIES_FILE);
         Enumeration keys = (java.util.Enumeration)visible.propertyNames();
         if (keys.hasMoreElements()) {
 
-          String toolBarIsVisible = 
+          String toolBarIsVisible =
             visible.getProperty("weka.gui.beans.KnowledgeFlow.PerspectiveToolBarVisisble");
           if (toolBarIsVisible != null && toolBarIsVisible.length() > 0) {
             m_configAndPerspectivesVisible = toolBarIsVisible.equalsIgnoreCase("yes");
@@ -2771,14 +2772,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         System.err.println("Problem reading visible perspectives property file");
         ex.printStackTrace();
       }
-      
-      // add the perspectives toolbar      
+
+      // add the perspectives toolbar
       // does the user want it visible?
       if (m_configAndPerspectivesVisible) {
         add(m_configAndPerspectives, BorderLayout.NORTH);
       }
 
-      JButton configB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH + 
+      JButton configB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH +
       "cog.png")));
       configB.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 1));
       configB.setToolTipText("Enable/disable perspectives");
@@ -2790,7 +2791,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             JCheckBox dontShow = new JCheckBox("Do not show this message again");
             Object[] stuff = new Object[2];
             stuff[0] = "Perspectives are environments that take over the\n" +
-            "Knowledge Flow UI and provide major additional functionality.\n" + 
+            "Knowledge Flow UI and provide major additional functionality.\n" +
             "Many perspectives will operate on a set of instances. Instances\n" +
             "Can be sent to a perspective by placing a DataSource on the\n" +
             "layout canvas, configuring it and then selecting \"Send to perspective\"\n" +
@@ -2799,7 +2800,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             "can be installed via the package manager.\n";
             stuff[1] = dontShow;
 
-            JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff, 
+            JOptionPane.showMessageDialog(KnowledgeFlowApp.this, stuff,
                 "Perspective information", JOptionPane.OK_OPTION);
 
             if (dontShow.isSelected()) {
@@ -2810,12 +2811,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               }
             }
           }
-          
+
           popupPerspectiveConfigurer();
         }
       });
     }
-    
+
     // set main perspective on all cached perspectives
     for (String pName : m_perspectiveCache.keySet()) {
       m_perspectiveCache.get(pName).setMainKFPerspective(m_mainKFPerspective);
@@ -2824,10 +2825,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     loadUserComponents();
     clearLayout(); // add an initial "Untitled" tab
   }
-  
+
   /**
    * Gets the main knowledge flow perspective
-   * 
+   *
    * @return the main knowledge flow perspective
    */
   public MainKFPerspective getMainPerspective() {
@@ -2836,7 +2837,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   private void popupPerspectiveConfigurer() {
     if (m_perspectiveConfigurer == null) {
-      m_perspectiveConfigurer = 
+      m_perspectiveConfigurer =
         new AttributeSelectionPanel(true, true, true, true);
     }
 
@@ -2856,14 +2857,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       String pName = m_pluginPerspectiveLookup.get(clName);
       atts.add(new Attribute(pName));
     }
-    Instances perspectiveInstances = 
+    Instances perspectiveInstances =
       new Instances("Perspectives", atts, 1);
 
-    boolean[] selectedPerspectives = 
+    boolean[] selectedPerspectives =
       new boolean[perspectiveInstances.numAttributes()];
     for (String selected : VISIBLE_PERSPECTIVES) {
       String pName = m_pluginPerspectiveLookup.get(selected);
-      
+
       // check here - just in case the user has uninstalled/deleted a plugin
       // perspective since the last time that the user-selected visible perspectives
       // list was written out to the props file
@@ -2881,8 +2882,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       return;
     }
 
-    final JDialog d = new JDialog((JFrame)KnowledgeFlowApp.this.getTopLevelAncestor(), 
-        "Manage Perspectives", true);
+    final JDialog d = new JDialog((JFrame)KnowledgeFlowApp.this.getTopLevelAncestor(),
+        "Manage Perspectives", ModalityType.DOCUMENT_MODAL);
     d.setLayout(new BorderLayout());
 
     JPanel holder = new JPanel();
@@ -2920,7 +2921,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               }
             } catch (Exception ex) {
               ex.printStackTrace();
-            }                                  
+            }
           }
           VISIBLE_PERSPECTIVES.add(selectedClassName);
         }
@@ -2996,20 +2997,20 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     repaint();
     notifyIsDirty();
   }
-  
+
   protected void setActivePerspective(int theIndex) {
     if (theIndex < 0 || theIndex > m_perspectives.size() - 1) {
       return;
     }
-    
+
     KFPerspective current = (KFPerspective)m_perspectiveHolder.getComponent(0);
     current.setActive(false);
     m_perspectiveHolder.remove(0);
-    m_perspectiveHolder.add((JComponent)m_perspectives.get(theIndex), 
+    m_perspectiveHolder.add((JComponent)m_perspectives.get(theIndex),
         BorderLayout.CENTER);
     m_perspectives.get(theIndex).setActive(true);
     ((JToggleButton)m_perspectiveToolBar.getComponent(theIndex)).setSelected(true);
-    
+
     //KnowledgeFlowApp.this.invalidate();
     KnowledgeFlowApp.this.revalidate();
     KnowledgeFlowApp.this.repaint();
@@ -3053,7 +3054,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         if (m_toolBarBean == null) {
           if (((me.getModifiers() & InputEvent.BUTTON1_MASK)
               == InputEvent.BUTTON1_MASK) && m_mode == NONE) {
-            BeanInstance bi = BeanInstance.findInstance(me.getPoint(), 
+            BeanInstance bi = BeanInstance.findInstance(me.getPoint(),
                 m_mainKFPerspective.getCurrentTabIndex());
             JComponent bc = null;
             if (bi != null) {
@@ -3107,7 +3108,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
 
       public void mouseClicked(MouseEvent me) {
-        BeanInstance bi = BeanInstance.findInstance(me.getPoint(), 
+        BeanInstance bi = BeanInstance.findInstance(me.getPoint(),
             m_mainKFPerspective.getCurrentTabIndex());
         if (m_mode == ADDING || m_mode == NONE) {
           // try and popup a context sensitive menu if we have
@@ -3118,7 +3119,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             // as long as we're not a meta bean
             if (me.getClickCount() == 2 && !(bc instanceof MetaBean)) {
               try {
-                Class custClass = 
+                Class custClass =
                   Introspector.getBeanInfo(bc.getClass()).getBeanDescriptor().getCustomizerClass();
                 if (custClass != null) {
                   if (bc instanceof BeanCommon) {
@@ -3146,7 +3147,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               } else {
                 v = new Vector();
               }
-              v.add(bi);             
+              v.add(bi);
               m_mainKFPerspective.setSelectedBeans(v);
 
               return;
@@ -3162,18 +3163,18 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               return;
               /*int delta = 10;
                 deleteConnectionPopup(BeanConnection.
-                      getClosestConnections(new Point(me.getX(), me.getY()), 
-                                            delta, m_mainKFPerspective.getCurrentTabIndex()), 
+                      getClosestConnections(new Point(me.getX(), me.getY()),
+                                            delta, m_mainKFPerspective.getCurrentTabIndex()),
                                             me.getX(), me.getY()); */
             } else if (m_toolBarBean != null) {
-              // otherwise, if a toolbar button is active then 
+              // otherwise, if a toolbar button is active then
               // add the component
 
               // snap to grid
               int x = me.getX();
               int y = me.getY();
               if (m_snapToGridB.isSelected()) {
-                x = snapToGrid(me.getX()); 
+                x = snapToGrid(me.getX());
                 y = snapToGrid(me.getY());
               }
 
@@ -3204,10 +3205,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         if (m_mode == CONNECTING) {
           // turn off connecting points and remove connecting line
           layout.repaint();
-          Vector beanInstances = 
+          Vector beanInstances =
             BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
           for (int i = 0; i < beanInstances.size(); i++) {
-            JComponent bean = 
+            JComponent bean =
               (JComponent)((BeanInstance)beanInstances.elementAt(i)).
               getBean();
             if (bean instanceof Visible) {
@@ -3231,14 +3232,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             if (doConnection) {
 
               addUndoPoint();
-              // attempt to connect source and target beans                                
+              // attempt to connect source and target beans
               if (bi.getBean() instanceof MetaBean) {
                 BeanConnection.doMetaConnection(m_editElement, bi,
                     m_sourceEventSetDescriptor,
                     layout, m_mainKFPerspective.getCurrentTabIndex());
               } else {
-                BeanConnection bc = 
-                  new BeanConnection(m_editElement, bi, 
+                BeanConnection bc =
+                  new BeanConnection(m_editElement, bi,
                       m_sourceEventSetDescriptor,
                       m_mainKFPerspective.getCurrentTabIndex());
               }
@@ -3263,7 +3264,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         if (m_editElement != null && m_mode == MOVING) {
 
           /*int width = ic.getIconWidth() / 2;
-            int height = ic.getIconHeight() / 2; */ 
+            int height = ic.getIconHeight() / 2; */
           /*int width = m_oldX - m_editElement.getX();
             int height = m_oldY - m_editElement.getY(); */
 
@@ -3275,9 +3276,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           //int newX = snapToGrid(m_oldX-width);
           //int newX = m_oldX-width;
           //int newY = snapToGrid(m_oldY-height);
-          //int newY = m_oldY-height;            
+          //int newY = m_oldY-height;
 
-          m_editElement.setXY(m_editElement.getX() + deltaX, 
+          m_editElement.setXY(m_editElement.getX() + deltaX,
               m_editElement.getY() + deltaY);
 
           if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
@@ -3286,7 +3287,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               BeanInstance b = (BeanInstance)v.get(i);
               if (b != m_editElement) {
                 b.setXY(b.getX() + deltaX, b.getY() + deltaY);
-              }                                
+              }
             }
           }
           layout.repaint();
@@ -3316,7 +3317,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     .format(new Date());
     logPanel.logMessage("Weka Knowledge Flow was written by Mark Hall");
     logPanel.logMessage("Weka Knowledge Flow");
-    logPanel.logMessage("(c) 2002-" + Copyright.getToYear() + " " 
+    logPanel.logMessage("(c) 2002-" + Copyright.getToYear() + " "
         + Copyright.getOwner() + ", " + Copyright.getAddress());
     logPanel.logMessage("web: " + Copyright.getURL());
     logPanel.logMessage(date);
@@ -3332,14 +3333,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             long totalM = currR.totalMemory();
             long maxM = currR.maxMemory();
             logPanel.
-            logMessage("[KnowledgeFlow] Memory (free/total/max.) in bytes: " 
-                + String.format("%,d", freeM) + " / " 
-                + String.format("%,d", totalM) + " / " 
+            logMessage("[KnowledgeFlow] Memory (free/total/max.) in bytes: "
+                + String.format("%,d", freeM) + " / "
+                + String.format("%,d", totalM) + " / "
                 + String.format("%,d", maxM));
-            logPanel.statusMessage("[KnowledgeFlow]|Memory (free/total/max.) in bytes: " 
-                + String.format("%,d", freeM) + " / " 
-                + String.format("%,d", totalM) + " / " 
-                + String.format("%,d", maxM)); 
+            logPanel.statusMessage("[KnowledgeFlow]|Memory (free/total/max.) in bytes: "
+                + String.format("%,d", freeM) + " / "
+                + String.format("%,d", totalM) + " / "
+                + String.format("%,d", maxM));
           }
         }
       }
@@ -3361,16 +3362,16 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
     return pic;
   }
-  
+
   protected class RunThread extends Thread {
     int m_flowIndex;
     boolean m_sequential;
     boolean m_wasUserStopped = false;
-    
+
     public RunThread(boolean sequential) {
       m_sequential = sequential;
     }
-    
+
     public void run() {
       m_flowIndex = m_mainKFPerspective.getCurrentTabIndex();
       String flowName = m_mainKFPerspective.getTabTitle(m_flowIndex);
@@ -3390,12 +3391,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         runner.run();
         runner.waitUntilFinished();
       } catch (InterruptedException ie) {
-        
+
       } catch (Exception ex) {
         m_logPanel.logMessage("An error occurred while running the flow: " +
             ex.getMessage());
       } finally {
-        if (m_flowIndex >= m_mainKFPerspective.getNumTabs() - 1 || 
+        if (m_flowIndex >= m_mainKFPerspective.getNumTabs() - 1 ||
             !m_mainKFPerspective.getTabTitle(m_flowIndex).equals(flowName)) {
           // try and find which index our flow is at (user must have closed some
           // other tabs at lower indexes than us)!
@@ -3407,7 +3408,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             }
           }
         }
-        
+
         m_mainKFPerspective.setExecuting(m_flowIndex, false);
         m_mainKFPerspective.setExecutionThread(m_flowIndex, null);
         if (m_wasUserStopped) {
@@ -3420,9 +3421,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
       }
     }
-    
+
     public void stopAllFlows() {
-      Vector components = 
+      Vector components =
         BeanInstance.getBeanInstances(m_flowIndex);
 
       if (components != null) {
@@ -3434,7 +3435,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           }
         }
         m_wasUserStopped = true;
-        
+
       }
     }
   }
@@ -3445,29 +3446,29 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * the start points with "<num> :" in order to specify the order. In both
    * parallel and sequential mode, a start point can be ommitted from exectution
    * by prefixing its name with "! :".
-   * 
+   *
    * @param sequential true if the flow layout is to have its start points run
    * sequentially rather than in parallel
-   * 
+   *
    */
   private void runFlow(final boolean sequential) {
-    if (m_mainKFPerspective.getNumTabs() > 0) {      
+    if (m_mainKFPerspective.getNumTabs() > 0) {
       RunThread runThread = new RunThread(sequential);
       m_mainKFPerspective.setExecutionThread(runThread);
 
       runThread.start();
-    }    
+    }
   }
 
   private void stopFlow() {
     if (m_mainKFPerspective.getCurrentTabIndex() >= 0) {
       RunThread running = m_mainKFPerspective.getExecutionThread();
-      
+
       if (running != null) {
         running.stopAllFlows();
       }
-      
-/*      Vector components = 
+
+/*      Vector components =
         BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
 
       if (components != null) {
@@ -3489,7 +3490,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       // instantiate a bean and add it to the holderPanel
       //      System.err.println("Would add "+hpp.fullValue());
       /*String algName = hpp.fullValue();
-      JPanel tempBean = 
+      JPanel tempBean =
 	instantiateToolBarBean(true, tempBeanCompName, algName);
       if (tempBean != null && holderPanel != null) {
         holderPanel.add(tempBean);
@@ -3506,7 +3507,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       if (hpp.isLeafReached()) {
         String algName = hpp.fullValue();
 
-        Object visibleCheck = instantiateBean(true, 
+        Object visibleCheck = instantiateBean(true,
             tempBeanCompName, algName);
         if (visibleCheck instanceof BeanContextChild) {
           m_bcSupport.add(visibleCheck);
@@ -3519,20 +3520,20 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             // m_iconLookup.put(algName, scaledForTree);
           }
         }
-        
+
      // try and get a tool tip
         String toolTip = "";
         try {
           Object wrappedA = Class.forName(algName).newInstance();
           toolTip = getGlobalInfo(wrappedA);
         } catch (Exception ex) { }
-        
-        JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, algName, 
+
+        JTreeLeafDetails leafData = new JTreeLeafDetails(tempBeanCompName, algName,
             scaledForTree);
         if (toolTip != null && toolTip.length() > 0) {
           leafData.setToolTipText(toolTip);
         }
-        child = new DefaultMutableTreeNode(leafData);        
+        child = new DefaultMutableTreeNode(leafData);
       } else {
         child = new DefaultMutableTreeNode(children[i]);
       }
@@ -3603,7 +3604,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     try {
       tempB.setEnabled(false);
       // Modified by Zerbetto
-      //InputStream inR = 
+      //InputStream inR =
       //	ClassLoader.
       //        getSystemResourceAsStream("weka/gui/beans/README_KnowledgeFlow");
       InputStream inR = this.getClass().getClassLoader()
@@ -3640,7 +3641,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       tempB.setEnabled(true);
     }
   }
-  
+
   public void closeAllTabs() {
     for (int i = m_mainKFPerspective.getNumTabs() - 1; i >= 0; i--) {
       m_mainKFPerspective.removeTab(i);
@@ -3655,10 +3656,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
 
     if (!getAllowMultipleTabs()) {
-      BeanConnection.setConnections(new Vector(), 
+      BeanConnection.setConnections(new Vector(),
           m_mainKFPerspective.getCurrentTabIndex());
-      BeanInstance.setBeanInstances(new Vector(), 
-          m_mainKFPerspective.getBeanLayout(m_mainKFPerspective.getCurrentTabIndex()), 
+      BeanInstance.setBeanInstances(new Vector(),
+          m_mainKFPerspective.getBeanLayout(m_mainKFPerspective.getCurrentTabIndex()),
           m_mainKFPerspective.getCurrentTabIndex());
     }
 
@@ -3669,7 +3670,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     m_logPanel.clearStatus();
     m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow"); */
   }
-  
+
   /**
    * Pops up the menu for selecting template layouts
    */
@@ -3679,7 +3680,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     for (int i = 0; i < TEMPLATE_PATHS.size(); i++) {
       String mE = TEMPLATE_DESCRIPTIONS.get(i);
       final String path = TEMPLATE_PATHS.get(i);
-      
+
       MenuItem m = new MenuItem(mE);
       m.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ee) {
@@ -3687,7 +3688,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             InputStream inR = this.getClass().getClassLoader()
             .getResourceAsStream(path);
             m_mainKFPerspective.addTab("Untitled" + m_untitledCount++);
-            XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+            XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport,
                 m_mainKFPerspective.getCurrentTabIndex());
             InputStreamReader isr = new InputStreamReader(inR);
 
@@ -3704,10 +3705,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               logMessage("Problem loading template: " + ex.getMessage());
           }
         }
-      });            
-      templatesMenu.add(m);            
+      });
+      templatesMenu.add(m);
     }
-    
+
     m_templatesB.add(templatesMenu);
     templatesMenu.show(m_templatesB, 0, 0);
   }
@@ -3734,11 +3735,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     //JPopupMenu beanContextMenu = new JPopupMenu();
 
-    //    beanContextMenu.insert(new JLabel("Edit", 
-    //				      SwingConstants.CENTER), 
+    //    beanContextMenu.insert(new JLabel("Edit",
+    //				      SwingConstants.CENTER),
     //			   menuItemCount);
     boolean executing = m_mainKFPerspective.getExecuting();
-    
+
     MenuItem edit = new MenuItem("Edit:");
     edit.setEnabled(false);
     beanContextMenu.insert(edit, menuItemCount);
@@ -3783,11 +3784,11 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
           m_beanLayout.repaint();
           m_mainKFPerspective.setEditedStatus(true);
-          notifyIsDirty();            
+          notifyIsDirty();
         }
       });
       ungroupItem.setEnabled(!executing);
-      
+
       beanContextMenu.add(ungroupItem);
       menuItemCount++;
 
@@ -3813,7 +3814,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       public void actionPerformed(ActionEvent e) {
         BeanConnection.removeConnections(bi, m_mainKFPerspective.getCurrentTabIndex());
         bi.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
-        if (bc instanceof BeanCommon) {            
+        if (bc instanceof BeanCommon) {
           String key = ((BeanCommon)bc).getCustomName()
           + "$" + bc.hashCode();
           m_logPanel.statusMessage(key + "|remove");
@@ -3831,7 +3832,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);
       }
     });
-    
+
     deleteItem.setEnabled(!executing);
     if (bc instanceof BeanCommon) {
       if (((BeanCommon)bc).isBusy()) {
@@ -3923,7 +3924,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   custName = custName.substring(0, custName.indexOf("Customizer"));
                 }
 
-                custName = custName.substring(custName.lastIndexOf('.') + 1,              
+                custName = custName.substring(custName.lastIndexOf('.') + 1,
                     custName.length());
               }
               //custItem = new JMenuItem("Configure: "+ custName);
@@ -3959,7 +3960,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
         //for (int i = 0; i < compInfoOutputs.size(); i++) {
         for (int i = 0; i < compInfo.size(); i++) {
-          EventSetDescriptor[] temp = 
+          EventSetDescriptor[] temp =
             //  ((BeanInfo) compInfoOutputs.elementAt(i)).getEventSetDescriptors();
             ((BeanInfo) compInfo.elementAt(i)).getEventSetDescriptors();
 
@@ -3971,8 +3972,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         //        EventSetDescriptor [] esds = compInfo.getEventSetDescriptors();
         //        if (esds != null && esds.length > 0) {
         if (esdV.size() > 0) {
-          //          beanContextMenu.insert(new JLabel("Connections", 
-          //                                            SwingConstants.CENTER), 
+          //          beanContextMenu.insert(new JLabel("Connections",
+          //                                            SwingConstants.CENTER),
           //                                 menuItemCount);
           MenuItem connections = new MenuItem("Connections:");
           connections.setEnabled(false);
@@ -4000,8 +4001,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 sourceBeanName = sourceBean.getClass().getName();
               }
 
-              sourceBeanName = 
-                sourceBeanName.substring(sourceBeanName.lastIndexOf('.') + 1, 
+              sourceBeanName =
+                sourceBeanName.substring(sourceBeanName.lastIndexOf('.') + 1,
                     sourceBeanName.length());
             }
             sourceBeanName += ": ";
@@ -4058,8 +4059,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
 
       if (/*(bc instanceof Startable) ||*/ (req !=null && req.hasMoreElements())) {
-        //	beanContextMenu.insert(new JLabel("Actions", 
-        //					  SwingConstants.CENTER), 
+        //	beanContextMenu.insert(new JLabel("Actions",
+        //					  SwingConstants.CENTER),
         //			       menuItemCount);
         MenuItem actions = new MenuItem("Actions:");
         actions.setEnabled(false);
@@ -4082,7 +4083,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     // Send to perspective menu item?
     if (bc instanceof weka.gui.beans.Loader && m_perspectives.size() > 1 &&
         m_perspectiveDataLoadThread == null) {
-      final weka.core.converters.Loader theLoader = 
+      final weka.core.converters.Loader theLoader =
         ((weka.gui.beans.Loader)bc).getLoader();
 
       boolean ok = true;
@@ -4092,12 +4093,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         Environment env = m_mainKFPerspective.getEnvironmentSettings();
         try {
           fileName = env.substitute(fileName);
-        } catch (Exception ex) {          
+        } catch (Exception ex) {
         }
 
         File tempF = new File(fileName);
         String fileNameFixedPathSep = fileName.replace(File.separatorChar, '/');
-        if (!tempF.isFile() && 
+        if (!tempF.isFile() &&
             this.getClass().getClassLoader().getResource(fileNameFixedPathSep) == null) {
           ok = false;
         }
@@ -4145,7 +4146,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
   }
 
-  private synchronized void loadDataAndSendToPerspective(final weka.core.converters.Loader loader, 
+  private synchronized void loadDataAndSendToPerspective(final weka.core.converters.Loader loader,
       final int perspectiveIndex, final boolean sendToAll) {
     if (m_perspectiveDataLoadThread == null) {
       m_perspectiveDataLoadThread = new Thread() {
@@ -4155,7 +4156,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             if (loader instanceof EnvironmentHandler) {
               ((EnvironmentHandler)loader).setEnvironment(env);
             }
-            
+
             loader.reset();
             m_logPanel.statusMessage("[KnowledgeFlow]|Sending data to perspective(s)...");
             Instances data = loader.getDataSet();
@@ -4165,7 +4166,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                 KnowledgeFlowApp.this.add(m_configAndPerspectives, BorderLayout.NORTH);
                 m_configAndPerspectivesVisible = true;
               }
-              
+
               // need to disable all the perspective buttons
               for (int i = 0; i < m_perspectives.size(); i++) {
                 m_perspectiveToolBar.getComponent(i).setEnabled(false);
@@ -4178,13 +4179,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   }
                 }
               } else {
-                KFPerspective currentP = 
+                KFPerspective currentP =
                   (KFPerspective)m_perspectiveHolder.getComponent(0);
                 if (currentP != m_perspectives.get(perspectiveIndex)) {
                   m_perspectives.get(perspectiveIndex).setInstances(data);
                   currentP.setActive(false);
                   m_perspectiveHolder.remove(0);
-                  m_perspectiveHolder.add((JComponent)m_perspectives.get(perspectiveIndex), 
+                  m_perspectiveHolder.add((JComponent)m_perspectives.get(perspectiveIndex),
                       BorderLayout.CENTER);
                   m_perspectives.get(perspectiveIndex).setActive(true);
                   ((JToggleButton)m_perspectiveToolBar.
@@ -4215,7 +4216,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
   }
 
-  private void insertUserOrStartableMenuItem(final JComponent bc, 
+  private void insertUserOrStartableMenuItem(final JComponent bc,
       final boolean startable, String tempS, PopupMenu beanContextMenu) {
 
     boolean disabled = false;
@@ -4240,7 +4241,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     if (confirmRequest) {
       custItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          // 
+          //
           int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
               tempS2,
               "Confirm action",
@@ -4250,7 +4251,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               public void run() {
                 try {
                   if (startable) {
-                    ((Startable)bc).start();                    
+                    ((Startable)bc).start();
                   } else if (bc instanceof UserRequestAcceptor) {
                     ((UserRequestAcceptor) bc).performRequest(tempS2);
                   }
@@ -4272,7 +4273,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             public void run() {
               try {
                 if (startable) {
-                  ((Startable)bc).start();                  
+                  ((Startable)bc).start();
                 } else if (bc instanceof UserRequestAcceptor) {
                   ((UserRequestAcceptor) bc).performRequest(tempS2);
                 }
@@ -4292,7 +4293,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       custItem.setEnabled(false);
     }
 
-    beanContextMenu.add(custItem); 
+    beanContextMenu.add(custItem);
   }
 
   /**
@@ -4327,7 +4328,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       ((Customizer)customizer).setObject(bc);
       // final javax.swing.JFrame jf = new javax.swing.JFrame();
-      final JDialog d = new JDialog((java.awt.Frame)KnowledgeFlowApp.this.getTopLevelAncestor(), true);
+      final JDialog d = new JDialog((java.awt.Frame)KnowledgeFlowApp.this.getTopLevelAncestor(), ModalityType.DOCUMENT_MODAL);
       d.setLayout(new BorderLayout());
       d.getContentPane().add((JComponent)customizer, BorderLayout.CENTER);
 
@@ -4357,7 +4358,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   private void addToUserTreeNode(BeanInstance meta, boolean installListener) {
     DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
     DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-    if (m_userCompNode == null) {            
+    if (m_userCompNode == null) {
       m_userCompNode = new DefaultMutableTreeNode("User");
       model.insertNodeInto(m_userCompNode, root, 0);
     }
@@ -4374,7 +4375,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       if (meta.getBean() instanceof Visible) {
         //((Visible)copy).getVisual().scale(3);
         scaledIcon = new ImageIcon(((Visible)meta.getBean()).getVisual().scale(0.33));
-        displayName = ((Visible)meta.getBean()).getVisual().getText();      
+        displayName = ((Visible)meta.getBean()).getVisual().getText();
       }
 
       Vector metaDetails = new Vector();
@@ -4400,7 +4401,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         } catch (Exception ex) {
           ex.printStackTrace();
         }
-      }            
+      }
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -4413,7 +4414,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     // of this MetaBean (prevents serialization of the entire
     // KnowledgeFlow!!)
     /*    Vector tempRemovedConnections = new Vector();
-    Vector allConnections = 
+    Vector allConnections =
       BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
     Vector inputs = bean.getInputs();
     Vector outputs = bean.getOutputs();
@@ -4449,10 +4450,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
 
     for (int i = 0; i < tempRemovedConnections.size(); i++) {
-      BeanConnection temp = 
+      BeanConnection temp =
         (BeanConnection)tempRemovedConnections.elementAt(i);
       temp.remove(m_mainKFPerspective.getCurrentTabIndex());
-    }        
+    }
 
     MetaBean copy = copyMetaBean(bean, true);
 
@@ -4462,7 +4463,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     if (copy instanceof Visible) {
       //((Visible)copy).getVisual().scale(3);
       scaledIcon = new ImageIcon(((Visible)copy).getVisual().scale(0.33));
-      displayName = ((Visible)copy).getVisual().getText();      
+      displayName = ((Visible)copy).getVisual().getText();
     }
 
     JTreeLeafDetails metaLeaf = new JTreeLeafDetails(displayName, copy, scaledIcon);
@@ -4483,9 +4484,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     // Now reinstate any deleted connections to the original MetaBean
     for (int i = 0; i < tempRemovedConnections.size(); i++) {
-      BeanConnection temp = 
+      BeanConnection temp =
         (BeanConnection)tempRemovedConnections.elementAt(i);
-      BeanConnection newC = 
+      BeanConnection newC =
         new BeanConnection(temp.getSource(), temp.getTarget(),
                            temp.getSourceEventSetDescriptor(),
                            m_mainKFPerspective.getCurrentTabIndex());
@@ -4508,24 +4509,24 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
     }*/
   }
-  
+
   /**
    * Set the contents of the "paste" buffer and enable the paste
    * from cliboard toolbar button
-   * 
+   *
    * @param b the buffer to use
    */
   public void setPasteBuffer(StringBuffer b) {
     m_pasteBuffer = b;
-    
+
     if (m_pasteBuffer != null && m_pasteBuffer.length() > 0) {
       m_pasteB.setEnabled(true);
     }
   }
-  
+
   /**
    * Get the contents of the paste buffer
-   * 
+   *
    * @return the contents of the paste buffer
    */
   public StringBuffer getPasteBuffer() {
@@ -4535,17 +4536,17 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   /**
    * Utility routine that serializes the supplied Vector of BeanInstances
    * to XML
-   * 
+   *
    * @param selectedBeans the vector of BeanInstances to serialize
    * @return a StringBuffer containing the serialized vector
    * @throws Exception if a problem occurs
    */
-  public StringBuffer copyToBuffer(Vector selectedBeans) 
+  public StringBuffer copyToBuffer(Vector selectedBeans)
     throws Exception {
 
-    Vector associatedConnections = 
+    Vector associatedConnections =
       BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
-    /*  BeanConnection.associatedConnections(selectedBeans, 
+    /*  BeanConnection.associatedConnections(selectedBeans,
           m_mainKFPerspective.getCurrentTabIndex()); */
 
     // xml serialize to a string and store in the
@@ -4555,7 +4556,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     v.set(XMLBeans.INDEX_BEANINSTANCES, selectedBeans);
     v.set(XMLBeans.INDEX_BEANCONNECTIONS, associatedConnections);
 
-    XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+    XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport,
         m_mainKFPerspective.getCurrentTabIndex());
     java.io.StringWriter sw = new java.io.StringWriter();
     xml.write(sw, v);
@@ -4575,7 +4576,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     try {
       m_pasteBuffer = copyToBuffer(selectedBeans);
     } catch (Exception ex) {
-      m_logPanel.logMessage("[KnowledgeFlow] problem copying beans: " 
+      m_logPanel.logMessage("[KnowledgeFlow] problem copying beans: "
           + ex.getMessage());
       ex.printStackTrace();
       return false;
@@ -4584,18 +4585,18 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     m_pasteB.setEnabled(true);
     return true;
   }
-  
-  protected boolean pasteFromBuffer(int x, int y, 
+
+  protected boolean pasteFromBuffer(int x, int y,
       StringBuffer pasteBuffer, boolean addUndoPoint) {
-    
+
     if (addUndoPoint) {
       addUndoPoint();
     }
 
-    java.io.StringReader sr = 
+    java.io.StringReader sr =
       new java.io.StringReader(pasteBuffer.toString());
     try {
-      XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+      XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport,
           m_mainKFPerspective.getCurrentTabIndex());
       Vector v = (Vector)xml.read(sr);
       Vector beans = (Vector)v.get(XMLBeans.INDEX_BEANINSTANCES);
@@ -4615,7 +4616,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
       }
 
-      // adjust beans coords with respect to x, y. Look for 
+      // adjust beans coords with respect to x, y. Look for
       // the smallest x and the smallest y (top left corner of the bounding)
       // box.
       int minX = Integer.MAX_VALUE;
@@ -4641,7 +4642,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           b.setY(b.getY() + deltaY); */
           b.setXY(b.getX() + deltaX, b.getY() + deltaY);
         }
-      }            
+      }
 
       // integrate these beans
       integrateFlow(beans, connections, false, false);
@@ -4652,7 +4653,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       notifyIsDirty();
       m_mainKFPerspective.setSelectedBeans(beans);
     } catch (Exception e) {
-      m_logPanel.logMessage("[KnowledgeFlow] problem pasting beans: " 
+      m_logPanel.logMessage("[KnowledgeFlow] problem pasting beans: "
           + e.getMessage());
       e.printStackTrace();
     }
@@ -4663,7 +4664,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     return true;
   }
 
-  private boolean pasteFromClipboard(int x, int y, 
+  private boolean pasteFromClipboard(int x, int y,
       StringBuffer pasteBuffer, boolean addUndoPoint) {
 
     return pasteFromBuffer(x, y, pasteBuffer, addUndoPoint);
@@ -4682,7 +4683,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       BeanConnection.removeConnections(b, m_mainKFPerspective.getCurrentTabIndex());
       b.removeBean(m_beanLayout, m_mainKFPerspective.getCurrentTabIndex());
-      if (b instanceof BeanCommon) {            
+      if (b instanceof BeanCommon) {
         String key = ((BeanCommon)b).getCustomName()
         + "$" + b.hashCode();
         m_logPanel.statusMessage(key + "|remove");
@@ -4715,20 +4716,20 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     } catch (Exception ex) {
       m_logPanel.logMessage("[KnowledgeFlow] a problem occurred while trying to " +
           "create a undo point : " + ex.getMessage());
-    }    
+    }
   }
 
   // right click over empty canvas (not on a bean)
   private void rightClickCanvasPopup(final int x, final int y) {
 
-    Vector closestConnections = 
-      BeanConnection.getClosestConnections(new Point(x, y), 
+    Vector closestConnections =
+      BeanConnection.getClosestConnections(new Point(x, y),
           10, m_mainKFPerspective.getCurrentTabIndex());
 
     PopupMenu rightClickMenu = new PopupMenu();
     int menuItemCount = 0;
     if (m_mainKFPerspective.getSelectedBeans().size() > 0 ||
-        closestConnections.size() > 0 || 
+        closestConnections.size() > 0 ||
         (m_pasteBuffer != null && m_pasteBuffer.length() > 0)) {
 
       if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
@@ -4757,7 +4758,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         cutItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             // only delete if our copy was successful!
-            if (copyToClipboard()) {              
+            if (copyToClipboard()) {
               deleteSelectedBeans();
             }
           }
@@ -4779,9 +4780,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         boolean groupable = true;
         final Vector selected = m_mainKFPerspective.getSelectedBeans();
         // check if sub flow is valid
-        final Vector inputs = BeanConnection.inputs(selected, 
+        final Vector inputs = BeanConnection.inputs(selected,
             m_mainKFPerspective.getCurrentTabIndex());
-        final Vector outputs = BeanConnection.outputs(selected, 
+        final Vector outputs = BeanConnection.outputs(selected,
             m_mainKFPerspective.getCurrentTabIndex());
 
         // screen the inputs and outputs
@@ -4828,8 +4829,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           });
           rightClickMenu.add(groupItem);
           menuItemCount++;
-        }                        
-      }      
+        }
+      }
 
       if (m_pasteBuffer != null && m_pasteBuffer.length() > 0) {
         rightClickMenu.addSeparator();
@@ -4842,7 +4843,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
             // position at x, y
 
             pasteFromClipboard(x, y, m_pasteBuffer, true);
-          }        
+          }
         });
         rightClickMenu.add(pasteItem);
         menuItemCount++;
@@ -4881,14 +4882,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
               m_mainKFPerspective.setEditedStatus(true);
               if (m_mainKFPerspective.getSelectedBeans().size() > 0) {
                 m_mainKFPerspective.setSelectedBeans(new Vector());
-              }                
+              }
               notifyIsDirty();
             }
           });
           rightClickMenu.add(deleteItem);
           menuItemCount++;
         }
-      }            
+      }
     }
 
     if (menuItemCount > 0) {
@@ -4932,8 +4933,8 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       //JPopupMenu deleteConnectionMenu = new JPopupMenu();
       PopupMenu deleteConnectionMenu = new PopupMenu();
 
-      //      deleteConnectionMenu.insert(new JLabel("Delete Connection", 
-      //					     SwingConstants.CENTER), 
+      //      deleteConnectionMenu.insert(new JLabel("Delete Connection",
+      //					     SwingConstants.CENTER),
       //				  menuItemCount);
       MenuItem deleteConnection = new MenuItem("Delete Connection:");
       deleteConnection.setEnabled(false);
@@ -4980,7 +4981,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * @param x the x coordinate to start connecting from
    * @param y the y coordinate to start connecting from
    */
-  private void connectComponents(EventSetDescriptor esd, 
+  private void connectComponents(EventSetDescriptor esd,
       BeanInstance bi,
       int x,
       int y) {
@@ -4988,10 +4989,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     if (m_mainKFPerspective.
         getSelectedBeans(m_mainKFPerspective.getCurrentTabIndex()).size() > 0) {
       m_mainKFPerspective.
-        setSelectedBeans(m_mainKFPerspective.getCurrentTabIndex(), 
+        setSelectedBeans(m_mainKFPerspective.getCurrentTabIndex(),
             new Vector());
     }
-    
+
     // record the event set descriptior for this event
     m_sourceEventSetDescriptor = esd;
 
@@ -5000,10 +5001,10 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     // now determine which (if any) of the other beans implement this
     // listener
     int targetCount = 0;
-    Vector beanInstances = 
+    Vector beanInstances =
       BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
     for (int i = 0; i < beanInstances.size(); i++) {
-      JComponent bean = 
+      JComponent bean =
         (JComponent)((BeanInstance)beanInstances.elementAt(i)).getBean();
       boolean connectable = false;
       boolean canContinue = false;
@@ -5040,7 +5041,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     // have some possible beans to connect to?
     if (targetCount > 0) {
       //      System.err.println("target count "+targetCount);
-      if (source instanceof Visible) {        
+      if (source instanceof Visible) {
         ((Visible)source).getVisual().setDisplayConnectors(true);
 
 
@@ -5061,14 +5062,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       }
     }
   }
-  
+
   private void checkForDuplicateName(BeanInstance comp) {
     if (comp.getBean() instanceof BeanCommon) {
       String currentName = ((BeanCommon)comp.getBean()).getCustomName();
       if (currentName != null && currentName.length() > 0) {
         Vector layoutBeans = BeanInstance.
           getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
-        
+
         boolean exactMatch = false;
         int maxCopyNum = 1;
         for (int i = 0; i < layoutBeans.size(); i++) {
@@ -5086,13 +5087,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
                   if (compNum > maxCopyNum) {
                     maxCopyNum = compNum;
                   }
-                } catch (NumberFormatException e) {                    
+                } catch (NumberFormatException e) {
                 }
               }
             }
           }
         }
-        
+
         if (exactMatch) {
           maxCopyNum++;
           currentName += "" + maxCopyNum;
@@ -5123,12 +5124,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       for (int i = 0; i < list.size(); i++) {
         ((BeanInstance) list.get(i)).setX(comp.getX());
         ((BeanInstance) list.get(i)).setY(comp.getY());
-      }            
+      }
     }
-    
+
     // check for a duplicate name
     checkForDuplicateName(comp);
-    
+
     KnowledgeFlowApp.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     if (repaint) {
       m_beanLayout.repaint();
@@ -5144,7 +5145,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     if (m_toolBarBean instanceof MetaBean) {
       // need to add the MetaBean's internal connections
       // to BeanConnection's vector
-      Vector associatedConnections = 
+      Vector associatedConnections =
         ((MetaBean)m_toolBarBean).getAssociatedConnections();
       BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex()).
       addAll(associatedConnections);
@@ -5157,7 +5158,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     if (m_toolBarBean instanceof BeanContextChild) {
       m_bcSupport.add(m_toolBarBean);
     }
-    BeanInstance bi = new BeanInstance(m_beanLayout, m_toolBarBean, x, y, 
+    BeanInstance bi = new BeanInstance(m_beanLayout, m_toolBarBean, x, y,
         m_mainKFPerspective.getCurrentTabIndex());
     //    addBean((JComponent)bi.getBean());
     m_toolBarBean = null;
@@ -5166,13 +5167,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   private void highlightSubFlow(int startX, int startY,
       int endX, int endY) {
-    java.awt.Rectangle r = 
+    java.awt.Rectangle r =
       new java.awt.Rectangle((startX < endX) ? startX : endX,
           (startY < endY) ? startY: endY,
               Math.abs(startX - endX),
               Math.abs(startY - endY));
     //    System.err.println(r);
-    Vector selected = 
+    Vector selected =
       BeanInstance.findInstances(r, m_mainKFPerspective.getCurrentTabIndex());
 
     // show connector dots for selected beans
@@ -5222,9 +5223,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     java.awt.Rectangle r = new java.awt.Rectangle(upperLeftX, upperLeftY,
         lowerRightX, lowerRightY);
 
-    /*  BufferedImage subFlowPreview = null; 
+    /*  BufferedImage subFlowPreview = null;
     try {
-        subFlowPreview = createImage(m_beanLayout, r);              
+        subFlowPreview = createImage(m_beanLayout, r);
     } catch (IOException ex) {
       ex.printStackTrace();
       // drop through quietly
@@ -5236,14 +5237,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         "Group Components",
         JOptionPane.YES_NO_OPTION);
     if (result == JOptionPane.YES_OPTION) {
-      Vector associatedConnections = 
-        BeanConnection.associatedConnections(selected, 
+      Vector associatedConnections =
+        BeanConnection.associatedConnections(selected,
             m_mainKFPerspective.getCurrentTabIndex());
 
       String name = JOptionPane.showInputDialog(KnowledgeFlowApp.this,
           "Enter a name for this group",
       "MyGroup");
-      if (name != null) {       
+      if (name != null) {
         MetaBean group = new MetaBean();
         //group.setXCreate(bx); group.setYCreate(by);
         //group.setXDrop(bx); group.setYDrop(by);
@@ -5265,7 +5266,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         //int by = (int)r.getCenterY() - group.getVisual().m_icon.getIconHeight();
 
 
-        /*BeanInstance bi = new BeanInstance(m_beanLayout, group, 
+        /*BeanInstance bi = new BeanInstance(m_beanLayout, group,
                                            (int)r.getX()+(int)(r.getWidth()/2),
                                            (int)r.getY()+(int)(r.getHeight()/2),
                                            m_mainKFPerspective.getCurrentTabIndex()); */
@@ -5273,7 +5274,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         int dx = (int)(d.getWidth() / 2);
         int dy = (int)(d.getHeight() / 2);
 
-        BeanInstance bi = new BeanInstance(m_beanLayout, group, bx + dx, by + dy, 
+        BeanInstance bi = new BeanInstance(m_beanLayout, group, bx + dx, by + dy,
             m_mainKFPerspective.getCurrentTabIndex());
 
         for (int i = 0; i < selected.size(); i++) {
@@ -5331,27 +5332,27 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
       // determine filename
       File oFile = m_FileChooser.getSelectedFile();
-      // set internal flow directory environment variable      
+      // set internal flow directory environment variable
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
         if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION)) {
-          oFile = new File(oFile.getParent(), 
+          oFile = new File(oFile.getParent(),
               oFile.getName() + FILE_EXTENSION);
         }
       } else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
         if (!oFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION + "kf")) {
-          oFile = new File(oFile.getParent(), 
+          oFile = new File(oFile.getParent(),
               oFile.getName() + KOML.FILE_EXTENSION + "kf");
         }
       } else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
         if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
-          oFile = new File(oFile.getParent(), 
+          oFile = new File(oFile.getParent(),
               oFile.getName() + FILE_EXTENSION_XML);
         }
       } else if (m_FileChooser.getFileFilter() == m_XStreamFilter) {
         if (!oFile.getName().toLowerCase().endsWith(XStream.FILE_EXTENSION +"kf")) {
-          oFile = new File(oFile.getParent(), 
+          oFile = new File(oFile.getParent(),
               oFile.getName() + XStream.FILE_EXTENSION + "kf");
         }
       }
@@ -5366,13 +5367,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     m_loadB.setEnabled(true);
     m_playB.setEnabled(true);
     m_playBB.setEnabled(true);
-    m_saveB.setEnabled(true);    
+    m_saveB.setEnabled(true);
   }
 
   /**
    * Load a layout from a file. Supports loading binary and XML serialized
    * flow files
-   * 
+   *
    * @param oFile the file to load from
    * @param newTab true if the loaded layout should be displayed in a new tab
    */
@@ -5382,18 +5383,18 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   /**
    * Load a layout from a file
-   * 
+   *
    * @param oFile the file to load from
    * @param newTab true if the loaded layout should be displayed in a new tab
    * @param isUndo is this file an "undo" file?
    */
   protected void loadLayout(File oFile, boolean newTab, boolean isUndo) {
-    
+
     // stop any running flow first (if we are loading into this tab)
     if (!newTab) {
       stopFlow();
     }
-    
+
     m_loadB.setEnabled(false);
     m_saveB.setEnabled(false);
     m_playB.setEnabled(false);
@@ -5421,13 +5422,13 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       Vector connections = new Vector();
 
       // KOML?
-      if ( (KOML.isPresent()) && 
+      if ( (KOML.isPresent()) &&
           (oFile.getAbsolutePath().toLowerCase().
               endsWith(KOML.FILE_EXTENSION + "kf")) ) {
         Vector v     = (Vector) KOML.read(oFile.getAbsolutePath());
         beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
         connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-      } /* XStream */ else if ( (XStream.isPresent()) && 
+      } /* XStream */ else if ( (XStream.isPresent()) &&
           (oFile.getAbsolutePath().toLowerCase().
               endsWith(XStream.FILE_EXTENSION + "kf")) ) {
         Vector v     = (Vector) XStream.read(oFile.getAbsolutePath());
@@ -5435,7 +5436,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
       } /* XML? */ else if (oFile.getAbsolutePath().toLowerCase().
           endsWith(FILE_EXTENSION_XML)) {
-        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport,
             m_mainKFPerspective.getCurrentTabIndex());
         Vector v     = (Vector) xml.read(oFile);
         beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
@@ -5447,7 +5448,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         beans = (Vector) ois.readObject();
         connections = (Vector) ois.readObject();
         ois.close();
-      }                
+      }
 
       integrateFlow(beans, connections, true, false);
       setEnvironment();
@@ -5460,30 +5461,30 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       m_logPanel.logMessage("[KnowledgeFlow] Unable to load flow ("
           + ex.getMessage() + ").");
       ex.printStackTrace();
-    }        
+    }
     m_loadB.setEnabled(true);
     m_saveB.setEnabled(true);
     m_playB.setEnabled(true);
     m_playBB.setEnabled(true);
   }
-  
+
   /**
    * Load a flow file from an input stream. Only supports XML serialized flows.
-   * 
+   *
    * @param is the input stream to laod from
    * @param newTab whether to open a new tab in the UI for the flow
    * @param flowName the name of the flow
    * @throws Exception if a problem occurs during de-serialization
    */
-  public void loadLayout(InputStream is, boolean newTab, 
+  public void loadLayout(InputStream is, boolean newTab,
       String flowName) throws Exception {
     InputStreamReader isr = new InputStreamReader(is);
     loadLayout(isr, newTab, flowName);
   }
-  
+
   /**
    * Load a flow file from a reader. Only supports XML serialized flows.
-   * 
+   *
    * @param reader the reader to load from
    * @param newTab whether to open a new tab in the UI for the flow
    * @param flowName the name of the flow
@@ -5491,39 +5492,39 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    */
   public void loadLayout(Reader reader, boolean newTab,
       String flowName) throws Exception {
-    
+
     // stop any running flow first (if we are loading into this tab)
     if (!newTab) {
       stopFlow();
     }
-    
+
     m_loadB.setEnabled(false);
     m_saveB.setEnabled(false);
     m_playB.setEnabled(false);
     m_playBB.setEnabled(false);
-    
+
     if (newTab) {
       m_mainKFPerspective.addTab(flowName);
       m_mainKFPerspective.setEditedStatus(false);
     }
-    
-    XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, 
+
+    XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport,
         m_mainKFPerspective.getCurrentTabIndex());
     Vector v = (Vector) xml.read(reader);
     Vector beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
     Vector connections = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-    
+
     integrateFlow(beans, connections, true, false);
     setEnvironment();
     if (newTab) {
       m_logPanel.clearStatus();
       m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
     }
-    
+
     m_loadB.setEnabled(true);
     m_saveB.setEnabled(true);
     m_playB.setEnabled(true);
-    m_playBB.setEnabled(true);    
+    m_playBB.setEnabled(true);
   }
 
   // Link the supplied beans into the KnowledgeFlow gui
@@ -5556,14 +5557,14 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     }
 
     if (replace) {
-      BeanInstance.setBeanInstances(beans, m_beanLayout, 
+      BeanInstance.setBeanInstances(beans, m_beanLayout,
           m_mainKFPerspective.getCurrentTabIndex());
-      BeanConnection.setConnections(connections, 
+      BeanConnection.setConnections(connections,
           m_mainKFPerspective.getCurrentTabIndex());
     } else if (notReplaceAndSourcedFromBinary){
-      BeanInstance.appendBeans(m_beanLayout, beans, 
+      BeanInstance.appendBeans(m_beanLayout, beans,
           m_mainKFPerspective.getCurrentTabIndex());
-      BeanConnection.appendConnections(connections, 
+      BeanConnection.appendConnections(connections,
           m_mainKFPerspective.getCurrentTabIndex());
     }
     revalidate();
@@ -5572,7 +5573,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     notifyIsDirty();
 
     m_selectAllB.setEnabled(BeanInstance.
-        getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);    
+        getBeanInstances(m_mainKFPerspective.getCurrentTabIndex()).size() > 0);
   }
 
   /**
@@ -5628,9 +5629,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    */
   public Vector getFlow() throws Exception {
     Vector v = new Vector();
-    Vector beans = 
+    Vector beans =
       BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex());
-    Vector connections = 
+    Vector connections =
       BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
     detachFromLayout(beans);
     v.add(beans);
@@ -5656,7 +5657,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   throws IOException {
     boolean opaqueValue = component.isOpaque();
     component.setOpaque( true );
-    BufferedImage image = new BufferedImage(region.width, 
+    BufferedImage image = new BufferedImage(region.width,
         region.height, BufferedImage.TYPE_INT_RGB);
     Graphics2D g2d = image.createGraphics();
     g2d.translate(-region.getX(), -region.getY());
@@ -5701,7 +5702,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
   protected boolean saveLayout(File sFile, int tabIndex, boolean isUndoPoint) {
     java.awt.Color bckC = getBackground();
 
-    Vector beans = 
+    Vector beans =
       BeanInstance.getBeanInstances(tabIndex);
     detachFromLayout(beans);
     detachFromLayout(beans);
@@ -5709,22 +5710,22 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     // now serialize components vector and connections vector
     try {
       // KOML?
-      if ((KOML.isPresent()) && 
+      if ((KOML.isPresent()) &&
           (sFile.getAbsolutePath().toLowerCase().
               endsWith(KOML.FILE_EXTENSION + "kf")) ) {
         Vector v = new Vector();
         v.setSize(2);
         v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-        v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+        v.set(XMLBeans.INDEX_BEANCONNECTIONS,
             BeanConnection.getConnections(tabIndex));
         KOML.write(sFile.getAbsolutePath(), v);
-      } /* XStream */ else if ((XStream.isPresent()) && 
+      } /* XStream */ else if ((XStream.isPresent()) &&
           (sFile.getAbsolutePath().toLowerCase().
               endsWith(XStream.FILE_EXTENSION + "kf")) ) {
         Vector v = new Vector();
         v.setSize(2);
         v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-        v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+        v.set(XMLBeans.INDEX_BEANCONNECTIONS,
             BeanConnection.getConnections(tabIndex));
         XStream.write(sFile.getAbsolutePath(), v);
       } /* XML? */ else if (sFile.getAbsolutePath().
@@ -5732,9 +5733,9 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         Vector v = new Vector();
         v.setSize(2);
         v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-        v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+        v.set(XMLBeans.INDEX_BEANCONNECTIONS,
             BeanConnection.getConnections(tabIndex));
-        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, tabIndex); 
+        XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, tabIndex);
         xml.write(sFile, v);
       } /* binary */ else {
         OutputStream os = new FileOutputStream(sFile);
@@ -5743,7 +5744,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         oos.writeObject(BeanConnection.getConnections(tabIndex));
         oos.flush();
         oos.close();
-      } 
+      }
     } catch (Exception ex) {
       m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
       m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
@@ -5772,7 +5773,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       if (!isUndoPoint) {
         Environment e = m_mainKFPerspective.getEnvironmentSettings(tabIndex);
 
-        e.addVariable("Internal.knowledgeflow.directory", 
+        e.addVariable("Internal.knowledgeflow.directory",
             new File(sFile.getAbsolutePath()).getParent());
         m_mainKFPerspective.setEditedStatus(tabIndex, false);
         String tabTitle = sFile.getName();
@@ -5802,7 +5803,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       // temporarily remove this panel as a property changle listener from
       // each bean
 
-      Vector beans = 
+      Vector beans =
         BeanInstance.getBeanInstances(tabIndex);
       detachFromLayout(beans);
 
@@ -5812,29 +5813,29 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
         if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION)) {
-          sFile = new File(sFile.getParent(), 
+          sFile = new File(sFile.getParent(),
               sFile.getName() + FILE_EXTENSION);
         }
       } else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
         if (!sFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION + "kf")) {
-          sFile = new File(sFile.getParent(), 
+          sFile = new File(sFile.getParent(),
               sFile.getName() + KOML.FILE_EXTENSION + "kf");
         }
       } else if (m_FileChooser.getFileFilter() == m_XStreamFilter) {
         if (!sFile.getName().toLowerCase().endsWith(XStream.FILE_EXTENSION + "kf")) {
-          sFile = new File(sFile.getParent(), 
+          sFile = new File(sFile.getParent(),
               sFile.getName() + XStream.FILE_EXTENSION + "kf");
         }
       } else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
         if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
-          sFile = new File(sFile.getParent(), 
+          sFile = new File(sFile.getParent(),
               sFile.getName() + FILE_EXTENSION_XML);
         }
       }
 
       saveLayout(sFile, m_mainKFPerspective.getCurrentTabIndex(), false);
       m_mainKFPerspective.setFlowFile(tabIndex, sFile);
-    } 
+    }
   }
 
   /**
@@ -5866,7 +5867,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       Vector v = new Vector();
       v.setSize(2);
       v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
-      v.set(XMLBeans.INDEX_BEANCONNECTIONS, 
+      v.set(XMLBeans.INDEX_BEANCONNECTIONS,
           BeanConnection.getConnections(tabIndex));
 
       XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport, tabIndex);
@@ -5922,7 +5923,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       if (tempV.size() > 0) {
         DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
-        if (m_userCompNode == null) {            
+        if (m_userCompNode == null) {
           m_userCompNode = new DefaultMutableTreeNode("User");
           model.insertNodeInto(m_userCompNode, root, 0);
         }
@@ -5954,7 +5955,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       public void windowClosing(java.awt.event.WindowEvent e) {
 
         System.out.println("[KnowledgeFlow] Saving user components....");
-        File sFile = new File(WekaPackageManager.WEKA_HOME.getPath() 
+        File sFile = new File(WekaPackageManager.WEKA_HOME.getPath()
             + File.separator + "knowledgeFlow");
 
         if (!sFile.exists()) {
@@ -5992,7 +5993,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
         //        if (VISIBLE_PERSPECTIVES.size() > 0) {
         System.out.println("Saving preferences for selected perspectives...");
-        sFile = new File(weka.core.WekaPackageManager.PROPERTIES_DIR.toString() 
+        sFile = new File(weka.core.WekaPackageManager.PROPERTIES_DIR.toString()
             + File.separator + "VisiblePerspectives.props");
         try {
           FileWriter f = new FileWriter(sFile);
@@ -6007,7 +6008,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
           }
           f.write("\n");
 
-          f.write("weka.gui.beans.KnowledgeFlow.PerspectiveToolBarVisisble=" 
+          f.write("weka.gui.beans.KnowledgeFlow.PerspectiveToolBarVisisble="
               + ((m_configAndPerspectivesVisible) ? "yes" : "no"));
           f.write("\n");
           f.close();
@@ -6025,7 +6026,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
    * Utility method for grabbing the global info help (if it exists) from
    * an arbitrary object
    *
-   * @param tempBean the object to grab global info from 
+   * @param tempBean the object to grab global info from
    * @return the global help info or null if global info does not exist
    */
   public static String getGlobalInfo(Object tempBean) {
@@ -6082,19 +6083,19 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
         }
         remainder += p + "<br>";
       }
-      
+
       return firstLine + remainder + "</html>";
     }
-    
+
     // gi = gi.replaceFirst("[.] ", ".<br><br>");
     /*gi = gi.replace("\n", "<br>");
     gi = "<html>" + gi + "</html>"; */
-    
+
     return null;
   }
 
-  /** variable for the KnowLedgeFlow class which would be set to null by the 
-      memory monitoring thread to free up some memory if we running out of 
+  /** variable for the KnowLedgeFlow class which would be set to null by the
+      memory monitoring thread to free up some memory if we running out of
       memory.
    */
   private static KnowledgeFlowApp m_knowledgeFlow;
@@ -6112,7 +6113,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   /**
    * Create the singleton instance of the KnowledgeFlow
-   * @param args can contain a file argument for loading a flow layout 
+   * @param args can contain a file argument for loading a flow layout
    * (format: "file=[path to layout file]")
    * Modified by Zerbetto: you can specify the path of a knowledge flow layout file at input
    */
@@ -6150,7 +6151,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       m_knowledgeFlow.loadInitialLayout(fileName);
     }
 
-    // end modifications 
+    // end modifications
   }
 
   public static void disposeSingleton() {
@@ -6168,7 +6169,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
   /**
    * Add a listener to be notified when startup is complete
-   * 
+   *
    * @param s a listener to add
    */
   public static void addStartupListener(StartUpListener s) {
@@ -6201,7 +6202,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
     } else {
       System.err.println("[KnowledgeFlow] File '" + fileName + "' does not exists.");
     }
-    
+
     loadLayout(oFile, true);
   }
 
@@ -6252,12 +6253,12 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 //      m_knowledgeFlow = new KnowledgeFlowApp(true);
 
       for (int i = 0; i < args.length; i++) {
-        if (args[i].toLowerCase().endsWith(".kf") || 
+        if (args[i].toLowerCase().endsWith(".kf") ||
             args[i].toLowerCase().endsWith(".kfml")) {
           args[i] = "file=" + args[i];
         }
       }
-      
+
       KnowledgeFlowApp.createSingleton(args);
 
       Image icon = Toolkit.getDefaultToolkit().
@@ -6268,7 +6269,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
       jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       jf.setSize(1024,768);
-      jf.setVisible(true);     
+      jf.setVisible(true);
 
 
       Thread memMonitor = new Thread() {

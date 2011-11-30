@@ -28,6 +28,7 @@ import weka.gui.visualize.PrintablePanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -101,7 +102,7 @@ public class GraphVisualizer
 
   /** for serialization */
   private static final long serialVersionUID = -2038911085935515624L;
-  
+
   /** Vector containing nodes */
   protected FastVector m_nodes=new FastVector();
   /** Vector containing edges */
@@ -112,7 +113,7 @@ public class GraphVisualizer
   protected GraphPanel m_gp;
   /** String containing graph's name */
   protected String graphID;
-  
+
   /**
    * Save button to save the current graph in DOT or XMLBIF format.
    * The graph should be layed out again to get the original form
@@ -120,10 +121,10 @@ public class GraphVisualizer
    * saving specific information for a properly layed out graph.
    */
   protected JButton m_jBtSave;
-  
+
   /** path for icons */
   private final String ICONPATH = "weka/gui/graphvisualizer/icons/";
-  
+
   private FontMetrics fm = this.getFontMetrics( this.getFont() );
   private double scale = 1;   //current zoom
   private int nodeHeight = 2*fm.getHeight(), nodeWidth = 24;
@@ -143,7 +144,7 @@ public class GraphVisualizer
   250, 275, 300, 350, 400, 450, 500, 550, 600, 650, 700, 800, 900, 999 };
   /** this contains the m_gp GraphPanel */
   JScrollPane m_js;
-  
+
   /**
    * Constructor<br>
    * Sets up the gui and initializes all the other previously
@@ -152,13 +153,13 @@ public class GraphVisualizer
   public GraphVisualizer() {
     m_gp = new GraphPanel();
     m_js = new JScrollPane(m_gp);
-    
+
     //creating a new layout engine and adding this class as its listener
     // to receive layoutComplete events
-    m_le=new HierarchicalBCEngine(m_nodes, m_edges, 
+    m_le=new HierarchicalBCEngine(m_nodes, m_edges,
                                   paddedNodeWidth, nodeHeight);
     m_le.addLayoutCompleteEventListener(this);
-    
+
     m_jBtSave = new JButton();
     java.net.URL tempURL = ClassLoader.getSystemResource(ICONPATH+"save.gif");
     if(tempURL!=null)
@@ -177,7 +178,7 @@ public class GraphVisualizer
         fc.addChoosableFileFilter(ef2);
         fc.setDialogTitle("Save Graph As");
         int rval = fc.showSaveDialog(GraphVisualizer.this);
-        
+
         if (rval == JFileChooser.APPROVE_OPTION) {
           //System.out.println("Saving to file \""+
           //                   f.getAbsoluteFile().toString()+"\"");
@@ -196,7 +197,7 @@ public class GraphVisualizer
         }
       }
     });
-    
+
     final JButton jBtZoomIn = new JButton();
     tempURL = ClassLoader.getSystemResource(ICONPATH+"zoomin.gif");
     if(tempURL!=null)
@@ -205,7 +206,7 @@ public class GraphVisualizer
       System.err.println(ICONPATH+
       "zoomin.gif not found for weka.gui.graphvisualizer.Graph");
     jBtZoomIn.setToolTipText("Zoom In");
-    
+
     final JButton jBtZoomOut = new JButton();
     tempURL = ClassLoader.getSystemResource(ICONPATH+"zoomout.gif");
     if(tempURL!=null)
@@ -214,12 +215,12 @@ public class GraphVisualizer
       System.err.println(ICONPATH+
       "zoomout.gif not found for weka.gui.graphvisualizer.Graph");
     jBtZoomOut.setToolTipText("Zoom Out");
-    
+
     final JTextField jTfZoom = new JTextField("100%");
     jTfZoom.setMinimumSize( jTfZoom.getPreferredSize() );
     jTfZoom.setHorizontalAlignment(JTextField.CENTER);
     jTfZoom.setToolTipText("Zoom");
-    
+
     jTfZoom.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         JTextField jt = (JTextField)ae.getSource();
@@ -230,12 +231,12 @@ public class GraphVisualizer
             i = Integer.parseInt(jt.getText());
           else
             i = Integer.parseInt(jt.getText().substring(0,i));
-          
+
           if(i<=999)
             scale = i/100D;
-          
+
           jt.setText((int)(scale*100)+"%");
-          
+
           if(scale>0.1){
             if(!jBtZoomOut.isEnabled())
               jBtZoomOut.setEnabled(true);
@@ -248,7 +249,7 @@ public class GraphVisualizer
           }
           else
             jBtZoomIn.setEnabled(false);
-          
+
           setAppropriateSize();
           //m_gp.clearBuffer();
           m_gp.repaint();
@@ -263,8 +264,8 @@ public class GraphVisualizer
         }
       }
     });
-    
-    
+
+
     jBtZoomIn.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         int i=0, s = (int)(scale*100);
@@ -274,7 +275,7 @@ public class GraphVisualizer
           i = 6 +  s/50;
         else
           i = 13 +s/100;
-        
+
         if(s>=999) {
           JButton b = (JButton)ae.getSource();
           b.setEnabled(false);
@@ -304,8 +305,8 @@ public class GraphVisualizer
         m_js.revalidate();
       }
     });
-    
-    
+
+
     jBtZoomOut.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         int i=0, s = (int)(scale*100);
@@ -315,7 +316,7 @@ public class GraphVisualizer
           i = 6 +  (int) Math.ceil(s/50D);
         else
           i = 13 + (int) Math.ceil(s/100D);
-        
+
         if(s<=10) {
           JButton b = (JButton)ae.getSource();
           b.setEnabled(false);
@@ -342,8 +343,8 @@ public class GraphVisualizer
         m_js.revalidate();
       }
     });
-    
-    
+
+
     //This button pops out the extra controls
     JButton jBtExtraControls = new JButton();
     tempURL = ClassLoader.getSystemResource(ICONPATH+"extra.gif");
@@ -353,12 +354,12 @@ public class GraphVisualizer
       System.err.println(ICONPATH+
       "extra.gif not found for weka.gui.graphvisualizer.Graph");
     jBtExtraControls.setToolTipText("Show/Hide extra controls");
-    
-    
+
+
     final JCheckBox jCbCustomNodeSize = new JCheckBox("Custom Node Size");
     final JLabel jLbNodeWidth = new JLabel("Width");
     final JLabel jLbNodeHeight = new JLabel("Height");
-    
+
     jTfNodeWidth.setHorizontalAlignment(JTextField.CENTER);
     jTfNodeWidth.setText(""+nodeWidth);
     jTfNodeHeight.setHorizontalAlignment(JTextField.CENTER);
@@ -367,7 +368,7 @@ public class GraphVisualizer
     jTfNodeWidth.setEnabled(false);
     jLbNodeHeight.setEnabled(false);
     jTfNodeHeight.setEnabled(false);
-    
+
     jCbCustomNodeSize.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         if( ((JCheckBox)ae.getSource()).isSelected() ) {
@@ -385,13 +386,13 @@ public class GraphVisualizer
         }
       }
     });
-    
-    
+
+
     jBtLayout  = new JButton("Layout Graph");
     jBtLayout.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         int tmpW, tmpH;
-        
+
         if(jCbCustomNodeSize.isSelected()) {
           try{ tmpW = Integer.parseInt(jTfNodeWidth.getText()); }
           catch(NumberFormatException ne) {
@@ -401,7 +402,7 @@ public class GraphVisualizer
             JOptionPane.ERROR_MESSAGE);
             tmpW = nodeWidth;
             jTfNodeWidth.setText(""+nodeWidth);
-            
+
           }
           try{ tmpH = Integer.parseInt(jTfNodeHeight.getText()); }
           catch(NumberFormatException ne) {
@@ -412,7 +413,7 @@ public class GraphVisualizer
             tmpH = nodeHeight;
             jTfNodeWidth.setText(""+nodeHeight);
           }
-          
+
           if(tmpW!=nodeWidth || tmpH!=nodeHeight) {
             nodeWidth = tmpW; paddedNodeWidth = nodeWidth+8; nodeHeight = tmpH;
           }
@@ -423,10 +424,10 @@ public class GraphVisualizer
         m_le.layoutGraph();
       }
     });
-    
-    
+
+
     GridBagConstraints gbc = new GridBagConstraints();
-    
+
     final JPanel p = new JPanel(new GridBagLayout());
     gbc.gridwidth = gbc.REMAINDER;
     gbc.anchor = gbc.NORTHWEST;
@@ -436,7 +437,7 @@ public class GraphVisualizer
     gbc.insets = new Insets(8,0,0,0);
     gbc.anchor = gbc.NORTHWEST;
     gbc.gridwidth = gbc.REMAINDER;
-    
+
     p.add( jCbCustomNodeSize, gbc );
     gbc.insets = new Insets(0,0,0,0);
     gbc.gridwidth = gbc.REMAINDER;
@@ -452,7 +453,7 @@ public class GraphVisualizer
     c.add(jTfNodeHeight, gbc);
     gbc.fill = gbc.HORIZONTAL;
     p.add( c, gbc );
-    
+
     gbc.anchor = gbc.NORTHWEST;
     gbc.insets = new Insets(8,0,0,0);
     gbc.fill = gbc.HORIZONTAL;
@@ -463,7 +464,7 @@ public class GraphVisualizer
     BorderFactory.createEmptyBorder(4,4,4,4)
     ) );
     p.setPreferredSize( new Dimension(0, 0) );
-    
+
     final JToolBar jTbTools = new JToolBar();
     jTbTools.setFloatable(false);
     jTbTools.setLayout( new GridBagLayout() );
@@ -475,7 +476,7 @@ public class GraphVisualizer
     jTbTools.add(m_jBtSave, gbc);
     jTbTools.addSeparator(new Dimension(2,2));
     jTbTools.add(jBtZoomIn, gbc);
-    
+
     gbc.fill = gbc.VERTICAL;
     gbc.weighty = 1;
     JPanel p2 = new JPanel(new BorderLayout());
@@ -485,7 +486,7 @@ public class GraphVisualizer
     jTbTools.add(p2, gbc);
     gbc.weighty =0;
     gbc.fill = gbc.NONE;
-    
+
     jTbTools.add(jBtZoomOut, gbc);
     jTbTools.addSeparator(new Dimension(2,2));
     jTbTools.add(jBtExtraControls, gbc);
@@ -493,7 +494,7 @@ public class GraphVisualizer
     gbc.weightx = 1;
     gbc.fill = gbc.BOTH;
     jTbTools.add(m_le.getProgressBar(), gbc);
-    
+
     jBtExtraControls.addActionListener( new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         Dimension d = p.getPreferredSize();
@@ -508,11 +509,11 @@ public class GraphVisualizer
             int h = 0, w = 0;
             LayoutManager lm = p.getLayout();
             Dimension d2 = lm.preferredLayoutSize(p);
-           
+
             int tow = (int)d2.getWidth(), toh = (int)d2.getHeight();
             //toh = (int)d2.getHeight();
             //tow = (int)d2.getWidth();
-           
+
             public void run() {
               while(h<toh || w<tow) {
                 if((h+10)<toh)
@@ -544,7 +545,7 @@ public class GraphVisualizer
             int h = p.getHeight(), w = p.getWidth();
             LayoutManager lm = p.getLayout();
             int tow = 0, toh = 0;
-           
+
             public void run() {
               while(h>toh || w>tow) {
                 if((h-10)>toh)
@@ -555,7 +556,7 @@ public class GraphVisualizer
                   w -= 10;
                 else if(w>tow)
                   w = tow;
-           
+
                 p.setPreferredSize(new Dimension(w, h));
                 //p.invalidate();
                 jTbTools.revalidate();
@@ -575,8 +576,8 @@ public class GraphVisualizer
     this.add(jTbTools, BorderLayout.NORTH);
     this.add(m_js, BorderLayout.CENTER);
   }
-  
-  
+
+
   /**
    * This method sets the node size that is appropriate
    * considering the maximum label size that is present.
@@ -594,20 +595,20 @@ public class GraphVisualizer
     nodeWidth = maxStringWidth+4;
     paddedNodeWidth = nodeWidth+8;
     jTfNodeWidth.setText(""+nodeWidth);
-    
+
     nodeHeight = 2*fm.getHeight();
     jTfNodeHeight.setText(""+nodeHeight);
   }
-  
+
   /**
    * Sets the preferred size for m_gp GraphPanel to the
    * minimum size that is neccessary to display the graph.
    */
   protected void setAppropriateSize() {
     int maxX=0, maxY=0;
-    
+
     m_gp.setScale(scale, scale);
-    
+
     for(int i=0; i<m_nodes.size(); i++) {
       GraphNode n = (GraphNode)m_nodes.elementAt(i);
       if(maxX<n.x)
@@ -623,8 +624,8 @@ public class GraphVisualizer
     (int)((maxY+nodeHeight+2)*scale)));
     //System.out.println("Size set to "+this.getPreferredSize());
   }
-  
-  
+
+
   /**
    * This method is an implementation for LayoutCompleteEventListener
    * class. It sets the size appropriate for m_gp GraphPanel and
@@ -639,8 +640,8 @@ public class GraphVisualizer
     m_gp.repaint();
     jBtLayout.setEnabled(true);
   }
-  
-  
+
+
   /**
    * This method lays out the graph by calling the
    * LayoutEngine's layoutGraph() method. This method
@@ -651,9 +652,9 @@ public class GraphVisualizer
   public void layoutGraph() {
     if(m_le!=null)
       m_le.layoutGraph();
-    
+
   }
-  
+
   /*********************************************************
    *
    *  BIF reader<br>
@@ -670,13 +671,13 @@ public class GraphVisualizer
       bf.printStackTrace();
     }
     catch(Exception ex) { ex.printStackTrace(); return; }
-    
+
     setAppropriateNodeSize();
     if(m_le!=null) {
       m_le.setNodeSize(paddedNodeWidth, nodeHeight);
     }
   } //end readBIF1
-  
+
   /**
    *
    *  BIF reader<br>
@@ -693,15 +694,15 @@ public class GraphVisualizer
       bf.printStackTrace();
     }
     catch(Exception ex) { ex.printStackTrace(); return; }
-    
+
     setAppropriateNodeSize();
     if(m_le!=null) {
       m_le.setNodeSize(paddedNodeWidth, nodeHeight);
     }
     setAppropriateSize();
   } //end readBIF2
-  
-  
+
+
   /*********************************************************
    *
    *  Dot reader<br>
@@ -712,7 +713,7 @@ public class GraphVisualizer
   public void readDOT(Reader input) {
     DotParser dp = new DotParser(input, m_nodes, m_edges);
     graphID = dp.parse();
-    
+
     setAppropriateNodeSize();
     if(m_le!=null) {
       m_le.setNodeSize(paddedNodeWidth, nodeHeight);
@@ -720,7 +721,7 @@ public class GraphVisualizer
       layoutGraph();
     }
   }
-  
+
   /**
    * The panel which contains the actual graph.
    */
@@ -736,7 +737,7 @@ public class GraphVisualizer
       this.addMouseMotionListener( new GraphVisualizerMouseMotionListener() );
       this.setToolTipText("");
     }
-    
+
     public String getToolTipText(MouseEvent me) {
       int x, y, nx, ny;
       Rectangle r;
@@ -745,16 +746,16 @@ public class GraphVisualizer
       //System.out.println("Preferred Size: "+this.getPreferredSize()+
       //                   " Actual Size: "+this.getSize());
       x=y=nx=ny=0;
-      
+
       if(d.width < m_gp.getWidth())
         nx = (int)((nx + m_gp.getWidth()/2 - d.width/2)/scale);
       if(d.height < m_gp.getHeight())
         ny = (int)((ny + m_gp.getHeight()/2 - d.height/2)/scale);
-      
-      r = new Rectangle(0, 0, 
+
+      r = new Rectangle(0, 0,
                        (int)(paddedNodeWidth*scale), (int)(nodeHeight*scale));
       x += me.getX(); y += me.getY();
-      
+
       int i;
       for(i=0; i<m_nodes.size(); i++) {
         n = (GraphNode) m_nodes.elementAt(i);
@@ -770,8 +771,8 @@ public class GraphVisualizer
       }
       return null;
     }
-    
-    
+
+
     public void paintComponent(Graphics gr) {
       Graphics2D g = (Graphics2D)gr;
       RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
@@ -787,14 +788,14 @@ public class GraphVisualizer
       Dimension d = this.getPreferredSize();
       //System.out.println("Preferred Size: "+this.getPreferredSize()+
       //                   " Actual Size: "+this.getSize());
-      
+
       //initializing x & y to display the graph in the middle
       //if the display area is larger than the graph
       if(d.width < this.getWidth())
         x = (int)((x + this.getWidth()/2 - d.width/2)/scale);
       if(d.height < this.getHeight())
         y = (int)((y + this.getHeight()/2 - d.height/2)/scale);
-      
+
       for(int index=0; index<m_nodes.size(); index++) {
         GraphNode n = (GraphNode) m_nodes.elementAt(index);
         if( n.nodeType==NORMAL) {
@@ -803,7 +804,7 @@ public class GraphVisualizer
                           (paddedNodeWidth-nodeWidth)/2,
                      y+n.y,
                      nodeWidth, nodeHeight);
-          
+
           g.setColor(Color.white);
           //g.setColor(Color.black);
           //System.out.println("drawing "+
@@ -811,8 +812,8 @@ public class GraphVisualizer
           //                   " at "+" x: "+ (x+n.x+paddedNodeWidth/2-
           //      fm.stringWidth( ((GraphNode)m_nodes.elementAt(index)).ID )/2)+
           //		       " y: "+(y+n.y+nodeHeight/2+fm.getHeight()/2-2) );
-          
-          
+
+
           //Draw the node's label if it can fit inside the node's current
           // width otherwise display its ID or otherwise just display its
           // idx in the FastVector (to distinguish it from others)
@@ -832,25 +833,25 @@ public class GraphVisualizer
             x+n.x+paddedNodeWidth/2
             -fm.stringWidth( Integer.toString(index) )/2,
             y+n.y+nodeHeight/2+fm.getHeight()/2-2 );
-          
+
           g.setColor(Color.black);
         }
         else {
-          //g.draw( new java.awt.geom.QuadCurve2D.Double(n.x+paddedNodeWidth/2, 
+          //g.draw( new java.awt.geom.QuadCurve2D.Double(n.x+paddedNodeWidth/2,
           //                                             n.y,
           //				n.x+paddedNodeWidth-nodeSize
           //                                   -(paddedNodeWidth-nodeSize)/2,
           //                                  n.y+nodeHeight/2,
           //                           n.x+paddedNodeWidth/2, n.y+nodeHeight) );
-          g.drawLine(x+n.x+paddedNodeWidth/2, y+n.y, 
+          g.drawLine(x+n.x+paddedNodeWidth/2, y+n.y,
                      x+n.x+paddedNodeWidth/2, y+n.y+nodeHeight);
-          
+
         }
-        
+
         GraphNode n2;
         int x1, y1, x2, y2;
         //System.out.println("Drawing edges of "+n.lbl);
-        
+
         //Drawing all the edges coming out from the node,
         //including reversed and double ones
         if(n.edges!=null)
@@ -879,7 +880,7 @@ public class GraphVisualizer
           }
       }
     }
-    
+
     /**
      * This method draws an arrow on a line from (x1,y1)
      * to (x2,y2). The arrow head is seated on (x2,y2) and
@@ -889,7 +890,7 @@ public class GraphVisualizer
      * and (x2, y2) when calling this function.
      */
     protected void drawArrow(Graphics g, int x1, int y1, int x2, int y2) {
-      
+
       if(x1==x2) {
         if(y1<y2) {
           g.drawLine(x2, y2, x2+4, y2-8);
@@ -904,7 +905,7 @@ public class GraphVisualizer
         //theta=line's angle from base, beta=angle of arrow's side from line
         double hyp=0, base=0, perp=0, theta, beta;
         int x3=0, y3=0;
-        
+
         if(x2<x1) {
           base = x1-x2; hyp = Math.sqrt( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) );
           theta = Math.acos( base/hyp );
@@ -916,26 +917,26 @@ public class GraphVisualizer
         beta = 30*Math.PI/180;
         //System.out.println("Original base "+base+" perp "+perp+" hyp "+hyp+
         //                   "\ntheta "+theta+" beta "+beta);
-        
+
         hyp = 8;
         base = Math.cos(theta-beta)*hyp;
         perp = Math.sin(theta-beta)*hyp;
-        
+
         x3 = (int)(x2+base);
         if(y1<y2)
           y3 = (int)(y2-perp);
         else
           y3 = (int)(y2+perp);
-        
+
         //System.out.println("Drawing 1 from "+x2+","+y2+" to "+x3+","+y3+
         //                   " x1,y1 is "+x1+","+y1+" base "+base+
         //		     " perp "+perp+" cos(theta-beta) "+
         //                   Math.cos(theta-beta));
         g.drawLine(x2, y2, x3, y3);
-        
+
         base = Math.cos(theta+beta)*hyp;
         perp = Math.sin(theta+beta)*hyp;
-        
+
         x3 = (int)(x2+base);
         if(y1<y2)
           y3 = (int)(y2-perp);
@@ -947,7 +948,7 @@ public class GraphVisualizer
         g.drawLine(x2, y2, x3, y3);
       }
     }
-    
+
     /**
      * This method highlights a given node and all its children
      * and the edges coming out of it.
@@ -964,24 +965,24 @@ public class GraphVisualizer
       Dimension d = this.getPreferredSize();
       //System.out.println("Preferred Size: "+this.getPreferredSize()+
       //                   " Actual Size: "+this.getSize());
-      
+
       //initializing x & y to display the graph in the middle
       //if the display area is larger than the graph
       if(d.width < this.getWidth())
         x = (int)((x + this.getWidth()/2 - d.width/2)/scale);
       if(d.height < this.getHeight())
         y = (int)((y + this.getHeight()/2 - d.height/2)/scale);
-      
+
       //if the node is of type NORMAL only then highlight
       if(n.nodeType==NORMAL) {
-        
+
         g.setXORMode(Color.green); //g.setColor(Color.green);
-        
+
         g.fillOval(x+n.x+paddedNodeWidth-nodeWidth-
         (paddedNodeWidth-nodeWidth)/2,
         y+n.y, nodeWidth, nodeHeight);
         g.setXORMode(Color.red);
-        
+
         //Draw the node's label if it can fit inside the node's current
         // width otherwise display its ID or otherwise just display its
         // idx in the FastVector (to distinguish it from others)
@@ -1002,10 +1003,10 @@ public class GraphVisualizer
           x+n.x+paddedNodeWidth/2
           -fm.stringWidth( Integer.toString(m_nodes.indexOf(n)) )/2,
           y+n.y+nodeHeight/2+fm.getHeight()/2-2 );
-        
+
         g.setXORMode(Color.green);
-        
-        
+
+
         GraphNode n2;
         int x1, y1, x2, y2;
         //System.out.println("Drawing edges of "+n.lbl);
@@ -1032,7 +1033,7 @@ public class GraphVisualizer
                 g.fillOval(x+n2.x+paddedNodeWidth-nodeWidth-
                 (paddedNodeWidth-nodeWidth)/2,
                 y+n2.y, nodeWidth, nodeHeight);
-              
+
               //If n2 is not of NORMAL type
               // then carry on drawing all the edges and add all the
               // dummy nodes encountered in a Vector until no
@@ -1056,7 +1057,7 @@ public class GraphVisualizer
                       GraphNode n3 =
                       (GraphNode) m_nodes.elementAt(n2.edges[m][0]); //m_nodes.elementAt(m);
                       g.drawLine(x+x1, y+y1, x+n3.x+paddedNodeWidth/2, y+n3.y);
-                      
+
                       if(n3.nodeType==NORMAL){ //!n2.dummy)
                         g.fillOval(x+n3.x+paddedNodeWidth-nodeWidth-
                         (paddedNodeWidth-nodeWidth)/2,
@@ -1080,13 +1081,13 @@ public class GraphVisualizer
               x1=n.x+paddedNodeWidth/2; y1=n.y;
               x2=n2.x+paddedNodeWidth/2; y2=n2.y+nodeHeight;
               g.drawLine(x+x1, y+y1, x+x2, y+y2);
-              
+
               if(n.edges[k][1]==-DOUBLE) {
                 drawArrow(g, x+x2, y+y2, x+x1, y+y1);
                 if(n2.nodeType!=SINGULAR_DUMMY) //!n2.dummy)
                   drawArrow(g, x+x1, y+y1, x+x2, y+y2);
               }
-              
+
               int tmpIndex=k;
               while(n2.nodeType!=NORMAL) { //n2.dummy==true) {
                 g.drawLine(x+n2.x+paddedNodeWidth/2,
@@ -1110,8 +1111,8 @@ public class GraphVisualizer
       }
     }
   }
-  
-  
+
+
   /**
    * Table Model for the Table that shows the probability
    * distribution for a node
@@ -1121,32 +1122,32 @@ public class GraphVisualizer
 
     /** for serialization */
     private static final long serialVersionUID = -4789813491347366596L;
-    
+
     final String[] columnNames;
     final double[][] data;
-    
-    
+
+
     public GraphVisualizerTableModel(double[][] d, String[] c) {
       data = d;
       columnNames = c;
     }
-    
+
     public int getColumnCount() {
       return columnNames.length;
     }
-    
+
     public int getRowCount() {
       return data.length;
     }
-    
+
     public String getColumnName(int col) {
       return columnNames[col];
     }
-    
+
     public Object getValueAt(int row, int col) {
       return new Double(data[row][col]);
     }
-    
+
    /*
     * JTable uses this method to determine the default renderer/
     * editor for each cell.
@@ -1154,7 +1155,7 @@ public class GraphVisualizer
     public Class getColumnClass(int c) {
       return getValueAt(0, c).getClass();
     }
-    
+
     /*
      * Implemented this to make sure the table is uneditable.
      */
@@ -1162,15 +1163,15 @@ public class GraphVisualizer
       return false;
     }
   }
-  
-  
-  
+
+
+
   /**
    * Listener class for processing mouseClicked
    */
   private class GraphVisualizerMouseListener extends MouseAdapter {
     int x, y, nx, ny; Rectangle r;
-    
+
     /**
      * If the mouse is clicked on a node then this method
      * displays a dialog box with the probability distribution
@@ -1182,16 +1183,16 @@ public class GraphVisualizer
       //System.out.println("Preferred Size: "+this.getPreferredSize()+
       //                   " Actual Size: "+this.getSize());
       x=y=nx=ny=0;
-      
+
       if(d.width < m_gp.getWidth())
         nx = (int)((nx + m_gp.getWidth()/2 - d.width/2)/scale);
       if(d.height < m_gp.getHeight())
         ny = (int)((ny + m_gp.getHeight()/2 - d.height/2)/scale);
-      
-      r=new Rectangle(0, 0, 
+
+      r=new Rectangle(0, 0,
                      (int)(paddedNodeWidth*scale), (int)(nodeHeight*scale));
       x += me.getX(); y += me.getY();
-      
+
       int i;
       for(i=0; i<m_nodes.size(); i++) {
         n = (GraphNode) m_nodes.elementAt(i);
@@ -1199,7 +1200,7 @@ public class GraphVisualizer
         if(r.contains(x,y)) {
           if(n.probs==null)
             return;
-          
+
           int noOfPrntsOutcomes = 1;
           if(n.prnts!=null) {
             for(int j=0; j<n.prnts.length; j++) {
@@ -1212,23 +1213,23 @@ public class GraphVisualizer
               return;
             }
           }
-          
-          GraphVisualizerTableModel tm = 
+
+          GraphVisualizerTableModel tm =
                              new GraphVisualizerTableModel(n.probs, n.outcomes);
-          
+
           JTable jTblProbs = new JTable(tm); //JTable(probabilities, (Object[])n.outcomes);
-          
+
           JScrollPane js = new JScrollPane(jTblProbs);
-          
+
           if(n.prnts!=null) {
             GridBagConstraints gbc = new GridBagConstraints();
             JPanel jPlRowHeader = new JPanel( new GridBagLayout() );
-            
+
             //indices of the parent nodes in the Vector
-            int [] idx = new int[n.prnts.length]; 
+            int [] idx = new int[n.prnts.length];
             //max length of values of each parent
-            int [] lengths = new int[n.prnts.length];  
-            
+            int [] lengths = new int[n.prnts.length];
+
             //System.out.println("n.probs.length "+n.probs.length+
             //                   " should be "+noOfPrntsOutcomes);
             //System.out.println("n.probs[0].length "+n.probs[0].length+
@@ -1239,7 +1240,7 @@ public class GraphVisualizer
             //	   System.out.print(probabilities[j][k]+" ");
             //     System.out.println("");
             //}
-            
+
             //Adding labels for rows
             gbc.anchor = gbc.NORTHWEST;
             gbc.fill = gbc.HORIZONTAL;
@@ -1262,7 +1263,7 @@ public class GraphVisualizer
                 }
                 else
                   lb.setForeground( Color.black );
-                
+
                 temp = lb.getPreferredSize().width;
                 //System.out.println("Preferred width "+temp+
                 //                   " for "+n2.outcomes[idx[k]]);
@@ -1272,7 +1273,7 @@ public class GraphVisualizer
                 if(lengths[k]<temp)
                   lengths[k] = temp;
                 temp=0;
-                
+
                 if(k==n.prnts.length-1) {
                   gbc.gridwidth = gbc.REMAINDER;
                   dark = (dark==true) ?  false:true;
@@ -1280,7 +1281,7 @@ public class GraphVisualizer
                 jPlRowHeader.add(lb, gbc);
                 addNum++;
               }
-              
+
               for(int k=n.prnts.length-1; k>=0; k--) {
                 n2 = (GraphNode) m_nodes.elementAt(n.prnts[k]);
                 if(idx[k]==n2.outcomes.length-1 && k!=0) {
@@ -1292,12 +1293,12 @@ public class GraphVisualizer
                   break;
                 }
               }
-              
+
               n2 = (GraphNode) m_nodes.elementAt(n.prnts[0]);
               if(idx[0]==n2.outcomes.length) {
                 JLabel lb= (JLabel) jPlRowHeader.getComponent(addNum-1);
                 jPlRowHeader.remove(addNum-1);
-                lb.setPreferredSize( new Dimension(lb.getPreferredSize().width, 
+                lb.setPreferredSize( new Dimension(lb.getPreferredSize().width,
                                                    jTblProbs.getRowHeight()) );
                 gbc.gridwidth = gbc.REMAINDER;
                 gbc.weighty = 1;
@@ -1306,8 +1307,8 @@ public class GraphVisualizer
                 break;
               }
             }
-            
-            
+
+
             gbc.gridwidth = 1;
             //The following panel contains the names of the parents
             //and is displayed above the row names to identify
@@ -1315,7 +1316,7 @@ public class GraphVisualizer
             JPanel jPlRowNames = new JPanel(new GridBagLayout());
             for(int j=0; j<n.prnts.length; j++) {
               JLabel lb2;
-              JLabel lb1 = 
+              JLabel lb1 =
                    new JLabel( ((GraphNode)m_nodes.elementAt(n.prnts[j])).lbl );
               lb1.setBorder( BorderFactory.createEmptyBorder( 1,2,1,1 ) );
               Dimension tempd = lb1.getPreferredSize();
@@ -1328,7 +1329,7 @@ public class GraphVisualizer
               }
               else if(tempd.width>lengths[j]) {
                 lb2 = (JLabel) jPlRowHeader.getComponent(j);
-                lb2.setPreferredSize( new Dimension(tempd.width, 
+                lb2.setPreferredSize( new Dimension(tempd.width,
                                                lb2.getPreferredSize().height) );
               }
               jPlRowNames.add(lb1, gbc);
@@ -1337,29 +1338,29 @@ public class GraphVisualizer
             js.setRowHeaderView(jPlRowHeader);
             js.setCorner( JScrollPane.UPPER_LEFT_CORNER, jPlRowNames );
           }
-          
-          
-          JDialog jd = 
+
+
+          JDialog jd =
                 new JDialog((Frame)GraphVisualizer.this.getTopLevelAncestor(),
-                            "Probability Distribution Table For "+n.lbl, true);
+                            "Probability Distribution Table For "+n.lbl, ModalityType.DOCUMENT_MODAL);
           jd.setSize(500, 400);
           jd.setLocation(GraphVisualizer.this.getLocation().x+
                             GraphVisualizer.this.getWidth()/2-250,
                          GraphVisualizer.this.getLocation().y+
                             GraphVisualizer.this.getHeight()/2-200 );
-          
+
           jd.getContentPane().setLayout( new BorderLayout() );
           jd.getContentPane().add(js, BorderLayout.CENTER);
           jd.setVisible(true);
-          
+
           return;
         }
       }
     }
-    
+
   }
-  
-  
+
+
   /**
    * private class for handling mouseMoved events
    * to highlight nodes if the the mouse is moved on
@@ -1368,23 +1369,23 @@ public class GraphVisualizer
   private class GraphVisualizerMouseMotionListener extends MouseMotionAdapter {
     int x, y, nx, ny; Rectangle r;
     GraphNode lastNode;
-    
+
     public void mouseMoved(MouseEvent me) {
       GraphNode n;
       Dimension d = m_gp.getPreferredSize();
       //System.out.println("Preferred Size: "+this.getPreferredSize()+
       //                   " Actual Size: "+this.getSize());
       x=y=nx=ny=0;
-      
+
       if(d.width < m_gp.getWidth())
         nx = (int)((nx + m_gp.getWidth()/2 - d.width/2)/scale);
       if(d.height < m_gp.getHeight())
         ny = (int)((ny + m_gp.getHeight()/2 - d.height/2)/scale);
-      
-      r=new Rectangle(0, 0, 
+
+      r=new Rectangle(0, 0,
                      (int)(paddedNodeWidth*scale), (int)(nodeHeight*scale));
       x += me.getX(); y += me.getY();
-      
+
       int i;
       for(i=0; i<m_nodes.size(); i++) {
         n = (GraphNode) m_nodes.elementAt(i);
@@ -1406,7 +1407,7 @@ public class GraphVisualizer
       }
     }
   }
-  
+
   /**
    * Main method to load a text file with the
    * description of a graph from the command
@@ -1416,7 +1417,7 @@ public class GraphVisualizer
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
     JFrame jf = new JFrame("Graph Visualizer");
     GraphVisualizer g = new GraphVisualizer();
-    
+
     try{
       if(args[0].endsWith(".xml")) {
         //StringBuffer sb = new StringBuffer();
@@ -1436,7 +1437,7 @@ public class GraphVisualizer
     }
     catch(IOException ex) { ex.printStackTrace(); }
     catch(BIFFormatException bf) { bf.printStackTrace(); System.exit(-1); }
-    
+
     jf.getContentPane().add(g);
     //RepaintManager.currentManager(jf.getRootPane()).setDoubleBufferingEnabled(false);
     jf.setDefaultCloseOperation( jf.EXIT_ON_CLOSE );
