@@ -133,8 +133,16 @@ public class GenericArrayEditor
 	  m_Support.firePropertyChange("", null, null);
 	}
       } else if (e.getSource() == m_EditBut) {
-        ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
-        m_Editor.setValue(m_ElementList.getSelectedValue());
+        if (m_Editor instanceof GenericObjectEditor) {
+          ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
+        }
+        try {
+          m_Editor.setValue(GenericObjectEditor.makeCopy(m_ElementList.getSelectedValue()));
+        }
+        catch (Exception ex) {
+          // not possible to serialize?
+          m_Editor.setValue(m_ElementList.getSelectedValue());
+        }
         if (m_Editor.getValue() != null) {
           int x = getLocationOnScreen().x;
           int y = getLocationOnScreen().y;
@@ -147,6 +155,7 @@ public class GenericArrayEditor
         	PropertyDialog.getParentFrame(GenericArrayEditor.this),
         	m_Editor, x, y);
           m_PD.setVisible(true);
+          m_ListModel.set(m_ElementList.getSelectedIndex(), m_Editor.getValue());
           m_Support.firePropertyChange("", null, null);
         }
       } else if (e.getSource() == m_UpBut) {
