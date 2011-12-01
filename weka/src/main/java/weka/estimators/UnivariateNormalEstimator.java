@@ -33,7 +33,8 @@ import weka.core.Statistics;
  * @version $Revision$
  */
 public class UnivariateNormalEstimator implements UnivariateDensityEstimator,
-                                                  UnivariateIntervalEstimator {
+                                                  UnivariateIntervalEstimator,
+                                                  UnivariateQuantileEstimator {
 
   /** The weighted sum of values */
   protected double m_WeightedSum = 0;
@@ -112,6 +113,19 @@ public class UnivariateNormalEstimator implements UnivariateDensityEstimator,
     arr[0][0] = m_Mean - val * Math.sqrt(m_Variance);
 
     return arr;
+  }
+
+  /**
+   * Returns the quantile for the given percentage.
+   * 
+   * @param percentage the percentage
+   * @return the quantile
+   */
+  public double predictQuantile(double percentage) {
+    
+    updateMeanAndVariance();
+
+    return m_Mean + Statistics.normalInverse(percentage) * Math.sqrt(m_Variance);
   }
 
   /**
