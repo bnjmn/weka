@@ -149,6 +149,9 @@ public class RegressionByDiscretization
   /** Whether to delete empty intervals. */
   protected boolean m_DeleteEmptyBins;
 
+  /** Mapping to convert indices in case empty bins are deleted. */
+  protected int[] m_OldIndexToNewIndex;
+
   /** Header of discretized data. */
   protected Instances m_DiscretizedHeader = null;
 
@@ -282,6 +285,7 @@ public class RegressionByDiscretization
     Instances newTrain = Filter.useFilter(instances, m_Discretizer);
 
     // Should empty bins be deleted?
+    m_OldIndexToNewIndex = null;
     if (m_DeleteEmptyBins) {
 
       // Figure out which classes are empty after discretization
@@ -296,10 +300,10 @@ public class RegressionByDiscretization
       
       // Compute new list of non-empty classes and mapping of indices
       FastVector newClassVals = new FastVector(numNonEmptyClasses);
-      int[] oldIndexToNewIndex = new int[newTrain.numClasses()];
+      m_OldIndexToNewIndex = new int[newTrain.numClasses()];
       for (int i = 0; i < newTrain.numClasses(); i++) {
         if (notEmptyClass[i]) {
-         oldIndexToNewIndex[i] = newClassVals.size();
+         m_OldIndexToNewIndex[i] = newClassVals.size();
           newClassVals.addElement(newTrain.classAttribute().value(i));
         }
       }
@@ -325,7 +329,7 @@ public class RegressionByDiscretization
         Instance inst = newTrain.instance(i);
         newTrainTransformed.add(inst);
         newTrainTransformed.lastInstance().
-          setClassValue(oldIndexToNewIndex[(int)inst.classValue()]);
+          setClassValue(m_OldIndexToNewIndex[(int)inst.classValue()]);
       }
       newTrain = newTrainTransformed;
     }
@@ -408,7 +412,12 @@ public class RegressionByDiscretization
     }
 
     // Make sure structure of class attribute correct
-    Instance newInstance = (Instance)instance.copy();
+    m_Discretizer.input(instance);
+    m_Discretizer.batchFinished();
+    Instance newInstance = m_Discretizer.output();//(Instance)instance.copy();
+    if (m_OldIndexToNewIndex != null) {
+      newInstance.setClassValue(m_OldIndexToNewIndex[(int)newInstance.classValue()]);
+    }
     newInstance.setDataset(m_DiscretizedHeader);
     double [] probs = m_Classifier.distributionForInstance(newInstance);
 
@@ -469,7 +478,12 @@ public class RegressionByDiscretization
   public double classifyInstance(Instance instance) throws Exception {  
 
     // Make sure structure of class attribute correct
-    Instance newInstance = (Instance)instance.copy();
+    m_Discretizer.input(instance);
+    m_Discretizer.batchFinished();
+    Instance newInstance = m_Discretizer.output();//(Instance)instance.copy();
+    if (m_OldIndexToNewIndex != null) {
+      newInstance.setClassValue(m_OldIndexToNewIndex[(int)newInstance.classValue()]);
+    }
     newInstance.setDataset(m_DiscretizedHeader);
     double [] probs = m_Classifier.distributionForInstance(newInstance);
 
