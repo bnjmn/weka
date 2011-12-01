@@ -155,6 +155,7 @@ public class GenericArrayEditor
         	PropertyDialog.getParentFrame(GenericArrayEditor.this), 
         	m_Editor, x, y);
           m_PD.setVisible(true);
+          m_ListModel.set(m_ElementList.getSelectedIndex(), m_Editor.getValue());
           m_Support.firePropertyChange("", null, null);
         }
       } else if (e.getSource() == m_UpBut) {
