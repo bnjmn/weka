@@ -22,23 +22,17 @@
 
 package weka.gui.beans;
 
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseSaver;
-import weka.core.converters.FileSourcedConverter;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
-
 import java.awt.BorderLayout;
-import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.Customizer;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -49,12 +43,22 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
+
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.converters.DatabaseConverter;
+import weka.core.converters.DatabaseSaver;
+import weka.core.converters.FileSourcedConverter;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
 
 /**
  * GUI Customizer for the saver bean
@@ -73,20 +77,20 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     GenericObjectEditor.registerEditors();
   }
 
-  private PropertyChangeSupport m_pcSupport =
+  private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);
 
   private weka.gui.beans.Saver m_dsSaver;
 
-  private PropertySheetPanel m_SaverEditor =
+  private PropertySheetPanel m_SaverEditor = 
     new PropertySheetPanel();
 
-  private JFileChooser m_fileChooser
+  private JFileChooser m_fileChooser 
   = new JFileChooser(new File(System.getProperty("user.dir")));
 
 
   private Window m_parentWindow;
-
+  
   private JDialog m_fileChooserFrame;
 
   private EnvironmentField m_dbaseURLText;
@@ -96,7 +100,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   private JPasswordField m_passwordText;
 
   private EnvironmentField m_tableText;
-
+  
   private JCheckBox m_truncateBox;
 
   private JCheckBox m_idBox;
@@ -110,15 +114,15 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   private JCheckBox m_relationNameForFilename;
 
   private Environment m_env = Environment.getSystemWide();
-
+  
   private EnvironmentField m_directoryText;
-
+  
   private FileEnvironmentField m_dbProps;
-
+  
   private ModifyListener m_modifyListener;
 
 
-  /** Constructor */
+  /** Constructor */  
   public SaverCustomizer() {
 
     setLayout(new BorderLayout());
@@ -146,7 +150,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
           m_fileChooserFrame.dispose();
         }
       }
-    });
+    });   
   }
 
   public void setParentWindow(Window parent) {
@@ -155,10 +159,45 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
 
   /** Sets up dialog for saving instances in other data sinks then files
    * To be extended.
-   */
+   */ 
   private void setUpOther() {
     removeAll();
     add(m_SaverEditor, BorderLayout.CENTER);
+    
+    JPanel buttonsP = new JPanel();
+    buttonsP.setLayout(new FlowLayout());
+    JButton ok,cancel;
+    buttonsP.add(ok = new JButton("OK"));
+    buttonsP.add(cancel=new JButton("Cancel"));
+    ok.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent evt){
+        
+        // Tell the editor that we are closing under an OK condition
+        // so that it can pass on the message to any customizer that
+        // might be in use
+        m_SaverEditor.closingOK();        
+        
+        if (m_parentWindow != null) {
+          m_parentWindow.dispose();
+        }
+      }
+    });
+    cancel.addActionListener(new ActionListener(){
+      public void actionPerformed(ActionEvent evt){
+        
+        // Tell the editor that we are closing under a CANCEL condition
+        // so that it can pass on the message to any customizer that
+        // might be in use
+        m_SaverEditor.closingCancel();
+        
+        if (m_parentWindow != null) {
+          m_parentWindow.dispose();
+        }
+      }
+    });
+    
+    add(buttonsP, BorderLayout.SOUTH);
+    
     validate();
     repaint();
   }
@@ -170,7 +209,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     JPanel db = new JPanel();
     GridBagLayout gbLayout = new GridBagLayout();
     db.setLayout(gbLayout);
-
+    
     JLabel dbaseURLLab = new JLabel(" Database URL", SwingConstants.RIGHT);
     dbaseURLLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     GridBagConstraints gbConstraints = new GridBagConstraints();
@@ -179,7 +218,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 0; gbConstraints.gridx = 0;
     gbLayout.setConstraints(dbaseURLLab, gbConstraints);
     db.add(dbaseURLLab);
-
+    
     m_dbaseURLText = new EnvironmentField();
     m_dbaseURLText.setEnvironment(m_env);
 /*    int width = m_dbaseURLText.getPreferredSize().width;
@@ -193,8 +232,8 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 0; gbConstraints.gridx = 1;
     gbConstraints.weightx = 5;
     gbLayout.setConstraints(m_dbaseURLText, gbConstraints);
-    db.add(m_dbaseURLText);
-
+    db.add(m_dbaseURLText);    
+    
     JLabel userLab = new JLabel("Username", SwingConstants.RIGHT);
     userLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
@@ -215,7 +254,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 1; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_userNameText, gbConstraints);
     db.add(m_userNameText);
-
+    
     JLabel passwordLab = new JLabel("Password ", SwingConstants.RIGHT);
     passwordLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
@@ -248,7 +287,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 3; gbConstraints.gridx = 0;
     gbLayout.setConstraints(tableLab, gbConstraints);
     db.add(tableLab);
-
+    
     m_tableText = new EnvironmentField();
     m_tableText.setEnvironment(m_env);
 /*    m_tableText.setMinimumSize(new Dimension(width * 2, height));
@@ -261,7 +300,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 3; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_tableText, gbConstraints);
     db.add(m_tableText);
-
+        
     JLabel tabLab = new JLabel("Use relation name", SwingConstants.RIGHT);
     tabLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
@@ -270,9 +309,9 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 4; gbConstraints.gridx = 0;
     gbLayout.setConstraints(tabLab, gbConstraints);
     db.add(tabLab);
-
+    
     m_tabBox = new JCheckBox();
-    m_tabBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getRelationForTableName());
+    m_tabBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getRelationForTableName()); 
     m_tabBox.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         m_tableText.setEnabled(!m_tabBox.isSelected());
@@ -284,7 +323,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 4; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_tabBox, gbConstraints);
     db.add(m_tabBox);
-
+    
     JLabel truncLab = new JLabel("Truncate table", SwingConstants.RIGHT);
     truncLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
@@ -293,7 +332,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 5; gbConstraints.gridx = 0;
     gbLayout.setConstraints(truncLab, gbConstraints);
     db.add(truncLab);
-
+    
     m_truncateBox = new JCheckBox();
     m_truncateBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getTruncate());
     gbConstraints = new GridBagConstraints();
@@ -310,8 +349,8 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
     gbConstraints.gridy = 6; gbConstraints.gridx = 0;
     gbLayout.setConstraints(idLab, gbConstraints);
-    db.add(idLab);
-
+    db.add(idLab);        
+    
     m_idBox = new JCheckBox();
     m_idBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getAutoKeyGeneration());
     gbConstraints = new GridBagConstraints();
@@ -320,7 +359,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 6; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_idBox, gbConstraints);
     db.add(m_idBox);
-
+    
     JLabel propsLab = new JLabel("DB config props", SwingConstants.RIGHT);
     propsLab.setToolTipText("The custom properties that the user can use to override the default ones.");
     propsLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
@@ -330,11 +369,11 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 7; gbConstraints.gridx = 0;
     gbLayout.setConstraints(propsLab, gbConstraints);
     db.add(propsLab);
-
+    
     m_dbProps = new FileEnvironmentField();
     m_dbProps.setEnvironment(m_env);
     m_dbProps.resetFileFilters();
-    m_dbProps.addFileFilter(new ExtensionFileFilter(".props" ,
+    m_dbProps.addFileFilter(new ExtensionFileFilter(".props" , 
         "DatabaseUtils property file (*.props)"));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -384,7 +423,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
             setCustomPropsFile(new File(m_dbProps.getText()));
         }
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetStructure();
-        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetOptions();
+        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetOptions();  
         ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setUrl(m_dbaseURLText.getText());
         ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setUser(m_userNameText.getText());
         ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setPassword(new String(m_passwordText.getPassword()));
@@ -394,11 +433,11 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setTruncate(m_truncateBox.isSelected());
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setAutoKeyGeneration(m_idBox.isSelected());
         ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setRelationForTableName(m_tabBox.isSelected());
-
+        
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(SaverCustomizer.this, true);
         }
-
+        
         if (m_parentWindow != null) {
           m_parentWindow.dispose();
         }
@@ -409,13 +448,13 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(SaverCustomizer.this, false);
         }
-
+        
         if (m_parentWindow != null) {
           m_parentWindow.dispose();
         }
       }
     });
-
+    
     JPanel holderP = new JPanel();
     holderP.setLayout(new BorderLayout());
     holderP.add(db, BorderLayout.NORTH);
@@ -429,21 +468,21 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     add(holderP,BorderLayout.SOUTH);
   }
 
-  /** Sets up dialog for saving instances in a file */
+  /** Sets up dialog for saving instances in a file */  
   public void setUpFile() {
     removeAll();
-
-    m_fileChooser.setFileFilter(new FileFilter() {
-      public boolean accept(File f) {
+    
+    m_fileChooser.setFileFilter(new FileFilter() { 
+      public boolean accept(File f) { 
         return f.isDirectory();
       }
       public String getDescription() {
         return "Directory";
       }
     });
-
+    
     m_fileChooser.setAcceptAllFileFilterUsed(false);
-
+    
     try{
       if(!(((m_dsSaver.getSaverTemplate()).retrieveDir()).equals(""))) {
         String dirStr = m_dsSaver.getSaverTemplate().retrieveDir();
@@ -452,7 +491,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
             dirStr = m_env.substitute(dirStr);
           } catch (Exception ex) {
             // ignore
-          }
+          }          
         }
         File tmp = new File(dirStr);
         tmp = new File(tmp.getAbsolutePath());
@@ -461,14 +500,14 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     } catch(Exception ex) {
       System.out.println(ex);
     }
-
+    
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
-
+    
     JPanel alignedP = new JPanel();
     GridBagLayout gbLayout = new GridBagLayout();
     alignedP.setLayout(gbLayout);
-
+    
     final JLabel prefixLab = new JLabel("Prefix for file name", SwingConstants.RIGHT);
     prefixLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     GridBagConstraints gbConstraints = new GridBagConstraints();
@@ -477,7 +516,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 0; gbConstraints.gridx = 0;
     gbLayout.setConstraints(prefixLab, gbConstraints);
     alignedP.add(prefixLab);
-
+    
     m_prefixText = new EnvironmentField();
     m_prefixText.setEnvironment(m_env);
     m_prefixText.setToolTipText("Prefix for file name "
@@ -492,15 +531,15 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 0; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_prefixText, gbConstraints);
     alignedP.add(m_prefixText);
-
+    
     try{
 //      m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25);
 
       m_prefixText.setText(m_dsSaver.getSaverTemplate().filePrefix());
-
-/*      final JLabel prefixLab =
+      
+/*      final JLabel prefixLab = 
         new JLabel(" Prefix for file name:", SwingConstants.LEFT); */
-
+      
       JLabel relationLab = new JLabel("Relation name for filename", SwingConstants.RIGHT);
       relationLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
       gbConstraints = new GridBagConstraints();
@@ -509,7 +548,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
       gbConstraints.gridy = 1; gbConstraints.gridx = 0;
       gbLayout.setConstraints(relationLab, gbConstraints);
       alignedP.add(relationLab);
-
+      
       m_relationNameForFilename = new JCheckBox();
       m_relationNameForFilename.setSelected(m_dsSaver.getRelationNameForFilename());
       if (m_dsSaver.getRelationNameForFilename()) {
@@ -528,7 +567,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
           }
         }
       });
-
+      
       gbConstraints = new GridBagConstraints();
       gbConstraints.anchor = GridBagConstraints.EAST;
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -545,7 +584,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     }
     add(innerPanel, BorderLayout.NORTH);
 //    add(m_fileChooser, BorderLayout.CENTER);
-
+    
     JLabel directoryLab = new JLabel("Directory", SwingConstants.RIGHT);
     directoryLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
@@ -554,27 +593,27 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 2; gbConstraints.gridx = 0;
     gbLayout.setConstraints(directoryLab, gbConstraints);
     alignedP.add(directoryLab);
-
+    
     m_directoryText = new EnvironmentField();
 //    m_directoryText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    m_directoryText.setEnvironment(m_env);
+    m_directoryText.setEnvironment(m_env);  
 /*    width = m_directoryText.getPreferredSize().width;
     height = m_directoryText.getPreferredSize().height;
     m_directoryText.setMinimumSize(new Dimension(width * 2, height));
     m_directoryText.setPreferredSize(new Dimension(width * 2, height)); */
-
+    
     try {
       m_directoryText.setText(m_dsSaver.getSaverTemplate().retrieveDir());
     } catch (IOException ex) {
       // ignore
     }
-
+    
     JButton browseBut = new JButton("Browse...");
     browseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
           //final JFrame jf = new JFrame("Choose directory");
-          final JDialog jf = new JDialog((JDialog)SaverCustomizer.this.getTopLevelAncestor(),
+          final JDialog jf = new JDialog((JDialog)SaverCustomizer.this.getTopLevelAncestor(), 
               "Choose directory", ModalityType.DOCUMENT_MODAL);
           jf.setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
@@ -586,7 +625,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
         }
       }
     });
-
+    
     JPanel efHolder = new JPanel();
     efHolder.setLayout(new BorderLayout());
     JPanel bP = new JPanel(); bP.setLayout(new BorderLayout());
@@ -601,7 +640,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 2; gbConstraints.gridx = 1;
     gbLayout.setConstraints(efHolder, gbConstraints);
     alignedP.add(efHolder);
-
+    
 
     JLabel relativeLab = new JLabel("Use relative file paths", SwingConstants.RIGHT);
     relativeLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
@@ -611,7 +650,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 3; gbConstraints.gridx = 0;
     gbLayout.setConstraints(relativeLab, gbConstraints);
     alignedP.add(relativeLab);
-
+    
     m_relativeFilePath = new JCheckBox();
     m_relativeFilePath.
     setSelected(((FileSourcedConverter)m_dsSaver.getSaverTemplate()).getUseRelativePath());
@@ -628,11 +667,11 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 3; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_relativeFilePath, gbConstraints);
     alignedP.add(m_relativeFilePath);
-
+        
     JButton OKBut = new JButton("OK");
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        try {
+        try {          
           (m_dsSaver.getSaverTemplate()).setFilePrefix(m_prefixText.getText());
           (m_dsSaver.getSaverTemplate()).setDir(m_directoryText.getText());
           m_dsSaver.
@@ -640,11 +679,11 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
         } catch (Exception ex) {
           ex.printStackTrace();
         }
-
+        
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(SaverCustomizer.this, true);
         }
-
+        
         m_parentWindow.dispose();
       }
     });
@@ -655,11 +694,11 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(SaverCustomizer.this, false);
         }
-
+        
         m_parentWindow.dispose();
       }
     });
-
+    
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new FlowLayout());
     butHolder.add(OKBut);
@@ -667,7 +706,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     JPanel holder2 = new JPanel();
     holder2.setLayout(new BorderLayout());
     holder2.add(alignedP, BorderLayout.NORTH);
-
+    
     JPanel optionsHolder = new JPanel();
     optionsHolder.setLayout(new BorderLayout());
     optionsHolder.setBorder(BorderFactory.createTitledBorder("Other options"));
@@ -675,7 +714,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     optionsHolder.add(m_SaverEditor, BorderLayout.SOUTH);
     JScrollPane scroller = new JScrollPane(optionsHolder);
     //holder2.add(scroller, BorderLayout.CENTER);
-
+    
     //holder2.add(butHolder, BorderLayout.SOUTH);
     innerPanel.add(holder2, BorderLayout.SOUTH);
     add(scroller, BorderLayout.CENTER);
