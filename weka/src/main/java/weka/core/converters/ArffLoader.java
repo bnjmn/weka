@@ -60,7 +60,7 @@ import java.util.Vector;
  */
 public class ArffLoader 
   extends AbstractFileLoader 
-  implements OptionHandler, BatchConverter, IncrementalConverter, 
+  implements BatchConverter, IncrementalConverter, 
   URLSourcedLoader {
 
   /** for serialization */
@@ -77,13 +77,7 @@ public class ArffLoader
   protected transient Reader m_sourceReader = null;
 
   /** The parser for the ARFF file */
-  protected transient ArffReader m_ArffReader = null;
-  
-  /**
-   * If false, and reading incrementally, then only one string value (the current
-   * one) will be available in the header for each String attribute
-   */
-  protected boolean m_retainStringValues = false;
+  protected transient ArffReader m_ArffReader = null;  
   
   /**
    * Reads data from an ARFF file, either in incremental or batch mode. <p/>
@@ -159,7 +153,7 @@ public class ArffLoader
     }
     
     public ArffReader(Reader reader, int capacity) throws IOException {
-      this(reader, capacity, true, true);
+      this(reader, capacity, true);
     }
     
     /**
@@ -173,14 +167,14 @@ public class ArffLoader
      * @see				#getStructure()
      * @see				#readInstance(Instances)
      */
-    public ArffReader(Reader reader, int capacity, boolean batch, boolean retainStringVals) 
+    public ArffReader(Reader reader, int capacity, boolean batch) 
       throws IOException {
       
       m_batchMode = batch;
       if (batch) {
         m_retainStringValues = true;
       } else {
-        m_retainStringValues = retainStringVals;
+        m_retainStringValues = false;
       }
       
       if (capacity < 0)
@@ -987,91 +981,6 @@ public class ArffLoader
   }
   
   /**
-   * Returns an enumeration describing the available options.
-   *
-   * @return an enumeration of all the available options.
-   */
-  public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
-    
-    result.add(new Option(
-        "\tRetain all string attribute values when reading " +
-        "incrementally.", "R", 0, "-R"));
-    
-    return result.elements();
-  }
-  
-  /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -R
-   *  Retain all string attribute values when reading incrementally.</pre>
-   *  
-   <!-- options-end -->
-   *
-   * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
-  public void setOptions(String[] options) throws Exception {
-
-    setRetainStringValues(Utils.getFlag('R', options));
-  }
-  
-  /**
-   * Set whether to retain all string values for string in the header
-   * when reading incrementally
-   * 
-   * @param r true if all string values are to be stored (as opposed to
-   * just the current one).
-   */
-  public void setRetainStringValues(boolean r) {
-    m_retainStringValues = r;
-  }
-  
-  /**
-   * Get whether to retain all string values for string in the header
-   * when reading incrementally
-   * 
-   * @return true if all string values are to be stored (as opposed to
-   * just the current one).
-   */
-  public boolean getRetainStringValues() {
-    return m_retainStringValues;
-  }
-  
-  /**
-   * the tip text for this property
-   * 
-   * @return            the tip text
-   */
-  public String retainStringValuesTipText() {
-    return "When reading incrementally, whether to retain all " +
-    		"values for string attributes. When set to false " +
-    		"only the values for string attributes in the currently " +
-    		"read instance will be held in memory.";
-  }
-  
-  /**
-   * Gets the current settings of the Classifier.
-   *
-   * @return an array of strings suitable for passing to setOptions
-   */
-  public String[] getOptions() {
-    Vector<String>      result;
-    
-    result  = new Vector<String>();
-    
-    if (getRetainStringValues()) {
-      result.add("-R");
-    }
-    
-    return result.toArray(new String[result.size()]);
-  }
-
-  /**
    * Resets the Loader object and sets the source of the data set to be 
    * the supplied InputStream.
    *
@@ -1100,8 +1009,7 @@ public class ArffLoader
       }
       
       try {       
-        m_ArffReader = new ArffReader(m_sourceReader, 1, (getRetrieval() == BATCH), 
-            m_retainStringValues);       
+        m_ArffReader = new ArffReader(m_sourceReader, 1, (getRetrieval() == BATCH));       
 	m_structure  = m_ArffReader.getStructure();
       } catch (Exception ex) {
 	throw new IOException("Unable to determine structure as arff (Reason: " + ex.toString() + ").");
