@@ -27,6 +27,7 @@ import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.DatabaseLoader;
@@ -167,11 +168,19 @@ public class Loader
 	  Instance nextInstance = null;
 	  // load and pass on the structure first
 	  Instances structure = null;
+	  Instances structureCopy = null;
+	  Instances currentStructure = null;
+	  boolean stringAttsPresent = false;
 	  try {
             m_Loader.reset();
             m_Loader.setRetrieval(weka.core.converters.Loader.INCREMENTAL);
             //	    System.err.println("NOTIFYING STRUCTURE AVAIL");
 	    structure = m_Loader.getStructure();
+	    if (structure.checkForStringAttributes()) {
+	      structureCopy = (Instances)(new SerializedObject(structure).getObject());
+	      stringAttsPresent = true;
+	    }
+	    currentStructure = structure;
 	    notifyStructureAvailable(structure);
 	  } catch (IOException e) {
 	    if (m_log != null) {
@@ -198,7 +207,7 @@ public class Loader
 	    if (m_stopped) {
 	      break;
 	    }
-	    nextInstance.setDataset(structure);
+	    //nextInstance.setDataset(structure);
 	    //	    format.add(nextInstance);
 	    /*	    InstanceEvent ie = (start)
 	      ? new InstanceEvent(m_DP, nextInstance, 
@@ -213,7 +222,23 @@ public class Loader
 	    m_ie.setInstance(nextInstance);
 	    //	    start = false;
 	    //	    System.err.println(z);
-	    nextInstance = m_Loader.getNextInstance(structure);
+	    
+	    // a little jiggery pokery to ensure that our
+	    // one instance lookahead to determine whether
+	    // this instance is the end of the batch doesn't
+	    // clobber any string values in the current
+	    // instance, if the loader is loading them
+	    // incrementally (i.e. only retaining one
+	    // value in the header at any one time).
+	    if (stringAttsPresent) {
+	      if (currentStructure == structure) {
+	        currentStructure = structureCopy;
+	      } else {
+	        currentStructure = structure;
+	      }
+	    }
+	    nextInstance = m_Loader.getNextInstance(currentStructure);
+
 	    if (nextInstance == null) {
 	      m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
 	    }
