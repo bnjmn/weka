@@ -102,7 +102,7 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.19 $
+ * @version $Revision$
  */
 public class Vote
   extends RandomizableMultipleClassifiersCombiner
@@ -439,6 +439,8 @@ public class Vote
   protected double[] distributionForInstanceAverage(Instance instance) throws Exception {
 
     double[] probs = getClassifier(0).distributionForInstance(instance);
+    probs = (double[])probs.clone();
+    
     for (int i = 1; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
       for (int j = 0; j < dist.length; j++) {
@@ -463,6 +465,8 @@ public class Vote
   protected double[] distributionForInstanceProduct(Instance instance) throws Exception {
 
     double[] probs = getClassifier(0).distributionForInstance(instance);
+    probs = (double[])probs.clone();
+    
     for (int i = 1; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
       for (int j = 0; j < dist.length; j++) {
@@ -517,8 +521,7 @@ public class Vote
     int majorityIndex = majorityIndexes.get(m_Random.nextInt(majorityIndexes.size()));
     
     //set probs to 0
-    for (int k = 0; k<probs.length; k++)
-      probs[k] = 0;
+    probs = new double[probs.length];
     probs[majorityIndex] = 1; //the class that have been voted the most receives 1
     
     return probs;
@@ -535,6 +538,8 @@ public class Vote
   protected double[] distributionForInstanceMax(Instance instance) throws Exception {
 
     double[] max = getClassifier(0).distributionForInstance(instance);
+    max = (double[])max.clone();
+    
     for (int i = 1; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
       for (int j = 0; j < dist.length; j++) {
@@ -557,6 +562,9 @@ public class Vote
   protected double[] distributionForInstanceMin(Instance instance) throws Exception {
 
     double[] min = getClassifier(0).distributionForInstance(instance);
+    
+    min = (double[])min.clone();
+    
     for (int i = 1; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
       for (int j = 0; j < dist.length; j++) {
@@ -655,7 +663,7 @@ public class Vote
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
