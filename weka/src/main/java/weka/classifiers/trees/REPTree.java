@@ -194,7 +194,7 @@ public class REPTree
       if ((m_Attribute == -1) || (returnedDist == null)) {
 	
 	// Node is a leaf or successor is empty
-	return m_ClassProbs;
+        return (double[])m_ClassProbs.clone();
       } else {
 	return returnedDist;
       }
