@@ -320,34 +320,37 @@ public class Filter
       return;
     }
    
-    if (e.getStatus() == InstanceEvent.BATCH_FINISHED) {
+    if (e.getStatus() == InstanceEvent.BATCH_FINISHED ||
+        e.getInstance() == null) {
       // get the last instance (if available)
       try {
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix() 
               + "Stream finished.");
         }
-        if (m_Filter.input(e.getInstance())) {
-          Instance filteredInstance = m_Filter.output();
-          if (filteredInstance != null) {
-            if (!m_structurePassedOn) {
-              // pass on the new structure first
-              m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
-              notifyInstanceListeners(m_ie);
-              m_structurePassedOn = true;
-            }
+        if (e.getInstance() != null) {
+          if (m_Filter.input(e.getInstance())) {
+            Instance filteredInstance = m_Filter.output();
+            if (filteredInstance != null) {
+              if (!m_structurePassedOn) {
+                // pass on the new structure first
+                m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
+                notifyInstanceListeners(m_ie);
+                m_structurePassedOn = true;
+              }
 
-            m_ie.setInstance(filteredInstance);
-            
-            // if there are instances pending for output don't want to send
-            // a batch finisehd at this point...
-            //System.err.println("Filter - in batch finisehd...");
-            if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
-              m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
-            } else {
-              m_ie.setStatus(e.getStatus());
+              m_ie.setInstance(filteredInstance);
+
+              // if there are instances pending for output don't want to send
+              // a batch finisehd at this point...
+              //System.err.println("Filter - in batch finisehd...");
+              if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
+                m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
+              } else {
+                m_ie.setStatus(e.getStatus());
+              }
+              notifyInstanceListeners(m_ie);
             }
-            notifyInstanceListeners(m_ie);
           }
         }
         if (m_log != null) {
