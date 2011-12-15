@@ -653,17 +653,20 @@ public class Classifier
 
     try {
       // test on this instance
-      if (m_incrementalEvent.getInstance().dataset().classIndex() < 0) {
-        // System.err.println("Classifier : setting class index...");
-        m_incrementalEvent.getInstance().dataset().setClassIndex(
-            m_incrementalEvent.getInstance().dataset().numAttributes()-1);
+      if (m_incrementalEvent.getInstance() != null) {
+        if (m_incrementalEvent.getInstance().dataset().classIndex() < 0) {
+          // System.err.println("Classifier : setting class index...");
+          m_incrementalEvent.getInstance().dataset().setClassIndex(
+              m_incrementalEvent.getInstance().dataset().numAttributes()-1);
+        }
       }
       
       int status = IncrementalClassifierEvent.WITHIN_BATCH;
       /*      if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
 	      status = IncrementalClassifierEvent.NEW_BATCH; */
       /* } else */ if (m_incrementalEvent.getStatus() ==
-		       InstanceEvent.BATCH_FINISHED) {
+		       InstanceEvent.BATCH_FINISHED || 
+		       m_incrementalEvent.getInstance() == null) {
 	status = IncrementalClassifierEvent.BATCH_FINISHED;
       }
 
@@ -677,6 +680,7 @@ public class Classifier
       // updated)
       if (m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier &&
 	  m_updateIncrementalClassifier == true &&
+	  m_incrementalEvent.getInstance() != null &&
 	  !(m_incrementalEvent.getInstance().
 	    isMissing(m_incrementalEvent.getInstance().
 		      dataset().classIndex()))) {
@@ -684,7 +688,8 @@ public class Classifier
 	  updateClassifier(m_incrementalEvent.getInstance());
       }
       if (m_incrementalEvent.getStatus() == 
-	  InstanceEvent.BATCH_FINISHED) {
+	  InstanceEvent.BATCH_FINISHED || 
+	  m_incrementalEvent.getInstance() == null) {
 	if (m_textListeners.size() > 0) {
 	  String modelString = m_Classifier.toString();
 	  String titleString = m_Classifier.getClass().getName();
