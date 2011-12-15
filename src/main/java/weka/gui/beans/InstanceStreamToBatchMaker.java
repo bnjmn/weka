@@ -25,6 +25,8 @@ package weka.gui.beans;
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -70,7 +72,7 @@ public class InstanceStreamToBatchMaker extends JPanel
   /**
    * Collects up the instances. 
    */
-  private ArrayList<Instance> m_batch;
+  private List<Instance> m_batch;
   
   private Instances m_structure;
   
@@ -86,7 +88,7 @@ public class InstanceStreamToBatchMaker extends JPanel
    */
   public void acceptInstance(InstanceEvent e) {
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
-      m_batch = new ArrayList<Instance>();
+      m_batch = new LinkedList<Instance>();
       m_structure = e.getStructure();
       
       // notify dataset listeners of structure available
@@ -100,8 +102,10 @@ public class InstanceStreamToBatchMaker extends JPanel
     } else {
       // batch finished
       
-      // add the last instance
-      m_batch.add(e.getInstance());
+      if (e.getInstance() != null) {
+        // add the last instance
+        m_batch.add(e.getInstance());
+      }
       
       // create the new Instances
       Instances dataSet = new Instances(m_structure, m_batch.size());
