@@ -542,7 +542,9 @@ public class Saver
       if(e.getStatus() == e.BATCH_FINISHED){
         try{  
             m_Saver.writeIncremental(e.getInstance());
-            m_Saver.writeIncremental(null);
+            if (e.getInstance() != null) {
+              m_Saver.writeIncremental(null);
+            }
             //m_firstNotice = true;
             m_visual.setStatic();
             System.out.println("...relation "+ m_fileName +" saved.");
