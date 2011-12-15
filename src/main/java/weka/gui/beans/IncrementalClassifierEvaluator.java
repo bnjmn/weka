@@ -152,101 +152,104 @@ public class IncrementalClassifierEvaluator
         }
         m_instanceCount++;
 	Instance inst = ce.getCurrentInstance();
-	//	if (inst.attribute(inst.classIndex()).isNominal()) {
-	double [] dist = ce.getClassifier().distributionForInstance(inst);
-	double pred = 0;
-	if (!inst.isMissing(inst.classIndex())) {
-          if (m_outputInfoRetrievalStats) {
-            // store predictions so AUC etc can be output.
-            m_eval.evaluateModelOnceAndRecordPrediction(dist, inst);
-          } else {
-            m_eval.evaluateModelOnce(dist, inst);
-          }
-	} else {
-	  pred = ce.getClassifier().classifyInstance(inst);
-	}
-	if (inst.classIndex() >= 0) {
-	  // need to check that the class is not missing
-	  if (inst.attribute(inst.classIndex()).isNominal()) {
-	    if (!inst.isMissing(inst.classIndex())) {
-	      if (m_dataPoint.length < 2) {
-		m_dataPoint = new double[2];
-		m_dataLegend.addElement("Accuracy");
-		m_dataLegend.addElement("RMSE (prob)");
-	      }
-	      //		int classV = (int) inst.value(inst.classIndex());
-	      m_dataPoint[1] = m_eval.rootMeanSquaredError();
-	      //  		int maxO = Utils.maxIndex(dist);
-	      //  		if (maxO == classV) {
-	      //  		  dist[classV] = -1;
-	      //  		  maxO = Utils.maxIndex(dist);
-	      //  		}
-	      //  		m_dataPoint[1] -= dist[maxO];
+	if (inst != null) {
+	  //	if (inst.attribute(inst.classIndex()).isNominal()) {
+	  double [] dist = ce.getClassifier().distributionForInstance(inst);
+	  double pred = 0;
+	  if (!inst.isMissing(inst.classIndex())) {
+	    if (m_outputInfoRetrievalStats) {
+	      // store predictions so AUC etc can be output.
+	      m_eval.evaluateModelOnceAndRecordPrediction(dist, inst);
 	    } else {
-	      if (m_dataPoint.length < 1) {
-		m_dataPoint = new double[1];
-		m_dataLegend.addElement("Confidence");
+	      m_eval.evaluateModelOnce(dist, inst);
+	    }
+	  } else {
+	    pred = ce.getClassifier().classifyInstance(inst);
+	  }
+	  if (inst.classIndex() >= 0) {
+	    // need to check that the class is not missing
+	    if (inst.attribute(inst.classIndex()).isNominal()) {
+	      if (!inst.isMissing(inst.classIndex())) {
+	        if (m_dataPoint.length < 2) {
+	          m_dataPoint = new double[2];
+	          m_dataLegend.addElement("Accuracy");
+	          m_dataLegend.addElement("RMSE (prob)");
+	        }
+	        //		int classV = (int) inst.value(inst.classIndex());
+	        m_dataPoint[1] = m_eval.rootMeanSquaredError();
+	        //  		int maxO = Utils.maxIndex(dist);
+	        //  		if (maxO == classV) {
+	        //  		  dist[classV] = -1;
+	        //  		  maxO = Utils.maxIndex(dist);
+	        //  		}
+	        //  		m_dataPoint[1] -= dist[maxO];
+	      } else {
+	        if (m_dataPoint.length < 1) {
+	          m_dataPoint = new double[1];
+	          m_dataLegend.addElement("Confidence");
+	        }
 	      }
-	    }
-	    double primaryMeasure = 0;
-	    if (!inst.isMissing(inst.classIndex())) {
-	      primaryMeasure = 1.0 - m_eval.errorRate();
-	    } else {
-	      // record confidence as the primary measure
-	      // (another possibility would be entropy of
-	      // the distribution, or perhaps average
-	      // confidence)
-	      primaryMeasure = dist[Utils.maxIndex(dist)];
-	    }
-	    //	    double [] dataPoint = new double[1];
-	    m_dataPoint[0] = primaryMeasure;
-	    //	    double min = 0; double max = 100;
-	    /*	    ChartEvent e = 
+	      double primaryMeasure = 0;
+	      if (!inst.isMissing(inst.classIndex())) {
+	        primaryMeasure = 1.0 - m_eval.errorRate();
+	      } else {
+	        // record confidence as the primary measure
+	        // (another possibility would be entropy of
+	        // the distribution, or perhaps average
+	        // confidence)
+	        primaryMeasure = dist[Utils.maxIndex(dist)];
+	      }
+	      //	    double [] dataPoint = new double[1];
+	      m_dataPoint[0] = primaryMeasure;
+	      //	    double min = 0; double max = 100;
+	      /*	    ChartEvent e = 
 		    new ChartEvent(IncrementalClassifierEvaluator.this, 
 		    m_dataLegend, min, max, dataPoint); */
-	    m_ce.setLegendText(m_dataLegend);
-	    m_ce.setMin(0); m_ce.setMax(1);
-	    m_ce.setDataPoint(m_dataPoint);
-	    m_ce.setReset(m_reset);
-	    m_reset = false;
-	  } else {
-	    // numeric class
-	    if (m_dataPoint.length < 1) {
-	      m_dataPoint = new double[1];
-	      if (inst.isMissing(inst.classIndex())) {
-		m_dataLegend.addElement("Prediction");
-	      } else {
-		m_dataLegend.addElement("RMSE");
+	      m_ce.setLegendText(m_dataLegend);
+	      m_ce.setMin(0); m_ce.setMax(1);
+	      m_ce.setDataPoint(m_dataPoint);
+	      m_ce.setReset(m_reset);
+	      m_reset = false;
+	    } else {
+	      // numeric class
+	      if (m_dataPoint.length < 1) {
+	        m_dataPoint = new double[1];
+	        if (inst.isMissing(inst.classIndex())) {
+	          m_dataLegend.addElement("Prediction");
+	        } else {
+	          m_dataLegend.addElement("RMSE");
+	        }
 	      }
-	    }
-	    if (!inst.isMissing(inst.classIndex())) {
-	      double update;
 	      if (!inst.isMissing(inst.classIndex())) {
-		update = m_eval.rootMeanSquaredError();
-	      } else {
-		update = pred;
+	        double update;
+	        if (!inst.isMissing(inst.classIndex())) {
+	          update = m_eval.rootMeanSquaredError();
+	        } else {
+	          update = pred;
+	        }
+	        m_dataPoint[0] = update;
+	        if (update > m_max) {
+	          m_max = update;
+	        }
+	        if (update < m_min) {
+	          m_min = update;
+	        }
 	      }
-	      m_dataPoint[0] = update;
-	      if (update > m_max) {
-		  m_max = update;
-	      }
-	      if (update < m_min) {
-		m_min = update;
-	      }
-	    }
-	    
-	    m_ce.setLegendText(m_dataLegend);
-	    m_ce.setMin((inst.isMissing(inst.classIndex()) 
-			 ? m_min
-			 : 0)); 
-	    m_ce.setMax(m_max);
-	    m_ce.setDataPoint(m_dataPoint);
-	    m_ce.setReset(m_reset);
-	    m_reset = false;
-	  }
-	  notifyChartListeners(m_ce);
 
-	  if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED) {
+	      m_ce.setLegendText(m_dataLegend);
+	      m_ce.setMin((inst.isMissing(inst.classIndex()) 
+	          ? m_min
+	              : 0)); 
+	      m_ce.setMax(m_max);
+	      m_ce.setDataPoint(m_dataPoint);
+	      m_ce.setReset(m_reset);
+	      m_reset = false;
+	    }
+	    notifyChartListeners(m_ce);
+	  }
+
+	  if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED ||
+	      inst == null) {
             if (m_logger != null) {
               m_logger.logMessage("[IncrementalClassifierEvaluator]"
                   + statusMessagePrefix() + " Finished processing.");
@@ -259,16 +262,16 @@ public class IncrementalClassifierEvaluator
 				    textTitle.length());
 	      String results = "=== Performance information ===\n\n"
 		+  "Scheme:   " + textTitle + "\n"
-		+  "Relation: "+ inst.dataset().relationName() + "\n\n"
+		+  "Relation: "+ m_eval.getHeader().relationName() + "\n\n"
 		+ m_eval.toSummaryString();
-              if (inst.classIndex() >= 0 && 
-                  inst.classAttribute().isNominal() &&
+              if (m_eval.getHeader().classIndex() >= 0 && 
+                  m_eval.getHeader().classAttribute().isNominal() &&
                   (m_outputInfoRetrievalStats)) {
                 results += "\n" + m_eval.toClassDetailsString();
               }
 
-              if (inst.classIndex() >= 0 && 
-                  inst.classAttribute().isNominal()) {
+              if (m_eval.getHeader().classIndex() >= 0 && 
+                  m_eval.getHeader().classAttribute().isNominal()) {
                 results += "\n" + m_eval.toMatrixString();
               }
 	      textTitle = "Results: " + textTitle;
