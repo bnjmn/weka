@@ -344,7 +344,7 @@ public class SVMLightSaver
       
       if (inst != null) {
 	//write instance 
-	if ((retrieveFile() == null) || (outW == null)) {
+	if ((retrieveFile() == null) && (outW == null)) {
 	  System.out.println(instanceToSvmlight(inst));
 	}
 	else {

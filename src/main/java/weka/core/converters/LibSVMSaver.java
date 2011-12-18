@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see Saver
  */
 public class LibSVMSaver 
@@ -331,7 +331,7 @@ public class LibSVMSaver
       
       if (inst != null) {
 	//write instance 
-	if ((retrieveFile() == null) || (outW == null)) {
+	if ((retrieveFile() == null) && (outW == null)) {
 	  System.out.println(instanceToLibsvm(inst));
 	}
 	else {
@@ -398,7 +398,7 @@ public class LibSVMSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

@@ -303,7 +303,7 @@ public class ArffSaver
           setWriteMode(WRITE);
           //write header
           Instances header = new Instances(structure,0);
-          if(retrieveFile() == null || outW == null)
+          if(retrieveFile() == null && outW == null)
               System.out.println(header.toString());
           else{
               outW.print(header.toString());
@@ -317,7 +317,7 @@ public class ArffSaver
               throw new IOException("No instances information available.");
           if(inst != null){
           //write instance
-              if(retrieveFile() == null || outW == null)
+              if(retrieveFile() == null && outW == null)
                 System.out.println(inst);
               else{
                 outW.println(inst);
