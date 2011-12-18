@@ -551,6 +551,7 @@ public class Classifier
               + ex.getMessage());
         }
 	ex.printStackTrace();
+	return;
       }
       // Notify incremental classifier listeners of new batch
       System.err.println("NOTIFYING NEW BATCH");
