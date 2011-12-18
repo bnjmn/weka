@@ -93,12 +93,12 @@ import weka.core.tokenizers.WordTokenizer;
  * <pre> -lowercase
  *  Convert all tokens to lowercase before adding to the dictionary.</pre>
  * 
- * <pre> -S
+ * <pre> -stoplist
  *  Ignore words that are in the stoplist.</pre>
  * 
  * <pre> -stopwords &lt;file&gt;
  *  A file containing stopwords to override the default ones.
- *  Using this option automatically sets the flag ('-S') to use the
+ *  Using this option automatically sets the flag ('-stoplist') to use the
  *  stoplist if the file exists.
  *  Format: one stopword per line, lines starting with '#'
  *  are interpreted as comments and ignored.</pre>
@@ -730,10 +730,10 @@ public class SGDText extends RandomizableClassifier
         "lowercase", 0, "-lowercase"));
     newVector.addElement(new Option(
         "\tIgnore words that are in the stoplist.",
-        "S", 0, "-S"));
+        "stoplist", 0, "-stoplist"));
     newVector.addElement(new Option(
         "\tA file containing stopwords to override the default ones.\n"
-        + "\tUsing this option automatically sets the flag ('-S') to use the\n"
+        + "\tUsing this option automatically sets the flag ('-stoplist') to use the\n"
         + "\tstoplist if the file exists.\n"
         + "\tFormat: one stopword per line, lines starting with '#'\n"
         + "\tare interpreted as comments and ignored.",
@@ -788,12 +788,12 @@ public class SGDText extends RandomizableClassifier
    * <pre> -lowercase
    *  Convert all tokens to lowercase before adding to the dictionary.</pre>
    * 
-   * <pre> -S
+   * <pre> -stoplist
    *  Ignore words that are in the stoplist.</pre>
    * 
    * <pre> -stopwords &lt;file&gt;
    *  A file containing stopwords to override the default ones.
-   *  Using this option automatically sets the flag ('-S') to use the
+   *  Using this option automatically sets the flag ('-stoplist') to use the
    *  stoplist if the file exists.
    *  Format: one stopword per line, lines starting with '#'
    *  are interpreted as comments and ignored.</pre>
@@ -857,7 +857,7 @@ public class SGDText extends RandomizableClassifier
     }
     
     setLowercaseTokens(Utils.getFlag("lowercase", options));
-    setUseStopList(Utils.getFlag("S", options));
+    setUseStopList(Utils.getFlag("stoplist", options));
     
     String stopwordsS = Utils.getOption("stopwords", options);
     if (stopwordsS.length() > 0) {
@@ -920,7 +920,7 @@ public class SGDText extends RandomizableClassifier
       options.add("-lowercase");
     }
     if (getUseStopList()) {
-      options.add("-S");
+      options.add("-stoplist");
     }
     if (!getStopwords().isDirectory()) {
       options.add("-stopwords"); options.add(getStopwords().getAbsolutePath());
