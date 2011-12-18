@@ -628,6 +628,7 @@ public class Classifier
               + ex.getMessage());
         }
 	ex.printStackTrace();
+	return;
       }
       
       String msg = statusMessagePrefix() + "Training incrementally...";
