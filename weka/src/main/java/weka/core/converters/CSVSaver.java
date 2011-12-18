@@ -156,7 +156,7 @@ public class CSVSaver
       if(writeMode == STRUCTURE_READY){
           setWriteMode(WRITE);
           //write header
-          if(retrieveFile() == null || outW == null){
+          if(retrieveFile() == null && outW == null){
               // print out attribute names as first row
               for (int i = 0; i < structure.numAttributes(); i++) {
                 System.out.print(structure.attribute(i).name());
@@ -185,7 +185,7 @@ public class CSVSaver
               throw new IOException("No instances information available.");
           if(inst != null){
           //write instance 
-              if(retrieveFile() == null || outW == null)
+              if(retrieveFile() == null && outW == null)
                 System.out.println(inst);
               else{
                 outW.println(instanceToString(inst));
