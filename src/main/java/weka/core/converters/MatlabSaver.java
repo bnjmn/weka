@@ -381,7 +381,7 @@ public class MatlabSaver
     // header
     if (writeMode == STRUCTURE_READY) {
       setWriteMode(WRITE);
-      if ((retrieveFile() == null) || (outW == null))
+      if ((retrieveFile() == null) && (outW == null))
 	System.out.println(matlabHeader());
       else
 	outW.println(matlabHeader());
@@ -395,7 +395,7 @@ public class MatlabSaver
       
       if (inst != null) {
 	//write instance 
-	if ((retrieveFile() == null) || (outW == null)) {
+	if ((retrieveFile() == null) && (outW == null)) {
 	  System.out.println(instanceToMatlab(inst));
 	}
 	else {

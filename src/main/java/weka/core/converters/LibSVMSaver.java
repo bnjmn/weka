@@ -331,7 +331,7 @@ public class LibSVMSaver
       
       if (inst != null) {
 	//write instance 
-	if ((retrieveFile() == null) || (outW == null)) {
+	if ((retrieveFile() == null) && (outW == null)) {
 	  System.out.println(instanceToLibsvm(inst));
 	}
 	else {
