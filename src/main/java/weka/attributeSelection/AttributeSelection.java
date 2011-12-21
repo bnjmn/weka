@@ -82,7 +82,7 @@ import java.util.Random;
  * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.47 $
+ * @version  $Revision$
  */
 public class AttributeSelection 
   implements Serializable, RevisionHandler {
@@ -404,8 +404,8 @@ public class AttributeSelection
       int[] s = Utils.sort(m_rankResults[1]);
       for (int i=0; i<s.length; i++) {
 	if (m_rankResults[1][s[i]] > 0) {
-	  CvString.append(Utils.doubleToString(Math.
-					       abs(m_rankResults[0][s[i]]),
+	  CvString.append(Utils.doubleToString(/*Math.
+					       abs(*/m_rankResults[0][s[i]]/*)*/,
 					       6, 3) 
 			  + " +-" 
 			  + Utils.doubleToString(m_rankResults[2][s[i]], 6, 3) 
@@ -1098,6 +1098,6 @@ public class AttributeSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.47 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
