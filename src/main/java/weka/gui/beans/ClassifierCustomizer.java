@@ -73,6 +73,8 @@ public class ClassifierCustomizer
     new PropertySheetPanel();
 
   private JPanel m_incrementalPanel = new JPanel();
+  private JCheckBox m_resetIncrementalClassifier =
+    new JCheckBox("Reset classifier at the start of the stream");
   private JCheckBox m_updateIncrementalClassifier 
     = new JCheckBox("Update classifier on incoming instance stream");
   private boolean m_panelVisible = false;
@@ -100,6 +102,9 @@ public class ClassifierCustomizer
     m_ClassifierEditor.
       setBorder(BorderFactory.createTitledBorder("Classifier options"));
     
+    m_incrementalPanel.setLayout(new GridLayout(0,1));
+    m_resetIncrementalClassifier.setToolTipText("Reset the classifier " +
+    		"before processing the first incoming instance");
     m_updateIncrementalClassifier.
       setToolTipText("Train the classifier on "
 		     +"each individual incoming streamed instance.");
@@ -113,6 +118,16 @@ public class ClassifierCustomizer
 	    }
 	  }
 	});
+    m_resetIncrementalClassifier.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_dsClassifier != null) {
+          m_dsClassifier.setResetIncrementalClassifier(
+              m_resetIncrementalClassifier.isSelected());
+        }
+      }
+    });
+    
+    m_incrementalPanel.add(m_resetIncrementalClassifier);
     m_incrementalPanel.add(m_updateIncrementalClassifier);
     
     m_executionSlotsText.addActionListener(new ActionListener() {
@@ -239,6 +254,7 @@ public class ClassifierCustomizer
     }
     m_ClassifierEditor.setEnvironment(m_env);
     m_ClassifierEditor.setTarget(m_dsClassifier.getClassifierTemplate());
+    m_resetIncrementalClassifier.setSelected(m_dsClassifier.getResetIncrementalClassifier());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
     m_executionSlotsText.setText(""+m_dsClassifier.getExecutionSlots());
