@@ -143,7 +143,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       }
       
       if (parts.length == 5) {
-        m_replace = parts[4].trim();
+        m_replace = parts[4];
       }
     }
     
