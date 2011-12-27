@@ -936,6 +936,16 @@ public class SGDText extends RandomizableClassifier
           ((OptionHandler) getTokenizer()).getOptions());
     options.add(spec.trim());
     
+    if (getStemmer() != null) {
+      options.add("-stemmer");
+      spec = getStemmer().getClass().getName();
+      if (getStemmer() instanceof OptionHandler) {
+        spec += " " + Utils.joinOptions(((OptionHandler) getStemmer()).getOptions());
+      }
+      
+      options.add(spec.trim());
+    }
+    
     return options.toArray(new String[1]);
   }
   
