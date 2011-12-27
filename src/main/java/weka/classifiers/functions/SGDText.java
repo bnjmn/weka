@@ -250,6 +250,9 @@ public class SGDText extends RandomizableClassifier
     
     //attributes    
     result.enable(Capability.STRING_ATTRIBUTES);
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
     
     result.enable(Capability.BINARY_CLASS);
@@ -944,8 +947,9 @@ public class SGDText extends RandomizableClassifier
   public String globalInfo() {
     return "Implements stochastic gradient descent for learning" +
                 " a linear binary class SVM or binary class" +
-                " logistic regression on text data. Operates directly on String " +
-                "attributes.";
+                " logistic regression on text data. Operates directly (and only) " +
+                "on String attributes. Other types of input attributes are accepted " +
+                "but ignored during training and classification.";
   }
   
   /**
@@ -967,6 +971,18 @@ public class SGDText extends RandomizableClassifier
     
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
+    
+    boolean hasString = false;
+    for (int i = 0; i < data.numAttributes(); i++) {
+      if (data.attribute(i).isString() && data.classIndex() != i) {
+        hasString = true;
+        break;
+      }
+    }
+    
+    if (!hasString) {
+      throw new Exception("Incoming data does not have any string attributes!");
+    }
     
     m_dictionary = new LinkedHashMap<String, Count>(10000);
     
