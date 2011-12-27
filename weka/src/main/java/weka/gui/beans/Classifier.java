@@ -164,6 +164,16 @@ public class Classifier
                             + XStream.FILE_EXTENSION + FILE_EXTENSION + ")");
   
   protected transient Environment m_env;
+  
+  /**
+   * If the classifier is an incremental classifier, should we
+   * reset it (i.e. call buildClassifier()) and discard any previously
+   * learned model before processing the first instance in the stream. 
+   * Note that this happens automatically if the incoming instance 
+   * structure does not match that (if any) that the classifier was 
+   * trained with previously.
+   */
+  private boolean m_resetIncrementalClassifier = false;
 
   /**
    * If the classifier is an incremental classifier, should we
@@ -480,6 +490,34 @@ public class Classifier
   public Object getWrappedAlgorithm() {
     return getClassifierTemplate();
   }
+  
+  /**
+   * Set whether to reset (by calling buildClassifier()) an incremental 
+   * classifier, and thus discarding any previously learned model, 
+   * before processing the first instance in the incoming stream. Note 
+   * that this happens automatically if the incoming instances structure 
+   * does not match that of any previous structure used to train the model.
+   * 
+   * @param reset true if the incremental classifier should be reset 
+   * before processing the first instance in the incoming data stream
+   */
+  public void setResetIncrementalClassifier(boolean reset) {
+    m_resetIncrementalClassifier =  reset;
+  }
+  
+  /**
+   * Get whether to reset (by calling buildClassifier()) an incremental 
+   * classifier, and thus discarding any previously learned model, 
+   * before processing the first instance in the incoming stream. Note 
+   * that this happens automatically if the incoming instances structure 
+   * does not match that of any previous structure used to train the model.
+   * 
+   * @param reset true if the incremental classifier should be reset 
+   * before processing the first instance in the incoming data stream
+   */
+  public boolean getResetIncrementalClassifier() {
+    return m_resetIncrementalClassifier;
+  }
 
   /**
    * Get whether an incremental classifier will be updated on the
@@ -562,7 +600,8 @@ public class Classifier
 	// initialize classifier if m_trainingSet is null
 	// otherwise assume that classifier has been pre-trained in batch
 	// mode, *if* headers match
-	if (m_trainingSet == null || !m_trainingSet.equalHeaders(dataset)) {
+	if (m_trainingSet == null || !m_trainingSet.equalHeaders(dataset) || 
+	    m_resetIncrementalClassifier) {
 	  if (!(m_ClassifierTemplate instanceof 
 		weka.classifiers.UpdateableClassifier) &&
 		!(m_ClassifierTemplate instanceof 
@@ -608,6 +647,18 @@ public class Classifier
 	    }
 	    m_trainingSet = null;
 	  }
+	  
+	  if (m_resetIncrementalClassifier) {
+	    if (m_log != null) {
+	      String msg = statusMessagePrefix()
+	      + " Reseting incremental classifier";
+	      m_log.logMessage("[Classifier] " + msg);
+	      m_log.statusMessage(msg);
+	    }
+	    
+	    m_trainingSet = null;
+	  }
+	  
 	  if (m_trainingSet == null) {
 	    // initialize the classifier if it hasn't been trained yet
 	    m_trainingSet = new Instances(dataset, 0);
