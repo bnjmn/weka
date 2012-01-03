@@ -171,12 +171,14 @@ public class IncrementalClassifierEvaluator
 	    if (inst.attribute(inst.classIndex()).isNominal()) {
 	      if (!inst.isMissing(inst.classIndex())) {
 	        if (m_dataPoint.length < 2) {
-	          m_dataPoint = new double[2];
+	          m_dataPoint = new double[3];
 	          m_dataLegend.addElement("Accuracy");
 	          m_dataLegend.addElement("RMSE (prob)");
+	          m_dataLegend.addElement("Kappa");
 	        }
 	        //		int classV = (int) inst.value(inst.classIndex());
 	        m_dataPoint[1] = m_eval.rootMeanSquaredError();
+	        m_dataPoint[2] = m_eval.kappa();
 	        //  		int maxO = Utils.maxIndex(dist);
 	        //  		if (maxO == classV) {
 	        //  		  dist[classV] = -1;
@@ -205,6 +207,7 @@ public class IncrementalClassifierEvaluator
 	      /*	    ChartEvent e = 
 		    new ChartEvent(IncrementalClassifierEvaluator.this, 
 		    m_dataLegend, min, max, dataPoint); */
+	      
 	      m_ce.setLegendText(m_dataLegend);
 	      m_ce.setMin(0); m_ce.setMax(1);
 	      m_ce.setDataPoint(m_dataPoint);
