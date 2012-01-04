@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the incremental classifier evaluator bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class IncrementalClassifierEvaluatorBeanInfo extends SimpleBeanInfo {
   
@@ -41,10 +41,13 @@ public class IncrementalClassifierEvaluatorBeanInfo extends SimpleBeanInfo {
     try {
       PropertyDescriptor p1;
       PropertyDescriptor p2;
+      PropertyDescriptor p3;
       p1 = new PropertyDescriptor("statusFrequency", IncrementalClassifierEvaluator.class);
       p2 = new PropertyDescriptor("outputPerClassInfoRetrievalStats", 
                                   IncrementalClassifierEvaluator.class);
-      PropertyDescriptor [] pds = { p1, p2 };
+      p3 = new PropertyDescriptor("chartingEvalWindowSize", 
+          IncrementalClassifierEvaluator.class);
+      PropertyDescriptor [] pds = { p1, p2, p3 };
       return pds;
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -67,7 +70,7 @@ public class IncrementalClassifierEvaluatorBeanInfo extends SimpleBeanInfo {
 	new EventSetDescriptor(IncrementalClassifierEvaluator.class,
 			       "text",
 			       TextListener.class,
-			       "acceptText") 
+			       "acceptText")
       };
       return esds;
     } catch (Exception ex) {
