@@ -22,14 +22,14 @@
 
 package weka.gui.beans;
 
+import java.util.LinkedList;
+import java.util.Vector;
+
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
-
-import java.util.Vector;
 
 /**
  * Bean that evaluates incremental classifiers
@@ -67,6 +67,13 @@ public class IncrementalClassifierEvaluator
 
   // output info retrieval and auc stats for each class (if class is nominal)
   private boolean m_outputInfoRetrievalStats = false;
+  
+  // window size for computing performance metrics - 0 means no window, i.e
+  // don't "forget" performance on any instances
+  private int m_windowSize = 0;
+  private Evaluation m_windowEval;
+  private LinkedList<Instance> m_window;
+  private LinkedList<double[]> m_windowedPreds;
 
   public IncrementalClassifierEvaluator() {
      m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -122,10 +129,25 @@ public class IncrementalClassifierEvaluator
 	Instances inst = ce.getStructure();
 	System.err.println("NEW BATCH");
         m_instanceCount = 0;
+        
+        if (m_windowSize > 0) {
+          m_window = new LinkedList<Instance>();
+          m_windowEval = new Evaluation(ce.getStructure());
+          m_windowEval.useNoPriors();
+          m_windowedPreds = new LinkedList<double[]>();
+          
+          if (m_logger != null) {
+            m_logger.logMessage(statusMessagePrefix() + 
+                "[IncrementalClassifierEvaluator] Chart output using windowed " +
+                "evaluation over " + m_windowSize + " instances");
+          }
+        }
+        
         if (m_logger != null) {
           m_logger.statusMessage(statusMessagePrefix() 
               + "IncrementalClassifierEvaluator: started processing...");
-          m_logger.logMessage("[IncrementalClassifierEvaluator]" +
+          m_logger.logMessage(statusMessagePrefix() + 
+              " [IncrementalClassifierEvaluator]" +
               statusMessagePrefix() + " started processing...");
         }
 	/* if (inst.classIndex() >= 0) {
@@ -163,6 +185,23 @@ public class IncrementalClassifierEvaluator
 	    } else {
 	      m_eval.evaluateModelOnce(dist, inst);
 	    }
+	    
+	    if (m_windowSize > 0) {	      
+	      
+	      m_windowEval.evaluateModelOnce(dist, inst);
+	      m_window.addFirst(inst);
+	      m_windowedPreds.addFirst(dist);
+	      
+	      if (m_instanceCount > m_windowSize) {
+	        // "forget" the oldest prediction
+	        Instance oldest = m_window.removeLast();
+	        
+	        double [] oldDist = m_windowedPreds.removeLast();
+	        oldest.setWeight(-oldest.weight());
+	        m_windowEval.evaluateModelOnce(oldDist, oldest);
+	        oldest.setWeight(-oldest.weight());
+	      }
+	    }
 	  } else {
 	    pred = ce.getClassifier().classifyInstance(inst);
 	  }
@@ -177,8 +216,14 @@ public class IncrementalClassifierEvaluator
 	          m_dataLegend.addElement("Kappa");
 	        }
 	        //		int classV = (int) inst.value(inst.classIndex());
-	        m_dataPoint[1] = m_eval.rootMeanSquaredError();
-	        m_dataPoint[2] = m_eval.kappa();
+	        
+	        if (m_windowSize > 0) {
+	          m_dataPoint[1] = m_windowEval.rootMeanSquaredError();
+	          m_dataPoint[2] = m_windowEval.kappa();
+	        } else {
+	          m_dataPoint[1] = m_eval.rootMeanSquaredError();
+	          m_dataPoint[2] = m_eval.kappa();
+	        }
 	        //  		int maxO = Utils.maxIndex(dist);
 	        //  		if (maxO == classV) {
 	        //  		  dist[classV] = -1;
@@ -193,7 +238,11 @@ public class IncrementalClassifierEvaluator
 	      }
 	      double primaryMeasure = 0;
 	      if (!inst.isMissing(inst.classIndex())) {
-	        primaryMeasure = 1.0 - m_eval.errorRate();
+	        if (m_windowSize > 0) {
+	          primaryMeasure = 1.0 - m_windowEval.errorRate();
+	        } else {
+	          primaryMeasure = 1.0 - m_eval.errorRate();
+	        }
 	      } else {
 	        // record confidence as the primary measure
 	        // (another possibility would be entropy of
@@ -226,7 +275,11 @@ public class IncrementalClassifierEvaluator
 	      if (!inst.isMissing(inst.classIndex())) {
 	        double update;
 	        if (!inst.isMissing(inst.classIndex())) {
-	          update = m_eval.rootMeanSquaredError();
+	          if (m_windowSize > 0) {
+	            update = m_windowEval.rootMeanSquaredError();
+	          } else {
+	            update = m_eval.rootMeanSquaredError();
+	          }
 	        } else {
 	          update = pred;
 	        }
@@ -258,6 +311,12 @@ public class IncrementalClassifierEvaluator
                   + statusMessagePrefix() + " Finished processing.");
               m_logger.statusMessage(statusMessagePrefix() + "Done.");
             }
+            
+            // save memory if using windowed evaluation for charting
+            m_windowEval = null;
+            m_window = null;
+            m_windowedPreds = null;
+            
 	    if (m_textListeners.size() > 0) {
 	      String textTitle = ce.getClassifier().getClass().getName();
 	      textTitle = 
@@ -430,6 +489,40 @@ public class IncrementalClassifierEvaluator
   public String outputPerClassInfoRetrievalStatsTipText() {
     return "Output per-class info retrieval stats. If set to true, predictions get "
       +"stored so that stats such as AUC can be computed. Note: this consumes some memory.";
+  }
+  
+  /**
+   * Set whether to compute evaluation for charting over a fixed sized window of
+   * the most recent instances (rather than the whole stream).
+   * 
+   * @param windowSize the size of the window to use for computing the evaluation
+   * metrics used for charting. Setting a value of zero or less specifies that no 
+   * windowing is to be used.
+   */
+  public void setChartingEvalWindowSize(int windowSize) {
+    m_windowSize = windowSize;
+  }
+  
+  /**
+   * Get whether to compute evaluation for charting over a fixed sized window of
+   * the most recent instances (rather than the whole stream).
+   * 
+   * @return the size of the window to use for computing the evaluation
+   * metrics used for charting. Setting a value of zero or less specifies that no 
+   * windowing is to be used.
+   */
+  public int getChartingEvalWindowSize() {
+    return m_windowSize;
+  }
+  
+  /**
+   * Return a tip text string for this property
+   * 
+   * @return a string for the tip text
+   */
+  public String chartingEvalWindowSizeTipText() {
+    return "For charting only, specify a sliding window size over which to compute " +
+    		"performance stats. <= 0 means eval on whole stream";
   }
 
   /**
