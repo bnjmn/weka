@@ -1583,7 +1583,8 @@ public class StringToWordVector
     int firstCopy = 0;
     for (int i = 0; i < getInputFormat().numAttributes(); i++) {
       if (!m_SelectedRange.isInRange(i)) { 
-	if (getInputFormat().attribute(i).type() != Attribute.STRING) {
+	if (getInputFormat().attribute(i).type() != Attribute.STRING && 
+	    getInputFormat().attribute(i).type() != Attribute.RELATIONAL) {
 	  // Add simple nominal and numeric attributes directly
 	  if (instance.value(i) != 0.0) {
 	    contained.put(new Integer(firstCopy), 
@@ -1593,7 +1594,7 @@ public class StringToWordVector
 	  if (instance.isMissing(i)) {
 	    contained.put(new Integer(firstCopy),
 		new Double(Utils.missingValue()));
-	  } else {
+	  } else if (getInputFormat().attribute(i).type() == Attribute.STRING) {
 
 	    // If this is a string attribute, we have to first add
 	    // this value to the range of possible values, then add
@@ -1608,6 +1609,17 @@ public class StringToWordVector
 	    .addStringValue(instance.stringValue(i));
 	    contained.put(new Integer(firstCopy), 
 		new Double(newIndex));
+	  } else {
+	    // relational
+	    if (outputFormatPeek().attribute(firstCopy).numValues() == 0) {
+	      Instances relationalHeader = outputFormatPeek().attribute(firstCopy).relation();
+	      
+	      // hack to defeat sparse instances bug
+	      outputFormatPeek().attribute(firstCopy).addRelation(relationalHeader);
+	    }
+	    int newIndex = outputFormatPeek().attribute(firstCopy)
+	      .addRelation(instance.relationalValue(i));
+	    contained.put(new Integer(firstCopy), new Double(newIndex));
 	  }
 	}
 	firstCopy++;
