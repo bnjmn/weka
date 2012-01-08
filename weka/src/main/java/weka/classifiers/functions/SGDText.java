@@ -34,8 +34,11 @@ import java.util.Vector;
 
 import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.UpdateableClassifier;
+import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -53,7 +56,7 @@ import weka.core.tokenizers.WordTokenizer;
 
 /**
  <!-- globalinfo-start -->
- * Implements stochastic gradient descent for learning a linear binary class SVM or binary class logistic regression on text data. Operates directly on String attributes.
+ * Implements stochastic gradient descent for learning a linear binary class SVM or binary class logistic regression on text data. Operates directly (and only) on String attributes. Other types of input attributes are accepted but ignored during training and classification.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -63,6 +66,10 @@ import weka.core.tokenizers.WordTokenizer;
  * <pre> -F
  *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression)
  *  (default = 0)</pre>
+ * 
+ * <pre> -outputProbs
+ *  Output probabilities for SVMs (fits a logsitic
+ *  model to the output of the SVM)</pre>
  * 
  * <pre> -L
  *  The learning rate (default = 0.01).</pre>
@@ -224,6 +231,16 @@ public class SGDText extends RandomizableClassifier
     new Tag(HINGE, "Hinge loss (SVM)"),
     new Tag(LOGLOSS, "Log loss (logistic regression)")    
   };
+  
+  /** Used for producing probabilities for SVM via SGD logistic regression */
+  protected SGD m_svmProbs;
+  
+  /** 
+   * True if a logistic regression is to be fit to the output of the SVM for
+   * producing probability estimates
+   */
+  protected boolean m_fitLogistic = false;
+  protected Instances m_fitLogisticStructure;
   
   protected double dloss(double z) {
     if (m_loss == HINGE) {
@@ -694,6 +711,41 @@ public class SGDText extends RandomizableClassifier
   }
   
   /**
+   * Set whether to fit a logistic regression (itself trained
+   * using SGD) to the outputs of the SVM (if an SVM is being 
+   * learned).
+   * 
+   * @param o true if a logistic regression is to be fit to the 
+   * output of the SVM to produce probability estimates.
+   */
+  public void setOutputProbsForSVM(boolean o) {
+    m_fitLogistic = o;
+  }
+  
+  /**
+   * Get whether to fit a logistic regression (itself trained
+   * using SGD) to the outputs of the SVM (if an SVM is being 
+   * learned).
+   * 
+   * @return true if a logistic regression is to be fit to the 
+   * output of the SVM to produce probability estimates.
+   */
+  public boolean getOutputProbsForSVM() {
+    return m_fitLogistic;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String outputProbsForSVMTipText() {
+    return "Fit a logistic regression to the output of SVM for " +
+    		"producing probability estimates";
+  }
+  
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
@@ -704,6 +756,9 @@ public class SGDText extends RandomizableClassifier
     newVector.add(new Option("\tSet the loss function to minimize. 0 = " +
         "hinge loss (SVM), 1 = log loss (logistic regression)\n\t" +
         "(default = 0)", "F", 1, "-F"));
+    newVector.add(new Option("\tOutput probabilities for SVMs (fits a logsitic\n\t" +
+    		"model to the output of the SVM)", "output-probs", 
+        0, "-outputProbs"));
     newVector.add(new Option("\tThe learning rate (default = 0.01).", "L", 1, "-L"));
     newVector.add(new Option("\tThe lambda regularization constant " +
                 "(default = 0.0001)",
@@ -761,6 +816,10 @@ public class SGDText extends RandomizableClassifier
    * <pre> -F
    *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression)
    *  (default = 0)</pre>
+   * 
+   * <pre> -outputProbs
+   *  Output probabilities for SVMs (fits a logsitic
+   *  model to the output of the SVM)</pre>
    * 
    * <pre> -L
    *  The learning rate (default = 0.01).</pre>
@@ -823,6 +882,8 @@ public class SGDText extends RandomizableClassifier
       setLossFunction(new SelectedTag(Integer.parseInt(lossString), 
           TAGS_SELECTION));
     }
+    
+    setOutputProbsForSVM(Utils.getFlag("output-probs", options));
     
     String lambdaString = Utils.getOption('R', options);
     if (lambdaString.length() > 0) {
@@ -909,6 +970,9 @@ public class SGDText extends RandomizableClassifier
     ArrayList<String> options = new ArrayList<String>();
     
     options.add("-F"); options.add("" + getLossFunction().getSelectedTag().getID());
+    if (getOutputProbsForSVM()) {
+      options.add("-output-probs");
+    }
     options.add("-L"); options.add("" + getLearningRate());
     options.add("-R"); options.add("" + getLambda());
     options.add("-E"); options.add("" + getEpochs());  
@@ -977,12 +1041,9 @@ public class SGDText extends RandomizableClassifier
    * @throws Exception if the classifier can't be built successfully.
    */
   public void buildClassifier(Instances data) throws Exception {
-    reset();
+    reset();    
     
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-    
-    boolean hasString = false;
+/*    boolean hasString = false;
     for (int i = 0; i < data.numAttributes(); i++) {
       if (data.attribute(i).isString() && data.classIndex() != i) {
         hasString = true;
@@ -992,7 +1053,10 @@ public class SGDText extends RandomizableClassifier
     
     if (!hasString) {
       throw new Exception("Incoming data does not have any string attributes!");
-    }
+    } */
+    
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
     
     m_dictionary = new LinkedHashMap<String, Count>(10000);
     
@@ -1000,10 +1064,33 @@ public class SGDText extends RandomizableClassifier
     m_data = new Instances(data, 0);
     data = new Instances(data);
     
+    if (m_fitLogistic && m_loss == HINGE) {
+      initializeSVMProbs(data);      
+    }
+    
     if (data.numInstances() > 0) {
       data.randomize(new Random(getSeed()));
       train(data);
     }    
+  }
+  
+  protected void initializeSVMProbs(Instances data) throws Exception {
+    m_svmProbs = new SGD();
+    m_svmProbs.setLossFunction(new SelectedTag(SGD.LOGLOSS, 
+        TAGS_SELECTION));
+    m_svmProbs.setLearningRate(m_learningRate);
+    m_svmProbs.setLambda(m_lambda);
+    m_svmProbs.setEpochs(m_epochs);
+    FastVector atts = new FastVector(2);
+    atts.addElement(new Attribute("pred"));
+    FastVector attVals = new FastVector(2);
+    attVals.addElement(data.classAttribute().value(0));
+    attVals.addElement(data.classAttribute().value(1));
+    atts.addElement(new Attribute("class", attVals));
+    m_fitLogisticStructure = new Instances("data", atts, 0);
+    m_fitLogisticStructure.setClassIndex(1);
+    
+    m_svmProbs.buildClassifier(m_fitLogisticStructure);
   }
   
   protected void train(Instances data) throws Exception {
@@ -1036,6 +1123,18 @@ public class SGDText extends RandomizableClassifier
       
       // tokenize
       tokenizeInstance(instance, updateDictionary);
+      
+      // make a meta instance for the logistic model before we update
+      // the SVM
+      if (m_loss == HINGE && m_fitLogistic) {
+        double pred = svmOutput();
+        double[] vals = new double[2];
+        vals[0] = pred;
+        vals[1] = instance.classValue();
+        DenseInstance metaI = new DenseInstance(instance.weight(), vals);
+        metaI.setDataset(m_fitLogisticStructure);
+        m_svmProbs.updateClassifier(metaI);
+      }
       
       // --- 
       double wx = dotProd(m_inputVector);
@@ -1073,7 +1172,7 @@ public class SGDText extends RandomizableClassifier
         m_bias += factor;
       }
       
-      m_t++;
+      m_t++;      
     }
   }
   
@@ -1151,12 +1250,29 @@ public class SGDText extends RandomizableClassifier
     }
   }
   
+  protected double svmOutput() {
+    double wx = dotProd(m_inputVector);
+    double z = (wx + m_bias);
+    
+    return z;
+  }
+  
   public double[] distributionForInstance(Instance inst) throws Exception {
     double[] result = new double[2];
     
     tokenizeInstance(inst, false);
     double wx = dotProd(m_inputVector);
     double z = (wx + m_bias);
+    
+    if (m_loss == HINGE && m_fitLogistic) {
+      double pred = z;
+      double[] vals = new double[2];
+      vals[0] = pred;
+      vals[1] = Utils.missingValue();
+      DenseInstance metaI = new DenseInstance(inst.weight(), vals);
+      metaI.setDataset(m_fitLogisticStructure);
+      return m_svmProbs.distributionForInstance(metaI);
+    }
     
     if (z <= 0) {
       if (m_loss == LOGLOSS) {
@@ -1192,7 +1308,9 @@ public class SGDText extends RandomizableClassifier
     
     for (Map.Entry<String, Count> feature : document.entrySet()) {
       String word = feature.getKey();
-      double freq = (feature.getValue().m_count / iNorm * m_norm);
+      double freq = (m_wordFrequencies) ? feature.getValue().m_count : 1.0;
+      //double freq = (feature.getValue().m_count / iNorm * m_norm);
+      freq /= iNorm * m_norm;
       
       Count weight = m_dictionary.get(word);
       
