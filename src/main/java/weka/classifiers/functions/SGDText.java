@@ -91,6 +91,9 @@ import weka.core.tokenizers.WordTokenizer;
  *  If periodic pruning is turned on then this is also used to determine which
  *  words to remove from the dictionary (default = 3).</pre>
  * 
+ * <pre> -normalize
+ *  Normalize document length (use in conjunction with -norm and -lnorm</pre>
+ * 
  * <pre> -norm &lt;num&gt;
  *  Specify the norm that each instance must have (default 1.0)</pre>
  * 
@@ -156,6 +159,9 @@ public class SGDText extends RandomizableClassifier
   
   /** Use word frequencies rather than bag-of-words if true */
   protected boolean m_wordFrequencies = false;
+  
+  /** Whether to normalized document length or not */
+  protected boolean m_normalize = false;
   
   /** The length that each document vector should have in the end */
   protected double m_norm = 1.0;
@@ -542,6 +548,35 @@ public class SGDText extends RandomizableClassifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String normalizeDocLengthTipText() {
+    return "If true then document length is normalized according " +
+    		"to the settings for norm and lnorm";
+  }
+  
+  /**
+   * Set whether to normalize the length of each document
+   * 
+   * @param norm true if document lengths is to be normalized
+   */
+  public void setNormalizeDocLength(boolean norm) {
+    m_normalize = norm;
+  }
+  
+  /**
+   * Get whether to normalize the length of each document
+   * 
+   * @return true if document lengths is to be normalized
+   */
+  public boolean getNormalizeDocLength() {
+    return m_normalize;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String normTipText() { 
     return "The norm of the instances after normalization.";
   }
@@ -778,6 +813,9 @@ public class SGDText extends RandomizableClassifier
     		"words to remove from the dictionary (default = 3).",
     		"M", 1, "-M <double>"));
     newVector.addElement(new Option(
+        "\tNormalize document length (use in conjunction with -norm and " +
+        "-lnorm)", "normalize", 0, "-normalize"));
+    newVector.addElement(new Option(
         "\tSpecify the norm that each instance must have (default 1.0)",
         "norm", 1, "-norm <num>"));
     newVector.addElement(new Option(
@@ -840,6 +878,9 @@ public class SGDText extends RandomizableClassifier
    *  Minimum word frequency. Words with less than this frequence are ignored.
    *  If periodic pruning is turned on then this is also used to determine which
    *  words to remove from the dictionary (default = 3).</pre>
+   * 
+   * <pre> -normalize
+   *  Normalize document length (use in conjunction with -norm and -lnorm</pre>
    * 
    * <pre> -norm &lt;num&gt;
    *  Specify the norm that each instance must have (default 1.0)</pre>
@@ -911,6 +952,8 @@ public class SGDText extends RandomizableClassifier
       setMinWordFrequency(Double.parseDouble(minFreq));
     }
     
+    setNormalizeDocLength(Utils.getFlag("normalize", options));
+    
     String normFreqS = Utils.getOption("norm", options);
     if (normFreqS.length() > 0) {
       setNorm(Double.parseDouble(normFreqS));
@@ -981,6 +1024,10 @@ public class SGDText extends RandomizableClassifier
     }
     options.add("-P"); options.add("" + getPeriodicPruning());
     options.add("-M"); options.add("" + getMinWordFrequency());
+    
+    if (getNormalizeDocLength()) {
+      options.add("-normalize");
+    }
     options.add("-norm"); options.add("" + getNorm());
     options.add("-lnorm"); options.add("" + getLNorm());
     if (getLowercaseTokens()) {
@@ -1299,18 +1346,22 @@ public class SGDText extends RandomizableClassifier
     // document normalization
     double iNorm = 0;
     double fv = 0;
-    for (Count c : document.values()) {
-      // word counts or bag-of-words?
-      fv = (m_wordFrequencies) ? c.m_count : 1.0;
-      iNorm += Math.pow(Math.abs(fv), m_lnorm);
+    if (m_normalize) {
+      for (Count c : document.values()) {
+        // word counts or bag-of-words?
+        fv = (m_wordFrequencies) ? c.m_count : 1.0;
+        iNorm += Math.pow(Math.abs(fv), m_lnorm);
+      }
+      iNorm = Math.pow(iNorm, 1.0 / m_lnorm);
     }
-    iNorm = Math.pow(iNorm, 1.0 / m_lnorm);
     
     for (Map.Entry<String, Count> feature : document.entrySet()) {
       String word = feature.getKey();
       double freq = (m_wordFrequencies) ? feature.getValue().m_count : 1.0;
       //double freq = (feature.getValue().m_count / iNorm * m_norm);
-      freq /= iNorm * m_norm;
+      if (m_normalize) {
+        freq /= iNorm * m_norm;
+      }
       
       Count weight = m_dictionary.get(word);
       
