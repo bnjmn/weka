@@ -221,8 +221,22 @@ public class BayesianLogisticRegression extends Classifier
       m_Instances = Filter.useFilter(m_Instances, m_Filter);
     }
 
-    //Set the intecept coefficient.
-    Attribute att = new Attribute("(intercept)");
+    //Set the intercept coefficient.
+    String attName = "(intercept)";
+    String attAtZero = m_Instances.attribute(0).name();
+    int attNameIncr = 0;
+    if (attAtZero.startsWith(attName)) {
+      if (attAtZero.indexOf(')') < 
+          attAtZero.length() - 1) {
+        String tempNum = attAtZero.substring(attAtZero.indexOf(')') + 1,
+            attAtZero.length());
+        attNameIncr = Integer.parseInt(tempNum);
+        attNameIncr++;
+      }
+      attName += "" + attNameIncr;
+    }
+
+    Attribute att = new Attribute(attName);
     Instance instance;
 
     m_Instances.insertAttributeAt(att, 0);
