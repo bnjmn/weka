@@ -115,6 +115,9 @@ public class BayesianLogisticRegression extends Classifier
 
   /** NumFolds for CV based Hyperparameters selection*/
   public int NumFolds = 2;
+  
+  /** seed for randomizing the instances before CV */
+  public int m_seed;
 
   /** Methods for selecting the hyperparameter value */
   public static final int NORM_BASED = 1;
@@ -682,7 +685,7 @@ public class BayesianLogisticRegression extends Classifier
     // unbiased predictions
     if (list != null) {
       int numFolds = (int) NumFolds;
-      Random random = new Random();
+      Random random = new Random(m_seed);
       m_Instances.randomize(random);
       m_Instances.stratify(numFolds);
 
@@ -785,6 +788,11 @@ public class BayesianLogisticRegression extends Classifier
                                     "-I <integer>"));
     newVector.addElement(new Option("\tNormalize the data",
                                     "N", 0, "-N"));
+    
+    newVector.addElement(new Option("\tSeed for randomizing instances order" +
+    		"\n\tin CV-based hyperparameter selection\n\t(default: 1)",
+    		"seed", 1, 
+    		"-seed <number>"));
 
     return newVector.elements();
   }
@@ -887,6 +895,11 @@ public class BayesianLogisticRegression extends Classifier
     if (folds.length() != 0) {
       NumFolds = Integer.parseInt(folds);
     }
+    
+    String seed = Utils.getOption("seed", options);
+    if (seed.length() > 0) {
+      setSeed(Integer.parseInt(seed));
+    }
 
     String iterations = Utils.getOption('I', options);
 
@@ -933,6 +946,9 @@ public class BayesianLogisticRegression extends Classifier
 
     result.add("-F");
     result.add("" + NumFolds);
+    
+    result.add("-seed");
+    result.add("" + getSeed());
 
     result.add("-I");
     result.add("" + maxIterations);
@@ -1160,6 +1176,37 @@ public class BayesianLogisticRegression extends Classifier
    */
   public void setNumFolds(int numFolds) {
     NumFolds = numFolds;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Seed for randomizing instances order prior to CV-based " +
+    		"hyperparameter selection";
+  }
+  
+  /**
+   * Set the seed for randomizing the instances for CV-based
+   * hyperparameter selection
+   * 
+   * @param seed the seed to use
+   */
+  public void setSeed(int seed) {
+    m_seed = seed;
+  }
+  
+  /**
+   * Get the seed for randomizing the instances for CV-based
+   * hyperparameter selection
+   * 
+   * @return the seed to use
+   */
+  public int getSeed() {
+    return m_seed;
   }
 
   /**
