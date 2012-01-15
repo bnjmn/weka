@@ -843,6 +843,11 @@ public class BayesianLogisticRegression extends Classifier
    * <pre> -N
    *  Normalize the data</pre>
    * 
+   * <pre> -seed &lt;number&gt;
+   *  Seed for randomizing instances order
+   *  in CV-based hyperparameter selection
+   *  (default: 1)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
