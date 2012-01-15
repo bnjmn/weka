@@ -117,6 +117,9 @@ public class BayesianLogisticRegression extends AbstractClassifier
   /** NumFolds for CV based Hyperparameters selection*/
   public int NumFolds = 2;
 
+  /** seed for randomizing the instances before CV */
+  public int m_seed = 1;
+
   /** Methods for selecting the hyperparameter value */
   public static final int NORM_BASED = 1;
   public static final int CV_BASED = 2;
@@ -223,7 +226,21 @@ public class BayesianLogisticRegression extends AbstractClassifier
     }
 
     //Set the intecept coefficient.
-    Attribute att = new Attribute("(intercept)");
+    String attName = "(intercept)";
+    String attAtZero = m_Instances.attribute(0).name();
+    int attNameIncr = 0;
+    if (attAtZero.startsWith(attName)) {
+      if (attAtZero.indexOf(')') < 
+          attAtZero.length() - 1) {
+        String tempNum = attAtZero.substring(attAtZero.indexOf(')') + 1,
+                                             attAtZero.length());
+        attNameIncr = Integer.parseInt(tempNum);
+        attNameIncr++;
+      }
+      attName += "" + attNameIncr;
+    }
+
+    Attribute att = new Attribute(attName);
     Instance instance;
 
     m_Instances.insertAttributeAt(att, 0);
@@ -669,7 +686,7 @@ public class BayesianLogisticRegression extends AbstractClassifier
     // unbiased predictions
     if (list != null) {
       int numFolds = (int) NumFolds;
-      Random random = new Random();
+      Random random = new Random(m_seed);
       m_Instances.randomize(random);
       m_Instances.stratify(numFolds);
 
@@ -773,6 +790,11 @@ public class BayesianLogisticRegression extends AbstractClassifier
     newVector.addElement(new Option("\tNormalize the data",
                                     "N", 0, "-N"));
 
+    newVector.addElement(new Option("\tSeed for randomizing instances order" +
+                                    "\n\tin CV-based hyperparameter selection\n\t(default: 1)",
+                                    "seed", 1, 
+                                    "-seed <number>"));
+
     return newVector.elements();
   }
 
@@ -821,6 +843,11 @@ public class BayesianLogisticRegression extends AbstractClassifier
    * 
    * <pre> -N
    *  Normalize the data</pre>
+   * 
+   * <pre> -seed &lt;number&gt;
+   *  Seed for randomizing instances order
+   *  in CV-based hyperparameter selection
+   *  (default: 1)</pre>
    * 
    <!-- options-end -->
    *
@@ -875,6 +902,11 @@ public class BayesianLogisticRegression extends AbstractClassifier
       NumFolds = Integer.parseInt(folds);
     }
 
+    String seed = Utils.getOption("seed", options);
+    if (seed.length() > 0) {
+      setSeed(Integer.parseInt(seed));
+    }
+
     String iterations = Utils.getOption('I', options);
 
     if (iterations.length() != 0) {
@@ -920,6 +952,9 @@ public class BayesianLogisticRegression extends AbstractClassifier
 
     result.add("-F");
     result.add("" + NumFolds);
+
+    result.add("-seed");
+    result.add("" + getSeed());
 
     result.add("-I");
     result.add("" + maxIterations);
@@ -1147,6 +1182,37 @@ public class BayesianLogisticRegression extends AbstractClassifier
    */
   public void setNumFolds(int numFolds) {
     NumFolds = numFolds;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Seed for randomizing instances order prior to CV-based " +
+      "hyperparameter selection";
+  }
+  
+  /**
+   * Set the seed for randomizing the instances for CV-based
+   * hyperparameter selection
+   * 
+   * @param seed the seed to use
+   */
+  public void setSeed(int seed) {
+    m_seed = seed;
+  }
+  
+  /**
+   * Get the seed for randomizing the instances for CV-based
+   * hyperparameter selection
+   * 
+   * @return the seed to use
+   */
+  public int getSeed() {
+    return m_seed;
   }
 
   /**
