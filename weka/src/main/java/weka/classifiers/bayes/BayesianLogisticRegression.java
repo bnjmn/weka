@@ -117,7 +117,7 @@ public class BayesianLogisticRegression extends Classifier
   public int NumFolds = 2;
   
   /** seed for randomizing the instances before CV */
-  public int m_seed;
+  public int m_seed = 1;
 
   /** Methods for selecting the hyperparameter value */
   public static final int NORM_BASED = 1;
