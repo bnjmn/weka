@@ -104,7 +104,7 @@ public class SubstringLabelerCustomizer extends JPanel implements
         SwingConstants.RIGHT);
     checkHolder.add(caseLab);
     checkHolder.add(m_ignoreCaseCheck);
-    JLabel nominalBinaryLab = new JLabel("Make binary label attribute nominal");
+    JLabel nominalBinaryLab = new JLabel("Make binary label attribute nominal", SwingConstants.RIGHT);
     nominalBinaryLab.setToolTipText("<html>If the label attribute is binary (i.e. no <br>" +
     		"explicit labels have been declared) then<br>this makes the resulting " +
     		"attribute nominal<br>rather than numeric.</html>");
