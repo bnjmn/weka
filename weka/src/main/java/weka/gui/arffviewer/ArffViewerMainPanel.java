@@ -25,6 +25,7 @@ package weka.gui.arffviewer;
 import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.converters.AbstractSaver;
+import weka.core.converters.ConverterUtils;
 import weka.gui.ComponentHelper;
 import weka.gui.ConverterFileChooser;
 import weka.gui.JTableHelper;
@@ -64,7 +65,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision$ 
  */
 
 public class ArffViewerMainPanel 
@@ -646,9 +647,10 @@ public class ArffViewerMainPanel
       saveFileAs();
     }
     else {
-      saver = fileChooser.getSaver();
+      saver = ConverterUtils.getSaverForFile(filename);
       try {
 	saver.setInstances(panel.getInstances());
+	saver.setFile(new File(filename));
 	saver.writeBatch();
 	panel.setChanged(false);
 	setCurrentFilename(filename);
