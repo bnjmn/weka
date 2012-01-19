@@ -25,6 +25,7 @@ package weka.gui.arffviewer;
 import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.converters.AbstractSaver;
+import weka.core.converters.ConverterUtils;
 import weka.gui.ComponentHelper;
 import weka.gui.ConverterFileChooser;
 import weka.gui.JTableHelper;
@@ -64,16 +65,16 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision$
  */
 
-public class ArffViewerMainPanel 
-  extends JPanel 
+public class ArffViewerMainPanel
+  extends JPanel
   implements ActionListener, ChangeListener {
-  
+
   /** for serialization */
   static final long serialVersionUID = -8763161167586738753L;
-  
+
   /** the default for width */
   public final static int    DEFAULT_WIDTH     = -1;
   /** the default for height */
@@ -114,7 +115,7 @@ public class ArffViewerMainPanel
   protected JMenuItem             menuViewAttributes;
   protected JMenuItem             menuViewValues;
   protected JMenuItem             menuViewOptimalColWidths;
-  
+
   protected ConverterFileChooser  fileChooser;
   protected String                frameTitle;
   protected boolean               confirmExit;
@@ -123,32 +124,32 @@ public class ArffViewerMainPanel
   protected int                   top;
   protected int                   left;
   protected boolean               exitOnClose;
-  
+
   /**
    * initializes the object
-   * 
+   *
    * @param parentFrame		the parent frame (JFrame or JInternalFrame)
    */
   public ArffViewerMainPanel(Container parentFrame) {
     parent     = parentFrame;
-    frameTitle = Messages.getInstance().getString("ArffViewerMainPanel_Title_Text"); 
+    frameTitle = Messages.getInstance().getString("ArffViewerMainPanel_Title_Text");
     createPanel();
   }
-  
+
   /**
    * creates all the components in the panel
    */
   protected void createPanel() {
     // basic setup
     setSize(WIDTH, HEIGHT);
-    
+
     setConfirmExit(false);
     setLayout(new BorderLayout());
-    
+
     // file dialog
     fileChooser = new ConverterFileChooser(new File(System.getProperty("user.dir")));
     fileChooser.setMultiSelectionEnabled(true);
-    
+
     // menu
     menuBar        = new JMenuBar();
     menuFile       = new JMenu(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_File_JMenu_Text"));
@@ -182,7 +183,7 @@ public class ArffViewerMainPanel
     menuFile.addSeparator();
     menuFile.add(menuFileExit);
     menuBar.add(menuFile);
-    
+
     menuEdit       = new JMenu(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Edit_JMenuItem_Text"));
     menuEditUndo   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_Undo_JMenuItem_Text"), ComponentHelper.getImageIcon("undo.gif"));
     menuEditUndo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_MASK));
@@ -226,7 +227,7 @@ public class ArffViewerMainPanel
     menuEdit.add(menuEditDeleteInstances);
     menuEdit.add(menuEditSortInstances);
     menuBar.add(menuEdit);
-    
+
     menuView       = new JMenu(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_View_JMenu_Text"));
     menuViewAttributes   = new JMenuItem(Messages.getInstance().getString("ArffViewerMainPanel_CreatePanel_ViewAttributes_JMenuItem_Text"), ComponentHelper.getImageIcon("objects.gif"));
     menuViewAttributes.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
@@ -241,19 +242,19 @@ public class ArffViewerMainPanel
     menuView.addSeparator();
     menuView.add(menuViewOptimalColWidths);
     menuBar.add(menuView);
-    
+
     // tabbed pane
     tabbedPane  = new JTabbedPane();
     tabbedPane.addChangeListener(this);
     add(tabbedPane, BorderLayout.CENTER);
-    
+
     updateMenu();
     updateFrameTitle();
   }
-  
+
   /**
    * returns the parent frame, if it's a JFrame, otherwise null
-   * 
+   *
    * @return		the parent frame
    */
   public JFrame getParentFrame() {
@@ -262,10 +263,10 @@ public class ArffViewerMainPanel
     else
       return null;
   }
-  
+
   /**
    * returns the parent frame, if it's a JInternalFrame, otherwise null
-   * 
+   *
    * @return		the parent frame
    */
   public JInternalFrame getParentInternalFrame() {
@@ -274,34 +275,34 @@ public class ArffViewerMainPanel
     else
       return null;
   }
-  
+
   /**
    * sets the new parent frame
-   * 
+   *
    * @param value	the parent frame
    */
   public void setParent(Container value) {
     parent = value;
   }
-  
+
   /**
    * returns the menu bar to be added in a frame
-   * 
+   *
    * @return		the menu bar
    */
   public JMenuBar getMenu() {
     return menuBar;
   }
-  
+
   /**
    * returns the tabbedpane instance
-   * 
+   *
    * @return		the tabbed pane
    */
   public JTabbedPane getTabbedPane() {
     return tabbedPane;
   }
-  
+
   /**
    * whether to present a MessageBox on Exit or not
    * @param confirm           whether a MessageBox pops up or not to confirm
@@ -310,7 +311,7 @@ public class ArffViewerMainPanel
   public void setConfirmExit(boolean confirm) {
     confirmExit = confirm;
   }
-  
+
   /**
    * returns the setting of whether to display a confirm messagebox or not
    * on exit
@@ -322,7 +323,7 @@ public class ArffViewerMainPanel
 
   /**
    * whether to do a System.exit(0) on close
-   * 
+   *
    * @param value	enables/disables a System.exit(0) on close
    */
   public void setExitOnClose(boolean value) {
@@ -331,13 +332,13 @@ public class ArffViewerMainPanel
 
   /**
    * returns TRUE if a System.exit(0) is done on a close
-   * 
+   *
    * @return		true if a System.exit(0) is done on close
    */
   public boolean getExitOnClose() {
     return exitOnClose;
   }
-  
+
   /**
    * validates and repaints the frame
    */
@@ -345,10 +346,10 @@ public class ArffViewerMainPanel
     validate();
     repaint();
   }
-  
+
   /**
    * returns the title (incl. filename) for the frame
-   * 
+   *
    * @return		the frame title
    */
   public String getFrameTitle() {
@@ -357,7 +358,7 @@ public class ArffViewerMainPanel
     else
       return frameTitle + Messages.getInstance().getString("ArffViewerMainPanel_GetFrameTitle_Text") + getCurrentFilename();
   }
-  
+
   /**
    * sets the title of the parent frame, if one was provided
    */
@@ -367,19 +368,19 @@ public class ArffViewerMainPanel
     if (getParentInternalFrame() != null)
       getParentInternalFrame().setTitle(getFrameTitle());
   }
-  
+
   /**
-   * sets the enabled/disabled state of the menu 
+   * sets the enabled/disabled state of the menu
    */
   protected void updateMenu() {
     boolean       fileOpen;
     boolean       isChanged;
     boolean       canUndo;
-    
+
     fileOpen  = (getCurrentPanel() != null);
     isChanged = fileOpen && (getCurrentPanel().isChanged());
     canUndo   = fileOpen && (getCurrentPanel().canUndo());
-    
+
     // File
     menuFileOpen.setEnabled(true);
     menuFileSave.setEnabled(isChanged);
@@ -405,38 +406,38 @@ public class ArffViewerMainPanel
     menuViewValues.setEnabled(fileOpen);
     menuViewOptimalColWidths.setEnabled(fileOpen);
   }
-  
+
   /**
    * sets the title of the tab that contains the given component
-   * 
+   *
    * @param component		the component to set the title for
    */
   protected void setTabTitle(JComponent component) {
     int            index;
-    
+
     if (!(component instanceof ArffPanel))
       return;
-    
+
     index = tabbedPane.indexOfComponent(component);
     if (index == -1)
       return;
-    
+
     tabbedPane.setTitleAt(index, ((ArffPanel) component).getTitle());
     updateFrameTitle();
   }
-  
+
   /**
    * returns the number of panels currently open
-   * 
+   *
    * @return		the number of open panels
    */
   public int getPanelCount() {
     return tabbedPane.getTabCount();
   }
-  
+
   /**
-   * returns the specified panel, <code>null</code> if index is out of bounds  
-   * 
+   * returns the specified panel, <code>null</code> if index is out of bounds
+   *
    * @param index	the index of the panel
    * @return		the panel
    */
@@ -446,114 +447,114 @@ public class ArffViewerMainPanel
     else
       return null;
   }
-  
+
   /**
    * returns the currently selected tab index
-   * 
+   *
    * @return		the index of the currently selected tab
    */
   public int getCurrentIndex() {
     return tabbedPane.getSelectedIndex();
   }
-  
+
   /**
    * returns the currently selected panel
-   * 
+   *
    * @return		the currently selected panel
    */
   public ArffPanel getCurrentPanel() {
     return getPanel(getCurrentIndex());
   }
-  
+
   /**
    * checks whether a panel is currently selected
-   * 
+   *
    * @return		true if a panel is currently selected
    */
   public boolean isPanelSelected() {
     return (getCurrentPanel() != null);
   }
-  
+
   /**
-   * returns the filename of the specified panel 
-   * 
+   * returns the filename of the specified panel
+   *
    * @param index	the index of the panel
    * @return		the filename for the panel
    */
   public String getFilename(int index) {
     String            result;
     ArffPanel         panel;
-    
+
     result = "";
     panel  = getPanel(index);
-    
+
     if (panel != null)
       result = panel.getFilename();
-    
+
     return result;
   }
-  
+
   /**
    * returns the filename of the current tab
-   * 
+   *
    * @return		the current filename
    */
   public String getCurrentFilename() {
     return getFilename(getCurrentIndex());
   }
-  
+
   /**
    * sets the filename of the specified panel
-   * 
+   *
    * @param index	the index of the panel
    * @param filename	the new filename
    */
   public void setFilename(int index, String filename) {
     ArffPanel         panel;
-    
+
     panel = getPanel(index);
-    
+
     if (panel != null) {
       panel.setFilename(filename);
       setTabTitle(panel);
     }
   }
-  
+
   /**
    * sets the filename of the current tab
-   * 
+   *
    * @param filename	the new filename
    */
   public void setCurrentFilename(String filename) {
     setFilename(getCurrentIndex(), filename);
   }
-  
+
   /**
    * if the file is changed it pops up a dialog whether to change the
    * settings. if the project wasn't changed or saved it returns TRUE
-   * 
+   *
    * @return 		true if project wasn't changed or saved
    */
   protected boolean saveChanges() {
     return saveChanges(true);
   }
-  
+
   /**
    * if the file is changed it pops up a dialog whether to change the
    * settings. if the project wasn't changed or saved it returns TRUE
-   * 
+   *
    * @param showCancel	whether we have YES/NO/CANCEL or only YES/NO
    * @return 		true if project wasn't changed or saved
    */
   protected boolean saveChanges(boolean showCancel) {
     int            button;
     boolean        result;
-    
+
     if (!isPanelSelected())
       return true;
-    
+
     result = !getCurrentPanel().isChanged();
-    
+
     if (getCurrentPanel().isChanged()) {
       try {
         if (showCancel)
@@ -572,9 +573,9 @@ public class ArffViewerMainPanel
               JOptionPane.QUESTION_MESSAGE );
       }
       catch (Exception e) {
-        button = JOptionPane.CANCEL_OPTION; 
+        button = JOptionPane.CANCEL_OPTION;
       }
-      
+
       switch (button) {
         case JOptionPane.YES_OPTION:
           saveFile();
@@ -583,18 +584,18 @@ public class ArffViewerMainPanel
         case JOptionPane.NO_OPTION:
           result = true;
           break;
-        case JOptionPane.CANCEL_OPTION: 
+        case JOptionPane.CANCEL_OPTION:
           result = false;
           break;
       }
     }
-    
+
     return result;
   }
 
   /**
    * loads the specified file
-   * 
+   *
    * @param filename	the file to load
    */
   public void loadFile(String filename) {
@@ -605,7 +606,7 @@ public class ArffViewerMainPanel
     tabbedPane.addTab(panel.getTitle(), panel);
     tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
   }
-  
+
   /**
    * loads the specified file into the table
    */
@@ -613,21 +614,21 @@ public class ArffViewerMainPanel
     int               retVal;
     int               i;
     String            filename;
-    
+
     retVal = fileChooser.showOpenDialog(this);
     if (retVal != ConverterFileChooser.APPROVE_OPTION)
       return;
-    
+
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    
+
     for (i = 0; i< fileChooser.getSelectedFiles().length; i++) {
       filename = fileChooser.getSelectedFiles()[i].getAbsolutePath();
       loadFile(filename);
     }
-    
+
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
-  
+
   /**
    * saves the current data into a file
    */
@@ -635,20 +636,21 @@ public class ArffViewerMainPanel
     ArffPanel           panel;
     String              filename;
     AbstractSaver       saver;
-    
+
     // no panel? -> exit
     panel = getCurrentPanel();
     if (panel == null)
       return;
-    
+
     filename = panel.getFilename();
     if (filename.equals(ArffPanel.TAB_INSTANCES)) {
       saveFileAs();
     }
     else {
-      saver = fileChooser.getSaver();
+      saver = ConverterUtils.getSaverForFile(filename);
       try {
 	saver.setInstances(panel.getInstances());
+	saver.setFile(new File(filename));
 	saver.writeBatch();
 	panel.setChanged(false);
 	setCurrentFilename(filename);
@@ -658,21 +660,21 @@ public class ArffViewerMainPanel
       }
     }
   }
-  
+
   /**
    * saves the current data into a new file
    */
   public void saveFileAs() {
     int                  retVal;
     ArffPanel            panel;
-    
+
     // no panel? -> exit
     panel = getCurrentPanel();
     if (panel == null) {
       System.out.println(Messages.getInstance().getString("ArffViewerMainPanel_SaveFileAs_Text"));
       return;
     }
-    
+
     if (!getCurrentFilename().equals("")) {
       try {
         fileChooser.setSelectedFile(new File(getCurrentFilename()));
@@ -681,7 +683,7 @@ public class ArffViewerMainPanel
         // ignore
       }
     }
-    
+
     // set filter for savers
     try {
       fileChooser.setCapabilitiesFilter(Capabilities.forInstances(panel.getInstances()));
@@ -693,19 +695,19 @@ public class ArffViewerMainPanel
     retVal = fileChooser.showSaveDialog(this);
     if (retVal != ConverterFileChooser.APPROVE_OPTION)
       return;
-    
+
     panel.setChanged(false);
     setCurrentFilename(fileChooser.getSelectedFile().getAbsolutePath());
     saveFile();
   }
-  
+
   /**
    * closes the current tab
    */
   public void closeFile() {
     closeFile(true);
   }
-  
+
   /**
    * closes the current tab
    * @param showCancel           whether to show an additional CANCEL button
@@ -715,15 +717,15 @@ public class ArffViewerMainPanel
   public void closeFile(boolean showCancel) {
     if (getCurrentIndex() == -1)
       return;
-    
+
     if (!saveChanges(showCancel))
       return;
-    
+
     tabbedPane.removeTabAt(getCurrentIndex());
     updateFrameTitle();
     System.gc();
   }
-  
+
   /**
    * closes all open files
    */
@@ -731,13 +733,13 @@ public class ArffViewerMainPanel
     while (tabbedPane.getTabCount() > 0) {
       if (!saveChanges(true))
         return;
-      
+
       tabbedPane.removeTabAt(getCurrentIndex());
       updateFrameTitle();
       System.gc();
     }
   }
-  
+
   /**
    * displays some properties of the instances
    */
@@ -746,17 +748,17 @@ public class ArffViewerMainPanel
     ListSelectorDialog    dialog;
     Vector                props;
     Instances             inst;
-    
+
     panel = getCurrentPanel();
     if (panel == null)
       return;
-    
+
     inst  = panel.getInstances();
     if (inst == null)
       return;
     if (inst.classIndex() < 0)
       inst.setClassIndex(inst.numAttributes() - 1);
-    
+
     // get some data
     props = new Vector();
     props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_Filename_Text") + panel.getFilename());
@@ -765,11 +767,11 @@ public class ArffViewerMainPanel
     props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_Attributes_Text") + inst.numAttributes());
     props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_ClassAttribute_Text") + inst.classAttribute().name());
     props.add(Messages.getInstance().getString("ArffViewerMainPanel_ShowProperties_ClassLabels_Text") + inst.numClasses());
-    
+
     dialog = new ListSelectorDialog(getParentFrame(), new JList(props));
     dialog.showDialog();
   }
-  
+
   /**
    * closes the window, i.e., if the parent is not null and implements
    * the WindowListener interface it calls the windowClosing method
@@ -782,27 +784,27 @@ public class ArffViewerMainPanel
 	  new WindowEvent(
 	      (Window) getParentFrame(), WindowEvent.WINDOW_CLOSING));
   }
-  
+
   /**
-   * undoes the last action 
+   * undoes the last action
    */
   public void undo() {
     if (!isPanelSelected())
       return;
-    
+
     getCurrentPanel().undo();
   }
-  
+
   /**
    * copies the content of the selection to the clipboard
    */
   public void copyContent() {
     if (!isPanelSelected())
       return;
-    
+
     getCurrentPanel().copyContent();
   }
-  
+
   /**
    * searches for a string in the cells
    */
@@ -812,7 +814,7 @@ public class ArffViewerMainPanel
 
     getCurrentPanel().search();
   }
-  
+
   /**
    * clears the search, i.e. resets the found cells
    */
@@ -822,17 +824,17 @@ public class ArffViewerMainPanel
 
     getCurrentPanel().clearSearch();
   }
-  
+
   /**
    * renames the current selected Attribute
    */
   public void renameAttribute() {
     if (!isPanelSelected())
       return;
-    
+
     getCurrentPanel().renameAttribute();
   }
-  
+
   /**
    * sets the current selected Attribute as class attribute, i.e. it moves it
    * to the end of the attributes
@@ -840,53 +842,53 @@ public class ArffViewerMainPanel
   public void attributeAsClass() {
     if (!isPanelSelected())
       return;
-    
+
     getCurrentPanel().attributeAsClass();
   }
-  
+
   /**
    * deletes the current selected Attribute or several chosen ones
-   * 
+   *
    * @param multiple	whether to delete myultiple attributes
    */
   public void deleteAttribute(boolean multiple) {
     if (!isPanelSelected())
       return;
-    
+
     if (multiple)
       getCurrentPanel().deleteAttributes();
     else
       getCurrentPanel().deleteAttribute();
   }
-  
+
   /**
    * deletes the current selected Instance or several chosen ones
-   * 
+   *
    * @param multiple		whether to delete multiple instances
    */
   public void deleteInstance(boolean multiple) {
     if (!isPanelSelected())
       return;
-    
+
     if (multiple)
       getCurrentPanel().deleteInstances();
     else
       getCurrentPanel().deleteInstance();
   }
-  
+
   /**
    * sorts the current selected attribute
    */
   public void sortInstances() {
     if (!isPanelSelected())
       return;
-    
+
     getCurrentPanel().sortInstances();
   }
-  
+
   /**
    * displays all the attributes, returns the selected item or NULL if canceled
-   * 
+   *
    * @return		the name of the selected attribute
    */
   public String showAttributes() {
@@ -896,14 +898,14 @@ public class ArffViewerMainPanel
     JList               list;
     String              name;
     int                 result;
-    
+
     if (!isPanelSelected())
       return null;
-    
+
     list   = new JList(getCurrentPanel().getAttributes());
     dialog = new ListSelectorDialog(getParentFrame(), list);
     result = dialog.showDialog();
-    
+
     if (result == ListSelectorDialog.APPROVE_OPTION) {
       model = (ArffSortedTableModel) getCurrentPanel().getTable().getModel();
       name  = list.getSelectedValue().toString();
@@ -916,7 +918,7 @@ public class ArffViewerMainPanel
       return null;
     }
   }
-  
+
   /**
    * displays all the distinct values for an attribute
    */
@@ -930,15 +932,15 @@ public class ArffViewerMainPanel
     ListSelectorDialog    dialog;
     int                   i;
     int                   col;
-    
+
     // choose attribute to retrieve values for
     attribute = showAttributes();
     if (attribute == null)
       return;
-    
+
     table  = (ArffTable) getCurrentPanel().getTable();
     model  = (ArffSortedTableModel) table.getModel();
-    
+
     // get column index
     col    = -1;
     for (i = 0; i < table.getColumnCount(); i++) {
@@ -950,7 +952,7 @@ public class ArffViewerMainPanel
     // not found?
     if (col == -1)
       return;
-    
+
     // get values
     values = new HashSet();
     items  = new Vector();
@@ -962,31 +964,31 @@ public class ArffViewerMainPanel
     while (iter.hasNext())
       items.add(iter.next());
     Collections.sort(items);
-    
+
     dialog = new ListSelectorDialog(getParentFrame(), new JList(items));
     dialog.showDialog();
   }
-  
+
   /**
    * sets the optimal column width for all columns
    */
   public void setOptimalColWidths() {
     if (!isPanelSelected())
       return;
-    
+
     getCurrentPanel().setOptimalColWidths();
   }
-  
+
   /**
    * invoked when an action occurs
-   * 
+   *
    * @param e		the action event
    */
   public void actionPerformed(ActionEvent e) {
     Object          o;
-    
+
     o = e.getSource();
-    
+
     if (o == menuFileOpen)
       loadFile();
     else if (o == menuFileSave)
@@ -1029,27 +1031,27 @@ public class ArffViewerMainPanel
       showValues();
     else if (o == menuViewOptimalColWidths)
       setOptimalColWidths();
-    
+
     updateMenu();
   }
-  
+
   /**
    * Invoked when the target of the listener has changed its state.
-   * 
+   *
    * @param e		the change event
    */
   public void stateChanged(ChangeEvent e) {
     updateFrameTitle();
     updateMenu();
-    
+
     // did the content of panel change? -> change title of tab
     if (e.getSource() instanceof JComponent)
       setTabTitle((JComponent) e.getSource());
   }
-  
+
   /**
    * returns only the classname
-   * 
+   *
    * @return		the classname
    */
   public String toString() {
