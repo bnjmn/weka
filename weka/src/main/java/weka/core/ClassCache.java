@@ -233,6 +233,11 @@ public class ClassCache
     if (VERBOSE)
       System.out.println("Analyzing jar: " + file);
 
+    if (!file.exists()) {
+      System.out.println("Jar does not exist: " + file);
+      return;
+    }
+
     try {
       jar = new JarFile(file);
       enm = jar.entries();
