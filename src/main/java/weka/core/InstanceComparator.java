@@ -16,7 +16,7 @@
 
 /*
  * InstanceComparator.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005,2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,13 +29,15 @@ import java.util.Comparator;
 
 /**
  * A comparator for the Instance class. it can be used with or without the
- * class label. Missing values are sorted at the beginning.<br>
+ * class label. Missing values are sorted at the beginning.</br>
  * Can be used as comparator in the sorting and binary search algorithms of
  * <code>Arrays</code> and <code>Collections</code>.
+ * Relational values are compared instance by instance with a nested
+ * InstanceComparator.
  *
  * @see     Instance
  * @author  FracPete (fracpete at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see     java.util.Arrays
  * @see     java.util.Collections
  */
@@ -44,34 +46,34 @@ public class InstanceComparator
 
   /** for serialization */
   private static final long serialVersionUID = -6589278678230949683L;
-  
+
   /** whether to include the class in the comparison */
   protected boolean m_IncludeClass;
-  
+
   /**
-   * initializes the comparator and includes the class in the comparison 
+   * initializes the comparator and includes the class in the comparison
    */
   public InstanceComparator() {
     this(true);
   }
-  
+
   /**
-   * initializes the comparator  
+   * initializes the comparator
    */
   public InstanceComparator(boolean includeClass) {
     super();
     setIncludeClass(includeClass);
   }
-  
+
   /**
    * sets whether the class should be included (= TRUE) in the comparison
-   * 
-   * @param includeClass        whether to include the class in the comparison 
+   *
+   * @param includeClass        whether to include the class in the comparison
    */
   public void setIncludeClass(boolean includeClass) {
     m_IncludeClass = includeClass;
   }
-  
+
   /**
    * returns TRUE if the class is included in the comparison
    */
@@ -83,22 +85,26 @@ public class InstanceComparator
    * compares the two instances, returns -1 if o1 is smaller than o2, 0
    * if equal and +1 if greater. The method assumes that both instance objects
    * have the same attributes, they don't have to belong to the same dataset.
-   * 
+   *
    * @param o1        the first instance to compare
    * @param o2        the second instance to compare
-   * @return          returns -1 if o1 is smaller than o2, 0 if equal and +1 
+   * @return          returns -1 if o1 is smaller than o2, 0 if equal and +1
    *                  if greater
    */
   public int compare(Object o1, Object o2) {
-    int         result;
-    Instance    inst1;
-    Instance    inst2;
-    int         classindex;
-    int         i;
-    
+    int         	result;
+    Instance    	inst1;
+    Instance    	inst2;
+    int         	classindex;
+    int         	i;
+    Instances		data1;
+    Instances		data2;
+    int			n;
+    InstanceComparator	comp;
+
     inst1 = (Instance) o1;
     inst2 = (Instance) o2;
-    
+
     // get class index
     if (inst1.classIndex() == -1)
       classindex = inst1.numAttributes() - 1;
@@ -110,7 +116,7 @@ public class InstanceComparator
       // exclude class?
       if (!getIncludeClass() && (i == classindex))
         continue;
-   
+
       // comparing attribute values
       // 1. special handling if missing value (NaN) is involved:
       if (inst1.isMissing(i) || inst2.isMissing(i)) {
@@ -127,53 +133,71 @@ public class InstanceComparator
       }
       // 2. regular values:
       else {
-        if (Utils.eq(inst1.value(i), inst2.value(i))) { 
-          continue;
-        }
-        else {
-          if (inst1.value(i) < inst2.value(i))
-            result = -1;
-          else
-            result = 1;
-          break;
-        }
+	switch (inst1.attribute(i).type()) {
+	  case Attribute.STRING:
+	    result = inst1.stringValue(i).compareTo(inst2.stringValue(i));
+	    break;
+	  case Attribute.RELATIONAL:
+	    data1 = inst1.relationalValue(i);
+	    data2 = inst2.relationalValue(i);
+	    n     = 0;
+	    comp  = new InstanceComparator();
+	    while ((n < data1.numInstances()) && (n < data2.numInstances()) && (result == 0)) {
+	      result = comp.compare(data1.instance(n), data2.instance(n));
+	      n++;
+	    }
+	    break;
+	  default:
+	    if (Utils.eq(inst1.value(i), inst2.value(i))) {
+	      continue;
+	    }
+	    else {
+	      if (inst1.value(i) < inst2.value(i))
+		result = -1;
+	      else
+		result = 1;
+	      break;
+	    }
+	}
       }
+      if (result != 0)
+	break;
     }
-    
+
     return result;
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
-  
+
   /**
    * for testing only. takes an ARFF-filename as first argument to perform
-   * some tests. 
+   * some tests.
    */
   public static void main(String[] args) throws Exception {
     Instances       inst;
     Comparator      comp;
-    
+
     if (args.length == 0)
       return;
-    
+
     // read instances
     inst = new Instances(new BufferedReader(new FileReader(args[0])));
     inst.setClassIndex(inst.numAttributes() - 1);
-    
+
     // compare incl. class
     comp = new InstanceComparator();
     System.out.println("\nIncluding the class");
     System.out.println("comparing 1. instance with 1.: " + comp.compare(inst.instance(0), inst.instance(0)));
     System.out.println("comparing 1. instance with 2.: " + comp.compare(inst.instance(0), inst.instance(1)));
     System.out.println("comparing 2. instance with 1.: " + comp.compare(inst.instance(1), inst.instance(0)));
-        
+
     // compare excl. class
     comp = new InstanceComparator(false);
     System.out.println("\nExcluding the class");
