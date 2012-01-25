@@ -341,12 +341,14 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
      */
     public String apply(Instance inst) {
       for (int i = 0; i < m_selectedAtts.length; i++) {
-        String value  = inst.stringValue(m_selectedAtts[i]);
-        
-        String result = apply(value);
-        if (result != null) {
-          // first match is good enough
-          return result;
+        if (!inst.isMissing(m_selectedAtts[i])) {
+          String value  = inst.stringValue(m_selectedAtts[i]);
+
+          String result = apply(value);
+          if (result != null) {
+            // first match is good enough
+            return result;
+          }
         }
       }
       
