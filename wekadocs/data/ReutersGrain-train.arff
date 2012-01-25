@@ -1,7 +1,7 @@
 @relation 'Reuters-21578 Grain ModApte Train-weka.filters.unsupervised.attribute.NumericToBinary-weka.filters.unsupervised.instance.RemoveFolds-S0-N5-F1'
 
 @attribute Text string
-@attribute class {0,1}
+@attribute class-att {0,1}
 
 @data
 
