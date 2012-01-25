@@ -334,20 +334,22 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       
       for (int i = 0; i < m_selectedAtts.length; i++) {
         int numStringVals = inst.attribute(m_selectedAtts[i]).numValues();
-        String value = inst.stringValue(m_selectedAtts[i]);
-        value = apply(value);
-        inst.dataset().attribute(m_selectedAtts[i]).setStringValue(value);
-        
-        // only set the index to zero if there were more than 1 string values
-        // for this string attribute (meaning that although the data is streaming
-        // in, the user has opted to retain all string values in the header. We
-        // only operate in pure streaming - one string value in memory at any
-        // one time - mode).
-        
-        // this check saves time (no new attribute vector created) if there is
-        // only one value (i.e. index is already zero).
-        if (numStringVals > 1) {
-          inst.setValue(m_selectedAtts[i], 0);
+        if (!inst.isMissing(m_selectedAtts[i])) {
+          String value = inst.stringValue(m_selectedAtts[i]);
+          value = apply(value);
+          inst.dataset().attribute(m_selectedAtts[i]).setStringValue(value);
+
+          // only set the index to zero if there were more than 1 string values
+          // for this string attribute (meaning that although the data is streaming
+          // in, the user has opted to retain all string values in the header. We
+          // only operate in pure streaming - one string value in memory at any
+          // one time - mode).
+
+          // this check saves time (no new attribute vector created) if there is
+          // only one value (i.e. index is already zero).
+          if (numStringVals > 1) {
+            inst.setValue(m_selectedAtts[i], 0);
+          }
         }
       }
     }
