@@ -229,7 +229,11 @@ public class PreprocessPanel
           
           if (!currentFilterCapabilities.supportsMaybe(currentCapabilitiesFilter) &&
               !currentFilterCapabilities.supports(currentCapabilitiesFilter)) {
-            m_ApplyFilterBut.setEnabled(false);
+            try {
+              filter.setInputFormat(getInstances());              
+            } catch (Exception ex) {
+              m_ApplyFilterBut.setEnabled(false);
+            }
           }
         }
       }
@@ -1416,7 +1420,11 @@ public class PreprocessPanel
       
       if (!currentFilterCapabilities.supportsMaybe(currentCapabilitiesFilter) &&
           !currentFilterCapabilities.supports(currentCapabilitiesFilter)) {
-        m_ApplyFilterBut.setEnabled(false);
+        try {
+          currentFilter.setInputFormat(getInstances());
+        } catch (Exception ex) {
+          m_ApplyFilterBut.setEnabled(false);
+        }
       }
     }
   }
