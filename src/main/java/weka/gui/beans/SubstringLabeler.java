@@ -783,7 +783,8 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
    * @return true if the object will accept a connection
    */
   public boolean connectionAllowed(String eventName) {
-    if (!eventName.equals("instance") && !eventName.equals("dataSet")) {
+    if (!eventName.equals("instance") && !eventName.equals("dataSet") && 
+        !eventName.equals("trainingSet") && !eventName.equals("testSet")) {
       return false;
     }
     
