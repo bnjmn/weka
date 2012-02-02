@@ -166,14 +166,14 @@ public class LibSVMSaver
    */
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
-    
-    super.setOptions(options);
 
     tmpStr = Utils.getOption('c', options);
     if (tmpStr.length() != 0)
       setClassIndex(tmpStr);
     else
       setClassIndex("last");
+    
+    super.setOptions(options);
   }
   
   /**
