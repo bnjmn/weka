@@ -28,6 +28,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -64,9 +66,9 @@ public class SubstringReplacerCustomizer extends JPanel implements
   protected ModifyListener m_modifyL = null;
   protected SubstringReplacer m_replacer;
   
-  protected JTextField m_attListField = new JTextField(20);
-  protected JTextField m_matchField = new JTextField(15);
-  protected JTextField m_replaceField = new JTextField(15);
+  protected EnvironmentField m_attListField;
+  protected EnvironmentField m_matchField;
+  protected EnvironmentField m_replaceField;
   protected JCheckBox m_regexCheck = new JCheckBox();
   protected JCheckBox m_ignoreCaseCheck = new JCheckBox();
   protected JList m_list = new JList();
@@ -99,16 +101,19 @@ public class SubstringReplacerCustomizer extends JPanel implements
     JPanel attListP = new JPanel();
     attListP.setLayout(new BorderLayout());
     attListP.setBorder(BorderFactory.createTitledBorder("Apply to attributes"));
+    m_attListField = new EnvironmentField(m_env);
     attListP.add(m_attListField, BorderLayout.CENTER);
-    m_attListField.setToolTipText("<html>Accepts a range of indexes (e.g. '1,2,6-10')<br> " +
+    attListP.setToolTipText("<html>Accepts a range of indexes (e.g. '1,2,6-10')<br> " +
                 "or a comma-separated list of named attributes</html>");
     JPanel matchP = new JPanel();
     matchP.setLayout(new BorderLayout());
     matchP.setBorder(BorderFactory.createTitledBorder("Match"));
+    m_matchField = new EnvironmentField(m_env);
     matchP.add(m_matchField, BorderLayout.CENTER);
     JPanel replaceP = new JPanel();
     replaceP.setLayout(new BorderLayout());
     replaceP.setBorder(BorderFactory.createTitledBorder("Replace"));
+    m_replaceField = new EnvironmentField(m_env);
     replaceP.add(m_replaceField, BorderLayout.CENTER);
     fieldHolder.add(attListP);
     fieldHolder.add(matchP); fieldHolder.add(replaceP);
@@ -149,6 +154,39 @@ public class SubstringReplacerCustomizer extends JPanel implements
     add(listPanel, BorderLayout.CENTER);
     
     addButtons();
+    
+    m_attListField.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        Object mr = m_list.getSelectedValue();
+        if (mr != null) {
+          ((SubstringReplacer.MatchReplace)mr).
+            setAttsToApplyTo(m_attListField.getText());
+          m_list.repaint();
+        }
+      }
+    });
+    
+    m_matchField.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        Object mr = m_list.getSelectedValue();
+        if (mr != null) {
+          ((SubstringReplacer.MatchReplace)mr).
+            setMatch(m_matchField.getText());
+          m_list.repaint();
+        }
+      }
+    });
+    
+    m_replaceField.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        Object mr = m_list.getSelectedValue();
+        if (mr != null) {
+          ((SubstringReplacer.MatchReplace)mr).
+            setReplace(m_replaceField.getText());
+          m_list.repaint();
+        }
+      }
+    });
     
     m_list.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
@@ -222,40 +260,7 @@ public class SubstringReplacerCustomizer extends JPanel implements
       public void actionPerformed(ActionEvent e) {
         JListHelper.moveDown(m_list);
       }
-    });
-    
-    m_attListField.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent e) {
-        Object mr = m_list.getSelectedValue();
-        if (mr != null) {
-          ((SubstringReplacer.MatchReplace)mr).
-            setAttsToApplyTo(m_attListField.getText());
-          m_list.repaint();
-        }
-      }
-    });
-    
-    m_matchField.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent e) {
-        Object mr = m_list.getSelectedValue();
-        if (mr != null) {
-          ((SubstringReplacer.MatchReplace)mr).
-            setMatch(m_matchField.getText());
-          m_list.repaint();
-        }
-      }
-    });
-    
-    m_replaceField.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent e) {
-        Object mr = m_list.getSelectedValue();
-        if (mr != null) {
-          ((SubstringReplacer.MatchReplace)mr).
-            setReplace(m_replaceField.getText());
-          m_list.repaint();
-        }
-      }
-    });
+    });    
     
     m_regexCheck.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
