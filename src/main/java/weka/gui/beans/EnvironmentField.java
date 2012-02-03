@@ -140,7 +140,7 @@ public class EnvironmentField extends JPanel
         }
       });
       
-      ((JTextField)m_combo.getEditor().getEditorComponent()).addKeyListener(new KeyAdapter() {
+      m_combo.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
         public void keyReleased(KeyEvent e) {
           m_support.firePropertyChange("", null, null);
         }
@@ -182,7 +182,12 @@ public class EnvironmentField extends JPanel
    * @return the text from the combo box
    */
   public String getText() {
-    return (String)m_combo.getSelectedItem();
+    java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
+    String text = m_combo.getSelectedItem().toString();
+    if (theEditor instanceof JTextField) {
+      text = ((JTextField)theEditor).getText();
+    }
+    return text;
   }
   
   public void setAsText(String s) {
@@ -262,6 +267,7 @@ public class EnvironmentField extends JPanel
       ((JTextField)theEditor).setText(m_currentContents);
     } */
     m_combo.setSelectedItem(m_currentContents);
+    m_support.firePropertyChange("", null, null);
     
     return m_currentContents;
   }
