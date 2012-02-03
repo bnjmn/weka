@@ -38,9 +38,9 @@ public class SubstringLabelerCustomizer extends JPanel implements
   protected SubstringLabeler m_labeler;
   
   protected EnvironmentField m_matchAttNameField;
-  protected JTextField m_attListField = new JTextField(15);
-  protected JTextField m_matchField = new JTextField(15);
-  protected JTextField m_labelField = new JTextField(15);
+  protected EnvironmentField m_attListField;
+  protected EnvironmentField m_matchField;
+  protected EnvironmentField m_labelField;
   protected JCheckBox m_regexCheck = new JCheckBox();
   protected JCheckBox m_ignoreCaseCheck = new JCheckBox();
   protected JCheckBox m_nominalBinaryCheck = new JCheckBox();
@@ -73,16 +73,19 @@ public class SubstringLabelerCustomizer extends JPanel implements
     JPanel attListP = new JPanel();
     attListP.setLayout(new BorderLayout());
     attListP.setBorder(BorderFactory.createTitledBorder("Apply to attributes"));
+    m_attListField = new EnvironmentField(m_env);
     attListP.add(m_attListField, BorderLayout.CENTER);
-    m_attListField.setToolTipText("<html>Accepts a range of indexes (e.g. '1,2,6-10')<br> " +
+    attListP.setToolTipText("<html>Accepts a range of indexes (e.g. '1,2,6-10')<br> " +
                 "or a comma-separated list of named attributes</html>");
     JPanel matchP = new JPanel();
     matchP.setLayout(new BorderLayout());
     matchP.setBorder(BorderFactory.createTitledBorder("Match"));
+    m_matchField = new EnvironmentField(m_env);
     matchP.add(m_matchField, BorderLayout.CENTER);
     JPanel labelP = new JPanel();
     labelP.setLayout(new BorderLayout());
     labelP.setBorder(BorderFactory.createTitledBorder("Label"));
+    m_labelField = new EnvironmentField(m_env);
     labelP.add(m_labelField, BorderLayout.CENTER);
     fieldHolder.add(attListP);
     fieldHolder.add(matchP); fieldHolder.add(labelP);
@@ -144,6 +147,39 @@ public class SubstringLabelerCustomizer extends JPanel implements
     add(listPanel, BorderLayout.CENTER);
     
     addButtons();
+    
+    m_attListField.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        Object m = m_list.getSelectedValue();
+        if (m != null) {
+          ((SubstringLabeler.Match)m).
+            setAttsToApplyTo(m_attListField.getText());
+          m_list.repaint();
+        }
+      }
+    });
+    
+    m_matchField.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        Object m = m_list.getSelectedValue();
+        if (m != null) {
+          ((SubstringLabeler.Match)m).
+            setMatch(m_matchField.getText());
+          m_list.repaint();
+        }
+      }
+    });
+    
+    m_labelField.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        Object m = m_list.getSelectedValue();
+        if (m != null) {
+          ((SubstringLabeler.Match)m).
+            setLabel(m_labelField.getText());
+          m_list.repaint();
+        }
+      }
+    });
     
     m_list.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
@@ -217,40 +253,7 @@ public class SubstringLabelerCustomizer extends JPanel implements
       public void actionPerformed(ActionEvent e) {
         JListHelper.moveDown(m_list);
       }
-    });
-    
-    m_attListField.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent e) {
-        Object m = m_list.getSelectedValue();
-        if (m != null) {
-          ((SubstringLabeler.Match)m).
-            setAttsToApplyTo(m_attListField.getText());
-          m_list.repaint();
-        }
-      }
-    });
-    
-    m_matchField.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent e) {
-        Object m = m_list.getSelectedValue();
-        if (m != null) {
-          ((SubstringLabeler.Match)m).
-            setMatch(m_matchField.getText());
-          m_list.repaint();
-        }
-      }
-    });
-    
-    m_labelField.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent e) {
-        Object m = m_list.getSelectedValue();
-        if (m != null) {
-          ((SubstringLabeler.Match)m).
-            setLabel(m_labelField.getText());
-          m_list.repaint();
-        }
-      }
-    });
+    });    
     
     m_regexCheck.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
