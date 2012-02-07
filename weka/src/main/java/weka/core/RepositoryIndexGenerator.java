@@ -189,6 +189,7 @@ public class RepositoryIndexGenerator {
     String packageName = latestProps.getProperty("PackageName") + ": ";
     String packageTitle = latestProps.getProperty("Title");
     String packageCategory = latestProps.getProperty("Category");
+    String latestVersion = latestProps.getProperty("Version");
     if (packageCategory == null) {
       packageCategory = "";
     }
@@ -300,8 +301,9 @@ public class RepositoryIndexGenerator {
     br.close();
     
     // return indexBuff.toString();
-    String[] returnInfo = new String[2];
+    String[] returnInfo = new String[3];
     returnInfo[0] = packageTitle; returnInfo[1] = packageCategory;
+    returnInfo[2] = latestVersion;
     return returnInfo;
   }
   
@@ -309,6 +311,10 @@ public class RepositoryIndexGenerator {
       File repositoryHome) throws Exception {
     StringBuffer indexBuf = new StringBuffer();
     StringBuffer packageList = new StringBuffer();
+    
+    // new package list that includes version number of latest version of each
+    // package. We keep the old package list as well for backwards compatibility
+    StringBuffer packageListPlusVersion = new StringBuffer();
     
     indexBuf.append(HEADER + BIRD_IMAGE1);
     indexBuf.append(PENTAHO_IMAGE1);
@@ -343,6 +349,7 @@ public class RepositoryIndexGenerator {
       String[] info  = packages.get(packageName);
       String packageTitle = info[0];
       String packageCategory = info[1];
+      String latestVersion = info[2];
       String href = "<a href=\"./" + packageName + "/index.html\">" + packageName + "</a>";
       
       indexBuf.append("<tr valign=\"top\">\n");
@@ -352,6 +359,8 @@ public class RepositoryIndexGenerator {
       
       // append to the package list
       packageList.append(packageName + "\n");
+      packageListPlusVersion.append(packageName).append(":").
+        append(latestVersion).append("\n");
     }
     
     indexBuf.append("</table>\n<hr/>\n</body></html>\n");
@@ -366,6 +375,13 @@ public class RepositoryIndexGenerator {
       repositoryHome.getAbsolutePath() + File.separator + "packageList.txt";
     br = new BufferedWriter(new FileWriter(packageListName));
     br.write(packageList.toString());
+    br.flush();
+    br.close();
+    
+    packageListName = 
+      repositoryHome.getAbsolutePath() + File.separator + "packageListWithVersion.txt";
+    br = new BufferedWriter(new FileWriter(packageListName));
+    br.write(packageListPlusVersion.toString());
     br.flush();
     br.close();
     
