@@ -82,6 +82,7 @@ public class WekaPackageManager {
   private static URL REP_URL;
   private static URL CACHE_URL;
   private static boolean INITIAL_CACHE_BUILD_NEEDED = false;
+  private static String PACKAGE_LIST_FILENAME = "packageListWithVersion.txt";
   
   static {
     establishWekaHome();
@@ -180,7 +181,7 @@ public class WekaPackageManager {
     }
     
     File packagesList = new File(cacheDir.getAbsolutePath() + File.separator 
-        + "packageList.txt");
+        + PACKAGE_LIST_FILENAME);
     if (!cacheDir.exists()) {
       if (!cacheDir.mkdir()) {
         System.err.println("Unable to create repository cache directory ("
@@ -717,7 +718,7 @@ public class WekaPackageManager {
       }
 
       String packageListS = PACKAGE_MANAGER.getPackageRepositoryURL().toString()
-        + "/packageList.txt";
+        + "/packageListWithVersion.txt";
       URLConnection conn = null;
       URL connURL = new URL(packageListS);
 
@@ -733,7 +734,10 @@ public class WekaPackageManager {
         new BufferedReader(new InputStreamReader(conn.getInputStream()));
       String l = null;
       while ((l = bi.readLine()) != null) {
-        result.put(l,l);
+        String[] parts = l.split(":");
+        if (parts.length == 2) {
+          result.put(parts[0], parts[1]);
+        }
       }
       bi.close();
 
@@ -800,7 +804,32 @@ public class WekaPackageManager {
         }
       }
       problem = refreshCache(progress);
-    }      
+    } else {
+      // check for new versions of packages
+      boolean refresh = false;
+      for (String localPackage : localPackageNameList.keySet()) {
+        String localVersion = localPackageNameList.get(localPackage);
+        
+        String repoVersion = repositoryPackageNameList.get(localPackage);
+        if (repoVersion == null) {
+          continue;
+        }
+
+        // a difference here indicates a newer version on the server
+        if (!localVersion.equals(repoVersion)) {
+          refresh = true;
+          break;
+        }        
+      }
+      
+      if (refresh) {
+        for (PrintStream p : progress) {
+          p.println("There are newer versions of existing packages " +
+          		"at the repository. Refreshing cache...");          
+        }
+        problem = refreshCache(progress);
+      }      
+    }
     
     return problem;
   }
