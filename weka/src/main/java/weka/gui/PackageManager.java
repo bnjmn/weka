@@ -328,6 +328,7 @@ public class PackageManager extends JPanel {
       }
       
       StringBuffer newPackagesBuff = new StringBuffer();
+      StringBuffer updatedPackagesBuff = new StringBuffer();
       
       for (String s : repositoryPackageNameList.keySet()) {
         if (!localPackageNameList.containsKey(s)) {
@@ -335,11 +336,34 @@ public class PackageManager extends JPanel {
         }
       }
       
-      if (newPackagesBuff.length() > 0) {
-        String information = "<html><font size=-2>There are new packages available " +
-        		"on the server (do a cache refresh for more " +
-        		"information):<br><br>" + newPackagesBuff.toString() + 
-        		"</font></html>";
+      for (String localPackage : localPackageNameList.keySet()) {
+        String localVersion = localPackageNameList.get(localPackage);
+        
+        String repoVersion = repositoryPackageNameList.get(localPackage);
+        if (repoVersion == null) {
+          continue;
+        }
+        
+        // a difference here indicates a newer version on the server
+        if (!localVersion.equals(repoVersion)) {
+          updatedPackagesBuff.append(localPackage + " (" + repoVersion + ")");
+        }
+      }
+      
+      
+      if (newPackagesBuff.length() > 0 || updatedPackagesBuff.length() > 0) {
+        String information = "<html><font size=-2>There are new and/or updated packages available " +
+        "on the server (do a cache refresh for more " +
+        "information):";
+        if (newPackagesBuff.length() > 0) {
+          information += "<br><br><b>New:</b><br>" 
+            + newPackagesBuff.toString(); 
+        }
+        if (updatedPackagesBuff.length() > 0) {
+          information += "<br><br><b>Updated:</b><br>" 
+            + updatedPackagesBuff.toString() + "<br><br>";
+        }
+        information += "</font></html>";
         m_newPackagesAvailableL.setToolTipText(information);
         m_browserTools.add(m_newPackagesAvailableL);
 
