@@ -1,0 +1,64 @@
+# Template Description file for a Weka package
+# 
+
+# Package name (required)
+PackageName=cascadeKMeans
+
+# Version (required)
+Version=1.0.0
+
+#Date (year-month-day)
+Date=2012-02-08
+
+# Title (required)
+Title=k-means clustering with automatic selection of k
+
+# Category (recommended)
+Category=Clustering
+
+# Author (required)
+Author=Martin Guetlein <martin.guetlein@googlemail.com>
+
+# Maintainer (required)
+Maintainer=Martin Guetlein <martin.guetlein@googlemail.com>
+
+# License (required)
+License=GPL 2
+
+# Description (required)
+Description=k-means clustering with automatic selection of k. Restarts k-means and selects the best k using the Calinski and Harabasz criterion, without cross-validation.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/cascadeKMeans1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/cascadeKMeans
+
+# Changes in this release
+#Changes=
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.5)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+#MessageToDisplayOnInstall=Funky package requires some extra\n\
+# stuff to be installed after installing this package. You will\n\
+# need to blah, blah, blah in order to blah, blah, blah...
+
+# Prevent package from being loaded by Weka if the named
+# files/directories are not present (relative to the package's
+# root directory). Useful for packages that require the user
+# to manually install some third-party library(s). (optional)
+#DoNotLoadIfFileNotPresent=
+
+# Log message to be displayed if package can't be loaded due to
+# missing files/directories. (optional)
+#DoNotLoadIfFileNotPresentMessage=
