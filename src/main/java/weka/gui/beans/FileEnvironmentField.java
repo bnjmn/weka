@@ -68,7 +68,7 @@ public class FileEnvironmentField extends EnvironmentField {
    * Constructor
    */
   public FileEnvironmentField() {
-    this("", JFileChooser.OPEN_DIALOG);
+    this("", JFileChooser.OPEN_DIALOG, false);
     setEnvironment(Environment.getSystemWide());
   }
   
@@ -78,12 +78,12 @@ public class FileEnvironmentField extends EnvironmentField {
    * @param env an Environment object to use
    */
   public FileEnvironmentField(Environment env) {
-    this("", JFileChooser.OPEN_DIALOG);
+    this("", JFileChooser.OPEN_DIALOG, false);
     setEnvironment(env);
   }
   
   public FileEnvironmentField(String label, Environment env) {
-    this(label, JFileChooser.OPEN_DIALOG);
+    this(label, JFileChooser.OPEN_DIALOG, false);
     setEnvironment(env);
   }
   
@@ -94,13 +94,28 @@ public class FileEnvironmentField extends EnvironmentField {
    * @param env an Environment object to use.
    * @param fileChooserType the type of file chooser to use (either JFileChooser.OPEN_DIALOG
    * or JFileChooser.SAVE_DIALOG)
-   * @param 
    */
   public FileEnvironmentField(String label, Environment env, 
       int fileChooserType) {
-    this(label, fileChooserType);
+    this(label, fileChooserType, false);
     setEnvironment(env);
   }  
+  
+  /**
+   * Constructor
+   * 
+   * @param label a label to display alongside the field.
+   * @param env an Environment object to use.
+   * @param fileChooserType the type of file chooser to use (either JFileChooser.OPEN_DIALOG
+   * or JFileChooser.SAVE_DIALOG)
+   * @param directoriesOnly true if file chooser should allow only directories to be selected
+   * @param 
+   */
+  public FileEnvironmentField(String label, Environment env, 
+      int fileChooserType, boolean directoriesOnly) {
+    this(label, fileChooserType, directoriesOnly);
+    setEnvironment(env);
+  }
   
   /**
    * Constructor
@@ -109,7 +124,7 @@ public class FileEnvironmentField extends EnvironmentField {
    * @param fileChooserType the type of file chooser to use (either JFileChooser.OPEN_DIALOG
    * or JFileChooser.SAVE_DIALOG)
    */
-  public FileEnvironmentField(String label, int fileChooserType) {
+  public FileEnvironmentField(String label, int fileChooserType, boolean directoriesOnly) {
     super(label);
     
     m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -122,7 +137,11 @@ public class FileEnvironmentField extends EnvironmentField {
     });
     
     final JFileChooser embeddedEditor = (JFileChooser)m_fileEditor.getCustomEditor();
-    embeddedEditor.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    if (directoriesOnly) {
+      embeddedEditor.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    } else {
+      embeddedEditor.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    }
     embeddedEditor.setDialogType(fileChooserType);
     ExtensionFileFilter ff =
       new ExtensionFileFilter(".model", "Serialized Weka classifier (*.model)");
