@@ -30,7 +30,9 @@ import weka.core.Instances;
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JPanel;
@@ -94,6 +96,8 @@ public class PredictionAppender
   protected boolean m_appendProbabilities;
 
   protected transient weka.gui.Logger m_logger;
+  
+  protected transient List<Integer> m_stringAttIndexes;
 
   /**
    * Global description of this bean
@@ -304,6 +308,17 @@ public class PredictionAppender
       Instances oldStructure = new Instances(e.getStructure(), 0);
       //String relationNameModifier = oldStructure.relationName()
 	//+"_with predictions";
+      
+      // check for string attributes
+      for (int i = 0; i < e.getStructure().numAttributes(); i++) {
+        if (e.getStructure().attribute(i).isString()) {
+          if (m_stringAttIndexes == null) {
+            m_stringAttIndexes = new ArrayList<Integer>();
+          }
+          m_stringAttIndexes.add(new Integer(i));
+        }
+      }
+      
       String relationNameModifier = "_with predictions";
 	//+"_with predictions";
        if (!m_appendProbabilities 
@@ -356,6 +371,15 @@ public class PredictionAppender
     } finally {
       newInst = new DenseInstance(currentI.weight(), instanceVals);
       newInst.setDataset(m_format);
+      // check for string attributes
+      if (m_stringAttIndexes != null) {
+        for (int i = 0; i < m_stringAttIndexes.size(); i++) {
+          int index = m_stringAttIndexes.get(i);
+          m_format.attribute(m_stringAttIndexes.get(i)).
+            setStringValue(currentI.stringValue(index));
+        }
+      }
+      
       m_instanceEvent.setInstance(newInst);
       m_instanceEvent.setStatus(status);
       // notify listeners
