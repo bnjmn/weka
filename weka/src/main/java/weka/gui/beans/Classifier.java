@@ -344,25 +344,25 @@ public class Classifier
     return m_ClassifierTemplate;
   }
   
-  private void setTrainedClassifier(weka.classifiers.Classifier tc) {
-    m_Classifier = tc;
-    
+  private void setTrainedClassifier(weka.classifiers.Classifier tc) 
+    throws Exception {
+
     // set the template
     weka.classifiers.Classifier newTemplate = null;
-    try {
-      String[] options = tc.getOptions();
-      newTemplate = weka.classifiers.Classifier.forName(tc.getClass().getName(), options);
-      setClassifierTemplate(newTemplate);
-    } catch (Exception ex) {
-      if (m_log != null) {
-        m_log.logMessage(Messages.getInstance().getString("Classifier_SetTrainedClassifier_LogMessage_Text_First") + statusMessagePrefix() + ex.getMessage());
-        String errorMessage = statusMessagePrefix()
-        + Messages.getInstance().getString("Classifier_SetTrainedClassifier_ErrorMessage_Text_First");
-        m_log.statusMessage(errorMessage);        
-      } else {
-        ex.printStackTrace();
-      }
-    }    
+
+    String[] options = tc.getOptions();
+    newTemplate = weka.classifiers.Classifier.forName(tc.getClass().getName(), options);
+
+    if (!newTemplate.getClass().equals(m_ClassifierTemplate.getClass())) {
+      throw new Exception("Classifier model " 
+          + tc.getClass().getName() 
+          + " is not the same type "
+          + "of classifier as this one (" 
+          + m_ClassifierTemplate.getClass().getName() + ")");
+    }
+    setClassifierTemplate(newTemplate);
+
+    m_Classifier = tc;
   }
 
   /**
