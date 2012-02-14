@@ -403,24 +403,24 @@ public class Classifier
     return m_ClassifierTemplate;
   }
   
-  private void setTrainedClassifier(weka.classifiers.Classifier tc) {
+  private void setTrainedClassifier(weka.classifiers.Classifier tc) 
+    throws Exception {
     
     // set the template
     weka.classifiers.Classifier newTemplate = null;
-    try {
       String[] options = ((OptionHandler)tc).getOptions();
-      newTemplate = weka.classifiers.AbstractClassifier.forName(tc.getClass().getName(), options);
-      setClassifierTemplate(newTemplate);
-    } catch (Exception ex) {
-      if (m_log != null) {
-        m_log.logMessage("[Classifier] " + statusMessagePrefix() + ex.getMessage());
-        String errorMessage = statusMessagePrefix()
-        + "ERROR: see log for details.";
-        m_log.statusMessage(errorMessage);        
-      } else {
-        ex.printStackTrace();
-      }
+      newTemplate = weka.classifiers.AbstractClassifier.forName(tc.getClass().getName(), options);      
+
+    if (!newTemplate.getClass().equals(m_ClassifierTemplate.getClass())) {
+      throw new Exception("Classifier model " 
+          + tc.getClass().getName() 
+          + " is not the same type "
+          + "of classifier as this one (" 
+          + m_ClassifierTemplate.getClass().getName() + ")");
     }
+
+    setClassifierTemplate(newTemplate);
+
     m_Classifier = tc;
   }
 
@@ -1904,7 +1904,8 @@ public class Classifier
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Classifier.this,
-                                    "Problem loading classifier.\n",
+                                    "Problem loading classifier.\n"
+          + ex.getMessage(),
                                     "Load Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
