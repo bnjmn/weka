@@ -80,7 +80,7 @@ import java.util.Vector;
  * 
  * <pre> -E
  *  Desired size of ensemble.
- *  (default 10)</pre>
+ *  (default 15)</pre>
  * 
  * <pre> -R
  *  Factor that determines number of artificial examples to generate.
@@ -93,7 +93,7 @@ import java.util.Vector;
  * 
  * <pre> -I &lt;num&gt;
  *  Number of iterations.
- *  (default 10)</pre>
+ *  (default 50)</pre>
  * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
@@ -146,7 +146,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.9 $ 
+ * @version $Revision$ 
  */
 public class Decorate 
     extends RandomizableIteratedSingleClassifierEnhancer
@@ -159,7 +159,7 @@ public class Decorate
     protected Vector m_Committee = null;
     
     /** The desired ensemble size. */
-    protected int m_DesiredSize = 10;
+    protected int m_DesiredSize = 15;
     
     /** Amount of artificial/random instances to use - specified as a
         fraction of the training data size. */
@@ -178,6 +178,7 @@ public class Decorate
   public Decorate() {
     
     m_Classifier = new weka.classifiers.trees.J48();
+    m_NumIterations = 50;
   }
 
   /**
@@ -200,8 +201,12 @@ public class Decorate
 
 	newVector.addElement(new Option(
               "\tDesired size of ensemble.\n" 
-              + "\t(default 10)",
+              + "\t(default 15)",
               "E", 1, "-E"));
+	    newVector.addElement(new Option(
+	              "\tNumber of iterations.\n"
+	              + "\t(default 50)",
+	              "I", 1, "-I <num>"));
 	newVector.addElement(new Option(
  	    "\tFactor that determines number of artificial examples to generate.\n"
            +"\tSpecified proportional to training set size.\n" 
@@ -212,6 +217,11 @@ public class Decorate
         while (enu.hasMoreElements()) {
           newVector.addElement(enu.nextElement());
         }
+        
+        // remove the super class num iterations option because
+        // we have a different default (50)
+        newVector.remove(4);
+        
         return newVector.elements();
     }
 
@@ -224,7 +234,7 @@ public class Decorate
      * 
      * <pre> -E
      *  Desired size of ensemble.
-     *  (default 10)</pre>
+     *  (default 15)</pre>
      * 
      * <pre> -R
      *  Factor that determines number of artificial examples to generate.
@@ -237,7 +247,7 @@ public class Decorate
      * 
      * <pre> -I &lt;num&gt;
      *  Number of iterations.
-     *  (default 10)</pre>
+     *  (default 50)</pre>
      * 
      * <pre> -D
      *  If set, classifier is run in debug mode and
@@ -773,7 +783,7 @@ public class Decorate
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
     
     /**
