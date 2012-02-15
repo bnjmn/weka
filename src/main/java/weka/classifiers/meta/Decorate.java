@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    Decorate.java
- *    Copyright (C) 2002 Prem Melville
+ *    Copyright (C) 2002-2012 Prem Melville
  *
  */
 
@@ -82,7 +81,7 @@ import java.util.Vector;
  * 
  * <pre> -E
  *  Desired size of ensemble.
- *  (default 10)</pre>
+ *  (default 15)</pre>
  * 
  * <pre> -R
  *  Factor that determines number of artificial examples to generate.
@@ -95,7 +94,7 @@ import java.util.Vector;
  * 
  * <pre> -I &lt;num&gt;
  *  Number of iterations.
- *  (default 10)</pre>
+ *  (default 50)</pre>
  * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
@@ -161,7 +160,7 @@ public class Decorate
     protected Vector m_Committee = null;
     
     /** The desired ensemble size. */
-    protected int m_DesiredSize = 10;
+    protected int m_DesiredSize = 15;
     
     /** Amount of artificial/random instances to use - specified as a
         fraction of the training data size. */
@@ -180,6 +179,7 @@ public class Decorate
   public Decorate() {
     
     m_Classifier = new weka.classifiers.trees.J48();
+    m_NumIterations = 50;
   }
 
   /**
@@ -214,6 +214,11 @@ public class Decorate
         while (enu.hasMoreElements()) {
           newVector.addElement(enu.nextElement());
         }
+
+        // remove the super class num iterations option because
+        // we have a different default (50)
+        newVector.remove(4);
+
         return newVector.elements();
     }
 
@@ -300,7 +305,7 @@ public class Decorate
 	if (desiredSize.length() != 0) {
 	    setDesiredSize(Integer.parseInt(desiredSize));
 	} else {
-	    setDesiredSize(10);
+	    setDesiredSize(15);
 	}
 	
 	String artSize = Utils.getOption('R', options);
