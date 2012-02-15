@@ -20,6 +20,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -27,7 +28,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -111,6 +111,16 @@ public class InterquartileRange
 
   /** indicator for non-numeric attributes */
   public final static int NON_NUMERIC = -1;
+  
+  /** enum for obtaining the various determined IQR values. */
+  public enum ValueType {
+    UPPER_EXTREME_VALUES,
+    UPPER_OUTLIER_VALUES,
+    LOWER_OUTLIER_VALUES,
+    LOWER_EXTREME_VALUES,
+    MEDIAN,
+    IQR
+  };
   
   /** the attribute range to work on */
   protected Range m_Attributes = new Range("first-last");
@@ -603,13 +613,11 @@ public class InterquartileRange
    * @see                   #hasImmediateOutputFormat()
    * @see                   #batchFinished()
    */
-  protected Instances determineOutputFormat(Instances inputFormat)
-      throws Exception {
-    
-    FastVector		atts;
-    FastVector		values;
-    Instances		result;
-    int			i;
+  protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
+    ArrayList<Attribute>	atts;
+    ArrayList<String>		values;
+    Instances			result;
+    int				i;
 
     // attributes must be numeric
     m_Attributes.setUpper(inputFormat.numAttributes() - 1);
@@ -626,24 +634,24 @@ public class InterquartileRange
     }
     
     // get old attributes
-    atts = new FastVector();
+    atts = new ArrayList<Attribute>();
     for (i = 0; i < inputFormat.numAttributes(); i++)
-      atts.addElement(inputFormat.attribute(i));
+      atts.add(inputFormat.attribute(i));
     
     if (!getDetectionPerAttribute()) {
       m_OutlierAttributePosition    = new int[1];
       m_OutlierAttributePosition[0] = atts.size();
       
       // add 2 new attributes
-      values = new FastVector();
-      values.addElement("no");
-      values.addElement("yes");
-      atts.addElement(new Attribute("Outlier", values));
+      values = new ArrayList<String>();
+      values.add("no");
+      values.add("yes");
+      atts.add(new Attribute("Outlier", values));
       
-      values = new FastVector();
-      values.addElement("no");
-      values.addElement("yes");
-      atts.addElement(new Attribute("ExtremeValue", values));
+      values = new ArrayList<String>();
+      values.add("no");
+      values.add("yes");
+      atts.add(new Attribute("ExtremeValue", values));
     }
     else {
       m_OutlierAttributePosition = new int[m_AttributeIndices.length];
@@ -655,24 +663,24 @@ public class InterquartileRange
 	m_OutlierAttributePosition[i] = atts.size();
 
 	// add new attributes
-	values = new FastVector();
-	values.addElement("no");
-	values.addElement("yes");
-	atts.addElement(
+	values = new ArrayList<String>();
+	values.add("no");
+	values.add("yes");
+	atts.add(
 	    new Attribute(
 		inputFormat.attribute(
 		    m_AttributeIndices[i]).name() + "_Outlier", values));
 	
-	values = new FastVector();
-	values.addElement("no");
-	values.addElement("yes");
-	atts.addElement(
+	values = new ArrayList<String>();
+	values.add("no");
+	values.add("yes");
+	atts.add(
 	    new Attribute(
 		inputFormat.attribute(
 		    m_AttributeIndices[i]).name() + "_ExtremeValue", values));
 
 	if (getOutputOffsetMultiplier())
-	  atts.addElement(
+	  atts.add(
 	      new Attribute(
 		  inputFormat.attribute(
 		      m_AttributeIndices[i]).name() + "_Offset"));
@@ -744,6 +752,31 @@ public class InterquartileRange
       m_UpperOutlier[i]      = q3 + getOutlierFactor()       * m_IQR[i];
       m_LowerOutlier[i]      = q1 - getOutlierFactor()       * m_IQR[i];
       m_LowerExtremeValue[i] = q1 - getExtremeValuesFactor() * m_IQR[i];
+    }
+  }
+  
+  /**
+   * Returns the values for the specified type.
+   * 
+   * @param type	the type of values to return
+   * @return		the values
+   */
+  public double[] getValues(ValueType type) {
+    switch (type) {
+      case UPPER_EXTREME_VALUES:
+	return m_UpperExtremeValue;
+      case UPPER_OUTLIER_VALUES:
+	return m_UpperOutlier;
+      case LOWER_OUTLIER_VALUES:
+	return m_LowerOutlier;
+      case LOWER_EXTREME_VALUES:
+	return m_LowerExtremeValue;
+      case MEDIAN:
+	return m_Median;
+      case IQR:
+	return m_IQR;
+      default:
+	throw new IllegalArgumentException("Unhandled value type: " + type);
     }
   }
   
