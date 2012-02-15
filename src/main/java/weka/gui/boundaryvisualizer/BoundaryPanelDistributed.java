@@ -1,36 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *   BoundaryPanelDistrubuted.java
- *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.experiment.Compute;
-import weka.experiment.RemoteExperimentEvent;
-import weka.experiment.RemoteExperimentListener;
-import weka.experiment.TaskStatusInfo;
 
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
@@ -39,6 +28,16 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.rmi.Naming;
 import java.util.Vector;
+
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.experiment.Compute;
+import weka.experiment.RemoteExperimentEvent;
+import weka.experiment.RemoteExperimentListener;
+import weka.experiment.TaskStatusInfo;
 
 /**
  * This class extends BoundaryPanel with code for distributing the
