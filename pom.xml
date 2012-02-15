@@ -9,7 +9,11 @@
   <packaging>jar</packaging>
 
   <name>weka-dev</name>
-  <description>The Waikato Environment for Knowledge Analysis (WEKA), a machine learning workbench.</description>
+  <description>The Waikato Environment for Knowledge Analysis (WEKA), a machine 
+  learning workbench. This version represents the developer version, the
+  "bleeding edge" of development, you could say. New functionality gets added
+  to this version.
+  </description>
   <organization>
     <name>University of Waikato, Hamilton, NZ</name>
     <url>http://www.waikato.ac.nz/ml/weka/</url>
@@ -133,14 +137,6 @@
           <include>**/*.xml</include>
           <include>**/DatabaseUtils.props.*</include>
           <include>weka/gui/beans/README</include>
-        </includes>
-      </resource>
-      <resource>
-        <targetPath>${project.build.outputDirectory}</targetPath>
-        <directory>src/main/resources/revision</directory>
-        <filtering>true</filtering>
-        <includes>
-          <include>**/*.rev</include>
         </includes>
       </resource>
     </resources>
