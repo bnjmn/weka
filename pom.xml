@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>weka-stable</groupId>
+  <artifactId>weka</artifactId>
+  <version>3.6.7-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>weka-stable</name>
+  <description>The Waikato Environment for Knowledge Analysis (WEKA), a machine 
+  learning workbench. This version is tied to the 3rd edition the "Data Mining: 
+  Practical Machine Learning Tools and Techniques" book by Ian H. Witten, Eibe Frank, 
+  Mark A. Hall. Apart from bugfixes, this version does not receive any other updates.
+  </description>
+  <organization>
+    <name>University of Waikato, Hamilton, NZ</name>
+    <url>http://www.waikato.ac.nz/ml/weka/</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>GPL 2</name>
+      <url>http://www.gnu.org/licenses/gpl-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.2</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/junit.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>java-cup</groupId>
+      <artifactId>java-cup</artifactId>
+      <version>11a</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/java-cup.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>jflex</groupId>
+      <artifactId>jflex</artifactId>
+      <version>1.4.2</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/JFlex.jar</systemPath>
+    </dependency>
+  </dependencies>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <weka.test.regression.root>src/test/resources/wekarefs</weka.test.regression.root>
+  </properties>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>weka-snapshots</id>
+      <name>WEKA Snapshot Repository</name>
+      <url>https://adams.cms.waikato.ac.nz/nexus/content/repositories/weka-snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>weka-releases</id>
+      <name>WEKA Release Repository</name>
+      <url>https://adams.cms.waikato.ac.nz/nexus/content/repositories/weka-releases</url>
+    </repository>
+  </distributionManagement>
+
+  <build>
+    <finalName>weka</finalName>
+    <directory>dist</directory>
+    <outputDirectory>build/classes</outputDirectory>
+    <testOutputDirectory>build/testcases</testOutputDirectory>
+
+    <resources>
+      <resource>
+        <targetPath>${project.build.outputDirectory}</targetPath>
+        <directory>${project.build.sourceDirectory}</directory>
+        <includes>
+          <include>**/*.arff</include>
+          <include>**/*.cost</include>
+          <include>**/*.cup</include>
+          <include>**/*.default</include>
+          <include>**/*.excludes</include>
+          <include>**/*.flex</include>
+          <include>**/*.gif</include>
+          <include>**/*.icns</include>
+          <include>**/*.ico</include>
+          <include>**/*.jflex</include>
+          <include>**/*.jpeg</include>
+          <include>**/*.jpg</include>
+          <include>**/*.kfml</include>
+          <include>**/*.matrix</include>
+          <include>**/*.png</include>
+          <include>**/*.properties</include>
+          <include>**/*.props</include>
+          <include>**/*.txt</include>
+          <include>**/*.xml</include>
+          <include>**/DatabaseUtils.props.*</include>
+          <include>weka/gui/beans/README</include>
+        </includes>
+      </resource>
+      <resource>
+        <targetPath>${project.build.testOutputDirectory}</targetPath>
+        <directory>${project.build.testSourceDirectory}</directory>
+        <includes>
+          <include>**/*.arff</include>
+          <include>**/*.cost</include>
+          <include>**/*.cup</include>
+          <include>**/*.default</include>
+          <include>**/*.excludes</include>
+          <include>**/*.flex</include>
+          <include>**/*.gif</include>
+          <include>**/*.icns</include>
+          <include>**/*.ico</include>
+          <include>**/*.jflex</include>
+          <include>**/*.jpeg</include>
+          <include>**/*.jpg</include>
+          <include>**/*.kfml</include>
+          <include>**/*.matrix</include>
+          <include>**/*.png</include>
+          <include>**/*.properties</include>
+          <include>**/*.props</include>
+          <include>**/*.txt</include>
+          <include>**/*.xml</include>
+          <include>**/DatabaseUtils.props.*</include>
+          <include>weka/gui/beans/README</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.0.2</version>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>.</directory>
+              <includes>
+                <include>**/*~</include>
+                <include>**/.attach_pid*</include>
+                <include>**/hs_err_pid*</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- in order to point to regression files, use the following in the 
+           command-line:
+           -Dweka.test.Regression.root=src/test/resources/wekarefs
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.7.2</version>
+        <configuration>
+          <disableXmlReport>true</disableXmlReport>
+          <forkMode>never</forkMode>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.2</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8.1</version>
+        <configuration>
+          <maxmemory>256m</maxmemory>
+          <subpackages>weka:org</subpackages>
+          <show>public</show>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
