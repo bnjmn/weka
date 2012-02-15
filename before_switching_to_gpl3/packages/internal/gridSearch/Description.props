@@ -1,0 +1,46 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=gridSearch
+
+# Version (required)
+Version=1.0.3
+
+#Date
+Date=2011-10-17
+
+# Title (required)
+Title=Performs a grid search of parameter pairs for the a classifier.
+
+Category=Classification
+
+# Author (required)
+Author=Bernhard Pfahringer, Geoff Holmes and Peter Reutemann
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Performs a grid search of parameter pairs for the a classifier (Y-axis, default is LinearRegression with the "Ridge" parameter) and the PLSFilter (X-axis, "# of Components") and chooses the best pair found for the actual predicting.<br/><br/>The initial grid is worked on with 2-fold CV to determine the values of the parameter pairs for the selected type of evaluation (e.g., accuracy). The best point in the grid is then taken and a 10-fold CV is performed with the adjacent parameter pairs. If a better pair is found, then this will act as new center and another 10-fold CV will be performed (kind of hill-climbing). This process is repeated until no better pair is found or the best pair is on the border of the grid.<br/>In case the best pair is on the border, one can let GridSearch automatically extend the grid and continue the search. Check out the properties 'gridIsExtendable' (option '-extend-grid') and 'maxGridExtensions' (option '-max-grid-extensions &lt;num&gt;').<br/><br/>GridSearch can handle doubles, integers (values are just cast to int) and booleans (0 is false, otherwise true). float, char and long are supported as well.<br/><br/>The best filter/classifier setup can be accessed after the buildClassifier call via the getBestFilter/getBestClassifier methods.<br/>Note on the implementation: after the data has been passed through the filter, a default NumericCleaner filter is applied to the data in order to avoid numbers that are getting too small and might produce NaNs in other schemes.
+
+Changes=This release fixes an npe and a concurrency-related hanging problem that was occurring in certain pathological cases
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/gridSearch1.0.3.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/gridSearch
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1), partialLeastSquares (>=1.0.0)

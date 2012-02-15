@@ -1,0 +1,41 @@
+# Description file for averagedOneDependenceEstimators
+#
+# 
+
+# Package name (required)
+PackageName=averagedOneDependenceEstimators
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Family of methods for learning ensembles of naive Bayes-like classifiers (with relaxed independence assumption) - includes AODE, WAODE and AODEsr
+
+Category=Classification
+
+# Author (required)
+Author=Janice Boughton <jrbought@csse.monash.edu.au>
+
+# Maintainer (required)
+Maintainer=Janice Boughton <jrbought@csse.monash.edu.au>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=AODE achieves highly accurate classification by averaging over all of a small space of alternative naive-Bayes-like models that have weaker (and hence less detrimental) independence assumptions than naive Bayes. The resulting algorithm is computationally efficient while delivering highly accurate classification on many learning  tasks. For more information, see G. Webb, J. Boughton, Z. Wang (2005). Not So Naive Bayes: Aggregating One-Dependence Estimators. Machine Learning. 58(1):5-24.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/averagedOneDependenceEstimators1.0.0.zip?download
+
+# URL for further information
+URL=http://www.csse.monash.edu.au/~webb/
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

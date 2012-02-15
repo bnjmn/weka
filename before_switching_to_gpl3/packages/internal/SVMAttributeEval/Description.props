@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=SVMAttributeEval
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Evaluates the worth of an attribute by using an SVM classifier.
+
+Category=Attribute selection
+
+# Author (required)
+Author=Mark Hall, Eibe Frank, Kieran Holland
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Evaluates the worth of an attribute by using an SVM classifier. Attributes are ranked by the square of the weight assigned by the SVM. Attribute selection for multiclass problems is handled by ranking attributes for each class seperately using a one-vs-all method and then "dealing" from the top of each pile to give a final ranking.<br/><br/>For more information see:<br/><br/> I. Guyon, J. Weston, S. Barnhill, V. Vapnik (2002). Gene selection for cancer classification using support vector machines. Machine Learning. 46:389-422.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/SVMAttributeEval1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/SVMAttributeEval
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1)

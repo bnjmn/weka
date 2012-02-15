@@ -1,0 +1,43 @@
+# Description file for LibSVM
+#
+# 
+
+# Package name (required)
+PackageName=LibSVM
+
+# Version (required)
+Version=1.0.1
+
+#Date
+Date=2011-09-13
+
+# Title (required)
+Title=A wrapper class for the libsvm tools
+
+Category=Classification
+
+# Author (required)
+Author=FracPete <fracpete@waikato.ac.nz>
+
+# Maintainer (required)
+Maintainer=FracPete <fracpete@waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description= A wrapper class for the libsvm tools (the libsvm classes, typically the jar file, need to be in the classpath to use this classifier). LibSVM runs faster than SMO since it uses LibSVM to build the SVM classifier. LibSVM allows users to experiment with One-class SVM, Regressing SVM, and nu-SVM supported by LibSVM tool. LibSVM reports many useful statistics about LibSVM classifier (e.g., confusion matrix,precision, recall, ROC score, etc.)
+
+Changes=Fixed a bug where the distribution from a one-class SVM was returning an single element array containing NaN (missing value) rather than a single 0 for unclassified/outlier instances (as per the spec in weka.classifiers.Classifier).
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.1.zip?download
+
+# URL for further information
+URL=http://www.cs.iastate.edu/~yasser/wlsvm/
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

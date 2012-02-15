@@ -1,0 +1,798 @@
+------------------------------------------------------------------------
+r7026 | mhall | 2010-12-10 20:23:05 +1300 (Fri, 10 Dec 2010) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/version.txt
+
+Updated to 3.7.3
+------------------------------------------------------------------------
+r7027 | mhall | 2010-12-10 20:26:40 +1300 (Fri, 10 Dec 2010) | 1 line
+Changed paths:
+   A /trunk/packages/external/J48graft/src/main/java/weka/classifiers/trees/j48
+   A /trunk/packages/external/J48graft/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTreeG.java (from /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTreeG.java:7025)
+   A /trunk/packages/external/J48graft/src/main/java/weka/classifiers/trees/j48/GraftSplit.java (from /trunk/weka/src/main/java/weka/classifiers/trees/j48/GraftSplit.java:7025)
+   D /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTreeG.java
+   D /trunk/weka/src/main/java/weka/classifiers/trees/j48/GraftSplit.java
+
+A couple of classes for J48graft were left in the core distribution - moved to the package
+------------------------------------------------------------------------
+r7029 | mhall | 2010-12-13 08:06:21 +1300 (Mon, 13 Dec 2010) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/PackageManager.java
+
+Was not resolving environment variables in the path/URL for unofficial packages - fixed.
+------------------------------------------------------------------------
+r7037 | mhall | 2010-12-31 09:23:24 +1300 (Fri, 31 Dec 2010) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/sql/ResultSetHelper.java
+
+Now uses ResultSetMetaData.getColumnLabel() rather than getColumnName() so that SQL queries using the "AS" clause are handled correctly.
+------------------------------------------------------------------------
+r7038 | mhall | 2010-12-31 09:23:46 +1300 (Fri, 31 Dec 2010) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/experiment/InstanceQuery.java
+
+Now uses ResultSetMetaData.getColumnLabel() rather than getColumnName() so that SQL queries using the "AS" clause are handled correctly.
+------------------------------------------------------------------------
+r7039 | mhall | 2010-12-31 09:36:38 +1300 (Fri, 31 Dec 2010) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/DatabaseLoader.java
+
+Now uses ResultSetMetaData.getColumnLabel() rather than getColumnName() so that SQL queries using the "AS" clause are handled correctly.
+------------------------------------------------------------------------
+r7048 | mhall | 2011-01-10 16:00:09 +1300 (Mon, 10 Jan 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/ArffLoader.java
+
+getStructure() now checks for a null sourceReader only if m_structure is null.
+------------------------------------------------------------------------
+r7051 | mhall | 2011-01-19 08:43:41 +1300 (Wed, 19 Jan 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/weka_icon_new.icns
+   A /trunk/weka/src/main/java/weka/gui/weka_icon_new.png
+
+New weka icon courtesy of the community
+------------------------------------------------------------------------
+r7057 | fracpete | 2011-01-28 14:38:41 +1300 (Fri, 28 Jan 2011) | 5 lines
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SGD.java
+
+constants for the loss functions are now public (useful, if the options get set manually using the API)
+getCapabilities() now returns the correct class attribute enabled, depending on the loss function; removed the manual check for class attribute in the buildClassifier(Instances) method
+added note to globalInfo() about using SQUAREDLOSS loss function when using data with numeric class
+updated Javadoc
+cleaned up imports
+------------------------------------------------------------------------
+r7060 | mhall | 2011-02-10 19:55:03 +1300 (Thu, 10 Feb 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/associations/FPGrowth.java
+
+Iterative routine for finding the requested number of rules now always starts at 1.0 for the support (instead of upper bound on min support). Upper bound is still used to prune the rule set in each iteration.
+------------------------------------------------------------------------
+r7063 | mhall | 2011-02-10 20:47:38 +1300 (Thu, 10 Feb 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/associations/Apriori.java
+
+Now prunes generated rule sets according to the upper bound on the support (if < 1). Previously was pruning large item sets of each subsequently larger size according to the upper bound which is somewhat counterintuitive.
+------------------------------------------------------------------------
+r7067 | mhall | 2011-02-10 21:49:31 +1300 (Thu, 10 Feb 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/associations/Apriori.java
+
+Fixed small bug in rule pruning.
+------------------------------------------------------------------------
+r7070 | mhall | 2011-03-07 14:13:33 +1300 (Mon, 07 Mar 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/Cobweb.java
+
+Made the internal CNode class public and added an accessor method to return the head of the cobweb tree.
+------------------------------------------------------------------------
+r7072 | remco | 2011-03-08 13:06:44 +1300 (Tue, 08 Mar 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/HierarchicalClusterer.java
+
+Make HierarchicalClusterer.m_clusters protected by user request
+------------------------------------------------------------------------
+r7076 | mhall | 2011-03-11 15:20:15 +1300 (Fri, 11 Mar 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Added an option to initialize cluster centers using the probabilistic farthest first like method from the k-means++ algorithm.
+------------------------------------------------------------------------
+r7080 | mhall | 2011-03-15 09:43:01 +1300 (Tue, 15 Mar 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/PackageManager.java
+
+Now prints feedback on the number of bytes read when downloading a package.
+------------------------------------------------------------------------
+r7081 | mhall | 2011-03-16 11:12:46 +1300 (Wed, 16 Mar 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Capabilities.java
+
+Constructor now checks to see if the owner is an UpdateableClassifier or UpdateableClusterer; if so, it sets the min number of instances to 0 (rather than the default of 1).
+------------------------------------------------------------------------
+r7086 | mhall | 2011-03-25 11:39:40 +1300 (Fri, 25 Mar 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/TextDirectoryLoader.java
+
+Added an option to allow a character set (e.g. UTF-8, US-ASCII, etc.) to be specified for use when reading the text files.
+------------------------------------------------------------------------
+r7091 | mhall | 2011-04-13 09:52:42 +1200 (Wed, 13 Apr 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/associations/FPGrowth.java
+
+Fixed a bug that was causing an infinite loop in the iterative support reduction procedure.
+------------------------------------------------------------------------
+r7094 | mhall | 2011-04-14 21:02:54 +1200 (Thu, 14 Apr 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Added the ability to disable loading of packages by setting weka.core.loadPackages=false as a property to the VM
+------------------------------------------------------------------------
+r7096 | mhall | 2011-04-29 20:53:50 +1200 (Fri, 29 Apr 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Added an option to allow a range of attributes to be forced to type date, and an option to specify a date format for parsing date values.
+------------------------------------------------------------------------
+r7099 | mhall | 2011-05-06 11:53:36 +1200 (Fri, 06 May 2011) | 2 lines
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/AttributeSelectionPanel.java
+
+Added "No class" to the class combo box. This allows principal components access to all the attributes if there is no class in the data. Previously, you were forced to have a class set, meaning that this attribute would always be omitted from the PCA.
+
+------------------------------------------------------------------------
+r7102 | mhall | 2011-05-13 20:59:58 +1200 (Fri, 13 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/StringToNominal.java
+
+Was not doing the right thing at all when run in batch mode. String values in the second batch of instances that occurred in the first batch were not being assigned the right index in the converted nominal attribute - fixed.
+------------------------------------------------------------------------
+r7105 | mhall | 2011-05-16 20:28:58 +1200 (Mon, 16 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Remove.java
+
+javadoc update.
+------------------------------------------------------------------------
+r7106 | mhall | 2011-05-16 20:30:48 +1200 (Mon, 16 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Remove.java
+
+Updated globalInfo() method.
+------------------------------------------------------------------------
+r7111 | mhall | 2011-05-17 15:45:48 +1200 (Tue, 17 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/FileEnvironmentField.java
+
+Added a setEnabled() method.
+------------------------------------------------------------------------
+r7113 | mhall | 2011-05-23 16:43:46 +1200 (Mon, 23 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Copyright.props
+
+Updated year to 2011
+------------------------------------------------------------------------
+r7118 | fracpete | 2011-05-25 15:40:28 +1200 (Wed, 25 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/ArffSaver.java
+
+writeBatch() is now more efficient by first writing the header and then one row at a time to disk instead of creating a string of the complete dataset in memory and then writing this string to disk
+------------------------------------------------------------------------
+r7120 | mhall | 2011-05-26 08:40:32 +1200 (Thu, 26 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/pmml/Function.java
+
+Factory method was missing the built in string functions - fixed.
+------------------------------------------------------------------------
+r7123 | mhall | 2011-05-27 15:31:13 +1200 (Fri, 27 May 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/cursor.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/disk.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/disk_multiple.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/folder_add.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/help.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/page_add.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/resultset_last.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/resultset_next.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/shape_square.png
+
+Initial import of new icons
+------------------------------------------------------------------------
+r7124 | mhall | 2011-05-27 15:34:47 +1200 (Fri, 27 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/AssociatorCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanConnection.java
+   A /trunk/weka/src/main/java/weka/gui/beans/BeanCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanInstance.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanVisual.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Beans.props
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssignerCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassValuePickerCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassifierCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ClustererCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/CustomizerCloseRequester.java
+   M /trunk/weka/src/main/java/weka/gui/beans/FilterCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowRunner.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/beans/LoaderCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/LogPanel.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SaverCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SerializedModelSaverCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+Fisrt stage of modernizing the KnowledgeFlow user interface and functionality.
+------------------------------------------------------------------------
+r7127 | mhall | 2011-05-27 20:33:23 +1200 (Fri, 27 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Disabled the ability to start a path in a flow from a startable component on the layout since we now have global start parallel and start sequential buttons in the toolbar.
+------------------------------------------------------------------------
+r7129 | mhall | 2011-05-28 11:10:11 +1200 (Sat, 28 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Was'nt allowing a connection to be deleted from a flow on any tab but the first one - fixed.
+------------------------------------------------------------------------
+r7133 | mhall | 2011-05-30 15:33:03 +1200 (Mon, 30 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanConnection.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanInstance.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/cut.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/delete.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/page_copy.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/paste_plain.png
+
+Added cut, copy, paste and delete functionality for beans that are selected on the canvas
+------------------------------------------------------------------------
+r7136 | mhall | 2011-05-31 10:13:44 +1200 (Tue, 31 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   A /trunk/weka/src/main/java/weka/gui/beans/Note.java
+   A /trunk/weka/src/main/java/weka/gui/beans/NoteBeanInfo.java
+   A /trunk/weka/src/main/java/weka/gui/beans/NoteCustomizer.java
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/shape_handles.png
+
+Added snap-to-grid functionality and the ability to add textual notes to the layout
+------------------------------------------------------------------------
+r7138 | mhall | 2011-05-31 11:11:22 +1200 (Tue, 31 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/Note.java
+
+Added a little bit of spacing around the text.
+------------------------------------------------------------------------
+r7140 | mhall | 2011-05-31 12:32:26 +1200 (Tue, 31 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Note.java
+   M /trunk/weka/src/main/java/weka/gui/beans/NoteCustomizer.java
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/note_add.png
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/shape_group.png
+
+Added a select all button and an add note button. Notes are now highlightable. Added a flag to allow the KnowledgeFlow to operate with just a single tab if desired.
+------------------------------------------------------------------------
+r7142 | mhall | 2011-05-31 15:54:08 +1200 (Tue, 31 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanInstance.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/arrow_undo.png
+
+Added an undo facility
+------------------------------------------------------------------------
+r7144 | mhall | 2011-05-31 16:14:00 +1200 (Tue, 31 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+JTree is now in a split pane
+------------------------------------------------------------------------
+r7146 | mhall | 2011-05-31 16:36:46 +1200 (Tue, 31 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/NoteCustomizer.java
+
+Now extends BeanCustomizer
+------------------------------------------------------------------------
+r7148 | mhall | 2011-05-31 20:40:20 +1200 (Tue, 31 May 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/beans/LoaderCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SaverCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SerializedModelSaverCustomizer.java
+
+Fixed some issues with customizer dialogs. Now shows a informational dialog on how to configure sequential execution when the sequential flow start button is pressed.
+------------------------------------------------------------------------
+r7151 | mhall | 2011-06-01 10:31:06 +1200 (Wed, 01 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Select all button now works as a toggle
+------------------------------------------------------------------------
+r7153 | mhall | 2011-06-01 14:50:27 +1200 (Wed, 01 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/ShadowBorder.java
+
+Initial import
+------------------------------------------------------------------------
+r7154 | mhall | 2011-06-01 15:07:18 +1200 (Wed, 01 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanConnection.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanVisual.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Note.java
+
+Notes now used a shadow border. Knowledge Flow now paints lines and text anti aliased
+------------------------------------------------------------------------
+r7155 | mhall | 2011-06-02 22:58:40 +1200 (Thu, 02 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanConnection.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanInstance.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/beans/MetaBean.java
+   M /trunk/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+Fixed major issues with meta beans. Also fixed some positioning issues with pasting and grouping/ungrouping meta beans
+------------------------------------------------------------------------
+r7159 | mhall | 2011-06-06 21:19:52 +1200 (Mon, 06 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Bagging.java
+
+Fixed a bug that made results non-deterministic when running multi-threaded with Randomizable base classifiers.
+------------------------------------------------------------------------
+r7161 | mhall | 2011-06-08 14:50:58 +1200 (Wed, 08 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/cog.png
+
+Initial import
+------------------------------------------------------------------------
+r7163 | mhall | 2011-06-08 15:14:02 +1200 (Wed, 08 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/README_KnowledgeFlow
+
+Updated
+------------------------------------------------------------------------
+r7165 | mhall | 2011-06-09 14:58:12 +1200 (Thu, 09 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/cog_go.png
+
+Added support for plugin perspectives
+------------------------------------------------------------------------
+r7167 | mhall | 2011-06-09 15:27:19 +1200 (Thu, 09 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Fixed cursor setting for all modes
+------------------------------------------------------------------------
+r7169 | mhall | 2011-06-10 10:34:15 +1200 (Fri, 10 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Small changes to the KFPerspective interface; now displays a info dialog on how to send data to a perspective; fixed some bugs in the saving/loading of user components; serialized user components now live if /knowledgeFlow
+------------------------------------------------------------------------
+r7171 | mhall | 2011-06-11 08:41:40 +1200 (Sat, 11 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Added a closeAllTabs() public method.
+------------------------------------------------------------------------
+r7172 | mhall | 2011-06-11 08:42:21 +1200 (Sat, 11 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GUIChooser.java
+
+Now calls closeAllTabs() on the KnowledgeFlow when its window is closed.
+------------------------------------------------------------------------
+r7175 | mhall | 2011-06-11 18:06:48 +1200 (Sat, 11 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Cut was copying rather than cutting - fixed.
+------------------------------------------------------------------------
+r7187 | mhall | 2011-06-13 14:57:23 +1200 (Mon, 13 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GUIChooser.java
+
+Some small changes to support handling file associations under Mac OS X.
+------------------------------------------------------------------------
+r7189 | mhall | 2011-06-13 15:32:01 +1200 (Mon, 13 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/weka_icon_new_48.png
+
+Initial import of new 48x48 icon
+------------------------------------------------------------------------
+r7190 | mhall | 2011-06-13 15:32:26 +1200 (Mon, 13 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GUIChooser.java
+   M /trunk/weka/src/main/java/weka/gui/Main.java
+   M /trunk/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/Experimenter.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/Explorer.java
+
+Apps now use the new icon
+------------------------------------------------------------------------
+r7195 | mhall | 2011-06-13 20:15:41 +1200 (Mon, 13 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Now catches NumberFormatException when parsing number of packages on the server. For some reason I've seen the odd NumberFormatException - probably an internet connection issue.
+------------------------------------------------------------------------
+r7200 | mhall | 2011-06-13 22:36:39 +1200 (Mon, 13 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GUIChooser.java
+
+Updated to handle mac file associations for KnowledgeFlow files
+------------------------------------------------------------------------
+r7202 | mhall | 2011-06-13 22:40:22 +1200 (Mon, 13 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GUIChooser.java
+
+Javadoc addition.
+------------------------------------------------------------------------
+r7206 | mhall | 2011-06-14 11:31:58 +1200 (Tue, 14 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Can supply a flow to load as a command line argument.
+------------------------------------------------------------------------
+r7218 | mhall | 2011-06-15 13:42:35 +1200 (Wed, 15 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/LoaderCustomizer.java
+
+Now passes on any environment variables to the PropertySheetPanel.
+------------------------------------------------------------------------
+r7220 | mhall | 2011-06-16 08:49:47 +1200 (Thu, 16 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Vote.java
+
+Now includes an option to load serialized model(s) and include them in the ensemble alongside any that are built from scratch when buildClassifier() is executed.
+------------------------------------------------------------------------
+r7221 | mhall | 2011-06-16 08:51:41 +1200 (Thu, 16 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GenericArrayEditor.java
+
+Can now handle an array of File objects. A bit of a hack was required here because java.io.File does not have a no-args constructor (which is used for populating the primary editor with a default object value when the array is empty)
+------------------------------------------------------------------------
+r7222 | mhall | 2011-06-16 08:52:25 +1200 (Thu, 16 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GUIEditors.props
+
+Now associates File[] with the GenericArrayEditor
+------------------------------------------------------------------------
+r7225 | mhall | 2011-06-16 09:42:24 +1200 (Thu, 16 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Fixed a nptr exection that was occurring in the setAllowMultipleTabs() method; Customizer dialogs are now positioned relative to the main KnowledgeFlow frame.
+------------------------------------------------------------------------
+r7227 | mhall | 2011-06-16 15:52:54 +1200 (Thu, 16 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/MathExpression.java
+
+Javadoc update.
+------------------------------------------------------------------------
+r7228 | mhall | 2011-06-16 20:23:25 +1200 (Thu, 16 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/Evaluation.java
+
+Small javadoc fix.
+------------------------------------------------------------------------
+r7229 | mhall | 2011-06-16 21:11:58 +1200 (Thu, 16 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/InstancesSummaryPanel.java
+
+Fixed a bug where the relation name would overlap the attributes. Now sets the tip text for the relation name label to be equal to the relation name (so that the full relation name can be seen when the mouse hovers over the name on the panel).
+------------------------------------------------------------------------
+r7232 | mhall | 2011-06-16 22:20:04 +1200 (Thu, 16 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Sending data to a perspective now makes sure that the perspectives toolbar is visible (otherwise it is not possible to get back to the main knowledge flow perspective).
+------------------------------------------------------------------------
+r7234 | mhall | 2011-06-17 12:11:22 +1200 (Fri, 17 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/application_view_tile.png
+   A /trunk/weka/src/main/java/weka/gui/beans/templates
+   A /trunk/weka/src/main/java/weka/gui/beans/templates/cvTemplate.kfml
+   A /trunk/weka/src/main/java/weka/gui/beans/templates/learnAndSaveModel.kfml
+   A /trunk/weka/src/main/java/weka/gui/beans/templates/templates.props
+
+Initial import
+------------------------------------------------------------------------
+r7235 | mhall | 2011-06-17 12:12:23 +1200 (Fri, 17 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Added a button for popping up a menu of 'template' flows. Fixed a bug where a tab's title was not being set with the name of the loaded flow
+------------------------------------------------------------------------
+r7240 | mhall | 2011-06-17 14:56:01 +1200 (Fri, 17 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Save layout was not recording the file against the tab in question (this is used so that the file dialog does not have to appear when pressing 'save' once a flow has been given a file name)
+------------------------------------------------------------------------
+r7242 | mhall | 2011-06-17 15:09:07 +1200 (Fri, 17 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/templates/ROCcurves.kfml
+   M /trunk/weka/src/main/java/weka/gui/beans/templates/templates.props
+
+Added a template for ROCcurves
+------------------------------------------------------------------------
+r7244 | mhall | 2011-06-18 20:39:54 +1200 (Sat, 18 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/README_KnowledgeFlow
+
+Updated
+------------------------------------------------------------------------
+r7245 | mhall | 2011-06-18 20:40:30 +1200 (Sat, 18 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/templates/cvTemplate.kfml
+
+Changed naive Bayes to J48 in order to match the example in the popup help
+------------------------------------------------------------------------
+r7248 | mhall | 2011-06-18 21:59:35 +1200 (Sat, 18 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+The "send to all perspectives" popup menu item was not getting added when there was more than one perspective available - fixed.
+------------------------------------------------------------------------
+r7250 | mhall | 2011-06-20 11:51:06 +1200 (Mon, 20 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Notify batch classifier listeners now first checks the executing thread's interrupted status
+------------------------------------------------------------------------
+r7251 | mhall | 2011-06-20 11:52:32 +1200 (Mon, 20 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/LogPanel.java
+
+Made the line lookup hashtable protected rather than private
+------------------------------------------------------------------------
+r7252 | mhall | 2011-06-20 11:53:15 +1200 (Mon, 20 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Made some small improvements to the flow stopping mechanism
+------------------------------------------------------------------------
+r7257 | mhall | 2011-06-20 15:43:59 +1200 (Mon, 20 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Fixed a bug that was preventing a loaded classifier from being used in an incremental flow. Can now use an InputMappedClassifier in an incremental flow
+------------------------------------------------------------------------
+r7258 | mhall | 2011-06-20 15:44:39 +1200 (Mon, 20 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/StripChart.java
+
+Was reporting 'busy' if the strip chart window was open - fixed. Now keeps the strip chart window on top.
+------------------------------------------------------------------------
+r7262 | mhall | 2011-06-20 20:19:08 +1200 (Mon, 20 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/templates/incrementalLearning.kfml
+   M /trunk/weka/src/main/java/weka/gui/beans/templates/templates.props
+
+Added an incremental learning template
+------------------------------------------------------------------------
+r7264 | mhall | 2011-06-20 21:13:59 +1200 (Mon, 20 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/templates/ROCcurves.kfml
+
+Updated to match the description in the WekaManual
+------------------------------------------------------------------------
+r7266 | mhall | 2011-06-21 08:46:39 +1200 (Tue, 21 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/attributeSelection/GreedyStepwise.java
+
+Improved the output to explain the ranking (both forward and backward) produced when the ranked list option is turned on.
+------------------------------------------------------------------------
+r7270 | mhall | 2011-06-21 09:36:59 +1200 (Tue, 21 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Removed an unused method.
+------------------------------------------------------------------------
+r7271 | mhall | 2011-06-21 10:40:42 +1200 (Tue, 21 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Added some publically available methods for loading XML flows from streams and readers.
+------------------------------------------------------------------------
+r7272 | mhall | 2011-06-21 10:43:10 +1200 (Tue, 21 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Removed some debugging output.
+------------------------------------------------------------------------
+r7276 | mhall | 2011-06-22 21:30:48 +1200 (Wed, 22 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ScatterPlotMatrix.java
+
+Now implements KFPerspective.
+------------------------------------------------------------------------
+r7277 | mhall | 2011-06-22 21:31:43 +1200 (Wed, 22 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Now configures the built-in ScatterPlotMatrix perspective.
+------------------------------------------------------------------------
+r7280 | mhall | 2011-06-23 11:58:08 +1200 (Thu, 23 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/AbstractFileLoader.java
+
+setSource now checks that the file is actually a file as well as whether it exists or not.
+------------------------------------------------------------------------
+r7282 | mhall | 2011-06-23 12:11:28 +1200 (Thu, 23 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+tip text method name for kmeans++ initialization was incorrect - fixed.
+------------------------------------------------------------------------
+r7285 | mhall | 2011-06-23 13:45:18 +1200 (Thu, 23 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Added a title to the manage perspectives dialog
+------------------------------------------------------------------------
+r7286 | mhall | 2011-06-23 13:45:48 +1200 (Thu, 23 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/templates/templates.props
+   A /trunk/weka/src/main/java/weka/gui/beans/templates/twoClusterers.kfml
+
+Added a clustering template
+------------------------------------------------------------------------
+r7289 | mhall | 2011-06-23 21:25:39 +1200 (Thu, 23 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/chart_bar.png
+
+Initial import
+------------------------------------------------------------------------
+r7290 | mhall | 2011-06-23 21:28:12 +1200 (Thu, 23 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/AttributeSummarizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Now implements KFPerspective
+------------------------------------------------------------------------
+r7293 | mhall | 2011-06-23 21:57:20 +1200 (Thu, 23 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/AttributeSummarizer.java
+
+Fixed a bug with setting the colouring index on the plots
+------------------------------------------------------------------------
+r7295 | mhall | 2011-06-24 11:47:27 +1200 (Fri, 24 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/LoaderCustomizer.java
+
+Now exposes additional loader options and creates a backup copy for cancel operations
+------------------------------------------------------------------------
+r7298 | mhall | 2011-06-24 16:16:48 +1200 (Fri, 24 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+
+Apply button for the filters is now only enabled if there is a data set loaded.
+------------------------------------------------------------------------
+r7302 | mhall | 2011-06-27 12:13:00 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssignerCustomizer.java
+
+Added ok and cancel buttons.
+------------------------------------------------------------------------
+r7304 | mhall | 2011-06-27 13:43:45 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassValuePickerCustomizer.java
+
+Now has ok and cancel buttons.
+------------------------------------------------------------------------
+r7306 | mhall | 2011-06-27 14:51:44 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssignerCustomizer.java
+
+Now sets modified status when OK button is pressed. Closing the customizer with the window close widget now behaves the same way as cancel.
+------------------------------------------------------------------------
+r7308 | mhall | 2011-06-27 14:56:42 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssignerCustomizer.java
+
+Cancel now calls customizerClosing() first before disposing of the window.
+------------------------------------------------------------------------
+r7310 | mhall | 2011-06-27 14:58:40 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassValuePickerCustomizer.java
+
+Now sets modified status when OK button is pressed. Closing the customizer with the window close widget now behaves the same way as cancel.
+------------------------------------------------------------------------
+r7312 | mhall | 2011-06-27 15:16:51 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssignerCustomizer.java
+
+Was not setting modified status correctly - fixed.
+------------------------------------------------------------------------
+r7314 | mhall | 2011-06-27 15:17:14 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassValuePickerCustomizer.java
+
+Was not setting modified status correctly - fixed.
+------------------------------------------------------------------------
+r7316 | mhall | 2011-06-27 15:20:19 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/CrossValidationFoldMakerCustomizer.java
+
+Now has ok and cancel buttons, and sets modified status.
+------------------------------------------------------------------------
+r7318 | mhall | 2011-06-27 15:46:13 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/SerializedModelSaverCustomizer.java
+
+Cancel button now restores previous state correctly and modified status reflects actual changes.
+------------------------------------------------------------------------
+r7320 | mhall | 2011-06-27 16:10:38 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/PredictionAppenderCustomizer.java
+
+Now has ok and cancel buttons, and sets modified status.
+------------------------------------------------------------------------
+r7322 | mhall | 2011-06-27 16:57:49 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/IncrementalClassifierEvaluatorCustomizer.java
+
+Now has ok and cancel buttons, and sets modified status.
+------------------------------------------------------------------------
+r7324 | mhall | 2011-06-27 21:52:49 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Now deselects any selected components on the canvas when a connection process is initiated.
+------------------------------------------------------------------------
+r7326 | mhall | 2011-06-27 22:06:41 +1200 (Mon, 27 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssigner.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassValuePicker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Loader.java
+
+Now implements StructureProducer so that ClassAssigner and ClassValuePicker can try to pull the structure from upstream steps in the case where a fully configured flow has been loaded and the user hasn't changed the loader configuration (and therefore the structure of the incoming data hasn't been pushed to downstream steps). This allows the customizers for ClassAssigner and ClassValuePicker to display the preferred UI in this case.
+------------------------------------------------------------------------
+r7328 | mhall | 2011-06-28 10:23:25 +1200 (Tue, 28 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssigner.java
+
+Fixed an issue in the getStructure() method
+------------------------------------------------------------------------
+r7329 | mhall | 2011-06-28 10:24:09 +1200 (Tue, 28 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassValuePicker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/CrossValidationFoldMaker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/TestSetMaker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/TrainTestSplitMaker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/TrainingSetMaker.java
+
+Now implements StructureProducer
+------------------------------------------------------------------------
+r7332 | mhall | 2011-06-28 11:33:26 +1200 (Tue, 28 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssigner.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Loader.java
+
+getStructure() was not working properly with DatabaseLoader - fixed.
+------------------------------------------------------------------------
+r7334 | mhall | 2011-06-28 14:43:03 +1200 (Tue, 28 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Moved some methods from private to protected. Added a method to allow clients to set the active perspective. Fixed a bug where perspectives were getting a null reference to the main perspective. Added the built-in SQLViewer perspective.
+------------------------------------------------------------------------
+r7335 | mhall | 2011-06-28 14:43:24 +1200 (Tue, 28 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/database.png
+
+Initial import
+------------------------------------------------------------------------
+r7339 | mhall | 2011-06-28 15:43:30 +1200 (Tue, 28 Jun 2011) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/SQLViewerPerspective.java
+
+Initial import
+------------------------------------------------------------------------
+r7340 | mhall | 2011-06-28 22:47:53 +1200 (Tue, 28 Jun 2011) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/Loader.java
+
+Now prints a warning (rather than a stack trace) if an exception is raised during a call to getStructure().
+------------------------------------------------------------------------

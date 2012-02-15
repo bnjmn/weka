@@ -1,0 +1,47 @@
+2002-07-03 11:20  rkirkby
+
+	* weka/build.xml (1.7): Added pace package.
+
+2002-07-03 10:59  eibe
+
+	* weka/classifiers/functions/pace/PaceRegression.java (1.4): Some
+	changes in the exception handling.
+
+2002-07-02 16:02  rkirkby
+
+	* weka/filters/unsupervised/attribute/NominalToBinary.java (1.3):
+	Fixed bug where class is not preserved.
+
+2002-07-02 12:52  mhall
+
+	* weka/gui/beans/FilterCustomizer.java (1.2): Changed default
+	filter used to initialize GOE - fixed a problem where filter
+	heirarchy was doubled in GOE
+
+2002-07-02 10:49  rkirkby
+
+	* weka/classifiers/functions/pace/PaceRegression.java (1.3): Added
+	getOption functionality.
+
+2002-07-01 17:03  rkirkby
+
+	* weka/classifiers/functions/pace/PaceRegression.java (1.2):
+	Changed estimator names.
+
+2002-07-01 15:51  rkirkby
+
+	* weka/gui/GenericObjectEditor.props (1.63): Added PaceRegression.
+
+2002-07-01 15:49  rkirkby
+
+	* weka/classifiers/functions/Makefile (1.3): Added pace package.
+
+2002-07-01 15:44  rkirkby
+
+	* weka/classifiers/functions/pace/: ChisqMixture.java (1.1),
+	DiscreteFunction.java (1.1), DoubleVector.java (1.1),
+	ExponentialFormat.java (1.1), FlexibleDecimalFormat.java (1.1),
+	FloatingPointFormat.java (1.1), IntVector.java (1.1), Maths.java
+	(1.1), Matrix.java (1.1), MixtureDistribution.java (1.1),
+	NormalMixture.java (1.1), PaceMatrix.java (1.1),
+	PaceRegression.java (1.1), Makefile (1.1): Initial import.
