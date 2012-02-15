@@ -1,5 +1,5 @@
 # Look'n'Feel configuration file
-# $Revision: 1.1 $
+# $Revision$
 
 # the theme to use, none specified or empty means the system default one
 #Theme=javax.swing.plaf.metal.MetalLookAndFeel

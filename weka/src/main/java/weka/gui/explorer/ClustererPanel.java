@@ -1,60 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    ClustererPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.explorer;
-
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.Clusterer;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Drawable;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.InstancesSummaryPanel;
-import weka.gui.ListSelectorDialog;
-import weka.gui.Logger;
-import weka.gui.PropertyPanel;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.SetInstancesPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -112,7 +77,40 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
+import weka.clusterers.ClusterEvaluation;
+import weka.clusterers.Clusterer;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.ListSelectorDialog;
+import weka.gui.Logger;
+import weka.gui.PropertyPanel;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.SetInstancesPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
 import weka.gui.hierarchyvisualizer.HierarchyVisualizer;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
 /** 
  * This panel allows the user to select and configure a clusterer, and evaluate
