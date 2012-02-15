@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.meta.DecorateTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class DecorateTest 
   extends AbstractClassifierTest {
@@ -42,7 +42,10 @@ public class DecorateTest
 
   /** Creates a default Decorate */
   public Classifier getClassifier() {
-    return new Decorate();
+    Decorate d = new Decorate();
+    d.setNumIterations(10);
+    d.setDesiredSize(10);
+    return d;
   }
 
   public static Test suite() {
