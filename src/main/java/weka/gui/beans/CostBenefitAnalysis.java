@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    CostBenefitAnalysis.java
- *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,9 +25,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -61,15 +60,14 @@ import javax.swing.event.ChangeListener;
 
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.gui.Logger;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.VisualizePanel;
 
 
 /**

@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    NNConditionalEstimator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,16 +24,16 @@ package weka.estimators;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.matrix.Matrix;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.matrix.Matrix;
 
 /** 
  * Conditional probability estimator for a numeric domain conditional upon
  * a numeric domain (using Mahalanobis distance).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class NNConditionalEstimator implements ConditionalEstimator {
 
@@ -230,7 +229,7 @@ public class NNConditionalEstimator implements ConditionalEstimator {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

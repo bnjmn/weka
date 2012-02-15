@@ -1,59 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * Main.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
-
-import weka.classifiers.bayes.net.GUI;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.Copyright;
-import weka.core.Instances;
-import weka.core.Memory;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SelectedTag;
-import weka.core.SystemInfo;
-import weka.core.Tag;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.scripting.Groovy;
-import weka.core.scripting.Jython;
-import weka.gui.arffviewer.ArffViewerMainPanel;
-import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.beans.StartUpListener;
-import weka.gui.boundaryvisualizer.BoundaryVisualizer;
-import weka.gui.experiment.Experimenter;
-import weka.gui.explorer.Explorer;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.scripting.GroovyPanel;
-import weka.gui.scripting.JythonPanel;
-import weka.gui.sql.SqlViewer;
-import weka.gui.treevisualizer.Node;
-import weka.gui.treevisualizer.NodePlace;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeBuild;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.ThresholdVisualizePanel;
-import weka.gui.visualize.VisualizePanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -101,6 +67,39 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+
+import weka.classifiers.bayes.net.GUI;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.Copyright;
+import weka.core.Instances;
+import weka.core.Memory;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.SystemInfo;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.core.scripting.Groovy;
+import weka.core.scripting.Jython;
+import weka.gui.arffviewer.ArffViewerMainPanel;
+import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.beans.StartUpListener;
+import weka.gui.boundaryvisualizer.BoundaryVisualizer;
+import weka.gui.experiment.Experimenter;
+import weka.gui.explorer.Explorer;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.scripting.GroovyPanel;
+import weka.gui.scripting.JythonPanel;
+import weka.gui.sql.SqlViewer;
+import weka.gui.treevisualizer.Node;
+import weka.gui.treevisualizer.NodePlace;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeBuild;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
+import weka.gui.visualize.VisualizePanel;
 
 /**
  * Menu-based GUI for Weka, replacement for the GUIChooser.

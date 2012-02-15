@@ -30,7 +30,7 @@
  * Note:
  * replace <db.jar> with actual jar filename, e.g., mysql.jar
  *
- * Version: $Revision: 1.3 $
+ * Version: $Revision$
  */
 
 grant {
