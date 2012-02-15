@@ -308,7 +308,7 @@ public class Decorate
 	if (desiredSize.length() != 0) {
 	    setDesiredSize(Integer.parseInt(desiredSize));
 	} else {
-	    setDesiredSize(10);
+	    setDesiredSize(15);
 	}
 	
 	String artSize = Utils.getOption('R', options);
