@@ -15,27 +15,12 @@
 
 /*
  *    ClassifierSplitEvaluator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.rules.ZeroR;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Summarizable;
-import weka.core.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -43,8 +28,23 @@ import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Summarizable;
+import weka.core.Utils;
 
 
 /**
@@ -74,6 +74,10 @@ import java.util.Vector;
  * <pre> -P
  *  Add target and prediction columns to the result
  *  for each fold.</pre>
+ * 
+ * <pre> -no-size
+ *  Skips the determination of sizes (train/test/classifier)
+ *  (default: sizes are determined)</pre>
  * 
  * <pre> 
  * Options specific to classifier weka.classifiers.rules.ZeroR:
@@ -149,6 +153,9 @@ public class ClassifierSplitEvaluator
   /** Attribute index of instance identifier (default -1) */
   private int m_attID = -1;
 
+  /** whether to skip determination of sizes (train/test/classifier). */
+  private boolean m_NoSizeDetermination;
+  
   /**
    * No args constructor.
    */
@@ -199,6 +206,11 @@ public class ClassifierSplitEvaluator
              "\tfor each fold.",
 	     "P", 0, 
 	     "-P"));
+    newVector.addElement(new Option(
+	     "\tSkips the determination of sizes (train/test/classifier)\n" +
+	     "\t(default: sizes are determined)",
+	     "no-size", 0, 
+	     "-no-size"));
 
     if ((m_Template != null) &&
 	(m_Template instanceof OptionHandler)) {
@@ -238,6 +250,10 @@ public class ClassifierSplitEvaluator
    * <pre> -P
    *  Add target and prediction columns to the result
    *  for each fold.</pre>
+   * 
+   * <pre> -no-size
+   *  Skips the determination of sizes (train/test/classifier)
+   *  (default: sizes are determined)</pre>
    * 
    * <pre> 
    * Options specific to classifier weka.classifiers.rules.ZeroR:
@@ -286,6 +302,7 @@ public class ClassifierSplitEvaluator
     }
     
     m_predTargetColumn = Utils.getFlag('P', options);
+    m_NoSizeDetermination = Utils.getFlag("no-size", options);
   }
 
   /**
@@ -293,37 +310,38 @@ public class ClassifierSplitEvaluator
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
-
-    String [] classifierOptions = new String [0];
+  public String[] getOptions() {
+    Vector<String>	result;
+    String[] 		classifierOptions;
+    
+    result = new Vector<String>();
+    
+    classifierOptions = new String [0];
     if ((m_Template != null) && 
 	(m_Template instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_Template).getOptions();
     }
     
-    String [] options = new String [classifierOptions.length + 8];
-    int current = 0;
-
     if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
+      result.add("-W");
+      result.add(getClassifier().getClass().getName());
     }
-    options[current++] = "-I"; 
-    options[current++] = "" + (m_attID + 1);
+    result.add("-I"); 
+    result.add("" + (m_attID + 1));
 
-    if (getPredTargetColumn()) options[current++] = "-P";
+    if (getPredTargetColumn()) 
+      result.add("-P");
     
-    options[current++] = "-C"; 
-    options[current++] = "" + (m_IRclass + 1);
-    options[current++] = "--";
+    result.add("-C"); 
+    result.add("" + (m_IRclass + 1));
     
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    if (getNoSizeDetermination())
+      result.add("-no-size");
+    
+    result.add("--");
+    result.addAll(Arrays.asList(classifierOptions));
+    
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -812,18 +830,25 @@ public class ClassifierSplitEvaluator
     }
 
     // sizes
-    ByteArrayOutputStream bastream = new ByteArrayOutputStream();
-    ObjectOutputStream oostream = new ObjectOutputStream(bastream);
-    oostream.writeObject(m_Classifier);
-    result[current++] = new Double(bastream.size());
-    bastream = new ByteArrayOutputStream();
-    oostream = new ObjectOutputStream(bastream);
-    oostream.writeObject(train);
-    result[current++] = new Double(bastream.size());
-    bastream = new ByteArrayOutputStream();
-    oostream = new ObjectOutputStream(bastream);
-    oostream.writeObject(test);
-    result[current++] = new Double(bastream.size());
+    if (m_NoSizeDetermination) {
+      result[current++] = -1.0;
+      result[current++] = -1.0;
+      result[current++] = -1.0;
+    }
+    else {
+      ByteArrayOutputStream bastream = new ByteArrayOutputStream();
+      ObjectOutputStream oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(m_Classifier);
+      result[current++] = new Double(bastream.size());
+      bastream = new ByteArrayOutputStream();
+      oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(train);
+      result[current++] = new Double(bastream.size());
+      bastream = new ByteArrayOutputStream();
+      oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(test);
+      result[current++] = new Double(bastream.size());
+    }
     
     // Prediction interval statistics
     result[current++] = new Double(eval.coverageOfTestCasesByPredictedRegions());
@@ -999,6 +1024,33 @@ public class ClassifierSplitEvaluator
   public void setPredTargetColumn(boolean v){
       m_predTargetColumn = v;
   }
+
+  /**
+   * Returns whether the size determination (train/test/classifer) is skipped.
+   * 
+   * @return 		true if size determination skipped
+   */
+  public boolean getNoSizeDetermination() {
+    return m_NoSizeDetermination;
+  }
+  
+  /**
+   * Sets whether the size determination (train/test/classifer) is skipped.
+   * 
+   * @param value	true if to determine sizes
+   */
+  public void setNoSizeDetermination(boolean value) {
+    m_NoSizeDetermination = value;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String noSizeDeterminationTipText() {
+    return "If enabled, the size determination for train/test/classifier is skipped.";
+  }
   
   /**
    * Updates the options that the current classifier is using.
@@ -1100,4 +1152,4 @@ public class ClassifierSplitEvaluator
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-} // ClassifierSplitEvaluator
+}
