@@ -22,8 +22,11 @@
 
 package weka.experiment;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -42,10 +45,53 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
 /**
+ <!-- globalinfo-start -->
  * A SplitEvaluator that produces results for a density based clusterer.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * -W classname <br>
- * Specify the full class name of the clusterer to evaluate. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -no-size
+ *  Skips the determination of sizes (train/test/clusterer)
+ *  (default: sizes are determined)</pre>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of the density based clusterer.
+ *  eg: weka.clusterers.EM</pre>
+ * 
+ * <pre> 
+ * Options specific to clusterer weka.clusterers.EM:
+ * </pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  number of clusters. If omitted or -1 specified, then 
+ *  cross validation is used to select the number of clusters.</pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  max iterations.
+ * (default 100)</pre>
+ * 
+ * <pre> -V
+ *  verbose.</pre>
+ * 
+ * <pre> -M &lt;num&gt;
+ *  minimum allowable standard deviation for normal density
+ *  computation
+ *  (default 1e-6)</pre>
+ * 
+ * <pre> -O
+ *  Display model in old format (good when there are many clusters)
+ * </pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 100)</pre>
+ * 
+ <!-- options-end -->
+ *
+ * All options after -- will be passed to the clusterer.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
  * @version $Revision$
@@ -56,6 +102,9 @@ public class DensityBasedClustererSplitEvaluator
 	     OptionHandler,
 	     AdditionalMeasureProducer,
 	     RevisionHandler {
+
+  /** for serialization. */
+  private static final long serialVersionUID = 5124501059135692160L;
 
   /** Remove the class column (if set) from the data */
   protected boolean m_removeClassColumn = true;
@@ -85,11 +134,14 @@ public class DensityBasedClustererSplitEvaluator
   /** The clusterer version */
   protected String m_clustererVersion = "";
 
+  /** whether to skip determination of sizes (train/test/classifier). */
+  protected boolean m_NoSizeDetermination;
+
   /** The length of a key */
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 6;
+  private static final int RESULT_SIZE = 9;
 
   
   public DensityBasedClustererSplitEvaluator() {
@@ -114,6 +166,11 @@ public class DensityBasedClustererSplitEvaluator
 
     Vector newVector = new Vector(1);
 
+    newVector.addElement(new Option(
+	     "\tSkips the determination of sizes (train/test/clusterer)\n" +
+	     "\t(default: sizes are determined)",
+	     "no-size", 0, 
+	     "-no-size"));
     newVector.addElement(new Option(
 				    "\tThe full class name of the density based clusterer.\n"
 				    +"\teg: weka.clusterers.EM", 
@@ -146,6 +203,7 @@ public class DensityBasedClustererSplitEvaluator
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
+    m_NoSizeDetermination = Utils.getFlag("no-size", options);
     
     String cName = Utils.getOption('W', options);
     if (cName.length() == 0) {
@@ -169,30 +227,29 @@ public class DensityBasedClustererSplitEvaluator
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-
-    String [] clustererOptions = new String [0];
+    Vector<String>	result;
+    String[] 		clustererOptions;
+    
+    result = new Vector<String>();
+    
+    clustererOptions = new String [0];
     if ((m_clusterer != null) && 
 	(m_clusterer instanceof OptionHandler)) {
       clustererOptions = ((OptionHandler)m_clusterer).getOptions();
     }
     
-    String [] options = new String [clustererOptions.length + 3];
-    int current = 0;
-
     if (getClusterer() != null) {
-      options[current++] = "-W";
-      options[current++] = getClusterer().getClass().getName();
+      result.add("-W");
+      result.add(getClusterer().getClass().getName());
     }
+    
+    if (getNoSizeDetermination())
+      result.add("-no-size");
 
-    options[current++] = "--";
-
-    System.arraycopy(clustererOptions, 0, options, current, 
-		     clustererOptions.length);
-    current += clustererOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    result.add("--");
+    result.addAll(Arrays.asList(clustererOptions));
+    
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -344,6 +401,11 @@ public class DensityBasedClustererSplitEvaluator
     // timing stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    
+    // sizes
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
 
     //    resultTypes[current++] = "";
@@ -383,6 +445,11 @@ public class DensityBasedClustererSplitEvaluator
     // Timing stats
     resultNames[current++] = "Time_training";
     resultNames[current++] = "Time_testing";
+
+    // sizes
+    resultNames[current++] = "Serialized_Model_Size";
+    resultNames[current++] = "Serialized_Train_Set_Size";
+    resultNames[current++] = "Serialized_Test_Set_Size";
 
     // Classifier defined extras
     //    resultNames[current++] = "Summary";
@@ -455,6 +522,27 @@ public class DensityBasedClustererSplitEvaluator
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
+
+    // sizes
+    if (m_NoSizeDetermination) {
+      result[current++] = -1.0;
+      result[current++] = -1.0;
+      result[current++] = -1.0;
+    }
+    else {
+      ByteArrayOutputStream bastream = new ByteArrayOutputStream();
+      ObjectOutputStream oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(m_clusterer);
+      result[current++] = new Double(bastream.size());
+      bastream = new ByteArrayOutputStream();
+      oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(train);
+      result[current++] = new Double(bastream.size());
+      bastream = new ByteArrayOutputStream();
+      oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(test);
+      result[current++] = new Double(bastream.size());
+    }
     
     for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
@@ -535,6 +623,32 @@ public class DensityBasedClustererSplitEvaluator
     updateOptions();
   }
 
+  /**
+   * Returns whether the size determination (train/test/clusterer) is skipped.
+   * 
+   * @return 		true if size determination skipped
+   */
+  public boolean getNoSizeDetermination() {
+    return m_NoSizeDetermination;
+  }
+  
+  /**
+   * Sets whether the size determination (train/test/clusterer) is skipped.
+   * 
+   * @param value	true if to determine sizes
+   */
+  public void setNoSizeDetermination(boolean value) {
+    m_NoSizeDetermination = value;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String noSizeDeterminationTipText() {
+    return "If enabled, the size determination for train/test/clusterer is skipped.";
+  }
 
   protected void updateOptions() {
     
