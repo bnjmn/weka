@@ -5,7 +5,7 @@
 
   <groupId>weka-dev</groupId>
   <artifactId>weka</artifactId>
-  <version>3.7.6-SNAPSHOT</version>
+  <version>3.7.6-SNAPSHOT</version><!-- weka-version -->
   <packaging>jar</packaging>
 
   <name>weka-dev</name>
@@ -63,6 +63,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <weka.test.regression.root>src/test/resources/wekarefs</weka.test.regression.root>
+    <weka.main.class>weka.gui.GUIChooser</weka.main.class>
   </properties>
 
   <distributionManagement>
@@ -139,6 +140,9 @@
           <include>weka/gui/beans/README</include>
         </includes>
       </resource>
+      <resource>
+        <directory>${project.build.directory}/generated-resources</directory>
+      </resource>
     </resources>
 
     <pluginManagement>
@@ -174,11 +178,52 @@
           </filesets>
         </configuration>
       </plugin>
+      
+      <!-- for including necessary classes from the lib directory -->
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>expand Pentaho Package Manager</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <includeGroupIds>pentaho</includeGroupIds>
+              <includeArtifactIds>packageManager</includeArtifactIds>
+              <includes>**/*</includes>
+              <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>expand java-cup runtime classes</id>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <includeGroupIds>java-cup</includeGroupIds>
+              <includeArtifactIds>java-cup</includeArtifactIds>
+              <includes>java_cup/runtime/**/*</includes>
+              <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin> 
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.3.2</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>${weka.main.class}</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
         <executions>
           <execution>
             <goals>
