@@ -15,27 +15,12 @@
 
 /*
  *    RegressionSplitEvaluator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.rules.ZeroR;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Summarizable;
-import weka.core.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -43,8 +28,23 @@ import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Summarizable;
+import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->
@@ -54,6 +54,10 @@ import java.util.Vector;
  *
  <!-- options-start -->
  * Valid options are: <p/>
+ * 
+ * <pre> -no-size
+ *  Skips the determination of sizes (train/test/classifier)
+ *  (default: sizes are determined)</pre>
  * 
  * <pre> -W &lt;class name&gt;
  *  The full class name of the classifier.
@@ -68,6 +72,8 @@ import java.util.Vector;
  *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
+ *
+ * All options after -- will be passed to the classifier.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
@@ -101,6 +107,9 @@ public class RegressionSplitEvaluator
 
   /** The classifier version */
   protected String m_ClassifierVersion = "";
+
+  /** whether to skip determination of sizes (train/test/classifier). */
+  private boolean m_NoSizeDetermination;
 
   /** The length of a key */
   private static final int KEY_SIZE = 3;
@@ -136,6 +145,11 @@ public class RegressionSplitEvaluator
     Vector newVector = new Vector(1);
 
     newVector.addElement(new Option(
+	     "\tSkips the determination of sizes (train/test/classifier)\n" +
+	     "\t(default: sizes are determined)",
+	     "no-size", 0, 
+	     "-no-size"));
+    newVector.addElement(new Option(
 	     "\tThe full class name of the classifier.\n"
 	      +"\teg: weka.classifiers.bayes.NaiveBayes", 
 	     "W", 1, 
@@ -161,6 +175,10 @@ public class RegressionSplitEvaluator
    <!-- options-start -->
    * Valid options are: <p/>
    * 
+   * <pre> -no-size
+   *  Skips the determination of sizes (train/test/classifier)
+   *  (default: sizes are determined)</pre>
+   * 
    * <pre> -W &lt;class name&gt;
    *  The full class name of the classifier.
    *  eg: weka.classifiers.bayes.NaiveBayes</pre>
@@ -181,6 +199,7 @@ public class RegressionSplitEvaluator
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
+    m_NoSizeDetermination = Utils.getFlag("no-size", options);
     
     String cName = Utils.getOption('W', options);
     if (cName.length() == 0) {
@@ -204,29 +223,28 @@ public class RegressionSplitEvaluator
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-
-    String [] classifierOptions = new String [0];
+    Vector<String>	result;
+    String[] 		classifierOptions;
+    
+    result = new Vector<String>();
+    
+    classifierOptions = new String [0];
     if ((m_Template != null) && 
 	(m_Template instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_Template).getOptions();
     }
     
-    String [] options = new String [classifierOptions.length + 3];
-    int current = 0;
+    if (getNoSizeDetermination())
+      result.add("-no-size");
 
     if (getClassifier() != null) {
-      options[current++] = "-W";
-      options[current++] = getClassifier().getClass().getName();
+      result.add("-W");
+      result.add(getClassifier().getClass().getName());
     }
-    options[current++] = "--";
-
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    result.add("--");
+    result.addAll(Arrays.asList(classifierOptions));
+    
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -551,18 +569,25 @@ public class RegressionSplitEvaluator
     }
     
     // sizes
-    ByteArrayOutputStream bastream = new ByteArrayOutputStream();
-    ObjectOutputStream oostream = new ObjectOutputStream(bastream);
-    oostream.writeObject(m_Classifier);
-    result[current++] = new Double(bastream.size());
-    bastream = new ByteArrayOutputStream();
-    oostream = new ObjectOutputStream(bastream);
-    oostream.writeObject(train);
-    result[current++] = new Double(bastream.size());
-    bastream = new ByteArrayOutputStream();
-    oostream = new ObjectOutputStream(bastream);
-    oostream.writeObject(test);
-    result[current++] = new Double(bastream.size());
+    if (m_NoSizeDetermination) {
+      result[current++] = -1.0;
+      result[current++] = -1.0;
+      result[current++] = -1.0;
+    }
+    else {
+      ByteArrayOutputStream bastream = new ByteArrayOutputStream();
+      ObjectOutputStream oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(m_Classifier);
+      result[current++] = new Double(bastream.size());
+      bastream = new ByteArrayOutputStream();
+      oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(train);
+      result[current++] = new Double(bastream.size());
+      bastream = new ByteArrayOutputStream();
+      oostream = new ObjectOutputStream(bastream);
+      oostream.writeObject(test);
+      result[current++] = new Double(bastream.size());
+    }
     
     // Prediction interval statistics
     result[current++] = new Double(eval.coverageOfTestCasesByPredictedRegions());
@@ -629,6 +654,33 @@ public class RegressionSplitEvaluator
     updateOptions();
 
     System.err.println("RegressionSplitEvaluator: In set classifier");
+  }
+
+  /**
+   * Returns whether the size determination (train/test/classifer) is skipped.
+   * 
+   * @return 		true if size determination skipped
+   */
+  public boolean getNoSizeDetermination() {
+    return m_NoSizeDetermination;
+  }
+  
+  /**
+   * Sets whether the size determination (train/test/classifer) is skipped.
+   * 
+   * @param value	true if to determine sizes
+   */
+  public void setNoSizeDetermination(boolean value) {
+    m_NoSizeDetermination = value;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String noSizeDeterminationTipText() {
+    return "If enabled, the size determination for train/test/classifier is skipped.";
   }
 
   /**
@@ -731,4 +783,4 @@ public class RegressionSplitEvaluator
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-} // RegressionSplitEvaluator
+}
