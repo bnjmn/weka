@@ -520,6 +520,10 @@
       <param name="packageName" value="classAssociationRules"/>
       <param name="cp" value="../../${packages_internal}/predictiveApriori/build/classes"/>
     </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="cascadeKMeans"/>
+    </antcall>
   </target>
 
   <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests|clean]"> 
