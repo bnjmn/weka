@@ -85,6 +85,9 @@ public class NominalToBinary
 
   /** Are all values transformed into new attributes? */
   private boolean m_TransformAll = false;
+  
+  /** Whether we need to transform at all */
+  private boolean m_needToTransform = false;
 
   /** Constructor - initialises the filter */
   public NominalToBinary() {
@@ -427,6 +430,21 @@ public class NominalToBinary
     FastVector vals;
 
     // Compute new attributes
+    
+    m_needToTransform = false;
+    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      Attribute att = getInputFormat().attribute(i);
+      if (att.isNominal() && i != getInputFormat().classIndex() && 
+          (att.numValues() > 2 || m_TransformAll)) {
+        m_needToTransform = true;
+        break;
+      }
+    }
+    
+    if (!m_needToTransform) {
+      setOutputFormat(getInputFormat());
+      return;
+    }
 
     newClassIndex = getInputFormat().classIndex();
     newAtts = new FastVector();
@@ -479,6 +497,11 @@ public class NominalToBinary
    * @param instance the instance to convert
    */
   private void convertInstance(Instance instance) {
+    
+    if (!m_needToTransform) {
+      push(instance);
+      return;
+    }
 
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
