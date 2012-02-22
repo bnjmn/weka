@@ -474,12 +474,9 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
     
     if (e.getInstance() == null || e.getStatus() == InstanceEvent.BATCH_FINISHED) {
       emitBufferedInstances();
-
-      String msg = statusMessagePrefix() + "Done";
-      if (m_log != null) {
-        m_log.statusMessage(msg);
-        m_log.logMessage("[" + getCustomName() + "] " + msg);
-      }
+      // thread will set busy to false and report done status when
+      // complete
+      return;
     } else if (m_incrementalBuffer.size() == m_bufferSizeI) {
       // time to sort and write this to a temp file
       try {
@@ -506,233 +503,250 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
    * all temp files and interleaving the instances.
    */
   protected void emitBufferedInstances() {
-    int mergeCount = 0;
-    
-    if (m_incrementalBuffer.size() > 0 && !m_stopRequested.get()) {
-      try {
-        sortBuffer(false);
-      } catch (Exception ex) { }
-      
-      if (m_bufferFiles.size() == 0) {
-        // we only have the in memory buffer...
+    Thread t = new Thread() {
+      public void run() {
+
+        int mergeCount = 0;
+
+        if (m_incrementalBuffer.size() > 0 && !m_stopRequested.get()) {
+          try {
+            sortBuffer(false);
+          } catch (Exception ex) { }
+
+          if (m_bufferFiles.size() == 0) {
+            // we only have the in memory buffer...
+            if (m_stopRequested.get()) {
+              m_busy = false;
+              return;
+            }
+            String msg = statusMessagePrefix() 
+              + "Emitting in memory buffer....";
+            if (m_log != null) {
+              m_log.statusMessage(msg);
+              m_log.logMessage("[" + getCustomName() + "] " + msg);
+            }
+
+            Instances newHeader = new Instances(m_incrementalBuffer.get(0).
+                m_instance.dataset(), 0); 
+            m_ie.setStructure(newHeader);
+            notifyInstanceListeners(m_ie);
+            for (int i = 0; i < m_incrementalBuffer.size(); i++) {
+              InstanceHolder currentH = m_incrementalBuffer.get(i);
+              currentH.m_instance.setDataset(newHeader);
+
+              if (m_stringAttIndexes != null) {
+                for (String attName : m_stringAttIndexes.keySet()) {
+                  boolean setValToZero = 
+                    (newHeader.attribute(attName).numValues() > 0);
+                  
+                  String valToSetInHeader = currentH.m_stringVals.get(attName);
+                  newHeader.attribute(attName).setStringValue(valToSetInHeader);
+
+                  if (setValToZero) {
+                    currentH.m_instance.
+                      setValue(newHeader.attribute(attName), 0);
+                  }
+                }
+              }
+
+              if (m_stopRequested.get()) {
+                m_busy = false;
+                return;
+              }
+              m_ie.setInstance(currentH.m_instance);
+              m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
+              if (i == m_incrementalBuffer.size() - 1) {
+                m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
+              }
+              notifyInstanceListeners(m_ie);
+            }
+            return;
+          }      
+        }
+
+        List<ObjectInputStream> inputStreams = new ArrayList<ObjectInputStream>();
+        // for the interleaving part of the merge sort
+        List<InstanceHolder> merger = new ArrayList<InstanceHolder>();
+
+        Instances tempHeader = new Instances(m_connectedFormat, 0);
+        m_ie.setStructure(tempHeader);
+        notifyInstanceListeners(m_ie);
+
+        // add an instance from the in-memory buffer first
+        if (m_incrementalBuffer.size() > 0) {
+          InstanceHolder tempH = m_incrementalBuffer.remove(0);  
+          merger.add(tempH);
+        }
+
         if (m_stopRequested.get()) {
+          m_busy = false;
           return;
         }
-        String msg = statusMessagePrefix() + "Emitting in memory buffer....";
-        if (m_log != null) {
-          m_log.statusMessage(msg);
-          m_log.logMessage("[" + getCustomName() + "] " + msg);
+
+        if (m_bufferFiles.size() > 0) {
+          String msg = statusMessagePrefix() + "Merging temp files...";
+          if (m_log != null) {
+            m_log.statusMessage(msg);
+            m_log.logMessage("[" + getCustomName() + "] " + msg);
+          }
         }
-        
-        Instances newHeader = new Instances(m_incrementalBuffer.get(0).
-            m_instance.dataset(), 0); 
-        m_ie.setStructure(newHeader);
-        notifyInstanceListeners(m_ie);
-        for (int i = 0; i < m_incrementalBuffer.size(); i++) {
-          InstanceHolder currentH = m_incrementalBuffer.get(i);
-          currentH.m_instance.setDataset(newHeader);
-          
-          if (m_stringAttIndexes != null) {
-            for (String attName : m_stringAttIndexes.keySet()) {
-              boolean setValToZero = (newHeader.attribute(attName).numValues() > 0);
-              String valToSetInHeader = currentH.m_stringVals.get(attName);
-              newHeader.attribute(attName).setStringValue(valToSetInHeader);
-              
-              if (setValToZero) {
-                currentH.m_instance.setValue(newHeader.attribute(attName), 0);
+        // open all temp buffer files and read one instance from each
+        for (int i = 0; i < m_bufferFiles.size(); i++) {
+
+          ObjectInputStream ois = null;
+
+          try {
+            FileInputStream fis = new FileInputStream(m_bufferFiles.get(i));
+            //GZIPInputStream giz = new GZIPInputStream(fis);
+            BufferedInputStream bis = new BufferedInputStream(fis, 50000);
+            ois = new ObjectInputStream(bis);
+
+            InstanceHolder tempH = (InstanceHolder)ois.readObject();
+            if (tempH != null) {
+              inputStreams.add(ois);
+
+              tempH.m_fileNumber = i;
+              merger.add(tempH);
+            } else {
+              // no instances?!??
+              ois.close();
+            }
+          } catch (Exception ex) {
+            ex.printStackTrace();
+            if (ois != null) {
+              try {
+                ois.close();
+              } catch (Exception e) {             
               }
             }
           }
-          
-          if (m_stopRequested.get()) {
-            return;
-          }
-          m_ie.setInstance(currentH.m_instance);
-          m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
-          if (i == m_incrementalBuffer.size() - 1) {
-            m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
-          }
-          notifyInstanceListeners(m_ie);
         }
-        return;
-      }      
-    }
-    
-    List<ObjectInputStream> inputStreams = new ArrayList<ObjectInputStream>();
-    // for the interleaving part of the merge sort
-    List<InstanceHolder> merger = new ArrayList<InstanceHolder>();
-    
-    Instances tempHeader = new Instances(m_connectedFormat, 0);
-    m_ie.setStructure(tempHeader);
-    notifyInstanceListeners(m_ie);
-    
-    // add an instance from the in-memory buffer first
-    if (m_incrementalBuffer.size() > 0) {
-      InstanceHolder tempH = m_incrementalBuffer.remove(0);
-      /*InstanceHolder holder = new InstanceHolder();
-      holder.m_instance = tempI;
-      holder.m_fileNumber = -1; // not a file */
-      merger.add(tempH);
-    }
-    
-    if (m_stopRequested.get()) {
-      return;
-    }
-    
-    if (m_bufferFiles.size() > 0) {
-      String msg = statusMessagePrefix() + "Merging temp files...";
-      if (m_log != null) {
-        m_log.statusMessage(msg);
-        m_log.logMessage("[" + getCustomName() + "] " + msg);
-      }
-    }
-    // open all temp buffer files and read one instance from each
-    for (int i = 0; i < m_bufferFiles.size(); i++) {
-      
-      ObjectInputStream ois = null;
-            
-      try {
-        FileInputStream fis = new FileInputStream(m_bufferFiles.get(i));
-        //GZIPInputStream giz = new GZIPInputStream(fis);
-        BufferedInputStream bis = new BufferedInputStream(fis, 50000);
-        ois = new ObjectInputStream(bis);
-        
-        InstanceHolder tempH = (InstanceHolder)ois.readObject();
-        if (tempH != null) {
-          inputStreams.add(ois);
+        Collections.sort(merger, m_sortComparator);
 
-          tempH.m_fileNumber = i;
-          merger.add(tempH);
-        } else {
-          // no instances?!??
-          ois.close();
-        }
-      } catch (Exception ex) {
-        ex.printStackTrace();
-        if (ois != null) {
-          try {
-            ois.close();
-          } catch (Exception e) {             
+        do {
+          if (m_stopRequested.get()) {
+            m_busy = false;
+            break;
           }
-        }
-      }
-    }
-    Collections.sort(merger, m_sortComparator);
-    
-    do {
-      if (m_stopRequested.get()) {
-        break;
-      }
-      InstanceHolder holder = merger.remove(0);
-      /*if (tempHeader == null) {
-        tempHeader = new Instances(holder.m_instance.dataset(), 0);
-        m_ie.setStructure(tempHeader);
-        notifyInstanceListeners(m_ie);
-      }*/
-      holder.m_instance.setDataset(tempHeader);
-      if (m_stringAttIndexes != null) {
-        for (String attName : m_stringAttIndexes.keySet()) {
-          boolean setValToZero = (tempHeader.attribute(attName).numValues() > 1);
-          String valToSetInHeader = holder.m_stringVals.get(attName);
-          tempHeader.attribute(attName).setStringValue(valToSetInHeader);
           
-          if (setValToZero) {
-            holder.m_instance.setValue(tempHeader.attribute(attName), 0);
+          InstanceHolder holder = merger.remove(0);
+          holder.m_instance.setDataset(tempHeader);
+          
+          if (m_stringAttIndexes != null) {
+            for (String attName : m_stringAttIndexes.keySet()) {
+              boolean setValToZero = 
+                (tempHeader.attribute(attName).numValues() > 1);
+              String valToSetInHeader = holder.m_stringVals.get(attName);
+              tempHeader.attribute(attName).setStringValue(valToSetInHeader);
+
+              if (setValToZero) {
+                holder.m_instance.setValue(tempHeader.attribute(attName), 0);
+              }
+            }
           }
-        }
-      }
-      
-      if (m_stopRequested.get()) {
-        break;
-      }
-      m_ie.setInstance(holder.m_instance);
-      m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
-      mergeCount++;
-      notifyInstanceListeners(m_ie);
-      
-      if (mergeCount % m_bufferSizeI == 0 && m_log != null) {
-        String msg = statusMessagePrefix() + "Merged " 
-          + mergeCount + " instances";
-        if (m_log != null) {
-          m_log.statusMessage(msg);
-        }
-      }
-      
-      int smallest = holder.m_fileNumber;
-      
-      // now get another instance from the source of "smallest"
-      InstanceHolder nextH = null;
-      if (smallest == -1) {
-        if (m_incrementalBuffer.size() > 0) {
-          nextH = m_incrementalBuffer.remove(0);
-          /*nextH = new InstanceHolder();
-          nextH.m_instance = m_incrementalBuffer.remove(0); */
-          nextH.m_fileNumber = -1;
-        }
-      } else {
-        ObjectInputStream tis = inputStreams.get(smallest);
-        
-        try {
-          InstanceHolder tempH = (InstanceHolder)tis.readObject();
-          if (tempH != null) {
-            nextH = tempH;
-            /*nextH = new InstanceHolder();
-            nextH.m_instance = tempI; */
-            nextH.m_fileNumber = smallest;
-          } else {
-            throw new Exception("end of buffer");
+
+          if (m_stopRequested.get()) {
+            m_busy = false;
+            break;
           }
-        } catch (Exception ex) {
-          // EOF
-          try {
+          m_ie.setInstance(holder.m_instance);
+          m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
+          mergeCount++;
+          notifyInstanceListeners(m_ie);
+
+          if (mergeCount % m_bufferSizeI == 0 && m_log != null) {
+            String msg = statusMessagePrefix() + "Merged " 
+            + mergeCount + " instances";
             if (m_log != null) {
-              String msg = statusMessagePrefix() + "Closing temp file";
               m_log.statusMessage(msg);
             }
-            tis.close();
-          } catch (Exception e) {            
           }
-          File file = m_bufferFiles.remove(smallest);
-          file.delete();
-          inputStreams.remove(smallest);
+
+          int smallest = holder.m_fileNumber;
+
+          // now get another instance from the source of "smallest"
+          InstanceHolder nextH = null;
+          if (smallest == -1) {
+            if (m_incrementalBuffer.size() > 0) {
+              nextH = m_incrementalBuffer.remove(0);
+              nextH.m_fileNumber = -1;
+            }
+          } else {
+            ObjectInputStream tis = inputStreams.get(smallest);
+
+            try {
+              InstanceHolder tempH = (InstanceHolder)tis.readObject();
+              if (tempH != null) {
+                nextH = tempH;
+                nextH.m_fileNumber = smallest;
+              } else {
+                throw new Exception("end of buffer");
+              }
+            } catch (Exception ex) {
+              // EOF
+              try {
+                if (m_log != null) {
+                  String msg = statusMessagePrefix() + "Closing temp file";
+                  m_log.statusMessage(msg);
+                }
+                tis.close();
+              } catch (Exception e) {            
+              }
+              File file = m_bufferFiles.remove(smallest);
+              file.delete();
+              inputStreams.remove(smallest);
+
+              // update file numbers
+              for (InstanceHolder h : merger) {
+                if (h.m_fileNumber != -1 && h.m_fileNumber > smallest) {
+                  h.m_fileNumber--;
+                }
+              }
+            }        
+          }
+
+          if (nextH != null) {
+            // find the correct position (i.e. interleave) for this new Instance
+            int index = Collections.
+              binarySearch(merger, nextH, m_sortComparator);
+
+            if (index < 0) {
+              merger.add(index * -1 -1, nextH);
+            } else {
+              merger.add(index, nextH);
+            }
+            nextH = null;
+          }
+
+        } while (merger.size() > 0 && !m_stopRequested.get());
+
+        if (!m_stopRequested.get()) {
+          // signal the end of the stream
+          m_ie.setInstance(null);
+          m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
+          notifyInstanceListeners(m_ie);
           
-          // update file numbers
-          for (InstanceHolder h : merger) {
-            if (h.m_fileNumber != -1 && h.m_fileNumber > smallest) {
-              h.m_fileNumber--;
+          String msg = statusMessagePrefix() + "Finished.";
+          if (m_log != null) {
+            m_log.statusMessage(msg);
+            m_log.logMessage("[" + getCustomName() + "] " + msg);
+          }
+          m_busy = false;
+        } else {
+          // try and close any input streams...
+          for (ObjectInputStream is : inputStreams) {
+            try {
+              is.close();
+            } catch (Exception ex) {          
             }
           }
-        }        
-      }
-      
-      if (nextH != null) {
-        // find the correct position (i.e. interleave) for this new Instance
-        int index = Collections.binarySearch(merger, nextH, m_sortComparator);
-        
-        if (index < 0) {
-          merger.add(index * -1 -1, nextH);
-        } else {
-          merger.add(index, nextH);
+          m_busy = false;
         }
-        nextH = null;
       }
-      
-    } while (merger.size() > 0 && !m_stopRequested.get());
+    };
     
-    if (!m_stopRequested.get()) {
-      // signal the end of the stream
-      m_ie.setInstance(null);
-      m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
-      notifyInstanceListeners(m_ie);
-    } else {
-      // try and close any input streams...
-      for (ObjectInputStream is : inputStreams) {
-        try {
-          is.close();
-        } catch (Exception ex) {          
-        }
-      }
-    }
+    t.setPriority(Thread.MIN_PRIORITY);
+    t.start();
   }
   
   /**
@@ -953,7 +967,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
     notifyDataListeners(d);
     
     if (m_log != null) {
-      m_log.statusMessage(statusMessagePrefix() + "Done.");
+      m_log.statusMessage(statusMessagePrefix() + "Finished.");
     }
     m_busy = false;
   }
