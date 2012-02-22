@@ -15,19 +15,22 @@
 
 /*
  *    NominalToBinary.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -35,12 +38,8 @@ import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -86,6 +85,9 @@ public class NominalToBinary
 
   /** Are all values transformed into new attributes? */
   private boolean m_TransformAll = false;
+  
+  /** Whether we need to transform at all */
+  private boolean m_needToTransform = false;
 
   /** Constructor - initialises the filter */
   public NominalToBinary() {
@@ -117,6 +119,7 @@ public class NominalToBinary
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -427,6 +430,21 @@ public class NominalToBinary
     FastVector vals;
 
     // Compute new attributes
+    // Compute new attributes
+    m_needToTransform = false;
+    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
+      Attribute att = getInputFormat().attribute(i);
+      if (att.isNominal() && i != getInputFormat().classIndex() && 
+          (att.numValues() > 2 || m_TransformAll)) {
+        m_needToTransform = true;
+        break;
+      }
+    }
+    
+    if (!m_needToTransform) {
+      setOutputFormat(getInputFormat());
+      return;
+    }
 
     newClassIndex = getInputFormat().classIndex();
     newAtts = new FastVector();
@@ -479,6 +497,11 @@ public class NominalToBinary
    * @param instance the instance to convert
    */
   private void convertInstance(Instance instance) {
+    
+    if (!m_needToTransform) {
+      push(instance);
+      return;
+    }
 
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
