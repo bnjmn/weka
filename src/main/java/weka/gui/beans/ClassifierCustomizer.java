@@ -15,7 +15,7 @@
 
 /*
  *    ClassifierCustomizer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -80,8 +80,12 @@ public class ClassifierCustomizer
   
   private JPanel m_holderPanel = new JPanel();
   private JTextField m_executionSlotsText = new JTextField();
+  private JLabel m_executionSlotsLabel;
+  private JPanel m_executionSlotsPanel;
   
   private JCheckBox m_blockOnLastFold = new JCheckBox("Block on last fold of last run");
+  
+  private FileEnvironmentField m_loadModelField;
   
   private Window m_parentWindow;
   
@@ -159,17 +163,17 @@ public class ClassifierCustomizer
       }
     });
     
-    JPanel executionSlotsPanel = new JPanel();
-    executionSlotsPanel.
+    m_executionSlotsPanel = new JPanel();
+    m_executionSlotsPanel.
       setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-    JLabel executionSlotsLabel = new JLabel("Execution slots");
-    executionSlotsPanel.setLayout(new BorderLayout());
-    executionSlotsPanel.add(executionSlotsLabel, BorderLayout.WEST);
-    executionSlotsPanel.add(m_executionSlotsText, BorderLayout.CENTER);
+    m_executionSlotsLabel = new JLabel("Execution slots");
+    m_executionSlotsPanel.setLayout(new BorderLayout());
+    m_executionSlotsPanel.add(m_executionSlotsLabel, BorderLayout.WEST);
+    m_executionSlotsPanel.add(m_executionSlotsText, BorderLayout.CENTER);
     m_holderPanel.
       setBorder(BorderFactory.createTitledBorder("More options"));
     m_holderPanel.setLayout(new BorderLayout());
-    m_holderPanel.add(executionSlotsPanel, BorderLayout.NORTH);
+    m_holderPanel.add(m_executionSlotsPanel, BorderLayout.NORTH);
 //    m_blockOnLastFold.setHorizontalTextPosition(SwingConstants.RIGHT);
     m_holderPanel.add(m_blockOnLastFold, BorderLayout.SOUTH);
     
@@ -183,6 +187,7 @@ public class ClassifierCustomizer
         // forces the template to be deep copied to the actual classifier.
         // necessary for InputMappedClassifier that is loading from a file
         m_dsClassifier.setClassifierTemplate(m_dsClassifier.getClassifierTemplate());
+        m_dsClassifier.setLoadClassifierFileName(m_loadModelField.getText());
         
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(ClassifierCustomizer.this, true);
@@ -227,12 +232,26 @@ public class ClassifierCustomizer
 	m_holderPanel.add(m_incrementalPanel, BorderLayout.SOUTH);
 	m_panelVisible = true;
 	m_executionSlotsText.setEnabled(false);
+	m_loadModelField = new FileEnvironmentField("Load model from file", 
+	    m_env);
+	m_incrementalPanel.add(m_loadModelField);
+	m_loadModelField.setText(m_dsClassifier.getLoadClassifierFileName());
       }
     } else {
       if (m_panelVisible) {
 	m_holderPanel.remove(m_incrementalPanel);
 	m_executionSlotsText.setEnabled(true);
-	m_panelVisible = false;
+	m_panelVisible = false;			
+      }
+      
+      if (m_dsClassifier.hasIncomingBatchInstances() && 
+          !m_dsClassifier.m_listenees.containsKey("trainingSet")) {
+        m_holderPanel.remove(m_blockOnLastFold);
+        m_holderPanel.remove(m_executionSlotsPanel);
+        m_loadModelField = new FileEnvironmentField("Load model from file", 
+                  m_env);
+        m_holderPanel.add(m_loadModelField, BorderLayout.SOUTH);
+        m_loadModelField.setText(m_dsClassifier.getLoadClassifierFileName());
       }
     }
   }
