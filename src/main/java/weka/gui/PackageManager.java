@@ -15,7 +15,7 @@
 
 /*
  *    PackageManager.java
- *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
@@ -379,7 +379,16 @@ public class PackageManager extends JPanel {
     
     public void makeProgress(String progressMessage) {
       m_detailLabel.setText(progressMessage);
-      m_progressCount++;
+      if (progressMessage.startsWith("[Default")) {
+        // We're using the new refresh mechanism - extract the number
+        // of KB read from the message
+        String kbs = 
+          progressMessage.replace("[DefaultPackageManager] downloaded ", "");
+        kbs = kbs.replace(" KB", "");
+        m_progressCount = Integer.parseInt(kbs);
+      } else {
+        m_progressCount++;
+      }
       m_progress.setValue(m_progressCount);
     }
     
@@ -389,16 +398,23 @@ public class PackageManager extends JPanel {
     
     public Void doInBackground() {
       m_cacheRefreshInProgress = true;
-      int numPackages = WekaPackageManager.numRepositoryPackages();
-      if (numPackages < 0) {
+      int progressUpper = WekaPackageManager.repoZipArchiveSize();
+      if (progressUpper == -1) {
+        // revert to legacy approach
+        progressUpper = WekaPackageManager.numRepositoryPackages();
+      }
+
+      if (progressUpper < 0) {
         // there was some problem getting the file that holds this
         // information from the repository server - try to continue
         // anyway with a max value of 100 for the number of packages
         // (since all we use this for is setting the upper bound on
         // the progress bar).
-        numPackages = 100;
+        progressUpper = 100;
       }
-      m_progress.setMaximum(numPackages);
+      
+      // number of KBs for the archive is approx 6 x # packages
+      m_progress.setMaximum(progressUpper);
       m_refreshCacheBut.setEnabled(false);
       m_installBut.setEnabled(false);
       m_unofficialBut.setEnabled(false);
