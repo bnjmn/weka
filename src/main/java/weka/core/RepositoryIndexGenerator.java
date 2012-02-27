@@ -21,11 +21,16 @@
 
 package weka.core;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -34,6 +39,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Class for generating html index files and supporting text files
@@ -390,6 +397,171 @@ public class RepositoryIndexGenerator {
     br.write(packages.keySet().size() + "\n");
     br.flush();
     br.close();
+    
+    // create zip archive
+    writeRepoZipFile(repositoryHome, packageList);
+  }
+  
+  private static void transBytes(BufferedInputStream bi,
+      ZipOutputStream z) throws Exception {
+    int b;
+    while ((b = bi.read()) != -1) {
+      z.write(b);
+    }
+  }
+  
+  protected static void writeZipEntryForPackage(File repositoryHome, 
+      String packageName, ZipOutputStream zos) throws Exception {
+    
+    ZipEntry packageDir = new ZipEntry(packageName + "/");
+    zos.putNextEntry(packageDir);
+    
+    ZipEntry z = new ZipEntry(packageName + "/Latest.props");
+    ZipEntry z2 = new ZipEntry(packageName + "/Latest.html");
+    
+    FileInputStream fi = new FileInputStream(repositoryHome.getAbsolutePath() 
+        + File.separator + packageName 
+        + File.separator + "Latest.props");
+    BufferedInputStream bi = new BufferedInputStream(fi);
+    zos.putNextEntry(z);
+    transBytes(bi, zos);    
+    bi.close();
+    
+    fi = new FileInputStream(repositoryHome.getAbsolutePath() 
+        + File.separator + packageName + File.separator 
+        + "Latest.html");
+    bi = new BufferedInputStream(fi);
+    zos.putNextEntry(z2);
+    transBytes(bi, zos);
+    bi.close();
+    
+    // write the versions.txt file to the zip
+    z = new ZipEntry(packageName + "/versions.txt");
+    fi = new FileInputStream(packageName + File.separator 
+        + "versions.txt");
+    bi = new BufferedInputStream(fi);
+    zos.putNextEntry(z);
+    transBytes(bi, zos);
+    bi.close();
+    
+    // write the index.html to the zip
+    z = new ZipEntry(packageName + "/index.html");
+    fi = new FileInputStream(repositoryHome.getAbsolutePath() 
+        + File.separator + packageName + File.separator
+        + "index.html");
+    bi = new BufferedInputStream(fi);
+    zos.putNextEntry(z);
+    transBytes(bi, zos);
+    bi.close();
+    
+    // Now process the available versions
+    FileReader vi = new FileReader(repositoryHome.getAbsolutePath() 
+        + File.separator + packageName + File.separator
+        + "versions.txt");
+    BufferedReader bvi = new BufferedReader(vi);
+    String version;
+    while ((version = bvi.readLine()) != null) {
+      z = new ZipEntry(packageName + "/" + version + ".props");
+      fi = new FileInputStream(repositoryHome.getAbsolutePath() 
+          + File.separator + packageName + File.separator
+          + version + ".props");
+      bi = new BufferedInputStream(fi);
+      zos.putNextEntry(z);
+      transBytes(bi, zos);
+      bi.close();
+      
+      z = new ZipEntry(packageName + "/" + version + ".html");
+      fi = new FileInputStream(repositoryHome.getAbsolutePath() 
+          + File.separator + packageName + File.separator
+          + version + ".html");
+      bi = new BufferedInputStream(fi);
+      zos.putNextEntry(z);
+      transBytes(bi, zos);
+      bi.close();
+    }
+  }
+  
+  protected static void writeRepoZipFile(File repositoryHome, 
+      StringBuffer packagesList) {
+    
+    System.out.print("Writing repo archive");
+    StringReader r = new StringReader(packagesList.toString());
+    BufferedReader br = new BufferedReader(r);
+    String packageName;
+        
+    try {
+      FileOutputStream fo = 
+        new FileOutputStream(repositoryHome.getAbsolutePath() 
+            + File.separator + "repo.zip");
+      ZipOutputStream zos = new ZipOutputStream(fo);
+      
+      while ((packageName = br.readLine()) != null) {
+        writeZipEntryForPackage(repositoryHome, packageName, zos);
+        System.out.print(".");
+      }
+      System.out.println();
+      
+      // include the package list (legacy) in the zip
+      ZipEntry z = new ZipEntry("packageList.txt");
+      FileInputStream fi = 
+        new FileInputStream(repositoryHome.getAbsolutePath() 
+          + File.separator + "packageList.txt");
+      BufferedInputStream bi = new BufferedInputStream(fi);
+      zos.putNextEntry(z);
+      transBytes(bi, zos);
+      bi.close();
+      
+      // include the package list with latest version numbers
+      z = new ZipEntry("packageListWithVersion.txt");
+      fi = new FileInputStream(repositoryHome.getAbsolutePath() 
+          + File.separator + "packageListWithVersion.txt");
+      bi = new BufferedInputStream(fi);
+      zos.putNextEntry(z);
+      transBytes(bi, zos);
+      bi.close();
+      
+      // Include the top level images
+      FileReader fr = new FileReader(repositoryHome.getAbsolutePath()
+          + File.separator + "images.txt");
+      br = new BufferedReader(fr);
+      String imageName;
+      while ((imageName = br.readLine()) != null) {
+        z = new ZipEntry(imageName);
+        fi = new FileInputStream(repositoryHome.getAbsolutePath() 
+            + File.separator + imageName);
+        bi = new BufferedInputStream(fi);
+        zos.putNextEntry(z);
+        transBytes(bi, zos);
+        bi.close();
+      }
+      
+      // include the image list in the zip
+      z = new ZipEntry("images.txt");
+      fi = new FileInputStream(repositoryHome.getAbsolutePath() 
+          + File.separator + "images.txt");
+      bi = new BufferedInputStream(fi);
+      zos.putNextEntry(z);
+      transBytes(bi, zos);
+      bi.close();
+      
+      zos.close();
+      
+      File f = new File(repositoryHome.getAbsolutePath() 
+            + File.separator + "repo.zip");
+      long size = f.length();
+      
+      // write the size of the repo (in KB) to a file
+      FileWriter fw = new FileWriter(repositoryHome.getAbsolutePath()
+          + File.separator + "repoSize.txt");
+      if (size > 1024) {
+        size /= 1024;
+      }
+      fw.write("" + size);
+      fw.flush();
+      fw.close();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
   
   /**
