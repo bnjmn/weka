@@ -361,6 +361,7 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "blockOnLastFold");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "resetIncrementalClassifier");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "updateIncrementalClassifier");
+    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "loadClassifierFileName");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");

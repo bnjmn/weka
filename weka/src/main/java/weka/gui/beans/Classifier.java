@@ -107,7 +107,7 @@ public class Classifier
   /**
    * Objects talking to us
    */
-  private Hashtable m_listenees = new Hashtable();
+  protected Hashtable m_listenees = new Hashtable();
 
   /**
    * Objects listening for batch classifier events
@@ -236,6 +236,13 @@ public class Classifier
    * all processing has been completed.
    */
   protected boolean m_block = false;
+  
+  /** 
+   * Optional file to load a pre-trained model to score with (batch, 
+   * or to score and update (incremental) in the case of testSet
+   * only (batch) or instance (incremental) connections
+   */
+  protected String m_loadModelFileName = "";
 
   /**
    * Global info (if it exists) for the wrapped classifier
@@ -391,6 +398,8 @@ public class Classifier
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+    
+    m_trainingSet = null;
   }
   
   /**
@@ -488,6 +497,30 @@ public class Classifier
    */
   public Object getWrappedAlgorithm() {
     return getClassifierTemplate();
+  }
+  
+  /**
+   * Set the name of the classifier to load at execution time. This 
+   * only applies in the case where the only incoming connection is a 
+   * test set connection (batch mode) or an instance connection 
+   * (incremental mode).
+   * 
+   * @param filename the name of the file to load the model from
+   */
+  public void setLoadClassifierFileName(String filename) {
+    m_loadModelFileName = filename;
+  }
+  
+  /**
+   * Get the name of the classifier to load at execution time. This 
+   * only applies in the case where the only incoming connection is a 
+   * test set connection (batch mode) or an instance connection 
+   * (incremental mode).
+   * 
+   * @return the name of the file to load the model from
+   */
+  public String getLoadClassifierFileName() {
+    return m_loadModelFileName;
   }
   
   /**
@@ -595,6 +628,32 @@ public class Classifier
 	// System.err.println("Classifier : setting class index...");
 	//dataset.setClassIndex(dataset.numAttributes()-1);
       }
+      
+      if (m_loadModelFileName != null && 
+          m_loadModelFileName.length() > 0 && 
+          m_state == IDLE && !m_listenees.containsKey("trainingSet")) {
+        
+        // load model (if specified)
+        String resolvedFileName = m_loadModelFileName;
+        if (m_env != null) {
+          try {
+            resolvedFileName = m_env.substitute(resolvedFileName);
+          } catch (Exception ex) { }
+        }
+        File loadFrom = new File(resolvedFileName);
+        try {
+          loadFromFile(loadFrom);
+        } catch (Exception ex) {
+          stop();
+          m_log.statusMessage(statusMessagePrefix() + "ERROR: unable to load " +
+            "model (see log).");
+          m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+              + "Problem loading classifier. " 
+              + ex.getMessage());
+          return;
+        }
+      }
+      
       try {
 	// initialize classifier if m_trainingSet is null
 	// otherwise assume that classifier has been pre-trained in batch
@@ -1102,10 +1161,7 @@ public class Classifier
             + " BUSY. Can't accept data at this time.");
       }
       return;
-    }
-    
-    
-    weka.classifiers.Classifier classifierToUse = m_Classifier;
+    }        
     
     Instances testSet = e.getTestSet();
     if (testSet != null) {
@@ -1124,6 +1180,34 @@ public class Classifier
         return;
       }
     }
+    
+    if (m_loadModelFileName != null && 
+        m_loadModelFileName.length() > 0 && 
+        m_state == IDLE && !m_listenees.containsKey("trainingSet") && 
+        e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1) {
+      
+      // load model (if specified)
+      String resolvedFileName = m_loadModelFileName;
+      if (m_env != null) {
+        try {
+          resolvedFileName = m_env.substitute(resolvedFileName);
+        } catch (Exception ex) { }
+      }
+      File loadFrom = new File(resolvedFileName);
+      try {
+        loadFromFile(loadFrom);
+      } catch (Exception ex) {
+        stop();
+        m_log.statusMessage(statusMessagePrefix() + "ERROR: unable to load " +
+          "model (see log).");
+        m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+            + "Problem loading classifier. " 
+            + ex.getMessage());
+        return;
+      }
+    }
+    
+    weka.classifiers.Classifier classifierToUse = m_Classifier;
 
     // If we just have a test set connection or
     // there is just one run involving one set (and we are not
@@ -1851,55 +1935,7 @@ public class Classifier
           }
         }
 
-        weka.classifiers.Classifier temp = null;
-        Instances tempHeader = null;
-        // KOML ?
-        if ((KOML.isPresent()) &&
-            (loadFrom.getAbsolutePath().toLowerCase().
-             endsWith(KOML.FILE_EXTENSION + FILE_EXTENSION))) {
-          Vector v = (Vector) KOML.read(loadFrom.getAbsolutePath());
-          temp = (weka.classifiers.Classifier) v.elementAt(0);
-          if (v.size() == 2) {
-            // try and grab the header
-            tempHeader = (Instances) v.elementAt(1);
-          }
-        } /* XStream */ else if ((XStream.isPresent()) &&
-                                 (loadFrom.getAbsolutePath().toLowerCase().
-                                  endsWith(XStream.FILE_EXTENSION + FILE_EXTENSION))) {
-          Vector v = (Vector) XStream.read(loadFrom.getAbsolutePath());
-          temp = (weka.classifiers.Classifier) v.elementAt(0);
-          if (v.size() == 2) {
-            // try and grab the header
-            tempHeader = (Instances) v.elementAt(1);
-          } 
-        } /* binary */ else {
-
-          ObjectInputStream is = 
-            new ObjectInputStream(new BufferedInputStream(
-                                                          new FileInputStream(loadFrom)));
-          // try and read the model
-          temp = (weka.classifiers.Classifier)is.readObject();
-          // try and read the header (if present)
-          try {
-            tempHeader = (Instances)is.readObject();
-          } catch (Exception ex) {
-            //            System.err.println("No header...");
-            // quietly ignore
-          }
-          is.close();
-        }        
-
-        // Update name and icon
-        setTrainedClassifier(temp);
-        // restore header
-        m_trainingSet = tempHeader;
-
-        if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Loaded model.");
-          m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-              + "Loaded classifier: "
-              + m_Classifier.getClass().toString());
-        }
+        loadFromFile(loadFrom);        
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Classifier.this,
@@ -1914,6 +1950,59 @@ public class Classifier
             + "Problem loading classifier. " 
             + ex.getMessage());
       }
+    }
+  }
+  
+  protected void loadFromFile(File loadFrom) throws Exception {
+    weka.classifiers.Classifier temp = null;
+    Instances tempHeader = null;
+    // KOML ?
+    if ((KOML.isPresent()) &&
+        (loadFrom.getAbsolutePath().toLowerCase().
+         endsWith(KOML.FILE_EXTENSION + FILE_EXTENSION))) {
+      Vector v = (Vector) KOML.read(loadFrom.getAbsolutePath());
+      temp = (weka.classifiers.Classifier) v.elementAt(0);
+      if (v.size() == 2) {
+        // try and grab the header
+        tempHeader = (Instances) v.elementAt(1);
+      }
+    } /* XStream */ else if ((XStream.isPresent()) &&
+                             (loadFrom.getAbsolutePath().toLowerCase().
+                              endsWith(XStream.FILE_EXTENSION + FILE_EXTENSION))) {
+      Vector v = (Vector) XStream.read(loadFrom.getAbsolutePath());
+      temp = (weka.classifiers.Classifier) v.elementAt(0);
+      if (v.size() == 2) {
+        // try and grab the header
+        tempHeader = (Instances) v.elementAt(1);
+      } 
+    } /* binary */ else {
+
+      ObjectInputStream is = 
+        new ObjectInputStream(new BufferedInputStream(
+                                                      new FileInputStream(loadFrom)));
+      // try and read the model
+      temp = (weka.classifiers.Classifier)is.readObject();
+      // try and read the header (if present)
+      try {
+        tempHeader = (Instances)is.readObject();
+      } catch (Exception ex) {
+        //            System.err.println("No header...");
+        // quietly ignore
+      }
+      is.close();
+    }        
+
+    // Update name and icon
+    setTrainedClassifier(temp);
+    // restore header
+    m_trainingSet = tempHeader;
+
+    if (m_log != null) {
+      m_log.statusMessage(statusMessagePrefix() + "Loaded model.");
+      m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+          + "Loaded classifier: "
+          + m_Classifier.getClass().toString() 
+          + " from file '" + loadFrom.toString() + "'");
     }
   }
 
