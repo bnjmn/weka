@@ -78,10 +78,13 @@ public class WekaPackageManager {
       + File.separator + PROPERTIES_DIR_NAME);
   
   private static PackageManager PACKAGE_MANAGER = PackageManager.create();
-  private static URL REP_URL;
+  private static URL REP_URL; // current repository URL to use
   private static URL CACHE_URL;
   private static boolean INITIAL_CACHE_BUILD_NEEDED = false;
   private static String PACKAGE_LIST_FILENAME = "packageListWithVersion.txt";
+  
+  private static String PRIMARY_REPOSITORY = "http://weka.sourceforge.net/packageMetaData";
+  private static String REP_MIRROR;
   
   static {
     establishWekaHome();
@@ -129,6 +132,10 @@ public class WekaPackageManager {
     m_wekaHomeEstablished = ok;
     PACKAGE_MANAGER.setPackageHome(PACKAGES_DIR);
     try {
+      // setup the backup mirror first
+      establishMirror();
+      
+      // user-supplied repository URL takes precedence over anything else 
       String repURL = env.getVariableValue("weka.core.wekaPackageRepositoryURL");
       if (repURL == null || repURL.length() == 0) {
         // See if there is a URL named in $WEKA_HOME/props/PackageRepository.props
@@ -144,7 +151,18 @@ public class WekaPackageManager {
       }
       
       if (repURL == null || repURL.length() == 0) {
-        repURL = "http://weka.sourceforge.net/packageMetaData";
+        if (REP_MIRROR != null && REP_MIRROR.length() > 0) {
+          repURL = REP_MIRROR;
+          
+          if (!REP_MIRROR.equals(PRIMARY_REPOSITORY)) {
+            System.out.println("Package manager using repository mirror: " +
+                REP_MIRROR);
+          }
+        } else {          
+          // primary hard-coded meta data repository if a mirror file doesn't exist
+          // (legacy repository)
+          repURL = PRIMARY_REPOSITORY;
+        }
       } else {
         System.err.println("weka.core.WekaPackageRepositoryURL = " + repURL);
       }
@@ -197,6 +215,34 @@ public class WekaPackageManager {
     }
     
     return ok;
+  }
+  
+  protected static void establishMirror() {
+    try {      
+      String mirrorListURL = 
+        "http://www.cs.waikato.ac.nz/ml/weka/packageMetaDataMirror.txt";
+      
+      URLConnection conn = null;
+      URL connURL = new URL(mirrorListURL);
+
+      if (PACKAGE_MANAGER.setProxyAuthentication()) {
+        conn = connURL.openConnection(PACKAGE_MANAGER.getProxy());
+      } else {
+        conn = connURL.openConnection();
+      }
+
+      conn.setConnectTimeout(30000); // timeout after 30 seconds
+
+      BufferedReader bi = 
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            
+      REP_MIRROR = bi.readLine();
+      
+      bi.close();
+    } catch (Exception ex) {
+      System.err.println("The repository meta data mirror file seems " +
+      		"to be unavailable (" + ex.getMessage() + ")");
+    }
   }
   
   public static void removeExplorerProps(String installedPackageName) {
@@ -648,8 +694,56 @@ public class WekaPackageManager {
     KnowledgeFlowApp.reInitialize();
   }
   
+  /**
+   * Get the underlying package manager implementation
+   * 
+   * @return the underlying concrete package management implementation.
+   */
   public static PackageManager getUnderlyingPackageManager() {
     return PACKAGE_MANAGER;
+  }
+  
+  /**
+   * Retrieves the size (in KB) of the repository zip archive stored
+   * on the server.
+   * 
+   * @return the size of the repository zip archive in KB.
+   */
+  public static int repoZipArchiveSize() {
+    int size = -1;
+    
+    try {
+      PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
+      String numPackagesS = PACKAGE_MANAGER.getPackageRepositoryURL().toString()
+      + "/repoSize.txt";
+      URLConnection conn = null;
+      URL connURL = new URL(numPackagesS);
+
+      if (PACKAGE_MANAGER.setProxyAuthentication()) {
+        conn = connURL.openConnection(PACKAGE_MANAGER.getProxy());
+      } else {
+        conn = connURL.openConnection();
+      }
+      
+      conn.setConnectTimeout(30000); // timeout after 30 seconds
+      
+      BufferedReader bi = 
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
+      
+      String n = bi.readLine();
+      try {
+        size = Integer.parseInt(n);
+      } catch (NumberFormatException ne) {
+        System.err.println("[WekaPackageManager] problem parsing the size " +
+                        "of repository zip archive from the server.");
+      }
+      bi.close();
+
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    
+    return size;
   }
   
   /**
