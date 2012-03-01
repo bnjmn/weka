@@ -260,6 +260,15 @@
             <goals>
               <goal>jar</goal>
             </goals>
+            <configuration>
+              <excludeResources>true</excludeResources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>attach-test-sources</id>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
