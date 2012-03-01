@@ -15,7 +15,7 @@
 
 /*
  *    Utils.java
- *    Copyright (C) 1999-2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.lang.reflect.Array;
 import java.net.URL;
+import java.text.BreakIterator;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Random;
@@ -2061,7 +2062,59 @@ public final class Utils
     br.flush();
     br.close();
   }
-  
+
+  /**
+   * Breaks up the string, if wider than "columns" characters.
+   *
+   * @param s		the string to process
+   * @param columns	the width in columns
+   * @return		the processed string
+   */
+  public static String[] breakUp(String s, int columns) {
+    Vector<String>	result;
+    String		line;
+    BreakIterator	boundary;
+    int			boundaryStart;
+    int			boundaryEnd;
+    String		word;
+    String		punctuation;
+    int			i;
+    String[]		lines;
+
+    result      = new Vector<String>();
+    punctuation = " .,;:!?'\"";
+    lines       = s.split("\n");
+
+    for (i = 0; i < lines.length; i++) {
+      boundary      = BreakIterator.getWordInstance();
+      boundary.setText(lines[i]);
+      boundaryStart = boundary.first();
+      boundaryEnd   = boundary.next();
+      line          = "";
+
+      while (boundaryEnd != BreakIterator.DONE) {
+	word = lines[i].substring(boundaryStart, boundaryEnd);
+	if (line.length() >= columns) {
+	  if (word.length() == 1) {
+	    if (punctuation.indexOf(word.charAt(0)) > -1) {
+	      line += word;
+	      word = "";
+	    }
+	  }
+	  result.add(line);
+	  line = "";
+	}
+	line          += word;
+	boundaryStart  = boundaryEnd;
+	boundaryEnd    = boundary.next();
+      }
+      if (line.length() > 0)
+	result.add(line);
+    }
+
+    return result.toArray(new String[result.size()]);
+  }
+
   /**
    * Returns the revision string.
    * 
