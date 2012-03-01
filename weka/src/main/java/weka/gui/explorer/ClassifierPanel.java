@@ -15,7 +15,7 @@
 
 /*
  *    ClassifierPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -99,9 +99,9 @@ import weka.core.Range;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.converters.ConverterUtils.DataSource;
 import weka.core.converters.IncrementalConverter;
 import weka.core.converters.Loader;
-import weka.core.converters.ConverterUtils.DataSource;
 import weka.core.pmml.PMMLFactory;
 import weka.core.pmml.PMMLModel;
 import weka.gui.CostMatrixEditor;
@@ -1028,6 +1028,8 @@ public class ClassifierPanel
       }
       m_RunThread = new Thread() {
 	public void run() {
+	  m_CEPanel.addToHistory();
+	  
 	  // Copy the current state of things
 	  m_Log.statusMessage("Setting up...");
 	  CostMatrix costMatrix = null;

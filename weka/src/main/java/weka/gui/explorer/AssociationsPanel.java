@@ -15,38 +15,11 @@
 
 /*
  *    AssociationsPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.explorer;
-
-import weka.associations.AssociationRule;
-import weka.associations.AssociationRules;
-import weka.associations.Associator;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Drawable;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.gui.GenericObjectEditor;
-import weka.gui.Logger;
-import weka.gui.PropertyPanel;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.plugins.TreeVisualizePlugin;
-import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -63,7 +36,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -78,6 +50,31 @@ import javax.swing.JTextArea;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import weka.associations.AssociationRules;
+import weka.associations.Associator;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Drawable;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.gui.GenericObjectEditor;
+import weka.gui.Logger;
+import weka.gui.PropertyPanel;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
+import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
 /** 
  * This panel allows the user to select, configure, and run a scheme
@@ -334,6 +331,8 @@ public class AssociationsPanel
       m_StopBut.setEnabled(true);
       m_RunThread = new Thread() {
 	public void run() {
+	  m_CEPanel.addToHistory();
+	  
 	  // Copy the current state of things
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);

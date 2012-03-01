@@ -15,45 +15,11 @@
 
 /*
  *    PreprocessPanel.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.explorer;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.AbstractFileSaver;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.Loader;
-import weka.core.converters.SerializedInstancesLoader;
-import weka.core.converters.URLSourcedLoader;
-import weka.datagenerators.DataGenerator;
-import weka.experiment.InstanceQuery;
-import weka.filters.Filter;
-import weka.filters.SupervisedFilter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.AttributeSelectionPanel;
-import weka.gui.AttributeSummaryPanel;
-import weka.gui.AttributeVisualizationPanel;
-import weka.gui.ConverterFileChooser;
-import weka.gui.GenericObjectEditor;
-import weka.gui.InstancesSummaryPanel;
-import weka.gui.Logger;
-import weka.gui.PropertyDialog;
-import weka.gui.PropertyPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.ViewerDialog;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.sql.SqlViewerDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -97,6 +63,40 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableModel;
+
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.ConverterUtils;
+import weka.core.converters.Loader;
+import weka.core.converters.SerializedInstancesLoader;
+import weka.core.converters.URLSourcedLoader;
+import weka.datagenerators.DataGenerator;
+import weka.experiment.InstanceQuery;
+import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.AttributeSelectionPanel;
+import weka.gui.AttributeSummaryPanel;
+import weka.gui.AttributeVisualizationPanel;
+import weka.gui.ConverterFileChooser;
+import weka.gui.GenericObjectEditor;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.Logger;
+import weka.gui.PropertyDialog;
+import weka.gui.PropertyPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.ViewerDialog;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.sql.SqlViewerDialog;
 
 /** 
  * This panel controls simple preprocessing of instances. Summary
@@ -615,6 +615,7 @@ public class PreprocessPanel
 	  try {
 
 	    if (filter != null) {
+	      m_FilterPanel.addToHistory();
 	    
 	      if (m_Log instanceof TaskLogger) {
 		((TaskLogger)m_Log).taskStarted();
