@@ -615,6 +615,7 @@ public class PreprocessPanel
 	  try {
 
 	    if (filter != null) {
+	      m_FilterPanel.addToHistory();
 	    
 	      if (m_Log instanceof TaskLogger) {
 		((TaskLogger)m_Log).taskStarted();
