@@ -692,6 +692,8 @@ public class ClustererPanel
       m_ignoreBut.setEnabled(false);
       m_RunThread = new Thread() {
 	public void run() {
+	  m_CLPanel.addToHistory();
+	  
 	  // for timing
           long trainTimeStart = 0, trainTimeElapsed = 0;
           

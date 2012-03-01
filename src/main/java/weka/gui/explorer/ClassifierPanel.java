@@ -1028,6 +1028,8 @@ public class ClassifierPanel
       }
       m_RunThread = new Thread() {
 	public void run() {
+	  m_CEPanel.addToHistory();
+	  
 	  // Copy the current state of things
 	  m_Log.statusMessage("Setting up...");
 	  CostMatrix costMatrix = null;
