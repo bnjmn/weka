@@ -598,6 +598,9 @@ public class AttributeSelectionPanel
       m_StopBut.setEnabled(true);
       m_RunThread = new Thread() {
 	public void run() {
+	  m_AEEPanel.addToHistory();
+	  m_ASEPanel.addToHistory();
+	  
 	  // Copy the current state of things
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);
