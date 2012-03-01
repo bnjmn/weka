@@ -15,21 +15,11 @@
 
 /*
  *    GenericObjectEditor.java
- *    Copyright (C) 2002-2010 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.ClassDiscovery;
-import weka.core.OptionHandler;
-import weka.core.WekaPackageManager;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.gui.CheckBoxList.CheckBoxListModel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -79,13 +69,14 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
 import weka.core.ClassDiscovery;
 import weka.core.CustomDisplayStringProvider;
 import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
+import weka.core.WekaPackageManager;
 import weka.gui.CheckBoxList.CheckBoxListModel;
 
 /**
@@ -159,6 +150,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
   /** whether the class can be changed. */
   protected boolean m_canChangeClassInDialog;
+
+  /** the history of used setups. */
+  protected GenericObjectEditorHistory m_History;
   
   /** whether the Weka Editors were already registered. */
   protected static boolean m_EditorsRegistered;
@@ -994,7 +988,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * Default constructor.
    */
   public GenericObjectEditor() {
-
     this(false);
   }
 
@@ -1005,8 +998,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @param canChangeClassInDialog whether the user can change the class
    */
   public GenericObjectEditor(boolean canChangeClassInDialog) {
-
     m_canChangeClassInDialog = canChangeClassInDialog;
+    m_History = new GenericObjectEditorHistory();
   }
   
   /**
@@ -1775,6 +1768,15 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     return result;
   }
 
+  /**
+   * Returns the history of the used setups.
+   * 
+   * @return		the history
+   */
+  public GenericObjectEditorHistory getHistory() {
+    return m_History;
+  }
+  
   /**
    * Tests out the Object editor from the command line.
    *

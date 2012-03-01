@@ -15,15 +15,12 @@
 
 /*
  *    PropertyPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
-
-import weka.core.OptionHandler;
-import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -47,6 +44,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.gui.GenericObjectEditorHistory.HistorySelectionEvent;
+import weka.gui.GenericObjectEditorHistory.HistorySelectionListener;
 
 /** 
  * Support for drawing a property value in a component.
@@ -92,7 +94,7 @@ public class PropertyPanel
    */
   public PropertyPanel(PropertyEditor pe, boolean ignoreCustomPanel) {
 
-    m_Editor = pe;
+    m_Editor  = pe;
     
     if (!ignoreCustomPanel && m_Editor instanceof CustomPanelSupplier) {
       setLayout(new BorderLayout());
@@ -175,6 +177,17 @@ public class PropertyPanel
               }
             });
             menu.add(item);
+
+            if (m_Editor instanceof GenericObjectEditor) {
+              ((GenericObjectEditor) m_Editor).getHistory().customizePopupMenu(
+        	  menu,
+        	  m_Editor.getValue(),
+        	  new HistorySelectionListener() {
+        	    public void historySelected(HistorySelectionEvent e) {
+        	      m_Editor.setValue(e.getHistoryItem());
+        	    }
+        	  });
+            }
             
             menu.show(comp, evt.getX(), evt.getY());
           }
@@ -261,4 +274,27 @@ public class PropertyPanel
     }
   }
 
+  /**
+   * Adds the current editor value to the history.
+   * 
+   * @return		true if successfully added (i.e., if editor is a GOE)
+   */
+  public boolean addToHistory() {
+    return addToHistory(m_Editor.getValue());
+  }
+
+  /**
+   * Adds the specified value to the history.
+   * 
+   * @param obj		the object to add to the history
+   * @return		true if successfully added (i.e., if editor is a GOE)
+   */
+  public boolean addToHistory(Object obj) {
+    if ((m_Editor instanceof GenericObjectEditor) && (obj != null)) {
+      ((GenericObjectEditor) m_Editor).getHistory().add(obj);
+      return true;
+    }
+    
+    return false;
+  }
 }
