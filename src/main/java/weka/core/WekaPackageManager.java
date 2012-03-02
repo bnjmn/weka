@@ -155,7 +155,7 @@ public class WekaPackageManager {
           repURL = REP_MIRROR;
           
           if (!REP_MIRROR.equals(PRIMARY_REPOSITORY)) {
-            System.out.println("Package manager using repository mirror: " +
+            System.err.println("Package manager using repository mirror: " +
                 REP_MIRROR);
           }
         } else {          
