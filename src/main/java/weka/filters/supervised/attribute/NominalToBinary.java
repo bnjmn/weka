@@ -471,7 +471,7 @@ public class NominalToBinary
     }
     
     if (!m_needToTransform) {
-      setOutputFormat(new Instances(getInputFormat()));
+      setOutputFormat(getInputFormat());
       return;
     }
 
@@ -546,7 +546,7 @@ public class NominalToBinary
     }
     
     if (!m_needToTransform) {
-      setOutputFormat(new Instances(getInputFormat()));
+      setOutputFormat(getInputFormat());
       return;
     }
 
