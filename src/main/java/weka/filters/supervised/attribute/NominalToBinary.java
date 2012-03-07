@@ -464,7 +464,7 @@ public class NominalToBinary
     for (int i = 0; i < getInputFormat().numAttributes(); i++) {
       Attribute att = getInputFormat().attribute(i);
       if (att.isNominal() && i != getInputFormat().classIndex() && 
-          (att.numValues() > 2 || m_TransformAll)) {
+          (att.numValues() > 2 || m_TransformAll || m_Numeric)) {
         m_needToTransform = true;
         break;
       }
@@ -539,7 +539,7 @@ public class NominalToBinary
     m_needToTransform = false;
     for (int i = 0; i < getInputFormat().numAttributes(); i++) {
       Attribute att = getInputFormat().attribute(i);
-      if (att.isNominal()) {
+      if (att.isNominal() && (att.numValues() > 2 || m_Numeric || m_TransformAll)) {
         m_needToTransform = true;
         break;
       }
