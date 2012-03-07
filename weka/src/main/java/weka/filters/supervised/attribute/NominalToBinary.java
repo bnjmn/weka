@@ -471,7 +471,7 @@ public class NominalToBinary
     }
     
     if (!m_needToTransform) {
-      setOutputFormat(new Instances(getInputFormat()));
+      setOutputFormat(getInputFormat());
       return;
     }
 
@@ -546,7 +546,7 @@ public class NominalToBinary
     }
     
     if (!m_needToTransform) {
-      setOutputFormat(new Instances(getInputFormat()));
+      setOutputFormat(getInputFormat());
       return;
     }
 
@@ -597,6 +597,11 @@ public class NominalToBinary
    * @param instance the instance to convert
    */
   private void convertInstanceNominal(Instance instance) {
+    
+    if (!m_needToTransform) {
+      push(instance);
+      return;
+    }
 
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
@@ -647,6 +652,11 @@ public class NominalToBinary
    * @param instance the instance to convert
    */
   private void convertInstanceNumeric(Instance instance) {
+    
+    if (!m_needToTransform) {
+      push(instance);
+      return;
+    }
 
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
