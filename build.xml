@@ -177,6 +177,7 @@
       taskname="junit" failonerror="${run_tests_fail}">
 	 <arg value="weka.AllTests"/>
          <classpath refid="project.class.path" /> 
+         <jvmarg value="-Duser.timezone=Pacific/Auckland"/>
          <jvmarg value="-Djava.awt.headless=${headless}"/> 
          <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
      </java>
