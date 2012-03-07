@@ -256,6 +256,7 @@
       <include name="src/**/*.cost"/>
       <include name="src/**/*.arff"/>
       <include name="src/**/*.matrix"/>
+      <include name="src/**/*.ref"/>
       <include name="lib/**/*.jar"/>
       <include name="resources/**/*"/>
     </jar>
