@@ -522,11 +522,15 @@ public class SMOreg
     m_Missing = new ReplaceMissingValues();
     m_Missing.setInputFormat(instances);
     instances = Filter.useFilter(instances, m_Missing);
-    
-    if (!m_onlyNumeric) {
-      m_NominalToBinary = new NominalToBinary();
-      m_NominalToBinary.setInputFormat(instances);
-      instances = Filter.useFilter(instances, m_NominalToBinary);
+
+    if (getCapabilities().handles(Capability.NUMERIC_ATTRIBUTES)) {
+      if (!m_onlyNumeric) {
+        m_NominalToBinary = new NominalToBinary();
+        m_NominalToBinary.setInputFormat(instances);
+        instances = Filter.useFilter(instances, m_NominalToBinary);
+      } else {
+        m_NominalToBinary = null;
+      }
     } else {
       m_NominalToBinary = null;
     }
@@ -585,7 +589,7 @@ public class SMOreg
     m_Missing.batchFinished();
     instance = m_Missing.output();
     
-    if (!m_onlyNumeric) {
+    if (!m_onlyNumeric && m_NominalToBinary != null) {
       m_NominalToBinary.input(instance);
       m_NominalToBinary.batchFinished();
       instance = m_NominalToBinary.output();
