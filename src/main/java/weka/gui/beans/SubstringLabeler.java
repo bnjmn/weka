@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
 
@@ -83,6 +84,9 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
     
     /** True if case should be ignored when matching */
     protected boolean m_ignoreCase;
+    
+    /** Precompiled regex pattern */
+    protected Pattern m_regexPattern;
     
     /** The attributes to apply the match-replace rule to */
     protected String m_attsToApplyTo = "";
@@ -259,7 +263,17 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
         m_matchS = env.substitute(m_matchS);
         m_labelS = env.substitute(m_labelS);
         attsToApplyToS = env.substitute(attsToApplyToS);
-      } catch (Exception ex) {}      
+      } catch (Exception ex) {}
+      
+      if (m_regex) {
+        String match = m_matchS;
+        if (m_ignoreCase) {
+          match = match.toLowerCase();
+        }
+
+        // precompile regular expression for speed
+        m_regexPattern = Pattern.compile(match);
+      }
             
       // Try a range first for the attributes
       String tempRangeS = attsToApplyToS;
@@ -373,7 +387,8 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       }
       if (result != null && result.length() > 0) {
         if (m_regex) {
-          if (result.matches(match)) {
+          if (m_regexPattern.matcher(result).matches()) {
+          //if (result.matches(match)) {
             ruleMatches = true;
           }
         } else {
