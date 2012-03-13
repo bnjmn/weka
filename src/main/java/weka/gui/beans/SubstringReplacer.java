@@ -15,7 +15,7 @@
 
 /*
  *    SubstringReplacer.java
- *    Copyright (C) 2011 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2011-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
 
@@ -76,6 +77,9 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     
     /** True if a regular expression match is to be used */
     protected boolean m_regex;
+    
+    /** Precompiled regex */
+    protected Pattern m_regexPattern;
     
     /** True if case should be ignored when matching */
     protected boolean m_ignoreCase;
@@ -142,7 +146,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       }
       
       if (parts.length == 5) {
-        m_replace = parts[4].trim();
+        m_replace = parts[4];
       }
     }
     
@@ -256,6 +260,16 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
         m_replaceS = env.substitute(m_replace);
         attsToApplyToS = env.substitute(attsToApplyToS);
       } catch (Exception ex) {}      
+      
+      if (m_regex) {
+        String match = m_matchS;
+        if (m_ignoreCase) {
+          match = match.toLowerCase();
+        }
+
+        // precompile regular expression for speed
+        m_regexPattern = Pattern.compile(match);
+      }
             
       // Try a range first for the attributes
       String tempRangeS = attsToApplyToS;
@@ -333,20 +347,22 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       
       for (int i = 0; i < m_selectedAtts.length; i++) {
         int numStringVals = inst.attribute(m_selectedAtts[i]).numValues();
-        String value = inst.stringValue(m_selectedAtts[i]);
-        value = apply(value);
-        inst.dataset().attribute(m_selectedAtts[i]).setStringValue(value);
-        
-        // only set the index to zero if there were more than 1 string values
-        // for this string attribute (meaning that although the data is streaming
-        // in, the user has opted to retain all string values in the header. We
-        // only operate in pure streaming - one string value in memory at any
-        // one time - mode).
-        
-        // this check saves time (no new attribute vector created) if there is
-        // only one value (i.e. index is already zero).
-        if (numStringVals > 1) {
-          inst.setValue(m_selectedAtts[i], 0);
+        if (!inst.isMissing(m_selectedAtts[i])) {
+          String value = inst.stringValue(m_selectedAtts[i]);
+          value = apply(value);
+          inst.dataset().attribute(m_selectedAtts[i]).setStringValue(value);
+
+          // only set the index to zero if there were more than 1 string values
+          // for this string attribute (meaning that although the data is streaming
+          // in, the user has opted to retain all string values in the header. We
+          // only operate in pure streaming - one string value in memory at any
+          // one time - mode).
+
+          // this check saves time (no new attribute vector created) if there is
+          // only one value (i.e. index is already zero).
+          if (numStringVals > 1) {
+            inst.setValue(m_selectedAtts[i], 0);
+          }
         }
       }
     }
@@ -367,7 +383,8 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       }
       if (result != null && result.length() > 0) {
         if (m_regex) {
-          result = result.replaceAll(match, m_replaceS);
+          //result = result.replaceAll(match, m_replaceS);
+          result = m_regexPattern.matcher(result).replaceAll(m_replaceS);
         } else {
           result = result.replace(match, m_replaceS);
         }
