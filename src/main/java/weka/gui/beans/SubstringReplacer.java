@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
 
@@ -76,6 +77,9 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     
     /** True if a regular expression match is to be used */
     protected boolean m_regex;
+    
+    /** Precompiled regex */
+    protected Pattern m_regexPattern;
     
     /** True if case should be ignored when matching */
     protected boolean m_ignoreCase;
@@ -256,6 +260,16 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
         m_replaceS = env.substitute(m_replace);
         attsToApplyToS = env.substitute(attsToApplyToS);
       } catch (Exception ex) {}      
+      
+      if (m_regex) {
+        String match = m_matchS;
+        if (m_ignoreCase) {
+          match = match.toLowerCase();
+        }
+
+        // precompile regular expression for speed
+        m_regexPattern = Pattern.compile(match);
+      }
             
       // Try a range first for the attributes
       String tempRangeS = attsToApplyToS;
@@ -369,7 +383,8 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       }
       if (result != null && result.length() > 0) {
         if (m_regex) {
-          result = result.replaceAll(match, m_replaceS);
+          //result = result.replaceAll(match, m_replaceS);
+          result = m_regexPattern.matcher(result).replaceAll(m_replaceS);
         } else {
           result = result.replace(match, m_replaceS);
         }
