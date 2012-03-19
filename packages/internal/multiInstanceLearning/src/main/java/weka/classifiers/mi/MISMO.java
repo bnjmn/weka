@@ -13,6 +13,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
  * MISMO.java
  * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
