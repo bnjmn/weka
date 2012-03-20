@@ -6,10 +6,10 @@
 PackageName=chiSquaredAttributeEval
 
 # Version (required)
-Version=1.0.0
+Version=1.0.2
 
 #Date
-Date=2009-09-10
+Date=2012-03-20
 
 # Title (required)
 Title=Attribute evaluator that evaluates the worth of an attribute by computing the value of the chi-squared statistic with respect to the class.
@@ -23,13 +23,13 @@ Author=Eibe Frank
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=Evaluates the worth of an attribute by computing the value of the chi-squared statistic with respect to the class.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/chiSquaredAttributeEval1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/chiSquaredAttributeEval1.0.2.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/chiSquaredAttributeEval
