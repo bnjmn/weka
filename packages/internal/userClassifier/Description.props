@@ -6,10 +6,10 @@
 PackageName=userClassifier
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2010-05-31
+Date=2012-03-20
 
 # Title (required)
 Title=Interactively classify through visual means.
@@ -23,13 +23,13 @@ Author=Malcolm Ware
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=Interactively classify through visual means. You are Presented with a scatter graph of the data against two user selectable attributes, as well as a view of the decision tree. You can create binary splits by creating polygons around data plotted on the scatter graph, as well as by allowing another classifier to take over at points in the decision tree should you see fit.<br/><br/>For more information see:<br/><br/>Malcolm Ware, Eibe Frank, Geoffrey Holmes, Mark Hall, Ian H. Witten (2001). Interactive machine learning: letting users build classifiers. Int. J. Hum.-Comput. Stud. 55(3):281-292.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/userClassifier1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/userClassifier1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/userClassifier

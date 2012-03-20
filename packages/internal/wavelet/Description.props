@@ -6,10 +6,10 @@
 PackageName=wavelet
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2010-05-31
+Date=2012-03-20
 
 # Title (required)
 Title= A filter for wavelet transformation.
@@ -23,13 +23,13 @@ Author=Peter Reutemann
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description= A filter for wavelet transformation.<br/><br/>For more information see:<br/><br/>Wikipedia (2004). Discrete wavelet transform.<br/><br/>Kristian Sandberg (2000). The Haar wavelet transform. University of Colorado at Boulder, USA.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wavelet1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wavelet1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/wavelet

@@ -6,10 +6,10 @@
 PackageName=hyperPipes
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2009-09-10
+Date=2012-03-20
 
 # Title (required)
 Title=Class implementing a HyperPipe classifier.
@@ -23,13 +23,13 @@ Author=Len Trigg and Lucio de Souza Coelho
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=Class implementing a HyperPipe classifier. For each category a HyperPipe is constructed that contains all points of that category (essentially records the attribute bounds observed for each category). Test instances are classified according to the category that "most contains the instance".<br/>Does not handle numeric class, or missing values in test cases. Extremely simple algorithm, but has the advantage of being extremely fast, and works quite well when you have "smegloads" of attributes.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/hyperPipes1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/hyperPipes1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/hyperPipes

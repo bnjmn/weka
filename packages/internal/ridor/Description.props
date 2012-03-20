@@ -6,10 +6,10 @@
 PackageName=ridor
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2010-05-31
+Date=2012-03-20
 
 # Title (required)
 Title=An implementation of a RIpple-DOwn Rule learner.
@@ -23,13 +23,13 @@ Author=Xin Xu
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=An implementation of a RIpple-DOwn Rule learner.<br/><br/>It generates a default rule first and then the exceptions for the default rule with the least (weighted) error rate.  Then it generates the "best" exceptions for each exception and iterates until pure.  Thus it performs a tree-like expansion of exceptions.The exceptions are a set of rules that predict classes other than the default. IREP is used to generate the exceptions.<br/><br/>For more information about Ripple-Down Rules, see:<br/><br/>Brian R. Gaines, Paul Compton (1995). Induction of Ripple-Down Rules Applied to Modeling Large Databases. J. Intell. Inf. Syst. 5(3):211-228.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/ridor1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/ridor1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/ridor

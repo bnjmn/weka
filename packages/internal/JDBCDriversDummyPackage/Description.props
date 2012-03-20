@@ -9,7 +9,7 @@ PackageName=JDBCDriversDummyPackage
 Version=1.0.0
 
 #Date
-Date=2010-08-30
+Date=2012-03-20
 
 # Title (required)
 Title=Dummy package that provides a place to drop JDBC driver jar files so that they get loaded by the system.
