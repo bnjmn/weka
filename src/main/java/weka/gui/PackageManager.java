@@ -345,7 +345,7 @@ public class PackageManager extends JPanel {
         
         // a difference here indicates a newer version on the server
         if (!localVersion.equals(repoVersion)) {
-          updatedPackagesBuff.append(localPackage + " (" + repoVersion + ")");
+          updatedPackagesBuff.append(localPackage + " (" + repoVersion + ")<br>");
         }
       }
       
