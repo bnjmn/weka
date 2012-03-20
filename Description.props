@@ -6,10 +6,10 @@
 PackageName=leastMedSquared
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2009-09-10
+Date=2012-03-20
 
 # Title (required)
 Title=Implements a least median squared linear regression utilizing the existing weka LinearRegression class to form predictions.
@@ -23,13 +23,13 @@ Author=Tony Voyle
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=Implements a least median squared linear regression utilizing the existing weka LinearRegression class to form predictions. Least squared regression functions are generated from random subsamples of the data. The least squared regression with the lowest meadian squared error is chosen as the final model.<br/><br/>The basis of the algorithm is <br/><br/>Peter J. Rousseeuw, Annick M. Leroy (1987). Robust regression and outlier detection.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/leastMedSquared1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/leastMedSquared1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/leastMedSquared
