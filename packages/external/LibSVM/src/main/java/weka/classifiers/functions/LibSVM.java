@@ -457,7 +457,7 @@ public class LibSVM
     
     result.addElement(
         new Option(
-            "\tTrains a SVC model instead of a SVR one (default: SVR)",
+            "\tGenerate probability estimates for classification",
             "B", 0, "-B"));
     
     result.addElement(
