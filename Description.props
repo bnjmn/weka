@@ -5,10 +5,10 @@
 PackageName=cascadeKMeans
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date (year-month-day)
-Date=2012-02-08
+Date=2012-03-20
 
 # Title (required)
 Title=k-means clustering with automatic selection of k
@@ -23,13 +23,13 @@ Author=Martin Guetlein <martin.guetlein@googlemail.com>
 Maintainer=Martin Guetlein <martin.guetlein@googlemail.com>
 
 # License (required)
-License=GPL 2
+License=GPL 3.0
 
 # Description (required)
 Description=k-means clustering with automatic selection of k. Restarts k-means and selects the best k using the Calinski and Harabasz criterion, without cross-validation.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/cascadeKMeans1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/cascadeKMeans1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/cascadeKMeans
