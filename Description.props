@@ -6,10 +6,10 @@
 PackageName=grading
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2009-09-10
+Date=2012-03-20
 
 # Title (required)
 Title=Implements Grading. The base classifiers are "graded".
@@ -23,13 +23,13 @@ Author=Alexander K. Seewald and Eibe Frank
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=Implements Grading. The base classifiers are "graded".<br/><br/>For more information, see<br/><br/>A.K. Seewald, J. Fuernkranz: An Evaluation of Grading Classifiers. In: Advances in Intelligent Data Analysis: 4th International Conference, Berlin/Heidelberg/New York/Tokyo, 115-124, 2001.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/grading1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/grading1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/grading
