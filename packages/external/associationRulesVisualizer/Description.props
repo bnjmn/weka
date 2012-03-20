@@ -6,10 +6,10 @@
 PackageName=associationRulesVisualizer
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2010-03-23
+Date=2012-03-20
 
 # Title (required)
 Title=A visualization component for displaying association rules that uses a modified version of the Association Rules Viewer from DESS IAGL of Lille.
@@ -23,13 +23,13 @@ Author=D. Delautre, S. Demay and Mark Hall
 Maintainer=Mark Hall <mhall@pentaho.com>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=A visualization component for displaying association rules that uses a modified version of the Association Rules Viewer from DESS IAGL of Lille. Requires Java 3D to be installed.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/associationRulesVisualizer1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/associationRulesVisualizer1.0.1.zip?download
 
 # URL for further information
 URL=http://www2.lifl.fr/~jourdan/download/arv.html

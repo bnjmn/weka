@@ -6,10 +6,10 @@
 PackageName=kfPMMLClassifierScoring
 
 # Version (required)
-Version=1.0.1
+Version=1.0.2
 
 #Date
-Date=2011-10-31
+Date=2012-03-20
 
 # Title (required)
 Title=A Knowledge Flow plugin that provides a Knowledge Flow step for scoring test sets or instance streams using a PMML classifier.
@@ -23,7 +23,7 @@ Author=Mark Hall <mhall@pentaho.com>
 Maintainer=Mark Hall <mhall@pentaho.com>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=A Knowledge Flow plugin that provides a Knowledge Flow step for scoring test sets or instance streams using a PMML classifier.
@@ -31,7 +31,7 @@ Description=A Knowledge Flow plugin that provides a Knowledge Flow step for scor
 Changes=This release uses the KFStep annotation to provide category and tool tip information.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/kfPMMLClassifierScoring1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/kfPMMLClassifierScoring1.0.2.zip?download
 
 # URL for further information
 URL=http://wiki.pentaho.com/display/DATAMINING/PMML+Support+in+Weka

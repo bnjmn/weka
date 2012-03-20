@@ -6,10 +6,10 @@
 PackageName=tabuAndScatterSearch
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2009-09-10
+Date=2012-03-20
 
 # Title (required)
 Title=Search methods contributed by Adrian Pino (ScatterSearchV1, TabuSearch)
@@ -23,13 +23,13 @@ Author=Adrian Pino <apinoa@facinf.uho.edu.cu>
 Maintainer=Adrian Pino <apinoa@facinf.uho.edu.cu>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=Search methods contributed by Adrian Pino (ScatterSearchV1, TabuSearch). ScatterSearch: Performs an Scatter Search through the space of attribute subsets. Start with a population of many significants and diverses subset  stops when the result is higher than a given treshold or there's not more improvement. For more information see: Felix Garcia Lopez (2004). Solving feature subset selection problem by a Parallel Scatter Search. Elsevier. Tabu Search: Abdel-Rahman Hedar, Jue Wangy, Masao Fukushima (2006). Tabu Search for Attribute Reduction in Rough Set Theory.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/tabuAndScatterSearch1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/tabuAndScatterSearch1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/tabuAndScatterSearch

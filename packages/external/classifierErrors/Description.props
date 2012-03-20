@@ -6,10 +6,10 @@
 PackageName=classifierErrors
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2009-09-10
+Date=2012-03-20
 
 # Title (required)
 Title=A visualization component for displaying errors from numeric schemes using the JMathTools library.
@@ -23,13 +23,13 @@ Author=Peter Reutemann <fracpete@cs.waikato.ac.nz>
 Maintainer=Peter Reutemann <fracpete@cs.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=A visualization component for displaying the errors made by numeric classifiers. This component uses the plotting classes from the JMathTools library.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/classifierErrors1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/classifierErrors1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.wikispaces.com/Explorer+error+visualization+plugins

@@ -9,7 +9,7 @@ PackageName=fuzzyUnorderedRuleInduction
 Version=1.0.0
 
 #Date
-Date=2009-09-10
+Date=2012-03-20
 
 # Title (required)
 Title=Fuzzy Unordered Rule Induction Algorithm
@@ -23,7 +23,7 @@ Author=Jens Christian H&uuml;hn <huehn@gmx.net>
 Maintainer=Jens Christian H&uuml;hn <huehn@gmx.net>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=FURIA: Fuzzy Unordered Rule Induction Algorithm. For details please see: Jens Christian Huehn, Eyke Huellermeier (2009). FURIA: An Algorithm for Unordered Fuzzy Rule Induction. Data Mining and Knowledge Discovery.

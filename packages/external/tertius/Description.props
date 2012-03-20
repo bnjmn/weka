@@ -6,10 +6,10 @@
 PackageName=tertius
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2009-09-10
+Date=2012-03-20
 
 # Title (required)
 Title=Finds rules according to confirmation measure (Tertius-type algorithm)
@@ -23,13 +23,13 @@ Author=Amelie Deltour <adeltour@netcourrier.com>
 Maintainer=Amelie Deltour <adeltour@netcourrier.com>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=Finds rules according to confirmation measure (Tertius-type algorithm). For more information see: P. A. Flach, N. Lachiche (1999). Confirmation-Guided Discovery of first-order rules with Tertius. Machine Learning. 42:61-95.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/tertius1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/tertius1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/tertius
