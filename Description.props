@@ -6,10 +6,10 @@
 PackageName=classAssociationRules
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2010-09-22
+Date=2012-03-20
 
 # Title (required)
 Title=Class association rules algorithms (including an implementation of the CBA algorithm).
@@ -23,7 +23,7 @@ Author= Stefan Mutter <mutter@cs.waikato.ac.nz>
 Maintainer=Stefan Mutter <mutter@cs.waikato.ac.nz>
 
 # License (required)
-License=GPL 2.0
+License=GPL 3.0
 
 # Description (required)
 Description=Class association rules algorithms (including an implementation of the CBA algorithm). For more information see:<br><br> W. Li, J. Han, J.Pei: CMAR: Accurate and Efficient Classification Based on Multiple Class-Association Rules. In ICDM'01:369-376,2001.<br><br>B. Liu, W. Hsu, Y. Ma: Integrating Classification and Association Rule Mining. In KDD'98:80-86,1998.
@@ -32,7 +32,7 @@ Description=Class association rules algorithms (including an implementation of t
 #Changes=
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/classAssociationRules1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/classAssociationRules1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/classAssociationRules
