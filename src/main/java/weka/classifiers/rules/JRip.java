@@ -668,7 +668,7 @@ public class JRip
    * the corresponding value.  There are two inherited classes, namely NumericAntd
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */    
-  private abstract class Antd 
+  public abstract class Antd 
     implements WeightedInstancesHandler, Copyable, Serializable, RevisionHandler {
 
     /** for serialization */
@@ -740,7 +740,7 @@ public class JRip
   /** 
    * The antecedent with numeric attribute
    */
-  private class 
+  public class 
     NumericAntd extends Antd {
     
     /** for serialization */
@@ -943,7 +943,7 @@ public class JRip
   /** 
    * The antecedent with nominal attribute
    */
-  private class NominalAntd 
+  public class NominalAntd 
     extends Antd {
 	
     /** for serialization */
@@ -1073,7 +1073,7 @@ public class JRip
    * select an antecedent and Reduced Error Prunning (REP) with the metric
    * of accuracy rate p/(p+n) or (TP+TN)/(P+N) is used to prune the rule. 
    */    
-  protected class RipperRule 
+  public class RipperRule 
     extends Rule {
     
     /** for serialization */
@@ -1152,6 +1152,15 @@ public class JRip
       else
 	return (m_Antds.size() > 0);
     }      
+    
+    /**
+     * Return the antecedents
+     * 
+     * @return the vector of antecedents
+     */
+    public FastVector getAntds() {
+      return m_Antds;
+    }
 	
     /** 
      * the number of antecedents of the rule
