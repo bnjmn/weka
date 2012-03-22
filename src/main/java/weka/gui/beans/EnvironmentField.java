@@ -171,7 +171,12 @@ public class EnvironmentField extends JPanel
    */
   public void setText(String text) {
     m_currentContents = text;
-    m_combo.setSelectedItem(m_currentContents);
+    java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
+    if (theEditor instanceof JTextField) {
+      ((JTextField)theEditor).setText(text);
+    } else {
+      m_combo.setSelectedItem(m_currentContents);
+    }
     m_support.firePropertyChange("", null, null);
   }
   
