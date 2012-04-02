@@ -1,0 +1,12 @@
+# Customises the list of options given by the GenericObjectEditor
+# for various superclasses.
+#
+# Version: $Revision$
+
+# Lists the nominal attribute generators packages I want to choose from
+weka.classifiers.meta.generators.NominalAttributeGenerator=\
+ weka.classifiers.meta.generators
+
+# Lists the numeric attribute generators packages I want to choose from
+weka.classifiers.meta.generators.NumericAttributeGenerator=\
+ weka.classifiers.meta.generators
