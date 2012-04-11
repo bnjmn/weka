@@ -1322,19 +1322,19 @@ public class LADTree
    */
   public double getMeasure(String additionalMeasureName) {
     
-    if (additionalMeasureName.equals("measureTreeSize")) {
+    if (additionalMeasureName.equalsIgnoreCase("measureTreeSize")) {
       return measureTreeSize();
     }
-    else if (additionalMeasureName.equals("measureNodesExpanded")) {
+    else if (additionalMeasureName.equalsIgnoreCase("measureNodesExpanded")) {
       return measureNodesExpanded();
     }
-    else if (additionalMeasureName.equals("measureNumLeaves")) {
+    else if (additionalMeasureName.equalsIgnoreCase("measureNumLeaves")) {
       return measureNumLeaves();
     }
-    else if (additionalMeasureName.equals("measureNumPredictionLeaves")) {
+    else if (additionalMeasureName.equalsIgnoreCase("measureNumPredictionLeaves")) {
       return measureNumPredictionLeaves();
     }
-    else if (additionalMeasureName.equals("measureExamplesCounted")) {
+    else if (additionalMeasureName.equalsIgnoreCase("measureExamplesCounted")) {
       return measureExamplesCounted();
     }
     else {throw new IllegalArgumentException(additionalMeasureName 
