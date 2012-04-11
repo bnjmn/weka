@@ -766,9 +766,9 @@ public class SMOreg
    * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String measureName) {
-    if (measureName.equals("measureKernelEvaluations"))
+    if (measureName.equalsIgnoreCase("measureKernelEvaluations"))
       return measureKernelEvaluations();
-    else if (measureName.equals("measureCacheHits"))
+    else if (measureName.equalsIgnoreCase("measureCacheHits"))
       return measureCacheHits();
     else
       throw new IllegalArgumentException("Measure '" +  measureName + "' is not supported!");
