@@ -53,9 +53,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/branches/stable-3-6/</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/branches/stable-3-6/</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/branches/stable-3-6/</url>
   </scm>
 
   <profiles>
@@ -287,6 +287,15 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.2.2</version>
+        <configuration>
+          <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags/</tagBase>
+        </configuration>
       </plugin>
     </plugins>
   </build>
