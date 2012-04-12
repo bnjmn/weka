@@ -1,0 +1,408 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-4-13 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-4-13 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://ant.apache.org/">Apache Ant</a>.</p>
+<hr>
+<table border="0" width="100%" cellspacing="1">
+<tr>
+<td class="dateAndAuthor">2008-07-15 04:30 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated copyright dates</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/KnowledgeFlowApp.html?rev=1.1.2.12&content-type=text/x-cvsweb-markup">gui/beans/KnowledgeFlowApp.html (1.1.2.12)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-15 04:29 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated copyright dates</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/Explorer.html?rev=1.30.2.4&content-type=text/x-cvsweb-markup">gui/explorer/Explorer.html (1.30.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-07-15 04:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated copyright dates</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GUIChooser.html?rev=1.14.2.13&content-type=text/x-cvsweb-markup">gui/GUIChooser.html (1.14.2.13)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-06-12 23:08 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fix for partitionOptions by Ingo Mierswa - allows additional options to the search to be given after the -- without having to explicitly specify the estimator with -E</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/BayesNet.html?rev=1.21.2.5&content-type=text/x-cvsweb-markup">classifiers/bayes/BayesNet.html (1.21.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-19 04:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed parameter rounding (now uses Math.rint() so that, for example, -1 is not rounded to 0.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/CVParameterSelection.html?rev=1.27.2.4&content-type=text/x-cvsweb-markup">classifiers/meta/CVParameterSelection.html (1.27.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-16 04:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Deleted all package names from file name of the saved file because the length of file names was getting out of hand (especially when a lot of filters are in the flow)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Saver.html?rev=1.1.2.2&content-type=text/x-cvsweb-markup">gui/beans/Saver.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-05-15 04:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug where class-distribution-spreads &lt; 1 caused the minority class to be undersampled as well as the other classes.</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/supervised/instance/SpreadSubsample.html?rev=1.3.2.2&content-type=text/x-cvsweb-markup">filters/supervised/instance/SpreadSubsample.html (1.3.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-11 03:18 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Cluster priors now use Laplace correction so that empty clusters from the base cluster can be handled.</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/MakeDensityBasedClusterer.html?rev=1.5.2.3&content-type=text/x-cvsweb-markup">clusterers/MakeDensityBasedClusterer.html (1.5.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-09 22:56 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Bugfixes courtesy of Benoit Depaire</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/PredictiveApriori.html?rev=1.3.2.3&content-type=text/x-cvsweb-markup">associations/PredictiveApriori.html (1.3.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-04-07 21:22 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed option handling of -C parameter:
+- initial value for m_ClassMode was OPTIMIZE_POS_NAME
+- default in setOptions was OPTIMIZE_LFREQ instead
+- getOptions returned m_DesignatedClass instead of m_ClassMode</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/ThresholdSelector.html?rev=1.30.2.3&content-type=text/x-cvsweb-markup">classifiers/meta/ThresholdSelector.html (1.30.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-30 08:56 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>if clusterer cannot cluster instance (in method convertInstance), the exception thrown is now caught and a missing value is set</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddCluster.html?rev=1.3.2.2&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddCluster.html (1.3.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-25 04:06 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug that caused missing values indicated by ,, in the csv file to be turned into '?' labels rather than actual missing values</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/CSVLoader.html?rev=1.9.2.4&content-type=text/x-cvsweb-markup">core/converters/CSVLoader.html (1.9.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-14 09:55 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>DatabaseUtils.props example file for sqlite3
+homepage:
+  http://www.sqlite.org/
+JDBC driver:
+  http://www.zentus.com/sqlitejdbc/</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.sqlite3?rev=1.1.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.sqlite3 (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-03-09 00:35 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>uses now ZeroR model in case there are no attributes in dataset apart from class (otherwise attribute selection combination WrapperSubsetEval+DecisionStump/BestFirst craps out)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/DecisionStump.html?rev=1.18.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/DecisionStump.html (1.18.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-27 01:41 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug related to computing centroids when there are empty clusters.</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/SimpleKMeans.html?rev=1.19.2.5&content-type=text/x-cvsweb-markup">clusterers/SimpleKMeans.html (1.19.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-21 01:36 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed old bug that prevented the classifier chosen by the user to take over at a node from being changed. The generic object editor used to be stuck on ZeroR after the classifier was initially chosen.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/UserClassifier.html?rev=1.18.2.2&content-type=text/x-cvsweb-markup">classifiers/trees/UserClassifier.html (1.18.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-20 02:37 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Made some methods synchronized</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/LogPanel.html?rev=1.14.2.2&content-type=text/x-cvsweb-markup">gui/LogPanel.html (1.14.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/WekaTaskMonitor.html?rev=1.6.4.1&content-type=text/x-cvsweb-markup">gui/WekaTaskMonitor.html (1.6.4.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-18 02:36 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug where if the window was closed (rather than ok or cancel being pressed) the connection would be made. Closing the window is now the same as canceling.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/DatabaseConnectionDialog.html?rev=1.2.2.2&content-type=text/x-cvsweb-markup">gui/DatabaseConnectionDialog.html (1.2.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-18 02:34 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed a couple of bugs where database connection was not being closed if close/cancel was pressed. Thanks to Miryam Gomez and Raquel Porras for the bug fix</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/ResultsPanel.html?rev=1.28.2.5&content-type=text/x-cvsweb-markup">gui/experiment/ResultsPanel.html (1.28.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-02-15 03:48 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed potential memory leak in removeElementAt</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/FastVector.html?rev=1.11.2.1&content-type=text/x-cvsweb-markup">core/FastVector.html (1.11.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-25 22:16 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now emits trainingSetEvents and testSetEvents as well as dataSetEvents for clusterers.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/PredictionAppender.html?rev=1.9.2.5&content-type=text/x-cvsweb-markup">gui/beans/PredictionAppender.html (1.9.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-18 04:39 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed proprietary com.sun.image.codec.jpeg.JPEGCodec etc classes and replaced them with javax.imageio ones</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/boundaryvisualizer/BoundaryPanel.html?rev=1.19.2.1&content-type=text/x-cvsweb-markup">gui/boundaryvisualizer/BoundaryPanel.html (1.19.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/JPEGWriter.html?rev=1.1.2.2&content-type=text/x-cvsweb-markup">gui/visualize/JPEGWriter.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-10 21:30 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added a readResolve method to ensure that the encapsulated loader gets reset after deserialization. This ensures that any structure available events get passed on correctly.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Loader.html?r1=1.10.2.5&r2=1.10.2.4">gui/beans/Loader.html (1.10.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2008-01-08 01:02 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now resets the loader for batch loading. This was preventing the loading of batch instances after deserialization</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Loader.html?rev=1.10.2.4&content-type=text/x-cvsweb-markup">gui/beans/Loader.html (1.10.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-12-18 23:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updated to 3-4-12</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/version.txt?rev=1.1.2.7&content-type=text/x-cvsweb-markup">core/version.txt (1.1.2.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-12-18 02:34 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added target for making an os x application</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?rev=1.19.2.18&content-type=text/x-cvsweb-markup">build.xml (1.19.2.18)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-12-18 02:28 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/weka_icon.icns?rev=1.1.4.2&content-type=text/x-cvsweb-markup">gui/weka_icon.icns (1.1.4.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>

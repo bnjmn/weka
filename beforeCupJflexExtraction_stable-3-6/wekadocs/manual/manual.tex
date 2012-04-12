@@ -1,0 +1,102 @@
+% Version: $Revision$
+
+\documentclass[a4paper]{book}
+
+\usepackage{epsfig}
+\usepackage{wrapfig}
+\usepackage{graphicx}
+
+\input{hyphenation}
+\input{extensions}
+
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Manual\\for Version 3-6-0}
+\author{Remco R. Bouckaert\\Eibe Frank\\Mark Hall\\Richard Kirkby\\Peter Reutemann\\Alex Seewald\\David Scuse}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\begin{document}
+
+\begin{titlepage}
+\maketitle
+\thispagestyle{empty}
+\center
+\begin{table}[b]
+\copyright 2002-2008 \\
+ \\
+University of Waikato, Hamilton, New Zealand \\
+Alex Seewald (original Commnd-line primer) \\
+David Scuse (original Experimenter tutorial)
+\end{table}
+
+\end{titlepage}
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{The Command-line}
+
+\chapter{A command-line primer}
+\input{commandline}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{The Graphical User Interface}
+
+\chapter{Launching WEKA}
+\input{launching}
+
+\chapter{Simple CLI}
+\input{simplecli}
+
+\chapter{Explorer}
+\input{explorer}
+
+\chapter{Experimenter}
+\input{experimenter}
+
+\chapter{KnowledgeFlow}
+\input{knowledgeflow}
+
+\chapter{ArffViewer}
+\input{arffviewer}
+
+\chapter{Bayesian Network Classifiers}
+\input{bayesnet}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Data}
+
+\chapter{ARFF}
+\input{arff}
+
+\chapter{XRFF}
+\label{xrff}
+\input{xrff}
+
+\chapter{Converters}
+\input{converters}
+
+\chapter{Stemmers}
+\input{stemmers}
+
+\chapter{Databases}
+\input{databases}
+
+\chapter{Windows databases}
+\input{windows_databases}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Appendix}
+\chapter{Research}
+\input{research}
+
+\chapter{Technical documentation}
+\input{technical_documentation}
+
+\chapter{Other resources}
+\input{other_resources}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{bibliography}
+
+\end{document}

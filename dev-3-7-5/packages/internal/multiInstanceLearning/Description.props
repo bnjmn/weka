@@ -1,0 +1,46 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=multiInstanceLearning
+
+# Version (required)
+Version=1.0.3
+
+#Date
+Date=2011-09-08
+
+# Title (required)
+Title=A collection of multi-instance learning classifiers.
+
+Category= Multi-instance learning
+
+# Author (required)
+Author=Eibe Frank, Xin Xu, Lin Dong, Miguel Garcia Torres, James Foulds, and Luke Bjerring
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=A collection of multi-instance learning classifiers. Includes the Citation KNN method, several variants of the diverse density method, support vector machines for multi-instance learning, simple wrappers for applying standard propositional learners to multi-instance data, decision tree and rule learners, and some other methods.
+
+Changes=This release adds the MITI tree learner and the MIRI rule learner
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceLearning1.0.3.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/multiInstanceLearning
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1), multiInstanceFilters (>=1.0.0)

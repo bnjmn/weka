@@ -1,0 +1,150 @@
+# Customises the list of options given by the GenericObjectEditor
+# for various superclasses.
+
+# Lists the ResultProducers I want to choose from
+weka.experiment.ResultProducer=\
+ weka.experiment.CrossValidationResultProducer,\
+ weka.experiment.RandomSplitResultProducer,\
+ weka.experiment.AveragingResultProducer,\
+ weka.experiment.DatabaseResultProducer
+
+# Lists the ResultListeners I want to choose from
+weka.experiment.ResultListener=\
+ weka.experiment.DatabaseResultListener,\
+ weka.experiment.InstancesResultListener, \
+ weka.experiment.CSVResultListener
+
+# Lists the SplitEvaluators I want to choose from
+weka.experiment.SplitEvaluator=\
+ weka.experiment.ClassifierSplitEvaluator, \
+ weka.experiment.CostSensitiveClassifierSplitEvaluator, \
+ weka.experiment.RegressionSplitEvaluator
+
+# Lists the Classifiers I want to choose from
+weka.classifiers.Classifier=\
+ weka.classifiers.ZeroR,\
+ weka.classifiers.DecisionStump,\
+ weka.classifiers.DecisionTable,\
+ weka.classifiers.HyperPipes,\
+ weka.classifiers.IB1,\
+ weka.classifiers.IBk,\
+ weka.classifiers.kstar.KStar,\
+ weka.classifiers.Id3,\
+ weka.classifiers.j48.J48,\
+ weka.classifiers.j48.PART,\
+ weka.classifiers.KernelDensity,\
+ weka.classifiers.LinearRegression,\
+ weka.classifiers.Logistic,\
+ weka.classifiers.LWR,\
+ weka.classifiers.m5.M5Prime,\
+ weka.classifiers.NaiveBayesSimple,\
+ weka.classifiers.NaiveBayes,\
+ weka.classifiers.OneR,\
+ weka.classifiers.Prism,\
+ weka.classifiers.SMO,\
+ weka.classifiers.VotedPerceptron,\
+ weka.classifiers.AdaBoostM1,\
+ weka.classifiers.Bagging, \
+ weka.classifiers.ClassificationViaRegression,\
+ weka.classifiers.CostSensitiveClassifier,\
+ weka.classifiers.CVParameterSelection,\
+ weka.classifiers.FilteredClassifier,\
+ weka.classifiers.LogitBoost,\
+ weka.classifiers.MetaCost,\
+ weka.classifiers.MultiClassClassifier,\
+ weka.classifiers.MultiScheme,\
+ weka.classifiers.RegressionByDiscretization,\
+ weka.classifiers.Stacking,\
+ weka.classifiers.UserClassifier,\
+ weka.classifiers.ThresholdSelector,\
+ weka.classifiers.AttributeSelectedClassifier
+
+# Lists the DistributionClassifiers I want to choose from
+weka.classifiers.DistributionClassifier=\
+ weka.classifiers.ZeroR,\
+ weka.classifiers.DecisionStump,\
+ weka.classifiers.DecisionTable,\
+ weka.classifiers.HyperPipes,\
+ weka.classifiers.IBk,\
+ weka.classifiers.kstar.KStar,\
+ weka.classifiers.Id3,\
+ weka.classifiers.j48.J48,\
+ weka.classifiers.j48.PART,\
+ weka.classifiers.KernelDensity,\
+ weka.classifiers.Logistic,\
+ weka.classifiers.NaiveBayesSimple,\
+ weka.classifiers.NaiveBayes,\
+ weka.classifiers.SMO,\
+ weka.classifiers.VotedPerceptron,\
+ weka.classifiers.AdaBoostM1,\
+ weka.classifiers.Bagging, \
+ weka.classifiers.ClassificationViaRegression,\
+ weka.classifiers.FilteredClassifier,\
+ weka.classifiers.LogitBoost,\
+ weka.classifiers.MultiClassClassifier,\
+ weka.classifiers.UserClassifier,\
+ weka.classifiers.AttributeSelectedClassifier
+
+# Lists the Filters I want to choose from
+weka.filters.Filter = \
+ weka.filters.AddFilter, \
+ weka.filters.AllFilter, \
+ weka.filters.AttributeFilter, \
+ weka.filters.AttributeSelectionFilter, \
+ weka.filters.AttributeTypeFilter, \
+ weka.filters.CopyAttributesFilter, \
+ weka.filters.DiscretizeFilter, \
+ weka.filters.FirstOrderFilter, \
+ weka.filters.InstanceFilter, \
+ weka.filters.MakeIndicatorFilter, \
+ weka.filters.MergeTwoValuesFilter, \
+ weka.filters.NominalToBinaryFilter, \
+ weka.filters.NormalizationFilter, \
+ weka.filters.NullFilter, \
+ weka.filters.NumericTransformFilter, \
+ weka.filters.ObfuscateFilter, \
+ weka.filters.RandomizeFilter, \
+ weka.filters.ReplaceMissingValuesFilter, \
+ weka.filters.ResampleFilter, \
+ weka.filters.SplitDatasetFilter, \
+ weka.filters.StringToNominalFilter, \
+ weka.filters.SwapAttributeValuesFilter, \
+ weka.filters.TimeSeriesDeltaFilter, \
+ weka.filters.TimeSeriesTranslateFilter, \
+ weka.filters.NonsparseToSparseFilter, \
+ weka.filters.NumericToBinaryFilter
+
+# Lists the Attribute Selection Evaluators I want to choose from
+weka.attributeSelection.ASEvaluation = \
+ weka.attributeSelection.CfsSubsetEval, \
+ weka.attributeSelection.ClassifierSubsetEval, \
+ weka.attributeSelection.WrapperSubsetEval, \
+ weka.attributeSelection.ConsistencySubsetEval, \
+ weka.attributeSelection.ReliefFAttributeEval, \
+ weka.attributeSelection.InfoGainAttributeEval, \
+ weka.attributeSelection.GainRatioAttributeEval, \
+ weka.attributeSelection.SymmetricalUncertAttributeEval, \
+ weka.attributeSelection.OneRAttributeEval, \
+ weka.attributeSelection.ChiSquaredAttributeEval, \
+ weka.attributeSelection.PrincipalComponents
+
+# Lists the Attribute Selection Search methods I want to choose from
+weka.attributeSelection.ASSearch = \
+ weka.attributeSelection.BestFirst, \
+ weka.attributeSelection.ForwardSelection, \
+ weka.attributeSelection.RaceSearch, \
+ weka.attributeSelection.GeneticSearch, \
+ weka.attributeSelection.RandomSearch, \
+ weka.attributeSelection.ExhaustiveSearch, \
+ weka.attributeSelection.Ranker, \
+ weka.attributeSelection.RankSearch
+
+# Lists the Associators I want to choose from
+weka.associations.Associator=\
+ weka.associations.Apriori
+
+# Lists the Clusterers I want to choose from
+weka.clusterers.Clusterer=\
+ weka.clusterers.EM, \
+ weka.clusterers.Cobweb
+ 

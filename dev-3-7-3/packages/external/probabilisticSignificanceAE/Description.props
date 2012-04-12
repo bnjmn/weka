@@ -1,0 +1,41 @@
+# Description file for probabilisticSignificanceAE
+#
+# 
+
+# Package name (required)
+PackageName=probabilisticSignificanceAE
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Evaluates the worth of an attribute by computing the Probabilistic Significance as a two-way function
+
+Category=Attribute Selection
+
+# Author (required)
+Author=Adrian Pino <apinoa@facinf.uho.edu.cu>
+
+# Maintainer (required)
+Maintainer=Adrian Pino <apinoa@facinf.uho.edu.cu>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Evaluates the worth of an attribute by computing the Probabilistic Significance as a two-way function (attribute-classes and classes-attribute association). For more information see: Amir Ahmad, Lipika Dey (2004). A feature selection technique for classificatory analysis.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/probabilisticSignificanceAE1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/probabilisticSignificanceAE
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

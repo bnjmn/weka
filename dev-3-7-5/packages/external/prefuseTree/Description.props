@@ -1,0 +1,43 @@
+# Description file for prefuseTree
+#
+# 
+
+# Package name (required)
+PackageName=prefuseTree
+
+# Version (required)
+Version=1.0.1
+
+#Date
+Date=2011-07-22
+
+# Title (required)
+Title=A visualization component for displaying trees that uses the prefuse visualization toolkit.
+
+Category=Visualization
+
+# Author (required)
+Author=Peter Reutemann <fracpete@cs.waikato.ac.nz>
+
+# Maintainer (required)
+Maintainer=Peter Reutemann <fracpete@cs.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=A visualization component for displaying tree structures from those schemes that can output trees (e.g. decision tree learners, Cobweb clusterer etc.). This component is available from the popup menu in the Explorer's classify and cluster panels. The component uses the prefuse visualization library.
+
+Changes=This release adds a method to retrieve the visualization as a JComponent that clients can embed.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/prefuseTree1.0.1.zip?download
+
+# URL for further information
+URL=http://weka.wikispaces.com/Explorer+tree+visualization+plugins
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.5.9)

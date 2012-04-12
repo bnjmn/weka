@@ -1,0 +1,18 @@
+README
+======
+
+Information about the libraries:
+
+- Jython
+  Version: 2.2.1
+  Homepage: http://www.jython.org/
+  Download: http://downloads.sourceforge.net/jython/jython_installer-2.2.1.jar
+            (this is the installer)
+
+- JMathPlot
+  Version: 2008-10-31
+  Homepage: http://jmathtools.berlios.de/
+  Download: http://prdownload.berlios.de/jmathtools/jmathplot.jar
+
+
+$Revision$

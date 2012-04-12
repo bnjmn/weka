@@ -1,0 +1,41 @@
+# Description file for ensembleLibrary
+#
+# 
+
+# Package name (required)
+PackageName=ensembleLibrary
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Manages a libary of ensemble classifiers
+
+Category=Ensemble learning
+
+# Author (required)
+Author=Robert Jung <mrbobjung@gmail.com>
+
+# Maintainer (required)
+Maintainer=Robert Jung <mrbobjung@gmail.com>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Manages a libary of ensemble classifiers
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/ensembleLibrary1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/ensembleLibrary
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

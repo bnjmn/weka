@@ -1,0 +1,41 @@
+# Description file for hiddenNaiveBayes
+#
+# 
+
+# Package name (required)
+PackageName=hiddenNaiveBayes
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Contructs Hidden Naive Bayes classification model with high classification accuracy and AUC
+
+Category=Classification
+
+# Author (required)
+Author=H. Zhang <hzhang@unb.ca>, Liangxiao Jiang <ljiang@cug.edu.cn>
+
+# Maintainer (required)
+Maintainer=H. Zhang <hzhang@unb.ca>, Liangxiao Jiang <ljiang@cug.edu.cn>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Contructs Hidden Naive Bayes classification model with high classification accuracy and AUC. For more information refer to: H. Zhang, L. Jiang, J. Su: Hidden Naive Bayes. In: Twentieth National Conference on Artificial Intelligence, 919-924, 2005.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/hiddenNaiveBayes1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/hiddenNaiveBayes
+
+# Related to other packages?
+Related=NaiveBayes
+
+# Dependencies
+Depends=weka (>=3.7.1)

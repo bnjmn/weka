@@ -1,0 +1,137 @@
+------------------------------------------------------------------------
+r4464 | fracpete | 2008-07-19 22:04:26 +1200 (Sat, 19 Jul 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/filters/unsupervised/attribute/ReplaceMissingValues.java
+
+
+------------------------------------------------------------------------
+r4467 | mhall | 2008-07-29 10:49:08 +1200 (Tue, 29 Jul 2008) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/core/converters/ArffLoader.java
+   M /branches/book2ndEd-branch/weka/core/converters/C45Loader.java
+   M /branches/book2ndEd-branch/weka/core/converters/CSVLoader.java
+   M /branches/book2ndEd-branch/weka/core/converters/SerializedInstancesLoader.java
+
+Now closes input streams and free resources.
+
+------------------------------------------------------------------------
+r4469 | mhall | 2008-07-30 10:41:11 +1200 (Wed, 30 Jul 2008) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/filters/unsupervised/attribute/RemoveUseless.java
+   M /trunk/weka/filters/unsupervised/attribute/RemoveUseless.java
+
+Changed the variance percentage computation for a given attribute to be equal to # distinct/(total # inst - # missing)
+
+------------------------------------------------------------------------
+r4472 | mhall | 2008-08-01 11:54:01 +1200 (Fri, 01 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/gui/beans/AttributeSummarizer.java
+
+Now sets the coloring index to be equal to the class attribute's index (if set).
+
+------------------------------------------------------------------------
+r4482 | mhall | 2008-08-12 09:51:25 +1200 (Tue, 12 Aug 2008) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/classifiers/functions/SMO.java
+
+Fixed bug in attributeNames(). It wasn't using the BinarySMO's sparse indices vector to index the attribute names.
+
+------------------------------------------------------------------------
+r4515 | fracpete | 2008-09-15 11:00:10 +1200 (Mon, 15 Sep 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/gui/visualize/PostscriptGraphics.java
+   M /trunk/weka/gui/visualize/PostscriptGraphics.java
+
+
+------------------------------------------------------------------------
+r4516 | fracpete | 2008-09-15 11:17:23 +1200 (Mon, 15 Sep 2008) | 3 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/core/converters/DatabaseLoader.java
+   M /branches/book2ndEd-branch/weka/experiment/InstanceQuery.java
+
+bug report by Adriano dos Santos Fernandes also applied to InstanceQuery (SHORT got read as BYTE)
+https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2008-September/014332.html
+
+------------------------------------------------------------------------
+r4539 | mhall | 2008-10-09 11:00:01 +1300 (Thu, 09 Oct 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/build.xml
+
+Deleted cvs stuff and added new subversion targets.
+------------------------------------------------------------------------
+r4562 | fracpete | 2008-10-15 11:48:00 +1300 (Wed, 15 Oct 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/attributeSelection/SVMAttributeEval.java
+   M /branches/book2ndEd-branch/weka/classifiers/BVDecomposeSegCVSub.java
+   M /branches/book2ndEd-branch/weka/classifiers/bayes/net/search/global/TAN.java
+   M /branches/book2ndEd-branch/weka/experiment/DatabaseUtils.props.mssqlserver
+   M /branches/book2ndEd-branch/weka/experiment/DatabaseUtils.props.mssqlserver2005
+   M /branches/book2ndEd-branch/weka/experiment/DatabaseUtils.props.mysql
+   M /branches/book2ndEd-branch/weka/experiment/DatabaseUtils.props.odbc
+   M /branches/book2ndEd-branch/weka/experiment/DatabaseUtils.props.oracle
+   M /branches/book2ndEd-branch/weka/experiment/DatabaseUtils.props.postgresql
+   M /branches/book2ndEd-branch/weka/experiment/remote.policy.example
+   M /branches/book2ndEd-branch/weka/gui/SimpleDateFormatEditor.java
+   M /branches/book2ndEd-branch/weka/gui/beans/icons/New24.gif
+   M /branches/book2ndEd-branch/weka/gui/experiment/Experimenter.props
+   M /branches/book2ndEd-branch/weka/gui/experiment/ExperimenterDefaults.java
+   M /branches/book2ndEd-branch/weka/gui/experiment/OutputFormatDialog.java
+   M /branches/book2ndEd-branch/weka/gui/images/empty_small.gif
+   M /branches/book2ndEd-branch/weka/gui/images/error_small.gif
+   M /branches/book2ndEd-branch/weka/gui/images/information_small.gif
+   M /branches/book2ndEd-branch/weka/gui/images/question_small.gif
+
+no longer executable (left-overs from importing files on Windows into CVS)
+------------------------------------------------------------------------
+r4588 | fracpete | 2008-10-25 15:42:35 +1300 (Sat, 25 Oct 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/gui/visualize/JPEGWriter.java
+
+java.lang.String.replace(String,String) method not available under 1.4.x (but doesn't show up when compiling with 1.5 and source-option set to 1.4??), fixed to compile under 1.4 again
+------------------------------------------------------------------------
+r4610 | fracpete | 2008-11-08 22:42:16 +1300 (Sat, 08 Nov 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/classifiers/rules/JRip.java
+   M /branches/book2ndEd-branch/weka/classifiers/rules/RuleStats.java
+
+added cleanUp method to RuleStats to set m_Data and m_Filter to null for dramatic memory savings (thanks to Bernhard for that hint)
+------------------------------------------------------------------------
+r4685 | mhall | 2008-11-14 10:01:35 +1300 (Fri, 14 Nov 2008) | 1 line
+Changed paths:
+   A /branches/book2ndEd-branch/src/main/java/weka (from /branches/book2ndEd-branch/weka:4684)
+   D /branches/book2ndEd-branch/weka
+
+Move to new structure
+------------------------------------------------------------------------
+r4687 | mhall | 2008-11-14 10:10:07 +1300 (Fri, 14 Nov 2008) | 1 line
+Changed paths:
+   A /branches/book2ndEd-branch/build.xml (from /branches/book2ndEd-branch/src/main/java/weka/build.xml:4686)
+   D /branches/book2ndEd-branch/src/main/java/weka/build.xml
+
+Move to top level
+------------------------------------------------------------------------
+r4703 | mhall | 2008-11-14 13:54:30 +1300 (Fri, 14 Nov 2008) | 1 line
+Changed paths:
+   D /branches/book2ndEd-branch/src
+   A /branches/book2ndEd-branch/weka/src (from /branches/book2ndEd-branch/src:4702)
+
+Move to top-level weka directory
+------------------------------------------------------------------------
+r4747 | mhall | 2008-11-22 21:45:55 +1300 (Sat, 22 Nov 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/ResultHistoryPanel.java
+
+Added a clearResults method to clear all result buffers.
+------------------------------------------------------------------------
+r4748 | mhall | 2008-11-22 21:46:54 +1300 (Sat, 22 Nov 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans/TextViewer.java
+
+Clear results action now actually clears all the result buffers :-)
+------------------------------------------------------------------------
+r4880 | mhall | 2008-12-18 12:30:52 +1300 (Thu, 18 Dec 2008) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/version.txt
+
+Updated for 3.4.14
+------------------------------------------------------------------------

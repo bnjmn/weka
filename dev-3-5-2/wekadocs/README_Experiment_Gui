@@ -1,0 +1,197 @@
+===================================================================
+Experiment Gui Quick Primer
+===================================================================
+
+NOTE THAT THIS README IS FOR THE "ADVANCED" MODE OF THE EXPERIMENTER
+(however, some of it may be useful for the "simple" mode as well).
+
+The basic philosophy of the Experiment package is described briefly in
+the main README file. Please read this first before continuing.
+
+The Experimenter provides a graphical front end to the classes in the
+Experiment package. However, the Experimenter can be bewildering for
+the new user. Here is a quick rundown on how to set it up for doing a
+standard 10x10 fold cross-validation experiment (that is, 10 runs of
+10 fold cross validation on a bunch of data sets using several
+classifiers).
+
+
+Setting up and running the experiment:
+
+First start the Experimenter:
+java weka.gui.experiment.Experimenter.
+
+Next click "New" for a new experiment.
+
+Next choose a destination for results:
+click on the destination panel and choose InstancesResultListener.
+
+Set the output file for the InstancesResultListener (all results
+will be saved in an arff file so that you can load them again
+later and perform the t-test again etc.)
+
+Now choose a ResultProducer: click on the Result generator panel and
+select AveragingResultProducer (this result producer takes results
+from a CrossValidationResultProducer and averages them----this will
+give you the 10 averaged results I mentioned above). Do not set the
+"calculateStdDevs" option to true for the
+AveragingResultProducer---this calculates the standard deviation for a
+SINGLE run of cross-validation. The standard deviation that you are
+most likely to be interested in is the standard deviation of the
+AVERAGES from the 10 runs of 10-fold cross validation.
+
+Next changed "Disabled" to "Enabled" under Generator properties (on
+the right hand side of the Setup panel. This will pop-up a list-view.
+Now expand the "resultProducer" entry in the list-view---this should
+show a property called "splitEvaluator". Expand the splitEvaluator
+entry.  This should show an entry called "classifier"---click on this
+to highlight it and press the "Select" button at the bottom of the
+list-view.
+
+Now you should see that the generator panel has become active and
+shows "ZeroR" as a single entry in a list. Here is where you can add
+(or delete) classifiers that will be involved in the experiment. Now
+add the classifers you are interested in comparing.
+
+Last step (whew!). Add datasets to compare the schemes on in the
+Datasets panel on the left of the Setup panel (Note that the last
+column is treated as the class column for all datasets---if this is
+not the case in a particular dataset of yours you will have to reorder
+the columns using an AttributeFilter).
+
+Now you are ready to run your experiment. Change to the "Run" panel
+and press start. If all goes well you will see the status of your
+experiment as it proceeds and will be informed in the Log panel of any
+errors.
+
+
+Analysing the results:
+
+Click on the Analyse panel of the Experimenter. If you've saved your
+results to an arff file you can load them into the Analyse panel
+either by pressing the experiment button (which goes and grabs the
+most recently run experiment's results) or by pressing the file
+button.
+
+You won't need to adjust the Row Key fields, Run fields or Column key
+fields. If you are just interested in percent correct as your accuracy
+measure you needn't change the Comparison field either. Significance
+allows you to change the statistical significance for the (corrected
+resampled) t-test (0.05 and 0.01 are standard levels of significance
+that you see used all the time in scientific papers). Test base allows
+you to set the scheme against which the other schemes are compared.
+
+Press Perform test to see a results table with significances.  The
+left hand column of the table shows the scheme which is being compared
+against. The figures are percent correct accuracies for each
+dataset/scheme. A 'v' indicates that a result is significantly higher
+at the chosen significance level; A '*' indicates that it is
+significantly lower; if no symbol is present it means that there is no
+significant difference at the chosen significance level.
+
+Click the Show std. deviations check box and press Perform test again
+to get the results with standard deviations.
+
+A couple of other summaries are available. If you choose
+"Summary" in the Test base drop-down list and press Perform
+test you will see a kind of wins vs losses table---it should
+be relatively self explaining. If you choose "Ranking" from
+the Test base drop-down you will get a kind of league-table.
+This ranks the schemes according to the total wins-losses
+against all other schemes.
+
+===================================================================
+Distributed Experiments 
+===================================================================
+
+This is very much experimental (no pun intended). The Experimenter
+includes the ability to split an experiment up and distribute it to
+multiple hosts. This works best when all results are being sent to a
+central data base, although you could have each host save its results
+to a distinct arff file and then merge the files afterwards.
+
+Distributed experiments have been tested using InstantDB (with the RMI
+bridge) and MySQL under Linux.
+
+Each host *must* have Java installed, access to whatever data
+sets you are using, and an experiment server running
+(weka.experiment.RemoteEngine).
+
+If results are being sent to a central data base, then the appropriate
+JDBC data base drivers must also be installed on each host and be
+listed in a DatabaseUtils.props file which is accessable to the
+RemoteEngine running on that host.
+
+To start a RemoteEngine experiment server on a host--- first copy the
+remoteExperimentServer.jar from weka-3-x-y to a directory on a host
+machine. Next unpack the jar with jar xvf remoteExperimentServer.jar.
+This will expand to three files: remoteEngine.jar, remote.policy, and
+DatabaseUtils.props. You will need to edit the DatabaseUtils.props
+file in order to list the names of the jdbc data base driver(s) you
+are using. The entry for the url to the data base is not needed by the
+remoteEngine server - this will be supplied by clients when they start
+a remote experiment on the server. The remoteEngine server will
+download code from clients on as needed basis. The remote.policy file
+grants permissions to downloaded code to perform certain operations,
+such as connect to ports etc. You will need to edit this file in order
+to specify correct paths in some of the permissions. This should be
+self explanitory when you look at the file. By default the policy file
+specifies that code can be downloaded from places accessable on the
+web via the http port (80). If you have a network accessable shared
+file system that your remoteEngines and clients will all be using,
+then you can also have remoteEngines obtain downloaded code from file
+urls - just uncomment the examples and replace the paths with
+something sensible. It is actually *necessary* to have a shared file
+system as data sets need to be accessable to tasks running on
+remoteEngines (see the first entry in remote.policy).
+
+To start the remoteEngine server first make sure that the CLASSPATH
+environment variable is unset and then type (from the directory
+containing remoteEngine.jar):
+
+java -classpath remoteEngine.jar:/path_to_any_jdbc_drivers \
+-Djava.security.policy=remote.policy \
+-Djava.rmi.server.codebase=file:/path_to_this_directory/remoteEngine.jar \
+weka.experiment.RemoteEngine
+
+If all goes well, you should see a message similar to:
+
+ml@kiwi:remote_engine>Host name : kiwi.cs.waikato.ac.nz
+RemoteEngine exception: Connection refused to host: kiwi.cs.waikato.ac.nz; nested exception is: 
+        java.net.ConnectException: Connection refused
+Attempting to start rmi registry...
+RemoteEngine bound in RMI registry
+
+
+Now you can repeat this process on all hosts that you want to use.
+
+The SetUp panel of the Experimenter works exactly as before, but there
+is now a small panel next to the Runs panel which controls whether an
+experiment will be distributed or not. By default, this panel is
+inactive indicating that the experiment is a default (single machine)
+experiment. Clicking the checkbox will enable a remote (distributed)
+experiment and activates the "Hosts" button. Clicking the Hosts button
+will popup a window into which you can enter the names of the machines
+that you want to distribute the experiment to. Enter fully qualified
+names here, eg. blackbird.cs.waikato.ac.nz.
+
+Once host names have been entered configure the rest of the experiment
+as you would normally. When you go to the Run panel and start the
+experiment progress on sub-experiments running on the different hosts
+will be displayed along with any error messages.
+
+Remote experiments work by splitting a standard experiment into a
+number of sub-experiments which get sent by RMI to remote hosts for
+execution. By default, an experiment is split up on the basis of data
+set, so each sub-experiment is self contained with all schemes applied
+to the single data set. This allows you to specify, at most, as many
+remote hosts as there are data sets in your experiment. If you only
+have a few data sets, you can split your experiment up by run instead.
+For example, a 10 x 10 fold cross validation experiment will get split
+into 10 sub-experiments - one for each run.
+
+
+
+
+
+

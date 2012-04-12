@@ -1,0 +1,41 @@
+# Description file for normalize
+#
+# 
+
+# Package name (required)
+PackageName=normalize
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=An instance filter that normalize instances considering only numeric attributes and ignoring class index
+
+Category=Preprocessing
+
+# Author (required)
+Author=Julien Prados
+
+# Maintainer (required)
+Maintainer=Julien Prados
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=An instance filter that normalize instances considering only numeric attributes and ignoring class index
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/normalize1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/normalize
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

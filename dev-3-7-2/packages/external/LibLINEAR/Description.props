@@ -1,0 +1,41 @@
+# Description file for LibLINEAR
+#
+# 
+
+# Package name (required)
+PackageName=LibLINEAR
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=A wrapper class for the liblinear tools
+
+Category=Classification
+
+# Author (required)
+Author=Benedikt Waldvogel <mail@bwaldvogel.de>
+
+# Maintainer (required)
+Maintainer=Benedikt Waldvogel <mail@bwaldvogel.de>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=A wrapper class for the liblinear tools (the liblinear classes, typically the jar file, need to be in the classpath to use this classifier). Rong-En Fan, Kai-Wei Chang, Cho-Jui Hsieh, Xiang-Rui Wang, Chih-Jen Lin (2008). LIBLINEAR - A Library for Large Linear Classification.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/LibLINEAR1.0.0.zip?download
+
+# URL for further information
+URL=http://www.csie.ntu.edu.tw/~cjlin/liblinear/
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

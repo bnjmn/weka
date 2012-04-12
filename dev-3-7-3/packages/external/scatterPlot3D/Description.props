@@ -1,0 +1,58 @@
+# Description file for prefuseTree
+#
+# 
+
+# Package name (required)
+PackageName=scatterPlot3D
+
+# Version (required)
+Version=1.0.1
+
+#Date
+Date=2010-09-15
+
+# Title (required)
+Title=A visualization component for displaying a 3D scatter plot of the data using Java 3D.
+
+Category=Visualization
+
+# Author (required)
+Author=Mark Hall
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=A visualization component for displaying a 3D scatter plot of the data using Java 3D. Requires Java 3D to be installed. This version adds built-in sampling controls to the GUI. The default sampling percentage is set so that a maximum of 5000 instances are plotted. The user can adjust this higher or lower to suit their available processing speed and memory.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/scatterPlot3D1.0.1.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/scatterPlot3D
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.2)
+
+# Special instructions to be displayed on installation of this package
+MessageToDisplayOnInstallation=This package requires Java 3D to be installed on your\n\
+ system before it can be used. Mac users will already have Java 3D available to\n\
+ them and will not require anything further. For other platforms, download and\n\
+ install Java3D from https://java3d.dev.java.net/binary-builds.html before restarting\n\
+ Weka.
+ 
+
+# External class check. Skip loading this package if the following
+# class can't be instantiated.
+DoNotLoadIfClassNotPresent=com.sun.j3d.utils.universe.SimpleUniverse
+
+# Log message to display if package can't be loaded because Java3D is not installed
+DoNotLoadIfClassNotPresentMessage=scatterPlot3D can't be loaded because \
+ Java3D does not seem to be installed. Download and install Java3D from \
+ https://java3d.dev.java.net/binary-builds.html before restarting Weka.

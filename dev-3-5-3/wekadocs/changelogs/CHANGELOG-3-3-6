@@ -1,0 +1,721 @@
+2003-04-17 11:54  mhall
+
+	* weka/gui/beans/README_KnowledgeFlow (1.3): removed a linefeed
+
+2003-04-17 11:52  mhall
+
+	* weka/gui/beans/README_KnowledgeFlow (1.2): Removed reference to
+	Tools toolbar
+
+2003-04-17 11:46  mhall
+
+	* weka/gui/beans/KnowledgeFlow.java (1.11): Added help button
+
+2003-04-17 11:44  mhall
+
+	* weka/gui/beans/: icons/Help24.gif (1.1), README_KnowledgeFlow
+	(1.1): Initial import
+
+2003-04-17 10:42  rkirkby
+
+	* weka/gui/AttributeVisualizationPanel.java (1.10): Performance
+	improvements by Ashraf, plus attempts to make more thread safe,
+	avoiding use of stop().
+
+2003-04-17 10:13  rkirkby
+
+	* weka/gui/explorer/PreprocessPanel.java (1.34): Prevented multiple
+	"visualize all" windows from being opened.
+
+2003-04-16 15:52  eibe
+
+	* weka/gui/AttributeVisualizationPanel.java (1.9): Fixed a bug.
+
+2003-04-16 14:46  eibe
+
+	* weka/gui/AttributeVisualizationPanel.java (1.8): Made thread safe
+
+2003-04-16 12:24  rkirkby
+
+	* weka/filters/unsupervised/attribute/RemoveUseless.java (1.4):
+	Fixed so that it will not remove the class attribute if set.
+
+2003-04-16 11:36  rkirkby
+
+	* weka/gui/GenericObjectEditor.props (1.78): Added Nnge.
+
+2003-04-16 11:33  rkirkby
+
+	* weka/classifiers/rules/Makefile (1.5): Added Nnge.
+
+2003-04-16 11:33  rkirkby
+
+	* weka/classifiers/rules/Nnge.java (1.1): Initial import.
+
+2003-04-16 11:30  rkirkby
+
+	* weka/gui/visualize/VisualizeUtils.java (1.7): Suppressed some
+	warning messages.
+
+2003-04-16 11:28  rkirkby
+
+	* weka/gui/explorer/ClassifierPanel.java (1.60): Suppressed console
+	output of random seed.
+
+2003-04-16 11:24  rkirkby
+
+	* weka/gui/visualize/: Plot2D.java (1.18), PlotData2D.java (1.15):
+	Suppressed some warning messages.
+
+2003-04-16 11:20  rkirkby
+
+	* weka/gui/visualize/: VisualizePanel.java (1.19),
+	AttributePanel.java (1.8): Suppressed some warning messages.
+
+2003-04-16 11:06  rkirkby
+
+	* weka/gui/: experiment/Experimenter.java (1.6),
+	beans/KnowledgeFlow.java (1.10): Now uses the system look & feel.
+
+2003-04-16 11:03  rkirkby
+
+	* weka/gui/: GUIChooser.java (1.11), explorer/Explorer.java (1.27):
+	Now uses the system look & feel.
+
+2003-04-16 09:25  eibe
+
+	* weka/classifiers/functions/SimpleLinearRegression.java (1.2):
+	Added some checks to SimpleLinearRegression.
+
+2003-04-16 09:19  eibe
+
+	* weka/: classifiers/functions/Makefile (1.6),
+	classifiers/functions/SimpleLinearRegression.java (1.1),
+	classifiers/functions/UnivariateLinearRegression.java (1.2),
+	gui/GenericObjectEditor.props (1.77): Renamed
+	UnivariateLinearRegression to become SimpleLinearRegression
+
+2003-04-15 14:09  mhall
+
+	* weka/gui/explorer/PreprocessPanel.java (1.33): Now displays color
+	combo box for histograms and a button to popup a panel of
+	histograms above the singe histogram display
+
+2003-04-15 14:08  mhall
+
+	* weka/gui/AttributeVisualizationPanel.java (1.7): Changed to allow
+	color combo box to be either visible or invisible and added a
+	method to return the combo box so that another component can place
+	this control wherever it likes
+
+2003-04-15 14:06  mhall
+
+	* weka/gui/beans/Makefile (1.2): Added beans to makefile
+
+2003-04-15 14:06  eibe
+
+	* weka/attributeSelection/SVMAttributeEval.java (1.15): Location of
+	SMO has changed
+
+2003-04-15 14:05  mhall
+
+	* weka/gui/beans/AttributeSummarizerBeanInfo.java (1.1): Initial
+	import
+
+2003-04-15 14:01  mhall
+
+	* weka/gui/beans/: AttributeSummarizer.java (1.3),
+	ClassAssigner.java (1.5), CrossValidationFoldMaker.java (1.3),
+	TrainTestSplitMaker.java (1.3): Added globalInfo and tool tip stuff
+
+2003-04-15 13:58  eibe
+
+	* weka/classifiers/functions/Logistic.java (1.26): Changed some
+	exceptions.
+
+2003-04-15 13:56  eibe
+
+	* weka/classifiers/meta/AdaBoostM1.java (1.16): AdaBoostM1 now
+	produces much better probability estimates (Thanks, Xin :-)
+
+2003-04-15 13:17  eibe
+
+	* weka/gui/GenericObjectEditor.props (1.76): SMO, etc., now in
+	supportVector package.
+
+2003-04-15 13:12  eibe
+
+	* weka/classifiers/functions/: Logistic.java (1.25), Makefile
+	(1.5), SMO.java (1.49), supportVector/Kernel.java (1.1),
+	supportVector/Makefile (1.1),
+	supportVector/NormalizedPolyKernel.java (1.1),
+	supportVector/PolyKernel.java (1.1), supportVector/RBFKernel.java
+	(1.1), supportVector/SMO.java (1.1), supportVector/SMOreg.java
+	(1.1), supportVector/SMOset.java (1.1): Replaced implementation of
+	logistic regression. SMO has moved into a new supportVector package
+	that also includes SMO for regression.
+
+2003-04-15 11:20  rkirkby
+
+	* weka/filters/unsupervised/attribute/RemoveUseless.java (1.3): The
+	maximum variance parameter default is now 99, and now only applies
+	to nominal attributes.
+
+2003-04-14 16:10  mhall
+
+	* weka/gui/PropertySheetPanel.java (1.12): set number of columns to
+	30 for the text area that displays the about info
+
+2003-04-14 10:10  mhall
+
+	* weka/gui/beans/AttributeSummarizer.java (1.2): Added a coloring
+	index property
+
+2003-04-14 10:09  mhall
+
+	* weka/gui/explorer/PreprocessPanel.java (1.32): Added ability to
+	pop up a matrix of AttributeVisualizationPanels
+
+2003-04-14 10:08  mhall
+
+	* weka/gui/AttributeVisualizationPanel.java (1.6): Added methods to
+	set and get the coloring index
+
+2003-04-11 12:21  mhall
+
+	* weka/gui/beans/: AttributeSummarizer.java (1.1),
+	icons/AttributeSummarizer.gif (1.1),
+	icons/AttributeSummarizer_animated.gif (1.1): Initial import
+
+2003-04-11 12:20  mhall
+
+	* weka/gui/beans/: DataVisualizer.java (1.5), KnowledgeFlow.java
+	(1.9), ScatterPlotMatrix.java (1.3): Some mods to allow beans to
+	determine whether they are running inside an editor environment or
+	not
+
+2003-04-11 12:19  mhall
+
+	* weka/gui/beans/Beans.props (1.4): Split the tools toolbar into
+	evaluationa and visualization
+
+2003-04-10 18:10  mhall
+
+	* weka/gui/AttributeVisualizationPanel.java (1.5): Made this
+	component respect the class attribute (if set in the data) and
+	fixed a couple of negative array size exceptions on construction
+
+2003-04-10 09:03  eibe
+
+	* weka/core/Utils.java (1.36): Added Bernhard's method for
+	converting log(P) back into P.
+
+2003-04-09 15:49  mhall
+
+	* weka/gui/beans/DataVisualizer.java (1.4): Changed a couple of
+	variables to protected to allow easier subclassing
+
+2003-04-09 15:48  mhall
+
+	* weka/gui/beans/ScatterPlotMatrix.java (1.2): Now extends
+	DataVisualizer
+
+2003-04-09 14:45  mhall
+
+	* weka/gui/beans/ScatterPlotMatrixBeanInfo.java (1.1): Initial
+	import
+
+2003-04-09 10:52  mhall
+
+	* weka/gui/beans/DataVisualizer.java (1.3): Fixed some docs
+
+2003-04-09 10:52  mhall
+
+	* weka/gui/beans/Beans.props (1.3): Added scatter plot matrix
+
+2003-04-09 10:49  mhall
+
+	* weka/gui/beans/: icons/ScatterPlotMatrix.gif (1.1),
+	icons/ScatterPlotMatrix_animated.gif (1.1), ScatterPlotMatrix.java
+	(1.1): Initial import
+
+2003-04-08 15:58  mhall
+
+	* weka/gui/beans/ClassifierPerformanceEvaluator.java (1.3): Fixed
+	eventGeneratable bug
+
+2003-04-08 15:57  mhall
+
+	* weka/gui/beans/KnowledgeFlow.java (1.8): Changed log to hidden
+	type
+
+2003-04-04 10:07  mhall
+
+	* weka/classifiers/trees/REPTree.java (1.10): GetOptions now
+	returns an integer value for tree depth rather than a double. This
+	is in line with setOptions that parses tree depths as an integer
+
+2003-04-04 09:20  eibe
+
+	* weka/gui/boundaryvisualizer/BoundaryVisualizer.java (1.11): Fixed
+	reference
+
+2003-04-04 09:17  eibe
+
+	* weka/gui/boundaryvisualizer/BoundaryVisualizer.java (1.10): Added
+	reference
+
+2003-04-04 09:14  eibe
+
+	* weka/: classifiers/lazy/LWL.java (1.6), classifiers/lazy/LWR.java
+	(1.16), classifiers/lazy/Makefile (1.5),
+	gui/GenericObjectEditor.props (1.75): LWR has been replaced by the
+	more general LWL class.
+
+2003-03-31 16:36  rkirkby
+
+	* weka/gui/experiment/ResultsPanel.java (1.23): Will now pass the
+	folds column if detected to the T-Tester, to ensure correct
+	ordering.
+
+2003-03-31 16:34  rkirkby
+
+	* weka/experiment/PairedTTester.java (1.17): Added option for fold
+	column, so that the folds can be taken into account when sorting.
+
+2003-03-31 08:40  eibe
+
+	* weka/filters/supervised/attribute/ClassOrder.java (1.2): Xin made
+	it a bit safer.
+
+2003-03-28 10:24  eibe
+
+	* weka/: attributeSelection/SVMAttributeEval.java (1.14),
+	classifiers/functions/SMO.java (1.48): Eliminated weights() method
+	from SMO.
+
+2003-03-27 10:11  rkirkby
+
+	* weka/classifiers/functions/SMO.java (1.47): Six utility methods
+	have been added that were submitted by Christopher Bader from
+	Unveil Technologies (cbader@Unveil.com).
+
+2003-03-27 09:46  rkirkby
+
+	* weka/gui/AttributeVisualizationPanel.java (1.4): Removed a debug
+	message.
+
+2003-03-26 10:13  rkirkby
+
+	* weka/gui/visualize/MatrixPanel.java (1.5): Point size can now be
+	changed.
+
+2003-03-26 10:12  rkirkby
+
+	* weka/gui/AttributeVisualizationPanel.java (1.3): Graphs are now
+	colour coded and other improvements.
+
+2003-03-25 15:43  rkirkby
+
+	* weka/filters/unsupervised/attribute/RemoveUseless.java (1.2):
+	Fixed filtering of instances after the inital batch has been
+	processed.
+
+2003-03-21 10:52  rkirkby
+
+	* weka/gui/LogPanel.java (1.13): The log can now either be hidden
+	or visible, to keep Experimenter run tab appearance the same as it
+	was.
+
+2003-03-21 10:16  rkirkby
+
+	* weka/gui/explorer/Explorer.java (1.26): Updated startup log
+	message.
+
+2003-03-20 15:57  rkirkby
+
+	* weka/gui/LogPanel.java (1.12): Log is now accessible via a
+	button, rather than always on display.
+
+2003-03-20 14:57  rkirkby
+
+	* weka/gui/explorer/ClustererPanel.java (1.38): Improved error
+	handling by displaying a dialog box when clustering fails.
+
+2003-03-20 14:50  rkirkby
+
+	* weka/gui/explorer/ClassifierPanel.java (1.59): Improved error
+	handling by displaying a dialog box when something fails.
+
+2003-03-18 15:42  rkirkby
+
+	* weka/experiment/PairedCorrectedTTester.java (1.3): Forgot to
+	override the main method.
+
+2003-03-13 17:13  mhall
+
+	* weka/classifiers/bayes/AODE.java (1.2): Fixed getOptions and
+	added get and set methods for the frequency option
+
+2003-03-13 12:12  rkirkby
+
+	* weka/experiment/RandomSplitResultProducer.java (1.15): Will now
+	stratify the train and test sets if the class is nominal and
+	randomization is enabled.
+
+2003-03-11 16:05  eibe
+
+	* weka/core/Optimization.java (1.4): Made it more memory efficient.
+
+2003-03-11 16:03  eibe
+
+	* weka/classifiers/rules/JRip.java (1.9): Fixed bug when class not
+	last attribute.
+
+2003-03-10 13:35  rkirkby
+
+	* weka/: classifiers/bayes/Makefile (1.5),
+	gui/GenericObjectEditor.props (1.74): Added AODE.
+
+2003-03-10 13:34  rkirkby
+
+	* weka/classifiers/bayes/AODE.java (1.1): Initial import.
+
+2003-03-07 15:42  rkirkby
+
+	* weka/gui/AttributeVisualizationPanel.java (1.2): Numeric ranges
+	are now displayed as histograms.
+
+2003-03-03 14:01  mhall
+
+	* weka/experiment/RemoteEngine.java (1.7): Small change to purge
+	code
+
+2003-03-03 14:01  mhall
+
+	* weka/gui/boundaryvisualizer/: BoundaryPanel.java (1.17),
+	BoundaryPanelDistributed.java (1.3): Small changes to progress info
+	and bugfix in plot routine
+
+2003-02-27 14:02  mhall
+
+	* weka/gui/boundaryvisualizer/BoundaryPanelDistributed.java (1.2):
+	Improved progress info
+
+2003-02-26 14:37  rkirkby
+
+	* weka/classifiers/trees/UserClassifier.java (1.12): Fixed use of
+	classifier so that the user can select which classifier to use.
+
+2003-02-26 14:29  mhall
+
+	* weka/gui/boundaryvisualizer/: BoundaryPanel.java (1.16),
+	DataGenerator.java (1.3), KDDataGenerator.java (1.4): Small changes
+	to allow distributed boundary visualization
+
+2003-02-26 14:28  mhall
+
+	* weka/gui/boundaryvisualizer/: BoundaryPanelDistributed.java
+	(1.1), RemoteBoundaryVisualizerSubTask.java (1.1),
+	RemoteResult.java (1.1): Initial import
+
+2003-02-26 14:27  mhall
+
+	* weka/experiment/: RemoteEngine.java (1.6),
+	RemoteExperimentSubTask.java (1.6), Task.java (1.7): Fix to type
+	unloading code plus some small changes to make distributed boudary
+	visualization possible
+
+2003-02-26 10:37  rkirkby
+
+	* weka/gui/GenericObjectEditor.java (1.38): Changed 'Set' button to
+	'Choose'. Changed popup background to match the tree so it doesn't
+	look as ugly when then tree is smaller than the popup.
+
+2003-02-20 16:11  rkirkby
+
+	* weka/classifiers/trees/RandomForest.java (1.3): Added out-of-bag
+	error estimation.
+
+2003-02-20 15:59  rkirkby
+
+	* weka/classifiers/meta/Bagging.java (1.23): Added ability to
+	calculate the out-of-bag error and return it as an additional
+	measure.
+
+2003-02-20 14:27  eibe
+
+	* weka/classifiers/lazy/LWL.java (1.5): Added rescaling of weights
+
+2003-02-20 10:50  rkirkby
+
+	* weka/classifiers/meta/Bagging.java (1.22): Added Randomizable
+	classifier handling.
+
+2003-02-19 11:31  rkirkby
+
+	* weka/: classifiers/meta/Makefile (1.5),
+	gui/GenericObjectEditor.props (1.73): Added StackingC, Grading and
+	Vote.
+
+2003-02-19 11:30  rkirkby
+
+	* weka/classifiers/meta/: Grading.java (1.1), StackingC.java (1.1),
+	Vote.java (1.1): Initial import.
+
+2003-02-19 10:50  rkirkby
+
+	* weka/classifiers/trees/REPTree.java (1.9): Has been made
+	sourcable thanks to a contribution by Igor Wronsky.
+
+2003-02-18 16:03  mhall
+
+	* weka/gui/boundaryvisualizer/BoundaryPanel.java (1.15): Fixed bug
+	in main method
+
+2003-02-17 11:30  mhall
+
+	* weka/gui/explorer/AttributeSelectionPanel.java (1.25): Modified
+	to allow scatter plot matrix to be popped up to show transformed or
+	reduced data
+
+2003-02-17 10:03  mhall
+
+	* weka/experiment/: RemoteEngine.java (1.5), remote.policy (1.4):
+	Mods that allow remote engine to unload types from its virtual
+	machine.
+
+2003-02-14 16:29  mhall
+
+	* weka/build.xml (1.10): oops another file left out of the
+	remoteEngine.jar file
+
+2003-02-14 16:17  mhall
+
+	* weka/build.xml (1.9): some classes were left out of the
+	remoteEngine.jar file
+
+2003-02-14 10:27  mhall
+
+	* weka/gui/boundaryvisualizer/BoundaryPanel.java (1.14): Merged
+	Len's stuff
+
+2003-02-13 15:50  mhall
+
+	* weka/gui/boundaryvisualizer/BoundaryVisualizer.java (1.9):
+	Changes to UI and merging of Len's progressive plotting code
+
+2003-02-13 15:49  mhall
+
+	* weka/gui/boundaryvisualizer/KDDataGenerator.java (1.3): now uses
+	k'th nearest neighbour to set kernel bandwidth
+
+2003-02-13 13:52  eibe
+
+	* weka/classifiers/bayes/: NaiveBayes.java (1.13),
+	NaiveBayesUpdateable.java (1.3): Included supervised discretization
+	as an option in NaiveBayes (mainly for convenience)
+
+2003-02-11 14:30  trigg
+
+	* weka/core/: Attribute.java (1.29), Instances.java (1.41): Moved a
+	bunch of strings into constants.  Fixed arff parsing bug reported
+	by JK Sakura <sakurajkr@yahoo.com>.
+
+2003-02-10 17:30  eibe
+
+	* weka/classifiers/lazy/: LWL.java (1.4), LWR.java (1.15): Fixed
+	bugs that I introduced with the last change
+
+2003-02-10 17:20  trigg
+
+	* weka/gui/boundaryvisualizer/BoundaryPanel.java (1.13): Use
+	progressive sampling and gridding to allow a faster overall
+	impression of the boundary graph.
+
+2003-02-10 14:48  trigg
+
+	* weka/gui/boundaryvisualizer/BoundaryPanel.java (1.12): Fixed
+	warning reported by jikes +P, and a CVS keyword typo.
+
+2003-02-10 14:46  trigg
+
+	* weka/classifiers/lazy/LWL.java (1.3): Removed warning reported by
+	jikes +P.
+
+2003-02-10 13:14  eibe
+
+	* weka/classifiers/lazy/: LWL.java (1.2), LWR.java (1.14): Made
+	some small changes to LWL and LWR
+
+2003-02-09 22:31  eibe
+
+	* weka/: classifiers/lazy/Makefile (1.4),
+	gui/GenericObjectEditor.props (1.72): Added LWL.java
+
+2003-02-09 22:29  eibe
+
+	* weka/classifiers/lazy/LWL.java (1.1): Locally weighted learning
+	for any base classifier.
+
+2003-02-07 12:08  mhall
+
+	* weka/gui/boundaryvisualizer/BoundaryPanel.java (1.11): tool tip
+	text now stays on screen until mouse is moved
+
+2003-02-05 15:18  mhall
+
+	* weka/gui/boundaryvisualizer/BoundaryPanel.java (1.10): Now saves
+	a jpeg when invoked from the command line. Also pops up tooltip for
+	probability vector for a pixel on mouseover
+
+2003-02-04 17:14  eibe
+
+	* weka/core/Optimization.java (1.3): Fixed bug.
+
+2003-02-04 11:13  rkirkby
+
+	* weka/gui/explorer/ClassifierPanel.java (1.58): Use of a test set
+	was broken.
+
+2003-02-04 09:29  rkirkby
+
+	* weka/gui/visualize/MatrixPanel.java (1.4): Prevented MatrixPanel
+	from altering the class index of the instances.
+
+2003-01-31 15:16  rkirkby
+
+	* weka/core/Attribute.java (1.28): Added check to disallow a
+	nominal attribute from having duplicate labels.
+
+2003-01-31 15:09  eibe
+
+	* weka/core/Optimization.java (1.2): Fixed Javadoc.
+
+2003-01-31 11:04  rkirkby
+
+	* weka/experiment/PairedCorrectedTTester.java (1.2): Removed some
+	debug output.
+
+2003-01-31 11:00  rkirkby
+
+	* weka/gui/experiment/ResultsPanel.java (1.22): Now uses the
+	PairedCorrectedTTester, plus a tool tip informing users.
+
+2003-01-31 10:58  rkirkby
+
+	* weka/experiment/PairedTTester.java (1.16): Restored old behaviour
+	- PairedCorrectedTTester now uses the corrected test. Also made
+	some private classes protected.
+
+2003-01-31 10:50  rkirkby
+
+	* weka/experiment/Makefile (1.13): Added PairedCorrectedTTester.
+
+2003-01-31 10:48  rkirkby
+
+	* weka/experiment/PairedCorrectedTTester.java (1.1): Initial
+	import.
+
+2003-01-31 09:00  rkirkby
+
+	* weka/experiment/PairedStatsCorrected.java (1.2): Added paper
+	reference.
+
+2003-01-30 12:05  mhall
+
+	* weka/gui/boundaryvisualizer/BoundaryPanel.java (1.9): Changed so
+	that white data points are plotted with a black outer circle
+
+2003-01-29 17:21  mhall
+
+	* weka/gui/boundaryvisualizer/BoundaryVisualizer.java (1.8): Fixed
+	label
+
+2003-01-29 17:12  mhall
+
+	* weka/gui/boundaryvisualizer/: BoundaryPanel.java (1.8),
+	BoundaryVisualizer.java (1.7): Can now superimpose training data on
+	plot
+
+2003-01-28 17:11  rkirkby
+
+	* weka/gui/experiment/SimpleSetupPanel.java (1.2): Cross-validation
+	no longer uses AveragingResultProducer.
+
+2003-01-28 17:03  rkirkby
+
+	* weka/gui/experiment/SetupPanel.java (1.19): Fixed loss of
+	property iterator any time the experiment is set, including when
+	switching from a simple experiment.
+
+2003-01-28 15:53  rkirkby
+
+	* weka/experiment/Makefile (1.12): Added PairedStatsCorrected.
+
+2003-01-28 15:52  rkirkby
+
+	* weka/experiment/PairedTTester.java (1.15): Now uses the corrected
+	resampled t which should result in lower Type I error and means
+	that the AveragingResultProducer is not necessary in a
+	cross-validation experiment.
+
+2003-01-28 15:48  rkirkby
+
+	* weka/experiment/PairedStatsCorrected.java (1.1): Initial import.
+
+2003-01-28 15:46  rkirkby
+
+	* weka/experiment/ClassifierSplitEvaluator.java (1.18): Modified
+	results to keep track of both test set and training set sizes.
+
+2003-01-28 14:36  mhall
+
+	* weka/gui/boundaryvisualizer/: BoundaryPanel.java (1.7),
+	BoundaryVisualizer.java (1.6): More UI improvements and tidy up
+
+2003-01-28 10:20  eibe
+
+	* weka/gui/boundaryvisualizer/Makefile (1.2): Fixed Makefile.
+
+2003-01-24 17:03  mhall
+
+	* weka/gui/visualize/ClassPanel.java (1.11): Small change for
+	interoperation with the boundary visualizer
+
+2003-01-24 17:02  mhall
+
+	* weka/gui/boundaryvisualizer/: BoundaryPanel.java (1.6),
+	BoundaryVisualizer.java (1.5): User interface improvements
+
+2003-01-24 10:57  mhall
+
+	* weka/gui/boundaryvisualizer/: BoundaryPanel.java (1.5),
+	BoundaryVisualizer.java (1.4): New groovy colours
+
+2003-01-23 16:05  eibe
+
+	* weka/gui/boundaryvisualizer/EMDataGenerator.java (1.2): Isn't
+	compatible anymore and never really worked properly anyway.
+
+2003-01-23 16:02  eibe
+
+	* weka/gui/boundaryvisualizer/: BoundaryPanel.java (1.4),
+	DataGenerator.java (1.2), KDDataGenerator.java (1.2): Improved
+	BoundaryVisualizer.
+
+2003-01-23 14:17  rkirkby
+
+	* weka/attributeSelection/OneRAttributeEval.java (1.12): Was broken
+	since OneR shifted packages.
+
+2003-01-21 14:07  eibe
+
+	* weka/gui/boundaryvisualizer/BoundaryPanel.java (1.3): Slightly
+	changed (fixed bug).
+
+2003-01-20 14:56  trigg
+
+	* weka/: core/Randomizable.java (1.2), gui/beans/Filter.java (1.5):
+	Fixed warnings reported by jikes +P
+

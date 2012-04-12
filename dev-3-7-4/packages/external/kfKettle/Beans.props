@@ -1,0 +1,2 @@
+# Specifies the tools to go into the Plugins toolbar
+weka.gui.beans.KnowledgeFlow.Plugins=org.pentaho.dm.plugins.kf.KettleInject

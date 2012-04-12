@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=gaussianProcesses
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Implements Gaussian Processes for regression without hyperparameter-tuning.
+
+Category=Regression
+
+# Author (required)
+Author=Kurt Driessens
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Implements Gaussian Processes for regression without hyperparameter-tuning. For more information see<br/><br/>David J.C. Mackay (1998). Introduction to Gaussian Processes. Dept. of Physics, Cambridge University, UK.<br/><br/><strong>This package moved back into the core Weka distribution in Weka 3.7.3</strong>.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/gaussianProcesses1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/gaussianProcesses
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (=3.7.2)

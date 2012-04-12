@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=paceRegression
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Class for building pace regression linear models and using them for prediction.
+
+Category=Regression
+
+# Author (required)
+Author=Yong Wang
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Class for building pace regression linear models and using them for prediction. <br/><br/>Under regularity conditions, pace regression is provably optimal when the number of coefficients tends to infinity. It consists of a group of estimators that are either overall optimal or optimal under certain conditions.<br/><br/>The current work of the pace regression theory, and therefore also this implementation, do not handle: <br/><br/>- missing values <br/>- non-binary nominal attributes <br/>- the case that n - k is small where n is the number of instances and k is the number of coefficients (the threshold used in this implmentation is 20)<br/><br/>For more information see:<br/><br/>Wang, Y (2000). A new approach to fitting linear models in high dimensional spaces. Hamilton, New Zealand.<br/>Wang, Y., Witten, I. H.: Modeling for optimal probability prediction. In: Proceedings of the Nineteenth International Conference in Machine Learning, Sydney, Australia, 650-657, 2002.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/paceRegression1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/paceRegression
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1)

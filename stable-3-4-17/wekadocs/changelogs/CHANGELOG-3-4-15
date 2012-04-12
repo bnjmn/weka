@@ -1,0 +1,220 @@
+------------------------------------------------------------------------
+r4959 | mhall | 2009-01-16 20:41:13 +1300 (Fri, 16 Jan 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Fixed nasty bug that prevented a MetaBean that had been stored in the user tab from being binary serialized when the flow was saved.
+------------------------------------------------------------------------
+r5077 | mhall | 2009-02-18 13:53:40 +1300 (Wed, 18 Feb 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/Filter.java
+
+output() was calling stringFreeStructure() on the output format instances resulting in a structure that was incompatible for subsequent batches.
+------------------------------------------------------------------------
+r5124 | fracpete | 2009-03-01 17:34:13 +1300 (Sun, 01 Mar 2009) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseResultListener.java
+   A /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.msaccess
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.odbc
+
+running Experiments in the Experimenter now works with MS Access as well: second call to getString(4) in method "determineColumnConstraints" of DatabaseResultListener class resulted in Exception (fixed this by using local variable)
+added sample setup for MS Access: DatabaseUtils.props.msaccess
+------------------------------------------------------------------------
+r5157 | fracpete | 2009-03-17 13:20:07 +1300 (Tue, 17 Mar 2009) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/attribute/Add.java
+
+setAttributeName(String) method no longer tries to "fix" the name by checking for single quotes/blanks, but just accepts the name as it is (if empty, "unnamed" is still used, though)
+added Utils.unbackQuoteChars/backQuoteChars to setOptions/getOptions to correctly escape tabs etc.
+------------------------------------------------------------------------
+r5159 | fracpete | 2009-03-19 09:47:55 +1300 (Thu, 19 Mar 2009) | 3 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/converters/DatabaseSaver.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.hsql
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.msaccess
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.mssqlserver
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.mssqlserver2005
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.mysql
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.odbc
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.oracle
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.postgresql
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.sqlite3
+
+fixed DatabaseSaver to correctly store date attributes
+added CREATE_DATE/DateFormat properties to DatabaseUtils.props* files, specifying the columnn type to create for date attributes and what format the date type expects (= SimpleDateFormat format string)
+DatabaseUtils class now outputs "database driver (JDBC)" instead of "JDBC driver", since users don't seem to be familiar with the JDBC acronym
+------------------------------------------------------------------------
+r5174 | fracpete | 2009-03-22 20:42:08 +1300 (Sun, 22 Mar 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/converters/DatabaseSaver.java
+
+SimpleDateFormat in Java 1.4 didn't have the format(long) method, needs a java.util.Date instead
+------------------------------------------------------------------------
+r5176 | fracpete | 2009-03-23 11:07:21 +1300 (Mon, 23 Mar 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/GenericArrayEditor.java
+
+fixed the "Delete" button: worked from the start of the indices and not from the rear, resulting in indices that no longer existed and throwing exceptions
+------------------------------------------------------------------------
+r5180 | mhall | 2009-03-23 14:08:54 +1300 (Mon, 23 Mar 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/rules/Ridor.java
+
+Random shuffling of the training instances was broken.
+------------------------------------------------------------------------
+r5288 | fracpete | 2009-04-18 23:43:13 +1200 (Sat, 18 Apr 2009) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/attributeSelection/GeneticSearch.java
+
+population size needs to be an even number
+documentation now states this and set-method only allows even numbers as well
+------------------------------------------------------------------------
+r5291 | mhall | 2009-04-22 15:08:23 +1200 (Wed, 22 Apr 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Eibe's speed improvements.
+------------------------------------------------------------------------
+r5335 | mhall | 2009-05-15 10:33:03 +1200 (Fri, 15 May 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net/search/local/TAN.java
+
+Now doesn't cause an exception if presented with an empty set of attributes.
+------------------------------------------------------------------------
+r5350 | fracpete | 2009-05-17 16:22:43 +1200 (Sun, 17 May 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka
+   M /branches/book2ndEd-branch/weka/lib
+   M /branches/book2ndEd-branch/weka/src
+   M /branches/book2ndEd-branch/weka/src/main
+   M /branches/book2ndEd-branch/weka/src/main/java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/associations
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/associations/tertius
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/attributeSelection
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net/estimate
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net/search
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net/search/ci
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net/search/fixed
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net/search/global
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/bayes/net/search/local
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/evaluation
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/neural
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/pace
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/supportVector
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/lazy
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/lazy/kstar
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/meta
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/misc
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/rules
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/rules/part
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees/adtree
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees/j48
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees/lmt
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/trees/m5
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/xml
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/clusterers
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/converters
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/matrix
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/xml
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/datagenerators
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/estimators
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/xml
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/supervised
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/supervised/attribute
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/supervised/instance
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/attribute
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/instance
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/arffviewer
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans/icons
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans/xml
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/boundaryvisualizer
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/experiment
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/explorer
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/graphvisualizer
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/graphvisualizer/icons
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/images
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/streams
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/treevisualizer
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/visualize
+   M /branches/book2ndEd-branch/weka/src/test
+   M /branches/book2ndEd-branch/weka/src/test/java
+   M /branches/book2ndEd-branch/weka/src/test/java/weka
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers/bayes
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers/data
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers/functions
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers/lazy
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers/meta
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers/misc
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers/rules
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/classifiers/trees
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters/data
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters/supervised
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters/supervised/attribute
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters/supervised/instance
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters/unsupervised
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters/unsupervised/attribute
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters/unsupervised/instance
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/test
+   M /branches/book2ndEd-branch/weka/src/test/resources
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/classifiers
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/classifiers/bayes
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/classifiers/functions
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/classifiers/lazy
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/classifiers/meta
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/classifiers/misc
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/classifiers/rules
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/classifiers/trees
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/filters
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/filters/supervised
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/filters/supervised/attribute
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/filters/supervised/instance
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/filters/unsupervised
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/filters/unsupervised/attribute
+   M /branches/book2ndEd-branch/weka/src/test/resources/wekarefs/weka/filters/unsupervised/instance
+
+updated ignore patterns
+------------------------------------------------------------------------
+r5376 | fracpete | 2009-05-21 14:26:48 +1200 (Thu, 21 May 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/GenericPropertiesCreator.java
+
+skips duplicate class names now
+------------------------------------------------------------------------
+r5405 | mhall | 2009-05-26 14:14:57 +1200 (Tue, 26 May 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/neural/NeuralConnection.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/neural/NeuralNode.java
+
+When using a validation set to stop training, the weights from the last iteration performed were getting used instead of the weights corresponding to the minimal error on the validation set.
+------------------------------------------------------------------------
+r5477 | mhall | 2009-06-02 10:30:34 +1200 (Tue, 02 Jun 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans/ClassifierPerformanceEvaluator.java
+
+Evaluation object was getting initialized with the test set rather than the training set (screwed up relative metrics). Fixed. Now checks for empty training set and initializes with test set and useNoPriors in this case.
+------------------------------------------------------------------------
+r5522 | mhall | 2009-06-03 14:54:18 +1200 (Wed, 03 Jun 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+Now implements Randomizable
+------------------------------------------------------------------------

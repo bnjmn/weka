@@ -1,0 +1,41 @@
+# Description file for winnow
+#
+# 
+
+# Package name (required)
+PackageName=winnow
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2009-09-10
+
+# Title (required)
+Title=Implements Winnow and Balanced Winnow algorithms by Littlestone
+
+Category=Classification
+
+# Author (required)
+Author=J. Lindgren <jtlindgr@cs.helsinki.fi>
+
+# Maintainer (required)
+Maintainer=J. Lindgren <jtlindgr@cs.helsinki.fi>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Implements Winnow and Balanced Winnow algorithms by Littlestone. For more information, see N. Littlestone (1988). Learning quickly when irrelevant attributes are abound: A new linear threshold algorithm. Machine Learning. 2:285-318; N. Littlestone (1989). Mistake bounds and logarithmic linear-threshold learning algorithms. University of California, Santa Cruz. Does classification for problems with nominal attributes (which it converts into binary attributes)
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/winnow1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/winnow
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

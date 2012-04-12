@@ -1,0 +1,421 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-4-12 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-4-12 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://ant.apache.org/">Apache Ant</a>.</p>
+<hr>
+<table border="0" width="100%" cellspacing="1">
+<tr>
+<td class="dateAndAuthor">2007-12-18 02:34 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added target for making an os x application</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.18&r2=1.19.2.17">build.xml (1.19.2.18)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-12-18 02:28 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Initial import</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/weka_icon.icns?r1=1.1.4.2&r2=1.1.4.1">gui/weka_icon.icns (1.1.4.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-12-13 02:45 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file weka_icon.icns was added on branch book2ndEd-branch on 2007-12-18 02:28:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/weka_icon.icns?rev=1.1.4.1&content-type=text/x-cvsweb-markup">gui/weka_icon.icns (1.1.4.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-11-27 02:50 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>General options help now shows flags in lower-case.</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/AttributeSelection.html?rev=1.35.2.5&content-type=text/x-cvsweb-markup">attributeSelection/AttributeSelection.html (1.35.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-11-27 02:49 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Added Martin Guetlein's bug fix for merit caching</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/BestFirst.html?r1=1.24.2.3&r2=1.24.2.2">attributeSelection/BestFirst.html (1.24.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-11-23 02:49 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed a potential division by zero in out-of-bag routine</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/Bagging.html?rev=1.31.2.4&content-type=text/x-cvsweb-markup">classifiers/meta/Bagging.html (1.31.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-10-09 23:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now throws an exception if NaN occurs during normalization. This avoids introducing missing values into the filtered data set in this situation.</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Normalize.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Normalize.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-10-09 23:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now throws an exception if NaN occurs during standardization. This avoids introducing missing values into the filtered data set in this situation.</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/Standardize.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/Standardize.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-10-06 22:44 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed "final" from getOutputFormat method declaration since that caused VerifyError exceptions in derived filters on Mac Books:
+https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2007-October/011339.html</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/PotentialClassIgnorer.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/PotentialClassIgnorer.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-08-30 23:11 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug that prevented quoted ? from being parsed as a label rather than a missing value</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/CSVLoader.html?r1=1.9.2.3&r2=1.9.2.2">core/converters/CSVLoader.html (1.9.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-08-29 23:27 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Changed most measures to divide by (m_WithClass - m_Unclassified), rather than by m_WithClass. This makes more sense for abstaining classifiers.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/Evaluation.html?rev=1.53.2.6&content-type=text/x-cvsweb-markup">classifiers/Evaluation.html (1.53.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-08-23 02:30 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug that caused stack overflow by removing all uses of Utils.sm and Utils.gr</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/RandomTree.html?rev=1.8.2.3&content-type=text/x-cvsweb-markup">classifiers/trees/RandomTree.html (1.8.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-08-12 23:55 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed the conversion of blanks into underscores of enumerated values (the CSVSaver isn't performing this conversion!). Would lead to incompatible files otherwise:
+load ARFF in Explorer -&gt; save as CSV [1] -&gt; load CSV [1] -&gt; save as CSV [2]
+CSV [1] and CSV [2] will differ, with CSV [2] having all the blanks converted to underscores.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/CSVLoader.html?rev=1.9.2.2&content-type=text/x-cvsweb-markup">core/converters/CSVLoader.html (1.9.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-08-09 22:50 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>savers were too restrictive in writeBatch method: instead ALWAYS having a file to write to, one needs only either a file OR a stream (both are used through a Writer)</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/ArffSaver.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">core/converters/ArffSaver.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/CSVSaver.html?rev=1.2.2.2&content-type=text/x-cvsweb-markup">core/converters/CSVSaver.html (1.2.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-07-03 23:55 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Instance weights were being cast to ints for some reason. Removed the casts</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/AODE.html?rev=1.8.2.4&content-type=text/x-cvsweb-markup">classifiers/bayes/AODE.html (1.8.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-07-03 01:25 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in kthSmallestValue that prevented the largest value from being returned</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Instances.html?r1=1.58.2.6&r2=1.58.2.5">core/Instances.html (1.58.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-25 02:56 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>de-serializing savers no longer sets the file, since the KnowledgeFlow handles that itself, by using prefix, directory and relation-name for the filename
+fixed Javadoc and other inconsistencies compared to developer version</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/xml/XMLBeans.html?rev=1.1.2.6&content-type=text/x-cvsweb-markup">gui/beans/xml/XMLBeans.html (1.1.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-25 02:55 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>doesn't stumble over '' anymore by replacing it with one single quote (creates an invalid SQL statement)</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/DatabaseSaver.html?rev=1.1.2.2&content-type=text/x-cvsweb-markup">core/converters/DatabaseSaver.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-25 02:55 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>statement/connection variables are now transient (otherwise an exception is raised that these objects aren't serializable)
+added checks whether a DB connection is active (after de-serializing for instance)</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.html?rev=1.18.2.8&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.html (1.18.2.8)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-25 02:54 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added checks whether a DB connection is active (after de-serializing for instance)</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/DatabaseConnection.html?rev=1.1.2.3&content-type=text/x-cvsweb-markup">core/converters/DatabaseConnection.html (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-25 02:54 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>the BufferedWriter is now transient, to make the derived classes serializable</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/AbstractFileSaver.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/converters/AbstractFileSaver.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-25 02:53 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed restriction that nominal attributes have to have at least one attribute. ARFF files generated from databases can have empty nominal attributes, e.g., "Summary" from a results table of the Experimenter may not be filled in (only missing values). Such a table could not be loaded again in the Explorer again.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Instances.html?r1=1.58.2.5&r2=1.58.2.4">core/Instances.html (1.58.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-22 01:24 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added information about how ROC and AUC are computed, based on this Wekalist post:
+https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2007-June/010386.html</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/evaluation/ThresholdCurve.html?rev=1.18.2.1&content-type=text/x-cvsweb-markup">classifiers/evaluation/ThresholdCurve.html (1.18.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-21 23:55 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed Javadoc for search direction</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/BestFirst.html?rev=1.24.2.2&content-type=text/x-cvsweb-markup">attributeSelection/BestFirst.html (1.24.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-13 20:58 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>build.xml gets now added to the source jar</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?rev=1.19.2.17&content-type=text/x-cvsweb-markup">build.xml (1.19.2.17)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-08 02:22 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>incorporated changes between Jama 1.0.1 and 1.0.2 in Weka's classes
+see also Jama's changelog: http://math.nist.gov/javanumerics/jama/ChangeLog</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/matrix/CholeskyDecomposition.html?rev=1.1.2.3&content-type=text/x-cvsweb-markup">core/matrix/CholeskyDecomposition.html (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/core/matrix/SingularValueDecomposition.html?rev=1.1.2.3&content-type=text/x-cvsweb-markup">core/matrix/SingularValueDecomposition.html (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-06-01 04:31 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>updated version</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/version.txt?rev=1.1.2.6&content-type=text/x-cvsweb-markup">core/version.txt (1.1.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-31 23:13 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added note to Javadoc of add(Instance) method, that string values are not transferred</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Instances.html?rev=1.58.2.4&content-type=text/x-cvsweb-markup">core/Instances.html (1.58.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>

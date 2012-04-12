@@ -1,0 +1,246 @@
+% Version: $Revision$
+
+An ARFF (= \textit{Attribute-Relation File Format}) file is an ASCII text file that describes a list of instances sharing a set of attributes.
+
+\section{Overview}
+ARFF files have two distinct sections. The first section is the \textbf{Header} information, which is followed the \textbf{Data} information.
+
+The \textbf{Header} of the ARFF file contains the name of the relation, a list of the attributes (the columns in the data), and their types. An example header on the standard IRIS dataset looks like this:
+
+\begin{verbatim}
+  % 1. Title: Iris Plants Database
+  % 
+  % 2. Sources:
+  %      (a) Creator: R.A. Fisher
+  %      (b) Donor: Michael Marshall (MARSHALL%PLU@io.arc.nasa.gov)
+  %      (c) Date: July, 1988
+  % 
+  @RELATION iris
+
+  @ATTRIBUTE sepallength  NUMERIC
+  @ATTRIBUTE sepalwidth   NUMERIC
+  @ATTRIBUTE petallength  NUMERIC
+  @ATTRIBUTE petalwidth   NUMERIC
+  @ATTRIBUTE class        {Iris-setosa,Iris-versicolor,Iris-virginica}
+\end{verbatim}
+
+\noindent The \textbf{Data} of the ARFF file looks like the following:
+
+\begin{verbatim}
+  @DATA
+  5.1,3.5,1.4,0.2,Iris-setosa
+  4.9,3.0,1.4,0.2,Iris-setosa
+  4.7,3.2,1.3,0.2,Iris-setosa
+  4.6,3.1,1.5,0.2,Iris-setosa
+  5.0,3.6,1.4,0.2,Iris-setosa
+  5.4,3.9,1.7,0.4,Iris-setosa
+  4.6,3.4,1.4,0.3,Iris-setosa
+  5.0,3.4,1.5,0.2,Iris-setosa
+  4.4,2.9,1.4,0.2,Iris-setosa
+  4.9,3.1,1.5,0.1,Iris-setosa
+\end{verbatim}
+
+Lines that begin with a \texttt{\%} are comments. The \texttt{@RELATION}, \texttt{@ATTRIBUTE} and \texttt{@DATA} declarations are case insensitive.
+
+
+\section{Examples}
+Several well-known machine learning datasets are distributed with Weka in the \texttt{\$WEKAHOME/data} directory as ARFF files.
+
+
+\subsection{The ARFF Header Section}
+The ARFF Header section of the file contains the relation declaration and attribute declarations. 
+
+
+\subsubsection*{The @relation Declaration}
+The relation name is defined as the first line in the ARFF file. The format is:
+
+\begin{verbatim}
+  @relation <relation-name>
+\end{verbatim}
+
+where \textit{$<$relation-name$>$} is a string. The string must be quoted if the name includes spaces.
+
+
+\subsubsection*{The @attribute Declarations}
+Attribute declarations take the form of an ordered sequence of \texttt{@attribute} statements. Each attribute in the data set has its own \texttt{@attribute} statement which uniquely defines the name of that attribute and it's data type. The order the attributes are declared indicates the column position in the data section of the file. For example, if an attribute is the third one declared then Weka expects that all that attributes values will be found in the third comma delimited column.
+
+The format for the \texttt{@attribute} statement is:
+
+\begin{verbatim}
+  @attribute <attribute-name> <datatype>
+\end{verbatim}
+
+where the \textit{$<$attribute-name$>$} must start with an alphabetic character. If spaces are to be included in the name then the entire name must be quoted.
+
+The \textit{$<$datatype$>$} can be any of the four types supported by Weka:
+\begin{itemize}
+	\item \textit{numeric}
+	\item \textit{integer} is treated as \textit{numeric}
+	\item \textit{real} is treated as \textit{numeric}
+	\item $<$nominal-specification$>$
+	\item \textit{string}
+	\item \textit{date} [$<$date-format$>$]
+	\item \textit{relational} for multi-instance data (for future use)
+\end{itemize}
+
+where \textit{$<$nominal-specification$>$} and \textit{$<$date-format$>$} are defined below. The keywords \textbf{numeric}, \textbf{real}, \textbf{integer}, \textbf{string} and \textbf{date} are case insensitive.
+
+
+\subsubsection*{Numeric attributes}
+Numeric attributes can be real or integer numbers. 
+
+
+\subsubsection*{Nominal attributes}
+Nominal values are defined by providing an $<$nominal-specification$>$ listing the possible values: \texttt{{$<$nominal-name1$>$, $<$nominal-name2$>$, $<$nominal-name3$>$, ...}}
+
+For example, the class value of the Iris dataset can be defined as follows:
+
+\begin{verbatim}
+  @ATTRIBUTE class {Iris-setosa,Iris-versicolor,Iris-virginica}
+\end{verbatim}
+
+Values that contain spaces must be quoted. 
+
+
+\subsubsection*{String attributes}
+String attributes allow us to create attributes containing arbitrary textual values. This is very useful in text-mining applications, as we can create datasets with string attributes, then write Weka Filters to manipulate strings (like StringToWordVectorFilter). String attributes are declared as follows:
+
+\begin{verbatim}
+  @ATTRIBUTE LCC string
+\end{verbatim}
+
+
+\subsubsection*{Date attributes}
+Date attribute declarations take the form:
+
+\begin{verbatim}
+  @attribute <name> date [<date-format>]
+\end{verbatim}
+
+where \textit{$<$name$>$} is the name for the attribute and \textit{$<$date-format$>$} is an optional string specifying how date values should be parsed and printed (this is the same format used by \texttt{SimpleDateFormat}). The default format string accepts the ISO-8601 combined date and time format: \texttt{yyyy-MM-dd'T'HH:mm:ss}.
+
+Dates must be specified in the data section as the corresponding string representations of the date/time (see example below). 
+
+\subsubsection*{Relational attributes}
+Relational attribute declarations take the form:
+
+\begin{verbatim}
+  @attribute <name> relational
+    <further attribute definitions>
+  @end <name>
+\end{verbatim}
+
+\noindent For the multi-instance dataset MUSK1 the definition would look like this ("..." denotes an omission):
+
+\begin{verbatim}
+  @attribute molecule_name {MUSK-jf78,...,NON-MUSK-199}
+  @attribute bag relational
+    @attribute f1 numeric
+    ...
+    @attribute f166 numeric
+  @end bag
+  @attribute class {0,1}
+  ...
+\end{verbatim}
+
+
+\subsection{The ARFF Data Section}
+The ARFF Data section of the file contains the data declaration line and the actual instance lines.
+
+
+\subsubsection*{The @data Declaration}
+The \texttt{@data} declaration is a single line denoting the start of the data segment in the file. The format is:
+
+\begin{verbatim}
+  @data
+\end{verbatim}
+
+
+\subsubsection*{The instance data}
+Each instance is represented on a single line, with carriage returns denoting the end of the instance. A percent sign (\texttt{\%}) introduces a comment, which continues to the end of the line.
+
+Attribute values for each instance are delimited by commas. They must appear in the order that they were declared in the header section (i.e. the data corresponding to the nth \texttt{@attribute} declaration is always the nth field of the attribute).
+
+Missing values are represented by a single question mark, as in:
+
+\begin{verbatim}
+  @data
+  4.4,?,1.5,?,Iris-setosa
+\end{verbatim}
+
+\noindent Values of string and nominal attributes are case sensitive, and any that contain space or the comment-delimiter character \texttt{\%} must be quoted. (The code suggests that double-quotes are acceptable and that a backslash will escape individual characters.) An example follows:
+
+\begin{verbatim}
+  @relation LCCvsLCSH
+
+  @attribute LCC string
+  @attribute LCSH string
+
+  @data
+  AG5,   'Encyclopedias and dictionaries.;Twentieth century.'
+  AS262, 'Science -- Soviet Union -- History.'
+  AE5,   'Encyclopedias and dictionaries.'
+  AS281, 'Astronomy, Assyro-Babylonian.;Moon -- Phases.'
+  AS281, 'Astronomy, Assyro-Babylonian.;Moon -- Tables.'
+\end{verbatim}
+
+\noindent Dates must be specified in the data section using the string representation specified in the attribute declaration. For example:
+
+\begin{verbatim}
+  @RELATION Timestamps
+
+  @ATTRIBUTE timestamp DATE "yyyy-MM-dd HH:mm:ss"
+
+  @DATA
+  "2001-04-03 12:12:12"
+  "2001-05-03 12:59:55"
+\end{verbatim}
+
+\noindent Relational data must be enclosed within double quotes ". For example an instance of the MUSK1 dataset ("..." denotes an omission):
+
+\begin{verbatim}
+  MUSK-188,"42,...,30",1
+\end{verbatim}
+
+
+\section{Sparse ARFF files}
+Sparse ARFF files are very similar to ARFF files, but data with value 0 are not be explicitly represented.
+
+Sparse ARFF files have the same header (i.e \texttt{@relation} and \texttt{@attribute} tags) but the data section is different. Instead of representing each value in order, like this:
+
+\begin{verbatim}
+  @data
+  0, X, 0, Y, "class A"
+  0, 0, W, 0, "class B"
+\end{verbatim}
+
+\noindent the non-zero attributes are explicitly identified by attribute number and their value stated, like this:
+
+\begin{verbatim}
+  @data
+  {1 X, 3 Y, 4 "class A"}
+  {2 W, 4 "class B"}
+\end{verbatim}
+
+\noindent Each instance is surrounded by curly braces, and the format for each entry is: $<$index$>$ $<$space$>$ $<$value$>$ where index is the attribute index (starting from 0).
+
+Note that the omitted values in a sparse instance are \textbf{0}, they are not \textbf{missing} values! If a value is unknown, you must explicitly represent it with a question mark (\texttt{?}).
+
+\textbf{Warning:} There is a known problem saving \texttt{SparseInstance} objects from datasets that have string attributes. In Weka, string and nominal data values are stored as numbers; these numbers act as indexes into an array of possible attribute values (this is very efficient). However, the first string value is assigned index 0: this means that, internally, this value is stored as a 0. When a \texttt{SparseInstance} is written, string instances with internal value 0 are not output, so their string value is lost (and when the arff file is read again, the default value 0 is the index of a different string value, so the attribute value appears to change). To get around this problem, add a dummy string value at index 0 that is never used whenever you declare string attributes that are likely to be used in \texttt{SparseInstance} objects and saved as Sparse ARFF files.
+
+\section{Instance weights in ARFF files}
+A weight can be associated with an instance in a standard ARFF file by appending it to the end of the line for that instance and enclosing the value in curly braces. E.g:
+
+\begin{verbatim}
+  @data
+  0, X, 0, Y, "class A", {5}
+\end{verbatim}
+
+\noindent For a sparse instance, this example would look like:
+
+\begin{verbatim}
+  @data
+  {1 X, 3 Y, 4 "class A"}, {5}
+\end{verbatim}
+
+\noindent Note that any instance without a weight value specified is assumed to have a weight of 1 for backwards compatibility.

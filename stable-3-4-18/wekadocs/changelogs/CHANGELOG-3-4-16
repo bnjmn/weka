@@ -1,0 +1,187 @@
+------------------------------------------------------------------------
+r5593 | mhall | 2009-06-09 11:35:05 +1200 (Tue, 09 Jun 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/Instances.java
+
+stratify() was checking for numFolds <= 0 rather than <= 1.
+------------------------------------------------------------------------
+r5594 | mhall | 2009-06-09 14:42:27 +1200 (Tue, 09 Jun 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/LearningRateResultProducer.java
+
+Disabled stratification when data is nominal. The data was being stratified using m_StepSize (which is clearly wrong). Changing to numInstances / m_StepSize makes sense intuitively, but problems arise with small step sizes - in the extreme case of step size 1 and small lower size, no stratification is done and the data is left sorted by the class label. This can lead to some pretty weird curves - for early parts of the curve (i.e. small training set sizes), it is possible that there is only one class label present, which leads to 100% accuracy.
+------------------------------------------------------------------------
+r5615 | mhall | 2009-06-17 14:31:14 +1200 (Wed, 17 Jun 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+The counter for early termination on the validation set was getting reset on each drop in error rather than only when the best error encountered was improved upon - fixed.
+------------------------------------------------------------------------
+r5617 | fracpete | 2009-06-18 10:51:28 +1200 (Thu, 18 Jun 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/Statistics.java
+
+all methods are now public
+------------------------------------------------------------------------
+r5676 | mhall | 2009-06-23 11:43:04 +1200 (Tue, 23 Jun 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/datagenerators/RDG1.java
+
+Was creating instances with weight 0 - fixed.
+------------------------------------------------------------------------
+r5691 | mhall | 2009-06-30 13:08:35 +1200 (Tue, 30 Jun 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/AttributeVisualizationPanel.java
+
+Now uses sparse representation for class value counts.
+------------------------------------------------------------------------
+r5707 | fracpete | 2009-07-03 17:38:17 +1200 (Fri, 03 Jul 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/visualize/PlotData2D.java
+
+addInstanceNumberAttribute() now sets the corresponding class attribute after adding the instance number attribute, instead of just using the last one
+------------------------------------------------------------------------
+r5712 | fracpete | 2009-07-03 18:03:28 +1200 (Fri, 03 Jul 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+the label index for the cluster assignments now start at 1 instead of 0 (cluster1, cluster2, ... instead of cluster0, cluster1, ...) to make it consistent with the AddCluster filter
+------------------------------------------------------------------------
+r5722 | mhall | 2009-07-12 10:33:24 +1200 (Sun, 12 Jul 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/AttributeVisualizationPanel.java
+
+Was consuming 100% cpu for String attributes - fixed.
+------------------------------------------------------------------------
+r5788 | mhall | 2009-07-23 14:41:42 +1200 (Thu, 23 Jul 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/meta/CVParameterSelection.java
+
+Fixed a typo in the CVParametersTipText() method.
+------------------------------------------------------------------------
+r5835 | fracpete | 2009-08-03 21:05:47 +1200 (Mon, 03 Aug 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.hsql
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.msaccess
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.mssqlserver
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.mssqlserver2005
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.mysql
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.odbc
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.oracle
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.postgresql
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/experiment/DatabaseUtils.props.sqlite3
+
+updated wiki URLs
+------------------------------------------------------------------------
+r5844 | mhall | 2009-08-04 14:07:09 +1200 (Tue, 04 Aug 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/GenericObjectEditor.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/GenericObjectEditor.props
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/PropertyPanel.java
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/experiment/SetupPanel.java
+
+"Choose" buttons in the advanced mode of the Experimenter were not disabled when first switching to advanced mode (and before loading an experiment or hitting the "new" button). Fixed.
+------------------------------------------------------------------------
+r5863 | fracpete | 2009-08-13 09:45:45 +1200 (Thu, 13 Aug 2009) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/attribute/MergeTwoValues.java
+   M /branches/book2ndEd-branch/weka/src/test/java/weka/filters/unsupervised/attribute/MergeTwoValuesTest.java
+
+MergeTwoValues no longer allows processing the class attribute, since this can lead to ArrayIndexOutOfBounds exceptions when used in conjunction with the FilteredClassifier:
+https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2009-August/018746.html
+------------------------------------------------------------------------
+r5906 | mhall | 2009-08-28 10:04:26 +1200 (Fri, 28 Aug 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/MultipleClassifiersCombiner.java
+
+setOptions was not calling super.setOptions - fixed.
+------------------------------------------------------------------------
+r5918 | fracpete | 2009-08-31 09:24:10 +1200 (Mon, 31 Aug 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/visualize/JPEGWriter.java
+
+uses now printAll(Graphics) instead of paint(Graphics) to ensure that everything is drawn properly generating image
+------------------------------------------------------------------------
+r5973 | mhall | 2009-09-25 07:52:49 +1200 (Fri, 25 Sep 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/core/Attribute.java
+
+Fixed a bug where a value was being directly compared to Instance.missingValue() (rather than using Instance.isMissingValue()).
+------------------------------------------------------------------------
+r5979 | mhall | 2009-09-25 09:19:35 +1200 (Fri, 25 Sep 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/attribute/AddExpression.java
+
+Fixed a bug where a value was being directly compared to Instance.missingValue() (rather than using Instance.isMissingValue()).
+------------------------------------------------------------------------
+r5986 | mhall | 2009-09-25 09:36:50 +1200 (Fri, 25 Sep 2009) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/boundaryvisualizer/BoundaryPanel.java
+
+Fixed a bug where a value was being directly compared to Instance.missingValue() (rather than using Instance.isMis
+singValue()).
+------------------------------------------------------------------------
+r5991 | mhall | 2009-09-25 11:14:10 +1200 (Fri, 25 Sep 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/attribute/AddExpression.java
+
+Removed an unnecessary test for missing value in evaluateExpression().
+------------------------------------------------------------------------
+r5999 | mhall | 2009-09-29 08:59:44 +1300 (Tue, 29 Sep 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/AttributeVisualizationPanel.java
+
+Fixed a bug which caused a glitching effect when computing histograms for numeric attributes when the class is also numeric.
+------------------------------------------------------------------------
+r6006 | mhall | 2009-09-29 20:28:49 +1300 (Tue, 29 Sep 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans/CrossValidationFoldMaker.java
+
+Fold thread was not transient and the finally clause of the try/catch block in the run() method of the thread was not setting the thread reference to null. This can cause serialization to fail if saving after interrupting the flow.
+------------------------------------------------------------------------
+r6080 | fracpete | 2009-11-13 11:56:21 +1300 (Fri, 13 Nov 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/PropertySheetPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/PropertySheetPanel.java
+   M /trunk/weka/src/main/java/weka/gui/PropertySheetPanel.java
+
+
+------------------------------------------------------------------------
+r6092 | mhall | 2009-11-18 14:26:06 +1300 (Wed, 18 Nov 2009) | 2 lines
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/classifiers/meta/LogitBoost.java
+
+Fixed bug: shrinkage was only applied at training time, not at prediction time. Now, changing the value of the shrinkage p
+arameter actually works properly.
+------------------------------------------------------------------------
+r6129 | mhall | 2009-12-09 11:20:44 +1300 (Wed, 09 Dec 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/filters/unsupervised/attribute/Remove.java
+
+Minor fix to the globalInfo and javadocs.
+------------------------------------------------------------------------
+r6134 | mhall | 2009-12-09 11:32:35 +1300 (Wed, 09 Dec 2009) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/attributeSelection/CfsSubsetEval.java
+
+
+------------------------------------------------------------------------
+r6208 | mhall | 2010-01-11 20:32:44 +1300 (Mon, 11 Jan 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/GUIChooser.java
+
+Updated copyright notice to 2010.
+------------------------------------------------------------------------
+r6209 | mhall | 2010-01-11 20:33:16 +1300 (Mon, 11 Jan 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/explorer/Explorer.java
+
+Updated copyright notice to 2010.
+------------------------------------------------------------------------
+r6210 | mhall | 2010-01-11 20:33:52 +1300 (Mon, 11 Jan 2010) | 1 line
+Changed paths:
+   M /branches/book2ndEd-branch/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Updated copyright notice to 2010.
+------------------------------------------------------------------------

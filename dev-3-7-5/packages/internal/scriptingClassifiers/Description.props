@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=scriptingClassifiers
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2010-05-31
+
+# Title (required)
+Title=Wrapper classifiers for Jython and Groovy scripting code.
+
+Category=Classification
+
+# Author (required)
+Author=Peter Reutemann
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=Wrapper classifiers for Jython and Groovy code. Even though the classifier is serializable, the trained classifier cannot be stored persistently. I.e., one cannot store a model file and re-load it at a later point in time again to make predictions.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/scriptingClassifiers1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/scriptingClassifiers
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)

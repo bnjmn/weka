@@ -1,0 +1,183 @@
+% Version: $Revision$
+
+\section{Configuration files}
+Thanks to JDBC it is easy to connect to Databases that provide a JDBC driver. Responsible for the setup is the following properties file, located in the weka.experiment package:
+
+\begin{verbatim}
+  DatabaseUtils.props
+\end{verbatim}
+
+\noindent You can get this properties file from the weka.jar or weka-src.jar jar-archive, both part of a normal Weka release. If you open up one of those files, you'll find the properties file in the sub-folder weka/experiment.
+
+Weka comes with example files for a wide range of databases:
+
+\begin{itemize}
+	\item \texttt{DatabaseUtils.props.hsql} - HSQLDB (>= 3.4.1)
+	\item \texttt{DatabaseUtils.props.mssqlserver} - MS SQL Server 2000 (>= 3.4.9, >= 3.5.4)
+	\item \texttt{DatabaseUtils.props.mssqlserver2005} - MS SQL Server 2005 (>= 3.4.11, >= 3.5.6)
+	\item \texttt{DatabaseUtils.props.mysql} - MySQL (>= 3.4.9, >= 3.5.4)
+	\item \texttt{DatabaseUtils.props.odbc} - ODBC access via Sun's ODBC/JDBC bridge, e.g., for MS Access (>= 3.4.9, >= 3.5.4) \\
+	see the \textit{Windows databases} chapter for more information:
+	\item \texttt{DatabaseUtils.props.oracle} - Oracle 10g (>= 3.4.9, >= 3.5.4)
+	\item \texttt{DatabaseUtils.props.postgresql} - PostgreSQL 7.4 (>= 3.4.9, >= 3.5.4)
+	\item \texttt{DatabaseUtils.props.sqlite3} - sqlite 3.x (> 3.4.12, > 3.5.7)
+\end{itemize}
+
+The easiest way is just to place the extracted properties file into your HOME directory. For more information on how property files are processed, check out this article.
+
+\textbf{Note:} Weka \textit{only} looks for the \texttt{DatabaseUtils.props} file. If you take one of the example files listed above, you need to rename it first.
+
+
+\section{Setup}
+Under normal circumstances you only have to edit the following two properties:
+
+\begin{itemize}
+	\item \texttt{jdbcDriver}
+	\item \texttt{jdbcURL}
+\end{itemize}
+
+\subsection*{Driver}
+\texttt{jdbcDriver} is the classname of the JDBC driver, necessary to connect to your database, e.g.:
+
+\begin{itemize}
+	\item HSQLDB \\
+	\texttt{org.hsqldb.jdbcDriver}
+	\item MS SQL Server 2000 (Desktop Edition) \\
+	\texttt{com.microsoft.jdbc.sqlserver.SQLServerDriver}
+	\item MS SQL Server 2005 \\
+	\texttt{com.microsoft.sqlserver.jdbc.SQLServerDriver}
+	\item MySQL \\
+	\texttt{org.gjt.mm.mysql.Driver} (or \texttt{com.mysql.jdbc.Driver})
+	\item ODBC - part of Sun's JDKs/JREs, no external driver necessary \\
+	\texttt{sun.jdbc.odbc.JdbcOdbcDriver}
+	\item Oracle \\
+	\texttt{oracle.jdbc.driver.OracleDriver}
+	\item PostgreSQL \\
+	\texttt{org.postgresql.Driver}
+	\item sqlite 3.x \\
+	\texttt{org.sqlite.JDBC}
+\end{itemize}
+
+\subsection*{URL}
+\texttt{jdbcURL} specifies the JDBC URL pointing to your database (can be still changed in the Experimenter/Explorer), e.g. for the database MyDatabase on the server \texttt{server.my.domain}:
+
+\begin{itemize}
+	\item HSQLDB \\
+	\texttt{jdbc:hsqldb:hsql://server.my.domain/MyDatabase}
+	\item MS SQL Server 2000 (Desktop Edition) \\
+	\texttt{jdbc:microsoft:sqlserver://v:1433} \\
+	(Note: if you add \texttt{;databasename=db-name} you can connect to a different database than the default one, e.g., MyDatabase)
+	\item MS SQL Server 2005 \\
+	\texttt{jdbc:sqlserver://server.my.domain:1433}
+	\item MySQL \\
+	\texttt{jdbc:mysql://server.my.domain:3306/MyDatabase}
+	\item ODBC \\
+	\texttt{jdbc:odbc:DSN\_name} (replace \textit{DSN\_name} with the DSN that you want to use)
+	\item Oracle (thin driver) \\
+	\texttt{jdbc:oracle:thin:@server.my.domain:1526:orcl} \\
+	(Note: \texttt{@machineName:port:SID}) \\
+	for the \textit{Express Edition} you can use \\
+	\texttt{jdbc:oracle:thin:@server.my.domain:1521:XE}
+	\item PostgreSQL \\
+	\texttt{jdbc:postgresql://server.my.domain:5432/MyDatabase} \\
+	You can also specify user and password directly in the URL: \\
+	\texttt{jdbc:postgresql://server.my.domain:5432/MyDatabase?user=$<$...$>$\&password=$<$...$>$} \\
+	where you have to replace the $<$...$>$ with the correct values
+	\item sqlite 3.x \\
+	\texttt{jdbc:sqlite:/path/to/database.db} \\
+	(you can access only local files)
+\end{itemize}
+
+\section{Missing Datatypes}
+Sometimes (e.g. with MySQL) it can happen that a column type cannot be interpreted. In that case it is necessary to map the name of the column type to the Java type it should be interpreted as. E.g. the MySQL type TEXT is returned as BLOB from the JDBC driver and has to be mapped to String (0 represents String - the mappings can be found in the comments of the properties file):
+
+\vspace{0.5cm}
+\begin{tabular}{l|l|r|l}
+Java type 	& Java method 	& Identifier 	& Weka attribute type \\
+\hline
+String		& getString() 	& 0	 	& nominal \\
+boolean 	& getBoolean() 	& 1 		& nominal \\
+double 		& getDouble() 	& 2 		& numeric \\
+byte 		& getByte() 	& 3 		& numeric \\
+short 		& getByte() 	& 4 		& numeric \\
+int 		& getInteger() 	& 5 		& numeric \\
+long 		& getLong() 	& 6 		& numeric \\
+float 		& getFloat() 	& 7 		& numeric \\
+date 		& getDate() 	& 8 		& date \\
+text 		& getString() 	& 9 		& string \\
+time 		& getTime() 	& 10 		& date \\
+\end{tabular}
+\vspace{0.5cm}
+
+\noindent In the props file one lists now the type names that the database returns and what Java type it represents (via the identifier), e.g.:
+
+\begin{verbatim}
+  CHAR=0
+  VARCHAR=0
+\end{verbatim}
+
+\noindent \texttt{CHAR} and \texttt{VARCHAR} are both String types, hence they are interpreted as String (identifier 0)
+
+\noindent \textbf{Note:} in case database types have blanks, one needs to replace those blanks with an underscore, e.g., DOUBLE PRECISION must be listed like this:
+
+\begin{verbatim}
+  DOUBLE_PRECISION=2
+\end{verbatim}
+
+
+\section{Stored Procedures}
+Let's say you're tired of typing the same query over and over again. A good way to shorten that, is to create a stored procedure.
+
+\subsection*{PostgreSQL 7.4.x}
+The following example creates a procedure called emplyoee\_name that returns the names of all the employees in table employee. Even though it doesn't make much sense to create a stored procedure for this query, nonetheless, it shows how to create and call stored procedures in PostgreSQL.
+
+\begin{itemize}
+	\item Create
+	\begin{verbatim}
+	CREATE OR REPLACE FUNCTION public.employee_name()
+	  RETURNS SETOF text AS 'select name from employee'
+	  LANGUAGE 'sql' VOLATILE;
+	\end{verbatim}
+
+	\item SQL statement to call procedure
+	\begin{verbatim}
+	SELECT * FROM employee_name()
+	\end{verbatim}
+
+	\item Retrieve data via \texttt{InstanceQuery}
+	\begin{verbatim}
+	java weka.experiment.InstanceQuery
+	     -Q "SELECT * FROM employee_name()"
+	     -U <user> -P <password>
+	\end{verbatim}
+\end{itemize}
+
+\section{Troubleshooting}
+\begin{itemize}
+	\item In case you're experiencing problems connecting to your database, check out the WEKA Mailing List (see Weka homepage for more information). It is possible that somebody else encountered the same problem as you and you'll find a post containing the solution to your problem.
+
+	\item Specific \textit{MS SQL Server 2000} Troubleshooting
+	\begin{itemize}
+		\item Error Establishing Socket with JDBC Driver \\
+		Add TCP/IP to the list of protocols as stated in the following article: \\ http://support.microsoft.com/default.aspx?scid=kb;en-us;313178
+		\item Login failed for user 'sa'. Reason: Not associated with a trusted SQL Server connection. \\
+		For changing the authentication to mixed mode see the following article: \\
+		http://support.microsoft.com/kb/319930/en-us
+	\end{itemize}
+
+	\item \textit{MS SQL Server 2005}: TCP/IP is not enabled for SQL Server, or the server or port number specified is incorrect.Verify that SQL Server is listening with TCP/IP on the specified server and port. This might be reported with an exception similar to: "The login has failed. The TCP/IP connection to the host has failed." This indicates one of the following:
+	\begin{itemize}
+		\item SQL Server is installed but TCP/IP has not been installed as a network protocol for SQL Server by using the SQL Server Network Utility for SQL Server 2000, or the SQL Server Configuration Manager for SQL Server 2005
+		\item TCP/IP is installed as a SQL Server protocol, but it is not listening on the port specified in the JDBC connection URL. The default port is 1433.
+		\item The port that is used by the server has not been opened in the firewall
+	\end{itemize}
+
+	\item The \textbf{Added driver: ...} output on the commandline does not mean that the actual class was found, but only that Weka will \textit{attempt} to load the class later on in order to establish a database connection.
+
+	\item The error message No suitable driver can be caused by the following:
+	\begin{itemize}
+		\item The JDBC driver you are attempting to load is not in the CLASSPATH (Note: using \texttt{-jar} in the java commandline \textbf{overwrites} the CLASSPATH environment variable!). Open the SimpleCLI, run the command \texttt{java weka.core.SystemInfo} and check whether the property \texttt{java.class.path} lists your database jar. If not correct your CLASSPATH or the Java call you start Weka with.
+		\item The JDBC driver class is misspelled in the \texttt{jdbcDriver} property or you have multiple entries of \texttt{jdbcDriver} (properties files need \textit{unique keys}!)
+		\item The jdbcURL property has a spelling error and tries to use a non-existing protocol or you listed it multiple times, which doesn't work either (remember, properties files need unique keys!)
+	\end{itemize}
+\end{itemize}

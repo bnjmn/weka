@@ -1,0 +1,172 @@
+<project name="weka-snapshot" default="snapshot" basedir=".">
+<!-- 
+  ===========================================================================
+   Ant build file for creating weka snapshot distributions. Make sure that
+   last-release.props contains the date of the last release of this branch
+   of Weka (so that the changelog is correct).
+
+   Use ./weka/build.xml for tasks related to compiling weka and making the
+   core weka.jar executable jar file.
+
+   Type ant -projecthelp for targets and descriptions.
+
+   $Revision$
+  ===========================================================================
+-->
+
+  <!-- set global properties for this build -->
+  <property name="temp" value="temp"/>
+  <property name="weka" value="weka"/>
+  <property name="wekadocs" value="wekadocs"/>
+  <property name="wekaexamples" value="wekaexamples"/>
+  <property name="dist"  value="dist"/>
+  <property name="branch" value="weka-development-3-7-distribution"/>
+
+  <!-- load the last release date -->
+  <property file="last-release.props"/>
+
+  <taskdef name="latex" classname="de.dokutransdata.antlatex.LaTeX"/>
+
+  
+
+  <target name="init_all">
+    <!-- Create the time stamp and various dirs -->
+    <tstamp>
+      <format property="TODAY" pattern="yyyy-MM-dd"/>
+    </tstamp>
+
+    <mkdir dir="${temp}"/>
+    <mkdir dir="${temp}/weka"/>
+    <mkdir dir="${temp}/weka/lib"/>
+    <mkdir dir="${temp}/changelogs"/>
+    <mkdir dir="${temp}/data"/>
+    <mkdir dir="${temp}/doc"/>
+    <mkdir dir="${dist}"/>
+
+    <echo message="NOTE: THIS BUILD FILE IS FOR CREATING WEKA SNAPSHOT DISTRIBUTIONS. USE THE build.xml IN ./weka FOR TASKS RELATED TO COMPILING WEKA."/>
+  </target>
+
+  <target name="weka-exe" depends="init_all">
+    <echo message="Building weka.jar executable jar file..."/>
+    <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
+    <ant antfile="build.xml" dir="${weka}" target="exejar" inheritall="false"/>
+  </target>
+
+  <target name="remote-engine" depends="weka-exe">
+    <echo message="Building remote engine jar..."/>
+    <ant antfile="build.xml" dir="${weka}" target="remotejar" inheritall="false"/>
+  </target>
+
+  <target name="weka-examples" depends="weka-exe">
+    <echo message="Building weka examples..."/>
+    <ant antfile="build.xml" dir="${wekaexamples}" target="clean" inheritall="false"/>
+    <ant antfile="build.xml" dir="${wekaexamples}" inheritall="false">
+      <property name="java.class.path" value="../${weka}/build/classes"/>
+    </ant>
+  </target>
+
+  <target name="weka-src" depends="init_all">
+    <echo message="Building weka.jar src jar file..."/>
+    <ant antfile="build.xml" dir="${weka}" target="srcjar" inheritall="false"/>
+  </target>
+
+  <target name="javadocs" depends="weka-exe" description="Create the javadocs">
+    <echo message="Generating java docs for weka..."/>
+    <ant antfile="build.xml" dir="${weka}" target="docs" inheritall="false"/>
+  </target>
+
+  <!-- changelog will need -DstartDate property -->
+  <target name="changelog" depends="init_all" description="Create a changelog for Weka development-3-7. Creates a changelog with changes from the date in last-release-props to today">
+    <echo message="Creating a changelog for {${lastReleaseDate}}:{${TODAY}}"/>
+    <ant antfile="build.xml" dir="${weka}" target="changelog" inheritall="false">
+      <property name="date_range" value="{${lastReleaseDate}}:{${TODAY}}"/>
+      <property name="release" value="SNAPSHOT"/>
+      <property name="weka_branch" value="trunk"/>
+    </ant>
+  </target>
+
+  <target name="manual" depends="init_all" description="Make the WekaManual.">
+    <latex
+       verbose="on"
+       clean="on"
+       pdftex="off"
+       workingDir="${wekadocs}/manual"
+       >
+      <fileset dir="${wekadocs}/manual">
+        <include name="manual.tex" />
+      </fileset>
+    </latex>
+    <echo message="Running dvips..."/>
+    <exec executable="dvips" dir="${wekadocs}/manual">
+      <arg value="-oWekaManual.ps"/>
+      <arg value="manual.dvi"/>
+    </exec>
+    <echo message="Running ps2pdf..."/>
+    <exec executable="ps2pdf" dir="${wekadocs}/manual">
+      <arg value="WekaManual.ps"/>
+    </exec>
+  </target>
+
+  <target name="copy-files" depends="javadocs, remote-engine, weka-src, changelog, manual">
+    <copy todir="${temp}/weka/lib">
+      <fileset dir="${weka}/lib">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+    <copy todir="${temp}/weka">
+      <fileset dir="${weka}/dist">
+        <include name="**/*"/>
+      </fileset>
+      <fileset dir="${weka}">
+        <include name="build.xml"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${temp}/changelogs">
+      <fileset dir="${wekadocs}/changelogs">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${temp}/doc">
+      <fileset dir="${weka}/doc"/>
+    </copy>
+
+    <copy todir="${temp}/data">
+      <fileset dir="${wekadocs}/data"/>
+    </copy>
+
+    <copy todir="${temp}">
+      <fileset dir="${wekadocs}">
+        <include name="documentation.*"/>
+        <include name="README" />
+        <include name="COPYING" />
+        <include name="weka.*" />
+      </fileset>
+    </copy>
+
+    <copy todir="${temp}">
+      <fileset dir="${wekadocs}/manual">
+        <include name="WekaManual.pdf"/>
+        </fileset>
+      </copy>
+
+    <zip destfile="${temp}/wekaexamples.zip" 
+     basedir="${wekaexamples}"/>
+  </target>
+
+  <target name="clean" description="Removes the dist directory">
+    <delete dir="${dist}"/>
+  </target>
+
+  <target name="snapshot" depends="copy-files" description="Make a SNAPSHOT distribution of Weka">
+    <echo message="Making snapshot zip..."/>
+    <zip destfile="${dist}/${branch}-SNAPSHOT.zip" basedir="${temp}">
+      <include name="**/*"/>
+    </zip>
+    <echo message="Cleaning up..."/>
+    <delete dir="${temp}"/>
+    <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
+  </target>
+
+</project>

@@ -1,0 +1,42 @@
+# WekaODF package description
+#
+# Version: $Revision$
+
+# Package name (required)
+PackageName=WekaExcel
+
+# Version (required)
+Version=1.0.0
+
+#Date (year-month-day)
+Date=2010-10-14
+
+# Title (required)
+Title=WEKA MS Excel loader/saver
+
+# Category (recommended)
+Category=Converter
+
+# Author (required)
+Author=FracPete (fracpete at waikato dot ac dot nz)
+
+# Maintainer (required)
+Maintainer=FracPete (fracpete at waikato dot ac dot nz)
+
+# License (required)
+License=GPL 2.0
+
+# Description (required)
+Description=WekaExcel adds support to directory read from and write to spreadsheets in Microsoft Excel 97-2007 format. It uses Apache POI (http://poi.apache.org/), specifically POI-HSSF and POI-XSSF (http://poi.apache.org/spreadsheet/), in order to read/write Excel spreadsheets.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/WekaExcel1.0.0.zip?download
+
+# URL for further information
+URL=http://poi.apache.org/spreadsheet/how-to.html
+
+# Related to other packages?
+Related=WekaODF
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.3)

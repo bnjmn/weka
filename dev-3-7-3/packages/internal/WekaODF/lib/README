@@ -1,0 +1,21 @@
+README
+======
+
+Information on the library versions used for WekaODF:
+
+- ODFDOM
+  Files:    odfdom.jar
+  License:  Apache 2.0
+  Version:  0.8.6
+  Homepage: http://odftoolkit.org/projects/odfdom
+  Download: http://odftoolkit.org/projects/odfdom/downloads/download/current-version%252Fodfdom-0.8.6-binaries.zip
+
+- Xerces-J
+  Files:    xercesImpl.jar, xml-apis.jar
+  License:  Apache 2.0
+  Version:  2.10.0
+  Homepage: http://xerces.apache.org/xerces2-j/
+  Download: http://xml.apache.org/dist/xerces-j/Xerces-J-bin.2.10.0.zip
+
+
+$Revision$

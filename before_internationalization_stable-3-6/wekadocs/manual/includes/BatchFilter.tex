@@ -1,0 +1,54 @@
+% Version: $Revision$
+
+\begin{verbatim}
+import weka.core.*;
+import weka.core.Capabilities.*;
+
+public class BatchFilter extends Filter {
+
+  public String globalInfo() {
+    return   "A batch filter that adds an additional attribute 'blah' at the end "
+           + "containing the index of the processed instance. The output format "
+           + "can be collected immediately.";
+  }
+
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    result.enableAllAttributes();
+    result.enableAllClasses();
+    result.enable(Capability.NO_CLASS);  // filter doesn't need class to be set
+    return result;
+  }
+
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
+    super.setInputFormat(instanceInfo);
+    Instances outFormat = new Instances(instanceInfo, 0);
+    outFormat.insertAttributeAt(new Attribute("blah"),
+	  outFormat.numAttributes());
+    setOutputFormat(outFormat);
+    return true;  // output format is immediately available
+  }
+
+  public boolean batchFinished() throws Exception {
+    if (getInputFormat() = null)
+      throw new NullPointerException("No input instance format defined");
+    Instances inst = getInputFormat();
+    Instances outFormat = getOutputFormat();
+    for (int i = 0; i < inst.numInstances(); i++) {
+      double[] newValues = new double[outFormat.numAttributes()];
+      double[] oldValues = inst.instance(i).toDoubleArray();
+      System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
+      newValues[newValues.length - 1] = i;
+      push(new Instance(1.0, newValues));
+    }
+    flushInput();
+    m_NewBatch = true;
+    m_FirstBatchDone = true;
+    return (numPendingOutput() != 0);
+  }
+
+  public static void main(String[] args) {
+    runFilter(new BatchFilter(), args);
+  }
+}
+\end{verbatim}
