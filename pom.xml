@@ -88,9 +88,8 @@
     </profile>
 
     <profile>
-      <!-- Used only when invoking release:perform so as not to re-run 
-           tests as part of the deployment-->
-      <id>release</id>
+      <!-- used for skipping tests -->
+      <id>no-tests</id>
       <properties>
         <skipTests>true</skipTests>
       </properties>
@@ -221,8 +220,8 @@
           <configuration>
             <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags/</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
-            <preparationGoals>clean install -P release</preparationGoals>
-            <goals>deploy -P release</goals> 
+            <preparationGoals>clean install -P no-tests</preparationGoals>
+            <goals>deploy -P no-tests</goals> 
           </configuration>
         </plugin>
       </plugins>
