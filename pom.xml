@@ -220,7 +220,7 @@
           <configuration>
             <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags/</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
-            <preparationGoals>clean install -P no-tests</preparationGoals>
+            <preparationGoals>clean verify -P no-tests</preparationGoals>
             <goals>deploy -P no-tests</goals> 
           </configuration>
         </plugin>
