@@ -133,7 +133,7 @@ public class CVParameterSelection
     static final long serialVersionUID = -4668812017709421953L;
 
     /**  Char used to identify the option of interest */
-    private char m_ParamChar;    
+    private String m_ParamChar;    
 
     /**  Lower bound for the CV search */
     private double m_Lower;      
@@ -152,7 +152,7 @@ public class CVParameterSelection
 
     /**  True if the parameter should be rounded to an integer */
     private boolean m_RoundParam;
-
+    
     /**
      * Constructs a CVParameter.
      * 
@@ -160,47 +160,54 @@ public class CVParameterSelection
      * @throws Exception if construction of CVParameter fails
      */
     public CVParameter(String param) throws Exception {
-     
-      // Tokenize the string into it's parts
-      StreamTokenizer st = new StreamTokenizer(new StringReader(param));
-      if (st.nextToken() != StreamTokenizer.TT_WORD) {
-	throw new Exception("CVParameter " + param 
-			    + ": Character parameter identifier expected");
+      String[] parts = param.split(" ");
+      if (parts.length < 4 || parts.length > 5) {
+        throw new Exception("CVParameter " + param 
+            + ": four or five components expected!");
       }
-      m_ParamChar = st.sval.charAt(0);
-      if (st.nextToken() != StreamTokenizer.TT_NUMBER) {
-	throw new Exception("CVParameter " + param 
-			    + ": Numeric lower bound expected");
+      
+      try {
+        Double.parseDouble(parts[0]);
+        throw new Exception("CVParameter " + param 
+                            + ": Character parameter identifier expected");
+      } catch (NumberFormatException n) {
+        m_ParamChar = parts[0];
       }
-      m_Lower = st.nval;
-      if (st.nextToken() == StreamTokenizer.TT_NUMBER) {
-	m_Upper = st.nval;
-	if (m_Upper < m_Lower) {
-	  throw new Exception("CVParameter " + param
-			      + ": Upper bound is less than lower bound");
-	}
-      } else if (st.ttype == StreamTokenizer.TT_WORD) {
-	if (st.sval.toUpperCase().charAt(0) == 'A') {
-	  m_Upper = m_Lower - 1;
-	} else if (st.sval.toUpperCase().charAt(0) == 'I') {
-	  m_Upper = m_Lower - 2;
-	} else {
-	  throw new Exception("CVParameter " + param 
-	      + ": Upper bound must be numeric, or 'A' or 'N'");
-	}
+      
+      try {
+        m_Lower = Double.parseDouble(parts[1]);
+      } catch (NumberFormatException n) {
+        throw new Exception("CVParameter " + param 
+            + ": Numeric lower bound expected");
+      }
+      
+      if (parts[2].equals("A")) {
+        m_Upper = m_Lower - 1;
+      } else if (parts[2].equals("I")) {
+        m_Upper = m_Lower - 2;
       } else {
-	throw new Exception("CVParameter " + param 
-	      + ": Upper bound must be numeric, or 'A' or 'N'");
+        try {
+          m_Upper = Double.parseDouble(parts[2]);
+          
+          if (m_Upper < m_Lower) {
+            throw new Exception("CVParameter " + param
+                                + ": Upper bound is less than lower bound");
+          }
+        } catch (NumberFormatException n) {
+          throw new Exception("CVParameter " + param 
+              + ": Upper bound must be numeric, or 'A' or 'N'");
+        }
       }
-      if (st.nextToken() != StreamTokenizer.TT_NUMBER) {
-	throw new Exception("CVParameter " + param 
-			    + ": Numeric number of steps expected");
+      
+      try {
+        m_Steps = Double.parseDouble(parts[3]);
+      } catch (NumberFormatException n) {
+        throw new Exception("CVParameter " + param 
+            + ": Numeric number of steps expected");
       }
-      m_Steps = st.nval;
-      if (st.nextToken() == StreamTokenizer.TT_WORD) {
-	if (st.sval.toUpperCase().charAt(0) == 'R') {
-	  m_RoundParam = true;
-	}
+      
+      if (parts.length == 5 && parts[4].equals("R")) {
+        m_RoundParam = true;
       }
     }
 
@@ -290,13 +297,13 @@ public class CVParameterSelection
         paramValue = Math.rint(paramValue);
       }
       if (cvParam.m_AddAtEnd) {
-	options[--end] = "" + 
-	Utils.doubleToString(paramValue,4);
+	options[--end] = "" + paramValue; 
+	//Utils.doubleToString(paramValue,4);
 	options[--end] = "-" + cvParam.m_ParamChar;
       } else {
 	options[start++] = "-" + cvParam.m_ParamChar;
-	options[start++] = "" 
-	+ Utils.doubleToString(paramValue,4);
+	options[start++] = "" + paramValue; 
+	//+ Utils.doubleToString(paramValue,4);
       }
     }
     // Add the static parameters
