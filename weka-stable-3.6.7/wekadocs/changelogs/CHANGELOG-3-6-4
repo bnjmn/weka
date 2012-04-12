@@ -1,0 +1,139 @@
+------------------------------------------------------------------------
+r6750 | mhall | 2010-08-06 21:14:46 +1200 (Fri, 06 Aug 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/RandomProjection.java
+
+Tags for the two sparse options do not match what setOptions() parses for - fixed.
+------------------------------------------------------------------------
+r6757 | mhall | 2010-08-08 20:05:07 +1200 (Sun, 08 Aug 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/REPTree.java
+
+Reduced memory consumption of REPTree by roughly 30 percent. Unfortunately the code is now even uglier than before.
+------------------------------------------------------------------------
+r6759 | mhall | 2010-08-09 09:32:27 +1200 (Mon, 09 Aug 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/GeneticSearch.java
+
+Selecting a population member for crossover can very rarely return an index outside of the number of population members due to floating point comparison problems - fixed.
+------------------------------------------------------------------------
+r6768 | mhall | 2010-08-10 11:42:10 +1200 (Tue, 10 Aug 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/TextDirectoryLoader.java
+
+Renamed the class attribute that gets created from "class" to "@@class@@". This is less likely to clash with any term that might occur when further processing via the StringToWordVector filter is done.
+------------------------------------------------------------------------
+r6790 | mhall | 2010-08-20 10:50:04 +1200 (Fri, 20 Aug 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/Cobweb.java
+
+Using a seed < 0 will now cause buildClusterer() to not randomize the data. This will give the same results as the command line (where Cobweb is trained incrementally and randomization can't be done anyway).
+------------------------------------------------------------------------
+r6796 | mhall | 2010-08-25 21:53:53 +1200 (Wed, 25 Aug 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Minor change to prevent the warning message about unpredictable results if the test set is incompatible in reevaluate classifier from getting displayed if the loaded classifier is a PMMLClassifier. PMML models do their own internal mapping from incoming test instance structure to the mining schema included in the model.
+------------------------------------------------------------------------
+r6833 | mhall | 2010-09-13 16:14:57 +1200 (Mon, 13 Sep 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/Filter.java
+
+Fixed a potential memory leak regarding String attributes and StringLocators. batchFinished now calls stringFreeStructure() on the output format and reinitializes the output string locator. flushInput() does the same for the input format and the input string locator.
+------------------------------------------------------------------------
+r6834 | mhall | 2010-09-13 16:17:02 +1200 (Mon, 13 Sep 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Remove.java
+
+setInputFormat was initializing the input locators with the instanceInfo instances object that is passed in rather than with the string cleansed version created by Filter.setInputFormat() - fixed.
+------------------------------------------------------------------------
+r6839 | mhall | 2010-09-14 09:41:15 +1200 (Tue, 14 Sep 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/MultiFilter.java
+
+Now ensures that batchFinished() is called on each of the filters.
+------------------------------------------------------------------------
+r6877 | fracpete | 2010-10-04 16:23:16 +1300 (Mon, 04 Oct 2010) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/AbstractFileSaver.java
+
+The setOptions(String[]) method no longer throws an exception if input ("-i") or output ("-o") file is not specified, which allows the setting of options via a string array as well and not just the various set-methods.
+The getOptions() method now only returns the -i/-o options if there is a sensible value available.
+------------------------------------------------------------------------
+r6897 | fracpete | 2010-10-11 11:54:23 +1300 (Mon, 11 Oct 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/AddValues.java
+
+handles missing values now correctly
+------------------------------------------------------------------------
+r6900 | fracpete | 2010-10-11 12:08:23 +1300 (Mon, 11 Oct 2010) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/AddClassification.java
+
+capabilities are now based on the actual classifier, i.e., either from the serialized model or the user-supplied one
+
+------------------------------------------------------------------------
+r6910 | fracpete | 2010-10-14 10:30:46 +1300 (Thu, 14 Oct 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/AbstractFileSaver.java
+
+now checks all available file extensions in setOptions method before using the default one (i.e., FILE_EXTENSION) in case no valid one was found
+------------------------------------------------------------------------
+r6932 | mhall | 2010-10-27 08:42:54 +1300 (Wed, 27 Oct 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/REPTree.java
+
+Backfitting of data from hold-out set now works properly, resulting in small improvements in RMSE and AUC.
+------------------------------------------------------------------------
+r6943 | mhall | 2010-11-09 08:44:10 +1300 (Tue, 09 Nov 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/net/ParentSet.java
+
+Now supports dynamic expansion of array for parents.
+------------------------------------------------------------------------
+r6947 | mhall | 2010-11-16 14:33:24 +1300 (Tue, 16 Nov 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/BFTree.java
+
+Fixed a npe that would occur sometimes when PREPRUNING was selected.
+------------------------------------------------------------------------
+r6952 | mhall | 2010-11-16 14:49:57 +1300 (Tue, 16 Nov 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/REPTree.java
+
+Fixed a bug that sometimes resulted in endless splitting (possibly when missing values are present).
+------------------------------------------------------------------------
+r6963 | fracpete | 2010-11-25 17:16:08 +1300 (Thu, 25 Nov 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/ArffLoader.java
+
+getNextInstance(Instances) can be called now multiple times without resulting in a "stream closed" exception
+------------------------------------------------------------------------
+r6970 | fracpete | 2010-11-26 16:23:26 +1300 (Fri, 26 Nov 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/PartitionedMultiFilter.java
+
+removed getCapabilities() method as the testInputFormat(Instances) method performs a detailed capabilities check of the sub-filters by calling their setInputFormat(Instances) methods with the appropriate attribute subsets 
+------------------------------------------------------------------------
+r6996 | fracpete | 2010-12-03 13:39:16 +1300 (Fri, 03 Dec 2010) | 3 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/Stacking.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instances.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/Copy.java
+
+Instances.renameAttribute/insertAttributeAt now check first whether the new name is already present and throw an IllegalArgumentException if that's the case (attribute names have to be unique in a dataset!)
+updated Copy filter to create a copy of the attribute with a new name instead of inserted a copy of it and then renaming it (which fails now)
+Stacking now appends the classifier index (1-based) to the classifier class name, otherwise non-unique attribute names can be generated if the same base classifier is used more than once
+------------------------------------------------------------------------
+r7012 | mhall | 2010-12-07 21:19:53 +1300 (Tue, 07 Dec 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/RotationForest.java
+
+Another fix to ensure unique attribute names in the transformed data
+------------------------------------------------------------------------
+r7013 | mhall | 2010-12-08 09:40:14 +1300 (Wed, 08 Dec 2010) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/AttributeSelectionPanel.java
+
+setValueAt() method in AttributeTableModel now calls fireTableRowsUpdated. Also added a method to return the TableModel. These two changes effectively allow clients to listen to changes in the state of the check boxes in the table. Added a constructor with a number of boolean parameters that control whether or not the various buttons are displayed.
+------------------------------------------------------------------------
