@@ -53,9 +53,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/branches/stable-3-6</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/branches/stable-3-6</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/branches/stable-3-6</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/branches/stable-3-6</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/branches/stable-3-6</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/branches/stable-3-6</url>
   </scm>
 
   <profiles>
