@@ -53,9 +53,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/weka-stable-3.6.7</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/weka-stable-3.6.7</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/weka-stable-3.6.7</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags</url>
   </scm>
 
   <profiles>
@@ -218,7 +218,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>2.1</version>
           <configuration>
-            <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags/</tagBase>
+            <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
             <preparationGoals>clean verify -P no-tests</preparationGoals>
             <goals>deploy -P no-tests</goals> 
