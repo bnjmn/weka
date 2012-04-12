@@ -1,6 +1,0 @@
-/* grants all privaleges to classes in the classpath */
-
-grant {
-  permission java.security.AllPermission;
-};
-

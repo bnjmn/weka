@@ -1,5 +1,0 @@
-# Mappings for classes to be handled in the GenericObjectEditor
-# Specify the editor for CARuleMiners
-
-# class association rule miners
-weka.associations.CARuleMiner=weka.gui.GenericObjectEditor

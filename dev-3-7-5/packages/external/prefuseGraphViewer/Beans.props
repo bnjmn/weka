@@ -1,2 +1,0 @@
-# Specifies the tools to go into the Plugins toolbar
-weka.gui.beans.KnowledgeFlow.Plugins=weka.gui.beans.PrefuseGraphViewer

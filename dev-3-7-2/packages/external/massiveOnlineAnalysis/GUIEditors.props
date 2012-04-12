@@ -1,5 +1,0 @@
-# Mappings for classes to be handled in the GenericObjectEditor
-# Specify the MOA classifier editor
-
-# classifiers
-moa.options.ClassOption=weka.gui.MOAClassOptionEditor
