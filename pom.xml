@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>weka-stable</artifactId>
-  <version>3.6.8-SNAPSHOT</version><!-- weka-version -->
+  <version>3.6.7-SNAPSHOT</version><!-- weka-version -->
   <packaging>jar</packaging>
 
   <name>weka-stable</name>
