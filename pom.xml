@@ -212,6 +212,8 @@
           <configuration>
             <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags/</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
+            <preparationGoals>clean install</preparationGoals>
+            <skipTests>true</skipTests>
           </configuration>
         </plugin>
       </plugins>
