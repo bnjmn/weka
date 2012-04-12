@@ -212,7 +212,6 @@
           <configuration>
             <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags/</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
-            <mavenExecutorId>invoker</mavenExecutorId>
           </configuration>
         </plugin>
       </plugins>
