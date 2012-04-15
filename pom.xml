@@ -3,8 +3,8 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>weka-dev</groupId>
-  <artifactId>weka</artifactId>
+  <groupId>nz.ac.waikato.cms.weka</groupId>
+  <artifactId>weka-dev</artifactId>
   <version>3.7.6-SNAPSHOT</version><!-- weka-version -->
   <packaging>jar</packaging>
 
@@ -14,70 +14,118 @@
   "bleeding edge" of development, you could say. New functionality gets added
   to this version.
   </description>
+  <url>http://www.cms.waikato.ac.nz/ml/weka/</url>
   <organization>
     <name>University of Waikato, Hamilton, NZ</name>
-    <url>http://www.waikato.ac.nz/ml/weka/</url>
+    <url>http://www.waikato.ac.nz/</url>
   </organization>
   <licenses>
     <license>
-      <name>GNU GPL 3</name>
+      <name>GNU General Public License 3</name>
       <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+      <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <developers>
+    <developer>
+      <id>mhall</id>
+      <name>Mark Hall</name>
+      <email>mhall at cs.waikato.ac.nz</email>
+    </developer>
+    <developer>
+      <id>fracpete</id>
+      <name>Peter Reutemann</name>
+      <email>fracpete at waikato.ac.nz</email>
+    </developer>
+    <developer>
+      <id>wekateam</id>
+      <name>The WEKA Team</name>
+    </developer>
+  </developers>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+
+  <scm>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka</url>
+  </scm>
+
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <!-- used for skipping tests -->
+      <id>no-tests</id>
+      <properties>
+        <skipTests>true</skipTests>
+      </properties>
+    </profile>
+  </profiles>
 
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/junit.jar</systemPath>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
-      <groupId>java-cup</groupId>
+      <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
       <artifactId>java-cup</artifactId>
-      <version>11a</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/java-cup.jar</systemPath>
-    </dependency>
+      <version>0.11a</version>
+    </dependency>    
 
     <dependency>
-      <groupId>jflex</groupId>
+      <groupId>de.jflex</groupId>
       <artifactId>jflex</artifactId>
       <version>1.4.2</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/JFlex.jar</systemPath>
-    </dependency>
+    </dependency>    
 
     <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>packageManager</artifactId>
+      <groupId>org.pentaho.pentaho-commons</groupId>
+      <artifactId>pentaho-package-manager</artifactId>
       <version>1.0.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/packageManager.jar</systemPath>
     </dependency>
   </dependencies>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <weka.test.regression.root>src/test/resources/wekarefs</weka.test.regression.root>
     <weka.main.class>weka.gui.GUIChooser</weka.main.class>
   </properties>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>weka-snapshots</id>
-      <name>WEKA Snapshot Repository</name>
-      <url>https://adams.cms.waikato.ac.nz/nexus/content/repositories/weka-snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>weka-releases</id>
-      <name>WEKA Release Repository</name>
-      <url>https://adams.cms.waikato.ac.nz/nexus/content/repositories/weka-releases</url>
-    </repository>
-  </distributionManagement>
 
   <build>
     <finalName>weka</finalName>
@@ -140,9 +188,6 @@
           <include>weka/gui/beans/README</include>
         </includes>
       </resource>
-      <resource>
-        <directory>${project.build.directory}/generated-resources</directory>
-      </resource>
     </resources>
 
     <pluginManagement>
@@ -154,6 +199,35 @@
           <configuration>
             <source>1.6</source>
             <target>1.6</target>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.7.2</version>
+          <configuration>
+            <includes>
+              <include>**/*Test.java</include>
+            </includes>
+            <disableXmlReport>true</disableXmlReport>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <systemPropertyVariables>
+              <weka.test.Regression.root>src/test/resources/wekarefs</weka.test.Regression.root>
+            </systemPropertyVariables>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.1</version>
+          <configuration>
+            <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags</tagBase>
+            <useReleaseProfile>false</useReleaseProfile>
+            <!-- tests are performed with the ant build file, hence skipped here. -->
+            <preparationGoals>clean verify -P no-tests</preparationGoals>
+            <goals>deploy -P no-tests</goals> 
           </configuration>
         </plugin>
       </plugins>
@@ -178,40 +252,6 @@
           </filesets>
         </configuration>
       </plugin>
-      
-      <!-- for including necessary classes from the lib directory -->
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.4</version>
-        <executions>
-          <execution>
-            <id>expand Pentaho Package Manager</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <phase>generate-resources</phase>
-            <configuration>
-              <includeGroupIds>pentaho</includeGroupIds>
-              <includeArtifactIds>packageManager</includeArtifactIds>
-              <includes>**/*</includes>
-              <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
-            </configuration>
-          </execution>
-          <execution>
-            <id>expand java-cup runtime classes</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <phase>generate-resources</phase>
-            <configuration>
-              <includeGroupIds>java-cup</includeGroupIds>
-              <includeArtifactIds>java-cup</includeArtifactIds>
-              <includes>java_cup/runtime/**/*</includes>
-              <outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin> 
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -231,23 +271,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-
-      <!-- in order to point to regression files, use the following in the 
-           command-line:
-           -Dweka.test.Regression.root=src/test/resources/wekarefs
-       -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.7.2</version>
-        <configuration>
-          <includes>
-            <include>**/*Test.java</include>
-          </includes>
-          <disableXmlReport>true</disableXmlReport>
-          <forkMode>never</forkMode>
-        </configuration>
       </plugin>
 
       <plugin>
