@@ -101,6 +101,7 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.2</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -220,6 +221,7 @@
           <configuration>
             <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
+            <!-- tests are performed with the ant build file, hence skipped here. -->
             <preparationGoals>clean verify -P no-tests</preparationGoals>
             <goals>deploy -P no-tests</goals> 
           </configuration>
