@@ -31,20 +31,20 @@
 
   <developers>
     <developer>
-      <id>mhall</id>
-      <name>Mark Hall</name>
-      <email>mhall at cs.waikato.ac.nz</email>
-    </developer>
-    <developer>
-      <id>fracpete</id>
-      <name>Peter Reutemann</name>
-      <email>fracpete at waikato.ac.nz</email>
-    </developer>
-    <developer>
       <id>wekateam</id>
       <name>The WEKA Team</name>
+      <email>wekalist@list.scms.waikato.ac.nz</email>
     </developer>
   </developers>
+
+  <mailingLists>
+    <mailingList>
+      <name>wekalist</name>
+      <subscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
+      <unsubscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
+      <archive>https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/</archive>
+    </mailingList>
+  </mailingLists>
 
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -300,6 +300,7 @@
           <maxmemory>256m</maxmemory>
           <subpackages>weka:org</subpackages>
           <show>public</show>
+          <outputDirectory>${project.basedir}/doc</outputDirectory>
         </configuration>
         <executions>
           <execution>
