@@ -23,10 +23,12 @@ package weka.core;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -34,7 +36,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,6 +89,7 @@ public class WekaPackageManager {
   
   private static String PRIMARY_REPOSITORY = "http://weka.sourceforge.net/packageMetaData";
   private static String REP_MIRROR;
+  private static boolean USER_SET_REPO = false;
   
   static {
     establishWekaHome();
@@ -133,7 +138,7 @@ public class WekaPackageManager {
     PACKAGE_MANAGER.setPackageHome(PACKAGES_DIR);
     try {
       // setup the backup mirror first
-      establishMirror();
+      // establishMirror();
       
       // user-supplied repository URL takes precedence over anything else 
       String repURL = env.getVariableValue("weka.core.wekaPackageRepositoryURL");
@@ -151,11 +156,21 @@ public class WekaPackageManager {
       }
       
       if (repURL == null || repURL.length() == 0) {
+        repURL = PRIMARY_REPOSITORY;
+      } else {          
+        log(weka.core.logging.Logger.Level.INFO, 
+            "[WekaPackageManager] weka.core.WekaPackageRepositoryURL = " + repURL);
+//        System.err.println("[WekaPackageManager] weka.core.WekaPackageRepositoryURL = " + repURL);
+        USER_SET_REPO = true;
+      }
+      
+/*      if (repURL == null || repURL.length() == 0) {
         if (REP_MIRROR != null && REP_MIRROR.length() > 0) {
           repURL = REP_MIRROR;
           
           if (!REP_MIRROR.equals(PRIMARY_REPOSITORY)) {
-            System.err.println("Package manager using repository mirror: " +
+            log(weka.core.logging.Logger.Level.INFO, 
+                "[WekaPackageManager] Package manager using repository mirror: " +
                 REP_MIRROR);
           }
         } else {          
@@ -164,8 +179,9 @@ public class WekaPackageManager {
           repURL = PRIMARY_REPOSITORY;
         }
       } else {
-        System.err.println("weka.core.WekaPackageRepositoryURL = " + repURL);
-      }
+        log(weka.core.logging.Logger.Level.INFO, 
+            "[WekaPackageManager] weka.core.WekaPackageRepositoryURL = " + repURL);
+      } */
       
       REP_URL = new URL(repURL);
       PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
@@ -203,6 +219,9 @@ public class WekaPackageManager {
       if (!cacheDir.mkdir()) {
         System.err.println("Unable to create repository cache directory ("
             + cacheDir.getAbsolutePath() + ")");
+        log(weka.core.logging.Logger.Level.WARNING, 
+            "Unable to create repository cache directory ("
+            + cacheDir.getAbsolutePath() + ")");
         CACHE_URL = null;
       } else {
         // refreshCache();
@@ -216,7 +235,7 @@ public class WekaPackageManager {
     
     return ok;
   }
-  
+    
   protected static void establishMirror() {
     try {      
       String mirrorListURL = 
@@ -231,7 +250,7 @@ public class WekaPackageManager {
         conn = connURL.openConnection();
       }
 
-      conn.setConnectTimeout(30000); // timeout after 30 seconds
+      conn.setConnectTimeout(10000); // timeout after 10 seconds
 
       BufferedReader bi = 
         new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -239,9 +258,41 @@ public class WekaPackageManager {
       REP_MIRROR = bi.readLine();
       
       bi.close();
+      if (REP_MIRROR != null && REP_MIRROR.length() > 0) {  
+        // use the mirror if it is different from the primary repo
+        // and the user hasn't specified an explicit repo via the
+        // property
+        if (!REP_MIRROR.equals(PRIMARY_REPOSITORY) && 
+            !USER_SET_REPO) {          
+          
+          log(weka.core.logging.Logger.Level.INFO, 
+              "[WekaPackageManager] Package manager using repository mirror: " +
+              REP_MIRROR);
+          
+          REP_URL = new URL(REP_MIRROR);
+        }
+      }      
     } catch (Exception ex) {
-      System.err.println("The repository meta data mirror file seems " +
+      log(weka.core.logging.Logger.Level.WARNING, 
+          "[WekaPackageManager] The repository meta data mirror file seems " +
       		"to be unavailable (" + ex.getMessage() + ")");
+    }
+  }
+  
+  protected static void log(weka.core.logging.Logger.Level level, 
+      String message) {
+    try {
+      File logFile = new File(WEKA_HOME.toString() + File.separator 
+          + "weka.log");
+      BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true));
+      SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      String linefeed = System.getProperty("line.separator");
+      String m = format.format(new Date()) + " " + level + ": " 
+        + message + linefeed;
+      writer.write(m);
+      writer.flush();
+      writer.close();
+    } catch (Exception ex) {
     }
   }
   
@@ -642,6 +693,13 @@ public class WekaPackageManager {
     if (establishWekaHome()) {
       // try and load any jar files and add to the classpath
       File[] contents = PACKAGES_DIR.listFiles();
+      
+      // if we have a non-empty packages dir then check 
+      // the integrity of our cache first
+      if (contents.length > 0) {
+        establishCacheIfNeeded(System.out);
+      }
+      
       for (int i = 0 ; i < contents.length; i++) {
         if (contents[i].isDirectory()) {
           try {
@@ -843,6 +901,10 @@ public class WekaPackageManager {
   }
   
   public static Exception establishCacheIfNeeded(PrintStream... progress) {
+    if (REP_MIRROR == null) {
+      establishMirror();
+    }
+    
     Exception problem = null;
     if (INITIAL_CACHE_BUILD_NEEDED) {
       for (PrintStream p : progress) {
@@ -999,6 +1061,10 @@ public class WekaPackageManager {
   }
   
   private static void useCacheOrOnlineRepository() {
+    if (REP_MIRROR == null) {
+      establishMirror();
+    }
+    
     if (CACHE_URL != null) {
       PACKAGE_MANAGER.setPackageRepositoryURL(CACHE_URL);
     } else {
