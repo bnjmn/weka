@@ -295,13 +295,17 @@ public class CVParameterSelection
         //	paramValue = (double)((int) (paramValue + 0.5));
         paramValue = Math.rint(paramValue);
       }
+      boolean isInt = ((paramValue - (int)paramValue) == 0);
+      
       if (cvParam.m_AddAtEnd) {
-	options[--end] = "" + paramValue;
+        options[--end] = "" + ((cvParam.m_RoundParam || isInt) ? 
+            Utils.doubleToString(paramValue,4) : cvParam.m_ParamValue);
 	//Utils.doubleToString(paramValue,4);
 	options[--end] = "-" + cvParam.m_ParamChar;
       } else {
 	options[start++] = "-" + cvParam.m_ParamChar;
-	options[start++] = "" + paramValue; 
+	options[start++] = "" + ((cvParam.m_RoundParam || isInt) ? 
+            Utils.doubleToString(paramValue,4) : cvParam.m_ParamValue);
 	//+ Utils.doubleToString(paramValue,4);
       }
     }
