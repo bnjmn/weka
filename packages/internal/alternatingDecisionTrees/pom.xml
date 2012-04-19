@@ -124,7 +124,6 @@
   </properties>
 
   <build>
-    <finalName>weka</finalName>
     <directory>dist</directory>
     <outputDirectory>build/classes</outputDirectory>
     <testOutputDirectory>build/testcases</testOutputDirectory>
