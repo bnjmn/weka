@@ -109,12 +109,6 @@
     </dependency>    
 
     <dependency>
-      <groupId>de.jflex</groupId>
-      <artifactId>jflex</artifactId>
-      <version>1.4.2</version>
-    </dependency>    
-
-    <dependency>
       <groupId>org.pentaho.pentaho-commons</groupId>
       <artifactId>pentaho-package-manager</artifactId>
       <version>1.0.0</version>
