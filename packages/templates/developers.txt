@@ -1,0 +1,142 @@
+In the following a list of WEKA developers, to be used in the pom.xml files ("developers" tag):
+
+    <developer>
+      <id>rkirkby</id>
+      <name>Richard Kirkby</name>
+    </developer>
+
+    <developer>
+      <id>bernhard</id>
+      <name>Bernhard Pfahringer</name>
+    </developer>
+    
+    <developer>
+      <id>eibe</id>
+      <name>Eibe Frank</name>
+    </developer>
+    
+    <developer>
+      <id>mhall</id>
+      <name>Mark Hall</name>
+    </developer>
+    
+    <developer>
+      <id>fracpete</id>
+      <name>Peter Reutemann</name>
+    </developer>
+    
+    <developer>
+      <id>trigg</id>
+      <name>Len Trigg</name>
+    </developer>
+    
+    <developer>
+      <id>amk14</id>
+      <name>Ashraf M. Kibriya</name>
+    </developer>
+    
+    <developer>
+      <id>xx5</id>
+      <name>Xin XU</name>
+    </developer>
+    
+    <developer>
+      <id>ld21</id>
+      <name>Lin Dong</name>
+    </developer>
+    
+    <developer>
+      <id>kurtd</id>
+      <name>Kurt Driessens</name>
+    </developer>
+    
+    <developer>
+      <id>alex</id>
+      <name>Alex K. Seewald</name>
+    </developer>
+    
+    <developer>
+      <id>geoff</id>
+      <name>Geoff Holmes</name>
+    </developer>
+    
+    <developer>
+      <id>lucio</id>
+      <name>Lucio de Souza Coelho</name>
+    </developer>
+    
+    <developer>
+      <id>tv6</id>
+      <name>Tony Voyle</name>
+    </developer>
+    
+    <developer>
+      <id>sbutle</id>
+      <name>Shane Butler</name>
+    </developer>
+    
+    <developer>
+      <id>lb54</id>
+      <name>Luke Bjerring</name>
+    </developer>
+    
+    <developer>
+      <id>jf47</id>
+      <name>James Foulds</name>
+    </developer>
+    
+    <developer>
+      <id>torres</id>
+      <name>Miguel Garcia Torres</name>
+    </developer>
+    
+    <developer>
+      <id>kah18</id>
+      <name>Kathryn Hempstalk</name>
+    </developer>
+    
+    <developer>
+      <id>yongwang</id>
+      <name>Yong Wang</name>
+    </developer>
+    
+    <developer>
+      <id>mutter</id>
+      <name>Stefan Mutter</name>
+    </developer>
+    
+    <developer>
+      <id>lh92</id>
+      <name>Anna Huang</name>
+    </developer>
+
+    <developer>
+      <id>hs69</id>
+      <name>Haijian Shi</name>
+    </developer>
+
+    <developer>
+      <id>ihw</id>
+      <name>Ian H. Witten</name>
+    </developer>
+
+    <developer>
+      <id>singlis</id>
+      <name>Stuart Inglis</name>
+    </developer>
+
+    <developer>
+      <id>kieran</id>
+      <name>Kieran Holland</name>
+    </developer>
+
+    <developer>
+      <id>mfw4</id>
+      <name>Malcolm Ware</name>
+    </developer>
+
+    <developer>
+      <id>gabi</id>
+      <name>Gabi Schmidberger</name>
+    </developer>
+
