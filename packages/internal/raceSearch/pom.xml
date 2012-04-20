@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>nz.ac.waikato.cms.weka</groupId>
+  <artifactId>raceSearch</artifactId>
+  <version>1.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>raceSearch</name>
+  <description>
+  Races the cross validation error of competing attribute subsets. Use in conjuction with a ClassifierSubsetEval. RaceSearch has four modes:
+  forward selection races all single attribute additions to a base set (initially  no attributes), selects the winner to become the new base set and then iterates until there is no improvement over the base set. 
+  Backward elimination is similar but the initial base set has all attributes included and races all single attribute deletions. 
+  Schemata search is a bit different. Each iteration a series of races are run in parallel. Each race in a set determines whether a particular attribute should be included or not---ie the race is between the attribute being "in" or "out". The other attributes for this race are included or excluded randomly at each point in the evaluation. As soon as one race has a clear winner (ie it has been decided whether a particular attribute should be inor not) then the next set of races begins, using the result of the winning race from the previous iteration as new base set.
+  Rank race first ranks the attributes using an attribute evaluator and then races the ranking. The race includes no attributes, the top ranked attribute, the top two attributes, the top three attributes, etc.
+  It is also possible to generate a raked list of attributes through the forward racing process. If generateRanking is set to true then a complete forward race will be run---that is, racing continues until all attributes have been selected. The order that they are added in determines a complete ranking of all the attributes.
+  Racing uses paired and unpaired t-tests on cross-validation errors of competing subsets. When there is a significant difference between the means of the errors of two competing subsets then the poorer of the two can be eliminated from the race. Similarly, if there is no significant difference between the mean errors of two competing subsets and they are within some threshold of each other, then one can be eliminated from the race.
+  </description>
+  <url>http://weka.sourceforge.net/doc.packages/raceSearch</url>
+  <organization>
+    <name>University of Waikato, Hamilton, NZ</name>
+    <url>http://www.waikato.ac.nz/</url>
+  </organization>
+  <licenses>
+    <license>
+      <name>GNU General Public License 3</name>
+      <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>mhall</id>
+      <name>Mark Hall</name>
+    </developer>
+  </developers>
+
+  <mailingLists>
+    <mailingList>
+      <name>wekalist</name>
+      <subscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
+      <unsubscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
+      <archive>https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/</archive>
+    </mailingList>
+  </mailingLists>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+
+  <scm>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/raceSearch</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/raceSearch</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/raceSearch</url>
+  </scm>
+
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <!-- used for skipping tests -->
+      <id>no-tests</id>
+      <properties>
+        <skipTests>true</skipTests>
+      </properties>
+    </profile>
+  </profiles>
+
+  <dependencies>
+    <dependency>
+      <groupId>nz.ac.waikato.cms.weka</groupId>
+      <artifactId>weka-dev</artifactId>
+      <version>[3.7.1,)</version>
+    </dependency>
+
+    <dependency>
+      <groupId>nz.ac.waikato.cms.weka</groupId>
+      <artifactId>weka-dev</artifactId>
+      <version>[3.7.1,)</version>
+      <type>test-jar</type>
+    </dependency>
+
+    <dependency>
+      <groupId>nz.ac.waikato.cms.weka</groupId>
+      <artifactId>classifierBasedAttributeSelection</artifactId>
+      <version>[1.0.0,)</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <build>
+    <directory>dist</directory>
+    <outputDirectory>build/classes</outputDirectory>
+    <testOutputDirectory>build/testcases</testOutputDirectory>
+
+    <resources>
+      <resource>
+        <targetPath>${project.build.outputDirectory}</targetPath>
+        <directory>${project.build.sourceDirectory}</directory>
+        <includes>
+          <include>**/*.arff</include>
+          <include>**/*.cost</include>
+          <include>**/*.cup</include>
+          <include>**/*.default</include>
+          <include>**/*.excludes</include>
+          <include>**/*.flex</include>
+          <include>**/*.gif</include>
+          <include>**/*.icns</include>
+          <include>**/*.ico</include>
+          <include>**/*.jflex</include>
+          <include>**/*.jpeg</include>
+          <include>**/*.jpg</include>
+          <include>**/*.kfml</include>
+          <include>**/*.matrix</include>
+          <include>**/*.png</include>
+          <include>**/*.properties</include>
+          <include>**/*.props</include>
+          <include>**/*.txt</include>
+          <include>**/*.xml</include>
+          <include>**/DatabaseUtils.props.*</include>
+          <include>weka/gui/beans/README</include>
+        </includes>
+      </resource>
+      <resource>
+        <targetPath>${project.build.testOutputDirectory}</targetPath>
+        <directory>${project.build.testSourceDirectory}</directory>
+        <includes>
+          <include>**/*.arff</include>
+          <include>**/*.cost</include>
+          <include>**/*.cup</include>
+          <include>**/*.default</include>
+          <include>**/*.excludes</include>
+          <include>**/*.flex</include>
+          <include>**/*.gif</include>
+          <include>**/*.icns</include>
+          <include>**/*.ico</include>
+          <include>**/*.jflex</include>
+          <include>**/*.jpeg</include>
+          <include>**/*.jpg</include>
+          <include>**/*.kfml</include>
+          <include>**/*.matrix</include>
+          <include>**/*.png</include>
+          <include>**/*.properties</include>
+          <include>**/*.props</include>
+          <include>**/*.txt</include>
+          <include>**/*.xml</include>
+          <include>**/DatabaseUtils.props.*</include>
+          <include>weka/gui/beans/README</include>
+        </includes>
+      </resource>
+    </resources>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.0.2</version>
+          <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.7.2</version>
+          <configuration>
+            <includes>
+              <include>**/*Test.java</include>
+            </includes>
+            <disableXmlReport>true</disableXmlReport>
+            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+            <systemPropertyVariables>
+              <weka.test.Regression.root>src/test/resources/wekarefs</weka.test.Regression.root>
+            </systemPropertyVariables>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.1</version>
+          <configuration>
+            <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags</tagBase>
+            <useReleaseProfile>false</useReleaseProfile>
+            <!-- tests are performed with the ant build file, hence skipped here. -->
+            <preparationGoals>clean verify -P no-tests</preparationGoals>
+            <goals>deploy -P no-tests</goals> 
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>.</directory>
+              <includes>
+                <include>**/*~</include>
+                <include>**/.attach_pid*</include>
+                <include>**/hs_err_pid*</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.2</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <excludeResources>true</excludeResources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>attach-test-sources</id>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8.1</version>
+        <configuration>
+          <maxmemory>256m</maxmemory>
+          <subpackages>weka:org</subpackages>
+          <show>public</show>
+          <outputDirectory>${project.basedir}/doc</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
