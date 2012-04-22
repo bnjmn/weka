@@ -15,38 +15,39 @@
 
 /*
  *    Discretize.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.supervised.attribute;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.ContingencyTables;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.ProtectedProperties;
 import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.SpecialFunctions;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -906,16 +907,20 @@ public class Discretize
 	      }
 	    }
 	  }
-	  attributes.addElement(new Attribute(getInputFormat().
-					      attribute(i).name(),
-					      attribValues));
+	  Attribute newAtt = new Attribute(getInputFormat().
+              attribute(i).name(),
+              attribValues);
+	  newAtt.setWeight(getInputFormat().attribute(i).weight());
+	  attributes.addElement(newAtt);
 	} else {
 	  if (m_CutPoints[i] == null) {
 	    FastVector attribValues = new FastVector(1);
 	    attribValues.addElement("'All'");
-	    attributes.addElement(new Attribute(getInputFormat().
-						attribute(i).name(),
-						attribValues));
+	    Attribute newAtt = new Attribute(getInputFormat().
+                attribute(i).name(),
+                attribValues);
+	    newAtt.setWeight(getInputFormat().attribute(i).weight());
+	    attributes.addElement(newAtt);
 	  } else {
 	    if (i < getInputFormat().classIndex()) {
 	      classIndex += m_CutPoints[i].length - 1;
@@ -926,9 +931,11 @@ public class Discretize
 		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
 	      attribValues.addElement("'("
 		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "-inf)'");
-	      attributes.addElement(new Attribute(getInputFormat().
-						  attribute(i).name() + "_" + (j+1),
-						  attribValues));
+	      Attribute newAtt = new Attribute(getInputFormat().
+                  attribute(i).name() + "_" + (j+1),
+                  attribValues);
+	      newAtt.setWeight(getInputFormat().attribute(i).weight());
+	      attributes.addElement(newAtt);
 	    }
 	  }
 	}
