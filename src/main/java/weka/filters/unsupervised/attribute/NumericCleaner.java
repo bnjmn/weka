@@ -480,7 +480,7 @@ public class NumericCleaner
       }
       
       // decimals?
-      if (m_Decimals > -1) {
+      if (m_Decimals > -1 && !result.isMissing(i)) {
 	val = result.value(i);
 	val = StrictMath.round(val * factor) / factor;
 	result.setValue(i, val);
