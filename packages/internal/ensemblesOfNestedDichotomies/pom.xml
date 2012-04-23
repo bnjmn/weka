@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>ensemblesOfNestedDichotomies</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>jar</packaging>
 
   <name>ensemblesOfNestedDichotomies</name>
@@ -55,9 +55,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/ensemblesOfNestedDichotomies</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/ensemblesOfNestedDichotomies</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/ensemblesOfNestedDichotomies</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/ensemblesOfNestedDichotomies-1.0.1</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/ensemblesOfNestedDichotomies-1.0.1</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/ensemblesOfNestedDichotomies-1.0.1</url>
   </scm>
 
   <profiles>
