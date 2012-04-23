@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>conjunctiveRule</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>jar</packaging>
 
   <name>conjunctiveRule</name>
@@ -52,9 +52,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/conjunctiveRule</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/conjunctiveRule</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/conjunctiveRule</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/conjunctiveRule-1.0.1</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/conjunctiveRule-1.0.1</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/conjunctiveRule-1.0.1</url>
   </scm>
 
   <profiles>
