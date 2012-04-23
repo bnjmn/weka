@@ -956,16 +956,20 @@ public class Discretize
 	      }
 	    }
 	  }
-	  attributes.addElement(new Attribute(getInputFormat().
-					      attribute(i).name(),
-					      attribValues));
+	  Attribute newAtt = new Attribute(getInputFormat().
+	      attribute(i).name(),
+	      attribValues);
+	  newAtt.setWeight(getInputFormat().attribute(i).weight());
+	  attributes.addElement(newAtt);
 	} else {
 	  if (m_CutPoints[i] == null) {
 	    FastVector attribValues = new FastVector(1);
 	    attribValues.addElement("'All'");
-	    attributes.addElement(new Attribute(getInputFormat().
-						attribute(i).name(),
-						attribValues));
+	    Attribute newAtt = new Attribute(getInputFormat().
+	        attribute(i).name(),
+	        attribValues);
+	    newAtt.setWeight(getInputFormat().attribute(i).weight());
+	    attributes.addElement(newAtt);
 	  } else {
 	    if (i < getInputFormat().classIndex()) {
 	      classIndex += m_CutPoints[i].length - 1;
@@ -976,9 +980,12 @@ public class Discretize
 		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
 	      attribValues.addElement("'("
 		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "-inf)'");
-	      attributes.addElement(new Attribute(getInputFormat().
-						  attribute(i).name() + "_" + (j+1),
-						  attribValues));
+	      
+	      Attribute newAtt = new Attribute(getInputFormat().
+                  attribute(i).name() + "_" + (j+1),
+                  attribValues);
+	      newAtt.setWeight(getInputFormat().attribute(i).weight());
+	      attributes.addElement(newAtt);
 	    }
 	  }
 	}
