@@ -285,8 +285,9 @@ public class MergeManyValues
 	}
 	newVals.addElement(m_Label);
 
-
-	newAtts.addElement(new Attribute(att.name(), newVals));
+	Attribute newAtt = new Attribute(att.name(), newVals);
+	newAtt.setWeight(getInputFormat().attribute(j).weight());
+	newAtts.addElement(newAtt);
       }
     }
 
