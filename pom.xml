@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>sequentialInformationalBottleneckClusterer</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>jar</packaging>
 
   <name>sequentialInformationalBottleneckClusterer</name>
@@ -51,9 +51,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/sequentialInformationalBottleneckClusterer</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/sequentialInformationalBottleneckClusterer</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/sequentialInformationalBottleneckClusterer</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/sequentialInformationalBottleneckClusterer-1.0.1</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/sequentialInformationalBottleneckClusterer-1.0.1</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/sequentialInformationalBottleneckClusterer-1.0.1</url>
   </scm>
 
   <profiles>
