@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>DTNB</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>DTNB</name>
@@ -54,9 +54,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/DTNB-1.0.1</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/DTNB-1.0.1</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/DTNB-1.0.1</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</url>
   </scm>
 
   <profiles>
