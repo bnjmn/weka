@@ -104,6 +104,7 @@
       <artifactId>weka-dev</artifactId>
       <version>[3.7.5,)</version>
       <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
