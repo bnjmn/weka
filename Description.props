@@ -31,7 +31,7 @@ Description=A collection of multi-instance learning classifiers. Includes the Ci
 Changes=This release adds the MITI tree learner and the MIRI rule learner
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceLearning1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceLearning1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/multiInstanceLearning
