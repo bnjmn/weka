@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>EMImputation</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>EMImputation</name>
@@ -49,9 +49,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/EMImputation-1.0.2</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/EMImputation-1.0.2</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/EMImputation-1.0.2</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/EMImputation</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/EMImputation</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/EMImputation</url>
   </scm>
 
   <profiles>
