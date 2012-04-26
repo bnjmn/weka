@@ -342,7 +342,9 @@ public class NumericToNominal
 	  values.addElement(
 	      Utils.doubleToString(((Double) o).doubleValue(), MAX_DECIMALS));
       }
-      atts.addElement(new Attribute(data.attribute(i).name(), values));
+      Attribute newAtt = new Attribute(data.attribute(i).name(), values);
+      newAtt.setWeight(data.attribute(i).weight());
+      atts.addElement(newAtt);
     }
     
     result = new Instances(inputFormat.relationName(), atts, 0);
