@@ -6,7 +6,7 @@
 PackageName=bayesianLogisticRegression
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
 Date=2012-03-20
