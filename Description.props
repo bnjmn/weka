@@ -31,7 +31,7 @@ Description=Performs a grid search of parameter pairs for the a classifier (Y-ax
 Changes=This release fixes an npe and a concurrency-related hanging problem that was occurring in certain pathological cases
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/gridSearch1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/gridSearch1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/gridSearch
