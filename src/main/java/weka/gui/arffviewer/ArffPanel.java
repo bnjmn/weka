@@ -15,18 +15,11 @@
 
 /*
  * ArffPanel.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
-
-import weka.core.Instances;
-import weka.core.Undoable;
-import weka.core.Utils;
-import weka.gui.ComponentHelper;
-import weka.gui.JTableHelper;
-import weka.gui.ListSelectorDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -53,6 +46,14 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
+
+import weka.core.Instances;
+import weka.core.Undoable;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.gui.ComponentHelper;
+import weka.gui.JTableHelper;
+import weka.gui.ListSelectorDialog;
 
 /**
  * A Panel representing an ARFF-Table and the associated filename.
@@ -131,11 +132,12 @@ public class ArffPanel
    * initializes the panel and loads the specified file
    * 
    * @param filename	the file to load
+   * @param loaders optional varargs loader to use
    */
-  public ArffPanel(String filename) {
+  public ArffPanel(String filename, AbstractFileLoader... loaders) {
     this();
     
-    loadFile(filename);
+    loadFile(filename, loaders);
   }
   
   /**
@@ -561,8 +563,9 @@ public class ArffPanel
    * loads the specified file into the table
    * 
    * @param filename		the file to load
+   * @param loaders optional varargs loader to use
    */
-  private void loadFile(String filename) {
+  private void loadFile(String filename, AbstractFileLoader... loaders) {
     ArffSortedTableModel         model;
     
     this.m_Filename = filename;
@@ -573,7 +576,7 @@ public class ArffPanel
       model = null;
     }
     else {
-      model = new ArffSortedTableModel(filename);
+      model = new ArffSortedTableModel(filename, loaders);
       model.setShowAttributeIndex(getShowAttributeIndex());
     }
     
