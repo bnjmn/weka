@@ -393,7 +393,9 @@ public class SwapValues
 	    newVals.addElement(att.value(i)); 
 	  }
 	}
-	newAtts.addElement(new Attribute(att.name(), newVals));
+	Attribute newAtt = new Attribute(att.name(), newVals);
+	newAtt.setWeight(att.weight());
+	newAtts.addElement(newAtt);
       }
     }
       
