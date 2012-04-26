@@ -31,7 +31,7 @@ Description=A Knowledge Flow plugin that provides a Knowledge Flow step that wra
 Changes=This version updates the learningCurve.groovy script so that it actually works again :-) It hadn't been updated to take into account the move from class to interface for Instance and Classifier.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/kfGroovy1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/kfGroovy1.0.5.zip?download
 
 # URL for further information
 URL=http://wiki.pentaho.com/display/DATAMINING/Groovy+Scripting+in+the+KnowledgeFlow
