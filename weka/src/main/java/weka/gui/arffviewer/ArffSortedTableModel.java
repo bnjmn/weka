@@ -15,19 +15,21 @@
 
 /*
  * ArffSortedTableModel.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
 
-import weka.gui.SortedTableModel;
-import weka.core.Instances;
-import weka.core.Attribute;
-import weka.core.Undoable;
-import javax.swing.table.TableModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
+
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.Undoable;
+import weka.core.converters.AbstractFileLoader;
+import weka.gui.SortedTableModel;
 
 /**
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
@@ -48,9 +50,10 @@ public class ArffSortedTableModel
    * from that a model
    * 
    * @param filename	the file to load
+   * @param loaders optional varargs loader to use
    */
-  public ArffSortedTableModel(String filename) {
-    this(new ArffTableModel(filename));
+  public ArffSortedTableModel(String filename, AbstractFileLoader... loaders) {
+    this(new ArffTableModel(filename, loaders));
   }
   
   /**
