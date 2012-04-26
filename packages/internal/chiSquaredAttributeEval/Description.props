@@ -29,7 +29,7 @@ License=GPL 3.0
 Description=Evaluates the worth of an attribute by computing the value of the chi-squared statistic with respect to the class.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/chiSquaredAttributeEval1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/chiSquaredAttributeEval1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/chiSquaredAttributeEval

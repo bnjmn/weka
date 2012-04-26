@@ -29,7 +29,7 @@ License=GPL 3.0
 Description=Functional trees (decision trees with oblique splits and functions at the leaves)
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/functionalTrees1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/functionalTrees1.0.2.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/functionalTrees

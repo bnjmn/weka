@@ -31,7 +31,7 @@ Description=Binary-class and multi-class alternating decision trees. For more in
 Changes=This release fixes a minor bug that only affects additional metrics prodcued by the classifier when used in experimental setups that store results to a database table
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/alternatingDecisionTrees1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/alternatingDecisionTrees1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/alternatingDecisionTrees
