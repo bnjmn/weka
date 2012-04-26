@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>ensembleLibrary</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.4</version>
   <packaging>jar</packaging>
 
   <name>ensembleLibrary</name>
@@ -49,9 +49,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/ensembleLibrary</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/ensembleLibrary</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/ensembleLibrary</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/ensembleLibrary-1.0.4</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/ensembleLibrary-1.0.4</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/ensembleLibrary-1.0.4</url>
   </scm>
 
   <profiles>
