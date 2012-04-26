@@ -288,10 +288,13 @@ public class NominalToString
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
 
-      if (!att.isNominal() || !m_AttIndex.isInRange(j))
+      if (!att.isNominal() || !m_AttIndex.isInRange(j)) {
 	newAtts.addElement(att); 
-      else
-	newAtts.addElement(new Attribute(att.name(), (FastVector) null));
+      } else {
+        Attribute newAtt = new Attribute(att.name(), (FastVector) null);
+        newAtt.setWeight(getInputFormat().attribute(j).weight());
+	newAtts.addElement(newAtt);
+      }
     }
       
     // Construct new header
