@@ -336,7 +336,9 @@ public class RemoveWithValues
 	newVals.addElement(oldAtt.value(selection[i]));
       }
       instanceInfo.deleteAttributeAt(m_AttIndex.getIndex());
-      instanceInfo.insertAttributeAt(new Attribute(oldAtt.name(), newVals),
+      Attribute newAtt = new Attribute(oldAtt.name(), newVals);
+      newAtt.setWeight(oldAtt.weight());
+      instanceInfo.insertAttributeAt(newAtt,
 				      m_AttIndex.getIndex());
       m_NominalMapping = new int [oldAtt.numValues()];
       for (int i = 0; i < m_NominalMapping.length; i++) {
