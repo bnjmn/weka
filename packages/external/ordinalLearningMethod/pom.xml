@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>ordinalLearningMethod</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>ordinalLearningMethod</name>
@@ -48,9 +48,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/ordinalLearningMethod-1.0.2</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/ordinalLearningMethod-1.0.2</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/ordinalLearningMethod-1.0.2</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/ordinalLearningMethod</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/ordinalLearningMethod</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/ordinalLearningMethod</url>
   </scm>
 
   <profiles>
