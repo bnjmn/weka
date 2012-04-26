@@ -51,6 +51,8 @@ import javax.swing.event.ChangeListener;
 
 import weka.core.Capabilities;
 import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.AbstractSaver;
 import weka.core.converters.ConverterUtils;
 import weka.gui.ComponentHelper;
@@ -596,11 +598,12 @@ public class ArffViewerMainPanel
    * loads the specified file
    * 
    * @param filename	the file to load
+   * @param loaders optional varargs loader to use
    */
-  public void loadFile(String filename) {
+  public void loadFile(String filename, AbstractFileLoader... loaders) {
     ArffPanel         panel;
 
-    panel    = new ArffPanel(filename);
+    panel    = new ArffPanel(filename, loaders);
     panel.addChangeListener(this);
     tabbedPane.addTab(panel.getTitle(), panel);
     tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
@@ -622,7 +625,7 @@ public class ArffViewerMainPanel
     
     for (i = 0; i< fileChooser.getSelectedFiles().length; i++) {
       filename = fileChooser.getSelectedFiles()[i].getAbsolutePath();
-      loadFile(filename);
+      loadFile(filename, fileChooser.getLoader());
     }
     
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));

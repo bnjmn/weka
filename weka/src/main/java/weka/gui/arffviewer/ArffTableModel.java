@@ -112,12 +112,13 @@ public class ArffTableModel
    * initializes the object and loads the given file
    * 
    * @param filename	the file to load
+   * @param loaders optional varargs for a loader to use
    */
-  public ArffTableModel(String filename) {
+  public ArffTableModel(String filename, AbstractFileLoader... loaders) {
     this();
     
     if ( (filename != null) && (!filename.equals("")) )
-      loadFile(filename);
+      loadFile(filename, loaders);
   }
   
   /**
@@ -189,11 +190,16 @@ public class ArffTableModel
    * loads the specified ARFF file
    * 
    * @param filename	the file to load
+   * @param loaders optional varargs for a loader to use
    */
-  protected void loadFile(String filename) {
+  protected void loadFile(String filename, AbstractFileLoader... loaders) {
     AbstractFileLoader          loader;
     
-    loader = ConverterUtils.getLoaderForFile(filename);
+    if (loaders == null || loaders.length == 0) {
+      loader = ConverterUtils.getLoaderForFile(filename);
+    } else {
+      loader = loaders[0];
+    }
     
     if (loader != null) {
       try {

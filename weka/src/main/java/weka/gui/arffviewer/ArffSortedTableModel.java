@@ -28,6 +28,7 @@ import javax.swing.table.TableModel;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Undoable;
+import weka.core.converters.AbstractFileLoader;
 import weka.gui.SortedTableModel;
 
 /**
@@ -49,9 +50,10 @@ public class ArffSortedTableModel
    * from that a model
    * 
    * @param filename	the file to load
+   * @param loaders optional varargs loader to use
    */
-  public ArffSortedTableModel(String filename) {
-    this(new ArffTableModel(filename));
+  public ArffSortedTableModel(String filename, AbstractFileLoader... loaders) {
+    this(new ArffTableModel(filename, loaders));
   }
   
   /**
