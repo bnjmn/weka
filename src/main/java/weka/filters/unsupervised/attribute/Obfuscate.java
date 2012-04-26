@@ -125,6 +125,7 @@ public class Obfuscate
   	  System.err.println("Not converting attribute: " + oldAtt.name());
 	  break;
       }
+      newAtt.setWeight(oldAtt.weight());
       v.addElement(newAtt);
     }
     Instances newHeader = new Instances("R", v, 10);
