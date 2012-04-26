@@ -29,7 +29,7 @@ License=GPL 3.0
 Description=Nearest-neighbor-like algorithm using non-nested generalized exemplars (which are hyperrectangles that can be viewed as if-then rules). For more information, see Brent Martin (1995). Instance-Based learning: Nearest Neighbor With Generalization. Hamilton, New Zealand. Sylvain Roy (2002). Nearest Neighbor With Generalization. Christchurch, New Zealand.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/NNge1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/NNge1.0.2.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/NNge
