@@ -380,19 +380,21 @@ public class SwapValues
 	newAtts.addElement(att.copy()); 
       } else {
 	  
-	// Compute list of attribute values
-	  
-	newVals = new FastVector(att.numValues());
-	for (int i = 0; i < att.numValues(); i++) {
-	  if (i == m_FirstIndex.getIndex()) {
-	    newVals.addElement(att.value(m_SecondIndex.getIndex()));
-	  } else if (i == m_SecondIndex.getIndex()) {
-	    newVals.addElement(att.value(m_FirstIndex.getIndex()));
-	  } else {
-	    newVals.addElement(att.value(i)); 
-	  }
-	}
-	newAtts.addElement(new Attribute(att.name(), newVals));
+        // Compute list of attribute values
+
+        newVals = new FastVector(att.numValues());
+        for (int i = 0; i < att.numValues(); i++) {
+          if (i == m_FirstIndex.getIndex()) {
+            newVals.addElement(att.value(m_SecondIndex.getIndex()));
+          } else if (i == m_SecondIndex.getIndex()) {
+            newVals.addElement(att.value(m_FirstIndex.getIndex()));
+          } else {
+            newVals.addElement(att.value(i)); 
+          }
+        }
+        Attribute newAtt = new Attribute(att.name(), newVals);
+        newAtt.setWeight(att.weight());
+        newAtts.addElement(newAtt);
       }
     }
       
