@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>prefuseTree</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>prefuseTree</name>
@@ -49,9 +49,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/prefuseTree-1.0.3</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/prefuseTree-1.0.3</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/prefuseTree-1.0.3</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/prefuseTree</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/prefuseTree</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/prefuseTree</url>
   </scm>
 
   <profiles>
