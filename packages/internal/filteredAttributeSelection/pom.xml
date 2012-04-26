@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>filteredAttributeSelection</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>filteredAttributeSelection</name>
@@ -48,9 +48,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/filteredAttributeSelection-1.0.2</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/filteredAttributeSelection-1.0.2</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/filteredAttributeSelection-1.0.2</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/filteredAttributeSelection</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/filteredAttributeSelection</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/filteredAttributeSelection</url>
   </scm>
 
   <profiles>
