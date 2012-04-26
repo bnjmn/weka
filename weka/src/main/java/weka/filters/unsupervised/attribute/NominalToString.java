@@ -15,37 +15,33 @@
 
 /*
  * NominalToString.java
- * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
-import weka.core.Range;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-
 import java.util.Enumeration;
 import java.util.Vector;
 
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
 /** 
  <!-- globalinfo-start -->
- * Converts a range of nominal attributes (i.e. set number of values) to string 
- * (i.e. unspecified number of values). Any non-nominal attributes in the supplied
- * range are left untouched.
+ * Converts a nominal attribute (i.e. set number of values) to string (i.e. unspecified number of values).
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -90,6 +86,7 @@ public class NominalToString
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -289,10 +286,13 @@ public class NominalToString
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
 
-      if (!att.isNominal() || !m_AttIndex.isInRange(j))
+      if (!att.isNominal() || !m_AttIndex.isInRange(j)) {        
 	newAtts.addElement(att); 
-      else
-	newAtts.addElement(new Attribute(att.name(), (FastVector) null));
+      } else {
+        Attribute newAtt = new Attribute(att.name(), (FastVector) null);
+        newAtt.setWeight(getInputFormat().attribute(j).weight());
+	newAtts.addElement(newAtt);
+      }
     }
       
     // Construct new header
@@ -320,3 +320,4 @@ public class NominalToString
     runFilter(new NominalToString(), args);
   }
 }
+
