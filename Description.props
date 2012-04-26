@@ -31,7 +31,7 @@ Description= A wrapper class for the libsvm tools (the libsvm classes, typically
 Changes=Fixed incorrect command line description of the -B option.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.4.zip?download
 
 # URL for further information
 URL=http://www.cs.iastate.edu/~yasser/wlsvm/
