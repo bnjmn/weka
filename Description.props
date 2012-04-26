@@ -32,7 +32,7 @@ Description=Class association rules algorithms (including an implementation of t
 #Changes=
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/classAssociationRules1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/classAssociationRules1.0.2.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/classAssociationRules
