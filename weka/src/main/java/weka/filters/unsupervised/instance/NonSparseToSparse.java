@@ -223,6 +223,7 @@ public class NonSparseToSparse
           }
           Attribute newAtt = new Attribute(instanceInfo.attribute(i).name(), 
               labels);
+          newAtt.setWeight(instanceInfo.attribute(i).weight());
           atts.addElement(newAtt);
         } else {
           atts.addElement(instanceInfo.attribute(i));
