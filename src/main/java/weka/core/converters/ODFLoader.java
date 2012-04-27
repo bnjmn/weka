@@ -354,7 +354,7 @@ public class ODFLoader
 
     if (m_structure == null) {
       try {
-	m_Spreadsheet = SpreadSheet.create(new ODPackage(m_sourceStream));
+	m_Spreadsheet = org.jopendocument.dom.spreadsheet.SpreadSheet.get(new ODPackage(m_sourceStream));
 	m_SheetIndex.setUpper(m_Spreadsheet.getSheetCount() - 1);
 	Sheet sheet = m_Spreadsheet.getSheet(m_SheetIndex.getIndex());
 	ArrayList<Attribute> atts = new ArrayList<Attribute>();

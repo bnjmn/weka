@@ -109,7 +109,7 @@
     <dependency>
       <groupId>org.jopendocument</groupId>
       <artifactId>jOpenDocument</artifactId>
-      <version>1.2</version>
+      <version>1.3b1</version>
     </dependency>
 
     <dependency>
