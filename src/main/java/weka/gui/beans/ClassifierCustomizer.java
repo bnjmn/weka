@@ -187,7 +187,12 @@ public class ClassifierCustomizer
         // forces the template to be deep copied to the actual classifier.
         // necessary for InputMappedClassifier that is loading from a file
         m_dsClassifier.setClassifierTemplate(m_dsClassifier.getClassifierTemplate());
-        m_dsClassifier.setLoadClassifierFileName(m_loadModelField.getText());
+        if (m_loadModelField != null) {
+          String loadFName = m_loadModelField.getText();
+          if (loadFName != null && loadFName.length() > 0) {
+            m_dsClassifier.setLoadClassifierFileName(m_loadModelField.getText());
+          }
+        }
         
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(ClassifierCustomizer.this, true);
