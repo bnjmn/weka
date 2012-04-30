@@ -84,6 +84,9 @@ import weka.core.WeightedInstancesHandler;
  *  The maximum depth of the trees, 0 for unlimited.
  *  (default 0)</pre>
  * 
+ * <pre> -print
+ *  Print the individual trees in the output</pre>
+ * 
  * <pre> -num-slots &lt;num&gt;
  *  Number of execution slots.
  *  (default 1 - i.e. no parallelism)</pre>
@@ -126,6 +129,9 @@ public class RandomForest
   
   /** The number of threads to have executing at any one time */
   protected int m_numExecutionSlots = 1;
+  
+  /** Print the individual trees in the output */
+  protected boolean m_printTrees = false;
 
   /**
    * Returns a string describing classifier
@@ -276,6 +282,34 @@ public class RandomForest
   public void setMaxDepth(int value) {
     m_MaxDepth = value;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String printTreesTipText() {
+    return "Print the individual trees in the output";
+  }
+  
+  /**
+   * Set whether to print the individual ensemble trees in the output
+   * 
+   * @param print true if the individual trees are to be printed
+   */
+  public void setPrintTrees(boolean print) {
+    m_printTrees = print;
+  }
+  
+  /**
+   * Get whether to print the individual ensemble trees in the output
+   * 
+   * @return true if the individual trees are to be printed
+   */
+  public boolean getPrintTrees() {
+    return m_printTrees;
+  }
 
   /**
    * Gets the out of bag error that was calculated as the classifier was built.
@@ -376,6 +410,9 @@ public class RandomForest
 	"depth", 1, "-depth <num>"));
     
     newVector.addElement(new Option(
+        "\tPrint the individual trees in the output", "print", 0, "-print"));
+    
+    newVector.addElement(new Option(
         "\tNumber of execution slots.\n"
         + "\t(default 1 - i.e. no parallelism)",
         "num-slots", 1, "-num-slots <num>"));
@@ -414,6 +451,10 @@ public class RandomForest
       result.add("" + getMaxDepth());
     }
     
+    if (m_printTrees) {
+      result.add("-print");
+    }
+    
     result.add("-num-slots");
     result.add("" + getNumExecutionSlots());
     
@@ -443,6 +484,9 @@ public class RandomForest
    * <pre> -depth &lt;num&gt;
    *  The maximum depth of the trees, 0 for unlimited.
    *  (default 0)</pre>
+   * 
+   * <pre> -print
+   *  Print the individual trees in the output</pre>
    * 
    * <pre> -num-slots &lt;num&gt;
    *  Number of execution slots.
@@ -488,6 +532,8 @@ public class RandomForest
       setMaxDepth(0);
     }
     
+    setPrintTrees(Utils.getFlag("print", options));
+
     tmpStr = Utils.getOption("num-slots", options);
     if (tmpStr.length() > 0) {
       setNumExecutionSlots(Integer.parseInt(tmpStr));
@@ -561,16 +607,22 @@ public class RandomForest
    */
   public String toString() {
 
-    if (m_bagger == null) 
+    if (m_bagger == null) { 
       return "Random forest not built yet";
-    else 
-      return "Random forest of " + m_numTrees
-	   + " trees, each constructed while considering "
-	   + m_KValue + " random feature" + (m_KValue==1 ? "" : "s") + ".\n"
-	   + "Out of bag error: "
-	   + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4) + "\n"
-	   + (getMaxDepth() > 0 ? ("Max. depth of trees: " + getMaxDepth() + "\n") : (""))
-	   + "\n";
+    } else {
+      StringBuffer temp = new StringBuffer();
+      temp.append("Random forest of " + m_numTrees
+          + " trees, each constructed while considering "
+          + m_KValue + " random feature" + (m_KValue==1 ? "" : "s") + ".\n"
+          + "Out of bag error: "
+          + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4) + "\n"
+          + (getMaxDepth() > 0 ? ("Max. depth of trees: " + getMaxDepth() + "\n") : (""))
+          + "\n");
+      if (m_printTrees) {
+        temp.append(m_bagger.toString());
+      }
+      return temp.toString();
+    }
   }
   
   /**
