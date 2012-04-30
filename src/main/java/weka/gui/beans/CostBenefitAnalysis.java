@@ -15,7 +15,7 @@
 
 /*
  *    CostBenefitAnalysis.java
- *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,9 +25,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -60,15 +60,14 @@ import javax.swing.event.ChangeListener;
 
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.gui.Logger;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.VisualizePanel;
 
 
 /**
@@ -914,6 +913,7 @@ public class CostBenefitAnalysis extends JPanel
       FastVector fv = new FastVector();
       fv.addElement(new Attribute("Sample Size"));
       fv.addElement(new Attribute("Cost/Benefit"));
+      fv.addElement(new Attribute("Threshold"));
       Instances costBenefitI = new Instances("Cost/Benefit Curve", fv, 100);
       
       // process the performance data to make this curve
@@ -922,12 +922,13 @@ public class CostBenefitAnalysis extends JPanel
       for (int i = 0; i < performanceI.numInstances(); i++) {
         Instance current = performanceI.instance(i);
         
-        double[] vals = new double[2];
+        double[] vals = new double[3];
         vals[0] = current.value(10); // sample size
         vals[1] = (current.value(0) * tpCost
             + current.value(1) * fnCost
             + current.value(2) * fpCost
             + current.value(3) * tnCost) * scaleFactor;
+        vals[2] = current.value(current.numAttributes() - 1);
         Instance newInst = new DenseInstance(1.0, vals);
         costBenefitI.add(newInst);
       }
