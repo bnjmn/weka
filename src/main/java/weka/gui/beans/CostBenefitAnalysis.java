@@ -905,6 +905,7 @@ public class CostBenefitAnalysis extends JPanel
       FastVector fv = new FastVector();
       fv.addElement(new Attribute("Sample Size"));
       fv.addElement(new Attribute("Cost/Benefit"));
+      fv.addElement(new Attribute("Threshold"));
       Instances costBenefitI = new Instances("Cost/Benefit Curve", fv, 100);
       
       // process the performance data to make this curve
@@ -913,12 +914,13 @@ public class CostBenefitAnalysis extends JPanel
       for (int i = 0; i < performanceI.numInstances(); i++) {
         Instance current = performanceI.instance(i);
         
-        double[] vals = new double[2];
+        double[] vals = new double[3];
         vals[0] = current.value(10); // sample size
         vals[1] = (current.value(0) * tpCost
             + current.value(1) * fnCost
             + current.value(2) * fpCost
             + current.value(3) * tnCost) * scaleFactor;
+        vals[2] = current.value(current.numAttributes() - 1);
         Instance newInst = new Instance(1.0, vals);
         costBenefitI.add(newInst);
       }
