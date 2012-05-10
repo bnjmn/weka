@@ -31,20 +31,20 @@
 
   <developers>
     <developer>
-      <id>mhall</id>
-      <name>Mark Hall</name>
-      <email>mhall at cs.waikato.ac.nz</email>
-    </developer>
-    <developer>
-      <id>fracpete</id>
-      <name>Peter Reutemann</name>
-      <email>fracpete at waikato.ac.nz</email>
-    </developer>
-    <developer>
       <id>wekateam</id>
       <name>The WEKA Team</name>
+      <email>wekalist@list.scms.waikato.ac.nz</email>
     </developer>
   </developers>
+
+  <mailingLists>
+    <mailingList>
+      <name>wekalist</name>
+      <subscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
+      <unsubscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
+      <archive>https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/</archive>
+    </mailingList>
+  </mailingLists>
 
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -101,18 +101,13 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.2</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
       <artifactId>java-cup</artifactId>
       <version>0.11a</version>
-    </dependency>    
-
-    <dependency>
-      <groupId>de.jflex</groupId>
-      <artifactId>jflex</artifactId>
-      <version>1.4.2</version>
     </dependency>    
   </dependencies>
 
@@ -123,7 +118,6 @@
   </properties>
 
   <build>
-    <finalName>weka</finalName>
     <directory>dist</directory>
     <outputDirectory>build/classes</outputDirectory>
     <testOutputDirectory>build/testcases</testOutputDirectory>
@@ -220,6 +214,7 @@
           <configuration>
             <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
+            <!-- tests are performed with the ant build file, hence skipped here. -->
             <preparationGoals>clean verify -P no-tests</preparationGoals>
             <goals>deploy -P no-tests</goals> 
           </configuration>
@@ -298,6 +293,7 @@
           <maxmemory>256m</maxmemory>
           <subpackages>weka:org</subpackages>
           <show>public</show>
+          <outputDirectory>${project.basedir}/doc</outputDirectory>
         </configuration>
         <executions>
           <execution>
