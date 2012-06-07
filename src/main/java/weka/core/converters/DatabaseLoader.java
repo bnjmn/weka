@@ -921,6 +921,7 @@ public class DatabaseLoader
     // TODO perhaps add option for sparse data
     try {
       InstanceQuery iq = new InstanceQuery();
+      iq.setDatabaseURL(m_URL);
       iq.setUsername(m_User);
       iq.setPassword(m_Password);
       iq.setQuery(m_query);
