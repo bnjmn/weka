@@ -26,7 +26,7 @@ package weka.core;
  * Class implementing some statistical routines for contingency tables.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class ContingencyTables
   implements RevisionHandler {
@@ -531,8 +531,7 @@ public class ContingencyTables
    */
   private static double lnFunc(double num){
     
-    // Constant hard coded for efficiency reasons
-    if (num < 1e-6) {
+    if (num <= 0) {
       return 0;
     } else {
       return num * Math.log(num);
@@ -578,7 +577,7 @@ public class ContingencyTables
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
