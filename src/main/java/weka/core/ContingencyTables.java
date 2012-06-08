@@ -530,8 +530,7 @@ public class ContingencyTables
    */
   private static double lnFunc(double num){
     
-    // Constant hard coded for efficiency reasons
-    if (num < 1e-6) {
+    if (num <= 0) {
       return 0;
     } else {
       return num * Math.log(num);
