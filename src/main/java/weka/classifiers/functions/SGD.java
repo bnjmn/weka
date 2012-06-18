@@ -585,7 +585,7 @@ public class SGD extends RandomizableClassifier
   private void train(Instances data) throws Exception {
     for (int e = 0; e < m_epochs; e++) {
       for (int i = 0; i < data.numInstances(); i++) {
-        updateClassifier(data.instance(i));
+        updateClassifier(data.instance(i), false);
       }
     }
   }
@@ -613,18 +613,37 @@ public class SGD extends RandomizableClassifier
     }
     return (result);
   }
-        
+  
   /**
    * Updates the classifier with the given instance.
    *
-   * @param instance the new training instance to include in the model 
+   * @param instance the new training instance to include in the model
+   * @param filter true if the instance should pass through any of the filters 
+   * set up in buildClassifier(). When batch training buildClassifier() already 
+   * batch filters all training instances so don't need to filter them again here.
    * @exception Exception if the instance could not be incorporated in
    * the model.
    */
-  public void updateClassifier(Instance instance) throws Exception {
-
+  protected void updateClassifier(Instance instance, boolean filter) throws Exception {
+    
     if (!instance.classIsMissing()) {
+      if (filter) {
+        if (m_replaceMissing != null) {
+          m_replaceMissing.input(instance);
+          instance = m_replaceMissing.output();
+        }
 
+        if (m_nominalToBinary != null) {
+          m_nominalToBinary.input(instance);
+          instance = m_nominalToBinary.output();
+        }
+
+        if (m_normalize != null){
+          m_normalize.input(instance);
+          instance = m_normalize.output();
+        }
+      }
+      
       double wx = dotProd(instance, m_weights, instance.classIndex());
       
       double y;
@@ -667,8 +686,19 @@ public class SGD extends RandomizableClassifier
         // update the bias
         m_weights[m_weights.length - 1] += factor;
       }
-      m_t++;
-    }
+      m_t++;      
+    }    
+  }
+        
+  /**
+   * Updates the classifier with the given instance.
+   *
+   * @param instance the new training instance to include in the model 
+   * @exception Exception if the instance could not be incorporated in
+   * the model.
+   */
+  public void updateClassifier(Instance instance) throws Exception {
+    updateClassifier(instance, true);
   }
     
   /**
