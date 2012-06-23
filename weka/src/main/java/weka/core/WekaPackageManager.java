@@ -586,7 +586,7 @@ public class WekaPackageManager {
       Environment env = Environment.getSystemWide();      
       
       for (String var : elements) {
-        if (env.getVariableValue(var) == null) {
+        if (env.getVariableValue(var.trim()) == null) {
           for (PrintStream p : progress) {
             p.println("[Weka] " + toLoad.getName() + " can't be loaded because "
                 + "the environment variable " + var + " is not set.");
