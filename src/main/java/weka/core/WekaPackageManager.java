@@ -520,6 +520,11 @@ public class WekaPackageManager {
       return false;
     }
     
+    // check for unset environment variables
+    if (!checkForUnsetEnvVar(toLoad, progress)) {
+      return false;
+    }
+    
     // now check for missing dependencies
     try {
       List<Dependency> missing = toLoad.getMissingDependencies();
@@ -556,9 +561,61 @@ public class WekaPackageManager {
       ex.printStackTrace();
       return false;
     }
-    
-    
+        
     return true;
+  }
+  
+  /**
+   * Checks to see if there are any environment variables or properties that 
+   * should be set at startup before allowing this package to be loaded. 
+   * This is useful for packages that might not be able to function correctly 
+   * if certain variables are not set correctly.
+   * 
+   * @param toLoad the package to check
+   * @return true if good to go
+   */
+  public static boolean checkForUnsetEnvVar(Package toLoad, 
+      PrintStream... progress) {
+    Object doNotLoadIfUnsetVar = 
+        toLoad.getPackageMetaDataElement("DoNotLoadIfEnvVarNotSet");
+    
+    boolean result = true;
+    if (doNotLoadIfUnsetVar != null && doNotLoadIfUnsetVar.toString().length() > 0) {
+      String[] elements = doNotLoadIfUnsetVar.toString().split(",");
+      
+      Environment env = Environment.getSystemWide();      
+      
+      for (String var : elements) {
+        if (env.getVariableValue(var) == null) {
+          for (PrintStream p : progress) {
+            p.println("[Weka] " + toLoad.getName() + " can't be loaded because "
+                + "the environment variable " + var + " is not set.");
+          }
+          
+          result = false;
+          break;
+        }
+      }            
+    }
+    
+    if (!result) {
+      // grab the message to print to the log (if any)
+      Object doNotLoadMessage = 
+        toLoad.getPackageMetaDataElement("DoNotLoadIfEnvVarNotSetMessage");
+      if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
+        for (PrintStream p : progress) {
+          String dnlM = doNotLoadMessage.toString();
+          try {
+            dnlM = Environment.getSystemWide().substitute(dnlM);
+          } catch (Exception e) {
+            // quietly ignore
+          }
+          p.println("[Weka] " + dnlM);
+        }
+      }
+    }    
+    
+    return result;
   }
   
   /**
