@@ -406,10 +406,20 @@ public class RandomSearch
     return "Seed for the random number generator";
   }
   
+  /**
+   * Set the random seed to use
+   * 
+   * @param seed the seed to use
+   */
   public void setSeed(int seed) {
     m_seed = seed;
   }
   
+  /**
+   * Get the random seed to use
+   * 
+   * @return the random seed
+   */
   public int getSeed() {
     return m_seed;
   }
