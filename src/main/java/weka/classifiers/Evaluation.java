@@ -15,7 +15,7 @@
 
 /*
  *    Evaluation.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -50,6 +50,7 @@ import weka.classifiers.evaluation.output.prediction.AbstractOutput;
 import weka.classifiers.evaluation.output.prediction.PlainText;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.classifiers.xml.XMLClassifier;
+import weka.core.BatchPredictor;
 import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -1568,13 +1569,25 @@ public class Evaluation
       classificationOutput = (AbstractOutput) forPredictionsPrinting[0];
     }
 
-    // Need to be able to collect predictions if appropriate (for AUC)
+    if (classifier instanceof BatchPredictor) {
+      double[][] preds = ((BatchPredictor)classifier).distributionsForInstances(data);
+      for (int i = 0; i < data.numInstances(); i++) {
+        double[] p = preds[i];
+        
+        predictions[i] = evaluationForSingleInstance(p, data.instance(i), true);
+        
+        if (classificationOutput != null)
+          classificationOutput.printClassification(p, data.instance(i), i);
+      }
+    } else {
+      // Need to be able to collect predictions if appropriate (for AUC)
 
-    for (int i = 0; i < data.numInstances(); i++) {
-      predictions[i] = evaluateModelOnceAndRecordPrediction((Classifier)classifier,
-          data.instance(i));
-      if (classificationOutput != null)
-        classificationOutput.printClassification(classifier, data.instance(i), i);
+      for (int i = 0; i < data.numInstances(); i++) {
+        predictions[i] = evaluateModelOnceAndRecordPrediction((Classifier)classifier,
+            data.instance(i));
+        if (classificationOutput != null)
+          classificationOutput.printClassification(classifier, data.instance(i), i);
+      }
     }
 
     return predictions;

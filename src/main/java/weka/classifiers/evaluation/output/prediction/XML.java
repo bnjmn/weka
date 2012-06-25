@@ -15,7 +15,7 @@
 
 /*
  * XML.java
- * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.evaluation.output.prediction;
@@ -300,6 +300,106 @@ public class XML
     }
     return text.toString();
   }
+  
+  /**
+   * Store the prediction made by the classifier as a string.
+   * 
+   * @param dist        the distribution to use
+   * @param inst        the instance to generate text from
+   * @param index       the index in the dataset
+   * @throws Exception  if something goes wrong
+   */
+  protected void doPrintClassification(double[] dist, Instance inst, int index) throws Exception {
+    int prec = m_NumDecimals;
+
+    Instance withMissing = (Instance)inst.copy();
+    withMissing.setDataset(inst.dataset());
+    
+    double predValue = 0;
+    if (Utils.sum(dist) == 0) {
+      predValue = Utils.missingValue();
+    } else {
+      if (inst.classAttribute().isNominal()) {
+        predValue = Utils.maxIndex(dist);
+      } else {
+        predValue = dist[0];                         
+      }
+    }
+    
+    // opening tag
+    append("  <" + TAG_PREDICTION + " " + ATT_INDEX + "=\"" + (index+1) + "\">\n");
+
+    if (inst.dataset().classAttribute().isNumeric()) {
+      // actual
+      append("    <" + TAG_ACTUAL_VALUE + ">");
+      if (inst.classIsMissing())
+        append("?");
+      else
+        append(Utils.doubleToString(inst.classValue(), prec));
+      append("</" + TAG_ACTUAL_VALUE + ">\n");
+      // predicted
+      append("    <" + TAG_PREDICTED_VALUE + ">");
+      if (inst.classIsMissing())
+        append("?");
+      else
+        append(Utils.doubleToString(predValue, prec));
+      append("</" + TAG_PREDICTED_VALUE + ">\n");
+      // error
+      append("    <" + TAG_ERROR + ">");
+      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
+        append("?");
+      else
+        append(Utils.doubleToString(predValue - inst.classValue(), prec));
+      append("</" + TAG_ERROR + ">\n");
+    } else {
+      // actual
+      append("    <" + TAG_ACTUAL_LABEL + " " + ATT_INDEX + "=\"" + ((int) inst.classValue()+1) + "\"" + ">");
+      append(sanitize(inst.toString(inst.classIndex())));
+      append("</" + TAG_ACTUAL_LABEL + ">\n");
+      // predicted
+      append("    <" + TAG_PREDICTED_LABEL + " " + ATT_INDEX + "=\"" + ((int) predValue+1) + "\"" + ">");
+      if (Utils.isMissingValue(predValue))
+        append("?");
+      else
+        append(sanitize(inst.dataset().classAttribute().value((int)predValue)));
+      append("</" + TAG_PREDICTED_LABEL + ">\n");
+      // error?
+      append("    <" + TAG_ERROR + ">");
+      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
+        append(VAL_YES);
+      else
+        append(VAL_NO);
+      append("</" + TAG_ERROR + ">\n");
+      // prediction/distribution
+      if (m_OutputDistribution) {
+        append("    <" + TAG_DISTRIBUTION + ">\n");
+        for (int n = 0; n < dist.length; n++) {
+          append("      <" + TAG_CLASS_LABEL + " " + ATT_INDEX + "=\"" + (n+1) + "\"");
+          if (!Utils.isMissingValue(predValue) && (n == (int) predValue))
+            append(" " + ATT_PREDICTED + "=\"" + VAL_YES + "\"");
+          append(">");
+          append(Utils.doubleToString(dist[n], prec));
+          append("</" + TAG_CLASS_LABEL + ">\n");
+        }
+        append("    </" + TAG_DISTRIBUTION + ">\n");
+      }
+      else {
+        append("    <" + TAG_PREDICTION + ">");
+        if (Utils.isMissingValue(predValue))
+          append("?");
+        else
+          append(Utils.doubleToString(dist[(int)predValue], prec));
+        append("</" + TAG_PREDICTION + ">\n");
+      }
+    }
+
+    // attributes
+    if (m_Attributes != null)
+      append(attributeValuesString(withMissing));
+    
+    // closing tag
+    append("  </" + TAG_PREDICTION + ">\n");
+  }
 
   /**
    * Store the prediction made by the classifier as a string.
@@ -310,88 +410,9 @@ public class XML
    * @throws Exception	if something goes wrong
    */
   protected void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception {
-    int prec = m_NumDecimals;
-
-    Instance withMissing = (Instance)inst.copy();
-    withMissing.setDataset(inst.dataset());
-    inst = preProcessInstance(inst, withMissing, classifier);
     
-    double predValue = classifier.classifyInstance(withMissing);
-
-    // opening tag
-    append("  <" + TAG_PREDICTION + " " + ATT_INDEX + "=\"" + (index+1) + "\">\n");
-
-    if (inst.dataset().classAttribute().isNumeric()) {
-      // actual
-      append("    <" + TAG_ACTUAL_VALUE + ">");
-      if (inst.classIsMissing())
-	append("?");
-      else
-	append(Utils.doubleToString(inst.classValue(), prec));
-      append("</" + TAG_ACTUAL_VALUE + ">\n");
-      // predicted
-      append("    <" + TAG_PREDICTED_VALUE + ">");
-      if (inst.classIsMissing())
-	append("?");
-      else
-	append(Utils.doubleToString(predValue, prec));
-      append("</" + TAG_PREDICTED_VALUE + ">\n");
-      // error
-      append("    <" + TAG_ERROR + ">");
-      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
-	append("?");
-      else
-	append(Utils.doubleToString(predValue - inst.classValue(), prec));
-      append("</" + TAG_ERROR + ">\n");
-    } else {
-      // actual
-      append("    <" + TAG_ACTUAL_LABEL + " " + ATT_INDEX + "=\"" + ((int) inst.classValue()+1) + "\"" + ">");
-      append(sanitize(inst.toString(inst.classIndex())));
-      append("</" + TAG_ACTUAL_LABEL + ">\n");
-      // predicted
-      append("    <" + TAG_PREDICTED_LABEL + " " + ATT_INDEX + "=\"" + ((int) predValue+1) + "\"" + ">");
-      if (Utils.isMissingValue(predValue))
-	append("?");
-      else
-	append(sanitize(inst.dataset().classAttribute().value((int)predValue)));
-      append("</" + TAG_PREDICTED_LABEL + ">\n");
-      // error?
-      append("    <" + TAG_ERROR + ">");
-      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
-	append(VAL_YES);
-      else
-	append(VAL_NO);
-      append("</" + TAG_ERROR + ">\n");
-      // prediction/distribution
-      if (m_OutputDistribution) {
-	append("    <" + TAG_DISTRIBUTION + ">\n");
-	double[] dist = classifier.distributionForInstance(withMissing);
-	for (int n = 0; n < dist.length; n++) {
-	  append("      <" + TAG_CLASS_LABEL + " " + ATT_INDEX + "=\"" + (n+1) + "\"");
-	  if (!Utils.isMissingValue(predValue) && (n == (int) predValue))
-	    append(" " + ATT_PREDICTED + "=\"" + VAL_YES + "\"");
-	  append(">");
-	  append(Utils.doubleToString(dist[n], prec));
-	  append("</" + TAG_CLASS_LABEL + ">\n");
-	}
-	append("    </" + TAG_DISTRIBUTION + ">\n");
-      }
-      else {
-	append("    <" + TAG_PREDICTION + ">");
-	if (Utils.isMissingValue(predValue))
-	  append("?");
-	else
-	  append(Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
-	append("</" + TAG_PREDICTION + ">\n");
-      }
-    }
-
-    // attributes
-    if (m_Attributes != null)
-      append(attributeValuesString(withMissing));
-    
-    // closing tag
-    append("  </" + TAG_PREDICTION + ">\n");
+    double[] d = classifier.distributionForInstance(inst);
+    doPrintClassification(d, inst, index);    
   }
   
   /**

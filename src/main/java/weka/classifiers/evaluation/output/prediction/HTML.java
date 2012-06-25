@@ -15,7 +15,7 @@
 
 /*
  * HTML.java
- * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.evaluation.output.prediction;
@@ -173,6 +173,85 @@ public class HTML
     }
     return text.toString();
   }
+  
+  protected void doPrintClassification(double[] dist, Instance inst, int index) throws Exception {
+    int prec = m_NumDecimals;
+    
+    Instance withMissing = (Instance)inst.copy();
+    withMissing.setDataset(inst.dataset());
+    
+    double predValue = 0;
+    if (Utils.sum(dist) == 0) {
+      predValue = Utils.missingValue();
+    } else {
+      if (inst.classAttribute().isNominal()) {
+        predValue = Utils.maxIndex(dist);
+      } else {
+        predValue = dist[0];                         
+      }
+    }
+    
+    // index
+    append("<tr>");
+    append("<td>" + (index+1) + "</td>");
+
+    if (inst.dataset().classAttribute().isNumeric()) {
+      // actual
+      if (inst.classIsMissing())
+        append("<td align=\"right\">" + "?" + "</td>");
+      else
+        append("<td align=\"right\">" + Utils.doubleToString(inst.classValue(), prec) + "</td>");
+      // predicted
+      if (Utils.isMissingValue(predValue))
+        append("<td align=\"right\">" + "?" + "</td>");
+      else
+        append("<td align=\"right\">" + Utils.doubleToString(predValue, prec) + "</td>");
+      // error
+      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
+        append("<td align=\"right\">" + "?" + "</td>");
+      else
+        append("<td align=\"right\">" + Utils.doubleToString(predValue - inst.classValue(), prec) + "</td>");
+    } else {
+      // actual
+      append("<td>" + ((int) inst.classValue()+1) + ":" + sanitize(inst.toString(inst.classIndex())) + "</td>");
+      // predicted
+      if (Utils.isMissingValue(predValue))
+        append("<td>" + "?" + "</td>");
+      else
+        append("<td>" + ((int) predValue+1) + ":" + sanitize(inst.dataset().classAttribute().value((int)predValue)) + "</td>");
+      // error?
+      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
+        append("<td>" + "+" + "</td>");
+      else
+        append("<td>" + "&nbsp;" + "</td>");
+      // prediction/distribution
+      if (m_OutputDistribution) {
+        if (Utils.isMissingValue(predValue)) {
+          append("<td>" + "?" + "</td>");
+        }
+        else {
+          append("<td align=\"right\">");
+          for (int n = 0; n < dist.length; n++) {
+            if (n > 0)
+              append("</td><td align=\"right\">");
+            if (n == (int) predValue)
+              append("*");
+            append(Utils.doubleToString(dist[n], prec));
+          }
+          append("</td>");
+        }
+      }
+      else {
+        if (Utils.isMissingValue(predValue))
+          append("<td align=\"right\">" + "?" + "</td>");
+        else
+          append("<td align=\"right\">" + Utils.doubleToString(dist[(int)predValue], prec) + "</td>");
+      }
+    }
+
+    // attributes
+    append(attributeValuesString(withMissing) + "</tr>\n");    
+  }
 
   /**
    * Store the prediction made by the classifier as a string.
@@ -183,75 +262,9 @@ public class HTML
    * @throws Exception	if something goes wrong
    */
   protected void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception {
-    int prec = m_NumDecimals;
-
-    Instance withMissing = (Instance)inst.copy();
-    withMissing.setDataset(inst.dataset());
-    inst = preProcessInstance(inst, withMissing, classifier);
     
-    double predValue = classifier.classifyInstance(withMissing);
-
-    // index
-    append("<tr>");
-    append("<td>" + (index+1) + "</td>");
-
-    if (inst.dataset().classAttribute().isNumeric()) {
-      // actual
-      if (inst.classIsMissing())
-	append("<td align=\"right\">" + "?" + "</td>");
-      else
-	append("<td align=\"right\">" + Utils.doubleToString(inst.classValue(), prec) + "</td>");
-      // predicted
-      if (Utils.isMissingValue(predValue))
-	append("<td align=\"right\">" + "?" + "</td>");
-      else
-	append("<td align=\"right\">" + Utils.doubleToString(predValue, prec) + "</td>");
-      // error
-      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
-	append("<td align=\"right\">" + "?" + "</td>");
-      else
-	append("<td align=\"right\">" + Utils.doubleToString(predValue - inst.classValue(), prec) + "</td>");
-    } else {
-      // actual
-      append("<td>" + ((int) inst.classValue()+1) + ":" + sanitize(inst.toString(inst.classIndex())) + "</td>");
-      // predicted
-      if (Utils.isMissingValue(predValue))
-	append("<td>" + "?" + "</td>");
-      else
-	append("<td>" + ((int) predValue+1) + ":" + sanitize(inst.dataset().classAttribute().value((int)predValue)) + "</td>");
-      // error?
-      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
-	append("<td>" + "+" + "</td>");
-      else
-	append("<td>" + "&nbsp;" + "</td>");
-      // prediction/distribution
-      if (m_OutputDistribution) {
-	if (Utils.isMissingValue(predValue)) {
-	  append("<td>" + "?" + "</td>");
-	}
-	else {
-	  append("<td align=\"right\">");
-	  double[] dist = classifier.distributionForInstance(withMissing);
-	  for (int n = 0; n < dist.length; n++) {
-	    if (n > 0)
-	      append("</td><td align=\"right\">");
-	    if (n == (int) predValue)
-	      append("*");
-            append(Utils.doubleToString(dist[n], prec));
-	  }
-	  append("</td>");
-	}
-      }
-      else {
-	if (Utils.isMissingValue(predValue))
-	  append("<td align=\"right\">" + "?" + "</td>");
-	else
-	  append("<td align=\"right\">" + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec) + "</td>");
-      }
-    }
-
-    // attributes
-    append(attributeValuesString(withMissing) + "</tr>\n");
+    double[] d = classifier.distributionForInstance(inst);
+    doPrintClassification(d, inst, index);    
   }
   
   /**

@@ -15,7 +15,7 @@
 
 /*
  * ClassifierErrorsPlotInstances.java
- * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.explorer;
@@ -25,6 +25,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.evaluation.NumericPrediction;
 import weka.core.Attribute;
+import weka.core.BatchPredictor;
 import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -258,6 +259,79 @@ public class ClassifierErrorsPlotInstances
     m_PlotInstances = new Instances(
 	m_Instances.relationName() + "_predicted", hv, m_Instances.numInstances());
     m_PlotInstances.setClassIndex(m_ClassIndex + 1);
+  }
+  
+  public void process(Instances batch, double[][] predictions, Evaluation eval) {
+    try {      
+      
+      for (int j = 0; j < batch.numInstances(); j++) {
+        Instance toPredict = batch.instance(j);
+        double[] preds = predictions[j];
+        
+        double pred = 0;
+        if (batch.classAttribute().isNominal()) {
+          pred = (Utils.sum(preds) == 0) 
+          ? Utils.missingValue() : Utils.maxIndex(preds);
+        } else {
+          pred = preds[0];
+        }
+        
+        eval.evaluationForSingleInstance(preds, toPredict, true);
+
+        if (!m_SaveForVisualization) {
+          continue;
+        }
+
+        if (m_PlotInstances != null) {
+          double[] values = new double[m_PlotInstances.numAttributes()];
+          for (int i = 0; i < m_PlotInstances.numAttributes(); i++) {
+            if (i < toPredict.classIndex()) {
+              values[i] = toPredict.value(i);
+            }
+            else if (i == toPredict.classIndex()) {
+              values[i]   = pred;
+              values[i+1] = toPredict.value(i);
+              i++;
+            }
+            else {
+              values[i] = toPredict.value(i-1);
+            }
+          }
+
+          m_PlotInstances.add(new DenseInstance(1.0, values));
+
+          if (toPredict.classAttribute().isNominal()) {
+            if (toPredict.isMissing(toPredict.classIndex()) || Utils.isMissingValue(pred)) {
+              m_PlotShapes.addElement(new Integer(Plot2D.MISSING_SHAPE));
+            }
+            else if (pred != toPredict.classValue()) {
+              // set to default error point shape
+              m_PlotShapes.addElement(new Integer(Plot2D.ERROR_SHAPE));
+            }
+            else {
+              // otherwise set to constant (automatically assigned) point shape
+              m_PlotShapes.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+            }
+            m_PlotSizes.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE));
+          }
+          else {
+            // store the error (to be converted to a point size later)
+            Double errd = null;
+            if (!toPredict.isMissing(toPredict.classIndex()) && !Utils.isMissingValue(pred)) {
+              errd = new Double(pred - toPredict.classValue());
+              m_PlotShapes.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+            }
+            else {
+              // missing shape if actual class not present or prediction is missing
+              m_PlotShapes.addElement(new Integer(Plot2D.MISSING_SHAPE));
+            }
+            m_PlotSizes.addElement(errd);
+          }
+        }
+      }      
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
   
   /**
