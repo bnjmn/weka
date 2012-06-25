@@ -6,7 +6,7 @@
 PackageName=LibSVM
 
 # Version (required)
-Version=1.0.5
+Version=1.0.4
 
 #Date
 Date=2012-06-25
@@ -31,7 +31,7 @@ Description= A wrapper class for the libsvm tools (the libsvm classes, typically
 Changes=Now has a -seed option which now makes probability estimates deterministic from run to run. Libsvm library updated to 3.12.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.5.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.4.zip?download
 
 # URL for further information
 URL=http://www.cs.iastate.edu/~yasser/wlsvm/
