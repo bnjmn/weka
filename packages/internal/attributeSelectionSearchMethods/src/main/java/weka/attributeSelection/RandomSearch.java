@@ -83,6 +83,10 @@ import java.util.Vector;
  * <pre> -V
  *  Output subsets as the search progresses.
  *  (default = false).</pre>
+ *
+ * <pre> -seed &lt;num&gt;
+ *  Random seed
+ *  (default = 1)</pre>
  * 
  <!-- options-end -->
  *
@@ -112,8 +116,8 @@ public class RandomSearch
 
   /** 
    * only accept a feature set as being "better" than the best if its
-   * merit is better or equal to the best, and it contains fewer
-   * features than the best (this allows LVF to be implimented).
+   * merit is better or equal to the best, and it contains as many or fewer
+   * features than the best (this allows LVF to be implemented).
    */
   private boolean m_onlyConsiderBetterAndSmaller;
 
@@ -212,6 +216,9 @@ public class RandomSearch
 				    +"\n\t(default = false)."
 				    , "V", 0
 				    , "-V"));
+
+    newVector.addElement(new Option("\tRandom seed\n\t(default = 1)", 
+                                    "seed", 1, "-seed <num>"));
     return  newVector.elements();
   }
 
@@ -260,6 +267,11 @@ public class RandomSearch
       setSearchPercent((new Double(optionString)).doubleValue());
     }
 
+    optionString = Utils.getOption("seed", options);
+    if (optionString.length() > 0) {
+      setSeed(Integer.parseInt(optionString));
+    }
+
     setVerbose(Utils.getFlag('V',options));
   }
 
@@ -268,7 +280,7 @@ public class RandomSearch
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[5];
+    String[] options = new String[7];
     int current = 0;
 
     if (m_verbose) {
@@ -282,6 +294,9 @@ public class RandomSearch
 
     options[current++] = "-F";
     options[current++] = "" + getSearchPercent();
+
+    options[current++] = "-seed";
+    options[current++] = "" + getSeed();
 
     while (current < options.length) {
       options[current++] = "";
@@ -384,6 +399,23 @@ public class RandomSearch
    */
   public double getSearchPercent() {
     return m_searchSize * 100;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "Seed for the random number generator";
+  }
+  
+  public void setSeed(int seed) {
+    m_seed = seed;
+  }
+  
+  public int getSeed() {
+    return m_seed;
   }
 
   /**
