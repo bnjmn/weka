@@ -23,7 +23,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.RandomizableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -45,6 +45,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -164,6 +165,10 @@ import java.util.Vector;
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
+ *
+ * <pre> -seed &lt;num&gt;
+ *  Random seed
+ *  (default = 1)</pre>
  * 
  <!-- options-end -->
  *
@@ -174,7 +179,7 @@ import java.util.Vector;
  * @see     weka.core.converters.LibSVMSaver
  */
 public class LibSVM 
-  extends AbstractClassifier
+  extends RandomizableClassifier
   implements TechnicalInformationHandler {
   
   /** the svm classname. */
@@ -466,6 +471,9 @@ public class LibSVM
             + "\tGets ignored if a directory is provided.",
             "model", 1, "-model <file>"));
 
+    result.addElement(
+        new Option("\tRandom seed\n\t(default = 1)", "seed", 1, "-seed <num>"));
+
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
       result.addElement(en.nextElement());
@@ -550,6 +558,10 @@ public class LibSVM
    * <pre> -D
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
+   *
+   * <pre> -seed &lt;num&gt;
+   *  Random seed
+   *  (default = 1)</pre>
    * 
    <!-- options-end -->
    *
@@ -638,6 +650,11 @@ public class LibSVM
       m_ModelFile = new File(System.getProperty("user.dir"));
     else
       m_ModelFile = new File(tmpStr);
+
+    String seedString = Utils.getOption("seed", options);
+    if (seedString.length() > 0) {
+      setSeed(Integer.parseInt(seedString.trim()));
+    }
   }
   
   /**
@@ -699,6 +716,8 @@ public class LibSVM
     
     result.add("-model");
     result.add(m_ModelFile.getAbsolutePath());
+
+    result.add("-seed"); result.add("" + getSeed());
     
     return (String[]) result.toArray(new String[result.size()]);
   }
@@ -1663,6 +1682,12 @@ public class LibSVM
     
     if (error_msg != null)
       throw new Exception("Error: " + error_msg);
+
+    // make probability estimates deterministic from run to run
+    Class svmClass = Class.forName(CLASS_SVM);
+    Field randF = svmClass.getField("rand");
+    Random rand = (Random)randF.get(null); // static field
+    rand.setSeed(m_Seed);
     
     // train model
     m_Model = invokeMethod(
