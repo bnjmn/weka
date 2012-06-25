@@ -24,6 +24,7 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.RandomizableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -44,6 +45,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -154,11 +156,11 @@ import java.util.Vector;
  *  (default: 1 for all classes)</pre>
  * 
  * <pre> -B
- *  Trains a SVC model instead of a SVR one (default: SVR)</pre>
+ *  Generate probability estimates for classification</pre>
  * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ * <pre> -seed &lt;num&gt;
+ *  Random seed
+ *  (default = 1)</pre>
  * 
  <!-- options-end -->
  *
@@ -169,7 +171,7 @@ import java.util.Vector;
  * @see     weka.core.converters.LibSVMSaver
  */
 public class LibSVM 
-  extends Classifier
+  extends RandomizableClassifier
   implements TechnicalInformationHandler {
   
   /** the svm classname */
@@ -452,9 +454,8 @@ public class LibSVM
             "\tGenerate probability estimates for classification",
             "B", 0, "-B"));
 
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+    result.addElement(
+        new Option("\tRandom seed\n\t(default = 1)", "seed", 1, "-seed <num>"));
     
     return result.elements();
   }
@@ -527,11 +528,11 @@ public class LibSVM
    *  (default: 1 for all classes)</pre>
    * 
    * <pre> -B
-   *  Trains a SVC model instead of a SVR one (default: SVR)</pre>
+   *  Generate probability estimates for classification</pre>
    * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   * <pre> -seed &lt;num&gt;
+   *  Random seed
+   *  (default = 1)</pre>
    * 
    <!-- options-end -->
    *
@@ -614,6 +615,11 @@ public class LibSVM
     setWeights(Utils.getOption('W', options));
     
     setProbabilityEstimates(Utils.getFlag('B', options));
+    
+    String seedString = Utils.getOption("seed", options);
+    if (seedString.length() > 0) {
+      setSeed(Integer.parseInt(seedString.trim()));
+    }
   }
   
   /**
@@ -622,6 +628,7 @@ public class LibSVM
    * @return            the current setup
    */
   public String[] getOptions() {
+    
     Vector        result;
     
     result  = new Vector();
@@ -672,6 +679,8 @@ public class LibSVM
     
     if (getProbabilityEstimates())
       result.add("-B");
+    
+    result.add("-seed"); result.add("" + getSeed());
     
     return (String[]) result.toArray(new String[result.size()]);
   }
@@ -1604,6 +1613,12 @@ public class LibSVM
     if (error_msg != null)
       throw new Exception("Error: " + error_msg);
     
+    // make probability estimates deterministic from run to run
+    Class svmClass = Class.forName(CLASS_SVM);
+    Field randF = svmClass.getField("rand");
+    Random rand = (Random)randF.get(null); // static field
+    rand.setSeed(m_Seed);
+    
     // train model
     m_Model = invokeMethod(
         Class.forName(CLASS_SVM).newInstance(), 
@@ -1643,3 +1658,4 @@ public class LibSVM
     runClassifier(new LibSVM(), args);
   }
 }
+
