@@ -88,9 +88,11 @@ import weka.classifiers.evaluation.output.prediction.AbstractOutput;
 import weka.classifiers.evaluation.output.prediction.Null;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.core.Attribute;
+import weka.core.BatchPredictor;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Drawable;
+import weka.core.Environment;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -1284,16 +1286,28 @@ public class ClassifierPanel
 		printPredictionsHeader(outBuff, classificationOutput, "training set");
 	      }
 
-	      for (int jj=0;jj<inst.numInstances();jj++) {
-		plotInstances.process(inst.instance(jj), classifier, eval);
-		
-		if (outputPredictionsText) {
-		  classificationOutput.printClassification(classifier, inst.instance(jj), jj);
-		}
-		if ((jj % 100) == 0) {
-		  m_Log.statusMessage("Evaluating on training data. Processed "
-				      +jj+" instances...");
-		}
+	      if (classifier instanceof BatchPredictor) {
+	        double[][] predictions = ((BatchPredictor)classifier).
+	            distributionsForInstances(inst);
+	        plotInstances.process(inst, predictions, eval);
+	        if (outputPredictionsText) {
+	          for (int jj = 0; jj < inst.numInstances(); jj++) {
+	            classificationOutput.
+	              printClassification(predictions[jj], inst.instance(jj), jj);
+	          }
+	        }
+	      } else {
+	        for (int jj=0;jj<inst.numInstances();jj++) {
+	          plotInstances.process(inst.instance(jj), classifier, eval);
+
+	          if (outputPredictionsText) {
+	            classificationOutput.printClassification(classifier, inst.instance(jj), jj);
+	          }
+	          if ((jj % 100) == 0) {
+	            m_Log.statusMessage("Evaluating on training data. Processed "
+	                +jj+" instances...");
+	          }
+	        }
 	      }
 	      if (outputPredictionsText)
 		classificationOutput.printFooter();
@@ -1355,10 +1369,23 @@ public class ClassifierPanel
 		Instances test = inst.testCV(numFolds, fold);
 		m_Log.statusMessage("Evaluating model for fold "
 				    + (fold + 1) + "...");
-		for (int jj=0;jj<test.numInstances();jj++) {
-		  plotInstances.process(test.instance(jj), current, eval);
+		
+		if (classifier instanceof BatchPredictor) {
+		  double[][] predictions = ((BatchPredictor)classifier).
+		      distributionsForInstances(test);
+		  plotInstances.process(test, predictions, eval);
 		  if (outputPredictionsText) {
-		    classificationOutput.printClassification(current, test.instance(jj), jj);
+		    for (int jj = 0; jj < test.numInstances(); jj++) {
+		      classificationOutput.
+		        printClassification(predictions[jj], test.instance(jj), jj);
+		    }
+		  }
+		} else {
+		  for (int jj=0;jj<test.numInstances();jj++) {
+		    plotInstances.process(test.instance(jj), current, eval);
+		    if (outputPredictionsText) {
+		      classificationOutput.printClassification(current, test.instance(jj), jj);
+		    }
 		  }
 		}
 	      }
@@ -1411,15 +1438,27 @@ public class ClassifierPanel
 		printPredictionsHeader(outBuff, classificationOutput, "test split");
 	      }
      
-	      for (int jj=0;jj<test.numInstances();jj++) {
-		plotInstances.process(test.instance(jj), current, eval);
-		if (outputPredictionsText) { 
-		  classificationOutput.printClassification(current, test.instance(jj), jj);
-		}
-		if ((jj % 100) == 0) {
-		  m_Log.statusMessage("Evaluating on test split. Processed "
-				      +jj+" instances...");
-		}
+	      if (classifier instanceof BatchPredictor) {
+                double[][] predictions = ((BatchPredictor)classifier).
+                    distributionsForInstances(test);
+                plotInstances.process(test, predictions, eval);
+                if (outputPredictionsText) {
+                  for (int jj = 0; jj < test.numInstances(); jj++) {
+                    classificationOutput.
+                      printClassification(predictions[jj], test.instance(jj), jj);
+                  }
+                }
+	      } else {
+	        for (int jj=0;jj<test.numInstances();jj++) {
+	          plotInstances.process(test.instance(jj), current, eval);
+	          if (outputPredictionsText) { 
+	            classificationOutput.printClassification(current, test.instance(jj), jj);
+	          }
+	          if ((jj % 100) == 0) {
+	            m_Log.statusMessage("Evaluating on test split. Processed "
+	                +jj+" instances...");
+	          }
+	        }
 	      }
 	      if (outputPredictionsText)
 		classificationOutput.printFooter();
@@ -1445,16 +1484,69 @@ public class ClassifierPanel
 
 	      Instance instance;
 	      int jj = 0;
+	      Instances batchInst = null;
+	      int batchSize = 100;
+	      if (classifier instanceof BatchPredictor) {
+	        batchInst = new Instances(userTestStructure, 0);
+	        String batchSizeS = ((BatchPredictor)classifier).getBatchSize();
+	        if (batchSizeS != null && batchSizeS.length() > 0) {
+	          try {
+	            batchSizeS = Environment.getSystemWide().substitute(batchSizeS);
+	          } catch (Exception ex) {}
+	          
+	          try {
+	            batchSize = Integer.parseInt(batchSizeS);
+	          } catch (NumberFormatException ex) {
+	            // just go with the default
+	          }
+	        }
+	      }
 	      while (source.hasMoreElements(userTestStructure)) {
 		instance = source.nextElement(userTestStructure);
-		plotInstances.process(instance, classifier, eval);
-		if (outputPredictionsText) {
-		  classificationOutput.printClassification(classifier, instance, jj);
+		
+		if (classifier instanceof BatchPredictor) {
+		  batchInst.add(instance);
+		  if (batchInst.numInstances() == batchSize) {
+		    double[][] predictions = ((BatchPredictor)classifier).
+		      distributionsForInstances(batchInst);
+		    plotInstances.process(batchInst, predictions, eval);
+		    
+		    if (outputPredictionsText) {
+		      for (int kk = 0; kk < batchInst.numInstances(); kk++) {
+		        classificationOutput.
+		          printClassification(predictions[kk], batchInst.instance(kk), kk);
+		      }
+		    }
+		    jj += batchInst.numInstances();
+		    m_Log.statusMessage("Evaluating on test data. Processed "
+	                      +jj+" instances...");
+		    batchInst.delete();
+		  }
+		} else {
+		  plotInstances.process(instance, classifier, eval);
+		  if (outputPredictionsText) {
+		    classificationOutput.printClassification(classifier, instance, jj);
+		  }
+		  if ((++jj % 100) == 0) {
+		    m_Log.statusMessage("Evaluating on test data. Processed "
+		        +jj+" instances...");
+		  }
 		}
-		if ((++jj % 100) == 0) {
-		  m_Log.statusMessage("Evaluating on test data. Processed "
-		      +jj+" instances...");
-		}
+	      }
+	      
+	      if (classifier instanceof BatchPredictor && batchInst.numInstances() > 0) {
+	        // finish the last batch
+
+	        double[][] predictions = ((BatchPredictor)classifier).
+	          distributionsForInstances(batchInst);
+	        plotInstances.process(batchInst, predictions, eval);
+
+	        if (outputPredictionsText) {
+	          for (int kk = 0; kk < batchInst.numInstances(); kk++) {
+	            classificationOutput.
+	            printClassification(predictions[kk], batchInst.instance(kk), kk);
+	          }
+	        }
 	      }
 
 	      if (outputPredictionsText)

@@ -113,6 +113,17 @@ public class Null
   
   /**
    * Does nothing.
+   * 
+   * @param dist        the distribution to use
+   * @param inst        the instance to generate text from
+   * @param index       the index in the dataset
+   * @throws Exception  if something goes wrong
+   */
+  protected void doPrintClassification(double[] dist, Instance inst, int index) throws Exception {    
+  }
+  
+  /**
+   * Does nothing.
    */
   protected void doPrintFooter() {
   }
