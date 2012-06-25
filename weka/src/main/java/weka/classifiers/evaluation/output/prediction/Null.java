@@ -15,7 +15,7 @@
 
 /*
  * Null.java
- * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.evaluation.output.prediction;
@@ -109,6 +109,17 @@ public class Null
    * @throws Exception	if something goes wrong
    */
   protected void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception {
+  }
+  
+  /**
+   * Does nothing.
+   * 
+   * @param dist        the distribution to use
+   * @param inst        the instance to generate text from
+   * @param index       the index in the dataset
+   * @throws Exception  if something goes wrong
+   */
+  protected void doPrintClassification(double[] dist, Instance inst, int index) throws Exception {    
   }
   
   /**
