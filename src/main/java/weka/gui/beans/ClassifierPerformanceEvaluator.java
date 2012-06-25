@@ -34,6 +34,7 @@ import weka.classifiers.AggregateableEvaluation;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.BatchPredictor;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -267,12 +268,19 @@ public class ClassifierPerformanceEvaluator
         
         plotInstances.setUp();
         
-        for (int i = 0; i < m_testData.numInstances(); i++) {
-          if (m_stopped) {
-            break;
+        if (m_classifier instanceof BatchPredictor) {
+          double[][] predictions = ((BatchPredictor)m_classifier).
+              distributionsForInstances(m_testData);
+          plotInstances.process(m_testData, predictions, eval);
+        } else {
+
+          for (int i = 0; i < m_testData.numInstances(); i++) {
+            if (m_stopped) {
+              break;
+            }
+            Instance temp = m_testData.instance(i);
+            plotInstances.process(temp, m_classifier, eval);
           }
-          Instance temp = m_testData.instance(i);
-          plotInstances.process(temp, m_classifier, eval);
         }
         
         if (m_stopped) {
