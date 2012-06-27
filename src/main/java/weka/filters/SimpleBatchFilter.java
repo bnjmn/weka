@@ -184,7 +184,7 @@ public abstract class SimpleBatchFilter
       m_NewBatch = false;
     }
 
-    bufferInput(instance);
+    bufferInput((Instance) instance.copy());
     
     if (isFirstBatchDone()) {
       Instances inst = new Instances(getInputFormat());
