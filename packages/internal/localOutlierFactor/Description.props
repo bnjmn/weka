@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=localOutlierFactor
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2012-06-28
+
+# Title (required)
+Title=Filter implementing the Local Outlier Factor (LOF) outlier/anomaly detection algorithm.
+
+Category=Outlier
+
+# Author (required)
+Author=Mark Hall
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=A filter that applies the LOF (Local Outlier Factor) algorithm to compute an "outlier" score for each instance in the data. Can use multiple cores/cpus to speed up the LOF computation for large datasets. Nearest neighbor search methods and distance functions are pluggable.<br/><br/>For more information, see:<br/><br/> Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000). LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record. 29(2):93-104.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/localOutlierFactor1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/localOutlierFactor
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.2)
