@@ -603,7 +603,7 @@ public class LOF extends Filter implements OptionHandler,
    */
   protected void postFirstBatch(Instance inst) throws Exception {
 
-    Instances nn = m_nnSearch.kNearestNeighbours(inst, m_kDistanceContainer.size());
+    Instances nn = m_nnSearch.kNearestNeighbours(inst, m_ubK * 2);
     Neighborhood currentN = new Neighborhood();
     currentN.m_neighbors = nn;
     currentN.m_distances = m_nnSearch.getDistances();
@@ -728,7 +728,7 @@ public class LOF extends Filter implements OptionHandler,
               current.numAttributes(), !m_classSet);
           Neighborhood n = new Neighborhood();
           if (addToKDistanceContainer(key, n)) {
-            Instances nn = m_search.kNearestNeighbours(current, m_nnTrain.numInstances());
+            Instances nn = m_search.kNearestNeighbours(current, m_ubK * 2);
             n.m_neighbors = nn;
             n.m_distances = m_search.getDistances();
             n.m_tempCardinality = new double[m_ubK - m_lbK];
@@ -980,7 +980,8 @@ public class LOF extends Filter implements OptionHandler,
       DecisionTableHashKey key = new DecisionTableHashKey(current, 
           current.numAttributes(), !m_classSet);
       if (!m_kDistanceContainer.containsKey(key)) {
-        Instances nn = m_nnSearch.kNearestNeighbours(current, training.numInstances());
+        // allow for a few more neighbors than m_ubK in case of ties
+        Instances nn = m_nnSearch.kNearestNeighbours(current, m_ubK * 2);
         Neighborhood n = new Neighborhood();
         n.m_neighbors = nn;
         n.m_distances = m_nnSearch.getDistances();
