@@ -23,9 +23,12 @@ package weka.filters.unsupervised.attribute;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -139,7 +142,7 @@ public class LOF extends Filter implements OptionHandler,
   protected transient DecisionTableHashKey[] m_instKeys;
   
   /** Map of training instances to their neighborhood information */
-  protected HashMap<DecisionTableHashKey, Neighborhood> m_kDistanceContainer;
+  protected Map<DecisionTableHashKey, Neighborhood> m_kDistanceContainer;
   
   /** For parallel execution mode */
   protected transient ThreadPoolExecutor m_executorPool;
@@ -582,8 +585,10 @@ public class LOF extends Filter implements OptionHandler,
      */
     private static final long serialVersionUID = 3381174623146672703L;
     
+    // nearest neighbor list
     public Instances m_neighbors;
     public double[] m_distances;
+    
     public double[] m_tempCardinality;
     public double[] m_lrd;
     public double[] m_lof;    
@@ -598,26 +603,33 @@ public class LOF extends Filter implements OptionHandler,
    */
   protected void postFirstBatch(Instance inst) throws Exception {
 
-    Instances nn = m_nnSearch.kNearestNeighbours(inst, m_ubK);
+    Instances nn = m_nnSearch.kNearestNeighbours(inst, m_kDistanceContainer.size());
     Neighborhood currentN = new Neighborhood();
     currentN.m_neighbors = nn;
     currentN.m_distances = m_nnSearch.getDistances();
     currentN.m_tempCardinality = new double[m_ubK - m_lbK];
     currentN.m_lof = new double[m_ubK - m_lbK];
     currentN.m_lrd = new double[m_ubK - m_lbK];
+    
+    trimZeroDistances(currentN);
 
     // for each k in the range minPtsLB to maxPtsLB
-    for (int k = m_lbK; k < m_ubK; k++) {                  
+    for (int k = m_lbK; k < m_ubK; k++) {  
+      
+      int indexOfKDistanceForK = k - 1;
+      while (indexOfKDistanceForK < currentN.m_distances.length - 1  &&
+          currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
+        indexOfKDistanceForK++;
+      }
+      
       // lrd first
       double cardinality = 0;
       double sumReachability = 0;
       
-      for (int j = 0; j <= k; j++) {       
+      for (int j = 0; j <= indexOfKDistanceForK; j++) {       
         Instance b = currentN.m_neighbors.instance(j);
-        if (b != inst) {
-          cardinality += b.weight();
-          sumReachability += reachability(inst, b, currentN.m_distances[j], k);
-        }
+        cardinality += b.weight();
+        sumReachability += reachability(inst, b, currentN.m_distances[j], k);
       }
       
       currentN.m_lrd[k - m_lbK] = cardinality / sumReachability;
@@ -677,7 +689,12 @@ public class LOF extends Filter implements OptionHandler,
     SerializedObject o = new SerializedObject(m_nnTemplate);
     m_nnSearch = (NearestNeighbourSearch)o.getObject();
     m_nnSearch.setInstances(new Instances(training));
-    m_kDistanceContainer = new HashMap<DecisionTableHashKey, Neighborhood>();
+   
+    if (m_numExecutionSlots > 1) {
+      m_kDistanceContainer = new ConcurrentHashMap<DecisionTableHashKey, Neighborhood>();
+    } else {
+      m_kDistanceContainer = new HashMap<DecisionTableHashKey, Neighborhood>();
+    }
     
     m_instKeys = new DecisionTableHashKey[training.numInstances()];
   }
@@ -693,32 +710,32 @@ public class LOF extends Filter implements OptionHandler,
     protected Instances m_nnTrain;
     protected int m_start;
     protected int m_end;
+    protected NearestNeighbourSearch m_search;
     
-    public NNFinder(Instances training, int start, int end) {
+    public NNFinder(Instances training, int start, int end, NearestNeighbourSearch search) {
       m_nnTrain = training;
       m_start = start;
       m_end = end;
+      m_search = search;
     }
 
     @Override
     public void run() {
-      try {
-        SerializedObject o = new SerializedObject(m_nnTemplate);
-        NearestNeighbourSearch nnSearch = (NearestNeighbourSearch)o.getObject();
-        nnSearch.setInstances(m_nnTrain);
-        
+      try {        
         for (int i = m_start; i < m_end; i++) {
           Instance current = m_nnTrain.get(i);
           DecisionTableHashKey key = new DecisionTableHashKey(current, 
               current.numAttributes(), !m_classSet);
           Neighborhood n = new Neighborhood();
           if (addToKDistanceContainer(key, n)) {
-            Instances nn = nnSearch.kNearestNeighbours(current, m_ubK);
+            Instances nn = m_search.kNearestNeighbours(current, m_nnTrain.numInstances());
             n.m_neighbors = nn;
-            n.m_distances = nnSearch.getDistances();
+            n.m_distances = m_search.getDistances();
             n.m_tempCardinality = new double[m_ubK - m_lbK];
             n.m_lrd = new double[m_ubK - m_lbK];
             n.m_lof = new double[m_ubK - m_lbK];
+            
+            trimZeroDistances(n);
           }
           m_instKeys[i] = key;
         }
@@ -752,21 +769,24 @@ public class LOF extends Filter implements OptionHandler,
           Instance current = m_lofTrain.instance(i);        
 
           Neighborhood currentN = m_kDistanceContainer.get(m_instKeys[i]);
+          // this defines the k-neighborhood and may be larger than k because of ties in                                                                   
+          // distance at the k-th nearest neighbor                                                                                                         
+          int indexOfKDistanceForK = m_k - 1;
+          while (indexOfKDistanceForK < currentN.m_distances.length - 1  &&
+              currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
+            indexOfKDistanceForK++;
+          }
 
           // lrd for current point with k nearest neighbors
           double cardinality = 0;
           double sumReachability = 0;
 
-          for (int j = 0; j <= m_k; j++) {
+          for (int j = 0; j <= indexOfKDistanceForK; j++) {
             Instance b = currentN.m_neighbors.instance(j);
-            // don't include the current instance
-            if (b != current) {
-              cardinality += b.weight();
-              sumReachability += 
-                reachability(current, b, currentN.m_distances[j], m_k);
-            } else {
-              System.out.println("a nearest neighbor is the same as a");
-            }
+
+            cardinality += b.weight();
+            sumReachability += 
+              reachability(current, b, currentN.m_distances[j], m_k);
           }
 
           currentN.m_lrd[m_k - m_lbK] = cardinality / sumReachability;
@@ -805,8 +825,8 @@ public class LOF extends Filter implements OptionHandler,
     init(training);
     m_completed = 0;
     m_failed = 0;
-    startExecutorPool();
-    
+    startExecutorPool();    
+        
     // first find all the nearest neighbours in parallel
     int numPerThread = training.numInstances() / m_numExecutionSlots;
     if (numPerThread < 1) {
@@ -821,19 +841,23 @@ public class LOF extends Filter implements OptionHandler,
       } else {
         end = start + numPerThread;
       }
-      NNFinder finder = new NNFinder(training, start, end);
+      SerializedObject oo = new SerializedObject(m_nnTemplate);
+      NearestNeighbourSearch s = (NearestNeighbourSearch)oo.getObject();
+      s.setInstances(new Instances(training));
+      NNFinder finder = new NNFinder(new Instances(training), start, end, s);
       m_executorPool.execute(finder);
       start += numPerThread; 
     }
     
     if (m_completed + m_failed < m_numExecutionSlots) {
-      block(true);
+      block(true, m_numExecutionSlots);
     }
     
     if (m_failed > 0) {
       throw new Exception("Can't continue - some tasks failed during the nearest " +
       		"neighbour phase");
     }
+    //m_kDistanceContainer = Collections.unmodifiableMap(m_kDistanceContainer);
     
     // now evaluate the minPts range between minPtsLB and minPtsUB in parallel
     m_completed = 0;
@@ -847,7 +871,7 @@ public class LOF extends Filter implements OptionHandler,
     }
     
     if (m_completed + m_failed < numLOFFinders) {
-      block(true);
+      block(true, numLOFFinders);
     }
     
     if (m_failed > 0) {
@@ -865,7 +889,7 @@ public class LOF extends Filter implements OptionHandler,
       double maxLOF = currentN.m_lof[Utils.maxIndex(currentN.m_lof)];
       Instance inst = makeOutputInstance(current, maxLOF);
       push(inst);
-    }
+    }    
   }
   
   protected synchronized boolean addToKDistanceContainer(DecisionTableHashKey key, 
@@ -893,14 +917,14 @@ public class LOF extends Filter implements OptionHandler,
             + " tasks - some iterations failed.");
       }
       
-      block(false);
+      block(false, totalTasks);
     }
   }
   
-  private synchronized void block(boolean tf) {
+  private synchronized void block(boolean tf, int totalTasks) {
     if (tf) {
       try {
-        if (m_completed + m_failed < m_numExecutionSlots) {
+        if (m_completed + m_failed < totalTasks) {
           wait();
         }
       } catch (InterruptedException ex) {        
@@ -922,6 +946,26 @@ public class LOF extends Filter implements OptionHandler,
         120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
   }
   
+  protected synchronized void trimZeroDistances(Neighborhood n) {    
+    int index = 0;
+    for (int i = 0; i < n.m_neighbors.numInstances(); i++) {
+      if (n.m_distances[i] > 0) {
+        index = i;
+        break;
+      }
+    }
+    
+    if (index > 0) {
+      // trim zero distances
+      for (int i = 0; i < index; i++) {
+        n.m_neighbors.remove(0);
+      }
+      double[] newDist = new double[n.m_distances.length - index];
+      System.arraycopy(n.m_distances, index, newDist, 0, newDist.length);
+      n.m_distances = newDist;
+    }
+  }
+  
   /**
    * Computes LOF value for each training instance in sequential mode
    * 
@@ -936,19 +980,20 @@ public class LOF extends Filter implements OptionHandler,
       DecisionTableHashKey key = new DecisionTableHashKey(current, 
           current.numAttributes(), !m_classSet);
       if (!m_kDistanceContainer.containsKey(key)) {
-        Instances nn = m_nnSearch.kNearestNeighbours(current, m_ubK);
+        Instances nn = m_nnSearch.kNearestNeighbours(current, training.numInstances());
         Neighborhood n = new Neighborhood();
         n.m_neighbors = nn;
         n.m_distances = m_nnSearch.getDistances();
         n.m_tempCardinality = new double[m_ubK - m_lbK];
         n.m_lrd = new double[m_ubK - m_lbK];
         n.m_lof = new double[m_ubK - m_lbK];
+        
+        trimZeroDistances(n);
 
         m_kDistanceContainer.put(key, n);
       }
       m_instKeys[i] = key;
     }
-//    System.out.println("Size of the hash table " + m_kDistanceContainer.size());
 
     // for each k in the range minPtsLB to maxPtsLB
     for (int k = m_lbK; k < m_ubK; k++) {                  
@@ -958,21 +1003,23 @@ public class LOF extends Filter implements OptionHandler,
         Instance current = training.instance(i);        
 
         Neighborhood currentN = m_kDistanceContainer.get(m_instKeys[i]);
+        // this defines the k-neighborhood and may be larger than k because of ties in 
+        // distance at the k-th nearest neighbor
+        int indexOfKDistanceForK = k - 1;
+        while (indexOfKDistanceForK < currentN.m_distances.length - 1  && 
+            currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
+          indexOfKDistanceForK++;
+        }        
         
         // lrd for current point with k nearest neighbors
         double cardinality = 0;
         double sumReachability = 0;
-        
-        for (int j = 0; j <= k; j++) {
+     
+        for (int j = 0; j <= indexOfKDistanceForK; j++) {
           Instance b = currentN.m_neighbors.instance(j);
-          // don't include the current instance
-          if (b != current) {
-            cardinality += b.weight();
-            sumReachability += 
-                reachability(current, b, currentN.m_distances[j], k);
-          } else {
-            System.out.println("a nearest neighbor is the same as a");
-          }
+          cardinality += b.weight();
+          sumReachability += 
+            reachability(current, b, currentN.m_distances[j], k);
         }
         
         currentN.m_lrd[k - m_lbK] = cardinality / sumReachability;
@@ -1047,8 +1094,14 @@ public class LOF extends Filter implements OptionHandler,
    */
   protected double lof(Neighborhood neighborhoodA, int k) {
     double sumlrdb = 0;
+    
+    int indexOfKDistanceForK = k - 1;
+    while (indexOfKDistanceForK < neighborhoodA.m_distances.length - 1  && 
+        neighborhoodA.m_distances[indexOfKDistanceForK] == neighborhoodA.m_distances[indexOfKDistanceForK + 1]) {
+      indexOfKDistanceForK++;
+    }
 
-    for (int i = 0; i <= k; i++) {
+    for (int i = 0; i <= indexOfKDistanceForK; i++) {
       Instance b = neighborhoodA.m_neighbors.get(i);
       DecisionTableHashKey bkey = null;
       try {
@@ -1084,9 +1137,13 @@ public class LOF extends Filter implements OptionHandler,
     // make k a zero-based index
     k--;
     double kDistanceB = bN.m_distances[k];
+    while (k < bN.m_distances.length - 1 && kDistanceB == bN.m_distances[k + 1]) {
+      k++;
+      kDistanceB = bN.m_distances[k];
+    }
     
     return Math.max(kDistanceB, distAB);
-  }
+  }    
 
   /**
    * Set environment variables to use
