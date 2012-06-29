@@ -49,7 +49,7 @@ import weka.core.WeightedInstancesHandler;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
-/** 
+/**
  <!-- globalinfo-start -->
  * An instance filter that discretizes a range of numeric attributes in the dataset into nominal attributes. Discretization is by Fayyad &amp; Irani's MDL method (the default).<br/>
  * <br/>
@@ -60,7 +60,7 @@ import weka.filters.SupervisedFilter;
  * Igor Kononenko: On Biases in Estimating Multi-Valued Attributes. In: 14th International Joint Conference on Articial Intelligence, 1034-1040, 1995.
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
@@ -73,7 +73,7 @@ import weka.filters.SupervisedFilter;
  *    volume = {2},
  *    year = {1993}
  * }
- * 
+ *
  * &#64;inproceedings{Kononenko1995,
  *    author = {Igor Kononenko},
  *    booktitle = {14th International Joint Conference on Articial Intelligence},
@@ -88,34 +88,37 @@ import weka.filters.SupervisedFilter;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -R &lt;col1,col2-col4,...&gt;
  *  Specifies list of columns to Discretize. First and last are valid indexes.
  *  (default none)</pre>
- * 
+ *
  * <pre> -V
  *  Invert matching sense of column indexes.</pre>
- * 
+ *
  * <pre> -D
  *  Output binary attributes for discretized attributes.</pre>
- * 
+ *
+ * <pre> -Y
+ *  Use bin numbers rather than ranges for discretized attributes.</pre>
+ *
  * <pre> -E
  *  Use better encoding of split point for MDL.</pre>
- * 
+ *
  * <pre> -K
  *  Use Kononenko's MDL criterion.</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class Discretize 
-  extends Filter 
-  implements SupervisedFilter, OptionHandler, WeightedInstancesHandler, 
+public class Discretize
+  extends Filter
+  implements SupervisedFilter, OptionHandler, WeightedInstancesHandler,
   	     TechnicalInformationHandler {
-  
+
   /** for serialization */
   static final long serialVersionUID = -3141006402280129097L;
 
@@ -127,6 +130,9 @@ public class Discretize
 
   /** Output binary attributes for discretized attributes. */
   protected boolean m_MakeBinary = false;
+
+  /** Use bin numbers rather than ranges for discretized attributes. */
+  protected boolean m_UseBinNumbers = false;
 
   /** Use better encoding of split point for MDL. */
   protected boolean m_UseBetterEncoding = false;
@@ -165,6 +171,10 @@ public class Discretize
               "D", 0, "-D"));
 
     newVector.addElement(new Option(
+              "\tUse bin numbers rather than ranges for discretized attributes.",
+              "Y", 0, "-Y"));
+
+    newVector.addElement(new Option(
               "\tUse better encoding of split point for MDL.",
               "E", 0, "-E"));
 
@@ -178,26 +188,29 @@ public class Discretize
 
   /**
    * Parses a given list of options. <p/>
-   * 
+   *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -R &lt;col1,col2-col4,...&gt;
    *  Specifies list of columns to Discretize. First and last are valid indexes.
    *  (default none)</pre>
-   * 
+   *
    * <pre> -V
    *  Invert matching sense of column indexes.</pre>
-   * 
+   *
    * <pre> -D
    *  Output binary attributes for discretized attributes.</pre>
-   * 
+   *
+   * <pre> -Y
+   *  Use bin numbers rather than ranges for discretized attributes.</pre>
+   *
    * <pre> -E
    *  Use better encoding of split point for MDL.</pre>
-   * 
+   *
    * <pre> -K
    *  Use Kononenko's MDL criterion.</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -206,10 +219,11 @@ public class Discretize
   public void setOptions(String[] options) throws Exception {
 
     setMakeBinary(Utils.getFlag('D', options));
+    setUseBinNumbers(Utils.getFlag('Y', options));
     setUseBetterEncoding(Utils.getFlag('E', options));
     setUseKononenko(Utils.getFlag('K', options));
     setInvertSelection(Utils.getFlag('V', options));
-    
+
     String convertList = Utils.getOption('R', options);
     if (convertList.length() != 0) {
       setAttributeIndices(convertList);
@@ -234,6 +248,9 @@ public class Discretize
     if (getMakeBinary()) {
       options[current++] = "-D";
     }
+    if (getUseBinNumbers()) {
+      options[current++] = "-Y";
+    }
     if (getUseBetterEncoding()) {
       options[current++] = "-E";
     }
@@ -252,7 +269,7 @@ public class Discretize
     return options;
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -265,10 +282,10 @@ public class Discretize
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enable(Capability.NOMINAL_CLASS);
-    
+
     return result;
   }
 
@@ -287,13 +304,13 @@ public class Discretize
 
     m_DiscretizeCols.setUpper(instanceInfo.numAttributes() - 1);
     m_CutPoints = null;
-    
-    // If we implement loading cutfiles, then load 
+
+    // If we implement loading cutfiles, then load
     //them here and set the output format
     return false;
   }
 
-  
+
 
   /**
    * Input an instance for filtering. Ordinarily the instance is processed
@@ -314,7 +331,7 @@ public class Discretize
       resetQueue();
       m_NewBatch = false;
     }
-    
+
     if (m_CutPoints != null) {
       convertInstance(instance);
       return true;
@@ -326,8 +343,8 @@ public class Discretize
 
 
   /**
-   * Signifies that this batch of input to the filter is finished. If the 
-   * filter requires all instances prior to filtering, output() may now 
+   * Signifies that this batch of input to the filter is finished. If the
+   * filter requires all instances prior to filtering, output() may now
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
@@ -349,7 +366,7 @@ public class Discretize
       for(int i = 0; i < getInputFormat().numInstances(); i++) {
 	convertInstance(getInputFormat().instance(i));
       }
-    } 
+    }
     flushInput();
 
     m_NewBatch = true;
@@ -372,16 +389,16 @@ public class Discretize
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
+   * Returns an instance of a TechnicalInformation object, containing
    * detailed information about the technical background of this class,
    * e.g., paper reference or book this class is based on.
-   * 
+   *
    * @return the technical information about this class
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
     TechnicalInformation 	additional;
-    
+
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "Usama M. Fayyad and Keki B. Irani");
     result.setValue(Field.TITLE, "Multi-interval discretization of continuousvalued attributes for classification learning");
@@ -390,7 +407,7 @@ public class Discretize
     result.setValue(Field.VOLUME, "2");
     result.setValue(Field.PAGES, "1022-1027");
     result.setValue(Field.PUBLISHER, "Morgan Kaufmann Publishers");
-    
+
     additional = result.add(Type.INPROCEEDINGS);
     additional.setValue(Field.AUTHOR, "Igor Kononenko");
     additional.setValue(Field.TITLE, "On Biases in Estimating Multi-Valued Attributes");
@@ -398,10 +415,10 @@ public class Discretize
     additional.setValue(Field.YEAR, "1995");
     additional.setValue(Field.PAGES, "1034-1040");
     additional.setValue(Field.PS, "http://ai.fri.uni-lj.si/papers/kononenko95-ijcai.ps.gz");
-    
+
     return result;
   }
-  
+
   /**
    * Returns the tip text for this property
    *
@@ -423,7 +440,7 @@ public class Discretize
     return m_MakeBinary;
   }
 
-  /** 
+  /**
    * Sets whether binary attributes should be made for discretized ones.
    *
    * @param makeBinary if binary attributes are to be made
@@ -439,12 +456,42 @@ public class Discretize
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String useBinNumbersTipText() {
+    return "Use bin numbers (eg BXofY) rather than ranges for for discretized attributes";
+  }
+
+  /**
+   * Gets whether bin numbers rather than ranges should be used for discretized attributes.
+   *
+   * @return true if bin numbers should be used
+   */
+  public boolean getUseBinNumbers() {
+
+    return m_UseBinNumbers;
+  }
+
+  /**
+   * Sets whether bin numbers rather than ranges should be used for discretized attributes.
+   *
+   * @param useBinNumbers if bin numbers should be used
+   */
+  public void setUseBinNumbers(boolean useBinNumbers) {
+
+    m_UseBinNumbers = useBinNumbers;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String useKononenkoTipText() {
 
     return "Use Kononenko's MDL criterion. If set to false"
       + " uses the Fayyad & Irani criterion.";
   }
-  
+
   /**
    * Gets whether Kononenko's MDL criterion is to be used.
    *
@@ -455,7 +502,7 @@ public class Discretize
     return m_UseKononenko;
   }
 
-  /** 
+  /**
    * Sets whether Kononenko's MDL criterion is to be used.
    *
    * @param useKon true if Kononenko's one is to be used
@@ -486,7 +533,7 @@ public class Discretize
     return m_UseBetterEncoding;
   }
 
-  /** 
+  /**
    * Sets whether better encoding is to be used for MDL.
    *
    * @param useBetterEncoding true if better encoding to be used.
@@ -520,7 +567,7 @@ public class Discretize
   }
 
   /**
-   * Sets whether selected columns should be removed or kept. If true the 
+   * Sets whether selected columns should be removed or kept. If true the
    * selected columns are kept and unselected columns are deleted. If false
    * selected columns are deleted and unselected columns are kept.
    *
@@ -562,7 +609,7 @@ public class Discretize
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * @throws IllegalArgumentException if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) {
 
@@ -577,7 +624,7 @@ public class Discretize
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
    * @throws IllegalArgumentException if an invalid set of ranges
-   * is supplied 
+   * is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) {
 
@@ -599,6 +646,77 @@ public class Discretize
     return m_CutPoints[attributeIndex];
   }
 
+  /**
+   * Gets the bin ranges string for an attribute
+   *
+   * @param attributeIndex the index (from 0) of the attribute to get the bin ranges string of
+   * @return the bin ranges string (or null if the
+   * attribute requested has been discretized into only one interval.)
+   */
+  public String getBinRangesString(int attributeIndex) {
+
+    if (m_CutPoints == null) {
+      return null;
+    }
+
+    double[] cutPoints = m_CutPoints[attributeIndex];
+
+    if (cutPoints == null) {
+      return "All";
+    }
+
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+
+    for (int j = 0, n = cutPoints.length; j <= n; ++ j) {
+      if (first) {
+        first = false;
+      } else {
+        sb.append(',');
+      }
+
+      sb.append(binRangeString(cutPoints, j));
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Get a bin range string for a specified bin of some
+   * attribute's cut points.
+   *
+   * @param cutPoints The attribute's cut points; never null.
+   * @param j         The bin number (zero based); never out of range.
+   *
+   * @return The bin range string.
+   */
+  private static String binRangeString(double[] cutPoints, int j) {
+    assert cutPoints != null;
+
+    int n = cutPoints.length;
+    assert 0 <= j && j <= n;
+
+    return
+      j == 0  ?  ""
+                   + "("
+                   +   "-inf"
+                   +   "-"
+                   +   Utils.doubleToString(cutPoints[0], 6)
+                   + "]"
+    : j == n  ?  ""
+                   + "("
+                   +   Utils.doubleToString(cutPoints[n - 1], 6)
+                   +   "-"
+                   +   "inf"
+                   + ")"
+    :            ""
+                   + "("
+                   +   Utils.doubleToString(cutPoints[j - 1], 6)
+                   +   "-"
+                   +   Utils.doubleToString(cutPoints[j], 6)
+                   + "]";
+  }
+
   /** Generate the cutpoints for each attribute */
   protected void calculateCutPoints() {
 
@@ -606,7 +724,7 @@ public class Discretize
 
     m_CutPoints = new double [getInputFormat().numAttributes()] [];
     for(int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
-      if ((m_DiscretizeCols.isInRange(i)) && 
+      if ((m_DiscretizeCols.isInRange(i)) &&
 	  (getInputFormat().attribute(i).isNumeric())) {
 
 	// Use copy to preserve order
@@ -641,9 +759,9 @@ public class Discretize
     m_CutPoints[index] = cutPointsForSubset(data, index, 0, firstMissing);
   }
 
-  /** 
+  /**
    * Test using Kononenko's MDL criterion.
-   * 
+   *
    * @param priorCounts
    * @param bestCounts
    * @param numInstances
@@ -668,7 +786,7 @@ public class Discretize
     }
 
     // Encode distribution prior to split
-    distPrior = SpecialFunctions.log2Binomial(numInstances 
+    distPrior = SpecialFunctions.log2Binomial(numInstances
 					      + numClassesTotal - 1,
 					      numClassesTotal - 1);
 
@@ -695,9 +813,9 @@ public class Discretize
   }
 
 
-  /** 
+  /**
    * Test using Fayyad and Irani's MDL criterion.
-   * 
+   *
    * @param priorCounts
    * @param bestCounts
    * @param numInstances
@@ -709,7 +827,7 @@ public class Discretize
 				     double numInstances,
 				     int numCutPoints) {
 
-    double priorEntropy, entropy, gain; 
+    double priorEntropy, entropy, gain;
     double entropyLeft, entropyRight, delta;
     int numClassesTotal, numClassesRight, numClassesLeft;
 
@@ -751,31 +869,31 @@ public class Discretize
     entropyRight = ContingencyTables.entropy(bestCounts[1]);
 
     // Compute terms for MDL formula
-    delta = Utils.log2(Math.pow(3, numClassesTotal) - 2) - 
-      (((double) numClassesTotal * priorEntropy) - 
-       (numClassesRight * entropyRight) - 
+    delta = Utils.log2(Math.pow(3, numClassesTotal) - 2) -
+      (((double) numClassesTotal * priorEntropy) -
+       (numClassesRight * entropyRight) -
        (numClassesLeft * entropyLeft));
 
     // Check if split is to be accepted
     return (gain > (Utils.log2(numCutPoints) + delta) / (double)numInstances);
   }
-    
 
-  /** 
+
+  /**
    * Selects cutpoints for sorted subset.
-   * 
+   *
    * @param instances
    * @param attIndex
    * @param first
    * @param lastPlusOne
    * @return
    */
-  private double[] cutPointsForSubset(Instances instances, int attIndex, 
-				      int first, int lastPlusOne) { 
+  private double[] cutPointsForSubset(Instances instances, int attIndex,
+				      int first, int lastPlusOne) {
 
     double[][] counts, bestCounts;
     double[] priorCounts, left, right, cutPoints;
-    double currentCutPoint = -Double.MAX_VALUE, bestCutPoint = -1, 
+    double currentCutPoint = -Double.MAX_VALUE, bestCutPoint = -1,
       currentEntropy, bestEntropy, priorEntropy, gain;
     int bestIndex = -1, numInstances = 0, numCutPoints = 0;
 
@@ -794,13 +912,13 @@ public class Discretize
 
     // Save prior counts
     priorCounts = new double[instances.numClasses()];
-    System.arraycopy(counts[1], 0, priorCounts, 0, 
+    System.arraycopy(counts[1], 0, priorCounts, 0,
 		     instances.numClasses());
 
     // Entropy of the full set
     priorEntropy = ContingencyTables.entropy(priorCounts);
     bestEntropy = priorEntropy;
-    
+
     // Find best entropy.
     bestCounts = new double[2][instances.numClasses()];
     for (int i = first; i < (lastPlusOne - 1); i++) {
@@ -808,19 +926,19 @@ public class Discretize
 	instances.instance(i).weight();
       counts[1][(int)instances.instance(i).classValue()] -=
 	instances.instance(i).weight();
-      if (instances.instance(i).value(attIndex) < 
+      if (instances.instance(i).value(attIndex) <
 	  instances.instance(i + 1).value(attIndex)) {
-	currentCutPoint = (instances.instance(i).value(attIndex) + 
+	currentCutPoint = (instances.instance(i).value(attIndex) +
 	  instances.instance(i + 1).value(attIndex)) / 2.0;
 	currentEntropy = ContingencyTables.entropyConditionedOnRows(counts);
 	if (currentEntropy < bestEntropy) {
 	  bestCutPoint = currentCutPoint;
 	  bestEntropy = currentEntropy;
 	  bestIndex = i;
-	  System.arraycopy(counts[0], 0, 
+	  System.arraycopy(counts[0], 0,
 			   bestCounts[0], 0, instances.numClasses());
-	  System.arraycopy(counts[1], 0, 
-			   bestCounts[1], 0, instances.numClasses()); 
+	  System.arraycopy(counts[1], 0,
+			   bestCounts[1], 0, instances.numClasses());
 	}
 	numCutPoints++;
       }
@@ -842,12 +960,12 @@ public class Discretize
 					 numInstances, numCutPoints)) ||
 	(!m_UseKononenko && FayyadAndIranisMDL(priorCounts, bestCounts,
 					       numInstances, numCutPoints))) {
-      
+
       // Select split points for the left and right subsets
       left = cutPointsForSubset(instances, attIndex, first, bestIndex + 1);
-      right = cutPointsForSubset(instances, attIndex, 
+      right = cutPointsForSubset(instances, attIndex,
 				 bestIndex + 1, lastPlusOne);
-      
+
       // Merge cutpoints and return them
       if ((left == null) && (right) == null) {
 	cutPoints = new double[1];
@@ -866,14 +984,14 @@ public class Discretize
 	cutPoints[left.length] = bestCutPoint;
 	System.arraycopy(right, 0, cutPoints, left.length + 1, right.length);
       }
-      
+
       return cutPoints;
     } else
       return null;
   }
- 
+
   /**
-   * Set the output format. Takes the currently defined cutpoints and 
+   * Set the output format. Takes the currently defined cutpoints and
    * m_InputFormat and calls setOutputFormat(Instances) appropriately.
    */
   protected void setOutputFormat() {
@@ -884,73 +1002,75 @@ public class Discretize
     }
     FastVector attributes = new FastVector(getInputFormat().numAttributes());
     int classIndex = getInputFormat().classIndex();
-    for(int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if ((m_DiscretizeCols.isInRange(i)) 
-	  && (getInputFormat().attribute(i).isNumeric())) {
-	if (!m_MakeBinary) {
-	  FastVector attribValues = new FastVector(1);
-	  if (m_CutPoints[i] == null) {
-	    attribValues.addElement("'All'");
-	  } else {
-	    for(int j = 0; j <= m_CutPoints[i].length; j++) {
-	      if (j == 0) {
-		attribValues.addElement("'(-inf-"
-			+ Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
-	      } else if (j == m_CutPoints[i].length) {
-		attribValues.addElement("'("
-			+ Utils.doubleToString(m_CutPoints[i][j - 1], 6) 
-					+ "-inf)'");
-	      } else {
-		attribValues.addElement("'("
-			+ Utils.doubleToString(m_CutPoints[i][j - 1], 6) + "-"
-			+ Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
-	      }
-	    }
-	  }
-	  Attribute newAtt = new Attribute(getInputFormat().
+    for (int i = 0, m = getInputFormat().numAttributes(); i < m; ++ i) {
+      if ((m_DiscretizeCols.isInRange(i))
+          && (getInputFormat().attribute(i).isNumeric())) {
+        double[] cutPoints = m_CutPoints[i];
+        if (!m_MakeBinary) {
+          FastVector attribValues;
+          if (cutPoints == null) {
+            attribValues = new FastVector(1);
+            attribValues.addElement("'All'");
+          } else {
+            attribValues = new FastVector(cutPoints.length + 1);
+            if (m_UseBinNumbers) {
+              for (int j = 0, n = cutPoints.length; j <= n; ++ j) {
+                attribValues.addElement("'B" + (j + 1) + "of" + (n + 1) + "'");
+              }
+            } else {
+              for (int j = 0, n = cutPoints.length; j <= n; ++ j) {
+                attribValues.addElement("'" + binRangeString(cutPoints, j) + "'");
+              }
+            }
+          }
+          Attribute newAtt = new Attribute(getInputFormat().
               attribute(i).name(),
               attribValues);
-	  newAtt.setWeight(getInputFormat().attribute(i).weight());
-	  attributes.addElement(newAtt);
-	} else {
-	  if (m_CutPoints[i] == null) {
-	    FastVector attribValues = new FastVector(1);
-	    attribValues.addElement("'All'");
-	    Attribute newAtt = new Attribute(getInputFormat().
+          newAtt.setWeight(getInputFormat().attribute(i).weight());
+          attributes.addElement(newAtt);
+        } else {
+          if (cutPoints == null) {
+            FastVector attribValues = new FastVector(1);
+            attribValues.addElement("'All'");
+            Attribute newAtt = new Attribute(getInputFormat().
                 attribute(i).name(),
                 attribValues);
-	    newAtt.setWeight(getInputFormat().attribute(i).weight());
-	    attributes.addElement(newAtt);
-	  } else {
-	    if (i < getInputFormat().classIndex()) {
-	      classIndex += m_CutPoints[i].length - 1;
-	    }
-	    for(int j = 0; j < m_CutPoints[i].length; j++) {
-	      FastVector attribValues = new FastVector(2);
-	      attribValues.addElement("'(-inf-"
-		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
-	      attribValues.addElement("'("
-		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "-inf)'");
-	      Attribute newAtt = new Attribute(getInputFormat().
+            newAtt.setWeight(getInputFormat().attribute(i).weight());
+            attributes.addElement(newAtt);
+          } else {
+            if (i < getInputFormat().classIndex()) {
+              classIndex += cutPoints.length - 1;
+            }
+            for (int j = 0, n = cutPoints.length; j < n; ++ j) {
+              FastVector attribValues = new FastVector(2);
+              if (m_UseBinNumbers) {
+                attribValues.addElement("'B1of2'");
+                attribValues.addElement("'B2of2'");
+              } else {
+                double[] binaryCutPoint = {cutPoints[j]};
+                attribValues.addElement("'" + binRangeString(binaryCutPoint, 0) + "'");
+                attribValues.addElement("'" + binRangeString(binaryCutPoint, 1) + "'");
+              }
+              Attribute newAtt = new Attribute(getInputFormat().
                   attribute(i).name() + "_" + (j+1),
                   attribValues);
-	      newAtt.setWeight(getInputFormat().attribute(i).weight());
-	      attributes.addElement(newAtt);
-	    }
-	  }
-	}
+              newAtt.setWeight(getInputFormat().attribute(i).weight());
+              attributes.addElement(newAtt);
+            }
+          }
+        }
       } else {
-	attributes.addElement(getInputFormat().attribute(i).copy());
+        attributes.addElement(getInputFormat().attribute(i).copy());
       }
     }
-    Instances outputFormat = 
+    Instances outputFormat =
       new Instances(getInputFormat().relationName(), attributes, 0);
     outputFormat.setClassIndex(classIndex);
     setOutputFormat(outputFormat);
   }
 
   /**
-   * Convert a single instance over. The converted instance is added to 
+   * Convert a single instance over. The converted instance is added to
    * the end of the output queue.
    *
    * @param instance the instance to convert
@@ -961,7 +1081,7 @@ public class Discretize
     double [] vals = new double [outputFormatPeek().numAttributes()];
     // Copy and convert the values
     for(int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if (m_DiscretizeCols.isInRange(i) && 
+      if (m_DiscretizeCols.isInRange(i) &&
 	  getInputFormat().attribute(i).isNumeric()) {
 	int j;
 	double currentVal = instance.value(i);
@@ -996,14 +1116,14 @@ public class Discretize
 	      }
 	      index++;
 	    }
-	  }   
+	  }
 	}
       } else {
         vals[index] = instance.value(i);
 	index++;
       }
     }
-    
+
     Instance inst = null;
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
@@ -1015,10 +1135,10 @@ public class Discretize
     inst.setDataset(getOutputFormat());
     push(inst);
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
