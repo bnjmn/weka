@@ -40,58 +40,61 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.filters.UnsupervisedFilter;
 
-/** 
+/**
  <!-- globalinfo-start -->
  * An instance filter that discretizes a range of numeric attributes in the dataset into nominal attributes. Discretization is by simple binning. Skips the class attribute if set.
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -unset-class-temporarily
  *  Unsets the class index temporarily before the filter is
  *  applied to the data.
  *  (default: no)</pre>
- * 
+ *
  * <pre> -B &lt;num&gt;
  *  Specifies the (maximum) number of bins to divide numeric attributes into.
  *  (default = 10)</pre>
- * 
+ *
  * <pre> -M &lt;num&gt;
  *  Specifies the desired weight of instances per bin for
  *  equal-frequency binning. If this is set to a positive
  *  number then the -B option will be ignored.
  *  (default = -1)</pre>
- * 
+ *
  * <pre> -F
  *  Use equal-frequency instead of equal-width discretization.</pre>
- * 
+ *
  * <pre> -O
  *  Optimize number of bins using leave-one-out estimate
  *  of estimated entropy (for equal-width discretization).
  *  If this is set then the -B option will be ignored.</pre>
- * 
+ *
  * <pre> -R &lt;col1,col2-col4,...&gt;
  *  Specifies list of columns to Discretize. First and last are valid indexes.
  *  (default: first-last)</pre>
- * 
+ *
  * <pre> -V
  *  Invert matching sense of column indexes.</pre>
- * 
+ *
  * <pre> -D
  *  Output binary attributes for discretized attributes.</pre>
- * 
+ *
+ * <pre> -Y
+ *  Use bin numbers rather than ranges for discretized attributes.</pre>
+ *
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class Discretize 
-  extends PotentialClassIgnorer 
+public class Discretize
+  extends PotentialClassIgnorer
   implements UnsupervisedFilter, WeightedInstancesHandler {
-  
+
   /** for serialization */
   static final long serialVersionUID = -1358531742174527279L;
 
@@ -110,6 +113,9 @@ public class Discretize
   /** Output binary attributes for discretized attributes. */
   protected boolean m_MakeBinary = false;
 
+  /** Use bin numbers rather than ranges for discretized attributes. */
+  protected boolean m_UseBinNumbers = false;
+
   /** Find the number of bins using cross-validated entropy. */
   protected boolean m_FindNumBins = false;
 
@@ -126,9 +132,9 @@ public class Discretize
     setAttributeIndices("first-last");
   }
 
-  /** 
+  /**
    * Another constructor, sets the attribute indices immediately
-   * 
+   *
    * @param cols the attribute indices
    */
   public Discretize(String cols) {
@@ -147,43 +153,47 @@ public class Discretize
     Enumeration enm = super.listOptions();
     while (enm.hasMoreElements())
       result.add(enm.nextElement());
-      
+
     result.addElement(new Option(
 	"\tSpecifies the (maximum) number of bins to divide numeric"
 	+ " attributes into.\n"
 	+ "\t(default = 10)",
 	"B", 1, "-B <num>"));
-    
+
     result.addElement(new Option(
 	"\tSpecifies the desired weight of instances per bin for\n"
 	+ "\tequal-frequency binning. If this is set to a positive\n"
 	+ "\tnumber then the -B option will be ignored.\n"
 	+ "\t(default = -1)",
 	"M", 1, "-M <num>"));
-    
+
     result.addElement(new Option(
 	"\tUse equal-frequency instead of equal-width discretization.",
 	"F", 0, "-F"));
-    
+
     result.addElement(new Option(
 	"\tOptimize number of bins using leave-one-out estimate\n"+
 	"\tof estimated entropy (for equal-width discretization).\n"+
 	"\tIf this is set then the -B option will be ignored.",
 	"O", 0, "-O"));
-    
+
     result.addElement(new Option(
 	"\tSpecifies list of columns to Discretize. First"
 	+ " and last are valid indexes.\n"
 	+ "\t(default: first-last)",
 	"R", 1, "-R <col1,col2-col4,...>"));
-    
+
     result.addElement(new Option(
 	"\tInvert matching sense of column indexes.",
 	"V", 0, "-V"));
-    
+
     result.addElement(new Option(
 	"\tOutput binary attributes for discretized attributes.",
 	"D", 0, "-D"));
+
+    result.addElement(new Option(
+	"\tUse bin numbers rather than ranges for discretized attributes.",
+	"Y", 0, "-Y"));
 
     return result.elements();
   }
@@ -191,43 +201,46 @@ public class Discretize
 
   /**
    * Parses a given list of options. <p/>
-   * 
+   *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -unset-class-temporarily
    *  Unsets the class index temporarily before the filter is
    *  applied to the data.
    *  (default: no)</pre>
-   * 
+   *
    * <pre> -B &lt;num&gt;
    *  Specifies the (maximum) number of bins to divide numeric attributes into.
    *  (default = 10)</pre>
-   * 
+   *
    * <pre> -M &lt;num&gt;
    *  Specifies the desired weight of instances per bin for
    *  equal-frequency binning. If this is set to a positive
    *  number then the -B option will be ignored.
    *  (default = -1)</pre>
-   * 
+   *
    * <pre> -F
    *  Use equal-frequency instead of equal-width discretization.</pre>
-   * 
+   *
    * <pre> -O
    *  Optimize number of bins using leave-one-out estimate
    *  of estimated entropy (for equal-width discretization).
    *  If this is set then the -B option will be ignored.</pre>
-   * 
+   *
    * <pre> -R &lt;col1,col2-col4,...&gt;
    *  Specifies list of columns to Discretize. First and last are valid indexes.
    *  (default: first-last)</pre>
-   * 
+   *
    * <pre> -V
    *  Invert matching sense of column indexes.</pre>
-   * 
+   *
    * <pre> -D
    *  Output binary attributes for discretized attributes.</pre>
-   * 
+   *
+   * <pre> -Y
+   *  Use bin numbers rather than ranges for discretized attributes.</pre>
+   *
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -238,6 +251,7 @@ public class Discretize
     super.setOptions(options);
 
     setMakeBinary(Utils.getFlag('D', options));
+    setUseBinNumbers(Utils.getFlag('Y', options));
     setUseEqualFrequency(Utils.getFlag('F', options));
     setFindNumBins(Utils.getFlag('O', options));
     setInvertSelection(Utils.getFlag('V', options));
@@ -255,7 +269,7 @@ public class Discretize
     } else {
       setBins(10);
     }
-    
+
     String convertList = Utils.getOption('R', options);
     if (convertList.length() != 0) {
       setAttributeIndices(convertList);
@@ -286,22 +300,25 @@ public class Discretize
 
     if (getMakeBinary())
       result.add("-D");
-    
+
+    if (getUseBinNumbers())
+      result.add("-Y");
+
     if (getUseEqualFrequency())
       result.add("-F");
-    
+
     if (getFindNumBins())
       result.add("-O");
-    
+
     if (getInvertSelection())
       result.add("-V");
-    
+
     result.add("-B");
     result.add("" + getBins());
-    
+
     result.add("-M");
     result.add("" + getDesiredWeightOfInstancesPerInterval());
-    
+
     if (!getAttributeIndices().equals("")) {
       result.add("-R");
       result.add(getAttributeIndices());
@@ -310,7 +327,7 @@ public class Discretize
     return (String[]) result.toArray(new String[result.size()]);
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -323,13 +340,13 @@ public class Discretize
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     if (!getMakeBinary())
       result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
@@ -353,13 +370,13 @@ public class Discretize
 
     m_DiscretizeCols.setUpper(instanceInfo.numAttributes() - 1);
     m_CutPoints = null;
-    
+
     if (getFindNumBins() && getUseEqualFrequency()) {
       throw new IllegalArgumentException("Bin number optimization in conjunction "+
 					 "with equal-frequency binning not implemented.");
     }
 
-    // If we implement loading cutfiles, then load 
+    // If we implement loading cutfiles, then load
     //them here and set the output format
     return false;
   }
@@ -383,7 +400,7 @@ public class Discretize
       resetQueue();
       m_NewBatch = false;
     }
-    
+
     if (m_CutPoints != null) {
       convertInstance(instance);
       return true;
@@ -394,8 +411,8 @@ public class Discretize
   }
 
   /**
-   * Signifies that this batch of input to the filter is finished. If the 
-   * filter requires all instances prior to filtering, output() may now 
+   * Signifies that this batch of input to the filter is finished. If the
+   * filter requires all instances prior to filtering, output() may now
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
@@ -417,7 +434,7 @@ public class Discretize
       for(int i = 0; i < getInputFormat().numInstances(); i++) {
 	convertInstance(getInputFormat().instance(i));
       }
-    } 
+    }
     flushInput();
 
     m_NewBatch = true;
@@ -437,7 +454,7 @@ public class Discretize
       + " Discretization is by simple binning. Skips the class"
       + " attribute if set.";
   }
-  
+
   /**
    * Returns the tip text for this property
    *
@@ -456,20 +473,20 @@ public class Discretize
    * @return Value of FindNumBins.
    */
   public boolean getFindNumBins() {
-    
+
     return m_FindNumBins;
   }
-  
+
   /**
    * Set the value of FindNumBins.
    *
    * @param newFindNumBins Value to assign to FindNumBins.
    */
   public void setFindNumBins(boolean newFindNumBins) {
-    
+
     m_FindNumBins = newFindNumBins;
   }
-  
+
   /**
    * Returns the tip text for this property
    *
@@ -491,7 +508,7 @@ public class Discretize
     return m_MakeBinary;
   }
 
-  /** 
+  /**
    * Sets whether binary attributes should be made for discretized ones.
    *
    * @param makeBinary if binary attributes are to be made
@@ -500,7 +517,37 @@ public class Discretize
 
     m_MakeBinary = makeBinary;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useBinNumbersTipText() {
+    return "Use bin numbers (eg BXofY) rather than ranges for for discretized attributes";
+  }
+
+  /**
+   * Gets whether bin numbers rather than ranges should be used for discretized attributes.
+   *
+   * @return true if bin numbers should be used
+   */
+  public boolean getUseBinNumbers() {
+
+    return m_UseBinNumbers;
+  }
+
+  /**
+   * Sets whether bin numbers rather than ranges should be used for discretized attributes.
+   *
+   * @param useBinNumbers if bin numbers should be used
+   */
+  public void setUseBinNumbers(boolean useBinNumbers) {
+
+    m_UseBinNumbers = useBinNumbers;
+  }
+
   /**
    * Returns the tip text for this property
    *
@@ -512,7 +559,7 @@ public class Discretize
     return "Sets the desired weight of instances per interval for " +
       "equal-frequency binning.";
   }
-  
+
   /**
    * Get the DesiredWeightOfInstancesPerInterval value.
    * @return the DesiredWeightOfInstancesPerInterval value.
@@ -527,10 +574,10 @@ public class Discretize
    * @param newDesiredNumber The new DesiredNumber value.
    */
   public void setDesiredWeightOfInstancesPerInterval(double newDesiredNumber) {
-    
+
     m_DesiredWeightOfInstancesPerInterval = newDesiredNumber;
   }
-  
+
   /**
    * Returns the tip text for this property
    *
@@ -542,24 +589,24 @@ public class Discretize
     return "If set to true, equal-frequency binning will be used instead of" +
       " equal-width binning.";
   }
-  
+
   /**
    * Get the value of UseEqualFrequency.
    *
    * @return Value of UseEqualFrequency.
    */
   public boolean getUseEqualFrequency() {
-    
+
     return m_UseEqualFrequency;
   }
-  
+
   /**
    * Set the value of UseEqualFrequency.
    *
    * @param newUseEqualFrequency Value to assign to UseEqualFrequency.
    */
   public void setUseEqualFrequency(boolean newUseEqualFrequency) {
-    
+
     m_UseEqualFrequency = newUseEqualFrequency;
   }
 
@@ -618,7 +665,7 @@ public class Discretize
   }
 
   /**
-   * Sets whether selected columns should be removed or kept. If true the 
+   * Sets whether selected columns should be removed or kept. If true the
    * selected columns are kept and unselected columns are deleted. If false
    * selected columns are deleted and unselected columns are kept.
    *
@@ -660,7 +707,7 @@ public class Discretize
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * @throws IllegalArgumentException if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) {
 
@@ -675,7 +722,7 @@ public class Discretize
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
    * @throws IllegalArgumentException if an invalid set of ranges
-   * is supplied 
+   * is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) {
 
@@ -697,12 +744,83 @@ public class Discretize
     return m_CutPoints[attributeIndex];
   }
 
+  /**
+   * Gets the bin ranges string for an attribute
+   *
+   * @param attributeIndex the index (from 0) of the attribute to get the bin ranges string of
+   * @return the bin ranges string (or null if the
+   * attribute requested has been discretized into only one interval.)
+   */
+  public String getBinRangesString(int attributeIndex) {
+
+    if (m_CutPoints == null) {
+      return null;
+    }
+
+    double[] cutPoints = m_CutPoints[attributeIndex];
+
+    if (cutPoints == null) {
+      return "All";
+    }
+
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+
+    for (int j = 0, n = cutPoints.length; j <= n; ++ j) {
+      if (first) {
+        first = false;
+      } else {
+        sb.append(',');
+      }
+
+      sb.append(binRangeString(cutPoints, j));
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Get a bin range string for a specified bin of some
+   * attribute's cut points.
+   *
+   * @param cutPoints The attribute's cut points; never null.
+   * @param j         The bin number (zero based); never out of range.
+   *
+   * @return The bin range string.
+   */
+  private static String binRangeString(double[] cutPoints, int j) {
+    assert cutPoints != null;
+
+    int n = cutPoints.length;
+    assert 0 <= j && j <= n;
+
+    return
+      j == 0  ?  ""
+                   + "("
+                   +   "-inf"
+                   +   "-"
+                   +   Utils.doubleToString(cutPoints[0], 6)
+                   + "]"
+    : j == n  ?  ""
+                   + "("
+                   +   Utils.doubleToString(cutPoints[n - 1], 6)
+                   +   "-"
+                   +   "inf"
+                   + ")"
+    :            ""
+                   + "("
+                   +   Utils.doubleToString(cutPoints[j - 1], 6)
+                   +   "-"
+                   +   Utils.doubleToString(cutPoints[j], 6)
+                   + "]";
+  }
+
   /** Generate the cutpoints for each attribute */
   protected void calculateCutPoints() {
 
     m_CutPoints = new double [getInputFormat().numAttributes()] [];
     for(int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
-      if ((m_DiscretizeCols.isInRange(i)) && 
+      if ((m_DiscretizeCols.isInRange(i)) &&
 	  (getInputFormat().attribute(i).isNumeric()) &&
 	  (getInputFormat().classIndex() != i)) {
 	if (m_FindNumBins) {
@@ -715,7 +833,7 @@ public class Discretize
       }
     }
   }
- 
+
   /**
    * Set cutpoints for a single attribute.
    *
@@ -751,7 +869,7 @@ public class Discretize
     }
     m_CutPoints[index] = cutPoints;
   }
- 
+
   /**
    * Set cutpoints for a single attribute.
    *
@@ -797,7 +915,7 @@ public class Discretize
       sumOfWeights -= data.instance(i).weight();
 
       // Do we have a potential breakpoint?
-      if (data.instance(i).value(index) < 
+      if (data.instance(i).value(index) <
 	  data.instance(i + 1).value(index)) {
 
 	// Have we passed the ideal size?
@@ -829,7 +947,7 @@ public class Discretize
     // Check whether there was another possibility for a cut point
     if ((cpindex < cutPoints.length) && (lastIndex != -1)) {
       cutPoints[cpindex] = (data.instance(lastIndex).value(index) +
-			    data.instance(lastIndex + 1).value(index)) / 2;      
+			    data.instance(lastIndex + 1).value(index)) / 2;
       cpindex++;
     }
 
@@ -852,7 +970,7 @@ public class Discretize
    */
   protected void findNumBins(int index) {
 
-    double min = Double.MAX_VALUE, max = -Double.MAX_VALUE, binWidth = 0, 
+    double min = Double.MAX_VALUE, max = -Double.MAX_VALUE, binWidth = 0,
       entropy, bestEntropy = Double.MAX_VALUE, currentVal;
     double[] distribution;
     int bestNumBins  = 1;
@@ -882,7 +1000,7 @@ public class Discretize
 	currentInstance = getInputFormat().instance(j);
 	if (!currentInstance.isMissing(index)) {
 	  for (int k = 0; k < i + 1; k++) {
-	    if (currentInstance.value(index) <= 
+	    if (currentInstance.value(index) <=
 		(min + (((double)k + 1) * binWidth))) {
 	      distribution[k] += currentInstance.weight();
 	      break;
@@ -898,7 +1016,7 @@ public class Discretize
 	  entropy = Double.MAX_VALUE;
 	  break;
 	}
-	entropy -= distribution[k] * Math.log((distribution[k] - 1) / 
+	entropy -= distribution[k] * Math.log((distribution[k] - 1) /
 					      binWidth);
       }
 
@@ -921,7 +1039,7 @@ public class Discretize
    }
 
   /**
-   * Set the output format. Takes the currently defined cutpoints and 
+   * Set the output format. Takes the currently defined cutpoints and
    * m_InputFormat and calls setOutputFormat(Instances) appropriately.
    */
   protected void setOutputFormat() {
@@ -932,75 +1050,76 @@ public class Discretize
     }
     FastVector attributes = new FastVector(getInputFormat().numAttributes());
     int classIndex = getInputFormat().classIndex();
-    for(int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if ((m_DiscretizeCols.isInRange(i)) 
-	  && (getInputFormat().attribute(i).isNumeric())
-	  && (getInputFormat().classIndex() != i)) {
-	if (!m_MakeBinary) {
-	  FastVector attribValues = new FastVector(1);
-	  if (m_CutPoints[i] == null) {
-	    attribValues.addElement("'All'");
-	  } else {
-	    for(int j = 0; j <= m_CutPoints[i].length; j++) {
-	      if (j == 0) {
-		attribValues.addElement("'(-inf-"
-			+ Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
-	      } else if (j == m_CutPoints[i].length) {
-		attribValues.addElement("'("
-			+ Utils.doubleToString(m_CutPoints[i][j - 1], 6) 
-					+ "-inf)'");
-	      } else {
-		attribValues.addElement("'("
-			+ Utils.doubleToString(m_CutPoints[i][j - 1], 6) + "-"
-			+ Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
-	      }
-	    }
-	  }
-	  Attribute newAtt = new Attribute(getInputFormat().
-              attribute(i).name(),
-              attribValues);
-	  newAtt.setWeight(getInputFormat().attribute(i).weight());
-	  attributes.addElement(newAtt);
-	} else {
-	  if (m_CutPoints[i] == null) {
-	    FastVector attribValues = new FastVector(1);
-	    attribValues.addElement("'All'");
-	    Attribute newAtt = new Attribute(getInputFormat().
-	        attribute(i).name(),
-	        attribValues);
-	    newAtt.setWeight(getInputFormat().attribute(i).weight());
-	    attributes.addElement(newAtt);
-	  } else {
-	    if (i < getInputFormat().classIndex()) {
-	      classIndex += m_CutPoints[i].length - 1;
-	    }
-	    for(int j = 0; j < m_CutPoints[i].length; j++) {
-	      FastVector attribValues = new FastVector(2);
-	      attribValues.addElement("'(-inf-"
-		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "]'");
-	      attribValues.addElement("'("
-		      + Utils.doubleToString(m_CutPoints[i][j], 6) + "-inf)'");
-	      
-	      Attribute newAtt = new Attribute(getInputFormat().
-                  attribute(i).name() + "_" + (j+1),
-                  attribValues);
+    for (int i = 0, m = getInputFormat().numAttributes(); i < m; ++ i) {
+      if ((m_DiscretizeCols.isInRange(i))
+          && (getInputFormat().attribute(i).isNumeric())
+          && (getInputFormat().classIndex() != i)) {
+        double[] cutPoints = m_CutPoints[i];
+        if (!m_MakeBinary) {
+          FastVector attribValues;
+          if (cutPoints == null) {
+            attribValues = new FastVector(1);
+            attribValues.addElement("'All'");
+          } else {
+            attribValues = new FastVector(cutPoints.length + 1);
+            if (m_UseBinNumbers) {
+              for (int j = 0, n = cutPoints.length; j <= n; ++ j) {
+                attribValues.addElement("'B" + (j + 1) + "of" + (n + 1) + "'");
+              }
+            } else {
+              for (int j = 0, n = cutPoints.length; j <= n; ++ j) {
+                attribValues.addElement("'" + binRangeString(cutPoints, j) + "'");
+              }
+            }
+          }
+          Attribute newAtt = new Attribute(getInputFormat().
+                                           attribute(i).name(),
+                                           attribValues);
+          newAtt.setWeight(getInputFormat().attribute(i).weight());
+          attributes.addElement(newAtt);
+        } else {
+          if (cutPoints == null) {
+            FastVector attribValues = new FastVector(1);
+            attribValues.addElement("'All'");
+            Attribute newAtt = new Attribute(getInputFormat().
+                                             attribute(i).name(),
+                                             attribValues);
+            newAtt.setWeight(getInputFormat().attribute(i).weight());
+            attributes.addElement(newAtt);
+          } else {
+            if (i < getInputFormat().classIndex()) {
+              classIndex += cutPoints.length - 1;
+            }
+            for (int j = 0, n = cutPoints.length; j < n; ++ j) {
+              FastVector attribValues = new FastVector(2);
+              if (m_UseBinNumbers) {
+                attribValues.addElement("'B1of2'");
+                attribValues.addElement("'B2of2'");
+              } else {
+                double[] binaryCutPoint = {cutPoints[j]};
+                attribValues.addElement("'" + binRangeString(binaryCutPoint, 0) + "'");
+                attribValues.addElement("'" + binRangeString(binaryCutPoint, 1) + "'");
+              }
+              Attribute newAtt = new Attribute(getInputFormat().
+                                                  attribute(i).name() + "_" + (j+1),
+                                                  attribValues);
               newAtt.setWeight(getInputFormat().attribute(i).weight());
               attributes.addElement(newAtt);
-	    }
-	  }
-	}
+            }
+          }
+        }
       } else {
-	attributes.addElement(getInputFormat().attribute(i).copy());
+        attributes.addElement(getInputFormat().attribute(i).copy());
       }
     }
-    Instances outputFormat = 
+    Instances outputFormat =
       new Instances(getInputFormat().relationName(), attributes, 0);
     outputFormat.setClassIndex(classIndex);
     setOutputFormat(outputFormat);
   }
 
   /**
-   * Convert a single instance over. The converted instance is added to 
+   * Convert a single instance over. The converted instance is added to
    * the end of the output queue.
    *
    * @param instance the instance to convert
@@ -1011,7 +1130,7 @@ public class Discretize
     double [] vals = new double [outputFormatPeek().numAttributes()];
     // Copy and convert the values
     for(int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if (m_DiscretizeCols.isInRange(i) && 
+      if (m_DiscretizeCols.isInRange(i) &&
 	  getInputFormat().attribute(i).isNumeric() &&
 	  (getInputFormat().classIndex() != i)) {
 	int j;
@@ -1047,14 +1166,14 @@ public class Discretize
 	      }
 	      index++;
 	    }
-	  }   
+	  }
 	}
       } else {
         vals[index] = instance.value(i);
 	index++;
       }
     }
-    
+
     Instance inst = null;
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
@@ -1066,10 +1185,10 @@ public class Discretize
     inst.setDataset(getOutputFormat());
     push(inst);
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {
