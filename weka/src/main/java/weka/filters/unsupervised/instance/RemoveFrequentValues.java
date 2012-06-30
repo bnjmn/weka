@@ -560,7 +560,10 @@ public class RemoveFrequentValues
       // value if m_ModifyHeader is set
       for (i = 0; i < getInputFormat().numInstances(); i++) {
          instance = getInputFormat().instance(i);
-      
+         if (instance.isMissing(m_AttIndex.getIndex())) {
+           push(instance);
+           continue;
+         }      
          if (m_Values.contains(instance.stringValue(m_AttIndex.getIndex()))) {
             if (getModifyHeader()) {
                instance.setValue(m_AttIndex.getIndex(),
