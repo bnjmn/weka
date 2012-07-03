@@ -15,7 +15,7 @@
 
 /*
  *    KnowledgeFlowApp.java
- *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,6 +26,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -41,7 +42,6 @@ import java.awt.PopupMenu;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
-import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -297,6 +297,7 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
     }
     
+    // System templates
     if (TEMPLATE_PATHS == null) {
       TEMPLATE_PATHS = new ArrayList<String>();
       TEMPLATE_DESCRIPTIONS = new ArrayList<String>();
@@ -359,6 +360,29 @@ implements PropertyChangeListener, BeanCustomizer.ModifyListener {
 
             }
           }
+        }
+        
+        // Check for user templates        
+        String templatePaths = 
+          tempP.getProperty("weka.gui.beans.KnowledgeFlow.templates");
+        String templateDesc = 
+          tempP.getProperty("weka.gui.beans.KnowledgeFlow.templates.desc");
+        if (templatePaths != null && templatePaths.length() > 0 && 
+            templateDesc != null && templateDesc.length() > 0) {
+          String[] templates = templatePaths.split(",");
+          String[] desc = templateDesc.split(",");
+          // quietly ignore any user-templates that are not consistent
+          if (templates.length == desc.length) {
+            
+            for (int kk = 0; kk < templates.length; kk++) {
+              String pth = templates[kk];
+              String d = desc[kk];
+              if (!TEMPLATE_PATHS.contains(pth)) {
+                TEMPLATE_PATHS.add(pth.trim());
+                TEMPLATE_DESCRIPTIONS.add(d.trim());                
+              }
+            }            
+          }          
         }
       }
       s_pluginManagerIntialized = true;
