@@ -15,19 +15,19 @@
 
 /*
  *    PruneableClassifierTree.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
 
+import java.util.Random;
+
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.util.Random;
 
 /**
  * Class for handling a tree structure that can
@@ -85,6 +85,7 @@ public class PruneableClassifierTree
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -121,7 +122,7 @@ public class PruneableClassifierTree
    Random random = new Random(m_seed);
    data.stratify(numSets);
    buildTree(data.trainCV(numSets, numSets - 1, random),
-	     data.testCV(numSets, numSets - 1), false);
+	     data.testCV(numSets, numSets - 1), !m_cleanup);
    if (pruneTheTree) {
      prune();
    }
@@ -170,7 +171,7 @@ public class PruneableClassifierTree
     PruneableClassifierTree newTree = 
       new PruneableClassifierTree(m_toSelectModel, pruneTheTree, numSets, m_cleanup,
 				  m_seed);
-    newTree.buildTree(train, test, false);
+    newTree.buildTree(train, test, !m_cleanup);
     return newTree;
   }
 
