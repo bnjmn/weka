@@ -1832,6 +1832,8 @@ public class WekaPackageManager {
         System.err.println("Unknown option: " + args[0]);
         printUsage();
       }
+      
+      System.exit(0);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
