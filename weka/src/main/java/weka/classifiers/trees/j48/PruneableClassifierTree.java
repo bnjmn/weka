@@ -122,7 +122,7 @@ public class PruneableClassifierTree
    Random random = new Random(m_seed);
    data.stratify(numSets);
    buildTree(data.trainCV(numSets, numSets - 1, random),
-	     data.testCV(numSets, numSets - 1), false);
+	     data.testCV(numSets, numSets - 1), !m_cleanup);
    if (pruneTheTree) {
      prune();
    }
@@ -171,7 +171,7 @@ public class PruneableClassifierTree
     PruneableClassifierTree newTree = 
       new PruneableClassifierTree(m_toSelectModel, pruneTheTree, numSets, m_cleanup,
 				  m_seed);
-    newTree.buildTree(train, test, false);
+    newTree.buildTree(train, test, !m_cleanup);
     return newTree;
   }
 
