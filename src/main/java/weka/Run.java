@@ -15,7 +15,7 @@
 
 /*
  *    Run.java
- *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -270,6 +270,8 @@ public class Run {
       } else if (selectedType == SchemeType.COMMANDLINE) {
         ((weka.core.CommandlineRunnable)scheme).run(scheme, options);
       }
+      
+      System.exit(0);
     } 
     catch (Exception e) {
       if (    ((e.getMessage() != null) && (e.getMessage().indexOf("General options") == -1))
