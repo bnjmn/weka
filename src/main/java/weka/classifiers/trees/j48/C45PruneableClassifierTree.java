@@ -15,17 +15,17 @@
 
 /*
  *    C45PruneableClassifierTree.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
 
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 
 /**
  * Class for handling a tree structure that can
@@ -90,6 +90,7 @@ public class C45PruneableClassifierTree
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -122,7 +123,7 @@ public class C45PruneableClassifierTree
     data = new Instances(data);
     data.deleteWithMissingClass();
     
-   buildTree(data, m_subtreeRaising);
+   buildTree(data, m_subtreeRaising || !m_cleanup);
    if (m_collapseTheTree) {
      collapse();
    }
@@ -234,7 +235,7 @@ public class C45PruneableClassifierTree
     C45PruneableClassifierTree newTree = 
       new C45PruneableClassifierTree(m_toSelectModel, m_pruneTheTree, m_CF,
 				     m_subtreeRaising, m_cleanup, m_collapseTheTree);
-    newTree.buildTree((Instances)data, m_subtreeRaising);
+    newTree.buildTree((Instances)data, m_subtreeRaising || !m_cleanup);
 
     return newTree;
   }
