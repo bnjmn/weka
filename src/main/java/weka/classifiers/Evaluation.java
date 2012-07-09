@@ -72,105 +72,131 @@ import weka.core.xml.XMLSerialization;
 import weka.estimators.UnivariateKernelEstimator;
 
 /**
- * Class for evaluating machine learning models. <p/>
- *
- * ------------------------------------------------------------------- <p/>
- *
- * General options when evaluating a learning scheme from the command-line: <p/>
- *
+ * Class for evaluating machine learning models.
+ * <p/>
+ * 
+ * -------------------------------------------------------------------
+ * <p/>
+ * 
+ * General options when evaluating a learning scheme from the command-line:
+ * <p/>
+ * 
  * -t filename <br/>
- * Name of the file with the training data. (required) <p/>
- *
+ * Name of the file with the training data. (required)
+ * <p/>
+ * 
  * -T filename <br/>
- * Name of the file with the test data. If missing a cross-validation
- * is performed. <p/>
- *
+ * Name of the file with the test data. If missing a cross-validation is
+ * performed.
+ * <p/>
+ * 
  * -c index <br/>
- * Index of the class attribute (1, 2, ...; default: last). <p/>
- *
+ * Index of the class attribute (1, 2, ...; default: last).
+ * <p/>
+ * 
  * -x number <br/>
- * The number of folds for the cross-validation (default: 10). <p/>
- *
+ * The number of folds for the cross-validation (default: 10).
+ * <p/>
+ * 
  * -no-cv <br/>
- * No cross validation.  If no test file is provided, no evaluation
- * is done. <p/>
- *
+ * No cross validation. If no test file is provided, no evaluation is done.
+ * <p/>
+ * 
  * -split-percentage percentage <br/>
- * Sets the percentage for the train/test set split, e.g., 66. <p/>
- *
+ * Sets the percentage for the train/test set split, e.g., 66.
+ * <p/>
+ * 
  * -preserve-order <br/>
- * Preserves the order in the percentage split instead of randomizing
- * the data first with the seed value ('-s'). <p/>
- *
+ * Preserves the order in the percentage split instead of randomizing the data
+ * first with the seed value ('-s').
+ * <p/>
+ * 
  * -s seed <br/>
- * Random number seed for the cross-validation and percentage split
- * (default: 1). <p/>
- *
+ * Random number seed for the cross-validation and percentage split (default:
+ * 1).
+ * <p/>
+ * 
  * -m filename <br/>
- * The name of a file containing a cost matrix. <p/>
- *
+ * The name of a file containing a cost matrix.
+ * <p/>
+ * 
  * -l filename <br/>
  * Loads classifier from the given file. In case the filename ends with ".xml",
- * a PMML file is loaded or, if that fails, options are loaded from XML. <p/>
- *
+ * a PMML file is loaded or, if that fails, options are loaded from XML.
+ * <p/>
+ * 
  * -d filename <br/>
  * Saves classifier built from the training data into the given file. In case
- * the filename ends with ".xml" the options are saved XML, not the model. <p/>
- *
+ * the filename ends with ".xml" the options are saved XML, not the model.
+ * <p/>
+ * 
  * -v <br/>
- * Outputs no statistics for the training data. <p/>
- *
+ * Outputs no statistics for the training data.
+ * <p/>
+ * 
  * -o <br/>
- * Outputs statistics only, not the classifier. <p/>
- *
+ * Outputs statistics only, not the classifier.
+ * <p/>
+ * 
  * -i <br/>
- * Outputs information-retrieval statistics per class. <p/>
- *
+ * Outputs information-retrieval statistics per class.
+ * <p/>
+ * 
  * -k <br/>
- * Outputs information-theoretic statistics. <p/>
- *
- * -classifications "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
- * Uses the specified class for generating the classification output.
- * E.g.: weka.classifiers.evaluation.output.prediction.PlainText
- * or  : weka.classifiers.evaluation.output.prediction.CSV
- *
+ * Outputs information-theoretic statistics.
+ * <p/>
+ * 
+ * -classifications
+ * "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
+ * Uses the specified class for generating the classification output. E.g.:
+ * weka.classifiers.evaluation.output.prediction.PlainText or :
+ * weka.classifiers.evaluation.output.prediction.CSV
+ * 
  * -p range <br/>
  * Outputs predictions for test instances (or the train instances if no test
- * instances provided and -no-cv is used), along with the attributes in the specified range
- * (and nothing else). Use '-p 0' if no attributes are desired. <p/>
- * Deprecated: use "-classifications ..." instead. <p/>
- *
+ * instances provided and -no-cv is used), along with the attributes in the
+ * specified range (and nothing else). Use '-p 0' if no attributes are desired.
+ * <p/>
+ * Deprecated: use "-classifications ..." instead.
+ * <p/>
+ * 
  * -distribution <br/>
- * Outputs the distribution instead of only the prediction
- * in conjunction with the '-p' option (only nominal classes). <p/>
- * Deprecated: use "-classifications ..." instead. <p/>
- *
+ * Outputs the distribution instead of only the prediction in conjunction with
+ * the '-p' option (only nominal classes).
+ * <p/>
+ * Deprecated: use "-classifications ..." instead.
+ * <p/>
+ * 
  * -no-predictions <br/>
- * Turns off the collection of predictions in order to conserve
- * memory. <p/>
- *
+ * Turns off the collection of predictions in order to conserve memory.
+ * <p/>
+ * 
  * -r <br/>
- * Outputs cumulative margin distribution (and nothing else). <p/>
- *
+ * Outputs cumulative margin distribution (and nothing else).
+ * <p/>
+ * 
  * -g <br/>
- * Only for classifiers that implement "Graphable." Outputs
- * the graph representation of the classifier (and nothing
- * else). <p/>
- *
+ * Only for classifiers that implement "Graphable." Outputs the graph
+ * representation of the classifier (and nothing else).
+ * <p/>
+ * 
  * -xml filename | xml-string <br/>
- * Retrieves the options from the XML-data instead of the command line. <p/>
- *
+ * Retrieves the options from the XML-data instead of the command line.
+ * <p/>
+ * 
  * -threshold-file file <br/>
- * The file to save the threshold data to.
- * The format is determined by the extensions, e.g., '.arff' for ARFF
- * format or '.csv' for CSV. <p/>
- *
+ * The file to save the threshold data to. The format is determined by the
+ * extensions, e.g., '.arff' for ARFF format or '.csv' for CSV.
+ * <p/>
+ * 
  * -threshold-label label <br/>
- * The class label to determine the threshold data for
- * (default is the first label) <p/>
- *
- * ------------------------------------------------------------------- <p/>
- *
+ * The class label to determine the threshold data for (default is the first
+ * label)
+ * <p/>
+ * 
+ * -------------------------------------------------------------------
+ * <p/>
+ * 
  * Example usage as the main of a classifier (called FunkyClassifier):
  * <code> <pre>
  * public static void main(String [] args) {
@@ -178,27 +204,26 @@ import weka.estimators.UnivariateKernelEstimator;
  * }
  * </pre> </code>
  * <p/>
- *
- * ------------------------------------------------------------------ <p/>
- *
- * Example usage from within an application:
- * <code> <pre>
+ * 
+ * ------------------------------------------------------------------
+ * <p/>
+ * 
+ * Example usage from within an application: <code> <pre>
  * Instances trainInstances = ... instances got from somewhere
  * Instances testInstances = ... instances got from somewhere
  * Classifier scheme = ... scheme got from somewhere
- *
+ * 
  * Evaluation evaluation = new Evaluation(trainInstances);
  * evaluation.evaluateModel(scheme, testInstances);
  * System.out.println(evaluation.toSummaryString());
  * </pre> </code>
- *
- *
- * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
- * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision$
+ * 
+ * 
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @author Len Trigg (trigg@cs.waikato.ac.nz)
+ * @version $Revision$
  */
-public class Evaluation
-  implements Summarizable, RevisionHandler, Serializable {
+public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /** For serialization */
   private static final long serialVersionUID = -7010314486866816271L;
@@ -225,16 +250,16 @@ public class Evaluation
   protected double m_WithClass;
 
   /** Array for storing the confusion matrix. */
-  protected double [][] m_ConfusionMatrix;
+  protected double[][] m_ConfusionMatrix;
 
   /** The names of the classes. */
-  protected String [] m_ClassNames;
+  protected String[] m_ClassNames;
 
   /** Is the class nominal or numeric? */
   protected boolean m_ClassIsNominal;
 
   /** The prior probabilities of the classes. */
-  protected double [] m_ClassPriors;
+  protected double[] m_ClassPriors;
 
   /** The sum of counts for priors. */
   protected double m_ClassPriorsSum;
@@ -282,16 +307,16 @@ public class Evaluation
   protected static int k_MarginResolution = 500;
 
   /** Cumulative margin distribution. */
-  protected double m_MarginCounts [];
+  protected double m_MarginCounts[];
 
   /** Number of non-missing class training instances seen. */
   protected int m_NumTrainClassVals;
 
   /** Array containing all numeric training class values seen. */
-  protected double [] m_TrainClassVals;
+  protected double[] m_TrainClassVals;
 
   /** Array containing all numeric training class weights. */
-  protected double [] m_TrainClassWeights;
+  protected double[] m_TrainClassWeights;
 
   /** Numeric class estimator for prior. */
   protected UnivariateKernelEstimator m_PriorEstimator;
@@ -300,8 +325,8 @@ public class Evaluation
   protected boolean m_ComplexityStatisticsAvailable = true;
 
   /**
-   * The minimum probablility accepted from an estimator to avoid
-   * taking log(0) in Sf calculations.
+   * The minimum probablility accepted from an estimator to avoid taking log(0)
+   * in Sf calculations.
    */
   protected static final double MIN_SF_PROB = Double.MIN_VALUE;
 
@@ -314,7 +339,7 @@ public class Evaluation
   /** Whether coverage statistics are available. */
   protected boolean m_CoverageStatisticsAvailable = true;
 
-  /**  The confidence level used for coverage statistics. */
+  /** The confidence level used for coverage statistics. */
   protected double m_ConfLevel = 0.95;
 
   /** Total size of predicted regions at the given confidence level. */
@@ -332,8 +357,10 @@ public class Evaluation
   /** The list of predictions that have been generated (for computing AUC). */
   protected FastVector m_Predictions;
 
-  /** enables/disables the use of priors, e.g., if no training set is
-   * present in case of de-serialized schemes. */
+  /**
+   * enables/disables the use of priors, e.g., if no training set is present in
+   * case of de-serialized schemes.
+   */
   protected boolean m_NoPriors = false;
 
   /** The header of the training set. */
@@ -343,16 +370,16 @@ public class Evaluation
   protected boolean m_DiscardPredictions;
 
   /**
-   * Initializes all the counters for the evaluation.
-   * Use <code>useNoPriors()</code> if the dataset is the test set and you
-   * can't initialize with the priors from the training set via
+   * Initializes all the counters for the evaluation. Use
+   * <code>useNoPriors()</code> if the dataset is the test set and you can't
+   * initialize with the priors from the training set via
    * <code>setPriors(Instances)</code>.
-   *
-   * @param data 	set of training instances, to get some header
-   * 			information and prior class distribution information
-   * @throws Exception 	if the class is not defined
-   * @see 		#useNoPriors()
-   * @see 		#setPriors(Instances)
+   * 
+   * @param data set of training instances, to get some header information and
+   *          prior class distribution information
+   * @throws Exception if the class is not defined
+   * @see #useNoPriors()
+   * @see #setPriors(Instances)
    */
   public Evaluation(Instances data) throws Exception {
 
@@ -360,22 +387,20 @@ public class Evaluation
   }
 
   /**
-   * Initializes all the counters for the evaluation and also takes a
-   * cost matrix as parameter.
-   * Use <code>useNoPriors()</code> if the dataset is the test set and you
-   * can't initialize with the priors from the training set via
+   * Initializes all the counters for the evaluation and also takes a cost
+   * matrix as parameter. Use <code>useNoPriors()</code> if the dataset is the
+   * test set and you can't initialize with the priors from the training set via
    * <code>setPriors(Instances)</code>.
-   *
-   * @param data 	set of training instances, to get some header
-   * 			information and prior class distribution information
-   * @param costMatrix 	the cost matrix---if null, default costs will be used
-   * @throws Exception 	if cost matrix is not compatible with
-   * 			data, the class is not defined or the class is numeric
-   * @see 		#useNoPriors()
-   * @see 		#setPriors(Instances)
+   * 
+   * @param data set of training instances, to get some header information and
+   *          prior class distribution information
+   * @param costMatrix the cost matrix---if null, default costs will be used
+   * @throws Exception if cost matrix is not compatible with data, the class is
+   *           not defined or the class is numeric
+   * @see #useNoPriors()
+   * @see #setPriors(Instances)
    */
-  public Evaluation(Instances data, CostMatrix costMatrix)
-  throws Exception {
+  public Evaluation(Instances data, CostMatrix costMatrix) throws Exception {
 
     m_Header = new Instances(data, 0);
     m_NumClasses = data.numClasses();
@@ -383,9 +408,9 @@ public class Evaluation
     m_ClassIsNominal = data.classAttribute().isNominal();
 
     if (m_ClassIsNominal) {
-      m_ConfusionMatrix = new double [m_NumClasses][m_NumClasses];
-      m_ClassNames = new String [m_NumClasses];
-      for(int i = 0; i < m_NumClasses; i++) {
+      m_ConfusionMatrix = new double[m_NumClasses][m_NumClasses];
+      m_ClassNames = new String[m_NumClasses];
+      for (int i = 0; i < m_NumClasses; i++) {
         m_ClassNames[i] = data.classAttribute().value(i);
       }
     }
@@ -398,15 +423,15 @@ public class Evaluation
         throw new Exception("Cost matrix not compatible with data!");
       }
     }
-    m_ClassPriors = new double [m_NumClasses];
+    m_ClassPriors = new double[m_NumClasses];
     setPriors(data);
-    m_MarginCounts = new double [k_MarginResolution + 1];
+    m_MarginCounts = new double[k_MarginResolution + 1];
   }
 
   /**
    * Returns the header of the underlying dataset.
-   *
-   * @return		the header information
+   * 
+   * @return the header information
    */
   public Instances getHeader() {
     return m_Header;
@@ -415,9 +440,9 @@ public class Evaluation
   /**
    * Sets whether to discard predictions, ie, not storing them for future
    * reference via predictions() method in order to conserve memory.
-   *
-   * @param value	true if to discard the predictions
-   * @see		#predictions()
+   * 
+   * @param value true if to discard the predictions
+   * @see #predictions()
    */
   public void setDiscardPredictions(boolean value) {
     m_DiscardPredictions = value;
@@ -426,11 +451,11 @@ public class Evaluation
   }
 
   /**
-   * Returns whether predictions are not recorded at all, in order to
-   * conserve memory.
-   *
-   * @return		true if predictions are not recorded
-   * @see		#predictions()
+   * Returns whether predictions are not recorded at all, in order to conserve
+   * memory.
+   * 
+   * @return true if predictions are not recorded
+   * @see #predictions()
    */
   public boolean getDiscardPredictions() {
     return m_DiscardPredictions;
@@ -440,7 +465,7 @@ public class Evaluation
    * Returns the area under ROC for those predictions that have been collected
    * in the evaluateClassifier(Classifier, Instances) method. Returns
    * Utils.missingValue() if the area is not available.
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the area under the ROC curve or not a number
    */
@@ -458,7 +483,7 @@ public class Evaluation
 
   /**
    * Calculates the weighted (by class size) AUC.
-   *
+   * 
    * @return the weighted AUC.
    */
   public double weightedAreaUnderROC() {
@@ -473,7 +498,7 @@ public class Evaluation
     }
 
     double aucTotal = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       double temp = areaUnderROC(i);
       if (!Utils.isMissingValue(temp)) {
         aucTotal += (temp * classCounts[i]);
@@ -482,13 +507,12 @@ public class Evaluation
 
     return aucTotal / classCountSum;
   }
-  
+
   /**
-   * Returns the area under precision-recall curve (AUPRC) for those 
-   * predictions that have been collected
-   * in the evaluateClassifier(Classifier, Instances) method. Returns
-   * Utils.missingValue() if the area is not available.
-   *
+   * Returns the area under precision-recall curve (AUPRC) for those predictions
+   * that have been collected in the evaluateClassifier(Classifier, Instances)
+   * method. Returns Utils.missingValue() if the area is not available.
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the area under the precision-recall curve or not a number
    */
@@ -502,10 +526,10 @@ public class Evaluation
       return ThresholdCurve.getPRCArea(result);
     }
   }
-  
+
   /**
    * Calculates the weighted (by class size) AUPRC.
-   *
+   * 
    * @return the weighted AUPRC.
    */
   public double weightedAreaUnderPRC() {
@@ -520,7 +544,7 @@ public class Evaluation
     }
 
     double auprcTotal = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       double temp = areaUnderPRC(i);
       if (!Utils.isMissingValue(temp)) {
         auprcTotal += (temp * classCounts[i]);
@@ -529,10 +553,10 @@ public class Evaluation
 
     return auprcTotal / classCountSum;
   }
-    
+
   /**
    * Returns a copy of the confusion matrix.
-   *
+   * 
    * @return a copy of the confusion matrix as a two-dimensional array
    */
   public double[][] confusionMatrix() {
@@ -548,27 +572,25 @@ public class Evaluation
   }
 
   /**
-   * Performs a (stratified if class is nominal) cross-validation
-   * for a classifier on a set of instances. Now performs
-   * a deep copy of the classifier before each call to
-   * buildClassifier() (just in case the classifier is not
-   * initialized properly).
-   *
+   * Performs a (stratified if class is nominal) cross-validation for a
+   * classifier on a set of instances. Now performs a deep copy of the
+   * classifier before each call to buildClassifier() (just in case the
+   * classifier is not initialized properly).
+   * 
    * @param classifier the classifier with any options set.
-   * @param data the data on which the cross-validation is to be
-   * performed
+   * @param data the data on which the cross-validation is to be performed
    * @param numFolds the number of folds for the cross-validation
    * @param random random number generator for randomization
    * @param forPredictionsPrinting varargs parameter that, if supplied, is
-   * expected to hold a weka.classifiers.evaluation.output.prediction.AbstractOutput
-   * object
-   * @throws Exception if a classifier could not be generated
-   * successfully or the class is not defined
+   *          expected to hold a
+   *          weka.classifiers.evaluation.output.prediction.AbstractOutput
+   *          object
+   * @throws Exception if a classifier could not be generated successfully or
+   *           the class is not defined
    */
-  public void crossValidateModel(Classifier classifier,
-                                 Instances data, int numFolds, Random random,
-                                 Object... forPredictionsPrinting)
-  throws Exception {
+  public void crossValidateModel(Classifier classifier, Instances data,
+      int numFolds, Random random, Object... forPredictionsPrinting)
+      throws Exception {
 
     // Make a copy of the data we can reorder
     data = new Instances(data);
@@ -603,154 +625,177 @@ public class Evaluation
   }
 
   /**
-   * Performs a (stratified if class is nominal) cross-validation
-   * for a classifier on a set of instances.
-   *
+   * Performs a (stratified if class is nominal) cross-validation for a
+   * classifier on a set of instances.
+   * 
    * @param classifierString a string naming the class of the classifier
-   * @param data the data on which the cross-validation is to be
-   * performed
+   * @param data the data on which the cross-validation is to be performed
    * @param numFolds the number of folds for the cross-validation
    * @param options the options to the classifier. Any options
-   * @param random the random number generator for randomizing the data
-   * accepted by the classifier will be removed from this array.
-   * @throws Exception if a classifier could not be generated
-   * successfully or the class is not defined
+   * @param random the random number generator for randomizing the data accepted
+   *          by the classifier will be removed from this array.
+   * @throws Exception if a classifier could not be generated successfully or
+   *           the class is not defined
    */
-  public void crossValidateModel(String classifierString,
-      Instances data, int numFolds,
-      String[] options, Random random)
-    throws Exception {
+  public void crossValidateModel(String classifierString, Instances data,
+      int numFolds, String[] options, Random random) throws Exception {
 
     crossValidateModel(AbstractClassifier.forName(classifierString, options),
         data, numFolds, random);
   }
 
   /**
-   * Evaluates a classifier with the options given in an array of
-   * strings. <p/>
-   *
-   * Valid options are: <p/>
-   *
+   * Evaluates a classifier with the options given in an array of strings.
+   * <p/>
+   * 
+   * Valid options are:
+   * <p/>
+   * 
    * -t filename <br/>
-   * Name of the file with the training data. (required) <p/>
-   *
+   * Name of the file with the training data. (required)
+   * <p/>
+   * 
    * -T filename <br/>
-   * Name of the file with the test data. If missing a cross-validation
-   * is performed. <p/>
-   *
+   * Name of the file with the test data. If missing a cross-validation is
+   * performed.
+   * <p/>
+   * 
    * -c index <br/>
-   * Index of the class attribute (1, 2, ...; default: last). <p/>
-   *
+   * Index of the class attribute (1, 2, ...; default: last).
+   * <p/>
+   * 
    * -x number <br/>
-   * The number of folds for the cross-validation (default: 10). <p/>
-   *
+   * The number of folds for the cross-validation (default: 10).
+   * <p/>
+   * 
    * -no-cv <br/>
-   * No cross validation.  If no test file is provided, no evaluation
-   * is done. <p/>
-   *
+   * No cross validation. If no test file is provided, no evaluation is done.
+   * <p/>
+   * 
    * -split-percentage percentage <br/>
-   * Sets the percentage for the train/test set split, e.g., 66. <p/>
-   *
+   * Sets the percentage for the train/test set split, e.g., 66.
+   * <p/>
+   * 
    * -preserve-order <br/>
-   * Preserves the order in the percentage split instead of randomizing
-   * the data first with the seed value ('-s'). <p/>
-   *
+   * Preserves the order in the percentage split instead of randomizing the data
+   * first with the seed value ('-s').
+   * <p/>
+   * 
    * -s seed <br/>
-   * Random number seed for the cross-validation and percentage split
-   * (default: 1). <p/>
-   *
+   * Random number seed for the cross-validation and percentage split (default:
+   * 1).
+   * <p/>
+   * 
    * -m filename <br/>
-   * The name of a file containing a cost matrix. <p/>
-   *
+   * The name of a file containing a cost matrix.
+   * <p/>
+   * 
    * -l filename <br/>
    * Loads classifier from the given file. In case the filename ends with
-   * ".xml",a PMML file is loaded or, if that fails, options are loaded from XML. <p/>
-   *
+   * ".xml",a PMML file is loaded or, if that fails, options are loaded from
+   * XML.
+   * <p/>
+   * 
    * -d filename <br/>
    * Saves classifier built from the training data into the given file. In case
-   * the filename ends with ".xml" the options are saved XML, not the model. <p/>
-   *
+   * the filename ends with ".xml" the options are saved XML, not the model.
+   * <p/>
+   * 
    * -v <br/>
-   * Outputs no statistics for the training data. <p/>
-   *
+   * Outputs no statistics for the training data.
+   * <p/>
+   * 
    * -o <br/>
-   * Outputs statistics only, not the classifier. <p/>
-   *
+   * Outputs statistics only, not the classifier.
+   * <p/>
+   * 
    * -i <br/>
-   * Outputs detailed information-retrieval statistics per class. <p/>
-   *
+   * Outputs detailed information-retrieval statistics per class.
+   * <p/>
+   * 
    * -k <br/>
-   * Outputs information-theoretic statistics. <p/>
-   *
-   * -classifications "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
-   * Uses the specified class for generating the classification output.
-   * E.g.: weka.classifiers.evaluation.output.prediction.PlainText
-   * or  : weka.classifiers.evaluation.output.prediction.CSV
-   *
+   * Outputs information-theoretic statistics.
+   * <p/>
+   * 
+   * -classifications
+   * "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
+   * Uses the specified class for generating the classification output. E.g.:
+   * weka.classifiers.evaluation.output.prediction.PlainText or :
+   * weka.classifiers.evaluation.output.prediction.CSV
+   * 
    * -p range <br/>
    * Outputs predictions for test instances (or the train instances if no test
-   * instances provided and -no-cv is used), along with the attributes in the specified range
-   * (and nothing else). Use '-p 0' if no attributes are desired. <p/>
-   * Deprecated: use "-classifications ..." instead. <p/>
-   *
+   * instances provided and -no-cv is used), along with the attributes in the
+   * specified range (and nothing else). Use '-p 0' if no attributes are
+   * desired.
+   * <p/>
+   * Deprecated: use "-classifications ..." instead.
+   * <p/>
+   * 
    * -distribution <br/>
-   * Outputs the distribution instead of only the prediction
-   * in conjunction with the '-p' option (only nominal classes). <p/>
-   * Deprecated: use "-classifications ..." instead. <p/>
-   *
+   * Outputs the distribution instead of only the prediction in conjunction with
+   * the '-p' option (only nominal classes).
+   * <p/>
+   * Deprecated: use "-classifications ..." instead.
+   * <p/>
+   * 
    * -no-predictions <br/>
-   * Turns off the collection of predictions in order to conserve
-   * memory. <p/>
-   *
+   * Turns off the collection of predictions in order to conserve memory.
+   * <p/>
+   * 
    * -r <br/>
-   * Outputs cumulative margin distribution (and nothing else). <p/>
-   *
+   * Outputs cumulative margin distribution (and nothing else).
+   * <p/>
+   * 
    * -g <br/>
-   * Only for classifiers that implement "Graphable." Outputs
-   * the graph representation of the classifier (and nothing
-   * else). <p/>
-   *
+   * Only for classifiers that implement "Graphable." Outputs the graph
+   * representation of the classifier (and nothing else).
+   * <p/>
+   * 
    * -xml filename | xml-string <br/>
-   * Retrieves the options from the XML-data instead of the command line. <p/>
-   *
+   * Retrieves the options from the XML-data instead of the command line.
+   * <p/>
+   * 
    * -threshold-file file <br/>
-   * The file to save the threshold data to.
-   * The format is determined by the extensions, e.g., '.arff' for ARFF
-   * format or '.csv' for CSV. <p/>
-   *
+   * The file to save the threshold data to. The format is determined by the
+   * extensions, e.g., '.arff' for ARFF format or '.csv' for CSV.
+   * <p/>
+   * 
    * -threshold-label label <br/>
-   * The class label to determine the threshold data for
-   * (default is the first label) <p/>
-   *
+   * The class label to determine the threshold data for (default is the first
+   * label)
+   * <p/>
+   * 
    * @param classifierString class of machine learning classifier as a string
    * @param options the array of string containing the options
    * @throws Exception if model could not be evaluated successfully
    * @return a string describing the results
    */
-  public static String evaluateModel(String classifierString,
-      String [] options) throws Exception {
+  public static String evaluateModel(String classifierString, String[] options)
+      throws Exception {
 
     Classifier classifier;
 
     // Create classifier
     try {
       classifier =
-        //  (Classifier)Class.forName(classifierString).newInstance();
-        AbstractClassifier.forName(classifierString, null);
+      // (Classifier)Class.forName(classifierString).newInstance();
+      AbstractClassifier.forName(classifierString, null);
     } catch (Exception e) {
-      throw new Exception("Can't find class with name "
-          + classifierString + '.');
+      throw new Exception("Can't find class with name " + classifierString
+          + '.');
     }
     return evaluateModel(classifier, options);
   }
 
   /**
-   * A test method for this class. Just extracts the first command line
-   * argument as a classifier class name and calls evaluateModel.
-   * @param args an array of command line arguments, the first of which
-   * must be the class name of a classifier.
+   * A test method for this class. Just extracts the first command line argument
+   * as a classifier class name and calls evaluateModel.
+   * 
+   * @param args an array of command line arguments, the first of which must be
+   *          the class name of a classifier.
    */
-  public static void main(String [] args) {
+  public static void main(String[] args) {
 
     try {
       if (args.length == 0) {
@@ -767,124 +812,142 @@ public class Evaluation
   }
 
   /**
-   * Evaluates a classifier with the options given in an array of
-   * strings. <p/>
-   *
-   * Valid options are: <p/>
-   *
+   * Evaluates a classifier with the options given in an array of strings.
+   * <p/>
+   * 
+   * Valid options are:
+   * <p/>
+   * 
    * -t name of training file <br/>
-   * Name of the file with the training data. (required) <p/>
-   *
+   * Name of the file with the training data. (required)
+   * <p/>
+   * 
    * -T name of test file <br/>
-   * Name of the file with the test data. If missing a cross-validation
-   * is performed. <p/>
-   *
+   * Name of the file with the test data. If missing a cross-validation is
+   * performed.
+   * <p/>
+   * 
    * -c class index <br/>
-   * Index of the class attribute (1, 2, ...; default: last). <p/>
-   *
+   * Index of the class attribute (1, 2, ...; default: last).
+   * <p/>
+   * 
    * -x number of folds <br/>
-   * The number of folds for the cross-validation (default: 10). <p/>
-   *
+   * The number of folds for the cross-validation (default: 10).
+   * <p/>
+   * 
    * -no-cv <br/>
-   * No cross validation.  If no test file is provided, no evaluation
-   * is done. <p/>
-   *
+   * No cross validation. If no test file is provided, no evaluation is done.
+   * <p/>
+   * 
    * -split-percentage percentage <br/>
-   * Sets the percentage for the train/test set split, e.g., 66. <p/>
-   *
+   * Sets the percentage for the train/test set split, e.g., 66.
+   * <p/>
+   * 
    * -preserve-order <br/>
-   * Preserves the order in the percentage split instead of randomizing
-   * the data first with the seed value ('-s'). <p/>
-   *
+   * Preserves the order in the percentage split instead of randomizing the data
+   * first with the seed value ('-s').
+   * <p/>
+   * 
    * -s seed <br/>
-   * Random number seed for the cross-validation and percentage split
-   * (default: 1). <p/>
-   *
+   * Random number seed for the cross-validation and percentage split (default:
+   * 1).
+   * <p/>
+   * 
    * -m file with cost matrix <br/>
-   * The name of a file containing a cost matrix. <p/>
-   *
+   * The name of a file containing a cost matrix.
+   * <p/>
+   * 
    * -l filename <br/>
    * Loads classifier from the given file. In case the filename ends with
-   * ".xml",a PMML file is loaded or, if that fails, options are loaded from XML. <p/>
-   *
+   * ".xml",a PMML file is loaded or, if that fails, options are loaded from
+   * XML.
+   * <p/>
+   * 
    * -d filename <br/>
    * Saves classifier built from the training data into the given file. In case
-   * the filename ends with ".xml" the options are saved XML, not the model. <p/>
-   *
+   * the filename ends with ".xml" the options are saved XML, not the model.
+   * <p/>
+   * 
    * -v <br/>
-   * Outputs no statistics for the training data. <p/>
-   *
+   * Outputs no statistics for the training data.
+   * <p/>
+   * 
    * -o <br/>
-   * Outputs statistics only, not the classifier. <p/>
-   *
+   * Outputs statistics only, not the classifier.
+   * <p/>
+   * 
    * -i <br/>
-   * Outputs detailed information-retrieval statistics per class. <p/>
-   *
+   * Outputs detailed information-retrieval statistics per class.
+   * <p/>
+   * 
    * -k <br/>
-   * Outputs information-theoretic statistics. <p/>
-   *
-   * -classifications "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
-   * Uses the specified class for generating the classification output.
-   * E.g.: weka.classifiers.evaluation.output.prediction.PlainText
-   * or  : weka.classifiers.evaluation.output.prediction.CSV
-   *
+   * Outputs information-theoretic statistics.
+   * <p/>
+   * 
+   * -classifications
+   * "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
+   * Uses the specified class for generating the classification output. E.g.:
+   * weka.classifiers.evaluation.output.prediction.PlainText or :
+   * weka.classifiers.evaluation.output.prediction.CSV
+   * 
    * -p range <br/>
    * Outputs predictions for test instances (or the train instances if no test
-   * instances provided and -no-cv is used), along with the attributes in the specified range
-   * (and nothing else). Use '-p 0' if no attributes are desired. <p/>
-   * Deprecated: use "-classifications ..." instead. <p/>
-   *
+   * instances provided and -no-cv is used), along with the attributes in the
+   * specified range (and nothing else). Use '-p 0' if no attributes are
+   * desired.
+   * <p/>
+   * Deprecated: use "-classifications ..." instead.
+   * <p/>
+   * 
    * -distribution <br/>
-   * Outputs the distribution instead of only the prediction
-   * in conjunction with the '-p' option (only nominal classes). <p/>
-   * Deprecated: use "-classifications ..." instead. <p/>
-   *
+   * Outputs the distribution instead of only the prediction in conjunction with
+   * the '-p' option (only nominal classes).
+   * <p/>
+   * Deprecated: use "-classifications ..." instead.
+   * <p/>
+   * 
    * -no-predictions <br/>
-   * Turns off the collection of predictions in order to conserve
-   * memory. <p/>
-   *
+   * Turns off the collection of predictions in order to conserve memory.
+   * <p/>
+   * 
    * -r <br/>
-   * Outputs cumulative margin distribution (and nothing else). <p/>
-   *
+   * Outputs cumulative margin distribution (and nothing else).
+   * <p/>
+   * 
    * -g <br/>
-   * Only for classifiers that implement "Graphable." Outputs
-   * the graph representation of the classifier (and nothing
-   * else). <p/>
-   *
+   * Only for classifiers that implement "Graphable." Outputs the graph
+   * representation of the classifier (and nothing else).
+   * <p/>
+   * 
    * -xml filename | xml-string <br/>
-   * Retrieves the options from the XML-data instead of the command line. <p/>
-   *
+   * Retrieves the options from the XML-data instead of the command line.
+   * <p/>
+   * 
    * @param classifier machine learning classifier
    * @param options the array of string containing the options
    * @throws Exception if model could not be evaluated successfully
    * @return a string describing the results
    */
-  public static String evaluateModel(Classifier classifier,
-      String [] options) throws Exception {
+  public static String evaluateModel(Classifier classifier, String[] options)
+      throws Exception {
 
     Instances train = null, tempTrain, test = null, template = null;
     int seed = 1, folds = 10, classIndex = -1;
     boolean noCrossValidation = false;
-    String trainFileName, testFileName, sourceClass,
-    classIndexString, seedString, foldsString, objectInputFileName,
-    objectOutputFileName;
-    boolean noOutput = false,
-    trainStatistics = true,
-    printMargins = false, printComplexityStatistics = false,
-    printGraph = false, classStatistics = false, printSource = false;
+    String trainFileName, testFileName, sourceClass, classIndexString, seedString, foldsString, objectInputFileName, objectOutputFileName;
+    boolean noOutput = false, trainStatistics = true, printMargins = false, printComplexityStatistics = false, printGraph = false, classStatistics = false, printSource = false;
     StringBuffer text = new StringBuffer();
     DataSource trainSource = null, testSource = null;
     ObjectInputStream objectInputStream = null;
     BufferedInputStream xmlInputStream = null;
     CostMatrix costMatrix = null;
     StringBuffer schemeOptionsText = null;
-    long trainTimeStart = 0, trainTimeElapsed = 0,
-    testTimeStart = 0, testTimeElapsed = 0;
+    long trainTimeStart = 0, trainTimeElapsed = 0, testTimeStart = 0, testTimeElapsed = 0;
     String xml = "";
     String[] optionsTmp = null;
     Classifier classifierBackup;
     Classifier classifierClassifications = null;
-    int actualClassIndex = -1;  // 0-based class index
+    int actualClassIndex = -1; // 0-based class index
     String splitPercentageString = "";
     double splitPercentage = -1;
     boolean preserveOrder = false;
@@ -900,8 +963,8 @@ public class Evaluation
     if (Utils.getFlag("h", options) || Utils.getFlag("help", options)) {
 
       // global info requested as well?
-      boolean globalInfo = Utils.getFlag("synopsis", options) ||
-        Utils.getFlag("info", options);
+      boolean globalInfo = Utils.getFlag("synopsis", options)
+          || Utils.getFlag("info", options);
 
       throw new Exception("\nHelp requested."
           + makeOptionString(classifier, globalInfo));
@@ -919,28 +982,31 @@ public class Evaluation
         optionsTmp[i] = options[i];
 
       String tmpO = Utils.getOption('l', optionsTmp);
-      //if (Utils.getOption('l', optionsTmp).toLowerCase().endsWith(".xml")) {
+      // if (Utils.getOption('l', optionsTmp).toLowerCase().endsWith(".xml")) {
       if (tmpO.endsWith(".xml")) {
         // try to load file as PMML first
         boolean success = false;
         try {
           PMMLModel pmmlModel = PMMLFactory.getPMMLModel(tmpO);
           if (pmmlModel instanceof PMMLClassifier) {
-            classifier = ((PMMLClassifier)pmmlModel);
+            classifier = ((PMMLClassifier) pmmlModel);
             success = true;
           }
         } catch (IllegalArgumentException ex) {
           success = false;
         }
         if (!success) {
-          // load options from serialized data  ('-l' is automatically erased!)
+          // load options from serialized data ('-l' is automatically erased!)
           XMLClassifier xmlserial = new XMLClassifier();
-          OptionHandler cl = (OptionHandler) xmlserial.read(Utils.getOption('l', options));
+          OptionHandler cl = (OptionHandler) xmlserial.read(Utils.getOption(
+              'l', options));
 
           // merge options
           optionsTmp = new String[options.length + cl.getOptions().length];
-          System.arraycopy(cl.getOptions(), 0, optionsTmp, 0, cl.getOptions().length);
-          System.arraycopy(options, 0, optionsTmp, cl.getOptions().length, options.length);
+          System.arraycopy(cl.getOptions(), 0, optionsTmp, 0,
+              cl.getOptions().length);
+          System.arraycopy(options, 0, optionsTmp, cl.getOptions().length,
+              options.length);
           options = optionsTmp;
         }
       }
@@ -970,17 +1036,17 @@ public class Evaluation
       }
       if (trainFileName.length() == 0) {
         if (objectInputFileName.length() == 0) {
-          throw new Exception("No training file and no object input file given.");
+          throw new Exception(
+              "No training file and no object input file given.");
         }
         if (testFileName.length() == 0) {
           throw new Exception("No training file and no test file given.");
         }
-      } else if ((objectInputFileName.length() != 0) &&
-          ((!(classifier instanceof UpdateableClassifier)) ||
-           (testFileName.length() == 0))) {
-        throw new Exception("Classifier not incremental, or no " +
-            "test file provided: can't "+
-            "use both train and model file.");
+      } else if ((objectInputFileName.length() != 0)
+          && ((!(classifier instanceof UpdateableClassifier)) || (testFileName
+              .length() == 0))) {
+        throw new Exception("Classifier not incremental, or no "
+            + "test file provided: can't " + "use both train and model file.");
       }
       try {
         if (trainFileName.length() != 0) {
@@ -1003,13 +1069,12 @@ public class Evaluation
               is = new GZIPInputStream(is);
             }
             // load from KOML?
-            if (!(objectInputFileName.endsWith(".koml") && KOML.isPresent()) ) {
+            if (!(objectInputFileName.endsWith(".koml") && KOML.isPresent())) {
               objectInputStream = new ObjectInputStream(is);
-              xmlInputStream    = null;
-            }
-            else {
+              xmlInputStream = null;
+            } else {
               objectInputStream = null;
-              xmlInputStream    = new BufferedInputStream(is);
+              xmlInputStream = new BufferedInputStream(is);
             }
           }
         }
@@ -1021,30 +1086,29 @@ public class Evaluation
         if (classIndex != -1) {
           test.setClassIndex(classIndex - 1);
         } else {
-          if ( (test.classIndex() == -1) || (classIndexString.length() != 0) )
+          if ((test.classIndex() == -1) || (classIndexString.length() != 0))
             test.setClassIndex(test.numAttributes() - 1);
         }
         actualClassIndex = test.classIndex();
-      }
-      else {
+      } else {
         // percentage split
         splitPercentageString = Utils.getOption("split-percentage", options);
         if (splitPercentageString.length() != 0) {
           if (foldsString.length() != 0)
             throw new Exception(
                 "Percentage split cannot be used in conjunction with "
-                + "cross-validation ('-x').");
+                    + "cross-validation ('-x').");
           splitPercentage = Double.parseDouble(splitPercentageString);
           if ((splitPercentage <= 0) || (splitPercentage >= 100))
             throw new Exception("Percentage split value needs be >0 and <100.");
-        }
-        else {
+        } else {
           splitPercentage = -1;
         }
         preserveOrder = Utils.getFlag("preserve-order", options);
         if (preserveOrder) {
           if (splitPercentage == -1)
-            throw new Exception("Percentage split ('-percentage-split') is missing.");
+            throw new Exception(
+                "Percentage split ('-percentage-split') is missing.");
         }
         // create new train/test sources
         if (splitPercentage > 0) {
@@ -1052,18 +1116,18 @@ public class Evaluation
           Instances tmpInst = trainSource.getDataSet(actualClassIndex);
           if (!preserveOrder)
             tmpInst.randomize(new Random(seed));
-          int trainSize =
-            (int) Math.round(tmpInst.numInstances() * splitPercentage / 100);
-          int testSize  = tmpInst.numInstances() - trainSize;
+          int trainSize = (int) Math.round(tmpInst.numInstances()
+              * splitPercentage / 100);
+          int testSize = tmpInst.numInstances() - trainSize;
           Instances trainInst = new Instances(tmpInst, 0, trainSize);
-          Instances testInst  = new Instances(tmpInst, trainSize, testSize);
+          Instances testInst = new Instances(tmpInst, trainSize, testSize);
           trainSource = new DataSource(trainInst);
-          testSource  = new DataSource(testInst);
+          testSource = new DataSource(testInst);
           template = test = testSource.getStructure();
           if (classIndex != -1) {
             test.setClassIndex(classIndex - 1);
           } else {
-            if ( (test.classIndex() == -1) || (classIndexString.length() != 0) )
+            if ((test.classIndex() == -1) || (classIndexString.length() != 0))
               test.setClassIndex(test.numAttributes() - 1);
           }
           actualClassIndex = test.classIndex();
@@ -1074,21 +1138,23 @@ public class Evaluation
         if (classIndex != -1) {
           train.setClassIndex(classIndex - 1);
         } else {
-          if ( (train.classIndex() == -1) || (classIndexString.length() != 0) )
+          if ((train.classIndex() == -1) || (classIndexString.length() != 0))
             train.setClassIndex(train.numAttributes() - 1);
         }
         actualClassIndex = train.classIndex();
         if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
           if ((testSetPresent) && !test.equalHeaders(train)) {
-            throw new IllegalArgumentException("Train and test file not compatible!\n" + test.equalHeadersMsg(train));
+            throw new IllegalArgumentException(
+                "Train and test file not compatible!\n"
+                    + test.equalHeadersMsg(train));
           }
         }
       }
       if (template == null) {
         throw new Exception("No actual dataset provided to use as template");
       }
-      costMatrix = handleCostOption(
-          Utils.getOption('m', options), template.numClasses());
+      costMatrix = handleCostOption(Utils.getOption('m', options),
+          template.numClasses());
 
       classStatistics = Utils.getFlag('i', options);
       noOutput = Utils.getFlag('o', options);
@@ -1107,7 +1173,9 @@ public class Evaluation
         noOutput = true;
         classificationOutput = AbstractOutput.fromCommandline(classifications);
         if (classificationOutput == null)
-          throw new Exception("Failed to instantiate class for classification output: " + classifications);
+          throw new Exception(
+              "Failed to instantiate class for classification output: "
+                  + classifications);
         classificationOutput.setHeader(template);
       }
       // backwards compatible with old "-p range" and "-distribution" options
@@ -1117,7 +1185,8 @@ public class Evaluation
         classificationOutput.setHeader(template);
         if (!classificationsOld.equals("0"))
           classificationOutput.setAttributes(classificationsOld);
-        classificationOutput.setOutputDistribution(Utils.getFlag("distribution", options));
+        classificationOutput.setOutputDistribution(Utils.getFlag(
+            "distribution", options));
       }
       // -distribution flag needs -p option
       else {
@@ -1126,11 +1195,13 @@ public class Evaluation
       }
       discardPredictions = Utils.getFlag("no-predictions", options);
       if (discardPredictions && (classificationOutput != null))
-	throw new Exception("Cannot discard predictions ('-no-predictions') and output predictions at the same time ('-classifications/-p')!");
+        throw new Exception(
+            "Cannot discard predictions ('-no-predictions') and output predictions at the same time ('-classifications/-p')!");
 
       // if no training file given, we don't have any priors
-      if ( (!trainSetPresent) && (printComplexityStatistics) )
-        throw new Exception("Cannot print complexity statistics ('-k') without training file ('-t')!");
+      if ((!trainSetPresent) && (printComplexityStatistics))
+        throw new Exception(
+            "Cannot print complexity statistics ('-k') without training file ('-t')!");
 
       // If a model file is given, we can't process
       // scheme-specific options
@@ -1152,7 +1223,7 @@ public class Evaluation
               }
             }
           }
-          ((OptionHandler)classifier).setOptions(options);
+          ((OptionHandler) classifier).setOptions(options);
         }
       }
 
@@ -1176,28 +1247,32 @@ public class Evaluation
         if (savedStructure != null) {
           // test for compatibility with template
           if (!template.equalHeaders(savedStructure)) {
-            throw new Exception("training and test set are not compatible\n" + template.equalHeadersMsg(savedStructure));
+            throw new Exception("training and test set are not compatible\n"
+                + template.equalHeadersMsg(savedStructure));
           }
         }
         objectInputStream.close();
-      }
-      else if (xmlInputStream != null) {
-        // whether KOML is available has already been checked (objectInputStream would null otherwise)!
+      } else if (xmlInputStream != null) {
+        // whether KOML is available has already been checked (objectInputStream
+        // would null otherwise)!
         classifier = (Classifier) KOML.read(xmlInputStream);
         xmlInputStream.close();
       }
     }
 
     // Setup up evaluation objects
-    Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
-    Evaluation testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
+    Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0),
+        costMatrix);
+    Evaluation testingEvaluation = new Evaluation(new Instances(template, 0),
+        costMatrix);
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      Instances mappedClassifierHeader =
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).
-          getModelHeader(new Instances(template, 0));
+      Instances mappedClassifierHeader = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getModelHeader(new Instances(template, 0));
 
-      trainingEvaluation = new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
-      testingEvaluation = new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
+      trainingEvaluation = new Evaluation(new Instances(mappedClassifierHeader,
+          0), costMatrix);
+      testingEvaluation = new Evaluation(new Instances(mappedClassifierHeader,
+          0), costMatrix);
     }
     trainingEvaluation.setDiscardPredictions(discardPredictions);
     testingEvaluation.setDiscardPredictions(discardPredictions);
@@ -1210,10 +1285,9 @@ public class Evaluation
     classifierBackup = AbstractClassifier.makeCopy(classifier);
 
     // Build the classifier if no object file provided
-    if ((classifier instanceof UpdateableClassifier) &&
-        (testSetPresent || noCrossValidation) &&
-        (costMatrix == null) &&
-        (trainSetPresent)) {
+    if ((classifier instanceof UpdateableClassifier)
+        && (testSetPresent || noCrossValidation) && (costMatrix == null)
+        && (trainSetPresent)) {
       // Build classifier incrementally
       trainingEvaluation.setPriors(train);
       testingEvaluation.setPriors(train);
@@ -1226,25 +1300,24 @@ public class Evaluation
         trainInst = trainSource.nextElement(train);
         trainingEvaluation.updatePriors(trainInst);
         testingEvaluation.updatePriors(trainInst);
-        ((UpdateableClassifier)classifier).updateClassifier(trainInst);
+        ((UpdateableClassifier) classifier).updateClassifier(trainInst);
       }
       trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
     } else if (objectInputFileName.length() == 0) {
       // Build classifier in one go
       tempTrain = trainSource.getDataSet(actualClassIndex);
 
-      if (classifier instanceof weka.classifiers.misc.InputMappedClassifier &&
-          !trainingEvaluation.getHeader().equalHeaders(tempTrain)) {
+      if (classifier instanceof weka.classifiers.misc.InputMappedClassifier
+          && !trainingEvaluation.getHeader().equalHeaders(tempTrain)) {
         // we need to make a new dataset that maps the training instances to
         // the structure expected by the mapped classifier - this is only
         // to ensure that the structure and priors computed by the *testing*
         // evaluation object is correct with respect to the mapped classifier
-        Instances mappedClassifierDataset =
-          ((weka.classifiers.misc.InputMappedClassifier)classifier).
-            getModelHeader(new Instances(template, 0));
+        Instances mappedClassifierDataset = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+            .getModelHeader(new Instances(template, 0));
         for (int zz = 0; zz < tempTrain.numInstances(); zz++) {
-          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier)classifier).
-            constructMappedInstance(tempTrain.instance(zz));
+          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+              .constructMappedInstance(tempTrain.instance(zz));
           mappedClassifierDataset.add(mapped);
         }
         tempTrain = mappedClassifierDataset;
@@ -1269,7 +1342,8 @@ public class Evaluation
     if (objectOutputFileName.length() != 0) {
       OutputStream os = new FileOutputStream(objectOutputFileName);
       // binary
-      if (!(objectOutputFileName.endsWith(".xml") || (objectOutputFileName.endsWith(".koml") && KOML.isPresent()))) {
+      if (!(objectOutputFileName.endsWith(".xml") || (objectOutputFileName
+          .endsWith(".koml") && KOML.isPresent()))) {
         if (objectOutputFileName.endsWith(".gz")) {
           os = new GZIPOutputStream(os);
         }
@@ -1287,24 +1361,23 @@ public class Evaluation
         if (objectOutputFileName.endsWith(".xml")) {
           XMLSerialization xmlSerial = new XMLClassifier();
           xmlSerial.write(xmlOutputStream, classifier);
+        } else
+        // whether KOML is present has already been checked
+        // if not present -> ".koml" is interpreted as binary - see above
+        if (objectOutputFileName.endsWith(".koml")) {
+          KOML.write(xmlOutputStream, classifier);
         }
-        else
-          // whether KOML is present has already been checked
-          // if not present -> ".koml" is interpreted as binary - see above
-          if (objectOutputFileName.endsWith(".koml")) {
-            KOML.write(xmlOutputStream, classifier);
-          }
         xmlOutputStream.close();
       }
     }
 
     // If classifier is drawable output string describing graph
-    if ((classifier instanceof Drawable) && (printGraph)){
-      return ((Drawable)classifier).graph();
+    if ((classifier instanceof Drawable) && (printGraph)) {
+      return ((Drawable) classifier).graph();
     }
 
     // Output the classifier as equivalent source
-    if ((classifier instanceof Sourcable) && (printSource)){
+    if ((classifier instanceof Sourcable) && (printSource)) {
       return wekaStaticWrapper((Sourcable) classifier, sourceClass);
     }
 
@@ -1312,7 +1385,7 @@ public class Evaluation
     if (!(noOutput || printMargins)) {
       if (classifier instanceof OptionHandler) {
         if (schemeOptionsText != null) {
-          text.append("\nOptions: "+schemeOptionsText);
+          text.append("\nOptions: " + schemeOptionsText);
           text.append("\n");
         }
       }
@@ -1343,9 +1416,8 @@ public class Evaluation
     // Compute error estimate from training data
     if ((trainStatistics) && (trainSetPresent)) {
 
-      if ((classifier instanceof UpdateableClassifier) &&
-          (testSetPresent) &&
-          (costMatrix == null)) {
+      if ((classifier instanceof UpdateableClassifier) && (testSetPresent)
+          && (costMatrix == null)) {
 
         // Classifier was trained incrementally, so we have to
         // reset the source.
@@ -1357,13 +1429,13 @@ public class Evaluation
         Instance trainInst;
         while (trainSource.hasMoreElements(train)) {
           trainInst = trainSource.nextElement(train);
-          trainingEvaluation.evaluateModelOnce((Classifier)classifier, trainInst);
+          trainingEvaluation.evaluateModelOnce(classifier, trainInst);
         }
         testTimeElapsed = System.currentTimeMillis() - testTimeStart;
       } else {
         testTimeStart = System.currentTimeMillis();
-        trainingEvaluation.evaluateModel(
-            classifier, trainSource.getDataSet(actualClassIndex));
+        trainingEvaluation.evaluateModel(classifier,
+            trainSource.getDataSet(actualClassIndex));
         testTimeElapsed = System.currentTimeMillis() - testTimeStart;
       }
 
@@ -1373,21 +1445,23 @@ public class Evaluation
       } else {
         if (classificationOutput == null) {
           text.append("\nTime taken to build model: "
-              + Utils.doubleToString(trainTimeElapsed / 1000.0,2)
-              + " seconds");
+              + Utils.doubleToString(trainTimeElapsed / 1000.0, 2) + " seconds");
 
           if (splitPercentage > 0)
             text.append("\nTime taken to test model on training split: ");
           else
             text.append("\nTime taken to test model on training data: ");
-          text.append(Utils.doubleToString(testTimeElapsed / 1000.0,2) + " seconds");
+          text.append(Utils.doubleToString(testTimeElapsed / 1000.0, 2)
+              + " seconds");
 
           if (splitPercentage > 0)
-            text.append(trainingEvaluation.toSummaryString("\n\n=== Error on training"
-                  + " split ===\n", printComplexityStatistics));
+            text.append(trainingEvaluation.toSummaryString(
+                "\n\n=== Error on training" + " split ===\n",
+                printComplexityStatistics));
           else
-            text.append(trainingEvaluation.toSummaryString("\n\n=== Error on training"
-                  + " data ===\n", printComplexityStatistics));
+            text.append(trainingEvaluation.toSummaryString(
+                "\n\n=== Error on training" + " data ===\n",
+                printComplexityStatistics));
 
           if (template.classAttribute().isNominal()) {
             if (classStatistics) {
@@ -1408,21 +1482,21 @@ public class Evaluation
       Instance testInst;
       while (testSource.hasMoreElements(test)) {
         testInst = testSource.nextElement(test);
-        testingEvaluation.evaluateModelOnceAndRecordPrediction(
-            (Classifier)classifier, testInst);
+        testingEvaluation.evaluateModelOnceAndRecordPrediction(classifier,
+            testInst);
       }
 
       if (splitPercentage > 0) {
         if (classificationOutput == null) {
-          text.append("\n\n" + testingEvaluation.
-              toSummaryString("=== Error on test split ===\n",
-                  printComplexityStatistics));
+          text.append("\n\n"
+              + testingEvaluation.toSummaryString(
+                  "=== Error on test split ===\n", printComplexityStatistics));
         }
       } else {
         if (classificationOutput == null) {
-          text.append("\n\n" + testingEvaluation.
-              toSummaryString("=== Error on test data ===\n",
-                  printComplexityStatistics));
+          text.append("\n\n"
+              + testingEvaluation.toSummaryString(
+                  "=== Error on test data ===\n", printComplexityStatistics));
         }
       }
 
@@ -1434,30 +1508,29 @@ public class Evaluation
         classifier = AbstractClassifier.makeCopy(classifierBackup);
         if (classificationOutput == null) {
           testingEvaluation.crossValidateModel(classifier,
-                                               trainSource.getDataSet(actualClassIndex),
-                                               folds, random);
+              trainSource.getDataSet(actualClassIndex), folds, random);
           if (template.classAttribute().isNumeric()) {
-            text.append("\n\n\n" + testingEvaluation.
-                        toSummaryString("=== Cross-validation ===\n",
-                                        printComplexityStatistics));
+            text.append("\n\n\n"
+                + testingEvaluation.toSummaryString(
+                    "=== Cross-validation ===\n", printComplexityStatistics));
           } else {
-            text.append("\n\n\n" + testingEvaluation.
-                        toSummaryString("=== Stratified " +
-                                        "cross-validation ===\n",
-                                        printComplexityStatistics));
+            text.append("\n\n\n"
+                + testingEvaluation.toSummaryString("=== Stratified "
+                    + "cross-validation ===\n", printComplexityStatistics));
           }
         } else {
           predsBuff = new StringBuffer();
           classificationOutput.setBuffer(predsBuff);
           predsBuff.append("\n=== Predictions under cross-validation ===\n\n");
           testingEvaluation.crossValidateModel(classifier,
-                                               trainSource.getDataSet(actualClassIndex),
-                                               folds, random, classificationOutput);
+              trainSource.getDataSet(actualClassIndex), folds, random,
+              classificationOutput);
         }
       }
     }
     if (template.classAttribute().isNominal()) {
-      if (classStatistics && !noCrossValidation && (classificationOutput == null)) {
+      if (classStatistics && !noCrossValidation
+          && (classificationOutput == null)) {
         text.append("\n\n" + testingEvaluation.toClassDetailsString());
       }
       if (!noCrossValidation && (classificationOutput == null))
@@ -1475,10 +1548,11 @@ public class Evaluation
       if (thresholdLabel.length() != 0)
         labelIndex = template.classAttribute().indexOfValue(thresholdLabel);
       if (labelIndex == -1)
-        throw new IllegalArgumentException(
-            "Class label '" + thresholdLabel + "' is unknown!");
+        throw new IllegalArgumentException("Class label '" + thresholdLabel
+            + "' is unknown!");
       ThresholdCurve tc = new ThresholdCurve();
-      Instances result = tc.getCurve(testingEvaluation.predictions(), labelIndex);
+      Instances result = tc.getCurve(testingEvaluation.predictions(),
+          labelIndex);
       DataSink.write(thresholdFile, result);
     }
 
@@ -1487,25 +1561,24 @@ public class Evaluation
 
   /**
    * Attempts to load a cost matrix.
-   *
+   * 
    * @param costFileName the filename of the cost matrix
    * @param numClasses the number of classes that should be in the cost matrix
-   * (only used if the cost file is in old format).
+   *          (only used if the cost file is in old format).
    * @return a <code>CostMatrix</code> value, or null if costFileName is empty
    * @throws Exception if an error occurs.
    */
   protected static CostMatrix handleCostOption(String costFileName,
-      int numClasses)
-    throws Exception {
+      int numClasses) throws Exception {
 
     if ((costFileName != null) && (costFileName.length() != 0)) {
-      System.out.println(
-          "NOTE: The behaviour of the -m option has changed between WEKA 3.0"
-          +" and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
-          +" only. For cost-sensitive *prediction*, use one of the"
-          +" cost-sensitive metaschemes such as"
-          +" weka.classifiers.meta.CostSensitiveClassifier or"
-          +" weka.classifiers.meta.MetaCost");
+      System.out
+          .println("NOTE: The behaviour of the -m option has changed between WEKA 3.0"
+              + " and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
+              + " only. For cost-sensitive *prediction*, use one of the"
+              + " cost-sensitive metaschemes such as"
+              + " weka.classifiers.meta.CostSensitiveClassifier or"
+              + " weka.classifiers.meta.MetaCost");
 
       Reader costReader = null;
       try {
@@ -1519,7 +1592,7 @@ public class Evaluation
       } catch (Exception ex) {
         try {
           // Now try as the poxy old format :-)
-          //System.err.println("Attempting to read old format cost file");
+          // System.err.println("Attempting to read old format cost file");
           try {
             costReader.close(); // Close the old one
             costReader = new BufferedReader(new FileReader(costFileName));
@@ -1527,13 +1600,13 @@ public class Evaluation
             throw new Exception("Can't open file " + e.getMessage() + '.');
           }
           CostMatrix costMatrix = new CostMatrix(numClasses);
-          //System.err.println("Created default cost matrix");
+          // System.err.println("Created default cost matrix");
           costMatrix.readOldFormat(costReader);
           return costMatrix;
-          //System.err.println("Read old format");
+          // System.err.println("Read old format");
         } catch (Exception e2) {
           // re-throw the original exception
-          //System.err.println("Re-throwing original exception");
+          // System.err.println("Re-throwing original exception");
           throw ex;
         }
       }
@@ -1543,23 +1616,22 @@ public class Evaluation
   }
 
   /**
-   * Evaluates the classifier on a given set of instances. Note that
-   * the data must have exactly the same format (e.g. order of
-   * attributes) as the data used to train the classifier! Otherwise
-   * the results will generally be meaningless.
-   *
+   * Evaluates the classifier on a given set of instances. Note that the data
+   * must have exactly the same format (e.g. order of attributes) as the data
+   * used to train the classifier! Otherwise the results will generally be
+   * meaningless.
+   * 
    * @param classifier machine learning classifier
    * @param data set of test instances for evaluation
    * @param forPredictionsPrinting varargs parameter that, if supplied, is
-   * expected to hold a weka.classifiers.evaluation.output.prediction.AbstractOutput
-   * object
+   *          expected to hold a
+   *          weka.classifiers.evaluation.output.prediction.AbstractOutput
+   *          object
    * @return the predictions
-   * @throws Exception if model could not be evaluated
-   * successfully
+   * @throws Exception if model could not be evaluated successfully
    */
-  public double[] evaluateModel(Classifier classifier,
-                                Instances data,
-                                Object... forPredictionsPrinting) throws Exception {
+  public double[] evaluateModel(Classifier classifier, Instances data,
+      Object... forPredictionsPrinting) throws Exception {
     // for predictions printing
     AbstractOutput classificationOutput = null;
 
@@ -1570,12 +1642,13 @@ public class Evaluation
     }
 
     if (classifier instanceof BatchPredictor) {
-      double[][] preds = ((BatchPredictor)classifier).distributionsForInstances(data);
+      double[][] preds = ((BatchPredictor) classifier)
+          .distributionsForInstances(data);
       for (int i = 0; i < data.numInstances(); i++) {
         double[] p = preds[i];
-        
+
         predictions[i] = evaluationForSingleInstance(p, data.instance(i), true);
-        
+
         if (classificationOutput != null)
           classificationOutput.printClassification(p, data.instance(i), i);
       }
@@ -1583,10 +1656,11 @@ public class Evaluation
       // Need to be able to collect predictions if appropriate (for AUC)
 
       for (int i = 0; i < data.numInstances(); i++) {
-        predictions[i] = evaluateModelOnceAndRecordPrediction((Classifier)classifier,
+        predictions[i] = evaluateModelOnceAndRecordPrediction(classifier,
             data.instance(i));
         if (classificationOutput != null)
-          classificationOutput.printClassification(classifier, data.instance(i), i);
+          classificationOutput.printClassification(classifier,
+              data.instance(i), i);
       }
     }
 
@@ -1595,7 +1669,7 @@ public class Evaluation
 
   /**
    * Evaluates the supplied distribution on a single instance.
-   *
+   * 
    * @param dist the supplied distribution
    * @param instance the test instance to be classified
    * @param storePredictions whether to store predictions for nominal classifier
@@ -1603,21 +1677,21 @@ public class Evaluation
    * @throws Exception if model could not be evaluated successfully
    */
   public double evaluationForSingleInstance(double[] dist, Instance instance,
-                                            boolean storePredictions) throws Exception {
+      boolean storePredictions) throws Exception {
 
     double pred;
 
     if (m_ClassIsNominal) {
       pred = Utils.maxIndex(dist);
-      if (dist[(int)pred] <= 0) {
+      if (dist[(int) pred] <= 0) {
         pred = Utils.missingValue();
       }
       updateStatsForClassifier(dist, instance);
       if (storePredictions && !m_DiscardPredictions) {
         if (m_Predictions == null)
           m_Predictions = new FastVector();
-        m_Predictions.addElement(new NominalPrediction(instance.classValue(), dist,
-                                                       instance.weight()));
+        m_Predictions.addElement(new NominalPrediction(instance.classValue(),
+            dist, instance.weight()));
       }
     } else {
       pred = dist[0];
@@ -1625,8 +1699,8 @@ public class Evaluation
       if (storePredictions && !m_DiscardPredictions) {
         if (m_Predictions == null)
           m_Predictions = new FastVector();
-        m_Predictions.addElement(new NumericPrediction(instance.classValue(), pred,
-                                                       instance.weight()));
+        m_Predictions.addElement(new NumericPrediction(instance.classValue(),
+            pred, instance.weight()));
       }
     }
 
@@ -1634,55 +1708,53 @@ public class Evaluation
   }
 
   /**
-   * Evaluates the classifier on a single instance and records the
-   * prediction.
-   *
+   * Evaluates the classifier on a single instance and records the prediction.
+   * 
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
    * @param storePredictions whether to store predictions for nominal classifier
    * @return the prediction made by the clasifier
-   * @throws Exception if model could not be evaluated
-   * successfully or the data contains string attributes
+   * @throws Exception if model could not be evaluated successfully or the data
+   *           contains string attributes
    */
   protected double evaluationForSingleInstance(Classifier classifier,
-                                               Instance instance,
-                                               boolean storePredictions) throws Exception {
+      Instance instance, boolean storePredictions) throws Exception {
 
-
-
-    Instance classMissing = (Instance)instance.copy();
+    Instance classMissing = (Instance) instance.copy();
     classMissing.setDataset(instance.dataset());
 
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      instance = (Instance)instance.copy();
-      instance =
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).
-          constructMappedInstance(instance);
-//      System.out.println("Mapped instance " + instance);
-      int mappedClass =
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).getMappedClassIndex();
+      instance = (Instance) instance.copy();
+      instance = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .constructMappedInstance(instance);
+      // System.out.println("Mapped instance " + instance);
+      int mappedClass = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getMappedClassIndex();
       classMissing.setMissing(mappedClass);
     } else {
       classMissing.setClassMissing();
     }
 
-//    System.out.println("instance (to predict)" + classMissing);
-    double pred = evaluationForSingleInstance(classifier.distributionForInstance(classMissing),
-                                              instance, storePredictions);
+    // System.out.println("instance (to predict)" + classMissing);
+    double pred = evaluationForSingleInstance(
+        classifier.distributionForInstance(classMissing), instance,
+        storePredictions);
 
-    // We don't need to do the following if the class is nominal because in that case
+    // We don't need to do the following if the class is nominal because in that
+    // case
     // entropy and coverage statistics are always computed.
     if (!m_ClassIsNominal) {
       if (!instance.classIsMissing() && !Utils.isMissingValue(pred)) {
         if (classifier instanceof IntervalEstimator) {
-          updateStatsForIntervalEstimator((IntervalEstimator)classifier, classMissing,
-                                          instance.classValue());
+          updateStatsForIntervalEstimator((IntervalEstimator) classifier,
+              classMissing, instance.classValue());
         } else {
           m_CoverageStatisticsAvailable = false;
         }
         if (classifier instanceof ConditionalDensityEstimator) {
-          updateStatsForConditionalDensityEstimator((ConditionalDensityEstimator)classifier,
-                                                    classMissing, instance.classValue());
+          updateStatsForConditionalDensityEstimator(
+              (ConditionalDensityEstimator) classifier, classMissing,
+              instance.classValue());
         } else {
           m_ComplexityStatisticsAvailable = false;
         }
@@ -1692,14 +1764,13 @@ public class Evaluation
   }
 
   /**
-   * Evaluates the classifier on a single instance and records the
-   * prediction.
-   *
+   * Evaluates the classifier on a single instance and records the prediction.
+   * 
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
    * @return the prediction made by the clasifier
-   * @throws Exception if model could not be evaluated
-   * successfully or the data contains string attributes
+   * @throws Exception if model could not be evaluated successfully or the data
+   *           contains string attributes
    */
   public double evaluateModelOnceAndRecordPrediction(Classifier classifier,
       Instance instance) throws Exception {
@@ -1709,42 +1780,42 @@ public class Evaluation
 
   /**
    * Evaluates the classifier on a single instance.
-   *
+   * 
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
    * @return the prediction made by the clasifier
-   * @throws Exception if model could not be evaluated
-   * successfully or the data contains string attributes
+   * @throws Exception if model could not be evaluated successfully or the data
+   *           contains string attributes
    */
-  public double evaluateModelOnce(Classifier classifier, Instance instance) throws Exception {
+  public double evaluateModelOnce(Classifier classifier, Instance instance)
+      throws Exception {
 
     return evaluationForSingleInstance(classifier, instance, false);
   }
 
   /**
    * Evaluates the supplied distribution on a single instance.
-   *
+   * 
    * @param dist the supplied distribution
    * @param instance the test instance to be classified
    * @return the prediction
-   * @throws Exception if model could not be evaluated
-   * successfully
+   * @throws Exception if model could not be evaluated successfully
    */
-  public double evaluateModelOnce(double [] dist, Instance instance) throws Exception {
+  public double evaluateModelOnce(double[] dist, Instance instance)
+      throws Exception {
 
     return evaluationForSingleInstance(dist, instance, false);
   }
 
   /**
    * Evaluates the supplied distribution on a single instance.
-   *
+   * 
    * @param dist the supplied distribution
    * @param instance the test instance to be classified
    * @return the prediction
-   * @throws Exception if model could not be evaluated
-   * successfully
+   * @throws Exception if model could not be evaluated successfully
    */
-  public double evaluateModelOnceAndRecordPrediction(double [] dist,
+  public double evaluateModelOnceAndRecordPrediction(double[] dist,
       Instance instance) throws Exception {
 
     return evaluationForSingleInstance(dist, instance, true);
@@ -1752,24 +1823,23 @@ public class Evaluation
 
   /**
    * Evaluates the supplied prediction on a single instance.
-   *
+   * 
    * @param prediction the supplied prediction
    * @param instance the test instance to be classified
-   * @throws Exception if model could not be evaluated
-   * successfully
+   * @throws Exception if model could not be evaluated successfully
    */
-  public void evaluateModelOnce(double prediction,
-      Instance instance) throws Exception {
+  public void evaluateModelOnce(double prediction, Instance instance)
+      throws Exception {
 
     evaluateModelOnce(makeDistribution(prediction), instance);
   }
 
   /**
    * Returns the predictions that have been collected.
-   *
-   * @return a reference to the FastVector containing the predictions
-   * that have been collected. This should be null if no predictions
-   * have been collected.
+   * 
+   * @return a reference to the FastVector containing the predictions that have
+   *         been collected. This should be null if no predictions have been
+   *         collected.
    */
   public FastVector predictions() {
     if (m_DiscardPredictions)
@@ -1779,24 +1849,25 @@ public class Evaluation
   }
 
   /**
-   * Wraps a static classifier in enough source to test using the weka
-   * class libraries.
-   *
+   * Wraps a static classifier in enough source to test using the weka class
+   * libraries.
+   * 
    * @param classifier a Sourcable Classifier
    * @param className the name to give to the source code class
-   * @return the source for a static classifier that can be tested with
-   * weka libraries.
+   * @return the source for a static classifier that can be tested with weka
+   *         libraries.
    * @throws Exception if code-generation fails
    */
   public static String wekaStaticWrapper(Sourcable classifier, String className)
-    throws Exception {
+      throws Exception {
 
     StringBuffer result = new StringBuffer();
     String staticClassifier = classifier.toSource(className);
 
     result.append("// Generated with Weka " + Version.VERSION + "\n");
     result.append("//\n");
-    result.append("// This code is public domain and comes with no warranty.\n");
+    result
+        .append("// This code is public domain and comes with no warranty.\n");
     result.append("//\n");
     result.append("// Timestamp: " + new Date() + "\n");
     result.append("\n");
@@ -1808,7 +1879,8 @@ public class Evaluation
     result.append("import weka.core.Instance;\n");
     result.append("import weka.core.Instances;\n");
     result.append("import weka.core.RevisionUtils;\n");
-    result.append("import weka.classifiers.Classifier;\nimport weka.classifiers.AbstractClassifier;\n");
+    result
+        .append("import weka.classifiers.Classifier;\nimport weka.classifiers.AbstractClassifier;\n");
     result.append("\n");
     result.append("public class WekaWrapper\n");
     result.append("  extends AbstractClassifier {\n");
@@ -1832,7 +1904,8 @@ public class Evaluation
     result.append("   * @return the capabilities\n");
     result.append("   */\n");
     result.append("  public Capabilities getCapabilities() {\n");
-    result.append(((Classifier) classifier).getCapabilities().toSource("result", 4));
+    result.append(((Classifier) classifier).getCapabilities().toSource(
+        "result", 4));
     result.append("    return result;\n");
     result.append("  }\n");
 
@@ -1843,7 +1916,8 @@ public class Evaluation
     result.append("   *\n");
     result.append("   * @param i the training data\n");
     result.append("   */\n");
-    result.append("  public void buildClassifier(Instances i) throws Exception {\n");
+    result
+        .append("  public void buildClassifier(Instances i) throws Exception {\n");
     result.append("    // can classifier handle the data?\n");
     result.append("    getCapabilities().testWithFail(i);\n");
     result.append("  }\n");
@@ -1856,7 +1930,8 @@ public class Evaluation
     result.append("   * @param i the instance to classify\n");
     result.append("   * @return the classification result\n");
     result.append("   */\n");
-    result.append("  public double classifyInstance(Instance i) throws Exception {\n");
+    result
+        .append("  public double classifyInstance(Instance i) throws Exception {\n");
     result.append("    Object[] s = new Object[i.numAttributes()];\n");
     result.append("    \n");
     result.append("    for (int j = 0; j < s.length; j++) {\n");
@@ -1888,14 +1963,16 @@ public class Evaluation
     // toString
     result.append("\n");
     result.append("  /**\n");
-    result.append("   * Returns only the classnames and what classifier it is based on.\n");
+    result
+        .append("   * Returns only the classnames and what classifier it is based on.\n");
     result.append("   *\n");
     result.append("   * @return a short description\n");
     result.append("   */\n");
     result.append("  public String toString() {\n");
     result.append("    return \"Auto-generated classifier wrapper, based on "
-        + classifier.getClass().getName() + " (generated with Weka " + Version.VERSION + ").\\n"
-        + "\" + this.getClass().getName() + \"/" + className + "\";\n");
+        + classifier.getClass().getName() + " (generated with Weka "
+        + Version.VERSION + ").\\n" + "\" + this.getClass().getName() + \"/"
+        + className + "\";\n");
     result.append("  }\n");
 
     // main
@@ -1918,10 +1995,9 @@ public class Evaluation
   }
 
   /**
-   * Gets the number of test instances that had a known class value
-   * (actually the sum of the weights of test instances with known
-   * class value).
-   *
+   * Gets the number of test instances that had a known class value (actually
+   * the sum of the weights of test instances with known class value).
+   * 
    * @return the number of test instances with known class
    */
   public final double numInstances() {
@@ -1930,9 +2006,9 @@ public class Evaluation
   }
 
   /**
-   * Gets the coverage of the test cases by the predicted regions at
-   * the confidence level specified when evaluation was performed.
-   *
+   * Gets the coverage of the test cases by the predicted regions at the
+   * confidence level specified when evaluation was performed.
+   * 
    * @return the coverage of the test cases by the predicted regions
    */
   public final double coverageOfTestCasesByPredictedRegions() {
@@ -1944,10 +2020,10 @@ public class Evaluation
   }
 
   /**
-   * Gets the average size of the predicted regions, relative to the
-   * range of the target in the training data, at the confidence level
-   * specified when evaluation was performed.
-   *
+   * Gets the average size of the predicted regions, relative to the range of
+   * the target in the training data, at the confidence level specified when
+   * evaluation was performed.
+   * 
    * @return the average size of the predicted regions
    */
   public final double sizeOfPredictedRegions() {
@@ -1959,10 +2035,10 @@ public class Evaluation
   }
 
   /**
-   * Gets the number of instances incorrectly classified (that is, for
-   * which an incorrect prediction was made). (Actually the sum of the
-   * weights of these instances)
-   *
+   * Gets the number of instances incorrectly classified (that is, for which an
+   * incorrect prediction was made). (Actually the sum of the weights of these
+   * instances)
+   * 
    * @return the number of incorrectly classified instances
    */
   public final double incorrect() {
@@ -1971,11 +2047,10 @@ public class Evaluation
   }
 
   /**
-   * Gets the percentage of instances incorrectly classified (that is,
-   * for which an incorrect prediction was made).
-   *
-   * @return the percent of incorrectly classified instances
-   * (between 0 and 100)
+   * Gets the percentage of instances incorrectly classified (that is, for which
+   * an incorrect prediction was made).
+   * 
+   * @return the percent of incorrectly classified instances (between 0 and 100)
    */
   public final double pctIncorrect() {
 
@@ -1983,9 +2058,9 @@ public class Evaluation
   }
 
   /**
-   * Gets the total cost, that is, the cost of each prediction times the
-   * weight of the instance, summed over all instances.
-   *
+   * Gets the total cost, that is, the cost of each prediction times the weight
+   * of the instance, summed over all instances.
+   * 
    * @return the total cost
    */
   public final double totalCost() {
@@ -1994,9 +2069,9 @@ public class Evaluation
   }
 
   /**
-   * Gets the average cost, that is, total cost of misclassifications
-   * (incorrect plus unclassified) over the total number of instances.
-   *
+   * Gets the average cost, that is, total cost of misclassifications (incorrect
+   * plus unclassified) over the total number of instances.
+   * 
    * @return the average cost.
    */
   public final double avgCost() {
@@ -2005,10 +2080,10 @@ public class Evaluation
   }
 
   /**
-   * Gets the number of instances correctly classified (that is, for
-   * which a correct prediction was made). (Actually the sum of the weights
-   * of these instances)
-   *
+   * Gets the number of instances correctly classified (that is, for which a
+   * correct prediction was made). (Actually the sum of the weights of these
+   * instances)
+   * 
    * @return the number of correctly classified instances
    */
   public final double correct() {
@@ -2017,9 +2092,9 @@ public class Evaluation
   }
 
   /**
-   * Gets the percentage of instances correctly classified (that is, for
-   * which a correct prediction was made).
-   *
+   * Gets the percentage of instances correctly classified (that is, for which a
+   * correct prediction was made).
+   * 
    * @return the percent of correctly classified instances (between 0 and 100)
    */
   public final double pctCorrect() {
@@ -2028,10 +2103,10 @@ public class Evaluation
   }
 
   /**
-   * Gets the number of instances not classified (that is, for
-   * which no prediction was made by the classifier). (Actually the sum
-   * of the weights of these instances)
-   *
+   * Gets the number of instances not classified (that is, for which no
+   * prediction was made by the classifier). (Actually the sum of the weights of
+   * these instances)
+   * 
    * @return the number of unclassified instances
    */
   public final double unclassified() {
@@ -2040,9 +2115,9 @@ public class Evaluation
   }
 
   /**
-   * Gets the percentage of instances not classified (that is, for
-   * which no prediction was made by the classifier).
-   *
+   * Gets the percentage of instances not classified (that is, for which no
+   * prediction was made by the classifier).
+   * 
    * @return the percent of unclassified instances (between 0 and 100)
    */
   public final double pctUnclassified() {
@@ -2051,12 +2126,12 @@ public class Evaluation
   }
 
   /**
-   * Returns the estimated error rate or the root mean squared error
-   * (if the class is numeric). If a cost matrix was given this
-   * error rate gives the average cost.
-   *
-   * @return the estimated error rate (between 0 and 1, or between 0 and
-   * maximum cost)
+   * Returns the estimated error rate or the root mean squared error (if the
+   * class is numeric). If a cost matrix was given this error rate gives the
+   * average cost.
+   * 
+   * @return the estimated error rate (between 0 and 1, or between 0 and maximum
+   *         cost)
    */
   public final double errorRate() {
 
@@ -2072,11 +2147,10 @@ public class Evaluation
 
   /**
    * Returns value of kappa statistic if class is nominal.
-   *
+   * 
    * @return the value of the kappa statistic
    */
   public final double kappa() {
-
 
     double[] sumRows = new double[m_ConfusionMatrix.length];
     double[] sumColumns = new double[m_ConfusionMatrix.length];
@@ -2105,28 +2179,24 @@ public class Evaluation
 
   /**
    * Returns the correlation coefficient if the class is numeric.
-   *
+   * 
    * @return the correlation coefficient
    * @throws Exception if class is not numeric
    */
   public final double correlationCoefficient() throws Exception {
 
     if (m_ClassIsNominal) {
-      throw
-      new Exception("Can't compute correlation coefficient: " +
-      "class is nominal!");
+      throw new Exception("Can't compute correlation coefficient: "
+          + "class is nominal!");
     }
 
     double correlation = 0;
-    double varActual =
-      m_SumSqrClass - m_SumClass * m_SumClass /
-      (m_WithClass - m_Unclassified);
-    double varPredicted =
-      m_SumSqrPredicted - m_SumPredicted * m_SumPredicted /
-      (m_WithClass - m_Unclassified);
-    double varProd =
-      m_SumClassPredicted - m_SumClass * m_SumPredicted /
-      (m_WithClass - m_Unclassified);
+    double varActual = m_SumSqrClass - m_SumClass * m_SumClass
+        / (m_WithClass - m_Unclassified);
+    double varPredicted = m_SumSqrPredicted - m_SumPredicted * m_SumPredicted
+        / (m_WithClass - m_Unclassified);
+    double varProd = m_SumClassPredicted - m_SumClass * m_SumPredicted
+        / (m_WithClass - m_Unclassified);
 
     if (varActual * varPredicted <= 0) {
       correlation = 0.0;
@@ -2138,10 +2208,10 @@ public class Evaluation
   }
 
   /**
-   * Returns the mean absolute error. Refers to the error of the
-   * predicted values for numeric classes, and the error of the
-   * predicted probability distribution for nominal classes.
-   *
+   * Returns the mean absolute error. Refers to the error of the predicted
+   * values for numeric classes, and the error of the predicted probability
+   * distribution for nominal classes.
+   * 
    * @return the mean absolute error
    */
   public final double meanAbsoluteError() {
@@ -2151,7 +2221,7 @@ public class Evaluation
 
   /**
    * Returns the mean absolute error of the prior.
-   *
+   * 
    * @return the mean absolute error
    */
   public final double meanPriorAbsoluteError() {
@@ -2164,7 +2234,7 @@ public class Evaluation
 
   /**
    * Returns the relative absolute error.
-   *
+   * 
    * @return the relative absolute error
    * @throws Exception if it can't be computed
    */
@@ -2178,7 +2248,7 @@ public class Evaluation
 
   /**
    * Returns the root mean squared error.
-   *
+   * 
    * @return the root mean squared error
    */
   public final double rootMeanSquaredError() {
@@ -2188,7 +2258,7 @@ public class Evaluation
 
   /**
    * Returns the root mean prior squared error.
-   *
+   * 
    * @return the root mean prior squared error
    */
   public final double rootMeanPriorSquaredError() {
@@ -2201,7 +2271,7 @@ public class Evaluation
 
   /**
    * Returns the root relative squared error if the class is numeric.
-   *
+   * 
    * @return the root relative squared error
    */
   public final double rootRelativeSquaredError() {
@@ -2214,41 +2284,38 @@ public class Evaluation
 
   /**
    * Calculate the entropy of the prior distribution.
-   *
+   * 
    * @return the entropy of the prior distribution
    * @throws Exception if the class is not nominal
    */
   public final double priorEntropy() throws Exception {
 
     if (!m_ClassIsNominal) {
-      throw
-      new Exception("Can't compute entropy of class prior: " +
-      "class numeric!");
+      throw new Exception("Can't compute entropy of class prior: "
+          + "class numeric!");
     }
 
     if (m_NoPriors)
       return Double.NaN;
 
     double entropy = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
-      entropy -= m_ClassPriors[i] / m_ClassPriorsSum *
-        Utils.log2(m_ClassPriors[i] / m_ClassPriorsSum);
+    for (int i = 0; i < m_NumClasses; i++) {
+      entropy -= m_ClassPriors[i] / m_ClassPriorsSum
+          * Utils.log2(m_ClassPriors[i] / m_ClassPriorsSum);
     }
     return entropy;
   }
 
   /**
    * Return the total Kononenko & Bratko Information score in bits.
-   *
+   * 
    * @return the K&B information score
    * @throws Exception if the class is not nominal
    */
   public final double KBInformation() throws Exception {
 
     if (!m_ClassIsNominal) {
-      throw
-      new Exception("Can't compute K&B Info score: " +
-      "class numeric!");
+      throw new Exception("Can't compute K&B Info score: " + "class numeric!");
     }
 
     if (m_NoPriors)
@@ -2258,17 +2325,15 @@ public class Evaluation
   }
 
   /**
-   * Return the Kononenko & Bratko Information score in bits per
-   * instance.
-   *
+   * Return the Kononenko & Bratko Information score in bits per instance.
+   * 
    * @return the K&B information score
    * @throws Exception if the class is not nominal
    */
   public final double KBMeanInformation() throws Exception {
 
     if (!m_ClassIsNominal) {
-      throw
-      new Exception("Can't compute K&B Info score: class numeric!");
+      throw new Exception("Can't compute K&B Info score: class numeric!");
     }
 
     if (m_NoPriors)
@@ -2279,16 +2344,14 @@ public class Evaluation
 
   /**
    * Return the Kononenko & Bratko Relative Information score.
-   *
+   * 
    * @return the K&B relative information score
    * @throws Exception if the class is not nominal
    */
   public final double KBRelativeInformation() throws Exception {
 
     if (!m_ClassIsNominal) {
-      throw
-      new Exception("Can't compute K&B Info score: " +
-      "class numeric!");
+      throw new Exception("Can't compute K&B Info score: " + "class numeric!");
     }
 
     if (m_NoPriors)
@@ -2299,7 +2362,7 @@ public class Evaluation
 
   /**
    * Returns the total entropy for the null model.
-   *
+   * 
    * @return the total null model entropy
    */
   public final double SFPriorEntropy() {
@@ -2312,7 +2375,7 @@ public class Evaluation
 
   /**
    * Returns the entropy per instance for the null model.
-   *
+   * 
    * @return the null model entropy per instance
    */
   public final double SFMeanPriorEntropy() {
@@ -2325,7 +2388,7 @@ public class Evaluation
 
   /**
    * Returns the total entropy for the scheme.
-   *
+   * 
    * @return the total scheme entropy
    */
   public final double SFSchemeEntropy() {
@@ -2338,7 +2401,7 @@ public class Evaluation
 
   /**
    * Returns the entropy per instance for the scheme.
-   *
+   * 
    * @return the scheme entropy per instance
    */
   public final double SFMeanSchemeEntropy() {
@@ -2350,9 +2413,9 @@ public class Evaluation
   }
 
   /**
-   * Returns the total SF, which is the null model entropy minus
-   * the scheme entropy.
-   *
+   * Returns the total SF, which is the null model entropy minus the scheme
+   * entropy.
+   * 
    * @return the total SF
    */
   public final double SFEntropyGain() {
@@ -2364,9 +2427,9 @@ public class Evaluation
   }
 
   /**
-   * Returns the SF per instance, which is the null model entropy
-   * minus the scheme entropy, per instance.
-   *
+   * Returns the SF per instance, which is the null model entropy minus the
+   * scheme entropy, per instance.
+   * 
    * @return the SF per instance
    */
   public final double SFMeanEntropyGain() {
@@ -2374,14 +2437,14 @@ public class Evaluation
     if (m_NoPriors || !m_ComplexityStatisticsAvailable)
       return Double.NaN;
 
-    return (m_SumPriorEntropy - m_SumSchemeEntropy) /
-      (m_WithClass - m_Unclassified);
+    return (m_SumPriorEntropy - m_SumSchemeEntropy)
+        / (m_WithClass - m_Unclassified);
   }
 
   /**
-   * Output the cumulative margin distribution as a string suitable
-   * for input for gnuplot or similar package.
-   *
+   * Output the cumulative margin distribution as a string suitable for input
+   * for gnuplot or similar package.
+   * 
    * @return the cumulative margin distribution
    * @throws Exception if the class attribute is nominal
    */
@@ -2393,16 +2456,16 @@ public class Evaluation
     String result = "";
     double cumulativeCount = 0;
     double margin;
-    for(int i = 0; i <= k_MarginResolution; i++) {
+    for (int i = 0; i <= k_MarginResolution; i++) {
       if (m_MarginCounts[i] != 0) {
         cumulativeCount += m_MarginCounts[i];
-        margin = (double)i * 2.0 / k_MarginResolution - 1.0;
+        margin = i * 2.0 / k_MarginResolution - 1.0;
         result = result + Utils.doubleToString(margin, 7, 3) + ' '
-          + Utils.doubleToString(cumulativeCount * 100
-              / m_WithClass, 7, 3) + '\n';
+            + Utils.doubleToString(cumulativeCount * 100 / m_WithClass, 7, 3)
+            + '\n';
       } else if (i == 0) {
         result = Utils.doubleToString(-1.0, 7, 3) + ' '
-          + Utils.doubleToString(0, 7, 3) + '\n';
+            + Utils.doubleToString(0, 7, 3) + '\n';
       }
     }
     return result;
@@ -2410,9 +2473,10 @@ public class Evaluation
 
   /**
    * Calls toSummaryString() with no title and no complexity stats.
-   *
+   * 
    * @return a summary description of the classifier evaluation
    */
+  @Override
   public String toSummaryString() {
 
     return toSummaryString("", false);
@@ -2420,9 +2484,9 @@ public class Evaluation
 
   /**
    * Calls toSummaryString() with a default title.
-   *
+   * 
    * @param printComplexityStatistics if true, complexity statistics are
-   * returned as well
+   *          returned as well
    * @return the summary string
    */
   public String toSummaryString(boolean printComplexityStatistics) {
@@ -2431,25 +2495,24 @@ public class Evaluation
   }
 
   /**
-   * Outputs the performance statistics in summary form. Lists
-   * number (and percentage) of instances classified correctly,
-   * incorrectly and unclassified. Outputs the total number of
-   * instances classified, and the number of instances (if any)
-   * that had no class value provided.
-   *
+   * Outputs the performance statistics in summary form. Lists number (and
+   * percentage) of instances classified correctly, incorrectly and
+   * unclassified. Outputs the total number of instances classified, and the
+   * number of instances (if any) that had no class value provided.
+   * 
    * @param title the title for the statistics
    * @param printComplexityStatistics if true, complexity statistics are
-   * returned as well
+   *          returned as well
    * @return the summary as a String
    */
-  public String toSummaryString(String title,
-      boolean printComplexityStatistics) {
+  public String toSummaryString(String title, boolean printComplexityStatistics) {
 
     StringBuffer text = new StringBuffer();
 
     if (printComplexityStatistics && m_NoPriors) {
       printComplexityStatistics = false;
-      System.err.println("Priors disabled, cannot print complexity statistics!");
+      System.err
+          .println("Priors disabled, cannot print complexity statistics!");
     }
 
     text.append(title + "\n");
@@ -2458,13 +2521,11 @@ public class Evaluation
         if (m_ClassIsNominal) {
 
           text.append("Correctly Classified Instances     ");
-          text.append(Utils.doubleToString(correct(), 12, 4) + "     " +
-              Utils.doubleToString(pctCorrect(),
-                12, 4) + " %\n");
+          text.append(Utils.doubleToString(correct(), 12, 4) + "     "
+              + Utils.doubleToString(pctCorrect(), 12, 4) + " %\n");
           text.append("Incorrectly Classified Instances   ");
-          text.append(Utils.doubleToString(incorrect(), 12, 4) + "     " +
-              Utils.doubleToString(pctIncorrect(),
-                12, 4) + " %\n");
+          text.append(Utils.doubleToString(incorrect(), 12, 4) + "     "
+              + Utils.doubleToString(pctIncorrect(), 12, 4) + " %\n");
           text.append("Kappa statistic                    ");
           text.append(Utils.doubleToString(kappa(), 12, 4) + "\n");
 
@@ -2479,25 +2540,22 @@ public class Evaluation
             text.append(Utils.doubleToString(KBRelativeInformation(), 12, 4)
                 + " %\n");
             text.append("K&B Information Score              ");
-            text.append(Utils.doubleToString(KBInformation(), 12, 4)
-                + " bits");
+            text.append(Utils.doubleToString(KBInformation(), 12, 4) + " bits");
             text.append(Utils.doubleToString(KBMeanInformation(), 12, 4)
                 + " bits/instance\n");
           }
         } else {
           text.append("Correlation coefficient            ");
-          text.append(Utils.doubleToString(correlationCoefficient(), 12 , 4) +
-              "\n");
+          text.append(Utils.doubleToString(correlationCoefficient(), 12, 4)
+              + "\n");
         }
         if (printComplexityStatistics && m_ComplexityStatisticsAvailable) {
           text.append("Class complexity | order 0         ");
-          text.append(Utils.doubleToString(SFPriorEntropy(), 12, 4)
-              + " bits");
+          text.append(Utils.doubleToString(SFPriorEntropy(), 12, 4) + " bits");
           text.append(Utils.doubleToString(SFMeanPriorEntropy(), 12, 4)
               + " bits/instance\n");
           text.append("Class complexity | scheme          ");
-          text.append(Utils.doubleToString(SFSchemeEntropy(), 12, 4)
-              + " bits");
+          text.append(Utils.doubleToString(SFSchemeEntropy(), 12, 4) + " bits");
           text.append(Utils.doubleToString(SFMeanSchemeEntropy(), 12, 4)
               + " bits/instance\n");
           text.append("Complexity improvement     (Sf)    ");
@@ -2507,35 +2565,34 @@ public class Evaluation
         }
 
         text.append("Mean absolute error                ");
-        text.append(Utils.doubleToString(meanAbsoluteError(), 12, 4)
-            + "\n");
+        text.append(Utils.doubleToString(meanAbsoluteError(), 12, 4) + "\n");
         text.append("Root mean squared error            ");
-        text.append(Utils.
-            doubleToString(rootMeanSquaredError(), 12, 4)
-            + "\n");
+        text.append(Utils.doubleToString(rootMeanSquaredError(), 12, 4) + "\n");
         if (!m_NoPriors) {
           text.append("Relative absolute error            ");
-          text.append(Utils.doubleToString(relativeAbsoluteError(),
-                12, 4) + " %\n");
+          text.append(Utils.doubleToString(relativeAbsoluteError(), 12, 4)
+              + " %\n");
           text.append("Root relative squared error        ");
-          text.append(Utils.doubleToString(rootRelativeSquaredError(),
-                12, 4) + " %\n");
+          text.append(Utils.doubleToString(rootRelativeSquaredError(), 12, 4)
+              + " %\n");
         }
         if (m_CoverageStatisticsAvailable) {
-          text.append("Coverage of cases (" + Utils.doubleToString(m_ConfLevel, 4, 2) + " level)     ");
-          text.append(Utils.doubleToString(coverageOfTestCasesByPredictedRegions(),
-                12, 4) + " %\n");
+          text.append("Coverage of cases ("
+              + Utils.doubleToString(m_ConfLevel, 4, 2) + " level)     ");
+          text.append(Utils.doubleToString(
+              coverageOfTestCasesByPredictedRegions(), 12, 4) + " %\n");
           if (!m_NoPriors) {
-            text.append("Mean rel. region size (" + Utils.doubleToString(m_ConfLevel, 4, 2) + " level) ");
-            text.append(Utils.doubleToString(sizeOfPredictedRegions(), 12, 4) + " %\n");
+            text.append("Mean rel. region size ("
+                + Utils.doubleToString(m_ConfLevel, 4, 2) + " level) ");
+            text.append(Utils.doubleToString(sizeOfPredictedRegions(), 12, 4)
+                + " %\n");
           }
         }
       }
       if (Utils.gr(unclassified(), 0)) {
         text.append("UnClassified Instances             ");
-        text.append(Utils.doubleToString(unclassified(), 12,4) +  "     " +
-            Utils.doubleToString(pctUnclassified(),
-              12, 4) + " %\n");
+        text.append(Utils.doubleToString(unclassified(), 12, 4) + "     "
+            + Utils.doubleToString(pctUnclassified(), 12, 4) + " %\n");
       }
       text.append("Total Number of Instances          ");
       text.append(Utils.doubleToString(m_WithClass, 12, 4) + "\n");
@@ -2554,7 +2611,7 @@ public class Evaluation
 
   /**
    * Calls toMatrixString() with a default title.
-   *
+   * 
    * @return the confusion matrix as a string
    * @throws Exception if the class is numeric
    */
@@ -2564,10 +2621,9 @@ public class Evaluation
   }
 
   /**
-   * Outputs the performance statistics as a classification confusion
-   * matrix. For each class value, shows the distribution of
-   * predicted class values.
-   *
+   * Outputs the performance statistics as a classification confusion matrix.
+   * For each class value, shows the distribution of predicted class values.
+   * 
    * @param title the title for the confusion matrix
    * @return the confusion matrix as a String
    * @throws Exception if the class is numeric
@@ -2575,9 +2631,9 @@ public class Evaluation
   public String toMatrixString(String title) throws Exception {
 
     StringBuffer text = new StringBuffer();
-    char [] IDChars = {'a','b','c','d','e','f','g','h','i','j',
-      'k','l','m','n','o','p','q','r','s','t',
-      'u','v','w','x','y','z'};
+    char[] IDChars = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+        'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+        'z' };
     int IDWidth;
     boolean fractional = false;
 
@@ -2588,8 +2644,8 @@ public class Evaluation
     // Find the maximum value in the matrix
     // and check for fractional display requirement
     double maxval = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
-      for(int j = 0; j < m_NumClasses; j++) {
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
         double current = m_ConfusionMatrix[i][j];
         if (current < 0) {
           current *= -10;
@@ -2604,39 +2660,37 @@ public class Evaluation
       }
     }
 
-    IDWidth = 1 + Math.max((int)(Math.log(maxval) / Math.log(10)
-          + (fractional ? 3 : 0)),
-        (int)(Math.log(m_NumClasses) /
-          Math.log(IDChars.length)));
+    IDWidth = 1 + Math.max(
+        (int) (Math.log(maxval) / Math.log(10) + (fractional ? 3 : 0)),
+        (int) (Math.log(m_NumClasses) / Math.log(IDChars.length)));
     text.append(title).append("\n");
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       if (fractional) {
-        text.append(" ").append(num2ShortID(i,IDChars,IDWidth - 3))
-          .append("   ");
+        text.append(" ").append(num2ShortID(i, IDChars, IDWidth - 3))
+            .append("   ");
       } else {
-        text.append(" ").append(num2ShortID(i,IDChars,IDWidth));
+        text.append(" ").append(num2ShortID(i, IDChars, IDWidth));
       }
     }
     text.append("   <-- classified as\n");
-    for(int i = 0; i< m_NumClasses; i++) {
-      for(int j = 0; j < m_NumClasses; j++) {
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
         text.append(" ").append(
-            Utils.doubleToString(m_ConfusionMatrix[i][j],
-              IDWidth,
-              (fractional ? 2 : 0)));
+            Utils.doubleToString(m_ConfusionMatrix[i][j], IDWidth,
+                (fractional ? 2 : 0)));
       }
-      text.append(" | ").append(num2ShortID(i,IDChars,IDWidth))
-        .append(" = ").append(m_ClassNames[i]).append("\n");
+      text.append(" | ").append(num2ShortID(i, IDChars, IDWidth)).append(" = ")
+          .append(m_ClassNames[i]).append("\n");
     }
     return text.toString();
   }
 
   /**
    * Generates a breakdown of the accuracy for each class (with default title),
-   * incorporating various information-retrieval statistics, such as
-   * true/false positive rate, precision/recall/F-Measure.  Should be
-   * useful for ROC curves, recall/precision curves.
-   *
+   * incorporating various information-retrieval statistics, such as true/false
+   * positive rate, precision/recall/F-Measure. Should be useful for ROC curves,
+   * recall/precision curves.
+   * 
    * @return the statistics presented as a string
    * @throws Exception if class is not nominal
    */
@@ -2646,11 +2700,11 @@ public class Evaluation
   }
 
   /**
-   * Generates a breakdown of the accuracy for each class,
-   * incorporating various information-retrieval statistics, such as
-   * true/false positive rate, precision/recall/F-Measure.  Should be
-   * useful for ROC curves, recall/precision curves.
-   *
+   * Generates a breakdown of the accuracy for each class, incorporating various
+   * information-retrieval statistics, such as true/false positive rate,
+   * precision/recall/F-Measure. Should be useful for ROC curves,
+   * recall/precision curves.
+   * 
    * @param title the title to prepend the stats string with
    * @return the statistics presented as a string
    * @throws Exception if class is not nominal
@@ -2662,48 +2716,52 @@ public class Evaluation
     }
 
     StringBuffer text = new StringBuffer(title
-        + "\n               TP Rate   FP Rate"
-        + "   Precision   Recall"
-        + "  F-Measure   ROC Area   PRC Area  Class\n");
-    for(int i = 0; i < m_NumClasses; i++) {
-      text.append("               " + Utils.doubleToString(truePositiveRate(i), 7, 3))
-        .append("   ");
+        + "\n                 TP Rate  FP Rate" + "  Precision  Recall"
+        + "  F-Measure  MCC    ROC Area  PRC Area  Class\n");
+    for (int i = 0; i < m_NumClasses; i++) {
+      text.append(
+          "               " + Utils.doubleToString(truePositiveRate(i), 7, 3))
+          .append("  ");
       text.append(Utils.doubleToString(falsePositiveRate(i), 7, 3))
-        .append("    ");
-      text.append(Utils.doubleToString(precision(i), 7, 3))
-        .append("   ");
-      text.append(Utils.doubleToString(recall(i), 7, 3))
-        .append("   ");
-      text.append(Utils.doubleToString(fMeasure(i), 7, 3))
-        .append("    ");
+          .append("  ");
+      text.append(Utils.doubleToString(precision(i), 7, 3)).append("    ");
+      text.append(Utils.doubleToString(recall(i), 7, 3)).append(" ");
+      text.append(Utils.doubleToString(fMeasure(i), 7, 3)).append("    ");
+      double mat = matthewsCorrelationCoefficient(i);
+      if (Utils.isMissingValue(mat)) {
+        text.append("  ?  ").append("   ");
+      } else {
+        text.append(
+            Utils.doubleToString(matthewsCorrelationCoefficient(i), 7, 3))
+            .append("");
+      }
 
       double rocVal = areaUnderROC(i);
       if (Utils.isMissingValue(rocVal)) {
-        text.append("  ?    ")
-          .append("    ");
+        text.append(" ?    ").append("   ");
       } else {
-        text.append(Utils.doubleToString(rocVal, 7, 3))
-          .append("    ");
+        text.append(Utils.doubleToString(rocVal, 7, 3)).append("   ");
       }
       double prcVal = areaUnderPRC(i);
       if (Utils.isMissingValue(prcVal)) {
-        text.append("  ?    ")
-        .append("    ");
+        text.append("  ?    ").append("     ");
       } else {
-        text.append(Utils.doubleToString(prcVal, 7, 3))
-        .append("    ");
+        text.append(Utils.doubleToString(prcVal, 7, 3)).append("     ");
       }
-      
+
       text.append(m_ClassNames[i]).append('\n');
     }
 
-    text.append("Weighted Avg.  " + Utils.doubleToString(weightedTruePositiveRate(), 7, 3));
-    text.append("   " + Utils.doubleToString(weightedFalsePositiveRate(), 7 ,3));
-    text.append("    " + Utils.doubleToString(weightedPrecision(), 7 ,3));
-    text.append("   " + Utils.doubleToString(weightedRecall(), 7 ,3));
-    text.append("   " + Utils.doubleToString(weightedFMeasure(), 7 ,3));
-    text.append("    " + Utils.doubleToString(weightedAreaUnderROC(), 7 ,3));
-    text.append("    " + Utils.doubleToString(weightedAreaUnderPRC(), 7 ,3));
+    text.append("Weighted Avg.  "
+        + Utils.doubleToString(weightedTruePositiveRate(), 7, 3));
+    text.append("  " + Utils.doubleToString(weightedFalsePositiveRate(), 7, 3));
+    text.append("  " + Utils.doubleToString(weightedPrecision(), 7, 3));
+    text.append("    " + Utils.doubleToString(weightedRecall(), 7, 3));
+    text.append(" " + Utils.doubleToString(weightedFMeasure(), 7, 3));
+    text.append("    "
+        + Utils.doubleToString(weightedMatthewsCorrelation(), 7, 3));
+    text.append("" + Utils.doubleToString(weightedAreaUnderROC(), 7, 3));
+    text.append("   " + Utils.doubleToString(weightedAreaUnderPRC(), 7, 3));
     text.append("\n");
 
     return text.toString();
@@ -2711,11 +2769,13 @@ public class Evaluation
 
   /**
    * Calculate the number of true positives with respect to a particular class.
-   * This is defined as<p/>
+   * This is defined as
+   * <p/>
+   * 
    * <pre>
    * correctly classified positives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
@@ -2731,14 +2791,16 @@ public class Evaluation
   }
 
   /**
-   * Calculate the true positive rate with respect to a particular class.
-   * This is defined as<p/>
+   * Calculate the true positive rate with respect to a particular class. This
+   * is defined as
+   * <p/>
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
    *       total positives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
@@ -2759,7 +2821,7 @@ public class Evaluation
 
   /**
    * Calculates the weighted (by class size) true positive rate.
-   *
+   * 
    * @return the weighted true positive rate.
    */
   public double weightedTruePositiveRate() {
@@ -2774,7 +2836,7 @@ public class Evaluation
     }
 
     double truePosTotal = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       double temp = truePositiveRate(i);
       truePosTotal += (temp * classCounts[i]);
     }
@@ -2784,11 +2846,13 @@ public class Evaluation
 
   /**
    * Calculate the number of true negatives with respect to a particular class.
-   * This is defined as<p/>
+   * This is defined as
+   * <p/>
+   * 
    * <pre>
    * correctly classified negatives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
@@ -2808,14 +2872,16 @@ public class Evaluation
   }
 
   /**
-   * Calculate the true negative rate with respect to a particular class.
-   * This is defined as<p/>
+   * Calculate the true negative rate with respect to a particular class. This
+   * is defined as
+   * <p/>
+   * 
    * <pre>
    * correctly classified negatives
    * ------------------------------
    *       total negatives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
@@ -2840,7 +2906,7 @@ public class Evaluation
 
   /**
    * Calculates the weighted (by class size) true negative rate.
-   *
+   * 
    * @return the weighted true negative rate.
    */
   public double weightedTrueNegativeRate() {
@@ -2855,7 +2921,7 @@ public class Evaluation
     }
 
     double trueNegTotal = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       double temp = trueNegativeRate(i);
       trueNegTotal += (temp * classCounts[i]);
     }
@@ -2865,11 +2931,13 @@ public class Evaluation
 
   /**
    * Calculate number of false positives with respect to a particular class.
-   * This is defined as<p/>
+   * This is defined as
+   * <p/>
+   * 
    * <pre>
    * incorrectly classified negatives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
@@ -2889,14 +2957,16 @@ public class Evaluation
   }
 
   /**
-   * Calculate the false positive rate with respect to a particular class.
-   * This is defined as<p/>
+   * Calculate the false positive rate with respect to a particular class. This
+   * is defined as
+   * <p/>
+   * 
    * <pre>
    * incorrectly classified negatives
    * --------------------------------
    *        total negatives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
@@ -2921,7 +2991,7 @@ public class Evaluation
 
   /**
    * Calculates the weighted (by class size) false positive rate.
-   *
+   * 
    * @return the weighted false positive rate.
    */
   public double weightedFalsePositiveRate() {
@@ -2936,7 +3006,7 @@ public class Evaluation
     }
 
     double falsePosTotal = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       double temp = falsePositiveRate(i);
       falsePosTotal += (temp * classCounts[i]);
     }
@@ -2944,15 +3014,15 @@ public class Evaluation
     return falsePosTotal / classCountSum;
   }
 
-
-
   /**
    * Calculate number of false negatives with respect to a particular class.
-   * This is defined as<p/>
+   * This is defined as
+   * <p/>
+   * 
    * <pre>
    * incorrectly classified positives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
@@ -2972,14 +3042,16 @@ public class Evaluation
   }
 
   /**
-   * Calculate the false negative rate with respect to a particular class.
-   * This is defined as<p/>
+   * Calculate the false negative rate with respect to a particular class. This
+   * is defined as
+   * <p/>
+   * 
    * <pre>
    * incorrectly classified positives
    * --------------------------------
    *        total positives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
@@ -3004,7 +3076,7 @@ public class Evaluation
 
   /**
    * Calculates the weighted (by class size) false negative rate.
-   *
+   * 
    * @return the weighted false negative rate.
    */
   public double weightedFalseNegativeRate() {
@@ -3019,7 +3091,7 @@ public class Evaluation
     }
 
     double falseNegTotal = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       double temp = falseNegativeRate(i);
       falseNegTotal += (temp * classCounts[i]);
     }
@@ -3028,15 +3100,66 @@ public class Evaluation
   }
 
   /**
-   * Calculate the recall with respect to a particular class.
-   * This is defined as<p/>
+   * Calculates the matthews correlation coefficient (sometimes called phi
+   * coefficient) for the supplied class
+   * 
+   * @param classIndex the index of the class to compute the matthews
+   *          correlation coefficient for
+   * 
+   * @return the mathews correlation coefficient
+   */
+  public double matthewsCorrelationCoefficient(int classIndex) {
+    double numTP = numTruePositives(classIndex);
+    double numTN = numTrueNegatives(classIndex);
+    double numFP = numFalsePositives(classIndex);
+    double numFN = numFalseNegatives(classIndex);
+    double n = (numTP * numTN) - (numFP * numFN);
+    double d = (numTP + numFP) * (numTP + numFN) * (numTN + numFP)
+        * (numTN + numFN);
+    d = Math.sqrt(d);
+
+    return n / d;
+  }
+
+  /**
+   * Calculates the weighted (by class size) matthews correlation coefficient.
+   * 
+   * @return the weighted matthews correlation coefficient.
+   */
+  public double weightedMatthewsCorrelation() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
+
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double mccTotal = 0;
+    for (int i = 0; i < m_NumClasses; i++) {
+      double temp = matthewsCorrelationCoefficient(i);
+      if (!Utils.isMissingValue(temp)) {
+        mccTotal += (temp * classCounts[i]);
+      }
+    }
+
+    return mccTotal / classCountSum;
+  }
+
+  /**
+   * Calculate the recall with respect to a particular class. This is defined as
+   * <p/>
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
    *       total positives
-   * </pre><p/>
+   * </pre>
+   * <p/>
    * (Which is also the same as the truePositiveRate.)
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the recall
    */
@@ -3047,7 +3170,7 @@ public class Evaluation
 
   /**
    * Calculates the weighted (by class size) recall.
-   *
+   * 
    * @return the weighted recall.
    */
   public double weightedRecall() {
@@ -3055,14 +3178,16 @@ public class Evaluation
   }
 
   /**
-   * Calculate the precision with respect to a particular class.
-   * This is defined as<p/>
+   * Calculate the precision with respect to a particular class. This is defined
+   * as
+   * <p/>
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
    *  total predicted as positive
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the precision
    */
@@ -3083,7 +3208,7 @@ public class Evaluation
 
   /**
    * Calculates the weighted (by class size) precision.
-   *
+   * 
    * @return the weighted precision.
    */
   public double weightedPrecision() {
@@ -3098,7 +3223,7 @@ public class Evaluation
     }
 
     double precisionTotal = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       double temp = precision(i);
       precisionTotal += (temp * classCounts[i]);
     }
@@ -3107,14 +3232,16 @@ public class Evaluation
   }
 
   /**
-   * Calculate the F-Measure with respect to a particular class.
-   * This is defined as<p/>
+   * Calculate the F-Measure with respect to a particular class. This is defined
+   * as
+   * <p/>
+   * 
    * <pre>
    * 2 * recall * precision
    * ----------------------
    *   recall + precision
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the F-Measure
    */
@@ -3129,9 +3256,8 @@ public class Evaluation
   }
 
   /**
-   * Calculates the macro weighted (by class size) average
-   * F-Measure.
-   *
+   * Calculates the macro weighted (by class size) average F-Measure.
+   * 
    * @return the weighted F-Measure.
    */
   public double weightedFMeasure() {
@@ -3146,7 +3272,7 @@ public class Evaluation
     }
 
     double fMeasureTotal = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       double temp = fMeasure(i);
       fMeasureTotal += (temp * classCounts[i]);
     }
@@ -3157,14 +3283,14 @@ public class Evaluation
   /**
    * Unweighted macro-averaged F-measure. If some classes not present in the
    * test set, they're just skipped (since recall is undefined there anyway) .
-   *
+   * 
    * @return unweighted macro-averaged F-measure.
    * */
   public double unweightedMacroFmeasure() {
     weka.experiment.Stats rr = new weka.experiment.Stats();
     for (int c = 0; c < m_NumClasses; c++) {
       // skip if no testing positive cases of this class
-      if (numTruePositives(c)+numFalseNegatives(c) > 0) {
+      if (numTruePositives(c) + numFalseNegatives(c) > 0) {
         rr.add(fMeasure(c));
       }
     }
@@ -3175,9 +3301,9 @@ public class Evaluation
   /**
    * Unweighted micro-averaged F-measure. If some classes not present in the
    * test set, they have no effect.
-   *
+   * 
    * Note: if the test set is *single-label*, then this is the same as accuracy.
-   *
+   * 
    * @return unweighted micro-averaged F-measure.
    */
   public double unweightedMicroFmeasure() {
@@ -3189,13 +3315,14 @@ public class Evaluation
       fn += numFalseNegatives(c);
       fp += numFalsePositives(c);
     }
-    return 2*tp / (2*tp + fn + fp);
+    return 2 * tp / (2 * tp + fn + fp);
   }
 
   /**
    * Sets the class prior probabilities.
-   *
-   * @param train the training instances used to determine the prior probabilities
+   * 
+   * @param train the training instances used to determine the prior
+   *          probabilities
    * @throws Exception if the class attribute of the instances is not set
    */
   public void setPriors(Instances train) throws Exception {
@@ -3222,7 +3349,8 @@ public class Evaluation
       m_ClassPriors[0] = m_ClassPriorsSum = 0;
       for (int i = 0; i < train.numInstances(); i++) {
         if (!train.instance(i).classIsMissing()) {
-          m_ClassPriors[0] += train.instance(i).classValue() * train.instance(i).weight();
+          m_ClassPriors[0] += train.instance(i).classValue()
+              * train.instance(i).weight();
           m_ClassPriorsSum += train.instance(i).weight();
         }
       }
@@ -3234,8 +3362,8 @@ public class Evaluation
       m_ClassPriorsSum = m_NumClasses;
       for (int i = 0; i < train.numInstances(); i++) {
         if (!train.instance(i).classIsMissing()) {
-          m_ClassPriors[(int)train.instance(i).classValue()] +=
-            train.instance(i).weight();
+          m_ClassPriors[(int) train.instance(i).classValue()] += train
+              .instance(i).weight();
           m_ClassPriorsSum += train.instance(i).weight();
         }
       }
@@ -3246,17 +3374,17 @@ public class Evaluation
 
   /**
    * Get the current weighted class counts.
-   *
+   * 
    * @return the weighted class counts
    */
-  public double [] getClassPriors() {
+  public double[] getClassPriors() {
     return m_ClassPriors;
   }
 
   /**
-   * Updates the class prior probabilities or the mean respectively (when incrementally
-   * training).
-   *
+   * Updates the class prior probabilities or the mean respectively (when
+   * incrementally training).
+   * 
    * @param instance the new training instance seen
    * @throws Exception if the class of the instance is not set
    */
@@ -3267,51 +3395,67 @@ public class Evaluation
         m_ClassPriors[0] += instance.classValue() * instance.weight();
         m_ClassPriorsSum += instance.weight();
       } else {
-        m_ClassPriors[(int)instance.classValue()] += instance.weight();
+        m_ClassPriors[(int) instance.classValue()] += instance.weight();
         m_ClassPriorsSum += instance.weight();
       }
     }
   }
 
   /**
-   * disables the use of priors, e.g., in case of de-serialized schemes
-   * that have no access to the original training set, but are evaluated
-   * on a set set.
+   * disables the use of priors, e.g., in case of de-serialized schemes that
+   * have no access to the original training set, but are evaluated on a set
+   * set.
    */
   public void useNoPriors() {
     m_NoPriors = true;
   }
 
   /**
-   * Tests whether the current evaluation object is equal to another
-   * evaluation object.
-   *
+   * Tests whether the current evaluation object is equal to another evaluation
+   * object.
+   * 
    * @param obj the object to compare against
    * @return true if the two objects are equal
    */
+  @Override
   public boolean equals(Object obj) {
 
     if ((obj == null) || !(obj.getClass().equals(this.getClass()))) {
       return false;
     }
     Evaluation cmp = (Evaluation) obj;
-    if (m_ClassIsNominal != cmp.m_ClassIsNominal) return false;
-    if (m_NumClasses != cmp.m_NumClasses) return false;
+    if (m_ClassIsNominal != cmp.m_ClassIsNominal)
+      return false;
+    if (m_NumClasses != cmp.m_NumClasses)
+      return false;
 
-    if (m_Incorrect != cmp.m_Incorrect) return false;
-    if (m_Correct != cmp.m_Correct) return false;
-    if (m_Unclassified != cmp.m_Unclassified) return false;
-    if (m_MissingClass != cmp.m_MissingClass) return false;
-    if (m_WithClass != cmp.m_WithClass) return false;
+    if (m_Incorrect != cmp.m_Incorrect)
+      return false;
+    if (m_Correct != cmp.m_Correct)
+      return false;
+    if (m_Unclassified != cmp.m_Unclassified)
+      return false;
+    if (m_MissingClass != cmp.m_MissingClass)
+      return false;
+    if (m_WithClass != cmp.m_WithClass)
+      return false;
 
-    if (m_SumErr != cmp.m_SumErr) return false;
-    if (m_SumAbsErr != cmp.m_SumAbsErr) return false;
-    if (m_SumSqrErr != cmp.m_SumSqrErr) return false;
-    if (m_SumClass != cmp.m_SumClass) return false;
-    if (m_SumSqrClass != cmp.m_SumSqrClass) return false;
-    if (m_SumPredicted != cmp.m_SumPredicted) return false;
-    if (m_SumSqrPredicted != cmp.m_SumSqrPredicted) return false;
-    if (m_SumClassPredicted != cmp.m_SumClassPredicted) return false;
+    if (m_SumErr != cmp.m_SumErr)
+      return false;
+    if (m_SumAbsErr != cmp.m_SumAbsErr)
+      return false;
+    if (m_SumSqrErr != cmp.m_SumSqrErr)
+      return false;
+    if (m_SumClass != cmp.m_SumClass)
+      return false;
+    if (m_SumSqrClass != cmp.m_SumSqrClass)
+      return false;
+    if (m_SumPredicted != cmp.m_SumPredicted)
+      return false;
+    if (m_SumSqrPredicted != cmp.m_SumSqrPredicted)
+      return false;
+    if (m_SumClassPredicted != cmp.m_SumClassPredicted)
+      return false;
 
     if (m_ClassIsNominal) {
       for (int i = 0; i < m_NumClasses; i++) {
@@ -3328,14 +3472,14 @@ public class Evaluation
 
   /**
    * Make up the help string giving all the command line options.
-   *
+   * 
    * @param classifier the classifier to include options for
-   * @param globalInfo include the global information string
-   * for the classifier (if available).
+   * @param globalInfo include the global information string for the classifier
+   *          (if available).
    * @return a string detailing the valid command line options
    */
   protected static String makeOptionString(Classifier classifier,
-                                           boolean globalInfo) {
+      boolean globalInfo) {
 
     StringBuffer optionsText = new StringBuffer("");
 
@@ -3349,30 +3493,38 @@ public class Evaluation
     optionsText.append("-t <name of training file>\n");
     optionsText.append("\tSets training file.\n");
     optionsText.append("-T <name of test file>\n");
-    optionsText.append("\tSets test file. If missing, a cross-validation will be performed\n");
+    optionsText
+        .append("\tSets test file. If missing, a cross-validation will be performed\n");
     optionsText.append("\ton the training data.\n");
     optionsText.append("-c <class index>\n");
     optionsText.append("\tSets index of class attribute (default: last).\n");
     optionsText.append("-x <number of folds>\n");
-    optionsText.append("\tSets number of folds for cross-validation (default: 10).\n");
+    optionsText
+        .append("\tSets number of folds for cross-validation (default: 10).\n");
     optionsText.append("-no-cv\n");
     optionsText.append("\tDo not perform any cross validation.\n");
     optionsText.append("-split-percentage <percentage>\n");
-    optionsText.append("\tSets the percentage for the train/test set split, e.g., 66.\n");
+    optionsText
+        .append("\tSets the percentage for the train/test set split, e.g., 66.\n");
     optionsText.append("-preserve-order\n");
     optionsText.append("\tPreserves the order in the percentage split.\n");
     optionsText.append("-s <random number seed>\n");
-    optionsText.append("\tSets random number seed for cross-validation or percentage split\n");
+    optionsText
+        .append("\tSets random number seed for cross-validation or percentage split\n");
     optionsText.append("\t(default: 1).\n");
     optionsText.append("-m <name of file with cost matrix>\n");
     optionsText.append("\tSets file with cost matrix.\n");
     optionsText.append("-l <name of input file>\n");
-    optionsText.append("\tSets model input file. In case the filename ends with '.xml',\n");
-    optionsText.append("\ta PMML file is loaded or, if that fails, options are loaded\n");
+    optionsText
+        .append("\tSets model input file. In case the filename ends with '.xml',\n");
+    optionsText
+        .append("\ta PMML file is loaded or, if that fails, options are loaded\n");
     optionsText.append("\tfrom the XML file.\n");
     optionsText.append("-d <name of output file>\n");
-    optionsText.append("\tSets model output file. In case the filename ends with '.xml',\n");
-    optionsText.append("\tonly the options are saved to the XML file, not the model.\n");
+    optionsText
+        .append("\tSets model output file. In case the filename ends with '.xml',\n");
+    optionsText
+        .append("\tonly the options are saved to the XML file, not the model.\n");
     optionsText.append("-v\n");
     optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-o\n");
@@ -3382,26 +3534,32 @@ public class Evaluation
     optionsText.append(" statistics for each class.\n");
     optionsText.append("-k\n");
     optionsText.append("\tOutputs information-theoretic statistics.\n");
-    optionsText.append("-classifications \"weka.classifiers.evaluation.output.prediction.AbstractOutput + options\"\n");
-    optionsText.append("\tUses the specified class for generating the classification output.\n");
+    optionsText
+        .append("-classifications \"weka.classifiers.evaluation.output.prediction.AbstractOutput + options\"\n");
+    optionsText
+        .append("\tUses the specified class for generating the classification output.\n");
     optionsText.append("\tE.g.: " + PlainText.class.getName() + "\n");
     optionsText.append("-p range\n");
-    optionsText.append("\tOutputs predictions for test instances (or the train instances if\n");
-    optionsText.append("\tno test instances provided and -no-cv is used), along with the \n");
-    optionsText.append("\tattributes in the specified range (and nothing else). \n");
+    optionsText
+        .append("\tOutputs predictions for test instances (or the train instances if\n");
+    optionsText
+        .append("\tno test instances provided and -no-cv is used), along with the \n");
+    optionsText
+        .append("\tattributes in the specified range (and nothing else). \n");
     optionsText.append("\tUse '-p 0' if no attributes are desired.\n");
     optionsText.append("\tDeprecated: use \"-classifications ...\" instead.\n");
     optionsText.append("-distribution\n");
-    optionsText.append("\tOutputs the distribution instead of only the prediction\n");
-    optionsText.append("\tin conjunction with the '-p' option (only nominal classes).\n");
+    optionsText
+        .append("\tOutputs the distribution instead of only the prediction\n");
+    optionsText
+        .append("\tin conjunction with the '-p' option (only nominal classes).\n");
     optionsText.append("\tDeprecated: use \"-classifications ...\" instead.\n");
     optionsText.append("-r\n");
     optionsText.append("\tOnly outputs cumulative margin distribution.\n");
     if (classifier instanceof Sourcable) {
       optionsText.append("-z <class name>\n");
       optionsText.append("\tOnly outputs the source representation"
-          + " of the classifier,\n\tgiving it the supplied"
-          + " name.\n");
+          + " of the classifier,\n\tgiving it the supplied" + " name.\n");
     }
     if (classifier instanceof Drawable) {
       optionsText.append("-g\n");
@@ -3409,22 +3567,24 @@ public class Evaluation
           + " of the classifier.\n");
     }
     optionsText.append("-xml filename | xml-string\n");
-    optionsText.append("\tRetrieves the options from the XML-data instead of the "
-        + "command line.\n");
+    optionsText
+        .append("\tRetrieves the options from the XML-data instead of the "
+            + "command line.\n");
     optionsText.append("-threshold-file <file>\n");
-    optionsText.append("\tThe file to save the threshold data to.\n"
-        + "\tThe format is determined by the extensions, e.g., '.arff' for ARFF \n"
-        + "\tformat or '.csv' for CSV.\n");
+    optionsText
+        .append("\tThe file to save the threshold data to.\n"
+            + "\tThe format is determined by the extensions, e.g., '.arff' for ARFF \n"
+            + "\tformat or '.csv' for CSV.\n");
     optionsText.append("-threshold-label <label>\n");
-    optionsText.append("\tThe class label to determine the threshold data for\n"
-        + "\t(default is the first label)\n");
+    optionsText
+        .append("\tThe class label to determine the threshold data for\n"
+            + "\t(default is the first label)\n");
 
     // Get scheme-specific options
     if (classifier instanceof OptionHandler) {
       optionsText.append("\nOptions specific to "
-          + classifier.getClass().getName()
-          + ":\n\n");
-      Enumeration enu = ((OptionHandler)classifier).listOptions();
+          + classifier.getClass().getName() + ":\n\n");
+      Enumeration enu = ((OptionHandler) classifier).listOptions();
       while (enu.hasMoreElements()) {
         Option option = (Option) enu.nextElement();
         optionsText.append(option.synopsis() + '\n');
@@ -3446,7 +3606,7 @@ public class Evaluation
 
   /**
    * Return the global info (if it exists) for the supplied classifier.
-   *
+   * 
    * @param classifier the classifier to get the global info for
    * @return the global info (synopsis) for the classifier
    * @throws Exception if there is a problem reflecting on the classifier
@@ -3457,13 +3617,13 @@ public class Evaluation
     methods = bi.getMethodDescriptors();
     Object[] args = {};
     String result = "\nSynopsis for " + classifier.getClass().getName()
-      + ":\n\n";
+        + ":\n\n";
 
     for (int i = 0; i < methods.length; i++) {
       String name = methods[i].getDisplayName();
       Method meth = methods[i].getMethod();
       if (name.equals("globalInfo")) {
-        String globalInfo = (String)(meth.invoke(classifier, args));
+        String globalInfo = (String) (meth.invoke(classifier, args));
         result += globalInfo;
         break;
       }
@@ -3474,25 +3634,25 @@ public class Evaluation
 
   /**
    * Method for generating indices for the confusion matrix.
-   *
-   * @param num 	integer to format
-   * @param IDChars	the characters to use
-   * @param IDWidth	the width of the entry
-   * @return 		the formatted integer as a string
+   * 
+   * @param num integer to format
+   * @param IDChars the characters to use
+   * @param IDWidth the width of the entry
+   * @return the formatted integer as a string
    */
   protected String num2ShortID(int num, char[] IDChars, int IDWidth) {
 
-    char ID [] = new char [IDWidth];
+    char ID[] = new char[IDWidth];
     int i;
 
-    for(i = IDWidth - 1; i >=0; i--) {
+    for (i = IDWidth - 1; i >= 0; i--) {
       ID[i] = IDChars[num % IDChars.length];
       num = num / IDChars.length - 1;
       if (num < 0) {
         break;
       }
     }
-    for(i--; i >= 0; i--) {
+    for (i--; i >= 0; i--) {
       ID[i] = ' ';
     }
 
@@ -3500,21 +3660,20 @@ public class Evaluation
   }
 
   /**
-   * Convert a single prediction into a probability distribution
-   * with all zero probabilities except the predicted value which
-   * has probability 1.0.
-   *
+   * Convert a single prediction into a probability distribution with all zero
+   * probabilities except the predicted value which has probability 1.0.
+   * 
    * @param predictedClass the index of the predicted class
    * @return the probability distribution
    */
-  protected double [] makeDistribution(double predictedClass) {
+  protected double[] makeDistribution(double predictedClass) {
 
-    double [] result = new double [m_NumClasses];
+    double[] result = new double[m_NumClasses];
     if (Utils.isMissingValue(predictedClass)) {
       return result;
     }
     if (m_ClassIsNominal) {
-      result[(int)predictedClass] = 1.0;
+      result[(int) predictedClass] = 1.0;
     } else {
       result[0] = predictedClass;
     }
@@ -3522,20 +3681,17 @@ public class Evaluation
   }
 
   /**
-   * Updates all the statistics about a classifiers performance for
-   * the current test instance.
-   *
-   * @param predictedDistribution the probabilities assigned to
-   * each class
+   * Updates all the statistics about a classifiers performance for the current
+   * test instance.
+   * 
+   * @param predictedDistribution the probabilities assigned to each class
    * @param instance the instance to be classified
-   * @throws Exception if the class of the instance is not
-   * set
+   * @throws Exception if the class of the instance is not set
    */
-  protected void updateStatsForClassifier(double [] predictedDistribution,
-      Instance instance)
-  throws Exception {
+  protected void updateStatsForClassifier(double[] predictedDistribution,
+      Instance instance) throws Exception {
 
-    int actualClass = (int)instance.classValue();
+    int actualClass = (int) instance.classValue();
 
     if (!instance.classIsMissing()) {
       updateMargins(predictedDistribution, actualClass, instance.weight());
@@ -3544,7 +3700,7 @@ public class Evaluation
       // classifications)
       int predictedClass = -1;
       double bestProb = 0.0;
-      for(int i = 0; i < m_NumClasses; i++) {
+      for (int i = 0; i < m_NumClasses; i++) {
         if (predictedDistribution[i] > bestProb) {
           predictedClass = i;
           bestProb = predictedDistribution[i];
@@ -3561,10 +3717,11 @@ public class Evaluation
           // Perhaps we could take the negative of the cost of a correct
           // prediction (-m_CostMatrix.getElement(actualClass,actualClass)),
           // although often this will be zero
-          m_TotalCost += instance.weight() * m_CostMatrix.getMaxCost(actualClass, instance);
+          m_TotalCost += instance.weight()
+              * m_CostMatrix.getMaxCost(actualClass, instance);
         } else {
-          m_TotalCost += instance.weight() * m_CostMatrix.getElement(actualClass, predictedClass,
-              instance);
+          m_TotalCost += instance.weight()
+              * m_CostMatrix.getElement(actualClass, predictedClass, instance);
         }
       }
 
@@ -3574,21 +3731,23 @@ public class Evaluation
         return;
       }
 
-      double predictedProb = Math.max(MIN_SF_PROB, predictedDistribution[actualClass]);
-      double priorProb = Math.max(MIN_SF_PROB, m_ClassPriors[actualClass] / m_ClassPriorsSum);
+      double predictedProb = Math.max(MIN_SF_PROB,
+          predictedDistribution[actualClass]);
+      double priorProb = Math.max(MIN_SF_PROB, m_ClassPriors[actualClass]
+          / m_ClassPriorsSum);
       if (predictedProb >= priorProb) {
-        m_SumKBInfo += (Utils.log2(predictedProb) - Utils.log2(priorProb)) * instance.weight();
+        m_SumKBInfo += (Utils.log2(predictedProb) - Utils.log2(priorProb))
+            * instance.weight();
       } else {
-        m_SumKBInfo -= (Utils.log2(1.0-predictedProb) - Utils.log2(1.0-priorProb))
-          * instance.weight();
+        m_SumKBInfo -= (Utils.log2(1.0 - predictedProb) - Utils
+            .log2(1.0 - priorProb)) * instance.weight();
       }
 
       m_SumSchemeEntropy -= Utils.log2(predictedProb) * instance.weight();
       m_SumPriorEntropy -= Utils.log2(priorProb) * instance.weight();
 
       updateNumericScores(predictedDistribution,
-          makeDistribution(instance.classValue()),
-          instance.weight());
+          makeDistribution(instance.classValue()), instance.weight());
 
       // Update coverage stats
       int[] indices = Utils.sort(predictedDistribution);
@@ -3619,20 +3778,23 @@ public class Evaluation
 
   /**
    * Updates stats for interval estimator based on current test instance.
-   *
+   * 
    * @param classifier the interval estimator
-   * @param classMissing the instance for which the intervals are computed, without a class value
+   * @param classMissing the instance for which the intervals are computed,
+   *          without a class value
    * @param classValue the class value of this instance
    * @throws Exception if intervals could not be computed successfully
    */
-  protected void updateStatsForIntervalEstimator(IntervalEstimator  classifier, Instance classMissing,
-                                                 double classValue) throws Exception {
+  protected void updateStatsForIntervalEstimator(IntervalEstimator classifier,
+      Instance classMissing, double classValue) throws Exception {
 
     double[][] preds = classifier.predictIntervals(classMissing, m_ConfLevel);
     if (m_Predictions != null)
-      ((NumericPrediction) m_Predictions.lastElement()).setPredictionIntervals(preds);
+      ((NumericPrediction) m_Predictions.lastElement())
+          .setPredictionIntervals(preds);
     for (int i = 0; i < preds.length; i++) {
-      m_TotalSizeOfRegions += (preds[i][1] - preds[i][0]) / (m_MaxTarget - m_MinTarget);
+      m_TotalSizeOfRegions += (preds[i][1] - preds[i][0])
+          / (m_MaxTarget - m_MinTarget);
     }
     for (int i = 0; i < preds.length; i++) {
       if ((preds[i][1] >= classValue) && (preds[i][0] <= classValue)) {
@@ -3643,38 +3805,40 @@ public class Evaluation
   }
 
   /**
-   * Updates stats for conditional density estimator based on current test instance.
-   *
+   * Updates stats for conditional density estimator based on current test
+   * instance.
+   * 
    * @param classifier the conditional density estimator
-   * @param classMissing the instance for which density is to be computed, without a class value
+   * @param classMissing the instance for which density is to be computed,
+   *          without a class value
    * @param classValue the class value of this instance
    * @throws Exception if density could not be computed successfully
    */
-  protected void updateStatsForConditionalDensityEstimator(ConditionalDensityEstimator classifier,
-                                                           Instance classMissing,
-                                                           double classValue) throws Exception {
+  protected void updateStatsForConditionalDensityEstimator(
+      ConditionalDensityEstimator classifier, Instance classMissing,
+      double classValue) throws Exception {
 
     if (m_PriorEstimator == null) {
       setNumericPriorsFromBuffer();
     }
-    m_SumSchemeEntropy -= classifier.logDensity(classMissing, classValue) * classMissing.weight() /
-      Utils.log2;
-    m_SumPriorEntropy -= m_PriorEstimator.logDensity(classValue) * classMissing.weight() /
-      Utils.log2;
+    m_SumSchemeEntropy -= classifier.logDensity(classMissing, classValue)
+        * classMissing.weight() / Utils.log2;
+    m_SumPriorEntropy -= m_PriorEstimator.logDensity(classValue)
+        * classMissing.weight() / Utils.log2;
   }
 
   /**
-   * Updates all the statistics about a predictors performance for
-   * the current test instance.
-   *
+   * Updates all the statistics about a predictors performance for the current
+   * test instance.
+   * 
    * @param predictedValue the numeric value the classifier predicts
    * @param instance the instance to be classified
    * @throws Exception if the class of the instance is not set
    */
-  protected void updateStatsForPredictor(double predictedValue, Instance instance)
-    throws Exception {
+  protected void updateStatsForPredictor(double predictedValue,
+      Instance instance) throws Exception {
 
-    if (!instance.classIsMissing()){
+    if (!instance.classIsMissing()) {
 
       // Update stats
       m_WithClass += instance.weight();
@@ -3683,14 +3847,15 @@ public class Evaluation
         return;
       }
       m_SumClass += instance.weight() * instance.classValue();
-      m_SumSqrClass += instance.weight() * instance.classValue() * instance.classValue();
-      m_SumClassPredicted += instance.weight() * instance.classValue() * predictedValue;
+      m_SumSqrClass += instance.weight() * instance.classValue()
+          * instance.classValue();
+      m_SumClassPredicted += instance.weight() * instance.classValue()
+          * predictedValue;
       m_SumPredicted += instance.weight() * predictedValue;
       m_SumSqrPredicted += instance.weight() * predictedValue * predictedValue;
 
       updateNumericScores(makeDistribution(predictedValue),
-          makeDistribution(instance.classValue()),
-          instance.weight());
+          makeDistribution(instance.classValue()), instance.weight());
 
     } else
       m_MissingClass += instance.weight();
@@ -3698,45 +3863,43 @@ public class Evaluation
 
   /**
    * Update the cumulative record of classification margins.
-   *
-   * @param predictedDistribution the probability distribution predicted for
-   * the current instance
+   * 
+   * @param predictedDistribution the probability distribution predicted for the
+   *          current instance
    * @param actualClass the index of the actual instance class
    * @param weight the weight assigned to the instance
    */
-  protected void updateMargins(double [] predictedDistribution,
-      int actualClass, double weight) {
+  protected void updateMargins(double[] predictedDistribution, int actualClass,
+      double weight) {
 
     double probActual = predictedDistribution[actualClass];
     double probNext = 0;
 
-    for(int i = 0; i < m_NumClasses; i++)
-      if ((i != actualClass) &&
-          (predictedDistribution[i] > probNext))
+    for (int i = 0; i < m_NumClasses; i++)
+      if ((i != actualClass) && (predictedDistribution[i] > probNext))
         probNext = predictedDistribution[i];
 
     double margin = probActual - probNext;
-    int bin = (int)((margin + 1.0) / 2.0 * k_MarginResolution);
+    int bin = (int) ((margin + 1.0) / 2.0 * k_MarginResolution);
     m_MarginCounts[bin] += weight;
   }
 
   /**
-   * Update the numeric accuracy measures. For numeric classes, the
-   * accuracy is between the actual and predicted class values. For
-   * nominal classes, the accuracy is between the actual and
-   * predicted class probabilities.
-   *
+   * Update the numeric accuracy measures. For numeric classes, the accuracy is
+   * between the actual and predicted class values. For nominal classes, the
+   * accuracy is between the actual and predicted class probabilities.
+   * 
    * @param predicted the predicted values
    * @param actual the actual value
    * @param weight the weight associated with this prediction
    */
-  protected void updateNumericScores(double [] predicted,
-      double [] actual, double weight) {
+  protected void updateNumericScores(double[] predicted, double[] actual,
+      double weight) {
 
     double diff;
     double sumErr = 0, sumAbsErr = 0, sumSqrErr = 0;
     double sumPriorAbsErr = 0, sumPriorSqrErr = 0;
-    for(int i = 0; i < m_NumClasses; i++) {
+    for (int i = 0; i < m_NumClasses; i++) {
       diff = predicted[i] - actual[i];
       sumErr += diff;
       sumAbsErr += Math.abs(diff);
@@ -3753,9 +3916,9 @@ public class Evaluation
   }
 
   /**
-   * Adds a numeric (non-missing) training class value and weight to
-   * the buffer of stored values. Also updates minimum and maximum target value.
-   *
+   * Adds a numeric (non-missing) training class value and weight to the buffer
+   * of stored values. Also updates minimum and maximum target value.
+   * 
    * @param classValue the class value
    * @param weight the instance weight
    */
@@ -3771,18 +3934,17 @@ public class Evaluation
 
     // Update buffer
     if (m_TrainClassVals == null) {
-      m_TrainClassVals = new double [100];
-      m_TrainClassWeights = new double [100];
+      m_TrainClassVals = new double[100];
+      m_TrainClassWeights = new double[100];
     }
     if (m_NumTrainClassVals == m_TrainClassVals.length) {
-      double [] temp = new double [m_TrainClassVals.length * 2];
-      System.arraycopy(m_TrainClassVals, 0,
-          temp, 0, m_TrainClassVals.length);
+      double[] temp = new double[m_TrainClassVals.length * 2];
+      System.arraycopy(m_TrainClassVals, 0, temp, 0, m_TrainClassVals.length);
       m_TrainClassVals = temp;
 
-      temp = new double [m_TrainClassWeights.length * 2];
-      System.arraycopy(m_TrainClassWeights, 0,
-          temp, 0, m_TrainClassWeights.length);
+      temp = new double[m_TrainClassWeights.length * 2];
+      System.arraycopy(m_TrainClassWeights, 0, temp, 0,
+          m_TrainClassWeights.length);
       m_TrainClassWeights = temp;
     }
     m_TrainClassVals[m_NumTrainClassVals] = classValue;
@@ -3791,8 +3953,8 @@ public class Evaluation
   }
 
   /**
-   * Sets up the priors for numeric class attributes from the
-   * training class values that have been seen so far.
+   * Sets up the priors for numeric class attributes from the training class
+   * values that have been seen so far.
    */
   protected void setNumericPriorsFromBuffer() {
 
@@ -3804,9 +3966,10 @@ public class Evaluation
 
   /**
    * Returns the revision string.
-   *
-   * @return		the revision
+   * 
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
