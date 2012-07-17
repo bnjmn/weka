@@ -1428,7 +1428,7 @@ public class StringToWordVector
 	      if(stopwords.is(word))
 		continue;
 
-	    if(!(h.contains(word)))
+	    if(!(h.containsKey(word)))
 	      h.put(word, new Integer(0));
 
 	    Count count = (Count)dictionaryArr[vInd].get(word);
