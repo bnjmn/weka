@@ -1793,6 +1793,18 @@ public class ClassifierPanel
     }
     resultListMenu.add(reEvaluate);
     
+    JMenuItem reApplyConfig = new JMenuItem("Re-apply this model's configuration");
+    if (classifier != null) {
+      reApplyConfig.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e) {
+          m_ClassifierEditor.setValue(classifier);
+        }
+      });
+    } else {
+      reApplyConfig.setEnabled(false);
+    }
+    resultListMenu.add(reApplyConfig);
+    
     resultListMenu.addSeparator();
     
     JMenuItem visErrors = new JMenuItem("Visualize classifier errors");
