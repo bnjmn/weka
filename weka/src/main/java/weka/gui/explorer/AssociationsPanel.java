@@ -76,17 +76,16 @@ import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
-/** 
- * This panel allows the user to select, configure, and run a scheme
- * that learns associations.
- *
+/**
+ * This panel allows the user to select, configure, and run a scheme that learns
+ * associations.
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class AssociationsPanel 
-  extends JPanel
-  implements CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
-  
+public class AssociationsPanel extends JPanel implements
+    CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
+
   /** for serialization */
   static final long serialVersionUID = -6867871711865476971L;
 
@@ -94,12 +93,11 @@ public class AssociationsPanel
   protected Explorer m_Explorer = null;
 
   /** Lets the user configure the associator */
-  protected GenericObjectEditor m_AssociatorEditor =
-    new GenericObjectEditor();
+  protected GenericObjectEditor m_AssociatorEditor = new GenericObjectEditor();
 
   /** The panel showing the current associator selection */
   protected PropertyPanel m_CEPanel = new PropertyPanel(m_AssociatorEditor);
-  
+
   /** The output area for associations */
   protected JTextArea m_OutText = new JTextArea(20, 40);
 
@@ -117,28 +115,27 @@ public class AssociationsPanel
 
   /** Click to stop a running associator */
   protected JButton m_StopBut = new JButton("Stop");
-  
-  /** 
-   * Whether to store any graph or xml rules output in
-   * the history list
+
+  /**
+   * Whether to store any graph or xml rules output in the history list
    */
-  protected JCheckBox m_storeOutput = 
-    new JCheckBox("Store output for visualization");
-  
+  protected JCheckBox m_storeOutput = new JCheckBox(
+      "Store output for visualization");
+
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
 
   /** The user-supplied test set (if any) */
   protected Instances m_TestInstances;
-  
+
   /** A thread that associator runs in */
   protected Thread m_RunThread;
 
   /* Register the property editors we need */
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
-  
+
   /**
    * Creates the associator panel
    */
@@ -149,50 +146,54 @@ public class AssociationsPanel
     m_OutText.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_OutText.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
-	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
-	    != InputEvent.BUTTON1_MASK) {
-	  m_OutText.selectAll();
-	}
+        if ((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK) {
+          m_OutText.selectAll();
+        }
       }
     });
-    m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
+    m_History.setBorder(BorderFactory
+        .createTitledBorder("Result list (right-click for options)"));
     m_History.setHandleRightClicks(false);
     // see if we can popup a menu for the selected result
     m_History.getList().addMouseListener(new MouseAdapter() {
-	public void mouseClicked(MouseEvent e) {
-	  if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
-	       != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
-	    int index = m_History.getList().locationToIndex(e.getPoint());
-	    if (index != -1) {
-	      String name = m_History.getNameAtIndex(index);
-	      historyRightClickPopup(name, e.getX(), e.getY());
-	    } else {
-	      historyRightClickPopup(null, e.getX(), e.getY());
-	    }
-	  }
-	}
-      });
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
+            || e.isAltDown()) {
+          int index = m_History.getList().locationToIndex(e.getPoint());
+          if (index != -1) {
+            String name = m_History.getNameAtIndex(index);
+            historyRightClickPopup(name, e.getX(), e.getY());
+          } else {
+            historyRightClickPopup(null, e.getX(), e.getY());
+          }
+        }
+      }
+    });
 
     m_AssociatorEditor.setClassType(Associator.class);
     m_AssociatorEditor.setValue(ExplorerDefaults.getAssociator());
     m_AssociatorEditor.addPropertyChangeListener(new PropertyChangeListener() {
+      @Override
       public void propertyChange(PropertyChangeEvent e) {
         m_StartBut.setEnabled(true);
         // Check capabilities
         Capabilities currentFilter = m_AssociatorEditor.getCapabilitiesFilter();
         Associator associator = (Associator) m_AssociatorEditor.getValue();
-        Capabilities currentSchemeCapabilities =  null;
-        if (associator != null && currentFilter != null && 
-            (associator instanceof CapabilitiesHandler)) {
-          currentSchemeCapabilities = ((CapabilitiesHandler)associator).getCapabilities();
-          
-          if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
-              !currentSchemeCapabilities.supports(currentFilter)) {
+        Capabilities currentSchemeCapabilities = null;
+        if (associator != null && currentFilter != null
+            && (associator instanceof CapabilitiesHandler)) {
+          currentSchemeCapabilities = ((CapabilitiesHandler) associator)
+              .getCapabilities();
+
+          if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
+              && !currentSchemeCapabilities.supports(currentFilter)) {
             m_StartBut.setEnabled(false);
           }
         }
-	repaint();
+        repaint();
       }
     });
 
@@ -201,38 +202,37 @@ public class AssociationsPanel
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
-	startAssociator();
+        startAssociator();
       }
     });
     m_StopBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
-	stopAssociator();
+        stopAssociator();
       }
     });
-    
+
     // check for any visualization plugins so that we
     // can add a checkbox for storing graphs or rules
-    boolean showStoreOutput = 
-      (GenericObjectEditor.
-        getClassnames(AssociationRuleVisualizePlugin.class.getName()).size() > 0 ||
-       GenericObjectEditor.
-        getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
+    boolean showStoreOutput = (GenericObjectEditor.getClassnames(
+        AssociationRuleVisualizePlugin.class.getName()).size() > 0 || GenericObjectEditor
+        .getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
 
     // Layout the GUI
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createCompoundBorder(
-		 BorderFactory.createTitledBorder("Associator"),
-		 BorderFactory.createEmptyBorder(0, 5, 5, 5)
-		 ));
+        BorderFactory.createTitledBorder("Associator"),
+        BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     p1.setLayout(new BorderLayout());
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
     JPanel buttons = new JPanel();
     buttons.setLayout(new BorderLayout());
     JPanel buttonsP = new JPanel();
-    buttonsP.setLayout(new GridLayout(1,2));
-    
+    buttonsP.setLayout(new GridLayout(1, 2));
+
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
@@ -251,17 +251,19 @@ public class AssociationsPanel
     p3.add(js, BorderLayout.CENTER);
     js.getViewport().addChangeListener(new ChangeListener() {
       private int lastHeight;
+
+      @Override
       public void stateChanged(ChangeEvent e) {
-	JViewport vp = (JViewport)e.getSource();
-	int h = vp.getViewSize().height; 
-	if (h != lastHeight) { // i.e. an addition not just a user scrolling
-	  lastHeight = h;
-	  int x = h - vp.getExtentSize().height;
-	  vp.setViewPosition(new Point(0, x));
-	}
+        JViewport vp = (JViewport) e.getSource();
+        int h = vp.getViewSize().height;
+        if (h != lastHeight) { // i.e. an addition not just a user scrolling
+          lastHeight = h;
+          int x = h - vp.getExtentSize().height;
+          vp.setViewPosition(new Point(0, x));
+        }
       }
     });
-    
+
     GridBagLayout gbL = new GridBagLayout();
     GridBagConstraints gbC = new GridBagConstraints();
     JPanel mondo = new JPanel();
@@ -270,19 +272,24 @@ public class AssociationsPanel
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 1;     gbC.gridx = 0;
+    gbC.gridy = 1;
+    gbC.gridx = 0;
     gbL.setConstraints(buttons, gbC);
     mondo.add(buttons);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
-    gbC.gridy = 2;     gbC.gridx = 0; gbC.weightx = 0;
+    gbC.gridy = 2;
+    gbC.gridx = 0;
+    gbC.weightx = 0;
     gbL.setConstraints(m_History, gbC);
     mondo.add(m_History);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
-    gbC.gridy = 0;     gbC.gridx = 1;
+    gbC.gridy = 0;
+    gbC.gridx = 1;
     gbC.gridheight = 3;
-    gbC.weightx = 100; gbC.weighty = 100;
+    gbC.weightx = 100;
+    gbC.weighty = 100;
     gbL.setConstraints(p3, gbC);
     mondo.add(p3);
 
@@ -290,39 +297,42 @@ public class AssociationsPanel
     add(p1, BorderLayout.NORTH);
     add(mondo, BorderLayout.CENTER);
   }
-  
+
   /**
    * Sets the Logger to receive informational messages
-   *
+   * 
    * @param newLog the Logger that will now get info messages
    */
+  @Override
   public void setLog(Logger newLog) {
 
     m_Log = newLog;
   }
-  
+
   /**
    * Tells the panel to use a new set of instances.
-   *
+   * 
    * @param inst a set of Instances
    */
+  @Override
   public void setInstances(Instances inst) {
-    
+
     m_Instances = inst;
-    String [] attribNames = new String [m_Instances.numAttributes()];
+    String[] attribNames = new String[m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
+      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i))
+          + ") ";
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_StartBut.setEnabled(m_RunThread == null);
     m_StopBut.setEnabled(m_RunThread != null);
   }
-  
+
   /**
    * Starts running the currently configured associator with the current
-   * settings. This is run in a separate thread, and will only start if
-   * there is no associator already running. The associator output is sent
-   * to the results history panel.
+   * settings. This is run in a separate thread, and will only start if there is
+   * no associator already running. The associator output is sent to the results
+   * history panel.
    */
   protected void startAssociator() {
 
@@ -330,118 +340,142 @@ public class AssociationsPanel
       m_StartBut.setEnabled(false);
       m_StopBut.setEnabled(true);
       m_RunThread = new Thread() {
-	public void run() {
-	  m_CEPanel.addToHistory();
-	  
-	  // Copy the current state of things
-	  m_Log.statusMessage("Setting up...");
-	  Instances inst = new Instances(m_Instances);
-	  String grph = null;
-	  //String xmlRules = null;
-	  AssociationRules rulesList = null;
-	  Associator associator = (Associator) m_AssociatorEditor.getValue();
-	  StringBuffer outBuff = new StringBuffer();
-	  String name = (new SimpleDateFormat("HH:mm:ss - "))
-	  .format(new Date());
-	  String cname = associator.getClass().getName();
-	  if (cname.startsWith("weka.associations.")) {
-	    name += cname.substring("weka.associations.".length());
-	  } else {
-	    name += cname;
-	  }
+        @Override
+        public void run() {
+          m_CEPanel.addToHistory();
+
+          // Copy the current state of things
+          m_Log.statusMessage("Setting up...");
+          Instances inst = new Instances(m_Instances);
+          String grph = null;
+          // String xmlRules = null;
+          AssociationRules rulesList = null;
+          Associator associator = (Associator) m_AssociatorEditor.getValue();
+          StringBuffer outBuff = new StringBuffer();
+          String name = (new SimpleDateFormat("HH:mm:ss - "))
+              .format(new Date());
+          String cname = associator.getClass().getName();
+          if (cname.startsWith("weka.associations.")) {
+            name += cname.substring("weka.associations.".length());
+          } else {
+            name += cname;
+          }
           String cmd = m_AssociatorEditor.getValue().getClass().getName();
           if (m_AssociatorEditor.getValue() instanceof OptionHandler)
-            cmd += " " + Utils.joinOptions(((OptionHandler) m_AssociatorEditor.getValue()).getOptions());
-	  try {
+            cmd += " "
+                + Utils.joinOptions(((OptionHandler) m_AssociatorEditor
+                    .getValue()).getOptions());
+          try {
 
-	    // Output some header information
-	    m_Log.logMessage("Started " + cname);
-	    m_Log.logMessage("Command: " + cmd);
-	    if (m_Log instanceof TaskLogger) {
-	      ((TaskLogger)m_Log).taskStarted();
-	    }
-	    outBuff.append("=== Run information ===\n\n");
-	    outBuff.append("Scheme:       " + cname);
-	    if (associator instanceof OptionHandler) {
-	      String [] o = ((OptionHandler) associator).getOptions();
-	      outBuff.append(" " + Utils.joinOptions(o));
-	    }
-	    outBuff.append("\n");
-	    outBuff.append("Relation:     " + inst.relationName() + '\n');
-	    outBuff.append("Instances:    " + inst.numInstances() + '\n');
-	    outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
-	    if (inst.numAttributes() < 100) {
-	      for (int i = 0; i < inst.numAttributes(); i++) {
-		outBuff.append("              " + inst.attribute(i).name()
-			       + '\n');
-	      }
-	    } else {
-	      outBuff.append("              [list of attributes omitted]\n");
-	    }
-	    m_History.addResult(name, outBuff);
-	    m_History.setSingle(name);
-	    
-	    // Build the model and output it.
-	    m_Log.statusMessage("Building model on training data...");
-	    associator.buildAssociations(inst);
-	    outBuff.append("=== Associator model (full training set) ===\n\n");
-	    outBuff.append(associator.toString() + '\n');
-	    m_History.updateResult(name);
-	    if (m_storeOutput.isSelected()) {
-	      if (associator instanceof Drawable) {
-	        grph = null;
-	        try {
-	          grph = ((Drawable)associator).graph();
-	        } catch (Exception ex) {	        
-	        }
-	      }
+            // Output some header information
+            m_Log.logMessage("Started " + cname);
+            m_Log.logMessage("Command: " + cmd);
+            if (m_Log instanceof TaskLogger) {
+              ((TaskLogger) m_Log).taskStarted();
+            }
+            outBuff.append("=== Run information ===\n\n");
+            outBuff.append("Scheme:       " + cname);
+            if (associator instanceof OptionHandler) {
+              String[] o = ((OptionHandler) associator).getOptions();
+              outBuff.append(" " + Utils.joinOptions(o));
+            }
+            outBuff.append("\n");
+            outBuff.append("Relation:     " + inst.relationName() + '\n');
+            outBuff.append("Instances:    " + inst.numInstances() + '\n');
+            outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
+            if (inst.numAttributes() < 100) {
+              for (int i = 0; i < inst.numAttributes(); i++) {
+                outBuff.append("              " + inst.attribute(i).name()
+                    + '\n');
+              }
+            } else {
+              outBuff.append("              [list of attributes omitted]\n");
+            }
+            m_History.addResult(name, outBuff);
+            m_History.setSingle(name);
 
-	      if (associator instanceof weka.associations.AssociationRulesProducer) {
-	        // xmlRules = null;
-	        rulesList = null;
-	        try {
-	          // xmlRules = ((weka.associations.XMLRulesProducer)associator).xmlRules();
-	          rulesList = 
-	            ((weka.associations.AssociationRulesProducer)associator).getAssociationRules();
-	        } catch (Exception ex) {}
-	      }
-	    }
-	    m_Log.logMessage("Finished " + cname);
-	    m_Log.statusMessage("OK");
-	  } catch (Exception ex) {
-	    m_Log.logMessage(ex.getMessage());
-	    m_Log.statusMessage("See error log");
-	  } finally {
-	    if (grph != null || rulesList != null) {
-	      Vector<Object> visVect = new Vector<Object>();
+            // Build the model and output it.
+            m_Log.statusMessage("Building model on training data...");
+            associator.buildAssociations(inst);
+            outBuff.append("=== Associator model (full training set) ===\n\n");
+            outBuff.append(associator.toString() + '\n');
+            m_History.updateResult(name);
+            if (m_storeOutput.isSelected()) {
+              if (associator instanceof Drawable) {
+                grph = null;
+                try {
+                  grph = ((Drawable) associator).graph();
+                } catch (Exception ex) {
+                }
+              }
 
-	      if (grph != null) {
-	        visVect.add(grph);
-	      }
+              if (associator instanceof weka.associations.AssociationRulesProducer) {
+                // xmlRules = null;
+                rulesList = null;
+                try {
+                  // xmlRules =
+                  // ((weka.associations.XMLRulesProducer)associator).xmlRules();
+                  rulesList = ((weka.associations.AssociationRulesProducer) associator)
+                      .getAssociationRules();
+                } catch (Exception ex) {
+                }
+              }
+            }
+            m_Log.logMessage("Finished " + cname);
+            m_Log.statusMessage("OK");
+          } catch (Exception ex) {
+            m_Log.logMessage(ex.getMessage());
+            m_Log.statusMessage("See error log");
+          } finally {
+            Vector<Object> visVect = new Vector<Object>();
+            try {
+              // save a copy since we don't need the learned model for
+              // anything yet.
+              // TODO should probably add options to store full model and
+              // save/load
+              // models like the classifier and clusterer panels
+              Associator configCopy = associator.getClass().newInstance();
+              if (configCopy instanceof OptionHandler) {
+                ((OptionHandler) configCopy)
+                    .setOptions(((OptionHandler) associator).getOptions());
+              }
+              visVect.add(configCopy);
+            } catch (Exception ex) {
+              ex.printStackTrace();
 
-	      if (rulesList != null) {
-	        visVect.add(rulesList);
-	      }
-	      m_History.addObject(name, visVect);
-	    }
-	    if (isInterrupted()) {
-	      m_Log.logMessage("Interrupted " + cname);
-	      m_Log.statusMessage("See error log");
-	    }
-	    m_RunThread = null;
-	    m_StartBut.setEnabled(true);
-	    m_StopBut.setEnabled(false);
-	    if (m_Log instanceof TaskLogger) {
-	      ((TaskLogger)m_Log).taskFinished();
-	    }
-	  }
-	}
+              // just add the original if we have problems copying
+              visVect.add(associator);
+            }
+
+            if (grph != null || rulesList != null) {
+
+              if (grph != null) {
+                visVect.add(grph);
+              }
+
+              if (rulesList != null) {
+                visVect.add(rulesList);
+              }
+            }
+            m_History.addObject(name, visVect);
+            if (isInterrupted()) {
+              m_Log.logMessage("Interrupted " + cname);
+              m_Log.statusMessage("See error log");
+            }
+            m_RunThread = null;
+            m_StartBut.setEnabled(true);
+            m_StopBut.setEnabled(false);
+            if (m_Log instanceof TaskLogger) {
+              ((TaskLogger) m_Log).taskFinished();
+            }
+          }
+        }
       };
       m_RunThread.setPriority(Thread.MIN_PRIORITY);
       m_RunThread.start();
     }
   }
-  
+
   /**
    * Stops the currently running Associator (if any).
    */
@@ -449,93 +483,98 @@ public class AssociationsPanel
 
     if (m_RunThread != null) {
       m_RunThread.interrupt();
-      
+
       // This is deprecated (and theoretically the interrupt should do).
       m_RunThread.stop();
-      
+
     }
   }
 
   /**
    * Save the currently selected associator output to a file.
+   * 
    * @param name the name of the buffer to save
    */
   protected void saveBuffer(String name) {
     StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
-	m_Log.logMessage("Save successful.");
+        m_Log.logMessage("Save successful.");
       }
     }
   }
-  
+
   /**
-   * Pops up a TreeVisualizer for the associator from the currently
-   * selected item in the results list
+   * Pops up a TreeVisualizer for the associator from the currently selected
+   * item in the results list
+   * 
    * @param dottyString the description of the tree in dotty format
    * @param treeName the title to assign to the display
    */
   protected void visualizeTree(String dottyString, String treeName) {
-    final javax.swing.JFrame jf = 
-      new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+treeName);
-    jf.setSize(500,400);
+    final javax.swing.JFrame jf = new javax.swing.JFrame(
+        "Weka Classifier Tree Visualizer: " + treeName);
+    jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
-    TreeVisualizer tv = new TreeVisualizer(null,
-                                           dottyString,
-                                           new PlaceNode2());
+    TreeVisualizer tv = new TreeVisualizer(null, dottyString, new PlaceNode2());
     jf.getContentPane().add(tv, BorderLayout.CENTER);
     jf.addWindowListener(new java.awt.event.WindowAdapter() {
-        public void windowClosing(java.awt.event.WindowEvent e) {
-          jf.dispose();
-        }
-      });
-    
+      @Override
+      public void windowClosing(java.awt.event.WindowEvent e) {
+        jf.dispose();
+      }
+    });
+
     jf.setVisible(true);
     tv.fitToScreen();
   }
-    
+
   /**
    * Handles constructing a popup menu with visualization options.
-   * @param name the name of the result history list entry clicked on by
-   * the user
+   * 
+   * @param name the name of the result history list entry clicked on by the
+   *          user
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
   protected void historyRightClickPopup(String name, int x, int y) {
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
-    
+
     JMenuItem visMainBuffer = new JMenuItem("View in main window");
     if (selectedName != null) {
       visMainBuffer.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    m_History.setSingle(selectedName);
-	  }
-	});
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          m_History.setSingle(selectedName);
+        }
+      });
     } else {
       visMainBuffer.setEnabled(false);
     }
     resultListMenu.add(visMainBuffer);
-    
+
     JMenuItem visSepBuffer = new JMenuItem("View in separate window");
     if (selectedName != null) {
       visSepBuffer.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.openFrame(selectedName);
-	}
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          m_History.openFrame(selectedName);
+        }
       });
     } else {
       visSepBuffer.setEnabled(false);
     }
     resultListMenu.add(visSepBuffer);
-    
+
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
     if (selectedName != null) {
       saveOutput.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    saveBuffer(selectedName);
-	  }
-	});
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          saveBuffer(selectedName);
+        }
+      });
     } else {
       saveOutput.setEnabled(false);
     }
@@ -544,146 +583,164 @@ public class AssociationsPanel
     JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
     if (selectedName != null) {
       deleteOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.removeResult(selectedName);
-	}
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          m_History.removeResult(selectedName);
+        }
       });
     } else {
       deleteOutput.setEnabled(false);
     }
     resultListMenu.add(deleteOutput);
-    
-//    String grph = null;
+
     Vector<Object> visVect = null;
     if (selectedName != null) {
-      //grph = (String)m_History.getNamedObject(selectedName);
-      visVect = (Vector)m_History.getNamedObject(selectedName);      
+      visVect = (Vector) m_History.getNamedObject(selectedName);
     }
-    
-/*    final String fgrph = grph;
-    JMenuItem visTree = new JMenuItem("Visualize tree");
-    if (grph != null) {
-      visTree.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          String title = selectedName;
-          visualizeTree(fgrph, title);
-        }
-      });
-      resultListMenu.add(visTree);
-    } */
-    
+
+    // check for the associator itself
+    if (visVect != null) {
+      // should be the first element
+      Associator temp_model = null;
+      if (visVect.get(0) instanceof Associator) {
+        temp_model = (Associator) visVect.get(0);
+      }
+
+      final Associator model = temp_model;
+      JMenuItem reApplyConfig = new JMenuItem(
+          "Re-apply this model's configuration");
+      if (model != null) {
+        reApplyConfig.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            m_AssociatorEditor.setValue(model);
+          }
+        });
+      } else {
+        reApplyConfig.setEnabled(false);
+      }
+      resultListMenu.add(reApplyConfig);
+    }
+
     // plugins
     JMenu visPlugins = new JMenu("Plugins");
     boolean availablePlugins = false;
-    
+
     // tree plugins
     if (visVect != null) {
       for (Object o : visVect) {
         if (o instanceof AssociationRules) {
-          Vector pluginsVector = 
-            GenericObjectEditor.getClassnames(AssociationRuleVisualizePlugin.class.getName());
+          Vector pluginsVector = GenericObjectEditor
+              .getClassnames(AssociationRuleVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
             String className = (String) (pluginsVector.elementAt(i));
             try {
-              AssociationRuleVisualizePlugin plugin = 
-                (AssociationRuleVisualizePlugin)Class.forName(className).newInstance();
+              AssociationRuleVisualizePlugin plugin = (AssociationRuleVisualizePlugin) Class
+                  .forName(className).newInstance();
               if (plugin == null) {
                 continue;
               }
               availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((AssociationRules)o, selectedName);
+              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(
+                  (AssociationRules) o, selectedName);
               if (pluginMenuItem != null) {
                 visPlugins.add(pluginMenuItem);
               }
             } catch (Exception ex) {
-              //ex.printStackTrace();
+              // ex.printStackTrace();
             }
           }
         } else if (o instanceof String) {
-          Vector pluginsVector = 
-            GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
+          Vector pluginsVector = GenericObjectEditor
+              .getClassnames(TreeVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
             String className = (String) (pluginsVector.elementAt(i));
             try {
-              TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(className).newInstance();
+              TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(
+                  className).newInstance();
               if (plugin == null)
                 continue;
               availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((String)o, selectedName);
+              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(
+                  (String) o, selectedName);
               // Version version = new Version();
               if (pluginMenuItem != null) {
-                /*  if (version.compareTo(plugin.getMinVersion()) < 0)
-              pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
-            if (version.compareTo(plugin.getMaxVersion()) >= 0)
-              pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");*/
+                /*
+                 * if (version.compareTo(plugin.getMinVersion()) < 0)
+                 * pluginMenuItem.setText(pluginMenuItem.getText() +
+                 * " (weka outdated)"); if
+                 * (version.compareTo(plugin.getMaxVersion()) >= 0)
+                 * pluginMenuItem.setText(pluginMenuItem.getText() +
+                 * " (plugin outdated)");
+                 */
                 visPlugins.add(pluginMenuItem);
               }
-            }
-            catch (Exception e) {
-              //e.printStackTrace();
+            } catch (Exception e) {
+              // e.printStackTrace();
             }
           }
         }
       }
     }
-    
+
     if (availablePlugins) {
       resultListMenu.add(visPlugins);
     }
 
     resultListMenu.show(m_History.getList(), x, y);
   }
-  
+
   /**
    * updates the capabilities filter of the GOE
    * 
-   * @param filter	the new filter to use
+   * @param filter the new filter to use
    */
   protected void updateCapabilitiesFilter(Capabilities filter) {
-    Instances           tempInst;
-    Capabilities        filterClass;
-    
+    Instances tempInst;
+    Capabilities filterClass;
+
     if (filter == null) {
       m_AssociatorEditor.setCapabilitiesFilter(new Capabilities(null));
       return;
     }
-    
+
     if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
       tempInst = new Instances(m_Instances, 0);
     else
       tempInst = new Instances(m_Instances);
     tempInst.setClassIndex(-1);
-    
+
     try {
       filterClass = Capabilities.forInstances(tempInst);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       filterClass = new Capabilities(null);
     }
-    
+
     m_AssociatorEditor.setCapabilitiesFilter(filterClass);
-    
+
     m_StartBut.setEnabled(true);
     // Check capabilities
     Capabilities currentFilter = m_AssociatorEditor.getCapabilitiesFilter();
     Associator associator = (Associator) m_AssociatorEditor.getValue();
-    Capabilities currentSchemeCapabilities =  null;
-    if (associator != null && currentFilter != null && 
-        (associator instanceof CapabilitiesHandler)) {
-      currentSchemeCapabilities = ((CapabilitiesHandler)associator).getCapabilities();
-      
-      if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
-          !currentSchemeCapabilities.supports(currentFilter)) {
+    Capabilities currentSchemeCapabilities = null;
+    if (associator != null && currentFilter != null
+        && (associator instanceof CapabilitiesHandler)) {
+      currentSchemeCapabilities = ((CapabilitiesHandler) associator)
+          .getCapabilities();
+
+      if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
+          && !currentSchemeCapabilities.supports(currentFilter)) {
         m_StartBut.setEnabled(false);
       }
     }
   }
-  
+
   /**
    * method gets called in case of a change event
    * 
-   * @param e		the associated change event
+   * @param e the associated change event
    */
+  @Override
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
     if (e.getFilter() == null)
       updateCapabilitiesFilter(null);
@@ -695,49 +752,53 @@ public class AssociationsPanel
    * Sets the Explorer to use as parent frame (used for sending notifications
    * about changes in the data)
    * 
-   * @param parent	the parent frame
+   * @param parent the parent frame
    */
+  @Override
   public void setExplorer(Explorer parent) {
     m_Explorer = parent;
   }
-  
+
   /**
    * returns the parent Explorer frame
    * 
-   * @return		the parent
+   * @return the parent
    */
+  @Override
   public Explorer getExplorer() {
     return m_Explorer;
   }
-  
+
   /**
    * Returns the title for the tab in the Explorer
    * 
-   * @return 		the title of this tab
+   * @return the title of this tab
    */
+  @Override
   public String getTabTitle() {
     return "Associate";
   }
-  
+
   /**
    * Returns the tooltip for the tab in the Explorer
    * 
-   * @return 		the tooltip of this tab
+   * @return the tooltip of this tab
    */
+  @Override
   public String getTabTitleToolTip() {
     return "Discover association rules";
   }
 
   /**
    * Tests out the Associator panel from the command line.
-   *
+   * 
    * @param args may optionally contain the name of a dataset to load.
    */
-  public static void main(String [] args) {
+  public static void main(String[] args) {
 
     try {
-      final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Explorer: Associator");
+      final javax.swing.JFrame jf = new javax.swing.JFrame(
+          "Weka Explorer: Associator");
       jf.getContentPane().setLayout(new BorderLayout());
       final AssociationsPanel sp = new AssociationsPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -745,19 +806,20 @@ public class AssociationsPanel
       sp.setLog(lp);
       jf.getContentPane().add(lp, BorderLayout.SOUTH);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	public void windowClosing(java.awt.event.WindowEvent e) {
-	  jf.dispose();
-	  System.exit(0);
-	}
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
       });
       jf.pack();
       jf.setVisible(true);
       if (args.length == 1) {
-	System.err.println("Loading instances from " + args[0]);
-	java.io.Reader r = new java.io.BufferedReader(
-			   new java.io.FileReader(args[0]));
-	Instances i = new Instances(r);
-	sp.setInstances(i);
+        System.err.println("Loading instances from " + args[0]);
+        java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
+            args[0]));
+        Instances i = new Instances(r);
+        sp.setInstances(i);
       }
     } catch (Exception ex) {
       ex.printStackTrace();
