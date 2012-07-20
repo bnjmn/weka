@@ -648,26 +648,26 @@ public class ArffTableModel
             default:
               result = "-can't display-";
           }
-        }
-      }
-    }
 
-    if (getType(columnIndex) != Attribute.NUMERIC) {
-      if (result != null) {
-        tmp = result.toString();
-        // fix html tags, otherwise Java parser hangs
-        if ((tmp.indexOf('<') > -1) || (tmp.indexOf('>') > -1)) {
-          tmp = tmp.replace("<", "(");
-          tmp = tmp.replace(">", ")");
+          if (getType(columnIndex) != Attribute.NUMERIC) {
+            if (result != null) {
+              tmp = result.toString();
+              // fix html tags, otherwise Java parser hangs
+              if ((tmp.indexOf('<') > -1) || (tmp.indexOf('>') > -1)) {
+                tmp = tmp.replace("<", "(");
+                tmp = tmp.replace(">", ")");
+              }
+              // does it contain "\n" or "\r"? -> replace with red html tag
+              if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
+                tmp = tmp.replaceAll("\\r\\n", "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
+                tmp = tmp.replaceAll("\\r", "<font color=\"red\"><b>\\\\r</b></font>");
+                tmp = tmp.replaceAll("\\n", "<font color=\"red\"><b>\\\\n</b></font>");
+                tmp = "<html>" + tmp + "</html>";
+              }
+              result = tmp;
+            }
+          }          
         }
-        // does it contain "\n" or "\r"? -> replace with red html tag
-        if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
-          tmp = tmp.replaceAll("\\r\\n", "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
-          tmp = tmp.replaceAll("\\r", "<font color=\"red\"><b>\\\\r</b></font>");
-          tmp = tmp.replaceAll("\\n", "<font color=\"red\"><b>\\\\n</b></font>");
-          tmp = "<html>" + tmp + "</html>";
-        }
-        result = tmp;
       }
     }
 
