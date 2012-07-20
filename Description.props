@@ -6,10 +6,10 @@
 PackageName=averagedOneDependenceEstimators
 
 # Version (required)
-Version=1.0.2
+Version=1.2.1
 
 #Date
-Date=2012-03-20
+Date=2012-07-20
 
 # Title (required)
 Title=Family of methods for learning ensembles of naive Bayes-like classifiers (with relaxed independence assumption) - includes AODE, WAODE and AODEsr
@@ -26,16 +26,22 @@ Maintainer=Janice Boughton <jrbought@csse.monash.edu.au>
 License=GPL 3.0
 
 # Description (required)
-Description=AODE achieves highly accurate classification by averaging over all of a small space of alternative naive-Bayes-like models that have weaker (and hence less detrimental) independence assumptions than naive Bayes. The resulting algorithm is computationally efficient while delivering highly accurate classification on many learning  tasks. For more information, see G. Webb, J. Boughton, Z. Wang (2005). Not So Naive Bayes: Aggregating One-Dependence Estimators. Machine Learning. 58(1):5-24.
+Description=NOTE: This package has been superseded by the AnDE (Averaged N Dependence Estimators) package - all users are encouraged to use this instead. AODE achieves highly accurate classification by averaging over all of a small space of alternative naive-Bayes-like models that have weaker (and hence less detrimental) independence assumptions than naive Bayes. The resulting algorithm is computationally efficient while delivering highly accurate classification on many learning  tasks. For more information, see G. Webb, J. Boughton, Z. Wang (2005). Not So Naive Bayes: Aggregating One-Dependence Estimators. Machine Learning. 58(1):5-24.
+
+Changes=This release deprecates this package. You should uninstall it and use the AnDE package instead.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/averagedOneDependenceEstimators1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/averagedOneDependenceEstimators1.2.1.zip?download
 
 # URL for further information
 URL=http://www.csse.monash.edu.au/~webb/
+
+MessageToDisplayOnInstallation=This package is deprecated. It has been superseded by\n\
+ the AnDE (Averaged N Depedence Estimators) package. Please uninstall this package and\n\
+ install AnDE instead.
 
 # Related to other packages?
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (<=3.7.6)
