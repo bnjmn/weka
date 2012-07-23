@@ -270,6 +270,7 @@ public abstract class AbstractFileSaver
             loader.setFile(input);
             setInstances(loader.getDataSet());
         } catch(Exception ex){
+          ex.printStackTrace();
             throw new IOException("No data set loaded. Data set has to be in ARFF format.");
         }
     }
