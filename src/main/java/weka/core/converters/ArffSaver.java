@@ -42,19 +42,23 @@ import weka.core.Utils;
  * Writes to a destination in arff text format.
  * <p/>
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
- * 
- * <pre>
- * -i &lt;the input file&gt;
- * The input file
- * </pre>
- * 
- * <pre>
- * -o &lt;the output file&gt;
- * The output file
- * </pre>
- * 
+ * <!-- options-start -->
+ * * Valid options are: <p/>
+ * * 
+ * * <pre> -i &lt;the input file&gt;
+ * *  The input file</pre>
+ * * 
+ * * <pre> -o &lt;the output file&gt;
+ * *  The output file</pre>
+ * * 
+ * * <pre> -compress
+ * *  Compresses the data (uses '.arff.gz' as extension instead of '.arff')
+ * *  (default: off)</pre>
+ * * 
+ * * <pre> -decimal &lt;num&gt;
+ * *  The maximum number of digits to print after the decimal
+ * *  place for numeric values (default: 6)</pre>
+ * * 
  * <!-- options-end -->
  * 
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
@@ -137,25 +141,23 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    * Parses the options for this object.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
-   * 
-   * <pre>
-   * -i &lt;the input file&gt;
-   *  The input file
-   * </pre>
-   * 
-   * <pre>
-   * -o &lt;the output file&gt;
-   *  The output file
-   * </pre>
-   * 
-   * <pre>
-   * -compress
-   *  Compresses the data (uses '.xrff.gz' as extension instead of '.xrff')
-   *  (default: off)
-   * </pre>
-   * 
+   * <!-- options-start -->
+   * * Valid options are: <p/>
+   * * 
+   * * <pre> -i &lt;the input file&gt;
+   * *  The input file</pre>
+   * * 
+   * * <pre> -o &lt;the output file&gt;
+   * *  The output file</pre>
+   * * 
+   * * <pre> -compress
+   * *  Compresses the data (uses '.arff.gz' as extension instead of '.arff')
+   * *  (default: off)</pre>
+   * * 
+   * * <pre> -decimal &lt;num&gt;
+   * *  The maximum number of digits to print after the decimal
+   * *  place for numeric values (default: 6)</pre>
+   * * 
    * <!-- options-end -->
    * 
    * @param options the options to use
@@ -469,3 +471,4 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
     runFileSaver(new ArffSaver(), args);
   }
 }
+
