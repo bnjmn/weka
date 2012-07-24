@@ -38,38 +38,33 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start --> Writes to a destination that is in CSV
- * (comma-separated values) format. The column separator can be chosen (default
- * is ',') as well as the value representing missing values (default is '?').
- * <p/>
+ * <!-- globalinfo-start -->
+ * * Writes to a destination that is in CSV (comma-separated values) format. The column separator can be chosen (default is ',') as well as the value representing missing values (default is '?').
+ * * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
- * 
- * <pre>
- * -F &lt;separator&gt;
- *  The field separator to be used.
- *  '\t' can be used as well.
- *  (default: ',')
- * </pre>
- * 
- * <pre>
- * -M &lt;str&gt;
- *  The string representing a missing value.
- *  (default: ?)
- * </pre>
- * 
- * <pre>
- * -i &lt;the input file&gt;
- *  The input file
- * </pre>
- * 
- * <pre>
- * -o &lt;the output file&gt;
- *  The output file
- * </pre>
- * 
+ * <!-- options-start -->
+ * * Valid options are: <p/>
+ * * 
+ * * <pre> -F &lt;separator&gt;
+ * *  The field separator to be used.
+ * *  '\t' can be used as well.
+ * *  (default: ',')</pre>
+ * * 
+ * * <pre> -M &lt;str&gt;
+ * *  The string representing a missing value.
+ * *  (default: ?)</pre>
+ * * 
+ * * <pre> -decimal &lt;num&gt;
+ * *  The maximum number of digits to print after the decimal
+ * *  place for numeric values (default: 6)</pre>
+ * * 
+ * * <pre> -i &lt;the input file&gt;
+ * *  The input file</pre>
+ * * 
+ * * <pre> -o &lt;the output file&gt;
+ * *  The output file</pre>
+ * * 
  * <!-- options-end -->
  * 
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
@@ -142,32 +137,28 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
-   * 
-   * <pre>
-   * -F &lt;separator&gt;
-   *  The field separator to be used.
-   *  '\t' can be used as well.
-   *  (default: ',')
-   * </pre>
-   * 
-   * <pre>
-   * -M &lt;str&gt;
-   *  The string representing a missing value.
-   *  (default: ?)
-   * </pre>
-   * 
-   * <pre>
-   * -i &lt;the input file&gt;
-   *  The input file
-   * </pre>
-   * 
-   * <pre>
-   * -o &lt;the output file&gt;
-   *  The output file
-   * </pre>
-   * 
+   * <!-- options-start -->
+   * * Valid options are: <p/>
+   * * 
+   * * <pre> -F &lt;separator&gt;
+   * *  The field separator to be used.
+   * *  '\t' can be used as well.
+   * *  (default: ',')</pre>
+   * * 
+   * * <pre> -M &lt;str&gt;
+   * *  The string representing a missing value.
+   * *  (default: ?)</pre>
+   * * 
+   * * <pre> -decimal &lt;num&gt;
+   * *  The maximum number of digits to print after the decimal
+   * *  place for numeric values (default: 6)</pre>
+   * * 
+   * * <pre> -i &lt;the input file&gt;
+   * *  The input file</pre>
+   * * 
+   * * <pre> -o &lt;the output file&gt;
+   * *  The output file</pre>
+   * * 
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
@@ -570,3 +561,4 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     runFileSaver(new CSVSaver(), args);
   }
 }
+
