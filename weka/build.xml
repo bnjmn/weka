@@ -347,7 +347,7 @@
                 icon="${src}/weka/gui/weka_icon_new.icns"
                 version="${release}"
                 verbose="true"
-                VMOptions="-Xmx256M"
+                VMOptions="-Xmx1Gb"
                 shortname="Weka"
                 arguments=""
                 workingdirectory="/Users"
