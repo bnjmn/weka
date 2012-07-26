@@ -257,7 +257,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     result.addElement(new Option(
         "\tThe enclosure character(s) to use for strings.\n"
             + "\tSpecify as a comma separated list (e.g. \",'"
-            + "\t(default: '\"')", "E", 1, "-E <enclosures>"));
+            + "(default: '\"')", "E", 1, "-E <enclosures>"));
 
     return result.elements();
   }
@@ -266,48 +266,48 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start -->
-   * * Valid options are: <p/>
-   * * 
-   * * <pre> -H
-   * *  No header row present in the data.</pre>
-   * * 
-   * * <pre> -N &lt;range&gt;
-   * *  The range of attributes to force type to be NOMINAL.
-   * *  'first' and 'last' are accepted as well.
-   * *  Examples: "first-last", "1,4,5-27,50-last"
-   * *  (default: -none-)</pre>
-   * * 
-   * * <pre> -S &lt;range&gt;
-   * *  The range of attribute to force type to be STRING.
-   * *  'first' and 'last' are accepted as well.
-   * *  Examples: "first-last", "1,4,5-27,50-last"
-   * *  (default: -none-)</pre>
-   * * 
-   * * <pre> -D &lt;range&gt;
-   * *  The range of attribute to force type to be DATE.
-   * *  'first' and 'last' are accepted as well.
-   * *  Examples: "first-last", "1,4,5-27,50-last"
-   * *  (default: -none-)</pre>
-   * * 
-   * * <pre> -format &lt;date format&gt;
-   * *  The date formatting string to use to parse date values.
-   * *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
-   * * 
-   * * <pre> -M &lt;str&gt;
-   * *  The string representing a missing value.
-   * *  (default: ?)</pre>
-   * * 
-   * * <pre> -F &lt;separator&gt;
-   * *  The field separator to be used.
-   * *  '\t' can be used as well.
-   * *  (default: ',')</pre>
-   * * 
-   * * <pre> -E &lt;enclosures&gt;
-   * *  The enclosure character(s) to use for strings.
-   * *  Specify as a comma separated list (e.g. ",' (default: '"')</pre>
-   * * 
-   * <!-- options-end -->
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -H
+   *  No header row present in the data.</pre>
+   * 
+   * <pre> -N &lt;range&gt;
+   *  The range of attributes to force type to be NOMINAL.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -S &lt;range&gt;
+   *  The range of attribute to force type to be STRING.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -D &lt;range&gt;
+   *  The range of attribute to force type to be DATE.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -format &lt;date format&gt;
+   *  The date formatting string to use to parse date values.
+   *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
+   * 
+   * <pre> -M &lt;str&gt;
+   *  The string representing a missing value.
+   *  (default: ?)</pre>
+   * 
+   * <pre> -F &lt;separator&gt;
+   *  The field separator to be used.
+   *  '\t' can be used as well.
+   *  (default: ',')</pre>
+   * 
+   * <pre> -E &lt;enclosures&gt;
+   *  The enclosure character(s) to use for strings.
+   *  Specify as a comma separated list (e.g. ",' (default: '"')</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
