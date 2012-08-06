@@ -141,6 +141,18 @@ weka.gui.MainMenuExtension=
 # List of Explorer visualization plugins (classification panel)
 weka.gui.visualize.plugins.VisualizePlugin=\
  weka.gui.visualize.plugins
+ 
+# List of Explorer tree visualization plugins (classification panel)
+weka.gui.visualize.plugins.TreeVisualizePlugin=\
+ weka.gui.visualize.plugins
+
+# List of Explorer graph visualization plugins (classification panel)
+weka.gui.visualize.plugins.GraphVisualizePlugin=\
+ weka.gui.visualize.plugins
+
+# List of Explorer error visualization plugins (classification panel)
+weka.gui.visualize.plugins.ErrorVisualizePlugin=\
+ weka.gui.visualize.plugins
 
 # List of writers for outputting graphics
 weka.gui.visualize.JComponentWriter=\
