@@ -1423,7 +1423,6 @@ public class ClassifierPanel extends JPanel implements
                     "test data");
               }
 
-              testTimeStart = System.currentTimeMillis();
               // Make some splits and do a CV
               for (int fold = 0; fold < numFolds; fold++) {
                 m_Log.statusMessage("Creating splits for fold " + (fold + 1)
@@ -1470,7 +1469,6 @@ public class ClassifierPanel extends JPanel implements
                   }
                 }
               }
-              testTimeElapsed = System.currentTimeMillis() - testTimeStart;
               if (outputPredictionsText)
                 classificationOutput.printFooter();
               if (outputPredictionsText) {
@@ -1658,9 +1656,19 @@ public class ClassifierPanel extends JPanel implements
               throw new Exception("Test mode not implemented");
             }
 
-            outBuff.append("\nTime taken to test model: "
-                + Utils.doubleToString(testTimeElapsed / 1000.0, 2)
-                + " seconds\n\n");
+            if (testMode != 1) {
+              String mode = "";
+              if (testMode == 2) {
+                mode = "training split";
+              } else if (testMode == 3) {
+                mode = "training data";
+              } else if (testMode == 4) {
+                mode = "supplied test set";
+              }
+              outBuff.append("\nTime taken to test model on " + mode + ": "
+                  + Utils.doubleToString(testTimeElapsed / 1000.0, 2)
+                  + " seconds\n\n");
+            }
 
             if (outputSummary) {
               outBuff.append(eval.toSummaryString(outputEntropy) + "\n");
