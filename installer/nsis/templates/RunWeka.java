@@ -56,7 +56,7 @@ import java.util.Vector;
  * Additional parameters will be appended to the generated java call.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class RunWeka {
 
@@ -177,6 +177,7 @@ public class RunWeka {
       }
       else {
         System.err.println("Environment variable '" + key + "' does not exist!");
+        result = result.replaceAll("%" + key + "%", "");
       }
     }
 
