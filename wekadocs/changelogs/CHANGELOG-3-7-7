@@ -1,0 +1,249 @@
+------------------------------------------------------------------------
+r8925 | mhall | 2012-06-08 14:39:11 +1200 (Fri, 08 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/ContingencyTables.java
+
+lnFunc now no longer truncates to zero if the value is < 1e-6. Test is now <= 0.
+------------------------------------------------------------------------
+r8931 | mhall | 2012-06-18 12:02:42 +1200 (Mon, 18 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SGD.java
+
+Now applies any filters configured in buildClassifier() when updateClassifier() is called
+------------------------------------------------------------------------
+r8933 | mhall | 2012-06-23 21:21:17 +1200 (Sat, 23 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Added a check for a new package description entry - doNotLoadIfEnvVarNotSet. This prevents a package from being loaded if one or more (comma separated)  environment variables or java properties are not set
+------------------------------------------------------------------------
+r8935 | mhall | 2012-06-23 21:24:05 +1200 (Sat, 23 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Now trims white space from specified environment variables to check.
+------------------------------------------------------------------------
+r8937 | mhall | 2012-06-25 12:04:55 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/Evaluation.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/AbstractOutput.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/CSV.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/HTML.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/Null.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/PlainText.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/XML.java
+   A /trunk/weka/src/main/java/weka/core/BatchPredictor.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierErrorsPlotInstances.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Added a BatchPredictor interface the schemes may choose to implement if they can handle making predictions on sets of instances.
+------------------------------------------------------------------------
+r8938 | mhall | 2012-06-25 12:07:05 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassifierPerformanceEvaluator.java
+
+Added a BatchPredictor interface the schemes may choose to implement if they can handle making predictions on sets of instances.
+------------------------------------------------------------------------
+r8954 | fracpete | 2012-06-27 13:59:14 +1200 (Wed, 27 Jun 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+   M /branches/waikato/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+   M /trunk/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+
+preventing batch filters from accidentally changing STRING attributes in input data, by buffering a copy of the instance
+------------------------------------------------------------------------
+r8964 | mhall | 2012-06-29 14:44:09 +1200 (Fri, 29 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/Discretize.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Discretize.java
+
+Wes Munsil's contribution of an option for using bin numbers (BXofY) rather than ranges for discretized attribute values
+------------------------------------------------------------------------
+r8971 | mhall | 2012-06-30 22:02:14 +1200 (Sat, 30 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveFrequentValues.java
+
+Was totally broken for instances with missing values for the attribute being screened for frequent values.
+------------------------------------------------------------------------
+r8976 | mhall | 2012-07-03 15:59:55 +1200 (Tue, 03 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Now allows user-templates that are part of Weka packages to appear in the templates menu.
+------------------------------------------------------------------------
+r8980 | mhall | 2012-07-04 13:49:12 +1200 (Wed, 04 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/Run.java
+
+Added a final System.exit(0) in case there are any schemes that prevent the JVM from exiting cleanly.
+------------------------------------------------------------------------
+r8982 | mhall | 2012-07-04 13:50:51 +1200 (Wed, 04 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Added a final System.exit(0) to the command line mode in case there is anything in a package that prevents the JVM from exiting cleanly.
+------------------------------------------------------------------------
+r8984 | eibe | 2012-07-04 17:33:53 +1200 (Wed, 04 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTree.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/PruneableClassifierTree.java
+
+Fixed bug where crash occurred during tree output when instance data was saved by selection of appropriate option. This occurred with reduced-error-pruning and pruning without subtree raising.
+------------------------------------------------------------------------
+r8989 | mhall | 2012-07-06 15:31:55 +1200 (Fri, 06 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/RepositoryIndexGenerator.java
+
+Added a check for the new DoNotLoadIfEnvVarNotSetMessage property.
+------------------------------------------------------------------------
+r8991 | mhall | 2012-07-09 13:55:17 +1200 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/Evaluation.java
+
+Added Matthews correlation coefficient.
+------------------------------------------------------------------------
+r8992 | mhall | 2012-07-09 13:56:57 +1200 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/experiment/ClassifierSplitEvaluator.java
+
+Added Matthews correlation coefficient.
+------------------------------------------------------------------------
+r8995 | mhall | 2012-07-09 15:28:06 +1200 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/SubstringLabelerCustomizer.java
+
+Now sets the modified status on the ModifyListener (if any is set).
+------------------------------------------------------------------------
+r8997 | mhall | 2012-07-09 15:30:01 +1200 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/SubstringReplacerCustomizer.java
+
+Now sets the modified status on the ModifyListener (if any is set).
+------------------------------------------------------------------------
+r8999 | mhall | 2012-07-09 20:48:13 +1200 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/filters
+   A /trunk/weka/src/main/java/weka/gui/filters/AddUserFieldsCustomizer.java
+
+Initial import
+------------------------------------------------------------------------
+r9002 | mhall | 2012-07-09 20:52:42 +1200 (Mon, 09 Jul 2012) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddUserFields.java
+   A /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddUserFieldsBeanInfo.java
+
+Initial import
+------------------------------------------------------------------------
+r9003 | mhall | 2012-07-17 14:53:04 +1200 (Tue, 17 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/StringToWordVector.java
+
+The hashtable used to accumulate words that occur in an instance in determineDictionary() used contains() to check for a word rather than containsKey(). This doesn't produce incorrect output but does have a performance impact. Fixed.
+------------------------------------------------------------------------
+r9006 | mhall | 2012-07-19 10:12:05 +1200 (Thu, 19 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Added a history list popup menu entry to allow the corresponding model's configuration to be re-applied (i.e. set as the current configuration in the "Classifier" entry at the top of the panel).
+------------------------------------------------------------------------
+r9008 | mhall | 2012-07-19 10:16:36 +1200 (Thu, 19 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+Added a history list popup menu entry to allow the corresponding model's configuration to be re-applied (i.e. set as the current configuration in the "Clusterer" entry at the top of the panel).
+------------------------------------------------------------------------
+r9010 | mhall | 2012-07-19 10:39:23 +1200 (Thu, 19 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/AssociationsPanel.java
+
+Added a history list popup menu entry to allow the corresponding model's configuration to be re-applied (i.e. set as the current configuration in the "Associator" entry at the top of the panel).
+------------------------------------------------------------------------
+r9012 | mhall | 2012-07-19 11:09:53 +1200 (Thu, 19 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/AttributeSelectionPanel.java
+
+Added a history list popup menu entry to allow the corresponding attribute selection configuration to be re-applied (i.e. set as the current configuration in the "Evaluator" and "Search" entries at the top of the panel).
+------------------------------------------------------------------------
+r9022 | mhall | 2012-07-23 19:49:13 +1200 (Mon, 23 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/AbstractFileSaver.java
+
+Now prints a stack trace when the saver can't handle the ARFF data for one reason or the other. This is more informative than the old error message.
+------------------------------------------------------------------------
+r9028 | mhall | 2012-07-24 15:41:10 +1200 (Tue, 24 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/AbstractInstance.java
+   M /trunk/weka/src/main/java/weka/core/BinarySparseInstance.java
+   M /trunk/weka/src/main/java/weka/core/DenseInstance.java
+   M /trunk/weka/src/main/java/weka/core/Instance.java
+   M /trunk/weka/src/main/java/weka/core/SparseInstance.java
+   M /trunk/weka/src/main/java/weka/core/converters/ArffSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/CSVSaver.java
+
+Now allows the user to specify the number of digits after the decimal place to print for numeric values
+------------------------------------------------------------------------
+r9031 | mhall | 2012-07-24 15:54:29 +1200 (Tue, 24 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVSaver.java
+
+Javadoc update.
+------------------------------------------------------------------------
+r9032 | mhall | 2012-07-24 15:54:42 +1200 (Tue, 24 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/ArffSaver.java
+
+Javadoc update.
+------------------------------------------------------------------------
+r9035 | mhall | 2012-07-24 21:39:46 +1200 (Tue, 24 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Added an option to allow the specification of a comma separated list of characters to use as string enclosures (default is a single ").
+------------------------------------------------------------------------
+r9037 | mhall | 2012-07-25 22:22:09 +1200 (Wed, 25 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Javadoc fix
+------------------------------------------------------------------------
+r9040 | mhall | 2012-07-26 12:39:12 +1200 (Thu, 26 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Removed an extraneous tab from the listOptions() output. More javadoc fixes.
+------------------------------------------------------------------------
+r9042 | mhall | 2012-07-30 15:14:09 +1200 (Mon, 30 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/weka/lib/packageManager.jar
+   M /trunk/weka/resources/packageManager-source.jar
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+   M /trunk/weka/src/main/java/weka/gui/PackageManager.java
+
+Updated to use the GUI proxy authentication from the Bounce framework
+------------------------------------------------------------------------
+r9047 | mhall | 2012-08-01 15:31:54 +1200 (Wed, 01 Aug 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/CostMatrix.java
+
+Now parses matlab formatted cost matrices that contain expressions correctly.
+------------------------------------------------------------------------
+r9049 | mhall | 2012-08-06 11:20:18 +1200 (Mon, 06 Aug 2012) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/attributeSelection/CorrelationAttributeEval.java
+   A /trunk/weka/src/test/java/weka/attributeSelection/CorrelationAttributeEvalTest.java
+   A /trunk/weka/src/test/resources/wekarefs/weka/attributeSelection/CorrelationAttributeEvalTest.ref
+
+Initial import
+------------------------------------------------------------------------
+r9056 | mhall | 2012-08-09 15:47:22 +1200 (Thu, 09 Aug 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Added time taken to test the model to the output.
+------------------------------------------------------------------------
+r9057 | mhall | 2012-08-09 20:35:54 +1200 (Thu, 09 Aug 2012) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Small fix to testing time output.
+------------------------------------------------------------------------

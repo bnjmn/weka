@@ -1,0 +1,196 @@
+------------------------------------------------------------------------
+r8913 | mhall | 2012-05-13 20:28:15 +1200 (Sun, 13 May 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare release RBFNetwork-1.0.2
+------------------------------------------------------------------------
+r8915 | mhall | 2012-05-13 20:28:24 +1200 (Sun, 13 May 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r8916 | mhall | 2012-05-13 20:56:42 +1200 (Sun, 13 May 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaODF/pom.xml
+
+[maven-release-plugin] prepare release WekaODF-1.0.4
+------------------------------------------------------------------------
+r8918 | mhall | 2012-05-13 20:56:51 +1200 (Sun, 13 May 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaODF/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r8919 | mhall | 2012-05-13 21:01:26 +1200 (Sun, 13 May 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaExcel/pom.xml
+
+[maven-release-plugin] prepare release WekaExcel-1.0.4
+------------------------------------------------------------------------
+r8921 | mhall | 2012-05-13 21:01:36 +1200 (Sun, 13 May 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaExcel/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r8941 | mhall | 2012-06-25 14:29:58 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+   M /trunk/packages/external/LibSVM/lib/libsvm.jar
+   M /trunk/packages/external/LibSVM/src/main/java/weka/classifiers/functions/LibSVM.java
+
+Now has an option to set the random seed. This means that probability estimates are now deterministic from run to run. Libsvm library updated to 3.12.
+------------------------------------------------------------------------
+r8942 | mhall | 2012-06-25 14:32:26 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+
+Accidently increased the point release number by one too many - fixed
+------------------------------------------------------------------------
+r8943 | mhall | 2012-06-25 14:53:55 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+
+Looks like I should have read the log :-) - back to version 1.5.
+------------------------------------------------------------------------
+r8944 | mhall | 2012-06-25 14:55:05 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+
+Updated.
+------------------------------------------------------------------------
+r8945 | mhall | 2012-06-25 14:57:52 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+[maven-release-plugin] prepare release LibSVM-1.0.5
+------------------------------------------------------------------------
+r8947 | mhall | 2012-06-25 14:58:00 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r8950 | mhall | 2012-06-25 15:41:04 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/Description.props
+   M /trunk/packages/internal/attributeSelectionSearchMethods/src/main/java/weka/attributeSelection/RandomSearch.java
+
+RandomSearch now has an option to set the random seed.
+------------------------------------------------------------------------
+r8951 | mhall | 2012-06-25 15:44:16 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+
+[maven-release-plugin] prepare release attributeSelectionSearchMethods-1.0.4
+------------------------------------------------------------------------
+r8953 | mhall | 2012-06-25 15:44:23 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r8955 | mhall | 2012-06-28 11:22:35 +1200 (Thu, 28 Jun 2012) | 1 line
+Changed paths:
+   A /trunk/packages/internal/localOutlierFactor
+   A /trunk/packages/internal/localOutlierFactor/Description.props
+   A /trunk/packages/internal/localOutlierFactor/build_package.xml
+   A /trunk/packages/internal/localOutlierFactor/lib
+   A /trunk/packages/internal/localOutlierFactor/pom.xml
+   A /trunk/packages/internal/localOutlierFactor/src
+   A /trunk/packages/internal/localOutlierFactor/src/main
+   A /trunk/packages/internal/localOutlierFactor/src/main/java
+   A /trunk/packages/internal/localOutlierFactor/src/main/java/weka
+   A /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters
+   A /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters/unsupervised
+   A /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters/unsupervised/attribute
+   A /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters/unsupervised/attribute/LOF.java
+   A /trunk/packages/internal/localOutlierFactor/src/test
+   A /trunk/packages/internal/localOutlierFactor/src/test/java
+   A /trunk/packages/internal/localOutlierFactor/src/test/java/weka
+   A /trunk/packages/internal/localOutlierFactor/src/test/java/weka/filters
+   A /trunk/packages/internal/localOutlierFactor/src/test/java/weka/filters/unsupervised
+   A /trunk/packages/internal/localOutlierFactor/src/test/java/weka/filters/unsupervised/attribute
+   A /trunk/packages/internal/localOutlierFactor/src/test/java/weka/filters/unsupervised/attribute/LOFTest.java
+
+Initial import
+------------------------------------------------------------------------
+r8956 | mhall | 2012-06-28 21:01:15 +1200 (Thu, 28 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/Description.props
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+   M /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters/unsupervised/attribute/LOF.java
+
+Fixed a bug in the k-distance computation and a subtle issue with the parallel execution mode that resulted in slightly different results on some data sets when running in parallel mode vs sequential mode.
+------------------------------------------------------------------------
+r8957 | mhall | 2012-06-28 21:28:17 +1200 (Thu, 28 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters/unsupervised/attribute/LOF.java
+
+Now more memory efficient
+------------------------------------------------------------------------
+r8960 | mhall | 2012-06-29 11:18:47 +1200 (Fri, 29 Jun 2012) | 1 line
+Changed paths:
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/test
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/test/java
+
+Adding src/test/java
+------------------------------------------------------------------------
+r8961 | mhall | 2012-06-29 12:03:42 +1200 (Fri, 29 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare release localOutlierFactor-1.0.1
+------------------------------------------------------------------------
+r8963 | mhall | 2012-06-29 12:03:49 +1200 (Fri, 29 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r8965 | eibe | 2012-06-29 15:59:16 +1200 (Fri, 29 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/Description.props
+
+New version of the RBFNetwork package that includes RBFClassifier, which trains an RBF network for classification in a fully supervised manner.
+------------------------------------------------------------------------
+r8966 | eibe | 2012-06-29 16:01:03 +1200 (Fri, 29 Jun 2012) | 1 line
+Changed paths:
+   A /trunk/packages/internal/RBFNetwork/src/main/java/weka/classifiers/functions/RBFClassifier.java
+   A /trunk/packages/internal/RBFNetwork/src/test/java/weka/classifiers/functions/RBFClassifierTest.java
+
+New version of the RBFNetwork package that includes RBFClassifier, which trains an RBF network for classification in a fully supervised manner.
+------------------------------------------------------------------------
+r8967 | mhall | 2012-06-29 16:22:15 +1200 (Fri, 29 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare release RBFNetwork-1.0.3
+------------------------------------------------------------------------
+r8969 | mhall | 2012-06-29 16:22:22 +1200 (Fri, 29 Jun 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9015 | mhall | 2012-07-20 20:20:49 +1200 (Fri, 20 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/averagedOneDependenceEstimators/Description.props
+   M /trunk/packages/external/averagedOneDependenceEstimators/pom.xml
+
+Updated for the last release of this package. It has been superseded by the AnDE package, which is now completely maintained by Geoff Webb's group.
+------------------------------------------------------------------------
+r9016 | mhall | 2012-07-20 20:24:46 +1200 (Fri, 20 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/averagedOneDependenceEstimators/pom.xml
+
+[maven-release-plugin] prepare release averagedOneDependenceEstimators-1.2.1
+------------------------------------------------------------------------
+r9018 | mhall | 2012-07-20 20:24:53 +1200 (Fri, 20 Jul 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/averagedOneDependenceEstimators/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
