@@ -1,0 +1,120 @@
+------------------------------------------------------------------------
+r8922 | mhall | 2012-06-07 22:06:27 +1200 (Thu, 07 Jun 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/DatabaseLoader.java
+
+Was not passing on the URL to InstanceQuery in getDataSet() - fixed.
+------------------------------------------------------------------------
+r8923 | mhall | 2012-06-08 13:47:40 +1200 (Fri, 08 Jun 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/ContingencyTables.java
+
+lnFunc now no longer truncates to zero if the value is < 1e-6. Test is now <= 0.
+------------------------------------------------------------------------
+r8940 | mhall | 2012-06-25 14:23:33 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/LibSVM.java
+
+Now has an option to set the random seed. This means that probability estimates are now deterministic from run to run. Requires libsbm >= 3.1.
+------------------------------------------------------------------------
+r8948 | mhall | 2012-06-25 15:31:43 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/RandomSearch.java
+
+Added an option to set the random seed
+------------------------------------------------------------------------
+r8949 | mhall | 2012-06-25 15:35:30 +1200 (Mon, 25 Jun 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/RandomSearch.java
+
+Updated javadoc
+------------------------------------------------------------------------
+r8954 | fracpete | 2012-06-27 13:59:14 +1200 (Wed, 27 Jun 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+   M /branches/waikato/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+   M /trunk/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+
+preventing batch filters from accidentally changing STRING attributes in input data, by buffering a copy of the instance
+------------------------------------------------------------------------
+r8972 | mhall | 2012-06-30 22:02:29 +1200 (Sat, 30 Jun 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/RemoveFrequentValues.java
+
+Was totally broken for instances with missing values for the attribute being screened for frequent values.
+------------------------------------------------------------------------
+r8985 | mhall | 2012-07-04 20:09:32 +1200 (Wed, 04 Jul 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/j48/PruneableClassifierTree.java
+
+Fixed bug where crash occurred during tree output when instance data was saved by selection of appropriate option. This occurred with reduced-error-pruning and pruning without subtree raising.
+------------------------------------------------------------------------
+r8986 | mhall | 2012-07-04 20:09:47 +1200 (Wed, 04 Jul 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTree.java
+
+Fixed bug where crash occurred during tree output when instance data was saved by selection of appropriate option. This occurred with reduced-error-pruning and pruning without subtree raising.
+------------------------------------------------------------------------
+r9004 | mhall | 2012-07-17 14:53:39 +1200 (Tue, 17 Jul 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/StringToWordVector.java
+
+The hashtable used to accumulate words that occur in an instance in determineDictionary() used contains() to check for a word rather than containsKey(). This doesn't produce incorrect output but does have a performance impact. Fixed.
+------------------------------------------------------------------------
+r9014 | mhall | 2012-07-20 18:15:46 +1200 (Fri, 20 Jul 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/arffviewer/ArffTableModel.java
+
+fixed a bug that prevented instances from sorting correctly according to the instance index
+------------------------------------------------------------------------
+r9023 | mhall | 2012-07-23 19:50:40 +1200 (Mon, 23 Jul 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/AbstractFileSaver.java
+
+Now prints a stack trace when the saver can't handle the ARFF data for one reason or the other. This is more informative than the old error message.
+------------------------------------------------------------------------
+r9036 | mhall | 2012-07-24 21:39:59 +1200 (Tue, 24 Jul 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Added an option to allow the specification of a comma separated list of characters to use as string enclosures (default is a single ").
+------------------------------------------------------------------------
+r9039 | mhall | 2012-07-25 22:24:28 +1200 (Wed, 25 Jul 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Javadoc fix
+------------------------------------------------------------------------
+r9041 | mhall | 2012-07-26 12:39:30 +1200 (Thu, 26 Jul 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Removed an extraneous tab from the listOptions() output. More javadoc fixes.
+------------------------------------------------------------------------
+r9048 | mhall | 2012-08-01 15:32:46 +1200 (Wed, 01 Aug 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/CostMatrix.java
+
+Now parses matlab formatted cost matrices that contain expressions correctly.
+------------------------------------------------------------------------
+r9053 | mhall | 2012-08-06 20:12:54 +1200 (Mon, 06 Aug 2012) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/gui/visualize/plugins/ErrorVisualizePlugin.java
+   A /branches/stable-3-6/weka/src/main/java/weka/gui/visualize/plugins/GraphVisualizePlugin.java
+   A /branches/stable-3-6/weka/src/main/java/weka/gui/visualize/plugins/TreeVisualizePlugin.java
+
+Back ported to 3.6 code line
+------------------------------------------------------------------------
+r9054 | mhall | 2012-08-06 20:13:55 +1200 (Mon, 06 Aug 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Back ported support for Error, Graph and Tree visualization plugins
+------------------------------------------------------------------------
+r9055 | mhall | 2012-08-06 20:14:29 +1200 (Mon, 06 Aug 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericObjectEditor.props
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GenericPropertiesCreator.props
+
+Back ported support for Error, Graph and Tree visualization plugins
+------------------------------------------------------------------------
