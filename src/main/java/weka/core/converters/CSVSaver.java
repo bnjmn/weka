@@ -38,34 +38,34 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start -->
- * * Writes to a destination that is in CSV (comma-separated values) format. The column separator can be chosen (default is ',') as well as the value representing missing values (default is '?').
- * * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-start -->
+ * Writes to a destination that is in CSV (comma-separated values) format. The column separator can be chosen (default is ',') as well as the value representing missing values (default is '?').
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start -->
- * * Valid options are: <p/>
- * * 
- * * <pre> -F &lt;separator&gt;
- * *  The field separator to be used.
- * *  '\t' can be used as well.
- * *  (default: ',')</pre>
- * * 
- * * <pre> -M &lt;str&gt;
- * *  The string representing a missing value.
- * *  (default: ?)</pre>
- * * 
- * * <pre> -decimal &lt;num&gt;
- * *  The maximum number of digits to print after the decimal
- * *  place for numeric values (default: 6)</pre>
- * * 
- * * <pre> -i &lt;the input file&gt;
- * *  The input file</pre>
- * * 
- * * <pre> -o &lt;the output file&gt;
- * *  The output file</pre>
- * * 
- * <!-- options-end -->
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -F &lt;separator&gt;
+ *  The field separator to be used.
+ *  '\t' can be used as well.
+ *  (default: ',')</pre>
+ * 
+ * <pre> -M &lt;str&gt;
+ *  The string representing a missing value.
+ *  (default: ?)</pre>
+ * 
+ * <pre> -decimal &lt;num&gt;
+ *  The maximum number of digits to print after the decimal
+ *  place for numeric values (default: 6)</pre>
+ * 
+ * <pre> -i &lt;the input file&gt;
+ *  The input file</pre>
+ * 
+ * <pre> -o &lt;the output file&gt;
+ *  The output file</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
  * @version $Revision$
@@ -133,33 +133,30 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     return result.elements();
   }
 
-  /**
-   * Parses a given list of options.
-   * <p/>
+  /** 
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <!-- options-start -->
-   * * Valid options are: <p/>
-   * * 
-   * * <pre> -F &lt;separator&gt;
-   * *  The field separator to be used.
-   * *  '\t' can be used as well.
-   * *  (default: ',')</pre>
-   * * 
-   * * <pre> -M &lt;str&gt;
-   * *  The string representing a missing value.
-   * *  (default: ?)</pre>
-   * * 
-   * * <pre> -decimal &lt;num&gt;
-   * *  The maximum number of digits to print after the decimal
-   * *  place for numeric values (default: 6)</pre>
-   * * 
-   * * <pre> -i &lt;the input file&gt;
-   * *  The input file</pre>
-   * * 
-   * * <pre> -o &lt;the output file&gt;
-   * *  The output file</pre>
-   * * 
-   * <!-- options-end -->
+   * <pre> -F &lt;separator&gt;
+   *  The field separator to be used.
+   *  '\t' can be used as well.
+   *  (default: ',')</pre>
+   * 
+   * <pre> -M &lt;str&gt;
+   *  The string representing a missing value.
+   *  (default: ?)</pre>
+   * 
+   * <pre> -decimal &lt;num&gt;
+   *  The maximum number of digits to print after the decimal
+   *  place for numeric values (default: 6)</pre>
+   * 
+   * <pre> -i &lt;the input file&gt;
+   *  The input file</pre>
+   * 
+   * <pre> -o &lt;the output file&gt;
+   *  The output file</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -253,12 +250,12 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
    */
   public void setFieldSeparator(String value) {
     m_FieldSeparator = Utils.unbackQuoteChars(value);
-    if (m_FieldSeparator.length() != 1) {
-      m_FieldSeparator = ",";
-      System.err
-          .println("Field separator can only be a single character (exception being '\t'), "
-              + "defaulting back to '" + m_FieldSeparator + "'!");
-    }
+    /*
+     * if (m_FieldSeparator.length() != 1) { m_FieldSeparator = ","; System.err
+     * .println(
+     * "Field separator can only be a single character (exception being '\t'), "
+     * + "defaulting back to '" + m_FieldSeparator + "'!"); }
+     */
   }
 
   /**
@@ -473,8 +470,7 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
         }
       }
       for (int i = 0; i < getInstances().numInstances(); i++) {
-        System.out.println(getInstances().instance(i).toStringMaxDecimalDigits(
-            m_MaxDecimalPlaces));
+        System.out.println(instanceToString(getInstances().instance(i)));
       }
       setWriteMode(WAIT);
       return;
@@ -522,8 +518,9 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     }
 
     for (i = 0; i < outInst.numAttributes(); i++) {
-      if (i > 0)
+      if (i > 0) {
         result.append(m_FieldSeparator);
+      }
 
       if (outInst.isMissing(i))
         field = m_MissingValue;
@@ -531,8 +528,9 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
         field = outInst.toString(i, m_MaxDecimalPlaces);
 
       // make sure that custom field separators, like ";" get quoted correctly
-      // as well
-      if ((field.indexOf(m_FieldSeparator) > -1) && !field.startsWith("'")
+      // as well (but only for single character field separators)
+      if (m_FieldSeparator.length() == 1
+          && (field.indexOf(m_FieldSeparator) > -1) && !field.startsWith("'")
           && !field.endsWith("'"))
         field = "'" + field + "'";
 
