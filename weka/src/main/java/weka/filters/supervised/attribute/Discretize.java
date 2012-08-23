@@ -777,7 +777,8 @@ public class Discretize
     double[] priorCounts, left, right, cutPoints;
     double currentCutPoint = -Double.MAX_VALUE, bestCutPoint = -1, 
       currentEntropy, bestEntropy, priorEntropy, gain;
-    int bestIndex = -1, numInstances = 0, numCutPoints = 0;
+    int bestIndex = -1, numCutPoints = 0;
+    double numInstances = 0;
 
     // Compute number of instances in set
     if ((lastPlusOne - first) < 2) {
