@@ -16,7 +16,6 @@
 /*
  *    Vote.java
  *    Copyright (C) 2000-2012 University of Waikato
- *    Copyright (C) 2006 Roberto Perdisci
  *
  */
 
