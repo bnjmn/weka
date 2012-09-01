@@ -937,6 +937,7 @@ public class DatabaseLoader
       }
       
       m_structure = new Instances(result,0);
+      iq.disconnectFromDatabase();
       
     } catch (Exception ex) {
       printException(ex);
