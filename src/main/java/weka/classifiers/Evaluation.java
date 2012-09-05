@@ -3117,6 +3117,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double d = (numTP + numFP) * (numTP + numFN) * (numTN + numFP)
         * (numTN + numFN);
     d = Math.sqrt(d);
+    if (d == 0) {
+      d = 1;
+    }
 
     return n / d;
   }
