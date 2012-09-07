@@ -46,45 +46,58 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Reads a source that is in comma separated or tab separated format. Assumes that the first row in the file determines the number of and names of the attributes.
+ * <!-- globalinfo-start --> Reads a source that is in comma separated or tab
+ * separated format. Assumes that the first row in the file determines the
+ * number of and names of the attributes.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -N &lt;range&gt;
+ * <pre>
+ * -N &lt;range&gt;
  *  The range of attributes to force type to be NOMINAL.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -S &lt;range&gt;
+ * <pre>
+ * -S &lt;range&gt;
  *  The range of attribute to force type to be STRING.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -D &lt;range&gt;
+ * <pre>
+ * -D &lt;range&gt;
  *  The range of attribute to force type to be DATE.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -format &lt;date format&gt;
+ * <pre>
+ * -format &lt;date format&gt;
  *  The date formatting string to use to parse date values.
- *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
+ *  (default: "yyyy-MM-dd'T'HH:mm:ss")
+ * </pre>
  * 
- * <pre> -M &lt;str&gt;
+ * <pre>
+ * -M &lt;str&gt;
  *  The string representing a missing value.
- *  (default: ?)</pre>
+ *  (default: ?)
+ * </pre>
  * 
- * <pre> -E &lt;enclosures&gt;
+ * <pre>
+ * -E &lt;enclosures&gt;
  *  The enclosure character(s) to use for strings.
- *  Specify as a comma separated list (e.g. ",' (default: '"')</pre>
+ *  Specify as a comma separated list (e.g. ",' (default: '"')
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
@@ -137,7 +150,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   protected boolean m_FirstCheck;
 
   /** enclosure character(s) to use for strings */
-  protected String m_Enclosures = "\"";
+  protected String m_Enclosures = "\",\'";
 
   /**
    * default constructor.
@@ -223,7 +236,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     result.addElement(new Option(
         "\tThe enclosure character(s) to use for strings.\n"
             + "\tSpecify as a comma separated list (e.g. \",'"
-            + "(default: '\"')", "E", 1, "-E <enclosures>"));
+            + " (default: \",')", "E", 1, "-E <enclosures>"));
 
     return result.elements();
   }
@@ -232,40 +245,52 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -N &lt;range&gt;
+   * <pre>
+   * -N &lt;range&gt;
    *  The range of attributes to force type to be NOMINAL.
    *  'first' and 'last' are accepted as well.
    *  Examples: "first-last", "1,4,5-27,50-last"
-   *  (default: -none-)</pre>
+   *  (default: -none-)
+   * </pre>
    * 
-   * <pre> -S &lt;range&gt;
+   * <pre>
+   * -S &lt;range&gt;
    *  The range of attribute to force type to be STRING.
    *  'first' and 'last' are accepted as well.
    *  Examples: "first-last", "1,4,5-27,50-last"
-   *  (default: -none-)</pre>
+   *  (default: -none-)
+   * </pre>
    * 
-   * <pre> -D &lt;range&gt;
+   * <pre>
+   * -D &lt;range&gt;
    *  The range of attribute to force type to be DATE.
    *  'first' and 'last' are accepted as well.
    *  Examples: "first-last", "1,4,5-27,50-last"
-   *  (default: -none-)</pre>
+   *  (default: -none-)
+   * </pre>
    * 
-   * <pre> -format &lt;date format&gt;
+   * <pre>
+   * -format &lt;date format&gt;
    *  The date formatting string to use to parse date values.
-   *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
+   *  (default: "yyyy-MM-dd'T'HH:mm:ss")
+   * </pre>
    * 
-   * <pre> -M &lt;str&gt;
+   * <pre>
+   * -M &lt;str&gt;
    *  The string representing a missing value.
-   *  (default: ?)</pre>
+   *  (default: ?)
+   * </pre>
    * 
-   * <pre> -E &lt;enclosures&gt;
+   * <pre>
+   * -E &lt;enclosures&gt;
    *  The enclosure character(s) to use for strings.
-   *  Specify as a comma separated list (e.g. ",' (default: '"')</pre>
+   *  Specify as a comma separated list (e.g. ",' (default: '"')
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -1004,4 +1029,3 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     runFileLoader(new CSVLoader(), args);
   }
 }
-
