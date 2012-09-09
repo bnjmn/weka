@@ -700,6 +700,68 @@ public class ClassifierTree
     
     return (ClassifierTree)m_sons[index];
   }
+	
+  /**
+   * Computes a list that indicates node membership
+   */
+  public double[] getMembershipValues(Instance inst) throws Exception {
+		
+    return computeMembershipValues(inst, new double[numElements()], inst.weight(), 
+                                   new int[1]);
+  }
+	
+  /**
+   * Helper method for computing node membership. Order of values is based
+   * on preorder traversal of thre tree.
+   *
+   * @param instance the instance for which we want to compute leaf membership
+   * @param a the array list used to store leaf membership values
+   * @param p the current weight/fraction of the instance
+   */
+  private double[] computeMembershipValues(Instance instance, double[] a, 
+                                           double p, int[] index) throws Exception {
+
+    // Set membership value
+    a[index[0]++] = p;
+    
+    // Is node a leaf?
+    if (!m_isLeaf) {
+
+      // Which subset?
+      int treeIndex = localModel().whichSubset(instance);
+      
+      // Space for weight distribution
+      double[] weights = new double[m_sons.length];
+
+      // Check for missing value
+      if (treeIndex == -1) {
+	weights = localModel().weights(instance);
+      } else {
+        weights[treeIndex] = 1.0;
+      }
+      for (int i = 0; i < m_sons.length; i++) {
+        a = m_sons[i].computeMembershipValues(instance, a, p * weights[i], index);
+      }
+    }
+    return a;
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() {
+    
+    // Is node a leaf?
+    if (m_isLeaf) {
+      return 1;
+    } else {
+      int result = 1;
+      for (int i = 0; i < m_sons.length; i++) {
+        result += m_sons[i].numElements();
+      }
+      return result;
+    }
+  }
   
   /**
    * Returns the revision string.
