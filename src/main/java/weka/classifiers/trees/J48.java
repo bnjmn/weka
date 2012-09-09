@@ -40,6 +40,7 @@ import weka.core.Instances;
 import weka.core.Matchable;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.PartitionGenerator;
 import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
@@ -123,7 +124,7 @@ public class J48
   extends AbstractClassifier 
   implements OptionHandler, Drawable, Matchable, Sourcable, 
              WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer, 
-             TechnicalInformationHandler {
+             TechnicalInformationHandler, PartitionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = -217733168393644444L;
@@ -1026,6 +1027,30 @@ public class J48
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
+  }
+
+  /**
+   * Builds the classifier to generate a partition.
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    buildClassifier(data);
+  }
+	
+  /**
+   * Computes a list that indicates node membership
+   */
+  public double[] getMembershipValues(Instance inst) throws Exception {
+		
+    return m_root.getMembershipValues(inst);
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() {
+    
+    return m_root.numElements();
   }
  
   /**
