@@ -413,10 +413,7 @@ public class SimpleKMeans
         } else {
           tempI = new Instances[m_NumClusters];
         }
-      }
-			
-      if (m_Iterations == m_MaxIterations)
-        converged = true;
+      }		
 			
       if (!converged) {
 	m_ClusterNominalCounts = new int [m_NumClusters][instances.numAttributes()][0];
