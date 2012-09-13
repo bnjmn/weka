@@ -395,6 +395,9 @@ public class SimpleKMeans
           moveCentroid( i, tempI[i], true  );					
 	}
       }
+      
+      if (m_Iterations == m_MaxIterations)
+        converged = true;
 
       if (emptyClusterCount > 0) {
 	m_NumClusters -= emptyClusterCount;
