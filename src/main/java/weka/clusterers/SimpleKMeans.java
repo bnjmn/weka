@@ -395,6 +395,9 @@ public class SimpleKMeans
           moveCentroid( i, tempI[i], true  );					
 	}
       }
+      
+      if (m_Iterations == m_MaxIterations)
+        converged = true;
 
       if (emptyClusterCount > 0) {
 	m_NumClusters -= emptyClusterCount;
@@ -411,9 +414,6 @@ public class SimpleKMeans
           tempI = new Instances[m_NumClusters];
         }
       }
-			
-      if (m_Iterations == m_MaxIterations)
-        converged = true;
 			
       if (!converged) {
 	m_ClusterNominalCounts = new int [m_NumClusters][instances.numAttributes()][0];
