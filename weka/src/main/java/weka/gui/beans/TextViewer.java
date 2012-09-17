@@ -21,10 +21,6 @@
 
 package weka.gui.beans;
 
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.Logger;
-
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -54,29 +50,28 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import weka.gui.Logger;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+
 /**
  * Bean that collects and displays pieces of text
- *
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
  * @version $Revision$
  */
-public class TextViewer 
-  extends JPanel
-  implements TextListener, DataSourceListener, 
-	     TrainingSetListener, TestSetListener,
-	     Visible, UserRequestAcceptor, 
-	     BeanContextChild,
-             BeanCommon,
-             EventConstraints, HeadlessEventCollector {
+public class TextViewer extends JPanel implements TextListener,
+    DataSourceListener, TrainingSetListener, TestSetListener, Visible,
+    UserRequestAcceptor, BeanContextChild, BeanCommon, EventConstraints,
+    HeadlessEventCollector {
 
   /** for serialization */
   private static final long serialVersionUID = 104838186352536832L;
 
   protected BeanVisual m_visual;
 
-
   private transient JFrame m_resultsFrame = null;
-  
+
   protected List<EventObject> m_headlessEvents;
 
   /**
@@ -93,7 +88,7 @@ public class TextViewer
    * True if this bean's appearance is the design mode appearance
    */
   protected boolean m_design;
-  
+
   /**
    * BeanContex that this bean might be contained within
    */
@@ -102,23 +97,23 @@ public class TextViewer
   /**
    * BeanContextChild support
    */
-  protected BeanContextChildSupport m_bcSupport = 
-    new BeanContextChildSupport(this);
+  protected BeanContextChildSupport m_bcSupport = new BeanContextChildSupport(
+      this);
 
   /**
    * Objects listening for text events
    */
-  private Vector m_textListeners = new Vector();
+  private final Vector m_textListeners = new Vector();
 
   private transient Logger m_log = null;
 
-  
   public TextViewer() {
-    /*    setUpResultHistory();
-    setLayout(new BorderLayout());
-    add(m_visual, BorderLayout.CENTER); */
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+    /*
+     * setUpResultHistory(); setLayout(new BorderLayout()); add(m_visual,
+     * BorderLayout.CENTER);
+     */
+    java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment
+        .getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
       appearanceFinal();
     } else {
@@ -129,9 +124,11 @@ public class TextViewer
   protected void appearanceDesign() {
     setUpResultHistory();
     removeAll();
-    m_visual =  new BeanVisual("TextViewer", 
-			       BeanVisual.ICON_PATH+"DefaultText.gif",
-			       BeanVisual.ICON_PATH+"DefaultText_animated.gif");
+    if (m_visual == null) {
+      m_visual = new BeanVisual("TextViewer", BeanVisual.ICON_PATH
+          + "DefaultText.gif", BeanVisual.ICON_PATH
+          + "DefaultText_animated.gif");
+    }
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
@@ -156,7 +153,7 @@ public class TextViewer
 
   /**
    * Global info for this bean
-   *
+   * 
    * @return a <code>String</code> value
    */
   public String globalInfo() {
@@ -164,9 +161,9 @@ public class TextViewer
   }
 
   private void setUpResultHistory() {
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-    if(!ge.isHeadless()) {
+    java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment
+        .getLocalGraphicsEnvironment();
+    if (!ge.isHeadless()) {
       if (m_outText == null) {
         m_outText = new JTextArea(20, 80);
         m_history = new ResultHistoryPanel(m_outText);
@@ -177,26 +174,28 @@ public class TextViewer
       m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
       m_history.setHandleRightClicks(false);
       m_history.getList().addMouseListener(new MouseAdapter() {
-          public void mouseClicked(MouseEvent e) {
-            if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
-                 != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
-              int index = m_history.getList().locationToIndex(e.getPoint());
-              if (index != -1) {
-                String name = m_history.getNameAtIndex(index);
-                visualize(name, e.getX(), e.getY());
-              } else {
-                visualize(null, e.getX(), e.getY());
-              }
+        @Override
+        public void mouseClicked(MouseEvent e) {
+          if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
+              || e.isAltDown()) {
+            int index = m_history.getList().locationToIndex(e.getPoint());
+            if (index != -1) {
+              String name = m_history.getNameAtIndex(index);
+              visualize(name, e.getX(), e.getY());
+            } else {
+              visualize(null, e.getX(), e.getY());
             }
           }
-        });
+        }
+      });
     }
   }
 
   /**
    * Handles constructing a popup menu with visualization options.
-   * @param name the name of the result history list entry clicked on by
-   * the user
+   * 
+   * @param name the name of the result history list entry clicked on by the
+   *          user
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
@@ -204,53 +203,57 @@ public class TextViewer
     final JPanel panel = this;
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
-    
+
     JMenuItem visMainBuffer = new JMenuItem("View in main window");
     if (selectedName != null) {
       visMainBuffer.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    m_history.setSingle(selectedName);
-	  }
-	});
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          m_history.setSingle(selectedName);
+        }
+      });
     } else {
       visMainBuffer.setEnabled(false);
     }
     resultListMenu.add(visMainBuffer);
-    
+
     JMenuItem visSepBuffer = new JMenuItem("View in separate window");
     if (selectedName != null) {
       visSepBuffer.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_history.openFrame(selectedName);
-	}
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          m_history.openFrame(selectedName);
+        }
       });
     } else {
       visSepBuffer.setEnabled(false);
     }
     resultListMenu.add(visSepBuffer);
-    
+
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
     if (selectedName != null) {
       saveOutput.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    SaveBuffer m_SaveOut = new SaveBuffer(null, panel);
-	    StringBuffer sb = m_history.getNamedBuffer(selectedName);
-	    if (sb != null) {
-	      m_SaveOut.save(sb);
-	    }
-	  }
-	});
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          SaveBuffer m_SaveOut = new SaveBuffer(null, panel);
+          StringBuffer sb = m_history.getNamedBuffer(selectedName);
+          if (sb != null) {
+            m_SaveOut.save(sb);
+          }
+        }
+      });
     } else {
       saveOutput.setEnabled(false);
     }
     resultListMenu.add(saveOutput);
-    
+
     JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
     if (selectedName != null) {
       deleteOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_history.removeResult(selectedName);
-	}
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          m_history.removeResult(selectedName);
+        }
       });
     } else {
       deleteOutput.setEnabled(false);
@@ -262,57 +265,57 @@ public class TextViewer
 
   /**
    * Accept a data set for displaying as text
-   *
+   * 
    * @param e a <code>DataSetEvent</code> value
    */
+  @Override
   public synchronized void acceptDataSet(DataSetEvent e) {
-    TextEvent nt = new TextEvent(e.getSource(), 
-				 e.getDataSet().toString(),
-				 e.getDataSet().relationName());
+    TextEvent nt = new TextEvent(e.getSource(), e.getDataSet().toString(), e
+        .getDataSet().relationName());
     acceptText(nt);
   }
 
   /**
    * Accept a training set for displaying as text
-   *
+   * 
    * @param e a <code>TrainingSetEvent</code> value
    */
+  @Override
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
-    TextEvent nt = new TextEvent(e.getSource(), 
-				 e.getTrainingSet().toString(),
-				 e.getTrainingSet().relationName());
+    TextEvent nt = new TextEvent(e.getSource(), e.getTrainingSet().toString(),
+        e.getTrainingSet().relationName());
     acceptText(nt);
   }
 
   /**
    * Accept a test set for displaying as text
-   *
+   * 
    * @param e a <code>TestSetEvent</code> value
    */
+  @Override
   public synchronized void acceptTestSet(TestSetEvent e) {
-    TextEvent nt = new TextEvent(e.getSource(), 
-				 e.getTestSet().toString(),
-				 e.getTestSet().relationName());
+    TextEvent nt = new TextEvent(e.getSource(), e.getTestSet().toString(), e
+        .getTestSet().relationName());
     acceptText(nt);
   }
 
   /**
    * Accept some text
-   *
+   * 
    * @param e a <code>TextEvent</code> value
    */
+  @Override
   public synchronized void acceptText(TextEvent e) {
     if (m_outText == null) {
       setUpResultHistory();
     }
     StringBuffer result = new StringBuffer();
     result.append(e.getText());
-    //    m_resultsString.append(e.getText());
-    //    m_outText.setText(m_resultsString.toString());
-    String name = (new SimpleDateFormat("HH:mm:ss - "))
-      .format(new Date());
+    // m_resultsString.append(e.getText());
+    // m_outText.setText(m_resultsString.toString());
+    String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
     name += e.getTextTitle();
-    //    System.err.println(name);
+    // System.err.println(name);
     if (name.length() > 30) {
       name = name.substring(0, 30);
     }
@@ -323,13 +326,13 @@ public class TextViewer
       int mod = 2;
       String nameOrig = new String(name);
       while (m_history.getNamedBuffer(name) != null) {
-        name = new String(nameOrig+""+mod);
+        name = new String(nameOrig + "" + mod);
         mod++;
       }
       m_history.addResult(name, result);
       m_history.setSingle(name);
     }
-    
+
     if (m_headlessEvents != null) {
       m_headlessEvents.add(e);
     }
@@ -337,30 +340,31 @@ public class TextViewer
     // pass on the event to any listeners
     notifyTextListeners(e);
   }
-  
+
   /**
-   * Get the list of events processed in headless mode. May return
-   * null or an empty list if not running in headless mode or no
-   * events were processed
+   * Get the list of events processed in headless mode. May return null or an
+   * empty list if not running in headless mode or no events were processed
    * 
    * @return a list of EventObjects or null.
    */
+  @Override
   public List<EventObject> retrieveHeadlessEvents() {
     return m_headlessEvents;
   }
-  
+
   /**
-   * Process a list of events that have been collected earlier. Has
-   * no affect if the component is running in headless mode.
+   * Process a list of events that have been collected earlier. Has no affect if
+   * the component is running in headless mode.
    * 
    * @param headless a list of EventObjects to process.
    */
+  @Override
   public void processHeadlessEvents(List<EventObject> headless) {
     // only process if we're not headless
     if (!java.awt.GraphicsEnvironment.isHeadless()) {
       for (EventObject e : headless) {
         if (e instanceof TextEvent) {
-          acceptText((TextEvent)e);
+          acceptText((TextEvent) e);
         }
       }
     }
@@ -368,9 +372,10 @@ public class TextViewer
 
   /**
    * Describe <code>setVisual</code> method here.
-   *
+   * 
    * @param newVisual a <code>BeanVisual</code> value
    */
+  @Override
   public void setVisual(BeanVisual newVisual) {
     m_visual = newVisual;
   }
@@ -378,16 +383,18 @@ public class TextViewer
   /**
    * Get the visual appearance of this bean
    */
+  @Override
   public BeanVisual getVisual() {
     return m_visual;
   }
-  
+
   /**
    * Use the default visual appearance for this bean
    */
+  @Override
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultText.gif",
-		       BeanVisual.ICON_PATH+"DefaultText_animated.gif");
+    m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultText.gif",
+        BeanVisual.ICON_PATH + "DefaultText_animated.gif");
   }
 
   /**
@@ -396,7 +403,7 @@ public class TextViewer
   public void showResults() {
     if (m_resultsFrame == null) {
       if (m_outText == null) {
-	setUpResultHistory();
+        setUpResultHistory();
       }
       m_resultsFrame = new JFrame("Text Viewer");
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
@@ -405,11 +412,12 @@ public class TextViewer
       m_resultsFrame.getContentPane().add(js, BorderLayout.CENTER);
       m_resultsFrame.getContentPane().add(m_history, BorderLayout.WEST);
       m_resultsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
-	  public void windowClosing(java.awt.event.WindowEvent e) {
-	    m_resultsFrame.dispose();
-	    m_resultsFrame = null;
-	  }
-	});
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          m_resultsFrame.dispose();
+          m_resultsFrame = null;
+        }
+      });
       m_resultsFrame.pack();
       m_resultsFrame.setVisible(true);
     } else {
@@ -419,9 +427,10 @@ public class TextViewer
 
   /**
    * Get a list of user requests
-   *
+   * 
    * @return an <code>Enumeration</code> value
    */
+  @Override
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
 
@@ -433,10 +442,11 @@ public class TextViewer
 
   /**
    * Perform the named request
-   *
+   * 
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
+  @Override
   public void performRequest(String request) {
     if (request.compareTo("Show results") == 0) {
       showResults();
@@ -444,70 +454,72 @@ public class TextViewer
       m_outText.setText("");
       m_history.clearResults();
     } else {
-      throw new 
-	IllegalArgumentException(request
-		    + " not supported (TextViewer)");
+      throw new IllegalArgumentException(request
+          + " not supported (TextViewer)");
     }
   }
 
   /**
    * Add a property change listener to this bean
-   *
+   * 
    * @param name the name of the property of interest
    * @param pcl a <code>PropertyChangeListener</code> value
    */
-  public void addPropertyChangeListener(String name,
-					PropertyChangeListener pcl) {
+  @Override
+  public void addPropertyChangeListener(String name, PropertyChangeListener pcl) {
     m_bcSupport.addPropertyChangeListener(name, pcl);
   }
 
   /**
    * Remove a property change listener from this bean
-   *
+   * 
    * @param name the name of the property of interest
    * @param pcl a <code>PropertyChangeListener</code> value
    */
+  @Override
   public void removePropertyChangeListener(String name,
-					   PropertyChangeListener pcl) {
+      PropertyChangeListener pcl) {
     m_bcSupport.removePropertyChangeListener(name, pcl);
   }
 
   /**
    * Add a vetoable change listener to this bean
-   *
+   * 
    * @param name the name of the property of interest
    * @param vcl a <code>VetoableChangeListener</code> value
    */
-  public void addVetoableChangeListener(String name,
-				       VetoableChangeListener vcl) {
+  @Override
+  public void addVetoableChangeListener(String name, VetoableChangeListener vcl) {
     m_bcSupport.addVetoableChangeListener(name, vcl);
   }
-  
+
   /**
    * Remove a vetoable change listener from this bean
-   *
+   * 
    * @param name the name of the property of interest
    * @param vcl a <code>VetoableChangeListener</code> value
    */
+  @Override
   public void removeVetoableChangeListener(String name,
-					   VetoableChangeListener vcl) {
+      VetoableChangeListener vcl) {
     m_bcSupport.removeVetoableChangeListener(name, vcl);
   }
 
   /**
    * Set a bean context for this bean
-   *
+   * 
    * @param bc a <code>BeanContext</code> value
    */
+  @Override
   public void setBeanContext(BeanContext bc) {
     m_beanContext = bc;
     m_design = m_beanContext.isDesignTime();
     if (m_design) {
       appearanceDesign();
     } else {
-      java.awt.GraphicsEnvironment ge = 
-        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-      if (!ge.isHeadless()){
+      java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment
+          .getLocalGraphicsEnvironment();
+      if (!ge.isHeadless()) {
         appearanceFinal();
       }
     }
@@ -515,26 +527,27 @@ public class TextViewer
 
   /**
    * Notify all text listeners of a text event
-   *
+   * 
    * @param ge a <code>TextEvent</code> value
    */
   private void notifyTextListeners(TextEvent ge) {
     Vector l;
     synchronized (this) {
-      l = (Vector)m_textListeners.clone();
+      l = (Vector) m_textListeners.clone();
     }
     if (l.size() > 0) {
-      for(int i = 0; i < l.size(); i++) {
-	((TextListener)l.elementAt(i)).acceptText(ge);
+      for (int i = 0; i < l.size(); i++) {
+        ((TextListener) l.elementAt(i)).acceptText(ge);
       }
     }
   }
 
   /**
    * Return the bean context (if any) that this bean is embedded in
-   *
+   * 
    * @return a <code>BeanContext</code> value
    */
+  @Override
   public BeanContext getBeanContext() {
     return m_beanContext;
   }
@@ -542,24 +555,27 @@ public class TextViewer
   /**
    * Stop any processing that the bean might be doing.
    */
+  @Override
   public void stop() {
   }
-  
+
   /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
+   * Returns true if. at this time, the bean is busy with some (i.e. perhaps a
+   * worker thread is performing some calculation).
    * 
    * @return true if the bean is busy.
    */
+  @Override
   public boolean isBusy() {
     return false;
   }
 
   /**
    * Set a logger
-   *
+   * 
    * @param logger a <code>Logger</code> value
    */
+  @Override
   public void setLog(Logger logger) {
     m_log = logger;
   }
@@ -569,6 +585,7 @@ public class TextViewer
    * 
    * @param name the name to use
    */
+  @Override
   public void setCustomName(String name) {
     m_visual.setText(name);
   }
@@ -578,66 +595,69 @@ public class TextViewer
    * 
    * @return the custom name (or the default name)
    */
+  @Override
   public String getCustomName() {
     return m_visual.getText();
   }
 
   /**
-   * Returns true if, at this time, 
-   * the object will accept a connection via the supplied
-   * EventSetDescriptor
-   *
+   * Returns true if, at this time, the object will accept a connection via the
+   * supplied EventSetDescriptor
+   * 
    * @param esd the EventSetDescriptor
    * @return true if the object will accept a connection
    */
+  @Override
   public boolean connectionAllowed(EventSetDescriptor esd) {
     return connectionAllowed(esd.getName());
   }
 
   /**
-   * Returns true if, at this time, 
-   * the object will accept a connection via the named event
-   *
+   * Returns true if, at this time, the object will accept a connection via the
+   * named event
+   * 
    * @param eventName the name of the event
    * @return true if the object will accept a connection
    */
+  @Override
   public boolean connectionAllowed(String eventName) {
     return true;
   }
 
   /**
-   * Notify this object that it has been registered as a listener with
-   * a source for recieving events described by the named event
-   * This object is responsible for recording this fact.
-   *
+   * Notify this object that it has been registered as a listener with a source
+   * for recieving events described by the named event This object is
+   * responsible for recording this fact.
+   * 
    * @param eventName the event
-   * @param source the source with which this object has been registered as
-   * a listener
+   * @param source the source with which this object has been registered as a
+   *          listener
    */
+  @Override
   public void connectionNotification(String eventName, Object source) {
   }
 
   /**
-   * Notify this object that it has been deregistered as a listener with
-   * a source for named event. This object is responsible
-   * for recording this fact.
-   *
+   * Notify this object that it has been deregistered as a listener with a
+   * source for named event. This object is responsible for recording this fact.
+   * 
    * @param eventName the event
-   * @param source the source with which this object has been registered as
-   * a listener
+   * @param source the source with which this object has been registered as a
+   *          listener
    */
+  @Override
   public void disconnectionNotification(String eventName, Object source) {
   }
 
   /**
-   * Returns true, if at the current time, the named event could
-   * be generated. Assumes that the supplied event name is
-   * an event that could be generated by this bean
-   *
+   * Returns true, if at the current time, the named event could be generated.
+   * Assumes that the supplied event name is an event that could be generated by
+   * this bean
+   * 
    * @param eventName the name of the event in question
-   * @return true if the named event could be generated at this point in
-   * time
+   * @return true if the named event could be generated at this point in time
    */
+  @Override
   public boolean eventGeneratable(String eventName) {
     if (eventName.equals("text")) {
       return true;
@@ -647,7 +667,7 @@ public class TextViewer
 
   /**
    * Add a text listener
-   *
+   * 
    * @param cl a <code>TextListener</code> value
    */
   public synchronized void addTextListener(TextListener cl) {
@@ -656,14 +676,14 @@ public class TextViewer
 
   /**
    * Remove a text listener
-   *
+   * 
    * @param cl a <code>TextListener</code> value
    */
   public synchronized void removeTextListener(TextListener cl) {
     m_textListeners.remove(cl);
   }
 
-  public static void main(String [] args) {
+  public static void main(String[] args) {
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
@@ -671,15 +691,16 @@ public class TextViewer
       final TextViewer tv = new TextViewer();
 
       tv.acceptText(new TextEvent(tv, "Here is some test text from the main "
-				  +"method of this class.", "The Title"));
+          + "method of this class.", "The Title"));
       jf.getContentPane().add(tv, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
         public void windowClosing(java.awt.event.WindowEvent e) {
           jf.dispose();
           System.exit(0);
         }
       });
-      jf.setSize(800,600);
+      jf.setSize(800, 600);
       jf.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();
