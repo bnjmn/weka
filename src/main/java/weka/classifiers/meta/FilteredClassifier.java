@@ -28,6 +28,7 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
+import weka.core.PartitionGenerator;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -103,7 +104,7 @@ import weka.filters.Filter;
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
-  implements Drawable {
+  implements Drawable, PartitionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = -4523450618538717400L;
@@ -171,6 +172,51 @@ public class FilteredClassifier
       return ((Drawable)m_Classifier).graph();
     else throw new Exception("Classifier: " + getClassifierSpec()
 			     + " cannot be graphed");
+  }
+
+  /**
+   * Builds the classifier to generate a partition.
+   * (If the base classifier supports this.)
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator)
+      buildClassifier(data);
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot generate a partition");
+  }
+  
+  /**
+   * Computes an array that has a value for each element in the partition.
+   * (If the base classifier supports this.)
+   */
+  public double[] getMembershipValues(Instance inst) throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator) {
+      Instance newInstance = filterInstance(inst);
+      if (newInstance == null) {
+        double[] unclassified = new double[numElements()];
+        for (int i = 0; i < unclassified.length; i++) {
+          unclassified[i] = Utils.missingValue();
+        }
+        return unclassified;
+      } else {
+        return ((PartitionGenerator)m_Classifier).getMembershipValues(newInstance);
+      }
+    } else throw new Exception("Classifier: " + getClassifierSpec()
+                               + " cannot generate a partition");
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   * (If the base classifier supports this.)
+   */
+  public int numElements() throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator)
+      return ((PartitionGenerator)m_Classifier).numElements();
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot generate a partition");
   }
 
   /**
@@ -397,6 +443,45 @@ public class FilteredClassifier
   }
 
   /**
+   * Filters the instance so that it can subsequently be classified.
+   */
+  protected Instance filterInstance(Instance instance)
+    throws Exception {
+    
+    /*
+      System.err.println("FilteredClassifier:: " 
+      + m_Filter.getClass().getName()
+      + " in: " + instance);
+    */
+    if (m_Filter.numPendingOutput() > 0) {
+      throw new Exception("Filter output queue not empty!");
+    }
+    /*
+      String fname = m_Filter.getClass().getName();
+      fname = fname.substring(fname.lastIndexOf('.') + 1);
+      util.Timer t = util.Timer.getTimer("FilteredClassifier::" + fname);
+      t.start();
+    */
+    if (!m_Filter.input(instance)) {
+      if (!m_Filter.mayRemoveInstanceAfterFirstBatchDone()) {
+        throw new Exception("Filter didn't make the test instance"
+                            + " immediately available!");
+      } else {
+        m_Filter.batchFinished();
+        return null;
+      }
+    }
+    m_Filter.batchFinished();
+    return m_Filter.output();
+    //t.stop();
+    /*
+      System.err.println("FilteredClassifier:: " 
+      + m_Filter.getClass().getName()
+      + " out: " + newInstance);
+    */
+  }
+  
+  /**
    * Classifies a given instance after filtering.
    *
    * @param instance the instance to be classified
@@ -407,49 +492,24 @@ public class FilteredClassifier
   public double [] distributionForInstance(Instance instance)
     throws Exception {
 
-    /*
-      System.err.println("FilteredClassifier:: " 
-                         + m_Filter.getClass().getName()
-                         + " in: " + instance);
-    */
-    if (m_Filter.numPendingOutput() > 0) {
-      throw new Exception("Filter output queue not empty!");
-    }
-    /*
-    String fname = m_Filter.getClass().getName();
-    fname = fname.substring(fname.lastIndexOf('.') + 1);
-    util.Timer t = util.Timer.getTimer("FilteredClassifier::" + fname);
-    t.start();
-    */
-    if (!m_Filter.input(instance)) {
-      if (!m_Filter.mayRemoveInstanceAfterFirstBatchDone()) {
-        throw new Exception("Filter didn't make the test instance"
-            + " immediately available!");
+    Instance newInstance = filterInstance(instance);
+    if (newInstance == null) {
+
+      // filter has consumed the instance (e.g. RemoveWithValues
+      // may do this). We will indicate no prediction for this
+      // instance
+      double[] unclassified = null;
+      if (instance.classAttribute().isNumeric()) {
+        unclassified = new double[1];
+        unclassified[0] = Utils.missingValue();
       } else {
-        // filter has consumed the instance (e.g. RemoveWithValues
-        // may do this). We will indicate no prediction for this
-        // instance
-        double[] unclassified = null;
-        if (instance.classAttribute().isNumeric()) {
-          unclassified = new double[1];
-          unclassified[0] = Utils.missingValue();
-        } else {
-          // all zeros
-          unclassified = new double[instance.classAttribute().numValues()];
-        }
-        m_Filter.batchFinished();
-        return unclassified;
+        // all zeros
+        unclassified = new double[instance.classAttribute().numValues()];
       }
+      return unclassified;
+    } else {
+      return m_Classifier.distributionForInstance(newInstance);
     }
-    m_Filter.batchFinished();
-    Instance newInstance = m_Filter.output();
-    //t.stop();
-    /*
-    System.err.println("FilteredClassifier:: " 
-                       + m_Filter.getClass().getName()
-                       + " out: " + newInstance);
-    */
-    return m_Classifier.distributionForInstance(newInstance);
   }
 
   /**
