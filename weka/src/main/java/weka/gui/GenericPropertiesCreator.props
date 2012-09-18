@@ -186,6 +186,11 @@ weka.core.converters.AbstractFileLoader=\
 weka.core.converters.AbstractFileSaver=\
  weka.core.converters
 
+# List of partition generators
+weka.core.PartitionGenerator=\
+ weka.classifiers.trees,\
+ weka.classifiers.meta
+
 # List of snowball stemmers.
 #
 # Note: the snowball jar needs to be in the CLASSPATH to make these stemmers

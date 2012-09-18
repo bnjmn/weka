@@ -35,12 +35,12 @@ public interface PartitionGenerator extends CapabilitiesHandler {
   public void generatePartition(Instances data) throws Exception;
   
   /**
-   * Computes a array that has a value for each element in the partition.
+   * Computes an array that has a value for each element in the partition.
    */
   public double[] getMembershipValues(Instance inst) throws Exception;
   
   /**
    * Returns the number of elements in the partition.
    */
-  public int numElements();
+  public int numElements() throws Exception;
 }

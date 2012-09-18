@@ -1038,7 +1038,7 @@ public class J48
   }
 	
   /**
-   * Computes a list that indicates node membership
+   * Computes an array that indicates node membership.
    */
   public double[] getMembershipValues(Instance inst) throws Exception {
 		
@@ -1048,9 +1048,9 @@ public class J48
   /**
    * Returns the number of elements in the partition.
    */
-  public int numElements() {
+  public int numElements() throws Exception {
     
-    return m_root.numElements();
+    return m_root.numNodes();
   }
  
   /**
