@@ -15,19 +15,26 @@
 
 /*
  *    REPTree.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+import java.util.Queue;
+import java.util.LinkedList;
+
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.ContingencyTables;
 import weka.core.Drawable;
 import weka.core.Instance;
@@ -38,12 +45,7 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.core.PartitionGenerator;
 
 /**
  <!-- globalinfo-start -->
@@ -81,7 +83,7 @@ import java.util.Vector;
 public class REPTree 
   extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
-	     AdditionalMeasureProducer, Sourcable {
+	     AdditionalMeasureProducer, Sourcable, PartitionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = -9216785998198681299L;
@@ -638,7 +640,7 @@ public class REPTree
 	  break;
 	}
       }
-
+      
       // Any useful split found?
       if (Utils.gr(vals[m_Attribute], 0) && (count > 1)) {
 
@@ -2052,6 +2054,80 @@ public class REPTree
     return     
       "\nREPTree\n============\n" + m_Tree.toString(0, null) + "\n" +
       "\nSize of the tree : " + numNodes();
+  }
+
+  /**
+   * Builds the classifier to generate a partition.
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    buildClassifier(data);
+  }
+	
+  /**
+   * Computes array that indicates node membership. Array locations
+   * are allocated based on breadth-first exploration of the tree.
+   */
+  public double[] getMembershipValues(Instance instance) throws Exception {
+		
+    if (m_zeroR != null) {
+      double[] m = new double[1];
+      m[0] = instance.weight();
+      return m;
+    } else {
+
+      // Set up array for membership values
+      double[] a = new double[numElements()];
+      
+      // Initialize queues
+      Queue<Double> queueOfWeights =  new LinkedList<Double>();
+      Queue<Tree> queueOfNodes = new LinkedList<Tree>();
+      queueOfWeights.add(instance.weight());
+      queueOfNodes.add(m_Tree);
+      int index = 0;
+      
+      // While the queue is not empty
+      while (!queueOfNodes.isEmpty()) {
+        
+        a[index++] = queueOfWeights.poll();
+        Tree node = queueOfNodes.poll();
+        
+        // Is node a leaf?
+        if (node.m_Attribute <= -1) {
+          continue;
+        }
+        
+        // Compute weight distribution
+        double[] weights = new double[node.m_Successors.length];
+        if (instance.isMissing(node.m_Attribute)) {
+          System.arraycopy(node.m_Prop, 0, weights, 0, node.m_Prop.length);
+        } else if (node.m_Info.attribute(node.m_Attribute).isNominal()) {
+	  weights[(int)instance.value(node.m_Attribute)] = 1.0;
+	} else {
+	  if (instance.value(node.m_Attribute) < node.m_SplitPoint) {
+            weights[0] = 1.0;
+	  } else {
+            weights[1] = 1.0;
+	  }
+	}
+        for (int i = 0; i < node.m_Successors.length; i++) {
+          queueOfNodes.add(node.m_Successors[i]);
+          queueOfWeights.add(a[index - 1] * weights[i]);
+        }
+      }
+      return a;
+    }
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() throws Exception {
+    
+    if (m_zeroR != null) {
+      return 1;
+    }
+    return numNodes();
   }
   
   /**

@@ -74,6 +74,9 @@ weka.attributeSelection.ASEvaluation=weka.gui.GenericObjectEditor
 weka.attributeSelection.ASSearch=weka.gui.GenericObjectEditor
 weka.attributeSelection.UnsupervisedSubsetEvaluator=weka.gui.GenericObjectEditor
 
+# partition generators
+weka.core.PartitionGenerator=weka.gui.GenericObjectEditor
+
 #generators
 #weka.classifiers.meta.generators.NominalAttributeGenerator=weka.gui.GenericObjectEditor
 #weka.classifiers.meta.generators.NumericAttributeGenerator=weka.gui.GenericObjectEditor

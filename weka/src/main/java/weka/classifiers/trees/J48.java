@@ -15,13 +15,15 @@
 
 /*
  *    J48.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
@@ -38,17 +40,15 @@ import weka.core.Instances;
 import weka.core.Matchable;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.PartitionGenerator;
 import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -124,7 +124,7 @@ public class J48
   extends AbstractClassifier 
   implements OptionHandler, Drawable, Matchable, Sourcable, 
              WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer, 
-             TechnicalInformationHandler {
+             TechnicalInformationHandler, PartitionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = -217733168393644444L;
@@ -217,6 +217,7 @@ public class J48
     }
     catch (Exception e) {
       result = new Capabilities(this);
+      result.disableAll();
     }
     
     result.setOwner(this);
@@ -1026,6 +1027,30 @@ public class J48
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
+  }
+
+  /**
+   * Builds the classifier to generate a partition.
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    buildClassifier(data);
+  }
+	
+  /**
+   * Computes an array that indicates node membership.
+   */
+  public double[] getMembershipValues(Instance inst) throws Exception {
+		
+    return m_root.getMembershipValues(inst);
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() throws Exception {
+    
+    return m_root.numNodes();
   }
  
   /**

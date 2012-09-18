@@ -514,6 +514,12 @@ weka.core.converters.AbstractFileSaver=\
  weka.core.converters.MatlabSaver,\
  weka.core.converters.SerializedInstancesSaver,\
  weka.core.converters.XRFFSaver
+ 
+# Lists the partition generators I want to choose from
+weka.core.PartitionGenerator=\
+ weka.classifiers.trees.J48,\
+ weka.classifiers.meta.FilteredClassifier
+ 
 
 # List of SnowballPrograms I want to choose from
 #

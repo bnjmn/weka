@@ -15,11 +15,13 @@
 
 /*
  *    ClassifierTree.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
+
+import java.io.Serializable;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
@@ -30,7 +32,8 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
-import java.io.Serializable;
+import java.util.Queue;
+import java.util.LinkedList;
 
 /**
  * Class for handling a tree structure used for
@@ -108,7 +111,10 @@ public class ClassifierTree
    * @return      the capabilities of this classifier tree
    */
   public Capabilities getCapabilities() {
-    return new Capabilities(this);
+    Capabilities result = new Capabilities(this);
+    result.enableAll();
+    
+    return result;
   }
 
   /**
@@ -696,6 +702,52 @@ public class ClassifierTree
   private ClassifierTree son(int index) {
     
     return (ClassifierTree)m_sons[index];
+  }
+	
+  /**
+   * Computes a list that indicates node membership
+   */
+  public double[] getMembershipValues(Instance instance) throws Exception {
+
+    // Set up array for membership values
+    double[] a = new double[numNodes()];
+    
+    // Initialize queues
+    Queue<Double> queueOfWeights =  new LinkedList<Double>();
+    Queue<ClassifierTree> queueOfNodes = new LinkedList<ClassifierTree>();
+    queueOfWeights.add(instance.weight());
+    queueOfNodes.add(this);
+    int index = 0;
+    
+    // While the queue is not empty
+    while (!queueOfNodes.isEmpty()) {
+      
+      a[index++] = queueOfWeights.poll();
+      ClassifierTree node = queueOfNodes.poll();
+      
+      // Is node a leaf?
+      if (node.m_isLeaf) {
+        continue;
+      }
+
+      // Which subset?
+      int treeIndex = node.localModel().whichSubset(instance);
+      
+      // Space for weight distribution
+      double[] weights = new double[node.m_sons.length];
+      
+      // Check for missing value
+      if (treeIndex == -1) {
+	weights = node.localModel().weights(instance);
+      } else {
+        weights[treeIndex] = 1.0;
+      }
+      for (int i = 0; i < node.m_sons.length; i++) {
+        queueOfNodes.add(node.son(i));
+        queueOfWeights.add(a[index - 1] * weights[i]);
+      }
+    }
+    return a;
   }
   
   /**
