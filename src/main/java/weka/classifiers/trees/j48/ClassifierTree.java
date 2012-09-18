@@ -32,6 +32,9 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
+import java.util.Queue;
+import java.util.LinkedList;
+
 /**
  * Class for handling a tree structure used for
  * classification.
@@ -704,63 +707,47 @@ public class ClassifierTree
   /**
    * Computes a list that indicates node membership
    */
-  public double[] getMembershipValues(Instance inst) throws Exception {
-		
-    return computeMembershipValues(inst, new double[numElements()], inst.weight(), 
-                                   new int[1]);
-  }
-	
-  /**
-   * Helper method for computing node membership. Order of values is based
-   * on preorder traversal of thre tree.
-   *
-   * @param instance the instance for which we want to compute leaf membership
-   * @param a the array list used to store leaf membership values
-   * @param p the current weight/fraction of the instance
-   */
-  private double[] computeMembershipValues(Instance instance, double[] a, 
-                                           double p, int[] index) throws Exception {
+  public double[] getMembershipValues(Instance instance) throws Exception {
 
-    // Set membership value
-    a[index[0]++] = p;
+    // Set up array for membership values
+    double[] a = new double[numNodes()];
     
-    // Is node a leaf?
-    if (!m_isLeaf) {
+    // Initialize queues
+    Queue<Double> queueOfWeights =  new LinkedList<Double>();
+    Queue<ClassifierTree> queueOfNodes = new LinkedList<ClassifierTree>();
+    queueOfWeights.add(instance.weight());
+    queueOfNodes.add(this);
+    int index = 0;
+    
+    // While the queue is not empty
+    while (!queueOfNodes.isEmpty()) {
+      
+      a[index++] = queueOfWeights.poll();
+      ClassifierTree node = queueOfNodes.poll();
+      
+      // Is node a leaf?
+      if (node.m_isLeaf) {
+        continue;
+      }
 
       // Which subset?
-      int treeIndex = localModel().whichSubset(instance);
+      int treeIndex = node.localModel().whichSubset(instance);
       
       // Space for weight distribution
-      double[] weights = new double[m_sons.length];
-
+      double[] weights = new double[node.m_sons.length];
+      
       // Check for missing value
       if (treeIndex == -1) {
-	weights = localModel().weights(instance);
+	weights = node.localModel().weights(instance);
       } else {
         weights[treeIndex] = 1.0;
       }
-      for (int i = 0; i < m_sons.length; i++) {
-        a = m_sons[i].computeMembershipValues(instance, a, p * weights[i], index);
+      for (int i = 0; i < node.m_sons.length; i++) {
+        queueOfNodes.add(node.son(i));
+        queueOfWeights.add(a[index - 1] * weights[i]);
       }
     }
     return a;
-  }
-  
-  /**
-   * Returns the number of elements in the partition.
-   */
-  public int numElements() {
-    
-    // Is node a leaf?
-    if (m_isLeaf) {
-      return 1;
-    } else {
-      int result = 1;
-      for (int i = 0; i < m_sons.length; i++) {
-        result += m_sons[i].numElements();
-      }
-      return result;
-    }
   }
   
   /**
