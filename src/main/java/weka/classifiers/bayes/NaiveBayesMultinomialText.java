@@ -227,7 +227,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   /**
    * Generates the classifier.
    *
-   * @param instances   set of instances serving as training data
+   * @param data   set of instances serving as training data
    * @throws Exception  if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances data) throws Exception {
@@ -599,7 +599,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * Get whether to use word frequencies rather than binary
    * bag of words representation.
    * 
-   * @param u true if word frequencies are to be used.
+   * @return true if word frequencies are to be used.
    */
   public boolean getUseWordFrequencies() {
     return m_wordFrequencies;
@@ -698,7 +698,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * If periodic pruning is turned on, then min frequency is used
    * when removing words from the dictionary.
    * 
-   * @param return the minimum word frequency to use
+   * @return the minimum word frequency to use
    */
   public double getMinWordFrequency() {
     return m_minWordP;
