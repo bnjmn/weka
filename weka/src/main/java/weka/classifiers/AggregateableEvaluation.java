@@ -24,8 +24,8 @@ import weka.core.FastVector;
 import weka.core.Instances;
 
 /**
- * Subclass of Evaluation that provides a method for aggregating the
- * results stored in another Evaluation object.
+ * Subclass of Evaluation that provides a method for aggregating the results
+ * stored in another Evaluation object.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -46,7 +46,7 @@ public class AggregateableEvaluation extends Evaluation {
   public AggregateableEvaluation(Instances data) throws Exception {
     super(data);
   }
-  
+
   /**
    * Constructs a new AggregateableEvaluation object
    * 
@@ -54,20 +54,20 @@ public class AggregateableEvaluation extends Evaluation {
    * @param costMatrix the cost matrix to use
    * @throws Exception if a problem occurs
    */
-  public AggregateableEvaluation(Instances data, CostMatrix costMatrix) 
-    throws Exception {
+  public AggregateableEvaluation(Instances data, CostMatrix costMatrix)
+      throws Exception {
     super(data, costMatrix);
   }
 
   /**
-   * Constructs a new AggregateableEvaluation object based
-   * on an Evaluation object
+   * Constructs a new AggregateableEvaluation object based on an Evaluation
+   * object
    * 
-   * @param evaluation the Evaluation object to use
+   * @param eval the Evaluation object to use
    */
   public AggregateableEvaluation(Evaluation eval) throws Exception {
     super(eval.m_Header, eval.m_CostMatrix);
-    
+
     m_NoPriors = eval.m_NoPriors;
     m_NumTrainClassVals = eval.m_NumTrainClassVals;
     m_TrainClassVals = eval.m_TrainClassVals;
@@ -78,12 +78,11 @@ public class AggregateableEvaluation extends Evaluation {
     m_ClassPriorsSum = eval.m_ClassPriorsSum;
     m_ClassPriors = eval.m_ClassPriors;
   }
-  
+
   /**
-   * Adds the statistics encapsulated in the supplied
-   * Evaluation object into this one. Does not perform
-   * any checks for compatibility between the supplied
-   * Evaluation object and this one.
+   * Adds the statistics encapsulated in the supplied Evaluation object into
+   * this one. Does not perform any checks for compatibility between the
+   * supplied Evaluation object and this one.
    * 
    * @param evaluation the evaluation object to aggregate
    */
@@ -93,20 +92,20 @@ public class AggregateableEvaluation extends Evaluation {
     m_Unclassified += evaluation.unclassified();
     m_MissingClass += evaluation.m_MissingClass;
     m_WithClass += evaluation.m_WithClass;
-    
+
     if (evaluation.m_ConfusionMatrix != null) {
-      double [][] newMatrix = evaluation.confusionMatrix();
+      double[][] newMatrix = evaluation.confusionMatrix();
       if (newMatrix != null) {
-        for(int i = 0; i < m_ConfusionMatrix.length; i++) {
-          for(int j = 0; j < m_ConfusionMatrix[i].length; j++) {
+        for (int i = 0; i < m_ConfusionMatrix.length; i++) {
+          for (int j = 0; j < m_ConfusionMatrix[i].length; j++) {
             m_ConfusionMatrix[i][j] += newMatrix[i][j];
           }
         }
       }
     }
-    double [] newClassPriors = evaluation.m_ClassPriors;
+    double[] newClassPriors = evaluation.m_ClassPriors;
     if (newClassPriors != null) {
-      for(int i = 0; i < this.m_ClassPriors.length; i++) {
+      for (int i = 0; i < this.m_ClassPriors.length; i++) {
         m_ClassPriors[i] = newClassPriors[i];
       }
     }
@@ -123,9 +122,9 @@ public class AggregateableEvaluation extends Evaluation {
     m_SumPriorAbsErr += evaluation.m_SumPriorAbsErr;
     m_SumPriorSqrErr += evaluation.m_SumPriorSqrErr;
     m_SumKBInfo += evaluation.m_SumKBInfo;
-    double [] newMarginCounts = evaluation.m_MarginCounts;
+    double[] newMarginCounts = evaluation.m_MarginCounts;
     if (newMarginCounts != null) {
-      for(int i = 0; i < m_MarginCounts.length; i++) {
+      for (int i = 0; i < m_MarginCounts.length; i++) {
         m_MarginCounts[i] += newMarginCounts[i];
       }
     }
@@ -133,9 +132,9 @@ public class AggregateableEvaluation extends Evaluation {
     m_SumSchemeEntropy += evaluation.m_SumSchemeEntropy;
     m_TotalSizeOfRegions += evaluation.m_TotalSizeOfRegions;
     m_TotalCoverage += evaluation.m_TotalCoverage;
-    
+
     FastVector predsToAdd = evaluation.m_Predictions;
-    if (predsToAdd != null ) {
+    if (predsToAdd != null) {
       if (m_Predictions == null) {
         m_Predictions = new FastVector();
       }
