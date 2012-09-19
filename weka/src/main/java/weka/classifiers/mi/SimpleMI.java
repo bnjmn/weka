@@ -80,7 +80,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class SimpleMI 
   extends SingleClassifierEnhancer
@@ -380,7 +380,7 @@ public class SimpleMI
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.RELATIONAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
+    result.disable(Capability.MISSING_VALUES);
 
     // class
     result.disableAllClasses();
@@ -489,7 +489,7 @@ public class SimpleMI
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
