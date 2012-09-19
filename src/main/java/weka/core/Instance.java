@@ -793,6 +793,9 @@ public class Instance
 
     int attIndex = att.index();
     if (att.isRelationValued()) {
+      if (isMissing(attIndex)) {
+        return null;
+      }
       return att.relation((int) value(attIndex));
     } else {
       throw new IllegalArgumentException("Attribute isn't relation-valued!");
@@ -834,6 +837,9 @@ public class Instance
   public final /*@pure@*/ String stringValue(Attribute att) {
 
     int attIndex = att.index();
+    if (isMissing(attIndex)) {
+      return "?";
+    }
     switch (att.type()) {
     case Attribute.NOMINAL:
     case Attribute.STRING:

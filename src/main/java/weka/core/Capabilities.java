@@ -41,7 +41,7 @@ import java.util.Vector;
  * A common code fragment for making use of the capabilities in a classifier 
  * would be this:
  * <pre>
- * public void <b>buildClassifier</b>(Instances instances) throws Exception {
+ * public void <b>buildClassifier</b>(Instances instances) sthrows Exception {
  *   // can the classifier handle the data?
  *   getCapabilities().<b>testWithFail(instances)</b>;
  *   ...
@@ -1232,7 +1232,7 @@ public class Capabilities
 	MultiInstanceCapabilitiesHandler handler = (MultiInstanceCapabilitiesHandler) getOwner();
 	cap = handler.getMultiInstanceCapabilities();
 	boolean result;
-	if (data.numInstances() > 0)
+	if (data.numInstances() > 0 && data.attribute(1).numValues() > 0)
 	  result = cap.test(data.attribute(1).relation(0));
 	else
 	  result = cap.test(data.attribute(1).relation());
