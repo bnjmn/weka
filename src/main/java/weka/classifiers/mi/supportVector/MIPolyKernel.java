@@ -147,7 +147,7 @@ public class MIPolyKernel
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.RELATIONAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
+    result.disable(Capability.MISSING_VALUES);
 
     // class
     result.enableAllClasses();
