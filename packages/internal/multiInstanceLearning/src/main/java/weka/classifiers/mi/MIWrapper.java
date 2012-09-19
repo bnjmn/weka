@@ -391,7 +391,8 @@ public class MIWrapper
       result.enable(Capability.BINARY_CLASS);
     result.enable(Capability.RELATIONAL_ATTRIBUTES);
     result.enable(Capability.MISSING_CLASS_VALUES);
-    
+    result.disable(Capability.MISSING_VALUES);
+
     // other
     result.enable(Capability.ONLY_MULTIINSTANCE);
     
