@@ -63,7 +63,7 @@ import weka.core.Capabilities.Capability;
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (MIkernel)
- * @version $Revision: 1.4 $ 
+ * @version $Revision$ 
  */
 public class MIRBFKernel 
   extends RBFKernel
@@ -155,7 +155,7 @@ public class MIRBFKernel
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.RELATIONAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
+    result.disable(Capability.MISSING_VALUES);
 
     // class
     result.enableAllClasses();
@@ -211,7 +211,7 @@ public class MIRBFKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
 

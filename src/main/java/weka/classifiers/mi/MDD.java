@@ -383,7 +383,6 @@ public class MDD
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.RELATIONAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
 
     // class
     result.enable(Capability.BINARY_CLASS);

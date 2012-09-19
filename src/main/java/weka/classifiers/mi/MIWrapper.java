@@ -110,7 +110,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision$ 
  */
 public class MIWrapper 
   extends SingleClassifierEnhancer
@@ -392,6 +392,7 @@ public class MIWrapper
       result.enable(Capability.BINARY_CLASS);
     result.enable(Capability.RELATIONAL_ATTRIBUTES);
     result.enable(Capability.MISSING_CLASS_VALUES);
+    result.disable(Capability.MISSING_VALUES);
     
     // other
     result.enable(Capability.ONLY_MULTIINSTANCE);
@@ -535,7 +536,7 @@ public class MIWrapper
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
