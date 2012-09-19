@@ -91,15 +91,15 @@ public class PropositionalToMultiInstance
    */
   public String globalInfo() {
     return  
-        "Converts the propositional instance dataset into multi-instance "
-      + "dataset (with relational attribute). When normalize or standardize a "
-      + "multi-instance dataset, a MIToSingleInstance filter can be applied "
-      + "first to convert the multi-instance dataset into propositional "
-      + "instance dataset. After normalization or standardization, may use "
+        "Converts a propositional dataset into a multi-instance "
+      + "dataset (with relational attribute). When normalizing or standardizing a "
+      + "multi-instance dataset, the MultiInstanceToPropositional filter can be applied "
+      + "first to convert the multi-instance dataset into a propositional "
+      + "instance dataset. After normalization or standardization, we may use "
       + "this PropositionalToMultiInstance filter to convert the data back to "
       + "multi-instance format.\n\n"
       + "Note: the first attribute of the original propositional instance "
-      + "dataset must be a nominal attribute which is expected to be bagId "
+      + "dataset must be a nominal attribute which is expected to be the bagId "
       + "attribute.";
 
   }
@@ -181,7 +181,7 @@ public class PropositionalToMultiInstance
    * 			displaying in the explorer/experimenter gui
    */
   public String seedTipText() {
-    return "The random seed used by the random number generator";
+    return "The seed used by the random number generator";
   }
 
   /**

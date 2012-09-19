@@ -305,7 +305,11 @@ public class MultiInstanceToPropositional
     m_NumBags = instanceInfo.numInstances();
     m_NumInstances = 0;
     for (int i=0; i<m_NumBags; i++)
-      m_NumInstances += instanceInfo.instance(i).relationalValue(1).numInstances();
+      if (instanceInfo.instance(i).relationalValue(1) == null) {
+        m_NumInstances++;
+      } else {
+        m_NumInstances += instanceInfo.instance(i).relationalValue(1).numInstances();
+      }
 
     Attribute classAttribute = (Attribute) instanceInfo.classAttribute().copy();
     Attribute bagIndex = (Attribute) instanceInfo.attribute(0).copy();
@@ -386,7 +390,10 @@ public class MultiInstanceToPropositional
   private void convertInstance(Instance bag) {
 
     Instances data = bag.relationalValue(1);
-    int bagSize = data.numInstances();
+    int bagSize = 1;
+    if (data != null) {
+      bagSize = data.numInstances();
+    }
     double bagIndex = bag.value(0);
     double classValue = bag.classValue();
     double weight = 0.0; 
@@ -411,7 +418,11 @@ public class MultiInstanceToPropositional
         newInst.setClassValue(classValue);
       // copy the attribute values to new instance
       for (int j = 1; j < outputFormat.numAttributes() - 1; j++){
-        newInst.setValue(j,data.instance(i).value(j - 1));
+        if (data == null) {
+          newInst.setMissing(j);
+        } else {
+          newInst.setValue(j,data.instance(i).value(j - 1));
+        }
       }	
 
       newInst.setWeight(weight);
