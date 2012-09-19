@@ -15,12 +15,10 @@
 
 /*
  * Capabilities.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
-
-import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,6 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
+
+import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * A class that describes the capabilites (e.g., handling certain types of
@@ -1231,7 +1231,7 @@ public class Capabilities
 	MultiInstanceCapabilitiesHandler handler = (MultiInstanceCapabilitiesHandler) getOwner();
 	cap = handler.getMultiInstanceCapabilities();
 	boolean result;
-	if (data.numInstances() > 0)
+	if (data.numInstances() > 0 && data.attribute(1).numValues() > 0)
 	  result = cap.test(data.attribute(1).relation(0));
 	else
 	  result = cap.test(data.attribute(1).relation());

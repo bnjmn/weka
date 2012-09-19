@@ -595,7 +595,7 @@ public abstract class AbstractInstance implements Instance, Serializable,
    * Returns the relational value of a relational attribute.
    * 
    * @param att the attribute
-   * @return the corresponding relation as an Instances object
+   * @return the corresponding relation as an Instances object, null if missing
    * @throws IllegalArgumentException if the attribute is not a relation-valued
    *           attribute
    * @throws UnassignedDatasetException if the instance doesn't belong to a
@@ -606,6 +606,9 @@ public abstract class AbstractInstance implements Instance, Serializable,
 
     int attIndex = att.index();
     if (att.isRelationValued()) {
+      if (isMissing(attIndex)) {
+        return null;
+      }
       return att.relation((int) value(attIndex));
     } else {
       throw new IllegalArgumentException("Attribute isn't relation-valued!");
@@ -649,6 +652,9 @@ public abstract class AbstractInstance implements Instance, Serializable,
   public final/* @pure@ */String stringValue(Attribute att) {
 
     int attIndex = att.index();
+    if (isMissing(attIndex)) {
+      return "?";
+    }
     switch (att.type()) {
     case Attribute.NOMINAL:
     case Attribute.STRING:
