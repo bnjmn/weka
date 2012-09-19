@@ -1,17 +1,16 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -24,7 +23,7 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Instance;
+import weka.core.Instance; 
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
@@ -305,7 +304,11 @@ public class MultiInstanceToPropositional
     m_NumBags = instanceInfo.numInstances();
     m_NumInstances = 0;
     for (int i=0; i<m_NumBags; i++)
-      m_NumInstances += instanceInfo.instance(i).relationalValue(1).numInstances();
+      if (instanceInfo.instance(i).relationalValue(1) == null) {
+        m_NumInstances++;
+      } else {
+        m_NumInstances += instanceInfo.instance(i).relationalValue(1).numInstances();
+      }
 
     Attribute classAttribute = (Attribute) instanceInfo.classAttribute().copy();
     Attribute bagIndex = (Attribute) instanceInfo.attribute(0).copy();
@@ -386,7 +389,10 @@ public class MultiInstanceToPropositional
   private void convertInstance(Instance bag) {
 
     Instances data = bag.relationalValue(1);
-    int bagSize = data.numInstances();
+    int bagSize = 1;
+    if (data != null) {
+      bagSize = data.numInstances();
+    }
     double bagIndex = bag.value(0);
     double classValue = bag.classValue();
     double weight = 0.0; 
@@ -404,14 +410,18 @@ public class MultiInstanceToPropositional
     Instances outputFormat = getOutputFormat().stringFreeStructure();
 
     for (int i = 0; i < bagSize; i++) {
-      newInst = new Instance (outputFormat.numAttributes());
+      newInst = new Instance(outputFormat.numAttributes());
       newInst.setDataset(outputFormat);
       newInst.setValue(0,bagIndex);
       if (!bag.classIsMissing())
         newInst.setClassValue(classValue);
       // copy the attribute values to new instance
       for (int j = 1; j < outputFormat.numAttributes() - 1; j++){
-        newInst.setValue(j,data.instance(i).value(j - 1));
+        if (data == null) {
+          newInst.setMissing(j);
+        } else {
+          newInst.setValue(j,data.instance(i).value(j - 1));
+        }
       }	
 
       newInst.setWeight(weight);
