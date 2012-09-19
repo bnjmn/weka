@@ -1231,7 +1231,7 @@ public class Capabilities
 	MultiInstanceCapabilitiesHandler handler = (MultiInstanceCapabilitiesHandler) getOwner();
 	cap = handler.getMultiInstanceCapabilities();
 	boolean result;
-	if (data.numInstances() > 0)
+	if (data.numInstances() > 0 && data.attribute(1).numValues() > 0)
 	  result = cap.test(data.attribute(1).relation(0));
 	else
 	  result = cap.test(data.attribute(1).relation());
