@@ -40,6 +40,7 @@ import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.PartitionGenerator;
 
 /**
  <!-- globalinfo-start -->
@@ -103,7 +104,8 @@ import weka.core.WeightedInstancesHandler;
 public class RandomForest 
   extends AbstractClassifier 
   implements OptionHandler, Randomizable, WeightedInstancesHandler, 
-             AdditionalMeasureProducer, TechnicalInformationHandler {
+             AdditionalMeasureProducer, TechnicalInformationHandler, 
+             PartitionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = 4216839470751428698L;
@@ -623,6 +625,30 @@ public class RandomForest
       }
       return temp.toString();
     }
+  }
+  
+  /**
+   * Builds the classifier to generate a partition.
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    buildClassifier(data);
+  }
+  
+  /**
+   * Computes an array that indicates leaf membership
+   */
+  public double[] getMembershipValues(Instance inst) throws Exception {
+
+    return m_bagger.getMembershipValues(inst);
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() throws Exception {
+
+    return m_bagger.numElements();
   }
   
   /**

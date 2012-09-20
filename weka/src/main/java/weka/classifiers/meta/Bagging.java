@@ -24,6 +24,7 @@ package weka.classifiers.meta;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
@@ -38,6 +39,7 @@ import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.PartitionGenerator;
 
 /**
  <!-- globalinfo-start -->
@@ -126,7 +128,7 @@ import weka.core.WeightedInstancesHandler;
 public class Bagging
   extends RandomizableParallelIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer,
-             TechnicalInformationHandler {
+             TechnicalInformationHandler, PartitionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = -505879962237199703L;
@@ -669,6 +671,57 @@ public class Bagging
     }
 
     return text.toString();
+  }
+  
+  /**
+   * Builds the classifier to generate a partition.
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator)
+      buildClassifier(data);
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot generate a partition");
+  }
+  
+  /**
+   * Computes an array that indicates leaf membership
+   */
+  public double[] getMembershipValues(Instance inst) throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator) {
+      ArrayList<double[]> al = new ArrayList<double[]>();
+      int size = 0;
+      for (int i = 0; i < m_Classifiers.length; i++) {
+        double[] r = ((PartitionGenerator)m_Classifiers[i]).
+          getMembershipValues(inst);
+        size += r.length;
+        al.add(r);
+      }
+      double[] values = new double[size];
+      int pos = 0;
+      for (double[] v: al) {
+        System.arraycopy(v, 0, values, pos, v.length);
+        pos += v.length;
+      }
+      return values;
+    } else throw new Exception("Classifier: " + getClassifierSpec()
+                               + " cannot generate a partition");
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator) {
+      int size = 0;
+      for (int i = 0; i < m_Classifiers.length; i++) {
+        size += ((PartitionGenerator)m_Classifiers[i]).numElements();
+      }
+      return size;
+    } else throw new Exception("Classifier: " + getClassifierSpec()
+                               + " cannot generate a partition");
   }
   
   /**
