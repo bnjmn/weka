@@ -27,6 +27,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -91,13 +92,19 @@ public class WekaPackageManager {
   private static String REP_MIRROR;
   private static boolean USER_SET_REPO = false;
 
-  static {
-    establishWekaHome();
-  }
+  private static String PACKAGE_MANAGER_PROPS_FILE_NAME = "PackageManager.props";
+
+  public static boolean m_offline;
+  private static boolean m_loadPackages = true;
 
   protected static boolean m_wekaHomeEstablished;
   protected static boolean m_packagesLoaded;
   public static boolean m_initialPackageLoadingInProcess = false;
+  public static boolean m_noPackageMetaDataAvailable;
+
+  static {
+    establishWekaHome();
+  }
 
   protected static boolean establishWekaHome() {
     if (m_wekaHomeEstablished) {
@@ -217,10 +224,71 @@ public class WekaPackageManager {
       INITIAL_CACHE_BUILD_NEEDED = true;
     }
 
+    // Package manager general properties
+    // Set via system props first
+    String offline = env.getVariableValue("weka.packageManager.offline");
+    if (offline != null) {
+      m_offline = offline.equalsIgnoreCase("true");
+    }
+    String loadPackages = env
+        .getVariableValue("weka.packageManager.loadPackages");
+    if (loadPackages == null) {
+      // try legacy
+      loadPackages = env.getVariableValue("weka.core.loadPackages");
+    }
+
+    if (loadPackages != null) {
+      m_loadPackages = loadPackages.equalsIgnoreCase("true");
+    }
+
+    // load any general package manager properties from props file
+    File generalProps = new File(PROPERTIES_DIR.toString() + File.separator
+        + PACKAGE_MANAGER_PROPS_FILE_NAME);
+    if (generalProps.exists()) {
+      Properties gProps = new Properties();
+      try {
+        gProps.load(new FileInputStream(generalProps));
+
+        // this one takes precedence over the legacy one
+        String repURL = gProps
+            .getProperty("weka.core.wekaPackageRepositoryURL");
+        if (repURL != null && repURL.length() > 0) {
+          REP_URL = new URL(repURL);
+          PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
+        }
+
+        offline = gProps.getProperty("weka.packageManager.offline");
+        if (offline != null && offline.length() > 0) {
+          m_offline = offline.equalsIgnoreCase("true");
+        }
+
+        loadPackages = gProps.getProperty("weka.packageManager.loadPackages");
+        if (loadPackages == null) {
+          // try legacy
+          loadPackages = env.getVariableValue("weka.core.loadPackages");
+        }
+        if (loadPackages != null) {
+          m_loadPackages = loadPackages.equalsIgnoreCase("true");
+        }
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    if (INITIAL_CACHE_BUILD_NEEDED && m_offline) {
+      m_noPackageMetaDataAvailable = true;
+    }
+
     return ok;
   }
 
   protected static void establishMirror() {
+    if (m_offline) {
+      return;
+    }
+
     try {
       String mirrorListURL = "http://www.cs.waikato.ac.nz/ml/weka/packageMetaDataMirror.txt";
 
@@ -500,6 +568,10 @@ public class WekaPackageManager {
       return false;
     }
 
+    if (m_offline) {
+      return true;
+    }
+
     // now check for missing dependencies
     try {
       List<Dependency> missing = toLoad.getMissingDependencies();
@@ -717,9 +789,8 @@ public class WekaPackageManager {
 
   public static synchronized void loadPackages(boolean verbose,
       boolean refreshGOEProperties) {
-    Environment env = Environment.getSystemWide();
-    String loadPackages = env.getVariableValue("weka.core.loadPackages");
-    if (loadPackages != null && loadPackages.equalsIgnoreCase("false")) {
+
+    if (!m_loadPackages) {
       return;
     }
 
@@ -935,6 +1006,10 @@ public class WekaPackageManager {
   }
 
   public static Exception establishCacheIfNeeded(PrintStream... progress) {
+    if (m_offline) {
+      return null;
+    }
+
     if (REP_MIRROR == null) {
       establishMirror();
     }
@@ -953,6 +1028,11 @@ public class WekaPackageManager {
   }
 
   public static Exception checkForNewPackages(PrintStream... progress) {
+
+    if (m_offline) {
+      return null;
+    }
+
     Exception problem = null;
 
     Map<String, String> localPackageNameList = getPackageList(true);
@@ -1094,7 +1174,7 @@ public class WekaPackageManager {
 
     if (CACHE_URL != null) {
       PACKAGE_MANAGER.setPackageRepositoryURL(CACHE_URL);
-    } else {
+    } else if (REP_URL != null) {
       PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
     }
   }
@@ -1679,6 +1759,14 @@ public class WekaPackageManager {
   }
 
   private static void listPackages(String arg) throws Exception {
+
+    if (m_offline
+        && (arg.equalsIgnoreCase("all") || arg.equalsIgnoreCase("available"))) {
+      System.out.println("Running offline - unable to display "
+          + "available or all package information");
+      return;
+    }
+
     List<Package> packageList = null;
     useCacheOrOnlineRepository();
 
@@ -1709,9 +1797,11 @@ public class WekaPackageManager {
         installedV = installedP.getPackageMetaDataElement("Version").toString()
             + "    ";
         try {
-          Package repP = getRepositoryPackageInfo(p.getName());
-          repositoryV = repP.getPackageMetaDataElement("Version").toString()
-              + "     ";
+          if (!m_offline) {
+            Package repP = getRepositoryPackageInfo(p.getName());
+            repositoryV = repP.getPackageMetaDataElement("Version").toString()
+                + "     ";
+          }
         } catch (Exception ex) {
           // not at the repository
         }
@@ -1728,7 +1818,8 @@ public class WekaPackageManager {
   }
 
   private static void printUsage() {
-    System.out.println("Usage: weka.core.WekaPackageManager [option]");
+    System.out
+        .println("Usage: weka.core.WekaPackageManager [-offline] [option]");
     System.out
         .println("Options:\n"
             + "\t-list-packages <all | installed | available>\n"
@@ -1741,6 +1832,19 @@ public class WekaPackageManager {
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
         "Logging started");
     try {
+
+      // scan for -offline
+      for (int i = 0; i < args.length; i++) {
+        if (args[i].equals("-offline")) {
+          m_offline = true;
+          String[] temp = new String[args.length - 1];
+          if (i > 0) {
+            System.arraycopy(args, 0, temp, 0, i);
+          }
+          System.arraycopy(args, i + 1, temp, i, args.length - (i + 1));
+          args = temp;
+        }
+      }
 
       establishCacheIfNeeded(System.out);
       checkForNewPackages(System.out);
