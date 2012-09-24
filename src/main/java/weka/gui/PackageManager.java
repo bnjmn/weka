@@ -450,9 +450,9 @@ public class PackageManager extends JPanel {
         m_detailLabel.setText("Cache refresh completed");
       }
 
-      m_installBut.setEnabled(true);
+      m_installBut.setEnabled(true && !WekaPackageManager.m_offline);
       m_unofficialBut.setEnabled(true);
-      m_refreshCacheBut.setEnabled(true);
+      m_refreshCacheBut.setEnabled(true && !WekaPackageManager.m_offline);
       m_installedBut.setEnabled(true);
       m_availableBut.setEnabled(true);
       m_allBut.setEnabled(true);
@@ -786,7 +786,7 @@ public class PackageManager extends JPanel {
       }
 
       m_unofficialBut.setEnabled(true);
-      m_refreshCacheBut.setEnabled(true);
+      m_refreshCacheBut.setEnabled(true && !WekaPackageManager.m_offline);
       m_availableBut.setEnabled(true);
       m_allBut.setEnabled(true);
       m_installedBut.setEnabled(true);
@@ -1288,7 +1288,7 @@ public class PackageManager extends JPanel {
       }
 
       m_unofficialBut.setEnabled(true);
-      m_refreshCacheBut.setEnabled(true);
+      m_refreshCacheBut.setEnabled(true && !WekaPackageManager.m_offline);
       m_availableBut.setEnabled(true);
       m_allBut.setEnabled(true);
       m_installedBut.setEnabled(true);
@@ -1405,6 +1405,16 @@ public class PackageManager extends JPanel {
   }
 
   public PackageManager() {
+
+    if (WekaPackageManager.m_noPackageMetaDataAvailable) {
+      JOptionPane
+          .showMessageDialog(
+              this,
+              "The package manager is unavailable "
+                  + "due to the fact that there is no cached package meta data and we are offline",
+              "Package manager unavailable", JOptionPane.INFORMATION_MESSAGE);
+      return;
+    }
 
     EstablishCache ec = new EstablishCache();
     ec.execute();
@@ -1874,8 +1884,15 @@ public class PackageManager extends JPanel {
     updateTable();
 
     // check for any new packages on the server (if possible)
-    CheckForNewPackages cp = new CheckForNewPackages();
-    cp.execute();
+    if (!WekaPackageManager.m_offline) {
+      System.err.println("Checking for new packages...");
+      CheckForNewPackages cp = new CheckForNewPackages();
+      cp.execute();
+    } else {
+      // disable cache refresh and install buttons
+      m_installBut.setEnabled(false);
+      m_refreshCacheBut.setEnabled(false);
+    }
   }
 
   private void updateInstallUninstallButtonEnablement() {
@@ -1919,7 +1936,7 @@ public class PackageManager extends JPanel {
     }
 
     // now set the button enablement
-    m_installBut.setEnabled(enableInstall);
+    m_installBut.setEnabled(enableInstall && !WekaPackageManager.m_offline);
     m_forceBut.setEnabled(enableInstall);
     m_uninstallBut.setEnabled(enableUninstall);
   }
@@ -2263,22 +2280,29 @@ public class PackageManager extends JPanel {
 
     PackageManager pm = new PackageManager();
 
-    final javax.swing.JFrame jf = new javax.swing.JFrame("Weka Package Manager");
-    jf.getContentPane().setLayout(new BorderLayout());
-    jf.getContentPane().add(pm, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-      @Override
-      public void windowClosing(java.awt.event.WindowEvent e) {
-        jf.dispose();
-        System.exit(0);
+    if (!WekaPackageManager.m_noPackageMetaDataAvailable) {
+      String offline = "";
+      if (WekaPackageManager.m_offline) {
+        offline = " (offline)";
       }
-    });
-    Dimension screenSize = jf.getToolkit().getScreenSize();
-    int width = screenSize.width * 8 / 10;
-    int height = screenSize.height * 8 / 10;
-    jf.setBounds(width / 8, height / 8, width, height);
-    jf.setVisible(true);
-    pm.setInitialSplitPaneDividerLocation();
+      final javax.swing.JFrame jf = new javax.swing.JFrame(
+          "Weka Package Manager" + offline);
+      jf.getContentPane().setLayout(new BorderLayout());
+      jf.getContentPane().add(pm, BorderLayout.CENTER);
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          jf.dispose();
+          System.exit(0);
+        }
+      });
+      Dimension screenSize = jf.getToolkit().getScreenSize();
+      int width = screenSize.width * 8 / 10;
+      int height = screenSize.height * 8 / 10;
+      jf.setBounds(width / 8, height / 8, width, height);
+      jf.setVisible(true);
+      pm.setInitialSplitPaneDividerLocation();
+    }
   }
 
 }
