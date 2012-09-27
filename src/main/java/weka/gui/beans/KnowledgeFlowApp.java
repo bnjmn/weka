@@ -45,6 +45,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -83,6 +84,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -113,6 +115,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
@@ -127,6 +130,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -558,6 +562,125 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     }
   }
 
+  protected class InvisibleNode extends DefaultMutableTreeNode {
+
+    protected boolean m_isVisible;
+
+    public InvisibleNode() {
+      this(null);
+    }
+
+    public InvisibleNode(Object userObject) {
+      this(userObject, true, true);
+    }
+
+    public InvisibleNode(Object userObject, boolean allowsChildren,
+        boolean isVisible) {
+      super(userObject, allowsChildren);
+      this.m_isVisible = isVisible;
+    }
+
+    public TreeNode getChildAt(int index, boolean filterIsActive) {
+      if (!filterIsActive) {
+        return super.getChildAt(index);
+      }
+      if (children == null) {
+        throw new ArrayIndexOutOfBoundsException("node has no children");
+      }
+
+      int realIndex = -1;
+      int visibleIndex = -1;
+      Enumeration e = children.elements();
+      while (e.hasMoreElements()) {
+        InvisibleNode node = (InvisibleNode) e.nextElement();
+        if (node.isVisible()) {
+          visibleIndex++;
+        }
+        realIndex++;
+        if (visibleIndex == index) {
+          return (TreeNode) children.elementAt(realIndex);
+        }
+      }
+
+      throw new ArrayIndexOutOfBoundsException("index unmatched");
+    }
+
+    public int getChildCount(boolean filterIsActive) {
+      if (!filterIsActive) {
+        return super.getChildCount();
+      }
+      if (children == null) {
+        return 0;
+      }
+
+      int count = 0;
+      Enumeration e = children.elements();
+      while (e.hasMoreElements()) {
+        InvisibleNode node = (InvisibleNode) e.nextElement();
+        if (node.isVisible()) {
+          count++;
+        }
+      }
+
+      return count;
+    }
+
+    public void setVisible(boolean visible) {
+      this.m_isVisible = visible;
+    }
+
+    public boolean isVisible() {
+      return m_isVisible;
+    }
+  }
+
+  protected class InvisibleTreeModel extends DefaultTreeModel {
+
+    protected boolean m_filterIsActive;
+
+    public InvisibleTreeModel(TreeNode root) {
+      this(root, false);
+    }
+
+    public InvisibleTreeModel(TreeNode root, boolean asksAllowsChildren) {
+      this(root, false, false);
+    }
+
+    public InvisibleTreeModel(TreeNode root, boolean asksAllowsChildren,
+        boolean filterIsActive) {
+      super(root, asksAllowsChildren);
+      this.m_filterIsActive = filterIsActive;
+    }
+
+    public void activateFilter(boolean newValue) {
+      m_filterIsActive = newValue;
+    }
+
+    public boolean isActivatedFilter() {
+      return m_filterIsActive;
+    }
+
+    @Override
+    public Object getChild(Object parent, int index) {
+      if (m_filterIsActive) {
+        if (parent instanceof InvisibleNode) {
+          return ((InvisibleNode) parent).getChildAt(index, m_filterIsActive);
+        }
+      }
+      return ((TreeNode) parent).getChildAt(index);
+    }
+
+    @Override
+    public int getChildCount(Object parent) {
+      if (m_filterIsActive) {
+        if (parent instanceof InvisibleNode) {
+          return ((InvisibleNode) parent).getChildCount(m_filterIsActive);
+        }
+      }
+      return ((TreeNode) parent).getChildCount();
+    }
+  }
+
   /**
    * Inner class for encapsulating information about a bean that is represented
    * at a leaf in the JTree.
@@ -905,6 +1028,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /** Keeps track of the undo buffers for each tab */
     protected List<Stack<File>> m_undoBufferList = new ArrayList<Stack<File>>();
+
+    protected Map<String, DefaultMutableTreeNode> m_nodeTextIndex = new LinkedHashMap<String, DefaultMutableTreeNode>();
 
     @Override
     public void setActive(boolean active) {
@@ -1880,8 +2005,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         // name for the tool bar
         String tempToolSetName = (String) tempBarSpecs.elementAt(0);
-        DefaultMutableTreeNode subTreeNode = new DefaultMutableTreeNode(
-            tempToolSetName);
+        DefaultMutableTreeNode subTreeNode = new InvisibleNode(tempToolSetName);
         jtreeRoot.add(subTreeNode);
 
         // Used for weka leaf packages
@@ -2003,9 +2127,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                   if (toolTip != null && toolTip.length() > 0) {
                     leafData.setToolTipText(toolTip);
                   }
-                  DefaultMutableTreeNode leafAlgo = new DefaultMutableTreeNode(
-                      leafData);
+                  DefaultMutableTreeNode leafAlgo = new InvisibleNode(leafData);
                   subTreeNode.add(leafAlgo);
+
+                  m_nodeTextIndex
+                      .put(algName.toLowerCase() + " " + toolTip.toLowerCase()
+                          + " ", leafAlgo);
                 }
 
                 hpp.goToParent();
@@ -2020,13 +2147,14 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                  * primaryPackages[kk]));
                  */
 
-                DefaultMutableTreeNode firstLevelOfMainAlgoType = new DefaultMutableTreeNode(
+                DefaultMutableTreeNode firstLevelOfMainAlgoType = new InvisibleNode(
                     primaryPackages[kk]);
                 subTreeNode.add(firstLevelOfMainAlgoType);
 
                 // processPackage(holderPanel, tempBeanCompName, hpp,
                 // firstLevelOfMainAlgoType);
-                processPackage(tempBeanCompName, hpp, firstLevelOfMainAlgoType);
+                processPackage(tempBeanCompName, hpp, firstLevelOfMainAlgoType,
+                    m_nodeTextIndex);
                 // tempToolBar.add(holderPanel);
               }
             }
@@ -2106,9 +2234,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               if (tipText != null) {
                 leafData.setToolTipText(tipText);
               }
-              DefaultMutableTreeNode fixedLeafNode = new DefaultMutableTreeNode(
-                  leafData);
+              DefaultMutableTreeNode fixedLeafNode = new InvisibleNode(leafData);
               subTreeNode.add(fixedLeafNode);
+
+              m_nodeTextIndex.put(tempBeanCompName.toLowerCase() + " "
+                  + (tipText != null ? tipText.toLowerCase() : ""),
+                  fixedLeafNode);
             }
           }
 
@@ -2208,13 +2339,16 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               if (tipText != null) {
                 leafData.setToolTipText(tipText);
               }
-              DefaultMutableTreeNode pluginLeaf = new DefaultMutableTreeNode(
-                  leafData);
+              DefaultMutableTreeNode pluginLeaf = new InvisibleNode(leafData);
+
+              m_nodeTextIndex.put(tempBeanCompName.toLowerCase()
+                  + (tipText != null ? " " + tipText.toLowerCase() : ""),
+                  pluginLeaf);
               if (targetFolder != null) {
                 targetFolder.add(pluginLeaf);
               } else if (category != null) {
                 // make a new category folder
-                DefaultMutableTreeNode newCategoryNode = new DefaultMutableTreeNode(
+                DefaultMutableTreeNode newCategoryNode = new InvisibleNode(
                     category);
                 jtreeRoot.add(newCategoryNode);
                 newCategoryNode.add(pluginLeaf);
@@ -2222,7 +2356,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                 // add to the default "Plugins" folder
                 if (!pluginBeans) {
                   // make the Plugins tree node entry
-                  userSubTree = new DefaultMutableTreeNode("Plugins");
+                  userSubTree = new InvisibleNode("Plugins");
                   jtreeRoot.add(userSubTree);
                   pluginBeans = true;
                 }
@@ -2287,7 +2421,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       // add(m_toolBars, BorderLayout.NORTH);
       add(toolBarPanel, BorderLayout.NORTH);
 
-      DefaultTreeModel model = new DefaultTreeModel(jtreeRoot);
+      InvisibleTreeModel model = new InvisibleTreeModel(jtreeRoot);// new
+                                                                   // DefaultTreeModel(jtreeRoot);
+      model.activateFilter(true);
 
       // subclass JTree so that tool tips can be displayed for leaves (if
       // necessary)
@@ -2399,6 +2535,58 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       treeHolder.setLayout(new BorderLayout());
       treeHolder.setBorder(BorderFactory.createTitledBorder("Design"));
       treeHolder.add(treeView, BorderLayout.CENTER);
+
+      final JTextField searchField = new JTextField();
+      treeHolder.add(searchField, BorderLayout.NORTH);
+      searchField.setToolTipText("Search (clear field to reset)");
+
+      searchField.addKeyListener(new KeyAdapter() {
+        @Override
+        public void keyReleased(KeyEvent e) {
+          String searchTerm = searchField.getText();
+          List<DefaultMutableTreeNode> nonhits = new ArrayList<DefaultMutableTreeNode>();
+          List<DefaultMutableTreeNode> hits = new ArrayList<DefaultMutableTreeNode>();
+          DefaultTreeModel model = (DefaultTreeModel) m_componentTree
+              .getModel();
+          model.reload(); // collapse all nodes first
+
+          for (Map.Entry<String, DefaultMutableTreeNode> entry : m_nodeTextIndex
+              .entrySet()) {
+            if (entry.getValue() instanceof InvisibleNode) {
+              ((InvisibleNode) entry.getValue()).setVisible(true);
+            }
+
+            if (searchTerm != null && searchTerm.length() > 0) {
+              if (entry.getKey().contains(searchTerm.toLowerCase())) {
+                hits.add(entry.getValue());
+              } else {
+                nonhits.add(entry.getValue());
+              }
+            }
+          }
+
+          if (searchTerm == null || searchTerm.length() == 0) {
+            model.reload(); // just reset everything
+          }
+          // if we have some hits then set all the non-hits to invisible
+          if (hits.size() > 0) {
+            for (DefaultMutableTreeNode h : nonhits) {
+              if (h instanceof InvisibleNode) {
+                ((InvisibleNode) h).setVisible(false);
+              }
+            }
+            model.reload(); // collapse all the nodes first
+
+            // expand all the hits
+            for (DefaultMutableTreeNode h : hits) {
+              TreeNode[] path = model.getPathToRoot(h);
+              TreePath tpath = new TreePath(path);
+              tpath = tpath.getParentPath();
+              m_componentTree.expandPath(tpath);
+            }
+          }
+        }
+      });
 
       // m_perspectiveHolder.add(treeHolder, BorderLayout.WEST);
 
@@ -3775,7 +3963,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   }
 
   private void processPackage(String tempBeanCompName,
-      weka.gui.HierarchyPropertyParser hpp, DefaultMutableTreeNode parentNode) {
+      weka.gui.HierarchyPropertyParser hpp, DefaultMutableTreeNode parentNode,
+      Map<String, DefaultMutableTreeNode> nodeTextIndex) {
     if (hpp.isLeafReached()) {
       // instantiate a bean and add it to the holderPanel
       // System.err.println("Would add "+hpp.fullValue());
@@ -3822,13 +4011,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         if (toolTip != null && toolTip.length() > 0) {
           leafData.setToolTipText(toolTip);
         }
-        child = new DefaultMutableTreeNode(leafData);
+        child = new InvisibleNode(leafData);
+        nodeTextIndex.put(algName.toLowerCase() + " "
+            + (toolTip != null ? toolTip.toLowerCase() : ""), child);
       } else {
-        child = new DefaultMutableTreeNode(children[i]);
+        child = new InvisibleNode(children[i]);
       }
       parentNode.add(child);
 
-      processPackage(tempBeanCompName, hpp, child);
+      processPackage(tempBeanCompName, hpp, child, nodeTextIndex);
     }
     hpp.goToParent();
   }
@@ -4679,7 +4870,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
     DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
     if (m_userCompNode == null) {
-      m_userCompNode = new DefaultMutableTreeNode("User");
+      m_userCompNode = new InvisibleNode("User");
       model.insertNodeInto(m_userCompNode, root, 0);
     }
 
@@ -4709,7 +4900,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       JTreeLeafDetails metaLeaf = new JTreeLeafDetails(displayName, copy,
           scaledIcon);
 
-      DefaultMutableTreeNode newUserComp = new DefaultMutableTreeNode(metaLeaf);
+      DefaultMutableTreeNode newUserComp = new InvisibleNode(metaLeaf);
       model.insertNodeInto(newUserComp, m_userCompNode, 0);
 
       // add to the list of user components
@@ -6240,7 +6431,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         DefaultTreeModel model = (DefaultTreeModel) m_componentTree.getModel();
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
         if (m_userCompNode == null) {
-          m_userCompNode = new DefaultMutableTreeNode("User");
+          m_userCompNode = new InvisibleNode("User");
           model.insertNodeInto(m_userCompNode, root, 0);
         }
 
@@ -6252,8 +6443,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           ImageIcon scaledIcon = (ImageIcon) tempB.get(2);
           JTreeLeafDetails treeLeaf = new JTreeLeafDetails(displayName, tempB,
               scaledIcon);
-          DefaultMutableTreeNode newUserComp = new DefaultMutableTreeNode(
-              treeLeaf);
+          DefaultMutableTreeNode newUserComp = new InvisibleNode(treeLeaf);
           model.insertNodeInto(newUserComp, m_userCompNode, 0);
 
           // add to the list of user components
