@@ -9,7 +9,7 @@ PackageName=isolationForest
 Version=1.0.0
 
 #Date
-Date=2012-03-20
+Date=2012-09-27
 
 # Title (required)
 Title=Class for building and using a classifier built on the Isolation Forest anomaly detection algorithm.
