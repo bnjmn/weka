@@ -119,6 +119,12 @@ public class HotSpot
   /** At each level of the tree consider at most this number extensions */
   protected int m_maxBranchingFactor;
 
+  /** The maximum depth of a path in the tree (or length of a rule) */
+  protected int m_maxRuleLength = -1;
+
+  /** Treat zero as missing for nominal attributes (useful for basket data in sparse format) */
+  protected boolean m_treatZeroAsMissing;
+
   /** Number of instances in the full data */
   protected int m_numInstances;
   
@@ -346,7 +352,7 @@ public class HotSpot
     double[] splitVals = new double[m_header.numAttributes()];
     byte[] tests = new byte[m_header.numAttributes()];
 
-    m_head = new HotNode(inst, m_globalTarget, splitVals, tests);
+    m_head = new HotNode(inst, m_globalTarget, splitVals, tests, 0);
     //    m_head = new HotNode(inst, m_globalTarget);
   }
 
@@ -384,6 +390,8 @@ public class HotSpot
                 + Utils.doubleToString((m_support * 100.0), 2) 
                 + "% of total population)");
     buff.append("\nMaximum branching factor: " + m_maxBranchingFactor);
+    buff.append("\nMaximum rule length: " + 
+                (m_maxRuleLength < 0 ? "unbounded" : "" + m_maxRuleLength));
     buff.append("\nMinimum improvement in target: " 
                 + Utils.doubleToString((m_minImprovement * 100.0), 2) + "%");
     
@@ -543,7 +551,12 @@ public class HotSpot
     public HotNode(Instances insts, 
                    double targetValue, 
                    double[] splitVals,
-                   byte[] tests) {
+                   byte[] tests, int depth) {
+
+      if (depth == m_maxRuleLength) {
+        return;
+      }
+
       m_insts = insts;
       m_targetValue = targetValue;
       PriorityQueue<HotTestDetails> splitQueue = new PriorityQueue<HotTestDetails>();
@@ -613,7 +626,7 @@ public class HotSpot
           Instances subset = subset(insts, m_testDetails[i]);
           HotSpotHashKey tempKey = keyList.get(i);
           m_children[i] = new HotNode(subset, m_testDetails[i].m_merit, 
-                                      tempKey.m_splitValues, tempKey.m_testTypes);
+                                      tempKey.m_splitValues, tempKey.m_testTypes, depth + 1);
 
         }
       }
@@ -854,7 +867,8 @@ public class HotSpot
       int[] counts = m_insts.attributeStats(attIndex).nominalCounts;
       boolean ok = false;
       // only consider attribute values that result in subsets that meet/exceed min support
-      for (int i = 0; i < m_insts.attribute(attIndex).numValues(); i++) {
+      int offset = (getTreatZeroAsMissing() ? 1 : 0);
+      for (int i = 0 + offset; i < m_insts.attribute(attIndex).numValues(); i++) {
         if (counts[i] >= m_supportCount) {
           ok = true;
           break;
@@ -866,7 +880,10 @@ public class HotSpot
 
         for (int i = 0; i < m_insts.numInstances(); i++) {
           Instance temp = m_insts.instance(i);
-          if (!temp.isMissing(attIndex) && !temp.isMissing(m_target)) {
+          boolean missingAtt = (temp.isMissing(attIndex) || 
+                                (getTreatZeroAsMissing() ? (int)temp.value(attIndex) == 0 : false));
+          //          if (!temp.isMissing(attIndex) && !temp.isMissing(m_target)) {
+          if (!missingAtt && !temp.isMissing(m_target)) {
             int attVal = (int)temp.value(attIndex);
             if (m_insts.attribute(m_target).isNumeric()) {
               subsetMerit[attVal] += temp.value(m_target);
@@ -1348,6 +1365,65 @@ public class HotSpot
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String maxRuleLengthTipText() {
+    return "Bound the length of a rule/path in the tree. "
+      +"-1 means unbounded";
+  }
+
+  /**
+   * Set the maximum rule length
+   *
+   * @param l the maximum rule length
+   */
+  public void setMaxRuleLength(int l) {
+    m_maxRuleLength = l;
+  }
+
+  /**
+   * Get the maximum rule length
+   *
+   * @return the maximum rule length
+   */
+  public int getMaxRuleLength() {
+    return m_maxRuleLength;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String treatZeroAsMissingTipText() {
+    return "Treat zero (first value) for nominal attributes "
+      + "the same way as missing value (i.e. ignore). This is useful "
+      + "for market basket data.";
+  }
+
+  /**
+   * Set whether to treat zero as missing.
+   *
+   * @param t true if zero (first value) for nominal
+   * attributes is to be treated like missing value.
+   */
+  public void setTreatZeroAsMissing(boolean t) {
+    m_treatZeroAsMissing = t;
+  }
+
+  /**
+   * Get whether to treat zero as missing.
+   *
+   * @return true if zero (first value) for nominal
+   * attributes is to be treated like missing value.
+   */
+  public boolean getTreatZeroAsMissing() {
+    return m_treatZeroAsMissing;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String minImprovementTipText() {
     return "Minimum improvement in target value in order to "
       + "consider adding a new branch/test";
@@ -1436,19 +1512,24 @@ public class HotSpot
                                     + "\n\tthe total population; values > 1 are "
                                     + "\n\tinterpreted as an absolute number of "
                                     +"\n\tinstances (default = 0.3)",
-                                    "-S", 1,
+                                    "S", 1,
                                     "-S <num>"));
     newVector.addElement(new Option("\tMaximum branching factor (default = 2)",
-                                    "-M", 1,
+                                    "M", 1,
                                     "-M <num>"));
+    newVector.addElement(new Option("\tMaximum rule length (default = -1, i.e. no maximum)",
+                                    "length", 1,
+                                    "-length <num>"));
     newVector.addElement(new Option("\tMinimum improvement in target value in order "
                                     + "\n\tto add a new branch/test (default = 0.01 (1%))",
-                                    "-I", 1,
+                                    "I", 1,
                                     "-I <num>"));
+    newVector.addElement(new Option("\tTreat zero (first value) as missing for nominal attributes",
+        "Z", 0, "-Z"));
     newVector.addElement(new Option("\tOutput a set of rules instead of a tree structure",
-        "-R", 0, "-R"));
+        "R", 0, "-R"));
     newVector.addElement(new Option("\tOutput debugging info (duplicate rule lookup "
-                                    + "\n\thash table stats)", "-D", 0, "-D"));
+                                    + "\n\thash table stats)", "D", 0, "-D"));
     return newVector.elements();
   }
 
@@ -1459,6 +1540,7 @@ public class HotSpot
     m_support = 0.33;
     m_minImprovement = 0.01; // 1%
     m_maxBranchingFactor = 2;
+    m_maxRuleLength = -1;
     m_minimize = false;
     m_debug = false;
     m_outputRules = false;
@@ -1531,6 +1613,11 @@ public class HotSpot
       setMaxBranchingFactor(Integer.parseInt(tempString));
     }
 
+    tempString = Utils.getOption("length", options);
+    if (tempString.length() > 0) {
+      setMaxRuleLength(Integer.parseInt(tempString));
+    }
+
     tempString = Utils.getOption('I', options);
     if (tempString.length() != 0) {
       setMinImprovement(Double.parseDouble(tempString));
@@ -1538,6 +1625,7 @@ public class HotSpot
 
     setDebug(Utils.getFlag('D', options));
     setOutputRules(Utils.getFlag('R', options));
+    setTreatZeroAsMissing(Utils.getFlag('Z', options));
   }
 
   /**
@@ -1546,7 +1634,7 @@ public class HotSpot
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    String[] options = new String[13];
+    String[] options = new String[16];
     int current = 0;
     
     options[current++] = "-c"; options[current++] = getTarget();
@@ -1556,6 +1644,7 @@ public class HotSpot
     }
     options[current++] = "-S"; options[current++] = "" + getSupport();
     options[current++] = "-M"; options[current++] = "" + getMaxBranchingFactor();
+    options[current++] = "-length"; options[current++] = "" + getMaxRuleLength();
     options[current++] = "-I"; options[current++] = "" + getMinImprovement();
     if (getDebug()) {
       options[current++] = "-D";
@@ -1563,6 +1652,10 @@ public class HotSpot
     
     if (getOutputRules()) {
       options[current++] = "-R";
+    }
+
+    if (getTreatZeroAsMissing()) {
+      options[current++] = "-Z";
     }
 
     while (current < options.length) {
