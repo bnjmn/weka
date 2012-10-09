@@ -3803,20 +3803,19 @@ public class GridSearch
   }
 
   /**
-   * Classifies the given instance.
+   * Computes the distribution for a given instance
    *
-   * @param instance 	the test instance
-   * @return 		the classification
-   * @throws Exception 	if classification can't be done successfully
+   * @param instance the instance for which distribution is computed
+   * @return the distribution
+   * @throws Exception if the distribution can't be computed successfully
    */
-  public double classifyInstance(Instance instance) throws Exception {
+  public double[] distributionForInstance(Instance instance) throws Exception {
     // transform instance
     m_Filter.input(instance);
     m_Filter.batchFinished();
     Instance transformed = m_Filter.output();
     
-    // classify instance
-    return m_Classifier.classifyInstance(transformed);
+    return m_Classifier.distributionForInstance(transformed);
   }
 
   /**
