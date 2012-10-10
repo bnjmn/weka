@@ -64,19 +64,19 @@ public class DecisionStump
   static final long serialVersionUID = 1618384535950391L;
   
   /** The attribute used for classification. */
-  private int m_AttIndex;
+  protected int m_AttIndex;
 
   /** The split point (index respectively). */
-  private double m_SplitPoint;
+  protected double m_SplitPoint;
 
   /** The distribution of class values or the means in each subset. */
-  private double[][] m_Distribution;
+  protected double[][] m_Distribution;
 
   /** The instances used for training. */
-  private Instances m_Instances;
+  protected Instances m_Instances;
 
   /** a ZeroR model in case no model can be built from the data */
-  private Classifier m_ZeroR;
+  protected Classifier m_ZeroR;
     
   /**
    * Returns a string describing classifier
@@ -266,7 +266,7 @@ public class DecisionStump
    * @param dist the distribution to extract the value
    * @return the value
    */
-  private String sourceClass(Attribute c, double []dist) {
+  protected String sourceClass(Attribute c, double []dist) {
 
     if (c.isNominal()) {
       return Integer.toString(Utils.maxIndex(dist));
@@ -349,7 +349,7 @@ public class DecisionStump
    * @return the distribution as a string
    * @throws Exception if distribution can't be printed
    */
-  private String printDist(double[] dist) throws Exception {
+  protected String printDist(double[] dist) throws Exception {
 
     StringBuffer text = new StringBuffer();
     
@@ -374,7 +374,7 @@ public class DecisionStump
    * @return the classificationn as a string
    * @throws Exception if the classification can't be printed
    */
-  private String printClass(double[] dist) throws Exception {
+  protected String printClass(double[] dist) throws Exception {
 
     StringBuffer text = new StringBuffer();
     
@@ -394,7 +394,7 @@ public class DecisionStump
    * @return value of criterion for the best split
    * @throws Exception if something goes wrong
    */
-  private double findSplitNominal(int index) throws Exception {
+  protected double findSplitNominal(int index) throws Exception {
 
     if (m_Instances.classAttribute().isNominal()) {
       return findSplitNominalNominal(index);
@@ -411,7 +411,7 @@ public class DecisionStump
    * @return value of criterion for the best split
    * @throws Exception if something goes wrong
    */
-  private double findSplitNominalNominal(int index) throws Exception {
+  protected double findSplitNominalNominal(int index) throws Exception {
 
     double bestVal = Double.MAX_VALUE, currVal;
     double[][] counts = new double[m_Instances.attribute(index).numValues() 
@@ -477,7 +477,7 @@ public class DecisionStump
    * @return value of criterion for the best split
    * @throws Exception if something goes wrong
    */
-  private double findSplitNominalNumeric(int index) throws Exception {
+  protected double findSplitNominalNumeric(int index) throws Exception {
 
     double bestVal = Double.MAX_VALUE, currVal;
     double[] sumsSquaresPerValue = 
@@ -556,7 +556,7 @@ public class DecisionStump
    * @return value of criterion for the best split
    * @throws Exception if something goes wrong
    */
-  private double findSplitNumeric(int index) throws Exception {
+  protected double findSplitNumeric(int index) throws Exception {
 
     if (m_Instances.classAttribute().isNominal()) {
       return findSplitNumericNominal(index);
@@ -573,7 +573,7 @@ public class DecisionStump
    * @return value of criterion for the best split
    * @throws Exception if something goes wrong
    */
-  private double findSplitNumericNominal(int index) throws Exception {
+  protected double findSplitNumericNominal(int index) throws Exception {
 
     double bestVal = Double.MAX_VALUE, currVal, currCutPoint;
     int numMissing = 0;
@@ -638,7 +638,7 @@ public class DecisionStump
    * @return value of criterion for the best split
    * @throws Exception if something goes wrong
    */
-  private double findSplitNumericNumeric(int index) throws Exception {
+  protected double findSplitNumericNumeric(int index) throws Exception {
 
     double bestVal = Double.MAX_VALUE, currVal, currCutPoint;
     int numMissing = 0;
@@ -712,7 +712,7 @@ public class DecisionStump
    * @param sumOfWeights
    * @return the variance
    */
-  private double variance(double[][] s,double[] sS,double[] sumOfWeights) {
+  protected double variance(double[][] s,double[] sS,double[] sumOfWeights) {
 
     double var = 0;
 
@@ -732,7 +732,7 @@ public class DecisionStump
    * @return the subset the instance falls into
    * @throws Exception if something goes wrong
    */
-  private int whichSubset(Instance instance) throws Exception {
+  protected int whichSubset(Instance instance) throws Exception {
 
     if (instance.isMissing(m_AttIndex)) {
       return 2;
