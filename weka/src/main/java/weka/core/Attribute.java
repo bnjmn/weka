@@ -15,7 +15,7 @@
 
 /*
  *    Attribute.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,12 +27,12 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Properties;
 
 /** 
  * Class for handling an attribute. Once an attribute has been created,
@@ -331,6 +331,10 @@ public class Attribute
       m_Hashtable = new Hashtable<Object,Integer>();
       m_Header = null;
       m_Type = STRING;
+
+      // Make sure there is at least one value so that string attribute
+      // values are always represented when output as part of a sparse instance.
+      addStringValue("");
     } else {
       m_Values = new ArrayList<Object>(attributeValues.size());
       m_Hashtable = new Hashtable<Object,Integer>(attributeValues.size());
