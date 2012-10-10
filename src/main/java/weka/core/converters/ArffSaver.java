@@ -42,24 +42,39 @@ import weka.core.Utils;
  * Writes to a destination in arff text format.
  * <p/>
  * 
- * <!-- options-start -->
- * * Valid options are: <p/>
- * * 
- * * <pre> -i &lt;the input file&gt;
- * *  The input file</pre>
- * * 
- * * <pre> -o &lt;the output file&gt;
- * *  The output file</pre>
- * * 
- * * <pre> -compress
+ * <!-- options-start --> * Valid options are:
+ * <p/>
+ * * *
+ * 
+ * <pre>
+ * -i &lt;the input file&gt;
+ * *  The input file
+ * </pre>
+ * 
+ * * *
+ * 
+ * <pre>
+ * -o &lt;the output file&gt;
+ * *  The output file
+ * </pre>
+ * 
+ * * *
+ * 
+ * <pre>
+ * -compress
  * *  Compresses the data (uses '.arff.gz' as extension instead of '.arff')
- * *  (default: off)</pre>
- * * 
- * * <pre> -decimal &lt;num&gt;
+ * *  (default: off)
+ * </pre>
+ * 
+ * * *
+ * 
+ * <pre>
+ * -decimal &lt;num&gt;
  * *  The maximum number of digits to print after the decimal
- * *  place for numeric values (default: 6)</pre>
- * * 
- * <!-- options-end -->
+ * *  place for numeric values (default: 6)
+ * </pre>
+ * 
+ * * <!-- options-end -->
  * 
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
  * @version $Revision$
@@ -141,24 +156,39 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    * Parses the options for this object.
    * <p/>
    * 
-   * <!-- options-start -->
-   * * Valid options are: <p/>
-   * * 
-   * * <pre> -i &lt;the input file&gt;
-   * *  The input file</pre>
-   * * 
-   * * <pre> -o &lt;the output file&gt;
-   * *  The output file</pre>
-   * * 
-   * * <pre> -compress
+   * <!-- options-start --> * Valid options are:
+   * <p/>
+   * * *
+   * 
+   * <pre>
+   * -i &lt;the input file&gt;
+   * *  The input file
+   * </pre>
+   * 
+   * * *
+   * 
+   * <pre>
+   * -o &lt;the output file&gt;
+   * *  The output file
+   * </pre>
+   * 
+   * * *
+   * 
+   * <pre>
+   * -compress
    * *  Compresses the data (uses '.arff.gz' as extension instead of '.arff')
-   * *  (default: off)</pre>
-   * * 
-   * * <pre> -decimal &lt;num&gt;
+   * *  (default: off)
+   * </pre>
+   * 
+   * * *
+   * 
+   * <pre>
+   * -decimal &lt;num&gt;
    * *  The maximum number of digits to print after the decimal
-   * *  place for numeric values (default: 6)</pre>
-   * * 
-   * <!-- options-end -->
+   * *  place for numeric values (default: 6)
+   * </pre>
+   * 
+   * * <!-- options-end -->
    * 
    * @param options the options to use
    * @throws Exception if setting of options fails
@@ -378,6 +408,20 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
       if (structure == null)
         throw new IOException("No instances information available.");
       if (inst != null) {
+        if (inst instanceof weka.core.SparseInstance
+            && inst.dataset().checkForStringAttributes()) {
+          // check for single valued string attributes
+          for (int i = 0; i < inst.numAttributes(); i++) {
+            if (inst.attribute(i).isString()
+                && inst.attribute(i).numValues() == 1) {
+              String theVal = inst.stringValue(i);
+              inst.attribute(i).setStringValue("");
+              inst.attribute(i).addStringValue(theVal);
+              inst.setValue(i, 1);
+            }
+          }
+        }
+
         // write instance
         if (retrieveFile() == null && outW == null)
           System.out.println(inst.toStringMaxDecimalDigits(m_MaxDecimalPlaces));
@@ -471,4 +515,3 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
     runFileSaver(new ArffSaver(), args);
   }
 }
-
