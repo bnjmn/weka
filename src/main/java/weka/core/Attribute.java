@@ -331,6 +331,10 @@ public class Attribute
       m_Hashtable = new Hashtable<Object,Integer>();
       m_Header = null;
       m_Type = STRING;
+
+      // Make sure there is at least one value so that string attribute
+      // values are always represented when output as part of a sparse instance.
+      addStringValue("");
     } else {
       m_Values = new ArrayList<Object>(attributeValues.size());
       m_Hashtable = new Hashtable<Object,Integer>(attributeValues.size());
