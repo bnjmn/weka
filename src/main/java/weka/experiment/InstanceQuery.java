@@ -457,7 +457,10 @@ public class InstanceQuery
           } else {
             Double index = (Double)nominalIndexes[i - 1].get(txt);
             if (index == null) {
-              index = new Double(nominalStrings[i - 1].size());
+
+              // Need to add one because first value in
+              // string attribute is dummy value.
+              index = new Double(nominalStrings[i - 1].size()) + 1;
               nominalIndexes[i - 1].put(txt, index);
               nominalStrings[i - 1].addElement(txt);
             }
