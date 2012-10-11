@@ -116,7 +116,7 @@ public class AdaBoostM1
   implements WeightedInstancesHandler, Sourcable, TechnicalInformationHandler {
 
   /** for serialization */
-  static final long serialVersionUID = -7378107808933117974L;
+  static final long serialVersionUID = -1178107808933117974L;
   
   /** Max num iterations tried to find classifier with non-zero error. */ 
   private static int MAX_NUM_RESAMPLING_ITERATIONS = 10;
