@@ -46,8 +46,8 @@ Search Method:
 Attribute Evaluator (supervised, Class (nominal): 7 Class):
 	Correlation Ranking Filter
 Ranked attributes:
- 0.229  2 Nominal2
- 0.229  1 Nominal1
+ 0.228  2 Nominal2
+ 0.228  1 Nominal1
  0.205  5 Date1
  0.199  3 Numeric1
  0      6 Relational1

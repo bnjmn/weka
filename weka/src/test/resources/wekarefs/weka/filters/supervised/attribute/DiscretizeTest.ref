@@ -28,5 +28,5 @@ horses,b,'\'All\'',over,b,'\'All\'','\'All\''
 and,r,'\'All\'',the,c,'\'All\'','\'All\''
 all,r,'\'All\'',lazy,d,'\'All\'','\'All\''
 the,r,'\'All\'',?,a,'\'All\'','\'All\''
-{0 wall,4 d}
-{1 b,3 lazy}
+{0 wall,3 the,4 d}
+{0 humpty,1 b,3 lazy}
