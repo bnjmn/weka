@@ -119,7 +119,7 @@ public class AttributeSelectedClassifier
              WeightedInstancesHandler {
 
   /** for serialization */
-  static final long serialVersionUID = -5951805453487947577L;
+  static final long serialVersionUID = -1151805453487947577L;
   
   /** The attribute selection object */
   protected AttributeSelection m_AttributeSelection = null;

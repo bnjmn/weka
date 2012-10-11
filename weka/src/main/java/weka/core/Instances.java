@@ -1118,6 +1118,7 @@ public class Instances extends AbstractList<Instance>
    * Creates a new dataset of the same size using random sampling
    * with replacement according to the current instance weights. The
    * weights of the instances in the new dataset are set to one.
+   * See also resampleWithWeights(Random, double[], boolean[]).
    *
    * @param random a random number generator
    * @return the new dataset
@@ -1128,17 +1129,32 @@ public class Instances extends AbstractList<Instance>
     for (int i = 0; i < weights.length; i++) {
       weights[i] = instance(i).weight();
     }
-    return resampleWithWeights(random, weights);
+    return resampleWithWeights(random, weights, null);
   }
-
 
   /**
    * Creates a new dataset of the same size using random sampling
-   * with replacement according to the given weight vector. The
+   * with replacement according to the current instance weights. The
    * weights of the instances in the new dataset are set to one.
-   * The length of the weight vector has to be the same as the
-   * number of instances in the dataset, and all weights have to
-   * be positive.
+   * See also resampleWithWeights(Random, double[], boolean[]).
+   *
+   * @param random a random number generator
+   * @param sampled an array indicating what has been sampled
+   * @return the new dataset
+   */
+  public Instances resampleWithWeights(Random random, boolean[] sampled) {
+
+    double [] weights = new double[numInstances()];
+    for (int i = 0; i < weights.length; i++) {
+      weights[i] = instance(i).weight();
+    }
+    return resampleWithWeights(random, weights, sampled);
+  }
+
+  /**
+   * Creates a new dataset of the same size using random sampling
+   * with replacement according to the given weight vector.
+   * See also resampleWithWeights(Random, double[], boolean[]).
    *
    * @param random a random number generator
    * @param weights the weight vector
@@ -1146,41 +1162,96 @@ public class Instances extends AbstractList<Instance>
    * @throws IllegalArgumentException if the weights array is of the wrong
    * length or contains negative weights.
    */
-  public Instances resampleWithWeights(Random random, 
-					     double[] weights) {
+  public Instances resampleWithWeights(Random random, double[] weights) {
+
+    return resampleWithWeights(random, weights, null);
+  }
+
+  /**
+   * Creates a new dataset of the same size using random sampling
+   * with replacement according to the given weight vector. The
+   * weights of the instances in the new dataset are set to one.
+   * The length of the weight vector has to be the same as the
+   * number of instances in the dataset, and all weights have to
+   * be positive. Uses Walker's method, see 
+   * pp. 232 of "Stochastic Simulation" by B.D. Ripley (1987).
+   *
+   * @param random a random number generator
+   * @param weights the weight vector
+   * @param sampled an array indicating what has been sampled, can be null
+   * @return the new dataset
+   * @throws IllegalArgumentException if the weights array is of the wrong
+   * length or contains negative weights.
+   */
+  public Instances resampleWithWeights(Random random, double[] weights,
+                                       boolean[] sampled) {
 
     if (weights.length != numInstances()) {
       throw new IllegalArgumentException("weights.length != numInstances.");
     }
+
     Instances newData = new Instances(this, numInstances());
     if (numInstances() == 0) {
       return newData;
     }
-    double[] probabilities = new double[numInstances()];
-    double sumProbs = 0, sumOfWeights = Utils.sum(weights);
-    for (int i = 0; i < numInstances(); i++) {
-      sumProbs += random.nextDouble();
-      probabilities[i] = sumProbs;
-    }
-    Utils.normalize(probabilities, sumProbs / sumOfWeights);
 
-    // Make sure that rounding errors don't mess things up
-    probabilities[numInstances() - 1] = sumOfWeights;
-    int k = 0; int l = 0;
-    sumProbs = 0;
-    while ((k < numInstances() && (l < numInstances()))) {
-      if (weights[l] < 0) {
+    // Walker's method, see pp. 232 of "Stochastic Simulation" by B.D. Ripley
+    double[] P = new double[weights.length];
+    System.arraycopy(weights, 0, P, 0, weights.length);
+    Utils.normalize(P);
+    double[] Q = new double[weights.length];
+    int[] A = new int[weights.length];
+    int[] W = new int[weights.length];
+    int M = weights.length;
+    int NN = -1;
+    int NP = M;
+    for (int I = 0; I < M; I++) { 
+      if (P[I] < 0) {
 	throw new IllegalArgumentException("Weights have to be positive.");
       }
-      sumProbs += weights[l];
-      while ((k < numInstances()) &&
-	     (probabilities[k] <= sumProbs)) { 
-	newData.add(instance(l));
-	newData.instance(k).setWeight(1);
-	k++;
+      Q[I] = M * P[I]; 
+      if (Q[I] < 1.0) {
+        W[++NN] = I;
+      } else {
+        W[--NP] = I;
       }
-      l++;
     }
+    if (NN > -1 && NP < M) {
+      for (int S = 0; S < M - 1; S++) {
+        int I = W[S];
+        int J = W[NP];
+        A[I] = J;
+        Q[J] += Q[I] - 1.0;
+        if (Q[J] < 1.0) {
+          NP++;
+        }
+        if (NP >= M) {
+          break;
+        }
+      }
+      //      A[W[M]] = W[M];
+    }
+
+    for (int I = 0; I < M; I++) {
+      Q[I] += I;
+    }
+
+    for (int i = 0; i < numInstances(); i++) {
+      int ALRV;
+      double U = M * random.nextDouble();
+      int I = (int)U;
+      if (U < Q[I]) {
+        ALRV = I;
+      } else {
+        ALRV = A[I];
+      }
+      newData.add(instance(ALRV));
+      if (sampled != null) {
+        sampled[ALRV] = true;
+      }
+      newData.instance(newData.numInstances() - 1).setWeight(1);
+    }
+    
     return newData;
   }
 

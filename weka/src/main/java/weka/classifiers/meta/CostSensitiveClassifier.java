@@ -105,7 +105,7 @@ public class CostSensitiveClassifier
   implements OptionHandler, Drawable {
 
   /** for serialization */
-  static final long serialVersionUID = -720658209263002404L;
+  static final long serialVersionUID = -110658209263002404L;
   
   /** load cost matrix on demand */
   public static final int MATRIX_ON_DEMAND = 1;

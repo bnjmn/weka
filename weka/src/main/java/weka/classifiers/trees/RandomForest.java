@@ -108,7 +108,7 @@ public class RandomForest
              PartitionGenerator {
 
   /** for serialization */
-  static final long serialVersionUID = 4216839470751428698L;
+  static final long serialVersionUID = 1116839470751428698L;
   
   /** Number of trees in forest. */
   protected int m_numTrees = 10;
