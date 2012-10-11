@@ -28,5 +28,5 @@ horses,b,6.5,over,b,-4.3,2001-05-06
 and,merged,7.5,the,c,-3.8,2001-06-06
 all,merged,8.5,lazy,d,-2.3,2001-06-06
 the,merged,9.4,?,a,-1,2001-06-07
-{0 wall,1 merged,2 4.3,4 d}
-{3 lazy,5 3.4}
+{0 wall,1 merged,2 4.3,3 the,4 d}
+{0 humpty,3 lazy,5 3.4}
