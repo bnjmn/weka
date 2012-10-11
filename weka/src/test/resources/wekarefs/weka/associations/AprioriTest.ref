@@ -39,10 +39,11 @@ Generated sets of large itemsets:
 
 Size of set of large itemsets L(1): 4
 
-Size of set of large itemsets L(2): 4
+Size of set of large itemsets L(2): 3
 
 Best rules found:
 
+ 1. Nominal2=att2val2 10 ==> Nominal1=att1val2 9    conf:(0.9)
 
 
 Apriori
