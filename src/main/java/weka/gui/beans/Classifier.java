@@ -383,8 +383,6 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-
-    m_trainingSet = null;
   }
 
   /**
