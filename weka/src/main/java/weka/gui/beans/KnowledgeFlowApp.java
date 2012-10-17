@@ -3512,6 +3512,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       @Override
       public void mousePressed(MouseEvent me) {
+        layout.requestFocusInWindow();
         if (m_toolBarBean == null) {
           if (((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
               && m_mode == NONE) {
@@ -3546,6 +3547,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       @Override
       public void mouseReleased(MouseEvent me) {
+        layout.requestFocusInWindow();
         if (m_editElement != null && m_mode == MOVING) {
           if (m_snapToGridB.isSelected()) {
             int x = snapToGrid(m_editElement.getX());
@@ -3571,6 +3573,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       @Override
       public void mouseClicked(MouseEvent me) {
+        layout.requestFocusInWindow();
         BeanInstance bi = BeanInstance.findInstance(me.getPoint(),
             m_mainKFPerspective.getCurrentTabIndex());
         if (m_mode == ADDING || m_mode == NONE) {
