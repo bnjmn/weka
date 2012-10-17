@@ -740,7 +740,6 @@ public class Evaluation
     String xml = "";
     String[] optionsTmp = null;
     Classifier classifierBackup;
-    Classifier classifierClassifications = null;
     boolean printDistribution = false;
     int actualClassIndex = -1;  // 0-based class index
     String splitPercentageString = "";
@@ -1077,10 +1076,6 @@ public class Evaluation
       trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
     } 
 
-    // backup of fully trained classifier for printing the classifications
-    if (printClassifications)
-      classifierClassifications = Classifier.makeCopy(classifier);
-
     // Save the classifier if an object output file is provided
     if (objectOutputFileName.length() != 0) {
       OutputStream os = new FileOutputStream(objectOutputFileName);
@@ -1155,7 +1150,7 @@ public class Evaluation
         /*      return printClassifications(classifierClassifications, new Instances(template, 0),
                 source, actualClassIndex + 1, attributesToOutput,
                 printDistribution); */
-        printClassifications(classifierClassifications, new Instances(template, 0),
+        printClassifications(classifier, new Instances(template, 0),
                              source, actualClassIndex + 1, attributesToOutput,
                              printDistribution, predsBuff);
         //        return predsText.toString();
