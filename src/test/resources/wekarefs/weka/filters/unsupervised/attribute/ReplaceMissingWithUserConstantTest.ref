@@ -1,4 +1,4 @@
-@relation FilterTest-weka.filters.unsupervised.attribute.ReplaceMissingWithUserConstant-R0-D1969-08-28-Fyyyy-MM-dd
+@relation FilterTest-weka.filters.unsupervised.attribute.ReplaceMissingWithUserConstant-Afirst-last-R0-D1969-08-28-Fyyyy-MM-dd
 
 @attribute StringAtt1 string
 @attribute NominalAtt1 {r,g,b,0}
