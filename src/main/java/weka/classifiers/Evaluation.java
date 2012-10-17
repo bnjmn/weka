@@ -946,7 +946,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     String xml = "";
     String[] optionsTmp = null;
     Classifier classifierBackup;
-    Classifier classifierClassifications = null;
     int actualClassIndex = -1; // 0-based class index
     String splitPercentageString = "";
     double splitPercentage = -1;
@@ -1332,7 +1331,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     // backup of fully trained classifier for printing the classifications
     if (classificationOutput != null) {
-      classifierClassifications = AbstractClassifier.makeCopy(classifier);
       if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
         classificationOutput.setHeader(trainingEvaluation.getHeader());
       }
@@ -1410,7 +1408,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         predsBuff.append("\n=== Predictions on test data ===\n\n");
       }
       if (source != null)
-        classificationOutput.print(classifierClassifications, source);
+        classificationOutput.print(classifier, source);
     }
 
     // Compute error estimate from training data
