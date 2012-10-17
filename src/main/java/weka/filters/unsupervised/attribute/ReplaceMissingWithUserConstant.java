@@ -37,6 +37,7 @@ import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
@@ -60,6 +61,13 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
 
   /** Environment variables */
   protected transient Environment m_env;
+
+  /** Range of columns to consider */
+  protected Range m_selectedRange;
+
+  protected String m_range = "first-last";
+
+  protected String m_resolvedRange = "";
 
   /** Constant for replacing missing values in nominal/string atts with */
   protected String m_nominalStringConstant = "";
@@ -126,6 +134,12 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     Vector<Option> opts = new Vector<Option>();
 
     opts.addElement(new Option(
+        "\tSpecify list of attributes to replace missing values for "
+            + "\n\t(as weka range list of indices or a comma separated list of attribute names).\n"
+            + "\t(default: consider all attributes)", "R", 1,
+        "-A <index1,index2-index4,... | att-name1,att-name2,...>"));
+
+    opts.addElement(new Option(
         "\tSpecify the replacement constant for nominal/string attributes",
         "N", 1, "-N"));
     opts.addElement(new Option(
@@ -151,6 +165,11 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
    * 
    <!-- options-start -->
    * Valid options are: <p/>
+   * 
+   * <pre> -A &lt;index1,index2-index4,... | att-name1,att-name2,...&gt;
+   *  Specify list of attributes to replace missing values for 
+   *  (as weka range list of indices or a comma separated list of attribute names).
+   *  (default: consider all attributes)</pre>
    * 
    * <pre> -N
    *  Specify the replacement constant for nominal/string attributes</pre>
@@ -178,6 +197,11 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
    */
   @Override
   public void setOptions(String[] options) throws Exception {
+    String atts = Utils.getOption('A', options);
+    if (atts.length() > 0) {
+      setAttributes(atts);
+    }
+
     String nomString = Utils.getOption('N', options);
     if (nomString.length() > 0) {
       setNominalStringReplacementValue(nomString);
@@ -200,6 +224,11 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
   public String[] getOptions() {
     ArrayList<String> options = new ArrayList<String>();
 
+    if (getAttributes().length() > 0) {
+      options.add("-A");
+      options.add(getAttributes());
+    }
+
     if (getNominalStringReplacementValue().length() > 0) {
       options.add("-N");
       options.add(getNominalStringReplacementValue());
@@ -221,6 +250,38 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     }
 
     return options.toArray(new String[1]);
+  }
+
+  /**
+   * Tip text for this property suitable for displaying in the GUI.
+   * 
+   * @return the tip text for this property.
+   */
+  public String attributesTipText() {
+    return "Specify range of attributes to act on."
+        + " This is a comma separated list of attribute indices, with"
+        + " \"first\" and \"last\" valid values. Specify an inclusive"
+        + " range with \"-\". E.g: \"first-3,5,6-10,last\". Can alternatively"
+        + " specify a comma separated list of attribute names. Note that "
+        + " you can't mix indices and attribute names in the same list";
+  }
+
+  /**
+   * Set the list of attributes to consider for replacing missing values
+   * 
+   * @param range the list of attributes to consider
+   */
+  public void setAttributes(String range) {
+    m_range = range;
+  }
+
+  /**
+   * Get the list of attributes to consider for replacing missing values
+   * 
+   * @return the list of attributes to consider
+   */
+  public String getAttributes() {
+    return m_range;
   }
 
   /**
@@ -340,6 +401,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     m_resolvedNumericConstant = m_numericConstant;
     m_resolvedDateConstant = m_dateConstant;
     m_resolvedDateFormat = m_defaultDateFormat;
+    m_resolvedRange = m_range;
 
     if (m_env == null) {
       m_env = Environment.getSystemWide();
@@ -364,11 +426,61 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
       if (m_resolvedDateFormat != null && m_resolvedDateFormat.length() > 0) {
         m_resolvedDateFormat = m_env.substitute(m_resolvedDateFormat);
       }
+
+      if (m_resolvedRange != null && m_resolvedRange.length() > 0) {
+        m_resolvedRange = m_env.substitute(m_resolvedRange);
+      }
     } catch (Exception ex) {
     }
 
-    if (instanceInfo.checkForAttributeType(Attribute.NOMINAL)
-        || instanceInfo.checkForAttributeType(Attribute.STRING)) {
+    // try and set up a Range first directly from the supplied string
+    m_selectedRange = new Range(m_resolvedRange);
+    try {
+      m_selectedRange.setUpper(instanceInfo.numAttributes() - 1);
+    } catch (IllegalArgumentException e) {
+      // now try as a list of named attributes
+      String[] parts = m_resolvedRange.split(",");
+      if (parts.length == 0) {
+        throw new Exception(
+            "Must specify which attributes to replace missing values for!");
+      }
+
+      StringBuffer indexList = new StringBuffer();
+      for (String att : parts) {
+        att = att.trim();
+        Attribute a = instanceInfo.attribute(att);
+        if (a == null) {
+          throw new Exception("I can't find the requested attribute '" + att
+              + "' in the incoming instances.");
+        }
+        indexList.append(",").append(a.index() + 1);
+      }
+      String result = indexList.toString();
+      result = result.substring(1, result.length());
+      m_selectedRange = new Range(result);
+      m_selectedRange.setUpper(instanceInfo.numAttributes() - 1);
+    }
+
+    boolean hasNominal = false;
+    boolean hasString = false;
+    boolean hasNumeric = false;
+    boolean hasDate = false;
+
+    for (int i = 0; i < instanceInfo.numAttributes(); i++) {
+      if (m_selectedRange.isInRange(i)) {
+        if (instanceInfo.attribute(i).isNominal()) {
+          hasNominal = true;
+        } else if (instanceInfo.attribute(i).isString()) {
+          hasString = true;
+        } else if (instanceInfo.attribute(i).isNumeric()) {
+          hasNumeric = true;
+        } else if (instanceInfo.attribute(i).isDate()) {
+          hasDate = true;
+        }
+      }
+    }
+
+    if (hasNominal || hasString) {
       if (m_resolvedNominalStringConstant == null
           || m_resolvedNominalStringConstant.length() == 0) {
         if (m_resolvedNumericConstant != null
@@ -382,7 +494,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
       }
     }
 
-    if (instanceInfo.checkForAttributeType(Attribute.NUMERIC)
+    if (hasNumeric
         && (m_numericConstant == null || m_numericConstant.length() == 0)) {
       if (m_resolvedNominalStringConstant != null
           && m_resolvedNominalStringConstant.length() > 0) {
@@ -409,7 +521,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
       }
     }
 
-    if (instanceInfo.checkForAttributeType(Attribute.DATE)) {
+    if (hasDate) {
       if (m_resolvedDateConstant == null
           || m_resolvedDateConstant.length() == 0) {
         throw new Exception(
@@ -428,7 +540,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     // list of legal values (if necessary)
     ArrayList<Attribute> updatedNoms = new ArrayList<Attribute>();
     for (int i = 0; i < instanceInfo.numAttributes(); i++) {
-      if (i != instanceInfo.classIndex()) {
+      if (i != instanceInfo.classIndex() && m_selectedRange.isInRange(i)) {
         Attribute temp = instanceInfo.attribute(i);
         if (temp.isNominal()) {
           if (temp.indexOfValue(m_resolvedNominalStringConstant) < 0) {
@@ -450,7 +562,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
       ArrayList<Attribute> atts = new ArrayList<Attribute>();
 
       for (int i = 0; i < instanceInfo.numAttributes(); i++) {
-        if (i != instanceInfo.classIndex()) {
+        if (i != instanceInfo.classIndex() && m_selectedRange.isInRange(i)) {
           if (instanceInfo.attribute(i).isNominal()) {
             atts.add(updatedNoms.get(nomCount++));
           } else {
@@ -483,7 +595,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     double[] vals = new double[inst.numAttributes()];
 
     for (int i = 0; i < inst.numAttributes(); i++) {
-      if (inst.isMissing(i)) {
+      if (inst.isMissing(i) && m_selectedRange.isInRange(i)) {
         if (i != inst.classIndex()) {
           if (inst.attribute(i).isNumeric()) {
             vals[i] = m_numericConstVal;
