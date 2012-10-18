@@ -768,6 +768,11 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     if (m_noHeaderRow && m_firstRow != null) {
       // add the first row that was read in readHeader() in order
       // to determine how many attributes the data has
+      try {
+        checkStructure(m_firstRow);
+      } catch (Exception ex) {
+        throw new IOException(ex);
+      }
       m_cumulativeInstances.add(m_firstRow);
     }
     ArrayList<Object> current;
