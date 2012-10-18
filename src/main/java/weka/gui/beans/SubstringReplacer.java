@@ -40,13 +40,12 @@ import weka.core.Range;
 import weka.gui.Logger;
 
 /**
- * A bean that can replace substrings in the values of string
- * attributes. Multiple match and replace "rules" can be specified - 
- * these get applied in the order that they are defined. Each 
- * rule can be applied to one or more user-specified input String 
- * attributes. Attributes can be specified using either a range 
- * list (e.g 1,2-10,last) or by a comma separated list of attribute 
- * names (where "/first" and "/last" are special strings indicating 
+ * A bean that can replace substrings in the values of string attributes.
+ * Multiple match and replace "rules" can be specified - these get applied in
+ * the order that they are defined. Each rule can be applied to one or more
+ * user-specified input String attributes. Attributes can be specified using
+ * either a range list (e.g 1,2-10,last) or by a comma separated list of
+ * attribute names (where "/first" and "/last" are special strings indicating
  * the first and last attribute respectively).
  * 
  * Matching can be by string literal or by regular expression.
@@ -56,61 +55,61 @@ import weka.gui.Logger;
  */
 @KFStep(category = "Tools", toolTipText = "Replace substrings in String attributes")
 public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
-    Serializable, InstanceListener, EventConstraints, EnvironmentHandler, DataSource {    
-  
+    Serializable, InstanceListener, EventConstraints, EnvironmentHandler,
+    DataSource {
+
   /** For serialization */
   private static final long serialVersionUID = 5636877747903965818L;
 
   /**
-   * Inner class encapsulating the logic for matching
-   * and replacing.
+   * Inner class encapsulating the logic for matching and replacing.
    * 
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
   protected static class MatchReplace {
-    
+
     /** The substring literal/regex to use for matching */
     protected String m_match = "";
-    
+
     /** The string to replace with */
     protected String m_replace = "";
-    
+
     /** True if a regular expression match is to be used */
     protected boolean m_regex;
-    
+
     /** Precompiled regex */
     protected Pattern m_regexPattern;
-    
+
     /** True if case should be ignored when matching */
     protected boolean m_ignoreCase;
-    
+
     /** The attributes to apply the match-replace rule to */
     protected String m_attsToApplyTo = "";
-        
+
     protected String m_matchS;
     protected String m_replaceS;
-    
+
     protected int[] m_selectedAtts;
-    
+
     protected String m_statusMessagePrefix;
     protected Logger m_logger;
-    
+
     /**
      * Constructor
      */
-    public MatchReplace() {  
+    public MatchReplace() {
     }
-    
+
     /**
      * Constructor
      * 
-     * @param setup an internally encoded representation of
-     * all the match and replace information for this rule
+     * @param setup an internally encoded representation of all the match and
+     *          replace information for this rule
      */
-    public MatchReplace(String setup) {      
-      parseFromInternal(setup);      
+    public MatchReplace(String setup) {
+      parseFromInternal(setup);
     }
-    
+
     /**
      * Constructor
      * 
@@ -128,28 +127,28 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       m_ignoreCase = ignoreCase;
       m_attsToApplyTo = selectedAtts;
     }
-    
+
     protected void parseFromInternal(String setup) {
       String[] parts = setup.split("@@MR@@");
       if (parts.length < 4 || parts.length > 5) {
-        throw new IllegalArgumentException("Malformed match-replace definition: " 
-            + setup);
+        throw new IllegalArgumentException(
+            "Malformed match-replace definition: " + setup);
       }
-      
+
       m_attsToApplyTo = parts[0].trim();
       m_regex = parts[1].trim().toLowerCase().equals("t");
       m_ignoreCase = parts[2].trim().toLowerCase().equals("t");
       m_match = parts[3].trim();
-      
+
       if (m_match == null || m_match.length() == 0) {
         throw new IllegalArgumentException("Must provide something to match!");
       }
-      
+
       if (parts.length == 5) {
         m_replace = parts[4];
       }
     }
-    
+
     /**
      * Set the string/regex to use for matching
      * 
@@ -158,7 +157,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public void setMatch(String match) {
       m_match = match;
     }
-    
+
     /**
      * Get the string/regex to use for matching
      * 
@@ -167,7 +166,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public String getMatch() {
       return m_match;
     }
-    
+
     /**
      * Set the replace string
      * 
@@ -176,7 +175,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public void setReplace(String replace) {
       m_replace = replace;
     }
-    
+
     /**
      * Get the replace string
      * 
@@ -185,7 +184,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public String getReplace() {
       return m_replace;
     }
-    
+
     /**
      * Set whether this is a regular expression match or not
      * 
@@ -194,7 +193,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public void setRegex(boolean regex) {
       m_regex = regex;
     }
-    
+
     /**
      * Get whether this is a regular expression match or not
      * 
@@ -203,7 +202,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public boolean getRegex() {
       return m_regex;
     }
-    
+
     /**
      * Set whether to ignore case when matching
      * 
@@ -212,7 +211,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public void setIgnoreCase(boolean ignore) {
       m_ignoreCase = ignore;
     }
-    
+
     /**
      * Get whether to ignore case when matching
      * 
@@ -221,7 +220,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public boolean getIgnoreCase() {
       return m_ignoreCase;
     }
-    
+
     /**
      * Set the attributes to apply the rule to
      * 
@@ -230,7 +229,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public void setAttsToApplyTo(String a) {
       m_attsToApplyTo = a;
     }
-        
+
     /**
      * Get the attributes to apply the rule to
      * 
@@ -239,13 +238,12 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     public String getAttsToApplyTo() {
       return m_attsToApplyTo;
     }
-    
+
     /**
-     * Initialize this match replace rule by substituting any
-     * environment variables in the attributes, match and replace
-     * strings. Sets up the attribute indices to apply to and
-     * validates that the selected attributes are all String
-     * attributes
+     * Initialize this match replace rule by substituting any environment
+     * variables in the attributes, match and replace strings. Sets up the
+     * attribute indices to apply to and validates that the selected attributes
+     * are all String attributes
      * 
      * @param env the environment variables
      * @param structure the structure of the incoming instances
@@ -254,13 +252,14 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       m_matchS = m_match;
       m_replaceS = m_replace;
       String attsToApplyToS = m_attsToApplyTo;
-      
+
       try {
         m_matchS = env.substitute(m_matchS);
         m_replaceS = env.substitute(m_replace);
         attsToApplyToS = env.substitute(attsToApplyToS);
-      } catch (Exception ex) {}      
-      
+      } catch (Exception ex) {
+      }
+
       if (m_regex) {
         String match = m_matchS;
         if (m_ignoreCase) {
@@ -270,10 +269,11 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
         // precompile regular expression for speed
         m_regexPattern = Pattern.compile(match);
       }
-            
+
       // Try a range first for the attributes
       String tempRangeS = attsToApplyToS;
-      tempRangeS = tempRangeS.replace("/first", "first").replace("/last", "last");
+      tempRangeS = tempRangeS.replace("/first", "first").replace("/last",
+          "last");
       Range tempR = new Range();
       tempR.setRanges(attsToApplyToS);
       try {
@@ -283,7 +283,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
         // probably contains attribute names then
         m_selectedAtts = null;
       }
-      
+
       if (m_selectedAtts == null) {
         // parse the comma separated list of attribute names
         Set<Integer> indexes = new HashSet<Integer>();
@@ -300,21 +300,21 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
               indexes.add(new Integer(structure.attribute(att).index()));
             } else {
               if (m_logger != null) {
-                String msg = m_statusMessagePrefix + "Can't find attribute '" +
-                		att + "in the incoming instances - ignoring";
+                String msg = m_statusMessagePrefix + "Can't find attribute '"
+                    + att + "in the incoming instances - ignoring";
                 m_logger.logMessage(msg);
               }
             }
           }
-        }        
-        
+        }
+
         m_selectedAtts = new int[indexes.size()];
         int c = 0;
         for (Integer i : indexes) {
           m_selectedAtts[c++] = i.intValue();
         }
       }
-      
+
       // validate the types of the selected atts
       Set<Integer> indexes = new HashSet<Integer>();
       for (int i = 0; i < m_selectedAtts.length; i++) {
@@ -322,14 +322,14 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
           indexes.add(m_selectedAtts[i]);
         } else {
           if (m_logger != null) {
-            String msg = m_statusMessagePrefix + "Attribute '" +
-            structure.attribute(m_selectedAtts[i]).name() + "is not a string attribute - " +
-            		"ignoring";
+            String msg = m_statusMessagePrefix + "Attribute '"
+                + structure.attribute(m_selectedAtts[i]).name()
+                + "is not a string attribute - " + "ignoring";
             m_logger.logMessage(msg);
           }
         }
       }
-      
+
       // final array
       m_selectedAtts = new int[indexes.size()];
       int c = 0;
@@ -337,14 +337,14 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
         m_selectedAtts[c++] = i.intValue();
       }
     }
-    
+
     /**
      * Apply this rule to the supplied instance
      * 
      * @param inst the instance to apply to
      */
     public void apply(Instance inst) {
-      
+
       for (int i = 0; i < m_selectedAtts.length; i++) {
         int numStringVals = inst.attribute(m_selectedAtts[i]).numValues();
         if (!inst.isMissing(m_selectedAtts[i])) {
@@ -353,8 +353,10 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
           inst.dataset().attribute(m_selectedAtts[i]).setStringValue(value);
 
           // only set the index to zero if there were more than 1 string values
-          // for this string attribute (meaning that although the data is streaming
-          // in, the user has opted to retain all string values in the header. We
+          // for this string attribute (meaning that although the data is
+          // streaming
+          // in, the user has opted to retain all string values in the header.
+          // We
           // only operate in pure streaming - one string value in memory at any
           // one time - mode).
 
@@ -366,13 +368,12 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
         }
       }
     }
-    
+
     /**
      * Apply this rule to the supplied string
      * 
      * @param source the string to apply to
-     * @return the source string with any matching
-     * substrings replaced.
+     * @return the source string with any matching substrings replaced.
      */
     protected String apply(String source) {
       String result = source;
@@ -383,37 +384,38 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       }
       if (result != null && result.length() > 0) {
         if (m_regex) {
-          //result = result.replaceAll(match, m_replaceS);
+          // result = result.replaceAll(match, m_replaceS);
           result = m_regexPattern.matcher(result).replaceAll(m_replaceS);
         } else {
           result = result.replace(match, m_replaceS);
         }
       }
-      
+
       return result;
-    }        
-    
+    }
+
     /**
      * Return a textual description of this rule
      * 
      * @param a textual description of this rule
      */
+    @Override
     public String toString() {
       // return a nicely formatted string for display
       // that shows all the details
-      
+
       StringBuffer buff = new StringBuffer();
       buff.append((m_regex) ? "Regex: " : "Substring: ");
       buff.append(m_match).append(" --> ").append(m_replace).append("  ");
       buff.append((m_ignoreCase) ? "[ignore case]" : "").append("  ");
       buff.append("[Atts: " + m_attsToApplyTo + "]");
-      
+
       return buff.toString();
     }
-    
+
     protected String toStringInternal() {
-      
-      // return a string in internal format that is 
+
+      // return a string in internal format that is
       // easy to parse all the data out of
       StringBuffer buff = new StringBuffer();
       buff.append(m_attsToApplyTo).append("@@MR@@");
@@ -421,44 +423,42 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       buff.append((m_ignoreCase) ? "t" : "f").append("@@MR@@");
       buff.append(m_match).append("@@MR@@");
       buff.append(m_replace);
-      
+
       return buff.toString();
     }
   }
-  
+
   /** Environment variables */
   protected transient Environment m_env;
-  
+
   /** Internally encoded list of match-replace rules */
   protected String m_matchReplaceDetails = "";
-  
+
   /** Temporary list of match-replace rules */
   protected transient List<MatchReplace> m_mr;
-  
+
   /** Logging */
   protected transient Logger m_log;
-  
+
   /** Busy indicator */
   protected transient boolean m_busy;
-  
+
   /** Component sending us instances */
   protected Object m_listenee;
-  
+
   /** Downstream steps listening to instance events */
-  protected ArrayList<InstanceListener> m_instanceListeners = 
-    new ArrayList<InstanceListener>();
-  
+  protected ArrayList<InstanceListener> m_instanceListeners = new ArrayList<InstanceListener>();
+
   /** Instance event to use */
   protected InstanceEvent m_ie = new InstanceEvent(this);
-  
+
   /**
    * Default visual filters
    */
-  protected BeanVisual m_visual = 
-    new BeanVisual("SubstringReplacer", 
-                   BeanVisual.ICON_PATH+"DefaultFilter.gif",
-                   BeanVisual.ICON_PATH+"DefaultFilter_animated.gif");
-  
+  protected BeanVisual m_visual = new BeanVisual("SubstringReplacer",
+      BeanVisual.ICON_PATH + "DefaultFilter.gif", BeanVisual.ICON_PATH
+          + "DefaultFilter_animated.gif");
+
   /**
    * Constructs a new SubstringReplacer
    */
@@ -466,27 +466,26 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     useDefaultVisual();
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
-    
+
     m_env = Environment.getSystemWide();
   }
-  
+
   /**
    * About information
    * 
    * @return about information
    */
   public String globalInfo() {
-    return "Replaces substrings in String attribute values " +
-    		"using either literal match and replace or " +
-    		"regular expression matching. The attributes" +
-    		"to apply the match and replace rules to " +
-    		"can be selected via a range string (e.g " +
-    		"1-5,6,last) or by a comma separated list " +
-    		"of attribute names (/first and /last can be" +
-    		" used to indicate the first and last attribute " +
-    		"respectively)";
+    return "Replaces substrings in String attribute values "
+        + "using either literal match and replace or "
+        + "regular expression matching. The attributes"
+        + "to apply the match and replace rules to "
+        + "can be selected via a range string (e.g "
+        + "1-5,6,last) or by a comma separated list "
+        + "of attribute names (/first and /last can be"
+        + " used to indicate the first and last attribute " + "respectively)";
   }
-  
+
   /**
    * Set internally encoded list of match-replace rules
    * 
@@ -495,7 +494,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
   public void setMatchReplaceDetails(String details) {
     m_matchReplaceDetails = details;
   }
-  
+
   /**
    * Get the internally encoded list of match-replace rules
    * 
@@ -506,24 +505,24 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
   }
 
   /**
-   * Returns true if, at the current time, the named event could be
-   * generated.
-   *
+   * Returns true if, at the current time, the named event could be generated.
+   * 
    * @param eventName the name of the event in question
    * @return true if the named event could be generated
    */
+  @Override
   public boolean eventGeneratable(String eventName) {
-    
+
     if (m_listenee == null) {
       return false;
     }
-    
+
     if (!eventName.equals("instance")) {
       return false;
     }
-    
+
     if (m_listenee instanceof EventConstraints) {
-      if (!((EventConstraints)m_listenee).eventGeneratable(eventName)) {
+      if (!((EventConstraints) m_listenee).eventGeneratable(eventName)) {
         return false;
       }
     }
@@ -533,25 +532,23 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
 
   /**
    * Accept and process an instance event
-   *
+   * 
    * @param e an <code>InstanceEvent</code> value
    */
+  @Override
   public synchronized void acceptInstance(InstanceEvent e) {
     m_busy = true;
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
       Instances structure = e.getStructure();
-      
-      /*if  (m_matchReplaceDetails == null || m_matchReplaceDetails.length() == 0) {
-        stop();
-        String msg = statusMessagePrefix() + "ERROR No match and replace details have been " +
-                        "specified!";
-        if (m_log != null) {
-          m_log.statusMessage(msg);
-          m_log.logMessage("[SubstringReplacer] " + msg);
-        }
-        m_busy = false;
-        return;
-      } */      
+
+      /*
+       * if (m_matchReplaceDetails == null || m_matchReplaceDetails.length() ==
+       * 0) { stop(); String msg = statusMessagePrefix() +
+       * "ERROR No match and replace details have been " + "specified!"; if
+       * (m_log != null) { m_log.statusMessage(msg);
+       * m_log.logMessage("[SubstringReplacer] " + msg); } m_busy = false;
+       * return; }
+       */
       m_mr = new ArrayList<MatchReplace>();
       if (m_matchReplaceDetails != null && m_matchReplaceDetails.length() > 0) {
 
@@ -562,19 +559,22 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
           mr.m_logger = m_log;
           mr.init(m_env, structure);
           m_mr.add(mr);
-        }      
-      }      
-      
-      if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "Processing stream...");
+        }
       }
-      
+
+      if (!e.m_formatNotificationOnly) {
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix() + "Processing stream...");
+        }
+      }
+
       // pass structure on downstream
       m_ie.setStructure(structure);
+      m_ie.m_formatNotificationOnly = e.m_formatNotificationOnly;
       notifyInstanceListeners(m_ie);
     } else {
       Instance inst = e.getInstance();
-      //System.err.println("got : " + inst.toString());
+      // System.err.println("got : " + inst.toString());
       if (inst != null) {
         for (MatchReplace mr : m_mr) {
           mr.apply(inst);
@@ -593,34 +593,37 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
         }
       }
     }
-    
+
     m_busy = false;
   }
 
   /**
    * Use the default visual representation
    */
+  @Override
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultFilter.gif",
-        BeanVisual.ICON_PATH+"DefaultFilter_animated.gif");
+    m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultFilter.gif",
+        BeanVisual.ICON_PATH + "DefaultFilter_animated.gif");
     m_visual.setText("SubstringReplacer");
 
   }
 
   /**
    * Set a new visual representation
-   *
+   * 
    * @param newVisual a <code>BeanVisual</code> value
    */
+  @Override
   public void setVisual(BeanVisual newVisual) {
     m_visual = newVisual;
   }
 
   /**
    * Get the visual representation
-   *
+   * 
    * @return a <code>BeanVisual</code> value
    */
+  @Override
   public BeanVisual getVisual() {
 
     return m_visual;
@@ -631,6 +634,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
    * 
    * @param name the name to use
    */
+  @Override
   public void setCustomName(String name) {
     m_visual.setText(name);
   }
@@ -640,6 +644,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
    * 
    * @return the custom name (or the default name)
    */
+  @Override
   public String getCustomName() {
     return m_visual.getText();
   }
@@ -647,79 +652,85 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
   /**
    * Stop any processing that the bean might be doing.
    */
+  @Override
   public void stop() {
     if (m_listenee != null) {
       if (m_listenee instanceof BeanCommon) {
-        ((BeanCommon)m_listenee).stop();
+        ((BeanCommon) m_listenee).stop();
       }
     }
-    
+
     if (m_log != null) {
       m_log.statusMessage(statusMessagePrefix() + "Stopped");
     }
-    
+
     m_busy = false;
   }
 
   /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
+   * Returns true if. at this time, the bean is busy with some (i.e. perhaps a
+   * worker thread is performing some calculation).
    * 
    * @return true if the bean is busy.
    */
+  @Override
   public boolean isBusy() {
     return m_busy;
   }
 
   /**
    * Set a logger
-   *
+   * 
    * @param logger a <code>weka.gui.Logger</code> value
    */
+  @Override
   public void setLog(Logger logger) {
     m_log = logger;
   }
 
   /**
-   * Returns true if, at this time, 
-   * the object will accept a connection via the named event
-   *
+   * Returns true if, at this time, the object will accept a connection via the
+   * named event
+   * 
    * @param esd the EventSetDescriptor for the event in question
    * @return true if the object will accept a connection
    */
+  @Override
   public boolean connectionAllowed(EventSetDescriptor esd) {
     return connectionAllowed(esd.getName());
   }
 
   /**
-   * Returns true if, at this time, 
-   * the object will accept a connection via the named event
-   *
+   * Returns true if, at this time, the object will accept a connection via the
+   * named event
+   * 
    * @param eventName the name of the event
    * @return true if the object will accept a connection
    */
+  @Override
   public boolean connectionAllowed(String eventName) {
-    
+
     if (!eventName.equals("instance")) {
       return false;
     }
-    
+
     if (m_listenee != null) {
       return false;
     }
-    
+
     return true;
   }
 
   /**
-   * Notify this object that it has been registered as a listener with
-   * a source for recieving events described by the named event
-   * This object is responsible for recording this fact.
-   *
+   * Notify this object that it has been registered as a listener with a source
+   * for recieving events described by the named event This object is
+   * responsible for recording this fact.
+   * 
    * @param eventName the event
-   * @param source the source with which this object has been registered as
-   * a listener
+   * @param source the source with which this object has been registered as a
+   *          listener
    */
+  @Override
   public void connectionNotification(String eventName, Object source) {
     if (connectionAllowed(eventName)) {
       m_listenee = source;
@@ -727,14 +738,14 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
   }
 
   /**
-   * Notify this object that it has been deregistered as a listener with
-   * a source for named event. This object is responsible
-   * for recording this fact.
-   *
+   * Notify this object that it has been deregistered as a listener with a
+   * source for named event. This object is responsible for recording this fact.
+   * 
    * @param eventName the event
-   * @param source the source with which this object has been registered as
-   * a listener
+   * @param source the source with which this object has been registered as a
+   *          listener
    */
+  @Override
   public void disconnectionNotification(String eventName, Object source) {
     if (source == m_listenee) {
       m_listenee = null;
@@ -744,14 +755,15 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
   /**
    * Set environment variables to use
    */
+  @Override
   public void setEnvironment(Environment env) {
     m_env = env;
   }
-  
+
   protected String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|";
   }
-  
+
   @SuppressWarnings("unchecked")
   private void notifyInstanceListeners(InstanceEvent e) {
     List<InstanceListener> l;
@@ -764,38 +776,42 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       }
     }
   }
-  
+
   /**
    * Add an instance listener
-   *
+   * 
    * @param tsl an <code>InstanceListener</code> value
    */
+  @Override
   public synchronized void addInstanceListener(InstanceListener tsl) {
     m_instanceListeners.add(tsl);
   }
 
   /**
    * Remove an instance listener
-   *
+   * 
    * @param tsl an <code>InstanceListener</code> value
    */
+  @Override
   public synchronized void removeInstanceListener(InstanceListener tsl) {
     m_instanceListeners.remove(tsl);
   }
 
   /**
    * Add a data source listener
-   *
+   * 
    * @param dsl a <code>DataSourceListener</code> value
    */
+  @Override
   public void addDataSourceListener(DataSourceListener dsl) {
   }
 
   /**
    * Remove a data source listener
-   *
+   * 
    * @param dsl a <code>DataSourceListener</code> value
    */
-  public void removeDataSourceListener(DataSourceListener dsl) {    
+  @Override
+  public void removeDataSourceListener(DataSourceListener dsl) {
   }
 }
