@@ -720,9 +720,11 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
         return;
       }
 
-      String msg = statusMessagePrefix() + "Training incrementally...";
-      if (m_log != null) {
-        m_log.statusMessage(msg);
+      if (!m_incrementalEvent.m_formatNotificationOnly) {
+        String msg = statusMessagePrefix() + "Training incrementally...";
+        if (m_log != null) {
+          m_log.statusMessage(msg);
+        }
       }
       // Notify incremental classifier listeners of new batch
       System.err.println("NOTIFYING NEW BATCH");
