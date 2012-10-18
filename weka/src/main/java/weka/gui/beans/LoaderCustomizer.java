@@ -15,20 +15,11 @@
 
 /*
  *    LoaderCustomizer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseLoader;
-import weka.core.converters.FileSourcedConverter;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalityType;
@@ -53,36 +44,44 @@ import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.converters.DatabaseConverter;
+import weka.core.converters.DatabaseLoader;
+import weka.core.converters.FileSourcedConverter;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+
 /**
  * GUI Customizer for the loader bean
- *
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
  * @version $Revision$
  */
-public class LoaderCustomizer
-  extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
+public class LoaderCustomizer extends JPanel implements BeanCustomizer,
+    CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 6990446313118930298L;
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
-  private PropertyChangeSupport m_pcSupport =
-    new PropertyChangeSupport(this);
+  private final PropertyChangeSupport m_pcSupport = new PropertyChangeSupport(
+      this);
 
   private weka.gui.beans.Loader m_dsLoader;
 
-  private PropertySheetPanel m_LoaderEditor =
-    new PropertySheetPanel();
+  private final PropertySheetPanel m_LoaderEditor = new PropertySheetPanel();
 
-  private JFileChooser m_fileChooser
-    = new JFileChooser(new File(System.getProperty("user.dir")));
-  /*  private JDialog m_chooserDialog =
-    new JDialog((JFrame)getTopLevelAncestor(),
-    true); */
+  private final JFileChooser m_fileChooser = new JFileChooser(new File(
+      System.getProperty("user.dir")));
+  /*
+   * private JDialog m_chooserDialog = new
+   * JDialog((JFrame)getTopLevelAncestor(), true);
+   */
 
   private Window m_parentWindow;
   private JDialog m_fileChooserFrame;
@@ -110,61 +109,57 @@ public class LoaderCustomizer
   private weka.core.converters.Loader m_backup = null;
 
   public LoaderCustomizer() {
-    /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
-	public void propertyChange(PropertyChangeEvent e) {
-	  if (m_dsLoader != null) {
-	    m_dsLoader.setDataSetFile((File)m_fileEditor.getValue());
-	  }
-	}
-	}); */
+    /*
+     * m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
+     * public void propertyChange(PropertyChangeEvent e) { if (m_dsLoader !=
+     * null) { m_dsLoader.setDataSetFile((File)m_fileEditor.getValue()); } } });
+     */
 
-    /*try {
-      m_LoaderEditor.addPropertyChangeListener(
-	  new PropertyChangeListener() {
-	      public void propertyChange(PropertyChangeEvent e) {
-		repaint();
-		if (m_dsLoader != null) {
-		  //System.err.println("Property change!!");
-		  m_dsLoader.setLoader(m_dsLoader.getLoader());
-		}
-	      }
-	    });
-      repaint();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }*/
+    /*
+     * try { m_LoaderEditor.addPropertyChangeListener( new
+     * PropertyChangeListener() { public void propertyChange(PropertyChangeEvent
+     * e) { repaint(); if (m_dsLoader != null) {
+     * //System.err.println("Property change!!");
+     * m_dsLoader.setLoader(m_dsLoader.getLoader()); } } }); repaint(); } catch
+     * (Exception ex) { ex.printStackTrace(); }
+     */
 
     setLayout(new BorderLayout());
-    //    add(m_fileEditor.getCustomEditor(), BorderLayout.CENTER);
-    //    add(m_LoaderEditor, BorderLayout.CENTER);
+    // add(m_fileEditor.getCustomEditor(), BorderLayout.CENTER);
+    // add(m_LoaderEditor, BorderLayout.CENTER);
     m_fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
     m_fileChooser.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-	    try {
-              File selectedFile = m_fileChooser.getSelectedFile();
-/*              EnvironmentField ef = m_environmentFields.get(0);
-              ef.setText(selectedFile.toString()); */
-              m_fileText.setText(selectedFile.toString());
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
+          try {
+            File selectedFile = m_fileChooser.getSelectedFile();
+            /*
+             * EnvironmentField ef = m_environmentFields.get(0);
+             * ef.setText(selectedFile.toString());
+             */
+            m_fileText.setText(selectedFile.toString());
 
-/*	      ((FileSourcedConverter)m_dsLoader.getLoader()).
-		setFile(selectedFile);
-	      // tell the loader that a new file has been selected so
-	      // that it can attempt to load the header
-	      //m_dsLoader.setLoader(m_dsLoader.getLoader());
-	      m_dsLoader.newFileSelected(); */
-	    } catch (Exception ex) {
-	      ex.printStackTrace();
-	    }
-	  }
-	  // closing
-	  if (m_fileChooserFrame != null) {
-	    m_fileChooserFrame.dispose();
-	  }
-	}
-      });
+            /*
+             * ((FileSourcedConverter)m_dsLoader.getLoader()).
+             * setFile(selectedFile); // tell the loader that a new file has
+             * been selected so // that it can attempt to load the header
+             * //m_dsLoader.setLoader(m_dsLoader.getLoader());
+             * m_dsLoader.newFileSelected();
+             */
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        }
+        // closing
+        if (m_fileChooserFrame != null) {
+          m_fileChooserFrame.dispose();
+        }
+      }
+    });
   }
 
+  @Override
   public void setParentWindow(Window parent) {
     m_parentWindow = parent;
   }
@@ -175,20 +170,22 @@ public class LoaderCustomizer
 
     JPanel buttonsP = new JPanel();
     buttonsP.setLayout(new FlowLayout());
-    JButton ok,cancel;
+    JButton ok, cancel;
     buttonsP.add(ok = new JButton("OK"));
-    buttonsP.add(cancel=new JButton("Cancel"));
-    ok.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
+    buttonsP.add(cancel = new JButton("Cancel"));
+    ok.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent evt) {
 
         // Tell the editor that we are closing under an OK condition
         // so that it can pass on the message to any customizer that
         // might be in use
         m_LoaderEditor.closingOK();
 
-        // make sure that the beans.Loader passes any changed structure downstream
+        // make sure that the beans.Loader passes any changed structure
+        // downstream
         try {
-          m_dsLoader.newStructure();
+          m_dsLoader.newStructure(true);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -198,8 +195,9 @@ public class LoaderCustomizer
         }
       }
     });
-    cancel.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
+    cancel.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent evt) {
 
         // Tell the editor that we are closing under a CANCEL condition
         // so that it can pass on the message to any customizer that
@@ -218,15 +216,14 @@ public class LoaderCustomizer
     repaint();
   }
 
-
-  /** Sets up a customizer window for a Database Connection*/
+  /** Sets up a customizer window for a Database Connection */
   private void setUpDatabase() {
 
     removeAll();
 
     JPanel db = new JPanel();
     GridBagLayout gbLayout = new GridBagLayout();
-    //db.setLayout(new GridLayout(6, 1));
+    // db.setLayout(new GridLayout(6, 1));
     db.setLayout(gbLayout);
 
     JLabel urlLab = new JLabel("Database URL", SwingConstants.RIGHT);
@@ -234,21 +231,26 @@ public class LoaderCustomizer
     GridBagConstraints gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 0;
+    gbConstraints.gridx = 0;
     gbLayout.setConstraints(urlLab, gbConstraints);
     db.add(urlLab);
 
     m_dbaseURLText = new EnvironmentField();
     m_dbaseURLText.setEnvironment(m_env);
-/*    int width = m_dbaseURLText.getPreferredSize().width;
-    int height = m_dbaseURLText.getPreferredSize().height;
-    m_dbaseURLText.setMinimumSize(new Dimension(width * 2, height));
-    m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_dbaseURLText.setText(((DatabaseConverter)m_dsLoader.getLoader()).getUrl());
+    /*
+     * int width = m_dbaseURLText.getPreferredSize().width; int height =
+     * m_dbaseURLText.getPreferredSize().height;
+     * m_dbaseURLText.setMinimumSize(new Dimension(width * 2, height));
+     * m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height));
+     */
+    m_dbaseURLText.setText(((DatabaseConverter) m_dsLoader.getLoader())
+        .getUrl());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 0;
+    gbConstraints.gridx = 1;
     gbConstraints.weightx = 5;
     gbLayout.setConstraints(m_dbaseURLText, gbConstraints);
     db.add(m_dbaseURLText);
@@ -258,19 +260,24 @@ public class LoaderCustomizer
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 1;
+    gbConstraints.gridx = 0;
     gbLayout.setConstraints(userLab, gbConstraints);
     db.add(userLab);
 
     m_userNameText = new EnvironmentField();
     m_userNameText.setEnvironment(m_env);
-/*    m_userNameText.setMinimumSize(new Dimension(width * 2, height));
-    m_userNameText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_userNameText.setText(((DatabaseConverter)m_dsLoader.getLoader()).getUser());
+    /*
+     * m_userNameText.setMinimumSize(new Dimension(width * 2, height));
+     * m_userNameText.setPreferredSize(new Dimension(width * 2, height));
+     */
+    m_userNameText.setText(((DatabaseConverter) m_dsLoader.getLoader())
+        .getUser());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 1;
+    gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_userNameText, gbConstraints);
     db.add(m_userNameText);
 
@@ -279,23 +286,28 @@ public class LoaderCustomizer
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 2; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 2;
+    gbConstraints.gridx = 0;
     gbLayout.setConstraints(passwordLab, gbConstraints);
     db.add(passwordLab);
 
     m_passwordText = new JPasswordField();
-    m_passwordText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getPassword());
+    m_passwordText.setText(((DatabaseLoader) m_dsLoader.getLoader())
+        .getPassword());
     JPanel passwordHolder = new JPanel();
     passwordHolder.setLayout(new BorderLayout());
     passwordHolder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-//    passwordHolder.add(passwordLab, BorderLayout.WEST);
+    // passwordHolder.add(passwordLab, BorderLayout.WEST);
     passwordHolder.add(m_passwordText, BorderLayout.CENTER);
-/*    passwordHolder.setMinimumSize(new Dimension(width * 2, height));
-    passwordHolder.setPreferredSize(new Dimension(width * 2, height)); */
+    /*
+     * passwordHolder.setMinimumSize(new Dimension(width * 2, height));
+     * passwordHolder.setPreferredSize(new Dimension(width * 2, height));
+     */
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 2; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 2;
+    gbConstraints.gridx = 1;
     gbLayout.setConstraints(passwordHolder, gbConstraints);
     db.add(passwordHolder);
 
@@ -304,19 +316,23 @@ public class LoaderCustomizer
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 3; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 3;
+    gbConstraints.gridx = 0;
     gbLayout.setConstraints(queryLab, gbConstraints);
     db.add(queryLab);
 
     m_queryText = new EnvironmentField();
     m_queryText.setEnvironment(m_env);
-/*    m_queryText.setMinimumSize(new Dimension(width * 2, height));
-    m_queryText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_queryText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getQuery());
+    /*
+     * m_queryText.setMinimumSize(new Dimension(width * 2, height));
+     * m_queryText.setPreferredSize(new Dimension(width * 2, height));
+     */
+    m_queryText.setText(((DatabaseLoader) m_dsLoader.getLoader()).getQuery());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 3; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 3;
+    gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_queryText, gbConstraints);
     db.add(m_queryText);
 
@@ -325,44 +341,51 @@ public class LoaderCustomizer
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 4; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 4;
+    gbConstraints.gridx = 0;
     gbLayout.setConstraints(keyLab, gbConstraints);
     db.add(keyLab);
 
     m_keyText = new EnvironmentField();
     m_keyText.setEnvironment(m_env);
-    /*m_keyText.setMinimumSize(new Dimension(width * 2, height));
-    m_keyText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_keyText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getKeys());
+    /*
+     * m_keyText.setMinimumSize(new Dimension(width * 2, height));
+     * m_keyText.setPreferredSize(new Dimension(width * 2, height));
+     */
+    m_keyText.setText(((DatabaseLoader) m_dsLoader.getLoader()).getKeys());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 4; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 4;
+    gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_keyText, gbConstraints);
     db.add(m_keyText);
 
     JLabel propsLab = new JLabel("DB config props", SwingConstants.RIGHT);
-    propsLab.setToolTipText("The custom properties that the user can use to override the default ones.");
+    propsLab
+        .setToolTipText("The custom properties that the user can use to override the default ones.");
     propsLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 5; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 5;
+    gbConstraints.gridx = 0;
     gbLayout.setConstraints(propsLab, gbConstraints);
     db.add(propsLab);
 
     m_dbProps = new FileEnvironmentField();
     m_dbProps.setEnvironment(m_env);
     m_dbProps.resetFileFilters();
-    m_dbProps.addFileFilter(new ExtensionFileFilter(".props" ,
+    m_dbProps.addFileFilter(new ExtensionFileFilter(".props",
         "DatabaseUtils property file (*.props)"));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 5; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 5;
+    gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_dbProps, gbConstraints);
     db.add(m_dbProps);
-    File toSet = ((DatabaseLoader)m_dsLoader.getLoader()).getCustomPropsFile();
+    File toSet = ((DatabaseLoader) m_dsLoader.getLoader()).getCustomPropsFile();
     if (toSet != null) {
       m_dbProps.setText(toSet.getPath());
     }
@@ -372,22 +395,26 @@ public class LoaderCustomizer
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 5; gbConstraints.gridx = 2;
+    gbConstraints.gridy = 5;
+    gbConstraints.gridx = 2;
     gbLayout.setConstraints(loadPropsBut, gbConstraints);
     db.add(loadPropsBut);
     loadPropsBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
-        if (m_dbProps.getText() != null &&
-            m_dbProps.getText().length() > 0) {
+        if (m_dbProps.getText() != null && m_dbProps.getText().length() > 0) {
           String propsS = m_dbProps.getText();
           try {
             propsS = m_env.substitute(propsS);
-          } catch (Exception ex) { }
+          } catch (Exception ex) {
+          }
           File propsFile = new File(propsS);
           if (propsFile.exists()) {
-            ((DatabaseLoader)m_dsLoader.getLoader()).setCustomPropsFile(propsFile);
-            ((DatabaseLoader)m_dsLoader.getLoader()).resetOptions();
-            m_dbaseURLText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getUrl());
+            ((DatabaseLoader) m_dsLoader.getLoader())
+                .setCustomPropsFile(propsFile);
+            ((DatabaseLoader) m_dsLoader.getLoader()).resetOptions();
+            m_dbaseURLText.setText(((DatabaseLoader) m_dsLoader.getLoader())
+                .getUrl());
           }
         }
       }
@@ -395,24 +422,32 @@ public class LoaderCustomizer
 
     JPanel buttonsP = new JPanel();
     buttonsP.setLayout(new FlowLayout());
-    JButton ok,cancel;
+    JButton ok, cancel;
     buttonsP.add(ok = new JButton("OK"));
-    buttonsP.add(cancel=new JButton("Cancel"));
-    ok.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        /*((DatabaseLoader)m_dsLoader.getLoader()).resetStructure();
-        ((DatabaseConverter)m_dsLoader.getLoader()).setUrl(m_dbaseURLText.getText());
-        ((DatabaseConverter)m_dsLoader.getLoader()).setUser(m_userNameText.getText());
-        ((DatabaseConverter)m_dsLoader.getLoader()).setPassword(new String(m_passwordText.getPassword()));
-        ((DatabaseLoader)m_dsLoader.getLoader()).setQuery(m_queryText.getText());
-        ((DatabaseLoader)m_dsLoader.getLoader()).setKeys(m_keyText.getText()); */
+    buttonsP.add(cancel = new JButton("Cancel"));
+    ok.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent evt) {
+        /*
+         * ((DatabaseLoader)m_dsLoader.getLoader()).resetStructure();
+         * ((DatabaseConverter
+         * )m_dsLoader.getLoader()).setUrl(m_dbaseURLText.getText());
+         * ((DatabaseConverter
+         * )m_dsLoader.getLoader()).setUser(m_userNameText.getText());
+         * ((DatabaseConverter)m_dsLoader.getLoader()).setPassword(new
+         * String(m_passwordText.getPassword()));
+         * ((DatabaseLoader)m_dsLoader.getLoader
+         * ()).setQuery(m_queryText.getText());
+         * ((DatabaseLoader)m_dsLoader.getLoader
+         * ()).setKeys(m_keyText.getText());
+         */
 
         if (resetAndUpdateDatabaseLoaderIfChanged()) {
-          try{
-            //m_dsLoader.notifyStructureAvailable(((DatabaseLoader)m_dsLoader.getLoader()).getStructure());
-            //database connection has been configured
+          try {
+            // m_dsLoader.notifyStructureAvailable(((DatabaseLoader)m_dsLoader.getLoader()).getStructure());
+            // database connection has been configured
             m_dsLoader.setDB(true);
-          }catch (Exception ex){
+          } catch (Exception ex) {
           }
         }
         if (m_parentWindow != null) {
@@ -420,8 +455,9 @@ public class LoaderCustomizer
         }
       }
     });
-    cancel.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
+    cancel.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent evt) {
         if (m_backup != null) {
           m_dsLoader.setLoader(m_backup);
         }
@@ -437,7 +473,7 @@ public class LoaderCustomizer
     holderP.add(db, BorderLayout.NORTH);
     holderP.add(buttonsP, BorderLayout.SOUTH);
 
-    //db.add(buttonsP);
+    // db.add(buttonsP);
     JPanel about = m_LoaderEditor.getAboutPanel();
     if (about != null) {
       add(about, BorderLayout.NORTH);
@@ -446,7 +482,7 @@ public class LoaderCustomizer
   }
 
   private boolean resetAndUpdateDatabaseLoaderIfChanged() {
-    DatabaseLoader dbl = (DatabaseLoader)m_dsLoader.getLoader();
+    DatabaseLoader dbl = (DatabaseLoader) m_dsLoader.getLoader();
     String url = dbl.getUrl();
     String user = dbl.getUser();
     String password = dbl.getPassword();
@@ -454,14 +490,14 @@ public class LoaderCustomizer
     String keys = dbl.getKeys();
     File propsFile = dbl.getCustomPropsFile();
 
-    boolean update = (!url.equals(m_dbaseURLText.getText()) ||
-        !user.equals(m_userNameText.getText()) ||
-        !password.equals(m_passwordText.getText()) ||
-        !query.equalsIgnoreCase(m_queryText.getText())||
-        !keys.equals(m_keyText.getText()));
+    boolean update = (!url.equals(m_dbaseURLText.getText())
+        || !user.equals(m_userNameText.getText())
+        || !password.equals(m_passwordText.getText())
+        || !query.equalsIgnoreCase(m_queryText.getText()) || !keys
+        .equals(m_keyText.getText()));
 
     if (propsFile != null && m_dbProps.getText().length() > 0) {
-       update = (update || !propsFile.toString().equals(m_dbProps.getText()));
+      update = (update || !propsFile.toString().equals(m_dbProps.getText()));
     } else {
       update = (update || m_dbProps.getText().length() > 0);
     }
@@ -485,7 +521,7 @@ public class LoaderCustomizer
     removeAll();
 
     boolean currentFileIsDir = false;
-    File tmp = ((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile();
+    File tmp = ((FileSourcedConverter) m_dsLoader.getLoader()).retrieveFile();
     String tmpString = tmp.toString();
     if (Environment.containsEnvVariables(tmpString)) {
       try {
@@ -507,11 +543,10 @@ public class LoaderCustomizer
     String[] ext = loader.getFileExtensions();
     ExtensionFileFilter firstFilter = null;
     for (int i = 0; i < ext.length; i++) {
-      ExtensionFileFilter ff =
-	new ExtensionFileFilter(
-	    ext[i], loader.getFileDescription() + " (*" + ext[i] + ")");
+      ExtensionFileFilter ff = new ExtensionFileFilter(ext[i],
+          loader.getFileDescription() + " (*" + ext[i] + ")");
       if (i == 0)
-	firstFilter = ff;
+        firstFilter = ff;
       m_fileChooser.addChoosableFileFilter(ff);
     }
     if (firstFilter != null)
@@ -529,13 +564,15 @@ public class LoaderCustomizer
     efHolder.setLayout(new BorderLayout());
 
     ef.setEnvironment(m_env);
-    /*int width = ef.getPreferredSize().width;
-    int height = ef.getPreferredSize().height;
-//    ef.setMinimumSize(new Dimension(width * 2, height));
-    ef.setPreferredSize(new Dimension(width * 2, height)); */
+    /*
+     * int width = ef.getPreferredSize().width; int height =
+     * ef.getPreferredSize().height; // ef.setMinimumSize(new Dimension(width *
+     * 2, height)); ef.setPreferredSize(new Dimension(width * 2, height));
+     */
     m_fileText = ef;
 
-    // only set the text on the EnvironmentField if the current file is not a directory
+    // only set the text on the EnvironmentField if the current file is not a
+    // directory
     if (!currentFileIsDir) {
       ef.setText(tmp.toString());
     }
@@ -543,13 +580,15 @@ public class LoaderCustomizer
     efHolder.add(ef, BorderLayout.CENTER);
     JButton browseBut = new JButton("Browse...");
     browseBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         try {
-          //final JFrame jf = new JFrame("Choose file");
-          final JDialog jf = new JDialog((JDialog)LoaderCustomizer.this.getTopLevelAncestor(),
-              "Choose file", ModalityType.DOCUMENT_MODAL);
+          // final JFrame jf = new JFrame("Choose file");
+          final JDialog jf = new JDialog((JDialog) LoaderCustomizer.this
+              .getTopLevelAncestor(), "Choose file",
+              ModalityType.DOCUMENT_MODAL);
           jf.setLayout(new BorderLayout());
-          //jf.getContentPane().setLayout(new BorderLayout());
+          // jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
           m_fileChooserFrame = jf;
           jf.pack();
@@ -560,8 +599,9 @@ public class LoaderCustomizer
       }
     });
 
-    JPanel bP = new JPanel(); bP.setLayout(new BorderLayout());
-    bP.setBorder(BorderFactory.createEmptyBorder(5,0,5,5));
+    JPanel bP = new JPanel();
+    bP.setLayout(new BorderLayout());
+    bP.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 5));
     bP.add(browseBut, BorderLayout.CENTER);
     efHolder.add(bP, BorderLayout.EAST);
     JPanel alignedP = new JPanel();
@@ -575,17 +615,18 @@ public class LoaderCustomizer
     northPanel.add(alignedP, BorderLayout.SOUTH);
 
     JPanel butHolder = new JPanel();
-    //butHolder.setLayout(new GridLayout(1,2));
+    // butHolder.setLayout(new GridLayout(1,2));
     butHolder.setLayout(new FlowLayout());
     JButton OKBut = new JButton("OK");
     OKBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         try {
-          ((FileSourcedConverter)m_dsLoader.getLoader()).
-          setFile(new File(ef.getText()));
+          ((FileSourcedConverter) m_dsLoader.getLoader()).setFile(new File(ef
+              .getText()));
           // tell the loader that a new file has been selected so
           // that it can attempt to load the header
-          //m_dsLoader.setLoader(m_dsLoader.getLoader());
+          // m_dsLoader.setLoader(m_dsLoader.getLoader());
           m_dsLoader.newFileSelected();
         } catch (Exception ex) {
           ex.printStackTrace();
@@ -599,6 +640,7 @@ public class LoaderCustomizer
 
     JButton CancelBut = new JButton("Cancel");
     CancelBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(LoaderCustomizer.this, false);
@@ -629,51 +671,54 @@ public class LoaderCustomizer
 
   /**
    * Set the loader to be customized
-   *
+   * 
    * @param object a weka.gui.beans.Loader
    */
+  @Override
   public void setObject(Object object) {
-    m_dsLoader = (weka.gui.beans.Loader)object;
+    m_dsLoader = (weka.gui.beans.Loader) object;
 
     try {
-      m_backup =
-        (weka.core.converters.Loader)GenericObjectEditor.makeCopy(m_dsLoader.getLoader());
+      m_backup = (weka.core.converters.Loader) GenericObjectEditor
+          .makeCopy(m_dsLoader.getLoader());
     } catch (Exception ex) {
       // ignore
     }
 
     m_LoaderEditor.setTarget(m_dsLoader.getLoader());
-    //    m_fileEditor.setValue(m_dsLoader.getDataSetFile());
+    // m_fileEditor.setValue(m_dsLoader.getDataSetFile());
     m_LoaderEditor.setEnvironment(m_env);
     if (m_dsLoader.getLoader() instanceof FileSourcedConverter) {
       setUpFile();
-    } else{
-        if(m_dsLoader.getLoader() instanceof DatabaseConverter) {
-            setUpDatabase();
-        }
-        else
-      setUpOther();
+    } else {
+      if (m_dsLoader.getLoader() instanceof DatabaseConverter) {
+        setUpDatabase();
+      } else
+        setUpOther();
     }
   }
 
+  @Override
   public void setEnvironment(Environment env) {
     m_env = env;
   }
 
   /**
    * Add a property change listener
-   *
+   * 
    * @param pcl a <code>PropertyChangeListener</code> value
    */
+  @Override
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.addPropertyChangeListener(pcl);
   }
 
   /**
    * Remove a property change listener
-   *
+   * 
    * @param pcl a <code>PropertyChangeListener</code> value
    */
+  @Override
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
   }
