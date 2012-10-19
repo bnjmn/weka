@@ -59,7 +59,7 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
   private double m_max = Double.MIN_VALUE;
 
   // how often to report # instances processed to the log
-  private int m_statusFrequency = 100;
+  private int m_statusFrequency = 10000;
   private int m_instanceCount = 0;
 
   // output info retrieval and auc stats for each class (if class is nominal)
@@ -108,6 +108,10 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
     return "Evaluate the performance of incrementally trained classifiers.";
   }
 
+  protected transient int m_instsPerSec = 0;
+  protected transient double m_startTime;
+  protected transient double m_testTime;
+
   /**
    * Accepts and processes a classifier encapsulated in an incremental
    * classifier event
@@ -118,6 +122,8 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
   public void acceptClassifier(final IncrementalClassifierEvent ce) {
     try {
       if (ce.getStatus() == IncrementalClassifierEvent.NEW_BATCH) {
+        m_instsPerSec = 0;
+        m_startTime = System.currentTimeMillis();
         // m_eval = new Evaluation(ce.getCurrentInstance().dataset());
         m_eval = new Evaluation(ce.getStructure());
         m_eval.useNoPriors();
@@ -153,8 +159,11 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
       } else {
         if (m_instanceCount > 0 && m_instanceCount % m_statusFrequency == 0) {
           if (m_logger != null) {
+            m_testTime = (System.currentTimeMillis() - m_startTime) / 1000.0;
+            m_instsPerSec = (int) (m_instanceCount / m_testTime);
             m_logger.statusMessage(statusMessagePrefix() + "Processed "
-                + m_instanceCount + " instances.");
+                + m_instanceCount + " instances (" + m_instsPerSec
+                + " insts/sec)");
           }
         }
         m_instanceCount++;
@@ -295,7 +304,9 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
             if (m_logger != null) {
               m_logger.logMessage("[IncrementalClassifierEvaluator]"
                   + statusMessagePrefix() + " Finished processing.");
-              m_logger.statusMessage(statusMessagePrefix() + "Finished.");
+              m_logger.statusMessage(statusMessagePrefix() + "Finished ("
+                  + m_instanceCount + " insts @ " + m_instsPerSec
+                  + " insts/sec)");
             }
 
             // save memory if using windowed evaluation for charting
