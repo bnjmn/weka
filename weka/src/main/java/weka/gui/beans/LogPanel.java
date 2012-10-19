@@ -15,7 +15,7 @@
 
 /*
  *    LogPanel
- *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,7 +24,6 @@ package weka.gui.beans;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -293,10 +292,10 @@ public class LogPanel extends JPanel implements Logger {
         }
         if (stepStatus.startsWith("ERROR") ||
             stepStatus.startsWith("INTERRUPTED") ||
-            stepStatus.equalsIgnoreCase("finished") ||
-            stepStatus.equalsIgnoreCase("finished.") ||
-            stepStatus.equalsIgnoreCase("done") ||
-            stepStatus.equalsIgnoreCase("done.") ||
+            stepStatus.toLowerCase().startsWith("finished") ||
+  //          stepStatus.toLowerCase().startsWith("finished.") ||
+            stepStatus.toLowerCase().startsWith("done") ||
+//            stepStatus.toLowerCase().startsWith("done.") ||
             stepStatus.equalsIgnoreCase("stopped") ||
             stepStatus.equalsIgnoreCase("stopped.")) {
           // stop the timer.

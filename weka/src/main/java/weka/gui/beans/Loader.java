@@ -130,6 +130,8 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
 
     @Override
     public void run() {
+      int instsPerSec = 10000;
+      int z = 0;
       try {
         m_visual.setAnimated();
         // m_visual.setText("Loading...");
@@ -204,7 +206,9 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
             }
             e.printStackTrace();
           }
-          int z = 0;
+          z = 0;
+          double startTime = System.currentTimeMillis();
+          double testTime = startTime;
           while (nextInstance != null) {
             if (m_stopped) {
               break;
@@ -250,8 +254,10 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
             if (z % 10000 == 0) {
               // m_visual.setText("" + z + " instances...");
               if (m_log != null) {
+                testTime = (System.currentTimeMillis() - startTime) / 1000.0;
+                instsPerSec = (int) (z / testTime);
                 m_log.statusMessage(statusMessagePrefix() + "Loaded " + z
-                    + " instances");
+                    + " instances (" + instsPerSec + " insts/sec)");
               }
             }
           }
@@ -291,7 +297,8 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
         m_state = IDLE;
         m_stopped = false;
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          m_log.statusMessage(statusMessagePrefix() + "Finished. (" + z
+              + " insts @ " + instsPerSec + " insts/sec)");
         }
         block(false);
       }
