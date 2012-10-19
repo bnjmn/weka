@@ -566,6 +566,11 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     handleIncrementalEvent();
   }
 
+  protected transient int m_instsPerSec = 0;
+  protected transient double m_startTime;
+  protected transient double m_testTime;
+  protected transient int m_instanceCount;
+
   /**
    * Handles initializing and updating an incremental classifier
    */
@@ -587,6 +592,10 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     }
 
     if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+      m_instsPerSec = 0;
+      m_instanceCount = 0;
+      m_startTime = System.currentTimeMillis();
+
       // clear any warnings/errors from the log
       if (m_log != null) {
         m_log.statusMessage(statusMessagePrefix() + "remove");
@@ -757,11 +766,23 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       }
 
       int status = IncrementalClassifierEvent.WITHIN_BATCH;
+
+      if (m_instanceCount > 0 && m_instanceCount % 10000 == 0) {
+        if (m_log != null) {
+          m_testTime = (System.currentTimeMillis() - m_startTime) / 1000.0;
+          m_instsPerSec = (int) (m_instanceCount / m_testTime);
+          m_log.statusMessage(statusMessagePrefix() + "Processed "
+              + m_instanceCount + " instances (" + m_instsPerSec
+              + " insts/sec)");
+        }
+      }
+      m_instanceCount++;
       /*
        * if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
        * status = IncrementalClassifierEvent.NEW_BATCH;
        */
-      /* } else */if (m_incrementalEvent.getStatus() == InstanceEvent.BATCH_FINISHED
+      /* } else */
+      if (m_incrementalEvent.getStatus() == InstanceEvent.BATCH_FINISHED
           || m_incrementalEvent.getInstance() == null) {
         status = IncrementalClassifierEvent.BATCH_FINISHED;
       }
@@ -798,7 +819,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
           TextEvent nt = new TextEvent(this, modelString, titleString);
           notifyTextListeners(nt);
         }
-        String msg = statusMessagePrefix() + "Finished.";
+        String msg = statusMessagePrefix() + "Finished (" + m_instanceCount
+            + " insts @ " + m_instsPerSec + " insts/sec)";
         if (m_log != null) {
           m_log.statusMessage(msg);
         }
