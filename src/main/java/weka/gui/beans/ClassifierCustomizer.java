@@ -198,6 +198,8 @@ public class ClassifierCustomizer extends JPanel implements BeanCustomizer,
           String loadFName = m_loadModelField.getText();
           if (loadFName != null && loadFName.length() > 0) {
             m_dsClassifier.setLoadClassifierFileName(m_loadModelField.getText());
+          } else {
+            m_dsClassifier.setLoadClassifierFileName("");
           }
         }
 
