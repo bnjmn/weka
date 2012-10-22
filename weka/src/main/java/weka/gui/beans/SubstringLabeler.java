@@ -927,6 +927,8 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
     m_outputStructure = new Instances(inputStructure);
   }
 
+  protected transient StreamThroughput m_throughput;
+
   /**
    * Accept and process an instance event
    * 
@@ -937,6 +939,8 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
     m_busy = true;
 
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+      m_throughput = new StreamThroughput(statusMessagePrefix());
+
       Instances structure = e.getStructure();
 
       try {
@@ -968,7 +972,9 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       Instance inst = e.getInstance();
       Instance out = null;
       if (inst != null) {
+        m_throughput.updateStart();
         out = makeOutputInstance(inst, false);
+        m_throughput.updateEnd(m_log);
       }
 
       if (inst == null || out != null
@@ -981,9 +987,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
 
       if (e.getStatus() == InstanceEvent.BATCH_FINISHED || inst == null) {
         // we're done
-        if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished");
-        }
+        m_throughput.finished(m_log);
       }
     }
 

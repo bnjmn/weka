@@ -123,6 +123,8 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
 
   private class LoadThread extends Thread {
     private final DataSource m_DP;
+    private StreamThroughput m_throughput;
+    private StreamThroughput m_flowThroughput;
 
     public LoadThread(DataSource dp) {
       m_DP = dp;
@@ -130,8 +132,8 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
 
     @Override
     public void run() {
-      int instsPerSec = 10000;
-      int z = 0;
+      String stm = getCustomName() + "$" + hashCode() + 99
+          + "| - overall flow throughput -|";
       try {
         m_visual.setAnimated();
         // m_visual.setText("Loading...");
@@ -165,6 +167,11 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
         }
 
         if (instanceGeneration) {
+          m_throughput = new StreamThroughput(statusMessagePrefix());
+
+          m_flowThroughput = new StreamThroughput(stm, "Starting flow...",
+              m_log);
+
           m_state = INCREMENTAL_LOADING;
           // boolean start = true;
           Instance nextInstance = null;
@@ -206,13 +213,13 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
             }
             e.printStackTrace();
           }
-          z = 0;
-          double startTime = System.currentTimeMillis();
-          double testTime = startTime;
+
           while (nextInstance != null) {
             if (m_stopped) {
               break;
             }
+            m_throughput.updateStart();
+            m_flowThroughput.updateStart();
             // nextInstance.setDataset(structure);
             // format.add(nextInstance);
             /*
@@ -249,17 +256,9 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
             if (nextInstance == null) {
               m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
             }
+            m_throughput.updateEnd(m_log);
             notifyInstanceLoaded(m_ie);
-            z++;
-            if (z % 10000 == 0) {
-              // m_visual.setText("" + z + " instances...");
-              if (m_log != null) {
-                testTime = (System.currentTimeMillis() - startTime) / 1000.0;
-                instsPerSec = (int) (z / testTime);
-                m_log.statusMessage(statusMessagePrefix() + "Loaded " + z
-                    + " instances (" + instsPerSec + " insts/sec)");
-              }
-            }
+            m_flowThroughput.updateEnd(m_log);
           }
           m_visual.setStatic();
           // m_visual.setText(structure.relationName());
@@ -297,8 +296,16 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
         m_state = IDLE;
         m_stopped = false;
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished. (" + z
-              + " insts @ " + instsPerSec + " insts/sec)");
+          if (m_throughput != null) {
+            String finalMessage = m_throughput.finished() + " (read speed); ";
+            m_flowThroughput.finished(m_log);
+            m_log.statusMessage(stm + "remove");
+            int flowSpeed = m_flowThroughput.getAverageInstancesPerSecond();
+            finalMessage += ("" + flowSpeed + " insts/sec (flow throughput)");
+            m_log.statusMessage(statusMessagePrefix() + finalMessage);
+          } else {
+            m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          }
         }
         block(false);
       }
@@ -573,6 +580,7 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
     if (m_ioThread == null) {
       // m_visual.setText(m_dataSetFile.getName());
       m_state = BATCH_LOADING;
+      m_stopped = false;
       m_ioThread = new LoadThread(Loader.this);
       m_ioThread.setPriority(Thread.MIN_PRIORITY);
       m_ioThread.start();

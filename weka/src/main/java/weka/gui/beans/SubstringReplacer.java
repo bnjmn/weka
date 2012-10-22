@@ -530,6 +530,8 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
     return true;
   }
 
+  protected transient StreamThroughput m_throughput;
+
   /**
    * Accept and process an instance event
    * 
@@ -539,6 +541,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
   public synchronized void acceptInstance(InstanceEvent e) {
     m_busy = true;
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+      m_throughput = new StreamThroughput(statusMessagePrefix());
       Instances structure = e.getStructure();
 
       /*
@@ -576,9 +579,11 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       Instance inst = e.getInstance();
       // System.err.println("got : " + inst.toString());
       if (inst != null) {
+        m_throughput.updateStart();
         for (MatchReplace mr : m_mr) {
           mr.apply(inst);
         }
+        m_throughput.updateEnd(m_log);
       }
 
       // notify listeners
@@ -588,9 +593,7 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
 
       if (e.getStatus() == InstanceEvent.BATCH_FINISHED || inst == null) {
         // we're done
-        if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished");
-        }
+        m_throughput.finished(m_log);
       }
     }
 
