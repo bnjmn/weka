@@ -566,10 +566,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     handleIncrementalEvent();
   }
 
-  protected transient int m_instsPerSec = 0;
-  protected transient double m_startTime;
-  protected transient double m_testTime;
-  protected transient int m_instanceCount;
+  protected transient StreamThroughput m_throughput;
 
   /**
    * Handles initializing and updating an incremental classifier
@@ -592,9 +589,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     }
 
     if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
-      m_instsPerSec = 0;
-      m_instanceCount = 0;
-      m_startTime = System.currentTimeMillis();
+      m_throughput = new StreamThroughput(statusMessagePrefix());
 
       // clear any warnings/errors from the log
       if (m_log != null) {
@@ -767,16 +762,6 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
 
       int status = IncrementalClassifierEvent.WITHIN_BATCH;
 
-      if (m_instanceCount > 0 && m_instanceCount % 10000 == 0) {
-        if (m_log != null) {
-          m_testTime = (System.currentTimeMillis() - m_startTime) / 1000.0;
-          m_instsPerSec = (int) (m_instanceCount / m_testTime);
-          m_log.statusMessage(statusMessagePrefix() + "Processed "
-              + m_instanceCount + " instances (" + m_instsPerSec
-              + " insts/sec)");
-        }
-      }
-      m_instanceCount++;
       /*
        * if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
        * status = IncrementalClassifierEvent.NEW_BATCH;
@@ -787,6 +772,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
         status = IncrementalClassifierEvent.BATCH_FINISHED;
       }
 
+      m_throughput.updateStart();
       m_ie.setStatus(status);
       m_ie.setClassifier(m_Classifier);
       m_ie.setCurrentInstance(m_incrementalEvent.getInstance());
@@ -804,6 +790,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
         ((weka.classifiers.UpdateableClassifier) m_Classifier)
             .updateClassifier(m_incrementalEvent.getInstance());
       }
+      m_throughput.updateEnd(m_log);
+
       if (m_incrementalEvent.getStatus() == InstanceEvent.BATCH_FINISHED
           || m_incrementalEvent.getInstance() == null) {
         if (m_textListeners.size() > 0) {
@@ -819,11 +807,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
           TextEvent nt = new TextEvent(this, modelString, titleString);
           notifyTextListeners(nt);
         }
-        String msg = statusMessagePrefix() + "Finished (" + m_instanceCount
-            + " insts @ " + m_instsPerSec + " insts/sec)";
-        if (m_log != null) {
-          m_log.statusMessage(msg);
-        }
+
+        m_throughput.finished(m_log);
       }
     } catch (Exception ex) {
       stop();

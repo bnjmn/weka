@@ -509,6 +509,8 @@ public class Saver extends AbstractDataSink implements WekaWrapper,
     block(true);
   }
 
+  protected transient StreamThroughput m_throughput;
+
   /**
    * Methods reacts to instance events and saves instances incrementally. If the
    * instance to save is null, the file is closed and the saving process is
@@ -520,6 +522,7 @@ public class Saver extends AbstractDataSink implements WekaWrapper,
   public synchronized void acceptInstance(InstanceEvent e) {
 
     if (e.getStatus() == e.FORMAT_AVAILABLE) {
+      m_throughput = new StreamThroughput(statusMessagePrefix());
       // start of a new stream
       try {
         m_Saver = makeCopy();
@@ -543,6 +546,7 @@ public class Saver extends AbstractDataSink implements WekaWrapper,
     }
     if (e.getStatus() == e.INSTANCE_AVAILABLE) {
       m_visual.setAnimated();
+      m_throughput.updateStart();
       if (m_count == 0) {
         passEnvOnToSaver();
         if (!m_isDBSaver) {
@@ -561,6 +565,7 @@ public class Saver extends AbstractDataSink implements WekaWrapper,
          * ? m_fileName : m_Saver.filePrefix(); m_visual.setText(m_fileName);
          */
         m_Saver.writeIncremental(e.getInstance());
+        m_throughput.updateEnd(m_logger);
       } catch (Exception ex) {
         m_visual.setStatic();
         System.err.println("Instance " + e.getInstance()
@@ -588,12 +593,13 @@ public class Saver extends AbstractDataSink implements WekaWrapper,
         }
         // m_firstNotice = true;
         m_visual.setStatic();
-        System.out.println("...relation " + m_fileName + " saved.");
+        // System.out.println("...relation " + m_fileName + " saved.");
         /*
          * String visText = this.getName(); visText = (m_fileName.length() > 0)
          * ? m_fileName : m_Saver.filePrefix(); m_visual.setText(visText);
          */
         m_count = 0;
+        m_throughput.finished(m_logger);
       } catch (Exception ex) {
         m_visual.setStatic();
         System.err.println("File could not have been closed.");
@@ -657,6 +663,7 @@ public class Saver extends AbstractDataSink implements WekaWrapper,
   /** Stops the bean */
   @Override
   public void stop() {
+
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
       ((BeanCommon) m_listenee).stop();
@@ -667,8 +674,11 @@ public class Saver extends AbstractDataSink implements WekaWrapper,
       m_ioThread.interrupt();
       m_ioThread.stop();
       m_ioThread = null;
-      m_visual.setStatic();
     }
+
+    m_count = 0;
+
+    m_visual.setStatic();
   }
 
   private String statusMessagePrefix() {
