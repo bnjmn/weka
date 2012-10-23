@@ -2221,10 +2221,27 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               Class compClass = visibleCheck.getClass();
               Annotation[] annotations = compClass.getDeclaredAnnotations();
 
+              String category = null;
+              DefaultMutableTreeNode targetFolder = null;
               for (Annotation ann : annotations) {
                 if (ann instanceof KFStep) {
                   tipText = "<html><font color=blue>"
                       + ((KFStep) ann).toolTipText() + "</font></html>";
+                  category = ((KFStep) ann).category();
+
+                  // Does this category already exist?
+                  Enumeration children = jtreeRoot.children();
+                  while (children.hasMoreElements()) {
+                    Object child = children.nextElement();
+                    if (child instanceof DefaultMutableTreeNode) {
+                      if (((DefaultMutableTreeNode) child).getUserObject()
+                          .toString().equals(category)) {
+                        targetFolder = (DefaultMutableTreeNode) child;
+                        break;
+                      }
+                    }
+                  }
+
                   break;
                 }
               }
@@ -2235,7 +2252,11 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                 leafData.setToolTipText(tipText);
               }
               DefaultMutableTreeNode fixedLeafNode = new InvisibleNode(leafData);
-              subTreeNode.add(fixedLeafNode);
+              if (targetFolder != null) {
+                targetFolder.add(fixedLeafNode);
+              } else {
+                subTreeNode.add(fixedLeafNode);
+              }
 
               m_nodeTextIndex.put(tempBeanCompName.toLowerCase() + " "
                   + (tipText != null ? tipText.toLowerCase() : ""),
