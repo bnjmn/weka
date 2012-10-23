@@ -48,9 +48,9 @@ This package currently contains classes for training multilayer perceptrons with
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiLayerPerceptrons</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiLayerPerceptrons</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiLayerPerceptrons</url>
   </scm>
 
   <profiles>
