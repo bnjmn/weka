@@ -3,21 +3,21 @@
 # 
 
 # Package name (required)
-PackageName=DTNB
+PackageName=multiLayerPerceptrons
 
 # Version (required)
-Version=1.0.2
+Version=1.0.0
 
 #Date
-Date=2012-03-20
+Date=2012-10-23
 
 # Title (required)
-Title=Class for building and using a decision table/naive bayes hybrid classifier.
+Title=This package currently contains classes for training multilayer perceptrons with one hidden layer for both classification and regression problems,
 
-Category=Classification
+Category=Classification/Regression
 
 # Author (required)
-Author=Mark Hall & Eibe Frank
+Author=Eibe Frank
 
 # Maintainer (required)
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
@@ -26,13 +26,13 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Class for building and using a decision table/naive bayes hybrid classifier. At each point in the search, the algorithm evaluates the merit of dividing the attributes into two disjoint subsets: one for the decision table, the other for naive Bayes. A forward selection search is used, where at each step, selected attributes are modeled by naive Bayes and the remainder by the decision table, and all attributes are modelled by the decision table initially. At each step, the algorithm also considers dropping an attribute entirely from the model.<br/><br/> For more information, see: <br/><br/> Mark Hall, Eibe Frank: Combining Naive Bayes and Decision Tables. In: Proceedings of the 21st Florida Artificial Intelligence Society Conference (FLAIRS), 318-319, 2008.
+Description=This package currently contains classes for training multilayer perceptrons with one hidden layer, where the number of hidden units is user specified. MLPClassifier can be used for classification problems and MLPRegressor is the corresponding class for numeric prediction tasks. The former has as many output units as there are classes, the latter only one output unit. Both minimise a penalised squared error with a quadratic penalty on the (non-bias) weights, i.e., they implement "weight decay", where this penalised error is averaged over all training instances. The size of the penalty can be determined by the user by modifying the "ridge" parameter to control overfitting. The sum of squared weights is multiplied by this parameter before added to the squared error. Both classes use BFGS optimisation by default to find parameters that correspond to a local minimum of the error function. but optionally conjugated gradient descent is available, which can be faster for problems with many parameters. Logistic functions are used as the activation functions for all units apart from the output unit in MLPRegressor, which employs the identity function. Input attributes are standardised to zero mean and unit variance. MLPRegressor also rescales the target attribute (i.e., "class") using standardisation. All network parameters are initialised with small normally distributed random values.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/DTNB1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/multiLayerPerceptrons1.0.0.zip?download
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.packages/DTNB
+URL=http://weka.sourceforge.net/doc.packages/multiLayerPerceptrons
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
@@ -41,4 +41,4 @@ URL=http://weka.sourceforge.net/doc.packages/DTNB
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.7.6)

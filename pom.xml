@@ -4,17 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
-  <artifactId>DTNB</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <artifactId>multiLayerPerceptrons</artifactId>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
-  <name>DTNB</name>
+  <name>multiLayerPerceptrons</name>
   <description>
-  Class for building and using a decision table/naive bayes hybrid classifier. At each point in the search, the algorithm evaluates the merit of dividing the attributes into two disjoint subsets: one for the decision table, the other for naive Bayes. A forward selection search is used, where at each step, selected attributes are modeled by naive Bayes and the remainder by the decision table, and all attributes are modelled by the decision table initially. At each step, the algorithm also considers dropping an attribute entirely from the model.
-  For more information, see: 
-  Mark Hall, Eibe Frank: Combining Naive Bayes and Decision Tables. In: Proceedings of the 21st Florida Artificial Intelligence Society Conference (FLAIRS), 318-319, 2008.
+This package currently contains classes for training multilayer perceptrons with one hidden layer, where the number of hidden units is user specified. MLPClassifier can be used for classification problems and MLPRegressor is the corresponding class for numeric prediction tasks. The former has as many output units as there are classes, the latter only one output unit. Both minimise a penalised squared error with a quadratic penalty on the (non-bias) weights, i.e., they implement "weight decay", where this penalised error is averaged over all training instances. The size of the penalty can be determined by the user by modifying the "ridge" parameter to control overfitting. The sum of squared weights is multiplied by this parameter before added to the squared error. Both classes use BFGS optimisation by default to find parameters that correspond to a local minimum of the error function. but optionally conjugated gradient descent is available, which can be faster for problems with many parameters. Logistic functions are used as the activation functions for all units apart from the output unit in MLPRegressor, which employs the identity function. Input attributes are standardised to zero mean and unit variance. MLPRegressor also rescales the target attribute (i.e., "class") using standardisation. All network parameters are initialised with small normally distributed random values.
   </description>
-  <url>http://weka.sourceforge.net/doc.packages/DTNB</url>
+  <url>http://weka.sourceforge.net/doc.packages/multiLayerPerceptrons</url>
   <organization>
     <name>University of Waikato, Hamilton, NZ</name>
     <url>http://www.waikato.ac.nz/</url>
@@ -28,10 +26,6 @@
   </licenses>
 
   <developers>
-    <developer>
-      <id>mhall</id>
-      <name>Mark Hall</name>
-    </developer>
     <developer>
       <id>eibe</id>
       <name>Eibe Frank</name>
@@ -54,9 +48,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/DTNB</url>
+    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/multiLayerPerceptrons-1.0.0</connection>
+    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/tags/multiLayerPerceptrons-1.0.0</developerConnection>
+    <url>https://svn.scms.waikato.ac.nz/svn/weka/tags/multiLayerPerceptrons-1.0.0</url>
   </scm>
 
   <profiles>
@@ -101,13 +95,13 @@
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.1,)</version>
+      <version>[3.7.6,)</version>
     </dependency>
 
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.1,)</version>
+      <version>[3.7.6,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
