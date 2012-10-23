@@ -134,23 +134,8 @@ public class StreamThroughput implements Serializable {
     boolean toFastToMeasure = false;
 
     if ((end - m_startTime) >= m_sampleTime) {
-      int instsPerSec = 0;
-      if (m_cumulativeTime == 0) {
-        // all single instance updates have taken < 1 millisecond each!
-        // the best we can do is compute the insts/sec based on the total
-        // number of instances processed in the elapsed sample time
-        // (rather than using the total number processed and the actual
-        // cumulative elapsed processing time). This is going to be closer
-        // to the throughput for the entire flow rather than for the component
-        // itself
-        double sampleTime = (end - m_startTime);
-        instsPerSec = (int) (m_sampleCount / (sampleTime / 1000.0));
-        toFastToMeasure = true;
-      } else {
-        instsPerSec = (int) (m_sampleCount / (m_cumulativeTime / 1000.0));
-      }
-      m_numSamples++;
-      m_avInstsPerSec += instsPerSec;
+      computeUpdate(end);
+
       if (log != null) {
         log.statusMessage(m_statusMessagePrefix + "Processed "
             + m_instanceCount + " insts @ " + m_avInstsPerSec / m_numSamples
@@ -160,6 +145,30 @@ public class StreamThroughput implements Serializable {
       m_cumulativeTime = 0;
       m_startTime = System.currentTimeMillis();
     }
+  }
+
+  protected boolean computeUpdate(double end) {
+    boolean toFastToMeasure = false;
+    int instsPerSec = 0;
+
+    if (m_cumulativeTime == 0) {
+      // all single instance updates have taken < 1 millisecond each!
+      // the best we can do is compute the insts/sec based on the total
+      // number of instances processed in the elapsed sample time
+      // (rather than using the total number processed and the actual
+      // cumulative elapsed processing time). This is going to be closer
+      // to the throughput for the entire flow rather than for the component
+      // itself
+      double sampleTime = (end - m_startTime);
+      instsPerSec = (int) (m_sampleCount / (sampleTime / 1000.0));
+      toFastToMeasure = true;
+    } else {
+      instsPerSec = (int) (m_sampleCount / (m_cumulativeTime / 1000.0));
+    }
+    m_numSamples++;
+    m_avInstsPerSec += instsPerSec;
+
+    return toFastToMeasure;
   }
 
   /**
@@ -180,6 +189,10 @@ public class StreamThroughput implements Serializable {
    * @return the message written to the status area.
    */
   public String finished(Logger log) {
+    if (m_avInstsPerSec == 0) {
+      computeUpdate(System.currentTimeMillis());
+    }
+
     int nS = m_numSamples > 0 ? m_numSamples : 1;
     String msg = "Finished - " + m_instanceCount + " insts @ "
         + m_avInstsPerSec / nS + " insts/sec";
@@ -197,6 +210,10 @@ public class StreamThroughput implements Serializable {
    * @return a message that contains the final throughput info.
    */
   public String finished() {
+    if (m_avInstsPerSec == 0) {
+      computeUpdate(System.currentTimeMillis());
+    }
+
     int nS = m_numSamples > 0 ? m_numSamples : 1;
     String msg = "Finished - " + m_instanceCount + " insts @ "
         + m_avInstsPerSec / nS + " insts/sec";
