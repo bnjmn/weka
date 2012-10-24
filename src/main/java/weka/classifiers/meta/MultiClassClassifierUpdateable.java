@@ -60,23 +60,7 @@ import weka.filters.unsupervised.instance.RemoveWithValues;
  * 
  * <pre> -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.functions.Logistic)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.functions.Logistic:
- * </pre>
- * 
- * <pre> -D
- *  Turn on debugging output.</pre>
- * 
- * <pre> -C
- *  Use conjugate gradient descent rather than BFGS updates.</pre>
- * 
- * <pre> -R &lt;ridge&gt;
- *  Set the ridge in the log-likelihood.</pre>
- * 
- * <pre> -M &lt;number&gt;
- *  Set the maximum number of iterations (default -1, until convergence).</pre>
+ *  (default: weka.classifiers.functions.SGD)</pre>
  * 
  <!-- options-end -->
  * 
@@ -92,6 +76,13 @@ public class MultiClassClassifierUpdateable extends MultiClassClassifier
 
   /** For serialization */
   private static final long serialVersionUID = -1619685269774366430L;
+  
+  /**
+   * Constructor
+   */
+  public MultiClassClassifierUpdateable() {
+    m_Classifier = new weka.classifiers.functions.SGD();
+  }
 
   /**
    * @return a description of the classifier suitable for displaying in the
