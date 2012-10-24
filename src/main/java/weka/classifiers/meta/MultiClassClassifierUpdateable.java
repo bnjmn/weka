@@ -31,70 +31,54 @@ import weka.core.Utils;
 import weka.filters.unsupervised.instance.RemoveWithValues;
 
 /**
- * <!-- globalinfo-start --> A metaclassifier for handling multi-class datasets
- * with 2-class classifiers. This classifier is also capable of applying error
- * correcting output codes for increased accuracy. The base classifier must be
- * an updateable classifier
+ <!-- globalinfo-start -->
+ * A metaclassifier for handling multi-class datasets with 2-class classifiers. This classifier is also capable of applying error correcting output codes for increased accuracy. The base classifier must be an updateable classifier
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -M &lt;num&gt;
+ * <pre> -M &lt;num&gt;
  *  Sets the method to use. Valid values are 0 (1-against-all),
  *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
  * </pre>
  * 
- * <pre>
- * -R &lt;num&gt;
- *  Sets the multiplier when using random codes. (default 2.0)
- * </pre>
+ * <pre> -R &lt;num&gt;
+ *  Sets the multiplier when using random codes. (default 2.0)</pre>
  * 
- * <pre>
- * -P
- *  Use pairwise coupling (only has an effect for 1-against1)
- * </pre>
+ * <pre> -P
+ *  Use pairwise coupling (only has an effect for 1-against1)</pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)
- * </pre>
+ *  (default 1)</pre>
  * 
- * <pre>
- * -D
+ * <pre> -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console
- * </pre>
+ *  may output additional info to the console</pre>
  * 
- * <pre>
- * -W
+ * <pre> -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.functions.Logistic)
- * </pre>
+ *  (default: weka.classifiers.functions.Logistic)</pre>
  * 
- * <pre>
+ * <pre> 
  * Options specific to classifier weka.classifiers.functions.Logistic:
  * </pre>
  * 
- * <pre>
- * -D
- *  Turn on debugging output.
- * </pre>
+ * <pre> -D
+ *  Turn on debugging output.</pre>
  * 
- * <pre>
- * -R &lt;ridge&gt;
- *  Set the ridge in the log-likelihood.
- * </pre>
+ * <pre> -C
+ *  Use conjugate gradient descent rather than BFGS updates.</pre>
  * 
- * <pre>
- * -M &lt;number&gt;
- *  Set the maximum number of iterations (default -1, until convergence).
- * </pre>
+ * <pre> -R &lt;ridge&gt;
+ *  Set the ridge in the log-likelihood.</pre>
  * 
- * <!-- options-end -->
+ * <pre> -M &lt;number&gt;
+ *  Set the maximum number of iterations (default -1, until convergence).</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
@@ -250,3 +234,4 @@ public class MultiClassClassifierUpdateable extends MultiClassClassifier
     runClassifier(new MultiClassClassifierUpdateable(), argv);
   }
 }
+
