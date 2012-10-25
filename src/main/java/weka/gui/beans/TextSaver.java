@@ -55,8 +55,8 @@ public class TextSaver extends JPanel implements TextListener, BeanCommon,
    * Default visual for data sources
    */
   protected BeanVisual m_visual = new BeanVisual("TextSaver",
-      BeanVisual.ICON_PATH + "SerializedModelSaver.gif", BeanVisual.ICON_PATH
-          + "SerializedModelSaver_animated.gif");
+      BeanVisual.ICON_PATH + "DefaultText.gif", BeanVisual.ICON_PATH
+          + "DefaultText_animated.gif");
 
   /**
    * The log for this bean
@@ -80,7 +80,7 @@ public class TextSaver extends JPanel implements TextListener, BeanCommon,
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Save static text file to a file.";
+    return "Save/append static text to a file.";
   }
 
   /**
@@ -132,8 +132,8 @@ public class TextSaver extends JPanel implements TextListener, BeanCommon,
 
   @Override
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH + "SerializedModelSaver.gif",
-        BeanVisual.ICON_PATH + "SerializedModelSaver_animated.gif");
+    m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultText.gif",
+        BeanVisual.ICON_PATH + "DefaultText_animated.gif");
     m_visual.setText("TextSaver");
   }
 
