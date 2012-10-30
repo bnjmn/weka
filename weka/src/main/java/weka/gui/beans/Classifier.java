@@ -207,6 +207,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
    * Identifier for the current batch. A batch is a group of related runs/sets.
    */
   protected transient Date m_currentBatchIdentifier;
+  protected transient boolean m_batchStarted = false;
 
   /**
    * Holds original icon label text
@@ -1090,10 +1091,13 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
         System.err.println(msg);
       }
 
-      m_outputQueues = new BatchClassifierEvent[e.getMaxRunNumber()][e
-          .getMaxSetNumber()];
-      m_completedSets = new boolean[e.getMaxRunNumber()][e.getMaxSetNumber()];
-      m_currentBatchIdentifier = new Date();
+      if (!m_batchStarted) {
+        m_outputQueues = new BatchClassifierEvent[e.getMaxRunNumber()][e
+            .getMaxSetNumber()];
+        m_completedSets = new boolean[e.getMaxRunNumber()][e.getMaxSetNumber()];
+        m_currentBatchIdentifier = new Date();
+        m_batchStarted = true;
+      }
     }
 
     // create a new task and schedule for execution
@@ -1181,10 +1185,12 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     // there is just one run involving one set (and we are not
     // currently building a model), then use the
     // last saved model
-    if (classifierToUse != null
-        && m_state == IDLE
-        && (!m_listenees.containsKey("trainingSet") || (e.getMaxRunNumber() == 1 && e
-            .getMaxSetNumber() == 1))) {
+    if (classifierToUse != null && m_state == IDLE
+        && (!m_listenees.containsKey("trainingSet") /*
+                                                     * || (e.getMaxRunNumber()
+                                                     * == 1 && e
+                                                     * .getMaxSetNumber() == 1)
+                                                     */)) {
       // if this is structure only then just return at this point
       if (e.getTestSet() != null && e.isStructureOnly()) {
         return;
@@ -1304,6 +1310,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
           if (m_log != null && !e.isStructureOnly()) {
             m_log.statusMessage(statusMessagePrefix() + "Finished.");
           }
+          m_batchStarted = false;
           notifyBatchClassifierListeners(ce);
         } else {
           // if headers do not match check to see if it's
@@ -1335,6 +1342,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
                 if (m_log != null && !e.isStructureOnly()) {
                   m_log.statusMessage(statusMessagePrefix() + "Finished.");
                 }
+                m_batchStarted = false;
                 notifyBatchClassifierListeners(ce);
               } else {
                 stop();
@@ -1356,8 +1364,19 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
        * System.err.println("[Classifier] accepting test set: run " +
        * e.getRunNumber() + " fold " + e.getSetNumber());
        */
+      if (e.getRunNumber() == 1 && e.getSetNumber() == 1) {
+        if (!m_batchStarted) {
+          m_outputQueues = new BatchClassifierEvent[e.getMaxRunNumber()][e
+              .getMaxSetNumber()];
+          m_completedSets = new boolean[e.getMaxRunNumber()][e
+              .getMaxSetNumber()];
+          m_currentBatchIdentifier = new Date();
+          m_batchStarted = true;
+        }
+      }
 
       if (m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1] == null) {
+
         // store an event with a null model and training set (to be filled in
         // later)
         m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1] = new BatchClassifierEvent(
@@ -1367,14 +1386,17 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
         if (e.getRunNumber() == e.getMaxRunNumber()
             && e.getSetNumber() == e.getMaxSetNumber()) {
 
-          // block on the last fold of the last run
+          // block on the last fold of the last run (unless there is only one
+          // fold and one run)
           /*
            * System.err.println("[Classifier] blocking on last fold of last run..."
            * ); block(true);
            */
-          m_reject = true;
-          if (m_block) {
-            block(true);
+          if (e.getMaxRunNumber() != 1 && e.getMaxSetNumber() != 1) {
+            m_reject = true;
+            if (m_block) {
+              block(true);
+            }
           }
         }
       } else {
@@ -1474,6 +1496,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       }
       // m_outputQueues = null; // free memory
       m_reject = false;
+      m_batchStarted = false;
       block(false);
       m_state = IDLE;
     }
@@ -1845,6 +1868,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       m_executorPool = null;
     }
     m_reject = false;
+    m_batchStarted = false;
     block(false);
     m_visual.setStatic();
     if (m_oldText.length() > 0) {
