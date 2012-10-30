@@ -15,7 +15,7 @@
 
 /*
  *    AttributeVisualizationPanel.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -765,7 +765,7 @@ public class AttributeVisualizationPanel
             
             try {
               //1. see footnote at the end of this file
-              t =(int) Math.ceil((
+              t =(int) Math.ceil((float)(
               (m_data.instance(k).value(m_attribIndex)-m_as.numericStats.min)
               / barRange));
               if(t==0) {
