@@ -1392,7 +1392,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
            * System.err.println("[Classifier] blocking on last fold of last run..."
            * ); block(true);
            */
-          if (e.getMaxRunNumber() != 1 && e.getMaxSetNumber() != 1) {
+          if (e.getMaxSetNumber() != 1) {
             m_reject = true;
             if (m_block) {
               block(true);
