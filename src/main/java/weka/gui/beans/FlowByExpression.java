@@ -1174,7 +1174,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
   public void acceptDataSet(DataSetEvent e) {
 
     m_busy = true;
-    if (m_log != null) {
+    if (m_log != null && !e.isStructureOnly()) {
       m_log.statusMessage(statusMessagePrefix() + "Processing batch...");
     }
 
@@ -1217,7 +1217,7 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
       }
     }
 
-    if (m_log != null) {
+    if (m_log != null && !e.isStructureOnly()) {
       m_log.statusMessage(statusMessagePrefix() + "Finished");
     }
 
