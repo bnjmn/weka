@@ -15,16 +15,11 @@
 
 /*
  * XMLSerialization.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.xml;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Version;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -43,12 +38,19 @@ import java.io.Writer;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.Version;
 
 /**
  * With this class objects can be serialized to XML instead into a binary 
@@ -160,6 +162,9 @@ public class XMLSerialization
       + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_VERSION + "   " + XMLDocument.DTD_CDATA + " \"" + Version.VERSION + "\">\n"
       + "]\n"
       + ">";
+   
+   /** List of fully qualified property names to suppress any warning messages for */
+   public final static List<String> SUPPRESS_PROPERTY_WARNINGS = new ArrayList<String>();
    
    /** the XMLDocument that performs the transformation to and fro XML */
    protected XMLDocument m_Document = null;
@@ -1291,7 +1296,8 @@ public class XMLSerialization
 
       // unknown property?
       if (descriptor == null) {
-         if (!m_CustomMethods.read().contains(methodName))
+         if (!m_CustomMethods.read().contains(methodName) && 
+             !SUPPRESS_PROPERTY_WARNINGS.contains(name + "." + methodName))
             System.out.println("WARNING: unknown property '" + name + "." + methodName + "'!");
          return result;
       }
