@@ -46,53 +46,71 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Reads a source that is in comma separated format (the default). One can also change the column separator from comma to tab or another character. Assumes that the first row in the file determines the number of and names of the attributes.
+ * <!-- globalinfo-start --> Reads a source that is in comma separated format
+ * (the default). One can also change the column separator from comma to tab or
+ * another character. Assumes that the first row in the file determines the
+ * number of and names of the attributes.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -H
- *  No header row present in the data.</pre>
+ * <pre>
+ * -H
+ *  No header row present in the data.
+ * </pre>
  * 
- * <pre> -N &lt;range&gt;
+ * <pre>
+ * -N &lt;range&gt;
  *  The range of attributes to force type to be NOMINAL.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -S &lt;range&gt;
+ * <pre>
+ * -S &lt;range&gt;
  *  The range of attribute to force type to be STRING.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -D &lt;range&gt;
+ * <pre>
+ * -D &lt;range&gt;
  *  The range of attribute to force type to be DATE.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -format &lt;date format&gt;
+ * <pre>
+ * -format &lt;date format&gt;
  *  The date formatting string to use to parse date values.
- *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
+ *  (default: "yyyy-MM-dd'T'HH:mm:ss")
+ * </pre>
  * 
- * <pre> -M &lt;str&gt;
+ * <pre>
+ * -M &lt;str&gt;
  *  The string representing a missing value.
- *  (default: ?)</pre>
+ *  (default: ?)
+ * </pre>
  * 
- * <pre> -F &lt;separator&gt;
+ * <pre>
+ * -F &lt;separator&gt;
  *  The field separator to be used.
  *  '\t' can be used as well.
- *  (default: ',')</pre>
+ *  (default: ',')
+ * </pre>
  * 
- * <pre> -E &lt;enclosures&gt;
+ * <pre>
+ * -E &lt;enclosures&gt;
  *  The enclosure character(s) to use for strings.
- *  Specify as a comma separated list (e.g. ",' (default: ",')</pre>
+ *  Specify as a comma separated list (e.g. ",' (default: ",')
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
@@ -266,48 +284,64 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -H
-   *  No header row present in the data.</pre>
+   * <pre>
+   * -H
+   *  No header row present in the data.
+   * </pre>
    * 
-   * <pre> -N &lt;range&gt;
+   * <pre>
+   * -N &lt;range&gt;
    *  The range of attributes to force type to be NOMINAL.
    *  'first' and 'last' are accepted as well.
    *  Examples: "first-last", "1,4,5-27,50-last"
-   *  (default: -none-)</pre>
+   *  (default: -none-)
+   * </pre>
    * 
-   * <pre> -S &lt;range&gt;
+   * <pre>
+   * -S &lt;range&gt;
    *  The range of attribute to force type to be STRING.
    *  'first' and 'last' are accepted as well.
    *  Examples: "first-last", "1,4,5-27,50-last"
-   *  (default: -none-)</pre>
+   *  (default: -none-)
+   * </pre>
    * 
-   * <pre> -D &lt;range&gt;
+   * <pre>
+   * -D &lt;range&gt;
    *  The range of attribute to force type to be DATE.
    *  'first' and 'last' are accepted as well.
    *  Examples: "first-last", "1,4,5-27,50-last"
-   *  (default: -none-)</pre>
+   *  (default: -none-)
+   * </pre>
    * 
-   * <pre> -format &lt;date format&gt;
+   * <pre>
+   * -format &lt;date format&gt;
    *  The date formatting string to use to parse date values.
-   *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
+   *  (default: "yyyy-MM-dd'T'HH:mm:ss")
+   * </pre>
    * 
-   * <pre> -M &lt;str&gt;
+   * <pre>
+   * -M &lt;str&gt;
    *  The string representing a missing value.
-   *  (default: ?)</pre>
+   *  (default: ?)
+   * </pre>
    * 
-   * <pre> -F &lt;separator&gt;
+   * <pre>
+   * -F &lt;separator&gt;
    *  The field separator to be used.
    *  '\t' can be used as well.
-   *  (default: ',')</pre>
+   *  (default: ',')
+   * </pre>
    * 
-   * <pre> -E &lt;enclosures&gt;
+   * <pre>
+   * -E &lt;enclosures&gt;
    *  The enclosure character(s) to use for strings.
-   *  Specify as a comma separated list (e.g. ",' (default: ",')</pre>
+   *  Specify as a comma separated list (e.g. ",' (default: ",')
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -814,13 +848,22 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
             }
           }
         } else if (dataSet.attribute(j).isNominal()) {
+          if (cval instanceof Object[]) {
+            cval = ((Object[]) cval)[1];
+          }
           // find correct index
           Hashtable<Object, Integer> lookup = m_cumulativeStructure.get(j);
           int index = lookup.get(cval).intValue();
           vals[j] = index;
         } else if (dataSet.attribute(j).isString()) {
+          if (cval instanceof Object[]) {
+            cval = ((Object[]) cval)[1];
+          }
           vals[j] = dataSet.attribute(j).addStringValue("" + cval);
         } else {
+          if (cval instanceof Object[]) {
+            cval = ((Object[]) cval)[0];
+          }
           vals[j] = ((Double) cval).doubleValue();
         }
       }
@@ -908,7 +951,20 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
           // try to parse as a number
           try {
             double val = Double.valueOf(tokenizer.sval).doubleValue();
-            current.add(new Double(val));
+            // if (m_NominalAttributes.isInRange(current.size())
+            // || m_StringAttributes.isInRange(current.size())) {
+            // carry the original string representation along
+            // as well so that strings that happen to be parseable
+            // as numbers remain in their original form - e.g.
+            // 00603E84 parses as a number and results in 6.03E86
+            // when forced to be a nominal value
+            Object[] temp = new Object[2];
+            temp[0] = new Double(val);
+            temp[1] = tokenizer.sval;
+            current.add(temp);
+            // } else {
+            // current.add(new Double(val));
+            // }
           } catch (NumberFormatException e) {
             // otherwise assume its an enumerated value
             current.add(new String(tokenizer.sval));
@@ -1001,7 +1057,9 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
           if (notDate) {
             Hashtable<Object, Integer> tempHash = m_cumulativeStructure.get(i);
-            if (!tempHash.containsKey(ob)) {
+            Object tempCurr = (ob instanceof Object[]) ? ((Object[]) ob)[1]
+                : ob;
+            if (!tempHash.containsKey(tempCurr)) {
               // may have found a nominal value in what was previously thought
               // to
               // be a numeric variable.
@@ -1012,15 +1070,23 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
                   if (tempO instanceof String) {
                     // must have been a missing value
                   } else {
-                    if (!tempHash.containsKey(tempO)) {
-                      tempHash.put(new Double(((Double) tempO).doubleValue()),
-                          new Integer(tempHash.size()));
+                    Object prevOb = (tempO instanceof Object[]) ? ((Object[]) tempO)[1]
+                        : tempO;
+                    if (!tempHash.containsKey(prevOb)) {
+                      if (prevOb instanceof Double) {
+                        tempHash.put(
+                            new Double(((Double) prevOb).doubleValue()),
+                            new Integer(tempHash.size()));
+                      } else {
+                        tempHash.put(prevOb.toString(),
+                            new Integer(tempHash.size()));
+                      }
                     }
                   }
                 }
               }
               int newIndex = tempHash.size();
-              tempHash.put(ob, new Integer(newIndex));
+              tempHash.put(tempCurr, new Integer(newIndex));
             }
           }
         }
@@ -1031,6 +1097,14 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
             int newIndex = tempHash.size();
             tempHash.put(new Double(((Double) ob).doubleValue()), new Integer(
                 newIndex));
+          }
+        }
+      } else if (ob instanceof Object[]) {
+        Hashtable<Object, Integer> tempHash = m_cumulativeStructure.get(i);
+        if (tempHash.size() != 0) {
+          if (!tempHash.containsKey(((Object[]) ob)[1])) {
+            int newIndex = tempHash.size();
+            tempHash.put(((Object[]) ob)[1].toString(), new Integer(newIndex));
           }
         }
       } else {
@@ -1154,4 +1228,3 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     runFileLoader(new CSVLoader(), args);
   }
 }
-
