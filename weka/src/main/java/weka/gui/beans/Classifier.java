@@ -917,6 +917,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
                                                                      // (yet)
               m_setNum, m_maxSetNum);
           ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
+          ce.setLabel(getCustomName());
           notifyBatchClassifierListeners(ce);
 
           // store in the output queue (if we have incoming test set events)
@@ -924,6 +925,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
               new DataSetEvent(this, m_train), null, // no test set (yet)
               m_setNum, m_maxSetNum);
           ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
+          ce.setLabel(getCustomName());
           classifierTrainingComplete(ce);
           // }
 
@@ -1306,6 +1308,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
               new DataSetEvent(this, e.getTestSet()), e.getRunNumber(),
               e.getMaxRunNumber(), e.getSetNumber(), e.getMaxSetNumber());
           ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
+          ce.setLabel(getCustomName());
 
           if (m_log != null && !e.isStructureOnly()) {
             m_log.statusMessage(statusMessagePrefix() + "Finished.");
@@ -1338,6 +1341,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
                     new DataSetEvent(this, e.getTestSet()), e.getRunNumber(),
                     e.getMaxRunNumber(), e.getSetNumber(), e.getMaxSetNumber());
                 ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
+                ce.setLabel(getCustomName());
 
                 if (m_log != null && !e.isStructureOnly()) {
                   m_log.statusMessage(statusMessagePrefix() + "Finished.");
@@ -1383,6 +1387,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
             this, null, null, new DataSetEvent(this, e.getTestSet()),
             e.getRunNumber(), e.getMaxRunNumber(), e.getSetNumber(),
             e.getMaxSetNumber());
+        m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1]
+            .setLabel(getCustomName());
         if (e.getRunNumber() == e.getMaxRunNumber()
             && e.getSetNumber() == e.getMaxSetNumber()) {
 
@@ -1457,6 +1463,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
           // dispatch this one
           m_outputQueues[runNum - 1][i]
               .setGroupIdentifier(m_currentBatchIdentifier.getTime());
+          m_outputQueues[runNum - 1][i].setLabel(getCustomName());
           notifyBatchClassifierListeners(m_outputQueues[runNum - 1][i]);
           // save memory
           m_outputQueues[runNum - 1][i] = null;
