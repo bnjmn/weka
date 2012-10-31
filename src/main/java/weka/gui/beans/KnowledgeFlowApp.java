@@ -405,6 +405,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   private static void init() {
     System.err.println("[KnowledgeFlow] Initializing KF...");
 
+    // suppress these benign warnings when loading/deserializing XML flows
+    if (!XMLBeans.SUPPRESS_PROPERTY_WARNINGS.contains("visual.iconPath")) {
+      XMLBeans.SUPPRESS_PROPERTY_WARNINGS.add("visual.iconPath");
+    }
+    if (!XMLBeans.SUPPRESS_PROPERTY_WARNINGS
+        .contains("visual.animatedIconPath")) {
+      XMLBeans.SUPPRESS_PROPERTY_WARNINGS.add("visual.animatedIconPath");
+    }
+
     try {
       TOOLBARS = new Vector();
 
@@ -5211,7 +5220,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   private void addUndoPoint() {
     try {
       Stack undo = m_mainKFPerspective.getUndoBuffer();
-      File tempFile = File.createTempFile("knowledgeFlow", FILE_EXTENSION);
+      File tempFile = File.createTempFile("knowledgeFlow", FILE_EXTENSION_XML);
       tempFile.deleteOnExit();
 
       if (saveLayout(tempFile, m_mainKFPerspective.getCurrentTabIndex(), true)) {
