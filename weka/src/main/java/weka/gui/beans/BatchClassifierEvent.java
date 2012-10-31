@@ -26,16 +26,14 @@ import java.util.EventObject;
 import weka.classifiers.Classifier;
 
 /**
- * Class encapsulating a built classifier and a batch of instances to
- * test on.
- *
+ * Class encapsulating a built classifier and a batch of instances to test on.
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
  * @version $Revision$
  * @since 1.0
  * @see EventObject
  */
-public class BatchClassifierEvent
-  extends EventObject {
+public class BatchClassifierEvent extends EventObject {
 
   /** for serialization */
   private static final long serialVersionUID = 878097199815991084L;
@@ -44,26 +42,27 @@ public class BatchClassifierEvent
    * The classifier
    */
   protected Classifier m_classifier;
-  //  protected Instances m_trainingSet;
+  // protected Instances m_trainingSet;
 
   /**
    * Instances that can be used for testing the classifier
    */
-  //  protected Instances m_testSet;
+  // protected Instances m_testSet;
   protected DataSetEvent m_testSet;
-  
+
   /**
-   * Instances that were used to train the classifier (may be null if not available)
+   * Instances that were used to train the classifier (may be null if not
+   * available)
    */
   protected DataSetEvent m_trainSet;
-  
+
   /**
-   * The run number that this classifier was generated for 
+   * The run number that this classifier was generated for
    */
   protected int m_runNumber = 1;
-    
+
   /**
-   * The maximum number of runs 
+   * The maximum number of runs
    */
   protected int m_maxRunNumber = 1;
 
@@ -76,16 +75,20 @@ public class BatchClassifierEvent
    * The last set number for this series
    */
   protected int m_maxSetNumber;
-  
+
   /**
-   * An identifier that can be used to group all related runs/sets
-   * together.
+   * An identifier that can be used to group all related runs/sets together.
    */
   protected long m_groupIdentifier = Long.MAX_VALUE;
 
   /**
+   * Label for this event
+   */
+  protected String m_eventLabel = "";
+
+  /**
    * Creates a new <code>BatchClassifierEvent</code> instance.
-   *
+   * 
    * @param source the source object
    * @param scheme a Classifier
    * @param trsI the training instances used to train the classifier
@@ -94,20 +97,19 @@ public class BatchClassifierEvent
    * @param maxSetNum the last set number in the series
    */
   public BatchClassifierEvent(Object source, Classifier scheme,
-			 DataSetEvent trsI, DataSetEvent tstI, int setNum,
-			 int maxSetNum) {
+      DataSetEvent trsI, DataSetEvent tstI, int setNum, int maxSetNum) {
     super(source);
-    //    m_trainingSet = trnI;
+    // m_trainingSet = trnI;
     m_classifier = scheme;
     m_testSet = tstI;
     m_trainSet = trsI;
     m_setNumber = setNum;
     m_maxSetNumber = maxSetNum;
   }
-  
+
   /**
    * Creates a new <code>BatchClassifierEvent</code> instance.
-   *
+   * 
    * @param source the source object
    * @param scheme a Classifier
    * @param trsI the training instances used to train the classifier
@@ -118,33 +120,42 @@ public class BatchClassifierEvent
    * @param maxSetNum the last set number in the series
    */
   public BatchClassifierEvent(Object source, Classifier scheme,
-    DataSetEvent trsI, DataSetEvent tstI, int runNum, int maxRunNum,
-    int setNum, int maxSetNum) {
-    
+      DataSetEvent trsI, DataSetEvent tstI, int runNum, int maxRunNum,
+      int setNum, int maxSetNum) {
+
     this(source, scheme, trsI, tstI, setNum, maxSetNum);
-    
+
     m_runNumber = runNum;
     m_maxRunNumber = maxRunNum;
   }
 
-//    /**
-//     * Get the training instances
-//     *
-//     * @return the training instances
-//     */
-//    public Instances getTrainingSet() {
-//      return m_trainingSet;
-//    }
+  /**
+   * Set the label for this event.
+   * 
+   * @param lab the label to use
+   */
+  public void setLabel(String lab) {
+    m_eventLabel = lab;
+  }
+
+  /**
+   * Get the label for this event
+   * 
+   * @return the label for this event
+   */
+  public String getLabel() {
+    return m_eventLabel;
+  }
 
   /**
    * Get the classifier
-   *
+   * 
    * @return the classifier
    */
   public Classifier getClassifier() {
     return m_classifier;
   }
-  
+
   /**
    * Set the classifier
    * 
@@ -153,7 +164,7 @@ public class BatchClassifierEvent
   public void setClassifier(Classifier classifier) {
     m_classifier = classifier;
   }
-  
+
   /**
    * Set the test set
    * 
@@ -165,13 +176,13 @@ public class BatchClassifierEvent
 
   /**
    * Get the test set
-   *
+   * 
    * @return the test set
    */
   public DataSetEvent getTestSet() {
     return m_testSet;
   }
-  
+
   /**
    * Set the training set
    * 
@@ -180,16 +191,16 @@ public class BatchClassifierEvent
   public void setTrainSet(DataSetEvent tse) {
     m_trainSet = tse;
   }
-  
+
   /**
    * Get the train set
-   *
+   * 
    * @return the training set
    */
   public DataSetEvent getTrainSet() {
     return m_trainSet;
   }
-  
+
   /**
    * Get the run number.
    * 
@@ -198,7 +209,7 @@ public class BatchClassifierEvent
   public int getRunNumber() {
     return m_runNumber;
   }
-  
+
   /**
    * Get the maximum run number
    * 
@@ -210,30 +221,29 @@ public class BatchClassifierEvent
 
   /**
    * Get the set number (ie which fold this is)
-   *
-   * @return the set number for the training and testing data sets
-   * encapsulated in this event
+   * 
+   * @return the set number for the training and testing data sets encapsulated
+   *         in this event
    */
   public int getSetNumber() {
     return m_setNumber;
   }
 
   /**
-   * Get the maximum set number (ie the total number of training
-   * and testing sets in the series).
-   *
+   * Get the maximum set number (ie the total number of training and testing
+   * sets in the series).
+   * 
    * @return the maximum set number
    */
   public int getMaxSetNumber() {
     return m_maxSetNumber;
   }
-  
+
   public void setGroupIdentifier(long identifier) {
     m_groupIdentifier = identifier;
   }
-  
+
   public long getGroupIdentifier() {
     return m_groupIdentifier;
   }
 }
-
