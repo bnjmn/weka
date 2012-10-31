@@ -358,7 +358,7 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
 
     if (m_logger != null) {
       if (m_setsComplete < maxSetNum) {
-        m_logger.statusMessage(statusMessagePrefix() + "Finished ("
+        m_logger.statusMessage(statusMessagePrefix() + "Completed ("
             + m_setsComplete + ").");
       }
     }
