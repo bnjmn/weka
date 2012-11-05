@@ -15,19 +15,11 @@
 
 /*
  *    ConverterUtils.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
-
-import weka.core.ClassDiscovery;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.gui.GenericObjectEditor;
-import weka.gui.GenericPropertiesCreator;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +34,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
+
+import weka.core.ClassDiscovery;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.gui.GenericObjectEditor;
+import weka.gui.GenericPropertiesCreator;
 
 /**
  * Utility routines for the converter package.
@@ -881,15 +881,7 @@ public class ConverterUtils
    */
   public static void getFirstToken(StreamTokenizer tokenizer) 
     throws IOException {
-    
-    while (tokenizer.nextToken() == StreamTokenizer.TT_EOL){};
-    if ((tokenizer.ttype == '\'') ||
-	(tokenizer.ttype == '"')) {
-      tokenizer.ttype = StreamTokenizer.TT_WORD;
-    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
-	       (tokenizer.sval.equals("?"))) {
-      tokenizer.ttype = '?';
-    }
+    StreamTokenizerUtils.getFirstToken(tokenizer);
   }
 
   /**
@@ -898,20 +890,8 @@ public class ConverterUtils
    * @param tokenizer 		the stream tokenizer
    * @throws IOException 	if reading the next token fails
    */
-  public static void getToken(StreamTokenizer tokenizer) throws IOException {
-    
-    tokenizer.nextToken();
-    if (tokenizer.ttype== StreamTokenizer.TT_EOL) {
-      return;
-    }
-
-    if ((tokenizer.ttype == '\'') ||
-	(tokenizer.ttype == '"')) {
-      tokenizer.ttype = StreamTokenizer.TT_WORD;
-    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
-	       (tokenizer.sval.equals("?"))) {
-      tokenizer.ttype = '?';
-    }
+  public static void getToken(StreamTokenizer tokenizer) throws IOException {    
+    StreamTokenizerUtils.getToken(tokenizer);
   }
 
   /**
