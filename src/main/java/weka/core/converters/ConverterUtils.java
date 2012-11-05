@@ -881,15 +881,7 @@ public class ConverterUtils
    */
   public static void getFirstToken(StreamTokenizer tokenizer) 
     throws IOException {
-    
-    while (tokenizer.nextToken() == StreamTokenizer.TT_EOL){};
-    if ((tokenizer.ttype == '\'') ||
-	(tokenizer.ttype == '"')) {
-      tokenizer.ttype = StreamTokenizer.TT_WORD;
-    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
-	       (tokenizer.sval.equals("?"))) {
-      tokenizer.ttype = '?';
-    }
+    StreamTokenizerUtils.getFirstToken(tokenizer);
   }
 
   /**
@@ -898,20 +890,8 @@ public class ConverterUtils
    * @param tokenizer 		the stream tokenizer
    * @throws IOException 	if reading the next token fails
    */
-  public static void getToken(StreamTokenizer tokenizer) throws IOException {
-    
-    tokenizer.nextToken();
-    if (tokenizer.ttype== StreamTokenizer.TT_EOL) {
-      return;
-    }
-
-    if ((tokenizer.ttype == '\'') ||
-	(tokenizer.ttype == '"')) {
-      tokenizer.ttype = StreamTokenizer.TT_WORD;
-    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
-	       (tokenizer.sval.equals("?"))) {
-      tokenizer.ttype = '?';
-    }
+  public static void getToken(StreamTokenizer tokenizer) throws IOException {    
+    StreamTokenizerUtils.getToken(tokenizer);
   }
 
   /**
