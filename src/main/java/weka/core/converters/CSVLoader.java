@@ -928,7 +928,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     ArrayList<Object> current = new ArrayList<Object>();
 
     // Check if end of file reached.
-    ConverterUtils.getFirstToken(tokenizer);
+    StreamTokenizerUtils.getFirstToken(tokenizer);
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       return null;
     }
@@ -940,7 +940,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
       // Get next token
       if (!first) {
-        ConverterUtils.getToken(tokenizer);
+        StreamTokenizerUtils.getToken(tokenizer);
       }
 
       if (tokenizer.ttype == m_FieldSeparator.charAt(0)
@@ -977,7 +977,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       }
 
       if (!wasSep) {
-        ConverterUtils.getToken(tokenizer);
+        StreamTokenizerUtils.getToken(tokenizer);
       }
       first = false;
     }
@@ -985,7 +985,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     if (!readingFirstRow) {
       // check number of values read
       if (current.size() != m_structure.numAttributes()) {
-        ConverterUtils.errms(tokenizer, "wrong number of values. Read "
+        StreamTokenizerUtils.errms(tokenizer, "wrong number of values. Read "
             + current.size() + ", expected " + m_structure.numAttributes());
       }
 
@@ -1152,15 +1152,15 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       }
       m_firstRow = firstRow;
     } else {
-      ConverterUtils.getFirstToken(tokenizer);
+      StreamTokenizerUtils.getFirstToken(tokenizer);
       if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-        ConverterUtils.errms(tokenizer, "premature end of file");
+        StreamTokenizerUtils.errms(tokenizer, "premature end of file");
       }
 
       while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
         attribNames.add(new Attribute(tokenizer.sval,
             (java.util.List<String>) null));
-        ConverterUtils.getToken(tokenizer);
+        StreamTokenizerUtils.getToken(tokenizer);
       }
     }
     String relationName;
