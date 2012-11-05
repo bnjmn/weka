@@ -361,8 +361,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
           BeanVisual.ICON_PATH + classifierName + "_animated.gif")) {
         useDefaultVisual();
       }
+      m_visual.setText(classifierName);
     }
-    m_visual.setText(classifierName);
 
     if (!(m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier)
         && (m_listenees.containsKey("instance"))) {
