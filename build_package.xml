@@ -69,6 +69,7 @@
          <include name="org/**/*.props"/>
          <include name="org/**/*.txt"/>
          <include name="org/**/*.xml"/>
+         <include name="org/**/*.kfml"/>
          <include name="**/*.cup"/>
          <include name="**/*.flex"/>
          <include name="**/*.jflex"/>
