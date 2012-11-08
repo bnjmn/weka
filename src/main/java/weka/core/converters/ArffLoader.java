@@ -193,7 +193,7 @@ public class ArffLoader
      * @see			#getData()
      */
     public ArffReader(Reader reader, Instances template, int lines) throws IOException {
-      this(reader, template, lines, 100);
+      this(reader, template, lines, 100, true);
 
       Instance inst;
       while ((inst = readInstance(m_Data)) != null) {
@@ -216,6 +216,30 @@ public class ArffLoader
      * @see			#getData()
      */
     public ArffReader(Reader reader, Instances template, int lines, int capacity) throws IOException {
+      this(reader, template, lines, capacity, false);
+    }
+    
+    /**
+     * Initializes the reader without reading the header according to the 
+     * specified template. The data must be read via the 
+     * <code>readInstance()</code> method.
+     * 
+     * @param reader            the reader to use
+     * @param template          the template header
+     * @param lines             the lines read so far
+     * @param capacity          the capacity of the new dataset
+     * @param batch             true if the values of string attributes should be collected in the header 
+     * @throws IOException      if something goes wrong
+     * @see                     #getData()
+     */
+    public ArffReader(Reader reader, Instances template, int lines, int capacity, boolean batch) throws IOException {
+      m_batchMode = batch;
+      if (batch) {
+        m_retainStringValues = true;
+      } else {
+        m_retainStringValues = false;
+      }
+      
       m_Lines     = lines;
       m_Tokenizer = new StreamTokenizer(reader);
       initTokenizer();
