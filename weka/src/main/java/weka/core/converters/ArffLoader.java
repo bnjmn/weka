@@ -15,22 +15,11 @@
 
 /*
  *    ArffLoader.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
-
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,8 +32,15 @@ import java.io.StringReader;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Vector;
+
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->
@@ -197,7 +193,7 @@ public class ArffLoader
      * @see			#getData()
      */
     public ArffReader(Reader reader, Instances template, int lines) throws IOException {
-      this(reader, template, lines, 100);
+      this(reader, template, lines, 100, true);
 
       Instance inst;
       while ((inst = readInstance(m_Data)) != null) {
@@ -220,6 +216,30 @@ public class ArffLoader
      * @see			#getData()
      */
     public ArffReader(Reader reader, Instances template, int lines, int capacity) throws IOException {
+      this(reader, template, lines, capacity, false);
+    }
+    
+    /**
+     * Initializes the reader without reading the header according to the 
+     * specified template. The data must be read via the 
+     * <code>readInstance()</code> method.
+     * 
+     * @param reader            the reader to use
+     * @param template          the template header
+     * @param lines             the lines read so far
+     * @param capacity          the capacity of the new dataset
+     * @param batch             true if the values of string attributes should be collected in the header 
+     * @throws IOException      if something goes wrong
+     * @see                     #getData()
+     */
+    public ArffReader(Reader reader, Instances template, int lines, int capacity, boolean batch) throws IOException {
+      m_batchMode = batch;
+      if (batch) {
+        m_retainStringValues = true;
+      } else {
+        m_retainStringValues = false;
+      }
+      
       m_Lines     = lines;
       m_Tokenizer = new StreamTokenizer(reader);
       initTokenizer();
