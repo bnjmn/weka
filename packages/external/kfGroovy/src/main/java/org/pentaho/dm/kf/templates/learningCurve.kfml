@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA|object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "no">
+   <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
+   <!ATTLIST object null      CDATA "no">
+   <!ATTLIST object version   CDATA "3.7.7">
+]
+>
+
+<object class="java.util.Vector" name="__root__" version="3.7.7">
+   <object class="java.util.Vector" name="0">
+      <object class="weka.gui.beans.BeanInstance" name="0">
+         <object class="int" name="id" primitive="yes">0</object>
+         <object class="int" name="x" primitive="yes">69</object>
+         <object class="int" name="y" primitive="yes">111</object>
+         <object class="java.lang.String" name="custom_name">ArffLoader</object>
+         <object class="weka.gui.beans.Loader" name="bean">
+            <object class="weka.core.converters.ArffLoader" name="wrappedAlgorithm">
+               <object class="java.lang.String" name="file">weka/gui/beans/templates/credit-g.arff</object>
+               <object class="boolean" name="useRelativePath" primitive="yes">false</object>
+            </object>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="1">
+         <object class="int" name="id" primitive="yes">1</object>
+         <object class="int" name="x" primitive="yes">229</object>
+         <object class="int" name="y" primitive="yes">111</object>
+         <object class="java.lang.String" name="custom_name">ClassAssigner</object>
+         <object class="weka.gui.beans.ClassAssigner" name="bean">
+            <object class="java.lang.String" name="classColumn">last</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="2">
+         <object class="int" name="id" primitive="yes">2</object>
+         <object class="int" name="x" primitive="yes">429</object>
+         <object class="int" name="y" primitive="yes">111</object>
+         <object class="java.lang.String" name="custom_name">TrainingSetMaker</object>
+         <object class="weka.gui.beans.TrainingSetMaker" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">TrainingSetMaker</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/TrainingSetMaker.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/TrainingSetMaker_animated.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">TrainingSetMaker</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="3">
+         <object class="int" name="id" primitive="yes">3</object>
+         <object class="int" name="x" primitive="yes">429</object>
+         <object class="int" name="y" primitive="yes">271</object>
+         <object class="java.lang.String" name="custom_name">GroovyComponent</object>
+         <object class="org.pentaho.dm.kf.GroovyComponent" name="bean">
+            <object class="java.lang.String" name="script">import java.beans.*&#10;import java.io.Serializable&#10;import java.util.Vector&#10;import java.util.Enumeration&#10;import org.pentaho.dm.kf.KFGroovyScript&#10;import org.pentaho.dm.kf.GroovyHelper&#10;import weka.core.*&#10;import weka.gui.Logger&#10;import weka.gui.beans.*&#10;import weka.classifiers.bayes.NaiveBayes&#10;import weka.classifiers.functions.Logistic&#10;import weka.classifiers.Evaluation&#10;import weka.classifiers.Classifier&#10;import weka.classifiers.AbstractClassifier&#10;&#10;import groovy.swing.SwingBuilder&#10;import javax.swing.*&#10;import java.awt.*&#10;&#10;&#10;// add further imports here if necessary&#10;&#10;/**&#10; * Example Groovy script that generates a learning curve for a classifier.&#10; * Allows the classifier to be connected via a &quot;configuration&quot; event or&#10; * specified via an environment variable (CLASSIFIER_NAME). Classifier options&#10; * and the parameters of the learning curve could be specified via environment&#10; * variables as well through just minor changes to the script.&#10; *&#10; * Generates both a &quot;TextEvent&quot; containing the curve information and a&#10; * &quot;DataSetEvent&quot;. The latter can be visualized in a DataVisualizer component.&#10; *&#10; * Also demonstrates how to allow the user to set options for the script&#10; * via a graphical pop-up window.&#10; *&#10; * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)&#10; */&#10;class LearningCurve&#10;&#9;implements&#10;&#9;&#9;KFGroovyScript,&#10;&#9;&#9;EnvironmentHandler,&#10;&#9;&#9;BeanCommon,&#10;&#9;&#9;EventConstraints,&#10;&#9;&#9;UserRequestAcceptor,&#10;&#9;&#9;TrainingSetListener,&#10;&#9;&#9;TestSetListener,&#10;&#9;&#9;DataSourceListener,&#10;&#9;&#9;InstanceListener,&#10;&#9;&#9;TextListener,&#10;&#9;&#9;BatchClassifierListener,&#10;&#9;&#9;IncrementalClassifierListener,&#10;&#9;&#9;BatchClustererListener,&#10;&#9;&#9;GraphListener,&#10;&#9;&#9;ChartListener,&#10;&#9;&#9;ThresholdDataListener,&#10;&#9;&#9;VisualizableErrorListener,&#10;                ConfigurationListener,&#10;&#9;&#9;Serializable {&#10;&#10;  /** Don&apos;t delete!!&#10;   *  GroovyHelper has the following useful methods:&#10;   *&#10;   *  notifyListenerType(Object event) - GroovyHelper will pass on event&#10;   *    appropriate listener type for you&#10;   *  ArrayList&lt;TrainingSetListener&gt; getTrainingSetListeners() - get&#10;   *    a list of any directly connected components that are listening&#10;   *    for TrainingSetEvents from us&#10;   *  ArrayList&lt;TestSetListener&gt; getTestSetListeners()&#10;   *  ArrayList&lt;InstanceListener&gt; getInstanceListeners()&#10;   *  ArrayList&lt;TextListener&gt; getTextListeners()&#10;   *  ArrayList&lt;DataSourceListener&gt; getDataSourceListeners()&#10;   *  ArrayList&lt;BatchClassifierListener&gt; getBatchClassifierListeners()&#10;   *  ArrayList&lt;IncrementalClassifierListener&gt; getIncrementalClassifierListeners()&#10;   *  ArrayList&lt;BatchClustererListener&gt; getBatchClustererListeners()&#10;   *  ArrayList&lt;GraphListenerListener&gt; getGraphListeners()&#10;   *  ArrayList&lt;ChartListener&gt; getChartListeners()&#10;   *  ArrayList&lt;ThresholdDataListener&gt; getThresholdDataListeners()&#10;   *  ArrayList&lt;VisualizableErrorListener&gt; getVisualizableErrorListeners()&#10;   */&#10;  GroovyHelper m_helper&#10;&#10;  Logger m_log = null&#10;&#10;  Environment m_env = Environment.getSystemWide()&#10;&#10;  String m_holdoutSize = &quot;33.0&quot;&#10;  String m_stepSize = &quot;100&quot;&#10;  String m_numSteps = &quot;10&quot;&#10;  String m_classifierName = &quot;\${CLASSIFIER_NAME}&quot;&#10;  String m_classifierOptions = null&#10;&#10;  Object m_incomingConnection = null&#10;&#10;  weka.gui.beans.Classifier m_connectedConfigurable = null&#10;&#10;  /** Don&apos;t delete!! */&#10;  void setManager(GroovyHelper manager) { m_helper = manager }&#10;&#10;  /** Alter or add to in order to tell the KnowlegeFlow&#10;   *  environment whether a certain incoming connection type is allowed&#10;   */&#10;  boolean connectionAllowed(String eventName) {&#10;    if (eventName.equals(&quot;trainingSet&quot;) &amp;&amp; &#10;        m_incomingConnection == null) { return true }&#10;&#10;    if (eventName.equals(&quot;configuration&quot;) &amp;&amp;&#10;        m_connectedConfigurable == null) { return true}&#10;&#10;      return false&#10;  }&#10;&#10;  /** Alter or add to in order to tell the KnowlegeFlow&#10;   *  environment whether a certain incoming connection type is allowed&#10;   */&#10;  boolean connectionAllowed(EventSetDescriptor esd) {&#10;    return connectionAllowed(esd.getName())&#10;  }&#10;&#10;  /** Add (optional) code to do something when you have been&#10;   *  registered as a listener with a source for the named event&#10;   */&#10;  void connectionNotification(String eventName, Object source) {&#10;    if (eventName.equals(&quot;trainingSet&quot;)) {&#10;      m_incomingConnection = source&#10;    }&#10;&#10;    if (eventName.equals(&quot;configuration&quot;)) {&#10;      // check the type of the configurable&#10;      if (source instanceof weka.gui.beans.Classifier) {&#10;        m_connectedConfigurable = (weka.gui.beans.Classifier)source&#10;      } else {&#10;        if (m_log != null) {&#10;          m_log.statusMessage(&quot;LearningCurve\$&quot;+hashCode()+&quot;|ERROR (see log for details)&quot;)&#10;            m_log.logMessage(&quot;[LearningCurve] Connected configurable is not a classifier!!&quot;)&#10;        }&#10;      } &#10;    }&#10;  }&#10;&#10;  /** Add (optional) code to do something when you have been&#10;   *  deregistered as a listener with a source for the named event&#10;   */&#10;  void disconnectionNotification(String eventName, Object source) { &#10;    if (eventName.equals(&quot;trainingSet&quot;)) {&#10;      m_incomingConnection = null&#10;    }&#10;&#10;    if (eventName.equals(&quot;configuration&quot;)) {&#10;      m_connectedConfigurable = null &#10;    }&#10;  }&#10;&#10;  /** Custom name of this component. Do something with it if you&#10;   *  like. GroovyHelper already stores it and alters the icon text&#10;   *  for you&#9; */&#10;  void setCustomName(String name) { }&#10;&#10;  /** Custom name of this component. No need to return anything&#10;   *  GroovyHelper already stores it and alters the icon text&#10;   *  for you&#9; */&#10;  String getCustomName() { return null }&#10;&#10;  /** Add code to return true when you are busy doing something&#10;   */&#10;  boolean isBusy() { return false }&#10;&#10;  /** Store and use this logging object in order to post messages&#10;   *  to the log&#10;   */&#10;  void setLog(Logger logger) { &#10;    m_log = logger&#10;  }&#10;&#10;  /** Store and use this Environment object in order to lookup and&#10;   *  use the values of environment variables&#10;   */&#10;  void setEnvironment(Environment env) { &#10;    m_env = env&#10;  }&#10;&#10;  /** Stop any processing (if possible)&#10;   */&#10;  void stop() { }&#10;&#10;  /** Alter or add to in order to tell the KnowlegeFlow&#10;   *  whether, at the current time, the named event could&#10;   *  be generated.&#10;   */&#10;  boolean eventGeneratable(String eventName) {&#10;    if (eventName.equals(&quot;text&quot;)) { return true }&#10;    if (eventName.equals(&quot;dataSet&quot;)) { return true }&#10;    return false&#10;  }&#10;&#10;  /** Implement this to tell KnowledgeFlow about any methods&#10;   *  that the user could invoke (i.e. to show a popup visualization&#10;   *  or something).&#10;   */&#10;  Enumeration enumerateRequests() {&#10;    Vector items = new Vector(0)&#10;      items.add(&quot;Set options...&quot;)&#10;      return items.elements()&#10;  }&#10;&#10;  /** Make the user-requested action happen here.&#10;   */&#10;  void performRequest(String requestName) {&#10;    if (requestName.equals(&quot;Set options...&quot;)) {&#10;      def swing = new SwingBuilder()&#10;        def holderP1 = {&#10;        swing.panel() {&#10;          borderLayout()&#10;          label (text:&apos;Holdout set size: &apos;, constraints:BorderLayout.WEST)&#10;          hSize = textField(text:m_holdoutSize, columns:6, &#10;                            actionPerformed: {&#10;                              m_holdoutSize = hSize.text &#10;                            }, constraints:BorderLayout.CENTER)&#10;        }&#10;      }&#10;&#10;      def holderP2 = {&#10;        swing.panel() {&#10;          borderLayout()&#10;          label (text:&apos;Number of steps: &apos;, constraints:BorderLayout.WEST)&#10;          nSteps = textField(text:m_numSteps, columns:6,&#10;                             actionPerformed: {&#10;                               m_numSteps = nSteps.text &#10;                             }, constraints:BorderLayout.CENTER)&#10;        } &#10;      }&#10;&#10;      def holderP3 = {&#10;        swing.panel() {&#10;          borderLayout()&#10;          label (text:&apos;Step size: &apos;, constraints:BorderLayout.WEST)&#10;          sSize = textField(text:m_stepSize, columns:6,&#10;                            actionPerformed: {&#10;                              m_stepSize = sSize.text &#10;                            }, constraints:BorderLayout.CENTER)&#10;        } &#10;      }&#10;&#10;      def holderP4 = {&#10;        swing.panel() {&#10;          boxLayout(axis:BoxLayout.Y_AXIS)&#10;          widget(holderP1())&#10;          widget(holderP2())&#10;          widget(holderP3()) &#10;        } &#10;      }&#10;&#10;      def holderP5 = {&#10;        swing.panel() {&#10;          boxLayout(axis:BoxLayout.X_AXIS)&#10;          button(text:&apos;OK&apos;,&#10;                 actionPerformed: {&#10;                   m_holdoutSize = hSize.text&#10;                   m_numSteps = nSteps.text&#10;                   m_stepSize = sSize.text&#10;                   dispose()&#10;                 })&#10;          button(text:&quot;CANCEL&quot;,&#10;                 actionPerformed: {&#10;                   dispose() &#10;                 })&#10;        } &#10;      }&#10;      def frame = swing.frame(title:&apos;Learning Curve Options&apos;, size:[300,600]) {&#10;        borderLayout()&#10;        widget(holderP4(), constraints:BorderLayout.NORTH)&#10;        widget(holderP5(), constraints:BorderLayout.SOUTH)&#10;      }&#10;      frame.pack()&#10;        frame.show()&#10;      &#10;    }&#10;  }&#10;&#10;  //--------------- Incoming events ------------------&#10;  //--------------- Implement as necessary -----------&#10;&#10;  void acceptTrainingSet(TrainingSetEvent e) {&#10;    if (e.isStructureOnly()) {&#10;      return &#10;    }&#10;&#10;    StringBuffer buff = new StringBuffer()&#10;    Instances insts = new Instances(e.getTrainingSet())&#10;    insts.randomize(new Random(1))&#10;&#10;    String hSize = m_holdoutSize&#10;    String sSize = m_stepSize&#10;    String nSteps = m_numSteps&#10;    String classifierName = m_classifierName&#10;    String classifierOptions = m_classifierOptions&#10;    String[] splitOptions = null&#10;&#10;    if (m_env != null) {&#10;      try {&#10;        hSize = m_env.substitute(hSize)&#10;        sSize = m_env.substitute(sSize)&#10;        nSteps = m_env.substitute(nSteps)&#10;        if (classifierName != null &amp;&amp; classifierName.length() &gt; 0) {&#10;          classifierName = m_env.substitute(classifierName) &#10;        }&#10;        if (classifierOptions != null &amp;&amp; classifierOptions.length() &gt; 0) {&#10;          classifierOptions = m_env.substitute(classifierOptions) &#10;        }&#10;      } catch (Exception ex) { &#10;      } &#10;    }&#10;&#10;    weka.classifiers.Classifier classifierToUse = null&#10;    if (m_connectedConfigurable == null) {&#10;      // try and instantiate from the supplied classifier name&#10;      if (classifierName == null || classifierName.length() == 0) {&#10;        if (m_log != null) {&#10;          m_log.statusMessage(&quot;LearningCurve\$&quot;+hashCode()+&quot;|ERROR (see log for details)&quot;)&#10;          m_log.logMessage(&quot;[LearningCurve] No classifier supplied!&quot;)&#10;        }&#10;        return &#10;      }&#10;      if (classifierOptions != null &amp;&amp; classifierOptions.length() &gt; 0) {&#10;        try {&#10;          splitOptions = Utils.splitOptions(classifierOptions)&#10;        } catch (Exception ex) {&#10;          if (m_log != null) {&#10;            m_log.statusMessage(&quot;LearningCurve\$&quot;+hashCode()+&quot;ERROR (see log for details)&quot;)&#10;            m_log.logMessage(&quot;[LearningCurve] Problem parsing classifier options&quot;) &#10;          } &#10;          return&#10;        }&#10;      }&#10;      classifierToUse = AbstractClassifier.forName(classifierName, splitOptions)&#10;    } else {&#10;        classifierToUse = m_connectedConfigurable.getClassifierTemplate()&#10;        classifierToUse = weka.classifiers.AbstractClassifier.makeCopy(classifierToUse)&#10;    }&#10;&#10;    double hS = Double.parseDouble(hSize)&#10;    hS /= 100&#10;    int sS = Integer.parseInt(sSize)&#10;    int nS = Integer.parseInt(nSteps)&#10;&#10;    int numInHoldout = hS * insts.numInstances()&#10;    Instances holdoutI = new Instances(insts, numInHoldout)&#10;    for (int i = insts.numInstances() - numInHoldout; i &lt; insts.numInstances(); i++) {&#10;          holdoutI.add(insts.instance(i)) &#10;    }&#10;&#10;    String classifierSetUpString = classifierToUse.class.toString() + &quot; &quot;&#10;    if (classifierToUse instanceof OptionHandler) {&#10;      classifierSetUpString += Utils.joinOptions(((OptionHandler)classifierToUse).getOptions()) &#10;    }&#10;&#10;    if (m_log != null) {&#10;      m_log.logMessage(&quot;[LearningCurve] Using classifier &quot; + classifierSetUpString) &#10;    }&#10;&#10;    // create the instances structure to hold the learning curve results&#10;    Attribute setSize = new Attribute(&quot;NumInstances&quot;)&#10;    Attribute aucA = new Attribute(&quot;PercentCorrect&quot;)&#10;    FastVector atts = new FastVector()&#10;    atts.addElement(setSize)&#10;    atts.addElement(aucA)&#10;&#10;    // The preceeding &quot;__&quot; tells the DataVisualizer to connect the points with lines&#10;    Instances learnCInstances = new Instances(&quot;__Learning curve: &quot; + classifierSetUpString, atts, 0)&#10;&#10;    boolean done = false&#10;    Instances training = new Instances(insts, 0)&#10;    for (int i = 0; i &lt; nS; i++) {&#10;       if (m_log != null) {&#10;         m_log.statusMessage(&quot;LearningCurve\$&quot;+hashCode()+&quot;|Processing set &quot;+(i+1))&#10;       }&#10;     &#10;       int numInThisStep = ((i + 1) * sS)&#10;       if (numInThisStep &gt;= (insts.numInstances() - numInHoldout)) {&#10;         numInThisStep = (insts.numInstances() - numInHoldout)&#10;         done = true &#10;       }&#10;       for (int k = (i * sS); k &lt; numInThisStep; k++) {&#10;         training.add(insts.instance(k)) &#10;       }&#10;    &#10;&#10;       // train on this set&#10;       Classifier newModel = AbstractClassifier.makeCopies(classifierToUse, 1)[0]&#10;       newModel.buildClassifier(training)&#10;&#10;       Evaluation eval = new Evaluation(holdoutI)&#10;       eval.evaluateModel(newModel, holdoutI)&#10;       double pc = (1.0 - eval.errorRate()) * 100.0&#10;       //double auc = 1.0 - eval.errorRate();&#10;       buff.append(&quot;&quot;+numInThisStep+&quot;,&quot;+pc+&quot;\n&quot;)&#10;       //System.err.println(&quot;&quot;+numInThisStep+&quot;,&quot;+auc+&quot;\n&quot;)&#10;       Instance newInst = new DenseInstance(2)&#10;       newInst.setValue(0, (double)numInThisStep)&#10;       newInst.setValue(1, pc)&#10;       learnCInstances.add(newInst)&#10;       if (done) {&#10;         break &#10;       } &#10;    }&#10;&#10;    if (m_log != null) {&#10;      m_log.statusMessage(&quot;LearningCurve\$&quot;+hashCode()+&quot;|Finished.&quot;)&#10;    }&#10;    //System.err.println(buff.toString())&#10;    m_helper.notifyTextListeners(new TextEvent(this, buff.toString(), &quot;learning curve&quot;))&#10;    m_helper.notifyDataSourceListeners(new DataSetEvent(this, learnCInstances))&#10;  }&#10;&#10;  void acceptTestSet(TestSetEvent e) { }&#10;&#10;  void acceptDataSet(DataSetEvent e) { }&#10;&#10;  void acceptInstance(InstanceEvent e) { }&#10;&#10;  void acceptText(TextEvent e) { }&#10;&#10;  void acceptClassifier(BatchClassifierEvent e) { }&#10;&#10;  void acceptClassifier(IncrementalClassifierEvent e) { }&#10;&#10;  void acceptClusterer(BatchClustererEvent e) { }&#10;&#10;  void acceptGraph(GraphEvent e) { }&#10;&#10;  void acceptDataPoint(ChartEvent e) { }&#10;&#10;  void acceptDataSet(ThresholdDataEvent e) { }&#10;&#10;  void acceptDataSet(VisualizableErrorEvent e) { }&#10;&#10;  void acceptConfiguration(ConfigurationEvent e) { }&#10;&#10;}</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">GroovyComponent</object>
+               <object class="java.lang.String" name="iconPath">org/pentaho/dm/kf/icons/GroovyComponent.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">org/pentaho/dm/kf/icons/GroovyComponent.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">GroovyComponent</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="4">
+         <object class="int" name="id" primitive="yes">4</object>
+         <object class="int" name="x" primitive="yes">229</object>
+         <object class="int" name="y" primitive="yes">271</object>
+         <object class="java.lang.String" name="custom_name">Logistic</object>
+         <object class="weka.gui.beans.Classifier" name="bean">
+            <object class="weka.classifiers.functions.Logistic" name="wrappedAlgorithm">
+               <object class="boolean" name="debug" primitive="yes">false</object>
+               <object array="yes" class="java.lang.String" name="options">
+                  <object class="java.lang.String" name="0">-R</object>
+                  <object class="java.lang.String" name="1">1.0E-8</object>
+                  <object class="java.lang.String" name="2">-M</object>
+                  <object class="java.lang.String" name="3">-1</object>
+                  <object class="java.lang.String" name="4"/>
+                  <object class="java.lang.String" name="5"/>
+               </object>
+            </object>
+            <object class="boolean" name="blockOnLastFold" primitive="yes">false</object>
+            <object class="int" name="executionSlots" primitive="yes">2</object>
+            <object class="boolean" name="updateIncrementalClassifier" primitive="yes">true</object>
+            <object class="boolean" name="resetIncrementalClassifier" primitive="yes">false</object>
+            <object class="java.lang.String" name="loadClassifierFileName"/>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="5">
+         <object class="int" name="id" primitive="yes">5</object>
+         <object class="int" name="x" primitive="yes">669</object>
+         <object class="int" name="y" primitive="yes">271</object>
+         <object class="java.lang.String" name="custom_name">DataVisualizer</object>
+         <object class="weka.gui.beans.DataVisualizer" name="bean">
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">DataVisualizer</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/DefaultDataVisualizer.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/DefaultDataVisualizer_animated.gif</object>
+            </object>
+            <object class="null" name="name" null="yes"/>
+            <object class="java.lang.String" name="offscreenRendererName">Weka Chart Renderer</object>
+            <object class="java.lang.String" name="offscreenHeight">400</object>
+            <object class="java.lang.String" name="customName">DataVisualizer</object>
+            <object class="java.lang.String" name="offscreenYAxis"/>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+            <object class="java.lang.String" name="offscreenWidth">500</object>
+            <object class="java.lang.String" name="offscreenAdditionalOpts"/>
+            <object class="java.lang.String" name="offscreenXAxis"/>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="6">
+         <object class="int" name="id" primitive="yes">6</object>
+         <object class="int" name="x" primitive="yes">669</object>
+         <object class="int" name="y" primitive="yes">111</object>
+         <object class="java.lang.String" name="custom_name">TextViewer</object>
+         <object class="weka.gui.beans.TextViewer" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">TextViewer</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/DefaultText.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/DefaultText_animated.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">TextViewer</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="7">
+         <object class="int" name="id" primitive="yes">7</object>
+         <object class="int" name="x" primitive="yes">103</object>
+         <object class="int" name="y" primitive="yes">190</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Load German credit&#10;data</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="8">
+         <object class="int" name="id" primitive="yes">8</object>
+         <object class="int" name="x" primitive="yes">236</object>
+         <object class="int" name="y" primitive="yes">355</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Provides the configured&#10;classifier definition to&#10;use for the learning&#10;curve</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="9">
+         <object class="int" name="id" primitive="yes">9</object>
+         <object class="int" name="x" primitive="yes">447</object>
+         <object class="int" name="y" primitive="yes">369</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Groovy script to generate&#10;the learning curve using&#10;the incoming data and&#10;classifier definition</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="10">
+         <object class="int" name="id" primitive="yes">10</object>
+         <object class="int" name="x" primitive="yes">675</object>
+         <object class="int" name="y" primitive="yes">340</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Visualize the curve</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="11">
+         <object class="int" name="id" primitive="yes">11</object>
+         <object class="int" name="x" primitive="yes">684</object>
+         <object class="int" name="y" primitive="yes">183</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Textual learning curve&#10;data</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="12">
+         <object class="int" name="id" primitive="yes">12</object>
+         <object class="int" name="x" primitive="yes">392</object>
+         <object class="int" name="y" primitive="yes">34</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">&lt;html&gt;&lt;b&gt;NOTE: this flow is configured to run out of the box.&lt;/b&gt; It loads an ARFF file as a resource from the classpath. If you want &#10;to use your own data, edit the ArffLoader.&lt;/html&gt;</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+   </object>
+   <object class="java.util.Vector" name="1">
+      <object class="weka.gui.beans.BeanConnection" name="0">
+         <object class="int" name="source_id" primitive="yes">0</object>
+         <object class="int" name="target_id" primitive="yes">1</object>
+         <object class="java.lang.String" name="eventname">dataSet</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="1">
+         <object class="int" name="source_id" primitive="yes">1</object>
+         <object class="int" name="target_id" primitive="yes">2</object>
+         <object class="java.lang.String" name="eventname">dataSet</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="2">
+         <object class="int" name="source_id" primitive="yes">2</object>
+         <object class="int" name="target_id" primitive="yes">3</object>
+         <object class="java.lang.String" name="eventname">trainingSet</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="3">
+         <object class="int" name="source_id" primitive="yes">4</object>
+         <object class="int" name="target_id" primitive="yes">3</object>
+         <object class="java.lang.String" name="eventname">configuration</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="4">
+         <object class="int" name="source_id" primitive="yes">3</object>
+         <object class="int" name="target_id" primitive="yes">5</object>
+         <object class="java.lang.String" name="eventname">dataSet</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="5">
+         <object class="int" name="source_id" primitive="yes">3</object>
+         <object class="int" name="target_id" primitive="yes">6</object>
+         <object class="java.lang.String" name="eventname">text</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+   </object>
+</object>

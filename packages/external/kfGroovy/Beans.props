@@ -1,2 +1,4 @@
 # Specifies the tools to go into the Plugins toolbar
 weka.gui.beans.KnowledgeFlow.Plugins=org.pentaho.dm.kf.GroovyComponent
+weka.gui.beans.KnowledgeFlow.templates=org/pentaho/dm/kf/templates/learningCurve.kfml
+weka.gui.beans.KnowledgeFlow.templates.desc=Groovy scripting: learning curve
