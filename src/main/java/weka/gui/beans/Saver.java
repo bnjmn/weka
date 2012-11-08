@@ -589,7 +589,9 @@ public class Saver extends AbstractDataSink implements WekaWrapper,
         }
         m_Saver.writeIncremental(e.getInstance());
         if (e.getInstance() != null) {
+          m_throughput.updateStart();
           m_Saver.writeIncremental(null);
+          m_throughput.updateEnd(m_logger);
         }
         // m_firstNotice = true;
         m_visual.setStatic();
