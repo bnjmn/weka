@@ -61,6 +61,7 @@ import weka.core.converters.ConverterUtils;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.beans.PluginManager;
 import weka.gui.explorer.ExplorerDefaults;
 
 /**
@@ -93,6 +94,7 @@ public class WekaPackageManager {
   private static boolean USER_SET_REPO = false;
 
   private static String PACKAGE_MANAGER_PROPS_FILE_NAME = "PackageManager.props";
+  private static Properties m_generalProps;
 
   public static boolean m_offline;
   private static boolean m_loadPackages = true;
@@ -248,6 +250,7 @@ public class WekaPackageManager {
       Properties gProps = new Properties();
       try {
         gProps.load(new FileInputStream(generalProps));
+        m_generalProps = gProps;
 
         // this one takes precedence over the legacy one
         String repURL = gProps
@@ -269,6 +272,18 @@ public class WekaPackageManager {
         }
         if (loadPackages != null) {
           m_loadPackages = loadPackages.equalsIgnoreCase("true");
+        }
+
+        String pluginManagerDisableList = gProps
+            .getProperty("weka.pluginManager.disable");
+        if (pluginManagerDisableList != null
+            && pluginManagerDisableList.length() > 0) {
+          List<String> disable = new ArrayList<String>();
+          String[] parts = pluginManagerDisableList.split(",");
+          for (String s : parts) {
+            disable.add(s.trim());
+          }
+          PluginManager.addToDisabledList(disable);
         }
       } catch (FileNotFoundException e) {
         e.printStackTrace();
@@ -491,6 +506,13 @@ public class WekaPackageManager {
     }
   }
 
+  protected static void processPluginManagerProps(File propsFile) {
+    try {
+      PluginManager.addFromProperties(propsFile);
+    } catch (Exception ex) {
+    }
+  }
+
   protected static void loadPackageDirectory(File directory, boolean verbose)
       throws Exception {
     File[] contents = directory.listFiles();
@@ -530,6 +552,9 @@ public class WekaPackageManager {
       } else if (contents[i].isFile()
           && contents[i].getPath().endsWith("GenericPropertiesCreator.props")) {
         processGenericPropertiesCreatorProps(contents[i]);
+      } else if (contents[i].isFile()
+          && contents[i].getParent().endsWith("PluginManager.props")) {
+        processPluginManagerProps(contents[i]);
       }
     }
   }

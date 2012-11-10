@@ -2403,6 +2403,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
             while (st2.hasMoreTokens()) {
               String className = st2.nextToken();
               try {
+                if (PluginManager.isInDisabledList(className)) {
+                  continue;
+                }
                 Object p = Class.forName(className).newInstance();
                 if (p instanceof KFPerspective && p instanceof JPanel) {
                   String title = ((KFPerspective) p).getPerspectiveTitle();
