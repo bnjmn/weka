@@ -26,7 +26,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -49,6 +51,67 @@ public class PluginManager {
    * plugin name/short title with values the actual fully qualified class name
    */
   protected static Map<String, Map<String, String>> PLUGINS = new HashMap<String, Map<String, String>>();
+
+  /**
+   * Set of concrete fully qualified class names or abstract/interface base
+   * types to "disable". Entries in this list wont ever be returned by any of
+   * the getPlugin() methods. Registering an abstract/interface base name will
+   * disable all concrete implementations of that type
+   */
+  protected static Set<String> DISABLED = new HashSet<String>();
+
+  /**
+   * Add the supplied list of fully qualified class names to the disabled list
+   * 
+   * @param classnames a list of class names to add
+   */
+  public static synchronized void addToDisabledList(List<String> classnames) {
+    for (String s : classnames) {
+      addToDisabledList(s);
+    }
+  }
+
+  /**
+   * Add the supplied fully qualified class name to the list of disabled plugins
+   * 
+   * @param classname the fully qualified name of a class to add
+   */
+  public static synchronized void addToDisabledList(String classname) {
+    DISABLED.add(classname);
+  }
+
+  /**
+   * Remove the supplied list of fully qualified class names to the disabled
+   * list
+   * 
+   * @param classnames a list of class names to remove
+   */
+  public static synchronized void removeFromDisabledList(List<String> classnames) {
+    for (String s : classnames) {
+      removeFromDisabledList(s);
+    }
+  }
+
+  /**
+   * Remove the supplied fully qualified class name from the list of disabled
+   * plugins
+   * 
+   * @param classname the fully qualified name of a class to remove
+   */
+  public static synchronized void removeFromDisabledList(String classname) {
+    DISABLED.remove(classname);
+  }
+
+  /**
+   * Returns true if the supplied fully qualified class name is in the disabled
+   * list
+   * 
+   * @param classname the name of the class to check
+   * @return true if the supplied class name is in the disabled list
+   */
+  public static boolean isInDisabledList(String classname) {
+    return DISABLED.contains(classname);
+  }
 
   /**
    * Add all key value pairs from the supplied property file
@@ -76,11 +139,23 @@ public class PluginManager {
     expProps.load(propsStream);
     propsStream.close();
     propsStream = null;
-    Set keys = expProps.keySet();
+
+    addFromProperties(expProps);
+  }
+
+  /**
+   * Add all key value pairs from the supplied properties object
+   * 
+   * @param props a Properties object
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(Properties props)
+      throws Exception {
+    Set keys = props.keySet();
     Iterator keysI = keys.iterator();
     while (keysI.hasNext()) {
       String baseType = (String) keysI.next();
-      String implementations = expProps.getProperty(baseType);
+      String implementations = props.getProperty(baseType);
       if (implementations != null && implementations.length() > 0) {
         String[] parts = implementations.split(",");
         for (String impl : parts) {
@@ -100,7 +175,16 @@ public class PluginManager {
    */
   public static Set<String> getPluginNamesOfType(String interfaceName) {
     if (PLUGINS.get(interfaceName) != null) {
-      return PLUGINS.get(interfaceName).keySet();
+      Set<String> match = PLUGINS.get(interfaceName).keySet();
+      Set<String> result = new HashSet<String>();
+      for (String s : match) {
+        String impl = PLUGINS.get(interfaceName).get(s);
+        if (!DISABLED.contains(impl)) {
+          result.add(s);
+        }
+      }
+      // return PLUGINS.get(interfaceName).keySet();
+      return result;
     }
 
     return null;
@@ -128,11 +212,38 @@ public class PluginManager {
   }
 
   /**
+   * Remove plugins of a specific type.
+   * 
+   * @param interfaceName the fully qualified interface name that the plugins to
+   *          be remove implement
+   * @param names a list of named plugins to remove
+   */
+  public static void removePlugins(String interfaceName, List<String> names) {
+    for (String name : names) {
+      removePlugin(interfaceName, name);
+    }
+  }
+
+  /**
+   * Remove a plugin.
+   * 
+   * @param interfaceName the fully qualified interface name that the plugin
+   *          implements
+   * 
+   * @param name the name/short description of the plugin
+   */
+  public static void removePlugin(String interfaceName, String name) {
+    if (PLUGINS.get(interfaceName) != null) {
+      PLUGINS.get(interfaceName).remove(name);
+    }
+  }
+
+  /**
    * Get an instance of a concrete implementation of a plugin type
    * 
    * @param interfaceType the fully qualified interface name of the plugin type
    * @param name the name/short description of the plugin to get
-   * @return the concrete plugin
+   * @return the concrete plugin or null if the plugin is disabled
    * @throws Exception if the plugin can't be found or instantiated
    */
   public static Object getPluginInstance(String interfaceType, String name)
@@ -150,7 +261,10 @@ public class PluginManager {
     }
 
     String concreteImpl = pluginsOfInterfaceType.get(name);
-    Object plugin = Class.forName(concreteImpl).newInstance();
+    Object plugin = null;
+    if (!DISABLED.contains(concreteImpl)) {
+      plugin = Class.forName(concreteImpl).newInstance();
+    }
 
     return plugin;
   }
