@@ -51,6 +51,7 @@ import weka.gui.LogPanel;
 import weka.gui.Logger;
 import weka.gui.LookAndFeel;
 import weka.gui.WekaTaskMonitor;
+import weka.gui.beans.PluginManager;
 
 /** 
  * The main class for the Weka explorer. Lets the user create,
@@ -223,6 +224,9 @@ public class Explorer
 	// determine classname and additional options
 	String[] optionsStr = tabs[i].split(":");
 	String classname = optionsStr[0];
+	if (PluginManager.isInDisabledList(classname)) {
+	  continue;
+	}
 	HashSet options = new HashSet();
 	tabOptions.put(classname, options);
 	for (int n = 1; n < optionsStr.length; n++)
