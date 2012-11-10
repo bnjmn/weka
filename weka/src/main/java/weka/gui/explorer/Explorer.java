@@ -15,22 +15,11 @@
 
 /*
  *    Explorer.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.explorer;
-
-import weka.core.Capabilities;
-import weka.core.Copyright;
-import weka.core.Instances;
-import weka.core.Memory;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.ConverterUtils;
-import weka.gui.LogPanel;
-import weka.gui.Logger;
-import weka.gui.LookAndFeel;
-import weka.gui.WekaTaskMonitor;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
@@ -51,6 +40,18 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
+
+import weka.core.Capabilities;
+import weka.core.Copyright;
+import weka.core.Instances;
+import weka.core.Memory;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.ConverterUtils;
+import weka.gui.LogPanel;
+import weka.gui.Logger;
+import weka.gui.LookAndFeel;
+import weka.gui.WekaTaskMonitor;
+import weka.gui.beans.PluginManager;
 
 /** 
  * The main class for the Weka explorer. Lets the user create,
@@ -223,6 +224,9 @@ public class Explorer
 	// determine classname and additional options
 	String[] optionsStr = tabs[i].split(":");
 	String classname = optionsStr[0];
+	if (PluginManager.isInDisabledList(classname)) {
+	  continue;
+	}
 	HashSet options = new HashSet();
 	tabOptions.put(classname, options);
 	for (int n = 1; n < optionsStr.length; n++)
@@ -351,12 +355,11 @@ public class Explorer
   public static void main(String [] args) {
 
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
-
+    
+    LookAndFeel.setLookAndFeel();
     // make sure that packages are loaded and the GenericPropertiesCreator
     // executes to populate the lists correctly
     weka.gui.GenericObjectEditor.determineClasses();
-    
-    LookAndFeel.setLookAndFeel();
     
     try {
       // uncomment to disable the memory management:
@@ -377,7 +380,7 @@ public class Explorer
       jf.setVisible(true);
       Image icon = Toolkit.getDefaultToolkit().
         getImage(m_explorer.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
-      jf.setIconImage(icon);      
+      jf.setIconImage(icon);
 
       if (args.length == 1) {
         System.err.println("Loading instances from " + args[0]);

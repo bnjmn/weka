@@ -49,6 +49,7 @@ import java.lang.reflect.Array;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -78,6 +79,7 @@ import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.WekaPackageManager;
 import weka.gui.CheckBoxList.CheckBoxListModel;
+import weka.gui.beans.PluginManager;
 
 /**
  * A PropertyEditor for objects. It can be used either in a static or a dynamic
@@ -223,6 +225,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
             "Could not initialize the GenericPropertiesCreator. ",
             "GenericObjectEditor",
             JOptionPane.ERROR_MESSAGE);
+      } else {
+        PluginManager.addFromProperties(EDITOR_PROPERTIES);
       }
     } catch (Exception e) {
       JOptionPane.showMessageDialog(
@@ -1181,7 +1185,14 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
     Hashtable hpps = new Hashtable();
     String className = m_ClassType.getName();
-    Hashtable typeOptions = sortClassesByRoot(EDITOR_PROPERTIES.getProperty(className));
+    Set<String> cls = PluginManager.getPluginNamesOfType(className);
+    StringBuilder b = new StringBuilder();
+    for (String s : cls) {
+      b.append(s).append(",");
+    }
+    String listS = b.substring(0, b.length() - 1);
+//    Hashtable typeOptions = sortClassesByRoot(EDITOR_PROPERTIES.getProperty(className));
+    Hashtable typeOptions = sortClassesByRoot(listS);
     if (typeOptions == null) {
       /*
       System.err.println("Warning: No configuration property found in\n"
@@ -1756,13 +1767,11 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     String[]		items;
     int			i;
     
+    Set<String> r = PluginManager.getPluginNamesOfType(property);
+
     result = new Vector<String>();
-    
-    value = EDITOR_PROPERTIES.getProperty(property, "").replaceAll(" ", "").trim();
-    if (value.length() > 0) {
-      items = value.split(",");
-      for (i = 0; i < items.length; i++)
-	result.add(items[i]);
+    if (r != null) {
+      result.addAll(r);
     }
     
     return result;
