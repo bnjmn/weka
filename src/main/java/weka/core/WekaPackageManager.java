@@ -553,7 +553,7 @@ public class WekaPackageManager {
           && contents[i].getPath().endsWith("GenericPropertiesCreator.props")) {
         processGenericPropertiesCreatorProps(contents[i]);
       } else if (contents[i].isFile()
-          && contents[i].getParent().endsWith("PluginManager.props")) {
+          && contents[i].getPath().endsWith("PluginManager.props")) {
         processPluginManagerProps(contents[i]);
       }
     }
