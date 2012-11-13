@@ -46,6 +46,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
@@ -81,6 +82,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
+import weka.classifiers.evaluation.AbstractEvaluationMetric;
 import weka.classifiers.evaluation.CostCurve;
 import weka.classifiers.evaluation.MarginCurve;
 import weka.classifiers.evaluation.ThresholdCurve;
@@ -107,6 +109,7 @@ import weka.core.converters.Loader;
 import weka.core.pmml.PMMLFactory;
 import weka.core.pmml.PMMLModel;
 import weka.gui.CostMatrixEditor;
+import weka.gui.EvaluationMetricSelectionDialog;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.Logger;
@@ -327,6 +330,10 @@ public class ClassifierPanel extends JPanel implements
   /** The file chooser for selecting model files. */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(
       System.getProperty("user.dir")));
+
+  /** The user's list of selected evaluation metrics */
+  protected List<String> m_selectedEvalMetrics = Evaluation
+      .getAllEvaluationMetricNames();
 
   /* Register the property editors we need */
   static {
@@ -569,7 +576,7 @@ public class ClassifierPanel extends JPanel implements
         m_MoreOptions.setEnabled(false);
         JPanel moreOptionsPanel = new JPanel();
         moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-        moreOptionsPanel.setLayout(new GridLayout(10, 1));
+        moreOptionsPanel.setLayout(new GridLayout(0, 1));
         moreOptionsPanel.add(m_OutputModelBut);
         moreOptionsPanel.add(m_OutputPerClassBut);
         moreOptionsPanel.add(m_OutputEntropyBut);
@@ -633,6 +640,30 @@ public class ClassifierPanel extends JPanel implements
         m_ClassificationOutputPanel.setPreferredSize(new Dimension(300,
             m_ClassificationOutputPanel.getHeight()));
         jd.pack();
+
+        final List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric
+            .getPluginMetrics();
+
+        final JButton editEvalMetrics = new JButton("Evaluation metrics...");
+        JPanel evalP = new JPanel();
+        evalP.setLayout(new BorderLayout());
+        evalP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        evalP.add(editEvalMetrics, BorderLayout.CENTER);
+        editEvalMetrics
+            .setToolTipText("Enable/disable output of specific evaluation metrics");
+        moreOptionsPanel.add(evalP);
+
+        editEvalMetrics.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            EvaluationMetricSelectionDialog esd = new EvaluationMetricSelectionDialog(
+                jd, m_selectedEvalMetrics);
+            esd.setLocation(m_MoreOptions.getLocationOnScreen());
+            esd.pack();
+            esd.setVisible(true);
+            m_selectedEvalMetrics = esd.getSelectedEvalMetrics();
+          }
+        });
 
         jd.setLocation(m_MoreOptions.getLocationOnScreen());
         jd.setVisible(true);
@@ -1348,6 +1379,7 @@ public class ClassifierPanel extends JPanel implements
               // make adjustments if the classifier is an InputMappedClassifier
               eval = setupEval(eval, classifier, inst, costMatrix,
                   plotInstances, classificationOutput, false);
+              eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
               plotInstances.setUp();
@@ -1414,6 +1446,7 @@ public class ClassifierPanel extends JPanel implements
               // make adjustments if the classifier is an InputMappedClassifier
               eval = setupEval(eval, classifier, inst, costMatrix,
                   plotInstances, classificationOutput, false);
+              eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
               plotInstances.setUp();
@@ -1433,6 +1466,7 @@ public class ClassifierPanel extends JPanel implements
                 // InputMappedClassifier
                 eval = setupEval(eval, classifier, train, costMatrix,
                     plotInstances, classificationOutput, true);
+                eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
                 // eval.setPriors(train);
                 m_Log.statusMessage("Building model for fold " + (fold + 1)
@@ -1512,6 +1546,7 @@ public class ClassifierPanel extends JPanel implements
               // make adjustments if the classifier is an InputMappedClassifier
               eval = setupEval(eval, classifier, train, costMatrix,
                   plotInstances, classificationOutput, false);
+              eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
               plotInstances.setUp();
@@ -1561,6 +1596,7 @@ public class ClassifierPanel extends JPanel implements
               // make adjustments if the classifier is an InputMappedClassifier
               eval = setupEval(eval, classifier, inst, costMatrix,
                   plotInstances, classificationOutput, false);
+              eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
               plotInstances.setUp();
@@ -2718,6 +2754,7 @@ public class ClassifierPanel extends JPanel implements
             m_Log.logMessage("Re-evaluating classifier (" + name
                 + ") on test set");
             eval = new Evaluation(userTestStructure, costMatrix);
+            eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
             // set up the structure of the plottable instances for
             // visualization if selected
