@@ -28,10 +28,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import weka.gui.EvaluationMetricSelectionDialog;
 import weka.gui.PropertySheetPanel;
 
 /**
@@ -59,6 +62,9 @@ public class ClassifierPerformanceEvaluatorCustomizer extends JPanel implements
 
   private Window m_parent;
 
+  private final JButton m_evalMetricsBut = new JButton("Evaluation metrics...");
+  private List<String> m_evaluationMetrics;
+
   /**
    * Constructor
    */
@@ -66,9 +72,15 @@ public class ClassifierPerformanceEvaluatorCustomizer extends JPanel implements
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
 
     setLayout(new BorderLayout());
-    add(m_splitEditor, BorderLayout.CENTER);
-    add(new javax.swing.JLabel("ClassifierPerformanceEvaluatorCustomizer"),
-        BorderLayout.NORTH);
+
+    JPanel holder = new JPanel();
+    holder.setLayout(new BorderLayout());
+
+    holder.add(m_splitEditor, BorderLayout.NORTH);
+    holder.add(m_evalMetricsBut, BorderLayout.SOUTH);
+    add(holder, BorderLayout.NORTH);
+    m_evalMetricsBut
+        .setToolTipText("Enable/disable output of specific evaluation metrics");
 
     addButtons();
   }
@@ -89,6 +101,15 @@ public class ClassifierPerformanceEvaluatorCustomizer extends JPanel implements
         if (m_modifyListener != null) {
           m_modifyListener.setModifiedStatus(
               ClassifierPerformanceEvaluatorCustomizer.this, true);
+        }
+
+        if (m_evaluationMetrics.size() > 0) {
+          StringBuilder b = new StringBuilder();
+          for (String s : m_evaluationMetrics) {
+            b.append(s).append(",");
+          }
+          String newList = b.substring(0, b.length() - 1);
+          m_cpe.setEvaluationMetricsToOutput(newList);
         }
         if (m_parent != null) {
           m_parent.dispose();
@@ -118,6 +139,15 @@ public class ClassifierPerformanceEvaluatorCustomizer extends JPanel implements
     m_cpe = (ClassifierPerformanceEvaluator) object;
     m_executionSlotsBackup = m_cpe.getExecutionSlots();
     m_splitEditor.setTarget(m_cpe);
+
+    String list = m_cpe.getEvaluationMetricsToOutput();
+    m_evaluationMetrics = new ArrayList<String>();
+    if (list != null && list.length() > 0) {
+      String[] parts = list.split(",");
+      for (String s : parts) {
+        m_evaluationMetrics.add(s.trim());
+      }
+    }
   }
 
   /**
@@ -154,6 +184,18 @@ public class ClassifierPerformanceEvaluatorCustomizer extends JPanel implements
   @Override
   public void setParentWindow(Window parent) {
     m_parent = parent;
+
+    m_evalMetricsBut.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        EvaluationMetricSelectionDialog esd = new EvaluationMetricSelectionDialog(
+            m_parent, m_evaluationMetrics);
+        esd.setLocation(m_evalMetricsBut.getLocationOnScreen());
+        esd.pack();
+        esd.setVisible(true);
+        m_evaluationMetrics = esd.getSelectedEvalMetrics();
+      }
+    });
 
   }
 
