@@ -1525,6 +1525,9 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    */
   @Override
   public boolean equals(Object obj) {
+    if (obj instanceof weka.classifiers.Evaluation) {
+      obj = ((weka.classifiers.Evaluation) obj).m_delegate;
+    }
     return m_delegate.equals(obj);
   }
 
