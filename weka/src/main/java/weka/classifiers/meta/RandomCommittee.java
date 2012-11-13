@@ -22,6 +22,7 @@
 package weka.classifiers.meta;
 
 import java.util.Random;
+import java.util.ArrayList;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
@@ -31,6 +32,7 @@ import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.PartitionGenerator;
 
 /**
  <!-- globalinfo-start -->
@@ -89,10 +91,10 @@ import weka.core.WeightedInstancesHandler;
  */
 public class RandomCommittee 
   extends RandomizableParallelIteratedSingleClassifierEnhancer
-  implements WeightedInstancesHandler {
+  implements WeightedInstancesHandler, PartitionGenerator {
     
   /** for serialization */
-  static final long serialVersionUID = -9204394360557300092L;
+  static final long serialVersionUID = -9204394360557300093L;
   
   /** training data */
   protected Instances m_data;
@@ -152,6 +154,12 @@ public class RandomCommittee
     m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, m_NumIterations);
 
     Random random = m_data.getRandomNumberGenerator(m_Seed);
+
+    // Resample data based on weights if base learner can't handle weights
+    if (!(m_Classifier instanceof WeightedInstancesHandler)) {
+      m_data = m_data.resampleWithWeights(random);
+    }
+
     for (int j = 0; j < m_Classifiers.length; j++) {
 
       // Set the random number seed for the current classifier.
@@ -229,7 +237,58 @@ public class RandomCommittee
 
     return text.toString();
   }
+    
+  /**
+   * Builds the classifier to generate a partition.
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator)
+      buildClassifier(data);
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot generate a partition");
+  }
   
+  /**
+   * Computes an array that indicates leaf membership
+   */
+  public double[] getMembershipValues(Instance inst) throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator) {
+      ArrayList<double[]> al = new ArrayList<double[]>();
+      int size = 0;
+      for (int i = 0; i < m_Classifiers.length; i++) {
+        double[] r = ((PartitionGenerator)m_Classifiers[i]).
+          getMembershipValues(inst);
+        size += r.length;
+        al.add(r);
+      }
+      double[] values = new double[size];
+      int pos = 0;
+      for (double[] v: al) {
+        System.arraycopy(v, 0, values, pos, v.length);
+        pos += v.length;
+      }
+      return values;
+    } else throw new Exception("Classifier: " + getClassifierSpec()
+                               + " cannot generate a partition");
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator) {
+      int size = 0;
+      for (int i = 0; i < m_Classifiers.length; i++) {
+        size += ((PartitionGenerator)m_Classifiers[i]).numElements();
+      }
+      return size;
+    } else throw new Exception("Classifier: " + getClassifierSpec()
+                               + " cannot generate a partition");
+  }
+
   /**
    * Returns the revision string.
    * 
