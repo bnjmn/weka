@@ -84,11 +84,60 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
    */
   protected int m_executionSlots = 2;
 
+  /** Evaluation metrics to output */
+  protected String m_selectedEvalMetrics = "";
+  protected List<String> m_metricsList = new ArrayList<String>();
+
   public ClassifierPerformanceEvaluator() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
         + "ClassifierPerformanceEvaluator.gif", BeanVisual.ICON_PATH
         + "ClassifierPerformanceEvaluator_animated.gif");
     m_visual.setText("ClassifierPerformanceEvaluator");
+
+    m_metricsList = Evaluation.getAllEvaluationMetricNames();
+    StringBuilder b = new StringBuilder();
+    for (String s : m_metricsList) {
+      b.append(s).append(",");
+    }
+    m_selectedEvalMetrics = b.substring(0, b.length() - 1);
+  }
+
+  protected void stringToList(String l) {
+    if (l != null && l.length() > 0) {
+      String[] parts = l.split(",");
+      m_metricsList.clear();
+      for (String s : parts) {
+        m_metricsList.add(s.trim());
+      }
+    }
+  }
+
+  /**
+   * Set the evaluation metrics to output (as a comma-separated list).
+   * 
+   * @param m the evaluation metrics to output
+   */
+  public void setEvaluationMetricsToOutput(String m) {
+    m_selectedEvalMetrics = m;
+    stringToList(m);
+  }
+
+  /**
+   * Get the evaluation metrics to output (as a comma-separated list).
+   * 
+   * @return the evaluation metrics to output
+   */
+  public String getEvaluationMetricsToOutput() {
+    return m_selectedEvalMetrics;
+  }
+
+  /**
+   * Get the tip text for this property.
+   * 
+   * @return the tip text for this property.
+   */
+  public String evaluationMetricsToOutputTipText() {
+    return "A comma-separated list of evaluation metrics to output";
   }
 
   /**
@@ -270,6 +319,7 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
               plotInstances);
 
           eval.useNoPriors();
+          eval.setMetricsToDisplay(m_metricsList);
         } else {
           eval = new Evaluation(m_trainData);
           plotInstances.setInstances(m_trainData);
@@ -278,6 +328,7 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
           plotInstances.setEvaluation(eval);
           eval = adjustForInputMappedClassifier(eval, m_classifier,
               m_trainData, plotInstances);
+          eval.setMetricsToDisplay(m_metricsList);
         }
 
         plotInstances.setUp();
@@ -518,6 +569,7 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
               .getTestSet().getDataSet(), m_PlotInstances);
           eval.useNoPriors();
           m_eval = new AggregateableEvaluation(eval);
+          m_eval.setMetricsToDisplay(m_metricsList);
         } else {
           // we can set up with the training set here
           Evaluation eval = new Evaluation(ce.getTrainSet().getDataSet());
@@ -531,6 +583,7 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
           eval = adjustForInputMappedClassifier(eval, ce.getClassifier(), ce
               .getTrainSet().getDataSet(), m_PlotInstances);
           m_eval = new AggregateableEvaluation(eval);
+          m_eval.setMetricsToDisplay(m_metricsList);
         }
 
         m_PlotInstances.setUp();
@@ -573,6 +626,7 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
         m_executorPool.execute(newTask);
       }
     } catch (Exception ex) {
+      ex.printStackTrace();
       // stop everything
       stop();
     }

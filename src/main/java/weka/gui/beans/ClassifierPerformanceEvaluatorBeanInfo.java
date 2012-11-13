@@ -28,58 +28,58 @@ import java.beans.SimpleBeanInfo;
 
 /**
  * Bean info class for the classifier performance evaluator
- *
+ * 
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
  * @version $Revision$
  */
 public class ClassifierPerformanceEvaluatorBeanInfo extends SimpleBeanInfo {
-  
-  public EventSetDescriptor [] getEventSetDescriptors() {
+
+  @Override
+  public EventSetDescriptor[] getEventSetDescriptors() {
     try {
-      EventSetDescriptor [] esds = { 
-	new EventSetDescriptor(ClassifierPerformanceEvaluator.class, 
-			       "text", 
-			       TextListener.class, 
-			       "acceptText"),
-	new EventSetDescriptor(ClassifierPerformanceEvaluator.class, 
-			       "thresholdData", 
-			       ThresholdDataListener.class, 
-			       "acceptDataSet"),
-      	new EventSetDescriptor(ClassifierPerformanceEvaluator.class, 
-			       "visualizableError", 
-			       VisualizableErrorListener.class, 
-			       "acceptDataSet")};
+      EventSetDescriptor[] esds = {
+          new EventSetDescriptor(ClassifierPerformanceEvaluator.class, "text",
+              TextListener.class, "acceptText"),
+          new EventSetDescriptor(ClassifierPerformanceEvaluator.class,
+              "thresholdData", ThresholdDataListener.class, "acceptDataSet"),
+          new EventSetDescriptor(ClassifierPerformanceEvaluator.class,
+              "visualizableError", VisualizableErrorListener.class,
+              "acceptDataSet") };
       return esds;
     } catch (Exception ex) {
       ex.printStackTrace();
     }
     return null;
   }
-  
+
   /**
    * Get the property descriptors for this bean
-   *
+   * 
    * @return a <code>PropertyDescriptor[]</code> value
    */
+  @Override
   public PropertyDescriptor[] getPropertyDescriptors() {
     try {
       PropertyDescriptor p1;
-      p1 = new PropertyDescriptor("executionSlots", ClassifierPerformanceEvaluator.class);
-      PropertyDescriptor [] pds = { p1 };
+      p1 = new PropertyDescriptor("executionSlots",
+          ClassifierPerformanceEvaluator.class);
+      PropertyDescriptor[] pds = { p1 };
       return pds;
     } catch (Exception ex) {
       ex.printStackTrace();
     }
     return null;
   }
-  
+
   /**
    * Get the bean descriptor for this bean
-   *
+   * 
    * @return a <code>BeanDescriptor</code> value
    */
+  @Override
   public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(weka.gui.beans.ClassifierPerformanceEvaluator.class,
-                              ClassifierPerformanceEvaluatorCustomizer.class);
+    return new BeanDescriptor(
+        weka.gui.beans.ClassifierPerformanceEvaluator.class,
+        ClassifierPerformanceEvaluatorCustomizer.class);
   }
 }
