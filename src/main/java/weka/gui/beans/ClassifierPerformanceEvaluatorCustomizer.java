@@ -42,60 +42,62 @@ import weka.gui.PropertySheetPanel;
  */
 public class ClassifierPerformanceEvaluatorCustomizer extends JPanel implements
     BeanCustomizer, CustomizerCloseRequester, CustomizerClosingListener {
-  
+
   /**
    * For serialization
    */
   private static final long serialVersionUID = -1055460295546483853L;
 
-  private PropertyChangeSupport m_pcSupport = 
-    new PropertyChangeSupport(this);
+  private final PropertyChangeSupport m_pcSupport = new PropertyChangeSupport(
+      this);
 
-  private PropertySheetPanel m_splitEditor = 
-    new PropertySheetPanel();
-  
+  private final PropertySheetPanel m_splitEditor = new PropertySheetPanel();
+
   private ClassifierPerformanceEvaluator m_cpe;
   private ModifyListener m_modifyListener;
   private int m_executionSlotsBackup;
-  
+
   private Window m_parent;
-  
+
   /**
    * Constructor
    */
   public ClassifierPerformanceEvaluatorCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
-    
+
     setLayout(new BorderLayout());
     add(m_splitEditor, BorderLayout.CENTER);
-    add(new javax.swing.JLabel("ClassifierPerformanceEvaluatorCustomizer"), 
+    add(new javax.swing.JLabel("ClassifierPerformanceEvaluatorCustomizer"),
         BorderLayout.NORTH);
-    
+
     addButtons();
   }
-  
+
   private void addButtons() {
     JButton okBut = new JButton("OK");
     JButton cancelBut = new JButton("Cancel");
-    
+
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new GridLayout(1, 2));
-    butHolder.add(okBut); butHolder.add(cancelBut);
-    add(butHolder, BorderLayout.SOUTH);        
-    
+    butHolder.add(okBut);
+    butHolder.add(cancelBut);
+    add(butHolder, BorderLayout.SOUTH);
+
     okBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if (m_modifyListener != null) {
-          m_modifyListener.
-            setModifiedStatus(ClassifierPerformanceEvaluatorCustomizer.this, true);
+          m_modifyListener.setModifiedStatus(
+              ClassifierPerformanceEvaluatorCustomizer.this, true);
         }
         if (m_parent != null) {
           m_parent.dispose();
         }
       }
     });
-    
+
     cancelBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
 
         customizerClosing();
@@ -108,28 +110,32 @@ public class ClassifierPerformanceEvaluatorCustomizer extends JPanel implements
 
   /**
    * Set the ClassifierPerformanceEvaluator to be customized
-   *
+   * 
    * @param object an <code>Object</code> value
    */
+  @Override
   public void setObject(Object object) {
-    m_cpe = (ClassifierPerformanceEvaluator)object;
-    m_splitEditor.setTarget((ClassifierPerformanceEvaluator)m_cpe);
+    m_cpe = (ClassifierPerformanceEvaluator) object;
+    m_executionSlotsBackup = m_cpe.getExecutionSlots();
+    m_splitEditor.setTarget(m_cpe);
   }
-  
+
   /**
    * Add a property change listener
-   *
+   * 
    * @param pcl a <code>PropertyChangeListener</code> value
    */
+  @Override
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.addPropertyChangeListener(pcl);
   }
-  
+
   /**
    * Remove a property change listener
-   *
+   * 
    * @param pcl a <code>PropertyChangeListener</code> value
    */
+  @Override
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
   }
@@ -142,13 +148,13 @@ public class ClassifierPerformanceEvaluatorCustomizer extends JPanel implements
   @Override
   public void customizerClosing() {
     // restore the backup
-    m_cpe.setExecutionSlots(m_executionSlotsBackup);        
+    m_cpe.setExecutionSlots(m_executionSlotsBackup);
   }
 
   @Override
   public void setParentWindow(Window parent) {
     m_parent = parent;
-    
+
   }
 
 }
