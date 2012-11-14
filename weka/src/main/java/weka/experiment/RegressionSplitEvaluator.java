@@ -28,13 +28,16 @@ import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.evaluation.AbstractEvaluationMetric;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
@@ -116,6 +119,9 @@ public class RegressionSplitEvaluator
 
   /** The length of a result */
   private static final int RESULT_SIZE = 23;
+  
+  private List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
+  private int m_numPluginStatistics = 0;
 
   /**
    * No args constructor.
@@ -123,6 +129,16 @@ public class RegressionSplitEvaluator
   public RegressionSplitEvaluator() {
 
     updateOptions();
+    
+    List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric.getPluginMetrics();
+    if (pluginMetrics != null) {
+      for (AbstractEvaluationMetric m : pluginMetrics) {
+        if (m.appliesToNumericClass()) {
+          m_pluginMetrics.add(m);
+          m_numPluginStatistics += m.getStatisticNames().size();
+        }
+      }
+    }
   }
 
   /**
@@ -383,7 +399,8 @@ public class RegressionSplitEvaluator
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    Object [] resultTypes = new Object[RESULT_SIZE+addm];
+    Object [] resultTypes = 
+        new Object[RESULT_SIZE + addm + m_numPluginStatistics];
     Double doub = new Double(0);
     int current = 0;
     resultTypes[current++] = doub;
@@ -423,7 +440,13 @@ public class RegressionSplitEvaluator
     for (int i=0;i<addm;i++) {
       resultTypes[current++] = doub;
     }
-    if (current != RESULT_SIZE+addm) {
+    
+    // plugin metrics
+    for (int i = 0; i < m_numPluginStatistics; i++) {
+      resultTypes[current++] = doub;
+    }
+    
+    if (current != RESULT_SIZE + addm + m_numPluginStatistics) {
       throw new Error("ResultTypes didn't fit RESULT_SIZE");
     }
     return resultTypes;
@@ -440,7 +463,8 @@ public class RegressionSplitEvaluator
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    String [] resultNames = new String[RESULT_SIZE+addm];
+    String [] resultNames = 
+        new String[RESULT_SIZE + addm + m_numPluginStatistics];
     int current = 0;
     resultNames[current++] = "Number_of_training_instances";
     resultNames[current++] = "Number_of_testing_instances";
@@ -481,7 +505,15 @@ public class RegressionSplitEvaluator
     for (int i=0;i<addm;i++) {
       resultNames[current++] = m_AdditionalMeasures[i];
     }
-    if (current != RESULT_SIZE+addm) {
+    
+    for (AbstractEvaluationMetric m : m_pluginMetrics) {
+      List<String> statNames = m.getStatisticNames();
+      for (String s : statNames) {
+        resultNames[current++] = s;
+      }
+    }
+    
+    if (current != RESULT_SIZE + addm + m_numPluginStatistics) {
       throw new Error("ResultNames didn't fit RESULT_SIZE");
     }
     return resultNames;
@@ -513,7 +545,7 @@ public class RegressionSplitEvaluator
       thMonitor.setThreadCpuTimeEnabled(true);
     
     int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
-    Object [] result = new Object[RESULT_SIZE+addm];
+    Object [] result = new Object[RESULT_SIZE + addm + m_numPluginStatistics];
     long thID = Thread.currentThread().getId();
     long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
          trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
@@ -618,7 +650,20 @@ public class RegressionSplitEvaluator
       }
     }
     
-    if (current != RESULT_SIZE+addm) {
+    // get the actual metrics from the evaluation object
+    List<AbstractEvaluationMetric> metrics = eval.getPluginMetrics();
+    if (metrics != null) {
+      for (AbstractEvaluationMetric m : metrics) {
+        if (m.appliesToNumericClass()) {
+          List<String> statNames = m.getStatisticNames();
+          for (String s : statNames) {
+            result[current++] = new Double(m.getStatistic(s));
+          }
+        }
+      }
+    }
+    
+    if (current != RESULT_SIZE + addm + m_numPluginStatistics) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
     return result;
