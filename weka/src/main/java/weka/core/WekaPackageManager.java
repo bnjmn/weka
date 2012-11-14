@@ -1245,13 +1245,27 @@ public class WekaPackageManager {
     return result;
   }
 
-  public static void installPackages(List<Package> toInstall,
+  public static boolean installPackages(List<Package> toInstall,
       PrintStream... progress) throws Exception {
 
     useCacheOrOnlineRepository();
-    PACKAGE_MANAGER.installPackages(toInstall, progress);
-
+    List<Boolean> upgrades = new ArrayList<Boolean>();
     for (Package p : toInstall) {
+      if (p.isInstalled()) {
+        upgrades.add(new Boolean(true));
+      } else {
+        upgrades.add(new Boolean(false));
+      }
+    }
+    PACKAGE_MANAGER.installPackages(toInstall, progress);
+    boolean atLeastOneUpgrade = false;
+
+    int i = 0;
+    for (Package p : toInstall) {
+      boolean isAnUpgrade = upgrades.get(i++);
+      if (isAnUpgrade) {
+        atLeastOneUpgrade = true;
+      }
 
       String packageName = p.getName();
       File packageDir = new File(PACKAGE_MANAGER.getPackageHome().toString()
@@ -1259,10 +1273,11 @@ public class WekaPackageManager {
 
       boolean loadIt = loadCheck(p, packageDir, progress);
 
-      if (loadIt) {
+      if (loadIt & !isAnUpgrade) {
         loadPackageDirectory(packageDir, false);
       }
     }
+    return atLeastOneUpgrade;
   }
 
   public static List<Object> getRepositoryPackageVersions(String packageName)
@@ -1321,10 +1336,17 @@ public class WekaPackageManager {
     return PACKAGE_MANAGER.getRepositoryPackageInfo(packageName, version);
   }
 
-  public static void installPackageFromRepository(String packageName,
+  public static boolean installPackageFromRepository(String packageName,
       String version, PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();
     Package toLoad = getRepositoryPackageInfo(packageName);
+
+    // check to see if a version is already installed. If so, we
+    // wont load the updated version into the classpath immediately in
+    // order to avoid conflicts, class not found exceptions etc. The
+    // user is told to restart Weka for the changes to come into affect
+    // anyway, so there is no point in loading the updated package now.
+    boolean isAnUpgrade = toLoad.isInstalled();
 
     Object specialInstallMessage = toLoad
         .getPackageMetaDataElement("MessageToDisplayOnInstallation");
@@ -1349,7 +1371,7 @@ public class WekaPackageManager {
         + File.separator + packageName);
 
     boolean loadIt = checkForMissingClasses(toLoad, progress);
-    if (loadIt) {
+    if (loadIt && !isAnUpgrade) {
       File packageRoot = new File(PACKAGE_MANAGER.getPackageHome()
           + File.separator + packageName);
       loadIt = checkForMissingFiles(toLoad, packageRoot, progress);
@@ -1357,6 +1379,8 @@ public class WekaPackageManager {
         loadPackageDirectory(packageDir, false);
       }
     }
+
+    return isAnUpgrade;
   }
 
   public static String installPackageFromArchive(String packageArchivePath,
