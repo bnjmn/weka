@@ -27,13 +27,16 @@ import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.evaluation.AbstractEvaluationMetric;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
@@ -169,12 +172,26 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /** whether to skip determination of sizes (train/test/classifier). */
   private boolean m_NoSizeDetermination;
 
+  private final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
+  private int m_numPluginStatistics = 0;
+
   /**
    * No args constructor.
    */
   public ClassifierSplitEvaluator() {
 
     updateOptions();
+
+    List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric
+        .getPluginMetrics();
+    if (pluginMetrics != null) {
+      for (AbstractEvaluationMetric m : pluginMetrics) {
+        if (m.appliesToNominalClass()) {
+          m_pluginMetrics.add(m);
+          m_numPluginStatistics += m.getStatisticNames().size();
+        }
+      }
+    }
   }
 
   /**
@@ -508,10 +525,14 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
     overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
+
     if (getAttributeID() >= 0)
       overall_length += 1;
     if (getPredTargetColumn())
       overall_length += 2;
+
+    overall_length += m_numPluginStatistics;
+
     Object[] resultTypes = new Object[overall_length];
     Double doub = new Double(0);
     int current = 0;
@@ -604,6 +625,12 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     for (int i = 0; i < addm; i++) {
       resultTypes[current++] = doub;
     }
+
+    // plugin metrics
+    for (int i = 0; i < m_numPluginStatistics; i++) {
+      resultTypes[current++] = doub;
+    }
+
     if (current != overall_length) {
       throw new Error("ResultTypes didn't fit RESULT_SIZE");
     }
@@ -627,6 +654,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       overall_length += 1;
     if (getPredTargetColumn())
       overall_length += 2;
+
+    overall_length += m_pluginMetrics.size();
 
     String[] resultNames = new String[overall_length];
     int current = 0;
@@ -722,6 +751,14 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     for (int i = 0; i < addm; i++) {
       resultNames[current++] = m_AdditionalMeasures[i];
     }
+
+    for (AbstractEvaluationMetric m : m_pluginMetrics) {
+      List<String> statNames = m.getStatisticNames();
+      for (String s : statNames) {
+        resultNames[current++] = s;
+      }
+    }
+
     if (current != overall_length) {
       throw new Error("ResultNames didn't fit RESULT_SIZE");
     }
@@ -757,6 +794,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       overall_length += 1;
     if (getPredTargetColumn())
       overall_length += 2;
+
+    overall_length += m_pluginMetrics.size();
 
     ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
     boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
@@ -976,6 +1015,19 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
         }
       } else {
         result[current++] = null;
+      }
+    }
+
+    // get the actual metrics from the evaluation object
+    List<AbstractEvaluationMetric> metrics = eval.getPluginMetrics();
+    if (metrics != null) {
+      for (AbstractEvaluationMetric m : metrics) {
+        if (m.appliesToNominalClass()) {
+          List<String> statNames = m.getStatisticNames();
+          for (String s : statNames) {
+            result[current++] = new Double(m.getStatistic(s));
+          }
+        }
       }
     }
 
