@@ -170,6 +170,8 @@ public class PackageManager extends JPanel {
       "File/URL", Environment.getSystemWide());
   protected JFrame m_unofficialFrame = null;
 
+  public static boolean s_atLeastOnePackageUpgradeHasOccurredInThisSession = false;
+
   protected Comparator<Package> m_packageComparator = new Comparator<Package>() {
 
     @Override
@@ -755,6 +757,27 @@ public class PackageManager extends JPanel {
       }
 
       if (installedPackage != null) {
+        if (!Utils
+            .getDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade")) {
+          JCheckBox dontShow = new JCheckBox("Do not show this message again");
+          Object[] stuff = new Object[2];
+          stuff[0] = "Weka will need to be restared after installation for\n"
+              + "the changes to come into effect.\n";
+          stuff[1] = dontShow;
+
+          JOptionPane.showMessageDialog(PackageManager.this, stuff,
+              "Weka Package Manager", JOptionPane.OK_OPTION);
+
+          if (dontShow.isSelected()) {
+            try {
+              Utils
+                  .setDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade");
+            } catch (Exception ex) {
+              // quietly ignore
+            }
+          }
+        }
+
         try {
           File packageRoot = new File(WekaPackageManager.getPackageHome()
               + File.separator + installedPackage.getName());
@@ -771,7 +794,15 @@ public class PackageManager extends JPanel {
           m_errorOccurred = true;
         }
 
-        WekaPackageManager.refreshGOEProperties();
+        // since we can't determine whether an unofficial package is installed
+        // already before performing the install/upgrade (due to the fact that
+        // the package name isn't known until the archive is unpacked) we will
+        // not refresh the GOE properties and make the user restart Weka in
+        // order
+        // to be safe and avoid any conflicts between old and new versions of
+        // classes
+        // for this package
+        // WekaPackageManager.refreshGOEProperties();
       }
       return null;
     }
@@ -1223,7 +1254,9 @@ public class PackageManager extends JPanel {
 
           // first install the final list of dependencies
           try {
-            WekaPackageManager.installPackages(finalListToInstall, pps);
+            boolean tempB = WekaPackageManager.installPackages(
+                finalListToInstall, pps);
+            s_atLeastOnePackageUpgradeHasOccurredInThisSession = (s_atLeastOnePackageUpgradeHasOccurredInThisSession || tempB);
           } catch (Exception e) {
             e.printStackTrace();
             displayErrorDialog("An error has occurred while installing "
@@ -1236,8 +1269,9 @@ public class PackageManager extends JPanel {
           // Now install the package itself
           // m_progress.setMaximum(finalListToInstall.size() * 10 + 10);
           try {
-            WekaPackageManager.installPackageFromRepository(packageName,
-                versionToInstall.toString(), pps);
+            boolean tempB = WekaPackageManager.installPackageFromRepository(
+                packageName, versionToInstall.toString(), pps);
+            s_atLeastOnePackageUpgradeHasOccurredInThisSession = (s_atLeastOnePackageUpgradeHasOccurredInThisSession || tempB);
           } catch (Exception e) {
             e.printStackTrace();
             displayErrorDialog("Problem installing package: " + packageName, e);
@@ -1250,8 +1284,9 @@ public class PackageManager extends JPanel {
           // just install this package without checking/downloading dependencies
           // etc.
           try {
-            WekaPackageManager.installPackageFromRepository(packageName,
-                versionToInstall.toString(), pps);
+            boolean tempB = WekaPackageManager.installPackageFromRepository(
+                packageName, versionToInstall.toString(), pps);
+            s_atLeastOnePackageUpgradeHasOccurredInThisSession = (s_atLeastOnePackageUpgradeHasOccurredInThisSession || tempB);
           } catch (Exception e) {
             e.printStackTrace();
             displayErrorDialog("Problem installing package: " + packageName, e);
@@ -1264,8 +1299,14 @@ public class PackageManager extends JPanel {
 
       // m_successfulInstall = true;
 
-      // Make sure that the new stuff is available to all GUIs
-      WekaPackageManager.refreshGOEProperties();
+      // Make sure that the new stuff is available to all GUIs (as long as no
+      // upgrades occurred).
+      // If an upgrade has occurred then the user is told to restart Weka
+      // anyway, so we won't
+      // refresh in this case in order to avoid old/new class conflicts
+      if (!s_atLeastOnePackageUpgradeHasOccurredInThisSession) {
+        WekaPackageManager.refreshGOEProperties();
+      }
       return null;
     }
 
