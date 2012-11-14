@@ -54,70 +54,106 @@ import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
 
 /**
- <!-- globalinfo-start -->
- * Implements stochastic gradient descent for learning a linear binary class SVM or binary class logistic regression on text data. Operates directly (and only) on String attributes. Other types of input attributes are accepted but ignored during training and classification.
+ <!-- globalinfo-start --> 
+ * Implements stochastic gradient descent for learning
+ * a linear binary class SVM or binary class logistic regression on text data.
+ * Operates directly (and only) on String attributes. Other types of input
+ * attributes are accepted but ignored during training and classification.
  * <p/>
  <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ <!-- options-start --> 
+ * Valid options are:
+ * <p/>
  * 
- * <pre> -F
+ * <pre>
+ * -F
  *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression)
- *  (default = 0)</pre>
+ *  (default = 0)
+ * </pre>
  * 
- * <pre> -outputProbs
+ * <pre>
+ * -outputProbs
  *  Output probabilities for SVMs (fits a logsitic
- *  model to the output of the SVM)</pre>
+ *  model to the output of the SVM)
+ * </pre>
  * 
- * <pre> -L
- *  The learning rate (default = 0.01).</pre>
+ * <pre>
+ * -L
+ *  The learning rate (default = 0.01).
+ * </pre>
  * 
- * <pre> -R &lt;double&gt;
- *  The lambda regularization constant (default = 0.0001)</pre>
+ * <pre>
+ * -R &lt;double&gt;
+ *  The lambda regularization constant (default = 0.0001)
+ * </pre>
  * 
- * <pre> -E &lt;integer&gt;
- *  The number of epochs to perform (batch learning only, default = 500)</pre>
+ * <pre>
+ * -E &lt;integer&gt;
+ *  The number of epochs to perform (batch learning only, default = 500)
+ * </pre>
  * 
- * <pre> -W
- *  Use word frequencies instead of binary bag of words.</pre>
+ * <pre>
+ * -W
+ *  Use word frequencies instead of binary bag of words.
+ * </pre>
  * 
- * <pre> -P &lt;# instances&gt;
- *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)</pre>
+ * <pre>
+ * -P &lt;# instances&gt;
+ *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)
+ * </pre>
  * 
- * <pre> -M &lt;double&gt;
+ * <pre>
+ * -M &lt;double&gt;
  *  Minimum word frequency. Words with less than this frequence are ignored.
  *  If periodic pruning is turned on then this is also used to determine which
- *  words to remove from the dictionary (default = 3).</pre>
+ *  words to remove from the dictionary (default = 3).
+ * </pre>
  * 
- * <pre> -normalize
- *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
+ * <pre>
+ * -normalize
+ *  Normalize document length (use in conjunction with -norm and -lnorm
+ * </pre>
  * 
- * <pre> -norm &lt;num&gt;
- *  Specify the norm that each instance must have (default 1.0)</pre>
+ * <pre>
+ * -norm &lt;num&gt;
+ *  Specify the norm that each instance must have (default 1.0)
+ * </pre>
  * 
- * <pre> -lnorm &lt;num&gt;
- *  Specify L-norm to use (default 2.0)</pre>
+ * <pre>
+ * -lnorm &lt;num&gt;
+ *  Specify L-norm to use (default 2.0)
+ * </pre>
  * 
- * <pre> -lowercase
- *  Convert all tokens to lowercase before adding to the dictionary.</pre>
+ * <pre>
+ * -lowercase
+ *  Convert all tokens to lowercase before adding to the dictionary.
+ * </pre>
  * 
- * <pre> -stoplist
- *  Ignore words that are in the stoplist.</pre>
+ * <pre>
+ * -stoplist
+ *  Ignore words that are in the stoplist.
+ * </pre>
  * 
- * <pre> -stopwords &lt;file&gt;
+ * <pre>
+ * -stopwords &lt;file&gt;
  *  A file containing stopwords to override the default ones.
  *  Using this option automatically sets the flag ('-stoplist') to use the
  *  stoplist if the file exists.
  *  Format: one stopword per line, lines starting with '#'
- *  are interpreted as comments and ignored.</pre>
+ *  are interpreted as comments and ignored.
+ * </pre>
  * 
- * <pre> -tokenizer &lt;spec&gt;
+ * <pre>
+ * -tokenizer &lt;spec&gt;
  *  The tokenizing algorihtm (classname plus parameters) to use.
- *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+ *  (default: weka.core.tokenizers.WordTokenizer)
+ * </pre>
  * 
- * <pre> -stemmer &lt;spec&gt;
- *  The stemmering algorihtm (classname plus parameters) to use.</pre>
+ * <pre>
+ * -stemmer &lt;spec&gt;
+ *  The stemmering algorihtm (classname plus parameters) to use.
+ * </pre>
  * 
  <!-- options-end -->
  * 
@@ -131,7 +167,7 @@ public class SGDText extends RandomizableClassifier implements
   /** For serialization */
   private static final long serialVersionUID = 7200171484002029584L;
 
-  private static class Count implements Serializable {
+  public static class Count implements Serializable {
 
     /**
      * For serialization
@@ -842,64 +878,97 @@ public class SGDText extends RandomizableClassifier implements
    * <p/>
    * 
    <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are:
+   * <p/>
    * 
-   * <pre> -F
+   * <pre>
+   * -F
    *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression)
-   *  (default = 0)</pre>
+   *  (default = 0)
+   * </pre>
    * 
-   * <pre> -outputProbs
+   * <pre>
+   * -outputProbs
    *  Output probabilities for SVMs (fits a logsitic
-   *  model to the output of the SVM)</pre>
+   *  model to the output of the SVM)
+   * </pre>
    * 
-   * <pre> -L
-   *  The learning rate (default = 0.01).</pre>
+   * <pre>
+   * -L
+   *  The learning rate (default = 0.01).
+   * </pre>
    * 
-   * <pre> -R &lt;double&gt;
-   *  The lambda regularization constant (default = 0.0001)</pre>
+   * <pre>
+   * -R &lt;double&gt;
+   *  The lambda regularization constant (default = 0.0001)
+   * </pre>
    * 
-   * <pre> -E &lt;integer&gt;
-   *  The number of epochs to perform (batch learning only, default = 500)</pre>
+   * <pre>
+   * -E &lt;integer&gt;
+   *  The number of epochs to perform (batch learning only, default = 500)
+   * </pre>
    * 
-   * <pre> -W
-   *  Use word frequencies instead of binary bag of words.</pre>
+   * <pre>
+   * -W
+   *  Use word frequencies instead of binary bag of words.
+   * </pre>
    * 
-   * <pre> -P &lt;# instances&gt;
-   *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)</pre>
+   * <pre>
+   * -P &lt;# instances&gt;
+   *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)
+   * </pre>
    * 
-   * <pre> -M &lt;double&gt;
+   * <pre>
+   * -M &lt;double&gt;
    *  Minimum word frequency. Words with less than this frequence are ignored.
    *  If periodic pruning is turned on then this is also used to determine which
-   *  words to remove from the dictionary (default = 3).</pre>
+   *  words to remove from the dictionary (default = 3).
+   * </pre>
    * 
-   * <pre> -normalize
-   *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
+   * <pre>
+   * -normalize
+   *  Normalize document length (use in conjunction with -norm and -lnorm
+   * </pre>
    * 
-   * <pre> -norm &lt;num&gt;
-   *  Specify the norm that each instance must have (default 1.0)</pre>
+   * <pre>
+   * -norm &lt;num&gt;
+   *  Specify the norm that each instance must have (default 1.0)
+   * </pre>
    * 
-   * <pre> -lnorm &lt;num&gt;
-   *  Specify L-norm to use (default 2.0)</pre>
+   * <pre>
+   * -lnorm &lt;num&gt;
+   *  Specify L-norm to use (default 2.0)
+   * </pre>
    * 
-   * <pre> -lowercase
-   *  Convert all tokens to lowercase before adding to the dictionary.</pre>
+   * <pre>
+   * -lowercase
+   *  Convert all tokens to lowercase before adding to the dictionary.
+   * </pre>
    * 
-   * <pre> -stoplist
-   *  Ignore words that are in the stoplist.</pre>
+   * <pre>
+   * -stoplist
+   *  Ignore words that are in the stoplist.
+   * </pre>
    * 
-   * <pre> -stopwords &lt;file&gt;
+   * <pre>
+   * -stopwords &lt;file&gt;
    *  A file containing stopwords to override the default ones.
    *  Using this option automatically sets the flag ('-stoplist') to use the
    *  stoplist if the file exists.
    *  Format: one stopword per line, lines starting with '#'
-   *  are interpreted as comments and ignored.</pre>
+   *  are interpreted as comments and ignored.
+   * </pre>
    * 
-   * <pre> -tokenizer &lt;spec&gt;
+   * <pre>
+   * -tokenizer &lt;spec&gt;
    *  The tokenizing algorihtm (classname plus parameters) to use.
-   *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+   *  (default: weka.core.tokenizers.WordTokenizer)
+   * </pre>
    * 
-   * <pre> -stemmer &lt;spec&gt;
-   *  The stemmering algorihtm (classname plus parameters) to use.</pre>
+   * <pre>
+   * -stemmer &lt;spec&gt;
+   *  The stemmering algorihtm (classname plus parameters) to use.
+   * </pre>
    * 
    <!-- options-end -->
    * 
@@ -1207,7 +1276,8 @@ public class SGDText extends RandomizableClassifier implements
       // Only need to do the following if the loss is non-zero
       if (m_loss != HINGE || (z < 1)) {
         // Compute Factor for updates
-        double factor = m_learningRate * y * dloss(z);
+        double dloss = dloss(z);
+        double factor = m_learningRate * y * dloss;
 
         // Update coefficients for attributes
         for (Map.Entry<String, Count> feature : m_inputVector.entrySet()) {
@@ -1279,6 +1349,7 @@ public class SGDText extends RandomizableClassifier implements
               count.m_count += instance.weight();
             }
           }
+
         }
       }
     }
@@ -1414,15 +1485,17 @@ public class SGDText extends RandomizableClassifier implements
     while (entries.hasNext()) {
       Map.Entry<String, Count> entry = entries.next();
 
-      if (printed > 0) {
-        buff.append(" + ");
-      } else {
-        buff.append("   ");
-      }
+      if (entry.getValue().m_count >= m_minWordP) {
+        if (printed > 0) {
+          buff.append(" + ");
+        } else {
+          buff.append("   ");
+        }
 
-      buff.append(Utils.doubleToString(entry.getValue().m_weight, 12, 4) + " "
-          + entry.getKey() + "\n");
-      printed++;
+        buff.append(Utils.doubleToString(entry.getValue().m_weight, 12, 4)
+            + " " + entry.getKey() + " " + entry.getValue().m_count + "\n");
+        printed++;
+      }
     }
 
     if (m_bias > 0) {
@@ -1432,6 +1505,45 @@ public class SGDText extends RandomizableClassifier implements
     }
 
     return buff.toString();
+  }
+
+  /**
+   * Get this model's dictionary (including term weights).
+   * 
+   * @return this model's dictionary.
+   */
+  public LinkedHashMap<String, Count> getDictionary() {
+    return m_dictionary;
+  }
+
+  /**
+   * Return the size of the dictionary (minus any low frequency terms that are
+   * below the threshold but haven't been pruned yet).
+   * 
+   * @return the size of the dictionary.
+   */
+  public int getDictionarySize() {
+    int size = 0;
+    if (m_dictionary != null) {
+      Iterator<Map.Entry<String, Count>> entries = m_dictionary.entrySet()
+          .iterator();
+      while (entries.hasNext()) {
+        Map.Entry<String, Count> entry = entries.next();
+        if (entry.getValue().m_count >= m_minWordP) {
+          size++;
+        }
+      }
+    }
+
+    return size;
+  }
+
+  public double bias() {
+    return m_bias;
+  }
+
+  public void setBias(double bias) {
+    m_bias = bias;
   }
 
   /**
@@ -1451,4 +1563,3 @@ public class SGDText extends RandomizableClassifier implements
     runClassifier(new SGDText(), args);
   }
 }
-
