@@ -1484,7 +1484,7 @@ public class ClassifierPanel extends JPanel implements
                     + "...");
 
                 if (classifier instanceof BatchPredictor) {
-                  double[][] predictions = ((BatchPredictor) classifier)
+                  double[][] predictions = ((BatchPredictor) current)
                       .distributionsForInstances(test);
                   plotInstances.process(test, predictions, eval);
                   if (outputPredictionsText) {
