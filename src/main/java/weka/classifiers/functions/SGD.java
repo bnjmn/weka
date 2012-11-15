@@ -755,6 +755,10 @@ public class SGD extends RandomizableClassifier
     return result;
   }
   
+  public double[] getWeights() {
+    return m_weights;
+  }
+  
   /**
    * Prints out the classifier.
    *
