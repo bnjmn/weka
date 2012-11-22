@@ -50,6 +50,13 @@ import weka.filters.Filter;
 import java.util.Random;
 import java.util.Vector;
 import java.util.Enumeration;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.concurrent.Future;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Callable;
 
 /**
  <!-- globalinfo-start -->
@@ -88,7 +95,7 @@ import java.util.Enumeration;
 public class MLPClassifier extends RandomizableClassifier {
   
   /** For serialization */
-  private static final long serialVersionUID = -6667474276438394655L;
+  private static final long serialVersionUID = -3297474276438394644L;
 
   /**
    * Returns default capabilities of the classifier.
@@ -206,6 +213,15 @@ public class MLPClassifier extends RandomizableClassifier {
   // Whether to use conjugate gradient descent rather than BFGS updates
   protected boolean m_useCGD = false;
 
+  // Tolerance parameter for delta values
+  protected double m_tolerance = 1.0e-6;
+
+  // The number of threads to use to calculate gradient and squared error
+  protected int m_numThreads = 1;
+
+  // The size of the thread pool
+  protected int m_poolSize = 1;
+
   // The standardization filer
   protected Filter m_Filter = null;
 
@@ -219,7 +235,10 @@ public class MLPClassifier extends RandomizableClassifier {
   protected ReplaceMissingValues m_ReplaceMissingValues;
 
   // a ZeroR model in case no model can be built from the data
-  private Classifier m_ZeroR;
+  protected Classifier m_ZeroR;
+
+  // Thread pool
+  protected transient ExecutorService m_Pool = null;
 
   /**
    * Method used to pre-process the data, perform clustering, and
@@ -311,6 +330,9 @@ public class MLPClassifier extends RandomizableClassifier {
       return;
     }
 
+    // Initialise thread pool
+    m_Pool = Executors.newFixedThreadPool(m_poolSize);
+
     // Apply optimization class to train the network
     Optimization opt = null;
     if (!m_useCGD) {
@@ -341,6 +363,9 @@ public class MLPClassifier extends RandomizableClassifier {
     }
     
     m_data = new Instances(m_data, 0); // Save memory
+
+    // Shut down thread pool
+    m_Pool.shutdown();
   } 
 
   /**
@@ -348,29 +373,53 @@ public class MLPClassifier extends RandomizableClassifier {
    */
   protected double calculateSE() {
 
+    // Set up result set, and chunk size
+    int chunksize = m_data.numInstances() / m_numThreads;
+    Set<Future<Double>> results = new HashSet<Future<Double>>();
+
+    // For each thread
+    for (int j = 0; j < m_numThreads; j++) {
+
+      // Determine batch to be processed
+      final int lo = j * chunksize;
+      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data.numInstances();
+
+      // Create and submit new job, where each instance in batch is processed
+      Future<Double> futureSE = m_Pool.submit(new Callable() {
+          public Double call() {
+            final double[] outputs = new double[m_numUnits];
+            double SE = 0;
+            for (int k = lo; k < hi; k++) {
+              final Instance inst = m_data.instance(k);
+              
+              // Calculate necessary input/output values and error term
+              calculateOutputs(inst, outputs, null);
+              
+              // For all class values
+              for (int i = 0; i < m_numClasses; i++) {
+                
+                // Get target (make them slightly different from 0/1 for better convergence)
+                final double target = ((int)inst.value(m_classIndex) == i) ? 0.99 : 0.01;
+                
+                // Add to squared error
+                final double err = getOutput(i, outputs, null) - target;
+                SE += err * err;
+              }
+            }
+            return SE;
+          }
+        });
+      results.add(futureSE);
+    }
+
+    // Calculate SE
     double SE = 0;
-
-    // Outputs from hidden units
-    double[] outputs = new double[m_numUnits];
-
-    // For each instance
-    for (int k = 0; k < m_data.numInstances(); k++) {
-      Instance inst = m_data.instance(k);
-
-      // Calculate necessary input/output values and error term
-      calculateOutputs(inst, outputs);
-      int cv = (int)inst.value(m_classIndex);
-      double err = 0;
-      for (int i = 0; i < cv; i++) {
-        err = getOutput(i, outputs) - 0.01;
-        SE += err * err;
+    try {
+      for (Future<Double> futureSE : results) {
+        SE += futureSE.get();
       }
-      err = getOutput(cv, outputs) - 0.99;
-      SE += err * err;
-      for (int i = cv + 1; i < m_numClasses; i++) {
-        err = getOutput(i, outputs) - 0.01;
-        SE += err * err;
-      }
+    } catch (Exception e) {
+      System.out.println("Squared error could not be calculated.");
     }
 
     // Calculate sum of squared weights, excluding bias
@@ -399,30 +448,49 @@ public class MLPClassifier extends RandomizableClassifier {
    */
   protected double[] calculateGradient() {
 
-    // Need to put gradient into a one-dimensional array
+    // Set up result set, and chunk size
+    int chunksize = m_data.numInstances() / m_numThreads;
+    Set<Future<double[]>> results = new HashSet<Future<double[]>>();
+
+    // For each thread
+    for (int j = 0; j < m_numThreads; j++) {
+
+      // Determine batch to be processed
+      final int lo = j * chunksize;
+      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data.numInstances();
+
+      // Create and submit new job, where each instance in batch is processed
+      Future<double[]> futureGrad = m_Pool.submit(new Callable() {
+          public double[] call() {
+
+            final double[] outputs = new double[m_numUnits];
+            final double[] deltaHidden = new double[m_numUnits];
+            final double[] sigmoidDerivativeOutput = new double[1];
+            final double[] sigmoidDerivativesHidden = new double[m_numUnits];
+            final double[] localGrad = new double[m_MLPParameters.length];
+            for (int k = lo; k < hi; k++) {
+              final Instance inst = m_data.instance(k);
+              calculateOutputs(inst, outputs, sigmoidDerivativesHidden);
+              updateGradient(localGrad, inst, outputs, sigmoidDerivativeOutput, deltaHidden);
+              updateGradientForHiddenUnits(localGrad, inst, sigmoidDerivativesHidden, deltaHidden);
+            }
+            return localGrad;
+          }
+        });
+      results.add(futureGrad);
+    }
+
+    // Calculate final gradient
     double[] grad = new double[m_MLPParameters.length];
-
-    // Outputs from hidden units
-    double[] outputs = new double[m_numUnits];
-
-    // For each instance
-    for (int k = 0; k < m_data.numInstances(); k++) {
-      Instance inst = m_data.instance(k);
-
-      // Calculate necessary input/output values and error term
-      calculateOutputs(inst, outputs);
-      int cv = (int)inst.value(m_classIndex);
-      double pred = 0;
-      for (int i = 0; i < cv; i++) {
-        pred = getOutput(i, outputs); 
-        updateGradient(grad, inst, outputs, (pred - 0.01) * (pred * (1.0 - pred)), i);
+    try {
+      for (Future<double[]> futureGrad : results) {
+        double[] lg = futureGrad.get();
+        for (int  i = 0; i < lg.length; i++) {
+          grad[i] += lg[i];
+        }
       }
-      pred = getOutput(cv, outputs);
-      updateGradient(grad, inst, outputs, (pred - 0.99) * (pred * (1.0 - pred)), cv);
-      for (int i = cv + 1; i < m_numClasses; i++) {
-        pred = getOutput(i, outputs);
-        updateGradient(grad, inst, outputs, (pred - 0.01) * (pred * (1.0 - pred)), i);
-      }
+    } catch (Exception e) {
+      System.out.println("Gradient could not be calculated.");
     }
 
     // For all network weights, perform weight decay
@@ -453,48 +521,82 @@ public class MLPClassifier extends RandomizableClassifier {
   /**
    * Update the gradient for the weights in the output layer.
    */
-  protected void updateGradient(double[] grad, Instance inst, double[] outputs, double deltaOut, int j) {
+  protected void updateGradient(double[] grad, Instance inst, double[] outputs, double[] sigmoidDerivativeOutput, double[] deltaHidden) {
 
-    // For output unit j
-    int offsetOW = OFFSET_WEIGHTS + (j * (m_numUnits + 1));
-
-    // Update gradient for output weights
-    for (int i = 0; i < m_numUnits; i++) {
-      grad[offsetOW + i] += deltaOut * outputs[i];
-    }
+    // Initialise deltaHidden
+    Arrays.fill(deltaHidden, 0.0);
     
-    // Update gradient for bias
-    grad[offsetOW + m_numUnits] += deltaOut;
+    // For all output units
+    for (int j = 0; j < m_numClasses; j++) {
 
-    // Update gradient for hidden units
-    for (int i = 0; i < m_numUnits; i++) {
-      updateGradientForHiddenUnits(grad, inst, deltaOut * m_MLPParameters[offsetOW + i] * 
-                                   (outputs[i] * (1.0 - outputs[i])), i);
+      // Get output from output unit j
+      double pred = getOutput(j, outputs, sigmoidDerivativeOutput); 
+
+      // Get target (make them slightly different from 0/1 for better convergence)
+      double target = ((int)inst.value(m_classIndex) == j) ? 0.99 : 0.01;
+
+      // Calculate delta from output unit
+      double deltaOut = (pred - target) * sigmoidDerivativeOutput[0];
+
+      // Go to next output unit if update too small
+      if (deltaOut <= m_tolerance && deltaOut >= -m_tolerance) {
+        continue;
+      }
+
+      // Establish offset
+      int offsetOW = OFFSET_WEIGHTS + (j * (m_numUnits + 1));
+
+      // Update deltaHidden
+      for (int i = 0; i < m_numUnits; i++) {
+        deltaHidden[i] += deltaOut * m_MLPParameters[offsetOW + i];
+      }
+      
+      // Update gradient for output weights
+      for (int i = 0; i < m_numUnits; i++) {
+        grad[offsetOW + i] += deltaOut * outputs[i];
+      }
+      
+      // Update gradient for bias
+      grad[offsetOW + m_numUnits] += deltaOut;
     }
   }
 
   /**
    * Update the gradient for the weights in the hidden layer.
    */
-  protected void updateGradientForHiddenUnits(double[] grad, Instance inst, double deltaHidden, int i) {
-      
-    // For hidden unit i
-    int offsetW = OFFSET_ATTRIBUTE_WEIGHTS + i * m_numAttributes;
+  protected void updateGradientForHiddenUnits(double[] grad, Instance inst, double[] sigmoidDerivativesHidden, double[] deltaHidden) {
 
-    // Update gradient for all weights, including bias at classIndex
-    for (int l = 0; l < m_classIndex; l++) {
-      grad[offsetW + l] += deltaHidden * inst.value(l);
+    // Finalize deltaHidden
+    for (int i = 0; i < m_numUnits; i++) {
+      deltaHidden[i] *= sigmoidDerivativesHidden[i];
     }
-    grad[offsetW + m_classIndex] += deltaHidden;
-    for (int l = m_classIndex + 1; l < m_numAttributes; l++) {
-      grad[offsetW + l] += deltaHidden * inst.value(l);
+
+    // Update gradient for hidden units
+    for (int i = 0; i < m_numUnits; i++) {
+      
+      // Skip calculations if update too small
+      if (deltaHidden[i] <= m_tolerance && deltaHidden[i] >= -m_tolerance) {
+        continue;
+      }
+      
+      // Update gradient for all weights, including bias at classIndex
+      int offsetW = OFFSET_ATTRIBUTE_WEIGHTS + i * m_numAttributes;
+      for (int l = 0; l < m_classIndex; l++) {
+        grad[offsetW + l] += deltaHidden[i] * inst.value(l);
+      }
+      grad[offsetW + m_classIndex] += deltaHidden[i];
+      for (int l = m_classIndex + 1; l < m_numAttributes; l++) {
+        grad[offsetW + l] += deltaHidden[i] * inst.value(l);
+      }
     }
   }
 
   /**
    * Calculates the array of outputs of the hidden units.
+   * Also calculates derivatives if d != null.
    */
-  protected void calculateOutputs(Instance inst, double[] o) {
+  protected void calculateOutputs(Instance inst, double[] o,
+                                  double[] d) {
 
     for (int i = 0; i < m_numUnits; i++) {
       int offsetW = OFFSET_ATTRIBUTE_WEIGHTS + i * m_numAttributes;
@@ -506,15 +608,17 @@ public class MLPClassifier extends RandomizableClassifier {
       for (int j = m_classIndex + 1; j < m_numAttributes; j++) {
         sum += inst.value(j) * m_MLPParameters[offsetW + j];
       }
-      o[i] = 1.0 / (1.0 + Math.exp(-sum));
+      o[i] = sigmoid(-sum, d, i);
     }
   }
   
   /**
    * Calculates the output of output unit based on the given 
-   * hidden layer outputs.
+   * hidden layer outputs. Also calculates the derivative
+   * if d != null.
    */
-  protected double getOutput(int unit, double[] outputs) {
+  protected double getOutput(int unit, double[] outputs,
+                             double[] d) {
 
     int offsetOW = OFFSET_WEIGHTS + (unit * (m_numUnits + 1));
     double result = 0;
@@ -522,9 +626,30 @@ public class MLPClassifier extends RandomizableClassifier {
       result +=  m_MLPParameters[offsetOW + i] * outputs[i];
     }
     result += m_MLPParameters[offsetOW + m_numUnits];
-    return 1.0 / (1.0 + Math.exp(-result));
+    return sigmoid(-result, d, 0);
   }    
   
+  /**
+   * Computes approximate sigmoid function. Derivative is 
+   * stored in second argument at given index if d != null.
+   */
+  protected double sigmoid(double x, double[] d, int index) {
+
+    // Compute approximate sigmoid
+    double y = 1.0 + x / 4096.0;
+    x = y * y; x *= x; x *= x; x *= x;
+    x *= x; x *= x; x *= x; x *= x;
+    x *= x; x *= x; x *= x; x *= x;
+    double output = 1.0 / (1.0 + x);
+
+    // Compute derivative if desired
+    if (d != null) {
+      d[index] = output * (1.0 - output) / y;
+    }
+
+    return output;
+  }
+
   /**
    * Calculates the output of the network after the instance has been
    * piped through the fliters to replace missing values, etc.
@@ -548,9 +673,9 @@ public class MLPClassifier extends RandomizableClassifier {
 
     double[] dist = new double[m_numClasses];
     double[] outputs = new double[m_numUnits];
-    calculateOutputs(inst, outputs);
+    calculateOutputs(inst, outputs, null);
     for (int i = 0; i < m_numClasses; i++) {
-      dist[i] = getOutput(i, outputs);
+      dist[i] = getOutput(i, outputs, null);
       if (dist[i] < 0) {
         dist[i] = 0;
       } else if (dist[i] > 1) {
@@ -574,11 +699,39 @@ public class MLPClassifier extends RandomizableClassifier {
       + " Note that all attributes are standardized. There are several parameters. The"
       + " ridge parameter is used to determine the penalty on the size of the weights. The"
       + " number of hidden units can also be specified. Note that large"
-      + " numbers produce long training times.Finally, it is possible to use conjugate gradient"
+      + " numbers produce long training times. Finally, it is possible to use conjugate gradient"
       + " descent rather than BFGS updates, which may be faster for cases with many parameters."
+      + " To improve speed, an approximate version of the logistic function is used as the"
+      + " activation function. Also, if delta values in the backpropagation step are "
+      + " within the user-specified tolerance, the gradient is not updated for that"
+      + " particular instance, which saves some additional time."
       + " Nominal attributes are processed using the unsupervised "
       + " NominalToBinary filter and missing values are replaced globally"
       + " using ReplaceMissingValues.";
+  }
+  
+  /**
+   * @return a string to describe the option
+   */
+  public String toleranceTipText() {
+
+    return "The tolerance parameter for the delta values.";
+  }
+
+  /**
+   * Gets the tolerance parameter for the delta values.
+   */
+  public double getTolerance() {
+
+    return m_tolerance;
+  }
+  
+  /**
+   * Sets the tolerance parameter for the delta values.
+   */
+  public void setTolerance(double newTolerance) {
+
+    m_tolerance = newTolerance;
   }
   
   /**
@@ -654,24 +807,81 @@ public class MLPClassifier extends RandomizableClassifier {
   }
 
   /**
+   * @return a string to describe the option
+   */
+  public String numThreadsTipText() {
+
+    return "The number of threads to use, which should be >= size of thread pool.";
+  }
+
+  /**
+   * Gets the number of threads.
+   */
+  public int getNumThreads() {
+
+    return m_numThreads;
+  }
+  
+  /**
+   * Sets the number of threads
+   */
+  public void setNumThreads(int nT) {
+
+    m_numThreads = nT;
+  }
+
+  /**
+   * @return a string to describe the option
+   */
+  public String poolSizeTipText() {
+
+    return "The size of the thread pool, for example, the number of cores in the CPU.";
+  }
+
+  /**
+   * Gets the number of threads.
+   */
+  public int getPoolSize() {
+
+    return m_poolSize;
+  }
+  
+  /**
+   * Sets the number of threads
+   */
+  public void setPoolSize(int nT) {
+
+    m_poolSize = nT;
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(3);
+    Vector<Option> newVector = new Vector<Option>(6);
 
     newVector.addElement(new Option(
                                     "\tNumber of hidden units (default is 2).\n", 
-                                    "N", 1, "-N"));
+                                    "N", 1, "-N <int>"));
 
     newVector.addElement(new Option(
                                     "\tRidge factor for quadratic penalty on weights (default is 0.01).\n", 
-                                    "R", 1, "-R"));
+                                    "R", 1, "-R <double>"));
+    newVector.addElement(new Option(
+                                    "\tTolerance parameter for delta values (default is 1.0e-6).\n", 
+                                    "O", 1, "-O <double>"));
     newVector.addElement(new Option(
                                     "\tUse conjugate gradient descent (recommended for many attributes).\n", 
                                     "G", 0, "-G"));
+    newVector.addElement(new Option(
+                                    "\t" + poolSizeTipText() + " (default 1)\n", 
+                                    "P", 1, "-P <int>"));
+    newVector.addElement(new Option(
+                                    "\t" + numThreadsTipText() + " (default 1)\n", 
+                                    "E", 1, "-E <int>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -728,7 +938,25 @@ public class MLPClassifier extends RandomizableClassifier {
     } else {
       setRidge(0.01);
     }
+    String Tolerance = Utils.getOption('O', options);
+    if (Tolerance.length() != 0) {
+      setTolerance(Double.parseDouble(Tolerance));
+    } else {
+      setTolerance(1.0e-6);
+    }
     m_useCGD = Utils.getFlag('G', options);
+    String PoolSize = Utils.getOption('P', options);
+    if (PoolSize.length() != 0) {
+      setPoolSize(Integer.parseInt(PoolSize));
+    } else {
+      setPoolSize(1);
+    }
+    String NumThreads = Utils.getOption('E', options);
+    if (NumThreads.length() != 0) {
+      setNumThreads(Integer.parseInt(NumThreads));
+    } else {
+      setNumThreads(1);
+    }
 
     super.setOptions(options);
   }
@@ -742,7 +970,7 @@ public class MLPClassifier extends RandomizableClassifier {
 
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 5];
+    String [] options = new String [superOptions.length + 11];
 
     int current = 0;
     options[current++] = "-N"; 
@@ -751,9 +979,18 @@ public class MLPClassifier extends RandomizableClassifier {
     options[current++] = "-R"; 
     options[current++] = "" + getRidge();
 
+    options[current++] = "-O"; 
+    options[current++] = "" + getTolerance();
+
     if (m_useCGD) {
       options[current++] = "-G";
     }
+
+    options[current++] = "-P"; 
+    options[current++] = "" + getPoolSize();
+
+    options[current++] = "-E"; 
+    options[current++] = "" + getNumThreads();
 
     System.arraycopy(superOptions, 0, options, current, 
 		     superOptions.length);
