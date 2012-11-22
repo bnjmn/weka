@@ -60,23 +60,35 @@ import java.util.concurrent.Callable;
 
 /**
  <!-- globalinfo-start -->
- * Trains a multilayer perceptron with one hidden layer using WEKA's Optimization class by minimizing the squared error plus a quadratic penalty with the BFGS method. Note that all attributes are standardized. There are several parameters. The ridge parameter is used to determine the penalty on the size of the weights. The number of hidden units can also be specified. Note that large numbers produce long training times.Finally, it is possible to use conjugate gradient descent rather than BFGS updates, which may be faster for cases with many parameters. Nominal attributes are processed using the unsupervised  NominalToBinary filter and missing values are replaced globally using ReplaceMissingValues.
+ * Trains a multilayer perceptron with one hidden layer using WEKA's Optimization class by minimizing the squared error plus a quadratic penalty with the BFGS method. Note that all attributes are standardized. There are several parameters. The ridge parameter is used to determine the penalty on the size of the weights. The number of hidden units can also be specified. Note that large numbers produce long training times. Finally, it is possible to use conjugate gradient descent rather than BFGS updates, which may be faster for cases with many parameters. To improve speed, an approximate version of the logistic function is used as the activation function. Also, if delta values in the backpropagation step are  within the user-specified tolerance, the gradient is not updated for that particular instance, which saves some additional time. Paralled calculation of squared error and gradient is possible when multiple CPU cores are present. Data is split into batches and processed in separate threads in this case. Note that this only improves runtime for larger datasets. Nominal attributes are processed using the unsupervised NominalToBinary filter and missing values are replaced globally using ReplaceMissingValues.
  * <p/>
  <!-- globalinfo-end -->
  *
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -N
+ * <pre> -N &lt;int&gt;
  *  Number of hidden units (default is 2).
  * </pre>
  * 
- * <pre> -R
+ * <pre> -R &lt;double&gt;
  *  Ridge factor for quadratic penalty on weights (default is 0.01).
+ * </pre>
+ * 
+ * <pre> -O &lt;double&gt;
+ *  Tolerance parameter for delta values (default is 1.0e-6).
  * </pre>
  * 
  * <pre> -G
  *  Use conjugate gradient descent (recommended for many attributes).
+ * </pre>
+ * 
+ * <pre> -P &lt;int&gt;
+ *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
+ * </pre>
+ * 
+ * <pre> -E &lt;int&gt;
+ *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
  * </pre>
  * 
  * <pre> -S &lt;num&gt;
@@ -704,8 +716,11 @@ public class MLPClassifier extends RandomizableClassifier {
       + " To improve speed, an approximate version of the logistic function is used as the"
       + " activation function. Also, if delta values in the backpropagation step are "
       + " within the user-specified tolerance, the gradient is not updated for that"
-      + " particular instance, which saves some additional time."
-      + " Nominal attributes are processed using the unsupervised "
+      + " particular instance, which saves some additional time. Paralled calculation"
+      + " of squared error and gradient is possible when multiple CPU cores are present."
+      + " Data is split into batches and processed in separate threads in this case."
+      + " Note that this only improves runtime for larger datasets."
+      + " Nominal attributes are processed using the unsupervised"
       + " NominalToBinary filter and missing values are replaced globally"
       + " using ReplaceMissingValues.";
   }
@@ -897,16 +912,28 @@ public class MLPClassifier extends RandomizableClassifier {
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -N
+   * <pre> -N &lt;int&gt;
    *  Number of hidden units (default is 2).
    * </pre>
    * 
-   * <pre> -R
+   * <pre> -R &lt;double&gt;
    *  Ridge factor for quadratic penalty on weights (default is 0.01).
+   * </pre>
+   * 
+   * <pre> -O &lt;double&gt;
+   *  Tolerance parameter for delta values (default is 1.0e-6).
    * </pre>
    * 
    * <pre> -G
    *  Use conjugate gradient descent (recommended for many attributes).
+   * </pre>
+   * 
+   * <pre> -P &lt;int&gt;
+   *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
+   * </pre>
+   * 
+   * <pre> -E &lt;int&gt;
+   *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
    * </pre>
    * 
    * <pre> -S &lt;num&gt;
