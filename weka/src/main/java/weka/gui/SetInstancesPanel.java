@@ -117,14 +117,18 @@ public class SetInstancesPanel extends JPanel {
    * Default constructor
    */
   public SetInstancesPanel() {
-    this(false);
+    this(false, null);
   }
 
   /**
    * Create the panel.
    */
-  public SetInstancesPanel(boolean showZeroInstancesAsUnknown) {
+  public SetInstancesPanel(boolean showZeroInstancesAsUnknown,
+      ConverterFileChooser chooser) {
     m_showZeroInstancesAsUnknown = showZeroInstancesAsUnknown;
+    if (chooser != null) {
+      m_FileChooser = chooser;
+    }
 
     m_OpenFileBut.setToolTipText(Messages.getInstance().getString(
         "SetInstancesPanel_OpenFileBut_SetToolTipText_Text"));
