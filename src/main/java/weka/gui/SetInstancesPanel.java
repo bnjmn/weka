@@ -122,6 +122,11 @@ public class SetInstancesPanel extends JPanel {
 
   /**
    * Create the panel.
+   * 
+   * @param showZeroInstancesAsUnknown whether to display zero instances as
+   *          unknown (e.g., when reading data incrementally)
+   * @param chooser the file chooser to use (may be null to use the default file
+   *          chooser)
    */
   public SetInstancesPanel(boolean showZeroInstancesAsUnknown,
       ConverterFileChooser chooser) {
