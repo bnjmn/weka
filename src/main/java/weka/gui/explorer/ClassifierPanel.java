@@ -935,7 +935,7 @@ public class ClassifierPanel extends JPanel implements
   protected void setTestSet() {
 
     if (m_SetTestFrame == null) {
-      final SetInstancesPanel sp = new SetInstancesPanel();
+      final SetInstancesPanel sp = new SetInstancesPanel(true);
 
       if (m_TestLoader != null) {
         try {
