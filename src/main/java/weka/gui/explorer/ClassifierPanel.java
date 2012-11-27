@@ -1751,7 +1751,8 @@ public class ClassifierPanel extends JPanel implements
                   vv.addElement(grph);
                 }
                 m_History.addObject(name, vv);
-              } else if (saveVis && plotInstances != null
+              } else if (saveVis && plotInstances != null 
+                  && plotInstances.getPlotInstances() != null
                   && plotInstances.getPlotInstances().numInstances() > 0) {
                 m_CurrentVis = new VisualizePanel();
                 m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
