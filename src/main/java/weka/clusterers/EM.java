@@ -431,7 +431,7 @@ public class EM extends RandomizableDensityBasedClusterer implements
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String MinLogLikelihoodImprovementCVTipText() {
+  public String minLogLikelihoodImprovementCVTipText() {
     return "The minimum improvement in cross-validated log likelihood required "
         + "in order to consider increasing the number of clusters "
         + "when cross-validiting to find the best number of clusters";
@@ -465,7 +465,7 @@ public class EM extends RandomizableDensityBasedClusterer implements
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String MinLogLikelihoodImprovementIteratingTipText() {
+  public String minLogLikelihoodImprovementIteratingTipText() {
     return "The minimum improvement in log likelihood required to "
         + "perform another iteration of the E and M steps";
   }
@@ -754,7 +754,7 @@ public class EM extends RandomizableDensityBasedClusterer implements
     }
 
     result.add("-num-slots");
-    result.add(getNumExecutionSlots());
+    result.add("" + getNumExecutionSlots());
 
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
