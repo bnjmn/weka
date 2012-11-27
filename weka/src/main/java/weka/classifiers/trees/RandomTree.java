@@ -1262,6 +1262,11 @@ WeightedInstancesHandler, Randomizable, Drawable {
 
             // Save split point
             splitPoint = (inst.value(att) + currSplit) / 2.0;
+            
+            // Check for numeric precision problems
+            if (splitPoint <= currSplit) {
+              splitPoint = inst.value(att);
+            }
 
             // Save distribution
             for (int j = 0; j < currDist.length; j++) {
