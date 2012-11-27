@@ -15,16 +15,23 @@
 
 /*
  *    RandomTree.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+import java.util.Queue;
+import java.util.LinkedList;
+
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.ContingencyTables;
 import weka.core.Drawable;
 import weka.core.Instance;
@@ -35,11 +42,7 @@ import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.core.PartitionGenerator;
 
 /**
  * <!-- globalinfo-start -->
@@ -81,8 +84,10 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class RandomTree extends AbstractClassifier implements OptionHandler,
-WeightedInstancesHandler, Randomizable, Drawable {
+public class RandomTree 
+  extends AbstractClassifier 
+  implements OptionHandler, WeightedInstancesHandler, Randomizable, 
+             Drawable, PartitionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = 8934314652175299374L;
@@ -494,6 +499,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1262,6 +1268,11 @@ WeightedInstancesHandler, Randomizable, Drawable {
             // Save split point
             splitPoint = (inst.value(att) + currSplit) / 2.0;
 
+            // Check for numeric precision problems
+            if (splitPoint <= currSplit) {
+              splitPoint = inst.value(att);
+            }
+
             // Save distribution
             for (int j = 0; j < currDist.length; j++) {
               System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
@@ -1440,6 +1451,80 @@ WeightedInstancesHandler, Randomizable, Drawable {
     }
 
     return num;
+  }
+
+  /**
+   * Builds the classifier to generate a partition.
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    buildClassifier(data);
+  }
+	
+  /**
+   * Computes array that indicates node membership. Array locations
+   * are allocated based on breadth-first exploration of the tree.
+   */
+  public double[] getMembershipValues(Instance instance) throws Exception {
+		
+    if (m_ZeroR != null) {
+      double[] m = new double[1];
+      m[0] = instance.weight();
+      return m;
+    } else {
+
+      // Set up array for membership values
+      double[] a = new double[numElements()];
+      
+      // Initialize queues
+      Queue<Double> queueOfWeights =  new LinkedList<Double>();
+      Queue<RandomTree> queueOfNodes = new LinkedList<RandomTree>();
+      queueOfWeights.add(instance.weight());
+      queueOfNodes.add(this);
+      int index = 0;
+      
+      // While the queue is not empty
+      while (!queueOfNodes.isEmpty()) {
+        
+        a[index++] = queueOfWeights.poll();
+        RandomTree node = queueOfNodes.poll();
+        
+        // Is node a leaf?
+        if (node.m_Attribute <= -1) {
+          continue;
+        }
+        
+        // Compute weight distribution
+        double[] weights = new double[node.m_Successors.length];
+        if (instance.isMissing(node.m_Attribute)) {
+          System.arraycopy(node.m_Prop, 0, weights, 0, node.m_Prop.length);
+        } else if (node.m_Info.attribute(node.m_Attribute).isNominal()) {
+	  weights[(int)instance.value(node.m_Attribute)] = 1.0;
+	} else {
+	  if (instance.value(node.m_Attribute) < node.m_SplitPoint) {
+            weights[0] = 1.0;
+	  } else {
+            weights[1] = 1.0;
+	  }
+	}
+        for (int i = 0; i < node.m_Successors.length; i++) {
+          queueOfNodes.add(node.m_Successors[i]);
+          queueOfWeights.add(a[index - 1] * weights[i]);
+        }
+      }
+      return a;
+    }
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() throws Exception {
+    
+    if (m_ZeroR != null) {
+      return 1;
+    }
+    return numNodes();
   }
 }
 
