@@ -985,7 +985,8 @@ public class ClassifierPanel extends JPanel implements
   protected void setTestSet() {
 
     if (m_SetTestFrame == null) {
-      final SetInstancesPanel sp = new SetInstancesPanel(true, true);
+      final SetInstancesPanel sp = new SetInstancesPanel(true, true,
+          m_Explorer.getPreprocessPanel().m_FileChooser);
 
       if (m_TestLoader != null) {
         try {
@@ -1750,7 +1751,8 @@ public class ClassifierPanel extends JPanel implements
                   vv.addElement(grph);
                 }
                 m_History.addObject(name, vv);
-              } else if (saveVis && plotInstances != null
+              } else if (saveVis && plotInstances != null 
+                  && plotInstances.getPlotInstances() != null
                   && plotInstances.getPlotInstances().numInstances() > 0) {
                 m_CurrentVis = new VisualizePanel();
                 m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
