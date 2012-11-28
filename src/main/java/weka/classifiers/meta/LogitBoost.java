@@ -132,8 +132,8 @@ public class LogitBoost
   implements Sourcable, WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
-  static final long serialVersionUID = -3905660358715833753L;
-  
+  private static final long serialVersionUID = 8627452775249625582L;
+
   /** Array for storing the generated base classifiers. 
    Note: we are hiding the variable from IteratedSingleClassifierEnhancer*/
   protected Classifier [][] m_Classifiers;
