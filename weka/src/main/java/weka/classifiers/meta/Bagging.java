@@ -15,13 +15,17 @@
 
 /*
  *    Bagging.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+import java.util.ArrayList;
+
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Instance;
@@ -30,15 +34,12 @@ import weka.core.Option;
 import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.core.PartitionGenerator;
 
 /**
  <!-- globalinfo-start -->
@@ -127,10 +128,10 @@ import java.util.Vector;
 public class Bagging
   extends RandomizableParallelIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer,
-             TechnicalInformationHandler {
+             TechnicalInformationHandler, PartitionGenerator {
 
   /** for serialization */
-  static final long serialVersionUID = -505879962237199703L;
+  static final long serialVersionUID = -115879962237199703L;
   
   /** The size of each bag sample, as a percentage of the training size */
   protected int m_BagSizePercent = 100;
@@ -418,62 +419,6 @@ public class Bagging
 					     + " not supported (Bagging)");
     }
   }
-
-  /**
-   * Creates a new dataset of the same size using random sampling
-   * with replacement according to the given weight vector. The
-   * weights of the instances in the new dataset are set to one.
-   * The length of the weight vector has to be the same as the
-   * number of instances in the dataset, and all weights have to
-   * be positive.
-   *
-   * @param data the data to be sampled from
-   * @param random a random number generator
-   * @param sampled indicating which instance has been sampled
-   * @return the new dataset
-   * @throws IllegalArgumentException if the weights array is of the wrong
-   * length or contains negative weights.
-   */
-  public final Instances resampleWithWeights(Instances data,
-					     Random random, 
-					     boolean[] sampled) {
-
-    double[] weights = new double[data.numInstances()];
-    for (int i = 0; i < weights.length; i++) {
-      weights[i] = data.instance(i).weight();
-    }
-    Instances newData = new Instances(data, data.numInstances());
-    if (data.numInstances() == 0) {
-      return newData;
-    }
-    double[] probabilities = new double[data.numInstances()];
-    double sumProbs = 0, sumOfWeights = Utils.sum(weights);
-    for (int i = 0; i < data.numInstances(); i++) {
-      sumProbs += random.nextDouble();
-      probabilities[i] = sumProbs;
-    }
-    Utils.normalize(probabilities, sumProbs / sumOfWeights);
-
-    // Make sure that rounding errors don't mess things up
-    probabilities[data.numInstances() - 1] = sumOfWeights;
-    int k = 0; int l = 0;
-    sumProbs = 0;
-    while ((k < data.numInstances() && (l < data.numInstances()))) {
-      if (weights[l] < 0) {
-	throw new IllegalArgumentException("Weights have to be positive.");
-      }
-      sumProbs += weights[l];
-      while ((k < data.numInstances()) &&
-	     (probabilities[k] <= sumProbs)) { 
-	newData.add(data.instance(l));
-	sampled[l] = true;
-	newData.instance(k).setWeight(1);
-	k++;
-      }
-      l++;
-    }
-    return newData;
-  }
   
   protected Random m_random;
   protected boolean[][] m_inBag;
@@ -494,7 +439,7 @@ public class Bagging
     // create the in-bag dataset
     if (m_CalcOutOfBag) {
       m_inBag[iteration] = new boolean[m_data.numInstances()];
-      bagData = resampleWithWeights(m_data, r, m_inBag[iteration]);
+      bagData = m_data.resampleWithWeights(r, m_inBag[iteration]);
     } else {
       bagData = m_data.resampleWithWeights(r);
       if (bagSize < m_data.numInstances()) {
@@ -670,6 +615,57 @@ public class Bagging
     }
 
     return text.toString();
+  }
+  
+  /**
+   * Builds the classifier to generate a partition.
+   */
+  public void generatePartition(Instances data) throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator)
+      buildClassifier(data);
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " cannot generate a partition");
+  }
+  
+  /**
+   * Computes an array that indicates leaf membership
+   */
+  public double[] getMembershipValues(Instance inst) throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator) {
+      ArrayList<double[]> al = new ArrayList<double[]>();
+      int size = 0;
+      for (int i = 0; i < m_Classifiers.length; i++) {
+        double[] r = ((PartitionGenerator)m_Classifiers[i]).
+          getMembershipValues(inst);
+        size += r.length;
+        al.add(r);
+      }
+      double[] values = new double[size];
+      int pos = 0;
+      for (double[] v: al) {
+        System.arraycopy(v, 0, values, pos, v.length);
+        pos += v.length;
+      }
+      return values;
+    } else throw new Exception("Classifier: " + getClassifierSpec()
+                               + " cannot generate a partition");
+  }
+  
+  /**
+   * Returns the number of elements in the partition.
+   */
+  public int numElements() throws Exception {
+    
+    if (m_Classifier instanceof PartitionGenerator) {
+      int size = 0;
+      for (int i = 0; i < m_Classifiers.length; i++) {
+        size += ((PartitionGenerator)m_Classifiers[i]).numElements();
+      }
+      return size;
+    } else throw new Exception("Classifier: " + getClassifierSpec()
+                               + " cannot generate a partition");
   }
   
   /**
