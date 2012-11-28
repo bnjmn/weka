@@ -22,9 +22,6 @@
 
 package weka.core;
 
-import weka.core.converters.ArffLoader.ArffReader;
-import weka.core.converters.ConverterUtils.DataSource;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -33,40 +30,46 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Random;
 
+import weka.core.converters.ArffLoader.ArffReader;
+import weka.core.converters.ConverterUtils.DataSource;
+
 /**
- * Class for handling an ordered set of weighted instances. <p>
- *
- * Typical usage: <p>
+ * Class for handling an ordered set of weighted instances.
+ * <p>
+ * 
+ * Typical usage:
+ * <p>
+ * 
  * <pre>
  * import weka.core.converters.ConverterUtils.DataSource;
  * ...
- *
+ * 
  * // Read all the instances in the file (ARFF, CSV, XRFF, ...)
  * DataSource source = new DataSource(filename);
  * Instances instances = source.getDataSet();
- *
+ * 
  * // Make the last attribute be the class
  * instances.setClassIndex(instances.numAttributes() - 1);
- *
+ * 
  * // Print header and instances.
  * System.out.println("\nDataset:\n");
  * System.out.println(instances);
- *
+ * 
  * ...
- * </pre><p>
- *
- * All methods that change a set of instances are safe, ie. a change
- * of a set of instances does not affect any other sets of
- * instances. All methods that change a datasets's attribute
- * information clone the dataset before it is changed.
- *
+ * </pre>
+ * <p>
+ * 
+ * All methods that change a set of instances are safe, ie. a change of a set of
+ * instances does not affect any other sets of instances. All methods that
+ * change a datasets's attribute information clone the dataset before it is
+ * changed.
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class Instances
-  implements Serializable, RevisionHandler {
+public class Instances implements Serializable, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -19412345060742748L;
@@ -74,7 +77,10 @@ public class Instances
   /** The filename extension that should be used for arff files */
   public final static String FILE_EXTENSION = ".arff";
 
-  /** The filename extension that should be used for bin. serialized instances files */
+  /**
+   * The filename extension that should be used for bin. serialized instances
+   * files
+   */
   public final static String SERIALIZED_OBJ_FILE_EXTENSION = ".bsi";
 
   /** The keyword used to denote the start of an arff header */
@@ -84,43 +90,46 @@ public class Instances
   public final static String ARFF_DATA = "@data";
 
   /** The dataset's name. */
-  protected /*@spec_public non_null@*/ String m_RelationName;
+  protected/* @spec_public non_null@ */String m_RelationName;
 
   /** The attribute information. */
-  protected /*@spec_public non_null@*/ FastVector m_Attributes;
-  /*  public invariant (\forall int i; 0 <= i && i < m_Attributes.size();
-                    m_Attributes.elementAt(i) != null);
-  */
+  protected/* @spec_public non_null@ */FastVector m_Attributes;
+  /*
+   * public invariant (\forall int i; 0 <= i && i < m_Attributes.size();
+   * m_Attributes.elementAt(i) != null);
+   */
 
   /** The instances. */
-  protected /*@spec_public non_null@*/ FastVector m_Instances;
+  protected/* @spec_public non_null@ */FastVector m_Instances;
 
   /** The class attribute's index */
   protected int m_ClassIndex;
-  //@ protected invariant classIndex() == m_ClassIndex;
+  // @ protected invariant classIndex() == m_ClassIndex;
 
-  /** The lines read so far in case of incremental loading. Since the
-   * StreamTokenizer will be re-initialized with every instance that is read,
-   * we have to keep track of the number of lines read so far.
-   * @see #readInstance(Reader) */
+  /**
+   * The lines read so far in case of incremental loading. Since the
+   * StreamTokenizer will be re-initialized with every instance that is read, we
+   * have to keep track of the number of lines read so far.
+   * 
+   * @see #readInstance(Reader)
+   */
   protected int m_Lines = 0;
 
-  /** used in randomizeAttribute and undoRandomizeAttribute to store/restore
-   * the index of attribute that was last shuffled, and it's original values
+  /**
+   * used in randomizeAttribute and undoRandomizeAttribute to store/restore the
+   * index of attribute that was last shuffled, and it's original values
    */
-  private int attIdx4Randomization = -1;
+  private final int attIdx4Randomization = -1;
   private double[] attIdxOrigValues;
 
   /**
-   * Reads an ARFF file from a reader, and assigns a weight of
-   * one to each instance. Lets the index of the class
-   * attribute be undefined (negative).
-   *
+   * Reads an ARFF file from a reader, and assigns a weight of one to each
+   * instance. Lets the index of the class attribute be undefined (negative).
+   * 
    * @param reader the reader
-   * @throws IOException if the ARFF file is not read
-   * successfully
+   * @throws IOException if the ARFF file is not read successfully
    */
-  public Instances(/*@non_null@*/Reader reader) throws IOException {
+  public Instances(/* @non_null@ */Reader reader) throws IOException {
     ArffReader arff = new ArffReader(reader);
     Instances dataset = arff.getData();
     initialize(dataset, dataset.numInstances());
@@ -129,25 +138,26 @@ public class Instances
   }
 
   /**
-   * Reads the header of an ARFF file from a reader and
-   * reserves space for the given number of instances. Lets
-   * the class index be undefined (negative).
-   *
+   * Reads the header of an ARFF file from a reader and reserves space for the
+   * given number of instances. Lets the class index be undefined (negative).
+   * 
    * @param reader the reader
    * @param capacity the capacity
-   * @throws IllegalArgumentException if the header is not read successfully
-   * or the capacity is negative.
+   * @throws IllegalArgumentException if the header is not read successfully or
+   *           the capacity is negative.
    * @throws IOException if there is a problem with the reader.
    * @deprecated instead of using this method in conjunction with the
-   * <code>readInstance(Reader)</code> method, one should use the
-   * <code>ArffLoader</code> or <code>DataSource</code> class instead.
+   *             <code>readInstance(Reader)</code> method, one should use the
+   *             <code>ArffLoader</code> or <code>DataSource</code> class
+   *             instead.
    * @see weka.core.converters.ArffLoader
    * @see weka.core.converters.ConverterUtils.DataSource
    */
-  //@ requires capacity >= 0;
-  //@ ensures classIndex() == -1;
-  @Deprecated public Instances(/*@non_null@*/Reader reader, int capacity)
-    throws IOException {
+  // @ requires capacity >= 0;
+  // @ ensures classIndex() == -1;
+  @Deprecated
+  public Instances(/* @non_null@ */Reader reader, int capacity)
+      throws IOException {
 
     ArffReader arff = new ArffReader(reader, 0);
     Instances header = arff.getStructure();
@@ -156,12 +166,12 @@ public class Instances
   }
 
   /**
-   * Constructor copying all instances and references to
-   * the header information from the given set of instances.
-   *
+   * Constructor copying all instances and references to the header information
+   * from the given set of instances.
+   * 
    * @param dataset the set to be copied
    */
-  public Instances(/*@non_null@*/Instances dataset) {
+  public Instances(/* @non_null@ */Instances dataset) {
 
     this(dataset, dataset.numInstances());
 
@@ -169,22 +179,22 @@ public class Instances
   }
 
   /**
-   * Constructor creating an empty set of instances. Copies references
-   * to the header information from the given set of instances. Sets
-   * the capacity of the set of instances to 0 if its negative.
-   *
-   * @param dataset the instances from which the header
-   * information is to be taken
+   * Constructor creating an empty set of instances. Copies references to the
+   * header information from the given set of instances. Sets the capacity of
+   * the set of instances to 0 if its negative.
+   * 
+   * @param dataset the instances from which the header information is to be
+   *          taken
    * @param capacity the capacity of the new dataset
    */
-  public Instances(/*@non_null@*/Instances dataset, int capacity) {
+  public Instances(/* @non_null@ */Instances dataset, int capacity) {
     initialize(dataset, capacity);
   }
 
   /**
-   * initializes with the header information of the given dataset and sets
-   * the capacity of the set of instances.
-   *
+   * initializes with the header information of the given dataset and sets the
+   * capacity of the set of instances.
+   * 
    * @param dataset the dataset to use as template
    * @param capacity the number of rows to reserve
    */
@@ -194,61 +204,60 @@ public class Instances
 
     // Strings only have to be "shallow" copied because
     // they can't be modified.
-    m_ClassIndex   = dataset.m_ClassIndex;
+    m_ClassIndex = dataset.m_ClassIndex;
     m_RelationName = dataset.m_RelationName;
-    m_Attributes   = dataset.m_Attributes;
-    m_Instances    = new FastVector(capacity);
+    m_Attributes = dataset.m_Attributes;
+    m_Instances = new FastVector(capacity);
   }
 
   /**
-   * Creates a new set of instances by copying a
-   * subset of another set.
-   *
-   * @param source the set of instances from which a subset
-   * is to be created
+   * Creates a new set of instances by copying a subset of another set.
+   * 
+   * @param source the set of instances from which a subset is to be created
    * @param first the index of the first instance to be copied
    * @param toCopy the number of instances to be copied
    * @throws IllegalArgumentException if first and toCopy are out of range
    */
-  //@ requires 0 <= first;
-  //@ requires 0 <= toCopy;
-  //@ requires first + toCopy <= source.numInstances();
-  public Instances(/*@non_null@*/Instances source, int first, int toCopy) {
+  // @ requires 0 <= first;
+  // @ requires 0 <= toCopy;
+  // @ requires first + toCopy <= source.numInstances();
+  public Instances(/* @non_null@ */Instances source, int first, int toCopy) {
 
     this(source, toCopy);
 
     if ((first < 0) || ((first + toCopy) > source.numInstances())) {
-      throw new IllegalArgumentException("Parameters first and/or toCopy out "+
-                                         "of range");
+      throw new IllegalArgumentException("Parameters first and/or toCopy out "
+          + "of range");
     }
     source.copyInstances(first, this, toCopy);
   }
 
   /**
-   * Creates an empty set of instances. Uses the given
-   * attribute information. Sets the capacity of the set of
-   * instances to 0 if its negative. Given attribute information
-   * must not be changed after this constructor has been used.
-   *
+   * Creates an empty set of instances. Uses the given attribute information.
+   * Sets the capacity of the set of instances to 0 if its negative. Given
+   * attribute information must not be changed after this constructor has been
+   * used.
+   * 
    * @param name the name of the relation
    * @param attInfo the attribute information
    * @param capacity the capacity of the set
    */
-  public Instances(/*@non_null@*/String name,
-		   /*@non_null@*/FastVector attInfo, int capacity) {
+  public Instances(/* @non_null@ */String name,
+  /* @non_null@ */FastVector attInfo, int capacity) {
 
     // check whether the attribute names are unique
     HashSet<String> names = new HashSet<String>();
     StringBuffer nonUniqueNames = new StringBuffer();
     for (int i = 0; i < attInfo.size(); i++) {
       if (names.contains(((Attribute) attInfo.elementAt(i)).name())) {
-        nonUniqueNames.append("'" + ((Attribute) attInfo.elementAt(i)).name() +"' ");
+        nonUniqueNames.append("'" + ((Attribute) attInfo.elementAt(i)).name()
+            + "' ");
       }
       names.add(((Attribute) attInfo.elementAt(i)).name());
     }
     if (names.size() != attInfo.size())
-      throw new IllegalArgumentException("Attribute names are not unique!" +
-          " Causes: " + nonUniqueNames.toString());
+      throw new IllegalArgumentException("Attribute names are not unique!"
+          + " Causes: " + nonUniqueNames.toString());
     names.clear();
 
     m_RelationName = name;
@@ -260,32 +269,32 @@ public class Instances
     m_Instances = new FastVector(capacity);
   }
 
-
   /**
-   * Create a copy of the structure if the data has string or
-   * relational attributes, "cleanses" string types (i.e. doesn't
-   * contain references to the strings seen in the past) and all
-   * relational attributes.
-   *
+   * Create a copy of the structure if the data has string or relational
+   * attributes, "cleanses" string types (i.e. doesn't contain references to the
+   * strings seen in the past) and all relational attributes.
+   * 
    * @return a copy of the instance structure.
    */
   public Instances stringFreeStructure() {
 
     FastVector newAtts = new FastVector();
-    for (int i = 0 ; i < m_Attributes.size(); i++) {
-      Attribute att = (Attribute)m_Attributes.elementAt(i);
+    for (int i = 0; i < m_Attributes.size(); i++) {
+      Attribute att = (Attribute) m_Attributes.elementAt(i);
       if (att.type() == Attribute.STRING) {
-        newAtts.addElement(new Attribute(att.name(), (FastVector)null, i));
+        newAtts.addElement(new Attribute(att.name(), (FastVector) null, i));
       } else if (att.type() == Attribute.RELATIONAL) {
-        newAtts.addElement(new Attribute(att.name(), new Instances(att.relation(), 0), i));
+        newAtts.addElement(new Attribute(att.name(), new Instances(att
+            .relation(), 0), i));
       }
     }
     if (newAtts.size() == 0) {
       return new Instances(this, 0);
     }
-    FastVector atts = (FastVector)m_Attributes.copy();
+    FastVector atts = (FastVector) m_Attributes.copy();
     for (int i = 0; i < newAtts.size(); i++) {
-      atts.setElementAt(newAtts.elementAt(i), ((Attribute)newAtts.elementAt(i)).index());
+      atts.setElementAt(newAtts.elementAt(i),
+          ((Attribute) newAtts.elementAt(i)).index());
     }
     Instances result = new Instances(this, 0);
     result.m_Attributes = atts;
@@ -293,17 +302,16 @@ public class Instances
   }
 
   /**
-   * Adds one instance to the end of the set.
-   * Shallow copies instance before it is added. Increases the
-   * size of the dataset if it is not large enough. Does not
-   * check if the instance is compatible with the dataset.
-   * Note: String or relational values are not transferred.
-   *
+   * Adds one instance to the end of the set. Shallow copies instance before it
+   * is added. Increases the size of the dataset if it is not large enough. Does
+   * not check if the instance is compatible with the dataset. Note: String or
+   * relational values are not transferred.
+   * 
    * @param instance the instance to be added
    */
-  public void add(/*@non_null@*/ Instance instance) {
+  public void add(/* @non_null@ */Instance instance) {
 
-    Instance newInstance = (Instance)instance.copy();
+    Instance newInstance = (Instance) instance.copy();
 
     newInstance.setDataset(this);
     m_Instances.addElement(newInstance);
@@ -311,32 +319,32 @@ public class Instances
 
   /**
    * Returns an attribute.
-   *
+   * 
    * @param index the attribute's index (index starts with 0)
    * @return the attribute at the given position
    */
-  //@ requires 0 <= index;
-  //@ requires index < m_Attributes.size();
-  //@ ensures \result != null;
-  public /*@pure@*/ Attribute attribute(int index) {
+  // @ requires 0 <= index;
+  // @ requires index < m_Attributes.size();
+  // @ ensures \result != null;
+  public/* @pure@ */Attribute attribute(int index) {
 
     return (Attribute) m_Attributes.elementAt(index);
   }
 
   /**
-   * Returns an attribute given its name. If there is more than
-   * one attribute with the same name, it returns the first one.
-   * Returns null if the attribute can't be found.
-   *
+   * Returns an attribute given its name. If there is more than one attribute
+   * with the same name, it returns the first one. Returns null if the attribute
+   * can't be found.
+   * 
    * @param name the attribute's name
-   * @return the attribute with the given name, null if the
-   * attribute can't be found
+   * @return the attribute with the given name, null if the attribute can't be
+   *         found
    */
-  public /*@pure@*/ Attribute attribute(String name) {
+  public/* @pure@ */Attribute attribute(String name) {
 
     for (int i = 0; i < numAttributes(); i++) {
       if (attribute(i).name().equals(name)) {
-	return attribute(i);
+        return attribute(i);
       }
     }
     return null;
@@ -344,9 +352,9 @@ public class Instances
 
   /**
    * Checks for attributes of the given type in the dataset
-   *
-   * @param attType  the attribute type to look for
-   * @return         true if attributes of the given type are present
+   * 
+   * @param attType the attribute type to look for
+   * @return true if attributes of the given type are present
    */
   public boolean checkForAttributeType(int attType) {
 
@@ -362,40 +370,36 @@ public class Instances
 
   /**
    * Checks for string attributes in the dataset
-   *
+   * 
    * @return true if string attributes are present, false otherwise
    */
-  public /*@pure@*/ boolean checkForStringAttributes() {
+  public/* @pure@ */boolean checkForStringAttributes() {
     return checkForAttributeType(Attribute.STRING);
   }
 
   /**
-   * Checks if the given instance is compatible
-   * with this dataset. Only looks at the size of
-   * the instance and the ranges of the values for
-   * nominal and string attributes.
-   *
+   * Checks if the given instance is compatible with this dataset. Only looks at
+   * the size of the instance and the ranges of the values for nominal and
+   * string attributes.
+   * 
    * @param instance the instance to check
    * @return true if the instance is compatible with the dataset
    */
-  public /*@pure@*/ boolean checkInstance(Instance instance) {
+  public/* @pure@ */boolean checkInstance(Instance instance) {
 
     if (instance.numAttributes() != numAttributes()) {
       return false;
     }
     for (int i = 0; i < numAttributes(); i++) {
       if (instance.isMissing(i)) {
-	continue;
-      } else if (attribute(i).isNominal() ||
-		 attribute(i).isString()) {
-	if (!(Utils.eq(instance.value(i),
-		       (double)(int)instance.value(i)))) {
-	  return false;
-	} else if (Utils.sm(instance.value(i), 0) ||
-		   Utils.gr(instance.value(i),
-			    attribute(i).numValues())) {
-	  return false;
-	}
+        continue;
+      } else if (attribute(i).isNominal() || attribute(i).isString()) {
+        if (!(Utils.eq(instance.value(i), (int) instance.value(i)))) {
+          return false;
+        } else if (Utils.sm(instance.value(i), 0)
+            || Utils.gr(instance.value(i), attribute(i).numValues())) {
+          return false;
+        }
       }
     }
     return true;
@@ -403,12 +407,12 @@ public class Instances
 
   /**
    * Returns the class attribute.
-   *
+   * 
    * @return the class attribute
    * @throws UnassignedClassException if the class is not set
    */
-  //@ requires classIndex() >= 0;
-  public /*@pure@*/ Attribute classAttribute() {
+  // @ requires classIndex() >= 0;
+  public/* @pure@ */Attribute classAttribute() {
 
     if (m_ClassIndex < 0) {
       throw new UnassignedClassException("Class index is negative (not set)!");
@@ -417,20 +421,20 @@ public class Instances
   }
 
   /**
-   * Returns the class attribute's index. Returns negative number
-   * if it's undefined.
-   *
+   * Returns the class attribute's index. Returns negative number if it's
+   * undefined.
+   * 
    * @return the class index as an integer
    */
   // ensures \result == m_ClassIndex;
-  public /*@pure@*/ int classIndex() {
+  public/* @pure@ */int classIndex() {
 
     return m_ClassIndex;
   }
 
   /**
-   * Compactifies the set of instances. Decreases the capacity of
-   * the set so that it matches the number of instances in the set.
+   * Compactifies the set of instances. Decreases the capacity of the set so
+   * that it matches the number of instances in the set.
    */
   public void compactify() {
 
@@ -447,26 +451,26 @@ public class Instances
 
   /**
    * Removes an instance at the given position from the set.
-   *
+   * 
    * @param index the instance's position (index starts with 0)
    */
-  //@ requires 0 <= index && index < numInstances();
+  // @ requires 0 <= index && index < numInstances();
   public void delete(int index) {
 
     m_Instances.removeElementAt(index);
   }
 
   /**
-   * Deletes an attribute at the given position
-   * (0 to numAttributes() - 1). A deep copy of the attribute
-   * information is performed before the attribute is deleted.
-   *
+   * Deletes an attribute at the given position (0 to numAttributes() - 1). A
+   * deep copy of the attribute information is performed before the attribute is
+   * deleted.
+   * 
    * @param position the attribute's position (position starts with 0)
-   * @throws IllegalArgumentException if the given index is out of range
-   *            or the class attribute is being deleted
+   * @throws IllegalArgumentException if the given index is out of range or the
+   *           class attribute is being deleted
    */
-  //@ requires 0 <= position && position < numAttributes();
-  //@ requires position != classIndex();
+  // @ requires 0 <= position && position < numAttributes();
+  // @ requires position != classIndex();
   public void deleteAttributeAt(int position) {
 
     if ((position < 0) || (position >= m_Attributes.size())) {
@@ -481,7 +485,7 @@ public class Instances
     }
     m_Attributes.removeElementAt(position);
     for (int i = position; i < m_Attributes.size(); i++) {
-      Attribute current = (Attribute)m_Attributes.elementAt(i);
+      Attribute current = (Attribute) m_Attributes.elementAt(i);
       current.setIndex(current.index() - 1);
     }
     for (int i = 0; i < numInstances(); i++) {
@@ -490,12 +494,12 @@ public class Instances
   }
 
   /**
-   * Deletes all attributes of the given type in the dataset. A deep copy of
-   * the attribute information is performed before an attribute is deleted.
-   *
+   * Deletes all attributes of the given type in the dataset. A deep copy of the
+   * attribute information is performed before an attribute is deleted.
+   * 
    * @param attType the attribute type to delete
-   * @throws IllegalArgumentException if attribute couldn't be
-   * successfully deleted (probably because it is the class attribute).
+   * @throws IllegalArgumentException if attribute couldn't be successfully
+   *           deleted (probably because it is the class attribute).
    */
   public void deleteAttributeType(int attType) {
     int i = 0;
@@ -511,9 +515,10 @@ public class Instances
   /**
    * Deletes all string attributes in the dataset. A deep copy of the attribute
    * information is performed before an attribute is deleted.
-   *
+   * 
    * @throws IllegalArgumentException if string attribute couldn't be
-   * successfully deleted (probably because it is the class attribute).
+   *           successfully deleted (probably because it is the class
+   *           attribute).
    * @see #deleteAttributeType(int)
    */
   public void deleteStringAttributes() {
@@ -521,39 +526,38 @@ public class Instances
   }
 
   /**
-   * Removes all instances with missing values for a particular
-   * attribute from the dataset.
-   *
+   * Removes all instances with missing values for a particular attribute from
+   * the dataset.
+   * 
    * @param attIndex the attribute's index (index starts with 0)
    */
-  //@ requires 0 <= attIndex && attIndex < numAttributes();
+  // @ requires 0 <= attIndex && attIndex < numAttributes();
   public void deleteWithMissing(int attIndex) {
 
     FastVector newInstances = new FastVector(numInstances());
 
     for (int i = 0; i < numInstances(); i++) {
       if (!instance(i).isMissing(attIndex)) {
-	newInstances.addElement(instance(i));
+        newInstances.addElement(instance(i));
       }
     }
     m_Instances = newInstances;
   }
 
   /**
-   * Removes all instances with missing values for a particular
-   * attribute from the dataset.
-   *
+   * Removes all instances with missing values for a particular attribute from
+   * the dataset.
+   * 
    * @param att the attribute
    */
-  public void deleteWithMissing(/*@non_null@*/ Attribute att) {
+  public void deleteWithMissing(/* @non_null@ */Attribute att) {
 
     deleteWithMissing(att.index());
   }
 
   /**
-   * Removes all instances with a missing class value
-   * from the dataset.
-   *
+   * Removes all instances with a missing class value from the dataset.
+   * 
    * @throws UnassignedClassException if class is not set
    */
   public void deleteWithMissingClass() {
@@ -566,32 +570,32 @@ public class Instances
 
   /**
    * Returns an enumeration of all the attributes.
-   *
+   * 
    * @return enumeration of all the attributes.
    */
-  public /*@non_null pure@*/ Enumeration enumerateAttributes() {
+  public/* @non_null pure@ */Enumeration enumerateAttributes() {
 
     return m_Attributes.elements(m_ClassIndex);
   }
 
   /**
    * Returns an enumeration of all instances in the dataset.
-   *
+   * 
    * @return enumeration of all instances in the dataset
    */
-  public /*@non_null pure@*/ Enumeration enumerateInstances() {
+  public/* @non_null pure@ */Enumeration enumerateInstances() {
 
     return m_Instances.elements();
   }
 
   /**
    * Checks if two headers are equivalent.
-   *
+   * 
    * @param dataset another dataset
-   * @return true if the header of the given dataset is equivalent
-   * to this header
+   * @return true if the header of the given dataset is equivalent to this
+   *         header
    */
-  public /*@pure@*/ boolean equalHeaders(Instances dataset){
+  public/* @pure@ */boolean equalHeaders(Instances dataset) {
 
     // Check class and all attributes
     if (m_ClassIndex != dataset.m_ClassIndex) {
@@ -602,7 +606,7 @@ public class Instances
     }
     for (int i = 0; i < m_Attributes.size(); i++) {
       if (!(attribute(i).equals(dataset.attribute(i)))) {
-	return false;
+        return false;
       }
     }
     return true;
@@ -610,59 +614,57 @@ public class Instances
 
   /**
    * Returns the first instance in the set.
-   *
+   * 
    * @return the first instance in the set
    */
-  //@ requires numInstances() > 0;
-  public /*@non_null pure@*/ Instance firstInstance() {
+  // @ requires numInstances() > 0;
+  public/* @non_null pure@ */Instance firstInstance() {
 
-    return (Instance)m_Instances.firstElement();
+    return (Instance) m_Instances.firstElement();
   }
 
   /**
-   * Returns a random number generator. The initial seed of the random
-   * number generator depends on the given seed and the hash code of
-   * a string representation of a instances chosen based on the given
-   * seed.
-   *
+   * Returns a random number generator. The initial seed of the random number
+   * generator depends on the given seed and the hash code of a string
+   * representation of a instances chosen based on the given seed.
+   * 
    * @param seed the given seed
    * @return the random number generator
    */
   public Random getRandomNumberGenerator(long seed) {
 
     Random r = new Random(seed);
-    r.setSeed(instance(r.nextInt(numInstances())).toStringNoWeight().hashCode() + seed);
+    r.setSeed(instance(r.nextInt(numInstances())).toStringNoWeight().hashCode()
+        + seed);
     return r;
   }
 
   /**
-   * Inserts an attribute at the given position (0 to
-   * numAttributes()) and sets all values to be missing.
-   * Shallow copies the attribute before it is inserted, and performs
-   * a deep copy of the existing attribute information.
-   *
+   * Inserts an attribute at the given position (0 to numAttributes()) and sets
+   * all values to be missing. Shallow copies the attribute before it is
+   * inserted, and performs a deep copy of the existing attribute information.
+   * 
    * @param att the attribute to be inserted
    * @param position the attribute's position (position starts with 0)
    * @throws IllegalArgumentException if the given index is out of range
    */
-  //@ requires 0 <= position;
-  //@ requires position <= numAttributes();
-  public void insertAttributeAt(/*@non_null@*/ Attribute att, int position) {
+  // @ requires 0 <= position;
+  // @ requires position <= numAttributes();
+  public void insertAttributeAt(/* @non_null@ */Attribute att, int position) {
 
-    if ((position < 0) ||
-	(position > m_Attributes.size())) {
+    if ((position < 0) || (position > m_Attributes.size())) {
       throw new IllegalArgumentException("Index out of range");
     }
     if (attribute(att.name()) != null) {
-      throw new IllegalArgumentException(
-	  "Attribute name '" + att.name() + "' already in use at position #" + attribute(att.name()).index());
+      throw new IllegalArgumentException("Attribute name '" + att.name()
+          + "' already in use at position #" + attribute(att.name()).index());
     }
-    att = (Attribute)att.copy();
+    att = (Attribute) att.copy();
     freshAttributeInfo();
     att.setIndex(position);
     m_Attributes.insertElementAt(att, position);
     for (int i = position + 1; i < m_Attributes.size(); i++) {
-      Attribute current = (Attribute)m_Attributes.elementAt(i);
+      Attribute current = (Attribute) m_Attributes.elementAt(i);
       current.setIndex(current.index() + 1);
     }
     for (int i = 0; i < numInstances(); i++) {
@@ -675,21 +677,21 @@ public class Instances
 
   /**
    * Returns the instance at the given position.
-   *
+   * 
    * @param index the instance's index (index starts with 0)
    * @return the instance at the given position
    */
-  //@ requires 0 <= index;
-  //@ requires index < numInstances();
-  public /*@non_null pure@*/ Instance instance(int index) {
+  // @ requires 0 <= index;
+  // @ requires index < numInstances();
+  public/* @non_null pure@ */Instance instance(int index) {
 
-    return (Instance)m_Instances.elementAt(index);
+    return (Instance) m_Instances.elementAt(index);
   }
 
   /**
-   * Returns the kth-smallest attribute value of a numeric attribute.
-   * Note that calling this method will change the order of the data!
-   *
+   * Returns the kth-smallest attribute value of a numeric attribute. Note that
+   * calling this method will change the order of the data!
+   * 
    * @param att the Attribute object
    * @param k the value of k
    * @return the kth-smallest value
@@ -700,11 +702,11 @@ public class Instances
   }
 
   /**
-   * Returns the kth-smallest attribute value of a numeric attribute.
-   * Note that calling this method will change the order of the data!
-   * The number of non-missing values in the data must be as least
-   * as last as k for this to work.
-   *
+   * Returns the kth-smallest attribute value of a numeric attribute. Note that
+   * calling this method will change the order of the data! The number of
+   * non-missing values in the data must be as least as last as k for this to
+   * work.
+   * 
    * @param attIndex the attribute's index
    * @param k the value of k
    * @return the kth-smallest value
@@ -712,28 +714,30 @@ public class Instances
   public double kthSmallestValue(int attIndex, int k) {
 
     if (!attribute(attIndex).isNumeric()) {
-      throw new IllegalArgumentException("Instances: attribute must be numeric to compute kth-smallest value.");
+      throw new IllegalArgumentException(
+          "Instances: attribute must be numeric to compute kth-smallest value.");
     }
 
-    int i,j;
+    int i, j;
 
     // move all instances with missing values to end
     j = numInstances() - 1;
     i = 0;
     while (i <= j) {
       if (instance(j).isMissing(attIndex)) {
-	j--;
+        j--;
       } else {
-	if (instance(i).isMissing(attIndex)) {
-	  swap(i,j);
-	  j--;
-	}
-	i++;
+        if (instance(i).isMissing(attIndex)) {
+          swap(i, j);
+          j--;
+        }
+        i++;
       }
     }
 
-    if ((k < 1) || (k > j+1)) {
-      throw new IllegalArgumentException("Instances: value for k for computing kth-smallest value too large.");
+    if ((k < 1) || (k > j + 1)) {
+      throw new IllegalArgumentException(
+          "Instances: value for k for computing kth-smallest value too large.");
     }
 
     return instance(select(attIndex, 0, j, k)).value(attIndex);
@@ -741,49 +745,49 @@ public class Instances
 
   /**
    * Returns the last instance in the set.
-   *
+   * 
    * @return the last instance in the set
    */
-  //@ requires numInstances() > 0;
-  public /*@non_null pure@*/ Instance lastInstance() {
+  // @ requires numInstances() > 0;
+  public/* @non_null pure@ */Instance lastInstance() {
 
-    return (Instance)m_Instances.lastElement();
+    return (Instance) m_Instances.lastElement();
   }
 
   /**
-   * Returns the mean (mode) for a numeric (nominal) attribute as
-   * a floating-point value. Returns 0 if the attribute is neither nominal nor
+   * Returns the mean (mode) for a numeric (nominal) attribute as a
+   * floating-point value. Returns 0 if the attribute is neither nominal nor
    * numeric. If all values are missing it returns zero.
-   *
+   * 
    * @param attIndex the attribute's index (index starts with 0)
    * @return the mean or the mode
    */
-  public /*@pure@*/ double meanOrMode(int attIndex) {
+  public/* @pure@ */double meanOrMode(int attIndex) {
 
     double result, found;
-    int [] counts;
+    int[] counts;
 
     if (attribute(attIndex).isNumeric()) {
       result = found = 0;
       for (int j = 0; j < numInstances(); j++) {
-	if (!instance(j).isMissing(attIndex)) {
-	  found += instance(j).weight();
-	  result += instance(j).weight()*instance(j).value(attIndex);
-	}
+        if (!instance(j).isMissing(attIndex)) {
+          found += instance(j).weight();
+          result += instance(j).weight() * instance(j).value(attIndex);
+        }
       }
       if (found <= 0) {
-	return 0;
+        return 0;
       } else {
-	return result / found;
+        return result / found;
       }
     } else if (attribute(attIndex).isNominal()) {
       counts = new int[attribute(attIndex).numValues()];
       for (int j = 0; j < numInstances(); j++) {
-	if (!instance(j).isMissing(attIndex)) {
-	  counts[(int) instance(j).value(attIndex)] += instance(j).weight();
-	}
+        if (!instance(j).isMissing(attIndex)) {
+          counts[(int) instance(j).value(attIndex)] += instance(j).weight();
+        }
       }
-      return (double)Utils.maxIndex(counts);
+      return Utils.maxIndex(counts);
     } else {
       return 0;
     }
@@ -791,37 +795,37 @@ public class Instances
 
   /**
    * Returns the mean (mode) for a numeric (nominal) attribute as a
-   * floating-point value.  Returns 0 if the attribute is neither
-   * nominal nor numeric.  If all values are missing it returns zero.
-   *
+   * floating-point value. Returns 0 if the attribute is neither nominal nor
+   * numeric. If all values are missing it returns zero.
+   * 
    * @param att the attribute
    * @return the mean or the mode
    */
-  public /*@pure@*/ double meanOrMode(Attribute att) {
+  public/* @pure@ */double meanOrMode(Attribute att) {
 
     return meanOrMode(att.index());
   }
 
   /**
    * Returns the number of attributes.
-   *
+   * 
    * @return the number of attributes as an integer
    */
-  //@ ensures \result == m_Attributes.size();
-  public /*@pure@*/ int numAttributes() {
+  // @ ensures \result == m_Attributes.size();
+  public/* @pure@ */int numAttributes() {
 
     return m_Attributes.size();
   }
 
   /**
    * Returns the number of class labels.
-   *
-   * @return the number of class labels as an integer if the class
-   * attribute is nominal, 1 otherwise.
+   * 
+   * @return the number of class labels as an integer if the class attribute is
+   *         nominal, 1 otherwise.
    * @throws UnassignedClassException if the class is not set
    */
-  //@ requires classIndex() >= 0;
-  public /*@pure@*/ int numClasses() {
+  // @ requires classIndex() >= 0;
+  public/* @pure@ */int numClasses() {
 
     if (m_ClassIndex < 0) {
       throw new UnassignedClassException("Class index is negative (not set)!");
@@ -834,32 +838,31 @@ public class Instances
   }
 
   /**
-   * Returns the number of distinct values of a given attribute.
-   * Returns the number of instances if the attribute is a
-   * string attribute. The value 'missing' is not counted.
-   *
+   * Returns the number of distinct values of a given attribute. Returns the
+   * number of instances if the attribute is a string attribute. The value
+   * 'missing' is not counted.
+   * 
    * @param attIndex the attribute (index starts with 0)
    * @return the number of distinct values of a given attribute
    */
-  //@ requires 0 <= attIndex;
-  //@ requires attIndex < numAttributes();
-  public /*@pure@*/ int numDistinctValues(int attIndex) {
+  // @ requires 0 <= attIndex;
+  // @ requires attIndex < numAttributes();
+  public/* @pure@ */int numDistinctValues(int attIndex) {
 
     if (attribute(attIndex).isNumeric()) {
-      double [] attVals = attributeToDoubleArray(attIndex);
-      int [] sorted = Utils.sort(attVals);
+      double[] attVals = attributeToDoubleArray(attIndex);
+      int[] sorted = Utils.sort(attVals);
       double prev = 0;
       int counter = 0;
       for (int i = 0; i < sorted.length; i++) {
-	Instance current = instance(sorted[i]);
-	if (current.isMissing(attIndex)) {
-	  break;
-	}
-	if ((i == 0) ||
-	    (current.value(attIndex) > prev)) {
-	  prev = current.value(attIndex);
-	  counter++;
-	}
+        Instance current = instance(sorted[i]);
+        if (current.isMissing(attIndex)) {
+          break;
+        }
+        if ((i == 0) || (current.value(attIndex) > prev)) {
+          prev = current.value(attIndex);
+          counter++;
+        }
       }
       return counter;
     } else {
@@ -868,58 +871,58 @@ public class Instances
   }
 
   /**
-   * Returns the number of distinct values of a given attribute.
-   * Returns the number of instances if the attribute is a
-   * string attribute. The value 'missing' is not counted.
-   *
+   * Returns the number of distinct values of a given attribute. Returns the
+   * number of instances if the attribute is a string attribute. The value
+   * 'missing' is not counted.
+   * 
    * @param att the attribute
    * @return the number of distinct values of a given attribute
    */
-  public /*@pure@*/ int numDistinctValues(/*@non_null@*/Attribute att) {
+  public/* @pure@ */int numDistinctValues(/* @non_null@ */Attribute att) {
 
     return numDistinctValues(att.index());
   }
 
   /**
    * Returns the number of instances in the dataset.
-   *
+   * 
    * @return the number of instances in the dataset as an integer
    */
-  //@ ensures \result == m_Instances.size();
-  public /*@pure@*/ int numInstances() {
+  // @ ensures \result == m_Instances.size();
+  public/* @pure@ */int numInstances() {
 
     return m_Instances.size();
   }
 
   /**
-   * Shuffles the instances in the set so that they are ordered
-   * randomly.
-   *
+   * Shuffles the instances in the set so that they are ordered randomly.
+   * 
    * @param random a random number generator
    */
   public void randomize(Random random) {
 
     for (int j = numInstances() - 1; j > 0; j--)
-      swap(j, random.nextInt(j+1));
+      swap(j, random.nextInt(j + 1));
   }
 
   /**
-   * Reads a single instance from the reader and appends it
-   * to the dataset.  Automatically expands the dataset if it
-   * is not large enough to hold the instance. This method does
-   * not check for carriage return at the end of the line.
-   *
+   * Reads a single instance from the reader and appends it to the dataset.
+   * Automatically expands the dataset if it is not large enough to hold the
+   * instance. This method does not check for carriage return at the end of the
+   * line.
+   * 
    * @param reader the reader
    * @return false if end of file has been reached
-   * @throws IOException if the information is not read
-   * successfully
+   * @throws IOException if the information is not read successfully
    * @deprecated instead of using this method in conjunction with the
-   * <code>readInstance(Reader)</code> method, one should use the
-   * <code>ArffLoader</code> or <code>DataSource</code> class instead.
+   *             <code>readInstance(Reader)</code> method, one should use the
+   *             <code>ArffLoader</code> or <code>DataSource</code> class
+   *             instead.
    * @see weka.core.converters.ArffLoader
    * @see weka.core.converters.ConverterUtils.DataSource
    */
-  @Deprecated public boolean readInstance(Reader reader) throws IOException {
+  @Deprecated
+  public boolean readInstance(Reader reader) throws IOException {
 
     ArffReader arff = new ArffReader(reader, this, m_Lines, 1);
     Instance inst = arff.readInstance(arff.getData(), false);
@@ -927,27 +930,25 @@ public class Instances
     if (inst != null) {
       add(inst);
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
 
   /**
    * Returns the relation's name.
-   *
+   * 
    * @return the relation's name as a string
    */
-  //@ ensures \result == m_RelationName;
-  public /*@pure@*/ String relationName() {
+  // @ ensures \result == m_RelationName;
+  public/* @pure@ */String relationName() {
 
     return m_RelationName;
   }
 
   /**
-   * Renames an attribute. This change only affects this
-   * dataset.
-   *
+   * Renames an attribute. This change only affects this dataset.
+   * 
    * @param att the attribute's index (index starts with 0)
    * @param name the new name
    */
@@ -955,10 +956,10 @@ public class Instances
     // name already present?
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att)
-	continue;
+        continue;
       if (attribute(i).name().equals(name)) {
-	throw new IllegalArgumentException(
-	    "Attribute name '" + name + "' already present at position #" + i);
+        throw new IllegalArgumentException("Attribute name '" + name
+            + "' already present at position #" + i);
       }
     }
 
@@ -966,18 +967,17 @@ public class Instances
     FastVector newVec = new FastVector(numAttributes());
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
-	newVec.addElement(newAtt);
+        newVec.addElement(newAtt);
       } else {
-	newVec.addElement(attribute(i));
+        newVec.addElement(attribute(i));
       }
     }
     m_Attributes = newVec;
   }
 
   /**
-   * Renames an attribute. This change only affects this
-   * dataset.
-   *
+   * Renames an attribute. This change only affects this dataset.
+   * 
    * @param att the attribute
    * @param name the new name
    */
@@ -987,49 +987,49 @@ public class Instances
   }
 
   /**
-   * Renames the value of a nominal (or string) attribute value. This
-   * change only affects this dataset.
-   *
+   * Renames the value of a nominal (or string) attribute value. This change
+   * only affects this dataset.
+   * 
    * @param att the attribute's index (index starts with 0)
    * @param val the value's index (index starts with 0)
    * @param name the new name
    */
   public void renameAttributeValue(int att, int val, String name) {
 
-    Attribute newAtt = (Attribute)attribute(att).copy();
+    Attribute newAtt = (Attribute) attribute(att).copy();
     FastVector newVec = new FastVector(numAttributes());
 
     newAtt.setValue(val, name);
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
-	newVec.addElement(newAtt);
+        newVec.addElement(newAtt);
       } else {
-	newVec.addElement(attribute(i));
+        newVec.addElement(attribute(i));
       }
     }
     m_Attributes = newVec;
   }
 
   /**
-   * Renames the value of a nominal (or string) attribute value. This
-   * change only affects this dataset.
-   *
+   * Renames the value of a nominal (or string) attribute value. This change
+   * only affects this dataset.
+   * 
    * @param att the attribute
    * @param val the value
    * @param name the new name
    */
-  public void renameAttributeValue(Attribute att, String val,
-                                         String name) {
+  public void renameAttributeValue(Attribute att, String val, String name) {
 
     int v = att.indexOfValue(val);
-    if (v == -1) throw new IllegalArgumentException(val + " not found");
+    if (v == -1)
+      throw new IllegalArgumentException(val + " not found");
     renameAttributeValue(att.index(), v, name);
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling
-   * with replacement.
-   *
+   * Creates a new dataset of the same size using random sampling with
+   * replacement.
+   * 
    * @param random a random number generator
    * @return the new dataset
    */
@@ -1043,78 +1043,147 @@ public class Instances
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling
-   * with replacement according to the current instance weights. The
-   * weights of the instances in the new dataset are set to one.
-   *
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the current instance weights. The weights of the
+   * instances in the new dataset are set to one.
+   * 
    * @param random a random number generator
    * @return the new dataset
    */
   public Instances resampleWithWeights(Random random) {
 
-    double [] weights = new double[numInstances()];
+    double[] weights = new double[numInstances()];
     for (int i = 0; i < weights.length; i++) {
       weights[i] = instance(i).weight();
     }
     return resampleWithWeights(random, weights);
   }
 
+  /**
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the current instance weights. The weights of the
+   * instances in the new dataset are set to one. See also
+   * resampleWithWeights(Random, double[], boolean[]).
+   * 
+   * @param random a random number generator
+   * @param sampled an array indicating what has been sampled
+   * @return the new dataset
+   */
+  public Instances resampleWithWeights(Random random, boolean[] sampled) {
+
+    double[] weights = new double[numInstances()];
+    for (int i = 0; i < weights.length; i++) {
+      weights[i] = instance(i).weight();
+    }
+    return resampleWithWeights(random, weights, sampled);
+  }
 
   /**
-   * Creates a new dataset of the same size using random sampling
-   * with replacement according to the given weight vector. The
-   * weights of the instances in the new dataset are set to one.
-   * The length of the weight vector has to be the same as the
-   * number of instances in the dataset, and all weights have to
-   * be positive.
-   *
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the given weight vector. See also
+   * resampleWithWeights(Random, double[], boolean[]).
+   * 
    * @param random a random number generator
    * @param weights the weight vector
    * @return the new dataset
    * @throws IllegalArgumentException if the weights array is of the wrong
-   * length or contains negative weights.
+   *           length or contains negative weights.
    */
-  public Instances resampleWithWeights(Random random,
-					     double[] weights) {
+  public Instances resampleWithWeights(Random random, double[] weights) {
+
+    return resampleWithWeights(random, weights, null);
+  }
+
+  /**
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the given weight vector. The weights of the
+   * instances in the new dataset are set to one. The length of the weight
+   * vector has to be the same as the number of instances in the dataset, and
+   * all weights have to be positive. Uses Walker's method, see pp. 232 of
+   * "Stochastic Simulation" by B.D. Ripley (1987).
+   * 
+   * @param random a random number generator
+   * @param weights the weight vector
+   * @param sampled an array indicating what has been sampled, can be null
+   * @return the new dataset
+   * @throws IllegalArgumentException if the weights array is of the wrong
+   *           length or contains negative weights.
+   */
+  public Instances resampleWithWeights(Random random, double[] weights,
+      boolean[] sampled) {
 
     if (weights.length != numInstances()) {
       throw new IllegalArgumentException("weights.length != numInstances.");
     }
+
     Instances newData = new Instances(this, numInstances());
     if (numInstances() == 0) {
       return newData;
     }
-    double[] probabilities = new double[numInstances()];
-    double sumProbs = 0, sumOfWeights = Utils.sum(weights);
-    for (int i = 0; i < numInstances(); i++) {
-      sumProbs += random.nextDouble();
-      probabilities[i] = sumProbs;
-    }
-    Utils.normalize(probabilities, sumProbs / sumOfWeights);
 
-    // Make sure that rounding errors don't mess things up
-    probabilities[numInstances() - 1] = sumOfWeights;
-    int k = 0; int l = 0;
-    sumProbs = 0;
-    while ((k < numInstances() && (l < numInstances()))) {
-      if (weights[l] < 0) {
-	throw new IllegalArgumentException("Weights have to be positive.");
+    // Walker's method, see pp. 232 of "Stochastic Simulation" by B.D. Ripley
+    double[] P = new double[weights.length];
+    System.arraycopy(weights, 0, P, 0, weights.length);
+    Utils.normalize(P);
+    double[] Q = new double[weights.length];
+    int[] A = new int[weights.length];
+    int[] W = new int[weights.length];
+    int M = weights.length;
+    int NN = -1;
+    int NP = M;
+    for (int I = 0; I < M; I++) {
+      if (P[I] < 0) {
+        throw new IllegalArgumentException("Weights have to be positive.");
       }
-      sumProbs += weights[l];
-      while ((k < numInstances()) &&
-	     (probabilities[k] <= sumProbs)) {
-	newData.add(instance(l));
-	newData.instance(k).setWeight(1);
-	k++;
+      Q[I] = M * P[I];
+      if (Q[I] < 1.0) {
+        W[++NN] = I;
+      } else {
+        W[--NP] = I;
       }
-      l++;
     }
+    if (NN > -1 && NP < M) {
+      for (int S = 0; S < M - 1; S++) {
+        int I = W[S];
+        int J = W[NP];
+        A[I] = J;
+        Q[J] += Q[I] - 1.0;
+        if (Q[J] < 1.0) {
+          NP++;
+        }
+        if (NP >= M) {
+          break;
+        }
+      }
+      // A[W[M]] = W[M];
+    }
+
+    for (int I = 0; I < M; I++) {
+      Q[I] += I;
+    }
+
+    for (int i = 0; i < numInstances(); i++) {
+      int ALRV;
+      double U = M * random.nextDouble();
+      int I = (int) U;
+      if (U < Q[I]) {
+        ALRV = I;
+      } else {
+        ALRV = A[I];
+      }
+      newData.add(instance(ALRV));
+      if (sampled != null) {
+        sampled[ALRV] = true;
+      }
+      newData.instance(newData.numInstances() - 1).setWeight(1);
+    }
+
     return newData;
   }
 
   /**
    * Sets the class attribute.
-   *
+   * 
    * @param att attribute to be the class
    */
   public void setClass(Attribute att) {
@@ -1123,10 +1192,9 @@ public class Instances
   }
 
   /**
-   * Sets the class index of the set.
-   * If the class index is negative there is assumed to be no class.
-   * (ie. it is undefined)
-   *
+   * Sets the class index of the set. If the class index is negative there is
+   * assumed to be no class. (ie. it is undefined)
+   * 
    * @param classIndex the new class index (index starts with 0)
    * @throws IllegalArgumentException if the class index is too big or < 0
    */
@@ -1140,39 +1208,39 @@ public class Instances
 
   /**
    * Sets the relation's name.
-   *
+   * 
    * @param newName the new relation name.
    */
-  public void setRelationName(/*@non_null@*/String newName) {
+  public void setRelationName(/* @non_null@ */String newName) {
 
     m_RelationName = newName;
   }
 
   /**
    * Sorts the instances based on an attribute. For numeric attributes,
-   * instances are sorted in ascending order. For nominal attributes,
-   * instances are sorted based on the attribute label ordering
-   * specified in the header. Instances with missing values for the
-   * attribute are placed at the end of the dataset.
-   *
+   * instances are sorted in ascending order. For nominal attributes, instances
+   * are sorted based on the attribute label ordering specified in the header.
+   * Instances with missing values for the attribute are placed at the end of
+   * the dataset.
+   * 
    * @param attIndex the attribute's index (index starts with 0)
    */
   public void sort(int attIndex) {
 
-    int i,j;
+    int i, j;
 
     // move all instances with missing values to end
     j = numInstances() - 1;
     i = 0;
     while (i <= j) {
       if (instance(j).isMissing(attIndex)) {
-	j--;
+        j--;
       } else {
-	if (instance(i).isMissing(attIndex)) {
-	  swap(i,j);
-	  j--;
-	}
-	i++;
+        if (instance(i).isMissing(attIndex)) {
+          swap(i, j);
+          j--;
+        }
+        i++;
       }
     }
     quickSort(attIndex, 0, j);
@@ -1181,10 +1249,10 @@ public class Instances
   /**
    * Sorts the instances based on an attribute. For numeric attributes,
    * instances are sorted into ascending order. For nominal attributes,
-   * instances are sorted based on the attribute label ordering
-   * specified in the header. Instances with missing values for the
-   * attribute are placed at the end of the dataset.
-   *
+   * instances are sorted based on the attribute label ordering specified in the
+   * header. Instances with missing values for the attribute are placed at the
+   * end of the dataset.
+   * 
    * @param att the attribute
    */
   public void sort(Attribute att) {
@@ -1193,17 +1261,18 @@ public class Instances
   }
 
   /**
-   * Stratifies a set of instances according to its class values
-   * if the class attribute is nominal (so that afterwards a
-   * stratified cross-validation can be performed).
-   *
+   * Stratifies a set of instances according to its class values if the class
+   * attribute is nominal (so that afterwards a stratified cross-validation can
+   * be performed).
+   * 
    * @param numFolds the number of folds in the cross-validation
    * @throws UnassignedClassException if the class is not set
    */
   public void stratify(int numFolds) {
 
     if (numFolds <= 1) {
-      throw new IllegalArgumentException("Number of folds must be greater than 1");
+      throw new IllegalArgumentException(
+          "Number of folds must be greater than 1");
     }
     if (m_ClassIndex < 0) {
       throw new UnassignedClassException("Class index is negative (not set)!");
@@ -1213,17 +1282,16 @@ public class Instances
       // sort by class
       int index = 1;
       while (index < numInstances()) {
-	Instance instance1 = instance(index - 1);
-	for (int j = index; j < numInstances(); j++) {
-	  Instance instance2 = instance(j);
-	  if ((instance1.classValue() == instance2.classValue()) ||
-	      (instance1.classIsMissing() &&
-	       instance2.classIsMissing())) {
-	    swap(index,j);
-	    index++;
-	  }
-	}
-	index++;
+        Instance instance1 = instance(index - 1);
+        for (int j = index; j < numInstances(); j++) {
+          Instance instance2 = instance(j);
+          if ((instance1.classValue() == instance2.classValue())
+              || (instance1.classIsMissing() && instance2.classIsMissing())) {
+            swap(index, j);
+            index++;
+          }
+        }
+        index++;
       }
       stratStep(numFolds);
     }
@@ -1231,10 +1299,10 @@ public class Instances
 
   /**
    * Computes the sum of all the instances' weights.
-   *
+   * 
    * @return the sum of all the instances' weights as a double
    */
-  public /*@pure@*/ double sumOfWeights() {
+  public/* @pure@ */double sumOfWeights() {
 
     double sum = 0;
 
@@ -1245,18 +1313,17 @@ public class Instances
   }
 
   /**
-   * Creates the test set for one fold of a cross-validation on
-   * the dataset.
-   *
-   * @param numFolds the number of folds in the cross-validation. Must
-   * be greater than 1.
+   * Creates the test set for one fold of a cross-validation on the dataset.
+   * 
+   * @param numFolds the number of folds in the cross-validation. Must be
+   *          greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @return the test set as a set of weighted instances
-   * @throws IllegalArgumentException if the number of folds is less than 2
-   * or greater than the number of instances.
+   * @throws IllegalArgumentException if the number of folds is less than 2 or
+   *           greater than the number of instances.
    */
-  //@ requires 2 <= numFolds && numFolds < numInstances();
-  //@ requires 0 <= numFold && numFold < numFolds;
+  // @ requires 2 <= numFolds && numFolds < numInstances();
+  // @ requires 0 <= numFold && numFold < numFolds;
   public Instances testCV(int numFolds, int numFold) {
 
     int numInstForFold, first, offset;
@@ -1266,13 +1333,14 @@ public class Instances
       throw new IllegalArgumentException("Number of folds must be at least 2!");
     }
     if (numFolds > numInstances()) {
-      throw new IllegalArgumentException("Can't have more folds than instances!");
+      throw new IllegalArgumentException(
+          "Can't have more folds than instances!");
     }
     numInstForFold = numInstances() / numFolds;
-    if (numFold < numInstances() % numFolds){
+    if (numFold < numInstances() % numFolds) {
       numInstForFold++;
       offset = numFold;
-    }else
+    } else
       offset = numInstances() % numFolds;
     test = new Instances(this, numInstForFold);
     first = numFold * (numInstances() / numFolds) + offset;
@@ -1281,18 +1349,18 @@ public class Instances
   }
 
   /**
-   * Returns the dataset as a string in ARFF format. Strings
-   * are quoted if they contain whitespace characters, or if they
-   * are a question mark.
-   *
+   * Returns the dataset as a string in ARFF format. Strings are quoted if they
+   * contain whitespace characters, or if they are a question mark.
+   * 
    * @return the dataset in ARFF format as a string
    */
+  @Override
   public String toString() {
 
     StringBuffer text = new StringBuffer();
 
-    text.append(ARFF_RELATION).append(" ").
-      append(Utils.quote(m_RelationName)).append("\n\n");
+    text.append(ARFF_RELATION).append(" ").append(Utils.quote(m_RelationName))
+        .append("\n\n");
     for (int i = 0; i < numAttributes(); i++) {
       text.append(attribute(i)).append("\n");
     }
@@ -1304,9 +1372,9 @@ public class Instances
 
   /**
    * Returns the instances in the dataset as a string in ARFF format. Strings
-   * are quoted if they contain whitespace characters, or if they
-   * are a question mark.
-   *
+   * are quoted if they contain whitespace characters, or if they are a question
+   * mark.
+   * 
    * @return the dataset in ARFF format as a string
    */
   protected String stringWithoutHeader() {
@@ -1316,25 +1384,24 @@ public class Instances
     for (int i = 0; i < numInstances(); i++) {
       text.append(instance(i));
       if (i < numInstances() - 1) {
-	text.append('\n');
+        text.append('\n');
       }
     }
     return text.toString();
   }
 
   /**
-   * Creates the training set for one fold of a cross-validation
-   * on the dataset.
-   *
-   * @param numFolds the number of folds in the cross-validation. Must
-   * be greater than 1.
+   * Creates the training set for one fold of a cross-validation on the dataset.
+   * 
+   * @param numFolds the number of folds in the cross-validation. Must be
+   *          greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @return the training set
-   * @throws IllegalArgumentException if the number of folds is less than 2
-   * or greater than the number of instances.
+   * @throws IllegalArgumentException if the number of folds is less than 2 or
+   *           greater than the number of instances.
    */
-  //@ requires 2 <= numFolds && numFolds < numInstances();
-  //@ requires 0 <= numFold && numFold < numFolds;
+  // @ requires 2 <= numFolds && numFolds < numInstances();
+  // @ requires 0 <= numFold && numFold < numFolds;
   public Instances trainCV(int numFolds, int numFold) {
 
     int numInstForFold, first, offset;
@@ -1344,38 +1411,39 @@ public class Instances
       throw new IllegalArgumentException("Number of folds must be at least 2!");
     }
     if (numFolds > numInstances()) {
-      throw new IllegalArgumentException("Can't have more folds than instances!");
+      throw new IllegalArgumentException(
+          "Can't have more folds than instances!");
     }
     numInstForFold = numInstances() / numFolds;
     if (numFold < numInstances() % numFolds) {
       numInstForFold++;
       offset = numFold;
-    }else
+    } else
       offset = numInstances() % numFolds;
     train = new Instances(this, numInstances() - numInstForFold);
     first = numFold * (numInstances() / numFolds) + offset;
     copyInstances(0, train, first);
-    copyInstances(first + numInstForFold, train,
-		  numInstances() - first - numInstForFold);
+    copyInstances(first + numInstForFold, train, numInstances() - first
+        - numInstForFold);
 
     return train;
   }
 
   /**
-   * Creates the training set for one fold of a cross-validation
-   * on the dataset. The data is subsequently randomized based
-   * on the given random number generator.
-   *
-   * @param numFolds the number of folds in the cross-validation. Must
-   * be greater than 1.
+   * Creates the training set for one fold of a cross-validation on the dataset.
+   * The data is subsequently randomized based on the given random number
+   * generator.
+   * 
+   * @param numFolds the number of folds in the cross-validation. Must be
+   *          greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @param random the random number generator
    * @return the training set
-   * @throws IllegalArgumentException if the number of folds is less than 2
-   * or greater than the number of instances.
+   * @throws IllegalArgumentException if the number of folds is less than 2 or
+   *           greater than the number of instances.
    */
-  //@ requires 2 <= numFolds && numFolds < numInstances();
-  //@ requires 0 <= numFold && numFold < numFolds;
+  // @ requires 2 <= numFolds && numFolds < numInstances();
+  // @ requires 0 <= numFold && numFold < numFolds;
   public Instances trainCV(int numFolds, int numFold, Random random) {
 
     Instances train = trainCV(numFolds, numFold);
@@ -1385,34 +1453,32 @@ public class Instances
 
   /**
    * Computes the variance for a numeric attribute.
-   *
+   * 
    * @param attIndex the numeric attribute (index starts with 0)
    * @return the variance if the attribute is numeric
    * @throws IllegalArgumentException if the attribute is not numeric
    */
-  public /*@pure@*/ double variance(int attIndex) {
+  public/* @pure@ */double variance(int attIndex) {
 
     double sum = 0, sumSquared = 0, sumOfWeights = 0;
 
     if (!attribute(attIndex).isNumeric()) {
-      throw new IllegalArgumentException("Can't compute variance because attribute is " +
-			  "not numeric!");
+      throw new IllegalArgumentException(
+          "Can't compute variance because attribute is " + "not numeric!");
     }
     for (int i = 0; i < numInstances(); i++) {
       if (!instance(i).isMissing(attIndex)) {
-	sum += instance(i).weight() *
-	  instance(i).value(attIndex);
-	sumSquared += instance(i).weight() *
-	  instance(i).value(attIndex) *
-	  instance(i).value(attIndex);
-	sumOfWeights += instance(i).weight();
+        sum += instance(i).weight() * instance(i).value(attIndex);
+        sumSquared += instance(i).weight() * instance(i).value(attIndex)
+            * instance(i).value(attIndex);
+        sumOfWeights += instance(i).weight();
       }
     }
     if (sumOfWeights <= 1) {
       return 0;
     }
-    double result = (sumSquared - (sum * sum / sumOfWeights)) /
-      (sumOfWeights - 1);
+    double result = (sumSquared - (sum * sum / sumOfWeights))
+        / (sumOfWeights - 1);
 
     // We don't like negative variance
     if (result < 0) {
@@ -1424,51 +1490,51 @@ public class Instances
 
   /**
    * Computes the variance for a numeric attribute.
-   *
+   * 
    * @param att the numeric attribute
    * @return the variance if the attribute is numeric
    * @throws IllegalArgumentException if the attribute is not numeric
    */
-  public /*@pure@*/ double variance(Attribute att) {
+  public/* @pure@ */double variance(Attribute att) {
 
     return variance(att.index());
   }
 
   /**
-   * Calculates summary statistics on the values that appear in this
-   * set of instances for a specified attribute.
-   *
+   * Calculates summary statistics on the values that appear in this set of
+   * instances for a specified attribute.
+   * 
    * @param index the index of the attribute to summarize (index starts with 0)
    * @return an AttributeStats object with it's fields calculated.
    */
-  //@ requires 0 <= index && index < numAttributes();
+  // @ requires 0 <= index && index < numAttributes();
   public AttributeStats attributeStats(int index) {
 
     AttributeStats result = new AttributeStats();
     if (attribute(index).isNominal()) {
-      result.nominalCounts = new int [attribute(index).numValues()];
+      result.nominalCounts = new int[attribute(index).numValues()];
     }
     if (attribute(index).isNumeric()) {
       result.numericStats = new weka.experiment.Stats();
     }
     result.totalCount = numInstances();
 
-    double [] attVals = attributeToDoubleArray(index);
-    int [] sorted = Utils.sort(attVals);
+    double[] attVals = attributeToDoubleArray(index);
+    int[] sorted = Utils.sort(attVals);
     int currentCount = 0;
     double prev = Instance.missingValue();
     for (int j = 0; j < numInstances(); j++) {
       Instance current = instance(sorted[j]);
       if (current.isMissing(index)) {
-	result.missingCount = numInstances() - j;
-	break;
+        result.missingCount = numInstances() - j;
+        break;
       }
       if (current.value(index) == prev) {
-	currentCount++;
+        currentCount++;
       } else {
-	result.addDistinct(prev, currentCount);
-	currentCount = 1;
-	prev = current.value(index);
+        result.addDistinct(prev, currentCount);
+        currentCount = 1;
+        prev = current.value(index);
       }
     }
     result.addDistinct(prev, currentCount);
@@ -1477,18 +1543,18 @@ public class Instances
   }
 
   /**
-   * Gets the value of all instances in this dataset for a particular
-   * attribute. Useful in conjunction with Utils.sort to allow iterating
-   * through the dataset in sorted order for some attribute.
-   *
+   * Gets the value of all instances in this dataset for a particular attribute.
+   * Useful in conjunction with Utils.sort to allow iterating through the
+   * dataset in sorted order for some attribute.
+   * 
    * @param index the index of the attribute.
-   * @return an array containing the value of the desired attribute for
-   * each instance in the dataset.
+   * @return an array containing the value of the desired attribute for each
+   *         instance in the dataset.
    */
-  //@ requires 0 <= index && index < numAttributes();
-  public /*@pure@*/ double [] attributeToDoubleArray(int index) {
+  // @ requires 0 <= index && index < numAttributes();
+  public/* @pure@ */double[] attributeToDoubleArray(int index) {
 
-    double [] result = new double[numInstances()];
+    double[] result = new double[numInstances()];
     for (int i = 0; i < result.length; i++) {
       result[i] = instance(i).value(index);
     }
@@ -1496,10 +1562,10 @@ public class Instances
   }
 
   /**
-   * Generates a string summarizing the set of instances. Gives a breakdown
-   * for each attribute indicating the number of missing/discrete/unique
-   * values and other information.
-   *
+   * Generates a string summarizing the set of instances. Gives a breakdown for
+   * each attribute indicating the number of missing/discrete/unique values and
+   * other information.
+   * 
    * @return a string summarizing the dataset
    */
   public String toSummaryString() {
@@ -1524,53 +1590,53 @@ public class Instances
       long percent;
       switch (a.type()) {
       case Attribute.NOMINAL:
-	result.append(Utils.padLeft("Nom", 4)).append(' ');
-	percent = Math.round(100.0 * as.intCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * as.realCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	break;
+        result.append(Utils.padLeft("Nom", 4)).append(' ');
+        percent = Math.round(100.0 * as.intCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        result.append(Utils.padLeft("" + 0, 3)).append("% ");
+        percent = Math.round(100.0 * as.realCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        break;
       case Attribute.NUMERIC:
-	result.append(Utils.padLeft("Num", 4)).append(' ');
-	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * as.intCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	percent = Math.round(100.0 * as.realCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	break;
+        result.append(Utils.padLeft("Num", 4)).append(' ');
+        result.append(Utils.padLeft("" + 0, 3)).append("% ");
+        percent = Math.round(100.0 * as.intCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        percent = Math.round(100.0 * as.realCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        break;
       case Attribute.DATE:
-	result.append(Utils.padLeft("Dat", 4)).append(' ');
-	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * as.intCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	percent = Math.round(100.0 * as.realCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	break;
+        result.append(Utils.padLeft("Dat", 4)).append(' ');
+        result.append(Utils.padLeft("" + 0, 3)).append("% ");
+        percent = Math.round(100.0 * as.intCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        percent = Math.round(100.0 * as.realCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        break;
       case Attribute.STRING:
-	result.append(Utils.padLeft("Str", 4)).append(' ');
-	percent = Math.round(100.0 * as.intCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * as.realCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	break;
+        result.append(Utils.padLeft("Str", 4)).append(' ');
+        percent = Math.round(100.0 * as.intCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        result.append(Utils.padLeft("" + 0, 3)).append("% ");
+        percent = Math.round(100.0 * as.realCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        break;
       case Attribute.RELATIONAL:
-	result.append(Utils.padLeft("Rel", 4)).append(' ');
-	percent = Math.round(100.0 * as.intCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * as.realCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	break;
+        result.append(Utils.padLeft("Rel", 4)).append(' ');
+        percent = Math.round(100.0 * as.intCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        result.append(Utils.padLeft("" + 0, 3)).append("% ");
+        percent = Math.round(100.0 * as.realCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        break;
       default:
-	result.append(Utils.padLeft("???", 4)).append(' ');
-	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * as.intCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	percent = Math.round(100.0 * as.realCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	break;
+        result.append(Utils.padLeft("???", 4)).append(' ');
+        result.append(Utils.padLeft("" + 0, 3)).append("% ");
+        percent = Math.round(100.0 * as.intCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        percent = Math.round(100.0 * as.realCount / as.totalCount);
+        result.append(Utils.padLeft("" + percent, 3)).append("% ");
+        break;
       }
       result.append(Utils.padLeft("" + as.missingCount, 5)).append(" /");
       percent = Math.round(100.0 * as.missingCount / as.totalCount);
@@ -1585,16 +1651,15 @@ public class Instances
   }
 
   /**
-   * Copies instances from one set to the end of another
-   * one.
-   *
+   * Copies instances from one set to the end of another one.
+   * 
    * @param from the position of the first instance to be copied
    * @param dest the destination for the instances
    * @param num the number of instances to be copied
    */
-  //@ requires 0 <= from && from <= numInstances() - num;
-  //@ requires 0 <= num;
-  protected void copyInstances(int from, /*@non_null@*/ Instances dest, int num) {
+  // @ requires 0 <= from && from <= numInstances() - num;
+  // @ requires 0 <= num;
+  protected void copyInstances(int from, /* @non_null@ */Instances dest, int num) {
 
     for (int i = 0; i < num; i++) {
       dest.add(instance(from + i));
@@ -1602,8 +1667,7 @@ public class Instances
   }
 
   /**
-   * Replaces the attribute information by a clone of
-   * itself.
+   * Replaces the attribute information by a clone of itself.
    */
   protected void freshAttributeInfo() {
 
@@ -1611,19 +1675,19 @@ public class Instances
   }
 
   /**
-   * Returns string including all instances, their weights and
-   * their indices in the original dataset.
-   *
+   * Returns string including all instances, their weights and their indices in
+   * the original dataset.
+   * 
    * @return description of instance and its weight as a string
    */
-  protected /*@pure@*/ String instancesAndWeights(){
+  protected/* @pure@ */String instancesAndWeights() {
 
     StringBuffer text = new StringBuffer();
 
     for (int i = 0; i < numInstances(); i++) {
       text.append(instance(i) + " " + instance(i).weight());
       if (i < numInstances() - 1) {
-	text.append("\n");
+        text.append("\n");
       }
     }
     return text.toString();
@@ -1632,15 +1696,15 @@ public class Instances
   /**
    * Partitions the instances around a pivot. Used by quicksort and
    * kthSmallestValue.
-   *
+   * 
    * @param attIndex the attribute's index (index starts with 0)
    * @param l the first index of the subset (index starts with 0)
    * @param r the last index of the subset (index starts with 0)
-   *
+   * 
    * @return the index of the middle element
    */
-  //@ requires 0 <= attIndex && attIndex < numAttributes();
-  //@ requires 0 <= left && left <= right && right < numInstances();
+  // @ requires 0 <= attIndex && attIndex < numAttributes();
+  // @ requires 0 <= left && left <= right && right < numInstances();
   protected int partition(int attIndex, int l, int r) {
 
     double pivot = instance((l + r) / 2).value(attIndex);
@@ -1666,15 +1730,16 @@ public class Instances
   }
 
   /**
-   * Implements quicksort according to Manber's "Introduction to
-   * Algorithms".
-   *
+   * Implements quicksort according to Manber's "Introduction to Algorithms".
+   * 
    * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset to be sorted (index starts with 0)
-   * @param right the last index of the subset to be sorted (index starts with 0)
+   * @param left the first index of the subset to be sorted (index starts with
+   *          0)
+   * @param right the last index of the subset to be sorted (index starts with
+   *          0)
    */
-  //@ requires 0 <= attIndex && attIndex < numAttributes();
-  //@ requires 0 <= first && first <= right && right < numInstances();
+  // @ requires 0 <= attIndex && attIndex < numAttributes();
+  // @ requires 0 <= first && first <= right && right < numInstances();
   protected void quickSort(int attIndex, int left, int right) {
 
     if (left < right) {
@@ -1685,18 +1750,18 @@ public class Instances
   }
 
   /**
-   * Implements computation of the kth-smallest element according
-   * to Manber's "Introduction to Algorithms".
-   *
+   * Implements computation of the kth-smallest element according to Manber's
+   * "Introduction to Algorithms".
+   * 
    * @param attIndex the attribute's index (index starts with 0)
    * @param left the first index of the subset (index starts with 0)
    * @param right the last index of the subset (index starts with 0)
    * @param k the value of k
-   *
+   * 
    * @return the index of the kth-smallest element
    */
-  //@ requires 0 <= attIndex && attIndex < numAttributes();
-  //@ requires 0 <= first && first <= right && right < numInstances();
+  // @ requires 0 <= attIndex && attIndex < numAttributes();
+  // @ requires 0 <= first && first <= right && right < numInstances();
   protected int select(int attIndex, int left, int right, int k) {
 
     if (left == right) {
@@ -1713,10 +1778,10 @@ public class Instances
 
   /**
    * Help function needed for stratification of set.
-   *
+   * 
    * @param numFolds the number of folds for the stratification
    */
-  protected void stratStep (int numFolds){
+  protected void stratStep(int numFolds) {
 
     FastVector newVec = new FastVector(m_Instances.capacity());
     int start = 0, j;
@@ -1725,8 +1790,8 @@ public class Instances
     while (newVec.size() < numInstances()) {
       j = start;
       while (j < numInstances()) {
-	newVec.addElement(instance(j));
-	j = j + numFolds;
+        newVec.addElement(instance(j));
+        j = j + numFolds;
       }
       start++;
     }
@@ -1735,22 +1800,22 @@ public class Instances
 
   /**
    * Swaps two instances in the set.
-   *
+   * 
    * @param i the first instance's index (index starts with 0)
    * @param j the second instance's index (index starts with 0)
    */
-  //@ requires 0 <= i && i < numInstances();
-  //@ requires 0 <= j && j < numInstances();
-  public void swap(int i, int j){
+  // @ requires 0 <= i && i < numInstances();
+  // @ requires 0 <= j && j < numInstances();
+  public void swap(int i, int j) {
 
     m_Instances.swap(i, j);
   }
 
   /**
-   * Merges two sets of Instances together. The resulting set will have
-   * all the attributes of the first set plus all the attributes of the
-   * second set. The number of instances in both sets must be the same.
-   *
+   * Merges two sets of Instances together. The resulting set will have all the
+   * attributes of the first set plus all the attributes of the second set. The
+   * number of instances in both sets must be the same.
+   * 
    * @param first the first set of Instances
    * @param second the second set of Instances
    * @return the merged set of Instances
@@ -1759,7 +1824,8 @@ public class Instances
   public static Instances mergeInstances(Instances first, Instances second) {
 
     if (first.numInstances() != second.numInstances()) {
-      throw new IllegalArgumentException("Instance sets must be of the same size");
+      throw new IllegalArgumentException(
+          "Instance sets must be of the same size");
     }
 
     // Create the vector of merged attributes
@@ -1773,9 +1839,7 @@ public class Instances
 
     // Create the set of Instances
     Instances merged = new Instances(first.relationName() + '_'
-				     + second.relationName(),
-				     newAttributes,
-				     first.numInstances());
+        + second.relationName(), newAttributes, first.numInstances());
     // Merge each instance
     for (int i = 0; i < first.numInstances(); i++) {
       merged.add(first.instance(i).mergeInstance(second.instance(i)));
@@ -1785,24 +1849,24 @@ public class Instances
 
   /**
    * Method for testing this class.
-   *
+   * 
    * @param argv should contain one element: the name of an ARFF file
    */
-  //@ requires argv != null;
-  //@ requires argv.length == 1;
-  //@ requires argv[0] != null;
-  public static void test(String [] argv) {
+  // @ requires argv != null;
+  // @ requires argv.length == 1;
+  // @ requires argv[0] != null;
+  public static void test(String[] argv) {
 
     Instances instances, secondInstances, train, test, empty;
     Random random = new Random(2);
     Reader reader;
     int start, num;
     FastVector testAtts, testVals;
-    int i,j;
+    int i, j;
 
-    try{
+    try {
       if (argv.length > 1) {
-	throw (new Exception("Usage: Instances [<filename>]"));
+        throw (new Exception("Usage: Instances [<filename>]"));
       }
 
       // Creating set of instances from scratch
@@ -1821,59 +1885,59 @@ public class Instances
       System.out.println(instances);
 
       if (argv.length == 1) {
-	String filename = argv[0];
-	reader = new FileReader(filename);
+        String filename = argv[0];
+        reader = new FileReader(filename);
 
-	// Read first five instances and print them
-	System.out.println("\nFirst five instances from file:\n");
-	instances = new Instances(reader, 1);
-	instances.setClassIndex(instances.numAttributes() - 1);
-	i = 0;
-	while ((i < 5) && (instances.readInstance(reader))) {
-	  i++;
-	}
-	System.out.println(instances);
+        // Read first five instances and print them
+        System.out.println("\nFirst five instances from file:\n");
+        instances = new Instances(reader, 1);
+        instances.setClassIndex(instances.numAttributes() - 1);
+        i = 0;
+        while ((i < 5) && (instances.readInstance(reader))) {
+          i++;
+        }
+        System.out.println(instances);
 
-	// Read all the instances in the file
-	reader = new FileReader(filename);
-	instances = new Instances(reader);
+        // Read all the instances in the file
+        reader = new FileReader(filename);
+        instances = new Instances(reader);
 
-	// Make the last attribute be the class
-	instances.setClassIndex(instances.numAttributes() - 1);
+        // Make the last attribute be the class
+        instances.setClassIndex(instances.numAttributes() - 1);
 
-	// Print header and instances.
-	System.out.println("\nDataset:\n");
-	System.out.println(instances);
-	System.out.println("\nClass index: "+instances.classIndex());
+        // Print header and instances.
+        System.out.println("\nDataset:\n");
+        System.out.println(instances);
+        System.out.println("\nClass index: " + instances.classIndex());
       }
 
       // Test basic methods based on class index.
-      System.out.println("\nClass name: "+instances.classAttribute().name());
-      System.out.println("\nClass index: "+instances.classIndex());
-      System.out.println("\nClass is nominal: " +
-			 instances.classAttribute().isNominal());
-      System.out.println("\nClass is numeric: " +
-			 instances.classAttribute().isNumeric());
+      System.out.println("\nClass name: " + instances.classAttribute().name());
+      System.out.println("\nClass index: " + instances.classIndex());
+      System.out.println("\nClass is nominal: "
+          + instances.classAttribute().isNominal());
+      System.out.println("\nClass is numeric: "
+          + instances.classAttribute().isNumeric());
       System.out.println("\nClasses:\n");
       for (i = 0; i < instances.numClasses(); i++) {
-	System.out.println(instances.classAttribute().value(i));
+        System.out.println(instances.classAttribute().value(i));
       }
       System.out.println("\nClass values and labels of instances:\n");
       for (i = 0; i < instances.numInstances(); i++) {
-	Instance inst = instances.instance(i);
-	System.out.print(inst.classValue() + "\t");
-	System.out.print(inst.toString(inst.classIndex()));
-	if (instances.instance(i).classIsMissing()) {
-	  System.out.println("\tis missing");
-	} else {
-	  System.out.println();
-	}
+        Instance inst = instances.instance(i);
+        System.out.print(inst.classValue() + "\t");
+        System.out.print(inst.toString(inst.classIndex()));
+        if (instances.instance(i).classIsMissing()) {
+          System.out.println("\tis missing");
+        } else {
+          System.out.println();
+        }
       }
 
       // Create random weights.
       System.out.println("\nCreating random weights for instances.");
       for (i = 0; i < instances.numInstances(); i++) {
-	instances.instance(i).setWeight(random.nextDouble());
+        instances.instance(i).setWeight(random.nextDouble());
       }
 
       // Print all instances and their weights (and the sum of weights).
@@ -1889,58 +1953,56 @@ public class Instances
       System.out.println("\nSet with inserted attribute:\n");
       System.out.println(secondInstances);
       System.out.println("\nClass name: "
-			 + secondInstances.classAttribute().name());
+          + secondInstances.classAttribute().name());
 
       // Delete the attribute
       secondInstances.deleteAttributeAt(0);
       System.out.println("\nSet with attribute deleted:\n");
       System.out.println(secondInstances);
       System.out.println("\nClass name: "
-			 + secondInstances.classAttribute().name());
+          + secondInstances.classAttribute().name());
 
       // Test if headers are equal
-      System.out.println("\nHeaders equal: "+
-			 instances.equalHeaders(secondInstances) + "\n");
+      System.out.println("\nHeaders equal: "
+          + instances.equalHeaders(secondInstances) + "\n");
 
       // Print data in internal format.
       System.out.println("\nData (internal values):\n");
       for (i = 0; i < instances.numInstances(); i++) {
-	for (j = 0; j < instances.numAttributes(); j++) {
-	  if (instances.instance(i).isMissing(j)) {
-	    System.out.print("? ");
-	  } else {
-	    System.out.print(instances.instance(i).value(j) + " ");
-	  }
-	}
-	System.out.println();
+        for (j = 0; j < instances.numAttributes(); j++) {
+          if (instances.instance(i).isMissing(j)) {
+            System.out.print("? ");
+          } else {
+            System.out.print(instances.instance(i).value(j) + " ");
+          }
+        }
+        System.out.println();
       }
 
       // Just print header
       System.out.println("\nEmpty dataset:\n");
       empty = new Instances(instances, 0);
       System.out.println(empty);
-      System.out.println("\nClass name: "+empty.classAttribute().name());
+      System.out.println("\nClass name: " + empty.classAttribute().name());
 
       // Create copy and rename an attribute and a value (if possible)
       if (empty.classAttribute().isNominal()) {
-	Instances copy = new Instances(empty, 0);
-	copy.renameAttribute(copy.classAttribute(), "new_name");
-	copy.renameAttributeValue(copy.classAttribute(),
-				  copy.classAttribute().value(0),
-				  "new_val_name");
-	System.out.println("\nDataset with names changed:\n" + copy);
-	System.out.println("\nOriginal dataset:\n" + empty);
+        Instances copy = new Instances(empty, 0);
+        copy.renameAttribute(copy.classAttribute(), "new_name");
+        copy.renameAttributeValue(copy.classAttribute(), copy.classAttribute()
+            .value(0), "new_val_name");
+        System.out.println("\nDataset with names changed:\n" + copy);
+        System.out.println("\nOriginal dataset:\n" + empty);
       }
 
       // Create and prints subset of instances.
       start = instances.numInstances() / 4;
       num = instances.numInstances() / 2;
       System.out.print("\nSubset of dataset: ");
-      System.out.println(num + " instances from " + (start + 1)
-			 + ". instance");
+      System.out.println(num + " instances from " + (start + 1) + ". instance");
       secondInstances = new Instances(instances, start, num);
       System.out.println("\nClass name: "
-			 + secondInstances.classAttribute().name());
+          + secondInstances.classAttribute().name());
 
       // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");
@@ -1952,25 +2014,25 @@ public class Instances
       // cross-validation.
       System.out.println("\nTrain and test folds for 3-fold CV:");
       if (instances.classAttribute().isNominal()) {
-	instances.stratify(3);
+        instances.stratify(3);
       }
       for (j = 0; j < 3; j++) {
-        train = instances.trainCV(3,j, new Random(1));
-	test = instances.testCV(3,j);
+        train = instances.trainCV(3, j, new Random(1));
+        test = instances.testCV(3, j);
 
-	// Print all instances and their weights (and the sum of weights).
-	System.out.println("\nTrain: ");
-	System.out.println("\nInstances and their weights:\n");
-	System.out.println(train.instancesAndWeights());
-	System.out.print("\nSum of weights: ");
-	System.out.println(train.sumOfWeights());
-	System.out.println("\nClass name: "+train.classAttribute().name());
-	System.out.println("\nTest: ");
-	System.out.println("\nInstances and their weights:\n");
-	System.out.println(test.instancesAndWeights());
-	System.out.print("\nSum of weights: ");
-	System.out.println(test.sumOfWeights());
-	System.out.println("\nClass name: "+test.classAttribute().name());
+        // Print all instances and their weights (and the sum of weights).
+        System.out.println("\nTrain: ");
+        System.out.println("\nInstances and their weights:\n");
+        System.out.println(train.instancesAndWeights());
+        System.out.print("\nSum of weights: ");
+        System.out.println(train.sumOfWeights());
+        System.out.println("\nClass name: " + train.classAttribute().name());
+        System.out.println("\nTest: ");
+        System.out.println("\nInstances and their weights:\n");
+        System.out.println(test.instancesAndWeights());
+        System.out.print("\nSum of weights: ");
+        System.out.println(test.sumOfWeights());
+        System.out.println("\nClass name: " + test.classAttribute().name());
       }
 
       // Randomize instances and print them.
@@ -2001,36 +2063,33 @@ public class Instances
   /**
    * Main method for this class. The following calls are possible:
    * <ul>
-   *   <li>
-   *     <code>weka.core.Instances</code> help<br/>
-   *     prints a short list of possible commands.
-   *   </li>
-   *   <li>
-   *     <code>weka.core.Instances</code> &lt;filename&gt;<br/>
-   *     prints a summary of a set of instances.
-   *   </li>
-   *   <li>
-   *     <code>weka.core.Instances</code> merge &lt;filename1&gt; &lt;filename2&gt;<br/>
-   *     merges the two datasets (must have same number of instances) and
-   *     outputs the results on stdout.
-   *   </li>
-   *   <li>
-   *     <code>weka.core.Instances</code> append &lt;filename1&gt; &lt;filename2&gt;<br/>
-   *     appends the second dataset to the first one (must have same headers) and
-   *     outputs the results on stdout.
-   *   </li>
-   *   <li>
-   *     <code>weka.core.Instances</code> headers &lt;filename1&gt; &lt;filename2&gt;<br/>
-   *     Compares the headers of the two datasets and prints whether they match
-   *     or not.
-   *   </li>
-   *   <li>
-   *     <code>weka.core.Instances</code> randomize &lt;seed&gt; &lt;filename&gt;<br/>
-   *     randomizes the dataset with the given seed and outputs the result on stdout.
-   *   </li>
+   * <li>
+   * <code>weka.core.Instances</code> help<br/>
+   * prints a short list of possible commands.</li>
+   * <li>
+   * <code>weka.core.Instances</code> &lt;filename&gt;<br/>
+   * prints a summary of a set of instances.</li>
+   * <li>
+   * <code>weka.core.Instances</code> merge &lt;filename1&gt; &lt;filename2&gt;<br/>
+   * merges the two datasets (must have same number of instances) and outputs
+   * the results on stdout.</li>
+   * <li>
+   * <code>weka.core.Instances</code> append &lt;filename1&gt; &lt;filename2&gt;
+   * <br/>
+   * appends the second dataset to the first one (must have same headers) and
+   * outputs the results on stdout.</li>
+   * <li>
+   * <code>weka.core.Instances</code> headers &lt;filename1&gt;
+   * &lt;filename2&gt;<br/>
+   * Compares the headers of the two datasets and prints whether they match or
+   * not.</li>
+   * <li>
+   * <code>weka.core.Instances</code> randomize &lt;seed&gt; &lt;filename&gt;<br/>
+   * randomizes the dataset with the given seed and outputs the result on
+   * stdout.</li>
    * </ul>
-   *
-   * @param args 	the commandline parameters
+   * 
+   * @param args the commandline parameters
    */
   public static void main(String[] args) {
 
@@ -2038,67 +2097,66 @@ public class Instances
       Instances i;
       // read from stdin and print statistics
       if (args.length == 0) {
-	DataSource source = new DataSource(System.in);
-	i = source.getDataSet();
-	System.out.println(i.toSummaryString());
+        DataSource source = new DataSource(System.in);
+        i = source.getDataSet();
+        System.out.println(i.toSummaryString());
       }
       // read file and print statistics
-      else if ((args.length == 1) && (!args[0].equals("-h")) && (!args[0].equals("help"))) {
-	DataSource source = new DataSource(args[0]);
-	i = source.getDataSet();
-	System.out.println(i.toSummaryString());
+      else if ((args.length == 1) && (!args[0].equals("-h"))
+          && (!args[0].equals("help"))) {
+        DataSource source = new DataSource(args[0]);
+        i = source.getDataSet();
+        System.out.println(i.toSummaryString());
       }
       // read two files, merge them and print result to stdout
       else if ((args.length == 3) && (args[0].toLowerCase().equals("merge"))) {
-	DataSource source1 = new DataSource(args[1]);
-	DataSource source2 = new DataSource(args[2]);
-	i = Instances.mergeInstances(source1.getDataSet(), source2.getDataSet());
-	System.out.println(i);
+        DataSource source1 = new DataSource(args[1]);
+        DataSource source2 = new DataSource(args[2]);
+        i = Instances
+            .mergeInstances(source1.getDataSet(), source2.getDataSet());
+        System.out.println(i);
       }
       // read two files, append them and print result to stdout
       else if ((args.length == 3) && (args[0].toLowerCase().equals("append"))) {
-	DataSource source1 = new DataSource(args[1]);
-	DataSource source2 = new DataSource(args[2]);
-	if (!source1.getStructure().equalHeaders(source2.getStructure()))
-	  throw new Exception("The two datasets have different headers!");
-	Instances structure = source1.getStructure();
-	System.out.println(source1.getStructure());
-	while (source1.hasMoreElements(structure))
-	  System.out.println(source1.nextElement(structure));
-	structure = source2.getStructure();
-	while (source2.hasMoreElements(structure))
-	  System.out.println(source2.nextElement(structure));
+        DataSource source1 = new DataSource(args[1]);
+        DataSource source2 = new DataSource(args[2]);
+        if (!source1.getStructure().equalHeaders(source2.getStructure()))
+          throw new Exception("The two datasets have different headers!");
+        Instances structure = source1.getStructure();
+        System.out.println(source1.getStructure());
+        while (source1.hasMoreElements(structure))
+          System.out.println(source1.nextElement(structure));
+        structure = source2.getStructure();
+        while (source2.hasMoreElements(structure))
+          System.out.println(source2.nextElement(structure));
       }
       // read two files and compare their headers
       else if ((args.length == 3) && (args[0].toLowerCase().equals("headers"))) {
-	DataSource source1 = new DataSource(args[1]);
-	DataSource source2 = new DataSource(args[2]);
-	if (source1.getStructure().equalHeaders(source2.getStructure()))
-	  System.out.println("Headers match");
-	else
-	  System.out.println("Headers don't match");
+        DataSource source1 = new DataSource(args[1]);
+        DataSource source2 = new DataSource(args[2]);
+        if (source1.getStructure().equalHeaders(source2.getStructure()))
+          System.out.println("Headers match");
+        else
+          System.out.println("Headers don't match");
       }
       // read file and seed value, randomize data and print result to stdout
-      else if ((args.length == 3) && (args[0].toLowerCase().equals("randomize"))) {
-	DataSource source = new DataSource(args[2]);
-	i = source.getDataSet();
-	i.randomize(new Random(Integer.parseInt(args[1])));
-	System.out.println(i);
+      else if ((args.length == 3)
+          && (args[0].toLowerCase().equals("randomize"))) {
+        DataSource source = new DataSource(args[2]);
+        i = source.getDataSet();
+        i.randomize(new Random(Integer.parseInt(args[1])));
+        System.out.println(i);
       }
       // wrong parameters
       else {
-	System.err.println(
-	    "\nUsage:\n"
-	    + "\tweka.core.Instances help\n"
-	    + "\tweka.core.Instances <filename>\n"
-	    + "\tweka.core.Instances merge <filename1> <filename2>\n"
-	    + "\tweka.core.Instances append <filename1> <filename2>\n"
-	    + "\tweka.core.Instances headers <filename1> <filename2>\n"
-	    + "\tweka.core.Instances randomize <seed> <filename>\n"
-	);
+        System.err.println("\nUsage:\n" + "\tweka.core.Instances help\n"
+            + "\tweka.core.Instances <filename>\n"
+            + "\tweka.core.Instances merge <filename1> <filename2>\n"
+            + "\tweka.core.Instances append <filename1> <filename2>\n"
+            + "\tweka.core.Instances headers <filename1> <filename2>\n"
+            + "\tweka.core.Instances randomize <seed> <filename>\n");
       }
-    }
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
@@ -2106,8 +2164,8 @@ public class Instances
 
   /**
    * Returns the revision string.
-   *
-   * @return		the revision
+   * 
+   * @return the revision
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
