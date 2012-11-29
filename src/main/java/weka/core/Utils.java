@@ -1175,7 +1175,7 @@ public final class Utils
    * @param k the value of k
    * @return the kth-smallest value
    */
-  public static double kthSmallestValue(int[] array, int k) {
+  public static int kthSmallestValue(int[] array, int k) {
 
     int[] index = new int[array.length];
     
@@ -1538,6 +1538,26 @@ public final class Utils
   }
 
   /**
+   * Sorts a given array of doubles in ascending order and returns an
+   * array of integers with the positions of the elements of the
+   * original array in the sorted array. Assumes there are no missing
+   * values in the data.
+   *
+   * @param array this array is not changed by the method!
+   * @return an array of integers with the positions in the sorted
+   * array.  
+   */
+  public static /*@pure@*/ int[] sortWithNoMissingValues(/*@non_null@*/ double[] array) {
+
+    int[] index = new int[array.length];
+    for (int i = 0; i < array.length; i++) {
+      index[i] = i;
+    }
+    quickSort(array, index, 0, array.length - 1);
+    return index;
+  }
+
+  /**
    * Sorts a given array of doubles in ascending order and returns an 
    * array of integers with the positions of the elements of the original 
    * array in the sorted array. The sort is stable (Equal elements remain
@@ -1562,7 +1582,7 @@ public final class Utils
         array[i] = Double.MAX_VALUE;
       }
     }
-    quickSort(array,index,0,array.length-1);
+    quickSort(array, index, 0, array.length-1);
 
     // Make sort stable
 
@@ -1664,6 +1684,34 @@ public final class Utils
   }
 
   /**
+   * Sorts left, right, and center elements only, returns resulting center as pivot.
+   */
+  private static int sortLeftRightAndCenter(double[] array, int[] index, int l, int r) {
+
+    int c = (l + r) / 2;
+    if (array[index[l]] > array[index[c]]) {
+      swap(index, l, c);
+    }
+    if (array[index[l]] > array[index[r]]) {
+      swap(index, l, r);
+    }
+    if (array[index[c]] > array[index[r]]) {
+      swap(index, c, r);
+    }
+    return c;
+  }
+
+  /**
+   * Swaps two elements in the given integer array.
+   */
+  private static void swap(int[] index, int l, int r) {
+    
+    int help = index[l];
+    index[l] = index[r];
+    index[r] = help;
+  }
+
+  /**
    * Partitions the instances around a pivot. Used by quicksort and
    * kthSmallestValue.
    *
@@ -1674,31 +1722,18 @@ public final class Utils
    *
    * @return the index of the middle element
    */
-  private static int partition(double[] array, int[] index, int l, int r) {
-    
-    double pivot = array[index[(l + r) / 2]];
-    int help;
+  private static int partition(double[] array, int[] index, int l, int r,
+                               double pivot) {
 
-    while (l < r) {
-      while ((array[index[l]] < pivot) && (l < r)) {
-        l++;
+    r--;
+    while (true) {
+      while ((array[index[++l]] < pivot));
+      while ((array[index[--r]] > pivot));
+      if (l >= r) {
+        return l;
       }
-      while ((array[index[r]] > pivot) && (l < r)) {
-        r--;
-      }
-      if (l < r) {
-        help = index[l];
-        index[l] = index[r];
-        index[r] = help;
-        l++;
-        r--;
-      }
+      swap(index, l, r);
     }
-    if ((l == r) && (array[index[r]] > pivot)) {
-      r--;
-    } 
-
-    return r;
   }
 
   /**
@@ -1738,10 +1773,10 @@ public final class Utils
 
     return r;
   }
-  
+
   /**
-   * Implements quicksort according to Manber's "Introduction to
-   * Algorithms".
+   * Implements quicksort with median-of-three method and explicit sort for
+   * problems of size three or less. 
    *
    * @param array the array of doubles to be sorted
    * @param index the index into the array of doubles
@@ -1753,13 +1788,40 @@ public final class Utils
   //@ requires array != index;
   //  assignable index;
   private static void quickSort(/*@non_null@*/ double[] array, /*@non_null@*/ int[] index, 
-                                int left, int right) {
+                               int left, int right) {
 
-    if (left < right) {
-      int middle = partition(array, index, left, right);
-      quickSort(array, index, left, middle);
-      quickSort(array, index, middle + 1, right);
+    int diff = right - left;
+    if (diff == 0) {
+
+      // Nothing to be done
+      return;
+    } 
+    if (diff == 1) {
+
+      // Swap two elements if necessary
+      if (array[index[left]] > array[index[right]]) {
+        swap(index, left, right);
+      }
+      return;
+    } 
+    if (diff == 2) {
+
+      // Just need to sort three elements
+      sortLeftRightAndCenter(array, index, left, right);
+      return;
     }
+    
+    // Establish pivot
+    int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
+    
+    // Move pivot to the right, partition, and restore pivot
+    swap(index, pivotLocation, right - 1); 
+    int center = partition(array, index, left, right, array[index[right - 1]]);
+    swap(index, center, right - 1);
+    
+    // Sort recursively
+    quickSort(array, index, left, center - 1);
+    quickSort(array, index, center + 1, right);
   }
   
   /**
@@ -1800,16 +1862,41 @@ public final class Utils
   //@ requires 0 <= first && first <= right && right < array.length;
   private static int select(/*@non_null@*/ double[] array, /*@non_null@*/ int[] index, 
                             int left, int right, int k) {
-    
-    if (left == right) {
+
+    int diff = right - left;
+    if (diff == 0) {
+
+      // Nothing to be done
       return left;
-    } else {
-      int middle = partition(array, index, left, right);
-      if ((middle - left + 1) >= k) {
-        return select(array, index, left, middle, k);
-      } else {
-        return select(array, index, middle + 1, right, k - (middle - left + 1));
+    } 
+    if (diff == 1) {
+
+      // Swap two elements if necessary
+      if (array[index[left]] > array[index[right]]) {
+        swap(index, left, right);
       }
+      return left + k - 1;
+    } 
+    if (diff == 2) {
+
+      // Just need to sort three elements
+      sortLeftRightAndCenter(array, index, left, right);
+      return left + k - 1;
+    }
+    
+    // Establish pivot
+    int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
+
+    // Move pivot to the right, partition, and restore pivot
+    swap(index, pivotLocation, right - 1); 
+    int center = partition(array, index, left, right, array[index[right - 1]]);
+    swap(index, center, right - 1);
+
+    // Proceed recursively
+    if ((center - left + 1) >= k) {
+      return select(array, index, left, center, k);
+    } else {
+      return select(array, index, center + 1, right, k - (center - left + 1));
     }
   }
 
@@ -2186,7 +2273,7 @@ public final class Utils
       System.out.println("Median (doubles): " + 
                          Utils.kthSmallestValue(doubles, doubles.length / 2));
       System.out.println("Median (ints): " + 
-                         Utils.kthSmallestValue(ints, ints.length / 2));
+      Utils.kthSmallestValue(ints, ints.length / 2));
 
       // Sorting and normalizing
       System.out.println("Sorted array with NaN (doubles): ");
