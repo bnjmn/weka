@@ -736,7 +736,6 @@ public class Instances extends AbstractList<Instance>
 
   /**
    * Returns the kth-smallest attribute value of a numeric attribute.
-   * Note that calling this method will change the order of the data!
    *
    * @param att the Attribute object
    * @param k the value of k
@@ -749,7 +748,6 @@ public class Instances extends AbstractList<Instance>
 
   /**
    * Returns the kth-smallest attribute value of a numeric attribute.
-   * Note that calling this method will change the order of the data!
    * The number of non-missing values in the data must be as least
    * as last as k for this to work.
    *
@@ -783,8 +781,13 @@ public class Instances extends AbstractList<Instance>
     if ((k < 1) || (k > j+1)) {
       throw new IllegalArgumentException("Instances: value for k for computing kth-smallest value too large.");
     }
+    
+    double[] vals = new double[j + 1];
+    for (i = 0; i < vals.length; i++) {
+      vals[i] = instance(i).value(attIndex);
+    }
 
-    return instance(select(attIndex, 0, j, k)).value(attIndex);
+    return Utils.kthSmallestValue(vals, k);
   }
 
   /**
@@ -1341,7 +1344,19 @@ public class Instances extends AbstractList<Instance>
 	i++;
       }
     }
-    quickSort(attIndex, 0, j);
+    
+    double[] vals = new double[j + 1];
+    for (i = 0; i < vals.length; i++) {
+      vals[i] = instance(i).value(attIndex);
+    }
+    int[] sortOrder = Utils.sortWithNoMissingValues(vals);
+    Instance[] backup = new Instance[vals.length];
+    for (i = 0; i < vals.length; i++) {
+      backup[i] = instance(i);
+    }
+    for (i = 0; i < vals.length; i++) {
+      m_Instances.set(i, backup[sortOrder[i]]);
+    }
   }
 
   /**
@@ -1801,88 +1816,6 @@ public class Instances extends AbstractList<Instance>
       }
     }
     return text.toString();
-  }
-  
-  /**
-   * Partitions the instances around a pivot. Used by quicksort and
-   * kthSmallestValue.
-   *
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param l the first index of the subset (index starts with 0)
-   * @param r the last index of the subset (index starts with 0)
-   *
-   * @return the index of the middle element
-   */
-  //@ requires 0 <= attIndex && attIndex < numAttributes();
-  //@ requires 0 <= left && left <= right && right < numInstances();
-  protected int partition(int attIndex, int l, int r) {
-    
-    double pivot = instance((l + r) / 2).value(attIndex);
-
-    while (l < r) {
-      while ((instance(l).value(attIndex) < pivot) && (l < r)) {
-        l++;
-      }
-      while ((instance(r).value(attIndex) > pivot) && (l < r)) {
-        r--;
-      }
-      if (l < r) {
-        swap(l, r);
-        l++;
-        r--;
-      }
-    }
-    if ((l == r) && (instance(r).value(attIndex) > pivot)) {
-      r--;
-    } 
-
-    return r;
-  }
-  
-  /**
-   * Implements quicksort according to Manber's "Introduction to
-   * Algorithms".
-   *
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset to be sorted (index starts with 0)
-   * @param right the last index of the subset to be sorted (index starts with 0)
-   */
-  //@ requires 0 <= attIndex && attIndex < numAttributes();
-  //@ requires 0 <= first && first <= right && right < numInstances();
-  protected void quickSort(int attIndex, int left, int right) {
-
-    if (left < right) {
-      int middle = partition(attIndex, left, right);
-      quickSort(attIndex, left, middle);
-      quickSort(attIndex, middle + 1, right);
-    }
-  }
-  
-  /**
-   * Implements computation of the kth-smallest element according
-   * to Manber's "Introduction to Algorithms".
-   *
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset (index starts with 0)
-   * @param right the last index of the subset (index starts with 0)
-   * @param k the value of k
-   *
-   * @return the index of the kth-smallest element
-   */
-  //@ requires 0 <= attIndex && attIndex < numAttributes();
-  //@ requires 0 <= first && first <= right && right < numInstances();
-  protected int select(int attIndex, int left, int right, int k) {
-    
-    if (left == right) {
-      return left;
-    } else {
-      int middle = partition(attIndex, left, right);
-      if ((middle - left + 1) >= k) {
-        return select(attIndex, left, middle, k);
-      } else {
-        return select(attIndex, middle + 1, right, k - (middle - left + 1));
-      }
-    }
   }
 
   /**
