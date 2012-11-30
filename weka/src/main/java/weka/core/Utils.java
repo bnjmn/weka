@@ -1533,7 +1533,9 @@ public final class Utils
         array[i] = Double.MAX_VALUE;
       }
     }
-    quickSort(array, index, 0, array.length - 1);
+    if (array.length > 1) {
+      quickSort(array, index, 0, array.length - 1);
+    }
     return index;
   }
 
@@ -1553,7 +1555,9 @@ public final class Utils
     for (int i = 0; i < array.length; i++) {
       index[i] = i;
     }
-    quickSort(array, index, 0, array.length - 1);
+    if (array.length > 1) {
+      quickSort(array, index, 0, array.length - 1);
+    }
     return index;
   }
 
@@ -1582,27 +1586,29 @@ public final class Utils
         array[i] = Double.MAX_VALUE;
       }
     }
-    quickSort(array, index, 0, array.length-1);
-
-    // Make sort stable
-
-    int i = 0;
-    while (i < index.length) {
-      numEqual = 1;
-      for (int j = i+1; ((j < index.length) && Utils.eq(array[index[i]],
-							array[index[j]])); j++)
-	numEqual++;
-      if (numEqual > 1) {
-	helpIndex = new int[numEqual];
-	for (int j = 0; j < numEqual; j++)
-	  helpIndex[j] = i+j;
-	quickSort(index, helpIndex, 0, numEqual-1);
-	for (int j = 0; j < numEqual; j++) 
-	  newIndex[i+j] = index[helpIndex[j]];
-	i += numEqual;
-      } else {
-	newIndex[i] = index[i];
-	i++;
+    if (array.length > 1) {
+      quickSort(array, index, 0, array.length-1);
+      
+      // Make sort stable
+      
+      int i = 0;
+      while (i < index.length) {
+        numEqual = 1;
+        for (int j = i+1; ((j < index.length) && Utils.eq(array[index[i]],
+                                                          array[index[j]])); j++)
+          numEqual++;
+        if (numEqual > 1) {
+          helpIndex = new int[numEqual];
+          for (int j = 0; j < numEqual; j++)
+            helpIndex[j] = i+j;
+          quickSort(index, helpIndex, 0, numEqual-1);
+          for (int j = 0; j < numEqual; j++) 
+            newIndex[i+j] = index[helpIndex[j]];
+          i += numEqual;
+        } else {
+          newIndex[i] = index[i];
+          i++;
+        }
       }
     }
 
@@ -1797,6 +1803,7 @@ public final class Utils
                                int left, int right) {
 
     int diff = right - left;
+
     switch (diff) {
     case 0 :
       
