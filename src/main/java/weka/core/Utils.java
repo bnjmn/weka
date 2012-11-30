@@ -1689,15 +1689,9 @@ public final class Utils
   private static int sortLeftRightAndCenter(double[] array, int[] index, int l, int r) {
 
     int c = (l + r) / 2;
-    if (array[index[l]] > array[index[c]]) {
-      swap(index, l, c);
-    }
-    if (array[index[l]] > array[index[r]]) {
-      swap(index, l, r);
-    }
-    if (array[index[c]] > array[index[r]]) {
-      swap(index, c, r);
-    }
+    conditionalSwap(array, index, l, c);
+    conditionalSwap(array, index, l, r);
+    conditionalSwap(array, index, c, r);
     return c;
   }
 
@@ -1709,6 +1703,18 @@ public final class Utils
     int help = index[l];
     index[l] = index[r];
     index[r] = help;
+  }
+  
+  /**
+   * Conditional swap for quick sort.
+   */
+  private static void conditionalSwap(double[] array, int[] index, int left, int right) {
+
+    if (array[index[left]] > array[index[right]]) {
+      int help = index[left];
+      index[left] = index[right];
+      index[right] = help;
+    }
   }
 
   /**
@@ -1791,39 +1797,39 @@ public final class Utils
                                int left, int right) {
 
     int diff = right - left;
-    if (diff == 0) {
-
-      // Nothing to be done
+    switch (diff) {
+    case 0 :
+      
+      // No need to do anything
       return;
-    } 
-    if (diff == 1) {
-
+    case 1 :
+      
       // Swap two elements if necessary
-      if (array[index[left]] > array[index[right]]) {
-        swap(index, left, right);
-      }
+      conditionalSwap(array, index, left, right);
       return;
-    } 
-    if (diff == 2) {
+    case 2 :
 
       // Just need to sort three elements
-      sortLeftRightAndCenter(array, index, left, right);
+      conditionalSwap(array, index, left, left + 1);
+      conditionalSwap(array, index, left, right);
+      conditionalSwap(array, index, left + 1, right);
       return;
+    default :
+      
+      // Establish pivot
+      int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
+      
+      // Move pivot to the right, partition, and restore pivot
+      swap(index, pivotLocation, right - 1); 
+      int center = partition(array, index, left, right, array[index[right - 1]]);
+      swap(index, center, right - 1);
+      
+      // Sort recursively
+      quickSort(array, index, left, center - 1);
+      quickSort(array, index, center + 1, right);
     }
-    
-    // Establish pivot
-    int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
-    
-    // Move pivot to the right, partition, and restore pivot
-    swap(index, pivotLocation, right - 1); 
-    int center = partition(array, index, left, right, array[index[right - 1]]);
-    swap(index, center, right - 1);
-    
-    // Sort recursively
-    quickSort(array, index, left, center - 1);
-    quickSort(array, index, center + 1, right);
   }
-  
+
   /**
    * Implements quicksort according to Manber's "Introduction to
    * Algorithms".
