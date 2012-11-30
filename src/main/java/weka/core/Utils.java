@@ -1870,39 +1870,39 @@ public final class Utils
                             int left, int right, int k) {
 
     int diff = right - left;
-    if (diff == 0) {
+    switch (diff) {
+    case 0 :
 
       // Nothing to be done
       return left;
-    } 
-    if (diff == 1) {
+    case 1 :
 
       // Swap two elements if necessary
-      if (array[index[left]] > array[index[right]]) {
-        swap(index, left, right);
-      }
+      conditionalSwap(array, index, left, right);
       return left + k - 1;
-    } 
-    if (diff == 2) {
+    case 2 :
 
       // Just need to sort three elements
-      sortLeftRightAndCenter(array, index, left, right);
+      conditionalSwap(array, index, left, left + 1);
+      conditionalSwap(array, index, left, right);
+      conditionalSwap(array, index, left + 1, right);
       return left + k - 1;
-    }
+    default :
     
-    // Establish pivot
-    int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
-
-    // Move pivot to the right, partition, and restore pivot
-    swap(index, pivotLocation, right - 1); 
-    int center = partition(array, index, left, right, array[index[right - 1]]);
-    swap(index, center, right - 1);
-
-    // Proceed recursively
-    if ((center - left + 1) >= k) {
-      return select(array, index, left, center, k);
-    } else {
-      return select(array, index, center + 1, right, k - (center - left + 1));
+      // Establish pivot
+      int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
+      
+      // Move pivot to the right, partition, and restore pivot
+      swap(index, pivotLocation, right - 1); 
+      int center = partition(array, index, left, right, array[index[right - 1]]);
+      swap(index, center, right - 1);
+      
+      // Proceed recursively
+      if ((center - left + 1) >= k) {
+        return select(array, index, left, center, k);
+      } else {
+        return select(array, index, center + 1, right, k - (center - left + 1));
+      }
     }
   }
 
