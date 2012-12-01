@@ -748,8 +748,8 @@ public class Instances extends AbstractList<Instance>
 
   /**
    * Returns the kth-smallest attribute value of a numeric attribute.
-   * The number of non-missing values in the data must be as least
-   * as last as k for this to work.
+   * NOTE CHANGE: Missing values (NaN values) are now treated as Double.MAX_VALUE.
+   * Also, the order of the instances in the data is no longer affected.
    *
    * @param attIndex the attribute's index
    * @param k the value of k
@@ -760,33 +760,21 @@ public class Instances extends AbstractList<Instance>
     if (!attribute(attIndex).isNumeric()) {
       throw new IllegalArgumentException("Instances: attribute must be numeric to compute kth-smallest value.");
     }
-
-    int i,j;
-
-    // move all instances with missing values to end
-    j = numInstances() - 1;
-    i = 0;
-    while (i <= j) {
-      if (instance(j).isMissing(attIndex)) {
-	j--;
-      } else {
-	if (instance(i).isMissing(attIndex)) {
-	  swap(i,j);
-	  j--;
-	}
-	i++;
-      }
-    }
-
-    if ((k < 1) || (k > j+1)) {
+ 
+    if ((k < 1) || (k > numInstances())) {
       throw new IllegalArgumentException("Instances: value for k for computing kth-smallest value too large.");
     }
     
-    double[] vals = new double[j + 1];
-    for (i = 0; i < vals.length; i++) {
-      vals[i] = instance(i).value(attIndex);
-    }
 
+    double[] vals = new double[numInstances()];
+    for (int i = 0; i < vals.length; i++) {
+      double val = instance(i).value(attIndex);
+      if (Utils.isMissingValue(val)) {
+        vals[i] = Double.MAX_VALUE;
+      } else {
+        vals[i] = val;
+      }
+    }
     return Utils.kthSmallestValue(vals, k);
   }
 
@@ -1328,33 +1316,22 @@ public class Instances extends AbstractList<Instance>
    */
   public void sort(int attIndex) {
 
-    int i,j;
-
-    // move all instances with missing values to end
-    j = numInstances() - 1;
-    i = 0;
-    while (i <= j) {
-      if (instance(j).isMissing(attIndex)) {
-	j--;
+    double[] vals = new double[numInstances()];
+    for (int i = 0; i < vals.length; i++) {
+      double val = instance(i).value(attIndex);
+      if (Utils.isMissingValue(val)) {
+        vals[i] = Double.MAX_VALUE;
       } else {
-	if (instance(i).isMissing(attIndex)) {
-	  swap(i,j);
-	  j--;
-	}
-	i++;
+        vals[i] = val;
       }
     }
     
-    double[] vals = new double[j + 1];
-    for (i = 0; i < vals.length; i++) {
-      vals[i] = instance(i).value(attIndex);
-    }
     int[] sortOrder = Utils.sortWithNoMissingValues(vals);
     Instance[] backup = new Instance[vals.length];
-    for (i = 0; i < vals.length; i++) {
+    for (int i = 0; i < vals.length; i++) {
       backup[i] = instance(i);
     }
-    for (i = 0; i < vals.length; i++) {
+    for (int i = 0; i < vals.length; i++) {
       m_Instances.set(i, backup[sortOrder[i]]);
     }
   }
