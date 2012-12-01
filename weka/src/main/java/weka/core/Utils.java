@@ -1177,12 +1177,7 @@ public final class Utils
    */
   public static int kthSmallestValue(int[] array, int k) {
 
-    int[] index = new int[array.length];
-    
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-    }
-
+    int[] index = initialIndex(array.length);
     return array[index[select(array, index, 0, array.length - 1, k)]];
   }
 
@@ -1195,12 +1190,7 @@ public final class Utils
    */
   public static double kthSmallestValue(double[] array, int k) {
 
-    int[] index = new int[array.length];
-    
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-    }
-
+    int[] index = initialIndex(array.length);
     return array[index[select(array, index, 0, array.length - 1, k)]];
   }
 
@@ -1449,6 +1439,21 @@ public final class Utils
   }
 
   /**
+   * Replaces all "missing values" in the given array of double values with
+   * MAX_VALUE.
+   *
+   * @param array the array to be modified.
+   */
+  public static void replaceMissingWithMAX_VALUE(double[] array) {
+
+    for (int i = 0; i < array.length; i++) {
+      if (isMissingValue(array[i])) {
+        array[i] = Double.MAX_VALUE;
+      }
+    }
+  }
+
+  /**
    * Rounds a double to the given number of decimal places.
    *
    * @param value the double value
@@ -1474,14 +1479,11 @@ public final class Utils
    */
   public static /*@pure@*/ int[] sort(int[] array) {
 
-    int[] index = new int[array.length];
+    int[] index = initialIndex(array.length);
     int[] newIndex = new int[array.length];
     int[] helpIndex;
     int numEqual;
-    
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-    }
+
     quickSort(array, index, 0, array.length - 1);
 
     // Make sort stable
@@ -1517,7 +1519,7 @@ public final class Utils
    * original array in the sorted array. NOTE THESE CHANGES: the sort
    * is no longer stable and it doesn't use safe floating-point
    * comparisons anymore. Occurrences of Double.NaN are treated as 
-   * Double.MAX_VALUE
+   * Double.MAX_VALUE.
    *
    * @param array this array is not changed by the method!
    * @return an array of integers with the positions in the sorted
@@ -1525,15 +1527,10 @@ public final class Utils
    */
   public static /*@pure@*/ int[] sort(/*@non_null@*/ double[] array) {
 
-    int[] index = new int[array.length];
-    array = (double[])array.clone();
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-      if (Double.isNaN(array[i])) {
-        array[i] = Double.MAX_VALUE;
-      }
-    }
+    int[] index = initialIndex(array.length);
     if (array.length > 1) {
+      array = (double[])array.clone();
+      replaceMissingWithMAX_VALUE(array);
       quickSort(array, index, 0, array.length - 1);
     }
     return index;
@@ -1542,19 +1539,16 @@ public final class Utils
   /**
    * Sorts a given array of doubles in ascending order and returns an
    * array of integers with the positions of the elements of the
-   * original array in the sorted array. Assumes there are no missing
-   * values in the data.
+   * original array in the sorted array. Missing values in the given
+   * array are replaced by Double.MAX_VALUE, so the array is modified in that case! 
    *
-   * @param array this array is not changed by the method!
+   * @param array the array to be sorted, which is modified if it has missing values
    * @return an array of integers with the positions in the sorted
    * array.  
    */
   public static /*@pure@*/ int[] sortWithNoMissingValues(/*@non_null@*/ double[] array) {
 
-    int[] index = new int[array.length];
-    for (int i = 0; i < array.length; i++) {
-      index[i] = i;
-    }
+    int[] index = initialIndex(array.length);
     if (array.length > 1) {
       quickSort(array, index, 0, array.length - 1);
     }
@@ -1574,19 +1568,16 @@ public final class Utils
    */
   public static /*@pure@*/ int[] stableSort(double[] array){
 
-    int[] index = new int[array.length];
-    int[] newIndex = new int[array.length];
-    int[] helpIndex;
-    int numEqual;
+    int[] index = initialIndex(array.length);
     
-    array = (double[])array.clone();
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-      if (Double.isNaN(array[i])) {
-        array[i] = Double.MAX_VALUE;
-      }
-    }
     if (array.length > 1) {
+
+      int[] newIndex = new int[array.length];
+      int[] helpIndex;
+      int numEqual;
+
+      array = (double[])array.clone();
+      replaceMissingWithMAX_VALUE(array);
       quickSort(array, index, 0, array.length-1);
       
       // Make sort stable
@@ -1610,9 +1601,10 @@ public final class Utils
           i++;
         }
       }
+      return newIndex;
+    } else {
+      return index;
     }
-
-    return newIndex;
   }
 
   /**
@@ -1687,6 +1679,18 @@ public final class Utils
       return 0.0;
     }
     return c * Utils.log2((double) c);
+  }
+
+  /**
+   * Initial index, filled with values from 0 to size - 1.
+   */
+  private static int[] initialIndex(int size) {
+   
+    int[] index = new int[size];
+    for (int i = 0; i < size; i++) {
+      index[i] = i;
+    }
+    return index;
   }
 
   /**
