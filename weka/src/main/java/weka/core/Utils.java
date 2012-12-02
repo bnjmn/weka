@@ -1175,14 +1175,9 @@ public final class Utils
    * @param k the value of k
    * @return the kth-smallest value
    */
-  public static double kthSmallestValue(int[] array, int k) {
+  public static int kthSmallestValue(int[] array, int k) {
 
-    int[] index = new int[array.length];
-    
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-    }
-
+    int[] index = initialIndex(array.length);
     return array[index[select(array, index, 0, array.length - 1, k)]];
   }
 
@@ -1195,12 +1190,7 @@ public final class Utils
    */
   public static double kthSmallestValue(double[] array, int k) {
 
-    int[] index = new int[array.length];
-    
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-    }
-
+    int[] index = initialIndex(array.length);
     return array[index[select(array, index, 0, array.length - 1, k)]];
   }
 
@@ -1449,6 +1439,21 @@ public final class Utils
   }
 
   /**
+   * Replaces all "missing values" in the given array of double values with
+   * MAX_VALUE.
+   *
+   * @param array the array to be modified.
+   */
+  public static void replaceMissingWithMAX_VALUE(double[] array) {
+
+    for (int i = 0; i < array.length; i++) {
+      if (isMissingValue(array[i])) {
+        array[i] = Double.MAX_VALUE;
+      }
+    }
+  }
+
+  /**
    * Rounds a double to the given number of decimal places.
    *
    * @param value the double value
@@ -1474,14 +1479,11 @@ public final class Utils
    */
   public static /*@pure@*/ int[] sort(int[] array) {
 
-    int[] index = new int[array.length];
+    int[] index = initialIndex(array.length);
     int[] newIndex = new int[array.length];
     int[] helpIndex;
     int numEqual;
-    
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-    }
+
     quickSort(array, index, 0, array.length - 1);
 
     // Make sort stable
@@ -1517,7 +1519,7 @@ public final class Utils
    * original array in the sorted array. NOTE THESE CHANGES: the sort
    * is no longer stable and it doesn't use safe floating-point
    * comparisons anymore. Occurrences of Double.NaN are treated as 
-   * Double.MAX_VALUE
+   * Double.MAX_VALUE.
    *
    * @param array this array is not changed by the method!
    * @return an array of integers with the positions in the sorted
@@ -1525,15 +1527,31 @@ public final class Utils
    */
   public static /*@pure@*/ int[] sort(/*@non_null@*/ double[] array) {
 
-    int[] index = new int[array.length];
-    array = (double[])array.clone();
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-      if (Double.isNaN(array[i])) {
-        array[i] = Double.MAX_VALUE;
-      }
+    int[] index = initialIndex(array.length);
+    if (array.length > 1) {
+      array = (double[])array.clone();
+      replaceMissingWithMAX_VALUE(array);
+      quickSort(array, index, 0, array.length - 1);
     }
-    quickSort(array, index, 0, array.length - 1);
+    return index;
+  }
+
+  /**
+   * Sorts a given array of doubles in ascending order and returns an
+   * array of integers with the positions of the elements of the
+   * original array in the sorted array. Missing values in the given
+   * array are replaced by Double.MAX_VALUE, so the array is modified in that case! 
+   *
+   * @param array the array to be sorted, which is modified if it has missing values
+   * @return an array of integers with the positions in the sorted
+   * array.  
+   */
+  public static /*@pure@*/ int[] sortWithNoMissingValues(/*@non_null@*/ double[] array) {
+
+    int[] index = initialIndex(array.length);
+    if (array.length > 1) {
+      quickSort(array, index, 0, array.length - 1);
+    }
     return index;
   }
 
@@ -1550,43 +1568,43 @@ public final class Utils
    */
   public static /*@pure@*/ int[] stableSort(double[] array){
 
-    int[] index = new int[array.length];
-    int[] newIndex = new int[array.length];
-    int[] helpIndex;
-    int numEqual;
+    int[] index = initialIndex(array.length);
     
-    array = (double[])array.clone();
-    for (int i = 0; i < index.length; i++) {
-      index[i] = i;
-      if (Double.isNaN(array[i])) {
-        array[i] = Double.MAX_VALUE;
+    if (array.length > 1) {
+
+      int[] newIndex = new int[array.length];
+      int[] helpIndex;
+      int numEqual;
+
+      array = (double[])array.clone();
+      replaceMissingWithMAX_VALUE(array);
+      quickSort(array, index, 0, array.length-1);
+      
+      // Make sort stable
+      
+      int i = 0;
+      while (i < index.length) {
+        numEqual = 1;
+        for (int j = i+1; ((j < index.length) && Utils.eq(array[index[i]],
+                                                          array[index[j]])); j++)
+          numEqual++;
+        if (numEqual > 1) {
+          helpIndex = new int[numEqual];
+          for (int j = 0; j < numEqual; j++)
+            helpIndex[j] = i+j;
+          quickSort(index, helpIndex, 0, numEqual-1);
+          for (int j = 0; j < numEqual; j++) 
+            newIndex[i+j] = index[helpIndex[j]];
+          i += numEqual;
+        } else {
+          newIndex[i] = index[i];
+          i++;
+        }
       }
+      return newIndex;
+    } else {
+      return index;
     }
-    quickSort(array,index,0,array.length-1);
-
-    // Make sort stable
-
-    int i = 0;
-    while (i < index.length) {
-      numEqual = 1;
-      for (int j = i+1; ((j < index.length) && Utils.eq(array[index[i]],
-							array[index[j]])); j++)
-	numEqual++;
-      if (numEqual > 1) {
-	helpIndex = new int[numEqual];
-	for (int j = 0; j < numEqual; j++)
-	  helpIndex[j] = i+j;
-	quickSort(index, helpIndex, 0, numEqual-1);
-	for (int j = 0; j < numEqual; j++) 
-	  newIndex[i+j] = index[helpIndex[j]];
-	i += numEqual;
-      } else {
-	newIndex[i] = index[i];
-	i++;
-      }
-    }
-
-    return newIndex;
   }
 
   /**
@@ -1664,6 +1682,52 @@ public final class Utils
   }
 
   /**
+   * Initial index, filled with values from 0 to size - 1.
+   */
+  private static int[] initialIndex(int size) {
+   
+    int[] index = new int[size];
+    for (int i = 0; i < size; i++) {
+      index[i] = i;
+    }
+    return index;
+  }
+
+  /**
+   * Sorts left, right, and center elements only, returns resulting center as pivot.
+   */
+  private static int sortLeftRightAndCenter(double[] array, int[] index, int l, int r) {
+
+    int c = (l + r) / 2;
+    conditionalSwap(array, index, l, c);
+    conditionalSwap(array, index, l, r);
+    conditionalSwap(array, index, c, r);
+    return c;
+  }
+
+  /**
+   * Swaps two elements in the given integer array.
+   */
+  private static void swap(int[] index, int l, int r) {
+    
+    int help = index[l];
+    index[l] = index[r];
+    index[r] = help;
+  }
+  
+  /**
+   * Conditional swap for quick sort.
+   */
+  private static void conditionalSwap(double[] array, int[] index, int left, int right) {
+
+    if (array[index[left]] > array[index[right]]) {
+      int help = index[left];
+      index[left] = index[right];
+      index[right] = help;
+    }
+  }
+
+  /**
    * Partitions the instances around a pivot. Used by quicksort and
    * kthSmallestValue.
    *
@@ -1674,31 +1738,18 @@ public final class Utils
    *
    * @return the index of the middle element
    */
-  private static int partition(double[] array, int[] index, int l, int r) {
-    
-    double pivot = array[index[(l + r) / 2]];
-    int help;
+  private static int partition(double[] array, int[] index, int l, int r,
+                               double pivot) {
 
-    while (l < r) {
-      while ((array[index[l]] < pivot) && (l < r)) {
-        l++;
+    r--;
+    while (true) {
+      while ((array[index[++l]] < pivot));
+      while ((array[index[--r]] > pivot));
+      if (l >= r) {
+        return l;
       }
-      while ((array[index[r]] > pivot) && (l < r)) {
-        r--;
-      }
-      if (l < r) {
-        help = index[l];
-        index[l] = index[r];
-        index[r] = help;
-        l++;
-        r--;
-      }
+      swap(index, l, r);
     }
-    if ((l == r) && (array[index[r]] > pivot)) {
-      r--;
-    } 
-
-    return r;
   }
 
   /**
@@ -1738,10 +1789,10 @@ public final class Utils
 
     return r;
   }
-  
+
   /**
-   * Implements quicksort according to Manber's "Introduction to
-   * Algorithms".
+   * Implements quicksort with median-of-three method and explicit sort for
+   * problems of size three or less. 
    *
    * @param array the array of doubles to be sorted
    * @param index the index into the array of doubles
@@ -1753,15 +1804,43 @@ public final class Utils
   //@ requires array != index;
   //  assignable index;
   private static void quickSort(/*@non_null@*/ double[] array, /*@non_null@*/ int[] index, 
-                                int left, int right) {
+                               int left, int right) {
 
-    if (left < right) {
-      int middle = partition(array, index, left, right);
-      quickSort(array, index, left, middle);
-      quickSort(array, index, middle + 1, right);
+    int diff = right - left;
+
+    switch (diff) {
+    case 0 :
+      
+      // No need to do anything
+      return;
+    case 1 :
+      
+      // Swap two elements if necessary
+      conditionalSwap(array, index, left, right);
+      return;
+    case 2 :
+
+      // Just need to sort three elements
+      conditionalSwap(array, index, left, left + 1);
+      conditionalSwap(array, index, left, right);
+      conditionalSwap(array, index, left + 1, right);
+      return;
+    default :
+      
+      // Establish pivot
+      int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
+      
+      // Move pivot to the right, partition, and restore pivot
+      swap(index, pivotLocation, right - 1); 
+      int center = partition(array, index, left, right, array[index[right - 1]]);
+      swap(index, center, right - 1);
+      
+      // Sort recursively
+      quickSort(array, index, left, center - 1);
+      quickSort(array, index, center + 1, right);
     }
   }
-  
+
   /**
    * Implements quicksort according to Manber's "Introduction to
    * Algorithms".
@@ -1800,15 +1879,40 @@ public final class Utils
   //@ requires 0 <= first && first <= right && right < array.length;
   private static int select(/*@non_null@*/ double[] array, /*@non_null@*/ int[] index, 
                             int left, int right, int k) {
-    
-    if (left == right) {
+
+    int diff = right - left;
+    switch (diff) {
+    case 0 :
+
+      // Nothing to be done
       return left;
-    } else {
-      int middle = partition(array, index, left, right);
-      if ((middle - left + 1) >= k) {
-        return select(array, index, left, middle, k);
+    case 1 :
+
+      // Swap two elements if necessary
+      conditionalSwap(array, index, left, right);
+      return left + k - 1;
+    case 2 :
+
+      // Just need to sort three elements
+      conditionalSwap(array, index, left, left + 1);
+      conditionalSwap(array, index, left, right);
+      conditionalSwap(array, index, left + 1, right);
+      return left + k - 1;
+    default :
+    
+      // Establish pivot
+      int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
+      
+      // Move pivot to the right, partition, and restore pivot
+      swap(index, pivotLocation, right - 1); 
+      int center = partition(array, index, left, right, array[index[right - 1]]);
+      swap(index, center, right - 1);
+      
+      // Proceed recursively
+      if ((center - left + 1) >= k) {
+        return select(array, index, left, center, k);
       } else {
-        return select(array, index, middle + 1, right, k - (middle - left + 1));
+        return select(array, index, center + 1, right, k - (center - left + 1));
       }
     }
   }
@@ -2186,7 +2290,7 @@ public final class Utils
       System.out.println("Median (doubles): " + 
                          Utils.kthSmallestValue(doubles, doubles.length / 2));
       System.out.println("Median (ints): " + 
-                         Utils.kthSmallestValue(ints, ints.length / 2));
+      Utils.kthSmallestValue(ints, ints.length / 2));
 
       // Sorting and normalizing
       System.out.println("Sorted array with NaN (doubles): ");

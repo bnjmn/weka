@@ -46,6 +46,7 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.PartitionGenerator;
+import weka.core.Randomizable;
 
 /**
  <!-- globalinfo-start -->
@@ -83,7 +84,7 @@ import weka.core.PartitionGenerator;
 public class REPTree 
   extends AbstractClassifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
-	     AdditionalMeasureProducer, Sourcable, PartitionGenerator {
+	     AdditionalMeasureProducer, Sourcable, PartitionGenerator, Randomizable {
 
   /** for serialization */
   static final long serialVersionUID = -9216785998198681299L;
