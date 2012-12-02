@@ -4171,7 +4171,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           makeDistribution(instance.classValue()), instance.weight());
 
       // Update coverage stats
-      int[] indices = Utils.sort(predictedDistribution);
+      int[] indices = Utils.stableSort(predictedDistribution);
       double sum = 0, sizeOfRegions = 0;
       for (int i = predictedDistribution.length - 1; i >= 0; i--) {
         if (sum >= m_ConfLevel) {
