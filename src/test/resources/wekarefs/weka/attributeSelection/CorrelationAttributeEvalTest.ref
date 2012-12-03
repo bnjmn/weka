@@ -11,11 +11,11 @@ Ranked attributes:
  0.992  3 Numeric1
  0.709  2 Nominal2
  0.625  1 Nominal1
- 0      4 String1
  0      6 Relational1
+ 0      4 String1
 -0.102  5 Date1
 
-Selected attributes: 3,2,1,4,6,5 : 6
+Selected attributes: 3,2,1,6,4,5 : 6
 
 
 
@@ -50,10 +50,10 @@ Ranked attributes:
  0.228  1 Nominal1
  0.205  5 Date1
  0.199  3 Numeric1
- 0      6 Relational1
  0      4 String1
+ 0      6 Relational1
 
-Selected attributes: 2,1,5,3,6,4 : 6
+Selected attributes: 2,1,5,3,4,6 : 6
 
 
 
@@ -88,8 +88,8 @@ Ranked attributes:
  0.225  2 Nominal2
  0.199  5 Date1
  0.199  3 Numeric1
- 0      6 Relational1
  0      4 String1
+ 0      6 Relational1
 
-Selected attributes: 1,2,5,3,6,4 : 6
+Selected attributes: 1,2,5,3,4,6 : 6
 
