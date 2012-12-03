@@ -54,10 +54,10 @@ Attribute Evaluator (supervised, Class (numeric): 5 Class):
 	Equal influence nearest neighbours
 
 Ranked attributes:
-NaN  2 Nominal2
-NaN  1 Nominal1
 NaN  4 Date1
 NaN  3 Numeric1
+NaN  2 Nominal2
+NaN  1 Nominal1
 
-Selected attributes: 2,1,4,3 : 4
+Selected attributes: 4,3,2,1 : 4
 
