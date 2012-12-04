@@ -1296,7 +1296,7 @@ public class RandomTree
       double splitPoint = Double.NaN;
       Attribute attribute = data.attribute(att);
       double[][] dist = null;
-      int indexOfFirstMissingValue = -1;
+      int indexOfFirstMissingValue = data.numInstances();
       
       if (attribute.isNominal()) {
         
@@ -1307,7 +1307,7 @@ public class RandomTree
           if (inst.isMissing(att)) {
             
             // Skip missing values at this stage
-            if (indexOfFirstMissingValue < 0) {
+            if (indexOfFirstMissingValue == data.numInstances()) {
               indexOfFirstMissingValue = i;
             }
             continue;
@@ -1346,13 +1346,8 @@ public class RandomTree
         // Try all possible split points
         double currSplit = data.instance(0).value(att);
         double currVal, bestVal = -Double.MAX_VALUE;
-        for (int i = 0; i < data.numInstances(); i++) {
+        for (int i = 0; i < indexOfFirstMissingValue; i++) {
           Instance inst = data.instance(i);
-          if (inst.isMissing(att)) {
-            
-            // Can stop as soon as we hit a missing value
-            break;
-          }
           
           // Can we place a sensible split point here?
           if (inst.value(att) > currSplit) {
@@ -1379,8 +1374,8 @@ public class RandomTree
                 System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
               }
             }
+            currSplit = inst.value(att);
           }
-          currSplit = inst.value(att);
           
           // Shift over the weight
           currDist[0][(int) inst.classValue()] += inst.weight();
@@ -1400,27 +1395,23 @@ public class RandomTree
       } else {
         Utils.normalize(props[0]);
       }
-      
-      // Any instances with missing values ?
-      if (indexOfFirstMissingValue > -1) {
         
-        // Distribute weights for instances with missing values
-        for (int i = indexOfFirstMissingValue; i < data.numInstances(); i++) {
-          Instance inst = data.instance(i);
-          if (attribute.isNominal()) {
-            
-            // Need to check if attribute value is missing
-            if (inst.isMissing(att)) {
-              for (int j = 0; j < dist.length; j++) {
-                dist[j][(int) inst.classValue()] += props[0][j] * inst.weight();
-              }
-            }
-          } else {
-            
-            // Can be sure that value is missing, so no test required
+      // Distribute weights for instances with missing values
+      for (int i = indexOfFirstMissingValue; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
+        if (attribute.isNominal()) {
+          
+          // Need to check if attribute value is missing
+          if (inst.isMissing(att)) {
             for (int j = 0; j < dist.length; j++) {
               dist[j][(int) inst.classValue()] += props[0][j] * inst.weight();
             }
+          }
+        } else {
+          
+          // Can be sure that value is missing, so no test required
+          for (int j = 0; j < dist.length; j++) {
+            dist[j][(int) inst.classValue()] += props[0][j] * inst.weight();
           }
         }
       }
