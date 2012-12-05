@@ -1560,7 +1560,7 @@ public class ClassifierPanel extends JPanel implements
 
               testTimeStart = System.currentTimeMillis();
               if (classifier instanceof BatchPredictor) {
-                double[][] predictions = ((BatchPredictor) classifier)
+                double[][] predictions = ((BatchPredictor) current)
                     .distributionsForInstances(test);
                 plotInstances.process(test, predictions, eval);
                 if (outputPredictionsText) {
@@ -1751,7 +1751,7 @@ public class ClassifierPanel extends JPanel implements
                   vv.addElement(grph);
                 }
                 m_History.addObject(name, vv);
-              } else if (saveVis && plotInstances != null 
+              } else if (saveVis && plotInstances != null
                   && plotInstances.getPlotInstances() != null
                   && plotInstances.getPlotInstances().numInstances() > 0) {
                 m_CurrentVis = new VisualizePanel();
