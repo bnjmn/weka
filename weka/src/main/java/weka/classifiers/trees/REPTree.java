@@ -34,6 +34,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.Randomizable;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
@@ -81,7 +82,7 @@ import java.util.Vector;
 public class REPTree 
   extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
-	     AdditionalMeasureProducer, Sourcable {
+	     AdditionalMeasureProducer, Sourcable, Randomizable {
 
   /** for serialization */
   static final long serialVersionUID = -9216785998198681299L;

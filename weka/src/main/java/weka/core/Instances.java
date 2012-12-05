@@ -689,8 +689,7 @@ public class Instances implements Serializable, RevisionHandler {
   }
 
   /**
-   * Returns the kth-smallest attribute value of a numeric attribute. Note that
-   * calling this method will change the order of the data!
+   * Returns the kth-smallest attribute value of a numeric attribute.
    * 
    * @param att the Attribute object
    * @param k the value of k
@@ -702,10 +701,9 @@ public class Instances implements Serializable, RevisionHandler {
   }
 
   /**
-   * Returns the kth-smallest attribute value of a numeric attribute. Note that
-   * calling this method will change the order of the data! The number of
-   * non-missing values in the data must be as least as last as k for this to
-   * work.
+   * Returns the kth-smallest attribute value of a numeric attribute. NOTE
+   * CHANGE: Missing values (NaN values) are now treated as Double.MAX_VALUE.
+   * Also, the order of the instances in the data is no longer affected.
    * 
    * @param attIndex the attribute's index
    * @param k the value of k
@@ -718,29 +716,21 @@ public class Instances implements Serializable, RevisionHandler {
           "Instances: attribute must be numeric to compute kth-smallest value.");
     }
 
-    int i, j;
-
-    // move all instances with missing values to end
-    j = numInstances() - 1;
-    i = 0;
-    while (i <= j) {
-      if (instance(j).isMissing(attIndex)) {
-        j--;
-      } else {
-        if (instance(i).isMissing(attIndex)) {
-          swap(i, j);
-          j--;
-        }
-        i++;
-      }
-    }
-
-    if ((k < 1) || (k > j + 1)) {
+    if ((k < 1) || (k > numInstances())) {
       throw new IllegalArgumentException(
           "Instances: value for k for computing kth-smallest value too large.");
     }
 
-    return instance(select(attIndex, 0, j, k)).value(attIndex);
+    double[] vals = new double[numInstances()];
+    for (int i = 0; i < vals.length; i++) {
+      double val = instance(i).value(attIndex);
+      if (Instance.isMissingValue(val)) {
+        vals[i] = Double.MAX_VALUE;
+      } else {
+        vals[i] = val;
+      }
+    }
+    return Utils.kthSmallestValue(vals, k);
   }
 
   /**
@@ -1227,23 +1217,28 @@ public class Instances implements Serializable, RevisionHandler {
    */
   public void sort(int attIndex) {
 
-    int i, j;
-
-    // move all instances with missing values to end
-    j = numInstances() - 1;
-    i = 0;
-    while (i <= j) {
-      if (instance(j).isMissing(attIndex)) {
-        j--;
+    double[] vals = new double[numInstances()];
+    for (int i = 0; i < vals.length; i++) {
+      double val = instance(i).value(attIndex);
+      if (Instance.isMissingValue(val)) {
+        vals[i] = Double.MAX_VALUE;
       } else {
-        if (instance(i).isMissing(attIndex)) {
-          swap(i, j);
-          j--;
-        }
-        i++;
+        vals[i] = val;
       }
     }
-    quickSort(attIndex, 0, j);
+
+    int[] sortOrder = Utils.sortWithNoMissingValues(vals);
+    Instance[] backup = new Instance[vals.length];
+    for (int i = 0; i < vals.length; i++) {
+      backup[i] = instance(i);
+    }
+    for (int i = 0; i < vals.length; i++) {
+      Instance newInstance = (Instance) backup[sortOrder[i]].copy();
+      m_Instances.insertElementAt(newInstance, i);
+      m_Instances.removeElementAt(i + 1);
+
+      // m_Instances.set(i, backup[sortOrder[i]]);
+    }
   }
 
   /**
@@ -1691,89 +1686,6 @@ public class Instances implements Serializable, RevisionHandler {
       }
     }
     return text.toString();
-  }
-
-  /**
-   * Partitions the instances around a pivot. Used by quicksort and
-   * kthSmallestValue.
-   * 
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param l the first index of the subset (index starts with 0)
-   * @param r the last index of the subset (index starts with 0)
-   * 
-   * @return the index of the middle element
-   */
-  // @ requires 0 <= attIndex && attIndex < numAttributes();
-  // @ requires 0 <= left && left <= right && right < numInstances();
-  protected int partition(int attIndex, int l, int r) {
-
-    double pivot = instance((l + r) / 2).value(attIndex);
-
-    while (l < r) {
-      while ((instance(l).value(attIndex) < pivot) && (l < r)) {
-        l++;
-      }
-      while ((instance(r).value(attIndex) > pivot) && (l < r)) {
-        r--;
-      }
-      if (l < r) {
-        swap(l, r);
-        l++;
-        r--;
-      }
-    }
-    if ((l == r) && (instance(r).value(attIndex) > pivot)) {
-      r--;
-    }
-
-    return r;
-  }
-
-  /**
-   * Implements quicksort according to Manber's "Introduction to Algorithms".
-   * 
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset to be sorted (index starts with
-   *          0)
-   * @param right the last index of the subset to be sorted (index starts with
-   *          0)
-   */
-  // @ requires 0 <= attIndex && attIndex < numAttributes();
-  // @ requires 0 <= first && first <= right && right < numInstances();
-  protected void quickSort(int attIndex, int left, int right) {
-
-    if (left < right) {
-      int middle = partition(attIndex, left, right);
-      quickSort(attIndex, left, middle);
-      quickSort(attIndex, middle + 1, right);
-    }
-  }
-
-  /**
-   * Implements computation of the kth-smallest element according to Manber's
-   * "Introduction to Algorithms".
-   * 
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset (index starts with 0)
-   * @param right the last index of the subset (index starts with 0)
-   * @param k the value of k
-   * 
-   * @return the index of the kth-smallest element
-   */
-  // @ requires 0 <= attIndex && attIndex < numAttributes();
-  // @ requires 0 <= first && first <= right && right < numInstances();
-  protected int select(int attIndex, int left, int right, int k) {
-
-    if (left == right) {
-      return left;
-    } else {
-      int middle = partition(attIndex, left, right);
-      if ((middle - left + 1) >= k) {
-        return select(attIndex, left, middle, k);
-      } else {
-        return select(attIndex, middle + 1, right, k - (middle - left + 1));
-      }
-    }
   }
 
   /**

@@ -425,11 +425,9 @@ public class SimpleKMeans
         if(members.numInstances() == 1){
           vals[j] = members.instance(0).value(j);
         }else{
-          sortedMembers.kthSmallestValue(j, middle+1);
-          vals[j] = sortedMembers.instance(middle).value(j);
-          if( dataIsEven ){						
-            sortedMembers.kthSmallestValue(j, middle+2);						
-            vals[j] = (vals[j]+sortedMembers.instance(middle+1).value(j))/2;
+          vals[j] = sortedMembers.kthSmallestValue(j, middle + 1);
+          if (dataIsEven) {
+            vals[j] = (vals[j] + sortedMembers.kthSmallestValue(j, middle + 2)) / 2;
           }
         }
       }	
