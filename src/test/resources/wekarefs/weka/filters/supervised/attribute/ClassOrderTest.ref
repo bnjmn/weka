@@ -4,7 +4,7 @@
 @attribute NominalAtt1 {r,g,b}
 @attribute NumericAtt1 numeric
 @attribute StringAtt2 string
-@attribute NominalAtt2 {b,c,d,a}
+@attribute NominalAtt2 {c,b,a,d}
 @attribute NumericAtt2 numeric
 @attribute DateAtt1 date yyyy-MM-dd
 
