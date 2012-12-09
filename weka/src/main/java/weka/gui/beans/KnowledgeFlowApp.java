@@ -6168,6 +6168,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
    * vectors are deep-copied via serialization before being returned.
    * 
    * @return the current flow being edited
+   * @throws Exception if a problem occurs
    */
   public Vector getFlow() throws Exception {
     Vector v = new Vector();
@@ -6186,6 +6187,21 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     integrateFlow(beans, connections, true, false);
     return copy;
+  }
+
+  /**
+   * Returns the current flow being edited in XML format.
+   * 
+   * @return the current flow as an XML string
+   * @throws Exception if a problem occurs
+   */
+  public String getFlowXML() throws Exception {
+    Vector beans = BeanInstance.getBeanInstances(m_mainKFPerspective
+        .getCurrentTabIndex());
+
+    StringBuffer buff = copyToBuffer(beans);
+
+    return buff.toString();
   }
 
   /**
