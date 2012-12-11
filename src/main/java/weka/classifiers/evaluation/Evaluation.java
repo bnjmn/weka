@@ -38,6 +38,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -379,8 +380,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /** whether to discard predictions (and save memory). */
   protected boolean m_DiscardPredictions;
 
+  /** Holds plugin evaluation metrics */
   protected List<AbstractEvaluationMetric> m_pluginMetrics;
 
+  /** The list of metrics to display in the output */
   protected List<String> m_metricsToDisplay = new ArrayList<String>();
 
   public static final String[] BUILT_IN_EVAL_METRICS = { "Correct",
@@ -3932,9 +3935,42 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText.append("\t(default: 1).\n");
     optionsText.append("-m <name of file with cost matrix>\n");
     optionsText.append("\tSets file with cost matrix.\n");
-    optionsText.append("-disable <list of evaluation metric names>\n");
     optionsText
-        .append("\tComma separated list of metric names not to print to the output.\n");
+        .append("-disable <comma-separated list of evaluation metric names>\n");
+    optionsText
+        .append("\tComma separated list of metric names not to print to the output.\n\t");
+    optionsText.append("Available metrics:\n\t");
+    List<String> metricsToDisplay = new ArrayList<String>(
+        Arrays.asList(BUILT_IN_EVAL_METRICS));
+
+    List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric
+        .getPluginMetrics();
+    if (pluginMetrics != null) {
+      for (AbstractEvaluationMetric m : pluginMetrics) {
+        if (m instanceof InformationRetrievalEvaluationMetric) {
+          List<String> statNames = m.getStatisticNames();
+          for (String s : statNames) {
+            metricsToDisplay.add(s.toLowerCase());
+          }
+        } else {
+          metricsToDisplay.add(m.getMetricName().toLowerCase());
+        }
+      }
+    }
+
+    int length = 0;
+    for (int i = 0; i < metricsToDisplay.size(); i++) {
+      optionsText.append(metricsToDisplay.get(i));
+      length += metricsToDisplay.get(i).length();
+      if (i != metricsToDisplay.size() - 1) {
+        optionsText.append(",");
+      }
+      if (length >= 60) {
+        optionsText.append("\n\t");
+        length = 0;
+      }
+    }
+    optionsText.append("\n");
     optionsText.append("-l <name of input file>\n");
     optionsText
         .append("\tSets model input file. In case the filename ends with '.xml',\n");
