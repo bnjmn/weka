@@ -71,6 +71,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextSupport;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -81,6 +82,7 @@ import java.io.LineNumberReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -2709,7 +2711,10 @@ public class KnowledgeFlowApp
           v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
           v.set(XMLBeans.INDEX_BEANCONNECTIONS, BeanConnection.getConnections());
           XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport); 
-          xml.write(sFile, v);
+          // XML flows are tagged as encoded with UTF-8
+          BufferedWriter br = new BufferedWriter(new OutputStreamWriter(
+              new FileOutputStream(sFile), "UTF-8"));
+          xml.write(br, v);
         } /* binary */ else {
           OutputStream os = new FileOutputStream(sFile);
           ObjectOutputStream oos = new ObjectOutputStream(os);
