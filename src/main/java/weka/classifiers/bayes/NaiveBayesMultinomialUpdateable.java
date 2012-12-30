@@ -148,11 +148,19 @@ public class NaiveBayesMultinomialUpdateable
 	continue;
 
       double numOccurences = instance.valueSparse(a) * instance.weight();
-      if (numOccurences < 0)
+/*      if (numOccurences < 0)
 	throw new Exception(
-	    "Numeric attribute values must all be greater or equal to zero.");
+	    "Numeric attribute values must all be greater or equal to zero."); */
       m_wordsPerClass[classIndex] += numOccurences;
+      if (m_wordsPerClass[classIndex] < 0) {
+        throw new Exception("Can't have a negative number of words for class " 
+            + (classIndex + 1));
+      }
       m_probOfWordGivenClass[classIndex][instance.index(a)] += numOccurences;
+      if (m_probOfWordGivenClass[classIndex][instance.index(a)] < 0) {
+        throw new Exception("Can't have a negative conditional sum for attribute " 
+           + instance.index(a));
+      }
     }
   }
 
