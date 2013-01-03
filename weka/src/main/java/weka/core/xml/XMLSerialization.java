@@ -854,6 +854,11 @@ public class XMLSerialization
         	tmpStr = tmpStr.replaceAll("\n", "&#10;")
         	               .replaceAll("\r", "&#13;")
         	               .replaceAll("\t", "&#9;");
+                if (o instanceof java.io.File) {
+                  // hack to force separators to be always saved as /
+                  tmpStr = tmpStr.replace('\\', '/');
+                }
+                
         	node.appendChild(node.getOwnerDocument().createTextNode(tmpStr));
               }
             }
