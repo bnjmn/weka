@@ -49,7 +49,9 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Martin Ester, Hans-Peter Kriegel, Joerg Sander, Xiaowei Xu: A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise. In: Second International Conference on Knowledge Discovery and Data Mining, 226-231, 1996.
+ * Basic implementation of DBSCAN clustering algorithm that should *not* be used as a reference for runtime benchmarks: more sophisticated implementations exist! Clustering of new instances is not supported. More info:<br/>
+ * <br/>
+ *  Martin Ester, Hans-Peter Kriegel, Joerg Sander, Xiaowei Xu: A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise. In: Second International Conference on Knowledge Discovery and Data Mining, 226-231, 1996.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -79,19 +81,19 @@ import java.util.Vector;
  *  minPoints (default = 6)</pre>
  * 
  * <pre> -I &lt;String&gt;
- *  index (database) used for DBScan (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
+ *  index (database) used for DBSCAN (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
  * 
  * <pre> -D &lt;String&gt;
- *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)</pre>
+ *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)</pre>
  * 
  <!-- options-end -->
  *
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision$
+ * @version $Revision: 8108 $
  */
-public class DBScan 
+public class DBSCAN 
     extends AbstractClusterer 
     implements OptionHandler, TechnicalInformationHandler {
 
@@ -120,9 +122,9 @@ public class DBScan
 
     /**
      * Holds the distance-type that is used
-     * (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)
+     * (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)
      */
-    private String database_distanceType = "weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject";
+    private String database_distanceType = "weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject";
 
     /**
      * Holds the type of the used database
@@ -131,7 +133,7 @@ public class DBScan
     private String database_Type = "weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase";
 
     /**
-     * The database that is used for DBScan
+     * The database that is used for DBSCAN
      */
     private Database database;
 
@@ -178,7 +180,7 @@ public class DBScan
     // *****************************************************************************************************************
 
     /**
-     * Generate Clustering via DBScan
+     * Generate Clustering via DBSCAN
      * @param instances The instances that need to be clustered
      * @throws java.lang.Exception If clustering was not successful
      */
@@ -316,12 +318,12 @@ public class DBScan
                         1,
                         "-M <int>"));
         vector.addElement(
-                new Option("\tindex (database) used for DBScan (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)",
+                new Option("\tindex (database) used for DBSCAN (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)",
                         "I",
                         1,
                         "-I <String>"));
         vector.addElement(
-                new Option("\tdistance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)",
+                new Option("\tdistance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)",
                         "D",
                         1,
                         "-D <String>"));
@@ -343,10 +345,10 @@ public class DBScan
      *  minPoints (default = 6)</pre>
      * 
      * <pre> -I &lt;String&gt;
-     *  index (database) used for DBScan (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
+     *  index (database) used for DBSCAN (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
      * 
      * <pre> -D &lt;String&gt;
-     *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)</pre>
+     *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)</pre>
      * 
      <!-- options-end -->
      *
@@ -564,7 +566,10 @@ public class DBScan
      * @return String Information for the gui-explorer
      */
     public String globalInfo() {
-        return getTechnicalInformation().toString();
+        return "Basic implementation of DBSCAN clustering algorithm that should "
+          + "*not* be used as a reference for runtime benchmarks: more sophisticated "
+          + "implementations exist! Clustering of new instances is not supported. More info:\n\n "
+          + getTechnicalInformation().toString();
     }
 
     /**
@@ -596,7 +601,7 @@ public class DBScan
      */
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("DBScan clustering results\n" +
+        stringBuffer.append("DBSCAN clustering results\n" +
                 "========================================================================================\n\n");
         stringBuffer.append("Clustered DataObjects: " + database.size() + "\n");
         stringBuffer.append("Number of attributes: " + database.getInstances().numAttributes() + "\n");
@@ -624,16 +629,17 @@ public class DBScan
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 8108 $");
     }
 
     /**
-     * Main Method for testing DBScan
+     * Main Method for testing DBSCAN
      * @param args Valid parameters are: 'E' epsilon (default = 0.9); 'M' minPoints (default = 6);
      *                                   'I' index-type (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase);
-     *                                   'D' distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject);
+     *                                   'D' distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject);
      */
     public static void main(String[] args) {
-        runClusterer(new DBScan(), args);
+        runClusterer(new DBSCAN(), args);
     }
 }
+
