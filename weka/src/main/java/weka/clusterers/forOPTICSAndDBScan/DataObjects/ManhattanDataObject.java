@@ -1,17 +1,16 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -44,7 +43,7 @@ import java.io.Serializable;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.5 $
+ * @version $Revision: 9420 $
  */
 public class ManhattanDataObject
     implements DataObject, Serializable, RevisionHandler {
@@ -109,50 +108,42 @@ public class ManhattanDataObject
     // methods
     // *****************************************************************************************************************
 
+
     /**
      * Compares two DataObjects in respect to their attribute-values
-     * @param dataObject The DataObject, that is compared with this.dataObject
+     * @param dataObject The DataObject, that is compared with this.dataObject;
+     *        now assumed to be of the same type and with the same structure
      * @return Returns true, if the DataObjects correspond in each value, else returns false
      */
     public boolean equals(DataObject dataObject) {
         if (this == dataObject) return true;
-        if (!(dataObject instanceof ManhattanDataObject)) return false;
 
-        final ManhattanDataObject manhattanDataObject = (ManhattanDataObject) dataObject;
-
-        if (getInstance().equalHeaders(manhattanDataObject.getInstance())) {
-            for (int i = 0; i < getInstance().numValues(); i++) {
-                double i_value_Instance_1 = getInstance().valueSparse(i);
-                double i_value_Instance_2 = manhattanDataObject.getInstance().valueSparse(i);
-
-                if (i_value_Instance_1 != i_value_Instance_2) return false;
-            }
-            return true;
+        for (int i = 0; i < getInstance().numValues(); i++) {
+          double i_value_Instance_1 = getInstance().valueSparse(i);
+          double i_value_Instance_2 = dataObject.getInstance().valueSparse(i);
+          
+          if (i_value_Instance_1 != i_value_Instance_2) return false;
         }
-        return false;
+        return true;
     }
 
     /**
      * Calculates the manhattan-distance between dataObject and this.dataObject
      * @param dataObject The DataObject, that is used for distance-calculation with this.dataObject
+     *        now assumed to be of the same type and with the same structure
      * @return double-value The manhattan-distance between dataObject and this.dataObject
      *                      NaN, if the computation could not be performed
      */
     public double distance(DataObject dataObject) {
         double dist = 0.0;
 
-        if (!(dataObject instanceof ManhattanDataObject)) return Double.NaN;
-
-        if (getInstance().equalHeaders(dataObject.getInstance())) {
-            for (int i = 0; i < getInstance().numValues(); i++) {
-                double cDistance = computeDistance(getInstance().index(i),
-                        getInstance().valueSparse(i),
-                        dataObject.getInstance().valueSparse(i));
-                dist += Math.abs(cDistance);
-            }
-            return dist;
+        for (int i = 0; i < getInstance().numValues(); i++) {
+          double cDistance = computeDistance(getInstance().index(i),
+                                             getInstance().valueSparse(i),
+                                             dataObject.getInstance().valueSparse(i));
+          dist += Math.abs(cDistance);
         }
-        return Double.NaN;
+        return dist;
     }
 
     /**
@@ -165,15 +156,15 @@ public class ManhattanDataObject
     private double computeDistance(int index, double v, double v1) {
         switch (getInstance().attribute(index).type()) {
             case Attribute.NOMINAL:
-                return (Instance.isMissingValue(v) || Instance.isMissingValue(v1)
+                return (Utils.isMissingValue(v) || Utils.isMissingValue(v1)
                         || ((int) v != (int) v1)) ? 1 : 0;
 
             case Attribute.NUMERIC:
-                if (Instance.isMissingValue(v) || Instance.isMissingValue(v1)) {
-                    if (Instance.isMissingValue(v) && Instance.isMissingValue(v1))
+                if (Utils.isMissingValue(v) || Utils.isMissingValue(v1)) {
+                    if (Utils.isMissingValue(v) && Utils.isMissingValue(v1))
                         return 1;
                     else {
-                        return (Instance.isMissingValue(v)) ? norm(v1, index)
+                        return (Utils.isMissingValue(v)) ? norm(v1, index)
                                 : norm(v, index);
                     }
                 } else
@@ -296,6 +287,6 @@ public class ManhattanDataObject
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision: 9420 $");
     }
 }
