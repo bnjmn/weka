@@ -26,26 +26,26 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests DBScan. Run from the command line with:<p/>
- * java weka.clusterers.DBScanTest
+ * Tests DBSCAN. Run from the command line with:<p/>
+ * java weka.clusterers.DBSCANTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 8108 $
  */
-public class DBScanTest 
+public class DBSCANTest 
   extends AbstractClustererTest {
 
-  public DBScanTest(String name) { 
+  public DBSCANTest(String name) { 
     super(name);  
   }
 
-  /** Creates a default DBScan */
+  /** Creates a default DBSCAN */
   public Clusterer getClusterer() {
-    return new DBScan();
+    return new DBSCAN();
   }
 
   public static Test suite() {
-    return new TestSuite(DBScanTest.class);
+    return new TestSuite(DBSCANTest.class);
   }
 
   public static void main(String[] args){

@@ -33,7 +33,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * EuclidianDataObject.java <br/>
+ * EuclideanDataObject.java <br/>
  * Authors: Rainer Holzmann, Zhanna Melnikova-Albrecht, Matthias Schubert <br/>
  * Date: Aug 19, 2004 <br/>
  * Time: 5:50:22 PM <br/>
@@ -43,9 +43,9 @@ import java.io.Serializable;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision$
+ * @version $Revision: 8108 $
  */
-public class EuclidianDataObject
+public class EuclideanDataObject
     implements DataObject, Serializable, RevisionHandler {
 
     /** for serialization */
@@ -94,7 +94,7 @@ public class EuclidianDataObject
      * Constructs a new DataObject. The original instance is kept as instance-variable
      * @param originalInstance the original instance
      */
-    public EuclidianDataObject(Instance originalInstance, String key, Database database) {
+    public EuclideanDataObject(Instance originalInstance, String key, Database database) {
         this.database = database;
         this.key = key;
         instance = originalInstance;
@@ -110,48 +110,38 @@ public class EuclidianDataObject
 
     /**
      * Compares two DataObjects in respect to their attribute-values
-     * @param dataObject The DataObject, that is compared with this.dataObject
+     * @param dataObject The DataObject, that is compared with this.dataObject;
+     *        now assumed to be of the same type and with the same structure
      * @return Returns true, if the DataObjects correspond in each value, else returns false
      */
     public boolean equals(DataObject dataObject) {
         if (this == dataObject) return true;
-        if (!(dataObject instanceof EuclidianDataObject)) return false;
 
-        final EuclidianDataObject euclidianDataObject = (EuclidianDataObject) dataObject;
-
-        if (getInstance().equalHeaders(euclidianDataObject.getInstance())) {
-            for (int i = 0; i < getInstance().numValues(); i++) {
-                double i_value_Instance_1 = getInstance().valueSparse(i);
-                double i_value_Instance_2 = euclidianDataObject.getInstance().valueSparse(i);
-
-                if (i_value_Instance_1 != i_value_Instance_2) return false;
-            }
-            return true;
+        for (int i = 0; i < getInstance().numValues(); i++) {
+          double i_value_Instance_1 = getInstance().valueSparse(i);
+          double i_value_Instance_2 = dataObject.getInstance().valueSparse(i);
+          
+          if (i_value_Instance_1 != i_value_Instance_2) return false;
         }
-        return false;
+        return true;
     }
 
     /**
      * Calculates the euclidian-distance between dataObject and this.dataObject
-     * @param dataObject The DataObject, that is used for distance-calculation with this.dataObject
+     * @param dataObject The DataObject, that is used for distance-calculation with this.dataObject;
+     *        now assumed to be of the same type and with the same structure
      * @return double-value The euclidian-distance between dataObject and this.dataObject
-     *                      NaN, if the computation could not be performed
      */
     public double distance(DataObject dataObject) {
         double dist = 0.0;
 
-        if (!(dataObject instanceof EuclidianDataObject)) return Double.NaN;
-
-        if (getInstance().equalHeaders(dataObject.getInstance())) {
-            for (int i = 0; i < getInstance().numValues(); i++) {
-                double cDistance = computeDistance(getInstance().index(i),
-                        getInstance().valueSparse(i),
-                        dataObject.getInstance().valueSparse(i));
-                dist += Math.pow(cDistance, 2.0);
-            }
-            return Math.sqrt(dist);
+        for (int i = 0; i < getInstance().numValues(); i++) {
+          double cDistance = computeDistance(getInstance().index(i),
+                                             getInstance().valueSparse(i),
+                                             dataObject.getInstance().valueSparse(i));
+          dist += cDistance * cDistance;
         }
-        return Double.NaN;
+        return Math.sqrt(dist);
     }
 
     /**
@@ -295,6 +285,6 @@ public class EuclidianDataObject
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 8108 $");
     }
 }

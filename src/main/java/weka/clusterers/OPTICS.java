@@ -62,7 +62,9 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Mihael Ankerst, Markus M. Breunig, Hans-Peter Kriegel, Joerg Sander: OPTICS: Ordering Points To Identify the Clustering Structure. In: ACM SIGMOD International Conference on Management of Data, 49-60, 1999.
+ * Basic implementation of OPTICS clustering algorithm that should *not* be used as a reference for runtime benchmarks: more sophisticated implementations exist! Clustering of new instances is not supported. More info:<br/>
+ * <br/>
+ *  Mihael Ankerst, Markus M. Breunig, Hans-Peter Kriegel, Joerg Sander: OPTICS: Ordering Points To Identify the Clustering Structure. In: ACM SIGMOD International Conference on Management of Data, 49-60, 1999.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -94,7 +96,7 @@ import java.util.Vector;
  *  index (database) used for OPTICS (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
  * 
  * <pre> -D &lt;String&gt;
- *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)</pre>
+ *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)</pre>
  * 
  * <pre> -F
  *  write results to OPTICS_#TimeStamp#.TXT - File</pre>
@@ -145,9 +147,9 @@ public class OPTICS
 
     /**
      * Holds the distance-type that is used
-     * (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)
+     * (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)
      */
-    private String database_distanceType = "weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject";
+    private String database_distanceType = "weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject";
 
     /**
      * Holds the type of the used database
@@ -418,7 +420,7 @@ public class OPTICS
         
         vector.addElement(
             new Option(
-        	"\tdistance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)",
+        	"\tdistance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)",
         	"D", 1, "-D <String>"));
         
         vector.addElement(
@@ -461,7 +463,7 @@ public class OPTICS
      *  index (database) used for OPTICS (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
      * 
      * <pre> -D &lt;String&gt;
-     *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)</pre>
+     *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)</pre>
      * 
      * <pre> -F
      *  write results to OPTICS_#TimeStamp#.TXT - File</pre>
@@ -504,7 +506,7 @@ public class OPTICS
         if (optionString.length() != 0)
             setDatabase_distanceType(optionString);
         else
-            setDatabase_distanceType(weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject.class.getName());
+            setDatabase_distanceType(weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject.class.getName());
 
         setWriteOPTICSresults(Utils.getFlag('F', options));
 
@@ -816,7 +818,10 @@ public class OPTICS
      * @return String Information for the gui-explorer
      */
     public String globalInfo() {
-        return getTechnicalInformation().toString();
+        return "Basic implementation of OPTICS clustering algorithm that should "
+          + "*not* be used as a reference for runtime benchmarks: more sophisticated "
+          + "implementations exist! Clustering of new instances is not supported. More info:\n\n "
+          + getTechnicalInformation().toString();
     }
 
     /**
@@ -897,10 +902,11 @@ public class OPTICS
      * Main Method for testing OPTICS
      * @param args Valid parameters are: 'E' epsilon (default = 0.9); 'M' minPoints (default = 6);
      *                                   'I' index-type (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase);
-     *                                   'D' distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject);
+     *                                   'D' distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject);
      *                                   'F' write results to OPTICS_#TimeStamp#.TXT - File
      */
     public static void main(String[] args) {
         runClusterer(new OPTICS(), args);
     }
 }
+

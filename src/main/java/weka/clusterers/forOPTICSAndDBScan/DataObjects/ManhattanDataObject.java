@@ -108,50 +108,42 @@ public class ManhattanDataObject
     // methods
     // *****************************************************************************************************************
 
+
     /**
      * Compares two DataObjects in respect to their attribute-values
-     * @param dataObject The DataObject, that is compared with this.dataObject
+     * @param dataObject The DataObject, that is compared with this.dataObject;
+     *        now assumed to be of the same type and with the same structure
      * @return Returns true, if the DataObjects correspond in each value, else returns false
      */
     public boolean equals(DataObject dataObject) {
         if (this == dataObject) return true;
-        if (!(dataObject instanceof ManhattanDataObject)) return false;
 
-        final ManhattanDataObject manhattanDataObject = (ManhattanDataObject) dataObject;
-
-        if (getInstance().equalHeaders(manhattanDataObject.getInstance())) {
-            for (int i = 0; i < getInstance().numValues(); i++) {
-                double i_value_Instance_1 = getInstance().valueSparse(i);
-                double i_value_Instance_2 = manhattanDataObject.getInstance().valueSparse(i);
-
-                if (i_value_Instance_1 != i_value_Instance_2) return false;
-            }
-            return true;
+        for (int i = 0; i < getInstance().numValues(); i++) {
+          double i_value_Instance_1 = getInstance().valueSparse(i);
+          double i_value_Instance_2 = dataObject.getInstance().valueSparse(i);
+          
+          if (i_value_Instance_1 != i_value_Instance_2) return false;
         }
-        return false;
+        return true;
     }
 
     /**
      * Calculates the manhattan-distance between dataObject and this.dataObject
      * @param dataObject The DataObject, that is used for distance-calculation with this.dataObject
+     *        now assumed to be of the same type and with the same structure
      * @return double-value The manhattan-distance between dataObject and this.dataObject
      *                      NaN, if the computation could not be performed
      */
     public double distance(DataObject dataObject) {
         double dist = 0.0;
 
-        if (!(dataObject instanceof ManhattanDataObject)) return Double.NaN;
-
-        if (getInstance().equalHeaders(dataObject.getInstance())) {
-            for (int i = 0; i < getInstance().numValues(); i++) {
-                double cDistance = computeDistance(getInstance().index(i),
-                        getInstance().valueSparse(i),
-                        dataObject.getInstance().valueSparse(i));
-                dist += Math.abs(cDistance);
-            }
-            return dist;
+        for (int i = 0; i < getInstance().numValues(); i++) {
+          double cDistance = computeDistance(getInstance().index(i),
+                                             getInstance().valueSparse(i),
+                                             dataObject.getInstance().valueSparse(i));
+          dist += Math.abs(cDistance);
         }
-        return Double.NaN;
+        return dist;
     }
 
     /**
