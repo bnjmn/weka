@@ -15,31 +15,10 @@
 
 /*
  *    MultilayerPerceptron.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.functions.neural.LinearUnit;
-import weka.classifiers.functions.neural.NeuralConnection;
-import weka.classifiers.functions.neural.NeuralNode;
-import weka.classifiers.functions.neural.SigmoidUnit;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Randomizable;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.NominalToBinary;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -68,6 +47,27 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.functions.neural.LinearUnit;
+import weka.classifiers.functions.neural.NeuralConnection;
+import weka.classifiers.functions.neural.NeuralNode;
+import weka.classifiers.functions.neural.SigmoidUnit;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Randomizable;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
 
 /** 
  <!-- globalinfo-start -->
@@ -1903,8 +1903,10 @@ public class MultilayerPerceptron
       m_controlPanel = null;
       m_nodePanel = null;
       m_instances = new Instances(m_instances, 0);
+      m_currentInstance = null;
       return;
     }
+    
 
     //connections done.
     double right = 0;
@@ -1977,7 +1979,8 @@ public class MultilayerPerceptron
 	  m_learningRate /= 2;
 	  buildClassifier(i);
 	  m_learningRate = origRate;
-	  m_instances = new Instances(m_instances, 0);	  
+	  m_instances = new Instances(m_instances, 0);
+	  m_currentInstance = null;
 	  return;
 	}
       }
@@ -2062,11 +2065,13 @@ public class MultilayerPerceptron
 	  m_controlPanel = null;
 	  m_nodePanel = null;
 	  m_instances = new Instances(m_instances, 0);
+	  m_currentInstance = null;
 	  return;
 	}
       }
       if (m_accepted) {
 	m_instances = new Instances(m_instances, 0);
+	m_currentInstance = null;
 	return;
       }
     }
@@ -2075,7 +2080,8 @@ public class MultilayerPerceptron
       m_controlPanel = null;
       m_nodePanel = null;
     }
-    m_instances = new Instances(m_instances, 0);  
+    m_instances = new Instances(m_instances, 0);
+    m_currentInstance = null;
   }
 
   /**
