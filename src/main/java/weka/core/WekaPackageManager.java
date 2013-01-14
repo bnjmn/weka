@@ -317,6 +317,7 @@ public class WekaPackageManager {
       }
 
       conn.setConnectTimeout(10000); // timeout after 10 seconds
+      conn.setReadTimeout(10000);
 
       BufferedReader bi = new BufferedReader(new InputStreamReader(
           conn.getInputStream()));
