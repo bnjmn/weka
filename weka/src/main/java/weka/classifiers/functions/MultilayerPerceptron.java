@@ -1903,6 +1903,7 @@ public class MultilayerPerceptron
       m_controlPanel = null;
       m_nodePanel = null;
       m_instances = new Instances(m_instances, 0);
+      m_currentInstance = null;
       return;
     }
 
@@ -1977,7 +1978,8 @@ public class MultilayerPerceptron
 	  m_learningRate /= 2;
 	  buildClassifier(i);
 	  m_learningRate = origRate;
-	  m_instances = new Instances(m_instances, 0);	  
+	  m_instances = new Instances(m_instances, 0);
+	  m_currentInstance = null;
 	  return;
 	}
       }
@@ -2063,11 +2065,13 @@ public class MultilayerPerceptron
 	  m_controlPanel = null;
 	  m_nodePanel = null;
 	  m_instances = new Instances(m_instances, 0);
+	  m_currentInstance = null;
 	  return;
 	}
       }
       if (m_accepted) {
 	m_instances = new Instances(m_instances, 0);
+	m_currentInstance = null;
 	return;
       }
     }
@@ -2076,7 +2080,8 @@ public class MultilayerPerceptron
       m_controlPanel = null;
       m_nodePanel = null;
     }
-    m_instances = new Instances(m_instances, 0);  
+    m_instances = new Instances(m_instances, 0);
+    m_currentInstance = null;
   }
 
   /**
