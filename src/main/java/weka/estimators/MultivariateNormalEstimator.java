@@ -25,18 +25,41 @@ import weka.core.matrix.Matrix;
 
 /**
  * Implementation of Multivariate Distribution Estimation using Normal
- * Distribution.
+ * Distribution. *
  * 
  * @author Uday Kamath, PhD candidate, George Mason University
  * @version $Revision$
+ * 
  */
-public class MultivariateNormalEstimator implements MultivariateEstimator {
+public class MultivariateNormalEstimator implements MultivariateEstimator,
+    Cloneable {
   // Distribution parameters
-  private double[] mean;
-  private double[][] covariance;
+  protected double[] mean;
+  protected double[][] covariance;
   // cholesky decomposition for fast determinant calculation
   private CholeskyDecomposition chol;
   private double lnconstant;
+
+  @Override
+  public MultivariateNormalEstimator clone() {
+    MultivariateNormalEstimator clone = new MultivariateNormalEstimator();
+    clone.mean = this.mean;
+    clone.covariance = this.covariance;
+    clone.lnconstant = this.lnconstant;
+    if (this.chol != null)
+      clone.chol = new CholeskyDecomposition((Matrix) this.chol.getL().clone());
+    return clone;
+  }
+
+  public MultivariateNormalEstimator() {
+
+  }
+
+  public MultivariateNormalEstimator(double[] means, double[][] covariance) {
+    this.mean = means;
+    this.covariance = covariance;
+    this.chol = new CholeskyDecomposition(new Matrix(covariance));
+  }
 
   /**
    * Log of twice number pi: log(2*pi).
@@ -63,7 +86,8 @@ public class MultivariateNormalEstimator implements MultivariateEstimator {
    * @return log density based on given distribution
    */
   @Override
-  public double logDensity(double[] value) {
+  public double logDensity(double[] valuePassed) {
+    double[] value = valuePassed.clone();
     double logProb = 0;
     // calculate mean subtractions
     double[] subtractedMean = new double[value.length];
