@@ -210,11 +210,11 @@ public class PlotData2D implements Serializable {
       throw new Exception("PlotData2D: Shape type array must have the same "
 			  +"number of entries as number of data points!");
     }
-    for (int i = 0; i < st.length; i++) {
+/*    for (int i = 0; i < st.length; i++) {
       if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
       }
-    }
+    } */
   }
   
   /**
@@ -239,9 +239,9 @@ public class PlotData2D implements Serializable {
     m_shapeType = new int [st.size()];
     for (int i = 0; i < st.size(); i++) {
       m_shapeType[i] = ((Integer)st.elementAt(i)).intValue();
-      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
+/*      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
-      }
+      } */
     }
   }
 
