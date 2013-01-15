@@ -22,10 +22,6 @@
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.VisualizePanel;
-
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
 import java.beans.PropertyChangeListener;
@@ -40,26 +36,28 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import weka.core.Instances;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.VisualizePanel;
+
 /**
- * Bean that can be used for displaying threshold curves (e.g. ROC
- * curves) and scheme error plots
- *
+ * Bean that can be used for displaying threshold curves (e.g. ROC curves) and
+ * scheme error plots
+ * 
  * @author Mark Hall
  * @version $Revision$
  */
-public class ModelPerformanceChart
-  extends JPanel
-  implements ThresholdDataListener, VisualizableErrorListener, 
-             Visible, UserRequestAcceptor,
-	     Serializable, BeanContextChild {
+public class ModelPerformanceChart extends JPanel implements
+    ThresholdDataListener, VisualizableErrorListener, Visible,
+    UserRequestAcceptor, Serializable, BeanContextChild {
 
   /** for serialization */
   private static final long serialVersionUID = -4602034200071195924L;
-  
+
   protected BeanVisual m_visual;
 
   protected transient PlotData2D m_masterPlot;
-  
+
   protected transient JFrame m_popupFrame;
 
   protected boolean m_framePoppedUp = false;
@@ -75,36 +73,36 @@ public class ModelPerformanceChart
   protected transient BeanContext m_beanContext = null;
 
   private transient VisualizePanel m_visPanel;
-  
+
   /**
    * BeanContextChild support
    */
-  protected BeanContextChildSupport m_bcSupport = 
-    new BeanContextChildSupport(this);
+  protected BeanContextChildSupport m_bcSupport = new BeanContextChildSupport(
+      this);
 
   public ModelPerformanceChart() {
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+    java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment
+        .getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
       appearanceFinal();
     }
   }
 
-    /**
+  /**
    * Global info for this bean
-   *
+   * 
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return Messages.getInstance().getString("ModelPerformanceChart_GlobalInfo_Text");
+    return Messages.getInstance().getString(
+        "ModelPerformanceChart_GlobalInfo_Text");
   }
 
   protected void appearanceDesign() {
     removeAll();
-    m_visual = new BeanVisual("ModelPerformanceChart", 
-			      BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
-			      BeanVisual.ICON_PATH
-			      +"ModelPerformanceChart_animated.gif");
+    m_visual = new BeanVisual("ModelPerformanceChart", BeanVisual.ICON_PATH
+        + "ModelPerformanceChart.gif", BeanVisual.ICON_PATH
+        + "ModelPerformanceChart_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
@@ -124,7 +122,7 @@ public class ModelPerformanceChart
 
   /**
    * Display a threshold curve.
-   *
+   * 
    * @param e a ThresholdDataEvent
    */
   public synchronized void acceptDataSet(ThresholdDataEvent e) {
@@ -137,21 +135,25 @@ public class ModelPerformanceChart
       }
       try {
         // check for compatable data sets
-        if (!m_masterPlot.getPlotInstances().relationName().
-            equals(e.getDataSet().getPlotInstances().relationName())) {
+        if (!m_masterPlot.getPlotInstances().relationName()
+            .equals(e.getDataSet().getPlotInstances().relationName())) {
 
           // if not equal then remove all plots and set as new master plot
           m_masterPlot = e.getDataSet();
           m_visPanel.setMasterPlot(m_masterPlot);
-          m_visPanel.validate(); m_visPanel.repaint();
+          m_visPanel.validate();
+          m_visPanel.repaint();
         } else {
           // add as new plot
           m_visPanel.addPlot(e.getDataSet());
-          m_visPanel.validate(); m_visPanel.repaint();
+          m_visPanel.validate();
+          m_visPanel.repaint();
         }
-        m_visPanel.setXIndex(4); m_visPanel.setYIndex(5);
+        m_visPanel.setXIndex(4);
+        m_visPanel.setYIndex(5);
       } catch (Exception ex) {
-        System.err.println(Messages.getInstance().getString("ModelPerformanceChart_AcceptDataSet_Error_Text"));
+        System.err.println(Messages.getInstance().getString(
+            "ModelPerformanceChart_AcceptDataSet_Error_Text"));
         ex.printStackTrace();
       }
     }
@@ -159,7 +161,7 @@ public class ModelPerformanceChart
 
   /**
    * Display a scheme error plot.
-   *
+   * 
    * @param e a VisualizableErrorEvent
    */
   public synchronized void acceptDataSet(VisualizableErrorEvent e) {
@@ -167,14 +169,14 @@ public class ModelPerformanceChart
       if (m_visPanel == null) {
         m_visPanel = new VisualizePanel();
       }
-      if (m_masterPlot == null) {
-        m_masterPlot = e.getDataSet();
-      }
+
+      m_masterPlot = e.getDataSet();
+
       try {
         m_visPanel.setMasterPlot(m_masterPlot);
       } catch (Exception ex) {
-        System.err.println(Messages.getInstance().getString("ModelPerformanceChart_AcceptDataSet_Error_Text")
-        );
+        System.err.println(Messages.getInstance().getString(
+            "ModelPerformanceChart_AcceptDataSet_Error_Text"));
         ex.printStackTrace();
       }
       m_visPanel.validate();
@@ -184,7 +186,7 @@ public class ModelPerformanceChart
 
   /**
    * Set the visual appearance of this bean
-   *
+   * 
    * @param newVisual a <code>BeanVisual</code> value
    */
   public void setVisual(BeanVisual newVisual) {
@@ -202,13 +204,13 @@ public class ModelPerformanceChart
    * Use the default appearance for this bean
    */
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
-		       BeanVisual.ICON_PATH+"DefaultDataVisualizer_animated.gif");
+    m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultDataVisualizer.gif",
+        BeanVisual.ICON_PATH + "DefaultDataVisualizer_animated.gif");
   }
 
   /**
    * Describe <code>enumerateRequests</code> method here.
-   *
+   * 
    * @return an <code>Enumeration</code> value
    */
   public Enumeration enumerateRequests() {
@@ -222,51 +224,51 @@ public class ModelPerformanceChart
 
   /**
    * Add a property change listener to this bean
-   *
+   * 
    * @param name the name of the property of interest
    * @param pcl a <code>PropertyChangeListener</code> value
    */
-  public void addPropertyChangeListener(String name,
-					PropertyChangeListener pcl) {
+  @Override
+  public void addPropertyChangeListener(String name, PropertyChangeListener pcl) {
     m_bcSupport.addPropertyChangeListener(name, pcl);
   }
 
   /**
    * Remove a property change listener from this bean
-   *
+   * 
    * @param name the name of the property of interest
    * @param pcl a <code>PropertyChangeListener</code> value
    */
+  @Override
   public void removePropertyChangeListener(String name,
-					   PropertyChangeListener pcl) {
+      PropertyChangeListener pcl) {
     m_bcSupport.removePropertyChangeListener(name, pcl);
   }
 
   /**
    * Add a vetoable change listener to this bean
-   *
+   * 
    * @param name the name of the property of interest
    * @param vcl a <code>VetoableChangeListener</code> value
    */
-  public void addVetoableChangeListener(String name,
-				       VetoableChangeListener vcl) {
+  public void addVetoableChangeListener(String name, VetoableChangeListener vcl) {
     m_bcSupport.addVetoableChangeListener(name, vcl);
   }
-  
+
   /**
    * Remove a vetoable change listener from this bean
-   *
+   * 
    * @param name the name of the property of interest
    * @param vcl a <code>VetoableChangeListener</code> value
    */
   public void removeVetoableChangeListener(String name,
-					   VetoableChangeListener vcl) {
+      VetoableChangeListener vcl) {
     m_bcSupport.removeVetoableChangeListener(name, vcl);
   }
 
   /**
    * Set a bean context for this bean
-   *
+   * 
    * @param bc a <code>BeanContext</code> value
    */
   public void setBeanContext(BeanContext bc) {
@@ -275,8 +277,8 @@ public class ModelPerformanceChart
     if (m_design) {
       appearanceDesign();
     } else {
-      java.awt.GraphicsEnvironment ge = 
-        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+      java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment
+          .getLocalGraphicsEnvironment();
       if (!ge.isHeadless()) {
         appearanceFinal();
       }
@@ -285,7 +287,7 @@ public class ModelPerformanceChart
 
   /**
    * Return the bean context (if any) that this bean is embedded in
-   *
+   * 
    * @return a <code>BeanContext</code> value
    */
   public BeanContext getBeanContext() {
@@ -294,56 +296,64 @@ public class ModelPerformanceChart
 
   /**
    * Describe <code>performRequest</code> method here.
-   *
+   * 
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
   public void performRequest(String request) {
     if (request.compareTo("Show chart") == 0) {
       try {
-	// popup visualize panel
-	if (!m_framePoppedUp) {
-	  m_framePoppedUp = true;
+        // popup visualize panel
+        if (!m_framePoppedUp) {
+          m_framePoppedUp = true;
 
-	  final javax.swing.JFrame jf = 
-	    new javax.swing.JFrame(Messages.getInstance().getString("ModelPerformanceChart_PerformRequest_Jf_JFRame_Text"));
-	  jf.setSize(800,600);
-	  jf.getContentPane().setLayout(new BorderLayout());
-	  jf.getContentPane().add(m_visPanel, BorderLayout.CENTER);
-	  jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	      public void windowClosing(java.awt.event.WindowEvent e) {
-		jf.dispose();
-		m_framePoppedUp = false;
-	      }
-	    });
-	  jf.setVisible(true);
-	  m_popupFrame = jf;
-	} else {
-	  m_popupFrame.toFront();
-	}
+          final javax.swing.JFrame jf = new javax.swing.JFrame(Messages
+              .getInstance().getString(
+                  "ModelPerformanceChart_PerformRequest_Jf_JFRame_Text"));
+          jf.setSize(800, 600);
+          jf.getContentPane().setLayout(new BorderLayout());
+          jf.getContentPane().add(m_visPanel, BorderLayout.CENTER);
+          jf.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+              jf.dispose();
+              m_framePoppedUp = false;
+            }
+          });
+          jf.setVisible(true);
+          m_popupFrame = jf;
+        } else {
+          m_popupFrame.toFront();
+        }
       } catch (Exception ex) {
-	ex.printStackTrace();
-	m_framePoppedUp = false;
+        ex.printStackTrace();
+        m_framePoppedUp = false;
       }
     } else if (request.equals("Clear all plots")) {
-        m_visPanel.removeAllPlots();
-        m_visPanel.validate(); m_visPanel.repaint();
-        m_visPanel = null;
-        m_masterPlot = null;
+      m_visPanel.removeAllPlots();
+      m_visPanel.validate();
+      m_visPanel.repaint();
+      m_visPanel = null;
+      m_masterPlot = null;
     } else {
-      throw new IllegalArgumentException(request
-					 + Messages.getInstance().getString("ModelPerformanceChart_PerformRequest_IllegalArgumentException_Text"));
+      throw new IllegalArgumentException(
+          request
+              + Messages
+                  .getInstance()
+                  .getString(
+                      "ModelPerformanceChart_PerformRequest_IllegalArgumentException_Text"));
     }
   }
-  
-  public static void main(String [] args) {
+
+  public static void main(String[] args) {
     try {
       if (args.length != 1) {
-	System.err.println(Messages.getInstance().getString("ModelPerformanceChart_Main_Error_Text"));
-	System.exit(1);
+        System.err.println(Messages.getInstance().getString(
+            "ModelPerformanceChart_Main_Error_Text"));
+        System.exit(1);
       }
-      java.io.Reader r = new java.io.BufferedReader(
-			 new java.io.FileReader(args[0]));
+      java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
+          args[0]));
       Instances inst = new Instances(r);
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
@@ -351,16 +361,17 @@ public class ModelPerformanceChart
       PlotData2D pd = new PlotData2D(inst);
       pd.setPlotName(inst.relationName());
       ThresholdDataEvent roc = new ThresholdDataEvent(as, pd);
-      as.acceptDataSet(roc);      
+      as.acceptDataSet(roc);
 
       jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
         public void windowClosing(java.awt.event.WindowEvent e) {
           jf.dispose();
           System.exit(0);
         }
       });
-      jf.setSize(800,600);
+      jf.setSize(800, 600);
       jf.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();
