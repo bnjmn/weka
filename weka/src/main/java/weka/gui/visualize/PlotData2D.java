@@ -15,20 +15,20 @@
 
 /*
  *    PlotData2D.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui.visualize;
 
+import java.awt.Color;
+import java.io.Serializable;
+
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
-
-import java.awt.Color;
-import java.io.Serializable;
 
 /**
  * This class is a container for plottable data. Instances form the
@@ -210,11 +210,11 @@ public class PlotData2D implements Serializable {
       throw new Exception("PlotData2D: Shape type array must have the same "
 			  +"number of entries as number of data points!");
     }
-    for (int i = 0; i < st.length; i++) {
+/*    for (int i = 0; i < st.length; i++) {
       if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
       }
-    }
+    } */
   }
   
   /**
@@ -239,9 +239,9 @@ public class PlotData2D implements Serializable {
     m_shapeType = new int [st.size()];
     for (int i = 0; i < st.size(); i++) {
       m_shapeType[i] = ((Integer)st.elementAt(i)).intValue();
-      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
+/*      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
-      }
+      } */
     }
   }
 

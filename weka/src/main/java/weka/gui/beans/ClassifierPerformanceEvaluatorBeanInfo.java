@@ -61,9 +61,12 @@ public class ClassifierPerformanceEvaluatorBeanInfo extends SimpleBeanInfo {
   public PropertyDescriptor[] getPropertyDescriptors() {
     try {
       PropertyDescriptor p1;
+      PropertyDescriptor p2;
       p1 = new PropertyDescriptor("executionSlots",
           ClassifierPerformanceEvaluator.class);
-      PropertyDescriptor[] pds = { p1 };
+      p2 = new PropertyDescriptor("errorPlotPointSizeProportionalToMargin",
+          ClassifierPerformanceEvaluator.class);
+      PropertyDescriptor[] pds = { p1, p2 };
       return pds;
     } catch (Exception ex) {
       ex.printStackTrace();
