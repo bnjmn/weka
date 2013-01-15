@@ -79,6 +79,8 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
   protected transient ThreadPoolExecutor m_executorPool;
   protected transient List<EvaluationTask> m_tasks;
 
+  protected boolean m_errorPlotPointSizeProportionalToMargin;
+
   /**
    * Number of threads to use to train models with
    */
@@ -138,6 +140,36 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
    */
   public String evaluationMetricsToOutputTipText() {
     return "A comma-separated list of evaluation metrics to output";
+  }
+
+  /**
+   * Set whether the point size on classification error plots should be
+   * proportional to the prediction margin.
+   * 
+   * @param e true if the point size is to be proportional to the margin.
+   */
+  public void setErrorPlotPointSizeProportionalToMargin(boolean e) {
+    m_errorPlotPointSizeProportionalToMargin = e;
+  }
+
+  /**
+   * Get whether the point size on classification error plots should be
+   * proportional to the prediction margin.
+   * 
+   * @return true if the point size is to be proportional to the margin.
+   */
+  public boolean getErrorPlotPointSizeProportionalToMargin() {
+    return m_errorPlotPointSizeProportionalToMargin;
+  }
+
+  /**
+   * Get the tip text for this property.
+   * 
+   * @return the tip text for this property.
+   */
+  public String errorPlotPointSizeProportionalToMarginTipText() {
+    return "Set the point size proportional to the prediction "
+        + "margin for classification error plots";
   }
 
   /**
@@ -315,6 +347,8 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
           plotInstances.setClassifier(m_classifier);
           plotInstances.setClassIndex(m_testData.classIndex());
           plotInstances.setEvaluation(eval);
+          plotInstances
+              .setPointSizeProportionalToMargin(m_errorPlotPointSizeProportionalToMargin);
           eval = adjustForInputMappedClassifier(eval, m_classifier, m_testData,
               plotInstances);
 
@@ -326,6 +360,8 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
           plotInstances.setClassifier(m_classifier);
           plotInstances.setClassIndex(m_trainData.classIndex());
           plotInstances.setEvaluation(eval);
+          plotInstances
+              .setPointSizeProportionalToMargin(m_errorPlotPointSizeProportionalToMargin);
           eval = adjustForInputMappedClassifier(eval, m_classifier,
               m_trainData, plotInstances);
           eval.setMetricsToDisplay(m_metricsList);
@@ -374,6 +410,58 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
   }
 
   /**
+   * Subclass of ClassifierErrorsPlotInstances to allow plot point sizes to be
+   * scaled according to global min/max values.
+   * 
+   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+   */
+  protected static class AggregateableClassifierErrorsPlotInstances extends
+      ClassifierErrorsPlotInstances {
+
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = 2012744784036684168L;
+
+    /**
+     * Set the vector of plot shapes to use;
+     * 
+     * @param plotShapes
+     */
+    @Override
+    public void setPlotShapes(FastVector plotShapes) {
+      m_PlotShapes = plotShapes;
+    }
+
+    /**
+     * Set the vector of plot sizes to use
+     * 
+     * @param plotSizes the plot sizes to use
+     */
+    @Override
+    public void setPlotSizes(FastVector plotSizes) {
+      m_PlotSizes = plotSizes;
+    }
+
+    public void setPlotInstances(Instances inst) {
+      m_PlotInstances = inst;
+    }
+
+    @Override
+    protected void finishUp() {
+      m_FinishUpCalled = true;
+
+      if (!m_SaveForVisualization)
+        return;
+
+      if (m_Instances.classAttribute().isNumeric()
+          || m_pointSizeProportionalToMargin) {
+        scaleNumericPredictions();
+      }
+    }
+  }
+
+  /**
    * Takes an evaluation object from a task and aggregates it with the overall
    * one.
    * 
@@ -393,16 +481,23 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
     m_eval.aggregate(eval);
 
     if (m_aggregatedPlotInstances == null) {
+      // get these first so that the post-processing does not scale the sizes!!
+      m_aggregatedPlotShapes = plotInstances.getPlotShapes().copy();
+      m_aggregatedPlotSizes = plotInstances.getPlotSizes().copy();
+
+      // this calls the post-processing, so do this last
       m_aggregatedPlotInstances = new Instances(
           plotInstances.getPlotInstances());
-      m_aggregatedPlotShapes = plotInstances.getPlotShapes();
-      m_aggregatedPlotSizes = plotInstances.getPlotSizes();
     } else {
+      // get these first so that post-processing does not scale sizes
+      FastVector tmpSizes = plotInstances.getPlotSizes().copy();
+      FastVector tmpShapes = plotInstances.getPlotShapes().copy();
+
       Instances temp = plotInstances.getPlotInstances();
       for (int i = 0; i < temp.numInstances(); i++) {
         m_aggregatedPlotInstances.add(temp.get(i));
-        m_aggregatedPlotShapes.addElement(plotInstances.getPlotShapes().get(i));
-        m_aggregatedPlotSizes.addElement(plotInstances.getPlotSizes().get(i));
+        m_aggregatedPlotShapes.addElement(tmpShapes.get(i));
+        m_aggregatedPlotSizes.addElement(tmpSizes.get(i));
       }
     }
     m_setsComplete++;
@@ -417,6 +512,17 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
     // if (ce.getSetNumber() == ce.getMaxSetNumber()) {
     if (m_setsComplete == maxSetNum) {
       try {
+        AggregateableClassifierErrorsPlotInstances aggPlot = new AggregateableClassifierErrorsPlotInstances();
+        aggPlot.setInstances(testData);
+        aggPlot.setPlotInstances(m_aggregatedPlotInstances);
+        aggPlot.setPlotShapes(m_aggregatedPlotShapes);
+        aggPlot.setPlotSizes(m_aggregatedPlotSizes);
+        aggPlot
+            .setPointSizeProportionalToMargin(m_errorPlotPointSizeProportionalToMargin);
+
+        // triggers scaling of shape sizes
+        aggPlot.getPlotInstances();
+
         String textTitle = "";
         textTitle += classifier.getClass().getName();
         String textOptions = "";
