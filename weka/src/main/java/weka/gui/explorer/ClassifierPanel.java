@@ -204,6 +204,13 @@ public class ClassifierPanel extends JPanel implements
   protected JCheckBox m_StorePredictionsBut = new JCheckBox(
       "Store predictions for visualization");
 
+  /**
+   * Check to have the point size in error plots proportional to the prediction
+   * margin (classification only)
+   */
+  protected JCheckBox m_errorPlotPointSizeProportionalToMargin = new JCheckBox(
+      "Error plot point size proportional to margin");
+
   /** Check to output the model built from the training data. */
   protected JCheckBox m_OutputModelBut = new JCheckBox("Output model");
 
@@ -395,6 +402,10 @@ public class ClassifierPanel extends JPanel implements
     m_StorePredictionsBut
         .setToolTipText("Store predictions in the result list for later "
             + "visualization");
+    m_errorPlotPointSizeProportionalToMargin
+        .setToolTipText("In classifier errors plots the point size will be "
+            + "set proportional to the absolute value of the "
+            + "prediction margin (affects classification only)");
     m_OutputModelBut
         .setToolTipText("Output the model obtained from the full training set");
     m_OutputPerClassBut.setToolTipText("Output precision/recall & true/false"
@@ -582,6 +593,7 @@ public class ClassifierPanel extends JPanel implements
         moreOptionsPanel.add(m_OutputEntropyBut);
         moreOptionsPanel.add(m_OutputConfusionBut);
         moreOptionsPanel.add(m_StorePredictionsBut);
+        moreOptionsPanel.add(m_errorPlotPointSizeProportionalToMargin);
         JPanel classOutPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         classOutPanel.add(new JLabel("Output predictions"));
         classOutPanel.add(m_ClassificationOutputPanel);
@@ -1289,6 +1301,9 @@ public class ClassifierPanel extends JPanel implements
             plotInstances.setClassifier(classifier);
             plotInstances.setClassIndex(inst.classIndex());
             plotInstances.setSaveForVisualization(saveVis);
+            plotInstances
+                .setPointSizeProportionalToMargin(m_errorPlotPointSizeProportionalToMargin
+                    .isSelected());
 
             // Output some header information
             m_Log.logMessage("Started " + cname);
