@@ -63,6 +63,7 @@
       fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${build}/classes"
       optimize="${optimization}"
+      includeantruntime="false"
       debug="${debug}"
       deprecation="${deprecation}"
       source="1.5" target="1.5">
@@ -146,6 +147,7 @@
             destdir="${build}/testcases"
             optimize="${optimization}"
             debug="${debug}"
+            includeantruntime="false"
             deprecation="${deprecation}"
             source="1.5" target="1.5">
        <classpath refid="project.class.path" /> 
