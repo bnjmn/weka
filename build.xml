@@ -550,6 +550,7 @@
       destdir="${build}/classes"
       optimize="${optimization}"
       debug="${debug}"
+      includeantruntime="false"
       deprecation="${deprecation}"
       source="1.6" target="1.6">
 
@@ -639,6 +640,7 @@
             destdir="${build}/testcases"
             optimize="${optimization}"
             debug="${debug}"
+            includeantruntime="false"
             deprecation="${deprecation}"
             source="1.5" target="1.5">
        <classpath refid="project.class.path" /> 
