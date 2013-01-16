@@ -411,6 +411,38 @@ public class ItemSet
     return text.toString();
   }
 
+   /**
+   * Returns the contents of an item set as a delimited string.
+   *
+   * @param instances contains the relevant header information
+   * @param outerDelim the outer delimiter
+   * @param innerDelim the inner delimiter
+   * @return string describing the item set
+   */
+  public String toString(Instances instances, char outerDelim, char innerDelim) {
+
+    StringBuffer text = new StringBuffer();
+
+    for (int i = 0; i < instances.numAttributes(); i++)
+      if (m_items[i] != -1) {
+        text.append(instances.attribute(i).name())
+          .append('=')
+          .append(instances.attribute(i).value(m_items[i]))
+          .append(innerDelim);
+      }
+
+    int n = text.length();
+    if (n > 0) {
+      text.setCharAt(n - 1, outerDelim);
+    } else {
+      if (outerDelim != ' ' || innerDelim != ' ') {
+        text.append(outerDelim);
+      }
+    }
+    text.append(m_counter);
+    return text.toString();
+  }
+
   /**
    * Updates counter of item set with respect to given transaction.
    *
