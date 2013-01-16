@@ -45,26 +45,20 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
 /**
- * <!-- globalinfo-start --> Class implementing an Apriori-type algorithm.
- * Iteratively reduces the minimum support until it finds the required number of
- * rules with the given minimum confidence.<br/>
- * The algorithm has an option to mine class association rules. It is adapted as
- * explained in the second reference.<br/>
+ <!-- globalinfo-start -->
+ * Class implementing an Apriori-type algorithm. Iteratively reduces the minimum support until it finds the required number of rules with the given minimum confidence.<br/>
+ * The algorithm has an option to mine class association rules. It is adapted as explained in the second reference.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * R. Agrawal, R. Srikant: Fast Algorithms for Mining Association Rules in Large
- * Databases. In: 20th International Conference on Very Large Data Bases,
- * 478-499, 1994.<br/>
+ * R. Agrawal, R. Srikant: Fast Algorithms for Mining Association Rules in Large Databases. In: 20th International Conference on Very Large Data Bases, 478-499, 1994.<br/>
  * <br/>
- * Bing Liu, Wynne Hsu, Yiming Ma: Integrating Classification and Association
- * Rule Mining. In: Fourth International Conference on Knowledge Discovery and
- * Data Mining, 80-86, 1998.
+ * Bing Liu, Wynne Hsu, Yiming Ma: Integrating Classification and Association Rule Mining. In: Fourth International Conference on Knowledge Discovery and Data Mining, 80-86, 1998.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;inproceedings{Agrawal1994,
  *    author = {R. Agrawal and R. Srikant},
@@ -85,74 +79,53 @@ import weka.filters.unsupervised.attribute.Remove;
  * }
  * </pre>
  * <p/>
- * <!-- technical-bibtex-end -->
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -N &lt;required number of rules output&gt;
- *  The required number of rules. (default = 10)
- * </pre>
+ * <pre> -N &lt;required number of rules output&gt;
+ *  The required number of rules. (default = 10)</pre>
  * 
- * <pre>
- * -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
- *  The metric type by which to rank rules. (default = confidence)
- * </pre>
+ * <pre> -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
+ *  The metric type by which to rank rules. (default = confidence)</pre>
  * 
- * <pre>
- * -C &lt;minimum metric score of a rule&gt;
- *  The minimum confidence of a rule. (default = 0.9)
- * </pre>
+ * <pre> -C &lt;minimum metric score of a rule&gt;
+ *  The minimum confidence of a rule. (default = 0.9)</pre>
  * 
- * <pre>
- * -D &lt;delta for minimum support&gt;
+ * <pre> -D &lt;delta for minimum support&gt;
  *  The delta by which the minimum support is decreased in
- *  each iteration. (default = 0.05)
- * </pre>
+ *  each iteration. (default = 0.05)</pre>
  * 
- * <pre>
- * -U &lt;upper bound for minimum support&gt;
- *  Upper bound for minimum support. (default = 1.0)
- * </pre>
+ * <pre> -U &lt;upper bound for minimum support&gt;
+ *  Upper bound for minimum support. (default = 1.0)</pre>
  * 
- * <pre>
- * -M &lt;lower bound for minimum support&gt;
- *  The lower bound for the minimum support. (default = 0.1)
- * </pre>
+ * <pre> -M &lt;lower bound for minimum support&gt;
+ *  The lower bound for the minimum support. (default = 0.1)</pre>
  * 
- * <pre>
- * -S &lt;significance level&gt;
+ * <pre> -S &lt;significance level&gt;
  *  If used, rules are tested for significance at
- *  the given level. Slower. (default = no significance testing)
- * </pre>
+ *  the given level. Slower. (default = no significance testing)</pre>
  * 
- * <pre>
- * -I
- *  If set the itemsets found are also output. (default = no)
- * </pre>
+ * <pre> -I
+ *  If set the itemsets found are also output. (default = no)</pre>
  * 
- * <pre>
- * -R
- *  Remove columns that contain all missing values (default = no)
- * </pre>
+ * <pre> -R
+ *  Remove columns that contain all missing values (default = no)</pre>
  * 
- * <pre>
- * -V
- *  Report progress iteratively. (default = no)
- * </pre>
+ * <pre> -V
+ *  Report progress iteratively. (default = no)</pre>
  * 
- * <pre>
- * -A
- *  If set class association rules are mined. (default = no)
- * </pre>
+ * <pre> -A
+ *  If set class association rules are mined. (default = no)</pre>
  * 
- * <pre>
- * -c &lt;the class index&gt;
- *  The class index. (default = last)
- * </pre>
+ * <pre> -Z
+ *  Treat zero (i.e. first value of nominal attributes) as missing</pre>
  * 
- * <!-- options-end -->
+ * <pre> -c &lt;the class index&gt;
+ *  The class index. (default = last)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
@@ -320,6 +293,8 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     m_outputItemSets = false;
     m_car = false;
     m_classIndex = -1;
+    m_treatZeroAsMissing = false;
+    m_metricType = CONFIDENCE;
   }
 
   /**
@@ -716,72 +691,51 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -N &lt;required number of rules output&gt;
-   *  The required number of rules. (default = 10)
-   * </pre>
+   * <pre> -N &lt;required number of rules output&gt;
+   *  The required number of rules. (default = 10)</pre>
    * 
-   * <pre>
-   * -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
-   *  The metric type by which to rank rules. (default = confidence)
-   * </pre>
+   * <pre> -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
+   *  The metric type by which to rank rules. (default = confidence)</pre>
    * 
-   * <pre>
-   * -C &lt;minimum metric score of a rule&gt;
-   *  The minimum confidence of a rule. (default = 0.9)
-   * </pre>
+   * <pre> -C &lt;minimum metric score of a rule&gt;
+   *  The minimum confidence of a rule. (default = 0.9)</pre>
    * 
-   * <pre>
-   * -D &lt;delta for minimum support&gt;
+   * <pre> -D &lt;delta for minimum support&gt;
    *  The delta by which the minimum support is decreased in
-   *  each iteration. (default = 0.05)
-   * </pre>
+   *  each iteration. (default = 0.05)</pre>
    * 
-   * <pre>
-   * -U &lt;upper bound for minimum support&gt;
-   *  Upper bound for minimum support. (default = 1.0)
-   * </pre>
+   * <pre> -U &lt;upper bound for minimum support&gt;
+   *  Upper bound for minimum support. (default = 1.0)</pre>
    * 
-   * <pre>
-   * -M &lt;lower bound for minimum support&gt;
-   *  The lower bound for the minimum support. (default = 0.1)
-   * </pre>
+   * <pre> -M &lt;lower bound for minimum support&gt;
+   *  The lower bound for the minimum support. (default = 0.1)</pre>
    * 
-   * <pre>
-   * -S &lt;significance level&gt;
+   * <pre> -S &lt;significance level&gt;
    *  If used, rules are tested for significance at
-   *  the given level. Slower. (default = no significance testing)
-   * </pre>
+   *  the given level. Slower. (default = no significance testing)</pre>
    * 
-   * <pre>
-   * -I
-   *  If set the itemsets found are also output. (default = no)
-   * </pre>
+   * <pre> -I
+   *  If set the itemsets found are also output. (default = no)</pre>
    * 
-   * <pre>
-   * -R
-   *  Remove columns that contain all missing values (default = no)
-   * </pre>
+   * <pre> -R
+   *  Remove columns that contain all missing values (default = no)</pre>
    * 
-   * <pre>
-   * -V
-   *  Report progress iteratively. (default = no)
-   * </pre>
+   * <pre> -V
+   *  Report progress iteratively. (default = no)</pre>
    * 
-   * <pre>
-   * -A
-   *  If set class association rules are mined. (default = no)
-   * </pre>
+   * <pre> -A
+   *  If set class association rules are mined. (default = no)</pre>
    * 
-   * <pre>
-   * -c &lt;the class index&gt;
-   *  The class index. (default = last)
-   * </pre>
+   * <pre> -Z
+   *  Treat zero (i.e. first value of nominal attributes) as missing</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -c &lt;the class index&gt;
+   *  The class index. (default = last)</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -1766,3 +1720,4 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     runAssociator(new Apriori(), args);
   }
 }
+
