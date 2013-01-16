@@ -122,6 +122,12 @@ import weka.filters.unsupervised.attribute.Remove;
  * <pre> -Z
  *  Treat zero (i.e. first value of nominal attributes) as missing</pre>
  * 
+ * <pre> -B &lt;toString delimiters&gt;
+ *  If used, two characters to use as rule delimiters
+ *  in the result of toString: the first to delimit fields,
+ *  the second to delimit items within fields.
+ *  (default = traditional toString result)</pre>
+ * 
  * <pre> -c &lt;the class index&gt;
  *  The class index. (default = last)</pre>
  * 
@@ -215,6 +221,11 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * Treat zeros as missing (rather than a value in their own right)
    */
   protected boolean m_treatZeroAsMissing = false;
+
+  /**
+   * ToString delimiters, if any
+   */
+  protected String m_toStringDelimiters = null;
 
   /**
    * Returns a string describing this associator
@@ -653,13 +664,27 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
     String string1 = "\tThe required number of rules. (default = " + m_numRules
         + ")", string2 = "\tThe minimum confidence of a rule. (default = "
-        + m_minMetric + ")", string3 = "\tThe delta by which the minimum support is decreased in\n", string4 = "\teach iteration. (default = "
-        + m_delta + ")", string5 = "\tThe lower bound for the minimum support. (default = "
-        + m_lowerBoundMinSupport + ")", string6 = "\tIf used, rules are tested for significance at\n", string7 = "\tthe given level. Slower. (default = no significance testing)", string8 = "\tIf set the itemsets found are also output. (default = no)", string9 = "\tIf set class association rules are mined. (default = no)", string10 = "\tThe class index. (default = last)", stringType = "\tThe metric type by which to rank rules. (default = "
-        + "confidence)", stringZeroAsMissing = "\tTreat zero (i.e. first value of nominal attributes) as "
-        + "missing";
+        + m_minMetric + ")", 
+      string3 = "\tThe delta by which the minimum support is decreased in\n", 
+      string4 = "\teach iteration. (default = "
+        + m_delta + ")", 
+      string5 = "\tThe lower bound for the minimum support. (default = "
+        + m_lowerBoundMinSupport + ")", 
+      string6 = "\tIf used, rules are tested for significance at\n", 
+      string7 = "\tthe given level. Slower. (default = no significance testing)", 
+      string8 = "\tIf set the itemsets found are also output. (default = no)", 
+      string9 = "\tIf set class association rules are mined. (default = no)", 
+      string10 = "\tThe class index. (default = last)", 
+      stringType = "\tThe metric type by which to rank rules. (default = "
+        + "confidence)", 
+      stringZeroAsMissing = "\tTreat zero (i.e. first value of nominal attributes) as "
+      + "missing", 
+      stringToStringDelimiters = "\tIf used, two characters to use as rule delimiters\n"
+        + "\tin the result of toString: the first to delimit fields,\n"
+        + "\tthe second to delimit items within fields.\n"
+        + "\t(default = traditional toString result)";
 
-    FastVector newVector = new FastVector(11);
+    FastVector newVector = new FastVector(14);
 
     newVector.addElement(new Option(string1, "N", 1,
         "-N <required number of rules output>"));
@@ -682,6 +707,8 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
         + "= no)", "V", 0, "-V"));
     newVector.addElement(new Option(string9, "A", 0, "-A"));
     newVector.addElement(new Option(stringZeroAsMissing, "Z", 0, "-Z"));
+    newVector.addElement(new Option(stringToStringDelimiters, "B", 1,
+				    "-B <toString delimiters>"));
     newVector.addElement(new Option(string10, "c", 1, "-c <the class index>"));
 
     return newVector.elements();
@@ -732,6 +759,12 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * <pre> -Z
    *  Treat zero (i.e. first value of nominal attributes) as missing</pre>
    * 
+   * <pre> -B &lt;toString delimiters&gt;
+   *  If used, two characters to use as rule delimiters
+   *  in the result of toString: the first to delimit fields,
+   *  the second to delimit items within fields.
+   *  (default = traditional toString result)</pre>
+   * 
    * <pre> -c &lt;the class index&gt;
    *  The class index. (default = last)</pre>
    * 
@@ -744,16 +777,20 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
   public void setOptions(String[] options) throws Exception {
 
     resetOptions();
-    String numRulesString = Utils.getOption('N', options), minConfidenceString = Utils
-        .getOption('C', options), deltaString = Utils.getOption('D', options), maxSupportString = Utils
-        .getOption('U', options), minSupportString = Utils.getOption('M',
-        options), significanceLevelString = Utils.getOption('S', options), classIndexString = Utils
-        .getOption('c', options);
+    String numRulesString = Utils.getOption('N', options), 
+      minConfidenceString = Utils.getOption('C', options), 
+      deltaString = Utils.getOption('D', options), 
+      maxSupportString = Utils.getOption('U', options), 
+      minSupportString = Utils.getOption('M',
+                                         options), 
+      significanceLevelString = Utils.getOption('S', options), 
+      classIndexString = Utils.getOption('c', options),
+      toStringDelimitersString = Utils.getOption('B',options);
 
     String metricTypeString = Utils.getOption('T', options);
     if (metricTypeString.length() != 0) {
       setMetricType(new SelectedTag(Integer.parseInt(metricTypeString),
-          TAGS_SELECTION));
+                                    TAGS_SELECTION));
     }
 
     if (numRulesString.length() != 0) {
@@ -789,6 +826,10 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     m_treatZeroAsMissing = Utils.getFlag('Z', options);
 
     setRemoveAllMissingCols(Utils.getFlag('R', options));
+
+    if (toStringDelimitersString.length() == 2) {
+      m_toStringDelimiters = toStringDelimitersString;
+    }
   }
 
   /**
@@ -799,7 +840,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
   @Override
   public String[] getOptions() {
 
-    String[] options = new String[21];
+    String[] options = new String[23];
     int current = 0;
 
     if (m_outputItemSets) {
@@ -834,6 +875,10 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     }
     options[current++] = "-c";
     options[current++] = "" + m_classIndex;
+
+    if (m_toStringDelimiters != null) {
+      options[current++] = "-B"; options[current++] = m_toStringDelimiters;
+    }
 
     while (current < options.length) {
       options[current++] = "";
@@ -890,42 +935,159 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
                 .elementAt(j)).toString(m_instances) + "\n");
         }
       }
+
       text.append("\nBest rules found:\n\n");
+
+      if (m_toStringDelimiters != null) {
+        text.append("Number,Premise,Premise Support,Consequence,Consequence Support,Confidence,Lift,Leverage,LeverageT,Conviction\n");
+      }
+
       for (int i = 0; i < m_allTheRules[0].size(); i++) {
-        text.append(Utils.doubleToString((double) i + 1,
-            (int) (Math.log(m_numRules) / Math.log(10) + 1), 0)
-            + ". "
-            + ((AprioriItemSet) m_allTheRules[0].elementAt(i))
-                .toString(m_instances)
-            + " ==> "
-            + ((AprioriItemSet) m_allTheRules[1].elementAt(i))
-                .toString(m_instances));
-        text.append("    "
-            + ((m_metricType == CONFIDENCE) ? "<" : "")
-            + "conf:("
-            + Utils.doubleToString(
-                ((Double) m_allTheRules[2].elementAt(i)).doubleValue(), 2)
-            + ")" + ((m_metricType == CONFIDENCE) ? ">" : ""));
+        /*        text.append(Utils.doubleToString((double) i + 1,
+                  (int) (Math.log(m_numRules) / Math.log(10) + 1), 0)
+                  + ". "
+                  + ((AprioriItemSet) m_allTheRules[0].elementAt(i))
+                  .toString(m_instances)
+                  + " ==> "
+                  + ((AprioriItemSet) m_allTheRules[1].elementAt(i))
+                  .toString(m_instances));
+                  text.append("    "
+                  + ((m_metricType == CONFIDENCE) ? "<" : "")
+                  + "conf:("
+                  + Utils.doubleToString(
+                  ((Double) m_allTheRules[2].elementAt(i)).doubleValue(), 2)
+                  + ")" + ((m_metricType == CONFIDENCE) ? ">" : "")); */
+
+        String outerDelim;
+        String innerDelim;
+
+        String stop;
+        String implies;
+            
+        String confOpen;
+        String confClose;
+            
+        String liftOpen;
+        String liftClose;
+            
+        String levOpen;
+        String levInner;
+        String levClose;
+            
+        String convOpen;
+        String convClose;
+            
+        if (m_toStringDelimiters != null) {
+          outerDelim = m_toStringDelimiters.substring(0, 1);
+          innerDelim = m_toStringDelimiters.substring(1, 2);
+                
+          stop       = outerDelim;
+          implies    = outerDelim;
+                
+          confOpen   = outerDelim;
+          confClose  = "";
+                
+          liftOpen   = outerDelim;
+          liftClose  = "";
+                
+          levOpen    = outerDelim;
+          levInner   = outerDelim;
+          levClose   = "";
+                
+          convOpen   = outerDelim;
+          convClose  = "";
+        } else {
+          outerDelim = " ";
+          innerDelim = " ";
+                
+          stop       = ". ";
+          implies    = " ==> ";
+                
+          confOpen   = "    "
+            + (m_metricType == CONFIDENCE ? "<"  : "")
+            + "conf:(";
+          confClose  = ")"
+            + (m_metricType == CONFIDENCE ? ">"  : "");
+                
+          liftOpen   = (m_metricType == LIFT       ? " <" : "")
+            + " lift:(";
+          liftClose  = ")"
+            + (m_metricType == LIFT       ? ">"  : "");
+                
+          levOpen    = (m_metricType == LEVERAGE   ? " <" : "")
+            + " lev:(";
+          levInner   = ")"
+            + " [";
+          levClose   = "]"
+            + (m_metricType == LEVERAGE   ? ">" : "");
+                
+          convOpen   = (m_metricType == CONVICTION ? " <" : "")
+            + " conv:(";
+          convClose  = ")"
+            + (m_metricType == CONVICTION ? ">" : "");
+        }
+            
+        char odc = outerDelim.charAt(0);
+        char idc = innerDelim.charAt(0);
+            
+        String n = Utils.doubleToString((double)i+1, (int)(Math.log(m_numRules)/Math.log(10)+1),0);
+            
+        String premise     = ((AprioriItemSet)m_allTheRules[0].elementAt(i)).toString(m_instances, odc, idc);
+        String consequence = ((AprioriItemSet)m_allTheRules[1].elementAt(i)).toString(m_instances, odc, idc);
+            
+        String confidence = Utils.doubleToString(((Double)m_allTheRules[2].elementAt(i)).doubleValue(),2);
+        String lift       = Utils.doubleToString(((Double)m_allTheRules[3].elementAt(i)).doubleValue(),2);
+        String leverage   = Utils.doubleToString(((Double)m_allTheRules[4].elementAt(i)).doubleValue(),2);
+        String conviction = Utils.doubleToString(((Double)m_allTheRules[5].elementAt(i)).doubleValue(),2);
+            
+        int leverageT = (int)(((Double)m_allTheRules[4].elementAt(i)).doubleValue() * (double)m_instances.numInstances());
+            
+        text.append(n)
+          .append(stop);
+        text.append(premise)
+          .append(implies)
+          .append(consequence);
+        text.append(confOpen)
+          .append(confidence)
+          .append(confClose);
+        //if (/*m_metricType != CONFIDENCE ||*/ m_significanceLevel != -1) {
+
+        text.append(liftOpen)
+          .append(lift)
+          .append(liftClose);
+        text.append(levOpen)
+          .append(leverage)
+          .append(levInner)
+          .append(leverageT)
+          .append(levClose);
+        text.append(convOpen)
+          .append(conviction)
+          .append(convClose);
+
+
+
+
+
 
         // if (/*m_metricType != CONFIDENCE ||*/ m_significanceLevel != -1) {
-        text.append((m_metricType == LIFT ? " <" : "")
-            + " lift:("
-            + Utils.doubleToString(
-                ((Double) m_allTheRules[3].elementAt(i)).doubleValue(), 2)
-            + ")" + (m_metricType == LIFT ? ">" : ""));
-        text.append((m_metricType == LEVERAGE ? " <" : "")
-            + " lev:("
-            + Utils.doubleToString(
-                ((Double) m_allTheRules[4].elementAt(i)).doubleValue(), 2)
-            + ")");
-        text.append(" ["
-            + (int) (((Double) m_allTheRules[4].elementAt(i)).doubleValue() * m_instances
-                .numInstances()) + "]" + (m_metricType == LEVERAGE ? ">" : ""));
-        text.append((m_metricType == CONVICTION ? " <" : "")
-            + " conv:("
-            + Utils.doubleToString(
-                ((Double) m_allTheRules[5].elementAt(i)).doubleValue(), 2)
-            + ")" + (m_metricType == CONVICTION ? ">" : ""));
+        /*        text.append((m_metricType == LIFT ? " <" : "")
+                  + " lift:("
+                  + Utils.doubleToString(
+                  ((Double) m_allTheRules[3].elementAt(i)).doubleValue(), 2)
+                  + ")" + (m_metricType == LIFT ? ">" : ""));
+                  text.append((m_metricType == LEVERAGE ? " <" : "")
+                  + " lev:("
+                  + Utils.doubleToString(
+                  ((Double) m_allTheRules[4].elementAt(i)).doubleValue(), 2)
+                  + ")");
+                  text.append(" ["
+                  + (int) (((Double) m_allTheRules[4].elementAt(i)).doubleValue() * m_instances
+                  .numInstances()) + "]" + (m_metricType == LEVERAGE ? ">" : ""));
+                  text.append((m_metricType == CONVICTION ? " <" : "")
+                  + " conv:("
+                  + Utils.doubleToString(
+                  ((Double) m_allTheRules[5].elementAt(i)).doubleValue(), 2)
+                  + ")" + (m_metricType == CONVICTION ? ">" : "")); */
         // }
         text.append('\n');
       }
@@ -946,8 +1108,13 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
         }
       }
       text.append("\nBest rules found:\n\n");
+
+      if (m_toStringDelimiters != null) {
+        text.append("Number,Premise,Premise Support,Consequence,Consequence Support,Confidence\n");
+      }
+
       for (int i = 0; i < m_allTheRules[0].size(); i++) {
-        text.append(Utils.doubleToString((double) i + 1,
+        /*  text.append(Utils.doubleToString((double) i + 1,
             (int) (Math.log(m_numRules) / Math.log(10) + 1), 0)
             + ". "
             + ((ItemSet) m_allTheRules[0].elementAt(i)).toString(m_instances)
@@ -955,8 +1122,57 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
             + ((ItemSet) m_allTheRules[1].elementAt(i)).toString(m_onlyClass)
             + "    conf:("
             + Utils.doubleToString(
-                ((Double) m_allTheRules[2].elementAt(i)).doubleValue(), 2)
-            + ")");
+            ((Double) m_allTheRules[2].elementAt(i)).doubleValue(), 2)
+            + ")"); */
+
+        String outerDelim;
+        String innerDelim;
+            
+        String stop;
+        String implies;
+            
+        String confOpen;
+        String confClose;
+            
+        if (m_toStringDelimiters != null) {
+          outerDelim = m_toStringDelimiters.substring(0, 1);
+          innerDelim = m_toStringDelimiters.substring(1, 2);
+                
+          stop      = outerDelim;
+          implies   = outerDelim;
+                
+          confOpen  = outerDelim;
+          confClose = "";
+        } else {
+          outerDelim = " ";
+          innerDelim = " ";
+                
+          stop      = ". ";
+          implies   = " ==> ";
+                
+          confOpen  = "    "
+            + "conf:(";
+          confClose = ")";
+        }
+            
+        char odc = outerDelim.charAt(0);
+        char idc = innerDelim.charAt(0);
+            
+        String n = Utils.doubleToString((double)i+1, (int)(Math.log(m_numRules)/Math.log(10)+1),0);
+            
+        String premise     = ((ItemSet)m_allTheRules[0].elementAt(i)).toString(m_instances, odc, idc);
+        String consequence = ((ItemSet)m_allTheRules[1].elementAt(i)).toString(m_onlyClass, odc, idc);
+            
+        String confidence = Utils.doubleToString(((Double)m_allTheRules[2].elementAt(i)).doubleValue(),2);
+            
+        text.append(n)
+          .append(stop)
+          .append(premise)
+          .append(implies)
+          .append(consequence)
+          .append(confOpen)
+          .append(confidence)
+          .append(confClose);
 
         text.append('\n');
       }
