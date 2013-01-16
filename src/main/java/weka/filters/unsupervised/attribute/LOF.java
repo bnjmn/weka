@@ -603,15 +603,22 @@ public class LOF extends Filter implements OptionHandler,
    */
   protected void postFirstBatch(Instance inst) throws Exception {
 
-    Instances nn = m_nnSearch.kNearestNeighbours(inst, m_ubK * 2);
+    Instances nn = null;
+    int nnFactor = 2;
     Neighborhood currentN = new Neighborhood();
-    currentN.m_neighbors = nn;
-    currentN.m_distances = m_nnSearch.getDistances();
+
+    do {
+      nn = m_nnSearch.kNearestNeighbours(inst, m_ubK * nnFactor);
+      currentN.m_neighbors = nn;
+      currentN.m_distances = m_nnSearch.getDistances();
+      trimZeroDistances(currentN);
+
+      nnFactor++;
+    } while (nn.numInstances() < m_ubK);
+
     currentN.m_tempCardinality = new double[m_ubK - m_lbK];
     currentN.m_lof = new double[m_ubK - m_lbK];
     currentN.m_lrd = new double[m_ubK - m_lbK];
-    
-    trimZeroDistances(currentN);
 
     // for each k in the range minPtsLB to maxPtsLB
     for (int k = m_lbK; k < m_ubK; k++) {  
@@ -674,15 +681,17 @@ public class LOF extends Filter implements OptionHandler,
       ubKS = m_env.substitute(ubKS);
       m_ubK = Integer.parseInt(ubKS);
     } catch (Exception ex) {}
+
+    m_ubK++; // upper bound is inclusive (our loops are exclusive)
     
     if (m_ubK >= training.numInstances()) {
       System.err.println("Can't have more neighbors than data points.");
       m_ubK = training.numInstances() - 1;
     }
     if (m_ubK <= m_lbK) {
-      System.err.println("Upper bound on k can't be <= lower bound - " +
-                "setting equal to the lower bound + 1");
-      m_ubK = m_lbK + 1;
+      System.err.println("Upper bound on k can't be < lower bound - " +
+                "setting equal to the lower bound");
+      m_ubK = m_lbK + 1; // upper bound is inclusive (our loops are exclusive)
     }
     
     // global search for use when processing after the first batch is done 
@@ -728,14 +737,20 @@ public class LOF extends Filter implements OptionHandler,
               current.numAttributes(), !m_classSet);
           Neighborhood n = new Neighborhood();
           if (addToKDistanceContainer(key, n)) {
-            Instances nn = m_search.kNearestNeighbours(current, m_ubK * 2);
-            n.m_neighbors = nn;
-            n.m_distances = m_search.getDistances();
+            Instances nn = null;
+            int nnFactor = 2;
+            do {
+              nn = m_search.kNearestNeighbours(current, m_ubK * nnFactor);
+              n.m_neighbors = nn;
+              n.m_distances = m_search.getDistances();
+              trimZeroDistances(n);
+
+              nnFactor++;
+            } while (nn.numInstances() < m_ubK);
+
             n.m_tempCardinality = new double[m_ubK - m_lbK];
             n.m_lrd = new double[m_ubK - m_lbK];
-            n.m_lof = new double[m_ubK - m_lbK];
-            
-            trimZeroDistances(n);
+            n.m_lof = new double[m_ubK - m_lbK];            
           }
           m_instKeys[i] = key;
         }
@@ -981,15 +996,21 @@ public class LOF extends Filter implements OptionHandler,
           current.numAttributes(), !m_classSet);
       if (!m_kDistanceContainer.containsKey(key)) {
         // allow for a few more neighbors than m_ubK in case of ties
-        Instances nn = m_nnSearch.kNearestNeighbours(current, m_ubK * 2);
+        int nnFactor = 2;
+        Instances nn = null;
         Neighborhood n = new Neighborhood();
-        n.m_neighbors = nn;
-        n.m_distances = m_nnSearch.getDistances();
+        do {
+          nn = m_nnSearch.kNearestNeighbours(current, m_ubK * nnFactor);          
+          n.m_neighbors = nn;
+          n.m_distances = m_nnSearch.getDistances();
+          trimZeroDistances(n);
+
+          nnFactor++;
+        } while (nn.numInstances() < m_ubK);
+
         n.m_tempCardinality = new double[m_ubK - m_lbK];
         n.m_lrd = new double[m_ubK - m_lbK];
-        n.m_lof = new double[m_ubK - m_lbK];
-        
-        trimZeroDistances(n);
+        n.m_lof = new double[m_ubK - m_lbK];        
 
         m_kDistanceContainer.put(key, n);
       }
