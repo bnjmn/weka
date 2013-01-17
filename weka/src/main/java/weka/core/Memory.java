@@ -24,9 +24,13 @@ package weka.core;
 
 import javax.swing.JOptionPane;
 
+import java.lang.management.MemoryMXBean;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryUsage;
+
+
 /**
- * A little helper class for Memory management. Very crude, since JDK 1.4 
- * doesn't offer real Memory Management.<p/>
+ * A little helper class for Memory management.
  * The memory management can be disabled by using the setEnabled(boolean)
  * method.
  *
@@ -44,16 +48,7 @@ public class Memory
   protected boolean m_UseGUI = false;
 
   /** the initial size of the JVM */
-  protected static long m_Initial = Runtime.getRuntime().totalMemory();
-
-  /** the total memory that is used */
-  protected long m_Total;
-
-  /** the maximum amount of memory that can be used */
-  protected long m_Max;
-
-  /** the current runtime variable  */
-  protected Runtime m_Runtime;
+  protected static MemoryMXBean m_memoryMXBean = ManagementFactory.getMemoryMXBean();
 
   /**
    * initializes the memory management without GUI support
@@ -68,9 +63,6 @@ public class Memory
    */
   public Memory(boolean useGUI) {
     m_UseGUI  = useGUI;
-    m_Runtime = Runtime.getRuntime();
-    m_Max     = m_Runtime.maxMemory();
-    m_Total   = m_Runtime.totalMemory();
   }
 
   /**
@@ -107,7 +99,7 @@ public class Memory
    * @return		the initial size in bytes
    */
   public long getInitial() {
-    return m_Initial;
+    return m_memoryMXBean.getHeapMemoryUsage().getInit();
   }
 
   /**
@@ -116,10 +108,7 @@ public class Memory
    * @return		the current size in bytes
    */
   public long getCurrent() {
-    m_Runtime = Runtime.getRuntime();
-    m_Total   = m_Runtime.totalMemory();
-
-    return m_Total;
+    return m_memoryMXBean.getHeapMemoryUsage().getUsed();
   }
 
   /**
@@ -128,7 +117,7 @@ public class Memory
    * @return		the maximum size in bytes
    */
   public long getMax() {
-    return m_Max;
+    return m_memoryMXBean.getHeapMemoryUsage().getMax();
   }
 
   /**
@@ -140,7 +129,7 @@ public class Memory
    */
   public boolean isOutOfMemory() {
     if (isEnabled())
-      return ((getMax() - getCurrent()) < (getInitial() + 200000));
+      return ((getMax() - getCurrent()) < 200000);
     else
       return false;
   }
@@ -169,12 +158,12 @@ public class Memory
 
     String msg =   "Not enough memory. Please load a smaller "  
                  + "dataset or use larger heap size.\n"
-                 + "- initial JVM size:   " 
-                 + Utils.doubleToString(toMegaByte(m_Initial), 1) + "MB\n"
-                 + "- total memory used:  " 
-                 + Utils.doubleToString(toMegaByte(m_Total), 1) + "MB\n"
-                 + "- max. memory avail.: " 
-                 + Utils.doubleToString(toMegaByte(m_Max), 1) + "MB\n"
+                 + "- initial heap size:   " 
+                 + Utils.doubleToString(toMegaByte(getInitial()), 1) + "MB\n"
+                 + "- current memory (heap) used:  " 
+                 + Utils.doubleToString(toMegaByte(getCurrent()), 1) + "MB\n"
+                 + "- max. memory (heap) available: " 
+                 + Utils.doubleToString(toMegaByte(getMax()), 1) + "MB\n"
                  + "\n"
                  + "Note:\n"
                  + "The Java heap size can be specified with the -Xmx option.\n"
