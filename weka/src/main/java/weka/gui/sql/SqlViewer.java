@@ -649,9 +649,6 @@ public class SqlViewer
                 m_Viewer = null;
                 System.gc();
 
-                // stop threads
-                m_Memory.stopThreads();
-
                 // display error
                 System.err.println("\ndisplayed message:");
                 m_Memory.showOutOfMemory();

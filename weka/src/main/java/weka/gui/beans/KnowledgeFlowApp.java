@@ -6859,9 +6859,6 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                 m_knowledgeFlow = null;
                 System.gc();
 
-                // stop threads
-                m_Memory.stopThreads();
-
                 // display error
                 System.err.println("\n[KnowledgeFlow] displayed message:");
                 m_Memory.showOutOfMemory();

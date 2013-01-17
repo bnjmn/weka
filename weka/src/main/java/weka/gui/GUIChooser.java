@@ -1599,9 +1599,6 @@ public class GUIChooser extends JFrame {
                 m_chooser = null;
                 System.gc();
 
-                // stop threads
-                m_Memory.stopThreads();
-
                 // display error
                 m_chooser.m_LogWindow.setVisible(true);
                 m_chooser.m_LogWindow.toFront();
