@@ -6851,9 +6851,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           while (true) {
             try {
               // System.out.println("Before sleeping");
-              this.sleep(4000);
-
-              System.gc();
+              this.sleep(10);
 
               if (m_Memory.isOutOfMemory()) {
                 // clean up

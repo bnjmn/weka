@@ -151,9 +151,7 @@ public class Experimenter
         public void run() {
           while(true) {
             try {
-              this.sleep(4000);
-              
-              System.gc();
+              this.sleep(10);
 
               if (m_Memory.isOutOfMemory()) {
                 // clean up
