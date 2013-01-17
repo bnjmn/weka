@@ -313,9 +313,7 @@ public class ArffViewer
               }
 
               //System.out.println("before sleeping");
-              Thread.sleep(4000);
-              
-              System.gc();
+              Thread.sleep(10);
               
               if (m_Memory.isOutOfMemory()) {
                 // clean up

@@ -1568,9 +1568,7 @@ public class GUIChooser extends JFrame {
           while (true) {
             try {
               // System.out.println("before sleeping");
-              this.sleep(4000);
-
-              System.gc();
+              this.sleep(10);
 
               if (m_Memory.isOutOfMemory()) {
                 // clean up
