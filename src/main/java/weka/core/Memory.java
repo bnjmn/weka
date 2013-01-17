@@ -131,7 +131,7 @@ public class Memory
 
   /**
    * checks if there's still enough memory left by checking whether
-   * there is still a 25MB margin between getUsed() and getMax(). 
+   * there is still a 50MB margin between getUsed() and getMax(). 
    * if ENABLED is true, then
    * false is returned always. updates the MemoryUsage variable
    * before checking.
@@ -142,7 +142,7 @@ public class Memory
   public boolean isOutOfMemory() {
     m_MemoryUsage = m_MemoryMXBean.getHeapMemoryUsage();
     if (isEnabled()) {
-      return ((m_MemoryUsage.getMax() - m_MemoryUsage.getUsed()) < 26214400);
+      return ((m_MemoryUsage.getMax() - m_MemoryUsage.getUsed()) < 52428800);
     } else
       return false;
   }
@@ -169,7 +169,7 @@ public class Memory
       
     System.gc();
 
-    String msg =   "Not enough memory (less than 25MB left on heap). Please load a smaller "  
+    String msg =   "Not enough memory (less than 50MB left on heap). Please load a smaller "  
                  + "dataset or use a larger heap size.\n"
                  + "- initial heap size:   " 
                  + Utils.doubleToString(toMegaByte(m_MemoryUsage.getInit()), 1) + "MB\n"
