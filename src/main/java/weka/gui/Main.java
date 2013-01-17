@@ -1915,8 +1915,7 @@ public class Main
 	public void run() {
 	  while(true) {
 	    try {
-	      Thread.sleep(4000);
-	      System.gc();
+	      Thread.sleep(10);
 	      
 	      if (m_Memory.isOutOfMemory()) {
 		// clean up
