@@ -47,8 +47,11 @@ public class Memory
   /** whether a GUI is present */
   protected boolean m_UseGUI = false;
 
-  /** the initial size of the JVM */
-  protected static MemoryMXBean m_memoryMXBean = ManagementFactory.getMemoryMXBean();
+  /** the managed bean to use */
+  protected static MemoryMXBean m_MemoryMXBean = ManagementFactory.getMemoryMXBean();
+
+  /** the last MemoryUsage object obtained */
+  protected MemoryUsage m_MemoryUsage = null;
 
   /**
    * initializes the memory management without GUI support
@@ -94,43 +97,53 @@ public class Memory
   }
 
   /**
-   * returns the initial size of the JVM
+   * returns the initial size of the JVM heap, 
+   * obtains a fresh MemoryUsage object to do so.
    * 
    * @return		the initial size in bytes
    */
   public long getInitial() {
-    return m_memoryMXBean.getHeapMemoryUsage().getInit();
+    m_MemoryUsage = m_MemoryMXBean.getHeapMemoryUsage();
+    return m_MemoryUsage.getInit();
   }
 
   /**
-   * returns the current memory consumption
+   * returns the currently used size of the JVM heap, 
+   * obtains a fresh MemoryUsage object to do so.
    * 
-   * @return		the current size in bytes
+   * @return		the used size in bytes
    */
   public long getCurrent() {
-    return m_memoryMXBean.getHeapMemoryUsage().getUsed();
+    m_MemoryUsage = m_MemoryMXBean.getHeapMemoryUsage();
+    return m_MemoryUsage.getUsed();
   }
 
   /**
-   * returns the maximum amount of memory that can be assigned
+   * returns the maximum size of the JVM heap, 
+   * obtains a fresh MemoryUsage object to do so.
    * 
    * @return		the maximum size in bytes
    */
   public long getMax() {
-    return m_memoryMXBean.getHeapMemoryUsage().getMax();
+    m_MemoryUsage = m_MemoryMXBean.getHeapMemoryUsage();
+    return m_MemoryUsage.getMax();
   }
 
   /**
-   * checks if there's still enough memory left. if ENABLED is true, then
-   * false is returned always
+   * checks if there's still enough memory left by checking whether
+   * there is still a 25MB margin between getUsed() and getMax(). 
+   * if ENABLED is true, then
+   * false is returned always. updates the MemoryUsage variable
+   * before checking.
    * 
    * @return		true if out of memory (only if management enabled, 
    * 			otherwise always false)
    */
   public boolean isOutOfMemory() {
-    if (isEnabled())
-      return ((getMax() - getCurrent()) < 200000);
-    else
+    m_MemoryUsage = m_MemoryMXBean.getHeapMemoryUsage();
+    if (isEnabled()) {
+      return ((m_MemoryUsage.getMax() - m_MemoryUsage.getUsed()) < 26214400);
+    } else
       return false;
   }
 
@@ -151,26 +164,27 @@ public class Memory
    * @see #m_Enabled
    */
   public void showOutOfMemory() {
-    if (!isEnabled())
+    if (!isEnabled() || (m_MemoryUsage == null))
       return;
       
     System.gc();
 
-    String msg =   "Not enough memory. Please load a smaller "  
-                 + "dataset or use larger heap size.\n"
+    String msg =   "Not enough memory (less than 25MB left on heap). Please load a smaller "  
+                 + "dataset or use a larger heap size.\n"
                  + "- initial heap size:   " 
-                 + Utils.doubleToString(toMegaByte(getInitial()), 1) + "MB\n"
+                 + Utils.doubleToString(toMegaByte(m_MemoryUsage.getInit()), 1) + "MB\n"
                  + "- current memory (heap) used:  " 
-                 + Utils.doubleToString(toMegaByte(getCurrent()), 1) + "MB\n"
+                 + Utils.doubleToString(toMegaByte(m_MemoryUsage.getUsed()), 1) + "MB\n"
                  + "- max. memory (heap) available: " 
-                 + Utils.doubleToString(toMegaByte(getMax()), 1) + "MB\n"
+                 + Utils.doubleToString(toMegaByte(m_MemoryUsage.getMax()), 1) + "MB\n"
                  + "\n"
                  + "Note:\n"
                  + "The Java heap size can be specified with the -Xmx option.\n"
                  + "E.g., to use 128MB as heap size, the command line looks like this:\n"
                  + "   java -Xmx128m -classpath ...\n"
-                 + "This does NOT work in the SimpleCLI, the java command refers\n"
-                 + "to the one with which Weka is started.";
+                 + "This does NOT work in the SimpleCLI, the above java command refers\n"
+                 + "to the one with which Weka is started. See the Weka FAQ on the web\n"
+                 + "for further info.";
     
     System.err.println(msg);
     
