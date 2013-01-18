@@ -157,9 +157,9 @@ public class Memory implements RevisionHandler {
     if (isEnabled()) {
       long lowThreshold = (long) (0.2 * m_MemoryUsage.getMax());
 
-      // 15Mb above the out of memory threshold
-      if (lowThreshold < 68157440) {
-        lowThreshold = 68157440;
+      // min threshold of 100Mb
+      if (lowThreshold < 104857600) {
+        lowThreshold = 104857600;
       }
 
       long avail = m_MemoryUsage.getMax() - m_MemoryUsage.getUsed();
@@ -230,7 +230,7 @@ public class Memory implements RevisionHandler {
       return true;
 
     String msg = "Warning: memory is running low - available heap space is less than "
-        + "20% of maximum or 65Mb (whichever is greater)\n\n"
+        + "20% of maximum or 100Mb (whichever is greater)\n\n"
         + "- initial heap size:   "
         + Utils.doubleToString(toMegaByte(m_MemoryUsage.getInit()), 1)
         + "MB\n"
@@ -241,8 +241,8 @@ public class Memory implements RevisionHandler {
         + Utils.doubleToString(toMegaByte(m_MemoryUsage.getMax()), 1)
         + "MB\n\n"
         + "Consider deleting some results before continuing.\nCheck the Weka FAQ "
-        + "on the web for suggestions on how to save memory.\n"
-        + "\nDo you wish to continue regardless?";
+        + "on the web for suggestions on how to save memory."
+        + "\nDo you wish to continue regardless?\n\n";
 
     System.err.println(msg);
 
