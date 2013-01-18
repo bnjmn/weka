@@ -165,9 +165,6 @@ public class Plot2D
   /** random values for perterbing the data points */
   protected Random m_JRand = new Random(0);
 
-  /** lookup table for plotted points */
-  protected double [][] m_pointLookup=null;
-
   /** Constructor */
   public Plot2D() {
     super();
