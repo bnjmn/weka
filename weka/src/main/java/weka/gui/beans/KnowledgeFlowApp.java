@@ -1810,7 +1810,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               m_mainKFPerspective.getCurrentTabIndex()).size() == 0) {
             return;
           }
-          runFlow(false);
+
+          boolean proceed = true;
+          if (m_Memory.memoryIsLow()) {
+            proceed = m_Memory.showMemoryIsLow();
+          }
+
+          if (proceed) {
+            runFlow(false);
+          }
         }
       });
 
@@ -1854,7 +1862,14 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
             }
           }
 
-          runFlow(true);
+          boolean proceed = true;
+          if (m_Memory.memoryIsLow()) {
+            proceed = m_Memory.showMemoryIsLow();
+          }
+
+          if (proceed) {
+            runFlow(true);
+          }
         }
       });
 
@@ -6851,18 +6866,13 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           while (true) {
             try {
               // System.out.println("Before sleeping");
-              this.sleep(4000);
-
-              System.gc();
+              this.sleep(10);
 
               if (m_Memory.isOutOfMemory()) {
                 // clean up
                 jf.dispose();
                 m_knowledgeFlow = null;
                 System.gc();
-
-                // stop threads
-                m_Memory.stopThreads();
 
                 // display error
                 System.err.println("\n[KnowledgeFlow] displayed message:");
