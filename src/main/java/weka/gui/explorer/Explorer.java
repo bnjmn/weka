@@ -399,9 +399,6 @@ public class Explorer
                 m_explorer = null;
                 System.gc();
 
-                // stop threads
-                m_Memory.stopThreads();
-
                 // display error
                 System.err.println(Messages.getInstance().getString("Explorer_Main_Run_Error_Text_First"));
                 m_Memory.showOutOfMemory();
