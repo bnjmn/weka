@@ -1842,9 +1842,6 @@ public class Main
 		m_MainCommandline = null;
 		System.gc();
 		
-		// stop threads
-		m_Memory.stopThreads();
-		
 		// display error
 		System.err.println(Messages.getInstance().getString("Main_Main_Thread_Run_Error_Text_First"));
 		m_Memory.showOutOfMemory();
