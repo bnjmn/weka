@@ -15,15 +15,11 @@
 
 /*
  *    Experimenter.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
-
-import weka.core.Memory;
-import weka.experiment.Experiment;
-import weka.gui.LookAndFeel;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
@@ -36,6 +32,10 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+
+import weka.core.Memory;
+import weka.experiment.Experiment;
+import weka.gui.LookAndFeel;
 
 /** 
  * The main class for the experiment environment. Lets the user create,
@@ -105,7 +105,7 @@ public class Experimenter
   private static Experimenter m_experimenter;
 
   /** for monitoring the Memory consumption */
-  private static Memory m_Memory = new Memory(true);
+  protected static Memory m_Memory = new Memory(true);
 
   /**
    * Tests out the experiment environment.
@@ -113,12 +113,12 @@ public class Experimenter
    * @param args ignored.
    */
   public static void main(String [] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");    
-
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    
     // make sure that packages are loaded and the GenericPropertiesCreator
     // executes to populate the lists correctly
     weka.gui.GenericObjectEditor.determineClasses();
-
+    
     LookAndFeel.setLookAndFeel();
     
     try {
@@ -142,7 +142,7 @@ public class Experimenter
       jf.pack();
       jf.setSize(800, 600);
       jf.setVisible(true);
-      
+
       Image icon = Toolkit.getDefaultToolkit().
         getImage(m_experimenter.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
@@ -151,18 +151,13 @@ public class Experimenter
         public void run() {
           while(true) {
             try {
-              this.sleep(4000);
-              
-              System.gc();
+              this.sleep(10);
 
               if (m_Memory.isOutOfMemory()) {
                 // clean up
                 jf.dispose();
                 m_experimenter = null;
                 System.gc();
-
-                // stop threads
-                m_Memory.stopThreads();
 
                 // display error
                 System.err.println("\ndisplayed message:");

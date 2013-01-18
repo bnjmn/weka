@@ -15,19 +15,11 @@
 
 /*
  *    RunPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
-
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.experiment.Experiment;
-import weka.experiment.RemoteExperiment;
-import weka.experiment.RemoteExperimentEvent;
-import weka.experiment.RemoteExperimentListener;
-import weka.gui.LogPanel;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -47,6 +39,14 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.experiment.Experiment;
+import weka.experiment.RemoteExperiment;
+import weka.experiment.RemoteExperimentEvent;
+import weka.experiment.RemoteExperimentListener;
+import weka.gui.LogPanel;
 
 /** 
  * This panel controls the running of an experiment.
@@ -298,15 +298,21 @@ public class RunPanel
 
     if (e.getSource() == m_StartBut) {
       if (m_RunThread == null) {
-	try {
-	  m_RunThread = new ExperimentRunner(m_Exp);
-	  m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-	  m_RunThread.start();
-	} catch (Exception ex) {
-          ex.printStackTrace();
-	  logMessage("Problem creating experiment copy to run: "
-		     + ex.getMessage());
-	}
+        boolean proceed = true;
+        if (Experimenter.m_Memory.memoryIsLow()) {
+          proceed = Experimenter.m_Memory.showMemoryIsLow();
+        }
+        if (proceed) {
+          try {
+            m_RunThread = new ExperimentRunner(m_Exp);
+            m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+            m_RunThread.start();
+          } catch (Exception ex) {
+            ex.printStackTrace();
+            logMessage("Problem creating experiment copy to run: "
+                + ex.getMessage());
+          }
+        }
       }
     } else if (e.getSource() == m_StopBut) {
       m_StopBut.setEnabled(false);
