@@ -107,7 +107,7 @@ public class Experimenter
   private static Experimenter m_experimenter;
 
   /** for monitoring the Memory consumption */
-  private static Memory m_Memory = new Memory(true);
+  protected static Memory m_Memory = new Memory(true);
 
   /**
    * Tests out the experiment environment.

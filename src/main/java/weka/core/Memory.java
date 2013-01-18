@@ -145,6 +145,31 @@ public class Memory implements RevisionHandler {
   }
 
   /**
+   * Checks to see if memory is running low. Low is defined as available memory
+   * less than 20% of max memory.
+   * 
+   * @return true if memory is running low
+   */
+  public boolean memoryIsLow() {
+    m_MemoryUsage = m_MemoryMXBean.getHeapMemoryUsage();
+
+    if (isEnabled()) {
+      long lowThreshold = (long) (0.2 * m_MemoryUsage.getMax());
+
+      // min threshold of 100Mb
+      if (lowThreshold < 104857600) {
+        lowThreshold = 104857600;
+      }
+
+      long avail = m_MemoryUsage.getMax() - m_MemoryUsage.getUsed();
+
+      return (avail < lowThreshold);
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * returns the amount of bytes as MB
    * 
    * @return the MB amount
@@ -192,6 +217,43 @@ public class Memory implements RevisionHandler {
     if (getUseGUI())
       JOptionPane.showMessageDialog(null, msg, "OutOfMemory",
           JOptionPane.WARNING_MESSAGE);
+  }
+
+  /**
+   * Prints a warning message if memoryIsLow (and if GUI is present a dialog).
+   * 
+   * @return true if user opts to continue, disabled or GUI is not present.
+   */
+  public boolean showMemoryIsLow() {
+    if (!isEnabled() || (m_MemoryUsage == null))
+      return true;
+
+    String msg = "Warning: memory is running low - available heap space is less than "
+        + "20% of maximum or 100MB (whichever is greater)\n\n"
+        + "- initial heap size:   "
+        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getInit()), 1)
+        + "MB\n"
+        + "- current memory (heap) used:  "
+        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getUsed()), 1)
+        + "MB\n"
+        + "- max. memory (heap) available: "
+        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getMax()), 1)
+        + "MB\n\n"
+        + "Consider deleting some results before continuing.\nCheck the Weka FAQ "
+        + "on the web for suggestions on how to save memory.\n"
+        + "Note that Weka will shut down when less than 50MB remain."
+        + "\nDo you wish to continue regardless?\n\n";
+
+    System.err.println(msg);
+
+    if (getUseGUI()) {
+      int result = JOptionPane.showConfirmDialog(null, msg, "Low Memory",
+          JOptionPane.YES_NO_OPTION);
+
+      return (result == JOptionPane.YES_OPTION);
+    }
+
+    return true;
   }
 
   /**

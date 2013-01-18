@@ -374,7 +374,14 @@ public class AttributeSelectionPanel
 
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	startAttributeSelection();
+        boolean proceed = true;
+        if (Explorer.m_Memory.memoryIsLow()) {
+          proceed = Explorer.m_Memory.showMemoryIsLow();
+        }
+        
+        if (proceed) {
+          startAttributeSelection();
+        }
       }
     });
     m_StopBut.addActionListener(new ActionListener() {

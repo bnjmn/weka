@@ -299,15 +299,21 @@ public class RunPanel
 
     if (e.getSource() == m_StartBut) {
       if (m_RunThread == null) {
-	try {
-	  m_RunThread = new ExperimentRunner(m_Exp);
-	  m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-	  m_RunThread.start();
-	} catch (Exception ex) {
-          ex.printStackTrace();
-	  logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_ActionPerformed_LogMessage_Text_First")
-		     + ex.getMessage());
-	}
+        boolean proceed = true;
+        if (Experimenter.m_Memory.memoryIsLow()) {
+          proceed = Experimenter.m_Memory.showMemoryIsLow();
+        }
+        if (proceed) {
+          try {
+            m_RunThread = new ExperimentRunner(m_Exp);
+            m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+            m_RunThread.start();
+          } catch (Exception ex) {
+            ex.printStackTrace();
+            logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_ActionPerformed_LogMessage_Text_First")
+                + ex.getMessage());
+          }
+        }
       }
     } else if (e.getSource() == m_StopBut) {
       m_StopBut.setEnabled(false);
