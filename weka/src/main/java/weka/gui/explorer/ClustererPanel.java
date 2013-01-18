@@ -329,7 +329,14 @@ public class ClustererPanel
     m_ignoreBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	startClusterer();
+        boolean proceed = true;
+        if (Explorer.m_Memory.memoryIsLow()) {
+          proceed = Explorer.m_Memory.showMemoryIsLow();
+        }
+        
+        if (proceed) {
+          startClusterer();
+        }
       }
     });
     m_StopBut.addActionListener(new ActionListener() {

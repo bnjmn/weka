@@ -187,7 +187,14 @@ public class AssociationsPanel
     m_StopBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	startAssociator();
+        boolean proceed = true;
+        if (Explorer.m_Memory.memoryIsLow()) {
+          proceed = Explorer.m_Memory.showMemoryIsLow();
+        }
+        
+        if (proceed) {
+          startAssociator();
+        }
       }
     });
     m_StopBut.addActionListener(new ActionListener() {

@@ -562,7 +562,14 @@ public class ClassifierPanel extends JPanel implements
     m_StopBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        startClassifier();
+        boolean proceed = true;
+        if (Explorer.m_Memory.memoryIsLow()) {
+          proceed = Explorer.m_Memory.showMemoryIsLow();
+        }
+
+        if (proceed) {
+          startClassifier();
+        }
       }
     });
     m_StopBut.addActionListener(new ActionListener() {

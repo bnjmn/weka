@@ -343,7 +343,7 @@ public class Explorer
   private static Explorer m_explorer;
 
   /** for monitoring the Memory consumption */
-  private static Memory m_Memory = new Memory(true);
+  protected static Memory m_Memory = new Memory(true);
 
   /**
    * Tests out the explorer environment.
