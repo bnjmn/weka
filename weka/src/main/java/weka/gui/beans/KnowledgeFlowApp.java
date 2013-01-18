@@ -1810,7 +1810,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               m_mainKFPerspective.getCurrentTabIndex()).size() == 0) {
             return;
           }
-          runFlow(false);
+
+          boolean proceed = true;
+          if (m_Memory.memoryIsLow()) {
+            proceed = m_Memory.showMemoryIsLow();
+          }
+
+          if (proceed) {
+            runFlow(false);
+          }
         }
       });
 
@@ -1854,7 +1862,14 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
             }
           }
 
-          runFlow(true);
+          boolean proceed = true;
+          if (m_Memory.memoryIsLow()) {
+            proceed = m_Memory.showMemoryIsLow();
+          }
+
+          if (proceed) {
+            runFlow(true);
+          }
         }
       });
 
