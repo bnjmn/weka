@@ -1,0 +1,303 @@
+------------------------------------------------------------------------
+r9090 | mhall | 2012-08-23 19:53:07 +1200 (Thu, 23 Aug 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/attribute/Discretize.java
+
+Bug fix from Sean Daugherty: instance weights were not dealt with correctly.
+------------------------------------------------------------------------
+r9093 | mhall | 2012-08-24 10:42:59 +1200 (Fri, 24 Aug 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/Vote.java
+
+Doc update.
+------------------------------------------------------------------------
+r9096 | mhall | 2012-08-26 21:12:09 +1200 (Sun, 26 Aug 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/Apriori.java
+   M /branches/stable-3-6/weka/src/main/java/weka/associations/AprioriItemSet.java
+
+Now allows significance testing for metrics other than just confidence
+------------------------------------------------------------------------
+r9097 | mhall | 2012-08-28 22:13:32 +1200 (Tue, 28 Aug 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/treevisualizer/TreeBuild.java
+
+Internationalization broke this for non-english locales - fixed
+------------------------------------------------------------------------
+r9100 | mhall | 2012-09-01 19:54:16 +1200 (Sat, 01 Sep 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/DatabaseLoader.java
+
+Batch mode was not disconnecting from database - fixed.
+------------------------------------------------------------------------
+r9105 | mhall | 2012-09-08 08:27:10 +1200 (Sat, 08 Sep 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Restored the default quote (enclosure) characters to ",' as setting the default just to " (when the enclosures options was added) broke the loading of CSV experiment results file in the Experimenter.
+------------------------------------------------------------------------
+r9110 | mhall | 2012-09-13 22:12:05 +1200 (Thu, 13 Sep 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Fixed a bug where a null pointer exception would result if empty clusters occurred on the last iteration.
+------------------------------------------------------------------------
+r9140 | mhall | 2012-09-19 21:42:07 +1200 (Wed, 19 Sep 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Capabilities.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instance.java
+
+From Eibe: Fixed bug in Instance: relationalValue() and stringValue() did not return the correct result for values that were missing. relationalValue() now returns null if that is the case and stringValue() the standard question mark. Also fixed bug in Capabilities: multi-instance dataset may have only missing values for relational attribute.
+------------------------------------------------------------------------
+r9141 | mhall | 2012-09-20 10:51:35 +1200 (Thu, 20 Sep 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/MultiInstanceToPropositional.java
+
+From Eibe: Fixed bug in MultiInstanceToPropositional: incorrect results were produced when relation-valued attribute had missing values (i.e. the bag was missing). Cleaned up some text in PropositionalToMultiInstance.
+------------------------------------------------------------------------
+r9144 | mhall | 2012-09-20 11:22:41 +1200 (Thu, 20 Sep 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MDD.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MIBoost.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MIDD.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MIEMDD.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MILR.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MINND.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MIOptimalBall.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MISMO.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MISVM.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/MIWrapper.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/SimpleMI.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/supportVector/MIPolyKernel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/supportVector/MIRBFKernel.java
+
+Classifiers now correctly declare that they cannot deal with missing values at the bag level.
+------------------------------------------------------------------------
+r9146 | mhall | 2012-09-21 08:56:44 +1200 (Fri, 21 Sep 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/mi/CitationKNN.java
+
+Classifiers now correctly declare that they cannot deal with missing values at the bag level.
+------------------------------------------------------------------------
+r9160 | mhall | 2012-10-09 15:56:23 +1300 (Tue, 09 Oct 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/GridSearch.java
+
+Now implements distributionForInstance() instead of classifyInstance().
+------------------------------------------------------------------------
+r9176 | mhall | 2012-10-10 20:35:43 +1300 (Wed, 10 Oct 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Attribute.java
+
+A string attribute always has at least one (empty string) value now, so that values are not lost when data is output in sparse instance form.
+------------------------------------------------------------------------
+r9184 | mhall | 2012-10-11 16:05:38 +1300 (Thu, 11 Oct 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/experiment/InstanceQuery.java
+
+Fix to account for fact that string attributes now always contain a dummy value.
+------------------------------------------------------------------------
+r9196 | mhall | 2012-10-17 22:28:56 +1300 (Wed, 17 Oct 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/Evaluation.java
+
+Code no longer copies the trained classifier for output of predictions. This did not seem necessary and increased memory consumption dramatically when making predictions for a test set.
+------------------------------------------------------------------------
+r9217 | mhall | 2012-10-21 14:28:09 +1300 (Sun, 21 Oct 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Saver.java
+
+Was failing to save in incremental mode when there was only one instance in the stream - fixed.
+------------------------------------------------------------------------
+r9257 | mhall | 2012-10-30 15:50:08 +1300 (Tue, 30 Oct 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Fixed a problem where Classifier wouldn't execute properly with training and test set connections coming from separate sources. It would only operate correctly if the training set connection was made before the test set connection.
+------------------------------------------------------------------------
+r9273 | mhall | 2012-11-02 14:41:47 +1300 (Fri, 02 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/StringToNominal.java
+
+Did not get updated completely to adjust for the change to String attributes in Attribute - fixed.
+------------------------------------------------------------------------
+r9280 | mhall | 2012-11-03 08:43:15 +1300 (Sat, 03 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Fixed a memory leak (didn't affect operation from the command line) where a reference to the copy of the data used to revise the structure wasn't getting released by getDataSet().
+------------------------------------------------------------------------
+r9294 | mhall | 2012-11-05 16:05:04 +1300 (Mon, 05 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Editing the classifier was overwriting any custom name set for the step - fixed.
+------------------------------------------------------------------------
+r9349 | mhall | 2012-11-25 20:05:00 +1300 (Sun, 25 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/InstancesSummaryPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/SetInstancesPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Separate test set panel now displays ? for number of instances instead of 0
+------------------------------------------------------------------------
+r9353 | mhall | 2012-11-25 21:00:13 +1300 (Sun, 25 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/SetInstancesPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Set test set panel's file chooser now opens at the last directory accessed from the Preprocess panel
+------------------------------------------------------------------------
+r9354 | mhall | 2012-11-25 21:02:56 +1300 (Sun, 25 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/SetInstancesPanel.java
+
+Javadoc update.
+------------------------------------------------------------------------
+r9367 | mhall | 2012-11-28 09:04:31 +1300 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/REPTree.java
+
+Fixed infinite recursion due to failure to split in RandomTree and REPTree.
+------------------------------------------------------------------------
+r9368 | mhall | 2012-11-28 09:06:41 +1300 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Fixed infinite recursion due to failure to split in RandomTree and REPTree.
+------------------------------------------------------------------------
+r9370 | mhall | 2012-11-28 21:13:05 +1300 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/Bagging.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomForest.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instances.java
+
+Changed resampleWithWeights() to use Walker's alias method. The old implementation did not implement sampling with weights correctly. Thanks very much to Juan Jose Rodriguez for pointing this out. Surprisingly, initial experiments with Bagging, RandomForest, and LogitBoost (-Q) indicate that there is very little difference in the results. Note that Bagging and RandomForest *always* use resampleWithWeights(), even if all weights are equal. (Also eliminated code from Bagging to reduce code redundancy, and changed serial version ID of all classifiers in the main trunk that use the resampling method.
+------------------------------------------------------------------------
+r9371 | mhall | 2012-11-28 22:20:27 +1300 (Wed, 28 Nov 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/LogitBoost.java
+
+Changed resampleWithWeights() to use Walker's alias method. The old implementation did not implement sampling with weights correctly. Thanks very much to Juan Jose Rodriguez for pointing this out. Surprisingly, initial experiments with Bagging, RandomForest, and LogitBoost (-Q) indicate that there is very little difference in the results. Note that Bagging and RandomForest *always* use resampleWithWeights(), even if all weights are equal. (Also eliminated code from Bagging to reduce code redundancy, and changed serial version ID of all classifiers in the main trunk that use the resampling method.
+------------------------------------------------------------------------
+r9381 | mhall | 2012-12-02 20:02:31 +1300 (Sun, 02 Dec 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/Clusterer.java
+
+Removed an unnecessary public modifier.
+------------------------------------------------------------------------
+r9382 | mhall | 2012-12-02 20:03:30 +1300 (Sun, 02 Dec 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/DensityBasedClusterer.java
+
+Now has the distributionForInstance() method.
+------------------------------------------------------------------------
+r9389 | mhall | 2012-12-05 14:04:51 +1300 (Wed, 05 Dec 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/REPTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instances.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Utils.java
+
+Utils.java now has an improved quicksort implementation for double[] based on the median-of-three method and explicit sorting of subsequences of size three or smaller. The kthSmallestValue() method for double[] was also changed accordingly. The implementations for int[] were left unchanged, but the return type for kthSmallestValue() was fixed (it used to be double). The sort() and kthSmallestValue() routines in Instances.java now simply call the ones in Utils.java and the corresponding code was deleted from Instances.java. Made inner Tree class in RandomTree to save memory. Made some changes to improve runtime too. Further code cleanup in Instances and Utils for sorting and finding of k-th smallest element. REPTree now implements Randomizable. Evaluation now uses stable sort to compute coverage stats.
+------------------------------------------------------------------------
+r9401 | mhall | 2012-12-14 10:27:08 +1300 (Fri, 14 Dec 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+XML flow files are written with <?xml version="1.0" encoding="utf-8"?> as the first tag. The Knowledge Flow was saving using the default encoding for the platform, which caused XML validation to fail in some cases. Now explicitly writes kfml files in UTF-8 encoding.
+------------------------------------------------------------------------
+r9411 | mhall | 2012-12-30 20:37:54 +1300 (Sun, 30 Dec 2012) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/NaiveBayesMultinomialUpdateable.java
+
+Changed updateClassifier so that it no longer checks that attVal * inst weight >= 0. Now checks that sum of words per class and conditional attribute sums are >= 0 instead. This allows instances to be "unlearned" by using negative instance weights.
+------------------------------------------------------------------------
+r9414 | mhall | 2013-01-03 21:43:33 +1300 (Thu, 03 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/xml/XMLSerialization.java
+
+Any windows back slashes in file paths are now converted to forward slashes when File objects are saved.
+------------------------------------------------------------------------
+r9429 | mhall | 2013-01-10 21:47:38 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/clusterers/DBSCAN.java (from /branches/stable-3-6/weka/src/main/java/weka/clusterers/DBScan.java:9428)
+   D /branches/stable-3-6/weka/src/main/java/weka/clusterers/DBScan.java
+
+Renamed
+------------------------------------------------------------------------
+r9430 | mhall | 2013-01-10 21:50:54 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclidieanDataObject.java (from /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclidianDataObject.java:9429)
+
+Renamed
+------------------------------------------------------------------------
+r9431 | mhall | 2013-01-10 21:51:16 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/DataObject.java
+   D /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclidianDataObject.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/ManhattanDataObject.java
+
+Renamed
+------------------------------------------------------------------------
+r9432 | mhall | 2013-01-10 21:54:12 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   A /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclideanDataObject.java (from /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclidieanDataObject.java:9430)
+   D /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclidieanDataObject.java
+
+Fixed rename typo
+------------------------------------------------------------------------
+r9434 | mhall | 2013-01-10 22:07:03 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/DBSCAN.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/OPTICS.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclideanDataObject.java
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/ManhattanDataObject.java
+
+Fixed some typos. Added warning that implementations should not be used as reference implementations for runtime comparisons. Improved runtime by eliminating redundant data consistency checks from distance calculations, which can make a dramatic difference if the dataset has a large header, and replacing pow(x,2) by x*x.
+------------------------------------------------------------------------
+r9441 | mhall | 2013-01-14 09:39:56 +1300 (Mon, 14 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Copyright.props
+
+Updated the toYear field to 2013.
+------------------------------------------------------------------------
+r9445 | mhall | 2013-01-14 14:31:44 +1300 (Mon, 14 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+Fixed a memory leak where a reference to the training data was being maintained after the classifier had been built.
+------------------------------------------------------------------------
+r9454 | mhall | 2013-01-15 14:15:48 +1300 (Tue, 15 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/ModelPerformanceChart.java
+
+Fixed a bug for error plots where once the master plot had been set it did not get changed for subsequent incoming VisualizableErrorEvents (unless manually clearing all plots via the GUI).
+------------------------------------------------------------------------
+r9490 | mhall | 2013-01-18 14:46:06 +1300 (Fri, 18 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Memory.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/GUIChooser.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/Main.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/experiment/Experimenter.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/Explorer.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/sql/SqlViewer.java
+
+Memory management improvements
+------------------------------------------------------------------------
+r9495 | mhall | 2013-01-18 16:47:09 +1300 (Fri, 18 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Memory.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/experiment/Experimenter.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/experiment/RunPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/AssociationsPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/AttributeSelectionPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/Explorer.java
+
+Now includes low memory warning
+------------------------------------------------------------------------
