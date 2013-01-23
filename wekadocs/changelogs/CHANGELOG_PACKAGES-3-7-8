@@ -1,0 +1,462 @@
+------------------------------------------------------------------------
+r9135 | eibe | 2012-09-19 16:48:24 +1200 (Wed, 19 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/src/main/java/weka/filters/unsupervised/attribute/MultiInstanceToPropositional.java
+   M /trunk/packages/internal/multiInstanceFilters/src/main/java/weka/filters/unsupervised/attribute/PropositionalToMultiInstance.java
+
+Fixed bug in MultiInstanceToPropositional: incorrect results were produced when relation-valued attribute had missing values (i.e. the bag was missing). Cleaned up some text in PropositionalToMultiInstance.
+------------------------------------------------------------------------
+r9136 | eibe | 2012-09-19 16:50:53 +1200 (Wed, 19 Sep 2012) | 1 line
+Changed paths:
+   A /trunk/packages/internal/multiInstanceFilters/src/main/java/weka/filters/unsupervised/attribute/MultiInstanceWrapper.java
+   A /trunk/packages/internal/multiInstanceFilters/src/test/java/weka/filters/unsupervised/attribute/MultiInstanceWrapperTest.java
+
+Added new filter and test.
+------------------------------------------------------------------------
+r9137 | eibe | 2012-09-19 16:53:14 +1200 (Wed, 19 Sep 2012) | 1 line
+Changed paths:
+   A /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/TLC.java
+   A /trunk/packages/internal/multiInstanceLearning/src/test/java/weka/classifiers/mi/TLCTest.java
+
+Added new two-level classifier and test. See Weidmann et al., ECML 2003.
+------------------------------------------------------------------------
+r9138 | eibe | 2012-09-19 17:13:19 +1200 (Wed, 19 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/Description.props
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+
+Updated description files to note changes. Release numbers, including dependencies, and URLs still need changing.
+------------------------------------------------------------------------
+r9142 | eibe | 2012-09-20 10:51:49 +1200 (Thu, 20 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MDD.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MIBoost.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MIDD.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MIEMDD.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MILR.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MINND.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MIOptimalBall.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MISMO.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MISVM.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MIWrapper.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/QuickDDIterative.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/SimpleMI.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/TLD.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/TLDSimple.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/supportVector/MIPolyKernel.java
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/supportVector/MIRBFKernel.java
+
+Classifiers now correctly declare that they cannot deal with missing values at the bag level.
+------------------------------------------------------------------------
+r9143 | eibe | 2012-09-20 10:54:39 +1200 (Thu, 20 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/citationKNN/src/main/java/weka/classifiers/mi/CitationKNN.java
+
+Classifier now correctly declares that it cannot deal with missing values at the bag level.
+------------------------------------------------------------------------
+r9149 | mhall | 2012-09-27 14:41:31 +1200 (Thu, 27 Sep 2012) | 1 line
+Changed paths:
+   A /trunk/packages/internal/isolationForest
+   A /trunk/packages/internal/isolationForest/Description.props
+   A /trunk/packages/internal/isolationForest/build_package.xml
+   A /trunk/packages/internal/isolationForest/lib
+   A /trunk/packages/internal/isolationForest/pom.xml
+   A /trunk/packages/internal/isolationForest/src
+   A /trunk/packages/internal/isolationForest/src/main
+   A /trunk/packages/internal/isolationForest/src/main/java
+   A /trunk/packages/internal/isolationForest/src/main/java/weka
+   A /trunk/packages/internal/isolationForest/src/main/java/weka/classifiers
+   A /trunk/packages/internal/isolationForest/src/main/java/weka/classifiers/trees
+   A /trunk/packages/internal/isolationForest/src/main/java/weka/classifiers/trees/IsolationForest.java
+   A /trunk/packages/internal/isolationForest/src/test
+   A /trunk/packages/internal/isolationForest/src/test/java
+   A /trunk/packages/internal/isolationForest/src/test/java/weka
+   A /trunk/packages/internal/isolationForest/src/test/java/weka/classifiers
+   A /trunk/packages/internal/isolationForest/src/test/java/weka/classifiers/trees
+   A /trunk/packages/internal/isolationForest/src/test/java/weka/classifiers/trees/IsolationForestTest.java
+
+Initial import of IsolationForest package.
+------------------------------------------------------------------------
+r9152 | mhall | 2012-09-27 14:54:19 +1200 (Thu, 27 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/isolationForest/Description.props
+
+Updated date in description file
+------------------------------------------------------------------------
+r9156 | mhall | 2012-09-27 15:43:28 +1200 (Thu, 27 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/isolationForest/pom.xml
+
+[maven-release-plugin] prepare release isolationForest-1.0.0
+------------------------------------------------------------------------
+r9158 | mhall | 2012-09-27 15:43:32 +1200 (Thu, 27 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/isolationForest/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9159 | mhall | 2012-09-28 14:35:48 +1200 (Fri, 28 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/hotSpot/Description.props
+   M /trunk/packages/internal/hotSpot/src/main/java/weka/associations/HotSpot.java
+
+Added an option to limit the length of the rules found, and an option to treat zeros (for nominal attribute) as missing values (useful for market basket data)
+------------------------------------------------------------------------
+r9161 | mhall | 2012-10-09 16:06:38 +1300 (Tue, 09 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/src/main/java/weka/classifiers/meta/GridSearch.java
+
+Now implements distributionForInstance() instead of classifyInstance()
+------------------------------------------------------------------------
+r9162 | mhall | 2012-10-09 16:08:30 +1300 (Tue, 09 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/Description.props
+
+Updated for the 1.0.6 release
+------------------------------------------------------------------------
+r9163 | mhall | 2012-10-09 16:17:56 +1300 (Tue, 09 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/pom.xml
+
+[maven-release-plugin] prepare release gridSearch-1.0.6
+------------------------------------------------------------------------
+r9165 | mhall | 2012-10-09 16:18:01 +1300 (Tue, 09 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9222 | mhall | 2012-10-23 20:47:12 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   A /trunk/packages/internal/multiLayerPerceptrons
+   A /trunk/packages/internal/multiLayerPerceptrons/Description.props
+   A /trunk/packages/internal/multiLayerPerceptrons/build_package.xml
+   A /trunk/packages/internal/multiLayerPerceptrons/lib
+   A /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+   A /trunk/packages/internal/multiLayerPerceptrons/src
+   A /trunk/packages/internal/multiLayerPerceptrons/src/main
+   A /trunk/packages/internal/multiLayerPerceptrons/src/main/java
+   A /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka
+   A /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers
+   A /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions
+   A /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPClassifier.java
+   A /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPRegressor.java
+   A /trunk/packages/internal/multiLayerPerceptrons/src/test
+   A /trunk/packages/internal/multiLayerPerceptrons/src/test/java
+   A /trunk/packages/internal/multiLayerPerceptrons/src/test/java/weka
+   A /trunk/packages/internal/multiLayerPerceptrons/src/test/java/weka/classifiers
+   A /trunk/packages/internal/multiLayerPerceptrons/src/test/java/weka/classifiers/functions
+   A /trunk/packages/internal/multiLayerPerceptrons/src/test/java/weka/classifiers/functions/MLPClassifierTest.java
+   A /trunk/packages/internal/multiLayerPerceptrons/src/test/java/weka/classifiers/functions/MLPRegressorTest.java
+
+Initial import of Eibe's multiLayerPerceptrons
+------------------------------------------------------------------------
+r9223 | mhall | 2012-10-23 21:37:26 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare release multiLayerPerceptrons-1.0.0
+------------------------------------------------------------------------
+r9225 | mhall | 2012-10-23 21:37:30 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9226 | mhall | 2012-10-23 21:41:27 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] rollback the release of multiLayerPerceptrons-1.0.0
+------------------------------------------------------------------------
+r9227 | mhall | 2012-10-23 21:44:39 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+Fixed a few tags
+------------------------------------------------------------------------
+r9228 | mhall | 2012-10-23 21:45:50 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare release multiLayerPerceptrons-1.0.0
+------------------------------------------------------------------------
+r9230 | mhall | 2012-10-23 21:45:55 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9231 | mhall | 2012-10-23 21:49:21 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] rollback the release of multiLayerPerceptrons-1.0.0
+------------------------------------------------------------------------
+r9232 | mhall | 2012-10-23 21:51:17 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare release multiLayerPerceptrons-1.0.0
+------------------------------------------------------------------------
+r9233 | mhall | 2012-10-23 21:52:04 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] rollback the release of multiLayerPerceptrons-1.0.0
+------------------------------------------------------------------------
+r9235 | mhall | 2012-10-23 21:56:25 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare release multiLayerPerceptrons-1.0.0
+------------------------------------------------------------------------
+r9237 | mhall | 2012-10-23 21:56:29 +1300 (Tue, 23 Oct 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9303 | mhall | 2012-11-08 21:49:27 +1300 (Thu, 08 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/Beans.props
+   M /trunk/packages/external/kfGroovy/Description.props
+   M /trunk/packages/external/kfGroovy/build_package.xml
+   A /trunk/packages/external/kfGroovy/src/main/java/org/pentaho/dm/kf/templates
+   A /trunk/packages/external/kfGroovy/src/main/java/org/pentaho/dm/kf/templates/learningCurve.kfml
+
+Learning curve example is now a template, accessible from the template popup menu in the Knowledge Flow
+------------------------------------------------------------------------
+r9304 | mhall | 2012-11-08 22:19:51 +1300 (Thu, 08 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] prepare release kfGroovy-1.0.6
+------------------------------------------------------------------------
+r9305 | mhall | 2012-11-08 22:22:17 +1300 (Thu, 08 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] rollback the release of kfGroovy-1.0.6
+------------------------------------------------------------------------
+r9306 | mhall | 2012-11-08 22:24:29 +1300 (Thu, 08 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+Updatd svn urls
+------------------------------------------------------------------------
+r9307 | mhall | 2012-11-08 22:25:33 +1300 (Thu, 08 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] prepare release kfGroovy-1.0.6
+------------------------------------------------------------------------
+r9309 | mhall | 2012-11-08 22:25:37 +1300 (Thu, 08 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9322 | mhall | 2012-11-14 11:40:39 +1300 (Wed, 14 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/pom.xml
+
+Updated the Weka dependency to 3.7.8
+------------------------------------------------------------------------
+r9323 | mhall | 2012-11-14 11:41:07 +1300 (Wed, 14 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/pom.xml
+
+Updated the Weka dependency to 3.7.8
+------------------------------------------------------------------------
+r9328 | mhall | 2012-11-14 14:04:42 +1300 (Wed, 14 Nov 2012) | 1 line
+Changed paths:
+   A /trunk/packages/internal/extraTrees
+   A /trunk/packages/internal/extraTrees/Description.props
+   A /trunk/packages/internal/extraTrees/build_package.xml
+   A /trunk/packages/internal/extraTrees/lib
+   A /trunk/packages/internal/extraTrees/pom.xml
+   A /trunk/packages/internal/extraTrees/src
+   A /trunk/packages/internal/extraTrees/src/main
+   A /trunk/packages/internal/extraTrees/src/main/java
+   A /trunk/packages/internal/extraTrees/src/main/java/weka
+   A /trunk/packages/internal/extraTrees/src/main/java/weka/classifiers
+   A /trunk/packages/internal/extraTrees/src/main/java/weka/classifiers/trees
+   A /trunk/packages/internal/extraTrees/src/main/java/weka/classifiers/trees/ExtraTree.java
+   A /trunk/packages/internal/extraTrees/src/test
+   A /trunk/packages/internal/extraTrees/src/test/java
+   A /trunk/packages/internal/extraTrees/src/test/java/weka
+   A /trunk/packages/internal/extraTrees/src/test/java/weka/classifiers
+   A /trunk/packages/internal/extraTrees/src/test/java/weka/classifiers/trees
+   A /trunk/packages/internal/extraTrees/src/test/java/weka/classifiers/trees/ExtraTreeTest.java
+
+Initial import of extraTrees
+------------------------------------------------------------------------
+r9344 | eibe | 2012-11-23 11:18:04 +1300 (Fri, 23 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPClassifier.java
+
+New version with several optimisations to reduce runtime: backpropagated signals with small deltas are ignored, exponential function is now approximated, and threads can be used for parallel execution, where data is split into chunks for gradient and error calculation.
+------------------------------------------------------------------------
+r9345 | eibe | 2012-11-23 11:30:02 +1300 (Fri, 23 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPClassifier.java
+
+Had neglected to update globalInfo() and Javadoc.
+------------------------------------------------------------------------
+r9346 | eibe | 2012-11-23 20:52:09 +1300 (Fri, 23 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPRegressor.java
+
+Same changes now also applied to MLPRegressor.java
+------------------------------------------------------------------------
+r9347 | mhall | 2012-11-25 19:31:05 +1300 (Sun, 25 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/Description.props
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+Updated for 1.0.1
+------------------------------------------------------------------------
+r9350 | mhall | 2012-11-25 20:44:40 +1300 (Sun, 25 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare release multiLayerPerceptrons-1.0.1
+------------------------------------------------------------------------
+r9352 | mhall | 2012-11-25 20:44:43 +1300 (Sun, 25 Nov 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9402 | eibe | 2012-12-18 10:20:36 +1300 (Tue, 18 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/src/main/java/weka/classifiers/functions/RBFClassifier.java
+   A /trunk/packages/internal/RBFNetwork/src/main/java/weka/classifiers/functions/RBFModel.java
+   M /trunk/packages/internal/RBFNetwork/src/main/java/weka/classifiers/functions/RBFRegressor.java
+
+RBFClassifier and RBFRegressor can now take advantage of multiple cores. RBFClassifier is significantly faster. Code redundancy has been eliminated by moving common code into new abstract RBFModel class.
+------------------------------------------------------------------------
+r9404 | mhall | 2012-12-18 12:01:49 +1300 (Tue, 18 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/Description.props
+
+Updated for 1.0.4
+------------------------------------------------------------------------
+r9405 | mhall | 2012-12-18 12:14:14 +1300 (Tue, 18 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare release RBFNetwork-1.0.4
+------------------------------------------------------------------------
+r9406 | mhall | 2012-12-18 12:15:04 +1300 (Tue, 18 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] rollback the release of RBFNetwork-1.0.4
+------------------------------------------------------------------------
+r9407 | mhall | 2012-12-18 12:17:07 +1300 (Tue, 18 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+Updated for svn URL changes
+------------------------------------------------------------------------
+r9408 | mhall | 2012-12-18 12:17:36 +1300 (Tue, 18 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare release RBFNetwork-1.0.4
+------------------------------------------------------------------------
+r9410 | mhall | 2012-12-18 12:17:40 +1300 (Tue, 18 Dec 2012) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9420 | eibe | 2013-01-10 15:19:41 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   A /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/DBSCAN.java
+   D /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/DBScan.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/OPTICS.java
+   A /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclideanDataObject.java
+   D /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclidianDataObject.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/ManhattanDataObject.java
+   A /trunk/packages/external/optics_dbScan/src/test/java/weka/clusterers/DBSCANTest.java
+   D /trunk/packages/external/optics_dbScan/src/test/java/weka/clusterers/DBScanTest.java
+
+Fixed some typos. Added warning that implementations should not be used as reference implementations for runtime comparisons. Improved runtime by eliminating redundant data consistency checks from distance calculations, which can make a dramatic difference if the dataset has a large header, and replacing pow(x,2) by x*x.
+------------------------------------------------------------------------
+r9421 | mhall | 2013-01-10 21:07:12 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/optics_dbScan/Description.props
+   M /trunk/packages/external/optics_dbScan/pom.xml
+
+Updated for the new release
+------------------------------------------------------------------------
+r9422 | mhall | 2013-01-10 21:08:11 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/optics_dbScan/pom.xml
+
+[maven-release-plugin] prepare release optics_dbScan-1.0.3
+------------------------------------------------------------------------
+r9424 | mhall | 2013-01-10 21:08:15 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/optics_dbScan/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9425 | mhall | 2013-01-10 21:09:36 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/optics_dbScan/pom.xml
+
+[maven-release-plugin] rollback the release of optics_dbScan-1.0.3
+------------------------------------------------------------------------
+r9426 | mhall | 2013-01-10 21:11:02 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/optics_dbScan/pom.xml
+
+[maven-release-plugin] prepare release optics_dbScan-1.0.3
+------------------------------------------------------------------------
+r9428 | mhall | 2013-01-10 21:11:07 +1300 (Thu, 10 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/optics_dbScan/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9470 | mhall | 2013-01-16 16:01:21 +1300 (Wed, 16 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/Description.props
+   M /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters/unsupervised/attribute/LOF.java
+
+Min points upper bound is now inclusive.
+------------------------------------------------------------------------
+r9471 | mhall | 2013-01-16 16:01:55 +1300 (Wed, 16 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare release localOutlierFactor-1.0.2
+------------------------------------------------------------------------
+r9472 | mhall | 2013-01-16 16:02:35 +1300 (Wed, 16 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] rollback the release of localOutlierFactor-1.0.2
+------------------------------------------------------------------------
+r9473 | mhall | 2013-01-16 16:03:14 +1300 (Wed, 16 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+Updated svn url
+------------------------------------------------------------------------
+r9474 | mhall | 2013-01-16 16:03:33 +1300 (Wed, 16 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare release localOutlierFactor-1.0.2
+------------------------------------------------------------------------
+r9476 | mhall | 2013-01-16 16:03:37 +1300 (Wed, 16 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
