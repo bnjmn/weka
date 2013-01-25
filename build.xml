@@ -70,6 +70,10 @@
      <include name="**/lib/*.jar"/>
      <include name="**/lib/*.zip"/>
    </fileset>
+   <fileset dir="${packages_internal}">
+     <include name="**/lib/*.jar"/>
+     <include name="**/lib/*.zip"/>
+   </fileset>
   </path>
 <!--  <property name="pack.cp" refid="package.class.path"/> -->
 
@@ -683,20 +687,38 @@
 
   <!-- Run the test cases for the core and all packages via junit's testrunner class.
    This is a faster, simpler option than running the junit task -->
-  <target name="run_tests_all" depends="compile_tests" 
+
+  <target name="run_tests_all" depends="compile_tests"
    description="Execute unit tests (fast)">
+    <antcall target="apply_all_internal">
+      <param name="packageCommand" value="clean"/>
+    </antcall>
+    <antcall target="apply_all_external">
+      <param name="packageCommand" value="clean"/>
+    </antcall>
+    <antcall target="apply_all_internal">
+      <param name="packageCommand" value="compile"/>
+    </antcall>
+    <antcall target="apply_all_internal">
+      <param name="packageCommand" value="compile_tests"/>
+    </antcall>
+    <antcall target="apply_all_external">
+      <param name="packageCommand" value="compile"/>
+    </antcall>
+    <antcall target="apply_all_external">
+      <param name="packageCommand" value="compile_tests"/>
+    </antcall>
 <!--    <echo message="pacakge classpath ${pack.cp}"/> -->
-     <java fork="yes" dir="."
-      classname="junit.textui.TestRunner"
-      taskname="junit" failonerror="${run_tests_fail}">
-	 <arg value="weka.AllTests"/>
-         <classpath refid="package.class.path" /> 
-       <jvmarg value="-server"/>
-       <jvmarg value="-Duser.timezone=Pacific/Auckland"/>
-<!--       <jvmarg value="-Xint"/> -->
-         <jvmarg value="-Djava.awt.headless=${headless}"/> 
-         <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
-     </java>
+    <java fork="yes" dir="."
+          classname="junit.textui.TestRunner"
+          taskname="junit" failonerror="${run_tests_fail}">
+      <arg value="weka.AllTests"/>
+      <classpath refid="package.class.path" />
+      <jvmarg value="-server"/>
+      <!--       <jvmarg value="-Xint"/> -->
+      <jvmarg value="-Djava.awt.headless=${headless}"/> 
+      <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
+    </java>
   </target>
 
 
