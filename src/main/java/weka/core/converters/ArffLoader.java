@@ -32,6 +32,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -113,6 +114,8 @@ public class ArffLoader
 
     /** Buffer of indices for sparse instance */
     protected int[] m_IndicesBuffer;
+    
+    protected List<Integer> m_stringAttIndices;
 
     /** the actual data */
     protected Instances m_Data;
@@ -257,6 +260,15 @@ public class ArffLoader
     protected void initBuffers() {
       m_ValueBuffer = new double[m_Data.numAttributes()];
       m_IndicesBuffer = new int[m_Data.numAttributes()];
+      
+      m_stringAttIndices = new ArrayList();
+      if (m_Data.checkForStringAttributes()) {
+        for (int i = 0; i < m_Data.numAttributes(); i++) {
+          if (m_Data.attribute(i).isString()) {
+            m_stringAttIndices.add(i);
+          }
+        }
+      }
     }
     
     /**
@@ -478,6 +490,14 @@ public class ArffLoader
     protected Instance getInstanceSparse(boolean flag) throws IOException {
       int valIndex, numValues = 0, maxIndex = -1;
       
+      // if reading incrementally, and we have string values, make sure that all string
+      // attributes are initialized to "0" with the dummy first value
+      if (!m_batchMode && !m_retainStringValues && m_stringAttIndices != null) {
+        for (int i = 0; i < m_stringAttIndices.size(); i++) {
+          m_Data.attribute(m_stringAttIndices.get(i)).setStringValue(Attribute.DUMMY_STRING_VAL);
+        }
+      }
+      
       // Get values
       do {
         // Get index
@@ -537,8 +557,9 @@ public class ArffLoader
   	  m_ValueBuffer[numValues] = 
   	    m_Data.attribute(m_IndicesBuffer[numValues]).addStringValue(m_Tokenizer.sval);
   	  } else {
-  	    m_ValueBuffer[numValues] = 0; 
-            m_Data.attribute(m_IndicesBuffer[numValues]).setStringValue(m_Tokenizer.sval);
+  	    m_ValueBuffer[numValues] = 1;
+            m_Data.attribute(m_IndicesBuffer[numValues]).setStringValue(Attribute.DUMMY_STRING_VAL);
+            m_Data.attribute(m_IndicesBuffer[numValues]).addStringValue(m_Tokenizer.sval);
   	  }
             break;
           case Attribute.DATE:
