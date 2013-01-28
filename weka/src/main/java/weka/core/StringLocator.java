@@ -15,7 +15,7 @@
 
 /*
  * StringLocator.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -144,7 +144,12 @@ public class StringLocator
       Attribute src  = srcDataset.attribute(srcLoc.getActualIndex(srcLoc.getAttributeIndices()[i]));
       Attribute dest = destDataset.attribute(destLoc.getActualIndex(destLoc.getAttributeIndices()[i]));
       if (!instance.isMissing(instIndex)) {
+        if (instance instanceof SparseInstance && instance.stringValue(instIndex).equals(Attribute.DUMMY_STRING_VAL)) {
+          continue;
+        }
+
         int valIndex = dest.addStringValue(src, (int)instance.value(instIndex));
+
         instance.setValue(instIndex, (double)valIndex);
       }
     }
