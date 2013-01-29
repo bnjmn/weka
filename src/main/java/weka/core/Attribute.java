@@ -142,6 +142,9 @@ public class Attribute
 
   /** The keyword used to denote the end of the declaration of a subrelation */
   public final static String ARFF_END_SUBRELATION = "@end";
+  
+  /** Dummy first value for String attributes (useful for sparse instances) */
+  public final static String DUMMY_STRING_VAL = "*WEKA*DUMMY*STRING*FOR*STRING*ATTRIBUTES*";
 
   /** Strings longer than this will be stored compressed. */
   private static final int STRING_COMPRESS_THRESHOLD = 200;
@@ -333,7 +336,7 @@ public class Attribute
       
       // Make sure there is at least one value so that string attribute
       // values are always represented when output as part of a sparse instance.
-      addStringValue("");
+      addStringValue(DUMMY_STRING_VAL);
     } else {
       m_Values = new FastVector(attributeValues.size());
       m_Hashtable = new Hashtable(attributeValues.size());
