@@ -738,6 +738,9 @@ public class RandomTree
    */
   protected class Tree implements Serializable {
     
+    /** For serializatiin */
+    private static final long serialVersionUID = 3549573538656522569L;
+    
     /** The subtrees appended to this tree. */
     protected Tree[] m_Successors;
     
