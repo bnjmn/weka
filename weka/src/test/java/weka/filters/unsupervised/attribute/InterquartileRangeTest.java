@@ -20,6 +20,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Instances;
+import weka.core.TestInstances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
@@ -35,6 +36,14 @@ import junit.framework.TestSuite;
  */
 public class InterquartileRangeTest
   extends AbstractFilterTest {
+  
+  protected void setUp() throws Exception {
+    super.setUp();
+    
+    TestInstances noMissing = TestInstances.forCapabilities(
+        m_Filter.getCapabilities());
+    m_Instances = noMissing.generate();
+  }
 
   /**
    * Initializes the test with the given name.
