@@ -46,14 +46,16 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
 /**
- * <!-- globalinfo-start --> Class for constructing a tree that considers K
+ <!-- globalinfo-start --> 
+ * Class for constructing a tree that considers K
  * randomly chosen attributes at each node. Performs no pruning. Also has an
  * option to allow estimation of class probabilities based on a hold-out set
  * (backfitting).
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ Valid options are:
  * <p/>
  * 
  * <pre>
@@ -95,7 +97,7 @@ import weka.core.WeightedInstancesHandler;
  *  may output additional info to the console
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
@@ -418,7 +420,8 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start --> 
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -460,7 +463,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    *  may output additional info to the console
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
