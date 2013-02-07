@@ -20,37 +20,47 @@
 
 package weka.filters.unsupervised.attribute;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import weka.core.Instances;
+import weka.core.TestInstances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
- * Tests InterquartileRange. Run from the command line with:<p>
+ * Tests InterquartileRange. Run from the command line with:
+ * <p>
  * java weka.filters.unsupervised.attribute.InterquartileRangeTest
- *
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class InterquartileRangeTest
-  extends AbstractFilterTest {
+public class InterquartileRangeTest extends AbstractFilterTest {
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+
+    TestInstances noMissing = TestInstances.forCapabilities(m_Filter
+        .getCapabilities());
+    m_Instances = noMissing.generate();
+  }
 
   /**
    * Initializes the test with the given name.
    * 
-   * @param name	the name of the test
+   * @param name the name of the test
    */
-  public InterquartileRangeTest(String name) { 
-    super(name);  
+  public InterquartileRangeTest(String name) {
+    super(name);
   }
 
   /**
    * Creates a default InterquartileRange.
    * 
-   * @return		the filter
+   * @return the filter
    */
+  @Override
   public Filter getFilter() {
     return new InterquartileRange();
   }
@@ -65,16 +75,14 @@ public class InterquartileRangeTest
     Instances result = null;
     try {
       m_Filter.setInputFormat(icopy);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
     }
     try {
       result = Filter.useFilter(icopy, m_Filter);
       assertNotNull(result);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on useFilter(): \n" + ex.getMessage());
     }
@@ -96,16 +104,14 @@ public class InterquartileRangeTest
     ((InterquartileRange) m_Filter).setAttributeIndices("3");
     try {
       m_Filter.setInputFormat(icopy);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
     }
     try {
       result = Filter.useFilter(icopy, m_Filter);
       assertNotNull(result);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on useFilter(): \n" + ex.getMessage());
     }
@@ -125,16 +131,14 @@ public class InterquartileRangeTest
     Instances result = null;
     try {
       m_Filter.setInputFormat(icopy);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
     }
     try {
       result = Filter.useFilter(icopy, m_Filter);
       assertNotNull(result);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on useFilter(): \n" + ex.getMessage());
     }
@@ -153,16 +157,14 @@ public class InterquartileRangeTest
     Instances result = null;
     try {
       m_Filter.setInputFormat(icopy);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
     }
     try {
       result = Filter.useFilter(icopy, m_Filter);
       assertNotNull(result);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on useFilter(): \n" + ex.getMessage());
     }
@@ -179,22 +181,20 @@ public class InterquartileRangeTest
   public void testPerAttribute() {
     // parameters
     ((InterquartileRange) m_Filter).setDetectionPerAttribute(true);
-    
+
     // run filter
     Instances icopy = new Instances(m_Instances);
     Instances result = null;
     try {
       m_Filter.setInputFormat(icopy);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
     }
     try {
       result = Filter.useFilter(icopy, m_Filter);
       assertNotNull(result);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on useFilter(): \n" + ex.getMessage());
     }
@@ -203,9 +203,9 @@ public class InterquartileRangeTest
     int count = 0;
     for (int i = 0; i < icopy.numAttributes(); i++) {
       if (icopy.attribute(i).isNumeric())
-	count++;
+        count++;
     }
-    assertEquals(icopy.numAttributes() + 2*count, result.numAttributes());
+    assertEquals(icopy.numAttributes() + 2 * count, result.numAttributes());
     assertEquals(icopy.numInstances(), result.numInstances());
   }
 
@@ -223,16 +223,14 @@ public class InterquartileRangeTest
     Instances result = null;
     try {
       m_Filter.setInputFormat(icopy);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
     }
     try {
       result = Filter.useFilter(icopy, m_Filter);
       assertNotNull(result);
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on useFilter(): \n" + ex.getMessage());
     }
@@ -241,16 +239,16 @@ public class InterquartileRangeTest
     int count = 0;
     for (int i = 0; i < icopy.numAttributes(); i++) {
       if (icopy.attribute(i).isNumeric())
-	count++;
+        count++;
     }
-    assertEquals(icopy.numAttributes() + 3*count, result.numAttributes());
+    assertEquals(icopy.numAttributes() + 3 * count, result.numAttributes());
     assertEquals(icopy.numInstances(), result.numInstances());
   }
 
   /**
    * Returns a test suite.
    * 
-   * @return		the suite
+   * @return the suite
    */
   public static Test suite() {
     return new TestSuite(InterquartileRangeTest.class);
@@ -259,9 +257,9 @@ public class InterquartileRangeTest
   /**
    * Runs the test from the commandline.
    * 
-   * @param args	ignored
+   * @param args ignored
    */
-  public static void main(String[] args){
+  public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
   }
 }
