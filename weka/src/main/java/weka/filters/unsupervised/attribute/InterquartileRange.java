@@ -580,7 +580,6 @@ public class InterquartileRange
 
     // attributes
     result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
     
     // class
     result.enableAllClasses();
