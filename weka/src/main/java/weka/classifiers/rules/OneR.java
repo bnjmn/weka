@@ -15,33 +15,33 @@
 
 /*
  *    OneR.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.rules;
 
-import weka.classifiers.Classifier;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WekaException;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -273,6 +273,7 @@ public class OneR
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -419,7 +420,7 @@ public class OneR
     // and aren't affected by sorting performed for any numeric
     // attributes processed before this one
     data = new Instances(data);
-
+    
     // ... can't be more than numInstances buckets
     int [] classifications = new int[data.numInstances()];
     double [] breakpoints = new double[data.numInstances()];

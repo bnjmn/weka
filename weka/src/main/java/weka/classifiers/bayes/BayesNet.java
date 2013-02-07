@@ -15,12 +15,14 @@
 
 /*
  * BayesNet.java
- * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes;
 
-import weka.classifiers.Classifier;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.bayes.net.ADNode;
 import weka.classifiers.bayes.net.BIFReader;
@@ -35,6 +37,7 @@ import weka.classifiers.bayes.net.search.local.Scoreable;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -43,14 +46,10 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
 import weka.estimators.Estimator;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -160,6 +159,7 @@ public class BayesNet
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);

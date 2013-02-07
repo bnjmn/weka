@@ -15,7 +15,7 @@
 
 /*
  *    AttributeExpression.java
- *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -426,10 +426,10 @@ public class AttributeExpression
 	operands.push(new Double(((NumericOperand)nextob).m_numericConst));
       } else if (nextob instanceof AttributeOperand) {
 	double value = vals[((AttributeOperand)nextob).m_attributeIndex];
-	if (Utils.isMissingValue(value)) {
+	/*if (Utils.isMissingValue(value)) {
 	  vals[vals.length-1] = Utils.missingValue();
 	  break;
-	}
+	}*/
 	if (((AttributeOperand)nextob).m_negative) {
 	  value = -value;
 	}

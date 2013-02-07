@@ -15,25 +15,24 @@
 
 /*
  *    ZeroR.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.rules;
 
-import weka.classifiers.Classifier;
+import java.util.Enumeration;
+
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
 
 /**
  <!-- globalinfo-start -->
@@ -86,6 +85,7 @@ public class ZeroR
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);

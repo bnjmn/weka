@@ -39,6 +39,12 @@ public class FilteredAssociatorTest
     super(name);  
   }
 
+  protected void setUp() throws Exception {
+    super.setUp();
+    
+    m_NClasses = 2; // for the default base associator (FPGrowth)
+  }
+
   /**
    * Creates a default FilteredAssociator
    */
