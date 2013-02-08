@@ -309,7 +309,7 @@ public class IsolationForest extends RandomizableClassifier implements Technical
     for (int i = 0; i < m_numTrees; i++) {
       data.randomize(r);
       m_trees[i] = new Tree(new Instances(data, 0, m_subsampleSize), r,
-                            0, (int) Math.ceil(Utils.log2(m_subsampleSize)));
+                            0, (int) Math.ceil(Utils.log2(data.numInstances())));
     }
   }
 
@@ -320,7 +320,7 @@ public class IsolationForest extends RandomizableClassifier implements Technical
   public static double c(double n) {
 
     if (n <= 1.0) return 0;
-    return 2 * (Math.log(n - 1) + Math.E) - (2 * (n - 1) / n);
+    return 2 * (Math.log(n - 1) + 0.5772156649) - (2 * (n - 1) / n);
   }
 
   /** 
