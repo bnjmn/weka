@@ -15,13 +15,21 @@
 
 /*
  *    ExplicitTestsetResultProducer.java
- *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
+import java.io.File;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.TimeZone;
+import java.util.Vector;
+
 import weka.core.AdditionalMeasureProducer;
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -30,13 +38,6 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WekaException;
 import weka.core.converters.ConverterUtils.DataSource;
-
-import java.io.File;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.TimeZone;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -187,6 +188,8 @@ public class ExplicitTestsetResultProducer
 
   /** The name of the result field containing the timestamp. */
   public static String TIMESTAMP_FIELD_NAME = "Date_time";
+  
+  protected transient Environment m_env;
 
   /**
    * Returns a string describing this result producer.
@@ -641,6 +644,12 @@ public class ExplicitTestsetResultProducer
     result  = getTestsetDir().getPath() + File.separator;
     result += getTestsetPrefix() + name + getTestsetSuffix();
     
+    // substitute the run number (and any other variables)
+    // if specified
+    try {
+      result = m_env.substitute(result);
+    } catch (Exception ex) { }
+    
     return result;
   }
   
@@ -674,6 +683,11 @@ public class ExplicitTestsetResultProducer
 	Random rand = new Random(run);
 	train.randomize(rand);
       }
+      
+      if (m_env == null) {
+        m_env = new Environment();
+      }
+      m_env.addVariable("RUN_NUMBER", "" + run);
 
       // test set
       String filename = createFilename(train);
