@@ -3064,10 +3064,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         text.append(String.format("%-11.3f", precision(i)));
       }
       if (displayR) {
-        text.append(String.format("%-9.3f", precision(i)));
+        text.append(String.format("%-9.3f", recall(i)));
       }
       if (displayFM) {
-        text.append(String.format("%-11.3f", precision(i)));
+        text.append(String.format("%-11.3f", fMeasure(i)));
       }
       if (displayMCC) {
         double mat = matthewsCorrelationCoefficient(i);
