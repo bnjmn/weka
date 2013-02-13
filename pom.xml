@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>weka-dev</artifactId>
-  <version>3.7.8-SNAPSHOT</version><!-- weka-version -->
+  <version>3.7.9-SNAPSHOT</version><!-- weka-version -->
   <packaging>jar</packaging>
 
   <name>weka-dev</name>
@@ -111,7 +111,7 @@
     <dependency>
       <groupId>org.pentaho.pentaho-commons</groupId>
       <artifactId>pentaho-package-manager</artifactId>
-      <version>1.0.3</version>
+      <version>1.0.6</version>
     </dependency>
   </dependencies>
 
