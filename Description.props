@@ -1,0 +1,52 @@
+# Description file for DilcaDistance
+#
+#
+
+# Package name (required)
+PackageName=DilcaDistance
+
+# Version (required)
+Version=1.0.0
+
+#Date (year-month-day)
+Date=2013-02-12
+
+# Title (required)
+Title=Learning distance measure for categorical data
+
+# Category (recommended)
+Category=Distance 
+
+# Author (required)
+Author=Dino Ienco <dino.ienco@teledetection.fr>,Ruggero G. Pensa <pensa@di.unito.it>
+
+# Maintainer (required)
+Maintainer=Dino Ienco <dino.ienco@teledetection.fr>>
+
+# License (required)
+License=GPL 2.0|Mozilla
+
+# Description (required)
+Description=This package implements the parameter free version of the DILCA distance. This approach allows to learn value-to-value distances between each pair of values for each attribute of the dataset. The distance between two values is computed indirectly based on the their distribution w.r.t. a set of related attributes (the context) carefully chosen
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/DilcaDistance1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/DilcaDistance
+
+# Enhances various other packages ?
+Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.1),fastCorrBasedFS (>=1.0.1)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+#MessageToDisplayOnInstallation=DilcaDistance package requires some extra\n\
+ stuff to be installed after installing this package. You will\n\
+ need to use it until you install the package fastCorrBasedFS because Dilca is based on this feature selection algorithm
