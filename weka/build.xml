@@ -534,6 +534,11 @@
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="cascadeKMeans"/>
     </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="DilcaDistance"/>
+      <param name="cp" value="../fastCorrBasedFS/build/classes"/>
+    </antcall>
   </target>
 
   <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests|clean]"> 
