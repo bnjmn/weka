@@ -47,6 +47,4 @@ Depends=weka (>=3.7.1),fastCorrBasedFS (>=1.0.1)
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
 # the installation process). (optional).
-#MessageToDisplayOnInstallation=DilcaDistance package requires some extra\n\
- stuff to be installed after installing this package. You will\n\
- need to use it until you install the package fastCorrBasedFS because Dilca is based on this feature selection algorithm
+#MessageToDisplayOnInstallation=
