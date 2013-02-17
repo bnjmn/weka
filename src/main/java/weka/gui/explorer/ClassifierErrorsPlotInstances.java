@@ -453,7 +453,13 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
       double probNext = 0;
 
       if (toPredict.classAttribute().isNominal()) {
-        preds = classifier.distributionForInstance(toPredict);
+        Instance classMissing = (Instance) toPredict.copy();
+        classMissing.setDataset(toPredict.dataset());
+
+        if (classMissing.classIndex() >= 0) {
+          classMissing.setClassMissing();
+        }
+        preds = classifier.distributionForInstance(classMissing);
 
         pred = (Utils.sum(preds) == 0) ? Utils.missingValue() : Utils
             .maxIndex(preds);
