@@ -15,17 +15,25 @@
 
 /*
  *    StringToWordVector.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
+import java.io.File;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -37,21 +45,12 @@ import weka.core.SparseInstance;
 import weka.core.Stopwords;
 import weka.core.Tag;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
-
-import java.io.File;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.TreeMap;
-import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -717,6 +716,14 @@ public class StringToWordVector
     // if the first batch hasn't been processed. Otherwise
     // input() has already done all the work.
     if (!isFirstBatchDone()) {
+      
+      // turn of per-class mode if the class is not nominal (or is all missing)!
+      if (getInputFormat().classIndex() >= 0) {
+        if (!getInputFormat().classAttribute().isNominal() || 
+            getInputFormat().attributeStats(getInputFormat().classIndex()).missingCount == getInputFormat().numInstances()) {
+          m_doNotOperateOnPerClassBasis = true;
+        }
+      }
 
       // Determine the dictionary from the first batch (training data)
       determineDictionary();
