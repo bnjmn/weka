@@ -25,6 +25,7 @@ package weka.classifiers.functions;
 import weka.classifiers.Classifier;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.functions.supportVector.Kernel;
+import weka.classifiers.functions.supportVector.CachedKernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.Capabilities;
@@ -344,6 +345,13 @@ public class GaussianProcesses
     // Initialize kernel
     m_kernel.buildKernel(insts);
     m_KernelIsLinear = (m_kernel instanceof PolyKernel) && (((PolyKernel) m_kernel).getExponent() == 1.0);
+    
+    // Save memory (can't use Kernel.clean() because of polynominal kernel with exponent 1)
+    if (m_kernel instanceof CachedKernel) {
+      m_kernel = Kernel.makeCopy(m_kernel);
+      ((CachedKernel)m_kernel).setCacheSize(-1);
+      m_kernel.buildKernel(insts);
+    }
 
     // Build Inverted Covariance Matrix
 
