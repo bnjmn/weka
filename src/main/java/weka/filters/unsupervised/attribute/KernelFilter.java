@@ -836,6 +836,7 @@ public class KernelFilter
     // backup class attribute and remove it
     double[] classes = instances.attributeToDoubleArray(instances.classIndex());
     int classIndex = instances.classIndex();
+    Attribute classAttribute = (Attribute)instances.classAttribute().copy();
     instances.setClassIndex(-1);
     instances.deleteAttributeAt(classIndex);
 
@@ -843,7 +844,7 @@ public class KernelFilter
     FastVector atts = new FastVector();
     for (int j = 0; j < m_NumTrainInstances; j++)
       atts.addElement(new Attribute("Kernel " + j));
-    atts.addElement(new Attribute("Class"));
+    atts.addElement(classAttribute);
     Instances result = new Instances("Kernel", atts, 0);
     result.setClassIndex(result.numAttributes() - 1);
 
