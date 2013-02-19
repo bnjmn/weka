@@ -15,46 +15,42 @@
 
 /*
  *    GaussianProcesses.java
- *    Copyright (C) 2005-2009 University of Waikato
+ *    Copyright (C) 2005-2012 University of Waikato
  */
 
 package weka.classifiers.functions;
 
 
-import weka.classifiers.Classifier;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.ConditionalDensityEstimator;
-import weka.classifiers.Evaluation;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.functions.supportVector.CachedKernel;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.matrix.Matrix;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Statistics;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.matrix.Matrix;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
-
-import java.io.FileReader;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * <!-- globalinfo-start --> 
@@ -388,6 +384,13 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
       }
       kv = m_kernel.eval(i, i, insts.instance(i));
       m_L[i][i] = kv + m_delta * m_delta;
+    }
+
+    // Save memory (can't use Kernel.clean() because of polynominal kernel with exponent 1)
+    if (m_kernel instanceof CachedKernel) {
+      m_kernel = Kernel.makeCopy(m_kernel);
+      ((CachedKernel)m_kernel).setCacheSize(-1);
+      m_kernel.buildKernel(insts);
     }
 
     // Calculate inverse matrix exploiting symmetry of covariance matrix
