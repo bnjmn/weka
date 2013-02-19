@@ -60,7 +60,7 @@ public class KernelFilterTest
     result = new FilteredClassifier();
     
     result.setFilter(getFilter());
-    result.setClassifier(new weka.classifiers.trees.M5P());
+    result.setClassifier(new weka.classifiers.trees.J48());
     
     return result;
   }
