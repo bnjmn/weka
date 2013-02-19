@@ -717,6 +717,14 @@ public class StringToWordVector
     // if the first batch hasn't been processed. Otherwise
     // input() has already done all the work.
     if (!isFirstBatchDone()) {
+      
+      // turn of per-class mode if the class is not nominal (or is all missing)!
+      if (getInputFormat().classIndex() >= 0) {
+        if (!getInputFormat().classAttribute().isNominal() || 
+            getInputFormat().attributeStats(getInputFormat().classIndex()).missingCount == getInputFormat().numInstances()) {
+          m_doNotOperateOnPerClassBasis = true;
+        }
+      }
 
       // Determine the dictionary from the first batch (training data)
       determineDictionary();
