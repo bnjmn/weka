@@ -386,6 +386,13 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
       m_L[i][i] = kv + m_delta * m_delta;
     }
 
+    // Save memory (can't use Kernel.clean() because of polynominal kernel with exponent 1)
+    if (m_kernel instanceof CachedKernel) {
+      m_kernel = Kernel.makeCopy(m_kernel);
+      ((CachedKernel)m_kernel).setCacheSize(-1);
+      m_kernel.buildKernel(insts);
+    }
+
     // Calculate inverse matrix exploiting symmetry of covariance matrix
     // NB this replaces the kernel matrix with (the negative of) its inverse and does
     // not require any extra memory for a solution matrix
