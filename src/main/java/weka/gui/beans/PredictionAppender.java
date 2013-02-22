@@ -311,7 +311,9 @@ public class PredictionAppender extends JPanel implements DataSource,
       oldNumAtts = e.getStructure().numAttributes();
       m_throughput = new StreamThroughput(statusMessagePrefix());
     } else {
-      oldNumAtts = currentI.dataset().numAttributes();
+      if (currentI != null) {
+        oldNumAtts = currentI.dataset().numAttributes();
+      }
     }
     if (status == IncrementalClassifierEvent.NEW_BATCH) {
       m_instanceEvent = new InstanceEvent(this, null, 0);
@@ -356,42 +358,48 @@ public class PredictionAppender extends JPanel implements DataSource,
       return;
     }
 
-    m_throughput.updateStart();
-    double[] instanceVals = new double[m_format.numAttributes()];
-    Instance newInst = null;
-    try {
-      // process the actual instance
-      for (int i = 0; i < oldNumAtts; i++) {
-        instanceVals[i] = currentI.value(i);
-      }
-      if (!m_appendProbabilities
-          || currentI.dataset().classAttribute().isNumeric()) {
-        double predClass = classifier.classifyInstance(currentI);
-        instanceVals[instanceVals.length - 1] = predClass;
-      } else if (m_appendProbabilities) {
-        double[] preds = classifier.distributionForInstance(currentI);
-        for (int i = oldNumAtts; i < instanceVals.length; i++) {
-          instanceVals[i] = preds[i - oldNumAtts];
+    if (currentI != null) {
+      m_throughput.updateStart();
+      double[] instanceVals = new double[m_format.numAttributes()];
+      Instance newInst = null;
+      try {
+        // process the actual instance
+        for (int i = 0; i < oldNumAtts; i++) {
+          instanceVals[i] = currentI.value(i);
         }
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      return;
-    } finally {
-      newInst = new DenseInstance(currentI.weight(), instanceVals);
-      newInst.setDataset(m_format);
-      // check for string attributes
-      if (m_stringAttIndexes != null) {
-        for (int i = 0; i < m_stringAttIndexes.size(); i++) {
-          int index = m_stringAttIndexes.get(i);
-          m_format.attribute(m_stringAttIndexes.get(i)).setStringValue(
-              currentI.stringValue(index));
+        if (!m_appendProbabilities
+            || currentI.dataset().classAttribute().isNumeric()) {
+          double predClass = classifier.classifyInstance(currentI);
+          instanceVals[instanceVals.length - 1] = predClass;
+        } else if (m_appendProbabilities) {
+          double[] preds = classifier.distributionForInstance(currentI);
+          for (int i = oldNumAtts; i < instanceVals.length; i++) {
+            instanceVals[i] = preds[i - oldNumAtts];
+          }
         }
-      }
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        return;
+      } finally {
+        newInst = new DenseInstance(currentI.weight(), instanceVals);
+        newInst.setDataset(m_format);
+        // check for string attributes
+        if (m_stringAttIndexes != null) {
+          for (int i = 0; i < m_stringAttIndexes.size(); i++) {
+            int index = m_stringAttIndexes.get(i);
+            m_format.attribute(m_stringAttIndexes.get(i)).setStringValue(
+                currentI.stringValue(index));
+          }
+        }
 
-      m_instanceEvent.setInstance(newInst);
-      m_instanceEvent.setStatus(status);
-      m_throughput.updateEnd(m_logger);
+        m_instanceEvent.setInstance(newInst);
+        m_instanceEvent.setStatus(status);
+        m_throughput.updateEnd(m_logger);
+        // notify listeners
+        notifyInstanceAvailable(m_instanceEvent);
+      }
+    } else {
+      m_instanceEvent.setInstance(null); // end of stream
       // notify listeners
       notifyInstanceAvailable(m_instanceEvent);
     }
