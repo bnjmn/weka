@@ -574,6 +574,14 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
               }
               notifyInstanceListeners(m_ie);
             }
+
+            msg = statusMessagePrefix() + "Finished.";
+            if (m_log != null) {
+              m_log.statusMessage(msg);
+              m_log.logMessage("[" + getCustomName() + "] " + msg);
+            }
+            m_busy = false;
+
             return;
           }
         }
@@ -730,7 +738,6 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
             }
             nextH = null;
           }
-
         } while (merger.size() > 0 && !m_stopRequested.get());
 
         if (!m_stopRequested.get()) {
