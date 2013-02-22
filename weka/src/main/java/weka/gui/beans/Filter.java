@@ -34,6 +34,7 @@ import javax.swing.JPanel;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.filters.AllFilter;
 import weka.filters.StreamableFilter;
@@ -293,7 +294,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
           if (m_Filter.isOutputFormatDefined()) {
             // System.err.println("Filter - passing on output format...");
             // System.err.println(m_Filter.getOutputFormat());
-            m_ie.setStructure(m_Filter.getOutputFormat());
+            m_ie.setStructure(new Instances(m_Filter.getOutputFormat(), 0));
             m_ie.m_formatNotificationOnly = e.m_formatNotificationOnly;
             notifyInstanceListeners(m_ie);
             m_structurePassedOn = true;
@@ -374,7 +375,8 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
           if (filteredInstance != null) {
             if (!m_structurePassedOn) {
               // pass on the new structure first
-              m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
+              m_ie.setStructure((Instances) (new SerializedObject(
+                  filteredInstance.dataset()).getObject()));
               notifyInstanceListeners(m_ie);
               m_structurePassedOn = true;
             }
@@ -387,6 +389,20 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
           }
           while (m_Filter.numPendingOutput() > 0) {
             filteredInstance = m_Filter.output();
+
+            if (filteredInstance.dataset().checkForStringAttributes()) {
+              for (int i = 0; i < filteredInstance.dataset().numAttributes(); i++) {
+                if (filteredInstance.dataset().attribute(i).isString()
+                    && !filteredInstance.isMissing(i)) {
+                  String val = filteredInstance.stringValue(i);
+
+                  m_ie.getStructure().attribute(i).setStringValue(val);
+                  filteredInstance.setValue(i, 0);
+                }
+              }
+            }
+            filteredInstance.setDataset(m_ie.getStructure());
+
             m_ie.setInstance(filteredInstance);
             // System.err.println("Filter - sending pending...");
             if (m_Filter.numPendingOutput() == 0) {
@@ -436,6 +452,20 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
           m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
           notifyInstanceListeners(m_ie);
           m_structurePassedOn = true;
+        }
+
+        filteredInstance.setDataset(m_ie.getStructure());
+
+        if (filteredInstance.dataset().checkForStringAttributes()) {
+          for (int i = 0; i < filteredInstance.dataset().numAttributes(); i++) {
+            if (filteredInstance.dataset().attribute(i).isString()
+                && !filteredInstance.isMissing(i)) {
+              String val = filteredInstance.stringValue(i);
+
+              filteredInstance.dataset().attribute(i).setStringValue(val);
+              filteredInstance.setValue(i, 0);
+            }
+          }
         }
 
         m_ie.setInstance(filteredInstance);
