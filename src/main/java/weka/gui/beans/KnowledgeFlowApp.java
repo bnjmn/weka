@@ -1924,9 +1924,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         @Override
         public void actionPerformed(ActionEvent e) {
           m_logPanel
-              .statusMessage("[KnowledgeFlow]|Attempting to stop all components...");
+              .statusMessage("@!@[KnowledgeFlow]|Attempting to stop all components...");
           stopFlow();
-          m_logPanel.statusMessage("[KnowledgeFlow]|OK.");
+          m_logPanel.statusMessage("@!@[KnowledgeFlow]|OK.");
         }
       });
 
@@ -3850,7 +3850,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     logPanel.logMessage("web: " + Copyright.getURL());
     logPanel.logMessage(date);
     logPanel
-        .statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
+        .statusMessage("@!@[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
     logPanel.getStatusTable().addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
@@ -3870,7 +3870,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                     + " / "
                     + String.format("%,d", maxM));
             logPanel
-                .statusMessage("[KnowledgeFlow]|Memory (free/total/max.) in bytes: "
+                .statusMessage("@!@[KnowledgeFlow]|Memory (free/total/max.) in bytes: "
                     + String.format("%,d", freeM)
                     + " / "
                     + String.format("%,d", totalM)
@@ -3913,7 +3913,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       m_mainKFPerspective.setExecuting(true);
       m_mainKFPerspective.getLogPanel(m_flowIndex).clearStatus();
       m_mainKFPerspective.getLogPanel(m_flowIndex).statusMessage(
-          "[KnowledgeFlow]|Executing...");
+          "@!@[KnowledgeFlow]|Executing...");
 
       FlowRunner runner = new FlowRunner(false, false);
       runner.setStartSequentially(m_sequential);
@@ -3952,7 +3952,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           lp.setMessageOnAll(false, "Stopped.");
         } else {
           m_mainKFPerspective.getLogPanel(m_flowIndex).statusMessage(
-              "[KnowledgeFlow]|OK.");
+              "@!@[KnowledgeFlow]|OK.");
         }
       }
     }
@@ -4714,7 +4714,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
             loader.reset();
             m_logPanel
-                .statusMessage("[KnowledgeFlow]|Sending data to perspective(s)...");
+                .statusMessage("@!@[KnowledgeFlow]|Sending data to perspective(s)...");
             Instances data = loader.getDataSet();
             if (data != null) {
               // make sure the perspective toolbar is visible!!
@@ -4765,7 +4765,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               m_perspectiveToolBar.getComponent(i).setEnabled(true);
             }
             m_perspectiveDataLoadThread = null;
-            m_logPanel.statusMessage("[KnowledgeFlow]|OK");
+            m_logPanel.statusMessage("@!@[KnowledgeFlow]|OK");
           }
         }
       };
@@ -6012,11 +6012,11 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       setEnvironment();
       if (newTab) {
         m_logPanel.clearStatus();
-        m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
+        m_logPanel.statusMessage("@!@[KnowledgeFlow]|Flow loaded.");
       }
     } catch (Exception ex) {
       m_logPanel
-          .statusMessage("[KnowledgeFlow]|Unable to load flow (see log).");
+          .statusMessage("@!@[KnowledgeFlow]|Unable to load flow (see log).");
       m_logPanel.logMessage("[KnowledgeFlow] Unable to load flow ("
           + ex.getMessage() + ").");
       ex.printStackTrace();
@@ -6077,7 +6077,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     setEnvironment();
     if (newTab) {
       m_logPanel.clearStatus();
-      m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
+      m_logPanel.statusMessage("@!@[KnowledgeFlow]|Flow loaded.");
     }
 
     m_loadB.setEnabled(true);
@@ -6325,7 +6325,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       }
     } catch (Exception ex) {
       m_logPanel
-          .statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
+          .statusMessage("@!@[KnowledgeFlow]|Unable to save flow (see log).");
       m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
           + ex.getMessage() + ").");
       ex.printStackTrace();
