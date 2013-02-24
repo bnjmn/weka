@@ -31,9 +31,12 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -100,9 +103,11 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   protected String m_globalInfo;
 
   /**
-   * Objects talking to us
+   * Objects talking to us. String connection event key, 2 element list
+   * containing source and count
    */
-  protected Hashtable m_listenees = new Hashtable();
+  // protected Hashtable m_listenees = new Hashtable();
+  protected HashMap<String, List<Object>> m_listenees = new HashMap<String, List<Object>>();
 
   /**
    * Objects listening for batch classifier events
@@ -1764,9 +1769,11 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
      * if (eventName.compareTo("instance") == 0) { if (!(m_Classifier instanceof
      * weka.classifiers.UpdateableClassifier)) { return false; } }
      */
-    if (m_listenees.containsKey(eventName)) {
+
+    if (eventName.equals("trainingSet") && m_listenees.containsKey(eventName)) {
       return false;
     }
+
     return true;
   }
 
@@ -1807,8 +1814,49 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       }
     }
 
+    if (eventName.equals("testSet") && m_listenees.containsKey("testSet")
+        && m_log != null) {
+      if (!Utils
+          .getDontShowDialog("weka.gui.beans.ClassifierMultipleTestSetConnections")
+          && !java.awt.GraphicsEnvironment.isHeadless()) {
+
+        String msg = "You have more than one incoming test set connection to \n"
+            + "'"
+            + getCustomName()
+            + "'. In order for this setup to run properly\n"
+            + "and generate correct evaluation results you MUST execute the flow\n"
+            + "by launching start points sequentially (second play button). In order\n"
+            + "to specify the order you'd like the start points launched in you can\n"
+            + "set the name of each start point (right click on start point and select\n"
+            + "'Set name') to include a number prefix - e.g. '1: load my arff file'.";
+
+        JCheckBox dontShow = new JCheckBox("Do not show this message again");
+        Object[] stuff = new Object[2];
+        stuff[0] = msg;
+        stuff[1] = dontShow;
+
+        JOptionPane.showMessageDialog(null, stuff,
+            "Classifier test connection", JOptionPane.OK_OPTION);
+
+        if (dontShow.isSelected()) {
+          try {
+            Utils
+                .setDontShowDialog("weka.gui.beans.ClassifierMultipleTestSetConnections");
+          } catch (Exception ex) {
+            // quietly ignore
+          }
+        }
+      }
+    }
+
     if (connectionAllowed(eventName)) {
-      m_listenees.put(eventName, source);
+      List<Object> listenee = m_listenees.get(eventName);
+      if (listenee == null) {
+        listenee = new ArrayList<Object>();
+        m_listenees.put(eventName, listenee);
+      }
+      listenee.add(source);
+
       /*
        * if (eventName.compareTo("instance") == 0) { startIncrementalHandler();
        * }
@@ -1827,7 +1875,17 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   @Override
   public synchronized void disconnectionNotification(String eventName,
       Object source) {
-    m_listenees.remove(eventName);
+
+    List<Object> listenees = m_listenees.get(eventName);
+
+    if (listenees != null) {
+      listenees.remove(source);
+
+      if (listenees.size() == 0) {
+        m_listenees.remove(eventName);
+      }
+    }
+
     if (eventName.compareTo("instance") == 0) {
       stop(); // kill the incremental handler thread if it is running
     }
@@ -1860,13 +1918,21 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   @Override
   public void stop() {
     // tell all listenees (upstream beans) to stop
-    Enumeration en = m_listenees.keys();
-    while (en.hasMoreElements()) {
-      Object tempO = m_listenees.get(en.nextElement());
-      if (tempO instanceof BeanCommon) {
-        ((BeanCommon) tempO).stop();
+
+    for (Map.Entry<String, List<Object>> e : m_listenees.entrySet()) {
+      List<Object> l = e.getValue();
+      for (Object o : l) {
+        if (o instanceof BeanCommon) {
+          ((BeanCommon) o).stop();
+        }
       }
     }
+
+    /*
+     * Enumeration en = m_listenees.keys(); while (en.hasMoreElements()) {
+     * Object tempO = m_listenees.get(en.nextElement()); if (tempO instanceof
+     * BeanCommon) { ((BeanCommon) tempO).stop(); } }
+     */
 
     // shutdown the executor pool and reclaim storage
     if (m_executorPool != null) {
