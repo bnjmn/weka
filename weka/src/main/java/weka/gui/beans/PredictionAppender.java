@@ -427,6 +427,24 @@ public class PredictionAppender extends JPanel implements DataSource,
         return;
       }
 
+      if ((e.getTestSet().isStructureOnly() || e.getTestSet().getDataSet()
+          .numInstances() == 0)
+          && e.getTestSet().getDataSet().classIndex() < 0) {
+        return; // don't do anything or make a fuss if there is no class set in
+                // a structure only data set
+      }
+
+      if (e.getTestSet().getDataSet().classIndex() < 0) {
+        if (m_logger != null) {
+          m_logger.logMessage("[PredictionAppender] " + statusMessagePrefix()
+              + "No class attribute set in the data!");
+          m_logger.statusMessage(statusMessagePrefix()
+              + "ERROR: Can't append probablities - see log.");
+        }
+        stop();
+        return;
+      }
+
       Instances testSet = e.getTestSet().getDataSet();
       Instances trainSet = e.getTrainSet().getDataSet();
       int setNum = e.getSetNumber();
