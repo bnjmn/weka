@@ -357,7 +357,8 @@ public class LogPanel extends JPanel implements Logger {
           m_tableModel.addRow(newRow);
         }
 
-        if (!noTimer) {
+        if (!noTimer && !stepStatus.toLowerCase().startsWith("finished")
+            && !stepStatus.toLowerCase().startsWith("done")) {
           installTimer(stepHashCopy);
         }
       } catch (Exception ex) {
