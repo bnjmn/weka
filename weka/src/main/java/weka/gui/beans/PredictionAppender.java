@@ -323,11 +323,9 @@ public class PredictionAppender extends JPanel implements DataSource,
       // +"_with predictions";
 
       // check for string attributes
+      m_stringAttIndexes = new ArrayList<Integer>();
       for (int i = 0; i < e.getStructure().numAttributes(); i++) {
         if (e.getStructure().attribute(i).isString()) {
-          if (m_stringAttIndexes == null) {
-            m_stringAttIndexes = new ArrayList<Integer>();
-          }
           m_stringAttIndexes.add(new Integer(i));
         }
       }
@@ -404,7 +402,7 @@ public class PredictionAppender extends JPanel implements DataSource,
       notifyInstanceAvailable(m_instanceEvent);
     }
 
-    if (status == IncrementalClassifierEvent.BATCH_FINISHED) {
+    if (status == IncrementalClassifierEvent.BATCH_FINISHED || currentI == null) {
       // clean up
       // m_incrementalStructure = null;
       m_instanceEvent = null;
