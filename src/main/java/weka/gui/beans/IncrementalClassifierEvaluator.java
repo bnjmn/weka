@@ -156,10 +156,10 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
          * " started processing..."); }
          */
       } else {
-        m_throughput.updateStart();
-        m_instanceCount++;
         Instance inst = ce.getCurrentInstance();
         if (inst != null) {
+          m_throughput.updateStart();
+          m_instanceCount++;
           // if (inst.attribute(inst.classIndex()).isNominal()) {
           double[] dist = ce.getClassifier().distributionForInstance(inst);
           double pred = 0;
@@ -287,45 +287,45 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
               m_ce.setReset(m_reset);
               m_reset = false;
             }
-            m_throughput.updateEnd(m_logger);
             notifyChartListeners(m_ce);
           }
+          m_throughput.updateEnd(m_logger);
+        }
 
-          if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED
-              || inst == null) {
-            if (m_logger != null) {
-              m_logger.logMessage("[IncrementalClassifierEvaluator]"
-                  + statusMessagePrefix() + " Finished processing.");
+        if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED
+            || inst == null) {
+          if (m_logger != null) {
+            m_logger.logMessage("[IncrementalClassifierEvaluator]"
+                + statusMessagePrefix() + " Finished processing.");
+          }
+          m_throughput.finished(m_logger);
+
+          // save memory if using windowed evaluation for charting
+          m_windowEval = null;
+          m_window = null;
+          m_windowedPreds = null;
+
+          if (m_textListeners.size() > 0) {
+            String textTitle = ce.getClassifier().getClass().getName();
+            textTitle = textTitle.substring(textTitle.lastIndexOf('.') + 1,
+                textTitle.length());
+            String results = "=== Performance information ===\n\n"
+                + "Scheme:   " + textTitle + "\n" + "Relation: "
+                + m_eval.getHeader().relationName() + "\n\n"
+                + m_eval.toSummaryString();
+            if (m_eval.getHeader().classIndex() >= 0
+                && m_eval.getHeader().classAttribute().isNominal()
+                && (m_outputInfoRetrievalStats)) {
+              results += "\n" + m_eval.toClassDetailsString();
             }
-            m_throughput.finished(m_logger);
 
-            // save memory if using windowed evaluation for charting
-            m_windowEval = null;
-            m_window = null;
-            m_windowedPreds = null;
-
-            if (m_textListeners.size() > 0) {
-              String textTitle = ce.getClassifier().getClass().getName();
-              textTitle = textTitle.substring(textTitle.lastIndexOf('.') + 1,
-                  textTitle.length());
-              String results = "=== Performance information ===\n\n"
-                  + "Scheme:   " + textTitle + "\n" + "Relation: "
-                  + m_eval.getHeader().relationName() + "\n\n"
-                  + m_eval.toSummaryString();
-              if (m_eval.getHeader().classIndex() >= 0
-                  && m_eval.getHeader().classAttribute().isNominal()
-                  && (m_outputInfoRetrievalStats)) {
-                results += "\n" + m_eval.toClassDetailsString();
-              }
-
-              if (m_eval.getHeader().classIndex() >= 0
-                  && m_eval.getHeader().classAttribute().isNominal()) {
-                results += "\n" + m_eval.toMatrixString();
-              }
-              textTitle = "Results: " + textTitle;
-              TextEvent te = new TextEvent(this, results, textTitle);
-              notifyTextListeners(te);
+            if (m_eval.getHeader().classIndex() >= 0
+                && m_eval.getHeader().classAttribute().isNominal()) {
+              results += "\n" + m_eval.toMatrixString();
             }
+            textTitle = "Results: " + textTitle;
+            TextEvent te = new TextEvent(this, results, textTitle);
+            notifyTextListeners(te);
           }
         }
       }
