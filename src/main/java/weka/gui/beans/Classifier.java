@@ -778,7 +778,10 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
         status = IncrementalClassifierEvent.BATCH_FINISHED;
       }
 
-      m_throughput.updateStart();
+      if (m_incrementalEvent.getInstance() != null) {
+        m_throughput.updateStart();
+      }
+
       m_ie.setStatus(status);
       m_ie.setClassifier(m_Classifier);
       m_ie.setCurrentInstance(m_incrementalEvent.getInstance());
@@ -796,7 +799,10 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
         ((weka.classifiers.UpdateableClassifier) m_Classifier)
             .updateClassifier(m_incrementalEvent.getInstance());
       }
-      m_throughput.updateEnd(m_log);
+
+      if (m_incrementalEvent.getInstance() != null) {
+        m_throughput.updateEnd(m_log);
+      }
 
       if (m_incrementalEvent.getStatus() == InstanceEvent.BATCH_FINISHED
           || m_incrementalEvent.getInstance() == null) {
