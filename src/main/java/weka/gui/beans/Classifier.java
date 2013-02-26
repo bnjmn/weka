@@ -731,7 +731,9 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       }
 
       if (!m_incrementalEvent.m_formatNotificationOnly) {
-        String msg = statusMessagePrefix() + "Training incrementally...";
+        String msg = m_updateIncrementalClassifier ? statusMessagePrefix()
+            + "Training incrementally..." : statusMessagePrefix()
+            + "Predicting incrementally...";
         if (m_log != null) {
           m_log.statusMessage(msg);
         }
