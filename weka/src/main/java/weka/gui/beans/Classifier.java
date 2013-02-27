@@ -1394,27 +1394,30 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
 
       if (m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1] == null) {
 
-        // store an event with a null model and training set (to be filled in
-        // later)
-        m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1] = new BatchClassifierEvent(
-            this, null, null, new DataSetEvent(this, e.getTestSet()),
-            e.getRunNumber(), e.getMaxRunNumber(), e.getSetNumber(),
-            e.getMaxSetNumber());
-        m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1]
-            .setLabel(getCustomName());
-        if (e.getRunNumber() == e.getMaxRunNumber()
-            && e.getSetNumber() == e.getMaxSetNumber()) {
+        if (!e.isStructureOnly()) {
+          // store an event with a null model and training set (to be filled in
+          // later)
+          m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1] = new BatchClassifierEvent(
+              this, null, null, new DataSetEvent(this, e.getTestSet()),
+              e.getRunNumber(), e.getMaxRunNumber(), e.getSetNumber(),
+              e.getMaxSetNumber());
+          m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1]
+              .setLabel(getCustomName());
+          if (e.getRunNumber() == e.getMaxRunNumber()
+              && e.getSetNumber() == e.getMaxSetNumber()) {
 
-          // block on the last fold of the last run (unless there is only one
-          // fold and one run)
-          /*
-           * System.err.println("[Classifier] blocking on last fold of last run..."
-           * ); block(true);
-           */
-          if (e.getMaxSetNumber() != 1) {
-            m_reject = true;
-            if (m_block) {
-              block(true);
+            // block on the last fold of the last run (unless there is only one
+            // fold and one run)
+            /*
+             * System.err.println(
+             * "[Classifier] blocking on last fold of last run..." );
+             * block(true);
+             */
+            if (e.getMaxSetNumber() != 1) {
+              m_reject = true;
+              if (m_block) {
+                block(true);
+              }
             }
           }
         }
