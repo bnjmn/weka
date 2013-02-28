@@ -451,14 +451,27 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
       double[] preds = null;
       double probActual = 0;
       double probNext = 0;
+      int mappedClass = -1;
+
+      Instance classMissing = (Instance) toPredict.copy();
+      classMissing.setDataset(toPredict.dataset());
+
+      // Only need to do this if the class is nominal, since we call
+      // evalForSingleInstance()
+      // which only takes a prob array
+      if (classifier instanceof weka.classifiers.misc.InputMappedClassifier
+          && toPredict.classAttribute().isNominal()) {
+        toPredict = (Instance) toPredict.copy();
+        toPredict = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+            .constructMappedInstance(toPredict);
+        mappedClass = ((weka.classifiers.misc.InputMappedClassifier) classifier)
+            .getMappedClassIndex();
+        classMissing.setMissing(mappedClass);
+      } else {
+        classMissing.setClassMissing();
+      }
 
       if (toPredict.classAttribute().isNominal()) {
-        Instance classMissing = (Instance) toPredict.copy();
-        classMissing.setDataset(toPredict.dataset());
-
-        if (classMissing.classIndex() >= 0) {
-          classMissing.setClassMissing();
-        }
         preds = classifier.distributionForInstance(classMissing);
 
         pred = (Utils.sum(preds) == 0) ? Utils.missingValue() : Utils
@@ -473,17 +486,16 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
             probNext = preds[i];
           }
         }
+
         eval.evaluationForSingleInstance(preds, toPredict, true);
       } else {
+        // Numeric class. evalModelOnceAndRecordPrediciton() does the
+        // InputMappedClassifier
+        // transformation for us.
         pred = eval.evaluateModelOnceAndRecordPrediction(classifier, toPredict);
       }
 
       //
-
-      if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-        toPredict = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-            .constructMappedInstance(toPredict);
-      }
 
       if (!m_SaveForVisualization)
         return;
