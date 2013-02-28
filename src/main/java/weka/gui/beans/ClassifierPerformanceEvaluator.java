@@ -702,12 +702,10 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
         String msg = "[ClassifierPerformanceEvaluator] "
             + statusMessagePrefix() + " starting executor pool ("
             + getExecutionSlots() + " slots)...";
+
         // start the execution pool
-        // if (m_executorPool == null) {
-        if (ce.getMaxSetNumber() > 1) {
-          startExecutorPool();
-        }
-        // }
+        startExecutorPool();
+
         m_tasks = new ArrayList<EvaluationTask>();
 
         if (m_logger != null) {
@@ -730,21 +728,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
         } else {
           System.out.println(msg);
         }
+
         m_tasks.add(newTask);
-
-        // only run in parallel if there are more than one set in the batch -
-        // this makes an attempt at protecting classifiers that are not thread
-        // safe in the single train/test scenario. E.g. if someone has a
-        // batchClassifier connection going to this component and to a
-        // PredictionAppender. FilteredClassifier's
-        // classify/distributionForInstance
-        // is not thread safe (because of the filter).
-
-        if (ce.getMaxSetNumber() > 1) {
-          m_executorPool.execute(newTask);
-        } else {
-          newTask.run();
-        }
+        m_executorPool.execute(newTask);
       }
     } catch (Exception ex) {
       ex.printStackTrace();
