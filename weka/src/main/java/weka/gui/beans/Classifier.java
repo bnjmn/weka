@@ -1625,7 +1625,36 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
-        ((BatchClassifierListener) l.elementAt(i)).acceptClassifier(ce);
+        if (l.size() > 1) {
+          try {
+            // make serialized copies here in order to protect classifiers that
+            // might not be thread safe in the predict/distributionForInstance()
+            // methods (e.g. FilteredClassifier). ClassifierPerformanceEvaluator
+            // is multi-threaded, so we could potentially have two different
+            // steps
+            // calling distributionForInstance() at the same time
+            weka.classifiers.Classifier newC = weka.classifiers.AbstractClassifier
+                .makeCopy(ce.getClassifier());
+            BatchClassifierEvent ne = new BatchClassifierEvent(Classifier.this,
+                newC, ce.getTrainSet(), ce.getTestSet(), ce.getRunNumber(),
+                ce.getMaxRunNumber(), ce.getSetNumber(), ce.getMaxSetNumber());
+            ((BatchClassifierListener) l.elementAt(i)).acceptClassifier(ne);
+          } catch (Exception e) {
+            stop(); // stop all processing
+            if (m_log != null) {
+              String msg = statusMessagePrefix()
+                  + "ERROR: unable to make copy of classifier - see log ";
+
+              m_log.logMessage("[Classifier] " + msg + " (" + e.getMessage()
+                  + ")");
+              m_log.statusMessage(msg);
+            }
+            e.printStackTrace();
+            break;
+          }
+        } else {
+          ((BatchClassifierListener) l.elementAt(i)).acceptClassifier(ce);
+        }
       }
     }
   }
