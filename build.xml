@@ -651,7 +651,7 @@
             debug="${debug}"
             includeantruntime="false"
             deprecation="${deprecation}"
-            source="1.5" target="1.5">
+            source="1.6" target="1.6">
        <classpath refid="project.class.path" /> 
      </javac>
      <copy todir="${build}/testcases" >
@@ -723,6 +723,7 @@
       <!--       <jvmarg value="-Xint"/> -->
       <jvmarg value="-Djava.awt.headless=${headless}"/> 
       <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
+       <jvmarg value="-Duser.timezone=Pacific/Auckland"/>
     </java>
   </target>
 
