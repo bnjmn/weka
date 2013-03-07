@@ -15,16 +15,16 @@
 
 /*
  *    NBTreeClassifierTree.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
 
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
-import weka.core.Capabilities.Capability;
 
 /**
  * Class for handling a naive bayes tree structure used for
@@ -50,6 +50,7 @@ public class NBTreeClassifierTree
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);

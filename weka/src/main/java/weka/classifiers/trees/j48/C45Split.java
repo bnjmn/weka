@@ -15,18 +15,18 @@
 
 /*
  *    C45Split.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
 
+import java.util.Enumeration;
+
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-
-import java.util.Enumeration;
 
 /**
  * Class implementing a C4.5-type split on an attribute.
@@ -127,6 +127,15 @@ public class C45Split
   public final int attIndex() {
 
     return m_attIndex;
+  }
+  
+  /**
+   * Returns the split point (numeric attribute only).
+   * 
+   * @return the split point used for a test on a numeric attribute
+   */
+  public double splitPoint() {
+    return m_splitPoint;
   }
 
   /**

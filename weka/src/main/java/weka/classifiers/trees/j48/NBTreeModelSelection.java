@@ -15,18 +15,18 @@
 
 /*
  *    NBTreeModelSelection.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
 
+import java.util.Enumeration;
+
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-
-import java.util.Enumeration;
 
 /**
  * Class for selecting a NB tree split.

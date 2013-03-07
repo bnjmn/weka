@@ -15,14 +15,16 @@
 
 /*
  *    NBTreeNoSplit.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.classifiers.Classifier;
+import java.util.Random;
+
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Instance;
@@ -30,8 +32,6 @@ import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
-
-import java.util.Random;
 
 /**
  * Class implementing a "no-split"-split (leaf node) for naive bayes

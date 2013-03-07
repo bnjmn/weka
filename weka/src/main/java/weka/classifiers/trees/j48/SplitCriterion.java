@@ -15,15 +15,15 @@
 
 /*
  *    SplitCriterion.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.RevisionHandler;
-
 import java.io.Serializable;
+
+import weka.core.RevisionHandler;
 
 /**
  * Abstract class for computing splitting criteria
