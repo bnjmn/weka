@@ -1,0 +1,129 @@
+------------------------------------------------------------------------
+r9519 | mhall | 2013-02-06 17:57:20 +1300 (Wed, 06 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/metaCost/Description.props
+   M /trunk/packages/internal/metaCost/pom.xml
+
+Updated svn urls in pom and Description.props for release 1.0.3. 1.0.3 updates the base dependency on Weka to >= 3.7.7 due to the change in ConstMatrix's parseMatlab() method
+------------------------------------------------------------------------
+r9520 | mhall | 2013-02-06 18:01:13 +1300 (Wed, 06 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/metaCost/pom.xml
+
+[maven-release-plugin] prepare release metaCost-1.0.3
+------------------------------------------------------------------------
+r9522 | mhall | 2013-02-06 18:01:18 +1300 (Wed, 06 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/metaCost/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9532 | eibe | 2013-02-09 10:34:35 +1300 (Sat, 09 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/isolationForest/src/main/java/weka/classifiers/trees/IsolationForest.java
+
+One bug fix and one other change: Euler–Mascheroni constant was to be used instead of Math.E, and official implementation uses log2(n), where n is the number of datapoints, not log2(subsample size) as stated in the paper.
+------------------------------------------------------------------------
+r9533 | mhall | 2013-02-09 12:57:54 +1300 (Sat, 09 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/isolationForest/Description.props
+
+Updated Description.props for 1.0.1.
+------------------------------------------------------------------------
+r9535 | mhall | 2013-02-09 13:01:23 +1300 (Sat, 09 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/isolationForest/pom.xml
+
+Updated svn URL
+------------------------------------------------------------------------
+r9536 | mhall | 2013-02-09 13:15:51 +1300 (Sat, 09 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/isolationForest/pom.xml
+
+[maven-release-plugin] prepare release isolationForest-1.0.1
+------------------------------------------------------------------------
+r9538 | mhall | 2013-02-09 13:15:54 +1300 (Sat, 09 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/isolationForest/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9545 | eibe | 2013-02-15 10:13:27 +1300 (Fri, 15 Feb 2013) | 1 line
+Changed paths:
+   A /trunk/packages/external/DilcaDistance
+   A /trunk/packages/external/DilcaDistance/Description.props
+   A /trunk/packages/external/DilcaDistance/DilcaDistance.jar
+   A /trunk/packages/external/DilcaDistance/build
+   A /trunk/packages/external/DilcaDistance/build/classes
+   A /trunk/packages/external/DilcaDistance/build_package.xml
+   A /trunk/packages/external/DilcaDistance/doc
+   A /trunk/packages/external/DilcaDistance/doc/allclasses-frame.html
+   A /trunk/packages/external/DilcaDistance/doc/allclasses-noframe.html
+   A /trunk/packages/external/DilcaDistance/doc/constant-values.html
+   A /trunk/packages/external/DilcaDistance/doc/deprecated-list.html
+   A /trunk/packages/external/DilcaDistance/doc/help-doc.html
+   A /trunk/packages/external/DilcaDistance/doc/index-all.html
+   A /trunk/packages/external/DilcaDistance/doc/index.html
+   A /trunk/packages/external/DilcaDistance/doc/overview-tree.html
+   A /trunk/packages/external/DilcaDistance/doc/package-list
+   A /trunk/packages/external/DilcaDistance/doc/resources
+   A /trunk/packages/external/DilcaDistance/doc/resources/inherit.gif
+   A /trunk/packages/external/DilcaDistance/doc/stylesheet.css
+   A /trunk/packages/external/DilcaDistance/doc/weka
+   A /trunk/packages/external/DilcaDistance/doc/weka/core
+   A /trunk/packages/external/DilcaDistance/doc/weka/core/DilcaDistance.html
+   A /trunk/packages/external/DilcaDistance/doc/weka/core/package-frame.html
+   A /trunk/packages/external/DilcaDistance/doc/weka/core/package-summary.html
+   A /trunk/packages/external/DilcaDistance/doc/weka/core/package-tree.html
+   A /trunk/packages/external/DilcaDistance/lib
+   A /trunk/packages/external/DilcaDistance/src
+   A /trunk/packages/external/DilcaDistance/src/main
+   A /trunk/packages/external/DilcaDistance/src/main/java
+   A /trunk/packages/external/DilcaDistance/src/main/java/weka
+   A /trunk/packages/external/DilcaDistance/src/main/java/weka/core
+   A /trunk/packages/external/DilcaDistance/src/main/java/weka/core/DilcaDistance.java
+   A /trunk/packages/external/DilcaDistance/test
+   A /trunk/packages/external/DilcaDistance/test/java
+   A /trunk/packages/external/DilcaDistance/test/java/weka
+   A /trunk/packages/external/DilcaDistance/test/java/weka/core
+
+Initial import of Dilca distance package contributed by Dino Ienco.
+------------------------------------------------------------------------
+r9546 | mhall | 2013-02-15 13:58:32 +1300 (Fri, 15 Feb 2013) | 1 line
+Changed paths:
+   D /trunk/packages/external/DilcaDistance/build
+
+Removing build directory
+------------------------------------------------------------------------
+r9547 | mhall | 2013-02-15 14:02:23 +1300 (Fri, 15 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/DilcaDistance/Description.props
+   D /trunk/packages/external/DilcaDistance/DilcaDistance.jar
+   D /trunk/packages/external/DilcaDistance/doc
+
+Updated Descpription.props and removed generated files and directories
+------------------------------------------------------------------------
+r9548 | mhall | 2013-02-15 14:06:01 +1300 (Fri, 15 Feb 2013) | 1 line
+Changed paths:
+   A /trunk/packages/external/DilcaDistance/pom.xml
+
+pom for DilcaDistance
+------------------------------------------------------------------------
+r9549 | mhall | 2013-02-15 14:17:53 +1300 (Fri, 15 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/DilcaDistance/pom.xml
+
+[maven-release-plugin] prepare release DilcaDistance-1.0.0
+------------------------------------------------------------------------
+r9551 | mhall | 2013-02-15 14:17:57 +1300 (Fri, 15 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/DilcaDistance/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9553 | mhall | 2013-02-15 15:14:54 +1300 (Fri, 15 Feb 2013) | 1 line
+Changed paths:
+   D /trunk/packages/external/DilcaDistance/test
+
+Removed empty test directory
+------------------------------------------------------------------------
