@@ -87,76 +87,7 @@ import java.util.Vector;
  * 
  * <pre> -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.functions.SMO)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.functions.SMO:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -no-checks
- *  Turns off all checks - use with caution!
- *  Turning them off assumes that data is purely numeric, doesn't
- *  contain any missing values, and has a nominal class. Turning them
- *  off also means that no header information will be stored if the
- *  machine is linear. Finally, it also assumes that no instance has
- *  a weight equal to 0.
- *  (default: checks on)</pre>
- * 
- * <pre> -C &lt;double&gt;
- *  The complexity constant C. (default 1)</pre>
- * 
- * <pre> -N
- *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
- * 
- * <pre> -L &lt;double&gt;
- *  The tolerance parameter. (default 1.0e-3)</pre>
- * 
- * <pre> -P &lt;double&gt;
- *  The epsilon for round-off error. (default 1.0e-12)</pre>
- * 
- * <pre> -M
- *  Fit logistic models to SVM outputs. </pre>
- * 
- * <pre> -V &lt;double&gt;
- *  The number of folds for the internal
- *  cross-validation. (default -1, use training data)</pre>
- * 
- * <pre> -W &lt;double&gt;
- *  The random number seed. (default 1)</pre>
- * 
- * <pre> -K &lt;classname and parameters&gt;
- *  The Kernel to use.
- *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
- * 
- * <pre> 
- * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
- * </pre>
- * 
- * <pre> -D
- *  Enables debugging output (if available) to be printed.
- *  (default: off)</pre>
- * 
- * <pre> -no-checks
- *  Turns off all checks - use with caution!
- *  (default: checks on)</pre>
- * 
- * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number), 0 for full cache and 
- *  -1 to turn it off.
- *  (default: 250007)</pre>
- * 
- * <pre> -E &lt;num&gt;
- *  The Exponent to use.
- *  (default: 1.0)</pre>
- * 
- * <pre> -L
- *  Use lower-order terms.
- *  (default: no)</pre>
- * 
+ *  (default: weka.classifiers.trees.DecisionStump)</pre>
  <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p/>
@@ -227,7 +158,7 @@ public class Dagging
    * Constructor.
    */
   public Dagging() {
-    m_Classifier = new weka.classifiers.functions.SMO();
+    m_Classifier = new weka.classifiers.trees.DecisionStump();
   }
 
   /**
@@ -236,7 +167,7 @@ public class Dagging
    * @return the default classifier classname
    */
   protected String defaultClassifierString() {
-    return weka.classifiers.functions.SMO.class.getName();
+    return weka.classifiers.trees.DecisionStump.class.getName();
   }
 
   /**
@@ -293,76 +224,7 @@ public class Dagging
    * 
    * <pre> -W
    *  Full name of base classifier.
-   *  (default: weka.classifiers.functions.SMO)</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.functions.SMO:
-   * </pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -no-checks
-   *  Turns off all checks - use with caution!
-   *  Turning them off assumes that data is purely numeric, doesn't
-   *  contain any missing values, and has a nominal class. Turning them
-   *  off also means that no header information will be stored if the
-   *  machine is linear. Finally, it also assumes that no instance has
-   *  a weight equal to 0.
-   *  (default: checks on)</pre>
-   * 
-   * <pre> -C &lt;double&gt;
-   *  The complexity constant C. (default 1)</pre>
-   * 
-   * <pre> -N
-   *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
-   * 
-   * <pre> -L &lt;double&gt;
-   *  The tolerance parameter. (default 1.0e-3)</pre>
-   * 
-   * <pre> -P &lt;double&gt;
-   *  The epsilon for round-off error. (default 1.0e-12)</pre>
-   * 
-   * <pre> -M
-   *  Fit logistic models to SVM outputs. </pre>
-   * 
-   * <pre> -V &lt;double&gt;
-   *  The number of folds for the internal
-   *  cross-validation. (default -1, use training data)</pre>
-   * 
-   * <pre> -W &lt;double&gt;
-   *  The random number seed. (default 1)</pre>
-   * 
-   * <pre> -K &lt;classname and parameters&gt;
-   *  The Kernel to use.
-   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
-   * 
-   * <pre> 
-   * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
-   * </pre>
-   * 
-   * <pre> -D
-   *  Enables debugging output (if available) to be printed.
-   *  (default: off)</pre>
-   * 
-   * <pre> -no-checks
-   *  Turns off all checks - use with caution!
-   *  (default: checks on)</pre>
-   * 
-   * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number), 0 for full cache and 
-   *  -1 to turn it off.
-   *  (default: 250007)</pre>
-   * 
-   * <pre> -E &lt;num&gt;
-   *  The Exponent to use.
-   *  (default: 1.0)</pre>
-   * 
-   * <pre> -L
-   *  Use lower-order terms.
-   *  (default: no)</pre>
-   * 
+   *  (default: weka.classifiers.trees.DecisionStump)</pre>
    <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
