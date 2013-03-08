@@ -1,0 +1,27 @@
+@relation 'Testdata-weka.filters.unsupervised.attribute.MultiInstanceToPropositional-A3-weka.filters.unsupervised.attribute.Remove-R1_partitionMembership-weka.filters.unsupervised.attribute.PartitionMembership-Wweka.classifiers.trees.J48---C0.25-M2-weka.filters.MultiFilter-Fweka.filters.unsupervised.attribute.Remove -R 1-Fweka.filters.unsupervised.attribute.PartitionMembership -W weka.classifiers.trees.J48 -- -C 0.25 -M 2-weka.filters.unsupervised.attribute.MultiInstanceWrapper-Fweka.filters.unsupervised.attribute.PartitionMembership -W weka.classifiers.trees.J48 -- -C 0.25 -M 2'
+
+@attribute Nominal1 {att1val1,att1val2}
+@attribute partition_0 numeric
+@attribute Class {class1,class2}
+
+@data
+att1val1,10,class1
+att1val2,10,class2
+att1val1,10,class1
+att1val1,10,class1
+att1val2,10,class2
+att1val1,10,class1
+att1val1,10,class1
+att1val1,10,class1
+att1val2,10,class2
+att1val2,10,class2
+att1val1,10,class1
+att1val1,10,class1
+att1val2,10,class2
+att1val1,10,class1
+att1val1,10,class1
+att1val2,10,class2
+att1val2,10,class2
+att1val1,10,class1
+att1val2,10,class2
+att1val2,10,class2
