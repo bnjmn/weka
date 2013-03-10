@@ -1004,7 +1004,9 @@ public class ClustererPanel extends JPanel implements
                 "Evaluate clusterer", JOptionPane.ERROR_MESSAGE);
             m_Log.statusMessage("Problem evaluating clusterer");
           } finally {
-            if (plotInstances != null) {
+            if (    (plotInstances != null) 
+        	 && (plotInstances.getInstances() != null) 
+        	 && (plotInstances.getPlotInstances().numInstances() > 0) ) {
               plotInstances.setUp();
               m_CurrentVis = new VisualizePanel();
               m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
