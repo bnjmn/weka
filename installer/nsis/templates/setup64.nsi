@@ -73,7 +73,7 @@ Var StartMenuGroup
 # required so that Vista/Win 7 uninstaller will remove start menu shortcuts
 RequestExecutionLevel admin
 
-OutFile "weka-${WEKA_VERSION_HYPHEN}${WEKA_JRE_SUFFIX}.exe"
+OutFile "weka-${WEKA_VERSION_HYPHEN}${WEKA_JRE_SUFFIX}-x64.exe"
 InstallDir $PROGRAMFILES64\${WEKA_DIR}
 CRCCheck on
 XPStyle on
