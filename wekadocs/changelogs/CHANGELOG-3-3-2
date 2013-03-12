@@ -1,0 +1,327 @@
+2002-05-21 14:35  eibe
+
+	* weka/classifiers/rules/JRip.java (1.4): Minor bug fix in JRip
+	regarding data description length for default rule.
+
+2002-05-15 09:35  mhall
+
+	* weka/attributeSelection/SVMAttributeEval.java (1.5): Fixed bug in
+	array indexing
+
+2002-05-14 14:40  mhall
+
+	* weka/attributeSelection/SVMAttributeEval.java (1.4): Tip text fix
+
+2002-05-14 14:05  mhall
+
+	* weka/attributeSelection/SVMAttributeEval.java (1.3): Added
+	options to allow eliminating more than one attribute per iteration
+	and for setting the value of C for SMO
+
+2002-05-13 15:24  mhall
+
+	* weka/gui/beans/: BeanVisual.java (1.2), GraphViewer.java (1.2),
+	KnowledgeFlow.java (1.3), TextViewer.java (1.2): Added a workaround
+	to account for JComponents not being serializable under Mac OS X
+
+2002-05-13 12:40  mhall
+
+	* weka/gui/beans/StripChart.java (1.3): Fixed so that legend title
+	is visible when run under JRE 1.4
+
+2002-05-13 10:20  eibe
+
+	* weka/attributeSelection/SVMAttributeEval.java (1.2): Fixed bug.
+
+2002-05-13 09:07  mhall
+
+	* weka/gui/beans/: AbstractEvaluator.java (1.2),
+	AbstractTestSetProducer.java (1.2),
+	AbstractTrainAndTestSetProducer.java (1.2),
+	AbstractTrainingSetProducer.java (1.2), ClassAssigner.java (1.2),
+	Classifier.java (1.2), Filter.java (1.2), StripChart.java (1.2):
+	made logger transient to prevent it getting serialized when saving
+	a layout
+
+2002-05-10 22:21  eibe
+
+	* weka/: attributeSelection/Makefile (1.15),
+	attributeSelection/SVMAttributeEval.java (1.1),
+	classifiers/functions/SMO.java (1.31),
+	gui/GenericObjectEditor.props (1.57): Added SVMAttributeEval.
+
+2002-05-06 11:47  mhall
+
+	* weka/gui/explorer/ClassifierPanel.java (1.50): Added the ability
+	to set a random seed for xval/% split in the more options panel
+
+2002-05-06 11:07  mhall
+
+	* weka/attributeSelection/PrincipalComponents.java (1.21): Changed
+	to be an UnsupervisedAttributeEvaluator
+
+2002-05-06 11:07  mhall
+
+	* weka/attributeSelection/: AttributeSelection.java (1.28),
+	Ranker.java (1.19): Changed so that class attribute need not be set
+	for Unsupervised schemes
+
+2002-05-06 10:11  mhall
+
+	* weka/filters/NominalToBinaryFilter.java (1.19): Changed so no
+	longer requires a class to be set. If data has no class set then
+	simple mode is used
+
+2002-05-04 12:50  mhall
+
+	* weka/gui/beans/KnowledgeFlow.java (1.2): Welcome message update
+
+2002-05-03 14:23  mhall
+
+	* weka/core/converters/BatchLoader.java (1.1): Initial import
+
+2002-05-03 14:13  mhall
+
+	* weka/core/converters/: AbstractLoader.java (1.5), ArffLoader.java
+	(1.4), C45Loader.java (1.4), CSVLoader.java (1.3),
+	ConverterUtils.java (1.3), IncrementalLoader.java (1.1),
+	Loader.java (1.5), SerializedInstancesLoader.java (1.4): Modified
+	to support the KnowledgeFlow
+
+2002-05-03 14:08  mhall
+
+	* weka/gui/beans/: icons/ClassAssigner.gif (1.1),
+	icons/ClassAssigner_animated.gif (1.1),
+	icons/ClassifierPerformanceEvaluator.gif (1.1),
+	icons/ClassifierPerformanceEvaluator_animated.gif (1.1),
+	icons/DefaultClassifier.gif (1.1),
+	icons/DefaultClassifier_animated.gif (1.1),
+	icons/DefaultDataSource.gif (1.1),
+	icons/DefaultDataSource_animated.gif (1.1),
+	icons/DefaultDataVisualizer.gif (1.1),
+	icons/DefaultDataVisualizer_animated.gif (1.1),
+	icons/DefaultEvaluator.gif (1.1),
+	icons/DefaultEvaluator_animated.gif (1.1), icons/DefaultFilter.gif
+	(1.1), icons/DefaultFilter_animated.gif (1.1),
+	icons/DefaultGraph.gif (1.1), icons/DefaultGraph_animated.gif
+	(1.1), icons/DefaultText.gif (1.1), icons/DefaultText_animated.gif
+	(1.1), icons/DefaultTrainTest.gif (1.1),
+	icons/DefaultTrainTest_animated.gif (1.1), icons/IB1.gif (1.1),
+	icons/IB1_animated.gif (1.1), icons/IBk.gif (1.1),
+	icons/IBk_animated.gif (1.1), icons/J48.gif (1.1),
+	icons/J48_animated.gif (1.1), icons/Open24.gif (1.1),
+	icons/Pointer.gif (1.1), icons/Save24.gif (1.1), icons/Stop24.gif
+	(1.1), icons/StripChart.gif (1.1), icons/StripChart_animated.gif
+	(1.1), AbstractDataSource.java (1.1),
+	AbstractDataSourceBeanInfo.java (1.1), AbstractEvaluator.java
+	(1.1), AbstractTestSetProducer.java (1.1),
+	AbstractTestSetProducerBeanInfo.java (1.1),
+	AbstractTrainAndTestSetProducer.java (1.1),
+	AbstractTrainAndTestSetProducerBeanInfo.java (1.1),
+	AbstractTrainingSetProducer.java (1.1),
+	AbstractTrainingSetProducerBeanInfo.java (1.1),
+	BatchClassifierEvent.java (1.1), BatchClassifierListener.java
+	(1.1), BeanCommon.java (1.1), BeanConnection.java (1.1),
+	BeanInstance.java (1.1), BeanVisual.java (1.1), Beans.props (1.1),
+	ChartEvent.java (1.1), ChartListener.java (1.1), ClassAssigner.java
+	(1.1), ClassAssignerBeanInfo.java (1.1),
+	ClassAssignerCustomizer.java (1.1), Classifier.java (1.1),
+	ClassifierBeanInfo.java (1.1), ClassifierCustomizer.java (1.1),
+	ClassifierPerformanceEvaluator.java (1.1),
+	ClassifierPerformanceEvaluatorBeanInfo.java (1.1),
+	CrossValidationFoldMaker.java (1.1),
+	CrossValidationFoldMakerBeanInfo.java (1.1),
+	CrossValidationFoldMakerCustomizer.java (1.1), DataSetEvent.java
+	(1.1), DataSource.java (1.1), DataSourceListener.java (1.1),
+	DataVisualizer.java (1.1), DataVisualizerBeanInfo.java (1.1),
+	EventConstraints.java (1.1), Filter.java (1.1), FilterBeanInfo.java
+	(1.1), FilterCustomizer.java (1.1), GraphEvent.java (1.1),
+	GraphListener.java (1.1), GraphViewer.java (1.1),
+	GraphViewerBeanInfo.java (1.1), IncrementalClassifierEvaluator.java
+	(1.1), IncrementalClassifierEvaluatorBeanInfo.java (1.1),
+	IncrementalClassifierEvent.java (1.1),
+	IncrementalClassifierListener.java (1.1), InstanceEvent.java (1.1),
+	InstanceListener.java (1.1), KnowledgeFlow.java (1.1), Loader.java
+	(1.1), LoaderBeanInfo.java (1.1), LoaderCustomizer.java (1.1),
+	StripChart.java (1.1), StripChartBeanInfo.java (1.1),
+	StripChartCustomizer.java (1.1), TestSetEvent.java (1.1),
+	TestSetListener.java (1.1), TestSetMaker.java (1.1),
+	TestSetMakerBeanInfo.java (1.1), TestSetProducer.java (1.1),
+	TextEvent.java (1.1), TextListener.java (1.1), TextViewer.java
+	(1.1), TextViewerBeanInfo.java (1.1), TrainTestSplitMaker.java
+	(1.1), TrainTestSplitMakerBeanInfo.java (1.1),
+	TrainTestSplitMakerCustomizer.java (1.1), TrainingSetEvent.java
+	(1.1), TrainingSetListener.java (1.1), TrainingSetMaker.java (1.1),
+	TrainingSetMakerBeanInfo.java (1.1), TrainingSetProducer.java
+	(1.1), UserRequestAcceptor.java (1.1), Visible.java (1.1),
+	WekaWrapper.java (1.1): Initial import
+
+2002-05-03 10:19  gabi
+
+	* weka/attributeSelection/PrincipalComponents.java (1.20): Error in
+	transformation to original space fixed.
+
+2002-04-30 14:02  mhall
+
+	* weka/classifiers/trees/m5/: M5Base.java (1.2), Rule.java (1.2),
+	RuleNode.java (1.2): Added an option to produce regression
+	trees/rules
+
+2002-04-10 10:26  cvs_rrb
+
+	* weka/classifiers/bayes/DiscreteEstimatorBayes.java (1.4): Added
+	getCount method
+
+2002-04-08 21:34  cvs_rrb
+
+	* weka/classifiers/bayes/BayesNetK2.java (1.2): Added RandomOrder
+	property Added informational strings for property editor
+
+2002-04-08 21:29  cvs_rrb
+
+	* weka/classifiers/bayes/BayesNetB.java (1.3): Added informational
+	string for property editor
+
+2002-04-08 21:28  cvs_rrb
+
+	* weka/classifiers/bayes/BayesNet.java (1.5): Using ADTree
+	implementation for faster counting on training data Added option to
+	switch between ADTree and classic counting Added informational
+	string for property editor
+
+2002-04-08 21:26  cvs_rrb
+
+	* weka/classifiers/bayes/: ADNode.java (1.1), VaryNode.java (1.1):
+	ADTree implementation for faster counting on training data
+
+2002-04-05 12:15  cvs_rbk1
+
+	* weka/filters/MisclassificationFilter.java (1.3): Minor
+	documentation fixes.
+
+2002-04-05 10:29  cvs_rbk1
+
+	* weka/filters/MisclassificationFilter.java (1.2): Fixed class to
+	default to previously set if possible.
+
+2002-04-04 15:07  cvs_rbk1
+
+	* weka/gui/explorer/PreprocessPanel.java (1.25): Improved user
+	feedback when an arff file fails to load. A dialog appears
+	explaining the reason.
+
+2002-03-27 16:11  cvs_rbk1
+
+	* weka/gui/GenericObjectEditor.props (1.56): Added
+	MisclassificationFilter.
+
+2002-03-27 16:06  cvs_rbk1
+
+	* weka/filters/Makefile (1.24): Added MisclassificationFilter.
+
+2002-03-27 16:04  cvs_rbk1
+
+	* weka/filters/MisclassificationFilter.java (1.1): Initial import.
+
+2002-03-20 16:24  cvs_eibe
+
+	* weka/classifiers/Evaluation.java (1.44): Cosmetic change.
+
+2002-03-20 16:21  cvs_eibe
+
+	* weka/core/SparseInstance.java (1.10): Fixed bug in SparseInstance
+	in forceAttributeDelete.
+
+2002-03-20 16:17  cvs_eibe
+
+	* weka/gui/GenericObjectEditor.java (1.33): Small fix to
+	GenericObjectEditor.java
+
+2002-03-20 16:14  cvs_eibe
+
+	* weka/classifiers/: bayes/Makefile (1.4), rules/Makefile (1.4):
+	Fixed a couple of Makefiles
+
+2002-03-13 15:24  cvs_eibe
+
+	* weka/filters/Makefile (1.23): Updated Makefile for filters.
+
+2002-03-13 14:32  cvs_eibe
+
+	* weka/: Makefile (1.35), classifiers/rules/JRip.java (1.3),
+	classifiers/rules/RuleStats.java (1.2), core/Instances.java (1.36),
+	filters/ClassOrderFilter.java (1.2), gui/GenericObjectEditor.java
+	(1.32), gui/HierachyPropertyParser.java (1.2),
+	gui/HierarchyPropertyParser.java (1.1): Xin made JRip more
+	efficient. Randomization in Instances uses nextInt(int) now! (THIS
+	MEANS THE SAME SEED WON'T GIVE THE SAME RESULT AS BEFORE ANYMORE
+	(E.G. IN A CROSS-VALIDATION!). Fixed main Makefile. Fixed spelling
+	mistake.
+
+2002-03-12 14:43  cvs_eibe
+
+	* weka/attributeSelection/:ChiSquaredAttributeEval.java (1.6): 
+	Online help was incorrect.
+
+2002-03-12 14:32  cvs_eibe
+
+	* weka/classifiers/functions/SMO.java (1.30): Overflow protecting
+	for cache wasn't working. Meant SMO wouldn't work properly for
+	large datasets.
+
+2002-03-06 16:56  cvs_eibe
+
+	* weka/gui/GenericObjectEditor.java (1.31): GenericObjectEditor
+	improved
+
+2002-03-05 17:07  cvs_eibe
+
+	* weka/classifiers/rules/Rule.java (1.1): Forgot to add class Rule
+
+2002-03-05 15:11  cvs_eibe
+
+	* weka/classifiers/rules/JRip.java (1.2): Made JRip pass
+	CheckClassifier.
+
+2002-03-05 14:56  cvs_eibe
+
+	* weka/: classifiers/rules/JRip.java (1.1),
+	classifiers/rules/Makefile (1.3), classifiers/rules/RuleStats.java
+	(1.1), filters/ClassOrderFilter.java (1.1), filters/Makefile
+	(1.22), gui/GenericObjectEditor.props (1.55): Added JRip and
+	related classes.
+
+2002-02-25 17:13  cvs_trigg
+
+	* weka/gui/SimpleCLI.java (1.6): Use Thread.setDaemon() rather than
+	System.exit() to get correct shutdown behaviour
+
+2002-02-25 15:36  cvs_rbk1
+
+	* weka/filters/UselessAttributeFilter.java (1.2): Fixed some
+	documentation.
+
+2002-02-20 14:28  cvs_gabi
+
+	* weka/attributeSelection/PrincipalComponents.java (1.19): Error
+	removed; Classvalues where overwritten with attribute values.
+
+2002-02-20 11:53  cvs_rbk1
+
+	* weka/gui/visualize/PlotData2D.java (1.13): Fixed bug caused when
+	all numeric values are missing.
+
+2002-02-20 11:43  cvs_rbk1
+
+	* weka/gui/visualize/ClassPanel.java (1.10): Fixed bug caused when
+	all numeric values are missing.
+
+2002-02-20 09:51  cvs_eibe
+
+	* weka/classifiers/functions/SMO.java (1.29): Reduced memory
+	requirements for linear case.
+
+2002-02-20 09:49  cvs_eibe
+
+	* weka/filters/NominalToBinaryFilter.java (1.18): Fixed description
+	of what NominalToBinaryFilter does

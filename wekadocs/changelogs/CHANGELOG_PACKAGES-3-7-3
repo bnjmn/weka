@@ -1,0 +1,456 @@
+------------------------------------------------------------------------
+r6739 | mhall | 2010-08-03 14:56:27 +1200 (Tue, 03 Aug 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/associationRulesVisualizer/src/main/java/ARViewer.java
+   M /trunk/packages/external/associationRulesVisualizer/src/main/java/sortedListPanel/ComposedComparator.java
+   M /trunk/packages/external/associationRulesVisualizer/src/main/java/sortedListPanel/ParameterComparator.java
+   M /trunk/packages/external/associationRulesVisualizer/src/main/java/sortedListPanel/Sorter.java
+   M /trunk/packages/external/associationRulesVisualizer/src/main/java/sortedListPanel/SorterComboBoxModel.java
+   M /trunk/packages/external/associationRulesVisualizer/src/main/java/visu1/Panel3D.java
+
+Changed some characters that were unmappable for UTF8
+------------------------------------------------------------------------
+r6740 | mhall | 2010-08-03 15:42:27 +1200 (Tue, 03 Aug 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/associationRulesVisualizer/src/main/java/ar/ARPanel.java
+
+Changed some characters that were unmappable for UTF8
+------------------------------------------------------------------------
+r6747 | mhall | 2010-08-06 20:40:37 +1200 (Fri, 06 Aug 2010) | 1 line
+Changed paths:
+   A /trunk/packages/external/LibSVM/lib/libsvm.jar
+
+Forgot to check in the libsvm library.
+------------------------------------------------------------------------
+r6748 | mhall | 2010-08-06 20:41:24 +1200 (Fri, 06 Aug 2010) | 1 line
+Changed paths:
+   A /trunk/packages/external/LibLINEAR/lib/liblinear-1.51-with-deps.jar
+
+Forgot to check in the liblinear library.
+------------------------------------------------------------------------
+r6761 | mhall | 2010-08-09 09:36:36 +1200 (Mon, 09 Aug 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/src/main/java/weka/attributeSelection/GeneticSearch.java
+
+Selecting a population member for crossover can very rarely return an index outside of the number of population members due to floating point comparison problems - fixed.
+------------------------------------------------------------------------
+r6762 | mhall | 2010-08-09 10:07:51 +1200 (Mon, 09 Aug 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/Description.props
+
+Updated to version 1.0.1
+------------------------------------------------------------------------
+r6787 | mhall | 2010-08-19 11:24:29 +1200 (Thu, 19 Aug 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/rotationForest/Description.props
+   M /trunk/packages/external/rotationForest/src/main/java/weka/classifiers/meta/RotationForest.java
+
+Fixed a bug related to duplicated attribute names in the transformed data used by the base classifiers.
+------------------------------------------------------------------------
+r6795 | mhall | 2010-08-25 12:33:57 +1200 (Wed, 25 Aug 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/hotSpot/Description.props
+
+Somehow hotSpot ended up with predictiveApriori's description file - fixex.
+------------------------------------------------------------------------
+r6806 | mhall | 2010-08-30 11:54:25 +1200 (Mon, 30 Aug 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/massiveOnlineAnalysis/Description.props
+
+Changed /Users/mhall to  in the do not load entries - package manager now uses Environment to resolve environment variables.
+------------------------------------------------------------------------
+r6811 | mhall | 2010-08-30 14:35:44 +1200 (Mon, 30 Aug 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/JDBCDriversDummyPackage
+   A /trunk/packages/internal/JDBCDriversDummyPackage/Description.props
+   A /trunk/packages/internal/JDBCDriversDummyPackage/build_package.xml
+   A /trunk/packages/internal/JDBCDriversDummyPackage/lib
+
+Initial import
+------------------------------------------------------------------------
+r6812 | mhall | 2010-08-31 09:17:10 +1200 (Tue, 31 Aug 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/JDBCDriversDummyPackage/Description.props
+
+Updated the cateogry field
+------------------------------------------------------------------------
+r6815 | mhall | 2010-09-06 09:38:12 +1200 (Mon, 06 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/associationRulesVisualizer/Description.props
+
+Added special installation instructions
+------------------------------------------------------------------------
+r6816 | mhall | 2010-09-06 09:38:42 +1200 (Mon, 06 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/build_package.xml
+   M /trunk/packages/external/kfKettle/build_package.xml
+
+Was not including the javadocs in the package zip file
+------------------------------------------------------------------------
+r6817 | mhall | 2010-09-06 09:42:17 +1200 (Mon, 06 Sep 2010) | 1 line
+Changed paths:
+   A /trunk/packages/external/kfPMMLClassifierScoring
+   A /trunk/packages/external/kfPMMLClassifierScoring/Beans.props
+   A /trunk/packages/external/kfPMMLClassifierScoring/Description.props
+   A /trunk/packages/external/kfPMMLClassifierScoring/build_package.xml
+   A /trunk/packages/external/kfPMMLClassifierScoring/lib
+   A /trunk/packages/external/kfPMMLClassifierScoring/src
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/main
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/main/java
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/main/java/weka
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/main/java/weka/gui
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/main/java/weka/gui/beans
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/main/java/weka/gui/beans/PMMLClassifierScoring.java
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/main/java/weka/gui/beans/PMMLClassifierScoringBeanInfo.java
+   A /trunk/packages/external/kfPMMLClassifierScoring/src/main/java/weka/gui/beans/PMMLClassifierScoringCustomizer.java
+
+Initial import
+------------------------------------------------------------------------
+r6822 | mhall | 2010-09-06 10:51:13 +1200 (Mon, 06 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfPMMLClassifierScoring/Description.props
+
+Updated the comments to have the correct package name
+------------------------------------------------------------------------
+r6823 | mhall | 2010-09-08 08:52:52 +1200 (Wed, 08 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfKettle/Description.props
+
+Updated for 1.0.1
+------------------------------------------------------------------------
+r6824 | mhall | 2010-09-08 08:53:28 +1200 (Wed, 08 Sep 2010) | 1 line
+Changed paths:
+   A /trunk/packages/external/kfKettle/src/main/java/org/pentaho/dm/plugins/kf/icons
+   A /trunk/packages/external/kfKettle/src/main/java/org/pentaho/dm/plugins/kf/icons/KettleInject.gif
+
+Initial import
+------------------------------------------------------------------------
+r6825 | mhall | 2010-09-08 21:24:40 +1200 (Wed, 08 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/multilayerPerceptronCS/Description.props
+
+URL now points to the javadoc on Sourceforge rather than to a non existent web site.
+------------------------------------------------------------------------
+r6826 | mhall | 2010-09-08 21:37:07 +1200 (Wed, 08 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/decorate/Description.props
+
+URL was commented out
+------------------------------------------------------------------------
+r6827 | mhall | 2010-09-08 21:39:43 +1200 (Wed, 08 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/fuzzyLaticeReasoning/Description.props
+
+URL was commented out
+------------------------------------------------------------------------
+r6828 | mhall | 2010-09-08 21:42:59 +1200 (Wed, 08 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/SMOTE/Description.props
+
+URL was commented out
+------------------------------------------------------------------------
+r6829 | mhall | 2010-09-08 21:44:46 +1200 (Wed, 08 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/ensembleLibrary/Description.props
+
+URL was commented out
+------------------------------------------------------------------------
+r6830 | mhall | 2010-09-08 21:46:01 +1200 (Wed, 08 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/fastCorrBasedFS/Description.props
+
+URL was commented out
+------------------------------------------------------------------------
+r6848 | mhall | 2010-09-14 14:23:57 +1200 (Tue, 14 Sep 2010) | 1 line
+Changed paths:
+   D /trunk/packages/external/massiveOnlineAnalysis
+
+MOA package now resides in MOA's svn repository.
+------------------------------------------------------------------------
+r6851 | mhall | 2010-09-15 14:36:06 +1200 (Wed, 15 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/scatterPlot3D/Description.props
+   M /trunk/packages/external/scatterPlot3D/src/main/java/weka/gui/visualize/Visualize3D.java
+
+Added sampling controls to the gui.
+------------------------------------------------------------------------
+r6855 | mhall | 2010-09-23 14:12:42 +1200 (Thu, 23 Sep 2010) | 1 line
+Changed paths:
+   A /trunk/packages/external/classAssociationRules
+   A /trunk/packages/external/classAssociationRules/Description.props
+   A /trunk/packages/external/classAssociationRules/GUIEditors.props
+   A /trunk/packages/external/classAssociationRules/GenericPropertiesCreator.props
+   A /trunk/packages/external/classAssociationRules/build_package.xml
+   A /trunk/packages/external/classAssociationRules/lib
+   A /trunk/packages/external/classAssociationRules/src
+   A /trunk/packages/external/classAssociationRules/src/main
+   A /trunk/packages/external/classAssociationRules/src/main/java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/CARuleMiner.java.orig
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/CaRuleGeneration.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/CarApriori.java.orig
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/CarPredictiveApriori.java.orig
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/CrList.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/CrListElement.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/CrNode.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/CrTree.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/JCBAPruning.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/LabeledItemSet.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/PrecedencePruning.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/associations/classification/PruneCAR.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/classifiers
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/classifiers/rules
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/classifiers/rules/car
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/classifiers/rules/car/CarClassifier.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/classifiers/rules/car/JCBA.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/classifiers/rules/car/WeightedClassifier.java
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/classifiers/rules/car/utils
+   A /trunk/packages/external/classAssociationRules/src/main/java/weka/classifiers/rules/car/utils/Stopwatch.java
+   A /trunk/packages/external/classAssociationRules/src/test
+   A /trunk/packages/external/classAssociationRules/src/test/java
+   A /trunk/packages/external/classAssociationRules/src/test/java/weka
+   A /trunk/packages/external/classAssociationRules/src/test/java/weka/classifiers
+   A /trunk/packages/external/classAssociationRules/src/test/java/weka/classifiers/rules
+   A /trunk/packages/external/classAssociationRules/src/test/java/weka/classifiers/rules/car
+   A /trunk/packages/external/classAssociationRules/src/test/java/weka/classifiers/rules/car/JCBATest.java
+   A /trunk/packages/external/classAssociationRules/src/test/java/weka/classifiers/rules/car/WeightedClassifierTest.java
+
+Initial import.
+------------------------------------------------------------------------
+r6867 | mhall | 2010-09-23 14:45:20 +1200 (Thu, 23 Sep 2010) | 1 line
+Changed paths:
+   M /trunk/packages/external/classAssociationRules/Description.props
+
+Now depends on Weka 3.7.3 since it requires support in the package manager for processing package-specific additions to the input properties processed by the GenericPropertiesCreator.
+------------------------------------------------------------------------
+r6917 | fracpete | 2010-10-14 12:46:54 +1300 (Thu, 14 Oct 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/WekaODF
+   A /trunk/packages/internal/WekaODF/.classpath.default
+   A /trunk/packages/internal/WekaODF/.project
+   A /trunk/packages/internal/WekaODF/Description.props
+   A /trunk/packages/internal/WekaODF/build_package.xml
+   A /trunk/packages/internal/WekaODF/lib
+   A /trunk/packages/internal/WekaODF/lib/README
+   A /trunk/packages/internal/WekaODF/lib/odfdom.jar
+   A /trunk/packages/internal/WekaODF/lib/xercesImpl.jar
+   A /trunk/packages/internal/WekaODF/lib/xml-apis.jar
+   A /trunk/packages/internal/WekaODF/src
+   A /trunk/packages/internal/WekaODF/src/main
+   A /trunk/packages/internal/WekaODF/src/main/java
+   A /trunk/packages/internal/WekaODF/src/main/java/weka
+   A /trunk/packages/internal/WekaODF/src/main/java/weka/core
+   A /trunk/packages/internal/WekaODF/src/main/java/weka/core/converters
+   A /trunk/packages/internal/WekaODF/src/main/java/weka/core/converters/ODFLoader.java
+   A /trunk/packages/internal/WekaODF/src/main/java/weka/core/converters/ODFSaver.java
+   A /trunk/packages/internal/WekaODF/src/test
+   A /trunk/packages/internal/WekaODF/src/test/java
+   A /trunk/packages/internal/WekaODF/src/test/java/weka
+   A /trunk/packages/internal/WekaODF/src/test/java/weka/core
+   A /trunk/packages/internal/WekaODF/src/test/java/weka/core/converters
+   A /trunk/packages/internal/WekaODF/src/test/java/weka/core/converters/ODFTest.java
+
+initial import for WekaODF, offering read/write support for spreadsheets in the Open Document format (ODF). ODF is used by the OpenOffice.org office suite.
+------------------------------------------------------------------------
+r6918 | fracpete | 2010-10-14 12:47:46 +1300 (Thu, 14 Oct 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/WekaExcel
+   A /trunk/packages/internal/WekaExcel/.classpath.default
+   A /trunk/packages/internal/WekaExcel/.project
+   A /trunk/packages/internal/WekaExcel/Description.props
+   A /trunk/packages/internal/WekaExcel/build_package.xml
+   A /trunk/packages/internal/WekaExcel/lib
+   A /trunk/packages/internal/WekaExcel/lib/README
+   A /trunk/packages/internal/WekaExcel/lib/dom4j-1.6.1.jar
+   A /trunk/packages/internal/WekaExcel/lib/geronimo-stax-api_1.0_spec-1.0.jar
+   A /trunk/packages/internal/WekaExcel/lib/poi-3.6-20091214.jar
+   A /trunk/packages/internal/WekaExcel/lib/poi-ooxml-3.6-20091214.jar
+   A /trunk/packages/internal/WekaExcel/lib/poi-ooxml-schemas-3.6-20091214.jar
+   A /trunk/packages/internal/WekaExcel/lib/xmlbeans-2.3.0.jar
+   A /trunk/packages/internal/WekaExcel/src
+   A /trunk/packages/internal/WekaExcel/src/main
+   A /trunk/packages/internal/WekaExcel/src/main/java
+   A /trunk/packages/internal/WekaExcel/src/main/java/weka
+   A /trunk/packages/internal/WekaExcel/src/main/java/weka/core
+   A /trunk/packages/internal/WekaExcel/src/main/java/weka/core/converters
+   A /trunk/packages/internal/WekaExcel/src/main/java/weka/core/converters/ExcelLoader.java
+   A /trunk/packages/internal/WekaExcel/src/main/java/weka/core/converters/ExcelSaver.java
+   A /trunk/packages/internal/WekaExcel/src/test
+   A /trunk/packages/internal/WekaExcel/src/test/java
+   A /trunk/packages/internal/WekaExcel/src/test/java/weka
+   A /trunk/packages/internal/WekaExcel/src/test/java/weka/core
+   A /trunk/packages/internal/WekaExcel/src/test/java/weka/core/converters
+   A /trunk/packages/internal/WekaExcel/src/test/java/weka/core/converters/ExcelTest.java
+
+initial import of WekaExcel, offering support for reading/writing MS Excel spreadsheets (.xls and .xlsx).
+------------------------------------------------------------------------
+r6924 | eibe | 2010-10-20 13:18:15 +1300 (Wed, 20 Oct 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/QuickDDIterative.java
+
+Initial import of quick diverse density learner as described in Discovery Science 2010 paper.
+------------------------------------------------------------------------
+r6925 | eibe | 2010-10-20 13:20:52 +1300 (Wed, 20 Oct 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+
+Updated to 1.0.1 because new classifier QuickDDIterative is now included.
+------------------------------------------------------------------------
+r6926 | mhall | 2010-10-20 14:23:52 +1300 (Wed, 20 Oct 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/multiInstanceLearning/src/test/java/weka/classifiers/mi/QuickDDIterativeTest.java
+
+Initial import
+------------------------------------------------------------------------
+r6927 | mhall | 2010-10-20 14:26:21 +1300 (Wed, 20 Oct 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/QuickDDIterative.java
+
+Fixed capabilities
+------------------------------------------------------------------------
+r6948 | mhall | 2010-11-16 14:35:32 +1300 (Tue, 16 Nov 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r6949 | mhall | 2010-11-16 14:36:14 +1300 (Tue, 16 Nov 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/bestFirstTree/src/main/java/weka/classifiers/trees/BFTree.java
+
+Fixed a bug that would occur occasionally when PREPRUNING was selected
+------------------------------------------------------------------------
+r6975 | mhall | 2010-11-30 16:49:35 +1300 (Tue, 30 Nov 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/bestFirstTree/Description.props
+
+Updated Description.props to new version
+------------------------------------------------------------------------
+r6976 | mhall | 2010-11-30 16:51:15 +1300 (Tue, 30 Nov 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gaussianProcesses/Description.props
+
+Updated Description.props with new Weka base version dependency and info on the move back to core in 3.7.3.
+------------------------------------------------------------------------
+r6977 | mhall | 2010-11-30 16:51:27 +1300 (Tue, 30 Nov 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classificationViaRegression/Description.props
+
+Updated Description.props with new Weka base version dependency and info on the move back to core in 3.7.3.
+------------------------------------------------------------------------
+r6978 | mhall | 2010-11-30 16:51:37 +1300 (Tue, 30 Nov 2010) | 1 line
+Changed paths:
+   M /trunk/packages/internal/regressionByDiscretization/Description.props
+
+Updated Description.props with new Weka base version dependency and info on the move back to core in 3.7.3.
+------------------------------------------------------------------------
+r6979 | mhall | 2010-12-01 14:47:58 +1300 (Wed, 01 Dec 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/complementNaiveBayes
+   A /trunk/packages/internal/complementNaiveBayes/Description.props
+   A /trunk/packages/internal/complementNaiveBayes/lib
+   A /trunk/packages/internal/complementNaiveBayes/src
+   A /trunk/packages/internal/complementNaiveBayes/src/main
+   A /trunk/packages/internal/complementNaiveBayes/src/main/java
+   A /trunk/packages/internal/complementNaiveBayes/src/main/java/weka
+   A /trunk/packages/internal/complementNaiveBayes/src/main/java/weka/classifiers
+   A /trunk/packages/internal/complementNaiveBayes/src/main/java/weka/classifiers/bayes
+   A /trunk/packages/internal/complementNaiveBayes/src/test
+   A /trunk/packages/internal/complementNaiveBayes/src/test/java
+   A /trunk/packages/internal/complementNaiveBayes/src/test/java/weka
+   A /trunk/packages/internal/complementNaiveBayes/src/test/java/weka/classifiers
+   A /trunk/packages/internal/complementNaiveBayes/src/test/java/weka/classifiers/bayes
+
+Initial import
+------------------------------------------------------------------------
+r6981 | mhall | 2010-12-01 14:55:56 +1300 (Wed, 01 Dec 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/complementNaiveBayes/src/main/java/weka/classifiers/bayes/ComplementNaiveBayes.java (from /trunk/weka/src/main/java/weka/classifiers/bayes/ComplementNaiveBayes.java:6972)
+   A /trunk/packages/internal/complementNaiveBayes/src/test/java/weka/classifiers/bayes/ComplementNaiveBayesTest.java (from /trunk/weka/src/test/java/weka/classifiers/bayes/ComplementNaiveBayesTest.java:6972)
+   D /trunk/weka/src/main/java/weka/classifiers/bayes/ComplementNaiveBayes.java
+   D /trunk/weka/src/test/java/weka/classifiers/bayes/ComplementNaiveBayesTest.java
+
+Moved complement naive bayes out to a package
+------------------------------------------------------------------------
+r6982 | mhall | 2010-12-01 14:59:05 +1300 (Wed, 01 Dec 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/complementNaiveBayes/build_package.xml
+
+Initial import
+------------------------------------------------------------------------
+r6984 | mhall | 2010-12-01 15:15:38 +1300 (Wed, 01 Dec 2010) | 1 line
+Changed paths:
+   D /trunk/packages/internal/gaussianProcesses/src/main/java/weka/classifiers/functions/GaussianProcesses.java
+   D /trunk/packages/internal/gaussianProcesses/src/test/java/weka/classifiers/functions/GaussianProcessesTest.java
+   A /trunk/weka/src/main/java/weka/classifiers/functions/GaussianProcesses.java (from /trunk/packages/internal/gaussianProcesses/src/main/java/weka/classifiers/functions/GaussianProcesses.java:6925)
+   A /trunk/weka/src/test/java/weka/classifiers/functions/GaussianProcessesTest.java (from /trunk/packages/internal/gaussianProcesses/src/test/java/weka/classifiers/functions/GaussianProcessesTest.java:6925)
+
+GaussianProcesses moves back into the core weka distribution
+------------------------------------------------------------------------
+r6986 | mhall | 2010-12-01 15:20:21 +1300 (Wed, 01 Dec 2010) | 1 line
+Changed paths:
+   D /trunk/packages/internal/classificationViaRegression/src/main/java/weka/classifiers/meta/ClassificationViaRegression.java
+   D /trunk/packages/internal/classificationViaRegression/src/test/java/weka/classifiers/meta/ClassificationViaRegressionTest.java
+   A /trunk/weka/src/main/java/weka/classifiers/meta/ClassificationViaRegression.java (from /trunk/packages/internal/classificationViaRegression/src/main/java/weka/classifiers/meta/ClassificationViaRegression.java:6925)
+   A /trunk/weka/src/test/java/weka/classifiers/meta/ClassificationViaRegressionTest.java (from /trunk/packages/internal/classificationViaRegression/src/test/java/weka/classifiers/meta/ClassificationViaRegressionTest.java:6925)
+
+ClassificationViaRegression moves back into the core weka distribution
+------------------------------------------------------------------------
+r6987 | mhall | 2010-12-01 15:21:49 +1300 (Wed, 01 Dec 2010) | 1 line
+Changed paths:
+   D /trunk/packages/internal/regressionByDiscretization/src/main/java/weka/classifiers/meta/RegressionByDiscretization.java
+   D /trunk/packages/internal/regressionByDiscretization/src/test/java/weka/classifiers/meta/RegressionByDiscretizationTest.java
+   A /trunk/weka/src/main/java/weka/classifiers/meta/RegressionByDiscretization.java (from /trunk/packages/internal/regressionByDiscretization/src/main/java/weka/classifiers/meta/RegressionByDiscretization.java:6925)
+   A /trunk/weka/src/test/java/weka/classifiers/meta/RegressionByDiscretizationTest.java (from /trunk/packages/internal/regressionByDiscretization/src/test/java/weka/classifiers/meta/RegressionByDiscretizationTest.java:6925)
+
+RegressionByDiscretization moves back into the core weka distribution
+------------------------------------------------------------------------
+r6990 | mhall | 2010-12-02 14:46:41 +1300 (Thu, 02 Dec 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/simpleEducationalLearningSchemes
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/Description.props
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/build_package.xml
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/lib
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers/bayes
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers/lazy
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers/rules
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers/trees
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers/bayes
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers/lazy
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers/rules
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers/trees
+
+Initial import
+------------------------------------------------------------------------
+r6991 | mhall | 2010-12-02 14:50:48 +1300 (Thu, 02 Dec 2010) | 1 line
+Changed paths:
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers/bayes/NaiveBayesSimple.java (from /trunk/weka/src/main/java/weka/classifiers/bayes/NaiveBayesSimple.java:6979)
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers/lazy/IB1.java (from /trunk/weka/src/main/java/weka/classifiers/lazy/IB1.java:6979)
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers/rules/Prism.java (from /trunk/weka/src/main/java/weka/classifiers/rules/Prism.java:6979)
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/main/java/weka/classifiers/trees/Id3.java (from /trunk/weka/src/main/java/weka/classifiers/trees/Id3.java:6979)
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers/bayes/NaiveBayesSimpleTest.java (from /trunk/weka/src/test/java/weka/classifiers/bayes/NaiveBayesSimpleTest.java:6979)
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers/lazy/IB1Test.java (from /trunk/weka/src/test/java/weka/classifiers/lazy/IB1Test.java:6979)
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers/rules/PrismTest.java (from /trunk/weka/src/test/java/weka/classifiers/rules/PrismTest.java:6979)
+   A /trunk/packages/internal/simpleEducationalLearningSchemes/src/test/java/weka/classifiers/trees/Id3Test.java (from /trunk/weka/src/test/java/weka/classifiers/trees/Id3Test.java:6979)
+   D /trunk/weka/src/main/java/weka/classifiers/bayes/NaiveBayesSimple.java
+   D /trunk/weka/src/main/java/weka/classifiers/lazy/IB1.java
+   D /trunk/weka/src/main/java/weka/classifiers/rules/Prism.java
+   D /trunk/weka/src/main/java/weka/classifiers/trees/Id3.java
+   D /trunk/weka/src/test/java/weka/classifiers/bayes/NaiveBayesSimpleTest.java
+   D /trunk/weka/src/test/java/weka/classifiers/lazy/IB1Test.java
+   D /trunk/weka/src/test/java/weka/classifiers/rules/PrismTest.java
+   D /trunk/weka/src/test/java/weka/classifiers/trees/Id3Test.java
+
+Moving out into a package called simpleEducationalLearningSchemes
+------------------------------------------------------------------------

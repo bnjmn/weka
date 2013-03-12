@@ -1,0 +1,133 @@
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+%
+%   This program is distributed in the hope that it will be useful,
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%   GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+
+% Version: $Revision$
+
+\documentclass[a4paper]{book}
+
+\usepackage{epsfig}
+\usepackage{wrapfig}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\input{hyphenation}
+\input{extensions}
+
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Manual\\for Version 3-7-9}
+\author{Remco R. Bouckaert\\Eibe Frank\\Mark Hall\\Richard Kirkby\\Peter Reutemann\\Alex Seewald\\David Scuse}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\begin{document}
+
+\begin{titlepage}
+\maketitle
+
+\thispagestyle{empty}
+\center
+\begin{table}[b]
+\copyright 2002-2013 \\
+ \\
+University of Waikato, Hamilton, New Zealand \\
+Alex Seewald (original Commnd-line primer) \\
+David Scuse (original Experimenter tutorial) \\
+\\
+This manual is licensed under the GNU General Public License version 3. More information about this license can be found at \url{http://www.gnu.org/licenses/gpl-3.0-standalone.html}
+\end{table}
+
+\end{titlepage}
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{The Command-line}
+
+\chapter{A command-line primer}
+\input{commandline}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{The Graphical User Interface}
+
+\chapter{Launching WEKA}
+\input{launching}
+
+\chapter{Package Manager}
+\input{package_manager}
+
+\chapter{Simple CLI}
+\input{simplecli}
+
+\chapter{Explorer}
+\input{explorer}
+
+\chapter{Experimenter}
+\input{experimenter}
+
+\chapter{KnowledgeFlow}
+\input{knowledgeflow}
+
+\chapter{ArffViewer}
+\input{arffviewer}
+
+\chapter{Bayesian Network Classifiers}
+\input{bayesnet}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Data}
+
+\chapter{ARFF}
+\input{arff}
+
+\chapter{XRFF}
+\label{xrff}
+\input{xrff}
+
+\chapter{Converters}
+\input{converters}
+
+\chapter{Stemmers}
+\input{stemmers}
+
+\chapter{Databases}
+\input{databases}
+
+\chapter{Windows databases}
+\input{windows_databases}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Appendix}
+\chapter{Research}
+\input{research}
+
+\chapter{Using the API}
+\input{using_api}
+
+\chapter{Extending WEKA}
+\input{extending}
+
+\chapter{Weka Packages}
+\input{weka_packages}
+
+\chapter{Technical documentation}
+\input{technical_documentation}
+
+\chapter{Other resources}
+\input{other_resources}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{bibliography}
+
+\end{document}

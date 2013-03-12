@@ -1,0 +1,266 @@
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+%
+%   This program is distributed in the hope that it will be useful,
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%   GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+
+% Version: $Revision$
+
+\section{Mailing list}
+The WEKA Mailing list can be found here:
+
+\begin{itemize}
+\item \url{http://list.scms.waikato.ac.nz/mailman/listinfo/wekalist}{}\\
+for subscribing/unsubscribing the list
+\item \url{https://list.scms.waikato.ac.nz/pipermail/wekalist/}{}\\
+(Mirrors: \url{http://news.gmane.org/gmane.comp.ai.weka}{}, \\ \url{http://www.nabble.com/WEKA-f435.html}{}) \\
+for searching previous posted messages
+\end{itemize}
+
+\noindent Before posting, please read the Mailing List Etiquette:\\
+\url{http://www.cs.waikato.ac.nz/~ml/weka/mailinglist_etiquette.html}{}.
+
+
+%$http://weka.sourceforge.net/wekadoc/index.php/en:Weka_Mailing_List_(3.5.6)$
+
+\section{Troubleshooting}
+Here are a few of things that are useful to know when you are having
+trouble installing or running Weka successfullyon your machine.
+
+\textbf{NB} these java commands refer to ones executed in a shell
+(bash, command prompt, etc.) and \textbf{NOT} to commands executed in the
+SimpleCLI.
+
+\subsection{Weka download problems}
+When you \textbf{download Weka}, make sure that the resulting file size is the
+same as on our webpage. Otherwise things won't work
+properly. Apparently some web browsers have trouble downloading Weka.
+
+\subsection{OutOfMemoryException}
+Most Java virtual machines only allocate a certain maximum amount of
+memory to run Java programs. Usually this is much less than the amount
+of RAM in your computer. However, you can extend the memory available
+for the virtual machine by setting appropriate options. With Sun's
+JDK, for example, you can go\\
+
+\verb=java -Xmx100m ...=\\
+
+\noindent to set the maximum Java heap size to 100MB. For more
+information about these options see
+\url{http://java.sun.com/docs/hotspot/VMOptions.html}{}.
+
+\subsubsection{Windows}
+
+\textbf{Book version}\\
+You have to modify the JVM invocation
+in the \verb=RunWeka.bat= batch file in your installation directory.\\
+
+\noindent \textbf{Developer version}
+\begin{itemize}
+\item up to \textbf{Weka 3.5.2}\\
+just like the book version.
+\item \textbf{Weka 3.5.3}\\
+You have to modify the link in the Windows Start menu, if you're starting the console-less Weka (only the link with console in its name executes the \verb=RunWeka.bat= batch file)
+\item \textbf{Weka 3.5.4} and higher
+Due to the new launching scheme, you no longer modify the batch file, but the \verb=RunWeka.ini= file. In that particular file, you'll have to change the \textbf{maxheap} placeholder. See section~\ref{RunWeka.ini}.
+\end{itemize}
+
+\subsection{Mac OSX}
+In your Weka installation directory (\verb=weka-3-x-y.app=) locate the \verb=Contents= subdirectory and edit the
+\verb=Info.plist= file. Near the bottom of the file you should see some text like:
+
+\begin{verbatim}
+<key>VMOptions</key>
+<string>-Xmx256M</string>
+\end{verbatim}
+
+\noindent Alter the \verb=256M= to something higher.
+
+\subsection{StackOverflowError}
+Try increasing the stack of your virtual machine. With Sun's JDK you
+can use this command to increase the stacksize:\\
+
+\verb=java -Xss512k ...=\\
+
+\noindent to set the maximum Java stack size to 512KB. If still not
+sufficient, slowly increase it.
+
+\subsection{just-in-time (JIT) compiler}
+For maximum enjoyment, use a virtual machine that incorporates a
+\textbf{just-in-time compiler}. This can speed things up quite
+significantly. Note also that there can be large differences in
+execution time between different virtual machines.
+
+\subsection{CSV file conversion}
+Either load the CSV file in the Explorer or use the CVS converter on
+the commandline as follows:\\
+
+\verb=java weka.core.converters.CSVLoader filename.csv > filename.arff=\\
+
+\subsection{ARFF file doesn't load}
+One way to figure out why ARFF files are failing to load is to give
+them to the Instances class. At the command line type the following:\\
+
+\verb=java weka.core.Instances filename.arff=\\
+
+\noindent where you substitute 'filename' for the actual name of your
+file. This should return an error if there is a problem reading the
+file, or show some statistics if the file is ok. The error message you
+get should give some indication of what is wrong.
+
+\subsection{Spaces in labels of ARFF files}
+A common problem people have with ARFF files is that labels can only
+have spaces if they are enclosed in single quotes, i.e. a label such
+as:\\
+
+\verb=some value=\\
+
+\noindent should be written either 'some value' or some\_value in the file.
+
+\subsection{CLASSPATH problems}
+Having problems getting Weka to run from a DOS/UNIX command prompt?
+Getting \verb=java.lang.NoClassDefFoundError= exceptions? Most likely your
+\textbf{CLASSPATH} environment variable is not set correctly - it needs to
+point to the Weka.jar file that you downloaded with Weka (or the
+parent of the Weka directory if you have extracted the jar). Under DOS
+this can be achieved with:\\
+
+\verb^set CLASSPATH=c:\weka-3-4\weka.jar;%CLASSPATH%^\\
+
+\noindent Under UNIX/Linux something like:\\
+
+\verb^export CLASSPATH=/home/weka/weka.jar:$CLASSPATH^\\
+
+\noindent An easy way to get avoid setting the variable this is to
+specify the CLASSPATH when calling Java. For example, if the jar file
+is located at c:$\backslash$weka-3-4$\backslash$weka.jar you can use:\\
+
+\verb^java -cp c:\weka-3-4\weka.jar weka.classifiers... etc.^\\
+
+\noindent See also Section~\ref{CLASSPATH}.
+
+\subsection{Instance ID}
+People often want to \textbf{tag} their \textbf{instances with
+  identifiers}, so they can keep track of them and the predictions
+made on them.
+
+\subsubsection{Adding the ID}
+A new ID attribute is added real easy: one only needs to run the \verb=AddID=
+filter over the dataset and it's done. Here's an example (at a
+DOS/Unix command prompt):\\
+
+\begin{verbatim}
+java weka.filters.unsupervised.attribute.AddID
+  -i data_without_id.arff
+  -o data_with_id.arff
+\end{verbatim}
+
+\noindent (all on a single line).
+
+\textbf{Note}: the AddID filter adds a numeric attribute, not a String
+attribute to the dataset. If you want to remove this ID attribute for
+the classifier in a \verb=FilteredClassifier= environment again, use the
+\verb=Remove= filter instead of the \verb=RemoveType= filter (same package).
+
+\subsubsection{Removing the ID}
+If you run from the command line you can use the \verb=-p= option to output
+predictions plus any other attributes you are interested in. So it is
+possible to have a string attribute in your data that acts as an
+identifier. A problem is that most classifiers don't like String
+attributes, but you can get around this by using the \verb=RemoveType= (this
+removes \textit{String} attributes by default).
+
+Here's an example. Lets say you have a training file named \verb=train.arff=,
+a testing file named \verb=test.arff=, and they have an identifier String
+attribute as their 5th attribute. You can get the predictions from \verb=J48=
+along with the identifier strings by issuing the following command (at
+a DOS/Unix command prompt):
+
+\begin{verbatim}
+java weka.classifiers.meta.FilteredClassifier
+  -F weka.filters.unsupervised.attribute.RemoveType
+  -W weka.classifiers.trees.J48
+  -t train.arff -T test.arff -p 5
+\end{verbatim}
+
+\noindent (all on a single line).
+
+If you want, you can redirect the output to a file by adding
+``\verb=> output.txt='' to the end of the line.
+
+In the Explorer GUI you could try a similar trick of using the String
+attribute identifiers here as well. Choose the \verb=FilteredClassifier=,
+with \verb=RemoveType= as the filter, and whatever classifier you
+prefer. When you visualize the results you will need click through
+each instance to see the identifier listed for each.
+
+\subsection{Visualization}
+Access to \textbf{visualization} from the ClassifierPanel, ClusterPanel and
+AttributeSelection panel is available from a popup menu. Click the
+right mouse button over an entry in the Result list to bring up the
+menu. You will be presented with options for viewing or saving the
+text output and---depending on the scheme---further options for
+visualizing errors, clusters, trees etc.
+
+\subsection{Memory consumption and Garbage collector}
+There is the ability to print \textbf{how much memory is available} in the
+Explorer and Experimenter and to run the garbage collector. Just right
+click over the Status area in the Explorer/Experimenter.
+
+\subsection{GUIChooser starts but not Experimenter or Explorer}
+\label{GUIChooserButNotExplorer}
+The GUIChooser starts, but Explorer and Experimenter don't start and
+output an Exception like this in the terminal:
+
+\begin{verbatim}
+/usr/share/themes/Mist/gtk-2.0/gtkrc:48: Engine "mist" is unsupported, ignoring
+---Registering Weka Editors---
+java.lang.NullPointerException
+       at weka.gui.explorer.PreprocessPanel.addPropertyChangeListener(PreprocessPanel.java:519)
+       at javax.swing.plaf.synth.SynthPanelUI.installListeners(SynthPanelUI.java:49)
+       at javax.swing.plaf.synth.SynthPanelUI.installUI(SynthPanelUI.java:38)
+       at javax.swing.JComponent.setUI(JComponent.java:652)
+       at javax.swing.JPanel.setUI(JPanel.java:131) 
+       ...
+\end{verbatim}
+
+\noindent This behavior happens only under Java 1.5 and Gnome/Linux,
+KDE doesn't produce this error. The reason for this is, that Weka
+tries to look more ``native'' and therefore sets a platform-specific
+Swing theme. Unfortunately, this doesn't seem to be working correctly
+in Java 1.5 together with Gnome. A workaround for this is to set the
+cross-platform \textbf{Metal} theme.
+
+In order to use another theme one only has to create the following
+properties file in ones home directory:\\
+
+\verb=LookAndFeel.props=\\
+
+\noindent With this content:\\
+
+\verb^Theme=javax.swing.plaf.metal.MetalLookAndFeel^\\
+
+\subsection{KnowledgeFlow toolbars are empty}
+In the terminal, you will most likely see this output as well:\\
+
+\verb=Failed to instantiate: weka.gui.beans.Loader=\\
+
+\noindent This behavior can happen under Gnome with Java 1.5, see
+Section~\ref{GUIChooserButNotExplorer} for a solution.
+
+\subsection{Links}
+\begin{itemize}
+\item Java VM options (\url{http://java.sun.com/docs/hotspot/VMOptions.html}{})
+\end{itemize}
+
+
+%$http://weka.sourceforge.net/wekadoc/index.php/en:Troubleshooting_(3.5.6)$

@@ -1,0 +1,292 @@
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+%
+%   This program is distributed in the hope that it will be useful,
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%   GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+
+% Version: $Revision$
+
+The previous sections covered how to implement classifiers and filters. In the
+following you will find some information on how to implement clusterers,
+associators and attribute selection algorithms. The various algorithms are only
+covered briefly, since other important components (capabilities, option
+handling, revisions) have already been discussed in the other chapters.
+
+%%%%%%%%%%%%%%
+% Clusterers %
+%%%%%%%%%%%%%%
+
+\subsection{Clusterers}
+\subsubsection*{Superclasses and interfaces}
+All clusterers implement the interface \texttt{weka.clusterers.Clusterer},
+but most algorithms will be most likely derived (directly or further up in the
+class hierarchy) from the abstract superclass
+\texttt{weka.clusterers.AbstractClusterer}.
+
+\texttt{weka.clusterers.SingleClustererEnhancer} is used for meta-clusterers,
+like the \texttt{FilteredClusterer} that filters the data on-the-fly for the
+base-clusterer. \\
+
+\noindent Here are some common interfaces that can be implemented:
+\begin{tight_itemize}
+  \item \texttt{weka.clusterers.DensityBasedClusterer} -- for clusterers that
+can estimate the density for a given instance.
+\texttt{AbstractDensityBasedClusterer} already implements this interface.
+  \item \texttt{weka.clusterers.UpdateableClusterer} -- clusterers that can
+generate their model incrementally implement this interface, like
+\texttt{CobWeb}.
+  \item \texttt{NumberOfClustersRequestable} -- is for clusterers that allow to
+specify the number of clusters to generate, like \texttt{SimpleKMeans}.
+  \item \texttt{weka.core.Randomizable} -- for clusterers that support
+randomization in one way or another. \texttt{RandomizableClusterer},
+\texttt{RandomizableDensityBasedClusterer} and
+\texttt{RandomizableSingleClustererEnhancer} all implement this interface
+already.
+\end{tight_itemize}
+
+\subsubsection*{Methods}
+In the following a short description of methods that are common to all cluster
+algorithms, see also the Javadoc for the \texttt{Clusterer} interface.
+
+\heading{buildClusterer(Instances)}
+Like the \texttt{buildClassifier(Instances)} method, this method completely
+rebuilds the model. Subsequent calls of this method with the same dataset must
+result in exactly the same model being built. This method also tests the
+training data against the capabilities of this this clusterer:
+\begin{verbatim}
+  public void buildClusterer(Instances data) throws Exception {
+    // test data against capabilities
+    getCapabilities().testWithFail(data);
+    // actual model generation
+    ...
+  }
+\end{verbatim}
+
+\heading{clusterInstance(Instance)}
+returns the index of the cluster the provided \texttt{Instance} belongs to.
+
+\heading{distributionForInstance(Instance)}
+returns the cluster membership for this \texttt{Instance} object. The
+membership is a double array containing the probabilities for each cluster.
+
+\heading{numberOfClusters()}
+returns the number of clusters that the model contains, after the model has
+been generated with the \texttt{buildClusterer(Instances)} method.
+
+\heading{getCapabilities()}
+see section ``Capabilities'' on page \pageref{classifier_capabilities} for more
+information.
+
+\heading{toString()}
+should output some information on the generated model. Even though this is not
+required, it is rather useful for the user to get some feedback on the built
+model.
+
+\heading{main(String[])}
+executes the clusterer from command-line. If your new algorithm is called
+\texttt{FunkyClusterer}, then use the following code as your \texttt{main}
+method:
+\begin{verbatim}
+  /**
+   * Main method for executing this clusterer.
+   *
+   * @param args the options, use "-h" to display options
+   */
+  public static void main(String[] args) {
+    AbstractClusterer.runClusterer(new FunkyClusterer(), args);
+  }
+\end{verbatim}
+
+\subsubsection*{Testing}
+For some basic tests from the command-line, you can use the following test
+class:
+\begin{verbatim}
+  weka.clusterers.CheckClusterer -W classname [further options]
+\end{verbatim}
+For junit tests, you can subclass the
+\texttt{weka.clusterers.AbstractClustererTest} class and add additional tests.
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% Attribute selection %
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\subsection{Attribute selection}
+Attribute selection consists basically of two different types of classes:
+\begin{tight_itemize}
+  \item \textit{evaluator} -- determines the merit of single attributes or
+subsets of attributes
+  \item \textit{search} algorithm -- the search heuristic
+\end{tight_itemize}
+Each of the them will be discussed separately in the following sections.
+
+\subsubsection*{Evaluator}
+The evaluator algorithm is responsible for determining merit of the current
+attribute selection.
+
+\heading{Superclasses and interfaces}
+The ancestor for all evaluators is the
+\texttt{weka.attributeSelection.ASEvaluation} class. \\
+
+\noindent Here are some interfaces that are commonly implemented by evaluators:
+\begin{tight_itemize}
+  \item \texttt{AttributeEvaluator} -- evaluates only single attributes
+  \item \texttt{SubsetEvaluator} -- evaluates subsets of attributes
+  \item \texttt{AttributeTransformer} -- evaluators that transform the input
+data
+\end{tight_itemize}
+
+\heading{Methods}
+In the following a brief description of the main methods of an evaluator.
+
+\heading{buildEvaluator(Instances)}
+Generates the attribute evaluator. Subsequent calls of this method with the
+same data (and the same search algorithm) must result in the same attributes
+being selected. This method also checks the data against the capabilities:
+\begin{verbatim}
+  public void buildEvaluator (Instances data) throws Exception {
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
+    // actual initialization of evaluator
+    ...
+  }
+\end{verbatim}
+
+\heading{postProcess(int[])}
+can be used for optional post-processing of the selected attributes, e.g., for
+ranking purposes.
+
+\newpage
+\heading{main(String[])}
+executes the evaluator from command-line. If your new algorithm is called
+\texttt{FunkyEvaluator}, then use the following code as your \texttt{main}
+method:
+\begin{verbatim}
+  /**
+   * Main method for executing this evaluator.
+   *
+   * @param args the options, use "-h" to display options
+   */
+  public static void main(String[] args) {
+    ASEvaluation.runEvaluator(new FunkyEvaluator(), args);
+  }
+\end{verbatim}
+
+\subsubsection*{Search}
+The search algorithm defines the heuristic of searching, e.g, exhaustive
+search, greedy or genetic.
+
+\heading{Superclasses and interfaces}
+The ancestor for all search algorithms is the
+\texttt{weka.attributeSelection.ASSearch} class. \\
+
+\noindent Interfaces that can be implemented, if applicable, by a search
+algorithm:
+\begin{tight_itemize}
+  \item \texttt{RankedOutputSearch} -- for search algorithms that produce
+ranked lists of attributes
+  \item \texttt{StartSetHandler} -- search algorithms that can make use of a
+start set of attributes implement this interface
+\end{tight_itemize}
+
+\heading{Methods}
+Search algorithms are rather basic classes in regards to methods that need to
+be implemented. Only the following method needs to be implemented:
+
+\heading{search(ASEvaluation,Instances)}
+uses the provided evaluator to guide the search.
+
+\subsubsection*{Testing}
+For some basic tests from the command-line, you can use the following test
+class:
+\begin{verbatim}
+  weka.attributeSelection.CheckAttributeSelection
+    -eval classname -search classname [further options]
+\end{verbatim}
+For junit tests, you can subclass the
+\texttt{weka.attributeSelection.AbstractEvaluatorTest} or
+\texttt{weka.attributeSelection.AbstractSearchTest} class and add additional
+tests.
+
+%%%%%%%%%%%%%%%
+% Associators %
+%%%%%%%%%%%%%%%
+
+\newpage
+\subsection{Associators}
+\subsubsection*{Superclasses and interfaces}
+The interface \texttt{weka.associations.Associator} is common to all associator
+algorithms. But most algorithms will be derived from
+\texttt{AbstractAssociator}, an abstract class implementing this interface.
+As with classifiers and clusterers, you can also implement a meta-associator,
+derived from \texttt{SingleAssociatorEnhancer}. An example for this is the
+\texttt{FilteredAssociator}, which filters the training data on-the-fly for the
+base-associator.
+
+The only other interface that is used by some other association algorithms, is
+the \texttt{weka.clusterers.CARuleMiner} one. Associators that learn class
+association rules implement this interface, like \texttt{Apriori}.
+
+\subsubsection*{Methods}
+The associators are very basic algorithms and only support building of the
+model.
+
+\heading{buildAssociations(Instances)}
+Like the \texttt{buildClassifier(Instances)} method, this method completely
+rebuilds the model. Subsequent calls of this method with the same dataset must
+result in exactly the same model being built. This method also tests the
+training data against the capabilities:
+\begin{verbatim}
+  public void buildAssociations(Instances data) throws Exception {
+    // other necessary setups
+    ...
+    // test data against capabilities
+    getCapabilities().testWithFail(data);
+    // actual model generation
+    ...
+  }
+\end{verbatim}
+
+\heading{getCapabilities()}
+see section ``Capabilities'' on page \pageref{classifier_capabilities} for more
+information.
+
+\heading{toString()}
+should output some information on the generated model. Even though this is not
+required, it is rather useful for the user to get some feedback on the built
+model.
+
+\newpage
+\heading{main(String[])}
+executes the associator from command-line. If your new algorithm is called
+\texttt{FunkyAssociator}, then use the following code as your \texttt{main}
+method:
+\begin{verbatim}
+  /**
+   * Main method for executing this associator.
+   *
+   * @param args the options, use "-h" to display options
+   */
+  public static void main(String[] args) {
+    AbstractAssociator.runAssociator(new FunkyAssociator(), args);
+  }
+\end{verbatim}
+
+\subsubsection*{Testing}
+For some basic tests from the command-line, you can use the following test
+class:
+\begin{verbatim}
+  weka.associations.CheckAssociator -W classname [further options]
+\end{verbatim}
+For junit tests, you can subclass the
+\texttt{weka.associations.AbstractAssociatorTest} class and add additional
+tests.

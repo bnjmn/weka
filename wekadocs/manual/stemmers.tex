@@ -1,0 +1,74 @@
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+%
+%   This program is distributed in the hope that it will be useful,
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%   GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+
+% Version: $Revision$
+
+\section{Introduction}
+Weka now supports stemming algorithms. The stemming algorithms are located in the following package:
+
+\begin{verbatim}
+  weka.core.stemmers
+\end{verbatim}
+
+\noindent Currently, the Lovins Stemmer (+ iterated version) and support for the Snowball stemmers are included.
+
+\section{Snowball stemmers}
+Weka contains a wrapper class for the Snowball (homepage: \url{http://snowball.tartarus.org/}{}) stemmers (containing the Porter stemmer and several other stemmers for different languages). The relevant class is \texttt{weka.core.stemmers.Snowball}.
+
+The Snowball classes are not included, they only have to be present in the classpath. The reason for this is, that the Weka team doesn't have to watch out for new versions of the stemmers and update them.
+
+There are two ways of getting hold of the Snowball stemmers:
+
+\begin{enumerate}
+	\item You can add the following pre-compiled jar archive to your classpath and you're set (based on source code from 2005-10-19, compiled 2005-10-22). \\
+	\url{http://www.cs.waikato.ac.nz/~ml/weka/stemmers/snowball.jar}{}
+	\item You can compile the stemmers yourself with the newest sources. Just download the following ZIP file, unpack it and follow the instructions in the README file (the zip contains an ANT (\url{http://ant.apache.org/}{}) build script for generating the jar archive). \\
+	\url{http://www.cs.waikato.ac.nz/~ml/weka/stemmers/snowball.zip}{} \\
+      \textbf{Note:} the patch target is specific to the source code from 2005-10-19.
+\end{enumerate}
+
+\newpage
+\section{Using stemmers}
+The stemmers can either used
+
+\begin{itemize}
+	\item from commandline
+	\item within the StringToWordVector (package \texttt{weka.filters.unsupervised.attribute})
+\end{itemize}
+
+\subsection{Commandline}
+All stemmers support the following options:
+
+\begin{itemize}
+	\item \textit{-h} \\
+		for displaying a brief help
+	\item \textit{-i $<$input-file$>$} \\
+		The file to process
+	\item \textit{-o $<$output-file$>$} \\
+		The file to output the processed data to (default \textit{stdout})
+	\item \textit{-l} \\
+		Uses lowercase strings, i.e., the input is automatically converted to lower case
+\end{itemize}
+
+\subsection{StringToWordVector}
+Just use the GenericObjectEditor to choose the right stemmer and the desired options (if the stemmer offers additional options).
+
+\section{Adding new stemmers}
+You can easily add new stemmers, if you follow these guidelines (for use in the GenericObjectEditor):
+
+\begin{itemize}
+	\item they should be located in the \texttt{weka.core.stemmers} package (if not, then the \texttt{GenericObjectEditor.props}/\texttt{GenericPropertiesCreator.props} file need to be updated) and
+	\item they must implement the interface \texttt{weka.core.stemmers.Stemmer}.
+\end{itemize}

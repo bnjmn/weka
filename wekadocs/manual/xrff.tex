@@ -1,0 +1,209 @@
+%
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+%
+%   This program is distributed in the hope that it will be useful,
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%   GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+
+% Version: $Revision$
+
+The XRFF (\textit{Xml attribute Relation File Format}) is a representing
+the data in a format that can store comments, attribute and instance weights.
+
+\section{File extensions}
+The following file extensions are recognized as XRFF files:
+
+\begin{itemize}
+	\item \texttt{.xrff} \\
+		the default extension of XRFF files
+	\item \texttt{.xrff.gz} \\
+		the extension for gzip compressed XRFF files (see \textit{Compression} section for more details)
+\end{itemize}
+
+\section{Comparison}
+
+\subsection{ARFF}
+In the following a snippet of the UCI dataset \textit{iris} in ARFF format:
+
+\begin{verbatim}
+  @relation iris
+
+  @attribute sepallength numeric
+  @attribute sepalwidth numeric
+  @attribute petallength numeric
+  @attribute petalwidth numeric
+  @attribute class {Iris-setosa,Iris-versicolor,Iris-virginica}
+
+  @data
+  5.1,3.5,1.4,0.2,Iris-setosa
+  4.9,3,1.4,0.2,Iris-setosa
+  ...
+\end{verbatim}
+
+\subsection{XRFF}
+And the same dataset represented as XRFF file:
+
+\begin{verbatim}
+  <?xml version="1.0" encoding="utf-8"?>
+
+  <!DOCTYPE dataset
+  [
+     <!ELEMENT dataset (header,body)>
+     <!ATTLIST dataset name CDATA #REQUIRED>
+     <!ATTLIST dataset version CDATA "3.5.4">
+
+     <!ELEMENT header (notes?,attributes)>
+     <!ELEMENT body (instances)>
+     <!ELEMENT notes ANY>   
+
+     <!ELEMENT attributes (attribute+)>
+     <!ELEMENT attribute (labels?,metadata?,attributes?)>
+     <!ATTLIST attribute name CDATA #REQUIRED>
+     <!ATTLIST attribute type (numeric|date|nominal|string|relational) #REQUIRED>
+     <!ATTLIST attribute format CDATA #IMPLIED>
+     <!ATTLIST attribute class (yes|no) "no">
+     <!ELEMENT labels (label*)>   
+     <!ELEMENT label ANY>
+     <!ELEMENT metadata (property*)>
+     <!ELEMENT property ANY>
+     <!ATTLIST property name CDATA #REQUIRED>
+
+     <!ELEMENT instances (instance*)>
+     <!ELEMENT instance (value*)>
+     <!ATTLIST instance type (normal|sparse) "normal">
+     <!ATTLIST instance weight CDATA #IMPLIED>
+     <!ELEMENT value (#PCDATA|instances)*>
+     <!ATTLIST value index CDATA #IMPLIED>   
+     <!ATTLIST value missing (yes|no) "no">
+  ]
+  >
+
+  <dataset name="iris" version="3.5.3">
+     <header>
+        <attributes>
+           <attribute name="sepallength" type="numeric"/>
+           <attribute name="sepalwidth" type="numeric"/>
+           <attribute name="petallength" type="numeric"/>
+           <attribute name="petalwidth" type="numeric"/>
+           <attribute class="yes" name="class" type="nominal">
+              <labels>
+                 <label>Iris-setosa</label>
+                 <label>Iris-versicolor</label>
+                 <label>Iris-virginica</label>
+              </labels>
+           </attribute>
+        </attributes>
+     </header>
+
+     <body>
+        <instances>
+           <instance>
+              <value>5.1</value>
+              <value>3.5</value>
+              <value>1.4</value>
+              <value>0.2</value>
+              <value>Iris-setosa</value>
+           </instance>
+           <instance>
+              <value>4.9</value>
+              <value>3</value>
+              <value>1.4</value>
+              <value>0.2</value>
+              <value>Iris-setosa</value>
+           </instance>
+           ...
+        </instances>
+     </body>
+  </dataset>
+\end{verbatim}
+
+\section{Sparse format}
+The XRFF format also supports a sparse data representation. Even though the iris dataset does not contain sparse data, the above example will be used here to illustrate the sparse format:
+
+\begin{verbatim}
+  ...
+  <instances>
+     <instance type="sparse">
+        <value index="1">5.1</value>
+        <value index="2">3.5</value>
+        <value index="3">1.4</value>
+        <value index="4">0.2</value>
+        <value index="5">Iris-setosa</value>
+     </instance>
+     <instance type="sparse">
+        <value index="1">4.9</value>
+        <value index="2">3</value>
+        <value index="3">1.4</value>
+        <value index="4">0.2</value>
+        <value index="5">Iris-setosa</value>
+     </instance>
+     ...
+  </instances>
+  ...
+\end{verbatim}
+
+\noindent In contrast to the \textit{normal} data format, each sparse instance tag contains a type attribute with the value sparse:
+
+\begin{verbatim}
+  <instance type="sparse">
+\end{verbatim}
+
+\noindent And each value tag needs to specify the \textit{index} attribute, which contains the 1-based index of this value.
+
+\begin{verbatim}
+  <value index="1">5.1</value>
+\end{verbatim}
+
+\section{Compression}
+Since the XML representation takes up considerably more space than the rather compact ARFF format, one can also compress the data via \textbf{gzip}. Weka automatically recognizes a file being gzip compressed, if the file's extension is \texttt{.xrff.gz} instead of \texttt{.xrff}.
+
+The Weka Explorer, Experimenter and command-line allow one to load/save compressed and uncompressed XRFF files (this applies also to ARFF files).
+
+\section{Useful features}
+In addition to all the features of the ARFF format, the XRFF format contains the following additional features:
+
+\begin{itemize}
+	\item class attribute specification
+	\item attribute weights
+\end{itemize}
+
+\subsection{Class attribute specification}
+Via the \texttt{class="yes"} attribute in the attribute specification in the header, one can define which attribute should act as class attribute. A feature that can be used on the command line as well as in the Experimenter, which now can also load other data formats, and removing the limitation of the class attribute always having to be the last one.
+
+Snippet from the \textit{iris} dataset:
+
+\begin{verbatim}
+  <attribute class="yes" name="class" type="nominal">
+\end{verbatim}
+
+\subsection{Attribute weights}
+Attribute weights are stored in an attributes meta-data tag (in the \textit{header} section). Here is an example of the \textit{petalwidth} attribute with a weight of 0.9:
+
+\begin{verbatim}
+  <attribute name="petalwidth" type="numeric">
+      <metadata>
+         <property name="weight">0.9</property>
+      </metadata>
+  </attribute>
+\end{verbatim}
+
+\subsection{Instance weights}
+Instance weights are defined via the \textit{weight} attribute in each instance tag. By default, the weight is 1. Here is an example:
+
+\begin{verbatim}
+  <instance weight="0.75">
+     <value>5.1</value>
+     <value>3.5</value>
+     <value>1.4</value>
+     <value>0.2</value>
+     <value>Iris-setosa</value>
+  </instance>
+\end{verbatim}

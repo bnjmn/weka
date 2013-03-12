@@ -1,0 +1,84 @@
+------------------------------------------------------------------------
+r9506 | mhall | 2013-01-25 11:45:14 +1300 (Fri, 25 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/version.txt
+
+trunk version is 3.7.9
+------------------------------------------------------------------------
+r9509 | mhall | 2013-01-25 14:11:20 +1300 (Fri, 25 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Version.java
+
+Updated to handle version numbers with '-snapshot' in them
+------------------------------------------------------------------------
+r9510 | mhall | 2013-01-25 14:11:43 +1300 (Fri, 25 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/version.txt
+
+snapshot version number
+------------------------------------------------------------------------
+r9515 | mhall | 2013-01-29 11:47:09 +1300 (Tue, 29 Jan 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Attribute.java
+   M /trunk/weka/src/main/java/weka/core/StringLocator.java
+   M /trunk/weka/src/main/java/weka/core/converters/ArffLoader.java
+   M /trunk/weka/src/main/java/weka/core/converters/ArffSaver.java
+
+Added a constant dummy first value for String attributes that is increadibly unlikely to actually occur in any real application. This is for the sparse instances String attribute 'bug'. StringLocator now checks for the dummy value and does not copy it over to the destination structure. ArffSaver now uses the dummy value. ArffLoader now resets all string values to the dummy when reading sparse instances incrementally
+------------------------------------------------------------------------
+r9523 | mhall | 2013-02-08 03:57:18 +1300 (Fri, 08 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Added a serial version UID for inner Tree class.
+------------------------------------------------------------------------
+r9526 | mhall | 2013-02-08 04:01:55 +1300 (Fri, 08 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Quick javadoc fix.
+------------------------------------------------------------------------
+r9528 | mhall | 2013-02-08 08:23:42 +1300 (Fri, 08 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/InterquartileRange.java
+   M /trunk/weka/src/test/java/weka/filters/unsupervised/attribute/InterquartileRangeTest.java
+   M /trunk/weka/src/test/resources/wekarefs/weka/filters/unsupervised/attribute/InterquartileRangeTest.ref
+
+Capabilities corrected to reflect the fact that this filter does not handle missing values
+------------------------------------------------------------------------
+r9539 | mhall | 2013-02-12 16:23:03 +1300 (Tue, 12 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/experiment/ExplicitTestsetResultProducer.java
+
+Now replaces environment variables in the filename that is constructed. Also sets the environment variable RUN_NUMBER equal to the current run number - this allows the run number to be used in the filename.
+------------------------------------------------------------------------
+r9543 | mhall | 2013-02-14 10:05:36 +1300 (Thu, 14 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+
+Fixed an output bug where precision was output instead of recall and f-measure.
+------------------------------------------------------------------------
+r9554 | mhall | 2013-02-17 20:32:53 +1300 (Sun, 17 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierErrorsPlotInstances.java
+
+process() method now sets the class to missing value before getting a prediction from the classifier.
+------------------------------------------------------------------------
+r9561 | eibe | 2013-02-19 14:37:47 +1300 (Tue, 19 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/KernelFilter.java
+
+Fixed bug in KernelFilter: now works with nominal class attributes as well.
+------------------------------------------------------------------------
+r9562 | eibe | 2013-02-19 16:01:42 +1300 (Tue, 19 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/GaussianProcesses.java
+
+GaussianProcesses model now requires less memory after training because kernel cache is cleared after training.
+------------------------------------------------------------------------
+r9563 | mhall | 2013-02-19 20:06:16 +1300 (Tue, 19 Feb 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/StringToWordVector.java
+
+Now checks for a non-nominal class and turns on doNotOperateOnPerClassBasis in that case.
+------------------------------------------------------------------------
