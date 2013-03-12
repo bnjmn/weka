@@ -737,7 +737,27 @@
       <arg value="-r"/>
       <arg value="${date_range}"/>
       <arg value="-v"/>
-      <arg value="${repository.URL}/${weka_branch}/weka/src/main/java/weka"/>
+      <arg value="${repository.URL}/branches/waikato/weka/src/main/java/weka"/>
+      <classpath>
+        <pathelement path="${java.class.path}"/>
+      </classpath>
+    </java>
+  </target>
+
+   <target name="packages_changelog"
+    description="Create a changelog file for the team-supported packages Weka (development branch only). Run with -Dsvn_username=username -Dsvn_password=password -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Ddate_range=&lt;date range for changes (eg. {2008-07-16}:{2008-09-29})&gt;.">
+    <property name="repository.URL" value="https://svn.cms.waikato.ac.nz/svn/weka"/>
+    <java classname="org.tmatesoft.svn.cli.SVN" fork="true"
+          output="../wekadocs/changelogs/CHANGELOG_PACKAGES-${release}">
+      <arg value="log"/>
+      <arg value="--username"/>
+      <arg value="${svn_username}"/>
+      <arg value="--password"/>
+      <arg value="${svn_password}"/>
+      <arg value="-r"/>
+      <arg value="${date_range}"/>
+      <arg value="-v"/>
+      <arg value="${repository.URL}/trunk/packages/"/>
       <classpath>
         <pathelement path="${java.class.path}"/>
       </classpath>
