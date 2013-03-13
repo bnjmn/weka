@@ -266,10 +266,6 @@
     </antcall>
 
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="userClassifier"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_internal">
       <param name="packageName" value="XMeans"/>
     </antcall>
 
