@@ -1155,6 +1155,22 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         m_playBB.setEnabled(!getExecuting());
         m_saveB.setEnabled(!getExecuting());
         m_saveBB.setEnabled(!getExecuting());
+
+        m_groupB.setEnabled(false);
+        if (getSelectedBeans().size() > 0 && !getExecuting()) {
+          // Able to group selected subflow?
+          final Vector selected = m_mainKFPerspective.getSelectedBeans();
+          // check if sub flow is valid
+          final Vector inputs = BeanConnection.inputs(selected,
+              m_mainKFPerspective.getCurrentTabIndex());
+          final Vector outputs = BeanConnection.outputs(selected,
+              m_mainKFPerspective.getCurrentTabIndex());
+
+          if (groupable(selected, inputs, outputs)) {
+            m_groupB.setEnabled(true);
+          }
+        }
+
         m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
@@ -1186,6 +1202,22 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         m_playB.setEnabled(!getExecuting());
         m_playBB.setEnabled(!getExecuting());
         m_stopB.setEnabled(getExecuting());
+
+        m_groupB.setEnabled(false);
+        if (getSelectedBeans().size() > 0 && !getExecuting()) {
+          // Able to group selected subflow?
+          final Vector selected = m_mainKFPerspective.getSelectedBeans();
+          // check if sub flow is valid
+          final Vector inputs = BeanConnection.inputs(selected,
+              m_mainKFPerspective.getCurrentTabIndex());
+          final Vector outputs = BeanConnection.outputs(selected,
+              m_mainKFPerspective.getCurrentTabIndex());
+
+          if (groupable(selected, inputs, outputs)) {
+            m_groupB.setEnabled(true);
+          }
+        }
+
         m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_selectAllB.setEnabled(BeanInstance.getBeanInstances(
@@ -1363,6 +1395,22 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     public synchronized void setSelectedBeans(Vector beans) {
       if (getNumTabs() > 0) {
         setSelectedBeans(getCurrentTabIndex(), beans);
+
+        m_groupB.setEnabled(false);
+        if (getSelectedBeans().size() > 0 && !getExecuting()) {
+          // Able to group selected subflow?
+          final Vector selected = m_mainKFPerspective.getSelectedBeans();
+          // check if sub flow is valid
+          final Vector inputs = BeanConnection.inputs(selected,
+              m_mainKFPerspective.getCurrentTabIndex());
+          final Vector outputs = BeanConnection.outputs(selected,
+              m_mainKFPerspective.getCurrentTabIndex());
+
+          if (groupable(selected, inputs, outputs)) {
+            m_groupB.setEnabled(true);
+          }
+        }
+
         m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
@@ -1484,6 +1532,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         JToolBar fixedTools = new JToolBar();
         fixedTools.setOrientation(JToolBar.HORIZONTAL);
 
+        m_groupB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
+            + "bricks.png")));
+        m_groupB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+        m_groupB.setToolTipText("Group selected (Ctrl+Z)");
         m_cutB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
             + "cut.png")));
         m_cutB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
@@ -1569,6 +1621,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         fixedTools.add(m_zoomOutB);
         fixedTools.addSeparator();
         fixedTools.add(m_selectAllB);
+        fixedTools.add(m_groupB);
         fixedTools.add(m_cutB);
         fixedTools.add(m_copyB);
         fixedTools.add(m_deleteB);
@@ -1748,6 +1801,29 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           @Override
           public void actionPerformed(ActionEvent e) {
             zoomOutAction.actionPerformed(e);
+          }
+        });
+
+        final Action groupAction = new AbstractAction("Group") {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            final Vector selected = m_mainKFPerspective.getSelectedBeans();
+            final Vector inputs = BeanConnection.inputs(selected,
+                m_mainKFPerspective.getCurrentTabIndex());
+            final Vector outputs = BeanConnection.outputs(selected,
+                m_mainKFPerspective.getCurrentTabIndex());
+            groupSubFlow(selected, inputs, outputs);
+          }
+        };
+        KeyStroke groupKey = KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+            InputEvent.CTRL_DOWN_MASK);
+        MainKFPerspective.this.getActionMap().put("Group", groupAction);
+        MainKFPerspective.this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(groupKey, "Group");
+        m_groupB.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            groupAction.actionPerformed(e);
           }
         });
 
@@ -3060,6 +3136,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   protected JButton m_togglePerspectivesB;
   protected JButton m_templatesB;
 
+  protected JButton m_groupB;
   protected JButton m_cutB;
   protected JButton m_copyB;
   protected JButton m_pasteB;
@@ -5444,6 +5521,45 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     }
   }
 
+  private boolean groupable(Vector selected, Vector inputs, Vector outputs) {
+    boolean groupable = true;
+
+    // screen the inputs and outputs
+    if (inputs.size() == 0 || outputs.size() == 0) {
+      return false;
+    }
+
+    // dissallow MetaBeans in the selected set (for the
+    // time being).
+    for (int i = 0; i < selected.size(); i++) {
+      BeanInstance temp = (BeanInstance) selected.elementAt(i);
+      if (temp.getBean() instanceof MetaBean) {
+        groupable = false;
+        return false;
+      }
+    }
+
+    // show connector dots for input beans
+    for (int i = 0; i < inputs.size(); i++) {
+      BeanInstance temp = (BeanInstance) inputs.elementAt(i);
+      if (temp.getBean() instanceof Visible) {
+        ((Visible) temp.getBean()).getVisual().setDisplayConnectors(true,
+            java.awt.Color.red);
+      }
+    }
+
+    // show connector dots for output beans
+    for (int i = 0; i < outputs.size(); i++) {
+      BeanInstance temp = (BeanInstance) outputs.elementAt(i);
+      if (temp.getBean() instanceof Visible) {
+        ((Visible) temp.getBean()).getVisual().setDisplayConnectors(true,
+            java.awt.Color.green);
+      }
+    }
+
+    return groupable;
+  }
+
   // right click over empty canvas (not on a bean)
   private void rightClickCanvasPopup(final int x, final int y) {
 
@@ -5505,7 +5621,6 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         menuItemCount++;
 
         // Able to group selected subflow?
-        boolean groupable = true;
         final Vector selected = m_mainKFPerspective.getSelectedBeans();
         // check if sub flow is valid
         final Vector inputs = BeanConnection.inputs(selected,
@@ -5513,42 +5628,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         final Vector outputs = BeanConnection.outputs(selected,
             m_mainKFPerspective.getCurrentTabIndex());
 
-        // screen the inputs and outputs
-        if (inputs.size() == 0 || outputs.size() == 0) {
-          groupable = false;
-        }
-
-        // dissallow MetaBeans in the selected set (for the
-        // time being).
-        if (groupable) {
-          for (int i = 0; i < selected.size(); i++) {
-            BeanInstance temp = (BeanInstance) selected.elementAt(i);
-            if (temp.getBean() instanceof MetaBean) {
-              groupable = false;
-              break;
-            }
-          }
-        }
+        boolean groupable = groupable(selected, inputs, outputs);
 
         if (groupable) {
-          // show connector dots for input beans
-          for (int i = 0; i < inputs.size(); i++) {
-            BeanInstance temp = (BeanInstance) inputs.elementAt(i);
-            if (temp.getBean() instanceof Visible) {
-              ((Visible) temp.getBean()).getVisual().setDisplayConnectors(true,
-                  java.awt.Color.red);
-            }
-          }
-
-          // show connector dots for output beans
-          for (int i = 0; i < outputs.size(); i++) {
-            BeanInstance temp = (BeanInstance) outputs.elementAt(i);
-            if (temp.getBean() instanceof Visible) {
-              ((Visible) temp.getBean()).getVisual().setDisplayConnectors(true,
-                  java.awt.Color.green);
-            }
-          }
-
           MenuItem groupItem = new MenuItem("Group selected");
           groupItem.addActionListener(new ActionListener() {
             @Override
