@@ -899,6 +899,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     @Override
     public void paintComponent(Graphics gx) {
+      double lz = m_layoutZoom / 100.0;
+      ((Graphics2D) gx).scale(lz, lz);
       super.paintComponent(gx);
 
       ((Graphics2D) gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -1016,6 +1018,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /** List of layouts - one for each tab */
     protected List<BeanLayout> m_beanLayouts = new ArrayList<BeanLayout>();
 
+    /** List of zoom settings - one for each tab */
+    protected List<Integer> m_zoomSettings = new ArrayList<Integer>();
+
     /** List of log panels - one for each tab */
     protected List<KFLogPanel> m_logPanels = new ArrayList<KFLogPanel>();
 
@@ -1104,6 +1109,36 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       return null;
     }
 
+    public synchronized int getCurrentZoomSetting() {
+      if (getCurrentTabIndex() >= 0) {
+        return m_zoomSettings.get(getCurrentTabIndex()).intValue();
+      }
+
+      // no scaling
+      return 100;
+    }
+
+    public synchronized int getZoomSetting(int index) {
+      if (index >= 0 && index < m_zoomSettings.size()) {
+        return m_zoomSettings.get(index);
+      }
+
+      // no scaling
+      return 100;
+    }
+
+    public synchronized void setCurrentZoomSetting(int z) {
+      if (getNumTabs() > 0) {
+        setZoomSetting(getCurrentTabIndex(), z);
+      }
+    }
+
+    public synchronized void setZoomSetting(int index, int z) {
+      if (index < getNumTabs() && index >= 0) {
+        m_zoomSettings.set(index, new Integer(z));
+      }
+    }
+
     public synchronized void setActiveTab(int index) {
       if (index < getNumTabs() && index >= 0) {
         m_flowTabs.setSelectedIndex(index);
@@ -1111,6 +1146,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         // set the log and layout to the ones belonging to this tab
         m_logPanel = m_logPanels.get(index);
         m_beanLayout = m_beanLayouts.get(index);
+        m_layoutZoom = m_zoomSettings.get(index);
         m_flowEnvironment = m_environmentSettings.get(index);
 
         m_saveB.setEnabled(!getExecuting());
@@ -1514,11 +1550,24 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         m_selectAllB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_selectAllB.setToolTipText("Select all (Ctrl+A)");
 
+        m_zoomInB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
+            + "zoom_in.png")));
+        m_zoomInB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+        m_zoomInB.setToolTipText("Zoom in (Ctrl++)");
+
+        m_zoomOutB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
+            + "zoom_out.png")));
+        m_zoomOutB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+        m_zoomOutB.setToolTipText("Zoom out (Ctrl+-)");
+
         m_undoB = new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
             + "arrow_undo.png")));
         m_undoB.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
         m_undoB.setToolTipText("Undo (Ctrl+U)");
 
+        fixedTools.add(m_zoomInB);
+        fixedTools.add(m_zoomOutB);
+        fixedTools.addSeparator();
         fixedTools.add(m_selectAllB);
         fixedTools.add(m_cutB);
         fixedTools.add(m_copyB);
@@ -1631,6 +1680,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                 m_mainKFPerspective.setSelectedBeans(newSelected);
               }
             }
+            revalidate();
+            repaint();
+            notifyIsDirty();
           }
         };
         KeyStroke selectAllKey = KeyStroke.getKeyStroke(KeyEvent.VK_A,
@@ -1642,6 +1694,60 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           @Override
           public void actionPerformed(ActionEvent e) {
             selectAllAction.actionPerformed(e);
+          }
+        });
+
+        final Action zoomInAction = new AbstractAction("ZoomIn") {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            m_layoutZoom += 25;
+            m_zoomOutB.setEnabled(true);
+            if (m_layoutZoom >= 200) {
+              m_layoutZoom = 200;
+              m_zoomInB.setEnabled(false);
+            }
+            m_mainKFPerspective.setCurrentZoomSetting(m_layoutZoom);
+            revalidate();
+            repaint();
+            notifyIsDirty();
+          }
+        };
+        KeyStroke zoomInKey = KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS,
+            InputEvent.CTRL_DOWN_MASK);
+        MainKFPerspective.this.getActionMap().put("ZoomIn", zoomInAction);
+        MainKFPerspective.this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(zoomInKey, "ZoomIn");
+        m_zoomInB.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            zoomInAction.actionPerformed(e);
+          }
+        });
+
+        final Action zoomOutAction = new AbstractAction("ZoomOut") {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            m_layoutZoom -= 25;
+            m_zoomInB.setEnabled(true);
+            if (m_layoutZoom <= 50) {
+              m_layoutZoom = 50;
+              m_zoomOutB.setEnabled(false);
+            }
+            m_mainKFPerspective.setCurrentZoomSetting(m_layoutZoom);
+            revalidate();
+            repaint();
+            notifyIsDirty();
+          }
+        };
+        KeyStroke zoomOutKey = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS,
+            InputEvent.CTRL_DOWN_MASK);
+        MainKFPerspective.this.getActionMap().put("ZoomOut", zoomOutAction);
+        MainKFPerspective.this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(zoomOutKey, "ZoomOut");
+        m_zoomOutB.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            zoomOutAction.actionPerformed(e);
           }
         });
 
@@ -2687,6 +2793,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       BeanInstance.removeBeanInstances(bl, tabIndex);
       BeanConnection.removeConnectionList(tabIndex);
       m_beanLayouts.remove(tabIndex);
+      m_zoomSettings.remove(tabIndex);
       m_logPanels.remove(tabIndex);
       m_editedList.remove(tabIndex);
       m_environmentSettings.remove(tabIndex);
@@ -2730,6 +2837,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       tabBeanLayout.setMinimumSize(d);
       // tabBeanLayout.setMaximumSize(d);
       tabBeanLayout.setPreferredSize(d);
+
+      m_zoomSettings.add(new Integer(100));
 
       KFLogPanel tabLogPanel = new KFLogPanel();
       setUpLogPanel(tabLogPanel);
@@ -2930,6 +3039,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
    */
   private BeanLayout m_beanLayout = null;// new BeanLayout();
 
+  private int m_layoutZoom = 100;
+
   /** Whether to allow more than one tab or not */
   private boolean m_allowMultipleTabs = true;
 
@@ -2956,6 +3067,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   protected JButton m_noteB;
   protected JButton m_selectAllB;
   protected JButton m_undoB;
+  protected JButton m_zoomInB;
+  protected JButton m_zoomOutB;
 
   protected JToggleButton m_snapToGridB;
 
@@ -3563,25 +3676,47 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       @Override
       public void mousePressed(MouseEvent me) {
         layout.requestFocusInWindow();
+        double z = m_layoutZoom / 100.0;
+        double px = me.getX();
+        double py = me.getY();
+        py /= z;
+        px /= z;
         if (m_toolBarBean == null) {
           if (((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
               && m_mode == NONE) {
-            BeanInstance bi = BeanInstance.findInstance(me.getPoint(),
-                m_mainKFPerspective.getCurrentTabIndex());
+            /*
+             * BeanInstance bi = BeanInstance.findInstance(me.getPoint(),
+             * m_mainKFPerspective.getCurrentTabIndex());
+             */
+            BeanInstance bi = BeanInstance.findInstance(new Point((int) px,
+                (int) py), m_mainKFPerspective.getCurrentTabIndex());
             JComponent bc = null;
             if (bi != null) {
               bc = (JComponent) (bi.getBean());
             }
+
             if (bc != null /* && (bc instanceof Visible) */) {
               m_editElement = bi;
-              m_oldX = me.getX();
-              m_oldY = me.getY();
+
+              /*
+               * m_oldX = me.getX(); m_oldY = me.getY();
+               */
+
+              m_oldX = (int) px;
+              m_oldY = (int) py;
+
               m_mode = MOVING;
             }
             if (m_mode != MOVING) {
               m_mode = SELECTING;
-              m_oldX = me.getX();
-              m_oldY = me.getY();
+
+              /*
+               * m_oldX = me.getX(); m_oldY = me.getY();
+               */
+
+              m_oldX = (int) px;
+              m_oldY = (int) py;
+
               m_startX = m_oldX;
               m_startY = m_oldY;
               Graphics2D gx = (Graphics2D) layout.getGraphics();
@@ -3616,15 +3751,25 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           layout.repaint();
           m_mode = NONE;
 
-          // checkSubFlow(m_startX, m_startY, me.getX(), me.getY());
-          highlightSubFlow(m_startX, m_startY, me.getX(), me.getY());
+          double z = m_layoutZoom / 100.0;
+          double px = me.getX();
+          double py = me.getY();
+          py /= z;
+          px /= z;
+
+          // highlightSubFlow(m_startX, m_startY, me.getX(), me.getY());
+          highlightSubFlow(m_startX, m_startY, (int) px, (int) py);
         }
       }
 
       @Override
       public void mouseClicked(MouseEvent me) {
         layout.requestFocusInWindow();
-        BeanInstance bi = BeanInstance.findInstance(me.getPoint(),
+        Point p = me.getPoint();
+        Point np = new Point();
+        double z = m_layoutZoom / 100.0;
+        np.setLocation(p.getX() / z, p.getY() / z);
+        BeanInstance bi = BeanInstance.findInstance(np,
             m_mainKFPerspective.getCurrentTabIndex());
         if (m_mode == ADDING || m_mode == NONE) {
           // try and popup a context sensitive menu if we have
@@ -3652,9 +3797,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               }
             } else if (((me.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
                 || me.isAltDown()) {
-              // if (!m_mainKFPerspective.getExecuting()) {
-              doPopup(me.getPoint(), bi, me.getX(), me.getY());
-              // }
+              // doPopup(me.getPoint(), bi, me.getX(), me.getY());
+              doPopup(me.getPoint(), bi, (int) (p.getX() / z),
+                  (int) (p.getY() / z));
               return;
             } else {
               // just select this bean
@@ -3672,9 +3817,19 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
             if (((me.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
                 || me.isAltDown()) {
 
+              double px = me.getX();
+              double py = me.getY();
+              py /= z;
+              px /= z;
+
               // find connections if any close to this point
               if (!m_mainKFPerspective.getExecuting()) {
-                rightClickCanvasPopup(me.getX(), me.getY());
+                // rightClickCanvasPopup(me.getX(), me.getY());
+                rightClickCanvasPopup((int) px, (int) py);
+
+                revalidate();
+                repaint();
+                notifyIsDirty();
               }
               return;
               /*
@@ -3688,33 +3843,46 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
               // add the component
 
               // snap to grid
-              int x = me.getX();
-              int y = me.getY();
+              double x = me.getX();
+              double y = me.getY();
+              x /= z;
+              y /= z;
               if (m_snapToGridB.isSelected()) {
-                x = snapToGrid(me.getX());
-                y = snapToGrid(me.getY());
+                // x = snapToGrid(me.getX());
+                x = snapToGrid((int) x);
+                // y = snapToGrid(me.getY());
+                y = snapToGrid((int) y);
               }
 
               addUndoPoint();
               if (m_toolBarBean instanceof StringBuffer) {
                 // serialized user meta bean
-                pasteFromClipboard(x, y, (StringBuffer) m_toolBarBean, false);
+                pasteFromClipboard((int) x, (int) y,
+                    (StringBuffer) m_toolBarBean, false);
                 m_mode = NONE;
                 KnowledgeFlowApp.this.setCursor(Cursor
                     .getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                 m_toolBarBean = null;
               } else {
                 // saveLayout(m_mainKFPerspective.getCurrentTabIndex(), false);
-                addComponent(x, y);
+                addComponent((int) x, (int) y);
               }
               m_componentTree.clearSelection();
               m_mainKFPerspective.setEditedStatus(true);
             }
           }
+          revalidate();
+          repaint();
+          notifyIsDirty();
         }
 
+        double px = me.getX();
+        double py = me.getY();
+        px /= z;
+        py /= z;
         if (m_mode == PASTING && m_pasteBuffer.length() > 0) {
-          pasteFromClipboard(me.getX(), me.getY(), m_pasteBuffer, true);
+          // pasteFromClipboard(me.getX(), me.getY(), m_pasteBuffer, true);
+          pasteFromClipboard((int) px, (int) py, m_pasteBuffer, true);
           m_mode = NONE;
           KnowledgeFlowApp.this.setCursor(Cursor
               .getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -3779,28 +3947,19 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       @Override
       public void mouseDragged(MouseEvent me) {
+        double z = m_layoutZoom / 100.0;
+        double px = me.getX();
+        double py = me.getY();
+        px /= z;
+        py /= z;
         if (m_editElement != null && m_mode == MOVING) {
 
           /*
-           * int width = ic.getIconWidth() / 2; int height = ic.getIconHeight()
-           * / 2;
-           */
-          /*
-           * int width = m_oldX - m_editElement.getX(); int height = m_oldY -
-           * m_editElement.getY();
+           * int deltaX = me.getX() - m_oldX; int deltaY = me.getY() - m_oldY;
            */
 
-          int deltaX = me.getX() - m_oldX;
-          int deltaY = me.getY() - m_oldY;
-
-          /*
-           * m_editElement.setX(m_oldX-width);
-           * m_editElement.setY(m_oldY-height);
-           */
-          // int newX = snapToGrid(m_oldX-width);
-          // int newX = m_oldX-width;
-          // int newY = snapToGrid(m_oldY-height);
-          // int newY = m_oldY-height;
+          int deltaX = (int) px - m_oldX;
+          int deltaY = (int) py - m_oldY;
 
           m_editElement.setXY(m_editElement.getX() + deltaX,
               m_editElement.getY() + deltaY);
@@ -3817,24 +3976,40 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           layout.repaint();
 
           // note the new points
-          m_oldX = me.getX();
-          m_oldY = me.getY();
+          /*
+           * m_oldX = me.getX(); m_oldY = me.getY();
+           */
+          m_oldX = (int) px;
+          m_oldY = (int) py;
           m_mainKFPerspective.setEditedStatus(true);
         }
         if (m_mode == SELECTING) {
           layout.repaint();
-          m_oldX = me.getX();
-          m_oldY = me.getY();
+          /*
+           * m_oldX = me.getX(); m_oldY = me.getY();
+           */
+          m_oldX = (int) px;
+          m_oldY = (int) py;
         }
       }
 
       @Override
       public void mouseMoved(MouseEvent e) {
+        double z = m_layoutZoom / 100.0;
+        double px = e.getX();
+        double py = e.getY();
+        px /= z;
+        py /= z;
+
         if (m_mode == CONNECTING) {
           layout.repaint();
           // note the new coordinates
-          m_oldX = e.getX();
-          m_oldY = e.getY();
+          /*
+           * m_oldX = e.getX(); m_oldY = e.getY();
+           */
+
+          m_oldX = (int) px;
+          m_oldY = (int) py;
         }
       }
     });
@@ -4694,8 +4869,13 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     // popup the menu
     if (menuItemCount > 0) {
       // beanContextMenu.show(m_beanLayout, x, y);
+
+      double z = m_layoutZoom / 100.0;
+      double px = x * z;
+      double py = y * z;
       m_beanLayout.add(beanContextMenu);
-      beanContextMenu.show(m_beanLayout, x, y);
+      // beanContextMenu.show(m_beanLayout, x, y);
+      beanContextMenu.show(m_beanLayout, (int) px, (int) py);
     }
   }
 
@@ -5121,6 +5301,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     }
 
     m_pasteB.setEnabled(true);
+    revalidate();
+    repaint();
+    notifyIsDirty();
+
     return true;
   }
 
@@ -5463,7 +5647,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     menuItemCount++;
 
     m_beanLayout.add(rightClickMenu);
-    rightClickMenu.show(m_beanLayout, x, y);
+
+    // make sure that popup location takes current scaling into account
+    double z = m_layoutZoom / 100.0;
+    double px = x * z;
+    double py = y * z;
+    rightClickMenu.show(m_beanLayout, (int) px, (int) py);
   }
 
   /**
@@ -5612,6 +5801,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         m_mode = CONNECTING;
       }
     }
+
+    revalidate();
+    repaint();
+    notifyIsDirty();
   }
 
   private void checkForDuplicateName(BeanInstance comp) {
