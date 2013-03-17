@@ -901,6 +901,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     public void paintComponent(Graphics gx) {
       double lz = m_layoutZoom / 100.0;
       ((Graphics2D) gx).scale(lz, lz);
+      if (m_layoutZoom < 100) {
+        ((Graphics2D) gx).setStroke(new BasicStroke(2));
+      }
       super.paintComponent(gx);
 
       ((Graphics2D) gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -1155,6 +1158,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         m_playBB.setEnabled(!getExecuting());
         m_saveB.setEnabled(!getExecuting());
         m_saveBB.setEnabled(!getExecuting());
+
+        m_zoomOutB.setEnabled(!getExecuting());
+        m_zoomInB.setEnabled(!getExecuting());
+        if (m_layoutZoom == 50) {
+          m_zoomOutB.setEnabled(false);
+        }
+        if (m_layoutZoom == 200) {
+          m_zoomInB.setEnabled(false);
+        }
 
         m_groupB.setEnabled(false);
         if (getSelectedBeans().size() > 0 && !getExecuting()) {
