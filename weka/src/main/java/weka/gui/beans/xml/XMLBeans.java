@@ -1271,8 +1271,16 @@ public class XMLBeans
     node     = addElement(parent, name, beaninst.getClass().getName(), false);
 
     writeIntToXML(node, m_BeanInstances.indexOf(beaninst), VAL_ID);
-    writeIntToXML(node, beaninst.getX() + beaninst.getWidth()  / 2, VAL_X);   // x is thought to be in the center?
-    writeIntToXML(node, beaninst.getY() + beaninst.getHeight() / 2, VAL_Y);   // y is thought to be in the center?
+    int w = beaninst.getWidth() / 2; int h = beaninst.getHeight() / 2;
+    // If a bean instance doesn't have dimensions (0 widht/height) then it means
+    // that it hasn't been rendered (yet). In this case we'll
+    // use half the known width/height of the icons so that the
+    // position does not change
+    if (w == 0 && h == 0) {
+      w = 28; h = 28;
+    }
+    writeIntToXML(node, beaninst.getX() + w, VAL_X);   // x is thought to be in the center?
+    writeIntToXML(node, beaninst.getY() + h, VAL_Y);   // y is thought to be in the center?
     if (beaninst.getBean() instanceof BeanCommon) {
       // write the custom name of this bean
       String custName = ((BeanCommon)beaninst.getBean()).getCustomName();
