@@ -999,28 +999,31 @@ public class ArffLoader
    */
   public Instances getDataSet() throws IOException {
 
-    if (m_sourceReader == null) {
-      throw new IOException("No source has been specified");
+    Instances insts = null;
+    try {
+      if (m_sourceReader == null) {
+        throw new IOException("No source has been specified");
+      }
+      if (getRetrieval() == INCREMENTAL) {
+        throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
+      }
+      setRetrieval(BATCH);
+      if (m_structure == null) {
+        getStructure();
+      }
+
+      // Read all instances
+      Instance inst;
+      insts = new Instances(m_structure, 0);
+      while ((inst = m_ArffReader.readInstance(m_structure)) != null)
+        insts.add(inst);
+
+      // Instances readIn = new Instances(m_structure);
+    } finally {
+      // close the stream
+      m_sourceReader.close();
     }
-    if (getRetrieval() == INCREMENTAL) {
-      throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
-    }
-    setRetrieval(BATCH);
-    if (m_structure == null) {
-      getStructure();
-    }
-
-    // Read all instances
-    Instance inst;
-    Instances insts = new Instances(m_structure, 0);
-    while ((inst = m_ArffReader.readInstance(m_structure)) != null)
-      insts.add(inst);
-
-    // Instances readIn = new Instances(m_structure);
-
-    // close the stream
-    m_sourceReader.close();
-
+    
     return insts;
   }
 
