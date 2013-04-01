@@ -34,6 +34,7 @@ import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.io.Writer;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -44,6 +45,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -53,10 +55,10 @@ import weka.core.Utils;
 import weka.core.converters.ArffLoader.ArffReader;
 
 /**
- <!-- globalinfo-start -->
- * Reads a source that is in comma separated format (the default). One can also change the column separator from comma to tab or another character, specify string enclosures, specify whether aheader row is present or not and specify which attributes are to beforced to be nominal or date. Can operate in batch or incremental mode. In batch mode, a buffer is used to process a fixed number of rows in memory at any one time and the data is dumped to a temporary file. This allows the legal values for nominal attributes to be automatically determined. The final ARFF file is produced in a second pass over the temporary file using the structure determined on the first pass. In incremental mode, the first buffer full of rows is used to determine the structure automatically. Following this all rows are read and output incrementally. An error will occur if a row containing nominal values not seen in the initial buffer is encountered. In this case, the size of the initial buffer can be increased, or the user can explicitly provide the legal values of all nominal attributes using the -L (setNominalLabelSpecs) option.
- * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-start -->
+ * * Reads a source that is in comma separated format (the default). One can also change the column separator from comma to tab or another character, specify string enclosures, specify whether aheader row is present or not and specify which attributes are to beforced to be nominal or date. Can operate in batch or incremental mode. In batch mode, a buffer is used to process a fixed number of rows in memory at any one time and the data is dumped to a temporary file. This allows the legal values for nominal attributes to be automatically determined. The final ARFF file is produced in a second pass over the temporary file using the structure determined on the first pass. In incremental mode, the first buffer full of rows is used to determine the structure automatically. Following this all rows are read and output incrementally. An error will occur if a row containing nominal values not seen in the initial buffer is encountered. In this case, the size of the initial buffer can be increased, or the user can explicitly provide the legal values of all nominal attributes using the -L (setNominalLabelSpecs) option.
+ * * <p/>
+ * <!-- globalinfo-end -->
  * 
  <!-- options-start -->
  * Valid options are: <p/>
@@ -83,7 +85,7 @@ import weka.core.converters.ArffLoader.ArffReader;
  *  second part is a comma-separated list of labels. E.g
  *  "1,2,4-6:red,green,blue" or "att1,att2:red,green,blue"</pre>
  * 
- * <pre> -L &lt;range&gt;
+ * <pre> -S &lt;range&gt;
  *  The range of attribute to force type to be STRING.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
@@ -571,7 +573,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         "\tThe range of attribute to force type to be STRING.\n"
             + "\t'first' and 'last' are accepted as well.\n"
             + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
-            + "\t(default: -none-)", "L", 1, "-L <range>"));
+            + "\t(default: -none-)", "S", 1, "-S <range>"));
 
     result.add(new Option(
         "\tThe range of attribute to force type to be DATE.\n"
@@ -740,13 +742,26 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     }
 
     if (m_numBufferedRows == 0) {
-      m_incrementalReader = new ArffReader(m_sourceReader, m_structure, 0, 0);
+      // m_incrementalReader = new ArffReader(m_sourceReader, m_structure, 0,
+      // 0);
       m_numBufferedRows = -1;
+
+      m_st = new StreamTokenizer(m_sourceReader);
+      initTokenizer(m_st);
+      m_st.ordinaryChar(m_FieldSeparator.charAt(0));
+      //
+      m_incrementalReader = null;
     }
 
     Instance current = null;
     if (m_sourceReader != null) {
-      current = m_incrementalReader.readInstance(m_structure);
+      if (m_incrementalReader != null) {
+        current = m_incrementalReader.readInstance(m_structure);
+      } else {
+        if (getInstance(m_st) != null) {
+          current = makeInstance();
+        }
+      }
       if (current == null) {
       }
       if (m_numBufferedRows > 0) {
@@ -764,6 +779,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         ex.printStackTrace();
       }
     }
+
     return current;
   }
 
@@ -783,12 +799,6 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     if (m_structure == null) {
       getStructure();
     }
-
-    /*
-     * if (m_rowBuffer.size() > 0) { // dump the instances used in determining
-     * the structure first for (String r : m_rowBuffer) { dumpRow(r); }
-     * m_rowBuffer.clear(); }
-     */
 
     while (readData(true))
       ;
@@ -815,58 +825,28 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
     boolean finished = false;
     boolean moreDataToRead = false;
-    Reader batchReader = null;
-    StringBuilder tempB;
 
     do {
-      String row = m_sourceReader.readLine();
+      String checked = getInstance(m_st);
+      if (checked == null) {
+        return false;
+      }
 
-      if (m_rowBuffer.size() > 0
-          && (m_rowBuffer.size() == m_bufferSize || row == null)) {
-        // tokenize and process buffer
-        if (m_rowBuffer.size() == 1) {
-          batchReader = new StringReader(m_rowBuffer.get(0) + "\n");
-        } else {
-          tempB = new StringBuilder();
-          for (String r : m_rowBuffer) {
-            tempB.append(r).append("\n");
-          }
-          batchReader = new BufferedReader(new StringReader(tempB.toString()));
-        }
+      if (dump) {
+        dumpRow(checked);
+      }
+      m_rowBuffer.add(checked);
+
+      if (m_rowBuffer.size() == m_bufferSize) {
         finished = true;
 
-        m_st = new StreamTokenizer(batchReader);
-        initTokenizer(m_st);
-        m_st.ordinaryChar(m_FieldSeparator.charAt(0));
-        String checked = "";
-        int rowIndex = 0;
-        while ((checked = getInstance(m_st)) != null) {
-          if (checked.length() > 0) {
-            // will have any missing values (i.e. ,, or ? or user-specified)
-            // replaced with "?" so that ArffLoader can load successfully
-            if (dump) {
-              dumpRow(checked);
-            }
-            rowIndex++;
-          } else {
-            if (dump) {
-              dumpRow(m_rowBuffer.get(rowIndex++));
-            }
-          }
-        }
-        if (dump) {
+        if (getRetrieval() == BATCH) {
           m_rowBuffer.clear();
         }
       }
-
-      if (row != null) {
-        m_rowBuffer.add(row);
-      } else {
-        moreDataToRead = false;
-      }
     } while (!finished);
 
-    return moreDataToRead;
+    return true;
   }
 
   /**
@@ -911,6 +891,57 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     return m_structure;
   }
 
+  protected Instance makeInstance() throws IOException {
+
+    if (m_current == null) {
+      return null;
+    }
+
+    double[] vals = new double[m_structure.numAttributes()];
+    for (int i = 0; i < m_structure.numAttributes(); i++) {
+      Object val = m_current.get(i);
+      if (val.toString().equals("?")) {
+        vals[i] = Utils.missingValue();
+      } else if (m_structure.attribute(i).isString()) {
+        vals[i] = 0;
+        m_structure.attribute(i).setStringValue(Utils.unquote(val.toString()));
+      } else if (m_structure.attribute(i).isDate()) {
+        String format = m_structure.attribute(i).getDateFormat();
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        try {
+          vals[i] = sdf.parse(val.toString()).getTime();
+        } catch (ParseException e) {
+          throw new IOException("Unable to parse date value " + val.toString()
+              + " using date format " + format + " for date attribute "
+              + m_structure.attribute(i));
+        }
+      } else if (m_structure.attribute(i).isNumeric()) {
+        try {
+          Double v = Double.parseDouble(val.toString());
+          vals[i] = v.doubleValue();
+        } catch (NumberFormatException ex) {
+          throw new IOException("Was expecting a number for attribute "
+              + m_structure.attribute(i).name() + " but read " + val.toString()
+              + " instead.");
+        }
+      } else {
+        // nominal
+        double index = m_structure.attribute(i).indexOfValue(
+            Utils.unquote(val.toString()));
+        if (index < 0) {
+          throw new IOException("Read unknown nominal value " + val.toString()
+              + "for attribute " + m_structure.attribute(i).name());
+        }
+        vals[i] = index;
+      }
+    }
+
+    DenseInstance inst = new DenseInstance(1.0, vals);
+    inst.setDataset(m_structure);
+
+    return inst;
+  }
+
   protected void makeStructure() {
     // make final structure
     ArrayList<Attribute> attribs = new ArrayList<Attribute>();
@@ -925,9 +956,10 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         ArrayList<String> theVals = new ArrayList<String>();
         if (vals.size() > 0) {
           for (String v : vals) {
-            if (v.startsWith("'") || v.startsWith("\"")) {
-              v = v.substring(1, v.length() - 1);
-            }
+            /*
+             * if (v.startsWith("'") || v.startsWith("\"")) { v = v.substring(1,
+             * v.length() - 1); }
+             */
             theVals.add(v);
           }
         } else {
@@ -998,7 +1030,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         } else {
           attName = m_st.sval;
         }
-        // System.out.println(attName);
+
         attribNames.add(new Attribute(attName, (java.util.List<String>) null));
       }
       if (!wasSep) {
@@ -1018,8 +1050,6 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     m_StringAttributes.setUpper(m_structure.numAttributes() - 1);
     m_dateAttributes.setUpper(m_structure.numAttributes() - 1);
     m_nominalVals = new HashMap<Integer, LinkedHashSet<String>>();
-
-    // System.out.println(m_structure);
 
     m_types = new TYPE[m_structure.numAttributes()];
     for (int i = 0; i < m_structure.numAttributes(); i++) {
@@ -1076,10 +1106,13 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       }
     }
 
+    m_st = new StreamTokenizer(m_sourceReader);
+    initTokenizer(m_st);
+    m_st.ordinaryChar(m_FieldSeparator.charAt(0));
+
     // try and determine a more accurate structure from the first batch
-    readData(false);
+    readData(false || getRetrieval() == BATCH);
     makeStructure();
-    // System.out.println(m_structure);
   }
 
   protected void openTempFiles() throws IOException {
@@ -1105,7 +1138,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     tokenizer.wordChars(' ', '\u00FF');
     tokenizer.whitespaceChars(m_FieldSeparator.charAt(0),
         m_FieldSeparator.charAt(0));
-    tokenizer.commentChar('%');
+    // tokenizer.commentChar('%');
 
     String[] parts = m_Enclosures.split(",");
     for (String e : parts) {
@@ -1130,8 +1163,8 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    * Attempts to parse a line of the data set.
    * 
    * @param tokenizer the tokenizer
-   * @return a ArrayList containg String and Double objects representing the
-   *         values of the instance.
+   * @return a String version of the instance that has had String and nominal
+   *         attribute values quoted if necessary
    * @exception IOException if an error occurs
    * 
    *              <pre>
@@ -1154,6 +1187,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       return null;
     }
+
     boolean first = true;
     boolean wasSep;
     boolean containedMissing = false;
@@ -1187,7 +1221,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
             m_types[i] = TYPE.NUMERIC;
           } catch (NumberFormatException e) {
             // otherwise assume its an enumerated value
-            m_current.add(tokenizer.sval);
+            m_current.add(Utils.quote(tokenizer.sval));
             if (m_types[i] == TYPE.UNDETERMINED) {
               m_types[i] = TYPE.NOMINAL;
               LinkedHashSet<String> ts = new LinkedHashSet<String>();
@@ -1198,9 +1232,9 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
             }
           }
         } else if (m_types[i] == TYPE.STRING || m_types[i] == TYPE.DATE) {
-          m_current.add(tokenizer.sval);
+          m_current.add(Utils.quote(tokenizer.sval));
         } else if (m_types[i] == TYPE.NOMINAL) {
-          m_current.add(tokenizer.sval);
+          m_current.add(Utils.quote(tokenizer.sval));
           m_nominalVals.get(i).add(tokenizer.sval);
         }
       }
@@ -1214,22 +1248,20 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
     // check number of values read
     if (m_current.size() != m_structure.numAttributes()) {
+      for (Object o : m_current) {
+        System.out.print(o.toString() + "|||");
+      }
+      System.out.println();
       StreamTokenizerUtils.errms(tokenizer, "wrong number of values. Read "
           + m_current.size() + ", expected " + m_structure.numAttributes());
 
     }
 
-    if (containedMissing) {
-      // we need to return a replacement row string with the
-      // empty missing values filled in with m_MissingValue
-      StringBuilder temp = new StringBuilder();
-      for (Object o : m_current) {
-        temp.append(o.toString()).append(m_FieldSeparator);
-      }
-      return temp.substring(0, temp.length() - 1);
+    StringBuilder temp = new StringBuilder();
+    for (Object o : m_current) {
+      temp.append(o.toString()).append(m_FieldSeparator);
     }
-
-    return "";
+    return temp.substring(0, temp.length() - 1);
   }
 
   @Override
@@ -1238,7 +1270,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     m_rowBuffer = null;
 
     if (m_dataDumper != null) {
-      // close the uneeded temp files (if necessary)
+      // close the unneeded temp files (if necessary)
       m_dataDumper.close();
       m_dataDumper = null;
     }
