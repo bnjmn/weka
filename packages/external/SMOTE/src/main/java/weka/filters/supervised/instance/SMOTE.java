@@ -638,7 +638,7 @@ public class SMOTE
 	public int compare(Object o1, Object o2) {
 	  double distance1 = (Double) ((Object[]) o1)[0];
 	  double distance2 = (Double) ((Object[]) o2)[0];
-	  return (int) Math.ceil(distance1 - distance2);
+          return Double.compare(distance1, distance2);
 	}
       });
 
