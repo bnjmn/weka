@@ -71,6 +71,9 @@ public class PropositionalToMultiInstance
   /** for serialization */
   private static final long serialVersionUID = 5825873573912102482L;
 
+  /** do not weight bags by number of instances they contain */
+  protected boolean m_DoNotWeightBags = false;
+
   /** the seed for randomizing, default is 1 */
   protected int m_Seed = 1;
   
@@ -113,6 +116,11 @@ public class PropositionalToMultiInstance
     Vector result = new Vector();
   
     result.addElement(new Option(
+        "\tDo not weight bags by number of instances they contain."
+        + "\t(default off)",
+        "no-weights", 0, "-no-weights"));
+  
+    result.addElement(new Option(
         "\tThe seed for the randomization of the order of bags."
         + "\t(default 1)",
         "S", 1, "-S <num>"));
@@ -146,6 +154,8 @@ public class PropositionalToMultiInstance
   public void setOptions(String[] options) throws Exception {
     String        tmpStr;
     
+    setDoNotWeightBags(Utils.getFlag("no-weights", options));
+
     setRandomize(Utils.getFlag('R', options));
     
     tmpStr = Utils.getOption('S', options);
@@ -170,6 +180,9 @@ public class PropositionalToMultiInstance
     
     if (m_Randomize)
       result.add("-R");
+
+    if (getDoNotWeightBags()) 
+      result.add("-no-weights");
 
     return (String[]) result.toArray(new String[result.size()]);
   }
@@ -202,6 +215,16 @@ public class PropositionalToMultiInstance
   public int getSeed() {
     return m_Seed;
   }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String randomizeTipText() {
+    return "Whether the order of the generated data is randomized.";
+  }
   
   /**
    * Sets whether the order of the generated data is randomized
@@ -227,8 +250,26 @@ public class PropositionalToMultiInstance
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String randomizeTipText() {
-    return "Whether the order of the generated data is randomized.";
+  public String doNotWeightBagsTipText() {
+    return "Whether the bags are weighted by the number of instances they contain.";
+  }
+  
+  /**
+   * Sets whether bags are weighted
+   * 
+   * @param value     whether bags are weighted
+   */
+  public void setDoNotWeightBags(boolean value) {
+    m_DoNotWeightBags = value;
+  }
+  
+  /**
+   * Gets whether the bags are weighted
+   * 
+   * @return      true if the bags are weighted
+   */
+  public boolean getDoNotWeightBags() {
+    return m_DoNotWeightBags;
   }
 
   /** 
@@ -335,7 +376,9 @@ public class PropositionalToMultiInstance
     newBag.setValue(0, bagIndex);
     newBag.setValue(2, classValue);
     newBag.setValue(1, value);
-    newBag.setWeight(bagWeight);
+    if (!m_DoNotWeightBags) {
+      newBag.setWeight(bagWeight);
+    }
     newBag.setDataset(output);
     output.add(newBag);
   }
