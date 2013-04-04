@@ -119,7 +119,7 @@ public class JSONInstances {
       result = new Attribute(name, values);
     }
     else if (type.equals(Attribute.typeToString(Attribute.DATE))) {
-      dateformat = (String) att.getChild(TYPE).getValue("yyyy-MM-dd'T'HH:mm:ss");
+      dateformat = (String) att.getChild(DATEFORMAT).getValue("yyyy-MM-dd'T'HH:mm:ss");
       result     = new Attribute(name, dateformat);
     }
     else if (type.equals(Attribute.typeToString(Attribute.STRING))) {
@@ -176,7 +176,7 @@ public class JSONInstances {
 	  // unescape '?' labels 
 	  if (value.equals("'" + MISSING_VALUE + "'"))
 	    value = MISSING_VALUE;
-	  if (data.attribute(index).isNumeric()) {
+	  if (data.attribute(index).isNumeric() && !data.attribute(index).isDate()) {
 	    vals[index] = Double.parseDouble(value);
 	  }
 	  else if (data.attribute(index).isNominal()) {
