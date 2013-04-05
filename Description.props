@@ -9,7 +9,7 @@ PackageName=multiInstanceFilters
 Version=1.0.4
 
 #Date
-Date=2012-11-13
+Date=2013-04-05
 
 # Title (required)
 Title=A collection of filters for manipulating multi-instance data.
