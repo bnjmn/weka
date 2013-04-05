@@ -1,17 +1,16 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -25,7 +24,7 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -43,14 +42,17 @@ import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * Converts the propositional instance dataset into multi-instance dataset (with relational attribute). When normalize or standardize a multi-instance dataset, a MIToSingleInstance filter can be applied first to convert the multi-instance dataset into propositional instance dataset. After normalization or standardization, may use this PropositionalToMultiInstance filter to convert the data back to multi-instance format.<br/>
+ * Converts a propositional dataset into a multi-instance dataset (with relational attribute). When normalizing or standardizing a multi-instance dataset, the MultiInstanceToPropositional filter can be applied first to convert the multi-instance dataset into a propositional instance dataset. After normalization or standardization, we may use this PropositionalToMultiInstance filter to convert the data back to multi-instance format.<br/>
  * <br/>
- * Note: the first attribute of the original propositional instance dataset must be a nominal attribute which is expected to be bagId attribute.
+ * Note: the first attribute of the original propositional instance dataset must be a nominal attribute which is expected to be the bagId attribute.
  * <p/>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
  * Valid options are: <p/>
+ * 
+ * <pre> -no-weights
+ *  Do not weight bags by number of instances they contain. (default off)</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  The seed for the randomization of the order of bags. (default 1)</pre>
@@ -70,6 +72,9 @@ public class PropositionalToMultiInstance
 
   /** for serialization */
   private static final long serialVersionUID = 5825873573912102482L;
+
+  /** do not weight bags by number of instances they contain */
+  protected boolean m_DoNotWeightBags = false;
 
   /** the seed for randomizing, default is 1 */
   protected int m_Seed = 1;
@@ -91,15 +96,15 @@ public class PropositionalToMultiInstance
    */
   public String globalInfo() {
     return  
-        "Converts the propositional instance dataset into multi-instance "
-      + "dataset (with relational attribute). When normalize or standardize a "
-      + "multi-instance dataset, a MIToSingleInstance filter can be applied "
-      + "first to convert the multi-instance dataset into propositional "
-      + "instance dataset. After normalization or standardization, may use "
+        "Converts a propositional dataset into a multi-instance "
+      + "dataset (with relational attribute). When normalizing or standardizing a "
+      + "multi-instance dataset, the MultiInstanceToPropositional filter can be applied "
+      + "first to convert the multi-instance dataset into a propositional "
+      + "instance dataset. After normalization or standardization, we may use "
       + "this PropositionalToMultiInstance filter to convert the data back to "
       + "multi-instance format.\n\n"
       + "Note: the first attribute of the original propositional instance "
-      + "dataset must be a nominal attribute which is expected to be bagId "
+      + "dataset must be a nominal attribute which is expected to be the bagId "
       + "attribute.";
 
   }
@@ -111,6 +116,11 @@ public class PropositionalToMultiInstance
    */
   public Enumeration listOptions() {
     Vector result = new Vector();
+  
+    result.addElement(new Option(
+        "\tDo not weight bags by number of instances they contain."
+        + "\t(default off)",
+        "no-weights", 0, "-no-weights"));
   
     result.addElement(new Option(
         "\tThe seed for the randomization of the order of bags."
@@ -132,6 +142,9 @@ public class PropositionalToMultiInstance
    <!-- options-start -->
    * Valid options are: <p/>
    * 
+   * <pre> -no-weights
+   *  Do not weight bags by number of instances they contain. (default off)</pre>
+   * 
    * <pre> -S &lt;num&gt;
    *  The seed for the randomization of the order of bags. (default 1)</pre>
    * 
@@ -146,6 +159,8 @@ public class PropositionalToMultiInstance
   public void setOptions(String[] options) throws Exception {
     String        tmpStr;
     
+    setDoNotWeightBags(Utils.getFlag("no-weights", options));
+
     setRandomize(Utils.getFlag('R', options));
     
     tmpStr = Utils.getOption('S', options);
@@ -171,6 +186,9 @@ public class PropositionalToMultiInstance
     if (m_Randomize)
       result.add("-R");
 
+    if (getDoNotWeightBags()) 
+      result.add("-no-weights");
+
     return (String[]) result.toArray(new String[result.size()]);
   }
 
@@ -181,7 +199,7 @@ public class PropositionalToMultiInstance
    * 			displaying in the explorer/experimenter gui
    */
   public String seedTipText() {
-    return "The random seed used by the random number generator";
+    return "The seed used by the random number generator";
   }
 
   /**
@@ -201,6 +219,16 @@ public class PropositionalToMultiInstance
    */
   public int getSeed() {
     return m_Seed;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String randomizeTipText() {
+    return "Whether the order of the generated data is randomized.";
   }
   
   /**
@@ -227,8 +255,26 @@ public class PropositionalToMultiInstance
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String randomizeTipText() {
-    return "Whether the order of the generated data is randomized.";
+  public String doNotWeightBagsTipText() {
+    return "Whether the bags are weighted by the number of instances they contain.";
+  }
+  
+  /**
+   * Sets whether bags are weighted
+   * 
+   * @param value     whether bags are weighted
+   */
+  public void setDoNotWeightBags(boolean value) {
+    m_DoNotWeightBags = value;
+  }
+  
+  /**
+   * Gets whether the bags are weighted
+   * 
+   * @return      true if the bags are weighted
+   */
+  public boolean getDoNotWeightBags() {
+    return m_DoNotWeightBags;
   }
 
   /** 
@@ -335,7 +381,9 @@ public class PropositionalToMultiInstance
     newBag.setValue(0, bagIndex);
     newBag.setValue(2, classValue);
     newBag.setValue(1, value);
-    newBag.setWeight(bagWeight);
+    if (!m_DoNotWeightBags) {
+      newBag.setWeight(bagWeight);
+    }
     newBag.setDataset(output);
     output.add(newBag);
   }
@@ -439,3 +487,4 @@ public class PropositionalToMultiInstance
     runFilter(new PropositionalToMultiInstance(), args);
   }
 }
+
