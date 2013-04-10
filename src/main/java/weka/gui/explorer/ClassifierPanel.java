@@ -15,7 +15,7 @@
 
 /*
  *    ClassifierPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2013 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -1773,8 +1773,7 @@ public class ClassifierPanel extends JPanel implements
                 }
                 m_History.addObject(name, vv);
               } else if (saveVis && plotInstances != null
-                  && plotInstances.getPlotInstances() != null
-                  && plotInstances.getPlotInstances().numInstances() > 0) {
+                  && plotInstances.canPlot(false)) {
                 m_CurrentVis = new VisualizePanel();
                 m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
                 m_CurrentVis.setLog(m_Log);
