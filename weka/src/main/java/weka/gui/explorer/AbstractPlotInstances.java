@@ -15,18 +15,18 @@
 
 /*
  * AbstractPlotInstances.java
- * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009-2013 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.explorer;
 
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.gui.visualize.PlotData2D;
-
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.gui.visualize.PlotData2D;
 
 /**
  * Abstract superclass for generating plottable instances.
@@ -140,6 +140,24 @@ public abstract class AbstractPlotInstances
    */
   protected void finishUp() {
     m_FinishUpCalled = true;
+  }
+  
+  /**
+   * Returns whether all the data is available and the plot instances can
+   * be used for plotting.
+   * 
+   * @param setup	whether to call setup as well
+   * @return		true if operational for plotting
+   */
+  public boolean canPlot(boolean setup) {
+    try {
+      if (setup)
+	setUp();
+      return (getPlotInstances().numInstances() > 0);
+    }
+    catch (Exception e) {
+      return false;
+    }
   }
   
   /**

@@ -15,12 +15,11 @@
 
 /*
  *    ClustererPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2013 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.explorer;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -111,6 +110,7 @@ import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
+
 
 /**
  * This panel allows the user to select and configure a clusterer, and evaluate
@@ -1005,9 +1005,7 @@ public class ClustererPanel extends JPanel implements
             m_Log.statusMessage("Problem evaluating clusterer");
           } finally {
             if (    (plotInstances != null) 
-        	 && (plotInstances.getInstances() != null) 
-        	 && (plotInstances.getPlotInstances().numInstances() > 0) ) {
-              plotInstances.setUp();
+       	         && plotInstances.canPlot(true) ) {
               m_CurrentVis = new VisualizePanel();
               m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
               m_CurrentVis.setLog(m_Log);
