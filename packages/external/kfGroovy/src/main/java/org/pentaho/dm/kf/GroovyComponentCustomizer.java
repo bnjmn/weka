@@ -30,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.Customizer;
 import java.util.Properties;
+import java.lang.reflect.Constructor;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -43,12 +44,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.text.DefaultStyledDocument;
 
 import weka.core.Utils;
 import weka.gui.beans.BeanCustomizer;
 import weka.gui.beans.CustomizerCloseRequester;
 import weka.gui.scripting.GroovyScript;
-import weka.gui.scripting.SyntaxDocument;
 import weka.gui.visualize.VisualizeUtils;
 
 /**
@@ -104,11 +105,27 @@ public class GroovyComponentCustomizer extends JPanel
       props = new Properties();
     }
     
+    // check for SyntaxDocument
+    boolean syntaxDocAvailable = true;
+    try {
+      Class.forName("weka.gui.scripting.SyntaxDocument");
+    } catch (Exception ex) {
+      syntaxDocAvailable = false;
+    }
     
-    if (props.getProperty("Syntax", "false").equals("true")) {
-      SyntaxDocument doc = new SyntaxDocument(props);
-      m_textPane.setDocument(doc);
-      m_textPane.setBackground(doc.getBackgroundColor());
+    if (props.getProperty("Syntax", "false").equals("true") && syntaxDocAvailable) {
+      try {
+        Class syntaxClass = Class.forName("weka.gui.scripting.SyntaxDocument");
+        Constructor constructor = syntaxClass.getConstructor(Properties.class);
+        Object doc = constructor.newInstance(props);
+        //      SyntaxDocument doc = new SyntaxDocument(props);
+        m_textPane.setDocument((DefaultStyledDocument) doc);
+        //        m_textPane.setBackground(doc.getBackgroundColor());
+        m_textPane.setBackground(VisualizeUtils.processColour(
+          props.getProperty("BackgroundColor", "white"), Color.WHITE));
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
     } else {
       m_textPane.setForeground(VisualizeUtils.processColour(
           props.getProperty("ForegroundColor", "black"), Color.BLACK));
