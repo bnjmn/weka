@@ -50,6 +50,9 @@ public class Version implements Comparable, RevisionHandler {
   /** the revision */
   public static int REVISION = 3;
 
+  /** point revision */
+  public static int POINT = 0;
+
   /** True if snapshot */
   public static boolean SNAPSHOT = false;
 
@@ -66,10 +69,12 @@ public class Version implements Comparable, RevisionHandler {
       int[] maj = new int[1];
       int[] min = new int[1];
       int[] rev = new int[1];
-      SNAPSHOT = parseVersion(line, maj, min, rev);
+      int[] point = new int[1];
+      SNAPSHOT = parseVersion(line, maj, min, rev, point);
       MAJOR = maj[0];
       MINOR = min[0];
       REVISION = rev[0];
+      POINT = point[0];
       lnr.close();
     } catch (Exception e) {
       System.err.println(Version.class.getName()
@@ -79,7 +84,7 @@ public class Version implements Comparable, RevisionHandler {
 
   /** the complete version */
   public static String VERSION = MAJOR + "." + MINOR + "." + REVISION
-      + (SNAPSHOT ? SNAPSHOT_STRING : "");
+      + (POINT > 0 ? "." + POINT : "") + (SNAPSHOT ? SNAPSHOT_STRING : "");
 
   /**
    * parses the version and stores the result in the arrays
@@ -90,10 +95,11 @@ public class Version implements Comparable, RevisionHandler {
    * @param rev the revision version
    */
   private static boolean parseVersion(String version, int[] maj, int[] min,
-      int[] rev) {
+      int[] rev, int[] point) {
     int major = 0;
     int minor = 0;
     int revision = 0;
+    int pnt = 0;
     boolean isSnapshot = false;
 
     try {
@@ -109,10 +115,23 @@ public class Version implements Comparable, RevisionHandler {
         if (tmpStr.indexOf(".") > -1) {
           minor = Integer.parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
           tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
-          if (!tmpStr.equals(""))
-            revision = Integer.parseInt(tmpStr);
-          else
-            revision = 0;
+          if (tmpStr.indexOf(".") > 0) {
+            revision = Integer
+                .parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
+            tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
+
+            if (!tmpStr.equals("")) {
+              pnt = Integer.parseInt(tmpStr);
+            } else {
+              pnt = 0;
+            }
+          } else {
+            if (!tmpStr.equals("")) {
+              revision = Integer.parseInt(tmpStr);
+            } else {
+              revision = 0;
+            }
+          }
         } else {
           if (!tmpStr.equals(""))
             minor = Integer.parseInt(tmpStr);
@@ -134,6 +153,7 @@ public class Version implements Comparable, RevisionHandler {
       maj[0] = major;
       min[0] = minor;
       rev[0] = revision;
+      point[0] = pnt;
     }
 
     return isSnapshot;
@@ -152,22 +172,26 @@ public class Version implements Comparable, RevisionHandler {
     int major;
     int minor;
     int revision;
+    int pnt;
     int[] maj = new int[1];
     int[] min = new int[1];
     int[] rev = new int[1];
+    int[] point = new int[1];
 
     // do we have a string?
     if (o instanceof String) {
-      parseVersion((String) o, maj, min, rev);
+      parseVersion((String) o, maj, min, rev, point);
       major = maj[0];
       minor = min[0];
       revision = rev[0];
+      pnt = point[0];
     } else {
       System.out.println(this.getClass().getName()
           + ": no version-string for comparTo povided!");
       major = -1;
       minor = -1;
       revision = -1;
+      pnt = -1;
     }
 
     if (MAJOR < major) {
@@ -179,7 +203,13 @@ public class Version implements Comparable, RevisionHandler {
         if (REVISION < revision) {
           result = -1;
         } else if (REVISION == revision) {
-          result = 0;
+          if (POINT < pnt) {
+            result = -1;
+          } else if (POINT == pnt) {
+            result = 0;
+          } else {
+            result = 1;
+          }
         } else {
           result = 1;
         }
