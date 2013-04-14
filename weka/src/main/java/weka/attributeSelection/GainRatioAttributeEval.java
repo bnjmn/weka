@@ -295,7 +295,7 @@ public class GainRatioAttributeEval
         jj = (int)inst.value(m_classIndex);
       }
 
-      counts[ii][jj]++;
+      counts[ii][jj] += inst.weight();
     }
 
     // get the row totals
@@ -319,8 +319,8 @@ public class GainRatioAttributeEval
 
     // distribute missing counts
     if (m_missing_merge && 
-	(sumi[ni-1] < m_numInstances) && 
-	(sumj[nj-1] < m_numInstances)) {
+	(sumi[ni-1] < sum) && 
+	(sumj[nj-1] < sum)) {
       double[] i_copy = new double[sumi.length];
       double[] j_copy = new double[sumj.length];
       double[][] counts_copy = new double[sumi.length][sumj.length];
@@ -369,7 +369,7 @@ public class GainRatioAttributeEval
       sumj[nj - 1] = 0.0;
 
       // do the both missing
-      if (counts[ni - 1][nj - 1] > 0.0  && total_missing != sum) {
+      if (counts[ni - 1][nj - 1] > 0.0  && total_missing < sum) {
         for (i = 0; i < ni - 1; i++) {
           for (j = 0; j < nj - 1; j++) {
             temp = (counts_copy[i][j]/(sum - total_missing)) * 
