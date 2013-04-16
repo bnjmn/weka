@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -116,8 +117,8 @@ public class LogPanel extends JPanel implements Logger {
     m_table.setModel(m_tableModel);
     m_table.getColumnModel().getColumn(0).setPreferredWidth(100);
     m_table.getColumnModel().getColumn(1).setPreferredWidth(150);
-    m_table.getColumnModel().getColumn(2).setPreferredWidth(30);
-    m_table.getColumnModel().getColumn(3).setPreferredWidth(400);
+    m_table.getColumnModel().getColumn(2).setPreferredWidth(40);
+    m_table.getColumnModel().getColumn(3).setPreferredWidth(350);
     m_table.setShowVerticalLines(true);
 
     JPanel statusPan = new JPanel();
@@ -388,16 +389,20 @@ public class LogPanel extends JPanel implements Logger {
                 SwingUtilities.invokeLater(new Runnable() {
                   @Override
                   public void run() {
-                    m_tableModel.setValueAt("" + hours + ":" + minutes2 + ":"
-                        + seconds2, rn.intValue(), 2);
+                    DecimalFormat f = new DecimalFormat("00");
+                    m_tableModel.setValueAt(
+                        "" + f.format(hours) + ":" + f.format(minutes2) + ":"
+                            + f.format(seconds2), rn.intValue(), 2);
                   }
                 });
               } catch (Exception ex) {
                 ex.printStackTrace();
               }
             } else {
-              m_tableModel.setValueAt("" + hours + ":" + minutes2 + ":"
-                  + seconds2, rn.intValue(), 2);
+              DecimalFormat f = new DecimalFormat("00");
+              m_tableModel.setValueAt(
+                  "" + f.format(hours) + ":" + f.format(minutes2) + ":"
+                      + f.format(seconds2), rn.intValue(), 2);
             }
           }
         }
