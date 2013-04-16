@@ -77,6 +77,11 @@ public class LogPanel extends JPanel implements Logger {
   private final JTabbedPane m_tabs = new JTabbedPane();
 
   /**
+   * For formatting timer digits
+   */
+  private final DecimalFormat m_formatter = new DecimalFormat("00");
+
+  /**
    * The log panel to delegate log messages to.
    */
   private final weka.gui.LogPanel m_logPanel = new weka.gui.LogPanel(null,
@@ -389,20 +394,19 @@ public class LogPanel extends JPanel implements Logger {
                 SwingUtilities.invokeLater(new Runnable() {
                   @Override
                   public void run() {
-                    DecimalFormat f = new DecimalFormat("00");
-                    m_tableModel.setValueAt(
-                        "" + f.format(hours) + ":" + f.format(minutes2) + ":"
-                            + f.format(seconds2), rn.intValue(), 2);
+                    m_tableModel.setValueAt("" + m_formatter.format(hours)
+                        + ":" + m_formatter.format(minutes2) + ":"
+                        + m_formatter.format(seconds2), rn.intValue(), 2);
                   }
                 });
               } catch (Exception ex) {
                 ex.printStackTrace();
               }
             } else {
-              DecimalFormat f = new DecimalFormat("00");
               m_tableModel.setValueAt(
-                  "" + f.format(hours) + ":" + f.format(minutes2) + ":"
-                      + f.format(seconds2), rn.intValue(), 2);
+                  "" + m_formatter.format(hours) + ":"
+                      + m_formatter.format(minutes2) + ":"
+                      + m_formatter.format(seconds2), rn.intValue(), 2);
             }
           }
         }
