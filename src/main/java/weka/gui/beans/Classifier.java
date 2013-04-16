@@ -993,7 +993,9 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       } finally {
         m_visual.setStatic();
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          if (m_setNum == m_maxSetNum) {
+            m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          }
         }
         m_state = IDLE;
         if (Thread.currentThread().isInterrupted()) {
