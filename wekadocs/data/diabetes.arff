@@ -83,14 +83,14 @@
 %    From: 1                       To: tested_positive     
 %
 @relation pima_diabetes
-@attribute 'preg' real
-@attribute 'plas' real
-@attribute 'pres' real
-@attribute 'skin' real
-@attribute 'insu' real
-@attribute 'mass' real
-@attribute 'pedi' real
-@attribute 'age' real
+@attribute 'preg' numeric
+@attribute 'plas' numeric
+@attribute 'pres' numeric
+@attribute 'skin' numeric
+@attribute 'insu' numeric
+@attribute 'mass' numeric
+@attribute 'pedi' numeric
+@attribute 'age' numeric
 @attribute 'class' { tested_negative, tested_positive}
 @data
 6,148,72,35,0,33.6,0.627,50,tested_positive
