@@ -105,15 +105,15 @@
 %    From: '7'                     To: headlamps           
 %
 @relation Glass
-@attribute 'RI' real
-@attribute 'Na' real
-@attribute 'Mg' real
-@attribute 'Al' real
-@attribute 'Si' real
-@attribute 'K' real
-@attribute 'Ca' real
-@attribute 'Ba' real
-@attribute 'Fe' real
+@attribute 'RI' numeric
+@attribute 'Na' numeric
+@attribute 'Mg' numeric
+@attribute 'Al' numeric
+@attribute 'Si' numeric
+@attribute 'K' numeric
+@attribute 'Ca' numeric
+@attribute 'Ba' numeric
+@attribute 'Fe' numeric
 @attribute 'Type' { 'build wind float', 'build wind non-float', 'vehic wind float', 'vehic wind non-float', containers, tableware, headlamps}
 @data
 1.51793,12.79,3.5,1.12,73.03,0.64,8.77,0,0,'build wind float'

@@ -278,23 +278,23 @@
 %
 @relation german_credit
 @attribute checking_status { '<0', '0<=X<200', '>=200', 'no checking'}
-@attribute duration real
+@attribute duration numeric
 @attribute credit_history { 'no credits/all paid', 'all paid', 'existing paid', 'delayed previously', 'critical/other existing credit'}
 @attribute purpose { 'new car', 'used car', furniture/equipment, radio/tv, 'domestic appliance', repairs, education, vacation, retraining, business, other}
-@attribute credit_amount real
+@attribute credit_amount numeric
 @attribute savings_status { '<100', '100<=X<500', '500<=X<1000', '>=1000', 'no known savings'}
 @attribute employment { unemployed, '<1', '1<=X<4', '4<=X<7', '>=7'}
-@attribute installment_commitment real
+@attribute installment_commitment numeric
 @attribute personal_status { 'male div/sep', 'female div/dep/mar', 'male single', 'male mar/wid', 'female single'}
 @attribute other_parties { none, 'co applicant', guarantor}
-@attribute residence_since real
+@attribute residence_since numeric
 @attribute property_magnitude { 'real estate', 'life insurance', car, 'no known property'}
-@attribute age real
+@attribute age numeric
 @attribute other_payment_plans { bank, stores, none}
 @attribute housing { rent, own, 'for free'}
-@attribute existing_credits real
+@attribute existing_credits numeric
 @attribute job { 'unemp/unskilled non res', 'unskilled resident', skilled, 'high qualif/self emp/mgmt'}
-@attribute num_dependents real
+@attribute num_dependents numeric
 @attribute own_telephone { none, yes}
 @attribute foreign_worker { yes, no}
 @attribute class { good, bad}

@@ -84,17 +84,17 @@
 % 
 % 
 @relation 'labor-neg-data'
-@attribute 'duration' real
-@attribute 'wage-increase-first-year' real
-@attribute 'wage-increase-second-year' real
-@attribute 'wage-increase-third-year' real
+@attribute 'duration' numeric
+@attribute 'wage-increase-first-year' numeric
+@attribute 'wage-increase-second-year' numeric
+@attribute 'wage-increase-third-year' numeric
 @attribute 'cost-of-living-adjustment' {'none','tcf','tc'}
-@attribute 'working-hours' real
+@attribute 'working-hours' numeric
 @attribute 'pension' {'none','ret_allw','empl_contr'}
-@attribute 'standby-pay' real
-@attribute 'shift-differential' real
+@attribute 'standby-pay' numeric
+@attribute 'shift-differential' numeric
 @attribute 'education-allowance' {'yes','no'}
-@attribute 'statutory-holidays' real
+@attribute 'statutory-holidays' numeric
 @attribute 'vacation' {'below_average','average','generous'}
 @attribute 'longterm-disability-assistance' {'yes','no'}
 @attribute 'contribution-to-dental-plan' {'none','half','full'}

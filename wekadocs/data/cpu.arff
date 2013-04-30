@@ -7,13 +7,13 @@
 % used in the data mining book.
 %
 @relation 'cpu'
-@attribute MYCT real
-@attribute MMIN real
-@attribute MMAX real
-@attribute CACH real
-@attribute CHMIN real
-@attribute CHMAX real
-@attribute class real
+@attribute MYCT numeric
+@attribute MMIN numeric
+@attribute MMAX numeric
+@attribute CACH numeric
+@attribute CHMIN numeric
+@attribute CHMAX numeric
+@attribute class numeric
 @data
 125,256,6000,256,16,128,198
 29,8000,32000,32,8,32,269
