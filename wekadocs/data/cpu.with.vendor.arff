@@ -6,13 +6,13 @@
 
 @relation 'cpu'
 @attribute vendor { adviser, amdahl, apollo, basf, bti, burroughs, c.r.d, cdc, cambex, dec, dg, formation, four-phase, gould, hp, harris, honeywell, ibm, ipl, magnuson, microdata, nas, ncr, nixdorf, perkin-elmer, prime, siemens, sperry, sratus, wang}
-@attribute MYCT real
-@attribute MMIN real
-@attribute MMAX real
-@attribute CACH real
-@attribute CHMIN real
-@attribute CHMAX real
-@attribute class real
+@attribute MYCT numeric
+@attribute MMIN numeric
+@attribute MMAX numeric
+@attribute CACH numeric
+@attribute CHMIN numeric
+@attribute CHMAX numeric
+@attribute class numeric
 @data
 adviser,125,256,6000,256,16,128,199
 amdahl,29,8000,32000,32,8,32,253

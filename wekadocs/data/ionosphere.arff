@@ -64,40 +64,40 @@
 
 @relation ionosphere
 
-@attribute a01 real
-@attribute a02 real
-@attribute a03 real
-@attribute a04 real
-@attribute a05 real
-@attribute a06 real
-@attribute a07 real
-@attribute a08 real
-@attribute a09 real
-@attribute a10 real
-@attribute a11 real
-@attribute a12 real
-@attribute a13 real
-@attribute a14 real
-@attribute a15 real
-@attribute a16 real
-@attribute a17 real
-@attribute a18 real
-@attribute a19 real
-@attribute a20 real
-@attribute a21 real
-@attribute a22 real
-@attribute a23 real
-@attribute a24 real
-@attribute a25 real
-@attribute a26 real
-@attribute a27 real
-@attribute a28 real
-@attribute a29 real
-@attribute a30 real
-@attribute a31 real
-@attribute a32 real
-@attribute a33 real
-@attribute a34 real
+@attribute a01 numeric
+@attribute a02 numeric
+@attribute a03 numeric
+@attribute a04 numeric
+@attribute a05 numeric
+@attribute a06 numeric
+@attribute a07 numeric
+@attribute a08 numeric
+@attribute a09 numeric
+@attribute a10 numeric
+@attribute a11 numeric
+@attribute a12 numeric
+@attribute a13 numeric
+@attribute a14 numeric
+@attribute a15 numeric
+@attribute a16 numeric
+@attribute a17 numeric
+@attribute a18 numeric
+@attribute a19 numeric
+@attribute a20 numeric
+@attribute a21 numeric
+@attribute a22 numeric
+@attribute a23 numeric
+@attribute a24 numeric
+@attribute a25 numeric
+@attribute a26 numeric
+@attribute a27 numeric
+@attribute a28 numeric
+@attribute a29 numeric
+@attribute a30 numeric
+@attribute a31 numeric
+@attribute a32 numeric
+@attribute a33 numeric
+@attribute a34 numeric
 @attribute class {b, g}
 
 @data
