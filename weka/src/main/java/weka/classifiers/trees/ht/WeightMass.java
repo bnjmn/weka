@@ -21,12 +21,20 @@
 
 package weka.classifiers.trees.ht;
 
+import java.io.Serializable;
+
 /**
  * Simple container for a weight
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class WeightMass {
+public class WeightMass implements Serializable {
+
+  /**
+   * For serialization
+   */
+  private static final long serialVersionUID = 6794839107050779425L;
+
   public double m_weight;
 }
