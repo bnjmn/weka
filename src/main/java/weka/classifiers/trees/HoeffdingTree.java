@@ -46,6 +46,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
+import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -62,17 +63,31 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
 /**
- <!-- globalinfo-start -->
- * A Hoeffding tree (VFDT) is an incremental, anytime decision tree induction algorithm that is capable of learning from massive data streams, assuming that the distribution generating examples does not change over time. Hoeffding trees exploit the fact that a small sample can often be enough to choose an optimal splitting attribute. This idea is supported mathematically by the Hoeffding bound, which quantifies the number of observations (in our case, examples) needed to estimate some statistics within a prescribed precision (in our case, the goodness of an attribute).<br/>
+ <!-- globalinfo-start --> 
+ * A Hoeffding tree (VFDT) is an incremental, anytime
+ * decision tree induction algorithm that is capable of learning from massive
+ * data streams, assuming that the distribution generating examples does not
+ * change over time. Hoeffding trees exploit the fact that a small sample can
+ * often be enough to choose an optimal splitting attribute. This idea is
+ * supported mathematically by the Hoeffding bound, which quantifies the number
+ * of observations (in our case, examples) needed to estimate some statistics
+ * within a prescribed precision (in our case, the goodness of an attribute).<br/>
  * <br/>
- * A theoretically appealing feature  of Hoeffding Trees not shared by otherincremental decision tree learners is that  it has sound guarantees of performance. Using the Hoeffding bound one can show that  its output is asymptotically nearly identical to that of a non-incremental learner  using infinitely many examples. For more information see: <br/>
+ * A theoretically appealing feature of Hoeffding Trees not shared by
+ * otherincremental decision tree learners is that it has sound guarantees of
+ * performance. Using the Hoeffding bound one can show that its output is
+ * asymptotically nearly identical to that of a non-incremental learner using
+ * infinitely many examples. For more information see: <br/>
  * <br/>
- * Geoff Hulten, Laurie Spencer, Pedro Domingos: Mining time-changing data streams. In: ACM SIGKDD Intl. Conf. on Knowledge Discovery and Data Mining, 97-106, 2001.
+ * Geoff Hulten, Laurie Spencer, Pedro Domingos: Mining time-changing data
+ * streams. In: ACM SIGKDD Intl. Conf. on Knowledge Discovery and Data Mining,
+ * 97-106, 2001.
  * <p/>
  <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start -->
+ <!-- technical-bibtex-start --> 
  * BibTeX:
+ * 
  * <pre>
  * &#64;inproceedings{Hulten2001,
  *    author = {Geoff Hulten and Laurie Spencer and Pedro Domingos},
@@ -86,39 +101,56 @@ import weka.core.WeightedInstancesHandler;
  * <p/>
  <!-- technical-bibtex-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ <!-- options-start --> 
+ * Valid options are:
+ * <p/>
  * 
- * <pre> -L
+ * <pre>
+ * -L
  *  The leaf prediction strategy to use. 0 = majority class, 1 = naive Bayes, 2 = naive Bayes adaptive.
- *  (default = 0)</pre>
+ *  (default = 0)
+ * </pre>
  * 
- * <pre> -S
+ * <pre>
+ * -S
  *  The splitting criterion to use. 0 = Gini, 1 = Info gain
- *  (default = 0)</pre>
+ *  (default = 0)
+ * </pre>
  * 
- * <pre> -E
+ * <pre>
+ * -E
  *  The allowable error in a split decision - values closer to zero will take longer to decide
- *  (default = 1e-7)</pre>
+ *  (default = 1e-7)
+ * </pre>
  * 
- * <pre> -H
+ * <pre>
+ * -H
  *  Threshold below which a split will be forced to break ties
- *  (default = 0.05)</pre>
+ *  (default = 0.05)
+ * </pre>
  * 
- * <pre> -M
+ * <pre>
+ * -M
  *  Minimum fraction of weight required down at least two branches for info gain splitting
- *  (default = 0.01)</pre>
+ *  (default = 0.01)
+ * </pre>
  * 
- * <pre> -G
+ * <pre>
+ * -G
  *  Grace period - the number of instances a leaf should observe between split attempts
- *  (default = 200)</pre>
+ *  (default = 200)
+ * </pre>
  * 
- * <pre> -N
+ * <pre>
+ * -N
  *  The number of instances (weight) a leaf should observe before allowing naive Bayes to make predictions (NB or NB adaptive only)
- *  (default = 0)</pre>
+ *  (default = 0)
+ * </pre>
  * 
- * <pre> -P
- *  Print leaf models when using naive Bayes at the leaves.</pre>
+ * <pre>
+ * -P
+ *  Print leaf models when using naive Bayes at the leaves.
+ * </pre>
  * 
  <!-- options-end -->
  * 
@@ -129,7 +161,7 @@ import weka.core.WeightedInstancesHandler;
 public class HoeffdingTree extends AbstractClassifier implements
     UpdateableClassifier, WeightedInstancesHandler, OptionHandler,
     CapabilitiesHandler, RevisionHandler, TechnicalInformationHandler,
-    Serializable {
+    Drawable, Serializable {
 
   /**
    * For serialization
@@ -318,39 +350,56 @@ public class HoeffdingTree extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   <!-- options-start --> 
+   * Valid options are:
+   * <p/>
    * 
-   * <pre> -L
+   * <pre>
+   * -L
    *  The leaf prediction strategy to use. 0 = majority class, 1 = naive Bayes, 2 = naive Bayes adaptive.
-   *  (default = 0)</pre>
+   *  (default = 0)
+   * </pre>
    * 
-   * <pre> -S
+   * <pre>
+   * -S
    *  The splitting criterion to use. 0 = Gini, 1 = Info gain
-   *  (default = 0)</pre>
+   *  (default = 0)
+   * </pre>
    * 
-   * <pre> -E
+   * <pre>
+   * -E
    *  The allowable error in a split decision - values closer to zero will take longer to decide
-   *  (default = 1e-7)</pre>
+   *  (default = 1e-7)
+   * </pre>
    * 
-   * <pre> -H
+   * <pre>
+   * -H
    *  Threshold below which a split will be forced to break ties
-   *  (default = 0.05)</pre>
+   *  (default = 0.05)
+   * </pre>
    * 
-   * <pre> -M
+   * <pre>
+   * -M
    *  Minimum fraction of weight required down at least two branches for info gain splitting
-   *  (default = 0.01)</pre>
+   *  (default = 0.01)
+   * </pre>
    * 
-   * <pre> -G
+   * <pre>
+   * -G
    *  Grace period - the number of instances a leaf should observe between split attempts
-   *  (default = 200)</pre>
+   *  (default = 200)
+   * </pre>
    * 
-   * <pre> -N
+   * <pre>
+   * -N
    *  The number of instances (weight) a leaf should observe before allowing naive Bayes to make predictions (NB or NB adaptive only)
-   *  (default = 0)</pre>
+   *  (default = 0)
+   * </pre>
    * 
-   * <pre> -P
-   *  Print leaf models when using naive Bayes at the leaves.</pre>
+   * <pre>
+   * -P
+   *  Print leaf models when using naive Bayes at the leaves.
+   * </pre>
    * 
    <!-- options-end -->
    * 
@@ -949,5 +998,23 @@ public class HoeffdingTree extends AbstractClassifier implements
   public static void main(String[] args) {
     runClassifier(new HoeffdingTree(), args);
   }
-}
 
+  @Override
+  public int graphType() {
+    return Drawable.TREE;
+  }
+
+  @Override
+  public String graph() throws Exception {
+    if (m_root == null) {
+      throw new Exception("No model built yet!");
+    }
+    m_root.installNodeNums(0);
+    StringBuffer buff = new StringBuffer();
+    buff.append("digraph HoeffdingTree {\n");
+    m_root.graphTree(buff);
+    buff.append("}\n");
+
+    return buff.toString();
+  }
+}
