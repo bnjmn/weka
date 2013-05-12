@@ -114,12 +114,16 @@ public class SplitNode extends HNode {
 
   @Override
   protected int dumpTree(int depth, int leafCount, StringBuffer buff) {
+
+    boolean first = true;
+
     for (Map.Entry<String, HNode> e : m_children.entrySet()) {
 
       HNode child = e.getValue();
       String branch = e.getKey();
 
       if (child != null) {
+
         buff.append("\n");
 
         for (int i = 0; i < depth; i++) {
@@ -132,6 +136,73 @@ public class SplitNode extends HNode {
       }
     }
     return leafCount;
+  }
+
+  @Override
+  public int installNodeNums(int nodeNum) {
+    nodeNum = super.installNodeNums(nodeNum);
+
+    for (Map.Entry<String, HNode> e : m_children.entrySet()) {
+
+      HNode child = e.getValue();
+
+      if (child != null) {
+        nodeNum = child.installNodeNums(nodeNum);
+      }
+    }
+
+    return nodeNum;
+  }
+
+  @Override
+  public void graphTree(StringBuffer buff) {
+    boolean first = true;
+    for (Map.Entry<String, HNode> e : m_children.entrySet()) {
+
+      HNode child = e.getValue();
+      String branch = e.getKey();
+
+      if (child != null) {
+        String conditionForBranch = m_split.conditionForBranch(branch);
+        if (first) {
+          String testAttName = null;
+
+          if (conditionForBranch.indexOf("<=") < 0) {
+            testAttName = conditionForBranch.substring(0,
+                conditionForBranch.indexOf("=")).trim();
+          } else {
+            testAttName = conditionForBranch.substring(0,
+                conditionForBranch.indexOf("<")).trim();
+          }
+          first = false;
+          buff.append("N" + m_nodeNum + " [label=\"" + testAttName + "\"]\n");
+        }
+
+        int startIndex = 0;
+        if (conditionForBranch.indexOf("<=") > 0) {
+          startIndex = conditionForBranch.indexOf("<") - 1;
+        } else if (conditionForBranch.indexOf("=") > 0) {
+          startIndex = conditionForBranch.indexOf("=") - 1;
+        } else {
+          startIndex = conditionForBranch.indexOf(">") - 1;
+        }
+        conditionForBranch = conditionForBranch.substring(startIndex,
+            conditionForBranch.length()).trim();
+
+        buff.append(
+            "N" + m_nodeNum + "->" + "N" + child.m_nodeNum + "[label=\""
+                + conditionForBranch + "\"]\n").append("\n");
+
+      }
+    }
+
+    for (Map.Entry<String, HNode> e : m_children.entrySet()) {
+      HNode child = e.getValue();
+
+      if (child != null) {
+        child.graphTree(buff);
+      }
+    }
   }
 
   @Override

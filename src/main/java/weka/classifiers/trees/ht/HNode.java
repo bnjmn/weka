@@ -45,8 +45,11 @@ public abstract class HNode implements Serializable {
   /** Class distribution at this node */
   public Map<String, WeightMass> m_classDistribution = new LinkedHashMap<String, WeightMass>();
 
-  /** Holds the leaf number */
+  /** Holds the leaf number (if this is a leaf) */
   protected int m_leafNum;
+
+  /** Holds the node number (for graphing purposes) */
+  protected int m_nodeNum;
 
   /**
    * Construct a new HNode
@@ -148,6 +151,13 @@ public abstract class HNode implements Serializable {
     return dist;
   }
 
+  public int installNodeNums(int nodeNum) {
+    nodeNum++;
+    m_nodeNum = nodeNum;
+
+    return nodeNum;
+  }
+
   protected int dumpTree(int depth, int leafCount, StringBuffer buff) {
 
     double max = -1;
@@ -168,6 +178,21 @@ public abstract class HNode implements Serializable {
   protected void printLeafModels(StringBuffer buff) {
   }
 
+  public void graphTree(StringBuffer text) {
+
+    double max = -1;
+    String classVal = "";
+    for (Map.Entry<String, WeightMass> e : m_classDistribution.entrySet()) {
+      if (e.getValue().m_weight > max) {
+        max = e.getValue().m_weight;
+        classVal = e.getKey();
+      }
+    }
+
+    text.append("N" + m_nodeNum + " [label=\"" + classVal + " ("
+        + String.format("%-9.3f", max).trim() + ")\" shape=box style=filled]\n");
+  }
+
   /**
    * Print a textual description of the tree
    * 
@@ -175,6 +200,9 @@ public abstract class HNode implements Serializable {
    * @return a textual description of the tree
    */
   public String toString(boolean printLeaf) {
+
+    installNodeNums(0);
+
     StringBuffer buff = new StringBuffer();
 
     dumpTree(0, 0, buff);
