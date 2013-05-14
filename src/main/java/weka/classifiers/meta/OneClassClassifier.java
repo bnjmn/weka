@@ -1009,6 +1009,7 @@ public class OneClassClassifier
     result.disableAllClasses();
     result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.UNARY_CLASS);
     
     return result;
   }
