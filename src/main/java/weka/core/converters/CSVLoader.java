@@ -55,24 +55,43 @@ import weka.core.Utils;
 import weka.core.converters.ArffLoader.ArffReader;
 
 /**
- * <!-- globalinfo-start -->
- * * Reads a source that is in comma separated format (the default). One can also change the column separator from comma to tab or another character, specify string enclosures, specify whether aheader row is present or not and specify which attributes are to beforced to be nominal or date. Can operate in batch or incremental mode. In batch mode, a buffer is used to process a fixed number of rows in memory at any one time and the data is dumped to a temporary file. This allows the legal values for nominal attributes to be automatically determined. The final ARFF file is produced in a second pass over the temporary file using the structure determined on the first pass. In incremental mode, the first buffer full of rows is used to determine the structure automatically. Following this all rows are read and output incrementally. An error will occur if a row containing nominal values not seen in the initial buffer is encountered. In this case, the size of the initial buffer can be increased, or the user can explicitly provide the legal values of all nominal attributes using the -L (setNominalLabelSpecs) option.
- * * <p/>
+ * <!-- globalinfo-start --> * Reads a source that is in comma separated format
+ * (the default). One can also change the column separator from comma to tab or
+ * another character, specify string enclosures, specify whether aheader row is
+ * present or not and specify which attributes are to beforced to be nominal or
+ * date. Can operate in batch or incremental mode. In batch mode, a buffer is
+ * used to process a fixed number of rows in memory at any one time and the data
+ * is dumped to a temporary file. This allows the legal values for nominal
+ * attributes to be automatically determined. The final ARFF file is produced in
+ * a second pass over the temporary file using the structure determined on the
+ * first pass. In incremental mode, the first buffer full of rows is used to
+ * determine the structure automatically. Following this all rows are read and
+ * output incrementally. An error will occur if a row containing nominal values
+ * not seen in the initial buffer is encountered. In this case, the size of the
+ * initial buffer can be increased, or the user can explicitly provide the legal
+ * values of all nominal attributes using the -L (setNominalLabelSpecs) option.
+ * *
+ * <p/>
  * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -H
- *  No header row present in the data.</pre>
+ * <pre>
+ * -H
+ *  No header row present in the data.
+ * </pre>
  * 
- * <pre> -N &lt;range&gt;
+ * <pre>
+ * -N &lt;range&gt;
  *  The range of attributes to force type to be NOMINAL.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -L &lt;nominal label spec&gt;
+ * <pre>
+ * -L &lt;nominal label spec&gt;
  *  Optional specification of legal labels for nominal
  *  attributes. May be specified multiple times.
  *  Batch mode can determine this
@@ -83,42 +102,57 @@ import weka.core.converters.ArffLoader.ArffReader;
  *  first part can be a range of attribute indexes or
  *  a comma-separated list off attruibute names; the
  *  second part is a comma-separated list of labels. E.g
- *  "1,2,4-6:red,green,blue" or "att1,att2:red,green,blue"</pre>
+ *  "1,2,4-6:red,green,blue" or "att1,att2:red,green,blue"
+ * </pre>
  * 
- * <pre> -S &lt;range&gt;
+ * <pre>
+ * -S &lt;range&gt;
  *  The range of attribute to force type to be STRING.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -D &lt;range&gt;
+ * <pre>
+ * -D &lt;range&gt;
  *  The range of attribute to force type to be DATE.
  *  'first' and 'last' are accepted as well.
  *  Examples: "first-last", "1,4,5-27,50-last"
- *  (default: -none-)</pre>
+ *  (default: -none-)
+ * </pre>
  * 
- * <pre> -format &lt;date format&gt;
+ * <pre>
+ * -format &lt;date format&gt;
  *  The date formatting string to use to parse date values.
- *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
+ *  (default: "yyyy-MM-dd'T'HH:mm:ss")
+ * </pre>
  * 
- * <pre> -M &lt;str&gt;
+ * <pre>
+ * -M &lt;str&gt;
  *  The string representing a missing value.
- *  (default: ?)</pre>
+ *  (default: ?)
+ * </pre>
  * 
- * <pre> -F &lt;separator&gt;
+ * <pre>
+ * -F &lt;separator&gt;
  *  The field separator to be used.
  *  '\t' can be used as well.
- *  (default: ',')</pre>
+ *  (default: ',')
+ * </pre>
  * 
- * <pre> -E &lt;enclosures&gt;
+ * <pre>
+ * -E &lt;enclosures&gt;
  *  The enclosure character(s) to use for strings.
- *  Specify as a comma separated list (e.g. ",' (default: ",')</pre>
+ *  Specify as a comma separated list (e.g. ",' (default: ",')
+ * </pre>
  * 
- * <pre> -B &lt;num&gt;
+ * <pre>
+ * -B &lt;num&gt;
  *  The size of the in memory buffer (in rows).
- *  (default: 100)</pre>
+ *  (default: 100)
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -406,7 +440,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    *         explorer/experimenter gui
    */
   public String dateAttributesTipText() {
-    return "The range of attributes to force to type STRING, example "
+    return "The range of attributes to force to type DATE, example "
         + "ranges: 'first-last', '1,4,7-14, 50-last'.";
   }
 
@@ -1292,4 +1326,3 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     runFileLoader(new CSVLoader(), args);
   }
 }
-
