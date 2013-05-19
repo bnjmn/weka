@@ -248,8 +248,13 @@ public abstract class SimpleStreamFilter
     
     try {
       if (hasImmediateOutputFormat() || isFirstBatchDone()) {
-        push(process((Instance) instance.copy()));
-        return true;
+        Instance processed = process((Instance) instance.copy());
+        if (processed != null) {
+          //push(process((Instance) instance.copy()));
+          push(processed);
+          return true;
+        }
+        return false;
       }
       else {
         bufferInput(instance);
