@@ -345,10 +345,15 @@ public class MultiFilter
     int         i;
     
     result = (Instance) instance.copy();
-
+    
     for (i = 0; i < getFilters().length; i++) {
-      getFilter(i).input(result);
-      result = getFilter(i).output();
+      if (getFilter(i).input(result)) {
+        result = getFilter(i).output();
+      } else {
+        // if a filter says nothing to collect then terminate
+        result = null;
+        break;
+      }
     }
 
     return result;
