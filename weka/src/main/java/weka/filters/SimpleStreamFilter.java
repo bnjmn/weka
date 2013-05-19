@@ -15,7 +15,7 @@
 
 /*
  * SimpleStreamFilter.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -247,8 +247,13 @@ public abstract class SimpleStreamFilter
     
     try {
       if (hasImmediateOutputFormat() || isFirstBatchDone()) {
-        push(process((Instance) instance.copy()));
-        return true;
+        Instance processed = process((Instance) instance.copy());
+        if (processed != null) {
+          //push(process((Instance) instance.copy()));
+          push(processed);
+          return true;
+        }
+        return false;
       }
       else {
         bufferInput(instance);

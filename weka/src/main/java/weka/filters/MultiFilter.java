@@ -15,12 +15,15 @@
 
 /*
  * MultiFilter.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -29,9 +32,6 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -169,10 +169,14 @@ public class MultiFilter
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    if (getFilters().length == 0)
-      return super.getCapabilities();
-    else
+    if (getFilters().length == 0) {
+      Capabilities result = super.getCapabilities();
+      result.disableAll();
+      
+      return result;
+    } else {
       return getFilters()[0].getCapabilities();
+    }
   }
 
   /**
@@ -342,8 +346,13 @@ public class MultiFilter
     result = (Instance) instance.copy();
 
     for (i = 0; i < getFilters().length; i++) {
-      getFilter(i).input(result);
-      result = getFilter(i).output();
+      if (getFilter(i).input(result)) {
+        result = getFilter(i).output();
+      } else {
+        // if a filter says nothing to collect then terminate
+        result = null;
+        break;
+      }
     }
 
     return result;
