@@ -87,7 +87,7 @@ public class GiniSplitMetric extends SplitMetric implements Serializable {
   }
 
   @Override
-  public double getMetricMax(Map<String, WeightMass> preDist) {
+  public double getMetricRange(Map<String, WeightMass> preDist) {
     return 1.0;
   }
 }
