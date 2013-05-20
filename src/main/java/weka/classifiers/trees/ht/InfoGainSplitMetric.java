@@ -97,7 +97,7 @@ public class InfoGainSplitMetric extends SplitMetric implements Serializable {
   }
 
   @Override
-  public double getMetricMax(Map<String, WeightMass> preDist) {
+  public double getMetricRange(Map<String, WeightMass> preDist) {
 
     int numClasses = preDist.size();
     if (numClasses < 2) {

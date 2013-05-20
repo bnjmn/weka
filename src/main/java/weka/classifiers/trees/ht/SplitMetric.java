@@ -65,5 +65,11 @@ public abstract class SplitMetric implements Serializable {
   public abstract double evaluateSplit(Map<String, WeightMass> preDist,
       List<Map<String, WeightMass>> postDist);
 
-  public abstract double getMetricMax(Map<String, WeightMass> preDist);
+  /**
+   * Get the range of the splitting metric
+   * 
+   * @param preDist the pre-split class distribution
+   * @return the range of the splitting metric
+   */
+  public abstract double getMetricRange(Map<String, WeightMass> preDist);
 }
