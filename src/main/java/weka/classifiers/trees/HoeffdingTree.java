@@ -894,7 +894,7 @@ public class HoeffdingTree extends AbstractClassifier implements
         doSplit = bestSplits.size() > 0;
       } else {
         // compute the Hoeffding bound
-        double metricMax = m_splitMetric.getMetricMax(node.m_classDistribution);
+        double metricMax = m_splitMetric.getMetricRange(node.m_classDistribution);
         double hoeffdingBound = computeHoeffdingBound(metricMax,
             m_splitConfidence, node.totalWeight());
 
