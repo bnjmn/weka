@@ -508,7 +508,6 @@ public class AprioriItemSet extends ItemSet implements Serializable,
       int j = (treatZeroAsMissing) ? 1 : 0;
       for (; j < instances.attribute(i).numValues(); j++) {
         current = new AprioriItemSet(instances.numInstances());
-        current.setTreatZeroAsMissing(treatZeroAsMissing);
         current.m_items = new int[instances.numAttributes()];
         for (int k = 0; k < instances.numAttributes(); k++)
           current.m_items[k] = -1;
