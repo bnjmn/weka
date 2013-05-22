@@ -962,7 +962,7 @@ public class LOF extends Filter implements OptionHandler,
   }
   
   protected synchronized void trimZeroDistances(Neighborhood n) {    
-    int index = 0;
+    int index = n.m_neighbors.numInstances();
     for (int i = 0; i < n.m_neighbors.numInstances(); i++) {
       if (n.m_distances[i] > 0) {
         index = i;
