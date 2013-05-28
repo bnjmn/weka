@@ -20,6 +20,7 @@
  */
 
 package weka.gui.explorer;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -110,7 +111,6 @@ import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
-
 
 /**
  * This panel allows the user to select and configure a clusterer, and evaluate
@@ -647,6 +647,8 @@ public class ClustererPanel extends JPanel implements
     m_PercentText.setEnabled(m_PercentBut.isSelected());
     m_PercentLab.setEnabled(m_PercentBut.isSelected());
     m_ClassCombo.setEnabled(m_ClassesToClustersBut.isSelected());
+
+    updateCapabilitiesFilter(m_ClustererEditor.getCapabilitiesFilter());
   }
 
   /**
@@ -1004,8 +1006,7 @@ public class ClustererPanel extends JPanel implements
                 "Evaluate clusterer", JOptionPane.ERROR_MESSAGE);
             m_Log.statusMessage("Problem evaluating clusterer");
           } finally {
-            if (    (plotInstances != null) 
-       	         && plotInstances.canPlot(true) ) {
+            if ((plotInstances != null) && plotInstances.canPlot(true)) {
               m_CurrentVis = new VisualizePanel();
               m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
               m_CurrentVis.setLog(m_Log);
@@ -1758,6 +1759,23 @@ public class ClustererPanel extends JPanel implements
 
     if (!m_ignoreKeyList.isSelectionEmpty()) {
       tempInst = removeIgnoreCols(tempInst);
+    }
+
+    if (m_ClassesToClustersBut.isSelected()) {
+      // remove the class too
+      String classSelection = m_ClassCombo.getSelectedItem().toString();
+      classSelection = classSelection
+          .substring(classSelection.indexOf(")") + 1).trim();
+      int classIndex = tempInst.attribute(classSelection).index();
+
+      Remove rm = new Remove();
+      rm.setAttributeIndices("" + (classIndex + 1));
+      try {
+        rm.setInputFormat(tempInst);
+        tempInst = Filter.useFilter(tempInst, rm);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
     try {
