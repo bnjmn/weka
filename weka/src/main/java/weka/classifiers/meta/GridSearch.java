@@ -2879,6 +2879,7 @@ public class GridSearch
     while (iter.hasNext()) {
       capab = (Capability) iter.next();
       if (    (capab != Capability.BINARY_CLASS)
+          && (capab != Capability.UNARY_CLASS)
 	   && (capab != Capability.NOMINAL_CLASS)
 	   && (capab != Capability.NUMERIC_CLASS)
 	   && (capab != Capability.DATE_CLASS) )
