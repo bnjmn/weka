@@ -2491,6 +2491,7 @@ public class ClassifierPanel extends JPanel implements
     File sFile = null;
     boolean saveOK = true;
 
+    m_FileChooser.removeChoosableFileFilter(m_PMMLModelFilter);
     int returnVal = m_FileChooser.showSaveDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       sFile = m_FileChooser.getSelectedFile();
@@ -2530,6 +2531,7 @@ public class ClassifierPanel extends JPanel implements
    */
   protected void loadClassifier() {
 
+    m_FileChooser.addChoosableFileFilter(m_PMMLModelFilter);
     int returnVal = m_FileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File selected = m_FileChooser.getSelectedFile();
