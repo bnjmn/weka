@@ -506,7 +506,7 @@ public final class Utils
    */
   public static /*@pure@*/ boolean eq(double a, double b){
     
-    return (a - b < SMALL) && (b - a < SMALL); 
+    return (a == b) || ((a - b < SMALL) && (b - a < SMALL)); 
   }
 
   /**
@@ -1132,7 +1132,7 @@ public final class Utils
    */
   public static /*@pure@*/ boolean smOrEq(double a,double b) {
     
-    return (a-b < SMALL);
+    return (a-b < SMALL) || (a <= b);
   }
 
   /**
@@ -1143,7 +1143,7 @@ public final class Utils
    */
   public static /*@pure@*/ boolean grOrEq(double a,double b) {
     
-    return (b-a < SMALL);
+    return (b-a < SMALL) || (a >= b);
   }
   
   /**
