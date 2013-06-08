@@ -51,7 +51,8 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start --> Class for combining classifiers. Different
+ <!-- globalinfo-start --> 
+ * Class for combining classifiers. Different
  * combinations of probability estimates for classification are available.<br/>
  * <br/>
  * For more information see:<br/>
@@ -63,9 +64,10 @@ import weka.core.Utils;
  * classifiers. IEEE Transactions on Pattern Analysis and Machine Intelligence.
  * 20(3):226-239.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -102,9 +104,10 @@ import weka.core.Utils;
  *  (default: AVG)
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
+ <!-- technical-bibtex-start --> 
+ * BibTeX:
  * 
  * <pre>
  * &#64;book{Kuncheva2004,
@@ -125,7 +128,7 @@ import weka.core.Utils;
  * }
  * </pre>
  * <p/>
- * <!-- technical-bibtex-end -->
+ <!-- technical-bibtex-end -->
  * 
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -253,7 +256,8 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start --> 
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -290,7 +294,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    *  (default: AVG)
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -359,6 +363,14 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+
+    if (m_preBuiltClassifiers.size() == 0 && m_classifiersToLoad.size() > 0) {
+      try {
+        loadClassifiers(null);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
 
     if (m_preBuiltClassifiers.size() > 0) {
       if (m_Classifiers.length == 0) {
@@ -459,7 +471,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       Object header = null;
       header = is.readObject();
       if (header instanceof Instances) {
-        if (!data.equalHeaders((Instances) header)) {
+        if (data != null && !data.equalHeaders((Instances) header)) {
           throw new Exception("\"" + path + "\" was trained with data that is "
               + "of a differnet structure than the incoming training data");
         }
