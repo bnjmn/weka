@@ -529,7 +529,7 @@ public class SimpleKMeans
                                  "\tDisplay std. deviations for centroids.\n", 
                                  "V", 0, "-V"));
     result.addElement(new Option(
-                                 "\tReplace missing values with mean/mode.\n", 
+                                 "\tDon't replace missing values with mean/mode.\n", 
                                  "M", 0, "-M"));
 
     result.add(new Option(
