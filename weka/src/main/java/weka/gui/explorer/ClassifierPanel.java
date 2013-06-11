@@ -277,6 +277,7 @@ public class ClassifierPanel extends JPanel implements
    * button
    */
   ActionListener m_RadioListener = new ActionListener() {
+    @Override
     public void actionPerformed(ActionEvent e) {
       updateRadioLinks();
     }
@@ -378,6 +379,7 @@ public class ClassifierPanel extends JPanel implements
     m_ClassifierEditor.setClassType(Classifier.class);
     m_ClassifierEditor.setValue(ExplorerDefaults.getClassifier());
     m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
+      @Override
       public void propertyChange(PropertyChangeEvent e) {
         m_StartBut.setEnabled(true);
         // Check capabilities
@@ -460,6 +462,7 @@ public class ClassifierPanel extends JPanel implements
     m_OutputPredictionsTextBut.setSelected(ExplorerDefaults
         .getClassifierOutputPredictions());
     m_OutputPredictionsTextBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         m_OutputAdditionalAttributesText.setEnabled(m_OutputPredictionsTextBut
             .isSelected());
@@ -473,6 +476,7 @@ public class ClassifierPanel extends JPanel implements
     m_PreserveOrderBut.setSelected(ExplorerDefaults
         .getClassifierPreserveOrder());
     m_OutputSourceCode.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         m_SourceCodeClass.setEnabled(m_OutputSourceCode.isSelected());
       }
@@ -505,11 +509,13 @@ public class ClassifierPanel extends JPanel implements
     m_PercentBut.addActionListener(m_RadioListener);
     m_TestSplitBut.addActionListener(m_RadioListener);
     m_SetTestBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         setTestSet();
       }
     });
     m_EvalWRTCostsBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         m_SetCostsBut.setEnabled(m_EvalWRTCostsBut.isSelected());
         if ((m_SetCostsFrame != null) && (!m_EvalWRTCostsBut.isSelected())) {
@@ -520,6 +526,7 @@ public class ClassifierPanel extends JPanel implements
     m_CostMatrixEditor.setValue(new CostMatrix(1));
     m_SetCostsBut.setEnabled(m_EvalWRTCostsBut.isSelected());
     m_SetCostsBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         m_SetCostsBut.setEnabled(false);
         if (m_SetCostsFrame == null) {
@@ -561,6 +568,7 @@ public class ClassifierPanel extends JPanel implements
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         boolean proceed = true;
         if (Explorer.m_Memory.memoryIsLow()) {
@@ -573,12 +581,14 @@ public class ClassifierPanel extends JPanel implements
       }
     });
     m_StopBut.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         stopClassifier();
       }
     });
 
     m_ClassCombo.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         int selected = m_ClassCombo.getSelectedIndex();
         if (selected != -1) {
@@ -609,6 +619,7 @@ public class ClassifierPanel extends JPanel implements
     });
 
     m_MoreOptions.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         m_MoreOptions.setEnabled(false);
         JPanel moreOptionsPanel = new JPanel();
@@ -667,6 +678,7 @@ public class ClassifierPanel extends JPanel implements
           }
         });
         oK.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent a) {
             m_MoreOptions.setEnabled(true);
             jd.dispose();
@@ -804,6 +816,7 @@ public class ClassifierPanel extends JPanel implements
     js.getViewport().addChangeListener(new ChangeListener() {
       private int lastHeight;
 
+      @Override
       public void stateChanged(ChangeEvent e) {
         JViewport vp = (JViewport) e.getSource();
         int h = vp.getViewSize().height;
@@ -875,6 +888,7 @@ public class ClassifierPanel extends JPanel implements
    * 
    * @param newLog the Logger that will now get info messages
    */
+  @Override
   public void setLog(Logger newLog) {
 
     m_Log = newLog;
@@ -885,6 +899,7 @@ public class ClassifierPanel extends JPanel implements
    * 
    * @param inst a set of Instances
    */
+  @Override
   public void setInstances(Instances inst) {
     m_Instances = inst;
 
@@ -953,6 +968,7 @@ public class ClassifierPanel extends JPanel implements
         }
       }
       sp.addPropertyChangeListener(new PropertyChangeListener() {
+        @Override
         public void propertyChange(PropertyChangeEvent e) {
           m_TestLoader = sp.getLoader();
         }
@@ -1971,6 +1987,7 @@ public class ClassifierPanel extends JPanel implements
         "ClassifierPanel_Visualize_VisMainBuffer_JMenuItem_Text"));
     if (selectedName != null) {
       visMainBuffer.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           m_History.setSingle(selectedName);
         }
@@ -1984,6 +2001,7 @@ public class ClassifierPanel extends JPanel implements
         "ClassifierPanel_Visualize_VisSepBuffer_JMenuItem_Text"));
     if (selectedName != null) {
       visSepBuffer.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           m_History.openFrame(selectedName);
         }
@@ -1997,6 +2015,7 @@ public class ClassifierPanel extends JPanel implements
         "ClassifierPanel_Visualize_SaveOutput_JMenuItem_Text"));
     if (selectedName != null) {
       saveOutput.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           saveBuffer(selectedName);
         }
@@ -2010,6 +2029,7 @@ public class ClassifierPanel extends JPanel implements
         "ClassifierPanel_Visualize_DeleteOutput_JMenuItem_Text"));
     if (selectedName != null) {
       deleteOutput.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           m_History.removeResult(selectedName);
         }
@@ -2024,6 +2044,7 @@ public class ClassifierPanel extends JPanel implements
     JMenuItem loadModel = new JMenuItem(Messages.getInstance().getString(
         "ClassifierPanel_Visualize_LoadModel_JMenuItem_Text"));
     loadModel.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         loadClassifier();
       }
@@ -2072,6 +2093,7 @@ public class ClassifierPanel extends JPanel implements
         "ClassifierPanel_Visualize_SaveModel_JMenuItem_Text"));
     if (classifier != null) {
       saveModel.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           saveClassifier(selectedName, classifier, trainHeader);
         }
@@ -2085,6 +2107,7 @@ public class ClassifierPanel extends JPanel implements
         "ClassifierPanel_Visualize_ReEvaluate_JMenuItem_Text"));
     if (classifier != null && m_TestLoader != null) {
       reEvaluate.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           reevaluateModel(selectedName, classifier, trainHeader);
         }
@@ -2108,6 +2131,7 @@ public class ClassifierPanel extends JPanel implements
         }
       }
       visErrors.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           visualizeClassifierErrors(vp);
         }
@@ -2122,6 +2146,7 @@ public class ClassifierPanel extends JPanel implements
     if (grph != null) {
       if (((Drawable) temp_classifier).graphType() == Drawable.TREE) {
         visGrph.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             String title;
             if (vp != null)
@@ -2135,6 +2160,7 @@ public class ClassifierPanel extends JPanel implements
         visGrph.setText(Messages.getInstance().getString(
             "ClassifierPanel_Visualize_VisGrph_JMenuItem_Text_Second"));
         visGrph.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             Thread th = new Thread() {
               @Override
@@ -2156,6 +2182,7 @@ public class ClassifierPanel extends JPanel implements
         "ClassifierPanel_Visualize_VisMargin_JMenuItem_Text"));
     if (preds != null) {
       visMargin.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           try {
             MarginCurve tc = new MarginCurve();
@@ -2185,6 +2212,7 @@ public class ClassifierPanel extends JPanel implements
         JMenuItem clv = new JMenuItem(classAtt.value(i));
         final int classValue = i;
         clv.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             try {
               ThresholdCurve tc = new ThresholdCurve();
@@ -2233,6 +2261,7 @@ public class ClassifierPanel extends JPanel implements
         JMenuItem clv = new JMenuItem(classAtt.value(i));
         final int classValue = i;
         clv.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             try {
               ThresholdCurve tc = new ThresholdCurve();
@@ -2299,6 +2328,7 @@ public class ClassifierPanel extends JPanel implements
         JMenuItem clv = new JMenuItem(classAtt.value(i));
         final int classValue = i;
         clv.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             try {
               CostCurve cc = new CostCurve();
@@ -2635,6 +2665,7 @@ public class ClassifierPanel extends JPanel implements
     boolean saveOK = true;
 
     m_FileChooser.removeChoosableFileFilter(m_PMMLModelFilter);
+    m_FileChooser.setFileFilter(m_ModelFilter);
     int returnVal = m_FileChooser.showSaveDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       sFile = m_FileChooser.getSelectedFile();
@@ -2690,6 +2721,7 @@ public class ClassifierPanel extends JPanel implements
   protected void loadClassifier() {
 
     m_FileChooser.addChoosableFileFilter(m_PMMLModelFilter);
+    m_FileChooser.setFileFilter(m_ModelFilter);
     int returnVal = m_FileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File selected = m_FileChooser.getSelectedFile();
@@ -3207,6 +3239,7 @@ public class ClassifierPanel extends JPanel implements
    * 
    * @param e the associated change event
    */
+  @Override
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
     if (e.getFilter() == null)
       updateCapabilitiesFilter(null);
@@ -3220,6 +3253,7 @@ public class ClassifierPanel extends JPanel implements
    * 
    * @param parent the parent frame
    */
+  @Override
   public void setExplorer(Explorer parent) {
     m_Explorer = parent;
   }
@@ -3229,6 +3263,7 @@ public class ClassifierPanel extends JPanel implements
    * 
    * @return the parent
    */
+  @Override
   public Explorer getExplorer() {
     return m_Explorer;
   }
@@ -3238,6 +3273,7 @@ public class ClassifierPanel extends JPanel implements
    * 
    * @return the title of this tab
    */
+  @Override
   public String getTabTitle() {
     return Messages.getInstance().getString("ClassifierPanel_GetTabTitle_Text");
   }
@@ -3247,6 +3283,7 @@ public class ClassifierPanel extends JPanel implements
    * 
    * @return the tooltip of this tab
    */
+  @Override
   public String getTabTitleToolTip() {
     return Messages.getInstance().getString(
         "ClassifierPanel_GetTabTitleToolTip_Text");
