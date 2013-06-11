@@ -869,7 +869,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
 
     result.addElement(new Option("\tDisplay std. deviations for centroids.\n",
         "V", 0, "-V"));
-    result.addElement(new Option("\tReplace missing values with mean/mode.\n",
+    result.addElement(new Option("\tDon't replace missing values with mean/mode.\n",
         "M", 0, "-M"));
 
     result.add(new Option("\tDistance function to use.\n"
