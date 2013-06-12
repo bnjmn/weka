@@ -1190,6 +1190,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     Hashtable hpps = new Hashtable();
     String className = m_ClassType.getName();
     Set<String> cls = PluginManager.getPluginNamesOfType(className);
+    if (cls == null) {
+      return hpps;
+    }
     List<String> toSort = new ArrayList<String>(cls);
     Collections.sort(toSort, new ClassDiscovery.StringCompare());
 
