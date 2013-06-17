@@ -180,6 +180,9 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
   /** Environment variables */
   protected transient Environment m_env = Environment.getSystemWide();
+  
+  /** Structure of the training data */
+  protected Instances m_structure;
 
   /**
    * Returns a string describing classifier
@@ -417,11 +420,12 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
+    m_structure = new Instances(newData, 0);
 
     m_Random = new Random(getSeed());
 
-    m_preBuiltClassifiers.clear();
     if (m_classifiersToLoad.size() > 0) {
+      m_preBuiltClassifiers.clear();
       loadClassifiers(data);
 
       int index = 0;
