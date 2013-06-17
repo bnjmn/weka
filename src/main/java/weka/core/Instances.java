@@ -1233,11 +1233,7 @@ public class Instances implements Serializable, RevisionHandler {
       backup[i] = instance(i);
     }
     for (int i = 0; i < vals.length; i++) {
-      Instance newInstance = (Instance) backup[sortOrder[i]].copy();
-      m_Instances.insertElementAt(newInstance, i);
-      m_Instances.removeElementAt(i + 1);
-
-      // m_Instances.set(i, backup[sortOrder[i]]);
+      m_Instances.setElementAt(backup[sortOrder[i]], i);
     }
   }
 
