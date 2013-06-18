@@ -29,7 +29,7 @@ import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Matrix;
+import weka.core.matrix.Matrix;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
@@ -878,17 +878,17 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 
     // Check whether there are still attributes left
     Matrix independent = null, dependent = null;
-    double[] weights = null;
     if (numAttributes > 0) {
       independent = new Matrix(m_TransformedData.numInstances(), 
 			       numAttributes);
       dependent = new Matrix(m_TransformedData.numInstances(), 1);
       for (int i = 0; i < m_TransformedData.numInstances(); i ++) {
 	Instance inst = m_TransformedData.instance(i);
+        double sqrt_weight = Math.sqrt(inst.weight());
 	int column = 0;
 	for (int j = 0; j < m_TransformedData.numAttributes(); j++) {
 	  if (j == m_ClassIndex) {
-	    dependent.setElement(i, 0, inst.classValue());
+      dependent.set(i, 0, inst.classValue() * sqrt_weight);
 	  } else {
 	    if (selectedAttributes[j]) {
 	      double value = inst.value(j) - m_Means[j];
@@ -898,17 +898,11 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 	      if (!m_checksTurnedOff) {
 		value /= m_StdDevs[j];
 	      }
-	      independent.setElement(i, column, value);
+        independent.set(i, column, value * sqrt_weight);
 	      column++;
 	    }
 	  }
 	}
-      }
-      
-      // Grab instance weights
-      weights = new double [m_TransformedData.numInstances()];
-      for (int i = 0; i < weights.length; i++) {
-	weights[i] = m_TransformedData.instance(i).weight();
       }
     }
 
@@ -918,7 +912,7 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
     double[] coefficients = new double[numAttributes + 1];
     if (numAttributes > 0) {
       double[] coeffsWithoutIntercept  =
-	independent.regression(dependent, weights, m_Ridge);
+          independent.regression(dependent, m_Ridge).getCoefficients();
       System.arraycopy(coeffsWithoutIntercept, 0, coefficients, 0,
 		       numAttributes);
     }
