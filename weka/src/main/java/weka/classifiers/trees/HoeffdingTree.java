@@ -318,10 +318,10 @@ public class HoeffdingTree extends AbstractClassifier implements
 
     newVector.add(new Option("\tThe leaf prediction strategy to use. 0 = "
         + "majority class, 1 = naive Bayes, 2 = naive Bayes adaptive.\n\t"
-        + "(default = 0)", "L", 1, "-L"));
+        + "(default = 2)", "L", 1, "-L"));
 
     newVector.add(new Option("\tThe splitting criterion to use. 0 = "
-        + "Gini, 1 = Info gain\n\t" + "(default = 0)", "S", 1, "-S"));
+        + "Gini, 1 = Info gain\n\t" + "(default = 1)", "S", 1, "-S"));
     newVector.add(new Option("\tThe allowable error in a split decision "
         + "- values closer to zero will take longer to decide\n\t"
         + "(default = 1e-7)", "E", 1, "-E"));
