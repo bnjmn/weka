@@ -63,8 +63,7 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
 /**
- <!-- globalinfo-start --> 
- * A Hoeffding tree (VFDT) is an incremental, anytime
+ * <!-- globalinfo-start --> A Hoeffding tree (VFDT) is an incremental, anytime
  * decision tree induction algorithm that is capable of learning from massive
  * data streams, assuming that the distribution generating examples does not
  * change over time. Hoeffding trees exploit the fact that a small sample can
@@ -83,10 +82,9 @@ import weka.core.WeightedInstancesHandler;
  * streams. In: ACM SIGKDD Intl. Conf. on Knowledge Discovery and Data Mining,
  * 97-106, 2001.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start --> 
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
  * 
  * <pre>
  * &#64;inproceedings{Hulten2001,
@@ -99,10 +97,9 @@ import weka.core.WeightedInstancesHandler;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
+ * <!-- technical-bibtex-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -152,7 +149,7 @@ import weka.core.WeightedInstancesHandler;
  *  Print leaf models when using naive Bayes at the leaves.
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
@@ -318,10 +315,10 @@ public class HoeffdingTree extends AbstractClassifier implements
 
     newVector.add(new Option("\tThe leaf prediction strategy to use. 0 = "
         + "majority class, 1 = naive Bayes, 2 = naive Bayes adaptive.\n\t"
-        + "(default = 0)", "L", 1, "-L"));
+        + "(default = 2)", "L", 1, "-L"));
 
     newVector.add(new Option("\tThe splitting criterion to use. 0 = "
-        + "Gini, 1 = Info gain\n\t" + "(default = 0)", "S", 1, "-S"));
+        + "Gini, 1 = Info gain\n\t" + "(default = 1)", "S", 1, "-S"));
     newVector.add(new Option("\tThe allowable error in a split decision "
         + "- values closer to zero will take longer to decide\n\t"
         + "(default = 1e-7)", "E", 1, "-E"));
@@ -350,8 +347,7 @@ public class HoeffdingTree extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start --> 
-   * Valid options are:
+   * <!-- options-start --> Valid options are:
    * <p/>
    * 
    * <pre>
@@ -401,7 +397,7 @@ public class HoeffdingTree extends AbstractClassifier implements
    *  Print leaf models when using naive Bayes at the leaves.
    * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -894,7 +890,8 @@ public class HoeffdingTree extends AbstractClassifier implements
         doSplit = bestSplits.size() > 0;
       } else {
         // compute the Hoeffding bound
-        double metricMax = m_splitMetric.getMetricRange(node.m_classDistribution);
+        double metricMax = m_splitMetric
+            .getMetricRange(node.m_classDistribution);
         double hoeffdingBound = computeHoeffdingBound(metricMax,
             m_splitConfidence, node.totalWeight());
 
