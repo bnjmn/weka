@@ -114,6 +114,15 @@ public class RankSearch
 
   /** start from this point in the ranking */
   protected int m_startPoint = 0;
+  
+  /** Output debugging (progress) info to the console */
+  protected boolean m_debug;
+  
+  /** 
+   * Terminate evaluation of the ranking after this many non improving additions. 0 means
+   * don't terminate.
+   */
+  protected int m_nonImprovingAdditions = 0;
 
   /**
    * Returns a string describing this search method
@@ -244,6 +253,55 @@ public class RankSearch
   public int getStartPoint() {
     return m_startPoint;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String debuggingOutputTipText() {
+    return "Output debugging information to the console";
+  }
+
+  /**
+   * Set whether to output debugging info to the console
+   * 
+   * @param d true if dubugging info is to be output
+   */
+  public void setDebuggingOutput(boolean d) {
+    m_debug = d;
+  }
+
+  /**
+   * Get whether to output debugging info to the console
+   * 
+   * @return true if dubugging info is to be output
+   */
+  public boolean getDebuggingOutput() {
+    return m_debug;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String nonImprovingAdditionsTipText() {
+    return "Terminate the evaluation of the ranking after this many " +
+    		"non-improving additions to the best subset seen (0 = don't " +
+    		"terminate early)"; 
+  }
+  
+  public void setNonImprovingAdditions(int t) {
+    m_nonImprovingAdditions = t;
+  }
+  
+  public int getNonImprovingAdditions() {
+    return m_nonImprovingAdditions;
+  }
+
 
   /**
    * Returns an enumeration describing the available options.
@@ -269,6 +327,14 @@ public class RankSearch
         "\tpoint in the ranking to start evaluating from. "
         +"\n\t(default = 0, ie. the head of the ranking).", 
         "R", 1,"-R <start point>"));
+    
+    newVector.addElement(new Option(
+        "\tNumber of non-improving additions to the best subset seen"
+        +"\n\tto tolerate before terminating the search (default = 0, i.e." +
+        "\n\tdon't terminate early).", 
+        "N", 1,"-N <number of non-improving additions>"));
+    
+    newVector.addElement(new Option("\tPrint debugging output", "D", 0, "-D"));
 
     if ((m_ASEval != null) && 
         (m_ASEval instanceof OptionHandler)) {
@@ -334,12 +400,19 @@ public class RankSearch
     if (optionString.length() != 0) {
       setStartPoint(Integer.parseInt(optionString));
     }
+    
+    optionString = Utils.getOption('N', options);
+    if (optionString.length() > 0) {
+      setNonImprovingAdditions(Integer.parseInt(optionString));
+    }
 
     optionString = Utils.getOption('A', options);
     if (optionString.length() == 0)
       optionString = GainRatioAttributeEval.class.getName();
     setAttributeEvaluator(ASEvaluation.forName(optionString, 
                                      Utils.partitionOptions(options)));
+    
+    setDebuggingOutput(Utils.getFlag('D', options));
   }
 
   /**
@@ -355,12 +428,18 @@ public class RankSearch
       evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
     }
 
-    String[] options = new String[8 + evaluatorOptions.length];
+    String[] options = new String[11 + evaluatorOptions.length];
     int current = 0;
 
     options[current++] = "-S"; options[current++] = ""+getStepSize();
 
     options[current++] = "-R"; options[current++] = ""+getStartPoint();
+    
+    options[current++] = "-N"; options[current++] = "" + getNonImprovingAdditions();
+    
+    if (getDebuggingOutput()) {
+      options[current++] = "-D";
+    }
 
     if (getAttributeEvaluator() != null) {
       options[current++] = "-A";
@@ -431,6 +510,9 @@ public class RankSearch
       m_classIndex = m_Instances.classIndex();
     }
 
+    if (m_debug) {
+      System.err.println("Ranking...");
+    }
     if (m_ASEval instanceof AttributeEvaluator) {
       // generate the attribute ranking first
       Ranker ranker = new Ranker();
@@ -454,20 +536,53 @@ public class RankSearch
         m_Ranking[i] = (int)rankres[i][0];
       }
     }
+    if (m_debug) {
+      System.err.println("Done ranking. Evaluating ranking...");
+    }
 
+    int additions = 0;
     // now evaluate the attribute ranking
+    int tenPercent = (m_Ranking.length - m_startPoint) / 10;
+    int count = 0;
     for (int i=m_startPoint;i<m_Ranking.length;i+=m_add) {
       temp_group = new BitSet(m_numAttribs);
       for (int j=0;j<=i;j++) {
         temp_group.set(m_Ranking[j]);
       }
+      additions++;
+      count += m_add;
       temp_merit = ((SubsetEvaluator)m_SubsetEval).evaluateSubset(temp_group);
+      
+      if (m_debug && tenPercent > 0 && count >= tenPercent) {
+        System.err.println(""+ ((double)(i - m_startPoint) / (double)(m_Ranking.length - m_startPoint)) * 100.0 
+            + " percent complete");
+        count = 0;
+      }
 
       if (temp_merit > best_merit) {
         best_merit = temp_merit;;
         best_group = temp_group;
+        additions = 0;
+        
+        if (m_debug) {
+          int[] atts = attributeList(best_group);
+          System.err.print("Best subset found so far (" + atts.length + " features): ");
+          for (int a : atts) {
+            System.err.print("" + (a + 1) + " ");
+          }
+          System.err.println("\nMerit: " + best_merit);
+        }
+      }
+      
+      if (m_nonImprovingAdditions > 0 && additions > m_nonImprovingAdditions) {
+        if (m_debug) {
+          System.err.println("Terminating the search after " + m_nonImprovingAdditions
+              + " non-improving additions");
+        }
+        break;
       }
     }
+    
     m_bestMerit = best_merit;
     return attributeList(best_group);
   }
