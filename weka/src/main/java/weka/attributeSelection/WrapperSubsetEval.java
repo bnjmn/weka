@@ -622,7 +622,7 @@ public class WrapperSubsetEval
     }
     
     if (m_IRClassValS != null && m_IRClassValS.length() > 0) {
-      options[current++] = "IRClass";
+      options[current++] = "-IRClass";
       options[current++] = m_IRClassValS;
     }
     
