@@ -12,7 +12,7 @@ Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 	Learning scheme: weka.classifiers.trees.J48
 	Scheme options: -C 0.25 -M 2             
 	Hold out/test set: Training data
-	Accuracy estimation: classification error
+	Subset evaluation: classification error
 
 Selected attributes: 1 : 1
                      Nominal1
