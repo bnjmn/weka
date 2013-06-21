@@ -35,6 +35,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Aggregateable;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
@@ -136,7 +137,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class Vote extends RandomizableMultipleClassifiersCombiner implements
-    TechnicalInformationHandler, EnvironmentHandler {
+    TechnicalInformationHandler, EnvironmentHandler, Aggregateable<Classifier> {
 
   /** for serialization */
   static final long serialVersionUID = -637891196294399624L;
@@ -1002,6 +1003,40 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   }
 
   /**
+   * Aggregate an object with this one
+   * 
+   * @param toAggregate the object to aggregate
+   * @return the result of aggregation
+   * @throws Exception if the supplied object can't be aggregated for some
+   *           reason
+   */
+  @Override
+  public Classifier aggregate(Classifier toAggregate) throws Exception {
+    
+    if (m_structure == null && m_Classifiers.length == 1 && 
+        (m_Classifiers[0] instanceof weka.classifiers.rules.ZeroR)) {
+      // remove the single untrained ZeroR
+      setClassifiers(new Classifier[0]);
+    }
+    
+    // Can't do any training data compatibility checks unfortunately
+    addPreBuiltClassifier(toAggregate);
+    
+    return this;
+  }
+
+  /**
+   * Call to complete the aggregation process. Allows implementers to do any
+   * final processing based on how many objects were aggregated.
+   * 
+   * @throws Exception if the aggregation can't be finalized for some reason
+   */
+  @Override
+  public void finalizeAggregation() throws Exception {
+    // nothing to do
+  }
+  
+  /**
    * Main method for testing this class.
    * 
    * @param argv should contain the following arguments: -t training file [-T
@@ -1010,4 +1045,5 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   public static void main(String[] argv) {
     runClassifier(new Vote(), argv);
   }
+
 }
