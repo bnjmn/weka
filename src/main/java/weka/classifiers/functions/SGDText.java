@@ -36,6 +36,7 @@ import weka.classifiers.UpdateableClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Aggregateable;
 import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -162,7 +163,7 @@ import weka.core.tokenizers.WordTokenizer;
  * 
  */
 public class SGDText extends RandomizableClassifier implements
-    UpdateableClassifier, WeightedInstancesHandler {
+    UpdateableClassifier, WeightedInstancesHandler, Aggregateable<SGDText> {
 
   /** For serialization */
   private static final long serialVersionUID = 7200171484002029584L;
@@ -1555,7 +1556,80 @@ public class SGDText extends RandomizableClassifier implements
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
+  
+  protected int m_numModels = 0;
 
+  /**
+   * Aggregate an object with this one
+   * 
+   * @param toAggregate the object to aggregate
+   * @return the result of aggregation
+   * @throws Exception if the supplied object can't be aggregated for some
+   *           reason
+   */
+  @Override
+  public SGDText aggregate(SGDText toAggregate) throws Exception {
+    
+    if (m_dictionary == null) {
+      throw new Exception("No model built yet, can't aggregate");
+    } 
+    LinkedHashMap<String, SGDText.Count> tempDict = toAggregate.getDictionary();
+
+    Iterator<Map.Entry<String, SGDText.Count>> entries = tempDict.entrySet()
+        .iterator();
+    while (entries.hasNext()) {
+      Map.Entry<String, SGDText.Count> entry = entries.next();
+
+      Count masterCount = m_dictionary.get(entry.getKey());
+      if (masterCount == null) {
+        // we havent seen this term (or it's been pruned)
+        masterCount = new Count(entry.getValue().m_count);
+        masterCount.m_weight = entry.getValue().m_weight;
+        m_dictionary.put(entry.getKey(), masterCount);
+      } else {
+        // add up
+        masterCount.m_count += entry.getValue().m_count;
+        masterCount.m_weight += entry.getValue().m_weight;
+
+      }
+    }
+
+    m_bias += toAggregate.bias();
+    
+    m_numModels++;
+    
+    return this;
+  }
+
+  /**
+   * Call to complete the aggregation process. Allows implementers to do any
+   * final processing based on how many objects were aggregated.
+   * 
+   * @throws Exception if the aggregation can't be finalized for some reason
+   */
+  @Override
+  public void finalizeAggregation() throws Exception {
+   
+    if (m_numModels == 0) {
+      throw new Exception("Unable to finalize aggregation - " +
+      		"haven't seen any models to aggregate");
+    }
+    
+    Iterator<Map.Entry<String, SGDText.Count>> entries = m_dictionary.entrySet()
+        .iterator();
+    
+    while (entries.hasNext()) {
+      Map.Entry<String, Count> entry = entries.next();
+      entry.getValue().m_count /= (m_numModels + 1); // plus one for us
+      entry.getValue().m_weight /= (m_numModels + 1);
+    }
+    
+    m_bias /= (m_numModels + 1);
+    
+    // aggregation complete
+    m_numModels = 0;
+  }
+  
   /**
    * Main method for testing this class.
    */

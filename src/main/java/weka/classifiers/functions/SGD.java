@@ -30,6 +30,7 @@ import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Aggregateable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -43,40 +44,62 @@ import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- <!-- globalinfo-start -->
- * Implements stochastic gradient descent for learning various linear models (binary class SVM, binary class logistic regression, squared loss, Huber loss and epsilon-insensitive loss linear regression). Globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes, so the coefficients in the output are based on the normalized data.<br/>
- * For numeric class attributes, the squared, Huber or epsilon-insensitve loss function must be used. Epsilon-insensitive and Huber loss may require a much higher learning rate.
+ <!-- globalinfo-start --> 
+ * Implements stochastic gradient descent for learning
+ * various linear models (binary class SVM, binary class logistic regression,
+ * squared loss, Huber loss and epsilon-insensitive loss linear regression).
+ * Globally replaces all missing values and transforms nominal attributes into
+ * binary ones. It also normalizes all attributes, so the coefficients in the
+ * output are based on the normalized data.<br/>
+ * For numeric class attributes, the squared, Huber or epsilon-insensitve loss
+ * function must be used. Epsilon-insensitive and Huber loss may require a much
+ * higher learning rate.
  * <p/>
  <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ <!-- options-start --> 
+ * Valid options are:
+ * <p/>
  * 
- * <pre> -F
+ * <pre>
+ * -F
  *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression),
  *  2 = squared loss (regression).
- *  (default = 0)</pre>
+ *  (default = 0)
+ * </pre>
  * 
- * <pre> -L
+ * <pre>
+ * -L
  *  The learning rate. If normalization is
  *  turned off (as it is automatically for streaming data), then the
  *  default learning rate will need to be reduced (try 0.0001).
- *  (default = 0.01).</pre>
+ *  (default = 0.01).
+ * </pre>
  * 
- * <pre> -R &lt;double&gt;
- *  The lambda regularization constant (default = 0.0001)</pre>
+ * <pre>
+ * -R &lt;double&gt;
+ *  The lambda regularization constant (default = 0.0001)
+ * </pre>
  * 
- * <pre> -E &lt;integer&gt;
- *  The number of epochs to perform (batch learning only, default = 500)</pre>
+ * <pre>
+ * -E &lt;integer&gt;
+ *  The number of epochs to perform (batch learning only, default = 500)
+ * </pre>
  * 
- * <pre> -C &lt;double&gt;
- *  The epsilon threshold (epsilon-insenstive and Huber loss only, default = 1e-3)</pre>
+ * <pre>
+ * -C &lt;double&gt;
+ *  The epsilon threshold (epsilon-insenstive and Huber loss only, default = 1e-3)
+ * </pre>
  * 
- * <pre> -N
- *  Don't normalize the data</pre>
+ * <pre>
+ * -N
+ *  Don't normalize the data
+ * </pre>
  * 
- * <pre> -M
- *  Don't replace missing values</pre>
+ * <pre>
+ * -M
+ *  Don't replace missing values
+ * </pre>
  * 
  <!-- options-end -->
  * 
@@ -86,7 +109,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * 
  */
 public class SGD extends RandomizableClassifier implements
-    UpdateableClassifier, OptionHandler {
+    UpdateableClassifier, OptionHandler, Aggregateable<SGD> {
 
   /** For serialization */
   private static final long serialVersionUID = -3732968666673530290L;
@@ -390,9 +413,10 @@ public class SGD extends RandomizableClassifier implements
   public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>();
-    newVector.add(new Option("\tSet the loss function to minimize. 0 = "
+    newVector.add(new Option("\tSet the loss function to minimize.\n\t0 = "
         + "hinge loss (SVM), 1 = log loss (logistic regression),\n\t"
-        + "2 = squared loss (regression).\n\t(default = 0)", "F", 1, "-F"));
+        + "2 = squared loss (regression), 3 = epsilon insensitive loss (regression)," +
+        "\n\t4 = Huber loss (regression).\n\t(default = 0)", "F", 1, "-F"));
     newVector
         .add(new Option(
             "\tThe learning rate. If normalization is\n"
@@ -417,34 +441,49 @@ public class SGD extends RandomizableClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   <!-- options-start --> 
+   * Valid options are:
+   * <p/>
    * 
-   * <pre> -F
+   * <pre>
+   * -F
    *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression),
    *  2 = squared loss (regression).
-   *  (default = 0)</pre>
+   *  (default = 0)
+   * </pre>
    * 
-   * <pre> -L
+   * <pre>
+   * -L
    *  The learning rate. If normalization is
    *  turned off (as it is automatically for streaming data), then the
    *  default learning rate will need to be reduced (try 0.0001).
-   *  (default = 0.01).</pre>
+   *  (default = 0.01).
+   * </pre>
    * 
-   * <pre> -R &lt;double&gt;
-   *  The lambda regularization constant (default = 0.0001)</pre>
+   * <pre>
+   * -R &lt;double&gt;
+   *  The lambda regularization constant (default = 0.0001)
+   * </pre>
    * 
-   * <pre> -E &lt;integer&gt;
-   *  The number of epochs to perform (batch learning only, default = 500)</pre>
+   * <pre>
+   * -E &lt;integer&gt;
+   *  The number of epochs to perform (batch learning only, default = 500)
+   * </pre>
    * 
-   * <pre> -C &lt;double&gt;
-   *  The epsilon threshold (epsilon-insenstive and Huber loss only, default = 1e-3)</pre>
+   * <pre>
+   * -C &lt;double&gt;
+   *  The epsilon threshold (epsilon-insenstive and Huber loss only, default = 1e-3)
+   * </pre>
    * 
-   * <pre> -N
-   *  Don't normalize the data</pre>
+   * <pre>
+   * -N
+   *  Don't normalize the data
+   * </pre>
    * 
-   * <pre> -M
-   *  Don't replace missing values</pre>
+   * <pre>
+   * -M
+   *  Don't replace missing values
+   * </pre>
    * 
    <!-- options-end -->
    * 
@@ -915,6 +954,64 @@ public class SGD extends RandomizableClassifier implements
     return RevisionUtils.extract("$Revision$");
   }
 
+  protected int m_numModels = 0;
+
+  /**
+   * Aggregate an object with this one
+   * 
+   * @param toAggregate the object to aggregate
+   * @return the result of aggregation
+   * @throws Exception if the supplied object can't be aggregated for some
+   *           reason
+   */
+  @Override
+  public SGD aggregate(SGD toAggregate) throws Exception {
+
+    if (m_weights == null) {
+      throw new Exception("No model built yet, can't aggregate");
+    }
+    
+    if (!m_data.equalHeaders(toAggregate.m_data)) {
+      throw new Exception("Can't aggregate - data headers dont match: "
+          + m_data.equalHeadersMsg(toAggregate.m_data));
+    }
+    
+    if (m_weights.length != toAggregate.getWeights().length) {
+      throw new Exception(
+          "Can't aggregate - SDG to aggregate has weight vector "
+              + "that differs in length from ours.");
+    }        
+    
+    for (int i = 0; i < m_weights.length; i++) {
+      m_weights[i] += toAggregate.getWeights()[i];
+    }
+
+    m_numModels++;
+
+    return this;
+  }
+
+  /**
+   * Call to complete the aggregation process. Allows implementers to do any
+   * final processing based on how many objects were aggregated.
+   * 
+   * @throws Exception if the aggregation can't be finalized for some reason
+   */
+  @Override
+  public void finalizeAggregation() throws Exception {    
+    if (m_numModels == 0) {
+      throw new Exception("Unable to finalize aggregation - " +
+                "haven't seen any models to aggregate");
+    }
+    
+    for (int i = 0; i < m_weights.length; i++) {
+      m_weights[i] /= (m_numModels + 1); // plus one for us
+    }
+
+    // aggregation complete
+    m_numModels = 0;
+  }
+  
   /**
    * Main method for testing this class.
    */
@@ -922,4 +1019,3 @@ public class SGD extends RandomizableClassifier implements
     runClassifier(new SGD(), args);
   }
 }
-

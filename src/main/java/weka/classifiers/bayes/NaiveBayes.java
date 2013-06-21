@@ -28,6 +28,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Aggregateable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -93,7 +94,7 @@ import weka.estimators.NormalEstimator;
  */
 public class NaiveBayes extends AbstractClassifier 
 implements OptionHandler, WeightedInstancesHandler, 
-           TechnicalInformationHandler {
+           TechnicalInformationHandler, Aggregateable<NaiveBayes> {
 
   /** for serialization */
   static final long serialVersionUID = 5995231201785697655L;
@@ -934,6 +935,40 @@ implements OptionHandler, WeightedInstancesHandler,
     return RevisionUtils.extract("$Revision$");
   }
 
+  @Override
+  public NaiveBayes aggregate(NaiveBayes toAggregate) throws Exception {
+    
+    // Highly unlikely that discretization intervals will match between the
+    // two classifiers
+    if (m_UseDiscretization || toAggregate.getUseSupervisedDiscretization()) {
+      throw new Exception("Unable to aggregate when supervised discretization "
+      		+ "has been turned on");
+    }
+    
+    if (!m_Instances.equalHeaders(toAggregate.m_Instances)) {
+      throw new Exception("Can't aggregate - data headers don't match: "
+          + m_Instances.equalHeadersMsg(toAggregate.m_Instances));
+    }
+        
+    ((Aggregateable) m_ClassDistribution).
+      aggregate((Aggregateable) toAggregate.m_ClassDistribution);
+    
+    // aggregate all conditional estimators    
+    for (int i = 0; i < m_Distributions.length; i++) {
+      for (int j = 0; j < m_Distributions[i].length; j++) {
+        ((Aggregateable) m_Distributions[i][j]).
+          aggregate((Aggregateable) toAggregate.m_Distributions[i][j]);
+      }
+    }
+    
+    return this;
+  }
+
+  @Override
+  public void finalizeAggregation() throws Exception {
+    // nothing to do    
+  }
+  
   /**
    * Main method for testing this class.
    *

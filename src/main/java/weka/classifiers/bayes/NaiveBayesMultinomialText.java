@@ -36,6 +36,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Aggregateable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -50,53 +51,78 @@ import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
 
 /**
- <!-- globalinfo-start -->
- * Multinomial naive bayes for text data. Operates directly (and only) on String attributes. Other types of input attributes are accepted but ignored during training and classification
+ <!-- globalinfo-start --> 
+ * Multinomial naive bayes for text data. Operates
+ * directly (and only) on String attributes. Other types of input attributes are
+ * accepted but ignored during training and classification
  * <p/>
  <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ <!-- options-start --> 
+ * Valid options are:
+ * <p/>
  * 
- * <pre> -W
- *  Use word frequencies instead of binary bag of words.</pre>
+ * <pre>
+ * -W
+ *  Use word frequencies instead of binary bag of words.
+ * </pre>
  * 
- * <pre> -P &lt;# instances&gt;
- *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)</pre>
+ * <pre>
+ * -P &lt;# instances&gt;
+ *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)
+ * </pre>
  * 
- * <pre> -M &lt;double&gt;
+ * <pre>
+ * -M &lt;double&gt;
  *  Minimum word frequency. Words with less than this frequence are ignored.
  *  If periodic pruning is turned on then this is also used to determine which
- *  words to remove from the dictionary (default = 3).</pre>
+ *  words to remove from the dictionary (default = 3).
+ * </pre>
  * 
- * <pre> -normalize
- *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
+ * <pre>
+ * -normalize
+ *  Normalize document length (use in conjunction with -norm and -lnorm)
+ * </pre>
  * 
- * <pre> -norm &lt;num&gt;
- *  Specify the norm that each instance must have (default 1.0)</pre>
+ * <pre>
+ * -norm &lt;num&gt;
+ *  Specify the norm that each instance must have (default 1.0)
+ * </pre>
  * 
- * <pre> -lnorm &lt;num&gt;
- *  Specify L-norm to use (default 2.0)</pre>
+ * <pre>
+ * -lnorm &lt;num&gt;
+ *  Specify L-norm to use (default 2.0)
+ * </pre>
  * 
- * <pre> -lowercase
- *  Convert all tokens to lowercase before adding to the dictionary.</pre>
+ * <pre>
+ * -lowercase
+ *  Convert all tokens to lowercase before adding to the dictionary.
+ * </pre>
  * 
- * <pre> -stoplist
- *  Ignore words that are in the stoplist.</pre>
+ * <pre>
+ * -stoplist
+ *  Ignore words that are in the stoplist.
+ * </pre>
  * 
- * <pre> -stopwords &lt;file&gt;
+ * <pre>
+ * -stopwords &lt;file&gt;
  *  A file containing stopwords to override the default ones.
  *  Using this option automatically sets the flag ('-stoplist') to use the
  *  stoplist if the file exists.
  *  Format: one stopword per line, lines starting with '#'
- *  are interpreted as comments and ignored.</pre>
+ *  are interpreted as comments and ignored.
+ * </pre>
  * 
- * <pre> -tokenizer &lt;spec&gt;
+ * <pre>
+ * -tokenizer &lt;spec&gt;
  *  The tokenizing algorihtm (classname plus parameters) to use.
- *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+ *  (default: weka.core.tokenizers.WordTokenizer)
+ * </pre>
  * 
- * <pre> -stemmer &lt;spec&gt;
- *  The stemmering algorihtm (classname plus parameters) to use.</pre>
+ * <pre>
+ * -stemmer &lt;spec&gt;
+ *  The stemmering algorihtm (classname plus parameters) to use.
+ * </pre>
  * 
  <!-- options-end -->
  * 
@@ -106,7 +132,8 @@ import weka.core.tokenizers.WordTokenizer;
  * 
  */
 public class NaiveBayesMultinomialText extends AbstractClassifier implements
-    UpdateableClassifier, WeightedInstancesHandler {
+    UpdateableClassifier, WeightedInstancesHandler,
+    Aggregateable<NaiveBayesMultinomialText> {
 
   /** For serialization */
   private static final long serialVersionUID = 2139025532014821394L;
@@ -910,48 +937,71 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   <!-- options-start --> 
+   * Valid options are:
+   * <p/>
    * 
-   * <pre> -W
-   *  Use word frequencies instead of binary bag of words.</pre>
+   * <pre>
+   * -W
+   *  Use word frequencies instead of binary bag of words.
+   * </pre>
    * 
-   * <pre> -P &lt;# instances&gt;
-   *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)</pre>
+   * <pre>
+   * -P &lt;# instances&gt;
+   *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)
+   * </pre>
    * 
-   * <pre> -M &lt;double&gt;
+   * <pre>
+   * -M &lt;double&gt;
    *  Minimum word frequency. Words with less than this frequence are ignored.
    *  If periodic pruning is turned on then this is also used to determine which
-   *  words to remove from the dictionary (default = 3).</pre>
+   *  words to remove from the dictionary (default = 3).
+   * </pre>
    * 
-   * <pre> -normalize
-   *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
+   * <pre>
+   * -normalize
+   *  Normalize document length (use in conjunction with -norm and -lnorm)
+   * </pre>
    * 
-   * <pre> -norm &lt;num&gt;
-   *  Specify the norm that each instance must have (default 1.0)</pre>
+   * <pre>
+   * -norm &lt;num&gt;
+   *  Specify the norm that each instance must have (default 1.0)
+   * </pre>
    * 
-   * <pre> -lnorm &lt;num&gt;
-   *  Specify L-norm to use (default 2.0)</pre>
+   * <pre>
+   * -lnorm &lt;num&gt;
+   *  Specify L-norm to use (default 2.0)
+   * </pre>
    * 
-   * <pre> -lowercase
-   *  Convert all tokens to lowercase before adding to the dictionary.</pre>
+   * <pre>
+   * -lowercase
+   *  Convert all tokens to lowercase before adding to the dictionary.
+   * </pre>
    * 
-   * <pre> -stoplist
-   *  Ignore words that are in the stoplist.</pre>
+   * <pre>
+   * -stoplist
+   *  Ignore words that are in the stoplist.
+   * </pre>
    * 
-   * <pre> -stopwords &lt;file&gt;
+   * <pre>
+   * -stopwords &lt;file&gt;
    *  A file containing stopwords to override the default ones.
    *  Using this option automatically sets the flag ('-stoplist') to use the
    *  stoplist if the file exists.
    *  Format: one stopword per line, lines starting with '#'
-   *  are interpreted as comments and ignored.</pre>
+   *  are interpreted as comments and ignored.
+   * </pre>
    * 
-   * <pre> -tokenizer &lt;spec&gt;
+   * <pre>
+   * -tokenizer &lt;spec&gt;
    *  The tokenizing algorihtm (classname plus parameters) to use.
-   *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+   *  (default: weka.core.tokenizers.WordTokenizer)
+   * </pre>
    * 
-   * <pre> -stemmer &lt;spec&gt;
-   *  The stemmering algorihtm (classname plus parameters) to use.</pre>
+   * <pre>
+   * -stemmer &lt;spec&gt;
+   *  The stemmering algorihtm (classname plus parameters) to use.
+   * </pre>
    * 
    <!-- options-end -->
    * 
@@ -1155,6 +1205,84 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     return RevisionUtils.extract("$Revision$");
   }
 
+  protected int m_numModels = 0;
+
+  @Override
+  public NaiveBayesMultinomialText aggregate(
+      NaiveBayesMultinomialText toAggregate) throws Exception {
+    if (m_numModels == Integer.MIN_VALUE) {
+      throw new Exception("Can't aggregate further - model has already been "
+          + "aggregated and finalized");
+    }
+
+    if (m_probOfClass == null) {
+      throw new Exception("No model built yet, can't aggregate");
+    }
+
+    // just check the class attribute for compatibility as we will be
+    // merging dictionaries
+    if (!m_data.classAttribute().equals(toAggregate.m_data.classAttribute())) {
+      throw new Exception("Can't aggregate - class attribute in data headers "
+          + "does not match: "
+          + m_data.classAttribute().equalsMsg(
+              toAggregate.m_data.classAttribute()));
+    }
+
+    for (int i = 0; i < m_probOfClass.length; i++) {
+      m_probOfClass[i] += toAggregate.m_probOfClass[i];
+    }
+
+    Map<Integer, LinkedHashMap<String, Count>> dicts = toAggregate.m_probOfWordGivenClass;
+    Iterator<Map.Entry<Integer, LinkedHashMap<String, Count>>> perClass = dicts
+        .entrySet().iterator();
+    while (perClass.hasNext()) {
+      Map.Entry<Integer, LinkedHashMap<String, Count>> currentClassDict = perClass
+          .next();
+
+      LinkedHashMap<String, Count> masterDict = m_probOfWordGivenClass
+          .get(currentClassDict.getKey());
+
+      if (masterDict == null) {
+        // we haven't seen this class during our training
+        masterDict = new LinkedHashMap<String, Count>();
+        m_probOfWordGivenClass.put(currentClassDict.getKey(), masterDict);
+      }
+
+      // now process words seen for this class
+      Iterator<Map.Entry<String, Count>> perClassEntries = currentClassDict
+          .getValue().entrySet().iterator();
+      while (perClassEntries.hasNext()) {
+        Map.Entry<String, Count> entry = perClassEntries.next();
+
+        Count masterCount = masterDict.get(entry.getKey());
+
+        if (masterCount == null) {
+          // we haven't seen this entry (or its been pruned)
+          masterCount = new Count(entry.getValue().m_count);
+          masterDict.put(entry.getKey(), masterCount);
+        } else {
+          // add up
+          masterCount.m_count += entry.getValue().m_count;
+        }
+      }
+    }
+
+    m_numModels++;
+
+    return this;
+  }
+
+  @Override
+  public void finalizeAggregation() throws Exception {
+    if (m_numModels == 0) {
+      throw new Exception("Unable to finalize aggregation - "
+          + "haven't seen any models to aggregate");
+    }
+
+    // Nothing more to do - we don't need to average anything,
+    // therefore further models can be aggregated at any time
+  }
+
   /**
    * Main method for testing this class.
    * 
@@ -1163,5 +1291,5 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   public static void main(String[] args) {
     runClassifier(new NaiveBayesMultinomialText(), args);
   }
-}
 
+}

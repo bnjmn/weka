@@ -21,6 +21,7 @@
 package weka.classifiers.evaluation;
 
 import weka.classifiers.CostMatrix;
+import weka.core.Aggregateable;
 import weka.core.FastVector;
 import weka.core.Instances;
 
@@ -31,7 +32,8 @@ import weka.core.Instances;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class AggregateableEvaluation extends Evaluation {
+public class AggregateableEvaluation extends Evaluation implements
+    Aggregateable<Evaluation> {
 
   /**
    * For serialization
@@ -78,6 +80,11 @@ public class AggregateableEvaluation extends Evaluation {
     m_MaxTarget = eval.m_MaxTarget;
     m_ClassPriorsSum = eval.m_ClassPriorsSum;
     m_ClassPriors = eval.m_ClassPriors;
+    m_MinTarget = eval.m_MinTarget;
+    m_MaxTarget = eval.m_MaxTarget;
+    m_TrainClassVals = eval.m_TrainClassVals;
+    m_TrainClassWeights = eval.m_TrainClassWeights;
+    m_NumTrainClassVals = eval.m_NumTrainClassVals;
   }
 
   /**
@@ -87,7 +94,8 @@ public class AggregateableEvaluation extends Evaluation {
    * 
    * @param evaluation the evaluation object to aggregate
    */
-  public void aggregate(Evaluation evaluation) {
+  @Override
+  public AggregateableEvaluation aggregate(Evaluation evaluation) {
     m_Incorrect += evaluation.incorrect();
     m_Correct += evaluation.correct();
     m_Unclassified += evaluation.unclassified();
@@ -104,12 +112,14 @@ public class AggregateableEvaluation extends Evaluation {
         }
       }
     }
+
     double[] newClassPriors = evaluation.m_ClassPriors;
-    if (newClassPriors != null) {
+    if (newClassPriors != null && m_ClassPriors != null) {
       for (int i = 0; i < this.m_ClassPriors.length; i++) {
         m_ClassPriors[i] = newClassPriors[i];
       }
     }
+
     m_ClassPriorsSum = evaluation.m_ClassPriorsSum;
     m_TotalCost += evaluation.totalCost();
     m_SumErr += evaluation.m_SumErr;
@@ -143,5 +153,12 @@ public class AggregateableEvaluation extends Evaluation {
         m_Predictions.addElement(predsToAdd.elementAt(i));
       }
     }
+
+    return this;
+  }
+
+  @Override
+  public void finalizeAggregation() {
+    // nothing to do here
   }
 }
