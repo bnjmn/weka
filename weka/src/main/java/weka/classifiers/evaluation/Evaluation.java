@@ -1096,6 +1096,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     String splitPercentageString = "";
     double splitPercentage = -1;
     boolean preserveOrder = false;
+    boolean forceBatchTraining = false; // set to true if updateable classifier
+                                        // should not be trained using
+                                        // updateClassifier()
     boolean trainSetPresent = false;
     boolean testSetPresent = false;
     boolean discardPredictions = false;
@@ -1320,6 +1323,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       printSource = (sourceClass.length() != 0);
       thresholdFile = Utils.getOption("threshold-file", options);
       thresholdLabel = Utils.getOption("threshold-label", options);
+      forceBatchTraining = Utils.getFlag("force-batch-training", options);
 
       String classifications = Utils.getOption("classifications", options);
       String classificationsOld = Utils.getOption("p", options);
@@ -1443,7 +1447,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     // Build the classifier if no object file provided
     if ((classifier instanceof UpdateableClassifier)
         && (testSetPresent || noCrossValidation) && (costMatrix == null)
-        && (trainSetPresent)) {
+        && (trainSetPresent) && !forceBatchTraining) {
       // Build classifier incrementally
       trainingEvaluation.setPriors(train);
       testingEvaluation.setPriors(train);
@@ -1797,8 +1801,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     }
 
     if (classifier instanceof BatchPredictor) {
+      // make a copy and set the class to missing
+      Instances dataPred = new Instances(data);
+      for (int i = 0; i < data.numInstances(); i++) {
+        dataPred.instance(i).setClassMissing();
+      }
       double[][] preds = ((BatchPredictor) classifier)
-          .distributionsForInstances(data);
+          .distributionsForInstances(dataPred);
       for (int i = 0; i < data.numInstances(); i++) {
         double[] p = preds[i];
 
@@ -3924,6 +3933,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         .append("\tSets number of folds for cross-validation (default: 10).\n");
     optionsText.append("-no-cv\n");
     optionsText.append("\tDo not perform any cross validation.\n");
+    optionsText.append("-force-batch-training\n");
+    optionsText
+        .append("\tAlways train classifier in batch mode, never incrementally.\n");
     optionsText.append("-split-percentage <percentage>\n");
     optionsText
         .append("\tSets the percentage for the train/test set split, e.g., 66.\n");
