@@ -1637,12 +1637,18 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     if (testSource != null) {
       // Testing is on the supplied test data
       testSource.reset();
-      test = testSource.getStructure(test.classIndex());
-      Instance testInst;
-      while (testSource.hasMoreElements(test)) {
-        testInst = testSource.nextElement(test);
-        testingEvaluation.evaluateModelOnceAndRecordPrediction(classifier,
-            testInst);
+
+      if (classifier instanceof BatchPredictor) {
+        testingEvaluation.evaluateModel(classifier,
+            testSource.getDataSet(test.classIndex()));
+      } else {
+        test = testSource.getStructure(test.classIndex());
+        Instance testInst;
+        while (testSource.hasMoreElements(test)) {
+          testInst = testSource.nextElement(test);
+          testingEvaluation.evaluateModelOnceAndRecordPrediction(classifier,
+              testInst);
+        }
       }
 
       if (splitPercentage > 0) {
