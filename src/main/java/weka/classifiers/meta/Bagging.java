@@ -21,13 +21,17 @@
 
 package weka.classifiers.meta;
 
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.ArrayList;
 
+import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
+import weka.core.Aggregateable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -128,7 +132,7 @@ import weka.core.PartitionGenerator;
 public class Bagging
   extends RandomizableParallelIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer,
-             TechnicalInformationHandler, PartitionGenerator {
+             TechnicalInformationHandler, PartitionGenerator, Aggregateable<Bagging> {
 
   /** for serialization */
   static final long serialVersionUID = -115879962237199703L;
@@ -684,5 +688,43 @@ public class Bagging
    */
   public static void main(String [] argv) {
     runClassifier(new Bagging(), argv);
+  }
+  
+  protected List<Classifier> m_classifiersCache;
+
+  /**
+   * Aggregate an object with this one
+   * 
+   * @param toAggregate the object to aggregate
+   * @return the result of aggregation
+   * @throws Exception if the supplied object can't be aggregated for some
+   *           reason
+   */
+  @Override
+  public Bagging aggregate(Bagging toAggregate) throws Exception {
+    if (!m_Classifier.getClass().isAssignableFrom(toAggregate.m_Classifier.getClass())) {
+      throw new Exception("Can't aggregate because base classifiers differ");
+    }
+    
+    if (m_classifiersCache == null) {
+      m_classifiersCache = new ArrayList<Classifier>();
+      m_classifiersCache.addAll(Arrays.asList(m_Classifiers));
+    }
+    m_classifiersCache.addAll(Arrays.asList(toAggregate.m_Classifiers));
+    
+    return this;
+  }
+
+  /**
+   * Call to complete the aggregation process. Allows implementers to do any
+   * final processing based on how many objects were aggregated.
+   * 
+   * @throws Exception if the aggregation can't be finalized for some reason
+   */
+  @Override
+  public void finalizeAggregation() throws Exception {    
+    m_Classifiers = m_classifiersCache.toArray(new Classifier[1]);
+    
+    m_classifiersCache = null;
   }
 }
