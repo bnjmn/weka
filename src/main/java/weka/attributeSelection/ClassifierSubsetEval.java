@@ -119,7 +119,14 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
   /** number of training instances */
   private int m_numInstances;
 
-  /** holds the classifier to use for error estimates */
+  /** holds the template classifier to use for error estimates */
+  private Classifier m_ClassifierTemplate = new ZeroR();
+  
+  /**
+   *  Holds the classifier used when evaluating single hold-out instances - this
+   * is used by RaceSearch and the trained classifier may need to persist between
+   * calls to that particular method.
+   */
   private Classifier m_Classifier = new ZeroR();
 
   /** the file that containts hold out/test instances */
@@ -228,10 +235,10 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
                 + "\tthe class-weighted average.", "IRclass", 1,
             "-IRclass <label | index>"));
 
-    if ((m_Classifier != null) && (m_Classifier instanceof OptionHandler)) {
+    if ((m_ClassifierTemplate != null) && (m_ClassifierTemplate instanceof OptionHandler)) {
       newVector.addElement(new Option("", "", 0, "\nOptions specific to "
-          + "scheme " + m_Classifier.getClass().getName() + ":"));
-      Enumeration enu = ((OptionHandler) m_Classifier).listOptions();
+          + "scheme " + m_ClassifierTemplate.getClass().getName() + ":"));
+      Enumeration enu = ((OptionHandler) m_ClassifierTemplate).listOptions();
 
       while (enu.hasMoreElements()) {
         newVector.addElement(enu.nextElement());
@@ -523,6 +530,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    * @param newClassifier the Classifier to use.
    */
   public void setClassifier(Classifier newClassifier) {
+    m_ClassifierTemplate = newClassifier;
     m_Classifier = newClassifier;
   }
 
@@ -532,7 +540,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    * @return the classifier used as the classifier
    */
   public Classifier getClassifier() {
-    return m_Classifier;
+    return m_ClassifierTemplate;
   }
 
   /**
@@ -600,8 +608,8 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
   public String[] getOptions() {
     String[] classifierOptions = new String[0];
 
-    if ((m_Classifier != null) && (m_Classifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler) m_Classifier).getOptions();
+    if ((m_ClassifierTemplate != null) && (m_ClassifierTemplate instanceof OptionHandler)) {
+      classifierOptions = ((OptionHandler) m_ClassifierTemplate).getOptions();
     }
 
     String[] options = new String[15 + classifierOptions.length];
@@ -769,10 +777,10 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     Instances testCopy = null;
     String[] cOpts = null;
     Evaluation evaluation = null;
-    if (m_Classifier instanceof OptionHandler) {
-      cOpts = ((OptionHandler) m_Classifier).getOptions();
+    if (m_ClassifierTemplate instanceof OptionHandler) {
+      cOpts = ((OptionHandler) m_ClassifierTemplate).getOptions();
     }
-    Classifier classifier = AbstractClassifier.forName(m_Classifier.getClass()
+    Classifier classifier = AbstractClassifier.forName(m_ClassifierTemplate.getClass()
         .getName(), cOpts);
 
     Remove delTransform = new Remove();
@@ -895,10 +903,10 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     Instances testCopy = null;
     String[] cOpts = null;
     Evaluation evaluation = null;
-    if (m_Classifier instanceof OptionHandler) {
-      cOpts = ((OptionHandler) m_Classifier).getOptions();
+    if (m_ClassifierTemplate instanceof OptionHandler) {
+      cOpts = ((OptionHandler) m_ClassifierTemplate).getOptions();
     }
-    Classifier classifier = AbstractClassifier.forName(m_Classifier.getClass()
+    Classifier classifier = AbstractClassifier.forName(m_ClassifierTemplate.getClass()
         .getName(), cOpts);
 
     if (m_trainingInstances.equalHeaders(holdOut) == false) {
@@ -1017,12 +1025,6 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     Instances trainCopy = null;
     Instance testCopy = null;
     Evaluation evaluation = null;
-    String[] cOpts = null;
-    if (m_Classifier instanceof OptionHandler) {
-      cOpts = ((OptionHandler) m_Classifier).getOptions();
-    }
-    Classifier classifier = AbstractClassifier.forName(m_Classifier.getClass()
-        .getName(), cOpts);
 
     if (m_trainingInstances.equalHeaders(holdOut.dataset()) == false) {
       throw new Exception("evaluateSubset : Incompatable instance types.\n"
@@ -1058,7 +1060,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     if (retrain) {
       trainCopy = Filter.useFilter(trainCopy, delTransform);
       // build the classifier
-      classifier.buildClassifier(trainCopy);
+      m_Classifier.buildClassifier(trainCopy);
     }
 
     delTransform.input(testCopy);
@@ -1066,7 +1068,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
 
     double pred;
     double[] distrib;
-    distrib = classifier.distributionForInstance(testCopy);
+    distrib = m_Classifier.distributionForInstance(testCopy);
     if (m_trainingInstances.classAttribute().isNominal()) {
       pred = distrib[(int) testCopy.classValue()];
     } else {
@@ -1102,8 +1104,8 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
       text.append("\tScheme options: ");
       String[] classifierOptions = new String[0];
 
-      if (m_Classifier instanceof OptionHandler) {
-        classifierOptions = ((OptionHandler) m_Classifier).getOptions();
+      if (m_ClassifierTemplate instanceof OptionHandler) {
+        classifierOptions = ((OptionHandler) m_ClassifierTemplate).getOptions();
 
         for (int i = 0; i < classifierOptions.length; i++) {
           text.append(classifierOptions[i] + " ");
@@ -1176,7 +1178,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    */
   protected void resetOptions() {
     m_trainingInstances = null;
-    m_Classifier = new ZeroR();
+    m_ClassifierTemplate = new ZeroR();
     m_holdOutFile = new File("Click to set hold out or test instances");
     m_holdOutInstances = null;
     m_useTraining = false;
