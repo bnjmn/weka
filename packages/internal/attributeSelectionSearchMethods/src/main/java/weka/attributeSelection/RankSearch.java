@@ -68,7 +68,7 @@ import java.util.Vector;
  * </pre>
  * 
  * <pre> -M
- *  treat missing values as a seperate value.</pre>
+ *  treat missing values as a separate value.</pre>
  * 
  <!-- options-end -->
  *
@@ -108,6 +108,18 @@ public class RankSearch
 
   /** will hold the attribute ranking */
   private int [] m_Ranking;
+  
+  /** 
+   * Threshold on improvement in merit by which to
+   * accept additional attributes from the ranked list
+   */
+  protected double m_improvementThreshold = 0;
+  
+  /** 
+   * Don't include non-improving attributes when evaluating more
+   * attributes from the ranked list
+   */
+  protected boolean m_excludeNonImproving = false;
 
   /** add this many attributes in each iteration from the ranking */
   protected int m_add = 1;
@@ -288,16 +300,91 @@ public class RankSearch
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
+  public String improvementThresholdTipText() {
+    return "Threshold on improvement in merit by which to " +
+    		"accept additional attributes from the ranked list";
+  }
+  
+  /**
+   * Set merit improvement threshold
+   * 
+   * @param t improvement threshold
+   */
+  public void setImprovementThreshold(double t) {
+    m_improvementThreshold = t;
+  }
+  
+  /**
+   * Get merit improvement threshold
+   * 
+   * @return improvement threshold
+   */
+  public double getImprovementThreshold() {
+    return m_improvementThreshold;
+  }
+   
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String excludeNonImprovingAttributesTipText() {
+    return "As more attributes are considered from the ranked list, " +
+    		"don't include any prior ones that did not improve " +
+    		"merit";
+  }
+  
+  /**
+   * Set whether or not to add prior non-improving attributes when
+   * considering more attributes from the ranked list
+   * 
+   * @param b true if prior non-improving attributes should be
+   * omitted
+   */
+  public void setExcludeNonImprovingAttributes(boolean b) {
+    m_excludeNonImproving = b;
+  }
+  
+  /**
+   * Get whether or not to add prior non-improving attributes when
+   * considering more attributes from the ranked list
+   * 
+   * @return true if prior non-improving attributes should be
+   * omitted
+   */
+  public boolean getExcludeNonImprovingAttributes() {
+    return m_excludeNonImproving;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
   public String nonImprovingAdditionsTipText() {
     return "Terminate the evaluation of the ranking after this many " +
     		"non-improving additions to the best subset seen (0 = don't " +
     		"terminate early)"; 
   }
   
+  /**
+   * Set the number of consecutive non-improving additions to tolerate
+   * before terminating the search
+   * 
+   * @param t the number of non-improving additions to allow
+   */
   public void setNonImprovingAdditions(int t) {
     m_nonImprovingAdditions = t;
   }
   
+  /**
+   * Get the number of consecutive non-improving additions to tolerate
+   * before terminating the search
+   * 
+   * @return the number of non-improving additions to allow
+   */
   public int getNonImprovingAdditions() {
     return m_nonImprovingAdditions;
   }
@@ -329,10 +416,20 @@ public class RankSearch
         "R", 1,"-R <start point>"));
     
     newVector.addElement(new Option(
+        "\tThreshold on improvement in merit by which to " +
+        "accept\n\tadditional attributes from the ranked list "
+        +"\n\t(default = 0).", 
+        "I", 1,"-I <threshold>"));
+    
+    newVector.addElement(new Option(
         "\tNumber of non-improving additions to the best subset seen"
         +"\n\tto tolerate before terminating the search (default = 0, i.e." +
         "\n\tdon't terminate early).", 
         "N", 1,"-N <number of non-improving additions>"));
+    
+    newVector.addElement(new Option("\tExclude non improving " +
+    		"attributes when\n\t" +
+    		"considering more attributes from the ranked list", "X", 0, "-X"));
     
     newVector.addElement(new Option("\tPrint debugging output", "D", 0, "-D"));
 
@@ -401,6 +498,11 @@ public class RankSearch
       setStartPoint(Integer.parseInt(optionString));
     }
     
+    optionString = Utils.getOption('I', options);
+    if (optionString.length() > 0) {
+      setImprovementThreshold(Double.parseDouble(optionString));
+    }
+    
     optionString = Utils.getOption('N', options);
     if (optionString.length() > 0) {
       setNonImprovingAdditions(Integer.parseInt(optionString));
@@ -411,6 +513,8 @@ public class RankSearch
       optionString = GainRatioAttributeEval.class.getName();
     setAttributeEvaluator(ASEvaluation.forName(optionString, 
                                      Utils.partitionOptions(options)));
+    
+    setExcludeNonImprovingAttributes(Utils.getFlag('X', options));
     
     setDebuggingOutput(Utils.getFlag('D', options));
   }
@@ -428,7 +532,7 @@ public class RankSearch
       evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
     }
 
-    String[] options = new String[11 + evaluatorOptions.length];
+    String[] options = new String[12 + evaluatorOptions.length];
     int current = 0;
 
     options[current++] = "-S"; options[current++] = ""+getStepSize();
@@ -437,9 +541,15 @@ public class RankSearch
     
     options[current++] = "-N"; options[current++] = "" + getNonImprovingAdditions();
     
+    options[current++] = "-I"; options[current++] = "" + getImprovementThreshold();
+    
+    if (getExcludeNonImprovingAttributes()) {
+      options[current++] = "-X";
+    }
+    
     if (getDebuggingOutput()) {
       options[current++] = "-D";
-    }
+    }       
 
     if (getAttributeEvaluator() != null) {
       options[current++] = "-A";
@@ -536,6 +646,12 @@ public class RankSearch
         m_Ranking[i] = (int)rankres[i][0];
       }
     }
+    
+    boolean[] dontAdd = null;
+    if (m_excludeNonImproving) {
+      dontAdd = new boolean[m_Ranking.length];
+    }
+    
     if (m_debug) {
       System.err.println("Done ranking. Evaluating ranking...");
     }
@@ -544,11 +660,22 @@ public class RankSearch
     // now evaluate the attribute ranking
     int tenPercent = (m_Ranking.length - m_startPoint) / 10;
     int count = 0;
-    for (int i=m_startPoint;i<m_Ranking.length;i+=m_add) {
-      temp_group = new BitSet(m_numAttribs);
-      for (int j=0;j<=i;j++) {
-        temp_group.set(m_Ranking[j]);
+    for (int i=m_startPoint;i<m_Ranking.length;) {
+      i += m_add;
+      if (i > m_Ranking.length) {
+        i = m_Ranking.length;
       }
+      temp_group = new BitSet(m_numAttribs);
+      for (int j = 0;j < i; j++) {
+        if (m_excludeNonImproving) {
+          if (!dontAdd[j]) {
+            temp_group.set(m_Ranking[j]);
+          }
+        } else {
+          temp_group.set(m_Ranking[j]);
+        }
+      }
+
       additions++;
       count += m_add;
       temp_merit = ((SubsetEvaluator)m_SubsetEval).evaluateSubset(temp_group);
@@ -559,7 +686,7 @@ public class RankSearch
         count = 0;
       }
 
-      if (temp_merit > best_merit) {
+      if (temp_merit - best_merit > m_improvementThreshold) {
         best_merit = temp_merit;;
         best_group = temp_group;
         additions = 0;
@@ -571,6 +698,14 @@ public class RankSearch
             System.err.print("" + (a + 1) + " ");
           }
           System.err.println("\nMerit: " + best_merit);
+        }
+      } else if (m_excludeNonImproving && i > 0) {
+        if (m_debug) {
+          System.err.println("Skipping atts ranked " + (i - m_add) + " to " + i 
+              + " as there is no improvement");
+        }
+        for (int j = (i - m_add); j < i; j++) {
+          dontAdd[j] = true;
         }
       }
       
