@@ -15,7 +15,7 @@
 
 /*
  *    PreprocessPanel.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003-2013 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -425,6 +425,7 @@ public class PreprocessPanel
 	      
 	      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
 	      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+		  @Override
 		  public void windowClosing(java.awt.event.WindowEvent e) {
 		    visAllBut.setEnabled(true);
 		    jf.dispose();
@@ -587,6 +588,7 @@ public class PreprocessPanel
    *
    * @param l a value of type 'PropertyChangeListener'
    */
+  @Override
   public void addPropertyChangeListener(PropertyChangeListener l) {
 
     m_Support.addPropertyChangeListener(l);
@@ -597,6 +599,7 @@ public class PreprocessPanel
    *
    * @param l a value of type 'PropertyChangeListener'
    */
+  @Override
   public void removePropertyChangeListener(PropertyChangeListener l) {
 
     m_Support.removePropertyChangeListener(l);
@@ -611,6 +614,7 @@ public class PreprocessPanel
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	@Override
 	public void run() {
 	  try {
 
@@ -634,8 +638,9 @@ public class PreprocessPanel
 	      }
 	      Instances copy = new Instances(m_Instances);
 	      copy.setClassIndex(classIndex);
-	      filter.setInputFormat(copy);
-	      Instances newInstances = Filter.useFilter(copy, filter);
+	      Filter filterCopy = Filter.makeCopy(filter);
+	      filterCopy.setInputFormat(copy);
+	      Instances newInstances = Filter.useFilter(copy, filterCopy);
 	      if (newInstances == null || newInstances.numAttributes() < 1) {
 		throw new Exception("Dataset is empty.");
 	      }
@@ -718,6 +723,7 @@ public class PreprocessPanel
   public void saveInstancesToFile(final AbstractFileSaver saver, final Instances inst) {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	  @Override
 	  public void run() {
 	    try {
 	      m_Log.statusMessage("Saving to file...");
@@ -897,6 +903,7 @@ public class PreprocessPanel
   public void generateInstances() {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	  @Override
 	  public void run() {
 	    try {
               // create dialog
@@ -1070,6 +1077,7 @@ public class PreprocessPanel
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	  @Override
 	  public void run() {
 	    try {
 	      cnv.setSource(f);
@@ -1106,6 +1114,7 @@ public class PreprocessPanel
       
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	@Override
 	public void run() {
 	  try {
 	    m_Log.statusMessage("Reading from file...");
@@ -1156,6 +1165,7 @@ public class PreprocessPanel
   public void setInstancesFromDB(final InstanceQuery iq) {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	@Override
 	public void run() {
 	  
 	  try {
@@ -1200,6 +1210,7 @@ public class PreprocessPanel
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	@Override
 	public void run() {
 
 	  try {
@@ -1475,6 +1486,7 @@ public class PreprocessPanel
       sp.setLog(lp);
       jf.getContentPane().add(lp, BorderLayout.SOUTH);
       jf.addWindowListener(new WindowAdapter() {
+	@Override
 	public void windowClosing(WindowEvent e) {
 	  jf.dispose();
 	  System.exit(0);
