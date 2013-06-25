@@ -611,8 +611,9 @@ public class PreprocessPanel
 	      }
 	      Instances copy = new Instances(m_Instances);
 	      copy.setClassIndex(classIndex);
-	      filter.setInputFormat(copy);
-	      Instances newInstances = Filter.useFilter(copy, filter);
+	      Filter filterCopy = Filter.makeCopy(filter);
+	      filterCopy.setInputFormat(copy);
+	      Instances newInstances = Filter.useFilter(copy, filterCopy);
 	      if (newInstances == null || newInstances.numAttributes() < 1) {
 		throw new Exception(Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_Exception_Text"));
 	      }
