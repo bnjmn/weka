@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=kernelLogisticRegression
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2013-06-26
+
+# Title (required)
+Title=A package that contains a class to train a two-class kernel logistic regression model.
+
+Category=Classification
+
+# Author (required)
+Author=Eibe Frank
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=This package contains a classifier that can be used to train a two-class kernel logistic regression model with the kernel functions that are available in WEKA. It optimises the negative log-likelihood with a quadratic penalty. Both, BFGS and conjugate gradient descent, are available as optimisation methods, but the former is normally faster. It is possible to use multiple threads, but the speed-up is generally very marginal when used with BFGS optimisation. With conjugate gradient descent optimisation, greater speed-ups can be achieved when using multiple threads. With the default kernel, the dot product kernel, this method produces results that are close to identical to those obtained using standard logistic regression in WEKA, provided a sufficiently large value for the parameter determining the size of the quadratic penalty is used in both cases.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/kernelLogisticRegression1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/kernelLogisticRegression
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.6)
