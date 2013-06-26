@@ -16,7 +16,7 @@
 
 /*
  * SubsetByExpression.java
- * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008-2013 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.instance;
@@ -347,12 +347,14 @@ public class SubsetByExpression
     result.disableAll();
 
     // attributes
+    result.enable(Capability.STRING_ATTRIBUTES);
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
     
     // class
+    result.enable(Capability.STRING_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);

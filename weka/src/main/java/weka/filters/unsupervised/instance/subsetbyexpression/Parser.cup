@@ -125,6 +125,8 @@ parser code {:
       return new Double(Instance.missingValue());
     else if (instance.attribute(index).isNominal())
       return new String(instance.stringValue(index));
+    else if (instance.attribute(index).isString())
+      return new String(instance.stringValue(index));
     else if (instance.attribute(index).isNumeric())
       return new Double(instance.value(index));
     else
