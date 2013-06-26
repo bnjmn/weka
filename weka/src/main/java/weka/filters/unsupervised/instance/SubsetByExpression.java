@@ -15,7 +15,7 @@
 
 /*
  * SubsetByExpression.java
- * Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008-2013 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.instance;
@@ -144,6 +144,7 @@ public class SubsetByExpression
    * @return 		a description of the filter suitable for
    * 			displaying in the explorer/experimenter gui
    */
+  @Override
   public String globalInfo() {
     return 
         "Filters instances according to a user-specified expression.\n\n"
@@ -228,6 +229,7 @@ public class SubsetByExpression
    * @return true this filter may remove (consume) input instances after
    * the first batch has been completed.
    */
+  @Override
   public boolean mayRemoveInstanceAfterFirstBatchDone() {
     return true;
   }
@@ -245,6 +247,7 @@ public class SubsetByExpression
    * @throws Exception  if something goes wrong
    * @see               #batchFinished()
    */
+  @Override
   public boolean input(Instance instance) throws Exception {
     if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
@@ -274,6 +277,7 @@ public class SubsetByExpression
    *
    * @return an enumeration of all the available options.
    */
+  @Override
   public Enumeration listOptions() {
     Vector	result;
     
@@ -314,6 +318,7 @@ public class SubsetByExpression
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
     
@@ -334,6 +339,7 @@ public class SubsetByExpression
    *
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
     Vector<String>	result;
     
@@ -355,17 +361,20 @@ public class SubsetByExpression
    * @return            the capabilities of this object
    * @see               Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
 
     // attributes
+    result.enable(Capability.STRING_ATTRIBUTES);
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
     
     // class
+    result.enable(Capability.STRING_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
@@ -455,6 +464,7 @@ public class SubsetByExpression
    * @return                the output format
    * @throws Exception      in case the determination goes wrong
    */
+  @Override
   protected Instances determineOutputFormat(Instances inputFormat)
       throws Exception {
     
@@ -470,6 +480,7 @@ public class SubsetByExpression
    * @throws Exception  in case the processing goes wrong
    * @see               #batchFinished()
    */
+  @Override
   protected Instances process(Instances instances) throws Exception {
     if (!isFirstBatchDone() || m_filterAfterFirstBatch) {
       return Parser.filter(m_Expression, instances);
@@ -483,6 +494,7 @@ public class SubsetByExpression
    * 
    * @return		the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
