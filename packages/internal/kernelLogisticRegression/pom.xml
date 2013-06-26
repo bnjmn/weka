@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>kernelLogisticRegression</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>kernelLogisticRegression</name>
@@ -48,9 +48,9 @@ This package contains a classifier that can be used to train a two-class kernel 
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/kernelLogisticRegression</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/kernelLogisticRegression</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/kernelLogisticRegression</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/kernelLogisticRegression-1.0.0</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/kernelLogisticRegression-1.0.0</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/kernelLogisticRegression-1.0.0</url>
   </scm>
 
   <profiles>
