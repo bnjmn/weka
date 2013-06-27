@@ -39,6 +39,7 @@ import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.filters.Filter;
+import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /** 
@@ -72,7 +73,7 @@ import weka.filters.UnsupervisedFilter;
  */
 public class NominalToBinary 
   extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
+  implements UnsupervisedFilter, OptionHandler, StreamableFilter {
   
   /** for serialization */
   static final long serialVersionUID = -1130642825710549138L;
