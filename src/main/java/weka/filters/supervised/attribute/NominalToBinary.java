@@ -43,6 +43,7 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.UnassignedClassException;
 import weka.core.Utils;
 import weka.filters.Filter;
+import weka.filters.StreamableFilter;
 import weka.filters.SupervisedFilter;
 
 /** 
@@ -86,7 +87,8 @@ import weka.filters.SupervisedFilter;
  */
 public class NominalToBinary 
   extends Filter 
-  implements SupervisedFilter, OptionHandler, TechnicalInformationHandler {
+  implements SupervisedFilter, OptionHandler, TechnicalInformationHandler, 
+  StreamableFilter {
   
   /** for serialization */
   static final long serialVersionUID = -5004607029857673950L;
