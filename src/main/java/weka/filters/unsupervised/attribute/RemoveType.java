@@ -128,8 +128,12 @@ public class RemoveType
     int[] attsToDelete = new int[instanceInfo.numAttributes()];
     int numToDelete = 0;
     for (int i=0; i<instanceInfo.numAttributes(); i++) {
-      if ((i == instanceInfo.classIndex() && !m_invert)) {
-	continue; // skip class
+      if (i == instanceInfo.classIndex()) {
+        if (!m_invert) {
+          continue; // skip class
+        } else {
+          attsToDelete[numToDelete++] = i; // Need to keep the class even if selection is inverted          
+        }
       }
       if (instanceInfo.attribute(i).type() == m_attTypeToDelete)
 	attsToDelete[numToDelete++] = i;
