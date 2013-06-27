@@ -36,6 +36,7 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
+import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 import java.util.Enumeration;
@@ -72,7 +73,7 @@ import java.util.Vector;
  */
 public class NominalToBinary 
   extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
+  implements UnsupervisedFilter, OptionHandler, StreamableFilter {
   
   /** for serialization */
   static final long serialVersionUID = -1130642825710549138L;
