@@ -48,6 +48,7 @@
 
   <target name="requirements_instructions">
     <echo message="NOTE: THIS BUILD FILE IS FOR CREATING WEKA RELEASE DISTRIBUTIONS. USE THE build.xml IN ./weka FOR TASKS RELATED TO COMPILING WEKA."/>
+    <echo message="This build file should be run from a clean checkout (and not from a working copy). Furthermore, there should be no packages installed."/>
     <echo message="In order to make a complete set of release artifacts for Weka, this build script requires the following"/>
     <echo message="1) Additional jars to be installed in Apache Ant's lib directory:"/>
     <echo message="nsvnkit.jar"/>
@@ -124,7 +125,7 @@
    <delete dir="packages/internal/multiInstanceLearning/src/test/java/weka/classifiers/mi/supportVector"/>
  </target>
 
-  <target name="run_tests_all">
+  <target name="run_tests_all" depends="clean, checkout_trunk_resources">
     <echo message="Running unit tests..."/>
     <ant antfile="build.xml" dir="${weka}" target="run_tests_all" inheritall="false"/>
   </target>
