@@ -87,8 +87,7 @@ import weka.filters.SupervisedFilter;
  */
 public class NominalToBinary 
   extends Filter 
-  implements SupervisedFilter, OptionHandler, TechnicalInformationHandler, 
-  StreamableFilter {
+  implements SupervisedFilter, OptionHandler, TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = -5004607029857673950L;
