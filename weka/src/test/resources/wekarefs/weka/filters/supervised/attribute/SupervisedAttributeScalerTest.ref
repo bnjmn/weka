@@ -1,0 +1,28 @@
+@relation FilterTest-weka.filters.unsupervised.attribute.RemoveType-V-Tnumeric-weka.filters.unsupervised.attribute.ReplaceMissingValues-weka.filters.supervised.attribute.SupervisedAttributeScaler-K30
+
+@attribute NominalAtt1 {r,g,b}
+@attribute NumericAtt1 numeric
+@attribute NumericAtt2 numeric
+
+@data
+g,0.056952,-0.087234
+b,0.113905,-0.125161
+r,0.170857,-0.091026
+r,0.227809,-0.201017
+b,0.284762,-0.098612
+r,0.341714,-0.276872
+r,0.398666,-0.106197
+g,0.455619,-0.352727
+b,0.512571,-0.075855
+r,0.535352,-0.341349
+r,0.079733,-0.314799
+b,0.13099,-0.276872
+r,0.187943,-0.153228
+r,0.244895,-0.201017
+g,0.301847,-0.212395
+b,0.37019,-0.163089
+r,0.427143,-0.144125
+r,0.484095,-0.087234
+r,0.535352,-0.037928
+r,0.244895,0
+b,0,0.128954
