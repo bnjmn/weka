@@ -15,16 +15,19 @@
 
 /*
  *    RemoveType.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Capabilities.Capability;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -32,13 +35,9 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -95,6 +94,7 @@ public class RemoveType
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -128,8 +128,12 @@ public class RemoveType
     int[] attsToDelete = new int[instanceInfo.numAttributes()];
     int numToDelete = 0;
     for (int i=0; i<instanceInfo.numAttributes(); i++) {
-      if ((i == instanceInfo.classIndex() && !m_invert)) {
-	continue; // skip class
+      if (i == instanceInfo.classIndex()) {
+        if (!m_invert) {
+          continue; // skip class
+        } else {
+          attsToDelete[numToDelete++] = i; // Need to keep the class even if selection is inverted          
+        }
       }
       if (instanceInfo.attribute(i).type() == m_attTypeToDelete)
 	attsToDelete[numToDelete++] = i;
