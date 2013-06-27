@@ -292,8 +292,21 @@
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="simpleEducationalLearningSchemes"/>
     </antcall>
+
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="localOutlierFactor"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="multiLayerPerceptrons"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="supervisedAttributeScaling"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="kernelLogisticRegression"/>
     </antcall>
   </target>
 
