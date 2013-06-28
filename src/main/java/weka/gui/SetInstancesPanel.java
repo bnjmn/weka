@@ -329,7 +329,8 @@ public class SetInstancesPanel extends JPanel {
     boolean incremental = m_readIncrementally;
 
     try {
-      m_Loader = ConverterUtils.getLoaderForFile(f);
+      // m_Loader = ConverterUtils.getLoaderForFile(f);
+      m_Loader = m_FileChooser.getLoader();
       if (m_Loader == null)
         throw new Exception(
             "No suitable FileSourcedConverter found for file!\n" + f);
