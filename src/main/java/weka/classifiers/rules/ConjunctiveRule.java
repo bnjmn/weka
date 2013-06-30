@@ -1,17 +1,16 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -698,6 +697,11 @@ public class ConjunctiveRule
 	  // Entropies of data covered and uncovered 	
 	  entrp = entropy(stats[x], t);
 	  double uncEntp = entropy(other, otherCover);
+
+          if (m_Debug) {
+            System.err.println(defInfo + " " + entrp + " " + t + " " + uncEntp +
+                               " " + otherCover + " " + whole);
+          }
 		    
 	  // Weighted average
 	  infoGain = defInfo - (entrp*t + uncEntp*otherCover)/whole;		   
@@ -758,7 +762,7 @@ public class ConjunctiveRule
 	    (Utils.eq(infoGain, maxInfoGain) && Utils.sm(entrp, minEntrp))){
 	  value = (double)x;
 	  maxInfoGain = infoGain;
-	  inform = maxInfoGain - defInfo;
+	  inform = -(maxInfoGain - defInfo);
 	  minEntrp = entrp;
 	  isIn = isWithin;
 	}		
@@ -852,6 +856,11 @@ public class ConjunctiveRule
   public Enumeration listOptions() {
     Vector newVector = new Vector(6);
 	
+    Enumeration enumer = super.listOptions();
+    while (enumer.hasMoreElements()) {
+      newVector.add(enumer.nextElement());
+    }
+
     newVector.addElement(new Option("\tSet number of folds for REP\n" +
 				    "\tOne fold is used as pruning set.\n" +
 				    "\t(default 3)","N", 1, "-N <number of folds>"));
@@ -943,6 +952,8 @@ public class ConjunctiveRule
       m_NumAntds = -1;
 	
     m_IsExclude = Utils.getFlag('E', options);	
+
+    super.setOptions(options);
   }
     
   /**
@@ -952,8 +963,10 @@ public class ConjunctiveRule
    */
   public String [] getOptions() {
 	
-    String [] options = new String [9];
-    int current = 0;
+    String[] supersOptions = super.getOptions();
+    String [] options = new String [9 + supersOptions.length];
+    System.arraycopy(supersOptions, 0, options, 0, supersOptions.length);
+    int current = supersOptions.length;
     options[current++] = "-N"; options[current++] = "" + m_Folds;
     options[current++] = "-M"; options[current++] = "" + m_MinNo;
     options[current++] = "-P"; options[current++] = "" + m_NumAntds;
@@ -1312,6 +1325,10 @@ public class ConjunctiveRule
 	Instances coverData = null, uncoverData = null;
 	Enumeration enumAttr=growData.enumerateAttributes();	    
 	int index=-1;  
+
+        if (m_Debug) {
+          System.out.println("Growing data: " + growData);
+        }
 		
 	/* Build one condition based on all attributes not used yet*/
 	while (enumAttr.hasMoreElements()){
@@ -1332,6 +1349,7 @@ public class ConjunctiveRule
 	      antd = new NominalAntd(att, uncoveredWtSq, uncoveredWtVl, uncoveredWts); 
 		    
 	  if(!used[index]){
+
 	    /* Compute the best information gain for each attribute,
 	       it's stored in the antecedent formed by this attribute.
 	       This procedure returns the data covered by the antecedent*/
@@ -1340,7 +1358,13 @@ public class ConjunctiveRule
 	    if(coveredData != null){
 	      double infoGain = antd.getMaxInfoGain();			
 	      boolean isUpdate = Utils.gr(infoGain, maxInfoGain);
-			    
+		
+              if (m_Debug) {
+                System.err.println(antd);
+                System.err.println("Info gain: " + infoGain);
+                System.err.println("Max info gain: " + maxInfoGain);
+              }
+	    
 	      if(isUpdate){
 		oneAntd=antd;
 		coverData = coveredData[0]; 
@@ -1354,6 +1378,15 @@ public class ConjunctiveRule
 	if(oneAntd == null) 		
 	  break;	    
 		
+        if (m_Debug) {
+          System.err.println("Adding antecedent: ");
+          System.err.println(oneAntd);
+          System.err.println("Covered data: ");
+          System.err.println(coverData);
+          System.err.println("Uncovered data: ");
+          System.err.println(uncoverData);
+        }
+
 	//Numeric attributes can be used more than once
 	if(!oneAntd.getAttr().isNumeric()){ 
 	  used[oneAntd.getAttr().index()]=true;
@@ -1393,6 +1426,9 @@ public class ConjunctiveRule
 	m_Targets.addElement(tmp);  
 		
 	defInfo = oneAntd.getInfo();
+        if (m_Debug) {
+          System.err.println("Default info: " + defInfo);
+        }
 	int numAntdsThreshold = (m_NumAntds == -1) ? Integer.MAX_VALUE : m_NumAntds;
 
 	if(Utils.eq(growData.sumOfWeights(), 0.0) || 
