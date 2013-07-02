@@ -22,7 +22,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.IterativeClassifier;
 import weka.classifiers.trees.adtree.PredictionNode;
 import weka.classifiers.trees.adtree.ReferenceInstances;
@@ -100,7 +100,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class ADTree
-  extends AbstractClassifier 
+  extends RandomizableClassifier
   implements OptionHandler, Drawable, AdditionalMeasureProducer,
              WeightedInstancesHandler, IterativeClassifier, 
              TechnicalInformationHandler {
@@ -235,7 +235,7 @@ public class ADTree
     m_lastAddedSplitNum = 0;
 
     // prepare the random generator
-    m_random = new Random(m_randomSeed);
+    m_random = instances.getRandomNumberGenerator(m_Seed);
 
     // create training set
     m_trainInstances = new Instances(instances);
@@ -1028,36 +1028,6 @@ public class ADTree
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String randomSeedTipText() {
-
-    return "Sets the random seed to use for a random search.";
-  }
-
-  /**
-   * Gets random seed for a random walk.
-   *
-   * @return the random seed
-   */
-  public int getRandomSeed() {
-    
-    return m_randomSeed;
-  }
-
-  /**
-   * Sets random seed for a random walk.
-   *
-   * @param seed the random seed
-   */
-  public void setRandomSeed(int seed) {
-    
-    // the actual random object is created when the tree is initialized
-    m_randomSeed = seed; 
-  }  
-
-  /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
   public String saveInstanceDataTipText() {
 
     return "Sets whether the tree is to save instance data - the model will take up more"
@@ -1135,7 +1105,7 @@ public class ADTree
       int value = Integer.parseInt(eString);
       if (value >= 0) {
 	setSearchPath(new SelectedTag(SEARCHPATH_RANDOM, TAGS_SEARCHPATH));
-	setRandomSeed(value);
+	setSeed(value);
       } else setSearchPath(new SelectedTag(value + 3, TAGS_SEARCHPATH));
     }
 
@@ -1156,7 +1126,7 @@ public class ADTree
     options[current++] = "-B"; options[current++] = "" + getNumOfBoostingIterations();
     options[current++] = "-E"; options[current++] = "" +
 				 (m_searchPath == SEARCHPATH_RANDOM ?
-				  m_randomSeed : m_searchPath - 3);
+				  m_Seed : m_searchPath - 3);
     if (getSaveInstanceData()) options[current++] = "-D";
     while (current < options.length) options[current++] = "";
     return options;
@@ -1458,7 +1428,7 @@ public class ADTree
     clone.m_examplesCounted = m_examplesCounted;
     clone.m_boostingIterations = m_boostingIterations;
     clone.m_searchPath = m_searchPath;
-    clone.m_randomSeed = m_randomSeed;
+    clone.m_Seed = m_Seed;
 
     return clone;
   }
