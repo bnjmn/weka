@@ -15,7 +15,7 @@
 
 /*
  * SimpleBatchFilter.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -163,6 +163,18 @@ public abstract class SimpleBatchFilter
   }
 
   /**
+   * Returns whether to allow the determineOutputFormat(Instances) method
+   * access to the full dataset rather than just the header.
+   * <p/>
+   * Default implementation returns false.
+   *
+   * @return whether determineOutputFormat has access to the full input dataset
+   */
+  public boolean allowAccessToFullInputFormat() {
+    return false;
+  }
+
+  /**
    * Input an instance for filtering. Filter requires all
    * training instances be read before producing output (calling the method
    * batchFinished() makes the data available). If this instance is part of
@@ -223,8 +235,12 @@ public abstract class SimpleBatchFilter
     inst = new Instances(getInputFormat());
 
     // if output format hasn't been set yet, do it now
-    if (!hasImmediateOutputFormat() && !isFirstBatchDone())
-      setOutputFormat(determineOutputFormat(new Instances(inst, 0)));
+    if (!hasImmediateOutputFormat() && !isFirstBatchDone()) {
+      if (allowAccessToFullInputFormat())
+        setOutputFormat(determineOutputFormat(inst));
+      else
+        setOutputFormat(determineOutputFormat(new Instances(inst, 0)));
+    }
 
     // don't do anything in case there are no instances pending.
     // in case of second batch, they may have already been processed
