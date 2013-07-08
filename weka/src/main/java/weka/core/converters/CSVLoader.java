@@ -820,7 +820,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   @Override
   public Instances getDataSet() throws IOException {
 
-    if ((m_sourceFile == null) && (m_sourceReader == null)) {
+    if (m_sourceReader == null) {
       throw new IOException("No source has been specified");
     }
 
@@ -853,7 +853,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   }
 
   private boolean readData(boolean dump) throws IOException {
-    if ((m_sourceFile == null) && (m_sourceReader == null)) {
+    if (m_sourceReader == null) {
       throw new IOException("No source has been specified");
     }
 
@@ -914,7 +914,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   @Override
   public Instances getStructure() throws IOException {
 
-    if ((m_sourceFile == null) && (m_sourceReader == null)) {
+    if (m_sourceReader == null) {
       throw new IOException("No source has been specified");
     }
 
