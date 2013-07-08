@@ -6659,9 +6659,11 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     File sFile = m_mainKFPerspective.getFlowFile(tabIndex);
     int returnVal = JFileChooser.APPROVE_OPTION;
+    boolean shownDialog = false;
 
     if (showDialog || sFile.getName().equals("-NONE-")) {
       returnVal = m_FileChooser.showSaveDialog(this);
+      shownDialog = true;
     }
 
     if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -6671,8 +6673,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       Vector beans = BeanInstance.getBeanInstances(tabIndex);
       detachFromLayout(beans);
 
-      // determine filename
-      sFile = m_FileChooser.getSelectedFile();
+      // determine filename (if necessary)
+      if (shownDialog) {
+        sFile = m_FileChooser.getSelectedFile();
+      }
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
