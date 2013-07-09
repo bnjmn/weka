@@ -44,6 +44,7 @@ import weka.core.Utils;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.DatabaseLoader;
 import weka.core.converters.FileSourcedConverter;
+import weka.core.converters.Loader.StructureNotReadyException;
 import weka.gui.Logger;
 
 /**
@@ -55,11 +56,8 @@ import weka.gui.Logger;
  * @see AbstractDataSource
  * @see UserRequestAcceptor
  */
-public class Loader extends AbstractDataSource implements Startable, /*
-                                                                      * UserRequestAcceptor
-                                                                      * ,
-                                                                      */
-WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
+public class Loader extends AbstractDataSource implements Startable,
+    WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
     StructureProducer {
 
   /** for serialization */
@@ -427,25 +425,33 @@ WekaWrapper, EventConstraints, BeanCommon, EnvironmentHandler,
       // If incremental then specify whether this FORMAT_AVAILABLE
       // event is actually the start of stream processing or just
       // due to a file/source change
-      System.err.println("Here - " + notificationOnly[0]);
       m_ie.m_formatNotificationOnly = notificationOnly[0];
     } else {
       m_ie.m_formatNotificationOnly = false;
     }
 
-    m_Loader.reset();
+    try {
+      m_Loader.reset();
 
-    // Set environment variables
-    if (m_Loader instanceof EnvironmentHandler && m_env != null) {
-      try {
-        ((EnvironmentHandler) m_Loader).setEnvironment(m_env);
-      } catch (Exception ex) {
+      // Set environment variables
+      if (m_Loader instanceof EnvironmentHandler && m_env != null) {
+        try {
+          ((EnvironmentHandler) m_Loader).setEnvironment(m_env);
+        } catch (Exception ex) {
+        }
+      }
+      m_dataFormat = m_Loader.getStructure();
+      System.out
+          .println("[Loader] Notifying listeners of instance structure avail.");
+      notifyStructureAvailable(m_dataFormat);
+    } catch (StructureNotReadyException e) {
+      if (m_log != null) {
+        m_log.statusMessage(statusMessagePrefix() + "WARNING: "
+            + e.getMessage());
+        m_log.logMessage("[Loader] " + statusMessagePrefix() + " "
+            + e.getMessage());
       }
     }
-    m_dataFormat = m_Loader.getStructure();
-    System.out
-        .println("[Loader] Notifying listeners of instance structure avail.");
-    notifyStructureAvailable(m_dataFormat);
   }
 
   /**
