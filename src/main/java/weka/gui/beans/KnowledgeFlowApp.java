@@ -2350,9 +2350,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                   DefaultMutableTreeNode leafAlgo = new InvisibleNode(leafData);
                   subTreeNode.add(leafAlgo);
 
-                  m_nodeTextIndex
-                      .put(algName.toLowerCase() + " " + toolTip.toLowerCase()
-                          + " ", leafAlgo);
+                  m_nodeTextIndex.put(algName.toLowerCase() + " "
+                      + (toolTip != null ? toolTip.toLowerCase() + " " : ""),
+                      leafAlgo);
                 }
 
                 hpp.goToParent();
