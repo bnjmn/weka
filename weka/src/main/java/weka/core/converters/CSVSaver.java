@@ -55,6 +55,9 @@ import weka.core.Utils;
  *  The string representing a missing value.
  *  (default: ?)</pre>
  * 
+ * <pre> -N
+ *  Don't write a header row.</pre>
+ * 
  * <pre> -decimal &lt;num&gt;
  *  The maximum number of digits to print after the decimal
  *  place for numeric values (default: 6)</pre>
@@ -85,6 +88,9 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
 
   /** Max number of decimal places for numeric values */
   protected int m_MaxDecimalPlaces = AbstractInstance.s_numericAfterDecimalPoint;
+  
+  /** Set to true to not write the header row */
+  protected boolean m_noHeaderRow = false;
 
   /**
    * Constructor.
@@ -120,6 +126,8 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
 
     result.addElement(new Option("\tThe string representing a missing value.\n"
         + "\t(default: ?)", "M", 1, "-M <str>"));
+    
+    result.addElement(new Option("\tDon't write a header row.", "N", 0, "-N"));
 
     result.addElement(new Option(
         "\tThe maximum number of digits to print after the decimal\n"
@@ -145,6 +153,9 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
    * <pre> -M &lt;str&gt;
    *  The string representing a missing value.
    *  (default: ?)</pre>
+   * 
+   * <pre> -N
+   *  Don't write a header row.</pre>
    * 
    * <pre> -decimal &lt;num&gt;
    *  The maximum number of digits to print after the decimal
@@ -176,6 +187,8 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
       setMissingValue(tmpStr);
     else
       setMissingValue("?");
+    
+    setNoHeaderRow(Utils.getFlag('N', options));
 
     tmpStr = Utils.getOption("decimal", options);
     if (tmpStr.length() > 0) {
@@ -202,7 +215,11 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     result.add(getFieldSeparator());
 
     result.add("-M");
-    result.add(getMissingValue());
+    result.add(getMissingValue());    
+    
+    if (getNoHeaderRow()) {
+      result.add("-N");
+    }
 
     result.add("-decimal");
     result.add("" + getMaxDecimalPlaces());
@@ -212,6 +229,34 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
       result.add(options[i]);
 
     return result.toArray(new String[result.size()]);
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String noHeaderRowTipText() {
+    return "If true then the header row is not written";
+  }
+  
+  /**
+   * Set whether to not write the header row
+   * 
+   * @param b true if no header row is to be written
+   */
+  public void setNoHeaderRow(boolean b) {
+    m_noHeaderRow = b;
+  }
+  
+  /**
+   * Get whether to not write the header row
+   * 
+   * @return true if no header row is to be written
+   */
+  public boolean getNoHeaderRow() {
+    return m_noHeaderRow;
   }
 
   /**
@@ -391,26 +436,28 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     if (writeMode == STRUCTURE_READY) {
       setWriteMode(WRITE);
       // write header
-      if (retrieveFile() == null && outW == null) {
-        // print out attribute names as first row
-        for (int i = 0; i < structure.numAttributes(); i++) {
-          System.out.print(structure.attribute(i).name());
-          if (i < structure.numAttributes() - 1) {
-            System.out.print(m_FieldSeparator);
-          } else {
-            System.out.println();
+      if (!getNoHeaderRow()) {
+        if (retrieveFile() == null && outW == null) {
+          // print out attribute names as first row
+          for (int i = 0; i < structure.numAttributes(); i++) {
+            System.out.print(structure.attribute(i).name());
+            if (i < structure.numAttributes() - 1) {
+              System.out.print(m_FieldSeparator);
+            } else {
+              System.out.println();
+            }
           }
-        }
-      } else {
-        for (int i = 0; i < structure.numAttributes(); i++) {
-          outW.print(structure.attribute(i).name());
-          if (i < structure.numAttributes() - 1) {
-            outW.print(m_FieldSeparator);
-          } else {
-            outW.println();
+        } else {
+          for (int i = 0; i < structure.numAttributes(); i++) {
+            outW.print(structure.attribute(i).name());
+            if (i < structure.numAttributes() - 1) {
+              outW.print(m_FieldSeparator);
+            } else {
+              outW.println();
+            }
           }
+          outW.flush();
         }
-        outW.flush();
       }
       writeMode = getWriteMode();
     }
@@ -460,13 +507,16 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     setRetrieval(BATCH);
     setWriteMode(WRITE);
     if (retrieveFile() == null && getWriter() == null) {
-      // print out attribute names as first row
-      for (int i = 0; i < getInstances().numAttributes(); i++) {
-        System.out.print(getInstances().attribute(i).name());
-        if (i < getInstances().numAttributes() - 1) {
-          System.out.print(m_FieldSeparator);
-        } else {
-          System.out.println();
+      
+      if (!getNoHeaderRow()) {
+        // print out attribute names as first row
+        for (int i = 0; i < getInstances().numAttributes(); i++) {
+          System.out.print(getInstances().attribute(i).name());
+          if (i < getInstances().numAttributes() - 1) {
+            System.out.print(m_FieldSeparator);
+          } else {
+            System.out.println();
+          }
         }
       }
       for (int i = 0; i < getInstances().numInstances(); i++) {
