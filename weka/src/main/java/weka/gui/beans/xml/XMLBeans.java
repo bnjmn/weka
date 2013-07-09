@@ -368,6 +368,8 @@ public class XMLBeans
     m_Properties.addAllowed(weka.associations.Associator.class, "options");
     m_Properties.addAllowed(weka.clusterers.Clusterer.class, "options");
     m_Properties.addAllowed(weka.filters.Filter.class, "options");
+    m_Properties.addAllowed(weka.core.converters.Saver.class, "options");
+    m_Properties.addAllowed(weka.core.converters.Loader.class, "options");
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
     m_Properties.addAllowed(weka.core.converters.DatabaseLoader.class, "options");
