@@ -78,7 +78,7 @@ public class MultiInstanceToPropositional
   private static final long serialVersionUID = -4102847628883002530L;
 
   /** the total number of bags */
-  protected int m_NumBags;
+  protected int m_NumBags = -1;
 
   /** Indices of string attributes in the bag */
   protected StringLocator m_BagStringAtts = null;
@@ -302,17 +302,11 @@ public class MultiInstanceToPropositional
     }  
     super.setInputFormat(instanceInfo);   
 
-    m_NumBags = instanceInfo.numInstances();
-    m_NumInstances = 0;
-    for (int i=0; i<m_NumBags; i++)
-      if (instanceInfo.instance(i).relationalValue(1) == null) {
-        m_NumInstances++;
-      } else {
-        m_NumInstances += instanceInfo.instance(i).relationalValue(1).numInstances();
-      }
-
     Attribute classAttribute = (Attribute) instanceInfo.classAttribute().copy();
     Attribute bagIndex = (Attribute) instanceInfo.attribute(0).copy();
+
+    // Indicator that batchFinished has not been called.
+    m_NumBags = -1;
 
     /* create a new output format (propositional instance format) */
     Instances newData = instanceInfo.attribute(1).relation().stringFreeStructure();
@@ -348,9 +342,14 @@ public class MultiInstanceToPropositional
       m_NewBatch = false;
     }
 
-    convertInstance(instance);
-    return true;
-
+    // Has batchFinished() been called?
+    if (m_NumBags != -1) {
+      convertInstance(instance);
+      return true;
+    } else {
+      bufferInput(instance);
+      return false;
+    }
   }
 
   /**
@@ -367,15 +366,27 @@ public class MultiInstanceToPropositional
       throw new IllegalStateException("No input instance format defined");
     }
 
-    Instances input = getInputFormat();
+    // Has batchFinished been called before?
+    if (m_NumBags == -1) {
+      Instances input = getInputFormat();
+      m_NumBags = input.numInstances();
+      m_NumInstances = 0;
+      for (int i=0; i<m_NumBags; i++) {
+        if (input.instance(i).relationalValue(1) == null) {
+          m_NumInstances++;
+        } else {
+          m_NumInstances += input.instance(i).relationalValue(1).numInstances();
+        }
+      }
 
-    // Convert pending input instances
-    for(int i = 0; i < input.numInstances(); i++) {
-      convertInstance(input.instance(i));
+      // Convert pending input instances
+      for(int i = 0; i < input.numInstances(); i++) {
+        convertInstance(input.instance(i));
+      }
+
+      // Free memory
+      flushInput();
     }
-
-    // Free memory
-    flushInput();
 
     m_NewBatch = true;
     return (numPendingOutput() != 0);
