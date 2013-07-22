@@ -514,8 +514,8 @@ public class WekaPackageManager {
     }
   }
 
-  protected static void loadPackageDirectory(File directory, boolean verbose)
-      throws Exception {
+  protected static void loadPackageDirectory(File directory, boolean verbose,
+      List<File> goePropsFiles) throws Exception {
     File[] contents = directory.listFiles();
 
     // make sure that jar files and lib directory get processed first
@@ -528,7 +528,7 @@ public class WekaPackageManager {
       } else if (contents[i].isDirectory()
           && contents[i].getName().equalsIgnoreCase("lib")) {
         // add any jar files in the lib directory to the classpath
-        loadPackageDirectory(contents[i], verbose);
+        loadPackageDirectory(contents[i], verbose, goePropsFiles);
       }
     }
 
@@ -552,7 +552,11 @@ public class WekaPackageManager {
         processGUIEditorsProps(contents[i]);
       } else if (contents[i].isFile()
           && contents[i].getPath().endsWith("GenericPropertiesCreator.props")) {
-        processGenericPropertiesCreatorProps(contents[i]);
+        if (goePropsFiles != null) {
+          goePropsFiles.add(contents[i]);
+        } else {
+          processGenericPropertiesCreatorProps(contents[i]);
+        }
       } else if (contents[i].isFile()
           && contents[i].getPath().endsWith("PluginManager.props")) {
         processPluginManagerProps(contents[i]);
@@ -816,6 +820,7 @@ public class WekaPackageManager {
   public static synchronized void loadPackages(boolean verbose,
       boolean refreshGOEProperties) {
 
+    List<File> goePropsFiles = new ArrayList<File>();
     if (!m_loadPackages) {
       return;
     }
@@ -853,7 +858,7 @@ public class WekaPackageManager {
                   System.out.println("[Weka] loading package "
                       + contents[i].getName());
                 }
-                loadPackageDirectory(contents[i], verbose);
+                loadPackageDirectory(contents[i], verbose, goePropsFiles);
               }
             }
           } catch (Exception ex) {
@@ -866,9 +871,19 @@ public class WekaPackageManager {
     }
     m_initialPackageLoadingInProcess = false;
 
+    // it is best to process all of these after all jars have been
+    // inserted into the classpath since the dynamic class discovery
+    // mechanism will load classes during the process of determining
+    // all implementations of base types, and this can cause problems
+    // if processed at the time of package loading and there are
+    // dependencies between packages
+    for (File f : goePropsFiles) {
+      processGenericPropertiesCreatorProps(f);
+    }
+
     // do we need to regenerate the list of available schemes for
     // the GUIs (this is not necessary when executing stuff from
-    // the command line
+    // the command line)
     if (refreshGOEProperties) {
       System.err.println("Refreshing GOE props...");
       refreshGOEProperties();
@@ -1174,7 +1189,6 @@ public class WekaPackageManager {
       try {
         DefaultPackageManager.deleteDir(new File(cacheDir), System.out);
       } catch (Exception e1) {
-        // TODO Auto-generated catch block
         e1.printStackTrace();
       }
 
@@ -1261,6 +1275,7 @@ public class WekaPackageManager {
     PACKAGE_MANAGER.installPackages(toInstall, progress);
     boolean atLeastOneUpgrade = false;
 
+    List<File> gpcFiles = new ArrayList<File>();
     int i = 0;
     for (Package p : toInstall) {
       boolean isAnUpgrade = upgrades.get(i++);
@@ -1275,9 +1290,14 @@ public class WekaPackageManager {
       boolean loadIt = loadCheck(p, packageDir, progress);
 
       if (loadIt & !isAnUpgrade) {
-        loadPackageDirectory(packageDir, false);
+        loadPackageDirectory(packageDir, false, gpcFiles);
       }
     }
+
+    for (File f : gpcFiles) {
+      processGenericPropertiesCreatorProps(f);
+    }
+
     return atLeastOneUpgrade;
   }
 
@@ -1377,7 +1397,7 @@ public class WekaPackageManager {
           + File.separator + packageName);
       loadIt = checkForMissingFiles(toLoad, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageDir, false);
+        loadPackageDirectory(packageDir, false, null);
       }
     }
 
@@ -1415,7 +1435,7 @@ public class WekaPackageManager {
           + File.separator + toInstall.getName());
       loadIt = checkForMissingFiles(toInstall, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageRoot, false);
+        loadPackageDirectory(packageRoot, false, null);
       }
     }
 
@@ -1448,7 +1468,7 @@ public class WekaPackageManager {
           + File.separator + installed.getName());
       loadIt = checkForMissingFiles(installed, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageRoot, false);
+        loadPackageDirectory(packageRoot, false, null);
       }
     }
     return packageName;
