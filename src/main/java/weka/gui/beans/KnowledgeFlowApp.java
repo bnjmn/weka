@@ -6171,7 +6171,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     int returnVal = m_FileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
-      stopFlow();
+      // stopFlow();
 
       // determine filename
       File oFile = m_FileChooser.getSelectedFile();
