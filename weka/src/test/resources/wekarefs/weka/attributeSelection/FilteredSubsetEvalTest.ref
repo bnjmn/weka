@@ -13,7 +13,7 @@ Search Method:
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 Filtered Attribute Evaluator
 Filter: weka.filters.supervised.instance.SpreadSubsample -M 0.0 -X 0.0 -S 1
-Attribute evaluator: weka.attributeSelection.CfsSubsetEval 
+Attribute evaluator: weka.attributeSelection.CfsSubsetEval -P 1 -E 1
 
 Filtered header:
 @relation Testdata-weka.filters.supervised.instance.SpreadSubsample-M0.0-X0.0-S1

@@ -1,4 +1,4 @@
-@relation 'FilterTest-weka.filters.unsupervised.attribute.RemoveType-Tstring-weka.filters.supervised.attribute.AttributeSelection-Eweka.attributeSelection.CfsSubsetEval-Sweka.attributeSelection.BestFirst -D 1 -N 5'
+@relation 'FilterTest-weka.filters.unsupervised.attribute.RemoveType-Tstring-weka.filters.supervised.attribute.AttributeSelection-Eweka.attributeSelection.CfsSubsetEval -P 1 -E 1-Sweka.attributeSelection.BestFirst -D 1 -N 5'
 
 @attribute NumericAtt1 numeric
 @attribute NominalAtt2 {a,b,c,d}
