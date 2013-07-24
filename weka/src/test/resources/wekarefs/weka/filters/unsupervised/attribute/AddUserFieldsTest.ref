@@ -1,4 +1,4 @@
-@relation 'FilterTest-weka.filters.unsupervised.attribute.AddUserFields-Adouglas@numeric@42-AnomAtt@nominal@aValue-AaDate@date:yyy-MM-dd@2012-07-09-AvarTest@nominal@${NOM}'
+@relation 'FilterTest-weka.filters.unsupervised.attribute.AddUserFields-Adouglas@numeric@42-AnomAtt@nominal@aValue-AaDate@date:yyyy-MM-dd@2012-07-09-AvarTest@nominal@${NOM}'
 
 @attribute StringAtt1 string
 @attribute NominalAtt1 {r,g,b}
@@ -9,7 +9,7 @@
 @attribute DateAtt1 date yyyy-MM-dd
 @attribute douglas numeric
 @attribute nomAtt {aValue}
-@attribute aDate date yyy-MM-dd
+@attribute aDate date yyyy-MM-dd
 @attribute varTest {aNomValue}
 
 @data
