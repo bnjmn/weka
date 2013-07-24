@@ -1,0 +1,2 @@
+weka.classifiers.Classifier=\
+ weka.classifiers.clojure

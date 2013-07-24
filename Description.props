@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=clojureClassifier
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2013-07-25
+
+# Title (required)
+Title=Wrapper classifiers for classifiers implemented in the Clojure programming language
+
+Category=Classification
+
+# Author (required)
+Author=Mark Hall
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Wrapper classifier for classifiers written in the Clojure programming language. The Clojure implementation is expected to have at least the following two functions:\n\nlearn-classifier [insts options-string]\ndistribution-for-instance [inst model]\n\nThe learn-classifier function takes an Instances object and an options string (which can be null). It is expected to return the learned model as some kind of serializable data structure. The distribution-for-instance function takes a Instance to be predicted and the model as arguments and returns the prediction as an array of doubles.\n\n The Clojure implementation can optionally provide a model-to-string [model header] function to return a textual description of the model. See the weka-clj.simple classifier included in the source code of this package.\n\nYour own Clojure classifier only needs to be available on the classpath to be accessible to the ClojureClassifier. The easiest thing to do is to place the jar file containing your Clojure implementation in the lib directory of the clojureClassifier package (i.e. in ${user.home}/wekafiles/packages/clojureClassifier/lib)
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/clojureClassifier1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/clojureClassifier
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)
