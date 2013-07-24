@@ -44,6 +44,7 @@ import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
+import weka.core.ThreadSafe;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
@@ -105,7 +106,7 @@ import weka.filters.supervised.attribute.Discretize;
  * @version $Revision$
  * @see Discretize
  */
-public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
+public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, ThreadSafe,
     OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
