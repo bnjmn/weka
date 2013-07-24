@@ -13,7 +13,7 @@ Search Method:
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 CostSensitiveSubsetEval using 
 
-weka.attributeSelection.CfsSubsetEval 
+weka.attributeSelection.CfsSubsetEval -P 1 -E 1
 
 Evaluator
 	CFS Subset Evaluator
