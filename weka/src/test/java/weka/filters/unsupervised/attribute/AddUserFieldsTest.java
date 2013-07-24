@@ -24,7 +24,7 @@ public class AddUserFieldsTest extends AbstractFilterTest {
     env.addVariable("NOM", "aNomValue");
     
     String params = "-A douglas@numeric@42 -A nomAtt@nominal@aValue -A "
-      + "aDate@date:yyy-MM-dd@2012-07-09 -A varTest@nominal@${NOM}";
+      + "aDate@date:yyyy-MM-dd@2012-07-09 -A varTest@nominal@${NOM}";
     try {
       String[] opts = Utils.splitOptions(params);
       temp.setEnvironment(env);
