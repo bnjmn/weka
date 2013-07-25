@@ -52,10 +52,18 @@ public class Explorer3DPanel extends JPanel implements ExplorerPanel {
   
   /** The actual Visualize3D panel that does the work */
   protected Visualize3D m_vis = new Visualize3D();
+
+  /** 
+   * Whether the actual visualzation panel has been added to this panel or not. We
+   * have to actually remove the vis panel from us whenever the user switches to 
+   * another tab in order to overcome a bug with Java 3D with Oracle Java 1.7 on the 
+   * Mac where the vis panel remains visible (and obscures) the other tab's contents
+   */
+  protected boolean m_visAdded = false;
   
   public Explorer3DPanel() {
     setLayout(new BorderLayout());
-    add(m_vis, BorderLayout.CENTER);
+    //    add(m_vis, BorderLayout.CENTER);
   }
 
   /**
@@ -97,7 +105,18 @@ public class Explorer3DPanel extends JPanel implements ExplorerPanel {
       public void stateChanged(ChangeEvent e) {
         if (m_explorer.getTabbedPane().getSelectedComponent() == 
           Explorer3DPanel.this) {
-          m_vis.updateDisplay();        
+          add(m_vis, BorderLayout.CENTER);
+          m_vis.updateDisplay();
+          m_visAdded = true;
+          Explorer3DPanel.this.revalidate();
+          Explorer3DPanel.this.repaint();
+        } else {
+          if (m_visAdded) {
+            remove(0);
+            Explorer3DPanel.this.revalidate();
+            Explorer3DPanel.this.repaint();
+            m_visAdded = false;
+          }
         }
       }
     });
