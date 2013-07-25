@@ -91,6 +91,13 @@
     </profile>
   </profiles>
 
+  <repositories>
+    <repository>
+      <id>clojars.org</id>
+      <url>http://clojars.org/repo</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
@@ -109,7 +116,6 @@
       <groupId>net.mikera</groupId>
       <artifactId>clojure-utils</artifactId>
       <version>0.2.3</version>
-      <type>jar</type>
     </dependency>
 
     <dependency>
