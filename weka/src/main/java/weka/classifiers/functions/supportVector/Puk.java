@@ -377,6 +377,7 @@ public class Puk
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enableAllClasses();
