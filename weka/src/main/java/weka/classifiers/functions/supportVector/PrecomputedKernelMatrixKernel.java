@@ -23,6 +23,7 @@ package weka.classifiers.functions.supportVector;
 
 import weka.core.Option;
 import weka.core.matrix.Matrix;
+import weka.core.Copyable;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.Capabilities;
@@ -64,7 +65,7 @@ import java.io.File;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class PrecomputedKernelMatrixKernel extends Kernel {
+public class PrecomputedKernelMatrixKernel extends Kernel implements Copyable {
 
   /** for serialization */
   static final long serialVersionUID = -321831645846363333L;
@@ -77,6 +78,22 @@ public class PrecomputedKernelMatrixKernel extends Kernel {
 	  
   /** A classifier counter. */
   protected int m_Counter;
+  
+  /**
+   * Return a shallow copy of this kernel
+   * 
+   * @return a shallow copy of this kernel
+   */
+  public Object copy() {
+    PrecomputedKernelMatrixKernel newK = new PrecomputedKernelMatrixKernel();
+    
+    newK.setKernelMatrix(m_KernelMatrix);
+    newK.setKernelMatrixFile(m_KernelMatrixFile);
+    newK.m_Counter = m_Counter;
+    
+    return newK;
+  }
+
  
   /**
    * Returns a string describing the kernel
