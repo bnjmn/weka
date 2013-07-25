@@ -49,9 +49,9 @@ MessageToDisplayOnInstallation=This package requires Java 3D to be installed on 
  
 # External class check. Skip loading this package if the following
 # class can't be instantiated.
-DoNotLoadIfClassNotPresent=com.sun.j3d.utils.universe.SimpleUniverse
+# DoNotLoadIfClassNotPresent=com.sun.j3d.utils.universe.SimpleUniverse
 
 # Log message to display if package can't be loaded because Java3D is not installed
-DoNotLoadIfClassNotPresentMessage=associationRulesViewer can't be loaded because \
- Java3D does not seem to be installed. Download and install Java3D from \
- https://java3d.dev.java.net/binary-builds.html before restarting Weka.
+# DoNotLoadIfClassNotPresentMessage=associationRulesViewer can't be loaded because \
+# Java3D does not seem to be installed. Download and install Java3D from \
+#  https://java3d.dev.java.net/binary-builds.html before restarting Weka.
