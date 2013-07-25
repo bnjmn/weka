@@ -27,6 +27,7 @@ import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.Copyable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -264,19 +265,23 @@ public abstract class Kernel
   }
 
   /**
-   * Creates a deep copy of the given kernel using serialization.
+   * Creates a shallow copy of the kernel (if it implements Copyable) 
+   * otherwise a deep copy using serialization.
    *
    * @param kernel 	the kernel to copy
-   * @return 		a deep copy of the kernel
+   * @return 		a shallow or deep copy of the kernel
    * @throws Exception 	if an error occurs
    */
   public static Kernel makeCopy(Kernel kernel) throws Exception {
+    if (kernel instanceof Copyable) {
+      return (Kernel) ((Copyable) kernel).copy();
+    }
     return (Kernel) new SerializedObject(kernel).getObject();
   }
 
   /**
-   * Creates a given number of deep copies of the given kernel using 
-   * serialization.
+   * Creates a given number of deep or shallow (if the kernel implements Copyable) 
+   * copies of the given kernel using serialization.
    * 
    * @param model 	the kernel to copy
    * @param num 	the number of kernel copies to create.
@@ -288,9 +293,15 @@ public abstract class Kernel
       throw new Exception("No model kernel set");
 
     Kernel[] kernels = new Kernel[num];
-    SerializedObject so = new SerializedObject(model);
-    for (int i = 0; i < kernels.length; i++)
-      kernels[i] = (Kernel) so.getObject();
+    if (model instanceof Copyable) {
+      for (int i = 0; i < kernels.length; i++) {
+        kernels[i] = (Kernel) ((Copyable) model).copy();
+      }
+    } else {
+      SerializedObject so = new SerializedObject(model);
+      for (int i = 0; i < kernels.length; i++)
+        kernels[i] = (Kernel) so.getObject();
+    }
 
     return kernels;
   }
