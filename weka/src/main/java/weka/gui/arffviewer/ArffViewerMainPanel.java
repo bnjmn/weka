@@ -30,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,8 +54,10 @@ import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
 import weka.core.converters.AbstractSaver;
 import weka.core.converters.ConverterUtils;
+import weka.core.converters.FileSourcedConverter;
 import weka.gui.ComponentHelper;
 import weka.gui.ConverterFileChooser;
 import weka.gui.JTableHelper;
@@ -645,14 +648,15 @@ public class ArffViewerMainPanel
       return;
     
     filename = panel.getFilename();
+
     if (filename.equals(ArffPanel.TAB_INSTANCES)) {
       saveFileAs();
     }
     else {
       saver = ConverterUtils.getSaverForFile(filename);
       try {
-	saver.setInstances(panel.getInstances());
 	saver.setFile(new File(filename));
+	saver.setInstances(panel.getInstances());
 	saver.writeBatch();
 	panel.setChanged(false);
 	setCurrentFilename(filename);
@@ -700,7 +704,16 @@ public class ArffViewerMainPanel
     
     panel.setChanged(false);
     setCurrentFilename(fileChooser.getSelectedFile().getAbsolutePath());
-    saveFile();
+    //saveFile();
+    
+    AbstractFileSaver saver = fileChooser.getSaver();
+    saver.setInstances(panel.getInstances());
+    try {
+      saver.writeBatch();
+      panel.setChanged(false);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
   
   /**
