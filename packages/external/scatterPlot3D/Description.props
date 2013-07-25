@@ -6,10 +6,10 @@
 PackageName=scatterPlot3D
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2012-03-20
+Date=2013-04-13
 
 # Title (required)
 Title=A visualization component for displaying a 3D scatter plot of the data using Java 3D.
@@ -26,15 +26,15 @@ Maintainer=Mark Hall <mhall@pentaho.com>
 License=GPL 3.0
 
 # Description (required)
-Description=A visualization component for displaying a 3D scatter plot of the data using Java 3D. Requires Java 3D to be installed. This version adds built-in sampling controls to the GUI. The default sampling percentage is set so that a maximum of 5000 instances are plotted. The user can adjust this higher or lower to suit their available processing speed and memory.
+Description=A visualization component for displaying a 3D scatter plot of the data using Java 3D.
+
+Changes=This version includes the Java3D classes and native libraries (32 and 64 bit) for Windows, Linux and Mac OSX. No special installation is required as the Java3D system loads the correct native library automatically. Users of Oracle Java 1.7 under Mac OSX should read the "MessageToDisplayOnInstallation" entry. More information about the updated version of Java3D used in this package can be found at http://gouessej.wordpress.com/2012/08/01/java-3d-est-de-retour-java-3d-is-back and http://jogamp.org/wiki/index.php/Downloading_and_installing_JOGL.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/scatterPlot3D1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/scatterPlot3D1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/scatterPlot3D
-
-Changes=This release includes a perspective for the KnowledgeFlow.
 
 # Related to other packages?
 #Related=
@@ -43,18 +43,14 @@ Changes=This release includes a perspective for the KnowledgeFlow.
 Depends=weka (>=3.7.4)
 
 # Special instructions to be displayed on installation of this package
-MessageToDisplayOnInstallation=This package requires Java 3D to be installed on your\n\
- system before it can be used. Mac users will already have Java 3D available to\n\
- them and will not require anything further. For other platforms, download and\n\
- install Java3D from https://java3d.dev.java.net/binary-builds.html before restarting\n\
- Weka.
- 
-
-# External class check. Skip loading this package if the following
-# class can't be instantiated.
-DoNotLoadIfClassNotPresent=com.sun.j3d.utils.universe.SimpleUniverse
-
-# Log message to display if package can't be loaded because Java3D is not installed
-DoNotLoadIfClassNotPresentMessage=scatterPlot3D can't be loaded because \
- Java3D does not seem to be installed. Download and install Java3D from \
- https://java3d.dev.java.net/binary-builds.html before restarting Weka.
+MessageToDisplayOnInstallation=This package includes Java3D classes and native\n\
+ 32 and 64 bit libraries for Windows, Linux and Mac OSX. No special installation is\n\
+ required and the correct native libraries should be loaded automatically. The only\n\
+ exception to this is Mac OSX when using Oracle Java 1.7 - in this case, if Apple's\n\
+ Java 1.6 JVM is (or has been) installed, there will be an old version of Java3D\n\
+ jar files and native libraries in /System/Java/Extensions. These will need to be\n\
+ removed or they will interfere with the new version included in this package.\n\
+ Note that, as of writing, there is a positioning bug when running under Oracle\n\
+ Java 1.7 under Mac OSX. This results in the display being offset slightly in the\n\
+ Window. It can be rectified (temporarily) by resizing the Explorer/Knowledge Flow\n\
+ Window.
