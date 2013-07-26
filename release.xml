@@ -1,0 +1,438 @@
+<project name="weka-release" default="release_base_zip_no_junit" basedir=".">
+<!-- 
+  ===========================================================================
+   Ant build file for creating weka release distributions. Make sure that
+   last-release.props contains the date of the last release of this branch
+   of Weka (so that the changelog is correct).
+
+   Use ./weka/build.xml for tasks related to compiling weka and making the
+   core weka.jar executable jar file.
+
+   Type ant -projecthelp for targets and descriptions.
+
+   $Revision$
+  ===========================================================================
+-->
+
+  <!-- set global properties for this build -->
+  <property name="temp" value="temp"/>
+  <property name="weka" value="weka"/>
+  <property name="wekadocs" value="wekadocs"/>
+  <property name="wekaexamples" value="wekaexamples"/>
+  <property name="dist"  value="dist"/>
+  <property name="os"  value="osx"/>
+  <property name="makensis"  value="makensis"/>
+  <property name="osx_jre_vendor" value="apple"/>
+
+  <!-- load the last release date -->
+  <property file="last-release.props"/>
+
+  <!-- define the latex task -->
+  <taskdef name="latex" classname="de.dokutransdata.antlatex.LaTeX"/>
+
+  <!-- Define the bundleapp task. Java Application Bundler (http://java.net/projects/appbundler) makes Mac OS application 
+       bundles for Java 1.7 or higher (jarbundler does not work for Java 1.7). This requires Oracle Java 1.7 or 
+       higher at build time too - uncomment this taskdef if building a Mac app for Java 1.7 -->
+<!--  <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/> -->
+
+  <target name="init_all" depends="requirements_instructions">
+    <!-- Create the time stamp and various dirs -->
+    <tstamp>
+      <format property="TODAY" pattern="yyyy-MM-dd"/>
+    </tstamp>
+
+    <mkdir dir="${temp}/weka-${release}"/>
+    <mkdir dir="${temp}/weka-${release}/changelogs"/>
+    <mkdir dir="${temp}/weka-${release}/data"/>
+    <mkdir dir="${temp}/weka-${release}/doc"/>
+    <mkdir dir="${dist}"/>
+  </target>
+
+  <target name="requirements_instructions">
+    <echo message="NOTE: THIS BUILD FILE IS FOR CREATING WEKA RELEASE DISTRIBUTIONS. USE THE build.xml IN ./weka FOR TASKS RELATED TO COMPILING WEKA."/>
+    <echo message="This build file should be run from a clean checkout (and not from a working copy)." />
+    <echo message="In order to make a complete set of release artifacts for Weka, this build script requires the following"/>
+    <echo message="1) Additional jars to be installed in Apache Ant's lib directory:"/>
+    <echo message="nsvnkit.jar"/>
+    <echo message="svnkit-cli.jar"/>
+    <echo message="ant_latex.jar (http://www.dokutransdata.de/ant_latex/)"/>
+    <echo message="jarbundler.jar (Mac app for Apple Java 1.6)"/>
+    <echo message="xercesImpl.jar"/>
+    <echo message="appbundler (Mac app for Oracle Java 1.7 or higher. http://java.net/projects/appbundler/)"/>
+    <echo message=""/>
+    <echo message="2) To create windows installers the makensis utility from NSIS is needed. Under Linux (Ubuntu), this can be installed by typing sudo apt-get install nsis. For instructions on how to build this for Mac OS X run the nsis_osx_howto target"/>
+    <echo message="3) Building Mac application bundles depends on the target JRE. For JRE 1.6, jarbundler is used. For Oracle JRE >= 1.7, jarbundler does not work and appbundler must be used. Appbundler *requires* Java >= 1.7, so the build script must run under >= 1.7 in this case."/>
+    <echo message="Under Mac OS X, hdiutil is used to create a compressed dmg file. Under Linux, genisoimage (already installed in Ubuntu) is used to first create a dmg and then libdmg (http://shanemcc.co.uk/libdmg/) is used to produce a compressed dmg file from the uncompressed one"/>
+    <echo message="LaTeX is required for building Weka's documentation. Additionally the wrapfig.sty style is needed if not already insalled"/>
+  </target>
+
+  <target name="nsis_osx_howto">
+    <echo message="To build makensis for OS X:"/>
+    <echo message="1) Download and install scons: http://www.scons.org/"/>
+    <echo message="2) Download pre-compiled (Windows) NSIS v2.46 (zip archive) from sourceforge and unzip somewhere"/>
+    <echo message="3) Check out NSIS 2.46 tag from subversion: https://nsis.svn.sourceforge.net/svnroot/nsis/NSIS/tags/v246"/>
+    <echo message="4) Execute the following from the root directory of the NSIS 2.46 checked out from subversion: scons SKIPSTUBS=all SKIPPLUGINS=all SKIPUTILS=all SKIPMISC=all NSIS_CONFIG_CONST_DATA_PATH=no PREFIX=[path to pre-compiled nsis 2.46] install-compiler"/>
+    <echo message="5) OS X executable version of makensis will be placed in the pre-compiled nsis 2.46 root directory"/>    
+  </target>
+
+  <target name="set_version">
+    <echo message="Setting version in weka/core/version.txt to ${release}"/>
+    <ant antfile="build.xml" dir="${weka}" target="set_version" inheritall="false">
+      <property name="release" value="${release}"/>
+    </ant>
+  </target>
+
+  <target name="run_tests_all" depends="clean, init_all">
+    <echo message="Running unit tests..."/>
+    <ant antfile="build.xml" dir="${weka}" target="run_tests" inheritall="false"/>
+  </target>
+
+  <target name="weka-exe" depends="init_all, set_version">
+    <echo message="Building weka.jar executable jar file..."/>
+    <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
+    <ant antfile="build.xml" dir="${weka}" target="exejar" inheritall="false"/>
+  </target>
+
+  <target name="remote-engine" depends="weka-exe">
+    <echo message="Building remote engine jar..."/>
+    <ant antfile="build.xml" dir="${weka}" target="remotejar" inheritall="false"/>
+  </target>
+
+  <target name="weka-examples" depends="weka-exe">
+    <echo message="Building weka examples..."/>
+    <ant antfile="build.xml" dir="${wekaexamples}" target="clean" inheritall="false"/>
+    <ant antfile="build.xml" dir="${wekaexamples}" inheritall="false">
+      <property name="java.class.path" value="../${weka}/build/classes"/>
+    </ant>
+  </target>
+
+  <target name="weka-src" depends="init_all">
+    <echo message="Building weka.jar src jar file..."/>
+    <ant antfile="build.xml" dir="${weka}" target="srcjar" inheritall="false"/>
+  </target>
+
+  <target name="javadocs" depends="weka-exe" description="Create the javadocs">
+    <echo message="Generating java docs for weka..."/>
+    <ant antfile="build.xml" dir="${weka}" target="docs" inheritall="false"/>
+  </target>
+
+  <!-- changelog will need -DstartDate property -->
+  <target name="changelog" depends="init_all" description="Create a changelog for Weka stable-3-6. Creates a changelog with changes from the date in last-release-props to today">
+    <echo message="Creating a changelog for {${lastReleaseDate}}:{${TODAY}}"/>
+    <ant antfile="build.xml" dir="${weka}" target="changelog" inheritall="false">
+      <property name="date_range" value="{${lastReleaseDate}}:{${TODAY}}"/>
+      <property name="release" value="${release}"/>
+      <property name="weka_branch" value="branches/stable-3-6"/>
+    </ant>
+  </target>
+
+  <target name="manual" depends="init_all" description="Make the WekaManual.">
+    <latex
+       verbose="on"
+       clean="on"
+       pdftex="off"
+       workingDir="${wekadocs}/manual"
+       >
+      <fileset dir="${wekadocs}/manual">
+        <include name="manual.tex" />
+      </fileset>
+    </latex>
+    <echo message="Running dvips..."/>
+    <exec executable="dvips" dir="${wekadocs}/manual">
+      <arg value="-oWekaManual.ps"/>
+      <arg value="manual.dvi"/>
+    </exec>
+    <echo message="Running ps2pdf..."/>
+    <exec executable="ps2pdf" dir="${wekadocs}/manual">
+      <arg value="WekaManual.ps"/>
+    </exec>
+  </target>
+
+  <target name="copy-files" depends="javadocs, remote-engine, weka-src, changelog, manual">
+    <copy todir="${temp}/weka-${release}">
+      <fileset dir="${weka}/dist">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${temp}/weka-${release}/changelogs">
+      <fileset dir="${wekadocs}/changelogs">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${temp}/weka-${release}/doc">
+      <fileset dir="${weka}/doc"/>
+    </copy>
+
+    <copy todir="${temp}/weka-${release}/data">
+      <fileset dir="${wekadocs}/data"/>
+    </copy>
+
+    <copy todir="${temp}/weka-${release}/">
+      <fileset dir="${wekadocs}">
+        <include name="documentation.*"/>
+        <include name="README" />
+        <include name="COPYING" />
+        <include name="weka.*" />
+      </fileset>
+    </copy>
+
+    <copy todir="${temp}/weka-${release}/">
+      <fileset dir="${wekadocs}/manual">
+        <include name="WekaManual.pdf"/>
+        </fileset>
+    </copy>
+
+    <!-- copy the generated pdf up one directory - this copy is under subversion control and needs to be committed -->
+    <copy file="${wekadocs}/manual/WekaManual.pdf" toFile="${wekadocs}/WekaManual.pdf"/>
+
+    <copy file="${wekadocs}/WekaManual.pdf" toFile="${dist}/WekaManual-${release}.pdf"/>
+    <!-- copy changelogs to README files for uploading to SourceForge release directories -->
+    <copy file="${wekadocs}/changelogs/CHANGELOG-${release}" toFile="${dist}/README-${release}.txt"/>
+
+    <zip destfile="${temp}/weka-${release}/wekaexamples.zip" 
+     basedir="${wekaexamples}"/>
+  </target>
+
+  <target name="clean" description="Removes the dist directory">
+    <delete dir="${dist}"/>
+    <delete dir="${temp}"/>
+  </target>
+
+  <!-- build the Mac application suitable for running under Oracle Java >= 1.7 -->
+  <target name="osx_app_oracle" if="${osx_jre_oracle}">
+    <bundleapp outputdirectory="${temp}"
+        name="weka-${release}-oracle-jvm"
+        displayname="Weka-${release}"
+	icon="weka/src/main/java/weka/gui/weka_icon_new.icns"
+        identifier="nz.ac.waikato.cms.Weka"
+        shortversion="${version}"
+        mainclassname="weka.gui.GUIChooser">
+        <classpath file="${temp}/weka-${release}/weka.jar"/>
+        <option value="-Xmx1024M"/>
+    </bundleapp>
+
+    <antcall target="dmg_${os}">
+      <param name="jvm_target" value="${jvm_target}"/>
+    </antcall>
+  </target>
+
+  <target name="install_app_stub_osx_apple_jre">
+    <!-- jarbundler does this automatically if we are building under OS X with Apple JRE 1.6 -->
+    <copy file="installer/osx_app_resources/JavaApplicationStub" toDir="${temp}/weka-${release}-apple-jvm.app/Contents/MacOS/"/>
+    <chmod file="${temp}/weka-${release}-apple-jvm.app/Contents/MacOS/JavaApplicationStub" perm="ugo+rx"/>
+  </target>
+
+  <!-- build the Mac application suitable for running under Apple Java 1.6 -->
+  <target name="osx_app_apple" if="${osx_jre_apple}">
+    <taskdef name="jarbundler" 
+             classname="net.sourceforge.jarbundler.JarBundler" />
+    <jarbundler dir="${temp}"
+                name="weka-${release}-apple-jvm"
+                mainclass="weka.gui.GUIChooser"
+                icon="weka/src/main/java/weka/gui/weka_icon_new.icns"
+                version="${release}"
+                verbose="true"
+                VMOptions="-Xmx1Gb"
+                shortname="Weka-${release}"
+                arguments=""
+                workingdirectory="/Users"
+                jvmversion="1.6+">
+      <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
+      <jarfileset dir="${temp}/weka-${release}/">
+        <include name="weka.jar"/>
+      </jarfileset>     
+      <documenttype name="Attribute Relation File Format (ARFF)"
+                    extensions="arff xrff" 
+                    iconFile="weka/src/main/java/weka/gui/weka_icon_new.icns"
+                    role="Editor"/> 
+      <documenttype name="Knowledge Flow layout"
+                    extensions="kf kfml" 
+                    iconFile="weka/src/main/java/weka/gui/weka_icon_new.icns"
+                    role="Editor"/> 
+    </jarbundler>
+
+    <antcall target="install_app_stub_osx_apple_jre"/>
+
+    <antcall target="dmg_${os}">
+      <param name="jvm_target" value="${jvm_target}"/>
+    </antcall>
+  </target>
+
+  <target name="dmg_osx">
+    <!-- Make a .dmg disk image under Mac OSX -->
+    <exec executable="/usr/bin/hdiutil" os="Mac OS X">
+      <arg value="create"/>
+      <arg value="-srcfolder"/>
+      <arg value="${temp}"/>
+      <arg value="-volname"/>
+      <arg value="weka-${release}"/>
+      <arg value="-ov"/>
+      <arg value="${dist}/weka-${release}-${jvm_target}.dmg"/>
+    </exec>
+
+    <delete dir="${temp}/weka-${release}-${jvm_target}.app"/>
+  </target>
+
+  <target name="dmg_linux">
+    <!-- Make a .dmg disk image under Linux -->
+    <exec executable="genisoimage" os="Linux">
+      <arg value="-D"/>
+      <arg value="-V"/>
+      <arg value="Weka-${release}"/>
+      <arg value="-no-pad"/>
+      <arg value="-r"/>
+      <arg value="-apple"/>
+      <arg value="-o"/>
+      <arg value="${dist}/weka-${release}-temp.dmg"/>
+      <arg value="${temp}"/>
+    </exec>    
+
+    <exec executable="dmg" os="Linux">
+      <arg value="dmg"/>
+      <arg value="${dist}/weka-${release}-temp.dmg"/>
+      <arg value="${dist}/weka-${release}-${jvm_target}.dmg"/>
+    </exec>
+
+    <delete file="${dist}/weka-${release}-temp.dmg"/>
+    <delete dir="${temp}/weka-${release}-${jvm_target}.app"/>
+  </target>
+
+  <target name="osx_installer" description="Make an OS X application(s).  Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt; and at least one JVM provider (e.g. -Dosx_jre_apple=true -Dosx_jre_oracle=true).">
+
+    <delete dir="${temp}/nsis"/>
+
+    <antcall target="osx_app_oracle">
+      <param name="jvm_target" value="oracle-jvm"/>
+    </antcall>
+    <antcall target="osx_app_apple">
+      <param name="jvm_target" value="apple-jvm"/>
+    </antcall>
+  </target>
+
+  <target name="installer_init">
+    <unzip src="${dist}/weka-${release}.zip" dest="${temp}"/>
+    <mkdir dir="${temp}/nsis"/>
+
+    <copy todir="${temp}/nsis">
+      <fileset dir="installer/nsis/">
+        <include name="**/*"/>
+      </fileset>
+    </copy>
+
+    <javac srcdir="${temp}/nsis" 
+      fork="yes"
+      destdir="${temp}/nsis"
+      includeantruntime="false"
+      source="1.6" target="1.6">
+      <include name="GenerateSetup.java"/>
+    </javac>
+
+    <javac srcdir="${temp}/nsis/templates" 
+      fork="yes"
+      destdir="${temp}/nsis/templates"
+      includeantruntime="false"
+      source="1.6" target="1.6">
+      <include name="RunWeka.java"/>
+    </javac>
+  </target>
+
+  <target name="release_base_zip_no_junit" depends="copy-files" description="Make a distribution of Weka. Run with -Drelease=number (e.g. 3-6-10)">
+    <echo message="Making weka-${release}.zip ..."/>
+    <zip destfile="${dist}/weka-${release}.zip" basedir="${temp}">
+      <include name="**/*"/>
+    </zip>
+    <echo message="Cleaning up..."/>
+    <delete dir="${temp}"/>
+    <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
+  </target>
+
+  <target name="release_base_zip" depends="run_tests_all, copy-files" description="Run unit tests ans make a distribution of Weka. Run with -Drelease=number (e.g. 3-6-10)">
+    <echo message="Making weka-${release}.zip ..."/>
+    <zip destfile="${dist}/weka-${release}.zip" basedir="${temp}">
+      <include name="**/*"/>
+    </zip>
+    <echo message="Cleaning up..."/>
+    <delete dir="${temp}"/>
+    <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
+  </target>
+
+  <target name="win_installers" depends="installer_init">
+        <!-- non-jre installer - 32 bit -->
+    <echo message="Creating nsis script for 32 bit installer"/>
+    <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-6 -link-prefix 'Weka 3.6'"/>
+      <classpath>
+        <pathelement location="${temp}/nsis"/>
+        <pathelement path="${java.class.path}"/>
+      </classpath>
+    </java>
+    <!-- non-jre installer - 64 bit -->
+    <echo message="Creating nsis script for 64 bit installer"/>
+    <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-6 -link-prefix 'Weka 3.6' -x64 true"/>
+      <classpath>
+        <pathelement location="${temp}/nsis"/>
+        <pathelement path="${java.class.path}"/>
+      </classpath>
+    </java>
+    <!-- jre installer - 32 bit -->
+    <echo message="Creating nsis script for 32 bit installer with JRE included"/>
+    <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-6 -link-prefix 'Weka 3.6' -jre ${jre}"/>
+      <classpath>
+        <pathelement location="${temp}/nsis"/>
+        <pathelement path="${java.class.path}"/>
+      </classpath>
+    </java>
+    <!-- jre installer - 64 bit -->
+    <echo message="Creating nsis script for 64 bit installer with JRE included"/>
+    <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-6 -link-prefix 'Weka 3.6' -x64 true -jre ${jre_64}"/>
+      <classpath>
+        <pathelement location="${temp}/nsis"/>
+        <pathelement path="${java.class.path}"/>
+      </classpath>
+    </java>
+
+    <echo message="Compiling nsis script for 32 bit installer to executable"/>
+    <exec executable="${makensis}">
+      <arg value="temp/nsis/output/weka-${release}.nsi"/>
+    </exec>
+
+    <echo message="Compiling nsis script for 32 bit installer with jre to executable"/>
+    <exec executable="${makensis}">
+      <arg value="temp/nsis/output/weka-${release}jre.nsi"/>
+    </exec>
+
+    <echo message="Compiling nsis script for 64 bit installer to executable"/>
+    <exec executable="${makensis}">
+      <arg value="temp/nsis/output/weka-${release}-x64.nsi"/>
+    </exec>
+
+    <echo message="Compiling nsis script for 64 bit installer with jre to executable"/>
+    <exec executable="${makensis}">
+      <arg value="temp/nsis/output/weka-${release}jre-x64.nsi"/>
+    </exec>
+
+    <!-- copy all exe installers to dist -->
+    <copy todir="${dist}">
+      <fileset dir="${temp}/nsis/output/">
+        <include name="**/*.exe"/>
+        </fileset>
+    </copy>
+    <delete dir="${temp}/nsis"/>
+  </target>
+
+  <target name="installers_no_junit" depends="clean, release_base_zip_no_junit, win_installers, osx_installer" description="Make a release and create installers without running unit tests. Default OS is OSX (add -Dos=linux to build Mac dmg file under Linux with genisoimage). Run with -Drelease=X-Y-Z -Dversion=X.Y.Z -Djre=&lt;path to 32 bit JRE installer&gt; -Djre_64=&lt;path to 64 bit JRE installer&gt; -Dmakensis=&lt;absolute path to the makensis executable&gt; (only needed if makensis is not in the PATH). Specify  at least one JVM provider for constructing Mac application bundles (e.g. -Dosx_jre_apple=true -Dosx_jre_oracle=true). Mote that Mac application for oracle requires Java 1.7 and the bundleapp taskdef at the beginning of this build script to be uncommented)">
+    <echo message="Cleaning up..."/>
+    <delete dir="${temp}"/>
+  </target>
+
+  <target name="installers" depends="clean, release_base_zip, win_installers, osx_installer" description="Make a release and create instalers. Default OS is OSX (add -Dos=linux to build Mac dmg file under Linux with genisoimage). Run with -Drelease=X-Y-Z -Dversion=X.Y.Z -Djre=&lt;path to 32 bit JRE installer&gt; -Djre_64=&lt;path to 64 bit JRE installer&gt; -Dmakensis=&lt;absolute path to the makensis executable&gt; (only needed if makensis is not in the PATH). Specify  at least one JVM provider for constructing Mac application bundles (e.g. -Dosx_jre_apple=true -Dosx_jre_oracle=true). Mote that Mac application for oracle requires Java 1.7 and the bundleapp taskdef at the beginning of this build script to be uncommented)">
+    <echo message="Cleaning up..."/>
+    <delete dir="${temp}"/>
+  </target>
+
+</project>
