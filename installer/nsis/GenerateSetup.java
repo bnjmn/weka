@@ -321,6 +321,7 @@ public class GenerateSetup {
       block += "!define WEKA_JRE_SUFFIX \"jre\"";
     else
       block += "!define WEKA_JRE_SUFFIX \"\"";
+
     setup = replaceBlock(setup, "Weka", block);
 
     // no JRE?
@@ -331,11 +332,11 @@ public class GenerateSetup {
     if (mJRE.length() != 0)
       return writeToFile(
           setup, 
-          mOutputDir + "/weka-" + versionHyphen + "jre.nsi");
+          mOutputDir + "/weka-" + versionHyphen + "jre" + (use64bit ? "-x64" : "") + ".nsi");
     else
       return writeToFile(
           setup, 
-          mOutputDir + "/weka-" + versionHyphen + ".nsi");
+          mOutputDir + "/weka-" + versionHyphen + (use64bit ? "-x64" : "") + ".nsi");
   }
 
   /**
