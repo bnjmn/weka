@@ -24,6 +24,8 @@ package weka.classifiers.rules;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.ListIterator;
+import java.util.LinkedList;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -82,7 +84,7 @@ public class OneR
   implements TechnicalInformationHandler, Sourcable {
     
   /** for serialization */
-  static final long serialVersionUID = -2459427002147861445L;
+  static final long serialVersionUID = -3459427003147861443L;
   
   /**
    * Returns a string describing classifier
@@ -125,7 +127,7 @@ public class OneR
     implements Serializable, RevisionHandler {
     
     /** for serialization */
-    static final long serialVersionUID = 1152814630957092281L;
+    static final long serialVersionUID = 2252814630957092281L;
 
     /** The class attribute. */
     private Attribute m_class;
@@ -421,13 +423,6 @@ public class OneR
     // attributes processed before this one
     data = new Instances(data);
     
-    // ... can't be more than numInstances buckets
-    int [] classifications = new int[data.numInstances()];
-    double [] breakpoints = new double[data.numInstances()];
-
-    // create array to hold the counts
-    int [] counts = new int[data.classAttribute().numValues()];
-    int correct = 0;
     int lastInstance = data.numInstances();
 
     // missing values get sorted to the end of the instances
@@ -438,58 +433,125 @@ public class OneR
       missingValueCounts[(int) data.instance(lastInstance).
                          classValue()]++; 
     }
-    int i = 0; 
-    int cl = 0; // index of next bucket to create
-    int it;
-    while (i < lastInstance) { // start a new bucket
-      for (int j = 0; j < counts.length; j++) counts[j] = 0;
-      do { // fill it until it has enough of the majority class
-        it = (int) data.instance(i++).classValue();
-        counts[it]++;
-      } while (counts[it] < m_minBucketSize && i < lastInstance);
-
-      // while class remains the same, keep on filling
-      while (i < lastInstance && 
-             (int) data.instance(i).classValue() == it) { 
-        counts[it]++; 
-        i++;
-      }
-      while (i < lastInstance && // keep on while attr value is the same
-             (data.instance(i - 1).value(attr) 
-	      == data.instance(i).value(attr))) {
-        counts[(int) data.instance(i++).classValue()]++;
-      }
-      for (int j = 0; j < counts.length; j++) {
-        if (counts[j] > counts[it]) { 
-	  it = j;
-	}
-      }
-      if (cl > 0) { // can we coalesce with previous class?
-        if (counts[classifications[cl - 1]] == counts[it]) {
-          it = classifications[cl - 1];
-	}
-        if (it == classifications[cl - 1]) {
-	  cl--; // yes!
-	}
-      }
-      correct += counts[it];
-      classifications[cl] = it;
-      if (i < lastInstance) {
-        breakpoints[cl] = (data.instance(i - 1).value(attr)
-			   + data.instance(i).value(attr)) / 2;
-      }
-      cl++;
-    }
-    if (cl == 0) {
+    if (lastInstance == 0) {
       throw new Exception("Only missing values in the training data!");
     }
-    OneRRule r = new OneRRule(data, attr, cl); // new rule with cl branches
-    r.m_correct = correct;
-    for (int v = 0; v < cl; v++) {
-      r.m_classifications[v] = classifications[v];
-      if (v < cl-1) {
-	r.m_breakpoints[v] = breakpoints[v];
+
+    // gather class distributions for all values
+    double lastValue = 0;
+    LinkedList<int[]> distributions = new LinkedList<int[]>();
+    LinkedList<Double> values = new LinkedList<Double>();
+    int[] distribution = null;
+    for (int i = 0; i < lastInstance; i++) {
+
+      // new value?
+      if ((i == 0) || (data.instance(i).value(attr) > lastValue)) {
+        if (i != 0) {
+          values.add((lastValue + data.instance(i).value(attr)) / 2.0);
+        }
+        lastValue = data.instance(i).value(attr);
+        distribution = new int[data.numClasses()];
+        distributions.add(distribution);
       }
+      distribution[(int)data.instance(i).classValue()]++;
+    }
+    values.add(Double.MAX_VALUE);
+
+    // create iterator to go through list
+    ListIterator<int[]> it = distributions.listIterator();
+    ListIterator<Double> itVals = values.listIterator();
+    int[] oldDist = null;
+    while (it.hasNext()) {
+      
+      // grab next trivial bucket and iterate to next value as well
+      int[] newDist = it.next();
+      double val = itVals.next();
+
+      // should we merge the two buckets?
+      if ((oldDist != null) && 
+
+          // classes the same?
+          ((Utils.maxIndex(newDist) == Utils.maxIndex(oldDist)) ||
+
+           // bucket not large enough?
+           (oldDist[Utils.maxIndex(oldDist)] < m_minBucketSize))) {
+        
+        // add counts
+        for (int j = 0; j < oldDist.length; j++) {
+          newDist[j] += oldDist[j];
+        }
+        
+        // remove distribution
+        it.previous(); // element just visited
+        it.previous(); // previous element we want to remove
+        it.remove();
+        it.next(); // back to element just visited
+
+        // remove value
+        itVals.previous(); // element just visited
+        itVals.previous(); // previous element we want to remove
+        itVals.remove();
+        itVals.next(); // back to element just visited
+      }
+     
+      // make progress
+      oldDist = newDist;
+    }
+
+    // last scan, merge adjacent intervals with same class and calculate correct classifications
+    int numCorrect = 0;
+    it = distributions.listIterator();
+    itVals = values.listIterator();
+    oldDist = null;
+    while (it.hasNext()) {
+      
+      // grab next trivial bucket and iterate to next value as well
+      int[] newDist = it.next();
+      double val = itVals.next();
+
+      // number of correct classifications does not change by merging
+      numCorrect += newDist[Utils.maxIndex(newDist)];
+
+      // should we merge the two buckets?
+      if ((oldDist != null) && 
+
+          // classes the same?
+          (Utils.maxIndex(newDist) == Utils.maxIndex(oldDist))) {
+        
+        // add counts
+        for (int j = 0; j < oldDist.length; j++) {
+          newDist[j] += oldDist[j];
+        }
+        
+        // remove distribution
+        it.previous(); // element just visited
+        it.previous(); // previous element we want to remove
+        it.remove();
+        it.next(); // back to element just visited
+
+        // remove value
+        itVals.previous(); // element just visited
+        itVals.previous(); // previous element we want to remove
+        itVals.remove();
+        itVals.next(); // back to element just visited
+      }
+     
+      // make progress
+      oldDist = newDist;
+    }
+
+    OneRRule r = new OneRRule(data, attr, distributions.size()); // new rule with cl branches
+    r.m_correct = numCorrect;
+    it = distributions.listIterator();
+    itVals = values.listIterator();
+    int v = 0;
+    while (it.hasNext()) {
+      r.m_classifications[v] = Utils.maxIndex(it.next());
+      double splitPoint = itVals.next();
+      if (itVals.hasNext()) {
+	r.m_breakpoints[v] = splitPoint;
+      }
+      v++;
     }
 
     return r;
