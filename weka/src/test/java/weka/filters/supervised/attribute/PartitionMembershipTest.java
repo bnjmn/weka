@@ -17,13 +17,14 @@
  * Copyright (C) 2005,2012 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.filters.unsupervised.attribute;
+package weka.filters.supervised.attribute;
 
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Instances;
 import weka.core.TestInstances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
+import weka.filters.supervised.attribute.PartitionMembership;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

@@ -19,7 +19,7 @@
  *
  */
 
-package weka.filters.unsupervised.attribute;
+package weka.filters.supervised.attribute;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -32,6 +32,7 @@ import weka.core.PartitionGenerator;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
 import weka.filters.UnsupervisedFilter;
 import weka.classifiers.trees.J48;
 
@@ -64,7 +65,7 @@ import weka.core.RevisionUtils;
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class PartitionMembership extends Filter implements UnsupervisedFilter, OptionHandler, RevisionHandler {
+public class PartitionMembership extends Filter implements SupervisedFilter, OptionHandler, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 333532554667754026L;
