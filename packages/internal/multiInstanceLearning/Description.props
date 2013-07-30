@@ -31,7 +31,7 @@ Description=A collection of multi-instance learning classifiers. Includes the Ci
 Changes=Tiny change required in TLC because the PartitionMembership filter is now in the supervised package.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceLearning1.0.6.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceLearning1.0.7.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/multiInstanceLearning
