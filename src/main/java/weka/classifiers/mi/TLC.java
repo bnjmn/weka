@@ -43,8 +43,8 @@ import weka.core.TechnicalInformationHandler;
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.PartitionMembership;
 import weka.filters.unsupervised.attribute.MultiInstanceWrapper;
+import weka.filters.supervised.attribute.PartitionMembership;
 
 import java.util.Enumeration;
 import java.util.Vector;
