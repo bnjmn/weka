@@ -34,7 +34,7 @@ import weka.core.Capabilities.Capability;
 
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
-import weka.filters.unsupervised.attribute.PartitionMembership;
+import weka.filters.supervised.attribute.PartitionMembership;
 import weka.filters.unsupervised.attribute.MultiInstanceToPropositional;
 import weka.filters.unsupervised.attribute.Remove;
 
