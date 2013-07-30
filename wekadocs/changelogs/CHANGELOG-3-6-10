@@ -1,0 +1,229 @@
+------------------------------------------------------------------------
+r9507 | mhall | 2013-01-25 11:45:50 +1300 (Fri, 25 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/version.txt
+
+stable-3-6 branch is now 3.6.10
+------------------------------------------------------------------------
+r9513 | mhall | 2013-01-25 14:18:34 +1300 (Fri, 25 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Version.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/version.txt
+
+Now handles version numbers with '-snapshot' in them
+------------------------------------------------------------------------
+r9518 | mhall | 2013-01-30 12:11:12 +1300 (Wed, 30 Jan 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Attribute.java
+
+String attributes now have a dummy first value that is unlikely to ever occur as a real value.
+------------------------------------------------------------------------
+r9524 | mhall | 2013-02-08 03:58:06 +1300 (Fri, 08 Feb 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Added a serial version UID for inner Tree class.
+------------------------------------------------------------------------
+r9525 | mhall | 2013-02-08 04:00:16 +1300 (Fri, 08 Feb 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Quick javadoc fix.
+------------------------------------------------------------------------
+r9529 | mhall | 2013-02-08 08:27:10 +1300 (Fri, 08 Feb 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/InterquartileRange.java
+   M /branches/stable-3-6/weka/src/test/java/weka/filters/unsupervised/attribute/InterquartileRangeTest.java
+   M /branches/stable-3-6/weka/src/test/resources/wekarefs/weka/filters/unsupervised/attribute/InterquartileRangeTest.ref
+
+Capabilities corrected to reflect the fact that this filter does not handle missing values
+------------------------------------------------------------------------
+r9565 | mhall | 2013-02-19 20:08:15 +1300 (Tue, 19 Feb 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/StringToWordVector.java
+
+Now checks for a non-nominal class and turns on doNotOperateOnPerClassBasis in that case.
+------------------------------------------------------------------------
+r9566 | mhall | 2013-02-19 20:30:09 +1300 (Tue, 19 Feb 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/GaussianProcesses.java
+
+GaussianProcesses model now requires less memory after training because kernel cache is cleared after training.
+------------------------------------------------------------------------
+r9570 | mhall | 2013-02-19 22:27:27 +1300 (Tue, 19 Feb 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/KernelFilter.java
+
+Fixed bug in KernelFilter: now works with nominal class attributes as well.
+------------------------------------------------------------------------
+r9653 | mhall | 2013-03-21 16:24:36 +1300 (Thu, 21 Mar 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/converters/ArffLoader.java
+
+Now makes sure that the source reader is closed if an exception occurs during reading.
+------------------------------------------------------------------------
+r9657 | mhall | 2013-04-04 08:31:22 +1300 (Thu, 04 Apr 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/supervised/instance/SMOTE.java
+
+Fixed a sorting problem that occurs under Java 7
+------------------------------------------------------------------------
+r9666 | mhall | 2013-04-05 16:20:09 +1300 (Fri, 05 Apr 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/PropositionalToMultiInstance.java
+
+Added option not to weight the bags by the number of instances they contain.
+------------------------------------------------------------------------
+r9692 | mhall | 2013-04-14 20:01:20 +1200 (Sun, 14 Apr 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/attributeSelection/GainRatioAttributeEval.java
+
+Now supports instance weights.
+------------------------------------------------------------------------
+r9697 | mhall | 2013-04-16 20:49:07 +1200 (Tue, 16 Apr 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/LogPanel.java
+
+Now formats timer digits so that each element always has two digits.
+------------------------------------------------------------------------
+r9700 | mhall | 2013-04-16 22:50:27 +1200 (Tue, 16 Apr 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/LogPanel.java
+
+Made the formatter a member variable rather than local to the timer.
+------------------------------------------------------------------------
+r9718 | mhall | 2013-05-19 15:48:03 +1200 (Sun, 19 May 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/MultiFilter.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/SimpleStreamFilter.java
+
+MultiFilter was generating a npe in the case where a filter in the chain was streamable but did not produce an output instance at a given point - an example is RemoveWithValues where the input instance is consumed because it does not match. Fixed.
+------------------------------------------------------------------------
+r9728 | mhall | 2013-05-29 04:26:13 +1200 (Wed, 29 May 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+Some clusterers were greyed out when classes to clusters evaluation was selected, even if all attributes apart from the class pass the Capabilities check - fixed.
+------------------------------------------------------------------------
+r9731 | mhall | 2013-05-30 01:32:49 +1200 (Thu, 30 May 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+PMML was appearing as a file type in the save classifier dialog - fixed.
+------------------------------------------------------------------------
+r9733 | mhall | 2013-05-30 06:44:39 +1200 (Thu, 30 May 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/meta/GridSearch.java
+
+Capabilities now allow unary class. This allows LibSVM and other one class classifiers to be used with GridSearch.
+------------------------------------------------------------------------
+r9737 | mhall | 2013-06-01 08:47:11 +1200 (Sat, 01 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Utils.java
+
+eq(), smOrEq() and grOrEq() now return true when both arguments are negative or positive infinity.
+------------------------------------------------------------------------
+r9751 | mhall | 2013-06-10 20:26:33 +1200 (Mon, 10 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/TrainingSetMaker.java
+
+Now accepts testSet connections.
+------------------------------------------------------------------------
+r9752 | mhall | 2013-06-10 20:28:22 +1200 (Mon, 10 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/beans/TestSetMaker.java
+
+Now accepts trainingSet connections.
+------------------------------------------------------------------------
+r9755 | mhall | 2013-06-11 20:18:07 +1200 (Tue, 11 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+File type filter is now defaults to "Model object files" again.
+------------------------------------------------------------------------
+r9758 | mhall | 2013-06-11 21:37:01 +1200 (Tue, 11 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Fixed an option description.
+------------------------------------------------------------------------
+r9764 | mhall | 2013-06-18 09:20:53 +1200 (Tue, 18 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/core/Instances.java
+
+sort() was slow due to stupidity on my part :-) Fixed.
+------------------------------------------------------------------------
+r9770 | mhall | 2013-06-18 20:56:29 +1200 (Tue, 18 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/LinearRegression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/core/matrix/LinearRegression.java
+
+Changes courtesy of Sean Daugherty that save memory and improve the speed of LinearRegression
+------------------------------------------------------------------------
+r9800 | fracpete | 2013-06-26 10:14:21 +1200 (Wed, 26 Jun 2013) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+
+applyFilter(Filter) method now creates a copy of the supplied filter to avoid anything leaking back, e.g., into the GOE
+otherwise problems can arise, e.g., with an AddClassification filter that holds on to its loaded model
+------------------------------------------------------------------------
+r9804 | fracpete | 2013-06-26 14:39:04 +1200 (Wed, 26 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/SubsetByExpression.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Parser.cup
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Parser.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Scanner.java
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/sym.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/SubsetByExpression.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Parser.cup
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Parser.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Scanner.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/sym.java
+
+SubsetByExpression filter now handles STRING attributes as well
+------------------------------------------------------------------------
+r9814 | mhall | 2013-06-27 12:33:26 +1200 (Thu, 27 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/RemoveType.java
+
+Class should always be kept if set, even if selection is inverted.
+------------------------------------------------------------------------
+r9819 | mhall | 2013-06-27 14:58:01 +1200 (Thu, 27 Jun 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/filters/unsupervised/attribute/NominalToBinary.java
+
+Now implements StreamableFilter.
+------------------------------------------------------------------------
+r9835 | mhall | 2013-07-01 10:42:41 +1200 (Mon, 01 Jul 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/ConjunctiveRule.java
+
+Migrated Eibe's bug fix: Fixed bug significantly affecting results when nominal attributes are present. Rule growing stopped much too early.
+------------------------------------------------------------------------
+r9892 | mhall | 2013-07-25 14:30:27 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/arffviewer/ArffViewerMainPanel.java
+
+Fixed a bug that occurred under Windows only when using the ArffViewer from the command line or GUIChooser - Save as would fail to save the current set of instances and claim that the chosen file name already exists.
+------------------------------------------------------------------------
+r9897 | mhall | 2013-07-25 20:11:43 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/Kernel.java
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/functions/supportVector/PrecomputedKernelMatrixKernel.java
+
+PrecomputedKernelMatrixKernel now implements Copyable (so that shallow copies can be made) and Kernel.makeCopy and Kernel.makeCopies now check for Copyable before using deep copying via serialization
+------------------------------------------------------------------------
+r9917 | mhall | 2013-07-30 11:31:01 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/HierarchyPropertyParser.java
+
+Got rid of a weird stray character in the javadocs.
+------------------------------------------------------------------------
+r9918 | mhall | 2013-07-30 11:41:05 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/classifiers/rules/OneR.java
+
+Eibe's fix for unexpected boundary selection behavior when changing values of B
+------------------------------------------------------------------------
