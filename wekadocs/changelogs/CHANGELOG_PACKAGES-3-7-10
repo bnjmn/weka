@@ -1,0 +1,580 @@
+------------------------------------------------------------------------
+r9618 | mhall | 2013-03-07 16:33:18 +1300 (Thu, 07 Mar 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dagging/src/main/java/weka/classifiers/meta/Dagging.java
+
+Changed base classifier to DecisionStump to make the package compatible with the Waikato branch
+------------------------------------------------------------------------
+r9656 | mhall | 2013-04-04 08:29:22 +1300 (Thu, 04 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/SMOTE/Description.props
+   M /trunk/packages/external/SMOTE/src/main/java/weka/filters/supervised/instance/SMOTE.java
+
+Fixed a sorting problem that occurs under Java 7
+------------------------------------------------------------------------
+r9658 | mhall | 2013-04-04 08:34:22 +1300 (Thu, 04 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/SMOTE/pom.xml
+
+[maven-release-plugin] prepare release SMOTE-1.0.3
+------------------------------------------------------------------------
+r9659 | mhall | 2013-04-04 08:34:58 +1300 (Thu, 04 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/SMOTE/pom.xml
+
+[maven-release-plugin] rollback the release of SMOTE-1.0.3
+------------------------------------------------------------------------
+r9660 | mhall | 2013-04-04 08:35:49 +1300 (Thu, 04 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/SMOTE/pom.xml
+
+Updated pom
+------------------------------------------------------------------------
+r9661 | mhall | 2013-04-04 08:36:17 +1300 (Thu, 04 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/SMOTE/pom.xml
+
+[maven-release-plugin] prepare release SMOTE-1.0.3
+------------------------------------------------------------------------
+r9663 | mhall | 2013-04-04 08:36:21 +1300 (Thu, 04 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/SMOTE/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9665 | eibe | 2013-04-05 11:56:02 +1300 (Fri, 05 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/src/main/java/weka/filters/unsupervised/attribute/PropositionalToMultiInstance.java
+
+Added option not to weight the bags by the number of instances they contain.
+------------------------------------------------------------------------
+r9667 | mhall | 2013-04-05 16:25:07 +1300 (Fri, 05 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/Description.props
+   M /trunk/packages/internal/multiInstanceFilters/pom.xml
+
+Updated Description.props and pom.xml
+------------------------------------------------------------------------
+r9668 | mhall | 2013-04-05 16:30:31 +1300 (Fri, 05 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/Description.props
+
+Updated date
+------------------------------------------------------------------------
+r9669 | mhall | 2013-04-05 16:35:35 +1300 (Fri, 05 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/pom.xml
+
+[maven-release-plugin] prepare release multiInstanceFilters-1.0.4
+------------------------------------------------------------------------
+r9671 | mhall | 2013-04-05 16:35:39 +1300 (Fri, 05 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9689 | mhall | 2013-04-12 18:00:03 +1200 (Fri, 12 Apr 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/Description.props
+   M /trunk/packages/external/kfGroovy/src/main/java/org/pentaho/dm/kf/GroovyComponentCustomizer.java
+
+Now uses reflection to test for SyntaxDocument (as this class is not available in the waikato branch of Weka)
+------------------------------------------------------------------------
+r9709 | mhall | 2013-05-14 19:58:14 +1200 (Tue, 14 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/oneClassClassifier/Description.props
+   M /trunk/packages/internal/oneClassClassifier/src/main/java/weka/classifiers/meta/OneClassClassifier.java
+
+Capabilities now allows for unary class data
+------------------------------------------------------------------------
+r9710 | mhall | 2013-05-14 20:05:00 +1200 (Tue, 14 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/oneClassClassifier/Description.props
+
+Fixed a spelling mistake
+------------------------------------------------------------------------
+r9711 | mhall | 2013-05-14 20:11:31 +1200 (Tue, 14 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/oneClassClassifier/pom.xml
+
+Updated svn url
+------------------------------------------------------------------------
+r9712 | mhall | 2013-05-14 20:12:40 +1200 (Tue, 14 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/oneClassClassifier/pom.xml
+
+[maven-release-plugin] prepare release oneClassClassifier-1.0.4
+------------------------------------------------------------------------
+r9714 | mhall | 2013-05-14 20:12:45 +1200 (Tue, 14 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/oneClassClassifier/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9723 | mhall | 2013-05-22 18:47:14 +1200 (Wed, 22 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/Description.props
+   M /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters/unsupervised/attribute/LOF.java
+
+Fixed a bug in trimZeroDistances()
+------------------------------------------------------------------------
+r9724 | mhall | 2013-05-22 18:59:30 +1200 (Wed, 22 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare release localOutlierFactor-1.0.3
+------------------------------------------------------------------------
+r9726 | mhall | 2013-05-22 18:59:33 +1200 (Wed, 22 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9734 | mhall | 2013-05-30 06:45:10 +1200 (Thu, 30 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/src/main/java/weka/classifiers/meta/GridSearch.java
+
+Capabilities now allow unary class. This allows LibSVM and other one class classifiers to be used with GridSearch.
+------------------------------------------------------------------------
+r9735 | mhall | 2013-05-30 06:48:03 +1200 (Thu, 30 May 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/Description.props
+   M /trunk/packages/internal/gridSearch/pom.xml
+
+Updated description.props and svn urls in pom.xml
+------------------------------------------------------------------------
+r9739 | mhall | 2013-06-05 15:34:42 +1200 (Wed, 05 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/pom.xml
+
+[maven-release-plugin] prepare release gridSearch-1.0.7
+------------------------------------------------------------------------
+r9741 | mhall | 2013-06-05 15:34:45 +1200 (Wed, 05 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9775 | mhall | 2013-06-20 20:23:15 +1200 (Thu, 20 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/src/main/java/weka/attributeSelection/ClassifierSubsetEval.java
+
+Now allows evaluation via different metrics - auc, f-measure etc.. Now has an option to evaluate via a percentage-split on the training data and another to enable debugging output.
+------------------------------------------------------------------------
+r9776 | mhall | 2013-06-20 20:25:49 +1200 (Thu, 20 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/Description.props
+
+Updated for the 1.0.3 release
+------------------------------------------------------------------------
+r9777 | mhall | 2013-06-20 20:29:52 +1200 (Thu, 20 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/pom.xml
+
+Updated svn urls
+------------------------------------------------------------------------
+r9778 | mhall | 2013-06-20 20:35:39 +1200 (Thu, 20 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/src/main/java/weka/attributeSelection/RankSearch.java
+
+Added an option to allow the evaluation of the ranking to terminate after n non-improving additions to the best subset. Now also has an option to output debugging information.
+------------------------------------------------------------------------
+r9779 | mhall | 2013-06-20 20:42:50 +1200 (Thu, 20 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/Description.props
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+
+Updated Description.props for the 1.0.5 release. Updated svn urls in pom.xml
+------------------------------------------------------------------------
+r9790 | mhall | 2013-06-23 10:17:08 +1200 (Sun, 23 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/src/main/java/weka/attributeSelection/ClassifierSubsetEval.java
+
+Last change to ClassifierSubsetEval broke RaceSearch - fixed.
+------------------------------------------------------------------------
+r9791 | mhall | 2013-06-24 09:41:52 +1200 (Mon, 24 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/Description.props
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+   M /trunk/packages/internal/attributeSelectionSearchMethods/src/main/java/weka/attributeSelection/RankSearch.java
+
+Added an option to set a threshold on the minimum improvement in merit needed for an attribute to be added from the ranking, and an option to exclude non-improving attributes when considering further additions from the ranking.
+------------------------------------------------------------------------
+r9792 | mhall | 2013-06-24 09:51:48 +1200 (Mon, 24 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+
+[maven-release-plugin] prepare release attributeSelectionSearchMethods-1.0.6
+------------------------------------------------------------------------
+r9794 | mhall | 2013-06-24 09:51:52 +1200 (Mon, 24 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9795 | mhall | 2013-06-24 09:53:02 +1200 (Mon, 24 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/pom.xml
+
+[maven-release-plugin] prepare release classifierBasedAttributeSelection-1.0.3
+------------------------------------------------------------------------
+r9797 | mhall | 2013-06-24 09:53:06 +1200 (Mon, 24 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9803 | eibe | 2013-06-26 11:50:26 +1200 (Wed, 26 Jun 2013) | 1 line
+Changed paths:
+   A /trunk/packages/internal/kernelLogisticRegression
+   A /trunk/packages/internal/kernelLogisticRegression/Description.props
+   A /trunk/packages/internal/kernelLogisticRegression/build_package.xml
+   A /trunk/packages/internal/kernelLogisticRegression/lib
+   A /trunk/packages/internal/kernelLogisticRegression/pom.xml
+   A /trunk/packages/internal/kernelLogisticRegression/src
+   A /trunk/packages/internal/kernelLogisticRegression/src/main
+   A /trunk/packages/internal/kernelLogisticRegression/src/main/java
+   A /trunk/packages/internal/kernelLogisticRegression/src/main/java/weka
+   A /trunk/packages/internal/kernelLogisticRegression/src/main/java/weka/classifiers
+   A /trunk/packages/internal/kernelLogisticRegression/src/main/java/weka/classifiers/functions
+   A /trunk/packages/internal/kernelLogisticRegression/src/main/java/weka/classifiers/functions/KernelLogisticRegression.java
+   A /trunk/packages/internal/kernelLogisticRegression/src/test
+   A /trunk/packages/internal/kernelLogisticRegression/src/test/java
+   A /trunk/packages/internal/kernelLogisticRegression/src/test/java/weka
+   A /trunk/packages/internal/kernelLogisticRegression/src/test/java/weka/classifiers
+   A /trunk/packages/internal/kernelLogisticRegression/src/test/java/weka/classifiers/functions
+   A /trunk/packages/internal/kernelLogisticRegression/src/test/java/weka/classifiers/functions/KernelLogisticRegressionTest.java
+
+Initial import.
+------------------------------------------------------------------------
+r9807 | mhall | 2013-06-26 15:25:26 +1200 (Wed, 26 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/kernelLogisticRegression/pom.xml
+
+Updated version number in pom
+------------------------------------------------------------------------
+r9810 | mhall | 2013-06-26 15:41:50 +1200 (Wed, 26 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/kernelLogisticRegression/pom.xml
+
+[maven-release-plugin] prepare release kernelLogisticRegression-1.0.0
+------------------------------------------------------------------------
+r9812 | mhall | 2013-06-26 15:41:53 +1200 (Wed, 26 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/kernelLogisticRegression/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9820 | eibe | 2013-06-27 16:01:36 +1200 (Thu, 27 Jun 2013) | 1 line
+Changed paths:
+   A /trunk/packages/internal/supervisedAttributeScaling
+   A /trunk/packages/internal/supervisedAttributeScaling/Description.props
+   A /trunk/packages/internal/supervisedAttributeScaling/build_package.xml
+   A /trunk/packages/internal/supervisedAttributeScaling/lib
+   A /trunk/packages/internal/supervisedAttributeScaling/pom.xml
+   A /trunk/packages/internal/supervisedAttributeScaling/src
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java/weka
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java/weka/classifiers
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java/weka/classifiers/functions
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java/weka/classifiers/functions/NonNegativeLogisticRegression.java
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java/weka/filters
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java/weka/filters/supervised
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java/weka/filters/supervised/attribute
+   A /trunk/packages/internal/supervisedAttributeScaling/src/main/java/weka/filters/supervised/attribute/SupervisedAttributeScaler.java
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java/weka
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java/weka/classifiers
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java/weka/classifiers/functions
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java/weka/classifiers/functions/NonNegativeLogisticRegressionTest.java
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java/weka/filters
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java/weka/filters/supervised
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java/weka/filters/supervised/attribute
+   A /trunk/packages/internal/supervisedAttributeScaling/src/test/java/weka/filters/supervised/attribute/SupervisedAttributeScalerTest.java
+
+Initial import.
+------------------------------------------------------------------------
+r9821 | mhall | 2013-06-27 20:11:03 +1200 (Thu, 27 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/supervisedAttributeScaling/pom.xml
+
+[maven-release-plugin] prepare release supervisedAttributeScaling-1.0.0
+------------------------------------------------------------------------
+r9823 | mhall | 2013-06-27 20:11:07 +1200 (Thu, 27 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/supervisedAttributeScaling/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9834 | eibe | 2013-06-29 17:04:19 +1200 (Sat, 29 Jun 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/conjunctiveRule/src/main/java/weka/classifiers/rules/ConjunctiveRule.java
+
+Fixed bug significantly affecting results when nominal attributes are present. Rule growing stopped much too early.
+------------------------------------------------------------------------
+r9836 | mhall | 2013-07-01 10:44:31 +1200 (Mon, 01 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/conjunctiveRule/Description.props
+   M /trunk/packages/internal/conjunctiveRule/pom.xml
+
+Updated for the 1.0.3 release
+------------------------------------------------------------------------
+r9839 | eibe | 2013-07-02 14:20:23 +1200 (Tue, 02 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/Description.props
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+   M /trunk/packages/internal/alternatingDecisionTrees/src/main/java/weka/classifiers/trees/ADTree.java
+
+This release makes ADTree implement RandomizableClassifier, which means ensembles can be build using RandomCommittee when random path expansions is turned on. Additionally, the seed for random number generation now depends on the input data.
+------------------------------------------------------------------------
+r9840 | mhall | 2013-07-02 16:04:40 +1200 (Tue, 02 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/Description.props
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+
+Updated package URL in description and set pom version to 1.0.4-SNAPSHOT
+------------------------------------------------------------------------
+r9841 | mhall | 2013-07-02 16:19:31 +1200 (Tue, 02 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+
+[maven-release-plugin] prepare release alternatingDecisionTrees-1.0.4
+------------------------------------------------------------------------
+r9842 | mhall | 2013-07-02 16:20:50 +1200 (Tue, 02 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+
+[maven-release-plugin] rollback the release of alternatingDecisionTrees-1.0.4
+------------------------------------------------------------------------
+r9843 | mhall | 2013-07-02 16:21:19 +1200 (Tue, 02 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+
+Updated svn urls
+------------------------------------------------------------------------
+r9844 | mhall | 2013-07-02 16:21:40 +1200 (Tue, 02 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+
+[maven-release-plugin] prepare release alternatingDecisionTrees-1.0.4
+------------------------------------------------------------------------
+r9846 | mhall | 2013-07-02 16:21:44 +1200 (Tue, 02 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9874 | eibe | 2013-07-16 16:12:06 +1200 (Tue, 16 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/src/main/java/weka/filters/unsupervised/attribute/MultiInstanceToPropositional.java
+
+Filter now works properly using default instance weighting method when run from the command-line.
+------------------------------------------------------------------------
+r9879 | mhall | 2013-07-23 19:15:06 +1200 (Tue, 23 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/Description.props
+   A /trunk/packages/internal/localOutlierFactor/src/main/java/weka/classifiers
+   A /trunk/packages/internal/localOutlierFactor/src/main/java/weka/classifiers/misc
+   A /trunk/packages/internal/localOutlierFactor/src/main/java/weka/classifiers/misc/LOF.java
+   M /trunk/packages/internal/localOutlierFactor/src/main/java/weka/filters/unsupervised/attribute/LOF.java
+   A /trunk/packages/internal/localOutlierFactor/src/test/java/weka/classifiers
+   A /trunk/packages/internal/localOutlierFactor/src/test/java/weka/classifiers/misc
+   A /trunk/packages/internal/localOutlierFactor/src/test/java/weka/classifiers/misc/LOFTest.java
+
+Added an LOF classifier. Also added code to LOF to handle the case where the data only contains the class attribute
+------------------------------------------------------------------------
+r9880 | mhall | 2013-07-23 19:42:57 +1200 (Tue, 23 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare release localOutlierFactor-1.0.4
+------------------------------------------------------------------------
+r9882 | mhall | 2013-07-23 19:43:00 +1200 (Tue, 23 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/localOutlierFactor/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9889 | mhall | 2013-07-25 09:27:58 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   A /trunk/packages/internal/clojureClassifier
+   A /trunk/packages/internal/clojureClassifier/Description.props
+   A /trunk/packages/internal/clojureClassifier/GenericPropertiesCreator.props
+   A /trunk/packages/internal/clojureClassifier/build_package.xml
+   A /trunk/packages/internal/clojureClassifier/lib
+   A /trunk/packages/internal/clojureClassifier/lib/clojure-1.5.1.jar
+   A /trunk/packages/internal/clojureClassifier/lib/clojure-utils-0.2.3.jar
+   A /trunk/packages/internal/clojureClassifier/pom.xml
+   A /trunk/packages/internal/clojureClassifier/src
+   A /trunk/packages/internal/clojureClassifier/src/main
+   A /trunk/packages/internal/clojureClassifier/src/main/clj
+   A /trunk/packages/internal/clojureClassifier/src/main/clj/weka_clj
+   A /trunk/packages/internal/clojureClassifier/src/main/clj/weka_clj/simple.clj
+   A /trunk/packages/internal/clojureClassifier/src/main/java
+   A /trunk/packages/internal/clojureClassifier/src/main/java/weka
+   A /trunk/packages/internal/clojureClassifier/src/main/java/weka/classifiers
+   A /trunk/packages/internal/clojureClassifier/src/main/java/weka/classifiers/clojure
+   A /trunk/packages/internal/clojureClassifier/src/main/java/weka/classifiers/clojure/ClojureClassifier.java
+
+Initial import
+------------------------------------------------------------------------
+r9898 | mhall | 2013-07-25 21:10:20 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/clojureClassifier/pom.xml
+
+Added clojars as a repository
+------------------------------------------------------------------------
+r9899 | mhall | 2013-07-25 21:10:48 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/clojureClassifier/pom.xml
+
+[maven-release-plugin] prepare release clojureClassifier-1.0.0
+------------------------------------------------------------------------
+r9901 | mhall | 2013-07-25 21:10:51 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/clojureClassifier/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r9902 | mhall | 2013-07-26 08:51:30 +1200 (Fri, 26 Jul 2013) | 1 line
+Changed paths:
+   A /trunk/packages/external/scatterPlot3D/lib/gluegen-rt-natives-linux-amd64.jar
+   A /trunk/packages/external/scatterPlot3D/lib/gluegen-rt-natives-linux-i586.jar
+   A /trunk/packages/external/scatterPlot3D/lib/gluegen-rt-natives-macosx-universal.jar
+   A /trunk/packages/external/scatterPlot3D/lib/gluegen-rt-natives-windows-amd64.jar
+   A /trunk/packages/external/scatterPlot3D/lib/gluegen-rt-natives-windows-i586.jar
+   A /trunk/packages/external/scatterPlot3D/lib/gluegen-rt.jar
+   A /trunk/packages/external/scatterPlot3D/lib/j3dcore.jar
+   A /trunk/packages/external/scatterPlot3D/lib/j3dutils.jar
+   A /trunk/packages/external/scatterPlot3D/lib/joal-natives-linux-amd64.jar
+   A /trunk/packages/external/scatterPlot3D/lib/joal-natives-linux-i586.jar
+   A /trunk/packages/external/scatterPlot3D/lib/joal-natives-macosx-universal.jar
+   A /trunk/packages/external/scatterPlot3D/lib/joal-natives-windows-amd64.jar
+   A /trunk/packages/external/scatterPlot3D/lib/joal-natives-windows-i586.jar
+   A /trunk/packages/external/scatterPlot3D/lib/joal.jar
+   A /trunk/packages/external/scatterPlot3D/lib/jogl-all-natives-linux-amd64.jar
+   A /trunk/packages/external/scatterPlot3D/lib/jogl-all-natives-linux-i586.jar
+   A /trunk/packages/external/scatterPlot3D/lib/jogl-all-natives-macosx-universal.jar
+   A /trunk/packages/external/scatterPlot3D/lib/jogl-all-natives-windows-amd64.jar
+   A /trunk/packages/external/scatterPlot3D/lib/jogl-all-natives-windows-i586.jar
+   A /trunk/packages/external/scatterPlot3D/lib/jogl-all.jar
+   A /trunk/packages/external/scatterPlot3D/lib/vecmath.jar
+
+New Java 3D libraries for all major platforms
+------------------------------------------------------------------------
+r9903 | mhall | 2013-07-26 08:52:41 +1200 (Fri, 26 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/scatterPlot3D/src/main/java/weka/gui/explorer/Explorer3DPanel.java
+
+A minor addition to try and overcome a bug with Java 3D on Oracle Java 1.7 on the Mac
+------------------------------------------------------------------------
+r9904 | mhall | 2013-07-26 08:53:06 +1200 (Fri, 26 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/scatterPlot3D/Description.props
+   M /trunk/packages/external/scatterPlot3D/pom.xml
+
+Updated
+------------------------------------------------------------------------
+r9905 | mhall | 2013-07-26 09:12:40 +1200 (Fri, 26 Jul 2013) | 1 line
+Changed paths:
+   A /trunk/packages/external/associationRulesVisualizer/lib/gluegen-rt-natives-linux-amd64.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/gluegen-rt-natives-linux-i586.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/gluegen-rt-natives-macosx-universal.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/gluegen-rt-natives-windows-amd64.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/gluegen-rt-natives-windows-i586.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/gluegen-rt.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/j3dcore.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/j3dutils.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/joal-natives-linux-amd64.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/joal-natives-linux-i586.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/joal-natives-macosx-universal.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/joal-natives-windows-amd64.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/joal-natives-windows-i586.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/joal.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/jogl-all-natives-linux-amd64.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/jogl-all-natives-linux-i586.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/jogl-all-natives-macosx-universal.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/jogl-all-natives-windows-amd64.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/jogl-all-natives-windows-i586.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/jogl-all.jar
+   A /trunk/packages/external/associationRulesVisualizer/lib/vecmath.jar
+
+Adding new Java 3D libraries
+------------------------------------------------------------------------
+r9906 | mhall | 2013-07-26 09:13:29 +1200 (Fri, 26 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/external/associationRulesVisualizer/Description.props
+
+Removed check for Java 3D installed. Package still needs the display bug fix for Mac.
+------------------------------------------------------------------------
+r9921 | eibe | 2013-07-30 15:29:20 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/Description.props
+
+Updated Description.props and incremented version number.
+------------------------------------------------------------------------
+r9922 | eibe | 2013-07-30 15:30:47 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+   M /trunk/packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/TLC.java
+
+Tiny change required in TLC because the PartitionMembership filter is now in the supervised package.
+------------------------------------------------------------------------
+r9923 | eibe | 2013-07-30 15:32:28 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+   M /trunk/packages/internal/multiInstanceLearning/pom.xml
+
+Neglected to change the dependency to 3.7.10.
+------------------------------------------------------------------------
+r9924 | mhall | 2013-07-30 16:19:54 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+
+Restored the dependency on multiInstanceFilters to (>=1.0.3)
+------------------------------------------------------------------------
+r9925 | mhall | 2013-07-30 16:23:24 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/src/main/java/weka/filters/unsupervised/attribute/MultiInstanceWrapper.java
+
+Fixed PartitionMembership dependency
+------------------------------------------------------------------------
+r9926 | mhall | 2013-07-30 16:27:58 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/Description.props
+
+Updated the package URL to the correct version number
+------------------------------------------------------------------------
+r9927 | mhall | 2013-07-30 16:31:28 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+
+Updated package URL to the correct version number
+------------------------------------------------------------------------
+r9928 | mhall | 2013-07-30 16:38:36 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/Description.props
+
+Updated weka dependency because of change in package for PartitionMembership
+------------------------------------------------------------------------
+r9929 | mhall | 2013-07-30 16:56:29 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceFilters/pom.xml
+
+Updated weka dependency in pom
+------------------------------------------------------------------------
+r9930 | mhall | 2013-07-30 20:25:12 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+   M /trunk/packages/internal/multiInstanceLearning/pom.xml
+
+Increased revision by one because package and maven releases got out of sync at some stage
+------------------------------------------------------------------------
+r9931 | mhall | 2013-07-30 20:33:00 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiInstanceLearning/Description.props
+
+Updated package URL
+------------------------------------------------------------------------

@@ -1,0 +1,585 @@
+------------------------------------------------------------------------
+r9575 | mhall | 2013-02-22 14:04:21 +1300 (Fri, 22 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Filter.java
+
+Fixed so that string attributes are handled properly during incremental processing.
+------------------------------------------------------------------------
+r9577 | mhall | 2013-02-22 15:34:31 +1300 (Fri, 22 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Sorter.java
+
+Was not indicating finished if there was only an in-memory buffer to output (and no files) - fixed.
+------------------------------------------------------------------------
+r9579 | mhall | 2013-02-22 16:06:44 +1300 (Fri, 22 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/PredictionAppender.java
+
+Was not handling the end of stream correctly in some cases when running in incremental mode - fixed. 
+------------------------------------------------------------------------
+r9584 | mhall | 2013-02-25 11:19:08 +1300 (Mon, 25 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Now allows multiple incoming testSet connections. This allows a flow to train a model (or load one) and then have multiple separate loaders sending test sets to the classifier. This will only work reliably and give sensible evaluation results if the user runs the flow by launching start points sequentially (and optionally setting the order that start points get launched by setting each one's name with a numeric prefix). The component will now pop up a dialog informing the user about this if it detects more than one testSet connection.
+------------------------------------------------------------------------
+r9586 | mhall | 2013-02-25 11:45:38 +1300 (Mon, 25 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/PredictionAppender.java
+
+Is now quiet if no class is set in an incoming format-only set of instances.
+------------------------------------------------------------------------
+r9588 | mhall | 2013-02-25 12:05:56 +1300 (Mon, 25 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/LogPanel.java
+
+Components can now use @!@ as a prefix to their name to tell the log panel not to start a timer.
+------------------------------------------------------------------------
+r9590 | mhall | 2013-02-25 12:07:10 +1300 (Mon, 25 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Status messages from the Knowledge Flow itself now no longer start a timer in the LogPanel.
+------------------------------------------------------------------------
+r9592 | mhall | 2013-02-25 14:04:41 +1300 (Mon, 25 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/IncrementalClassifierEvaluator.java
+
+Was not handling the end-of-stream case properly when end-of-stream was indicated by a null instance - fixed.
+------------------------------------------------------------------------
+r9594 | mhall | 2013-02-25 14:09:03 +1300 (Mon, 25 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Was reporting one to many instances when processing incrementally - fixed.
+------------------------------------------------------------------------
+r9596 | mhall | 2013-02-25 14:40:22 +1300 (Mon, 25 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/LogPanel.java
+
+If a component's first message starts with 'finished' or 'done" then a timer is not started.
+------------------------------------------------------------------------
+r9598 | mhall | 2013-02-25 15:41:34 +1300 (Mon, 25 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/PredictionAppender.java
+
+Fixed a bug where the list of string attribute indexes used during incremental processing when string atts are present was not getting reset on the start of a new stream.
+------------------------------------------------------------------------
+r9600 | mhall | 2013-02-26 13:53:03 +1300 (Tue, 26 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Initial status message when processing incrementally now reads "Predicting..." rather than "Training..." when the user has not chosen to update the classifier.
+------------------------------------------------------------------------
+r9602 | mhall | 2013-02-27 22:54:24 +1300 (Wed, 27 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Fixed a bug where a structure-only test set would get stored in the queue of valid test sets when training and test sets originated from separate sources.
+------------------------------------------------------------------------
+r9604 | mhall | 2013-02-28 16:02:09 +1300 (Thu, 28 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/ClassifierErrorsPlotInstances.java
+
+Fixed a bug that affected evaluation of InputMappedClassifier.
+------------------------------------------------------------------------
+r9606 | mhall | 2013-02-28 18:36:16 +1300 (Thu, 28 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/ClassifierPerformanceEvaluator.java
+
+Now evaluates single set batches sequentially rather than in a separate thread. This makes an attempt at protecting classifiers who's classify/distributionForInstance methods are not thread safe (e.g FilteredClassifier) in the case where there might be more than one batchClassifier connection outgoing from the Classifier component.
+------------------------------------------------------------------------
+r9609 | mhall | 2013-02-28 20:54:57 +1300 (Thu, 28 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/ClassifierPerformanceEvaluator.java
+
+Reverted back to pure multi-threaded mode as Classifier now deep copies models to protect non thread-safe classifiers.
+------------------------------------------------------------------------
+r9610 | mhall | 2013-02-28 20:55:41 +1300 (Thu, 28 Feb 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Now protects classifiers who's classify/distributionForInstance methods are not thread safe (e.g FilteredClassifier), in the case where there might be more than one batchClassifier connection outgoing from the Classifier component, by making deep copies of the trained classifier before notifying listeners.
+------------------------------------------------------------------------
+r9615 | mhall | 2013-03-07 15:05:19 +1300 (Thu, 07 Mar 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/BinC45ModelSelection.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/BinC45Split.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/C45ModelSelection.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/C45Split.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/ClassifierSplitModel.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/Distribution.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/EntropyBasedSplitCrit.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/EntropySplitCrit.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/GainRatioSplitCrit.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/InfoGainSplitCrit.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/ModelSelection.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/NBTreeClassifierTree.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/NBTreeModelSelection.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/NBTreeNoSplit.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/NBTreeSplit.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/NoSplit.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/SplitCriterion.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/j48/Stats.java
+
+Updated from trunk
+------------------------------------------------------------------------
+r9616 | mhall | 2013-03-07 15:30:24 +1300 (Thu, 07 Mar 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/filters/supervised/instance/SpreadSubsample.java
+
+Was missing a disableAll() call in the capabilities method - fixed
+------------------------------------------------------------------------
+r9629 | fracpete | 2013-03-11 10:36:01 +1300 (Mon, 11 Mar 2013) | 2 lines
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+finally-clause in startClusterer now checks whether there are any instances set to avoid exception that renders explorer unusable (start button never gets reactivated)
+
+------------------------------------------------------------------------
+r9641 | mhall | 2013-03-17 14:48:09 +1300 (Sun, 17 Mar 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/BeanVisual.java
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   A /branches/waikato/weka/src/main/java/weka/gui/beans/icons/zoom_in.png
+   A /branches/waikato/weka/src/main/java/weka/gui/beans/icons/zoom_out.png
+
+Added zoom facility. setAnimated() and setStatic() in BeanVisual are now deprecated (and no longer do anything).
+------------------------------------------------------------------------
+r9643 | mhall | 2013-03-17 15:42:37 +1300 (Sun, 17 Mar 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   A /branches/waikato/weka/src/main/java/weka/gui/beans/icons/bricks.png
+
+Added a toolbar button for grouping components
+------------------------------------------------------------------------
+r9647 | mhall | 2013-03-18 09:51:31 +1300 (Mon, 18 Mar 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Now sets zoom button enabled status correctly when switching between tabs at different zoom levels. Now draws connection lines at thickness 2 when zoom is less than 100% because perfectly horizontal lines were disappearing under Windows.
+------------------------------------------------------------------------
+r9649 | mhall | 2013-03-18 13:33:14 +1300 (Mon, 18 Mar 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/functions/SGD.java
+
+Added epsilon-insensitive and Huber loss functions
+------------------------------------------------------------------------
+r9651 | mhall | 2013-03-19 22:51:35 +1300 (Tue, 19 Mar 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+Small change to the write method to ensure that bean x, y positions don't change if writing happens when beans haven't been rendered graphically (i.e. they have zero width/height).
+------------------------------------------------------------------------
+r9655 | mhall | 2013-04-01 19:58:24 +1300 (Mon, 01 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Improved handling of nominal and string values.
+------------------------------------------------------------------------
+r9672 | fracpete | 2013-04-11 09:14:39 +1200 (Thu, 11 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/AbstractPlotInstances.java
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/AbstractPlotInstances.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+added canPlot(boolean) method to AbstractPlotInstances that checks whether we can generate a plot; parameter specifies whether to automatically make a call to the setUp() method as well
+------------------------------------------------------------------------
+r9674 | mhall | 2013-04-11 11:16:37 +1200 (Thu, 11 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/attributeSelection/WrapperSubsetEval.java
+
+Added an option to allow the user to specify a class label to use when evaluating subsets using IR statistics. Not specifying a class label results in the existing behavior, i.e. using the class-weighted average of the IR statistic.
+------------------------------------------------------------------------
+r9683 | mhall | 2013-04-12 16:36:39 +1200 (Fri, 12 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/Version.java
+
+Now handles up to four digits in a version number.
+------------------------------------------------------------------------
+r9687 | mhall | 2013-04-12 16:47:22 +1200 (Fri, 12 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/Copyright.props
+
+Updated copyright dates
+------------------------------------------------------------------------
+r9688 | mhall | 2013-04-12 16:49:21 +1200 (Fri, 12 Apr 2013) | 1 line
+Changed paths:
+   D /branches/waikato/weka/src/main/java/weka/gui/scripting/SyntaxDocument.java
+
+We don't have full copyright for SyntaxDocument
+------------------------------------------------------------------------
+r9691 | mhall | 2013-04-14 19:59:48 +1200 (Sun, 14 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/attributeSelection/GainRatioAttributeEval.java
+
+Now supports instance weights.
+------------------------------------------------------------------------
+r9694 | mhall | 2013-04-16 19:59:32 +1200 (Tue, 16 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Classifier.java
+
+Now only the last classifier from a set will report a finished status to the log, thus preventing the resetting of the timer after each fold of a cross-validation is processed.
+------------------------------------------------------------------------
+r9696 | mhall | 2013-04-16 20:38:57 +1200 (Tue, 16 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/LogPanel.java
+
+Now formats timer digits so that each element always has two digits.
+------------------------------------------------------------------------
+r9699 | mhall | 2013-04-16 22:48:54 +1200 (Tue, 16 Apr 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/LogPanel.java
+
+Made the formatter a member variable rather than local to the timer.
+------------------------------------------------------------------------
+r9706 | mhall | 2013-05-09 14:30:28 +1200 (Thu, 09 May 2013) | 1 line
+Changed paths:
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/HoeffdingTree.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/ActiveHNode.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/ConditionalSufficientStats.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/GaussianConditionalSufficientStats.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/GiniSplitMetric.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/HNode.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/InactiveHNode.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/InfoGainSplitMetric.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/LeafNode.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/LearningNode.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/NBNode.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/NBNodeAdaptive.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/NominalConditionalSufficientStats.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/Split.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/SplitCandidate.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/SplitMetric.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/SplitNode.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/UnivariateNominalMultiwaySplit.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/UnivariateNumericBinarySplit.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/WeightMass.java
+   A /branches/waikato/weka/src/test/java/weka/classifiers/trees/HoeffdingTreeTest.java
+   A /branches/waikato/weka/src/test/resources/wekarefs/weka/classifiers/trees/HoeffdingTreeTest.ref
+
+Initial import
+------------------------------------------------------------------------
+r9708 | mhall | 2013-05-12 21:37:59 +1200 (Sun, 12 May 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/HoeffdingTree.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/HNode.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/SplitNode.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/WeightMass.java
+
+Now implements Drawable
+------------------------------------------------------------------------
+r9716 | mhall | 2013-05-16 19:43:13 +1200 (Thu, 16 May 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Fixed the toolTipText for setDateAttributes.
+------------------------------------------------------------------------
+r9719 | mhall | 2013-05-19 15:50:23 +1200 (Sun, 19 May 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/filters/MultiFilter.java
+   M /branches/waikato/weka/src/main/java/weka/filters/SimpleStreamFilter.java
+
+MultiFilter was generating a npe in the case where a filter in the chain was streamable but did not produce an output instance at a given point - an example is RemoveWithValues where the input instance is consumed because it does not match. Fixed.
+------------------------------------------------------------------------
+r9721 | mhall | 2013-05-20 16:16:29 +1200 (Mon, 20 May 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/HoeffdingTree.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/GiniSplitMetric.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/InfoGainSplitMetric.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/ht/SplitMetric.java
+
+Renamed a method
+------------------------------------------------------------------------
+r9729 | mhall | 2013-05-29 04:28:30 +1200 (Wed, 29 May 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+
+Some clusterers were greyed out when classes to clusters evaluation was selected, even if all attributes apart from the class pass the Capabilities check - fixed.
+------------------------------------------------------------------------
+r9732 | mhall | 2013-05-30 01:34:39 +1200 (Thu, 30 May 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+PMML was appearing as a file type in the save classifier dialog - fixed.
+------------------------------------------------------------------------
+r9738 | mhall | 2013-06-01 08:47:43 +1200 (Sat, 01 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/Utils.java
+
+eq(), smOrEq() and grOrEq() now return true when both arguments are negative or positive infinity.
+------------------------------------------------------------------------
+r9743 | mhall | 2013-06-06 20:31:02 +1200 (Thu, 06 Jun 2013) | 1 line
+Changed paths:
+   A /branches/waikato/weka/src/main/java/weka/estimators/MultivariateGaussianEstimator.java (from /branches/waikato/weka/src/main/java/weka/estimators/MultivariateNormalEstimator.java:9728)
+
+Renamed to MultivariateGaussianDistribution to avoid a name clash with MultivariateNormalDistribution in the HMM package.
+------------------------------------------------------------------------
+r9746 | mhall | 2013-06-08 22:11:29 +1200 (Sat, 08 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/meta/Vote.java
+
+Capabilities method now loads any prebuilt classifiers. Previously, capabilities would fail if Vote (using only pre-built classifiers) was used in a FilteredClassifier.
+------------------------------------------------------------------------
+r9749 | mhall | 2013-06-10 20:24:13 +1200 (Mon, 10 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/TrainingSetMaker.java
+
+Now accepts testSet connections.
+------------------------------------------------------------------------
+r9750 | mhall | 2013-06-10 20:24:43 +1200 (Mon, 10 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/TestSetMaker.java
+
+Now accepts trainingSet connections.
+------------------------------------------------------------------------
+r9754 | mhall | 2013-06-11 20:17:21 +1200 (Tue, 11 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+File type filter is now defaults to "Model object files" again.
+------------------------------------------------------------------------
+r9757 | mhall | 2013-06-11 21:36:01 +1200 (Tue, 11 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Fixed an option description.
+------------------------------------------------------------------------
+r9760 | mhall | 2013-06-13 10:13:23 +1200 (Thu, 13 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/GenericObjectEditor.java
+
+Fixed an NPE that resulted when the GOE asked for classes of a base type that had no subclasses or implementations. This was an error introduced when moving the storage of implementation types to PluginManager.
+------------------------------------------------------------------------
+r9763 | mhall | 2013-06-18 08:45:45 +1200 (Tue, 18 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/meta/Vote.java
+
+Now stores a reference to the training data's structure, and only clears the pre-built classifier list in buildClassifier() if there are filenames of classifiers to load specified.
+------------------------------------------------------------------------
+r9767 | mhall | 2013-06-18 12:09:58 +1200 (Tue, 18 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/trees/HoeffdingTree.java
+
+Updated listOptions descriptions.
+------------------------------------------------------------------------
+r9769 | mhall | 2013-06-18 20:48:59 +1200 (Tue, 18 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/functions/LinearRegression.java
+   M /branches/waikato/weka/src/main/java/weka/core/matrix/LinearRegression.java
+
+Changes courtesy of Sean Daugherty that save memory and improve the speed of LinearRegression
+------------------------------------------------------------------------
+r9772 | mhall | 2013-06-20 12:05:54 +1200 (Thu, 20 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/attributeSelection/WrapperSubsetEval.java
+
+Fixed a getOptions() bug.
+------------------------------------------------------------------------
+r9774 | mhall | 2013-06-20 14:38:44 +1200 (Thu, 20 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/attributeSelection/GreedyStepwise.java
+
+
+------------------------------------------------------------------------
+r9787 | mhall | 2013-06-21 14:18:51 +1200 (Fri, 21 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+
+Eibe's -force-batch-training global option and test sets passed to BatchPredictors now have the class values set to missing.
+------------------------------------------------------------------------
+r9789 | mhall | 2013-06-21 15:42:25 +1200 (Fri, 21 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/evaluation/output/prediction/AbstractOutput.java
+
+More fixes for BatchPredictors
+------------------------------------------------------------------------
+r9800 | fracpete | 2013-06-26 10:14:21 +1200 (Wed, 26 Jun 2013) | 2 lines
+Changed paths:
+   M /branches/stable-3-6/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+   M /branches/waikato/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/PreprocessPanel.java
+
+applyFilter(Filter) method now creates a copy of the supplied filter to avoid anything leaking back, e.g., into the GOE
+otherwise problems can arise, e.g., with an AddClassification filter that holds on to its loaded model
+------------------------------------------------------------------------
+r9806 | mhall | 2013-06-26 15:19:45 +1200 (Wed, 26 Jun 2013) | 1 line
+Changed paths:
+   A /branches/waikato/weka/src/main/java/weka/filters/unsupervised/attribute/MergeInfrequentNominalValues.java
+   A /branches/waikato/weka/src/test/java/weka/filters/unsupervised/attribute/MergeInfrequentNominalValuesTest.java
+   A /branches/waikato/weka/src/test/resources/wekarefs/weka/filters/unsupervised/attribute/MergeInfrequentNominalValuesTest.ref
+
+Initial import of Eibe's MergeInfrequentNominalValues filter
+------------------------------------------------------------------------
+r9815 | mhall | 2013-06-27 12:34:07 +1200 (Thu, 27 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/filters/unsupervised/attribute/RemoveType.java
+
+Class should always be kept if set, even if selection is inverted.
+------------------------------------------------------------------------
+r9833 | mhall | 2013-06-28 22:23:16 +1200 (Fri, 28 Jun 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/SetInstancesPanel.java
+
+Was not honoring options that the user had set on the loader when the "Invoke options dialog" checkbox was used to bring up the GOE for the loader - fixed.
+------------------------------------------------------------------------
+r9838 | mhall | 2013-07-01 14:11:02 +1200 (Mon, 01 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/attributeSelection/CfsSubsetEval.java
+
+Added an option to allow the full correlation matrix to be pre-computed before the search starts (default is still to compute it lazily, as needed, during the search). Also added parallel processing functionality to be used when the correlation matrix gets pre-computed. This will speed up backward searches on large data sets.
+------------------------------------------------------------------------
+r9849 | mhall | 2013-07-03 14:47:58 +1200 (Wed, 03 Jul 2013) | 1 line
+Changed paths:
+   A /branches/waikato/weka/src/main/java/weka/core/ThreadSafe.java
+
+Initial import
+------------------------------------------------------------------------
+r9850 | mhall | 2013-07-03 14:48:24 +1200 (Wed, 03 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/attributeSelection/GreedyStepwise.java
+
+Added options to allow subsets to be evaluated in parallel during the search.
+------------------------------------------------------------------------
+r9852 | mhall | 2013-07-07 12:21:59 +1200 (Sun, 07 Jul 2013) | 1 line
+Changed paths:
+   D /branches/waikato/weka/src/main/java/weka/estimators/MultivariateNormalEstimator.java
+
+Got renamed to MultiVariateGaussianEstimator but the old class was not removed! Fixed.
+------------------------------------------------------------------------
+r9854 | mhall | 2013-07-08 11:31:48 +1200 (Mon, 08 Jul 2013) | 1 line
+Changed paths:
+   A /branches/waikato/weka/src/main/java/weka/filters/supervised/attribute/MergeNominalValues.java
+   A /branches/waikato/weka/src/test/java/weka/filters/supervised/attribute/MergeNominalValuesTest.java
+   A /branches/waikato/weka/src/test/resources/wekarefs/weka/filters/supervised/attribute/MergeNominalValuesTest.ref
+
+Initial import of Eibe's CHAID-based filter
+------------------------------------------------------------------------
+r9855 | mhall | 2013-07-08 11:44:55 +1200 (Mon, 08 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+
+From Eibe: Added method to make it possible to get access to the full input instances.
+------------------------------------------------------------------------
+r9856 | mhall | 2013-07-08 11:47:55 +1200 (Mon, 08 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/filters/unsupervised/attribute/NominalToBinary.java
+
+Now implements StreamableFilter.
+------------------------------------------------------------------------
+r9859 | mhall | 2013-07-08 16:17:22 +1200 (Mon, 08 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Was checking that the file as well as the input stream was set. Only the later is needed - fixed.
+------------------------------------------------------------------------
+r9861 | mhall | 2013-07-08 21:18:57 +1200 (Mon, 08 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Fixed a bug where a tab would get saved with the filename associated with another tab
+------------------------------------------------------------------------
+r9863 | mhall | 2013-07-09 15:52:52 +1200 (Tue, 09 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+Added options to the allowed list of properties for Loaders and Savers.
+------------------------------------------------------------------------
+r9865 | mhall | 2013-07-09 20:36:46 +1200 (Tue, 09 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Fixed a bug where a NPE occurs if a component does not have a globalInfo() method
+------------------------------------------------------------------------
+r9868 | mhall | 2013-07-10 11:19:45 +1200 (Wed, 10 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/converters/Loader.java
+
+Added a StructureNotReadyException that implementers can throw when they haven't been configured sufficiently in order to read the structure (or data).
+------------------------------------------------------------------------
+r9869 | mhall | 2013-07-10 11:20:11 +1200 (Wed, 10 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/Loader.java
+
+Now checks for the new StructureNotReadyException so that a warning can be printed to the log/status area (rather than just an exception getting dumped to the console) in the situation where the base Loader has deemed that it is not configured correctly and the structure cannot be provided.
+------------------------------------------------------------------------
+r9871 | mhall | 2013-07-10 11:59:14 +1200 (Wed, 10 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/converters/CSVSaver.java
+
+Added an option to not output the header row.
+------------------------------------------------------------------------
+r9873 | mhall | 2013-07-11 22:50:12 +1200 (Thu, 11 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/GenericPropertiesCreator.java
+
+Added some code to prevent the static intialization block from triggering dynamic class discovery if the package manager is in the process of loading packages. Some packages with custom GenericPropertiesCreator.props files would cause the GenericPropertiesCreator class to be loaded (and thus the dynamic class discovery process to start) during the package loading process - if this occurred between package A and package B, when A depends on B, then class not found errors will occur (because B's classes would not have been injected into the classpath yet).
+------------------------------------------------------------------------
+r9876 | mhall | 2013-07-23 11:22:43 +1200 (Tue, 23 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Now makes sure that any GOE props files are processed after jar files from all packages have been added to the classpath.
+------------------------------------------------------------------------
+r9878 | mhall | 2013-07-23 13:09:41 +1200 (Tue, 23 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Was stopping the currently running flow when loading a new one! Fixed.
+------------------------------------------------------------------------
+r9884 | mhall | 2013-07-24 20:15:51 +1200 (Wed, 24 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/attributeSelection/CfsSubsetEval.java
+
+Now implements ThreadSafe
+------------------------------------------------------------------------
+r9891 | mhall | 2013-07-25 14:05:05 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/arffviewer/ArffViewerMainPanel.java
+
+Fixed a bug that occurred under Windows only when using the ArffViewer from the command line or GUIChooser - Save as would fail to save the current set of instances and claim that the chosen file name already exists.
+------------------------------------------------------------------------
+r9894 | mhall | 2013-07-25 16:07:05 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/filters/unsupervised/attribute/ReplaceMissingValues.java
+
+getCapabilities() now disables all capabilities before enabling individual ones
+------------------------------------------------------------------------
+r9895 | mhall | 2013-07-25 19:58:07 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/functions/supportVector/Kernel.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/functions/supportVector/PolyKernel.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/functions/supportVector/Puk.java
+   M /branches/waikato/weka/src/main/java/weka/classifiers/functions/supportVector/StringKernel.java
+
+Small fix to capabilities methods. Kernel.makeCopy and makeCopies now checks if a Kernel is Copyable before performing a deep copy via serialization
+------------------------------------------------------------------------
+r9896 | mhall | 2013-07-25 19:59:17 +1200 (Thu, 25 Jul 2013) | 1 line
+Changed paths:
+   A /branches/waikato/weka/src/main/java/weka/classifiers/functions/supportVector/PrecomputedKernelMatrixKernel.java
+   A /branches/waikato/weka/src/test/java/weka/classifiers/data/test.matrix
+   A /branches/waikato/weka/src/test/java/weka/classifiers/functions/supportVector/PrecomputedKernelMatrixKernelTest.java
+   A /branches/waikato/weka/src/test/resources/wekarefs/weka/classifiers/functions/supportVector/PrecomputedKernelMatrixKernelTest.ref
+
+Initial import
+------------------------------------------------------------------------
+r9913 | mhall | 2013-07-29 19:16:15 +1200 (Mon, 29 Jul 2013) | 1 line
+Changed paths:
+   A /branches/waikato/weka/src/main/java/weka/filters/supervised/attribute/PartitionMembership.java (from /branches/waikato/weka/src/main/java/weka/filters/unsupervised/attribute/PartitionMembership.java:9894)
+   D /branches/waikato/weka/src/main/java/weka/filters/unsupervised/attribute/PartitionMembership.java
+   A /branches/waikato/weka/src/test/java/weka/filters/supervised/attribute/PartitionMembershipTest.java (from /branches/waikato/weka/src/test/java/weka/filters/unsupervised/attribute/PartitionMembershipTest.java:9894)
+   D /branches/waikato/weka/src/test/java/weka/filters/unsupervised/attribute/PartitionMembershipTest.java
+
+PartitionMembership has moved to the supervised package
+------------------------------------------------------------------------
+r9919 | mhall | 2013-07-30 11:41:24 +1200 (Tue, 30 Jul 2013) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/classifiers/rules/OneR.java
+
+Eibe's fix for unexpected boundary selection behavior when changing values of B
+------------------------------------------------------------------------
