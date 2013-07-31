@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>weka-stable</artifactId>
-  <version>3.6.10</version><!-- weka-version -->
+  <version>3.6.11-SNAPSHOT</version><!-- weka-version -->
   <packaging>jar</packaging>
 
   <name>weka-stable</name>
@@ -53,9 +53,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/weka-stable-3.6.10</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/weka-stable-3.6.10</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/weka-stable-3.6.10</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-6/weka</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-6/weka</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-6/weka</url>
   </scm>
 
   <profiles>
