@@ -129,7 +129,7 @@
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>multiInstanceFilters</artifactId>
-      <version>[1.0.0,)</version>
+      <version>[1.0.3,)</version>
     </dependency>
 
     <dependency>
