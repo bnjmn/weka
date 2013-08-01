@@ -68,8 +68,8 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiInstanceLearning</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiInstanceLearning</developerConnection>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiInstanceLearning</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiInstanceLearning</developerConnection>
     <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiInstanceLearning</url>
   </scm>
 
