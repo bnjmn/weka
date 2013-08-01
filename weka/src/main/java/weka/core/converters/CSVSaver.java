@@ -526,13 +526,15 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
       return;
     }
     PrintWriter outW = new PrintWriter(getWriter());
-    // print out attribute names as first row
-    for (int i = 0; i < getInstances().numAttributes(); i++) {
-      outW.print(Utils.quote(getInstances().attribute(i).name()));
-      if (i < getInstances().numAttributes() - 1) {
-        outW.print(m_FieldSeparator);
-      } else {
-        outW.println();
+    if (!getNoHeaderRow()) {
+      // print out attribute names as first row
+      for (int i = 0; i < getInstances().numAttributes(); i++) {
+        outW.print(Utils.quote(getInstances().attribute(i).name()));
+        if (i < getInstances().numAttributes() - 1) {
+          outW.print(m_FieldSeparator);
+        } else {
+          outW.println();
+        }
       }
     }
     for (int i = 0; i < getInstances().numInstances(); i++) {
