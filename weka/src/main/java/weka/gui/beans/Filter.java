@@ -64,7 +64,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
   private static int FILTERING_TEST = 2;
   private int m_state = IDLE;
 
-  protected Thread m_filterThread = null;
+  protected transient Thread m_filterThread = null;
 
   private transient Instances m_trainingSet;
   private transient Instances m_testingSet;
@@ -573,6 +573,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                   }
                 }
                 block(false);
+                m_filterThread = null;
               }
             }
           };
@@ -654,6 +655,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                 }
               }
               block(false);
+              m_filterThread = null;
             }
           }
         };
