@@ -48,10 +48,29 @@ import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- <!-- globalinfo-start-->
- <!-- globalinfo-end-->
+ <!-- globalinfo-start -->
+ * Renames the values of nominal attributes.
+ * <p/>
+ <!-- globalinfo-end -->
  *
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R
+ *  Attributes to act on. Can be either a range
+ *  string (e.g. 1,2,6-10) OR a comma-separated list of named attributes
+ *  (default none)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense (i.e. act on all attributes other than those specified)</pre>
+ * 
+ * <pre> -N
+ *  Nominal labels and their replacement values.
+ *  E.g. red:blue, black:white, fred:bob</pre>
+ * 
+ * <pre> -I
+ *  Ignore case when matching nominal values</pre>
+ * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
@@ -408,6 +427,23 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
    * Parses a given list of options. <p>
    * 
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R
+   *  Attributes to act on. Can be either a range
+   *  string (e.g. 1,2,6-10) OR a comma-separated list of named attributes
+   *  (default none)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense (i.e. act on all attributes other than those specified)</pre>
+   * 
+   * <pre> -N
+   *  Nominal labels and their replacement values.
+   *  E.g. red:blue, black:white, fred:bob</pre>
+   * 
+   * <pre> -I
+   *  Ignore case when matching nominal values</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -473,3 +509,4 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
     runFilter(new RenameNominalValues(), argv);
   }
 }
+
