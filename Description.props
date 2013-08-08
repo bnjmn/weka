@@ -6,10 +6,10 @@
 PackageName=XMeans
 
 # Version (required)
-Version=1.0.3
+Version=1.0.4
 
 #Date
-Date=2012-03-20
+Date=2013-08-08
 
 # Title (required)
 Title=Cluster data using the X-means algorithm.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Cluster data using the X-means algorithm.<br/><br/>X-Means is K-Means extended by an Improve-Structure part In this part of the algorithm the centers are attempted to be split in its region. The decision between the children of each center and itself is done comparing the BIC-values of the two structures.<br/><br/>For more information see:<br/><br/>Dan Pelleg, Andrew W. Moore: X-means: Extending K-means with Efficient Estimation of the Number of Clusters. In: Seventeenth International Conference on Machine Learning, 727-734, 2000.
 
-Changes=XMeans now contains an accessor method for retrieving the cluster centers.
+Changes=XMeans now actually saves cluster centers to a file when the -O option is set :-)
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/XMeans1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/XMeans1.0.4.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/XMeans

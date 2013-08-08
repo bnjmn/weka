@@ -59,9 +59,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/XMeans</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/XMeans</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/internal/XMeans</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/XMeans</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/XMeans</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/XMeans</url>
   </scm>
 
   <profiles>
@@ -225,7 +225,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>2.1</version>
           <configuration>
-            <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags</tagBase>
+            <tagBase>https://svn.cms.waikato.ac.nz/svn/weka/tags</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
             <!-- tests are performed with the ant build file, hence skipped here. -->
             <preparationGoals>clean verify -P no-tests</preparationGoals>
