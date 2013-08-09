@@ -119,6 +119,10 @@ public class EM extends RandomizableDensityBasedClusterer implements
 
   /** for serialization */
   static final long serialVersionUID = 8348181483812829475L;
+  
+  private Estimator m_modelPrev[][];
+  private double[][][] m_modelNormalPrev;
+  private double[] m_priorsPrev;
 
   /** hold the discrete estimators for each cluster */
   private Estimator m_model[][];
@@ -794,6 +798,11 @@ public class EM extends RandomizableDensityBasedClusterer implements
     m_model = new DiscreteEstimator[m_num_clusters][m_num_attribs];
     m_modelNormal = new double[m_num_clusters][m_num_attribs][3];
     m_priors = new double[m_num_clusters];
+    
+    m_modelPrev = new DiscreteEstimator[m_num_clusters][m_num_attribs];
+    m_modelNormalPrev = new double[m_num_clusters][m_num_attribs][3];
+    m_priorsPrev = new double[m_num_clusters];
+
     Instances centers = bestK.getClusterCentroids();
     Instances stdD = bestK.getClusterStandardDevs();
     int[][][] nominalCounts = bestK.getClusterNominalCounts();
@@ -851,6 +860,7 @@ public class EM extends RandomizableDensityBasedClusterer implements
   private void estimate_priors(Instances inst) throws Exception {
 
     for (int i = 0; i < m_num_clusters; i++) {
+      m_priorsPrev[i] = m_priors[i];
       m_priors[i] = 0.0;
     }
 
@@ -888,13 +898,17 @@ public class EM extends RandomizableDensityBasedClusterer implements
   /**
    * New probability estimators for an iteration
    */
-  private void new_estimators() {
+  private void new_estimators() {    
     for (int i = 0; i < m_num_clusters; i++) {
       for (int j = 0; j < m_num_attribs; j++) {
         if (m_theInstances.attribute(j).isNominal()) {
+          m_modelPrev[i][j] = m_model[i][j];
           m_model[i][j] = new DiscreteEstimator(m_theInstances.attribute(j)
               .numValues(), true);
         } else {
+          m_modelNormalPrev[i][j][0] = m_modelNormal[i][j][0];
+          m_modelNormalPrev[i][j][1] = m_modelNormal[i][j][1];
+          m_modelNormalPrev[i][j][2] = m_modelNormal[i][j][2];
           m_modelNormal[i][j][0] = m_modelNormal[i][j][1] = m_modelNormal[i][j][2] = 0.0;
         }
       }
@@ -1885,7 +1899,16 @@ public class EM extends RandomizableDensityBasedClusterer implements
 
           if (i > 0) {
             if ((llk - llkold) < m_minLogLikelihoodImprovementIterating) {
-              m_iterationsPerformed = i;
+              if (llk - llkold < 0) {
+                // decrease in log likelihood - revert to the model from the
+                // previous iteration
+                m_modelNormal = m_modelNormalPrev;
+                m_model = m_modelPrev;
+                m_priors = m_priorsPrev;
+                m_iterationsPerformed = i - 1;
+              } else {
+                m_iterationsPerformed = i;
+              }
               break;
             }
           }
