@@ -43,6 +43,7 @@ import weka.core.OptionHandler;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
 
 /**
  * 
@@ -68,7 +69,7 @@ import weka.filters.Filter;
  * @version $Revision$
  */
 public class AddUserFields extends Filter implements OptionHandler,
-    EnvironmentHandler {
+    EnvironmentHandler, UnsupervisedFilter {
 
   /** For serialization */
   private static final long serialVersionUID = -2761427344847891585L;
