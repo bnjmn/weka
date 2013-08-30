@@ -6,7 +6,7 @@
 PackageName=multiLayerPerceptrons
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
 Date=2013-08-27
@@ -31,7 +31,7 @@ Description=This package currently contains classes for training multilayer perc
 Changes=The Autoencoder class has been added
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/multiLayerPerceptrons1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/multiLayerPerceptrons1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/multiLayerPerceptrons
