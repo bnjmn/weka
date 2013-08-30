@@ -133,6 +133,7 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
     result.enable(Capability.NO_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
     
     return result;
   }
