@@ -15,7 +15,7 @@
  */
 
 /*
- *    Autoencoder.java
+ *    MLPAutoencoder.java
  *    Copyright (C) 2013 University of Waikato, Hamilton, New Zealand
  */
 
@@ -26,6 +26,7 @@ import weka.filters.UnsupervisedFilter;
 
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.SparseInstance;
 import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -42,6 +43,7 @@ import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 
+import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Standardize;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.Filter;
@@ -57,6 +59,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Callable;
+import java.io.File;
+import java.io.PrintWriter;
 
 /**
  <!-- globalinfo-start -->
@@ -105,6 +109,13 @@ import java.util.concurrent.Callable;
  *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
  * </pre>
  * 
+ * <pre> -weights-file &lt;filename&gt;
+ *  The file to write weight vectors to in ARFF format.
+ *  (default: none)</pre>
+ * 
+ * <pre> -S
+ *  Whether to 0=normalize/1=standardize/2=neither. (default 1=standardize)</pre>
+ * 
  * <pre> -D
  *  Turns on output of debugging information.</pre>
  * 
@@ -113,7 +124,7 @@ import java.util.concurrent.Callable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 9346 $
  */
-public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter, TechnicalInformationHandler  {
+public class MLPAutoencoder extends SimpleBatchFilter implements UnsupervisedFilter, TechnicalInformationHandler  {
   
   /** For serialization */
   private static final long serialVersionUID = -277474276438394612L;
@@ -235,7 +246,26 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
   // The size of the thread pool
   protected int m_poolSize = 1;
 
-  // The standardization filer
+  // filter: Normalize training data
+  public static final int FILTER_NORMALIZE = 0;
+
+  // filter: Standardize training data
+  public static final int FILTER_STANDARDIZE = 1;
+
+  // filter: No normalization/standardization
+  public static final int FILTER_NONE = 2;
+
+  // The filter to apply to the training data
+  public static final Tag [] TAGS_FILTER = {
+    new Tag(FILTER_NORMALIZE, "Normalize training data"),
+    new Tag(FILTER_STANDARDIZE, "Standardize training data"),
+    new Tag(FILTER_NONE, "No normalization/standardization"),
+  };
+
+  // Whether to normalize/standardize/neither
+  protected int m_filterType = FILTER_STANDARDIZE;
+
+  // The filer
   protected Filter m_Filter = null;
   
   // Filter used to remove class attribute (if necessary)
@@ -252,6 +282,37 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
 
   // Whether to output the data in the original space
   protected boolean m_outputInOriginalSpace = false;
+
+  // File to write weight vectors to
+  protected File m_WeightsFile = new File(System.getProperty("user.dir"));;
+
+  // Parameters for transformation
+  protected double[] m_offsets = null;
+  protected double[] m_factors = null;
+
+  /**
+   * Calculates min and max for all attributes in the given data.
+   */
+  protected double[][] minAndMax(Instances data) {
+
+    double[][] result = new double[2][m_numAttributes];
+    for (int j = 0; j < m_numAttributes; j++) {
+      result[0][j] = Double.MAX_VALUE;
+      result[1][j] = -Double.MAX_VALUE;
+    }
+    for (int i = 0; i < data.numInstances(); i++) {
+      for (int j = 0; j < m_numAttributes; j++) {
+        double value = data.instance(i).value(j);
+        if (value < result[0][j]) {
+          result[0][j] = value;
+        }
+        if (value > result[1][j]) {
+          result[1][j] = value;
+        }
+      }
+    }
+    return result;
+  }
 
   /**
    * Method used to pre-process the data, perform clustering, and
@@ -279,14 +340,35 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
       m_Remove.setInputFormat(data);
       data = Filter.useFilter(data, m_Remove);
     }
-
-    // Standardize data
-    m_Filter = new Standardize();
-    ((Standardize)m_Filter).setIgnoreClass(true);
-    m_Filter.setInputFormat(data);
-    data = Filter.useFilter(data, m_Filter); 
     
     m_numAttributes = data.numAttributes();
+
+    if (m_filterType == FILTER_STANDARDIZE || m_filterType == FILTER_NORMALIZE) {
+      double[][] beforeTransformation = minAndMax(data);
+      if (m_filterType == FILTER_STANDARDIZE) {
+        m_Filter = new Standardize();
+      } else {
+        m_Filter = new Normalize();
+      }
+      m_Filter.setInputFormat(data);
+      data = Filter.useFilter(data, m_Filter); 
+      double[][] afterTransformation = minAndMax(data);
+      m_offsets = new double[m_numAttributes];
+      m_factors = new double[m_numAttributes];
+      for (int j = 0; j < m_numAttributes; j++) {
+        if (beforeTransformation[1][j] > beforeTransformation[0][j]) {
+          m_factors[j] = (beforeTransformation[1][j] - beforeTransformation[0][j]) / 
+            (afterTransformation[1][j] - afterTransformation[0][j]);
+        } else {
+          m_factors[j] = 1.0;
+        }
+        m_offsets[j] = beforeTransformation[0][j] - afterTransformation[0][j] * m_factors[j];
+      }
+    } else {
+      m_Filter = null;
+      m_offsets = null;
+      m_factors = null;
+    }
     
     // Set up array 
     OFFSET_O_BIASES = m_numAttributes * m_numUnits;
@@ -380,32 +462,47 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
       // Create and submit new job, where each instance in batch is processed
       Future<Double> futureSE = m_Pool.submit(new Callable<Double>() {
           public Double call() {
-            final double[] outputs = new double[m_numUnits];
+            final double[] outputsHidden = new double[m_numUnits];
+            final double[] outputsOut = new double[m_numAttributes];
             double SE = 0;
             for (int k = lo; k < hi; k++) {
               final Instance inst = m_data.instance(k);
               
-              // Calculate necessary input/output values and error term
-              calculateOutputs(inst, outputs, null);
-                
+              // Calculate necessary input/output values
+              calculateOutputsHidden(inst, outputsHidden, null);
+              calculateOutputsOut(outputsHidden, outputsOut);
+
               // Add to squared error
-              for (int index = 0; index < m_data.numAttributes(); index++) {
-                final double err = getOutput(index, outputs) - inst.value(index);
-                SE += 0.5 * err * err;
+              if (inst instanceof SparseInstance) {
+                int instIndex = 0;
+                for (int index = 0; index < m_numAttributes; index++) {
+                  if (instIndex < inst.numValues() && inst.index(instIndex) == index) {
+                    final double err = outputsOut[index] - inst.valueSparse(instIndex++);
+                    SE += 0.5 * err * err;
+                  } else {
+                    final double err = outputsOut[index];
+                    SE += 0.5 * err * err;
+                  }
+                }
+              } else {
+                for (int index = 0; index < m_numAttributes; index++) {
+                  final double err = outputsOut[index] - inst.value(index);
+                  SE += 0.5 * err * err;
+                }
               }
 
               // Do we want to build a contractive autoencoder?
               if (m_useContractive) {
 
                 // Add penalty
-                for (int i = 0; i < outputs.length; i++) {
+                for (int i = 0; i < outputsHidden.length; i++) {
                   double sum = 0;
                   int offset = i * m_numAttributes;
-                  for (int index = 0; index < m_data.numAttributes(); index++) {
+                  for (int index = 0; index < m_numAttributes; index++) {
                     sum += m_MLPParameters[offset + index] * m_MLPParameters[offset + index];
                   }
-                  SE += m_lambda * outputs[i] * (1.0 - outputs[i]) *
-                    outputs[i] * (1.0 - outputs[i]) * sum;
+                  SE += m_lambda * outputsHidden[i] * (1.0 - outputsHidden[i]) *
+                    outputsHidden[i] * (1.0 - outputsHidden[i]) * sum;
                 }
               }
             }
@@ -462,34 +559,45 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
       Future<double[]> futureGrad = m_Pool.submit(new Callable<double[]>() {
           public double[] call() {
 
-            final double[] outputs = new double[m_numUnits];
+            final double[] outputsHidden = new double[m_numUnits];
+            final double[] outputsOut = new double[m_numAttributes];
             final double[] deltaHidden = new double[m_numUnits];
+            final double[] deltaOut = new double[m_numAttributes];            
             final double[] sigmoidDerivativesHidden = new double[m_numUnits];
             final double[] localGrad = new double[m_MLPParameters.length];
             for (int k = lo; k < hi; k++) {
               final Instance inst = m_data.instance(k);
-              calculateOutputs(inst, outputs, sigmoidDerivativesHidden);
-              updateGradient(localGrad, inst, outputs, deltaHidden);
+              calculateOutputsHidden(inst, outputsHidden, sigmoidDerivativesHidden);
+              updateGradient(localGrad, inst, outputsHidden, deltaHidden, outputsOut, deltaOut);
               updateGradientForHiddenUnits(localGrad, inst, sigmoidDerivativesHidden, deltaHidden);
 
               // Dow we want to build a contractive autoencoder?
               if (m_useContractive) {
                 
                 // Update gradient wrt penalty
-                for (int i = 0; i < outputs.length; i++) {
+                for (int i = 0; i < outputsHidden.length; i++) {
                   double sum = 0;
-                  for (int index = 0; index < m_data.numAttributes(); index++) {
-                    sum += m_MLPParameters[i * m_numAttributes + index] * 
-                      m_MLPParameters[i * m_numAttributes + index];
-                  }
-                  double multiplier = m_lambda * 2 * outputs[i] * (1.0 - outputs[i]) * outputs[i] * (1.0 - outputs[i]);
                   int offset = i * m_numAttributes;
-                  for (int index = 0; index < m_data.numAttributes(); index++) {
-                    localGrad[offset + index] +=  multiplier * (m_MLPParameters[offset + index] + inst.value(index) * (1.0 - 2.0 * outputs[i]) * sum);
+                  for (int index = 0; index < m_numAttributes; index++) {
+                    sum += m_MLPParameters[offset + index] * m_MLPParameters[offset + index];
+                  }
+                  double multiplier = m_lambda * 2 * outputsHidden[i] * (1.0 - outputsHidden[i]) * 
+                    outputsHidden[i] * (1.0 - outputsHidden[i]);
+                  if (inst instanceof SparseInstance) {
+                    for (int index = 0; index < inst.numValues(); index++) {
+                      int ind = inst.index(index);
+                      localGrad[offset + ind] +=  multiplier * 
+                        (m_MLPParameters[offset + ind] + inst.valueSparse(index) * (1.0 - 2.0 * outputsHidden[i]) * sum);
+                    }
+                  } else {
+                    for (int index = 0; index < m_numAttributes; index++) {
+                      localGrad[offset + index] +=  multiplier * 
+                        (m_MLPParameters[offset + index] + inst.value(index) * (1.0 - 2.0 * outputsHidden[i]) * sum);
+                    }
                   }
                   
                   // Update gradient for hidden unit bias wrt penalty
-                  localGrad[OFFSET_H_BIASES + i] += multiplier * (1.0 - 2.0 * outputs[i]) * sum;
+                  localGrad[OFFSET_H_BIASES + i] += multiplier * (1.0 - 2.0 * outputsHidden[i]) * sum;
                 }
               }
             }
@@ -524,7 +632,7 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
       }
     }
 
-    double factor = 1.0 / m_data.numInstances();
+     double factor = 1.0 / m_data.numInstances();
     for (int i = 0; i < grad.length; i++) {
       grad[i] *= factor;
     }
@@ -555,44 +663,61 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
   /**
    * Update the gradient for the weights in the output layer.
    */
-  protected void updateGradient(double[] grad, Instance inst, double[] outputs, double[] deltaHidden) {
+  protected void updateGradient(double[] grad, Instance inst, double[] outputsHidden, 
+                                double[] deltaHidden, double[] outputsOut, 
+                                double[] deltaOut) {
 
     // Initialise deltaHidden
     Arrays.fill(deltaHidden, 0.0);
 
+    // Get ouputs
+    calculateOutputsOut(outputsHidden, outputsOut);
+
+    // Go through all output units 
+    if (inst instanceof SparseInstance) {
+      int instIndex = 0;
+      for (int index = 0; index < m_numAttributes; index++) {
+        if (instIndex < inst.numValues() && inst.index(instIndex) == index) {
+          deltaOut[index] = outputsOut[index] - inst.valueSparse(instIndex++);
+        } else {
+          deltaOut[index] = outputsOut[index];
+        }
+      }
+    } else {
+      for (int j = 0; j < m_numAttributes; j++) {
+        deltaOut[j] = outputsOut[j] - inst.value(j);
+      }
+    }
+
+    
     // Go through all output units
     for (int j = 0; j < m_numAttributes; j++) {
 
-      // Get output 
-      double pred = getOutput(j, outputs); 
-
-      // Calculate delta from output unit
-      double deltaOut = (pred - inst.value(j));
-
       // Go to next output unit if update too small
-      if (deltaOut <= m_tolerance && deltaOut >= -m_tolerance) {
+       if (deltaOut[j] <= m_tolerance && deltaOut[j] >= -m_tolerance) {
         continue;
       }
 
       // Update deltaHidden
       for (int i = 0; i < m_numUnits; i++) {
-        deltaHidden[i] += deltaOut * m_MLPParameters[i * m_numAttributes + j];
+        deltaHidden[i] += deltaOut[j] * m_MLPParameters[i * m_numAttributes + j];
       }
 
       // Update gradient for output weights
       for (int i = 0; i < m_numUnits; i++) {
-        grad[i * m_numAttributes + j] += deltaOut * outputs[i];
+        grad[i * m_numAttributes + j] += deltaOut[j] * outputsHidden[i];
       }
     
       // Update gradient for bias
-      grad[OFFSET_O_BIASES + j] += deltaOut;
+      grad[OFFSET_O_BIASES + j] += deltaOut[j];
     }
   }
 
   /**
    * Update the gradient for the weights in the hidden layer.
    */
-  protected void updateGradientForHiddenUnits(double[] grad, Instance inst,  double[] sigmoidDerivativesHidden, double[] deltaHidden) {
+  protected void updateGradientForHiddenUnits(double[] grad, Instance inst,  double[] sigmoidDerivativesHidden, 
+                                              double[] deltaHidden) {
 
     // Finalize deltaHidden
     for (int i = 0; i < m_numUnits; i++) {
@@ -609,8 +734,15 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
       
       // Update gradient for all weights, including bias
       int offset = i * m_numAttributes;
-      for (int l = 0; l < m_numAttributes; l++) {
-        grad[offset + l] += deltaHidden[i] * inst.value(l);
+      if (inst instanceof SparseInstance) {
+        for (int index = 0; index < inst.numValues(); index++) {
+          int ind = inst.index(index);
+          grad[offset + ind] += deltaHidden[i] * inst.valueSparse(index);
+        }
+      } else {
+        for (int l = 0; l < m_numAttributes; l++) {
+          grad[offset + l] += deltaHidden[i] * inst.value(l);
+        }
       }
       grad[OFFSET_H_BIASES + i] += deltaHidden[i];
     }
@@ -619,32 +751,47 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
   /**
    * Calculates the array of outputs of the hidden units.
    */
-  protected void calculateOutputs(Instance inst, double[] o,
-                                  double[] d) {
+  protected void calculateOutputsHidden(Instance inst, double[] out, double[] d) {
 
     for (int i = 0; i < m_numUnits; i++) {
       double sum = 0;
       int offset = i * m_numAttributes;
-      for (int j = 0; j < m_numAttributes; j++) {
-        sum += inst.value(j) * m_MLPParameters[offset + j];
+      if (inst instanceof SparseInstance) {
+        for (int index = 0; index < inst.numValues(); index++) {
+          int ind = inst.index(index);
+          sum += inst.valueSparse(index) * m_MLPParameters[offset + ind];
+        }
+      } else {
+        for (int j = 0; j < m_numAttributes; j++) {
+          sum += inst.value(j) * m_MLPParameters[offset + j];
+        }
       }
       sum += m_MLPParameters[OFFSET_H_BIASES + i]; 
-      o[i] = sigmoid(-sum, d, i);
+      out[i] = sigmoid(-sum, d, i);
     }
   }
   
   /**
-   * Calculates the output of one output unit based on the given 
+   * Calculates the outputs of output units based on the given 
    * hidden layer outputs.
    */
-  protected double getOutput(int j, double[] outputs) {
+  protected void calculateOutputsOut(double[] outputsHidden, double[] outputsOut) {
 
-    double result = 0;
+    // Initialise outputs
+    Arrays.fill(outputsOut, 0.0);
+
+    // Calculate outputs
     for (int i = 0; i < m_numUnits; i++) {
-      result +=  m_MLPParameters[i * m_numAttributes + j] * outputs[i];
+      int offset = i * m_numAttributes;
+      for (int j = 0; j < m_numAttributes; j++) {
+        outputsOut[j] +=  m_MLPParameters[offset + j] * outputsHidden[i];
+      }
     }
-    result += m_MLPParameters[OFFSET_O_BIASES + j];
-    return result;
+
+    // Add bias weights
+    for (int j = 0; j < m_numAttributes; j++) {
+      outputsOut[j] += m_MLPParameters[OFFSET_O_BIASES + j];
+    }
   }    
   
   /**
@@ -722,6 +869,23 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
     // Do we need to build the filter model?
     if (!isFirstBatchDone()) {
       initFilter(instances);
+
+      // Write weight vectors into file as instances if desired
+      if (!m_WeightsFile.isDirectory()) {
+        PrintWriter pw = new PrintWriter(m_WeightsFile);
+        pw.println(new Instances(m_data, 0));
+        for (int i = 0; i < m_numUnits; i++) {
+          int offset = i * m_numAttributes;
+          for (int j = 0; j < m_numAttributes; j++) {
+            if (j > 0) {
+              pw.print(",");
+            }
+            pw.print(m_MLPParameters[offset + j]);
+          }
+          pw.println();
+        }
+        pw.close();
+      }
     }
 
     // Generate the output and return it
@@ -737,13 +901,16 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
         inst = m_Remove.output();
       }
 
-      // Standardize instance
-      m_Filter.input(inst);
-      inst = m_Filter.output();
+      // Filter instance
+      if (m_Filter != null) {
+        m_Filter.input(inst);
+        m_Filter.batchFinished();
+        inst = m_Filter.output();
+      }
 
       // Get new values
-      double[] outputs = new double[m_numUnits];
-      calculateOutputs(inst, outputs, null);
+      double[] outputsHidden = new double[m_numUnits];
+      calculateOutputsHidden(inst, outputsHidden, null);
 
       // Do we want to output reduced data?
       if (!m_outputInOriginalSpace) {
@@ -751,16 +918,24 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
         // Copy over class value if necessary
         if (instances.classIndex() >= 0) {
           double[] newVals = new double[m_numUnits + 1];
-          System.arraycopy(outputs, 0, newVals, 0, m_numUnits);
+          System.arraycopy(outputsHidden, 0, newVals, 0, m_numUnits);
           newVals[newVals.length - 1] = classVal;
-          outputs = newVals;
+          outputsHidden = newVals;
         }
-        result.add(new DenseInstance(inst.weight(), outputs));
+        result.add(new DenseInstance(inst.weight(), outputsHidden));
       } else {
         double[] newVals = new double[instances.numAttributes()];
+        double[] outputsOut = new double[m_numAttributes];
+        calculateOutputsOut(outputsHidden, outputsOut);
+        int j = 0;
         for (int index = 0; index < newVals.length; index++) {
           if (index != instances.classIndex()) {
-            newVals[index] = getOutput(index, outputs);
+            if (m_filterType == FILTER_STANDARDIZE || m_filterType == FILTER_NORMALIZE) {
+              newVals[index] = outputsOut[j] * m_factors[j] + m_offsets[j];
+            } else {
+              newVals[index] = outputsOut[j];
+            }
+            j++;
           } else {
             newVals[index] = classVal;
           }
@@ -1033,6 +1208,67 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
 
     m_poolSize = nT;
   }
+  
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String weightsFileTipText() {
+    return "The file to write weights to in ARFF format. Nothing is written if this is a directory.";
+  }
+
+  /**
+   * Gets current weights file.
+   *
+   * @return 		the weights file.
+   */
+  public File getWeightsFile() {
+    return m_WeightsFile;
+  }
+  
+  /**
+   * Sets the weights file to use.
+   *
+   * @param value 	the weights file.
+   */
+  public void setWeightsFile(File value) {
+    m_WeightsFile = value;
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String filterTypeTipText() {
+    return "Determines how/if the data will be transformed.";
+  }
+  
+  /**
+   * Gets how the training data will be transformed. Will be one of
+   * FILTER_NORMALIZE, FILTER_STANDARDIZE, FILTER_NONE.
+   *
+   * @return the filtering mode
+   */
+  public SelectedTag getFilterType() {
+
+    return new SelectedTag(m_filterType, TAGS_FILTER);
+  }
+  
+  /**
+   * Sets how the training data will be transformed. Should be one of
+   * FILTER_NORMALIZE, FILTER_STANDARDIZE, FILTER_NONE.
+   *
+   * @param newType the new filtering mode
+   */
+  public void setFilterType(SelectedTag newType) {
+    
+    if (newType.getTags() == TAGS_FILTER) {
+      m_filterType = newType.getSelectedTag().getID();
+    }
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -1071,6 +1307,16 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
     newVector.addElement(new Option(
                                     "\t" + numThreadsTipText() + " (default 1)\n", 
                                     "E", 1, "-E <int>"));
+
+    newVector.addElement(new Option(
+                                    "\tThe file to write weight vectors to in ARFF format.\n"
+                                    + "\t(default: none)",
+                                    "weights-file", 1, "-weights-file <filename>"));
+    
+    newVector.addElement(new Option(
+                                    "\tWhether to 0=normalize/1=standardize/2=neither. " +
+                                    "(default 1=standardize)",
+                                    "S", 1, "-S"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -1122,6 +1368,13 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
    *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
    * </pre>
    * 
+   * <pre> -weights-file &lt;filename&gt;
+   *  The file to write weight vectors to in ARFF format.
+   *  (default: none)</pre>
+   * 
+   * <pre> -S
+   *  Whether to 0=normalize/1=standardize/2=neither. (default 1=standardize)</pre>
+   * 
    * <pre> -D
    *  Turns on output of debugging information.</pre>
    * 
@@ -1168,6 +1421,17 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
     } else {
       setNumThreads(1);
     }
+    String tmpStr = Utils.getOption("weights-file", options);
+    if (tmpStr.length() != 0) {
+      setWeightsFile(new File(tmpStr));
+    } else {
+      setWeightsFile(new File(System.getProperty("user.dir")));
+    }
+    tmpStr = Utils.getOption('S', options);
+    if (tmpStr.length() != 0)
+      setFilterType(new SelectedTag(Integer.parseInt(tmpStr), TAGS_FILTER));
+    else
+      setFilterType(new SelectedTag(FILTER_STANDARDIZE, TAGS_FILTER));
 
     super.setOptions(options);
   }
@@ -1179,9 +1443,8 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
    */
   public String [] getOptions() {
 
-
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 14];
+    String [] options = new String [superOptions.length + 18];
 
     int current = 0;
     options[current++] = "-N"; 
@@ -1215,6 +1478,12 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
     options[current++] = "-E"; 
     options[current++] = "" + getNumThreads();
 
+    options[current++] = "-weights-file";
+    options[current++] = "" + getWeightsFile();
+    
+    options[current++] = "-S";
+    options[current++] = "" + m_filterType;
+
     System.arraycopy(superOptions, 0, options, current, 
 		     superOptions.length);
 
@@ -1231,7 +1500,7 @@ public class Autoencoder extends SimpleBatchFilter implements UnsupervisedFilter
    */
   public static void main(String[] argv) {
 
-    runFilter(new Autoencoder(), argv);
+    runFilter(new MLPAutoencoder(), argv);
   }
 }
 

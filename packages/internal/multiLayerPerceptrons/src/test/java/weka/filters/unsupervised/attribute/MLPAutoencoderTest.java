@@ -32,16 +32,16 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests Autoencoder. Run from the command line with: <p/>
- * java weka.filters.unsupervised.instance.AutoencoderTest
+ * Tests MLPAutoencoder. Run from the command line with: <p/>
+ * java weka.filters.unsupervised.instance.MLPAutoencoderTest
  *
  * @author Eibe Frank
  * @version $Revision: 8108 $
  */
-public class AutoencoderTest 
+public class MLPAutoencoderTest 
   extends AbstractFilterTest {
   
-  public AutoencoderTest(String name) { 
+  public MLPAutoencoderTest(String name) { 
     super(name);  
   }
 
@@ -66,14 +66,14 @@ public class AutoencoderTest
     m_FilteredClassifier = null; // Too much hassle...
   }
   
-  /** Creates a default Autoencoder */
+  /** Creates a default MLPAutoencoder */
   public Filter getFilter() {
-    Autoencoder f = new Autoencoder();
+    MLPAutoencoder f = new MLPAutoencoder();
     return f;
   }
 
   public static Test suite() {
-    return new TestSuite(AutoencoderTest.class);
+    return new TestSuite(MLPAutoencoderTest.class);
   }
 
   public static void main(String[] args){
