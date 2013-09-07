@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>multiLayerPerceptrons</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>multiLayerPerceptrons</name>
@@ -48,9 +48,9 @@ This package currently contains classes for training multilayer perceptrons with
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/multiLayerPerceptrons-1.0.3</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/multiLayerPerceptrons-1.0.3</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/multiLayerPerceptrons-1.0.3</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiLayerPerceptrons</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiLayerPerceptrons</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/multiLayerPerceptrons</url>
   </scm>
 
   <profiles>
