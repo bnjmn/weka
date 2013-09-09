@@ -583,21 +583,22 @@ public class MLPAutoencoder extends SimpleBatchFilter implements UnsupervisedFil
                   }
                   double multiplier = m_lambda * 2 * outputsHidden[i] * (1.0 - outputsHidden[i]) * 
                     outputsHidden[i] * (1.0 - outputsHidden[i]);
+                  for (int index = 0; index < m_numAttributes; index++) {
+                    localGrad[offset + index] +=  multiplier * m_MLPParameters[offset + index];
+                  }
+                  double multiplier2 = multiplier * (1.0 - 2.0 * outputsHidden[i]) * sum;
                   if (inst instanceof SparseInstance) {
                     for (int index = 0; index < inst.numValues(); index++) {
-                      int ind = inst.index(index);
-                      localGrad[offset + ind] +=  multiplier * 
-                        (m_MLPParameters[offset + ind] + inst.valueSparse(index) * (1.0 - 2.0 * outputsHidden[i]) * sum);
+                      localGrad[offset + inst.index(index)] +=  multiplier2 * inst.valueSparse(index);
                     }
                   } else {
                     for (int index = 0; index < m_numAttributes; index++) {
-                      localGrad[offset + index] +=  multiplier * 
-                        (m_MLPParameters[offset + index] + inst.value(index) * (1.0 - 2.0 * outputsHidden[i]) * sum);
+                      localGrad[offset + index] +=  multiplier2 * inst.value(index);
                     }
                   }
                   
                   // Update gradient for hidden unit bias wrt penalty
-                  localGrad[OFFSET_H_BIASES + i] += multiplier * (1.0 - 2.0 * outputsHidden[i]) * sum;
+                  localGrad[OFFSET_H_BIASES + i] += multiplier2;
                 }
               }
             }
@@ -736,8 +737,7 @@ public class MLPAutoencoder extends SimpleBatchFilter implements UnsupervisedFil
       int offset = i * m_numAttributes;
       if (inst instanceof SparseInstance) {
         for (int index = 0; index < inst.numValues(); index++) {
-          int ind = inst.index(index);
-          grad[offset + ind] += deltaHidden[i] * inst.valueSparse(index);
+          grad[offset + inst.index(index)] += deltaHidden[i] * inst.valueSparse(index);
         }
       } else {
         for (int l = 0; l < m_numAttributes; l++) {
@@ -758,8 +758,7 @@ public class MLPAutoencoder extends SimpleBatchFilter implements UnsupervisedFil
       int offset = i * m_numAttributes;
       if (inst instanceof SparseInstance) {
         for (int index = 0; index < inst.numValues(); index++) {
-          int ind = inst.index(index);
-          sum += inst.valueSparse(index) * m_MLPParameters[offset + ind];
+          sum += inst.valueSparse(index) * m_MLPParameters[offset + inst.index(index)];
         }
       } else {
         for (int j = 0; j < m_numAttributes; j++) {
