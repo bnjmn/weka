@@ -6,15 +6,15 @@
 PackageName=multiLayerPerceptrons
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2013-09-05
+Date=2013-09-09
 
 # Title (required)
 Title=This package currently contains classes for training multilayer perceptrons with one hidden layer for classification and regression, and autoencoders.
 
-Category=Classification/Regression
+Category=Classification/regression, Preprocessing
 
 # Author (required)
 Author=Eibe Frank
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=This package currently contains classes for training multilayer perceptrons with one hidden layer, where the number of hidden units is user specified. Classification and regression are possible, and it is also possible to build an autoencoder. MLPClassifier can be used for classification problems and MLPRegressor is the corresponding class for numeric prediction tasks. The former has as many output units as there are classes, the latter only one output unit. There is also an MLPAutoencoder implementation. All minimise a penalised squared error with a quadratic penalty on the (non-bias) weights, i.e., they implement "weight decay", where this penalised error is averaged over all training instances. The size of the penalty can be determined by the user by modifying the "ridge" parameter to control overfitting. The sum of squared weights is multiplied by this parameter before added to the squared error. The MLPAutoencoder also offers the option to build a Contractive Autoencoder rather than one with weight decay. The classes use BFGS optimisation by default to find parameters that correspond to a local minimum of the error function, but optionally conjugated gradient descent is available, which can be faster for problems with many parameters. Logistic functions are used as the activation functions for all units apart from the output units in MLPRegressor and MLPAutoencoder, which employ the identity function. Input attributes are standardised to zero mean and unit variance. MLPRegressor also rescales the target attribute (i.e., "class") using standardisation. All network parameters are initialised with small normally distributed random values. The algorithms use an approximation of the sigmoid function and do not backpropagate errors if the delta values are within a user-specified tolerance. This improves runtimes significantly. It is also possible to use multiple CPU cores for the evaluation of the error function and the calculation of the gradient. If this is done, the data is split into chunks, and one chunk is processed per thread.
 
-Changes=The Autoencoder has been renamed to MLPAutoencoder. It now supports normalization/standardization/no transformation as pre-processing steps. It can also write out the weights as an ARFF file. If the data is output in the original space, it is now properly scaled. There is support for SparseInstance input, and the code should run a little faster in general.
+Changes=Fixed bug in gradient calculation when training contractive encoder on sparse data.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/multiLayerPerceptrons1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/multiLayerPerceptrons1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/multiLayerPerceptrons
