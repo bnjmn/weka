@@ -1413,8 +1413,12 @@ public class ClassifierPanel extends JPanel implements
 
               testTimeStart = System.currentTimeMillis();
               if (classifier instanceof BatchPredictor) {
+                Instances toPred = new Instances(inst);
+                for (int i = 0; i < toPred.numInstances(); i++) {
+                  toPred.instance(i).setClassMissing();
+                }
                 double[][] predictions = ((BatchPredictor) classifier)
-                    .distributionsForInstances(inst);
+                    .distributionsForInstances(toPred);
                 plotInstances.process(inst, predictions, eval);
                 if (outputPredictionsText) {
                   for (int jj = 0; jj < inst.numInstances(); jj++) {
@@ -1506,8 +1510,12 @@ public class ClassifierPanel extends JPanel implements
                     + "...");
 
                 if (classifier instanceof BatchPredictor) {
+                  Instances toPred = new Instances(test);
+                  for (int i = 0; i < toPred.numInstances(); i++) {
+                    toPred.instance(i).setClassMissing();
+                  }
                   double[][] predictions = ((BatchPredictor) current)
-                      .distributionsForInstances(test);
+                      .distributionsForInstances(toPred);
                   plotInstances.process(test, predictions, eval);
                   if (outputPredictionsText) {
                     for (int jj = 0; jj < test.numInstances(); jj++) {
@@ -1581,8 +1589,13 @@ public class ClassifierPanel extends JPanel implements
 
               testTimeStart = System.currentTimeMillis();
               if (classifier instanceof BatchPredictor) {
+                Instances toPred = new Instances(test);
+                for (int i = 0; i < toPred.numInstances(); i++) {
+                  toPred.instance(i).setClassMissing();
+                }
+                
                 double[][] predictions = ((BatchPredictor) current)
-                    .distributionsForInstances(test);
+                    .distributionsForInstances(toPred);
                 plotInstances.process(test, predictions, eval);
                 if (outputPredictionsText) {
                   for (int jj = 0; jj < test.numInstances(); jj++) {
@@ -1653,12 +1666,16 @@ public class ClassifierPanel extends JPanel implements
               testTimeStart = System.currentTimeMillis();
               while (source.hasMoreElements(userTestStructure)) {
                 instance = source.nextElement(userTestStructure);
-
+                
                 if (classifier instanceof BatchPredictor) {
                   batchInst.add(instance);
                   if (batchInst.numInstances() == batchSize) {
+                    Instances toPred = new Instances(batchInst);
+                    for (int i = 0; i < toPred.numInstances(); i++) {
+                      toPred.instance(i).setClassMissing();
+                    }
                     double[][] predictions = ((BatchPredictor) classifier)
-                        .distributionsForInstances(batchInst);
+                        .distributionsForInstances(toPred);
                     plotInstances.process(batchInst, predictions, eval);
 
                     if (outputPredictionsText) {
@@ -1688,9 +1705,14 @@ public class ClassifierPanel extends JPanel implements
               if (classifier instanceof BatchPredictor
                   && batchInst.numInstances() > 0) {
                 // finish the last batch
+                
+                Instances toPred = new Instances(batchInst);
+                for (int i = 0; i < toPred.numInstances(); i++) {
+                  toPred.instance(i).setClassMissing();
+                }
 
                 double[][] predictions = ((BatchPredictor) classifier)
-                    .distributionsForInstances(batchInst);
+                    .distributionsForInstances(toPred);
                 plotInstances.process(batchInst, predictions, eval);
 
                 if (outputPredictionsText) {
