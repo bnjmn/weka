@@ -138,6 +138,14 @@ public class FilteredClassifier
   }
 
   /**
+   * String describing default filter.
+   */
+  protected String defaultFilterString() {
+
+    return "weka.filters.supervised.attribute.Discretize";
+  }
+
+  /**
    * Default constructor.
    */
   public FilteredClassifier() {
@@ -305,19 +313,17 @@ public class FilteredClassifier
    */
   public void setOptions(String[] options) throws Exception {
 
-    // Same for filter
     String filterString = Utils.getOption('F', options);
-    if (filterString.length() > 0) {
-      String [] filterSpec = Utils.splitOptions(filterString);
-      if (filterSpec.length == 0) {
-	throw new IllegalArgumentException("Invalid filter specification string");
-      }
-      String filterName = filterSpec[0];
-      filterSpec[0] = "";
-      setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
-    } else {
-      setFilter(new weka.filters.supervised.attribute.Discretize());
+    if (filterString.length() <= 0) {
+      filterString = defaultFilterString();
     }
+    String [] filterSpec = Utils.splitOptions(filterString);
+    if (filterSpec.length == 0) {
+      throw new IllegalArgumentException("Invalid filter specification string");
+    }
+    String filterName = filterSpec[0];
+    filterSpec[0] = "";
+    setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
 
     super.setOptions(options);
   }
@@ -398,7 +404,7 @@ public class FilteredClassifier
       result = super.getCapabilities();
     else
       result = getFilter().getCapabilities();
-    
+
     // the filtered classifier always needs a class
     result.disable(Capability.NO_CLASS);
     
@@ -420,6 +426,8 @@ public class FilteredClassifier
     if (m_Classifier == null) {
       throw new Exception("No base classifiers have been set!");
     }
+
+    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);

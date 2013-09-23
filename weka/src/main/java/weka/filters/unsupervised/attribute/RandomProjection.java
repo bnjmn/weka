@@ -41,6 +41,7 @@ import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
+import weka.core.Randomizable;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
@@ -107,7 +108,7 @@ import weka.filters.UnsupervisedFilter;
  */
 public class RandomProjection 
   extends Filter 
-  implements UnsupervisedFilter, OptionHandler, TechnicalInformationHandler {
+  implements UnsupervisedFilter, OptionHandler, TechnicalInformationHandler, Randomizable {
 
   /** for serialization */
   static final long serialVersionUID = 4428905532728645880L;
@@ -117,10 +118,6 @@ public class RandomProjection
 
   /** Stores the dimensionality the data should be reduced to as percentage of the original dimension */
   protected double m_percent = 0.0;
-
-  /** Is the random matrix will be computed using 
-      Gaussian distribution or not */
-  protected boolean m_useGaussian = false;
 
   /** distribution type: sparse 1 */
   public static final int SPARSE1 = 1;
@@ -155,7 +152,7 @@ public class RandomProjection
   protected Filter m_replaceMissing;
     
   /** Stores the random seed used to generate the random matrix */
-  protected long m_rndmSeed = 42;
+  protected int m_rndmSeed = 42;
 
   /** The random matrix */
   protected double m_rmatrix[][];
@@ -261,7 +258,7 @@ public class RandomProjection
     
     mString = Utils.getOption('R', options);
     if(mString.length()!=0) {
-	setRandomSeed( Long.parseLong(mString) );
+	setSeed(Integer.parseInt(mString) );
     }
 
     mString = Utils.getOption('D', options);
@@ -315,7 +312,7 @@ public class RandomProjection
     }
     
     options[current++] = "-R";
-    options[current++] = "" + getRandomSeed();
+    options[current++] = "" + getSeed();
     
     SelectedTag t = getDistribution();
     options[current++] = "-D";
@@ -456,7 +453,7 @@ public class RandomProjection
    * 
    * @param seed the random seed value
    */
-  public void setRandomSeed(long seed) {
+  public void setSeed(int seed) {
       m_rndmSeed = seed;
   }
 
@@ -465,7 +462,7 @@ public class RandomProjection
    * 
    * @return the random seed value
    */
-  public long getRandomSeed() {
+  public int getSeed() {
       return m_rndmSeed;
   }
 
@@ -554,7 +551,9 @@ public class RandomProjection
     result.enable(Capability.MISSING_VALUES);
     
     // class
-    result.enableAllClasses();
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
     
@@ -578,7 +577,7 @@ public class RandomProjection
       throw new UnassignedClassException("No class has been assigned to the instances");
     }
     */
-    
+
     for(int i=0; i<instanceInfo.numAttributes(); i++) {        
 	if( i!=instanceInfo.classIndex() && instanceInfo.attribute(i).isNominal() ) {
             if(instanceInfo.classIndex()>=0)
@@ -590,7 +589,7 @@ public class RandomProjection
 	}
     }
 
-    //r.setSeed(m_rndmSeed); //in case the setRandomSeed() is not
+    //r.setSeed(m_rndmSeed); //in case the setSeed() is not
                            //called we better set the seed to its 
                            //default value of 42.
     boolean temp=true;
@@ -765,7 +764,7 @@ public class RandomProjection
       }
       if(currentFormat.classIndex()!=-1)  {  //if classindex is set
 	  //attributes.removeElementAt(attributes.size()-1);
-	  attributes.addElement(currentFormat.attribute(currentFormat.classIndex()));
+          attributes.addElement(currentFormat.attribute(currentFormat.classIndex()).copy());
 	  newClassIndex = attributes.size()-1;
       }
 
