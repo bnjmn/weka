@@ -97,6 +97,7 @@ public class ClusterMembership
    */
   public Capabilities getCapabilities() {
     Capabilities result = m_clusterer.getCapabilities();
+    result.enableAllClasses();
     
     result.setMinimumNumberInstances(0);
     

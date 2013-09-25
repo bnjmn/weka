@@ -123,6 +123,7 @@ public class AddCluster
    */
   public Capabilities getCapabilities() {
     Capabilities result = m_Clusterer.getCapabilities();
+    result.enableAllClasses();
     
     result.setMinimumNumberInstances(0);
     
