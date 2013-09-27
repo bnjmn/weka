@@ -270,7 +270,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
   @Override
   public String getRevision() {
-    return "$Revisoon: $";
+    return "$Revision$";
   }
 
   /**
@@ -1022,7 +1022,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       throw new IOException("No data in the file!");
     }
     if (m_noHeaderRow) {
-      m_rowBuffer.add(firstRow);
+      m_rowBuffer.add(firstRow);      
     }
 
     ArrayList<Attribute> attribNames = new ArrayList<Attribute>();
@@ -1140,6 +1140,17 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
           }
         }
       }
+    }
+    
+    // Prevents the first row from getting lost in the
+    // case where there is no header row and we're
+    // running in batch mode
+    if (m_noHeaderRow && getRetrieval() == BATCH) {
+      StreamTokenizer tempT = new StreamTokenizer(new StringReader(firstRow));
+      initTokenizer(tempT);
+      tempT.ordinaryChar(m_FieldSeparator.charAt(0));
+      String checked = getInstance(tempT);
+      dumpRow(checked);
     }
 
     m_st = new StreamTokenizer(m_sourceReader);
