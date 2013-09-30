@@ -143,6 +143,9 @@ public class Bagging
   /** Whether to calculate the out of bag error */
   protected boolean m_CalcOutOfBag = false;
 
+  /** Whether to represent copies of instances using weights rather than explicitly */
+  protected boolean m_RepresentUsingWeights = false;
+
   /** The out of bag error that has been calculated */
   protected double m_OutOfBagError;  
     
@@ -215,6 +218,9 @@ public class Bagging
     newVector.addElement(new Option(
               "\tCalculate the out of bag error.",
               "O", 0, "-O"));
+    newVector.addElement(new Option(
+              "\tRepresent copies of instances using weights rather than explicitly.",
+              "-represent-copies-using-weights", 0, "-represent-copies-using-weights"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -294,6 +300,8 @@ public class Bagging
 
     setCalcOutOfBag(Utils.getFlag('O', options));
 
+    setRepresentCopiesUsingWeights(Utils.getFlag("represent-copies-using-weights", options));
+
     super.setOptions(options);
   }
 
@@ -306,7 +314,7 @@ public class Bagging
 
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 3];
+    String [] options = new String [superOptions.length + 4];
 
     int current = 0;
     options[current++] = "-P"; 
@@ -314,6 +322,10 @@ public class Bagging
 
     if (getCalcOutOfBag()) { 
       options[current++] = "-O";
+    }
+
+    if (getRepresentCopiesUsingWeights()) {
+      options[current++] = "-represent-copies-using-weights";
     }
 
     System.arraycopy(superOptions, 0, options, current, 
@@ -353,6 +365,35 @@ public class Bagging
   public void setBagSizePercent(int newBagSizePercent) {
 
     m_BagSizePercent = newBagSizePercent;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String representCopiesUsingWeightsTipText() {
+    return "Whether to represent copies of instances using weights rather than explicitly.";
+  }
+
+  /**
+   * Set whether copies of instances are represented using weights rather than explicitly.
+   *
+   * @param representUsingWeights whether to represent copies using weights
+   */
+  public void setRepresentCopiesUsingWeights(boolean representUsingWeights) {
+
+    m_RepresentUsingWeights = representUsingWeights;
+  }
+
+  /**
+   * Get whether copies of instances are represented using weights rather than explicitly.
+   *
+   * @return whether the out of bag error is calculated
+   */
+  public boolean getRepresentCopiesUsingWeights() {
+
+    return m_RepresentUsingWeights;
   }
 
   /**
@@ -443,9 +484,9 @@ public class Bagging
     // create the in-bag dataset
     if (m_CalcOutOfBag) {
       m_inBag[iteration] = new boolean[m_data.numInstances()];
-      bagData = m_data.resampleWithWeights(r, m_inBag[iteration]);
+      bagData = m_data.resampleWithWeights(r, m_inBag[iteration], getRepresentCopiesUsingWeights());
     } else {
-      bagData = m_data.resampleWithWeights(r);
+      bagData = m_data.resampleWithWeights(r, getRepresentCopiesUsingWeights());
       if (bagSize < m_data.numInstances()) {
         bagData.randomize(r);
         Instances newBagData = new Instances(bagData, 0, bagSize);
@@ -467,6 +508,13 @@ public class Bagging
 
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
+
+    // Has user asked to represent copies using weights?
+    if (getRepresentCopiesUsingWeights() && !(m_Classifier instanceof WeightedInstancesHandler)) {
+      throw new IllegalArgumentException("Cannot represent copies using weights when " +
+                                         "base learner in bagging does not implement " +
+                                         "WeightedInstancesHandler.");
+    }
 
     // remove instances with missing class
     m_data = new Instances(data);

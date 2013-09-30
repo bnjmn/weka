@@ -573,6 +573,11 @@ public class RandomForest
     data.deleteWithMissingClass();
     
     m_bagger = new Bagging();
+
+    // RandomTree implements WeightedInstancesHandler, so we can
+    // represent copies using weights to achieve speed-up.
+    m_bagger.setRepresentCopiesUsingWeights(true);
+
     RandomTree rTree = new RandomTree();
 
     // set up the random tree options

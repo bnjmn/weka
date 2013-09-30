@@ -1116,11 +1116,7 @@ public class Instances extends AbstractList<Instance>
    */
   public Instances resampleWithWeights(Random random) {
 
-    double [] weights = new double[numInstances()];
-    for (int i = 0; i < weights.length; i++) {
-      weights[i] = instance(i).weight();
-    }
-    return resampleWithWeights(random, weights, null);
+    return resampleWithWeights(random, false);
   }
 
   /**
@@ -1135,11 +1131,42 @@ public class Instances extends AbstractList<Instance>
    */
   public Instances resampleWithWeights(Random random, boolean[] sampled) {
 
+    return resampleWithWeights(random, sampled, false);
+  }
+
+  /**
+   * Creates a new dataset of the same size using random sampling
+   * with replacement according to the current instance weights. The
+   * weights of the instances in the new dataset are set to one.
+   * See also resampleWithWeights(Random, double[], boolean[]).
+   *
+   * @param random a random number generator
+   * @param representUsingWeights if true, copies are represented using weights in resampled data
+   * @return the new dataset
+   */
+  public Instances resampleWithWeights(Random random, boolean representUsingWeights) {
+
+    return resampleWithWeights(random, null, representUsingWeights);
+  }
+
+  /**
+   * Creates a new dataset of the same size using random sampling
+   * with replacement according to the current instance weights. The
+   * weights of the instances in the new dataset are set to one.
+   * See also resampleWithWeights(Random, double[], boolean[]).
+   *
+   * @param random a random number generator
+   * @param sampled an array indicating what has been sampled
+   * @param representUsingWeights if true, copies are represented using weights in resampled data
+   * @return the new dataset
+   */
+  public Instances resampleWithWeights(Random random, boolean[] sampled, boolean representUsingWeights) {
+
     double [] weights = new double[numInstances()];
     for (int i = 0; i < weights.length; i++) {
       weights[i] = instance(i).weight();
     }
-    return resampleWithWeights(random, weights, sampled);
+    return resampleWithWeights(random, weights, sampled, representUsingWeights);
   }
 
   /**
@@ -1176,6 +1203,29 @@ public class Instances extends AbstractList<Instance>
    */
   public Instances resampleWithWeights(Random random, double[] weights,
                                        boolean[] sampled) {
+
+    return resampleWithWeights(random, weights, sampled, false);
+  }
+
+  /**
+   * Creates a new dataset of the same size using random sampling
+   * with replacement according to the given weight vector. The
+   * weights of the instances in the new dataset are set to one.
+   * The length of the weight vector has to be the same as the
+   * number of instances in the dataset, and all weights have to
+   * be positive. Uses Walker's method, see 
+   * pp. 232 of "Stochastic Simulation" by B.D. Ripley (1987).
+   *
+   * @param random a random number generator
+   * @param weights the weight vector
+   * @param sampled an array indicating what has been sampled, can be null
+   * @param representUsingWeights if true, copies are represented using weights in resampled data
+   * @return the new dataset
+   * @throws IllegalArgumentException if the weights array is of the wrong
+   * length or contains negative weights.
+   */
+  public Instances resampleWithWeights(Random random, double[] weights,
+                                       boolean[] sampled, boolean representUsingWeights) {
 
     if (weights.length != numInstances()) {
       throw new IllegalArgumentException("weights.length != numInstances.");
@@ -1227,6 +1277,12 @@ public class Instances extends AbstractList<Instance>
       Q[I] += I;
     }
 
+    // Do we need to keep track of how many copies to use?
+    int[] counts = null;
+    if (representUsingWeights) {
+      counts = new int[M];
+    }
+
     for (int i = 0; i < numInstances(); i++) {
       int ALRV;
       double U = M * random.nextDouble();
@@ -1236,13 +1292,29 @@ public class Instances extends AbstractList<Instance>
       } else {
         ALRV = A[I];
       }
-      newData.add(instance(ALRV));
+      if (representUsingWeights) {
+        counts[ALRV]++;
+      } else {
+        newData.add(instance(ALRV));
+      }
       if (sampled != null) {
         sampled[ALRV] = true;
       }
-      newData.instance(newData.numInstances() - 1).setWeight(1);
+      if (!representUsingWeights) {
+        newData.instance(newData.numInstances() - 1).setWeight(1);
+      }
     }
     
+    // Add data based on counts if weights should represent numbers of copies.
+    if (representUsingWeights) {
+      for (int i = 0; i < counts.length; i++) {
+        if (counts[i] > 0) {
+          newData.add(instance(i));
+          newData.instance(newData.numInstances() - 1).setWeight((double)counts[i]);          
+        }
+      }
+    }
+
     return newData;
   }
 
