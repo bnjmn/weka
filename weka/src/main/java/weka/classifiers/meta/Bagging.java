@@ -81,9 +81,16 @@ import weka.core.PartitionGenerator;
  * <pre> -O
  *  Calculate the out of bag error.</pre>
  * 
+ * <pre> -represent-copies-using-weights
+ *  Represent copies of instances using weights rather than explicitly.</pre>
+ * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 1)</pre>
+ * 
+ * <pre> -num-slots &lt;num&gt;
+ *  Number of execution slots.
+ *  (default 1 - i.e. no parallelism)</pre>
  * 
  * <pre> -I &lt;num&gt;
  *  Number of iterations.
@@ -119,6 +126,12 @@ import weka.core.PartitionGenerator;
  * 
  * <pre> -L
  *  Maximum tree depth (default -1, no maximum)</pre>
+ * 
+ * <pre> -I
+ *  Initial class value count (default 0)</pre>
+ * 
+ * <pre> -R
+ *  Spread initial count over all class values (i.e. don't use 1 per value)</pre>
  * 
  <!-- options-end -->
  *
@@ -243,9 +256,16 @@ public class Bagging
    * <pre> -O
    *  Calculate the out of bag error.</pre>
    * 
+   * <pre> -represent-copies-using-weights
+   *  Represent copies of instances using weights rather than explicitly.</pre>
+   * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
    *  (default 1)</pre>
+   * 
+   * <pre> -num-slots &lt;num&gt;
+   *  Number of execution slots.
+   *  (default 1 - i.e. no parallelism)</pre>
    * 
    * <pre> -I &lt;num&gt;
    *  Number of iterations.
@@ -281,6 +301,12 @@ public class Bagging
    * 
    * <pre> -L
    *  Maximum tree depth (default -1, no maximum)</pre>
+   * 
+   * <pre> -I
+   *  Initial class value count (default 0)</pre>
+   * 
+   * <pre> -R
+   *  Spread initial count over all class values (i.e. don't use 1 per value)</pre>
    * 
    <!-- options-end -->
    *
@@ -776,3 +802,4 @@ public class Bagging
     m_classifiersCache = null;
   }
 }
+
