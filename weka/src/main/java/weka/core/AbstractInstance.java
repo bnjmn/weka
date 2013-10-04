@@ -139,10 +139,11 @@ public abstract class AbstractInstance implements Instance, Serializable,
   @Override
   public/* @pure@ */boolean classIsMissing() {
 
-    if (classIndex() < 0) {
+    int classIndex = classIndex();
+    if (classIndex < 0) {
       throw new UnassignedClassException("Class is not set!");
     }
-    return isMissing(classIndex());
+    return isMissing(classIndex);
   }
 
   /**
@@ -159,10 +160,11 @@ public abstract class AbstractInstance implements Instance, Serializable,
   @Override
   public/* @pure@ */double classValue() {
 
-    if (classIndex() < 0) {
+    int classIndex = classIndex();
+    if (classIndex < 0) {
       throw new UnassignedClassException("Class is not set!");
     }
-    return value(classIndex());
+    return value(classIndex);
   }
 
   /**
@@ -269,8 +271,9 @@ public abstract class AbstractInstance implements Instance, Serializable,
       throw new UnassignedDatasetException(
           "DenseInstance doesn't have access to a dataset!");
     }
+    int classIndex = classIndex();
     for (int i = 0; i < numValues(); i++) {
-      if (index(i) != classIndex()) {
+      if (index(i) != classIndex) {
         if (isMissingSparse(i)) {
           return true;
         }
@@ -379,10 +382,11 @@ public abstract class AbstractInstance implements Instance, Serializable,
   @Override
   public void setClassMissing() {
 
-    if (classIndex() < 0) {
+    int classIndex = classIndex();
+    if (classIndex < 0) {
       throw new UnassignedClassException("Class is not set!");
     }
-    setMissing(classIndex());
+    setMissing(classIndex);
   }
 
   /**
@@ -401,10 +405,11 @@ public abstract class AbstractInstance implements Instance, Serializable,
   @Override
   public void setClassValue(double value) {
 
-    if (classIndex() < 0) {
+    int classIndex = classIndex();
+    if (classIndex < 0) {
       throw new UnassignedClassException("Class is not set!");
     }
-    setValue(classIndex(), value);
+    setValue(classIndex, value);
   }
 
   /**
@@ -422,10 +427,11 @@ public abstract class AbstractInstance implements Instance, Serializable,
   @Override
   public final void setClassValue(String value) {
 
-    if (classIndex() < 0) {
+    int classIndex = classIndex();
+    if (classIndex < 0) {
       throw new UnassignedClassException("Class is not set!");
     }
-    setValue(classIndex(), value);
+    setValue(classIndex, value);
   }
 
   /**

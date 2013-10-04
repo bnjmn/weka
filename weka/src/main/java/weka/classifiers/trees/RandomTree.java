@@ -1111,13 +1111,13 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
 
       // Check if node doesn't contain enough instances or is pure
       // or maximum depth reached
-      m_ClassDistribution = classProbs.clone();
-
-      if (Utils.sum(m_ClassDistribution) < 2 * m_MinNum
-          || Utils.eq(m_ClassDistribution[Utils.maxIndex(m_ClassDistribution)],
-              Utils.sum(m_ClassDistribution))
+      double sum = Utils.sum(classProbs);
+      if (sum < 2 * m_MinNum
+          || Utils.eq(classProbs[Utils.maxIndex(classProbs)], sum)
           || ((getMaxDepth() > 0) && (depth >= getMaxDepth()))) {
+
         // Make leaf
+        m_ClassDistribution = classProbs.clone();
         m_Attribute = -1;
         m_Prop = null;
         return;
@@ -1191,13 +1191,14 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
             break;
           }
         }
-        if (!emptySuccessor) {
-          m_ClassDistribution = null;
+        if (emptySuccessor) {
+          m_ClassDistribution = classProbs.clone();
         }
       } else {
 
         // Make leaf
         m_Attribute = -1;
+        m_ClassDistribution = classProbs.clone();
       }
     }
 
@@ -1352,38 +1353,42 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
         double currVal, bestVal = -Double.MAX_VALUE;
         for (int i = 0; i < indexOfFirstMissingValue; i++) {
           Instance inst = data.instance(i);
+          double attVal = inst.value(att);
 
           // Can we place a sensible split point here?
-          if (inst.value(att) > currSplit) {
-
-            // Compute gain for split point
-            currVal = gain(currDist, priorVal);
-
-            // Is the current split point the best point so far?
-            if (currVal > bestVal) {
-
-              // Store value of current point
-              bestVal = currVal;
-
-              // Save split point
-              splitPoint = (inst.value(att) + currSplit) / 2.0;
-
-              // Check for numeric precision problems
-              if (splitPoint <= currSplit) {
-                splitPoint = inst.value(att);
-              }
-
-              // Save distribution
-              for (int j = 0; j < currDist.length; j++) {
-                System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
-              }
+          if (attVal > currSplit) {
+              
+              // Compute gain for split point
+              currVal = gain(currDist, priorVal);
+              
+              // Is the current split point the best point so far?
+              if (currVal > bestVal) {
+                
+                // Store value of current point
+                bestVal = currVal;
+                
+                // Save split point
+                splitPoint = (attVal + currSplit) / 2.0;
+                
+                // Check for numeric precision problems
+                if (splitPoint <= currSplit) {
+                  splitPoint = attVal;
+                }
+                
+                // Save distribution
+                for (int j = 0; j < currDist.length; j++) {
+                  System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
+                }
             }
-            currSplit = inst.value(att);
+
+            // Update value
+            currSplit = attVal;
           }
 
           // Shift over the weight
-          currDist[0][(int) inst.classValue()] += inst.weight();
-          currDist[1][(int) inst.classValue()] -= inst.weight();
+          int classVal = (int) inst.classValue();
+          currDist[0][classVal] += inst.weight();
+          currDist[1][classVal] -= inst.weight();
         }
       }
 
