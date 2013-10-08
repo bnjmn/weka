@@ -1389,8 +1389,11 @@ public class Instances extends AbstractList<Instance>
   public void sort(int attIndex) {
 
     double[] vals = new double[numInstances()];
+    Instance[] backup = new Instance[vals.length];
     for (int i = 0; i < vals.length; i++) {
-      double val = instance(i).value(attIndex);
+      Instance inst = instance(i);
+      backup[i] = inst;
+      double val = inst.value(attIndex);
       if (Utils.isMissingValue(val)) {
         vals[i] = Double.MAX_VALUE;
       } else {
@@ -1399,10 +1402,6 @@ public class Instances extends AbstractList<Instance>
     }
     
     int[] sortOrder = Utils.sortWithNoMissingValues(vals);
-    Instance[] backup = new Instance[vals.length];
-    for (int i = 0; i < vals.length; i++) {
-      backup[i] = instance(i);
-    }
     for (int i = 0; i < vals.length; i++) {
       m_Instances.set(i, backup[sortOrder[i]]);
     }
