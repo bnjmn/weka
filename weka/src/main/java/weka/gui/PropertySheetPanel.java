@@ -716,6 +716,7 @@ public class PropertySheetPanel extends JPanel
       JPanel newPanel = new JPanel();
       if (m_TipTexts[i] != null) {
 	m_Views[i].setToolTipText(m_TipTexts[i]);
+	m_Labels[i].setToolTipText(m_TipTexts[i]);
       }
       newPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 10));
       newPanel.setLayout(new BorderLayout());
