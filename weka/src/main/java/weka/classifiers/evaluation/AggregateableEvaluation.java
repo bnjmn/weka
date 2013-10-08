@@ -33,7 +33,7 @@ import weka.core.Instances;
  * @version $Revision$
  */
 public class AggregateableEvaluation extends Evaluation implements
-    Aggregateable<Evaluation> {
+  Aggregateable<Evaluation> {
 
   /**
    * For serialization
@@ -57,8 +57,7 @@ public class AggregateableEvaluation extends Evaluation implements
    * @param costMatrix the cost matrix to use
    * @throws Exception if a problem occurs
    */
-  public AggregateableEvaluation(Instances data, CostMatrix costMatrix)
-      throws Exception {
+  public AggregateableEvaluation(Instances data, CostMatrix costMatrix) throws Exception {
     super(data, costMatrix);
   }
 
@@ -139,6 +138,8 @@ public class AggregateableEvaluation extends Evaluation implements
         m_MarginCounts[i] += newMarginCounts[i];
       }
     }
+    m_ComplexityStatisticsAvailable = evaluation.m_ComplexityStatisticsAvailable;
+    m_CoverageStatisticsAvailable = evaluation.m_CoverageStatisticsAvailable;
     m_SumPriorEntropy += evaluation.m_SumPriorEntropy;
     m_SumSchemeEntropy += evaluation.m_SumSchemeEntropy;
     m_TotalSizeOfRegions += evaluation.m_TotalSizeOfRegions;
