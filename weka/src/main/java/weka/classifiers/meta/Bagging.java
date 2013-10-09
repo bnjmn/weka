@@ -190,6 +190,7 @@ public class Bagging
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
     
@@ -210,6 +211,7 @@ public class Bagging
    * 
    * @return the default classifier classname
    */
+  @Override
   protected String defaultClassifierString() {
     
     return "weka.classifiers.trees.REPTree";
@@ -220,6 +222,7 @@ public class Bagging
    *
    * @return an enumeration of all the available options.
    */
+  @Override
   public Enumeration listOptions() {
 
     Vector newVector = new Vector(2);
@@ -315,6 +318,7 @@ public class Bagging
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     String bagSize = Utils.getOption('P', options);
@@ -336,6 +340,7 @@ public class Bagging
    *
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String [] getOptions() {
 
 
@@ -467,6 +472,7 @@ public class Bagging
    *
    * @return an enumeration of the measure names
    */
+  @Override
   public Enumeration enumerateMeasures() {
     
     Vector newVector = new Vector(1);
@@ -481,6 +487,7 @@ public class Bagging
    * @return the value of the named measure
    * @throws IllegalArgumentException if the named measure is not supported
    */
+  @Override
   public double getMeasure(String additionalMeasureName) {
     
     if (additionalMeasureName.equalsIgnoreCase("measureOutOfBagError")) {
@@ -502,6 +509,7 @@ public class Bagging
    * @return the training set for the supplied iteration number
    * @throws Exception if something goes wrong when generating a training set.
    */
+  @Override
   protected synchronized Instances getTrainingSet(int iteration) throws Exception {
     int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
     Instances bagData = null;
@@ -530,6 +538,7 @@ public class Bagging
    * bagged classifier.
    * @throws Exception if the classifier could not be built successfully
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     // can classifier handle the data?
@@ -647,6 +656,7 @@ public class Bagging
    * @return preedicted class probability distribution
    * @throws Exception if distribution can't be computed successfully 
    */
+  @Override
   public double[] distributionForInstance(Instance instance) throws Exception {
 
     double [] sums = new double [instance.numClasses()], newProbs; 
@@ -661,7 +671,7 @@ public class Bagging
       }
     }
     if (instance.classAttribute().isNumeric() == true) {
-      sums[0] /= (double)m_NumIterations;
+      sums[0] /= m_NumIterations;
       return sums;
     } else if (Utils.eq(Utils.sum(sums), 0)) {
       return sums;
@@ -676,6 +686,7 @@ public class Bagging
    *
    * @return description of the bagged classifier as a string
    */
+  @Override
   public String toString() {
     
     if (m_Classifiers == null) {
@@ -698,6 +709,7 @@ public class Bagging
   /**
    * Builds the classifier to generate a partition.
    */
+  @Override
   public void generatePartition(Instances data) throws Exception {
     
     if (m_Classifier instanceof PartitionGenerator)
@@ -709,6 +721,7 @@ public class Bagging
   /**
    * Computes an array that indicates leaf membership
    */
+  @Override
   public double[] getMembershipValues(Instance inst) throws Exception {
     
     if (m_Classifier instanceof PartitionGenerator) {
@@ -734,6 +747,7 @@ public class Bagging
   /**
    * Returns the number of elements in the partition.
    */
+  @Override
   public int numElements() throws Exception {
     
     if (m_Classifier instanceof PartitionGenerator) {
@@ -751,6 +765,7 @@ public class Bagging
    * 
    * @return		the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
@@ -798,6 +813,7 @@ public class Bagging
   @Override
   public void finalizeAggregation() throws Exception {    
     m_Classifiers = m_classifiersCache.toArray(new Classifier[1]);
+    m_NumIterations = m_Classifiers.length;
     
     m_classifiersCache = null;
   }
