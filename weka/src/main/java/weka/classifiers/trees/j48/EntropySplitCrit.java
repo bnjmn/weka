@@ -23,6 +23,7 @@ package weka.classifiers.trees.j48;
 
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.ContingencyTables;
 
 /**
  * Class for computing the entropy for a given distribution.
@@ -68,7 +69,7 @@ public final class EntropySplitCrit
 	result += test.perBag(i) * Math.log(train.perBag(i) + numClasses);
       }
   
-    return result / log2;
+    return result / ContingencyTables.log2;
   }
   
   /**

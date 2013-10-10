@@ -33,6 +33,7 @@ import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.ContingencyTables;
 
 /**
  * Class for handling a rule (partial tree) for a decision list.
@@ -289,11 +290,12 @@ public class ClassifierDecList
 	else{
 	  estimated = 0;
 	  for (j = 0; j < localModel().distribution().numClasses(); j++) 
-	    estimated -= m_splitCrit.logFunc(localModel().distribution().
+	    estimated -= m_splitCrit.lnFunc(localModel().distribution().
 				     perClassPerBag(i,j));
-	  estimated += m_splitCrit.logFunc(localModel().distribution().
+	  estimated += m_splitCrit.lnFunc(localModel().distribution().
 				   perBag(i));
-	  estimated /= localModel().distribution().perBag(i);
+	  estimated /= (localModel().distribution().perBag(i) *
+                        ContingencyTables.log2);
 	}
 	if (Utils.smOrEq(estimated,0))
 	  return i;

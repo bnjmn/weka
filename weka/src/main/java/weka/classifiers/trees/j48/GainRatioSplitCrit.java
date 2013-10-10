@@ -104,7 +104,7 @@ public final class GainRatioSplitCrit
       returnValue = returnValue-lnFunc(noUnknown);
       returnValue = returnValue+lnFunc(totalnoInst);
     }
-    return returnValue/log2;
+    return returnValue/ContingencyTables.log2;
   }
   
   /**

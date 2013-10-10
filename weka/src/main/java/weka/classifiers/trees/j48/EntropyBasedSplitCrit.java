@@ -36,9 +36,6 @@ public abstract class EntropyBasedSplitCrit
   /** for serialization */
   private static final long serialVersionUID = -2618691439791653056L;
 
-  /** The log of 2. */
-  protected static double log2 = Math.log(2);
-
   /**
    * Help method for computing entropy.
    */
@@ -61,7 +58,7 @@ public abstract class EntropyBasedSplitCrit
 
     for (j=0;j<bags.numClasses();j++)
       returnValue = returnValue+lnFunc(bags.perClass(j));
-    return (lnFunc(bags.total())-returnValue)/log2; 
+    return (lnFunc(bags.total())-returnValue)/ContingencyTables.log2; 
   }
 
   /**
@@ -77,7 +74,7 @@ public abstract class EntropyBasedSplitCrit
 	returnValue = returnValue+lnFunc(bags.perClassPerBag(i,j));
       returnValue = returnValue-lnFunc(bags.perBag(i));
     }
-    return -(returnValue/log2);
+    return -(returnValue/ContingencyTables.log2);
   }
 
   /**
@@ -91,7 +88,7 @@ public abstract class EntropyBasedSplitCrit
 
     for (i=0;i<bags.numBags();i++)
       returnValue = returnValue+lnFunc(bags.perBag(i));
-    return (lnFunc(bags.total())-returnValue)/log2;
+    return (lnFunc(bags.total())-returnValue)/ContingencyTables.log2;
   }
 }
 
