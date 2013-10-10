@@ -23,6 +23,7 @@ package weka.classifiers.trees.j48;
 
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.ContingencyTables;
 
 /**
  * Class for computing the gain ratio for a given distribution.
@@ -99,11 +100,11 @@ public final class GainRatioSplitCrit
     noUnknown = totalnoInst-bags.total();
     if (Utils.gr(bags.total(),0)){
       for (i=0;i<bags.numBags();i++)
-	returnValue = returnValue-logFunc(bags.perBag(i));
-      returnValue = returnValue-logFunc(noUnknown);
-      returnValue = returnValue+logFunc(totalnoInst);
+	returnValue = returnValue-lnFunc(bags.perBag(i));
+      returnValue = returnValue-lnFunc(noUnknown);
+      returnValue = returnValue+lnFunc(totalnoInst);
     }
-    return returnValue;
+    return returnValue/log2;
   }
   
   /**

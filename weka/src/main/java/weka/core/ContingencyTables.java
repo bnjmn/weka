@@ -541,7 +541,7 @@ public class ContingencyTables
   /**
    * Help method for computing entropy.
    */
-  private static double lnFunc(double num){
+  public static double lnFunc(double num){
     
     if (num <= 0) {
       return 0;
