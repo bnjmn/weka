@@ -55,6 +55,9 @@ public abstract class AbstractClassifier
   /** Whether the classifier is run in debug mode. */
   protected boolean m_Debug = false;
 
+  /** Whether capbabilities should not be checked before classifier is built. */
+  protected boolean m_DoNotCheckCapabilities = false;
+
   /**
    * Classifies the given test instance. The instance has to belong to a
    * dataset when it's being classified. Note that a classifier MUST
@@ -190,12 +193,17 @@ public abstract class AbstractClassifier
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
           "\tIf set, classifier is run in debug mode and\n"
           + "\tmay output additional info to the console",
           "D", 0, "-D"));
+    newVector.addElement(new Option(
+          "\tIf set, classifier capabilities are not checked before classifier is built\n"
+          + "\t(use with caution).",
+          "-do-not-check-capabilities", 0, "-do-not-check-capabilities"));
+
     return newVector.elements();
   }
 
@@ -206,12 +214,17 @@ public abstract class AbstractClassifier
    * If set, classifier is run in debug mode and
    * may output additional info to the console.<p>
    *
+   * -do-not-check-capabilities  <br>
+   * If set, classifier capabilities are not checked before classifier is built
+   * (use with caution).<p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
     setDebug(Utils.getFlag('D', options));
+    setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities", options));
   }
 
   /**
@@ -221,12 +234,17 @@ public abstract class AbstractClassifier
    */
   public String [] getOptions() {
 
-    String [] options;
+    String [] options = new String [2];
+    int current = 0;
+
     if (getDebug()) {
-      options = new String[1];
-      options[0] = "-D";
-    } else {
-      options = new String[0];
+      options[current++] = "-D";
+    } 
+    if (getDoNotCheckCapabilities()) {
+      options[current++] = "-do-not-check-capabilities";
+    }
+    while (current < options.length) {
+      options[current++] = "";
     }
     return options;
   }
@@ -262,6 +280,36 @@ public abstract class AbstractClassifier
   }
 
   /**
+   * Set whether not to check capabilities.
+   *
+   * @param doNotCheckCapabilities true if capabilities are not to be checked.
+   */
+  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
+
+    m_DoNotCheckCapabilities = doNotCheckCapabilities;
+  }
+
+  /**
+   * Get whether capabilities checking is turned off.
+   *
+   * @return true if capabilities checking is turned off.
+   */
+  public boolean getDoNotCheckCapabilities() {
+  
+    return m_DoNotCheckCapabilities;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String doNotCheckCapabilitiesTipText() {
+    return "If set, classifier capabilities are not checked before classifier is built"
+      + " (Use with caution to reduce runtime).";
+  }
+
+  /**
    * Returns the Capabilities of this classifier. Maximally permissive
    * capabilities are allowed by default. Derived classifiers should
    * override this method and first disable all capabilities and then
@@ -273,6 +321,10 @@ public abstract class AbstractClassifier
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
     result.enableAll();
+
+    // Do we want to effectively turn off the testWithFail
+    // method in Capabilities to save runtime in buildClassifier()?
+    result.setTestWithFailAlwaysSucceeds(getDoNotCheckCapabilities());
 
     return result;
   }

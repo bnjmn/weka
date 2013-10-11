@@ -564,6 +564,7 @@ public class LogisticBase
 	    for (int i = 0; i < m_maxIterations; i++) {
 		classifiers[j][i] = new SimpleLinearRegression();
 		classifiers[j][i].setSuppressErrorMessage(true);
+                classifiers[j][i].setDoNotCheckCapabilities(true);
 	    }
 	}
 	return classifiers;

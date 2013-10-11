@@ -242,6 +242,9 @@ public class Capabilities
 
   /** whether to test for minimum number of instances */
   protected boolean m_MinimumNumberInstancesTest;
+
+  /** whether test with fail always succeeds */
+  private boolean m_TestWithFailAlwaysSucceeds;
   
   /**
    * initializes the capabilities for the given owner
@@ -1248,6 +1251,18 @@ public class Capabilities
   }
 
   /**
+   * Whether test with fail should always succeed.
+   * This can be used to effectively turn off the test, e.g.
+   * in buildClassifier() methods, to avoid the additional
+   * runtime required by capabilities testing.
+   *
+   * @param flag if true, the various testWithFail methods always succeed
+   */
+  public void setTestWithFailAlwaysSucceeds(boolean flag) {
+    m_TestWithFailAlwaysSucceeds = flag;
+  }
+
+  /**
    * tests the given attribute by calling the test(Attribute,boolean) method 
    * and throws an exception if the test fails. The method assumes that the
    * specified attribute is not the class attribute.
@@ -1257,6 +1272,9 @@ public class Capabilities
    * @see 		#test(Attribute,boolean)
    */
   public void testWithFail(Attribute att) throws Exception {
+    if (m_TestWithFailAlwaysSucceeds) {
+      return;
+    }
     test(att, false);
   }
 
@@ -1270,6 +1288,9 @@ public class Capabilities
    * @see 		#test(Attribute,boolean)
    */
   public void testWithFail(Attribute att, boolean isClass) throws Exception {
+    if (m_TestWithFailAlwaysSucceeds) {
+      return;
+    }
     if (!test(att, isClass))
       throw m_FailReason;
   }
@@ -1285,6 +1306,9 @@ public class Capabilities
    * @see 		#test(Instances,int,int)
    */
   public void testWithFail(Instances data, int fromIndex, int toIndex) throws Exception {
+    if (m_TestWithFailAlwaysSucceeds) {
+      return;
+    }
     if (!test(data, fromIndex, toIndex))
       throw m_FailReason;
   }
@@ -1298,6 +1322,9 @@ public class Capabilities
    * @see 		#test(Instances)
    */
   public void testWithFail(Instances data) throws Exception {
+    if (m_TestWithFailAlwaysSucceeds) {
+      return;
+    }
     if (!test(data))
       throw m_FailReason;
   }
