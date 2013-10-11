@@ -2806,14 +2806,15 @@ public class ClassifierPanel extends JPanel implements
 
             // set up the structure of the plottable instances for
             // visualization if selected
-            if (saveVis) {
-              plotInstances = new ClassifierErrorsPlotInstances();
+//            if (saveVis) {
+              plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
               plotInstances.setInstances(userTestStructure);
               plotInstances.setClassifier(classifierToUse);
               plotInstances.setClassIndex(userTestStructure.classIndex());
+              plotInstances.setSaveForVisualization(saveVis);
               plotInstances.setEvaluation(eval);
               plotInstances.setUp();
-            }
+//            }
 
             outBuff.append("\n=== Re-evaluation on test set ===\n\n");
             outBuff.append("User supplied test set\n");
@@ -2918,7 +2919,8 @@ public class ClassifierPanel extends JPanel implements
               }
 
               if (plotInstances != null
-                  && plotInstances.getPlotInstances().numInstances() > 0) {
+                  && plotInstances.getPlotInstances() != null && 
+                  plotInstances.getPlotInstances().numInstances() > 0) {
                 m_CurrentVis = new VisualizePanel();
                 m_CurrentVis.setName(name + " ("
                     + userTestStructure.relationName() + ")");
