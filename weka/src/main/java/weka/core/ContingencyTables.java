@@ -34,7 +34,7 @@ public class ContingencyTables
   public static final double log2 = Math.log(2);
 
   /** Cache of integer logs */
-  private static final double MAX_INT_FOR_CACHE_PLUS_ONE = 10000;
+  private static final double MAX_INT_FOR_CACHE_PLUS_ONE = 1000;
   private static final double[] INT_N_LOG_N_CACHE = new double[(int)MAX_INT_FOR_CACHE_PLUS_ONE];
 
   /** Initialize cache */
