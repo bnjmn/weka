@@ -121,6 +121,34 @@ public class SimpleLinearRegression extends AbstractClassifier
     return result;
   }
   
+  /** 
+   * Computes the attribute means.
+   */
+  protected double[] computeMeans(Instances insts) {
+
+    // We can assume that all the attributes are numeric and that
+    // we don't have any missing attribute values (excluding the class)
+    double[] means = new double[insts.numAttributes()];
+    double[] counts = new double[insts.numAttributes()];
+    for (int j = 0; j < insts.numInstances(); j++) {
+      Instance inst = insts.instance(j);
+      if (!inst.classIsMissing()) {
+        for (int i = 0; i < insts.numAttributes(); i++) {
+          means[i] += inst.weight() * inst.value(i);
+          counts[i] += inst.weight();
+        }
+      }
+    }
+    for (int i = 0; i < insts.numAttributes(); i++) {
+      if (counts[i] > 0) {
+        means[i] /= counts[i];
+      } else {
+        means[i] = 0.0;
+      }
+    }    
+    return means;
+  }
+
   /**
    * Builds a simple linear regression model given the supplied training data.
    *
@@ -132,59 +160,62 @@ public class SimpleLinearRegression extends AbstractClassifier
     // can classifier handle the data?
     getCapabilities().testWithFail(insts);
 
-    // remove instances with missing class
-    insts = new Instances(insts);
-    insts.deleteWithMissingClass();
-    
-    // Compute mean of target value
-    double yMean = insts.meanOrMode(insts.classIndex());
+    // Compute relevant statistics
+    double[] means = computeMeans(insts);
+    double[] slopes = new double[insts.numAttributes()];
+    double[] sumWeightedDiffsSquared = new double[insts.numAttributes()];
+    int classIndex = insts.classIndex();
 
-    // Choose best attribute
-    double minMsq = Double.MAX_VALUE;
+    // For all instances
+    for (int j = 0; j < insts.numInstances(); j++) {
+      Instance inst = insts.instance(j);
+
+      // Only need to do something if the class isn't missing
+      if (!inst.classIsMissing()) {
+        double yDiff = inst.value(classIndex) - means[classIndex];
+        double weightedYDiff = inst.weight() * yDiff;
+
+        // For all attributes
+        for (int i = 0; i < insts.numAttributes(); i++) {
+          double diff = inst.value(i) - means[i];
+          double weightedDiff = inst.weight() * diff;
+
+          // Doesn't mater if we compute this for the class
+          slopes[i] += weightedYDiff * diff;
+
+          // We need this for the class as well
+          sumWeightedDiffsSquared[i] += weightedDiff * diff;
+        }
+      }
+    }
+
+    // Pick the best attribute
+    double minSSE = Double.MAX_VALUE;
     m_attribute = null;
     int chosen = -1;
     double chosenSlope = Double.NaN;
     double chosenIntercept = Double.NaN;
     for (int i = 0; i < insts.numAttributes(); i++) {
-      if (i != insts.classIndex()) {
-	m_attribute = insts.attribute(i);
-	
-	// Compute slope and intercept
-	double xMean = insts.meanOrMode(i);
-	double sumWeightedXDiffSquared = 0;
-	double sumWeightedYDiffSquared = 0;
-	m_slope = 0;
-	for (int j = 0; j < insts.numInstances(); j++) {
-	  Instance inst = insts.instance(j);
-	  if (!inst.isMissing(i) && !inst.classIsMissing()) {
-	    double xDiff = inst.value(i) - xMean;
-	    double yDiff = inst.classValue() - yMean;
-	    double weightedXDiff = inst.weight() * xDiff;
-	    double weightedYDiff = inst.weight() * yDiff;
-	    m_slope += weightedXDiff * yDiff;
-	    sumWeightedXDiffSquared += weightedXDiff * xDiff;
-	    sumWeightedYDiffSquared += weightedYDiff * yDiff;
-	  }
-	}
+      
+      // Should we skip this attribute?
+      if ((i == classIndex) || (sumWeightedDiffsSquared[i] == 0)) {
+        continue;
+      }
 
-	// Skip attribute if not useful
-	if (sumWeightedXDiffSquared == 0) {
-	  continue;
-	}
-	double numerator = m_slope;
-	m_slope /= sumWeightedXDiffSquared;
-	m_intercept = yMean - m_slope * xMean;
-
-	// Compute sum of squared errors
-	double msq = sumWeightedYDiffSquared - m_slope * numerator;
-
-	// Check whether this is the best attribute
-	if (msq < minMsq) {
-	  minMsq = msq;
-	  chosen = i;
-	  chosenSlope = m_slope;
-	  chosenIntercept = m_intercept;
-	}
+      // Compute final slope and intercept
+      double numerator = slopes[i];
+      slopes[i] /= sumWeightedDiffsSquared[i];
+      double intercept = means[classIndex] - slopes[i] * means[i];
+      
+      // Compute sum of squared errors
+      double sse = sumWeightedDiffsSquared[classIndex] - slopes[i] * numerator;
+      
+      // Check whether this is the best attribute
+      if (sse < minSSE) {
+        minSSE = sse;
+        chosen = i;
+        chosenSlope = slopes[i];
+        chosenIntercept = intercept;
       }
     }
 
@@ -194,7 +225,7 @@ public class SimpleLinearRegression extends AbstractClassifier
       m_attribute = null;
       m_attributeIndex = 0;
       m_slope = 0;
-      m_intercept = yMean;
+      m_intercept = means[classIndex];
     } else {
       m_attribute = insts.attribute(chosen);
       m_attributeIndex = chosen;
