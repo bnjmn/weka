@@ -585,6 +585,7 @@ public class RandomForest
     if (m_KValue < 1) m_KValue = (int) Utils.log2(data.numAttributes())+1;
     rTree.setKValue(m_KValue);
     rTree.setMaxDepth(getMaxDepth());
+    rTree.setDoNotCheckCapabilities(true);
 
     // set up the bagger and build the forest
     m_bagger.setClassifier(rTree);
