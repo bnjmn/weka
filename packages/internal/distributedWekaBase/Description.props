@@ -1,0 +1,54 @@
+# Description file for distributedWekaBase
+# 
+
+# Package name (required)
+PackageName=distributedWekaBase
+
+# Version (required)
+Version=1.0.0
+
+#Date (year-month-day)
+Date=2013-10-15
+
+# Title (required)
+Title=Generic configuration classes and distributed map/reduce type tasks for Weka
+
+# Category (recommended)
+Category=Distributed
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Provides generic configuration classes and distributed map/reduce type tasks for Weka
+
+# Changes in this release
+# Changes=
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.0.zip?download
+
+# URL for further information
+URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.10)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+#MessageToDisplayOnInstall=Funky package requires some extra\n\
+# stuff to be installed after installing this package. You will\n\
+# need to blah, blah, blah in order to blah, blah, blah...
