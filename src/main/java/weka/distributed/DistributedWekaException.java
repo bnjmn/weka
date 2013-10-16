@@ -68,7 +68,7 @@ public class DistributedWekaException extends WekaException {
    * @param cause the root cause Throwable
    */
   public DistributedWekaException(Throwable cause) {
-    super();
+    super(cause.getMessage());
     initCause(cause);
     fillInStackTrace();
   }
