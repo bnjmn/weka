@@ -159,10 +159,6 @@ public class LogisticBase
 	//get numeric version of the training data (class variable replaced  by numeric pseudo-class)
 	m_numericData = getNumericData(m_train);	
 	
-	//save header info
-	m_numericDataHeader = new Instances(m_numericData, 0);
-	
-	
 	if (m_fixedNumIterations > 0) {
 	    //run LogitBoost for fixed number of iterations
 	    performBoosting(m_fixedNumIterations);
@@ -179,6 +175,9 @@ public class LogisticBase
 	
 	//only keep the simple regression functions that correspond to the selected number of LogitBoost iterations
 	m_regressions = selectRegressions(m_regressions);	
+
+        //clean up
+        cleanup();
     }   
 
     /**
@@ -579,13 +578,21 @@ public class LogisticBase
      * @throws Exception if something goes wrong
      */
     protected Instances getNumericData(Instances data) throws Exception{
-	Instances numericData = new Instances(data);
+
+        if (m_numericDataHeader == null) {
+          m_numericDataHeader = new Instances(data, 0);
 	
-	int classIndex = numericData.classIndex();
-	numericData.setClassIndex(-1);
-	numericData.deleteAttributeAt(classIndex);
-	numericData.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
-	numericData.setClassIndex(classIndex);
+          int classIndex = m_numericDataHeader.classIndex();
+          m_numericDataHeader.setClassIndex(-1);
+          m_numericDataHeader.deleteAttributeAt(classIndex);
+          m_numericDataHeader.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
+          m_numericDataHeader.setClassIndex(classIndex);
+        }
+        Instances numericData = new Instances(m_numericDataHeader, data.numInstances());
+        for (Instance inst : data) {
+          numericData.add(inst);
+        }
+          
 	return numericData;
     }
     

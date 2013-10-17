@@ -214,9 +214,9 @@ public class LMT
     filteredData = Filter.useFilter(filteredData, m_replaceMissing);	
 	
     //possibly convert nominal attributes globally
+    m_nominalToBinary = new NominalToBinary();
+    m_nominalToBinary.setInputFormat(filteredData);	
     if (m_convertNominal) {	    
-      m_nominalToBinary = new NominalToBinary();
-      m_nominalToBinary.setInputFormat(filteredData);	
       filteredData = Filter.useFilter(filteredData, m_nominalToBinary);
     }
 
@@ -232,7 +232,8 @@ public class LMT
 	
     //create tree root
     m_tree = new LMTNode(modSelection, m_numBoostingIterations, m_fastRegression, 
-			 m_errorOnProbabilities, m_minNumInstances, m_weightTrimBeta, m_useAIC);
+			 m_errorOnProbabilities, m_minNumInstances, m_weightTrimBeta, m_useAIC,
+                         m_nominalToBinary);
     //build tree
     m_tree.buildClassifier(filteredData);
 

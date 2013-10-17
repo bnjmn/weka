@@ -143,7 +143,7 @@ public class LMTNode
     public LMTNode(ModelSelection modelSelection, int numBoostingIterations, 
 		   boolean fastRegression, 
                    boolean errorOnProbabilities, int minNumInstances,
-                   double weightTrimBeta, boolean useAIC) {
+                   double weightTrimBeta, boolean useAIC, NominalToBinary ntb) {
 	m_modelSelection = modelSelection;
 	m_fixedNumIterations = numBoostingIterations;      
 	m_fastRegression = fastRegression;
@@ -152,6 +152,7 @@ public class LMTNode
 	m_maxIterations = 200;
         setWeightTrimBeta(weightTrimBeta);
         setUseAIC(useAIC);
+        m_nominalToBinary = ntb;
     }         
     
     /**
@@ -180,7 +181,7 @@ public class LMTNode
 	    Instances train = cvData.trainCV(m_numFoldsPruning, i);
 	    Instances test = cvData.testCV(m_numFoldsPruning, i);
 	    
-	    buildTree(train, null, train.numInstances() , 0);	
+	    buildTree(train, null, train.numInstances() , 0, null);	
 	    
 	    int numNodes = getNumInnerNodes();	   
 	    alphas[i] = new double[numNodes + 2];
@@ -190,8 +191,11 @@ public class LMTNode
 	    prune(alphas[i], errors[i], test);	    	   
 	}
 	
+        //don't need CV data anymore
+        cvData = null;
+
 	//build tree using all the data
-	buildTree(data, null, data.numInstances(), 0);
+	buildTree(data, null, data.numInstances(), 0, null);
 	int numNodes = getNumInnerNodes();
 
 	double[] treeAlphas = new double[numNodes + 2];	
@@ -234,7 +238,6 @@ public class LMTNode
 
 	//CART-prune it with best alpha
 	prune(bestAlpha);    	 		
-	cleanup();	
     }
 
     /**
@@ -250,11 +253,12 @@ public class LMTNode
      * @throws Exception if something goes wrong
      */
     public void buildTree(Instances data, SimpleLinearRegression[][] higherRegressions, 
-			  double totalInstanceWeight, double higherNumParameters) throws Exception{
+			  double totalInstanceWeight, double higherNumParameters,
+                          Instances numericDataHeader) throws Exception{
 
 	//save some stuff
 	m_totalInstanceWeight = totalInstanceWeight;
-	m_train = new Instances(data);
+	m_train = data; //no need to copy the data here
 	
 	m_isLeaf = true;
 	m_sons = null;
@@ -263,8 +267,8 @@ public class LMTNode
 	m_numClasses = m_train.numClasses();				
 	
 	//init 
+	m_numericDataHeader = numericDataHeader;
 	m_numericData = getNumericData(m_train);		  
-	m_numericDataHeader = new Instances(m_numericData, 0);
 	
 	m_regressions = initRegressions();
 	m_numRegressions = 0;
@@ -292,6 +296,11 @@ public class LMTNode
 	//only keep the simple regression functions that correspond to the selected number of LogitBoost iterations
 	m_regressions = selectRegressions(m_regressions);
 
+        //store performance of model at this node
+        Evaluation eval = new Evaluation(m_train);
+        eval.evaluateModel(this, m_train);
+        m_numIncorrectModel = eval.incorrect();
+
 	boolean grow;
 	//split node if more than minNumInstances...
 	if (m_numInstances > m_minNumInstances) {
@@ -316,20 +325,27 @@ public class LMTNode
 	    //create and build children of node
 	    m_isLeaf = false;	    	    
 	    Instances[] localInstances = m_localModel.split(m_train);	    
+
+            //don't need data anymore, so clean up
+            cleanup();
+
 	    m_sons = new LMTNode[m_localModel.numSubsets()];
 	    for (int i = 0; i < m_sons.length; i++) {
 		m_sons[i] = new LMTNode(m_modelSelection, m_fixedNumIterations, 
 					 m_fastRegression,  
 					 m_errorOnProbabilities,m_minNumInstances,
-                                        getWeightTrimBeta(), getUseAIC());
+                                        getWeightTrimBeta(), getUseAIC(), m_nominalToBinary);
 		//the "higherRegressions" (partial logistic model fit at higher levels in the tree) passed
 		//on to the children are the "higherRegressions" at this node plus the regressions added
 		//at this node (m_regressions).
 		m_sons[i].buildTree(localInstances[i],
-				  mergeArrays(m_regressions, m_higherRegressions), m_totalInstanceWeight, m_numParameters);		
+                                    mergeArrays(m_regressions, m_higherRegressions), m_totalInstanceWeight, m_numParameters,
+                                    m_numericDataHeader);		
 		localInstances[i] = null;
 	    }	    
-	} 
+	} else {
+          cleanup();
+        }
     }
 
     /** 
@@ -345,7 +361,6 @@ public class LMTNode
 	CompareNode comparator = new CompareNode();	
 	
 	//determine training error of logistic models and subtrees, and calculate alpha-values from them
-	modelErrors();
 	treeErrors();
 	calculateAlphas();
 	
@@ -390,7 +405,6 @@ public class LMTNode
 	CompareNode comparator = new CompareNode();	
 
 	//determine training error of logistic models and subtrees, and calculate alpha-values from them
-	modelErrors();
 	treeErrors();
 	calculateAlphas();
 
@@ -468,10 +482,7 @@ public class LMTNode
     protected int tryLogistic(Instances data) throws Exception{
 	
 	//convert nominal attributes
-	Instances filteredData = new Instances(data);	
-	NominalToBinary nominalToBinary = new NominalToBinary();			
-	nominalToBinary.setInputFormat(filteredData);
-	filteredData = Filter.useFilter(filteredData, nominalToBinary);	
+	Instances filteredData = Filter.useFilter(data, m_nominalToBinary);	
 	
 	LogisticBase logistic = new LogisticBase(0,true,m_errorOnProbabilities);
 	
@@ -517,25 +528,6 @@ public class LMTNode
 	    numLeaves = 1;
 	}	   
 	return numLeaves;	
-    }
-
-    /**
-     *Updates the numIncorrectModel field for all nodes. This is needed for calculating the alpha-values. 
-     */
-    public void modelErrors() throws Exception{
-		
-	Evaluation eval = new Evaluation(m_train);
-		
-	if (!m_isLeaf) {
-	    m_isLeaf = true;
-	    eval.evaluateModel(this, m_train);
-	    m_isLeaf = false;
-	    m_numIncorrectModel = eval.incorrect();
-	    for (int i = 0; i < m_sons.length; i++) m_sons[i].modelErrors();
-	} else {
-	    eval.evaluateModel(this, m_train);
-	    m_numIncorrectModel = eval.incorrect();
-	}
     }
     
     /**
@@ -633,10 +625,7 @@ public class LMTNode
      */
     protected Instances getNumericData(Instances train) throws Exception{
 	
-	Instances filteredData = new Instances(train);	
-	m_nominalToBinary = new NominalToBinary();			
-	m_nominalToBinary.setInputFormat(filteredData);
-	filteredData = Filter.useFilter(filteredData, m_nominalToBinary);	
+	Instances filteredData = Filter.useFilter(train, m_nominalToBinary);	
 
 	return super.getNumericData(filteredData);
     }
@@ -691,7 +680,6 @@ public class LMTNode
     public double[] modelDistributionForInstance(Instance instance) throws Exception {
 	
 	//make copy and convert nominal attributes
-	instance = (Instance)instance.copy();		
 	m_nominalToBinary.input(instance);
 	instance = m_nominalToBinary.output();	
 	
@@ -936,16 +924,6 @@ public class LMTNode
 	    }
 	}
     } 
-    
-    /**
-     * Cleanup in order to save memory.
-     */
-    public void cleanup() {
-	super.cleanup();
-	if (!m_isLeaf) {
-	    for (int i = 0; i < m_sons.length; i++) m_sons[i].cleanup();
-	}
-    }
     
     /**
      * Returns the revision string.
