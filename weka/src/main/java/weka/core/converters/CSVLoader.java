@@ -55,8 +55,7 @@ import weka.core.Utils;
 import weka.core.converters.ArffLoader.ArffReader;
 
 /**
- <!-- globalinfo-start --> 
- * Reads a source that is in comma separated format
+ * <!-- globalinfo-start --> Reads a source that is in comma separated format
  * (the default). One can also change the column separator from comma to tab or
  * another character, specify string enclosures, specify whether aheader row is
  * present or not and specify which attributes are to beforced to be nominal or
@@ -73,10 +72,9 @@ import weka.core.converters.ArffLoader.ArffReader;
  * values of all nominal attributes using the -L (setNominalLabelSpecs) option.
  * *
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -154,13 +152,13 @@ import weka.core.converters.ArffLoader.ArffReader;
  *  (default: 100)
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
 public class CSVLoader extends AbstractFileLoader implements BatchConverter,
-    IncrementalConverter, OptionHandler {
+  IncrementalConverter, OptionHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -1300595850715808438L;
@@ -227,22 +225,22 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    */
   public String globalInfo() {
     return "Reads a source that is in comma separated format (the default). "
-        + "One can also change the column separator from comma to tab or "
-        + "another character, specify string enclosures, specify whether a"
-        + "header row is present or not and specify which attributes are to be"
-        + "forced to be nominal or date. Can operate in batch or incremental mode. "
-        + "In batch mode, a buffer is used to process a fixed number of rows in "
-        + "memory at any one time and the data is dumped to a temporary file. This "
-        + "allows the legal values for nominal attributes to be automatically "
-        + "determined. The final ARFF file is produced in a second pass over the "
-        + "temporary file using the structure determined on the first pass. In "
-        + "incremental mode, the first buffer full of rows is used to determine "
-        + "the structure automatically. Following this all rows are read and output "
-        + "incrementally. An error will occur if a row containing nominal values not "
-        + "seen in the initial buffer is encountered. In this case, the size of the "
-        + "initial buffer can be increased, or the user can explicitly provide the "
-        + "legal values of all nominal attributes using the -L (setNominalLabelSpecs) "
-        + "option.";
+      + "One can also change the column separator from comma to tab or "
+      + "another character, specify string enclosures, specify whether a"
+      + "header row is present or not and specify which attributes are to be"
+      + "forced to be nominal or date. Can operate in batch or incremental mode. "
+      + "In batch mode, a buffer is used to process a fixed number of rows in "
+      + "memory at any one time and the data is dumped to a temporary file. This "
+      + "allows the legal values for nominal attributes to be automatically "
+      + "determined. The final ARFF file is produced in a second pass over the "
+      + "temporary file using the structure determined on the first pass. In "
+      + "incremental mode, the first buffer full of rows is used to determine "
+      + "the structure automatically. Following this all rows are read and output "
+      + "incrementally. An error will occur if a row containing nominal values not "
+      + "seen in the initial buffer is encountered. In this case, the size of the "
+      + "initial buffer can be increased, or the user can explicitly provide the "
+      + "legal values of all nominal attributes using the -L (setNominalLabelSpecs) "
+      + "option.";
   }
 
   /**
@@ -355,7 +353,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    */
   public String stringAttributesTipText() {
     return "The range of attributes to force to be of type STRING, example "
-        + "ranges: 'first-last', '1,4,7-14,50-last'.";
+      + "ranges: 'first-last', '1,4,7-14,50-last'.";
   }
 
   /**
@@ -384,7 +382,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    */
   public String nominalAttributesTipText() {
     return "The range of attributes to force to be of type NOMINAL, example "
-        + "ranges: 'first-last', '1,4,7-14,50-last'.";
+      + "ranges: 'first-last', '1,4,7-14,50-last'.";
   }
 
   /**
@@ -443,7 +441,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    */
   public String dateAttributesTipText() {
     return "The range of attributes to force to type DATE, example "
-        + "ranges: 'first-last', '1,4,7-14, 50-last'.";
+      + "ranges: 'first-last', '1,4,7-14, 50-last'.";
   }
 
   /**
@@ -484,8 +482,8 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     if (m_FieldSeparator.length() != 1) {
       m_FieldSeparator = ",";
       System.err
-          .println("Field separator can only be a single character (exception being '\t'), "
-              + "defaulting back to '" + m_FieldSeparator + "'!");
+        .println("Field separator can only be a single character (exception being '\t'), "
+          + "defaulting back to '" + m_FieldSeparator + "'!");
     }
   }
 
@@ -567,16 +565,16 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    */
   public String nominalLabelSpecsTipText() {
     return "Optional specification of legal labels for nominal "
-        + "attributes. May be specified multiple times. "
-        + "Batch mode can determine this "
-        + "automatically (and so can incremental mode if "
-        + "the first in memory buffer load of instances "
-        + "contains an example of each legal value). The "
-        + "spec contains two parts separated by a \":\". The "
-        + "first part can be a range of attribute indexes or "
-        + "a comma-separated list off attruibute names; the "
-        + "second part is a comma-separated list of labels. E.g "
-        + "\"1,2,4-6:red,green,blue\" or \"att1,att2:red,green,blue\"";
+      + "attributes. May be specified multiple times. "
+      + "Batch mode can determine this "
+      + "automatically (and so can incremental mode if "
+      + "the first in memory buffer load of instances "
+      + "contains an example of each legal value). The "
+      + "spec contains two parts separated by a \":\". The "
+      + "first part can be a range of attribute indexes or "
+      + "a comma-separated list off attruibute names; the "
+      + "second part is a comma-separated list of labels. E.g "
+      + "\"1,2,4-6:red,green,blue\" or \"att1,att2:red,green,blue\"";
   }
 
   @Override
@@ -584,58 +582,59 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     Vector<Option> result = new Vector<Option>();
 
     result
-        .add(new Option("\tNo header row present in the data.", "H", 0, "-H"));
+      .add(new Option("\tNo header row present in the data.", "H", 0, "-H"));
     result.add(new Option(
-        "\tThe range of attributes to force type to be NOMINAL.\n"
-            + "\t'first' and 'last' are accepted as well.\n"
-            + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
-            + "\t(default: -none-)", "N", 1, "-N <range>"));
+      "\tThe range of attributes to force type to be NOMINAL.\n"
+        + "\t'first' and 'last' are accepted as well.\n"
+        + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
+        + "\t(default: -none-)", "N", 1, "-N <range>"));
 
     result.add(new Option(
-        "\tOptional specification of legal labels for nominal\n"
-            + "\tattributes. May be specified multiple times.\n"
-            + "\tBatch mode can determine this\n"
-            + "\tautomatically (and so can incremental mode if\n"
-            + "\tthe first in memory buffer load of instances\n"
-            + "\tcontains an example of each legal value). The\n"
-            + "\tspec contains two parts separated by a \":\". The\n"
-            + "\tfirst part can be a range of attribute indexes or\n"
-            + "\ta comma-separated list off attruibute names; the\n"
-            + "\tsecond part is a comma-separated list of labels. E.g\n"
-            + "\t\"1,2,4-6:red,green,blue\" or \"att1,att2:red,green,"
-            + "blue\"", "L", 1, "-L <nominal label spec>"));
+      "\tOptional specification of legal labels for nominal\n"
+        + "\tattributes. May be specified multiple times.\n"
+        + "\tBatch mode can determine this\n"
+        + "\tautomatically (and so can incremental mode if\n"
+        + "\tthe first in memory buffer load of instances\n"
+        + "\tcontains an example of each legal value). The\n"
+        + "\tspec contains two parts separated by a \":\". The\n"
+        + "\tfirst part can be a range of attribute indexes or\n"
+        + "\ta comma-separated list off attruibute names; the\n"
+        + "\tsecond part is a comma-separated list of labels. E.g\n"
+        + "\t\"1,2,4-6:red,green,blue\" or \"att1,att2:red,green," + "blue\"",
+      "L", 1, "-L <nominal label spec>"));
 
     result.add(new Option(
-        "\tThe range of attribute to force type to be STRING.\n"
-            + "\t'first' and 'last' are accepted as well.\n"
-            + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
-            + "\t(default: -none-)", "S", 1, "-S <range>"));
+      "\tThe range of attribute to force type to be STRING.\n"
+        + "\t'first' and 'last' are accepted as well.\n"
+        + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
+        + "\t(default: -none-)", "S", 1, "-S <range>"));
 
     result.add(new Option(
-        "\tThe range of attribute to force type to be DATE.\n"
-            + "\t'first' and 'last' are accepted as well.\n"
-            + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
-            + "\t(default: -none-)", "D", 1, "-D <range>"));
+      "\tThe range of attribute to force type to be DATE.\n"
+        + "\t'first' and 'last' are accepted as well.\n"
+        + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
+        + "\t(default: -none-)", "D", 1, "-D <range>"));
 
     result.add(new Option(
-        "\tThe date formatting string to use to parse date values.\n"
-            + "\t(default: \"yyyy-MM-dd'T'HH:mm:ss\")", "format", 1,
-        "-format <date format>"));
+      "\tThe date formatting string to use to parse date values.\n"
+        + "\t(default: \"yyyy-MM-dd'T'HH:mm:ss\")", "format", 1,
+      "-format <date format>"));
 
     result.add(new Option("\tThe string representing a missing value.\n"
-        + "\t(default: ?)", "M", 1, "-M <str>"));
+      + "\t(default: ?)", "M", 1, "-M <str>"));
 
     result.addElement(new Option("\tThe field separator to be used.\n"
-        + "\t'\\t' can be used as well.\n" + "\t(default: ',')", "F", 1,
-        "-F <separator>"));
+      + "\t'\\t' can be used as well.\n" + "\t(default: ',')", "F", 1,
+      "-F <separator>"));
 
-    result.addElement(new Option(
+    result
+      .addElement(new Option(
         "\tThe enclosure character(s) to use for strings.\n"
-            + "\tSpecify as a comma separated list (e.g. \",'"
-            + " (default: \",')", "E", 1, "-E <enclosures>"));
+          + "\tSpecify as a comma separated list (e.g. \",'"
+          + " (default: \",')", "E", 1, "-E <enclosures>"));
 
     result.add(new Option("\tThe size of the in memory buffer (in rows).\n"
-        + "\t(default: 100)", "B", 1, "-B <num>"));
+      + "\t(default: 100)", "B", 1, "-B <num>"));
 
     return result.elements();
   }
@@ -755,7 +754,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     m_structure = structure;
     if (getRetrieval() == BATCH) {
       throw new IOException(
-          "Cannot mix getting instances in both incremental and batch modes");
+        "Cannot mix getting instances in both incremental and batch modes");
     }
     setRetrieval(INCREMENTAL);
 
@@ -772,7 +771,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       }
       m_numBufferedRows = m_rowBuffer.size();
       Reader batchReader = new BufferedReader(
-          new StringReader(tempB.toString()));
+        new StringReader(tempB.toString()));
       m_incrementalReader = new ArffReader(batchReader, m_structure, 0, 0);
       m_rowBuffer.clear();
     }
@@ -828,7 +827,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
     if (getRetrieval() == INCREMENTAL) {
       throw new IOException(
-          "Cannot mix getting instances in both incremental and batch modes");
+        "Cannot mix getting instances in both incremental and batch modes");
     }
     setRetrieval(BATCH);
 
@@ -948,8 +947,8 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
           vals[i] = sdf.parse(val.toString()).getTime();
         } catch (ParseException e) {
           throw new IOException("Unable to parse date value " + val.toString()
-              + " using date format " + format + " for date attribute "
-              + m_structure.attribute(i));
+            + " using date format " + format + " for date attribute "
+            + m_structure.attribute(i));
         }
       } else if (m_structure.attribute(i).isNumeric()) {
         try {
@@ -957,16 +956,16 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
           vals[i] = v.doubleValue();
         } catch (NumberFormatException ex) {
           throw new IOException("Was expecting a number for attribute "
-              + m_structure.attribute(i).name() + " but read " + val.toString()
-              + " instead.");
+            + m_structure.attribute(i).name() + " but read " + val.toString()
+            + " instead.");
         }
       } else {
         // nominal
         double index = m_structure.attribute(i).indexOfValue(
-            Utils.unquote(val.toString()));
+          Utils.unquote(val.toString()));
         if (index < 0) {
           throw new IOException("Read unknown nominal value " + val.toString()
-              + "for attribute " + m_structure.attribute(i).name());
+            + "for attribute " + m_structure.attribute(i).name());
         }
         vals[i] = index;
       }
@@ -984,7 +983,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     for (int i = 0; i < m_types.length; i++) {
       if (m_types[i] == TYPE.STRING || m_types[i] == TYPE.UNDETERMINED) {
         attribs.add(new Attribute(m_structure.attribute(i).name(),
-            (java.util.List<String>) null));
+          (java.util.List<String>) null));
       } else if (m_types[i] == TYPE.NUMERIC) {
         attribs.add(new Attribute(m_structure.attribute(i).name()));
       } else if (m_types[i] == TYPE.NOMINAL) {
@@ -1004,7 +1003,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         attribs.add(new Attribute(m_structure.attribute(i).name(), theVals));
       } else {
         attribs
-            .add(new Attribute(m_structure.attribute(i).name(), m_dateFormat));
+          .add(new Attribute(m_structure.attribute(i).name(), m_dateFormat));
       }
     }
     m_structure = new Instances(m_structure.relationName(), attribs, 0);
@@ -1022,7 +1021,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       throw new IOException("No data in the file!");
     }
     if (m_noHeaderRow) {
-      m_rowBuffer.add(firstRow);      
+      m_rowBuffer.add(firstRow);
     }
 
     ArrayList<Attribute> attribNames = new ArrayList<Attribute>();
@@ -1045,7 +1044,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     boolean wasSep;
 
     while (m_st.ttype != StreamTokenizer.TT_EOL
-        && m_st.ttype != StreamTokenizer.TT_EOF) {
+      && m_st.ttype != StreamTokenizer.TT_EOF) {
       // Get next token
 
       if (!first) {
@@ -1053,7 +1052,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       }
 
       if (m_st.ttype == m_FieldSeparator.charAt(0)
-          || m_st.ttype == StreamTokenizer.TT_EOL) {
+        || m_st.ttype == StreamTokenizer.TT_EOL) {
         wasSep = true;
       } else {
         wasSep = false;
@@ -1077,7 +1076,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     String relationName;
     if (m_sourceFile != null) {
       relationName = (m_sourceFile.getName())
-          .replaceAll("\\.[cC][sS][vV]$", "");
+        .replaceAll("\\.[cC][sS][vV]$", "");
     } else {
       relationName = "stream";
     }
@@ -1141,7 +1140,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         }
       }
     }
-    
+
     // Prevents the first row from getting lost in the
     // case where there is no header row and we're
     // running in batch mode
@@ -1184,14 +1183,14 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     tokenizer.whitespaceChars(0, (' ' - 1));
     tokenizer.wordChars(' ', '\u00FF');
     tokenizer.whitespaceChars(m_FieldSeparator.charAt(0),
-        m_FieldSeparator.charAt(0));
+      m_FieldSeparator.charAt(0));
     // tokenizer.commentChar('%');
 
     String[] parts = m_Enclosures.split(",");
     for (String e : parts) {
       if (e.length() > 1 || e.length() == 0) {
         throw new IllegalArgumentException(
-            "Enclosures can only be single characters");
+          "Enclosures can only be single characters");
       }
       tokenizer.quoteChar(e.charAt(0));
     }
@@ -1242,7 +1241,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
     int i = 0;
     while (tokenizer.ttype != StreamTokenizer.TT_EOL
-        && tokenizer.ttype != StreamTokenizer.TT_EOF) {
+      && tokenizer.ttype != StreamTokenizer.TT_EOF) {
 
       // Get next token
       if (!first) {
@@ -1250,17 +1249,18 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       }
 
       if (tokenizer.ttype == m_FieldSeparator.charAt(0)
-          || tokenizer.ttype == StreamTokenizer.TT_EOL) {
+        || tokenizer.ttype == StreamTokenizer.TT_EOL) {
         m_current.add("?");
         containedMissing = true;
         wasSep = true;
       } else {
         wasSep = false;
-        if (tokenizer.sval.equals(m_MissingValue)) {
+        if (tokenizer.sval.equals(m_MissingValue)
+          || tokenizer.sval.trim().length() == 0) {
           m_current.add("?");
           containedMissing = true;
         } else if (m_types[i] == TYPE.NUMERIC
-            || m_types[i] == TYPE.UNDETERMINED) {
+          || m_types[i] == TYPE.UNDETERMINED) {
           // try to parse as a number
           try {
             double val = Double.parseDouble(tokenizer.sval);
@@ -1300,7 +1300,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       }
       System.out.println();
       StreamTokenizerUtils.errms(tokenizer, "wrong number of values. Read "
-          + m_current.size() + ", expected " + m_structure.numAttributes());
+        + m_current.size() + ", expected " + m_structure.numAttributes());
 
     }
 
