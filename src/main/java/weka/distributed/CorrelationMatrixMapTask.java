@@ -75,6 +75,12 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
   /** Holds the partial covariance sums matrix */
   protected double[][] m_corrMatrix;
 
+  /**
+   * Co-occurrence counts when ignoring missings rather than replacing with
+   * means
+   */
+  protected int[][] m_coOccurrenceCounts;
+
   /** Holds the mean for each numeric attribute */
   protected double[] m_means;
 
@@ -213,6 +219,16 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
   }
 
   /**
+   * The co-occurrence counts (will be null if missings are replaced by means)
+   * 
+   * @return the co-occurrence counts, or null if missings are being replaced by
+   *         means
+   */
+  public int[][] getCoOccurrenceCounts() {
+    return m_coOccurrenceCounts;
+  }
+
+  /**
    * Computes the partial covariance for two attributes on the current instance
    * 
    * @param inst the instance to update from
@@ -242,6 +258,10 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
 
     iV -= m_means[i];
     jV -= m_means[j];
+
+    if (!m_replaceMissingWithMean) {
+      m_coOccurrenceCounts[i][j]++;
+    }
 
     return iV * jV;
   }
@@ -350,9 +370,16 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
     }
 
     m_corrMatrix = new double[m_header.numAttributes()][];
+    if (!m_replaceMissingWithMean) {
+      m_coOccurrenceCounts = new int[m_header.numAttributes()][];
+    }
 
     for (int i = 0; i < m_header.numAttributes(); i++) {
       m_corrMatrix[i] = new double[i + 1];
+
+      if (!m_replaceMissingWithMean) {
+        m_coOccurrenceCounts[i] = new int[i + 1];
+      }
     }
 
     for (int i = 0; i < m_header.numAttributes(); i++) {
@@ -399,8 +426,8 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
       for (int i = 0; i < matrix.length; i++) {
         List<double[]> toAgg = new ArrayList<double[]>();
         toAgg.add(matrix[i]);
-        double[] computed = reduce
-          .aggregate(i, toAgg, withSummary, true, false);
+        double[] computed = reduce.aggregate(i, toAgg, null, withSummary, true,
+          false);
         for (int j = 0; j < matrix[i].length; j++) {
           System.err.print(computed[j] + " ");
         }

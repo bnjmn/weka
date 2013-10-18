@@ -1300,8 +1300,8 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
       for (int i = 0; i < matrix.length; i++) {
         List<double[]> toAgg = new ArrayList<double[]>();
         toAgg.add(matrix[i]);
-        double[] computed = reduce
-          .aggregate(i, toAgg, withSummary, true, false);
+        double[] computed = reduce.aggregate(i, toAgg, null, withSummary, true,
+          false);
         matrix[i] = computed;
       }
 

@@ -26,6 +26,7 @@ import java.util.List;
 
 import weka.core.Attribute;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
@@ -47,6 +48,8 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
    * 
    * @param matrixRowNumber the index of the row in the matrix to be aggregated
    * @param toAggregate a list rows to be aggregated
+   * @param coOccurrencesToAgg a list of co-occurrence counts to aggregate (will
+   *          be null if missings have been replaced with means)
    * @param headerWithSummaryAtts the header of the data (including summary
    *          attributes)
    * @param missingsWereReplacedWithMeans true if missing values were replaced
@@ -57,7 +60,8 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
    * @throws DistributedWekaException if a problem occurs
    */
   public double[] aggregate(int matrixRowNumber, List<double[]> toAggregate,
-    Instances headerWithSummaryAtts, boolean missingsWereReplacedWithMeans,
+    List<int[]> coOccurrencesToAgg, Instances headerWithSummaryAtts,
+    boolean missingsWereReplacedWithMeans,
     boolean covarianceInsteadOfCorrelation) throws DistributedWekaException {
 
     StringBuilder rem = new StringBuilder();
@@ -113,6 +117,19 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
       }
     }
 
+    int[] coOccAgg = null;
+    if (!missingsWereReplacedWithMeans) {
+      coOccAgg = coOccurrencesToAgg.get(0).clone();
+
+      for (int i = 1; i < coOccurrencesToAgg.size(); i++) {
+        int[] toAgg = coOccurrencesToAgg.get(i);
+
+        for (int j = 0; j < toAgg.length; j++) {
+          coOccAgg[j] += toAgg[j];
+        }
+      }
+    }
+
     // correlation or covariance?
     double[] statsForRowAtt = CSVToARFFHeaderReduceTask
       .attributeToStatsArray(correspondingSummaryAtt);
@@ -126,24 +143,34 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
         .attributeToStatsArray(currespondingSummaryI);
 
       // if missings were replaced then sum is divided by the total count (i.e.
-      // count + #missing); otherwise only min(countRowAtt, countIAtt) values
-      // would have been multiplied and summed over all the map tasks
+      // count + #missing); otherwise use the co-occurrence count for rowAtt,
+      // col i
       double denom = missingsWereReplacedWithMeans ? statsForRowAtt[ArffSummaryNumericMetric.COUNT
         .ordinal()]
-        + statsForRowAtt[ArffSummaryNumericMetric.MISSING.ordinal()] : Math
-        .min(statsForRowAtt[ArffSummaryNumericMetric.COUNT.ordinal()],
-          statsForI[ArffSummaryNumericMetric.COUNT.ordinal()]);
+        + statsForRowAtt[ArffSummaryNumericMetric.MISSING.ordinal()]
+        : coOccAgg[i];
+
+      // Math
+      // .min(statsForRowAtt[ArffSummaryNumericMetric.COUNT.ordinal()],
+      // statsForI[ArffSummaryNumericMetric.COUNT.ordinal()]);
 
       if (covarianceInsteadOfCorrelation) {
         if (denom > 1) {
           aggregated[i] /= (denom - 1);
         } else {
-          aggregated[i] = Double.POSITIVE_INFINITY;
+          if (denom == 1) {
+            aggregated[i] = Double.POSITIVE_INFINITY;
+          } else {
+            aggregated[i] = Utils.missingValue(); // never co-occurred
+          }
         }
       } else {
-
         if (matrixRowNumber == i || denom <= 1) {
-          aggregated[i] = 1.0;
+          if (missingsWereReplacedWithMeans) {
+            aggregated[i] = 1.0;
+          } else {
+            aggregated[i] = Utils.missingValue(); // never co-occurred
+          }
         } else {
           double sR = statsForRowAtt[ArffSummaryNumericMetric.STDDEV.ordinal()];
           double sI = statsForI[ArffSummaryNumericMetric.STDDEV.ordinal()];

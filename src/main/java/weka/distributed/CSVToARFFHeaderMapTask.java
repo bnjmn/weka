@@ -45,6 +45,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.SparseInstance;
 import weka.core.Utils;
 import au.com.bytecode.opencsv.CSVParser;
 
@@ -996,10 +997,30 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     return m_nominalLabelSpecs.toArray(new String[0]);
   }
 
-  public void generateNames(int numAtts) {
-    for (int i = 0; i < numAtts; i++) {
+  /**
+   * Generate attribute names. Attributes are named "attinitial",
+   * "attinitial+1", ..., "attinitial+numAtts-1"
+   * 
+   * @param initial the number to use for the first attribute
+   * @param numAtts the number of attributes to generate
+   */
+  public void generateNames(int initial, int numAtts) {
+    for (int i = initial; i < initial + numAtts; i++) {
       m_attributeNames.add("att" + (i + 1));
     }
+  }
+
+  /**
+   * Generate attribute names. Attributes are named "att0", "att1", ...
+   * "attnumAtts-1"
+   * 
+   * @param numAtts the number of attribute names to generate
+   */
+  public void generateNames(int numAtts) {
+    generateNames(0, numAtts);
+    // for (int i = 0; i < numAtts; i++) {
+    // m_attributeNames.add("att" + (i + 1));
+    // }
   }
 
   public void initParserOnly() {
@@ -1411,6 +1432,26 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Utility method for Constructing a dense instance given an array of parsed
+   * CSV values
+   * 
+   * @param trainingHeader the header to associate the instance with. Does not
+   *          add the new instance to this data set; just gives the instance a
+   *          reference to the header
+   * @param setStringValues true if any string values should be set in the
+   *          header as opposed to being added to the header (i.e. accumulating
+   *          in the header).
+   * @param parsed the array of parsed CSV values
+   * @param sparse true if the new instance is to be a sparse instance
+   * @return an Instance
+   * @throws Exception if a problem occurs
+   */
+  public Instance makeInstance(Instances trainingHeader,
+    boolean setStringValues, String[] parsed) throws Exception {
+    return makeInstance(trainingHeader, setStringValues, parsed, false);
+  }
+
+  /**
    * Utility method for Constructing an instance given an array of parsed CSV
    * values
    * 
@@ -1421,11 +1462,12 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    *          header as opposed to being added to the header (i.e. accumulating
    *          in the header).
    * @param parsed the array of parsed CSV values
+   * @param sparse true if the new instance is to be a sparse instance
    * @return an Instance
    * @throws Exception if a problem occurs
    */
   public Instance makeInstance(Instances trainingHeader,
-    boolean setStringValues, String[] parsed) throws Exception {
+    boolean setStringValues, String[] parsed, boolean sparse) throws Exception {
     double[] vals = new double[trainingHeader.numAttributes()];
 
     for (int i = 0; i < trainingHeader.numAttributes(); i++) {
@@ -1470,7 +1512,13 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       }
     }
 
-    Instance result = new DenseInstance(1.0, vals);
+    Instance result = null;
+
+    if (sparse) {
+      result = new SparseInstance(1.0, vals);
+    } else {
+      result = new DenseInstance(1.0, vals);
+    }
     result.setDataset(trainingHeader);
 
     return result;
