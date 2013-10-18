@@ -820,6 +820,10 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
 
       job.setOptions(args);
       job.runJob();
+
+      if (!DistributedJobConfig.isEmpty(getText())) {
+        System.out.println(getText());
+      }
     } catch (Exception ex) {
       ex.printStackTrace();
     }

@@ -29,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.distributed.hadoop.WekaClassifierHadoopMapper;
 
 /**
  * Knowledge Flow step for executing the WekaClassifierHadoopJob
@@ -82,6 +83,16 @@ public class WekaClassifierHadoopJob extends AbstractHadoopJob {
       .getClassifier();
     Instances modelHeader = ((weka.distributed.hadoop.WekaClassifierHadoopJob) m_runningJob)
       .getTrainingHeader();
+    String classAtt = ((weka.distributed.hadoop.WekaClassifierHadoopJob) m_runningJob)
+      .getClassAttribute();
+    try {
+      WekaClassifierHadoopMapper.setClassIndex(classAtt, modelHeader, true);
+    } catch (Exception ex) {
+      if (m_log != null) {
+        m_log.logMessage(statusMessagePrefix() + ex.getMessage());
+      }
+      ex.printStackTrace();
+    }
 
     if (finalClassifier == null) {
       if (m_log != null) {

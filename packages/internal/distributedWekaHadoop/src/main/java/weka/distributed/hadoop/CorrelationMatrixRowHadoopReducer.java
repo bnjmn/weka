@@ -117,17 +117,25 @@ public class CorrelationMatrixRowHadoopReducer extends
       int rowNum = rowsToAgg.get(0).getRowNumber();
 
       List<double[]> rows = new ArrayList<double[]>();
+      List<int[]> coOcc = null;
+      if (!m_missingsWereReplacedWithMeans) {
+        coOcc = new ArrayList<int[]>();
+      }
+
       for (MatrixRowHolder r : rowsToAgg) {
         if (r.getRowNumber() != rowNum) {
           throw new IOException(
             "Matrix row numbers for this key appear to differ!");
         }
         rows.add(r.getRow());
+        if (!m_missingsWereReplacedWithMeans) {
+          coOcc.add(r.getCoOccurrencesCounts());
+        }
       }
       try {
         double[] aggregated = m_task.aggregate(rowsToAgg.get(0).getRowNumber(),
-          rows, m_headerWithSummaryAtts, m_missingsWereReplacedWithMeans,
-          m_covariance);
+          rows, coOcc, m_headerWithSummaryAtts,
+          m_missingsWereReplacedWithMeans, m_covariance);
 
         // assemble Text key (row num) and Text row (space separated
         // values)

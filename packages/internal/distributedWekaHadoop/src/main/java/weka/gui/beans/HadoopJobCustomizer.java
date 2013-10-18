@@ -257,8 +257,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     jobHolder.setLayout(new BorderLayout());
 
     PropertySheetPanel arffJobEditor = new PropertySheetPanel();
-    arffJobEditor.setTarget(arffJob);
     arffJobEditor.setEnvironment(m_env);
+    arffJobEditor.setTarget(arffJob);
     jobHolder.add(arffJobEditor, BorderLayout.NORTH);
 
     m_arffMapTask = new CSVToARFFHeaderMapTask();
@@ -270,9 +270,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     PropertySheetPanel mapTaskEditor = new PropertySheetPanel();
     mapTaskEditor.setTarget(m_arffMapTask);
 
-    jobHolder.add(mapTaskEditor, BorderLayout.CENTER);
-
     mapTaskEditor.setEnvironment(m_env);
+    jobHolder.add(mapTaskEditor, BorderLayout.CENTER);
 
     // JScrollPane scroller = new JScrollPane(jobHolder);
 
@@ -292,8 +291,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     jobHolder.setLayout(new BorderLayout());
 
     PropertySheetPanel classifierJobEditor = new PropertySheetPanel();
-    classifierJobEditor.setTarget(classifierJob);
     classifierJobEditor.setEnvironment(m_env);
+    classifierJobEditor.setTarget(classifierJob);
     jobHolder.add(classifierJobEditor, BorderLayout.NORTH);
 
     if (hideAbout) {
@@ -307,8 +306,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       e.printStackTrace();
     }
     PropertySheetPanel classifierTaskEditor = new PropertySheetPanel();
-    classifierTaskEditor.setTarget(m_classifierMapTask);
     classifierTaskEditor.setEnvironment(m_env);
+    classifierTaskEditor.setTarget(m_classifierMapTask);
     jobHolder.add(classifierTaskEditor, BorderLayout.CENTER);
 
     return jobHolder;
@@ -338,8 +337,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     jobHolder.setLayout(new BorderLayout());
 
     PropertySheetPanel evaluationJobEditor = new PropertySheetPanel();
-    evaluationJobEditor.setTarget(evaluationJob);
     evaluationJobEditor.setEnvironment(m_env);
+    evaluationJobEditor.setTarget(evaluationJob);
     jobHolder.add(evaluationJobEditor, BorderLayout.NORTH);
 
     m_tempClassifierJob = new weka.distributed.hadoop.WekaClassifierHadoopJob();
@@ -368,8 +367,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     jobHolder.setLayout(new BorderLayout());
 
     PropertySheetPanel matrixJobEditor = new PropertySheetPanel();
-    matrixJobEditor.setTarget(correlationJob);
     matrixJobEditor.setEnvironment(m_env);
+    matrixJobEditor.setTarget(correlationJob);
     jobHolder.add(matrixJobEditor, BorderLayout.NORTH);
 
     m_correlationMapTask = new CorrelationMatrixMapTask();
@@ -380,8 +379,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     }
 
     PropertySheetPanel matrixTaskEditor = new PropertySheetPanel();
-    matrixTaskEditor.setTarget(m_correlationMapTask);
     matrixTaskEditor.setEnvironment(m_env);
+    matrixTaskEditor.setTarget(m_correlationMapTask);
     jobHolder.add(matrixTaskEditor, BorderLayout.CENTER);
 
     m_configTabs.addTab(tabTitle, jobHolder);
@@ -398,8 +397,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     jobHolder.setLayout(new BorderLayout());
 
     PropertySheetPanel scoringJobEditor = new PropertySheetPanel();
-    scoringJobEditor.setTarget(scoringJob);
     scoringJobEditor.setEnvironment(m_env);
+    scoringJobEditor.setTarget(scoringJob);
     jobHolder.add(scoringJobEditor, BorderLayout.NORTH);
 
     m_configTabs.addTab(tabTitle, jobHolder);
@@ -685,8 +684,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
 
     m_mrConfig = m_job.getMapReduceJobConfig();
 
-    m_mrConfigEditor.setTarget(m_mrConfig);
     m_mrConfigEditor.setEnvironment(m_env);
+    m_mrConfigEditor.setTarget(m_mrConfig);
 
     setup();
   }
