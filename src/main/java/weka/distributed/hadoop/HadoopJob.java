@@ -152,13 +152,10 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     }
 
     String additionalPackages = Utils.getOption("weka-packages", options);
-    if (!DistributedJobConfig.isEmpty(additionalPackages)) {
-      setAdditionalWekaPackages(additionalPackages);
-    }
+    setAdditionalWekaPackages(additionalPackages);
+
     String logInt = Utils.getOption("logging-interval", options);
-    if (!DistributedJobConfig.isEmpty(logInt)) {
-      setLoggingInterval(logInt);
-    }
+    setLoggingInterval(logInt);
 
     m_mrConfig.setOptions(options);
   }
@@ -501,6 +498,9 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   protected boolean runJob(Job job) throws DistributedWekaException {
     try {
       m_stopRunningJob = false;
+      if (DistributedJobConfig.isEmpty(getLoggingInterval())) {
+        m_loggingInterval = "10";
+      }
       int logInterval = Integer.parseInt(m_loggingInterval);
       System.out.println("Setting logging interval to " + logInterval);
       job.submit();

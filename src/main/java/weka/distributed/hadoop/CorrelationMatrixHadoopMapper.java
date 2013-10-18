@@ -179,7 +179,27 @@ public class CorrelationMatrixHadoopMapper extends
     protected int m_rowNumber;
 
     /** The row itself */
-    protected double[] m_row = null;
+    protected double[] m_row;
+
+    /**
+     * If missings are not being replaced, then this holds the count of
+     * co-occurrences
+     */
+    protected int[] m_coCoccurrences;
+
+    /**
+     * Construct a new MatrixRowHolder
+     * 
+     * @param rowNum the number of this row of the matrix
+     * @param row the row itself
+     * @param coOccurrences the co-occurrence counts (if missings are not
+     *          replaced with means)
+     */
+    public MatrixRowHolder(int rowNum, double[] row, int[] coOccurrences) {
+      m_rowNumber = rowNum;
+      m_row = row;
+      m_coCoccurrences = coOccurrences;
+    }
 
     /**
      * Construct a new MatrixRowHolder
@@ -188,8 +208,7 @@ public class CorrelationMatrixHadoopMapper extends
      * @param row the row itself
      */
     public MatrixRowHolder(int rowNum, double[] row) {
-      m_rowNumber = rowNum;
-      m_row = row;
+      this(rowNum, row, null);
     }
 
     /**
@@ -208,6 +227,17 @@ public class CorrelationMatrixHadoopMapper extends
      */
     public double[] getRow() {
       return m_row;
+    }
+
+    /**
+     * Get the co-occurrences counts, or null if missings were replaced with
+     * means
+     * 
+     * @return the co-occurrences counts for this row, or null if missings were
+     *         replaced with means
+     */
+    public int[] getCoOccurrencesCounts() {
+      return m_coCoccurrences;
     }
   }
 
@@ -253,10 +283,15 @@ public class CorrelationMatrixHadoopMapper extends
 
     // output all the rows in this partial matrix
     double[][] partialMatrix = m_task.getMatrix();
+    int[][] coOcc = m_task.getCoOccurrenceCounts();
 
     for (int i = 0; i < partialMatrix.length; i++) {
       double[] row = partialMatrix[i];
-      MatrixRowHolder rh = new MatrixRowHolder(i, row);
+      int[] co = null;
+      if (coOcc != null) {
+        co = coOcc[i];
+      }
+      MatrixRowHolder rh = new MatrixRowHolder(i, row, co);
       byte[] bytes = rowHolderToBytes(rh);
 
       String sKey = ("" + i);

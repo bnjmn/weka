@@ -402,7 +402,9 @@ public class HDFSUtils {
       path.length());
 
     try {
-      DistributedCache.addCacheFile(new URI(path + "#" + fileNameOnly), conf);
+      DistributedCache.addCacheFile(
+        new URI(constructHDFSURI(hdfsConfig, path + "#" + fileNameOnly, env)),
+        conf);
     } catch (URISyntaxException e) {
       throw new IOException(e);
     }
