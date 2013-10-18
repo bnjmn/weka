@@ -55,7 +55,8 @@ import weka.core.Utils;
 import weka.core.converters.ArffLoader.ArffReader;
 
 /**
- * <!-- globalinfo-start --> Reads a source that is in comma separated format
+ <!-- globalinfo-start --> 
+ * Reads a source that is in comma separated format
  * (the default). One can also change the column separator from comma to tab or
  * another character, specify string enclosures, specify whether aheader row is
  * present or not and specify which attributes are to beforced to be nominal or
@@ -72,9 +73,10 @@ import weka.core.converters.ArffLoader.ArffReader;
  * values of all nominal attributes using the -L (setNominalLabelSpecs) option.
  * *
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -152,7 +154,7 @@ import weka.core.converters.ArffLoader.ArffReader;
  *  (default: 100)
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
