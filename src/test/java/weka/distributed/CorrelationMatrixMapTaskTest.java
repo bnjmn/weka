@@ -220,7 +220,8 @@ public class CorrelationMatrixMapTaskTest {
     for (int i = 0; i < matrix.length; i++) {
       List<double[]> toAgg = new ArrayList<double[]>();
       toAgg.add(matrix[i]);
-      double[] computed = reduce.aggregate(i, toAgg, withSummary, true, false);
+      double[] computed = reduce.aggregate(i, toAgg, null, withSummary, true,
+        false);
       // for (int j = 0; j < matrix[i].length; j++) {
       // System.err.print(computed[j] + " ");
       // }
