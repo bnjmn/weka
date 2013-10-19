@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoop
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date (year-month-day)
-Date=2013-10-15
+Date=2013-10-19
 
 # Title (required)
 Title=Hadoop wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 2
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Includes libraries for Hadoop 1.1.2.
 
 # Changes in this release
-# Changes=
+Changes=Fixed a bug in the computation of correlations when only co-occurring pairs are considered (i.e when missing values are not replaced by means). Also fixed a bug where the classifier output by the ClassifierHadoopJob Knowledge Flow step did not have the class attribute set in its associated training Instances header.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.1.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
@@ -44,7 +44,7 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.10), distributedWekaBase (>=1.0.0)
+Depends=weka (>=3.7.10), distributedWekaBase (>=1.0.1)
 # Depends=weka (>=3.7.10)
 
 # Message to display in installation. Can be used to provide
