@@ -5,10 +5,10 @@
 PackageName=distributedWekaBase
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date (year-month-day)
-Date=2013-10-15
+Date=2013-10-19
 
 # Title (required)
 Title=Generic configuration classes and distributed map/reduce type tasks for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides generic configuration classes and distributed map/reduce type tasks for Weka
 
 # Changes in this release
-# Changes=
+Changes=Fixed a bug in the computation of correlations when only co-occurring pairs are considered (i.e when missing values are not replaced by means). Also fixed a bug where the classifier output by the ClassifierHadoopJob Knowledge Flow step did not have the class attribute set in its associated training Instances header.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.1.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
