@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -681,6 +682,32 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       } finally {
         if (bw != null) {
           bw.close();
+        }
+      }
+
+      // now write it back in tuple format
+      statusMessage("Writing correlation matrix, in tuple format, back to HDFS: "
+        + outputDir);
+      logMessage("Writing correlation matrix, in tuple format, back to HDFS: "
+        + outputDir);
+
+      p = new Path(outputDir + "/" + arffFileName + "_matrix_tuple.txt");
+      dos = fs.create(p, true);
+      PrintWriter pw = null;
+      try {
+        bw = new BufferedWriter(new OutputStreamWriter(dos));
+        pw = new PrintWriter(bw);
+        for (Map.Entry<Integer, double[]> e : rows.entrySet()) {
+          int i = e.getKey();
+          double[] js = e.getValue();
+
+          for (int j = 0; j < js.length; j++) {
+            pw.println("" + i + "," + j + "," + js[j]);
+          }
+        }
+      } finally {
+        if (pw != null) {
+          pw.close();
         }
       }
     } catch (Exception e) {

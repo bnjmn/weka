@@ -68,6 +68,15 @@ public class CSVToArffHeaderHadoopMapper extends
   protected List<String> m_attNames;
 
   /**
+   * Any error that occurs during mapping. Hadoop does not seem to report these
+   * exceptions when thrown by the map() function (although they do stop the
+   * task attempt immediately), instead, the cleanup() method gets called (which
+   * might result in other exceptions getting reported and making the root cause
+   * more tricky to establish)
+   */
+  protected IOException m_fatalMappingError;
+
+  /**
    * Read attribute names (one per line) from the supplied Reader
    * 
    * @param br the BufferedReader to read from
@@ -167,6 +176,7 @@ public class CSVToArffHeaderHadoopMapper extends
       try {
         m_task.processRow(value.toString(), m_attNames);
       } catch (Exception ex) {
+        m_fatalMappingError = new IOException(ex);
         throw new IOException(ex);
       }
     }
@@ -174,6 +184,11 @@ public class CSVToArffHeaderHadoopMapper extends
 
   @Override
   public void cleanup(Context context) throws IOException, InterruptedException {
+
+    if (m_fatalMappingError != null) {
+      throw m_fatalMappingError;
+    }
+
     Instances header = m_task.getHeader();
 
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
