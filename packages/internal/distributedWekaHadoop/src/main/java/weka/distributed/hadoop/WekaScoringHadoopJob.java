@@ -50,6 +50,13 @@ import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
 import distributed.hadoop.HDFSUtils;
 
+/**
+ * Hadoop job for scoring new data using an existing Weka classifier or
+ * clusterer.
+ * 
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version: $Revision$
+ */
 public class WekaScoringHadoopJob extends HadoopJob implements
   CommandlineRunnable {
 
@@ -290,6 +297,11 @@ public class WekaScoringHadoopJob extends HadoopJob implements
    */
   protected String handleModelFile(Configuration conf) throws IOException {
     String modelPath = getModelPath();
+
+    try {
+      modelPath = environmentSubstitute(modelPath);
+    } catch (Exception ex) {
+    }
 
     if (modelPath.startsWith("hdfs://")) {
       modelPath = modelPath.replace("hdfs://", "");
