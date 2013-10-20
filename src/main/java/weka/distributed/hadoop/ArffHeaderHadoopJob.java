@@ -478,6 +478,11 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
 
     String existingPath = getPathToExistingHeader();
 
+    try {
+      existingPath = environmentSubstitute(existingPath);
+    } catch (Exception ex) {
+    }
+
     // check local file system first
     File f = new File(existingPath);
     boolean success = false;

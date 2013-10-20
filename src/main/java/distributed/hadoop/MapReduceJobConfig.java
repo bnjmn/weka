@@ -186,7 +186,7 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
 
     setJobTrackerHost(Utils.getOption("jobtracker-host", options));
     setJobTrackerPort(Utils.getOption("jobtracker-port", options));
-    setNumberOfMaps(Utils.getOption("num_maps", options));
+    setNumberOfMaps(Utils.getOption("num-maps", options));
     setTaskTrackerMapTasksMaximum(Utils.getOption("map-maximum", options));
     setNumberOfReducers(Utils.getOption("num-reducers", options));
     setInputPaths(Utils.getOption("input-paths", options));
