@@ -1063,8 +1063,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       fields = m_parser.parseLine(row);
 
       if (attNames != null && fields.length != attNames.size()) {
-        throw new IllegalArgumentException(
-          "Number of names given does not match number of fields in the first row!");
+        throw new IOException("Expected " + attNames.size()
+          + " fields, but got " + fields.length + " for row: " + row);
       }
 
       if (attNames == null) {
