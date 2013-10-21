@@ -78,6 +78,8 @@ public abstract class DistributedJobConfig implements OptionHandler,
 
   @Override
   public void setOptions(String[] options) throws Exception {
+    m_additionalUserSuppliedProperties.clear();
+
     while (true) {
       String userProp = Utils.getOption("user-prop", options);
       if (DistributedJobConfig.isEmpty(userProp)) {
