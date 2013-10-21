@@ -151,13 +151,13 @@ public class LogisticBase
 	m_train = new Instances(data);
 	
 	m_numClasses = m_train.numClasses();
-	
-	//init the array of simple regression functions
-	m_regressions = initRegressions();
-	m_numRegressions = 0;
 
 	//get numeric version of the training data (class variable replaced  by numeric pseudo-class)
 	m_numericData = getNumericData(m_train);	
+
+	//init the array of simple regression functions
+	m_regressions = initRegressions();
+	m_numRegressions = 0;
 	
 	if (m_fixedNumIterations > 0) {
 	    //run LogitBoost for fixed number of iterations
@@ -172,9 +172,6 @@ public class LogisticBase
 	    //run LogitBoost with number of iterations that minimizes error on the training set
 	    performBoosting();
 	}	
-	
-	//only keep the simple regression functions that correspond to the selected number of LogitBoost iterations
-	m_regressions = selectRegressions(m_regressions);	
 
         //clean up
         cleanup();
@@ -211,12 +208,13 @@ public class LogisticBase
 	    int iterations = performBoosting(train,test,error,completedIterations);	    
 	    if (iterations < completedIterations) completedIterations = iterations;	    
 	}
-	
+
 	//determine iteration with minimum error over the folds
 	int bestIteration = getBestIteration(error,completedIterations);
-	
+
 	//rebuild model on all of the training data
 	m_numRegressions = 0;
+        m_regressions = initRegressions();
 	performBoosting(bestIteration);
     }    
     
@@ -272,6 +270,7 @@ public class LogisticBase
         }
 
         m_numRegressions = 0;
+        m_regressions = initRegressions();
         performBoosting(bestIteration);
     }
 
@@ -388,9 +387,9 @@ public class LogisticBase
 		//could not fit simple regression
 		break;
 	    }
-	    
+
 	    trainErrors[iteration] = getErrorRate(m_train);	    
-	 
+
 	    //heuristic: stop LogitBoost if the current minimum has not changed for <m_heuristicStop> iterations
 	    if (noMin > m_heuristicStop) break;	    
 	    if (trainErrors[iteration] < lastMin) {
@@ -402,7 +401,10 @@ public class LogisticBase
 	}
 	
 	//find iteration with best error
-        m_numRegressions = getBestIteration(trainErrors, iteration);	
+        int bestIteration = getBestIteration(trainErrors, iteration);	
+	m_numRegressions = 0;
+        m_regressions = initRegressions();
+	performBoosting(bestIteration);
     }
 
     /**
@@ -466,6 +468,7 @@ public class LogisticBase
 				       double[][] probs,
 				       Instances trainNumeric) throws Exception {
 	
+        SimpleLinearRegression[] linearRegressionForEachClass = new SimpleLinearRegression[m_numClasses];
 	for (int j = 0; j < m_numClasses; j++) {
             // Keep track of sum of weights
             double[] weights = new double[trainNumeric.numInstances()];
@@ -516,24 +519,32 @@ public class LogisticBase
                     current.setWeight(current.weight() * (double)instancesCopy.numInstances() / weightSum);
                 }
             }
-	    
+
 	    //fit simple regression function
-	    m_regressions[j][iteration].buildClassifier(instancesCopy);
+            linearRegressionForEachClass[j] = new SimpleLinearRegression();
+            linearRegressionForEachClass[j].setSuppressErrorMessage(true);
+            linearRegressionForEachClass[j].setDoNotCheckCapabilities(true);
+	    linearRegressionForEachClass[j].buildClassifier(instancesCopy);
 	    
-	    boolean foundAttribute = m_regressions[j][iteration].foundUsefulAttribute();
+	    boolean foundAttribute = linearRegressionForEachClass[j].foundUsefulAttribute();
 	    if (!foundAttribute) {
 		//could not fit simple regression function
 		return false;
 	    }
-	    
 	}
 	
+        // Add each linear regression model to the sum
+        for (int i = 0; i < m_numClasses; i++) {
+            m_regressions[i][linearRegressionForEachClass[i].getAttributeIndex()].
+                addModel(linearRegressionForEachClass[i]);
+        }
+
 	// Evaluate / increment trainFs from the classifier
 	for (int i = 0; i < trainFs.length; i++) {
 	    double [] pred = new double [m_numClasses];
 	    double predSum = 0;
 	    for (int j = 0; j < m_numClasses; j++) {
-		pred[j] = m_regressions[j][iteration]
+		pred[j] = linearRegressionForEachClass[j]
 		    .classifyInstance(trainNumeric.instance(i));
 		predSum += pred[j];
 	    }
@@ -556,14 +567,14 @@ public class LogisticBase
      * 
      * @return the generated classifiers
      */
-    protected SimpleLinearRegression[][] initRegressions(){
+    protected SimpleLinearRegression[][] initRegressions() throws Exception {
 	SimpleLinearRegression[][] classifiers =   
-	    new SimpleLinearRegression[m_numClasses][m_maxIterations];
+            new SimpleLinearRegression[m_numClasses][m_numericDataHeader.numAttributes()];
 	for (int j = 0; j < m_numClasses; j++) {
-	    for (int i = 0; i < m_maxIterations; i++) {
-		classifiers[j][i] = new SimpleLinearRegression();
-		classifiers[j][i].setSuppressErrorMessage(true);
-                classifiers[j][i].setDoNotCheckCapabilities(true);
+            for (int i = 0; i < m_numericDataHeader.numAttributes(); i++) {
+                if (i != m_numericDataHeader.classIndex()) {
+                    classifiers[j][i] = new SimpleLinearRegression(m_numericDataHeader, i, 0, 0);
+                }
 	    }
 	}
 	return classifiers;
@@ -595,26 +606,6 @@ public class LogisticBase
           
 	return numericData;
     }
-    
-    /**
-     * Helper function for cutting back m_regressions to the set of classifiers 
-     * (corresponsing to the number of LogitBoost iterations) that gave the 
-     * smallest error.
-     * 
-     * @param classifiers the original set of classifiers
-     * @return the cut back set of classifiers
-     */
-    protected SimpleLinearRegression[][] selectRegressions(SimpleLinearRegression[][] classifiers){
-	SimpleLinearRegression[][] goodClassifiers = 
-	    new SimpleLinearRegression[m_numClasses][m_numRegressions];
-	
-	for (int j = 0; j < m_numClasses; j++) {
-	    for (int i = 0; i < m_numRegressions; i++) {
-		goodClassifiers[j][i] = classifiers[j][i];
-	    }
-	}
-	return goodClassifiers;
-    }		
     
     /**
      * Computes the LogitBoost response variable from y/p values 
@@ -732,17 +723,19 @@ public class LogisticBase
 	double [] instanceFs = new double [m_numClasses]; 
 	
 	//add up the predictions from the simple regression functions
-	for (int i = 0; i < m_numRegressions; i++) {
-	    double predSum = 0;
-	    for (int j = 0; j < m_numClasses; j++) {
-		pred[j] = m_regressions[j][i].classifyInstance(instance);
-		predSum += pred[j];
-	    }
-	    predSum /= m_numClasses;
-	    for (int j = 0; j < m_numClasses; j++) {
-		instanceFs[j] += (pred[j] - predSum) * (m_numClasses - 1) 
-		    / m_numClasses;
-	    }
+	for (int i = 0; i < m_numericDataHeader.numAttributes(); i++) {
+            if (i != m_numericDataHeader.classIndex()) {
+                double predSum = 0;
+                for (int j = 0; j < m_numClasses; j++) {
+                    pred[j] = m_regressions[j][i].classifyInstance(instance);
+                    predSum += pred[j];
+                }
+                predSum /= m_numClasses;
+                for (int j = 0; j < m_numClasses; j++) {
+                    instanceFs[j] += (pred[j] - predSum) * (m_numClasses - 1) 
+                        / m_numClasses;
+                }
+            }
 	}	
 	
 	return instanceFs; 
@@ -929,21 +922,22 @@ public class LogisticBase
 	for (int j = 0; j < m_numClasses; j++) {
 	    //go through simple regression functions and add their coefficient to the coefficient of
 	    //the attribute they are built on.
-	    for (int i = 0; i < m_numRegressions; i++) {
-		
-		double slope = m_regressions[j][i].getSlope();
-		double intercept = m_regressions[j][i].getIntercept();
-		int attribute = m_regressions[j][i].getAttributeIndex();
-		
-		coefficients[j][0] += intercept;
-		coefficients[j][attribute + 1] += slope;
+	    for (int i = 0; i < m_numericDataHeader.numAttributes(); i++) {
+		if (i != m_numericDataHeader.classIndex()) {
+                    double slope = m_regressions[j][i].getSlope();
+                    double intercept = m_regressions[j][i].getIntercept();
+                    int attribute = m_regressions[j][i].getAttributeIndex();
+                    
+                    coefficients[j][0] += intercept;
+                    coefficients[j][attribute + 1] += slope;
+                }
 	    }
 	}
         
         // Need to multiply all coefficients by (J-1) / J
         for (int j = 0; j < coefficients.length; j++) {
           for (int i = 0; i < coefficients[0].length; i++) {
-            coefficients[j][i] *= (double)(m_numClasses - 1) / (double)m_numClasses;
+              coefficients[j][i] *= (double)(m_numClasses - 1) / (double)m_numClasses;
           }
         }
 

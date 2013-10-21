@@ -81,6 +81,47 @@ public class SimpleLinearRegression extends AbstractClassifier
       +"Missing values are not allowed. Can only deal with numeric attributes.";
   }
 
+    /** 
+     * Default constructor.
+     */
+    public SimpleLinearRegression() {
+
+    }
+
+    /**
+     * Construct a simple linear regression model based on the given info.
+     */
+    public SimpleLinearRegression(Instances data, int attIndex, double slope, double intercept) {
+
+        m_attributeIndex = attIndex;
+        m_slope = slope;
+        m_intercept = intercept;
+        m_attribute = data.attribute(attIndex);
+    }
+
+
+  /**
+   * Takes the given simple linear regression model and adds it to this one.
+   * Does nothing if the given model is based on a different attribute.
+   * Assumes the given model has been initialized.
+   */
+  public void addModel(SimpleLinearRegression slr) throws Exception {
+    
+      if (m_attribute == null || slr.m_attributeIndex == m_attributeIndex) {
+          m_attributeIndex = slr.m_attributeIndex;
+          m_attribute = slr.m_attribute;
+          m_slope += slr.m_slope;
+          m_intercept += slr.m_intercept;
+      } else {
+          throw new Exception("Could not add models. " +
+                              m_attributeIndex + " " + slr.m_attributeIndex + " " +
+                              m_attribute + " " + slr.m_attribute + " " +
+                              m_slope + " " + slr.m_slope + " " +
+                              m_intercept + " " + slr.m_intercept);
+      }
+  }
+
+
   /**
    * Generate a prediction for the supplied instance.
    *

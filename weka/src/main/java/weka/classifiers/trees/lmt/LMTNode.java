@@ -110,9 +110,6 @@ public class LMTNode
     /**Simple regression functions fit by LogitBoost at higher levels in the tree*/
     protected SimpleLinearRegression[][] m_higherRegressions;
     
-    /**Number of simple regression functions fit by LogitBoost at higher levels in the tree*/
-    protected int m_numHigherRegressions = 0;
-    
     /**Number of folds for CART pruning*/
     protected static int m_numFoldsPruning = 5;
 
@@ -237,7 +234,7 @@ public class LMTNode
 	unprune();
 
 	//CART-prune it with best alpha
-	prune(bestAlpha);    	 		
+        prune(bestAlpha);    	 		
     }
 
     /**
@@ -274,9 +271,9 @@ public class LMTNode
 	m_numRegressions = 0;
 	
 	if (higherRegressions != null) m_higherRegressions = higherRegressions;
-	else m_higherRegressions = new SimpleLinearRegression[m_numClasses][0];	
-
-	m_numHigherRegressions = m_higherRegressions[0].length;	
+	else {
+            m_higherRegressions = initRegressions();
+        }
         
         m_numParameters = higherNumParameters;
         
@@ -292,9 +289,6 @@ public class LMTNode
         }
         
         m_numParameters += m_numRegressions;
-	
-	//only keep the simple regression functions that correspond to the selected number of LogitBoost iterations
-	m_regressions = selectRegressions(m_regressions);
 
         //store performance of model at this node
         Evaluation eval = new Evaluation(m_train);
@@ -387,6 +381,15 @@ public class LMTNode
 	    nodeList = getNodes();
 	    prune = (nodeList.size() > 0);   	  
 	}  
+
+        // discard references to models at internal nodes because they are not needed
+        for (Object node : getNodes()) {
+            LMTNode lnode = (LMTNode) node;
+            if (!lnode.m_isLeaf) {
+                m_regressions = null;
+                m_higherRegressions = null;
+            }
+        }
     }
 
     /**
@@ -577,22 +580,21 @@ public class LMTNode
      * @param a1 one array
      * @param a2 the other array
      *
-     * @return an array that contains all entries from both input arrays
+     * @return the second array with the first one added to it.
      */
     protected SimpleLinearRegression[][] mergeArrays(SimpleLinearRegression[][] a1,	
-							   SimpleLinearRegression[][] a2){
-	int numModels1 = a1[0].length;
-	int numModels2 = a2[0].length;		
+                                                     SimpleLinearRegression[][] a2)
+        throws Exception {
 	
-	SimpleLinearRegression[][] result =
-	    new SimpleLinearRegression[m_numClasses][numModels1 + numModels2];
-	
-	for (int i = 0; i < m_numClasses; i++)
-	    for (int j = 0; j < numModels1; j++) {
-		result[i][j]  = a1[i][j];
-	    }
-	for (int i = 0; i < m_numClasses; i++)
-	    for (int j = 0; j < numModels2; j++) result[i][j+numModels1] = a2[i][j];
+        SimpleLinearRegression[][] result = initRegressions();
+	for (int i = 0; i < m_numClasses; i++) {
+	    for (int j = 0; j < m_numericDataHeader.numAttributes(); j++) {
+                if (j != m_numericDataHeader.classIndex()) {
+                    result[i][j].addModel(a1[i][j]);
+                    result[i][j].addModel(a2[i][j]);
+                }
+            }
+        }
 	return result;
     }
 
@@ -648,17 +650,19 @@ public class LMTNode
 	double [] instanceFs = super.getFs(instance);		
 
 	//Fs from m_higherRegressions
-	for (int i = 0; i < m_numHigherRegressions; i++) {
-	    double predSum = 0;
-	    for (int j = 0; j < m_numClasses; j++) {
-		pred[j] = m_higherRegressions[j][i].classifyInstance(instance);
-		predSum += pred[j];
-	    }
-	    predSum /= m_numClasses;
-	    for (int j = 0; j < m_numClasses; j++) {
-		instanceFs[j] += (pred[j] - predSum) * (m_numClasses - 1) 
-		    / m_numClasses;
-	    }
+	for (int i = 0; i < m_numericDataHeader.numAttributes(); i++) {
+            if (i != m_numericDataHeader.classIndex()) {
+                double predSum = 0;
+                for (int j = 0; j < m_numClasses; j++) {
+                    pred[j] = m_higherRegressions[j][i].classifyInstance(instance);
+                    predSum += pred[j];
+                }
+                predSum /= m_numClasses;
+                for (int j = 0; j < m_numClasses; j++) {
+                    instanceFs[j] += (pred[j] - predSum) * (m_numClasses - 1) 
+                        / m_numClasses;
+                }
+            }
 	}
 	return instanceFs; 
     }
@@ -769,7 +773,7 @@ public class LMTNode
     public String getModelParameters(){
 	
 	StringBuffer text = new StringBuffer();
-	int numModels = m_numRegressions+m_numHigherRegressions;
+	int numModels = (int)m_numParameters;
 	text.append(m_numRegressions+"/"+numModels+" ("+m_numInstances+")");
 	return text.toString();
     }
@@ -843,12 +847,14 @@ public class LMTNode
 	//get coefficients from m_higherRegressions:
         double constFactor = (double)(m_numClasses - 1) / (double)m_numClasses; // (J - 1)/J
 	for (int j = 0; j < m_numClasses; j++) {
-	    for (int i = 0; i < m_numHigherRegressions; i++) {		
-		double slope = m_higherRegressions[j][i].getSlope();
-		double intercept = m_higherRegressions[j][i].getIntercept();
-		int attribute = m_higherRegressions[j][i].getAttributeIndex();
-		coefficients[j][0] += constFactor * intercept;
-		coefficients[j][attribute + 1] += constFactor * slope;
+	    for (int i = 0; i < m_numericDataHeader.numAttributes(); i++) {		
+                if (i != m_numericDataHeader.classIndex()) {
+                    double slope = m_higherRegressions[j][i].getSlope();
+                    double intercept = m_higherRegressions[j][i].getIntercept();
+                    int attribute = m_higherRegressions[j][i].getAttributeIndex();
+                    coefficients[j][0] += constFactor * intercept;
+                    coefficients[j][attribute + 1] += constFactor * slope;
+                }
 	    }
 	}
 
