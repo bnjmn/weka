@@ -506,9 +506,10 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       // set the number of reducers equal to Math.min(numMatrixRows,
       // (reduceMax * numNodesInCluster)
       int numNodesAvail = 1;
-      if (!DistributedJobConfig.isEmpty(m_numNodesAvailable)) {
+      String numNodesInCluster = environmentSubstitute(getNumNodesInCluster());
+      if (!DistributedJobConfig.isEmpty(numNodesInCluster)) {
         try {
-          numNodesAvail = Integer.parseInt(m_numNodesAvailable);
+          numNodesAvail = Integer.parseInt(numNodesInCluster);
         } catch (NumberFormatException n) {
           logMessage("WARNING: unable to parse the number of available nodes - setting to 1");
         }
@@ -516,6 +517,13 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       String reduceTasksMaxPerNode = conf
         .get("mapred.tasktracker.reduce.tasks.maximum");
       int reduceMax = 2;
+
+      // allow our configuration to override the defaults for the cluster
+      if (!DistributedJobConfig.isEmpty(m_mrConfig
+        .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
+        reduceTasksMaxPerNode = environmentSubstitute(m_mrConfig
+          .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
+      }
 
       // num rows in matrix is equal to num attributes in the arff
       // header file (possibly -1 if the class gets ignored)
@@ -533,13 +541,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
         reduceMax = Integer
           .parseInt(environmentSubstitute(reduceTasksMaxPerNode));
       }
-      String numNodesInCluster = environmentSubstitute(getNumNodesInCluster());
-      if (DistributedJobConfig.isEmpty(numNodesInCluster)) {
-        numNodesInCluster = "1";
-      }
 
-      int numReducers = Math.min(rowsInMatrix,
-        reduceMax * Integer.parseInt(numNodesInCluster));
+      int numReducers = Math.min(rowsInMatrix, reduceMax * numNodesAvail);
 
       logMessage("Setting number of reducers for correlation job to: "
         + numReducers);

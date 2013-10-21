@@ -531,6 +531,14 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
       Configuration conf = new Configuration();
       String reduceTasksMaxPerNode = conf
         .get("mapred.tasktracker.reduce.tasks.maximum");
+
+      // allow our configuration to override the defaults for the cluster
+      if (!DistributedJobConfig.isEmpty(m_mrConfig
+        .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
+        reduceTasksMaxPerNode = environmentSubstitute(m_mrConfig
+          .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
+      }
+
       int reduceMax = 2;
       if (!DistributedJobConfig.isEmpty(reduceTasksMaxPerNode)) {
         reduceMax = Integer
