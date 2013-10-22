@@ -29,7 +29,6 @@ import weka.classifiers.trees.j48.ClassifierSplitModel;
 import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.Stats;
-import weka.classifiers.trees.lmt.LogisticBase;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
