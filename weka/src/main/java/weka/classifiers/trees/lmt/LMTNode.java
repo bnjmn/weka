@@ -566,36 +566,6 @@ public class LMTNode
 	    m_alpha = Double.MAX_VALUE;
 	}
     }
-    
-    /**
-     * Merges two arrays of regression functions into one
-     * @param a1 one array
-     * @param a2 the other array
-     *
-     * @return the second array with the first one added to it.
-     */
-    protected SimpleLinearRegression[][] copyRegressions(SimpleLinearRegression[][] a)	
-        throws Exception {
-    
-        SimpleLinearRegression[][] result = initRegressions();
-        for (int i = 0; i < a.length; i++) {
-            for (int j = 0; j < a[i].length; j++) {
-                if (j != m_numericDataHeader.classIndex()) {
-                    result[i][j].addModel(a[i][j]);
-                }
-            }
-        }
-
-        /*        SimpleLinearRegression[][] result = null;
-        try {
-            SerializedObject so = new SerializedObject(a);
-            result = (SimpleLinearRegression[][])so.getObject();
-        } catch (Exception ex) {
-            System.err.println("Can't copy array of simple linear regression objects.");
-            System.err.println(ex);
-            }*/
-        return result;
-    }
 
     /**
      * Return a list of all inner nodes in the tree

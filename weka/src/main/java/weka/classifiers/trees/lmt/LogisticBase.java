@@ -195,6 +195,8 @@ public class LogisticBase
 
 	double[] error = new double[m_maxIterations + 1];	
 	
+        SimpleLinearRegression[][] backup = m_regressions;
+
 	for (int i = 0; i < m_numFoldsBoosting; i++) {
 	    //split into training/test data in fold
 	    Instances train = allData.trainCV(m_numFoldsBoosting,i);
@@ -202,7 +204,7 @@ public class LogisticBase
 
 	    //initialize LogitBoost
 	    m_numRegressions = 0;
-	    m_regressions = initRegressions();
+	    m_regressions = copyRegressions(backup);
 
 	    //run LogitBoost iterations
 	    int iterations = performBoosting(train,test,error,completedIterations);	    
@@ -214,10 +216,30 @@ public class LogisticBase
 
 	//rebuild model on all of the training data
 	m_numRegressions = 0;
-        m_regressions = initRegressions();
+        m_regressions = backup;
 	performBoosting(bestIteration);
     }    
+        
+    /**
+     * Deep copies the given array of simple linear regression functions.
+     * @param a the array to copy
+     *
+     * @return the new array
+     */
+    protected SimpleLinearRegression[][] copyRegressions(SimpleLinearRegression[][] a)	
+        throws Exception {
     
+        SimpleLinearRegression[][] result = initRegressions();
+        for (int i = 0; i < a.length; i++) {
+            for (int j = 0; j < a[i].length; j++) {
+                if (j != m_numericDataHeader.classIndex()) {
+                    result[i][j].addModel(a[i][j]);
+                }
+            }
+        }
+        return result;
+    }
+
     /**
      * Runs LogitBoost, determining the best number of iterations by an information criterion (currently AIC).
      */
