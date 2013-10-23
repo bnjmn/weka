@@ -214,5 +214,7 @@ public class RandomizedDataChunkHadoopReducer extends
         }
       }
     }
+
+    m_mos.close();
   }
 }
