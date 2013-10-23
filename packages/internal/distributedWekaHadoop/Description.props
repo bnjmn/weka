@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoop
 
 # Version (required)
-Version=1.0.1
+Version=1.0.2
 
 #Date (year-month-day)
-Date=2013-10-19
+Date=2013-10-23
 
 # Title (required)
 Title=Hadoop wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 2
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Includes libraries for Hadoop 1.1.2.
 
 # Changes in this release
-Changes=Fixed a bug in the computation of correlations when only co-occurring pairs are considered (i.e when missing values are not replaced by means). Also fixed a bug where the classifier output by the ClassifierHadoopJob Knowledge Flow step did not have the class attribute set in its associated training Instances header.
+Changes=Fixed a bug in the randomly shuffled data chunk job where the MultipleOutput writer was not getting closed at the end of the reduce phase. Also fixed a bug that affected the writing of the ARFF and CSV versions of evaluation results by the evaluation job under certain conditions.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.2.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
