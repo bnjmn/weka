@@ -275,10 +275,16 @@ public class WekaClassifierEvaluationHadoopReducer extends
     evalInsts.add(inst);
     evalInsts.compactify();
 
-    String arffFileName = WekaClassifierHadoopReducer.constructHDFSURI(
-      outputPath + "/evaluation.arff", conf);
-    String csvFileName = WekaClassifierHadoopReducer.constructHDFSURI(
-      outputPath + "/evaluation.csv", conf);
+    if (!outputPath.startsWith("hdfs://")) {
+      outputPath = WekaClassifierHadoopReducer.constructHDFSURI(outputPath,
+        conf);
+    }
+    String arffFileName = outputPath + "/evaluation.arff";
+    // String arffFileName = WekaClassifierHadoopReducer.constructHDFSURI(
+    // outputPath + "/evaluation.arff", conf);
+    String csvFileName = outputPath + "/evaluation.csv";
+    // String csvFileName = WekaClassifierHadoopReducer.constructHDFSURI(
+    // outputPath + "/evaluation.csv", conf);
 
     PrintWriter pr = null;
     try {
