@@ -115,9 +115,9 @@ public class CSVToArffHeaderHadoopReducer extends
     String outputDestination, Configuration conf) throws IOException {
     PrintWriter pr = null;
     try {
-      if (!outputDestination.startsWith("hdfs://")) {
-        outputDestination = constructHDFSURI(outputDestination, conf);
-      }
+      // if (!outputDestination.startsWith("hdfs://")) {
+      // outputDestination = constructHDFSURI(outputDestination, conf);
+      // }
 
       Path pt = new Path(outputDestination);
       FileSystem fs = FileSystem.get(conf);
@@ -147,17 +147,17 @@ public class CSVToArffHeaderHadoopReducer extends
    * @param conf the Configuration for the job
    * @return a HDFS URI
    */
-  protected static String constructHDFSURI(String path, Configuration conf) {
-    String hostPort = conf.get("fs.default.name");
-
-    if (!hostPort.endsWith("/") && !path.endsWith("/")) {
-      hostPort += "/";
-    }
-
-    hostPort += path;
-
-    return hostPort;
-  }
+  // protected static String constructHDFSURI(String path, Configuration conf) {
+  // String hostPort = conf.get("fs.default.name");
+  //
+  // if (!hostPort.endsWith("/") && !path.endsWith("/")) {
+  // hostPort += "/";
+  // }
+  //
+  // hostPort += path;
+  //
+  // return hostPort;
+  // }
 
   /**
    * Helper method to decompress a serialized Instances object

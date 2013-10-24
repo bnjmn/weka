@@ -51,7 +51,7 @@ public class HDFSUtils {
    * The default location in HDFS to place weka.jar and other libraries for
    * inclusion in the classpath of the hadoop nodes
    */
-  public static final String WEKA_LIBRARIES_LOCATION = "/opt/nz/ac/waikato/cms/";
+  public static final String WEKA_LIBRARIES_LOCATION = "opt/nz/ac/waikato/cms/";
 
   /**
    * Users need to set HADOOP_ON_LINUX environment variable to "true" if
@@ -69,15 +69,13 @@ public class HDFSUtils {
     + "tmpDistributedCache/";
 
   /**
-   * Utility method to construct a HDFS URI given a HDFSConfig and a path
+   * Utility method to resolve all environment variables in a given path
    * 
-   * @param config the HDFSConfig with connection details
    * @param path the path in HDFS
    * @param env environment variables to use
-   * @return a HDFS URI as a String
+   * @return the path with all environment variables resolved
    */
-  public static String constructHDFSURI(HDFSConfig config, String path,
-    Environment env) {
+  public static String resolvePath(String path, Environment env) {
     if (env != null) {
       try {
         path = env.substitute(path);
@@ -85,21 +83,25 @@ public class HDFSUtils {
       }
     }
 
-    if (path.startsWith("hdfs://")) {
-      return path;
-    }
+    return path;
 
-    String uri = "hdfs://" + config.getHDFSHost() + ":" + config.getHDFSPort()
-      + (path.startsWith("/") ? path : "/" + path);
+    // if (path.startsWith("hdfs://")) {
+    // return path;
+    // }
+    //
+    // String uri = "hdfs://" + config.getHDFSHost() + ":" +
+    // config.getHDFSPort()
+    // // + (path.startsWith("/") ? path : "/" + path);
+    // + path;
+    //
+    // if (env != null) {
+    // try {
+    // uri = env.substitute(uri);
+    // } catch (Exception ex) {
+    // }
+    // }
 
-    if (env != null) {
-      try {
-        uri = env.substitute(uri);
-      } catch (Exception ex) {
-      }
-    }
-
-    return uri;
+    // return uri;
   }
 
   /**
@@ -115,8 +117,7 @@ public class HDFSUtils {
 
     FileSystem fs = FileSystem.get(conf);
 
-    Path p = new Path(constructHDFSURI(config,
-      WEKA_TEMP_DISTRIBUTED_CACHE_FILES, null));
+    Path p = new Path(resolvePath(WEKA_TEMP_DISTRIBUTED_CACHE_FILES, null));
 
     if (!fs.exists(p)) {
       fs.mkdirs(p);
@@ -137,8 +138,8 @@ public class HDFSUtils {
 
     createTmpDistributedCacheDirIfNecessary(config);
 
-    Path sourceP = new Path(constructHDFSURI(config, source, env));
-    Path targetP = new Path(constructHDFSURI(config, target, env));
+    Path sourceP = new Path(resolvePath(source, env));
+    Path targetP = new Path(resolvePath(target, env));
 
     Configuration conf = new Configuration();
     config.configureForHadoop(conf, env);
@@ -170,7 +171,7 @@ public class HDFSUtils {
 
     Path localPath = new Path(localURI);
 
-    Path destPath = new Path(constructHDFSURI(config, hdfsPath, env));
+    Path destPath = new Path(resolvePath(hdfsPath, env));
 
     Configuration conf = new Configuration();
     // conf.set(HDFSConfig.FS_DEFAULT_NAME,
@@ -262,11 +263,25 @@ public class HDFSUtils {
       } catch (Exception ex) {
       }
     }
-    if (!path.startsWith("/")) {
-      path = "/" + path;
-    }
+    // if (!path.startsWith("/")) {
+    // path = "/" + path;
+    // }
 
+    // We know that all job-specific jars are installed in the user's home
+    // directory
     Path destPath = new Path(path);
+    String userHome = fs.getHomeDirectory().toString();
+    String absolutePath = userHome + "/" + destPath.toString();
+    if (absolutePath.startsWith("hdfs://")) {
+      // strip this off - for some reason under CDH4
+      // DistributedCache.addFileToClassPath() keeps the hdfs:// part
+      // of the URL in the classpath spec! Apache does not do this.
+      absolutePath = absolutePath.replace("hdfs://", "");
+      absolutePath = absolutePath.substring(absolutePath.indexOf("/"),
+        absolutePath.length());
+    }
+    destPath = new Path(absolutePath);
+
     DistributedCache.addFileToClassPath(destPath, conf, fs);
 
     checkForWindowsAccessingHadoopOnLinux(conf);
@@ -367,7 +382,7 @@ public class HDFSUtils {
     // HDFSConfig.constructHostURL(hdfsConfig, env));
     hdfsConfig.configureForHadoop(conf, env);
 
-    FileSystem fs = FileSystem.get(conf);
+    // FileSystem fs = FileSystem.get(conf);
 
     if (path.startsWith("hdfs://")) {
       throw new IOException("Path should not include 'hdfs://host:port'");
@@ -394,17 +409,16 @@ public class HDFSUtils {
       copyToHDFS(local.toString(), path, hdfsConfig, env, true);
     }
 
-    if (!path.startsWith("/")) {
-      path = "/" + path;
-    }
+    // if (!path.startsWith("/")) {
+    // path = "/" + path;
+    // }
 
     String fileNameOnly = path.substring(path.lastIndexOf('/') + 1,
       path.length());
 
     try {
       DistributedCache.addCacheFile(
-        new URI(constructHDFSURI(hdfsConfig, path + "#" + fileNameOnly, env)),
-        conf);
+        new URI(resolvePath(path + "#" + fileNameOnly, env)), conf);
     } catch (URISyntaxException e) {
       throw new IOException(e);
     }

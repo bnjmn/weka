@@ -603,8 +603,7 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
 
           // strip the host and port (if provided)
           namesFile = namesFile.substring(namesFile.indexOf("/"));
-          String pathS = HDFSUtils.constructHDFSURI(m_mrConfig.getHDFSConfig(),
-            namesFile, m_env);
+          String pathS = HDFSUtils.resolvePath(namesFile, m_env);
           Configuration tempConf = new Configuration();
           m_mrConfig.getHDFSConfig().configureForHadoop(tempConf, m_env);
           FileSystem fs = FileSystem.get(tempConf);

@@ -186,9 +186,9 @@ public class WekaClassifierHadoopReducer extends
 
     ObjectOutputStream oos = null;
     try {
-      if (!outputDestination.startsWith("hdfs://")) {
-        outputDestination = constructHDFSURI(outputDestination, conf);
-      }
+      // if (!outputDestination.startsWith("hdfs://")) {
+      // outputDestination = constructHDFSURI(outputDestination, conf);
+      // }
 
       Path pt = new Path(outputDestination);
       FileSystem fs = FileSystem.get(conf);
@@ -231,17 +231,17 @@ public class WekaClassifierHadoopReducer extends
    * @param conf the Configuration for the job
    * @return a HDFS URL as a string
    */
-  protected static String constructHDFSURI(String path, Configuration conf) {
-    String hostPort = conf.get("fs.default.name");
-
-    if (!hostPort.endsWith("/") && !path.endsWith("/")) {
-      hostPort += "/";
-    }
-
-    hostPort += path;
-
-    return hostPort;
-  }
+  // protected static String constructHDFSURI(String path, Configuration conf) {
+  // String hostPort = conf.get("fs.default.name");
+  //
+  // if (!hostPort.endsWith("/") && !path.endsWith("/")) {
+  // hostPort += "/";
+  // }
+  //
+  // hostPort += path;
+  //
+  // return hostPort;
+  // }
 
   /**
    * Deserializes a classifier and an integer holding the number of instances it

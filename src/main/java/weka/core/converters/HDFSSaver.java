@@ -317,11 +317,11 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
   }
 
   /**
-   * Constructs a URL to save the data to
+   * Constructs a final path save the data to
    * 
-   * @return A HDFS URL
+   * @return A final path
    */
-  protected String constructURL() {
+  protected String constructFinalPath() {
     String url = m_hdfsPath;
 
     try {
@@ -329,37 +329,65 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     } catch (Exception ex) {
     }
 
-    if (!url.toLowerCase().startsWith("hdfs://")) { //$NON-NLS-1$
-      url = "hdfs://" + m_config.getHDFSHost() + ":" + m_config.getHDFSPort() //$NON-NLS-1$ //$NON-NLS-2$
-        + (m_hdfsPath.startsWith("/") ? m_hdfsPath : "/" + m_hdfsPath); //$NON-NLS-1$ //$NON-NLS-2$
-
-      if (url.endsWith("/")) { //$NON-NLS-1$
-        url += (DistributedJobConfig.isEmpty(m_filePrefix) ? "" : m_filePrefix); //$NON-NLS-1$
-        url += (DistributedJobConfig.isEmpty(m_relationNamePartOfFilename) ? "" //$NON-NLS-1$
-          : m_relationNamePartOfFilename);
-      } else {
-        String namePart = url.substring(url.lastIndexOf('/') + 1, url.length());
-        url = url.substring(0, url.lastIndexOf('/') + 1);
-        if (!DistributedJobConfig.isEmpty(m_filePrefix)) {
-          url += (m_filePrefix + namePart);
-        } // else if
-          // (!DistributedJobConfig.isEmpty(m_relationNamePartOfFilename)) {
-          // url += (m_relationNamePartOfFilename + namePart);
-        // }
-        else {
-          url += namePart;
-        }
-      }
-
-      try {
-        url = m_env.substitute(url);
-      } catch (Exception ex) {
-      }
-
-      if (!url.toLowerCase().endsWith(m_delegate.getFileExtension())) {
-        url += m_delegate.getFileExtension();
+    url = url.replace("hdfs://", "");
+    if (url.endsWith("/")) { //$NON-NLS-1$
+      url += (DistributedJobConfig.isEmpty(m_filePrefix) ? "" : m_filePrefix); //$NON-NLS-1$
+      url += (DistributedJobConfig.isEmpty(m_relationNamePartOfFilename) ? "" //$NON-NLS-1$
+        : m_relationNamePartOfFilename);
+    } else {
+      String namePart = url.substring(url.lastIndexOf('/') + 1, url.length());
+      url = url.substring(0, url.lastIndexOf('/') + 1);
+      if (!DistributedJobConfig.isEmpty(m_filePrefix)) {
+        url += (m_filePrefix + namePart);
+      } // else if
+        // (!DistributedJobConfig.isEmpty(m_relationNamePartOfFilename)) {
+        // url += (m_relationNamePartOfFilename + namePart);
+      // }
+      else {
+        url += namePart;
       }
     }
+
+    try {
+      url = m_env.substitute(url);
+    } catch (Exception ex) {
+    }
+
+    if (!url.toLowerCase().endsWith(m_delegate.getFileExtension())) {
+      url += m_delegate.getFileExtension();
+    }
+
+    //    if (!url.toLowerCase().startsWith("hdfs://")) { //$NON-NLS-1$
+    //      url = "hdfs://" + m_config.getHDFSHost() + ":" + m_config.getHDFSPort() //$NON-NLS-1$ //$NON-NLS-2$
+    //        + (m_hdfsPath.startsWith("/") ? m_hdfsPath : "/" + m_hdfsPath); //$NON-NLS-1$ //$NON-NLS-2$
+    //
+    //      if (url.endsWith("/")) { //$NON-NLS-1$
+    //        url += (DistributedJobConfig.isEmpty(m_filePrefix) ? "" : m_filePrefix); //$NON-NLS-1$
+    //        url += (DistributedJobConfig.isEmpty(m_relationNamePartOfFilename) ? "" //$NON-NLS-1$
+    // : m_relationNamePartOfFilename);
+    // } else {
+    // String namePart = url.substring(url.lastIndexOf('/') + 1, url.length());
+    // url = url.substring(0, url.lastIndexOf('/') + 1);
+    // if (!DistributedJobConfig.isEmpty(m_filePrefix)) {
+    // url += (m_filePrefix + namePart);
+    // } // else if
+    // // (!DistributedJobConfig.isEmpty(m_relationNamePartOfFilename)) {
+    // // url += (m_relationNamePartOfFilename + namePart);
+    // // }
+    // else {
+    // url += namePart;
+    // }
+    // }
+    //
+    // try {
+    // url = m_env.substitute(url);
+    // } catch (Exception ex) {
+    // }
+    //
+    // if (!url.toLowerCase().endsWith(m_delegate.getFileExtension())) {
+    // url += m_delegate.getFileExtension();
+    // }
+    // }
 
     return url;
   }
@@ -395,7 +423,7 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     }
 
     if (!m_incrementalInit) {
-      String url = constructURL();
+      String url = constructFinalPath();
       Path pt = new Path(url);
       Configuration conf = new Configuration();
 
@@ -434,7 +462,6 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
 
   @Override
   public void writeBatch() throws IOException {
-    // TODO Auto-generated method stub
 
     if (getInstances() == null) {
       throw new IOException("No instances to save"); //$NON-NLS-1$
@@ -446,13 +473,23 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     setRetrieval(BATCH);
     setWriteMode(WRITE);
 
-    String url = constructURL();
+    String url = constructFinalPath();
 
     try {
       Path pt = new Path(url);
       Configuration conf = new Configuration();
-      conf.set(HDFSConfig.HADOOP_FS_DEFAULT_NAME,
-        HDFSConfig.constructHostURL(m_config, m_env)); //$NON-NLS-1$
+
+      if (!DistributedJobConfig.isEmpty(getDFSReplicationFactor())) {
+        m_config.setUserSuppliedProperty("dfs.replication", //$NON-NLS-1$
+          getDFSReplicationFactor());
+      }
+      // this makes sure that any user-supplied properties (such as
+      // dfs.replication) get set on the Configuration
+      m_config.configureForHadoop(conf, m_env);
+
+      // conf.set(HDFSConfig.HADOOP_FS_DEFAULT_NAME,
+      //        HDFSConfig.constructHostURL(m_config, m_env)); //$NON-NLS-1$
+
       FileSystem fs = FileSystem.get(conf);
       // if the file already exists delete it.
       if (fs.exists(pt)) {
@@ -465,7 +502,6 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
       m_delegate.setDestination(fout);
       m_delegate.writeBatch();
       setWriteMode(CANCEL);
-
     } catch (Exception ex) {
       throw new IOException(ex);
     }
