@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoop
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date (year-month-day)
-Date=2013-10-23
+Date=2013-10-24
 
 # Title (required)
 Title=Hadoop wrappers for Weka
@@ -26,13 +26,13 @@ Maintainer=Mark Hall <mhall@pentaho.com>
 License=GPL 2
 
 # Description (required)
-Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Includes libraries for Hadoop 1.1.2.
+Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Includes libraries for Apache Hadoop 1.1.2.
 
 # Changes in this release
-Changes=Fixed a bug in the randomly shuffled data chunk job where the MultipleOutput writer was not getting closed at the end of the reduce phase. Also fixed a bug that affected the writing of the ARFF and CSV versions of evaluation results by the evaluation job under certain conditions.
+Changes=Now installs Weka libraries in the user's home directory in HDFS. Can now operate with either absolute or relative input/output paths in HDFS. Has had some testing against Cloudera CDH 4.4. To use with CDH 4.4 delete all jar files in ${user.home}/wekafiles/distributedWekaHadoop/lib and replace with those in your CDH installation's /usr/lib/hadoop/client-0.20 directory.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.3.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
