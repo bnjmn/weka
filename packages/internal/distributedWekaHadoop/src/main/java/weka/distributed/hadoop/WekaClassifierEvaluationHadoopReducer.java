@@ -275,10 +275,10 @@ public class WekaClassifierEvaluationHadoopReducer extends
     evalInsts.add(inst);
     evalInsts.compactify();
 
-    if (!outputPath.startsWith("hdfs://")) {
-      outputPath = WekaClassifierHadoopReducer.constructHDFSURI(outputPath,
-        conf);
-    }
+    // if (!outputPath.startsWith("hdfs://")) {
+    // outputPath = WekaClassifierHadoopReducer.constructHDFSURI(outputPath,
+    // conf);
+    // }
     String arffFileName = outputPath + "/evaluation.arff";
     // String arffFileName = WekaClassifierHadoopReducer.constructHDFSURI(
     // outputPath + "/evaluation.arff", conf);
