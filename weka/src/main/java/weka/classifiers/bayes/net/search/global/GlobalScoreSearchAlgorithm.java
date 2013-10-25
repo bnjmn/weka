@@ -292,8 +292,8 @@ public class GlobalScoreSearchAlgorithm
 				Instance instance = instances.instance(iInstance);
 				instance.setWeight(-instance.weight());
 				fAccuracy += accuracyIncrease(instance);
+	                        fWeight += instance.weight();
 				instance.setWeight(-instance.weight());
-				fWeight += instance.weight();
 			}
 
 			// restore influence of fold iFold from the probability distribution
