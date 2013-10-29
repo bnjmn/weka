@@ -83,6 +83,11 @@ public class CSVToARFFHeaderMapTaskBeanInfo extends SimpleBeanInfo {
       p1.setPropertyEditorClass(weka.gui.GenericArrayEditor.class);
       pds.add(p1);
 
+      p1 = new PropertyDescriptor("nominalDefaultLabelSpecs",
+        CSVToARFFHeaderMapTask.class);
+      p1.setPropertyEditorClass(weka.gui.GenericArrayEditor.class);
+      pds.add(p1);
+
       p1 = new PropertyDescriptor("stringAttributes",
         CSVToARFFHeaderMapTask.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
