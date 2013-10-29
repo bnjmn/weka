@@ -87,7 +87,7 @@ public class RandomizedDataChunkHadoopMapper extends
         String[] csvOpts = Utils.splitOptions(csvOptsS);
         m_rowHelper.setOptions(csvOpts);
       }
-      m_rowHelper.initParserOnly();
+      // m_rowHelper.initParserOnly();
 
       if (!DistributedJobConfig.isEmpty(taskOptsS)) {
         String[] taskOpts = Utils.splitOptions(taskOptsS);
@@ -104,6 +104,9 @@ public class RandomizedDataChunkHadoopMapper extends
 
         WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
           true);
+
+        m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
+          .instanceHeaderToAttributeNameList(m_trainingHeader));
 
         if (DistributedJobConfig.isEmpty(numChunksS)) {
           throw new Exception("Can't continue because the number of "

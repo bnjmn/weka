@@ -806,6 +806,11 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
       RandomizedDataChunkHadoopMapper.RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS,
       environmentSubstitute(randomizeMapOptions.toString()));
 
+    // Need these for row parsing via open-csv
+    m_randomizeConfig.setUserSuppliedProperty(
+      CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
+      environmentSubstitute(getCSVMapTaskOptions()));
+
     int numChunks = 0;
     if (DistributedJobConfig.isEmpty(getNumRandomizedDataChunks())
       && DistributedJobConfig.isEmpty(getNumInstancesPerRandomizedDataChunk())) {

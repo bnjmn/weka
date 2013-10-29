@@ -108,7 +108,7 @@ public class WekaFoldBasedClassifierEvaluationHadoopMapper extends
         String[] csvOpts = Utils.splitOptions(csvOptsS);
         m_rowHelper.setOptions(csvOpts);
       }
-      m_rowHelper.initParserOnly();
+      // m_rowHelper.initParserOnly();
 
       if (!DistributedJobConfig.isEmpty(taskOptsS)) {
         String[] taskOpts = Utils.splitOptions(taskOptsS);
@@ -126,6 +126,10 @@ public class WekaFoldBasedClassifierEvaluationHadoopMapper extends
 
         WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
           true);
+
+        m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
+          .instanceHeaderToAttributeNameList(m_trainingHeader));
+
         Attribute classAtt = m_trainingHeader.classAttribute();
         // now look for the summary stats att with this name so that we can set
         // up priors for evaluation properly. NOTE, that the relative evaluation

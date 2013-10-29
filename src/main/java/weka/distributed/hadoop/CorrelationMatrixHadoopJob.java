@@ -492,6 +492,11 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       CorrelationMatrixHadoopMapper.CORRELATION_MATRIX_MAP_TASK_OPTIONS,
       environmentSubstitute(correlationMapOptions.toString()));
 
+    // Need these for row parsing via open-csv
+    m_mrConfig.setUserSuppliedProperty(
+      CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
+      environmentSubstitute(getCSVMapTaskOptions()));
+
     setJobName(getJobName() + " " + correlationMapOptions.toString());
 
     try {

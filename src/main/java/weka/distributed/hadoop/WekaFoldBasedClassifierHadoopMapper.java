@@ -82,7 +82,7 @@ public class WekaFoldBasedClassifierHadoopMapper extends
         String[] csvOpts = Utils.splitOptions(csvOptsS);
         m_rowHelper.setOptions(csvOpts);
       }
-      m_rowHelper.initParserOnly();
+      // m_rowHelper.initParserOnly();
 
       if (!DistributedJobConfig.isEmpty(taskOptsS)) {
         String[] taskOpts = Utils.splitOptions(taskOptsS);
@@ -97,6 +97,9 @@ public class WekaFoldBasedClassifierHadoopMapper extends
           .stripSummaryAtts(loadTrainingHeader(arffHeaderFileName));
 
         setClassIndex(taskOpts, m_trainingHeader, true);
+
+        m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
+          .instanceHeaderToAttributeNameList(m_trainingHeader));
 
         String totalFolds = Utils.getOption("total-folds", taskOpts);
         if (!DistributedJobConfig.isEmpty(totalFolds)) {

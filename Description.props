@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoop
 
 # Version (required)
-Version=1.0.3
+Version=1.0.4
 
 #Date (year-month-day)
-Date=2013-10-24
+Date=2013-10-30
 
 # Title (required)
 Title=Hadoop wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 2
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Includes libraries for Apache Hadoop 1.1.2.
 
 # Changes in this release
-Changes=Now installs Weka libraries in the user's home directory in HDFS. Can now operate with either absolute or relative input/output paths in HDFS. Has had some testing against Cloudera CDH 4.4. To use with CDH 4.4 delete all jar files in ${user.home}/wekafiles/distributedWekaHadoop/lib and replace with those in your CDH installation's /usr/lib/hadoop/client-0.20 directory.
+Changes=Fixed a bug where some CSV parsing options were not getting set in the Hadoop job config files.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.4.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
@@ -44,7 +44,7 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.10), distributedWekaBase (>=1.0.1)
+Depends=weka (>=3.7.10), distributedWekaBase (>=1.0.2)
 # Depends=weka (>=3.7.10)
 
 # Message to display in installation. Can be used to provide

@@ -585,6 +585,7 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
   protected void okScoringJob() {
     List<String> opts = getBaseConfig(m_job);
     addArffJobOptionsOnly(opts, m_tempArffJob);
+    addArffMapTaskOpts(opts);
     addScoringJobOptionsOnly(opts);
 
     applyOptionsToJob(opts);
@@ -597,6 +598,7 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
   protected void okCorrelationJob() {
     List<String> opts = getBaseConfig(m_job);
     addArffJobOptionsOnly(opts, m_tempArffJob);
+    addArffMapTaskOpts(opts);
     addCorrelationJobOptionsOnly(opts,
       (weka.distributed.hadoop.CorrelationMatrixHadoopJob) m_job);
     addCorrelationMapTaskOpts(opts);

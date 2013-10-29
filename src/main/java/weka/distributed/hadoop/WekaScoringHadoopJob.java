@@ -429,6 +429,11 @@ public class WekaScoringHadoopJob extends HadoopJob implements
       m_mrConfig.setUserSuppliedProperty(
         WekaScoringHadoopMapper.SCORING_MAP_TASK_OPTIONS, mapOptions);
 
+      // Need these for row parsing via open-csv
+      m_mrConfig.setUserSuppliedProperty(
+        CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
+        environmentSubstitute(getCSVMapTaskOptions()));
+
       installWekaLibrariesInHDFS(conf);
 
       Job job = null;
