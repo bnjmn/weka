@@ -89,7 +89,7 @@ public class CorrelationMatrixHadoopMapper extends
         String[] csvOpts = Utils.splitOptions(sCsvOpts);
         m_rowHelper.setOptions(csvOpts);
       }
-      m_rowHelper.initParserOnly();
+      // m_rowHelper.initParserOnly();
 
       if (!DistributedJobConfig.isEmpty(sTaskOpts)) {
         String[] taskOpts = Utils.splitOptions(sTaskOpts);
@@ -107,6 +107,9 @@ public class CorrelationMatrixHadoopMapper extends
           .stripSummaryAtts(new Instances(m_trainingHeaderWithSummary, 0));
         WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
           false);
+
+        m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
+          .instanceHeaderToAttributeNameList(m_trainingHeader));
 
         // Use this method to set the class index in the data with summary
         // attributes

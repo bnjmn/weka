@@ -252,7 +252,7 @@ public class WekaClassifierHadoopMapper extends
         String[] csvOpts = Utils.splitOptions(csvOptsS);
         m_rowHelper.setOptions(csvOpts);
       }
-      m_rowHelper.initParserOnly();
+      // m_rowHelper.initParserOnly();
 
       if (!DistributedJobConfig.isEmpty(taskOptsS)) {
         String[] taskOpts = Utils.splitOptions(taskOptsS);
@@ -267,6 +267,9 @@ public class WekaClassifierHadoopMapper extends
           .stripSummaryAtts(loadTrainingHeader(arffHeaderFileName));
 
         setClassIndex(taskOpts, m_trainingHeader, true);
+
+        m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
+          .instanceHeaderToAttributeNameList(m_trainingHeader));
 
         // multiple iterations over the training data for an updateable
         // classifier?

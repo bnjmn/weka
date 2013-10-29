@@ -139,7 +139,7 @@ public class WekaScoringHadoopMapper extends
         String[] csvOpts = Utils.splitOptions(csvOptsS);
         m_rowHelper.setOptions(csvOpts);
       }
-      m_rowHelper.initParserOnly();
+      // m_rowHelper.initParserOnly();
 
       if (!DistributedJobConfig.isEmpty(taskOptsS)) {
         String[] taskOpts = Utils.splitOptions(taskOptsS);
@@ -176,6 +176,9 @@ public class WekaScoringHadoopMapper extends
           throw new IOException(
             "No header included in serialized model file - can't continue.");
         }
+
+        m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
+          .instanceHeaderToAttributeNameList(modelHeader));
 
         m_task.setModel(model, modelHeader, m_scoringDataHeader);
 
