@@ -560,8 +560,22 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   /** The user-supplied legal nominal values - each entry in the list is a spec */
   protected List<String> m_nominalLabelSpecs = new ArrayList<String>();
 
+  /**
+   * The user-supplied default nominal values - each entry in the list is a spec
+   */
+  protected List<String> m_nominalDefaultLabelSpecs = new ArrayList<String>();
+
   /** Lookup for nominal values */
   protected Map<Integer, TreeSet<String>> m_nominalVals = new HashMap<Integer, TreeSet<String>>();
+
+  /**
+   * Default labels (if any) to use with nominal attributes. These are like a
+   * "catch-all" and can be used when you are are explicitly specifying labels
+   * but don't want to specify all labels. One use-case if to convert a
+   * multi-class problem into a binary one, by simply specifying the positive
+   * class label.
+   */
+  protected Map<Integer, String> m_nominalDefaultVals = new HashMap<Integer, String>();
 
   /** The placeholder for missing values. */
   protected String m_MissingValue = "?";
@@ -593,17 +607,20 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
     result.add(new Option(
       "\tOptional specification of legal labels for nominal\n"
-        + "\tattributes. May be specified multiple times.\n"
-        + "\tBatch mode can determine this\n"
-        + "\tautomatically (and so can incremental mode if\n"
-        + "\tthe first in memory buffer load of instances\n"
-        + "\tcontains an example of each legal value). The\n"
-        + "\tspec contains two parts separated by a \":\". The\n"
+        + "\tattributes. May be specified multiple times.\n" + "\tThe "
+        + "spec contains two parts separated by a \":\". The\n"
         + "\tfirst part can be a range of attribute indexes or\n"
         + "\ta comma-separated list off attruibute names; the\n"
         + "\tsecond part is a comma-separated list of labels. E.g\n"
         + "\t\"1,2,4-6:red,green,blue\" or \"att1,att2:red,green," + "blue\"",
       "L", 1, "-L <nominal label spec>"));
+
+    result.add(new Option("\tDefault label specs. Use in conjunction with\n"
+      + "\t-L to specify a default label to use in the case\n"
+      + "\twhere a label is encountered, for a given attribute,\n"
+      + "\t that is not in the set supplied via the -L option.\n"
+      + "Use the same format [index range | name list]:<default label>.",
+      "default-label", 1, "-default-label <spec>"));
 
     result.add(new Option(
       "\tThe range of attribute to force type to be STRING.\n"
@@ -696,6 +713,15 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       m_nominalLabelSpecs.add(tmpStr);
     }
+
+    while (true) {
+      tmpStr = Utils.getOption("default-label", options);
+      if (tmpStr.length() == 0) {
+        break;
+      }
+
+      m_nominalDefaultLabelSpecs.add(tmpStr);
+    }
   }
 
   @Override
@@ -734,6 +760,11 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
     for (String spec : m_nominalLabelSpecs) {
       result.add("-L");
+      result.add(spec);
+    }
+
+    for (String spec : m_nominalDefaultLabelSpecs) {
+      result.add("-default-label");
       result.add(spec);
     }
 
@@ -977,6 +1008,63 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String nominalDefaultLabelSpecsTipText() {
+    return "Specificaton of an optional 'default' label for nominal attributes. "
+      + "To be used in conjuction with nominalLabelSpecs in the case where "
+      + "you only want to specify some of the legal values that "
+      + "a given attribute can take on. Any remaining values are then "
+      + "assigned to this 'default' category. One use-case is to "
+      + "easily convert a multi-class problem into a binary one - "
+      + "in this case, only the positive class label need be specified "
+      + "via nominalLabelSpecs and then the default label acts as a "
+      + "catch-all for the rest. The specification format is the "
+      + "same as for nominalLabelSpecs, namely "
+      + "[index range | attribute name list]:<default label>";
+  }
+
+  /**
+   * Set the default label specifications for nominal attributes
+   * 
+   * @param specs an array of default label specifications
+   */
+  public void setNominalDefaultLabelSpecs(Object[] specs) {
+    m_nominalDefaultLabelSpecs.clear();
+    for (Object s : specs) {
+      m_nominalDefaultLabelSpecs.add(s.toString());
+    }
+  }
+
+  /**
+   * Get the default label specifications for nominal attributes
+   * 
+   * @return an array of default label specifications
+   */
+  public Object[] getNominalDefaultLabelSpecs() {
+    return m_nominalDefaultLabelSpecs.toArray(new String[0]);
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String nominalLabelSpecsTipText() {
+    return "Optional specification of legal labels for nominal "
+      + "attributes. May be specified multiple times. " + "The "
+      + "spec contains two parts separated by a \":\". The "
+      + "first part can be a range of attribute indexes or "
+      + "a comma-separated list off attruibute names; the "
+      + "second part is a comma-separated list of labels. E.g "
+      + "\"1,2,4-6:red,green,blue\" or \"att1,att2:red,green,blue\"";
+  }
+
+  /**
    * Set label specifications for nominal attributes.
    * 
    * @param specs an array of label specifications
@@ -1023,11 +1111,27 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     // }
   }
 
-  public void initParserOnly() {
+  /**
+   * Only initialize enough stuff in order to parse rows and construct instances
+   * 
+   * @param attNames the names of the attributes to use
+   */
+  public void initParserOnly(List<String> attNames) {
     m_parser = new CSVParser(m_FieldSeparator.charAt(0),
       m_Enclosures.charAt(0), '\\');
+
+    m_attributeNames = attNames;
+    processRanges(attNames.size(), TYPE.UNDETERMINED);
+    processNominalSpecs(attNames.size());
   }
 
+  /**
+   * Just parse a row.
+   * 
+   * @param row the row to parse
+   * @return the values of the row in an array
+   * @throws IOException if a problem occurs
+   */
   public String[] parseRowOnly(String row) throws IOException {
     return m_parser.parseLine(row);
   }
@@ -1110,12 +1214,20 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
               // assume its an enumerated value
               m_attributeTypes[i] = TYPE.NOMINAL;
               TreeSet<String> ts = new TreeSet<String>();
-              ts.add(fields[i]);
+
+              String defaultLabel = m_nominalDefaultVals.get(i);
+              String toAdd = defaultLabel;
+              if (defaultLabel != null && fields[i].equals(defaultLabel)) {
+                // don't add it if it's the default label
+              } else {
+                ts.add(fields[i]);
+                toAdd = fields[i];
+              }
               m_nominalVals.put(i, ts);
 
               if (m_computeSummaryStats) {
                 updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  fields[i], true);
+                  toAdd, true);
               }
             } else {
               m_attributeTypes[i] = TYPE.STRING;
@@ -1132,14 +1244,26 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
           if (m_computeSummaryStats) {
             updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
               d.getTime(), null, false);
-            ;
           }
 
         } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
-          m_nominalVals.get(i).add(fields[i]);
-          if (m_computeSummaryStats) {
-            updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-              fields[i], true);
+          String defaultLabel = m_nominalDefaultVals.get(i);
+          if (defaultLabel != null) {
+            String toUpdate = defaultLabel;
+            if (m_nominalVals.get(i).contains(fields[i])) {
+              toUpdate = fields[i];
+            }
+
+            if (m_computeSummaryStats) {
+              updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+                toUpdate, true);
+            }
+          } else {
+            m_nominalVals.get(i).add(fields[i]);
+            if (m_computeSummaryStats) {
+              updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+                fields[i], true);
+            }
           }
         }
       } else {
@@ -1370,6 +1494,43 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         }
       }
     }
+
+    if (m_nominalDefaultLabelSpecs.size() > 0) {
+      for (String spec : m_nominalDefaultLabelSpecs) {
+        String[] attsAndLabel = spec.split(":");
+        if (attsAndLabel.length == 2) {
+          String label = attsAndLabel[1];
+
+          try {
+            // try as a range string first
+            Range tempR = new Range();
+            tempR.setRanges(attsAndLabel[0].trim());
+            tempR.setUpper(numFields - 1);
+
+            int[] rangeIndexes = tempR.getSelection();
+            for (int i = 0; i < rangeIndexes.length; i++) {
+              // these specs should correspond with nominal attribute specs
+              // above -
+              // so the type should already be set for this
+              if (m_attributeTypes[rangeIndexes[i]] == TYPE.NOMINAL) {
+                m_nominalDefaultVals.put(rangeIndexes[i], label);
+              }
+            }
+          } catch (IllegalArgumentException e) {
+            // one or more named attributes?
+            String[] attNames = attsAndLabel[0].split(",");
+            for (String attN : attNames) {
+              int attIndex = m_attributeNames.indexOf(attN);
+              if (attIndex >= 0) {
+                if (m_attributeTypes[attIndex] == TYPE.NOMINAL) {
+                  m_nominalDefaultVals.put(attIndex, label);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   protected Instances makeStructure() {
@@ -1395,10 +1556,18 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       } else if (m_attributeTypes[i] == TYPE.NUMERIC) {
         attribs.add(new Attribute(m_attributeNames.get(i)));
       } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
-        TreeSet<String> vals = m_nominalVals.get(i);
+        TreeSet<String> treeVals = new TreeSet<String>();
+        treeVals.addAll(m_nominalVals.get(i));
+        // TreeSet<String> vals = m_nominalVals.get(i);
+
+        // Add the default label into the spec
+        if (m_nominalDefaultVals.get(i) != null) {
+          treeVals.add(m_nominalDefaultVals.get(i));
+        }
+
         ArrayList<String> theVals = new ArrayList<String>();
-        if (vals.size() > 0) {
-          for (String v : vals) {
+        if (treeVals.size() > 0) {
+          for (String v : treeVals) {
             theVals.add(v);
           }
         } else {
@@ -1488,8 +1657,15 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         int index = current.indexOfValue(parsed[i]);
 
         if (index < 0) {
-          throw new Exception("Can't find nominal value '" + parsed[i]
-            + "' in list of values for " + "attribute '" + current.name() + "'");
+          if (m_nominalDefaultVals.get(i) != null) {
+            index = current.indexOfValue(m_nominalDefaultVals.get(i));
+          }
+
+          if (index < 0) {
+            throw new Exception("Can't find nominal value '" + parsed[i]
+              + "' in list of values for " + "attribute '" + current.name()
+              + "'");
+          }
         }
         vals[i] = index;
       } else if (current.isDate()) {
@@ -1522,6 +1698,16 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     result.setDataset(trainingHeader);
 
     return result;
+  }
+
+  public static List<String> instanceHeaderToAttributeNameList(Instances header) {
+    List<String> attNames = new ArrayList<String>();
+
+    for (int i = 0; i < header.numAttributes(); i++) {
+      attNames.add(header.attribute(i).name());
+    }
+
+    return attNames;
   }
 
   public static void main(String[] args) {
