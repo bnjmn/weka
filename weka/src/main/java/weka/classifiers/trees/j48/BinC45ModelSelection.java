@@ -49,6 +49,9 @@ public class BinC45ModelSelection
   /** The FULL training dataset. */
   private Instances m_allData; 
 
+  /** Do not relocate split point to actual data value */
+  private boolean m_doNotMakeSplitPointActualValue;
+
   /**
    * Initializes the split selection method with the given parameters.
    *
@@ -60,10 +63,12 @@ public class BinC45ModelSelection
    * finding splits on numeric attributes
    */
   public BinC45ModelSelection(int minNoObj,Instances allData,
-                             boolean useMDLcorrection){
+                             boolean useMDLcorrection,
+                             boolean doNotMakeSplitPointActualValue){
     m_minNoObj = minNoObj;
     m_allData = allData;
-    m_useMDLcorrection = useMDLcorrection;
+    m_useMDLcorrection = useMDLcorrection;   
+    m_doNotMakeSplitPointActualValue = doNotMakeSplitPointActualValue;
   }
 
   /**
@@ -172,7 +177,9 @@ public class BinC45ModelSelection
 	addInstWithUnknown(data,bestModel.attIndex());
       
       // Set the split point analogue to C45 if attribute numeric.
-      bestModel.setSplitPoint(m_allData);
+      if (!m_doNotMakeSplitPointActualValue) {
+        bestModel.setSplitPoint(m_allData);
+      }
       return bestModel;
     }catch(Exception e){
       e.printStackTrace();

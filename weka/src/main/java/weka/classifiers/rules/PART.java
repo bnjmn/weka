@@ -102,6 +102,9 @@ import weka.core.WeightedInstancesHandler;
  * <pre> -Q &lt;seed&gt;
  *  Seed for random data shuffling (default 1).</pre>
  * 
+ * <pre> -doNotMakeSplitPointActualValue
+ *  Do not make split point actual value.</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -142,6 +145,9 @@ public class PART
   /** The seed for random number generation. */
   private int m_Seed = 1;
     
+  /** Do not relocate split point to actual data value */
+  private boolean m_doNotMakeSplitPointActualValue;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -216,9 +222,9 @@ public class PART
     ModelSelection modSelection;	 
 
     if (m_binarySplits)
-      modSelection = new BinC45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
+      modSelection = new BinC45ModelSelection(m_minNumObj, instances, m_useMDLcorrection, m_doNotMakeSplitPointActualValue);
     else
-      modSelection = new C45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
+      modSelection = new C45ModelSelection(m_minNumObj, instances, m_useMDLcorrection, m_doNotMakeSplitPointActualValue);
     if (m_unpruned) 
       m_root = new MakeDecList(modSelection, m_minNumObj);
     else if (m_reducedErrorPruning) 
@@ -320,6 +326,9 @@ public class PART
     newVector.
       addElement(new Option("\tSeed for random data shuffling (default 1).",
 			    "Q", 1, "-Q <seed>"));
+    newVector.
+    addElement(new Option("\tDo not make split point actual value.",
+                          "-doNotMakeSplitPointActualValue", 0, "-doNotMakeSplitPointActualValue"));
 
     return newVector.elements();
   }
@@ -358,6 +367,9 @@ public class PART
    * <pre> -Q &lt;seed&gt;
    *  Seed for random data shuffling (default 1).</pre>
    * 
+   * <pre> -doNotMakeSplitPointActualValue
+   *  Do not make split point actual value.</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -370,6 +382,7 @@ public class PART
     m_reducedErrorPruning = Utils.getFlag('R', options);
     m_binarySplits = Utils.getFlag('B', options);
     m_useMDLcorrection = !Utils.getFlag('J', options);
+    m_doNotMakeSplitPointActualValue = Utils.getFlag("doNotMakeSplitPointActualValue", options);
     String confidenceString = Utils.getOption('C', options);
     if (confidenceString.length() != 0) {
       if (m_reducedErrorPruning) {
@@ -419,7 +432,7 @@ public class PART
    */
   public String [] getOptions() {
 
-    String [] options = new String [12];
+    String [] options = new String [13];
     int current = 0;
 
     if (m_unpruned) {
@@ -441,6 +454,9 @@ public class PART
     options[current++] = "-Q"; options[current++] = "" + m_Seed;
     if (!m_useMDLcorrection) {
       options[current++] = "-J";
+    }
+    if (m_doNotMakeSplitPointActualValue) {
+      options[current++] = "-doNotMakeSplitPointActualValue";
     }
 
     while (current < options.length) {
@@ -739,6 +755,34 @@ public class PART
   public void setBinarySplits(boolean v) {
     
     m_binarySplits = v;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String doNotMakeSplitPointActualValueTipText() {
+    return "If true, the split point is not relocated to an actual data value." +
+      " This can yield substantial speed-ups for large datasets with numeric attributes.";
+  }
+
+  /**
+   * Gets the value of doNotMakeSplitPointActualValue.
+   * 
+   * @return the value
+   */
+  public boolean getDoNotMakeSplitPointActualValue() {
+    return m_doNotMakeSplitPointActualValue;
+  }
+
+  /**
+   * Sets the value of doNotMakeSplitPointActualValue.
+   * 
+   * @param m_doNotMakeSplitPointActualValue the value to set
+   */
+  public void setDoNotMakeSplitPointActualValue(boolean m_doNotMakeSplitPointActualValue) {
+    this.m_doNotMakeSplitPointActualValue = m_doNotMakeSplitPointActualValue;
   }
   
   /**

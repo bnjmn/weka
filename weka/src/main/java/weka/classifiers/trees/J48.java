@@ -115,6 +115,9 @@ import weka.core.WeightedInstancesHandler;
  * <pre> -Q &lt;seed&gt;
  *  Seed for random data shuffling (default 1).</pre>
  * 
+ * <pre> -doNotMakeSplitPointActualValue
+ *  Do not make split point actual value.</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -168,6 +171,9 @@ public class J48
 
   /** Random number seed for reduced-error pruning. */
   private int m_Seed = 1;
+  
+  /** Do not relocate split point to actual data value */
+  private boolean m_doNotMakeSplitPointActualValue;
 
   /**
    * Returns a string describing classifier
@@ -237,9 +243,9 @@ public class J48
     ModelSelection modSelection;	 
 
     if (m_binarySplits)
-      modSelection = new BinC45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
+      modSelection = new BinC45ModelSelection(m_minNumObj, instances, m_useMDLcorrection, m_doNotMakeSplitPointActualValue);
     else
-      modSelection = new C45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
+      modSelection = new C45ModelSelection(m_minNumObj, instances, m_useMDLcorrection, m_doNotMakeSplitPointActualValue);
     if (!m_reducedErrorPruning)
       m_root = new C45PruneableClassifierTree(modSelection, !m_unpruned, m_CF,
                                               m_subtreeRaising, !m_noCleanup, m_collapseTree);
@@ -373,7 +379,7 @@ public class J48
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(12);
+    Vector newVector = new Vector(13);
 
     newVector.
 	addElement(new Option("\tUse unpruned tree.",
@@ -415,6 +421,9 @@ public class J48
     newVector.
       addElement(new Option("\tSeed for random data shuffling (default 1).",
 			    "Q", 1, "-Q <seed>"));
+    newVector.
+    addElement(new Option("\tDo not make split point actual value.",
+                          "-doNotMakeSplitPointActualValue", 0, "-doNotMakeSplitPointActualValue"));
 
     return newVector.elements();
   }
@@ -465,6 +474,9 @@ public class J48
    * <pre> -Q &lt;seed&gt;
    *  Seed for random data shuffling (default 1).</pre>
    * 
+   * <pre> -doNotMakeSplitPointActualValue
+   *  Do not make split point actual value.</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -488,6 +500,7 @@ public class J48
     m_collapseTree = !Utils.getFlag('O', options);
     m_subtreeRaising = !Utils.getFlag('S', options);
     m_noCleanup = Utils.getFlag('L', options);
+    m_doNotMakeSplitPointActualValue = Utils.getFlag("doNotMakeSplitPointActualValue", options);
     if ((m_unpruned) && (!m_subtreeRaising)) {
       throw new Exception("Subtree raising doesn't need to be unset for unpruned tree!");
     }
@@ -541,7 +554,7 @@ public class J48
    */
   public String [] getOptions() {
 
-    String [] options = new String [16];
+    String [] options = new String [17];
     int current = 0;
 
     if (m_noCleanup) {
@@ -574,7 +587,9 @@ public class J48
     if (!m_useMDLcorrection) {
       options[current++] = "-J";
     }
-
+    if (m_doNotMakeSplitPointActualValue) {
+      options[current++] = "-doNotMakeSplitPointActualValue";
+    }
     while (current < options.length) {
       options[current++] = "";
     }
@@ -1019,7 +1034,35 @@ public class J48
     
     m_noCleanup = v;
   }
-  
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String doNotMakeSplitPointActualValueTipText() {
+    return "If true, the split point is not relocated to an actual data value." +
+      " This can yield substantial speed-ups for large datasets with numeric attributes.";
+  }
+
+  /**
+   * Gets the value of doNotMakeSplitPointActualValue.
+   * 
+   * @return the value
+   */
+  public boolean getDoNotMakeSplitPointActualValue() {
+    return m_doNotMakeSplitPointActualValue;
+  }
+
+  /**
+   * Sets the value of doNotMakeSplitPointActualValue.
+   * 
+   * @param m_doNotMakeSplitPointActualValue the value to set
+   */
+  public void setDoNotMakeSplitPointActualValue(boolean m_doNotMakeSplitPointActualValue) {
+    this.m_doNotMakeSplitPointActualValue = m_doNotMakeSplitPointActualValue;
+  }
+ 
   /**
    * Returns the revision string.
    * 

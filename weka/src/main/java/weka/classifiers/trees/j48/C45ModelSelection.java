@@ -49,6 +49,9 @@ public class C45ModelSelection
   /** All the training data */
   private Instances m_allData; // 
 
+  /** Do not relocate split point to actual data value */
+  private boolean m_doNotMakeSplitPointActualValue;
+
   /**
    * Initializes the split selection method with the given parameters.
    *
@@ -58,12 +61,16 @@ public class C45ModelSelection
    * selection of split points).
    * @param useMDLcorrection whether to use MDL adjustement when
    * finding splits on numeric attributes
+   * @param doNotMakeSplitPointActualValue if true, split point is not relocated
+   * by scanning the entire dataset for the closest data value 
    */
   public C45ModelSelection(int minNoObj, Instances allData,
-                             boolean useMDLcorrection) {
+                             boolean useMDLcorrection,
+                             boolean doNotMakeSplitPointActualValue) {
     m_minNoObj = minNoObj;
     m_allData = allData;
     m_useMDLcorrection = useMDLcorrection;
+    m_doNotMakeSplitPointActualValue = doNotMakeSplitPointActualValue;
   }
 
   /**
@@ -181,7 +188,7 @@ public class C45ModelSelection
 	  addInstWithUnknown(data,bestModel.attIndex());
       
       // Set the split point analogue to C45 if attribute numeric.
-      if (m_allData != null)
+      if ((m_allData != null) && (!m_doNotMakeSplitPointActualValue))
 	bestModel.setSplitPoint(m_allData);
       return bestModel;
     }catch(Exception e){

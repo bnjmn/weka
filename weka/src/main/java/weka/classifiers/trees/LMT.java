@@ -111,6 +111,9 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * <pre> -A
  *  The AIC is used to choose the best iteration.</pre>
  * 
+ * <pre> -doNotMakeSplitPointActualValue
+ *  Do not make split point actual value.</pre>
+ * 
  <!-- options-end -->
  *
  * @author Niels Landwehr 
@@ -160,6 +163,8 @@ public class LMT
   /** If true, the AIC is used to choose the best LogitBoost iteration*/
   private boolean m_useAIC = false;
   
+  /** Do not relocate split point to actual data value */
+  private boolean m_doNotMakeSplitPointActualValue;
   /**
    * Creates an instance of LMT with standard options
    */
@@ -227,7 +232,7 @@ public class LMT
     if (m_splitOnResiduals) {
       modSelection = new ResidualModelSelection(minNumInstances);
     } else {
-      modSelection = new C45ModelSelection(minNumInstances, filteredData, true);
+      modSelection = new C45ModelSelection(minNumInstances, filteredData, true, m_doNotMakeSplitPointActualValue);
     }
 	
     //create tree root
@@ -304,7 +309,7 @@ public class LMT
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector(8);
+    Vector newVector = new Vector(9);
     
     newVector.addElement(new Option("\tBinary splits (convert nominal attributes to binary ones)",
                                     "B", 0, "-B"));
@@ -331,7 +336,10 @@ public class LMT
     
     newVector.addElement(new Option("\tThe AIC is used to choose the best iteration.",
                                     "A", 0, "-A"));
-    
+    newVector.
+    addElement(new Option("\tDo not make split point actual value.",
+                          "-doNotMakeSplitPointActualValue", 0, "-doNotMakeSplitPointActualValue"));
+
     return newVector.elements();
   }
     
@@ -365,6 +373,9 @@ public class LMT
    * <pre> -A
    *  The AIC is used to choose the best iteration.</pre>
    * 
+   * <pre> -doNotMakeSplitPointActualValue
+   *  Do not make split point actual value.</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -393,7 +404,8 @@ public class LMT
     }
     
     setUseAIC(Utils.getFlag('A', options));        
-    
+    m_doNotMakeSplitPointActualValue = Utils.getFlag("doNotMakeSplitPointActualValue", options);
+
     Utils.checkForRemainingOptions(options);
 	
   } 
@@ -404,7 +416,7 @@ public class LMT
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[11];
+    String[] options = new String[12];
     int current = 0;
 
     if (getConvertNominal()) {
@@ -434,6 +446,10 @@ public class LMT
     
     if (getUseAIC()) {
       options[current++] = "-A";
+    }
+    
+    if (m_doNotMakeSplitPointActualValue) {
+      options[current++] = "-doNotMakeSplitPointActualValue";
     }
     
     while (current < options.length) {
@@ -782,7 +798,33 @@ public class LMT
     return "The AIC is used to determine when to stop LogitBoost iterations. "
     +"The default is not to use AIC.";
   }
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String doNotMakeSplitPointActualValueTipText() {
+    return "If true, the split point is not relocated to an actual data value." +
+      " This can yield substantial speed-ups for large datasets with numeric attributes.";
+  }
 
+  /**
+   * Gets the value of doNotMakeSplitPointActualValue.
+   * 
+   * @return the value
+   */
+  public boolean getDoNotMakeSplitPointActualValue() {
+    return m_doNotMakeSplitPointActualValue;
+  }
+
+  /**
+   * Sets the value of doNotMakeSplitPointActualValue.
+   * 
+   * @param m_doNotMakeSplitPointActualValue the value to set
+   */
+  public void setDoNotMakeSplitPointActualValue(boolean m_doNotMakeSplitPointActualValue) {
+    this.m_doNotMakeSplitPointActualValue = m_doNotMakeSplitPointActualValue;
+  }
   /**
    * Returns the revision string.
    * 
@@ -801,3 +843,4 @@ public class LMT
     runClassifier(new LMT(), argv);
   }  
 }
+
