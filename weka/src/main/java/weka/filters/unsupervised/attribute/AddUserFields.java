@@ -46,24 +46,24 @@ import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * 
- <!-- options-start --> 
- Valid options are:
+ <!-- globalinfo-start -->
+ * A filter that adds new attributes with user specified type and constant value. Numeric, nominal, string and date attributes can be created. Attribute name, and value can be set with environment variables. Date attributes can also specify a formatting string by which to parse the supplied date value. Alternatively, a current time stamp can be specified by supplying the special string "now" as the value for a date attribute.
  * <p/>
+ <!-- globalinfo-end -->  
  * 
- * <pre>
- * -A &lt;name:type:value&gt;
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -A &lt;name:type:value&gt;
  *  New field specification (name&#64;type&#64;value).
  *   Environment variables may be used for any/all parts of the
  *  specification. Type can be one of (numeric, nominal, string or date).
  *  The value for date be a specific date string or the special string
  *  "now" to indicate the current date-time. A specific date format
  *  string for parsing specific date values can be specified by suffixing
- *  the type specification - e.g. "myTime&#64;date:MM-dd-yyyy&#64;08-23-2009".
- *  This option may be specified multiple times
- * </pre>
+ *  the type specification - e.g. "myTime&#64;date:MM-dd-yyyy&#64;08-23-2009".This option may be specified multiple times</pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -447,22 +447,18 @@ public class AddUserFields extends Filter implements OptionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> 
-   Valid options are:
-   * <p/>
-   * 
-   * <pre>
-   * -A &lt;name:type:value&gt;
-   *  New field specification (name&#64;type&#64;value).
-   *   Environment variables may be used for any/all parts of the
-   *  specification. Type can be one of (numeric, nominal, string or date).
-   *  The value for date be a specific date string or the special string
-   *  "now" to indicate the current date-time. A specific date format
-   *  string for parsing specific date values can be specified by suffixing
-   *  the type specification - e.g. "myTime&#64;date:MM-dd-yyyy&#64;08-23-2009".
-   *  This option may be specified multiple times
-   * </pre>
-   * 
+   * <!-- options-start -->
+   * * Valid options are: <p/>
+   * * 
+   * * <pre> -A &lt;name:type:value&gt;
+   * *  New field specification (name&#64;type&#64;value).
+   * *   Environment variables may be used for any/all parts of the
+   * *  specification. Type can be one of (numeric, nominal, string or date).
+   * *  The value for date be a specific date string or the special string
+   * *  "now" to indicate the current date-time. A specific date format
+   * *  string for parsing specific date values can be specified by suffixing
+   * *  the type specification - e.g. "myTime&#64;date:MM-dd-yyyy&#64;08-23-2009".This option may be specified multiple times</pre>
+   * * 
    * <!-- options-end -->
    * 
    * @param otions the list of options as an array of string
@@ -700,3 +696,4 @@ public class AddUserFields extends Filter implements OptionHandler,
     runFilter(new AddUserFields(), argv);
   }
 }
+
