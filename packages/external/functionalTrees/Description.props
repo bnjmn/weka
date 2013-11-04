@@ -9,7 +9,7 @@ PackageName=functionalTrees
 Version=1.0.3
 
 #Date
-Date=2013-20-22
+Date=2013-10-22
 
 # Title (required)
 Title=Classifier for learning Functional Trees
@@ -40,4 +40,4 @@ URL=http://weka.sourceforge.net/doc.packages/functionalTrees
 #Related=LMT,J48
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.7.11)

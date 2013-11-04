@@ -155,7 +155,7 @@ public class FTInnerNode
       }
         
     // needed by dynamic data
-    m_modelSelection=new  C45ModelSelection(m_minNumInstances, data, true);
+    m_modelSelection=new  C45ModelSelection(m_minNumInstances, data, true, false);
     m_localModel = m_modelSelection.selectModel(data);
     //split node if more than minNumInstances...
     if (m_numInstances > m_minNumInstances) {

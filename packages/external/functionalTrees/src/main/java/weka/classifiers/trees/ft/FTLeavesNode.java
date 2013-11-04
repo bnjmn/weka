@@ -145,7 +145,7 @@ public class FTLeavesNode
       }
         
     //to choose split point on the node data
-    m_modelSelection=new  C45ModelSelection(m_minNumInstances, data, true);
+    m_modelSelection=new  C45ModelSelection(m_minNumInstances, data, true, false);
     m_localModel = m_modelSelection.selectModel(data);
        
     //split node if more than minNumInstances...
