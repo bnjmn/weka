@@ -198,7 +198,7 @@ public abstract class AbstractClassifier
     newVector.addElement(new Option(
           "\tIf set, classifier is run in debug mode and\n"
           + "\tmay output additional info to the console",
-          "D", 0, "-D"));
+          "output-debug-info", 0, "-output-debug-info"));
     newVector.addElement(new Option(
           "\tIf set, classifier capabilities are not checked before classifier is built\n"
           + "\t(use with caution).",
@@ -223,7 +223,7 @@ public abstract class AbstractClassifier
    */
   public void setOptions(String[] options) throws Exception {
 
-    setDebug(Utils.getFlag('D', options));
+    setDebug(Utils.getFlag("output-debug-info", options));
     setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities", options));
   }
 
@@ -238,7 +238,7 @@ public abstract class AbstractClassifier
     int current = 0;
 
     if (getDebug()) {
-      options[current++] = "-D";
+      options[current++] = "-output-debug-info";
     } 
     if (getDoNotCheckCapabilities()) {
       options[current++] = "-do-not-check-capabilities";
