@@ -580,7 +580,12 @@ public class SimpleKMeans extends RandomizableClusterer implements
           int index = 0;
           for (int k = 0; k < tempI.length; k++) {
             if (tempI[k].numInstances() > 0) {
-              t[index++] = tempI[k];
+              t[index] = tempI[k];
+              
+              for (i = 0; i < tempI[k].numAttributes(); i++) {
+                m_ClusterNominalCounts[index][i] = m_ClusterNominalCounts[k][i];
+              }
+              index++;
             }
           }
           tempI = t;
