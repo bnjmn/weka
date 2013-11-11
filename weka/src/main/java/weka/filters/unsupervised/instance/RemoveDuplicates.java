@@ -32,9 +32,16 @@ import java.util.HashSet;
 
 /**
  <!-- globalinfo-start -->
+ * Removes all duplicate instances from the first batch of data it receives.
+ * <p/>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Turns on output of debugging information.</pre>
+ * 
  <!-- options-end -->
  *
  * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
