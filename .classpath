@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="weka/src/main/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="weka/lib/java-cup.jar"/>
+	<classpathentry kind="lib" path="weka/lib/packageManager.jar"/>
+	<classpathentry kind="output" path="weka/build/classes"/>
+</classpath>
