@@ -21,6 +21,7 @@
 
 package weka.classifiers.functions;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -327,14 +328,8 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector();
-
-    newVector.addElement(
-	new Option(
-	    "\tProduce debugging output.\n"
-	    + "\t(default no debugging output)",
-	    "D", 0, "-D"));
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(
 	new Option(
@@ -360,6 +355,8 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 	    + "\tModel cannot be printed out if this option is enabled."
 	    + "\t(default: keep data)",
 	    "minimal", 0, "-minimal"));
+    
+    newVector.addAll(Collections.list(super.listOptions()));
     
     return newVector.elements();
   }
@@ -412,9 +409,12 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
     } else {
       setRidge(1.0e-8);
     }
-    setDebug(Utils.getFlag('D', options));
     setEliminateColinearAttributes(!Utils.getFlag('C', options));
     setMinimal(Utils.getFlag("minimal", options));
+    
+    super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -459,6 +459,8 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 
     if (getMinimal())
       result.add("-minimal");
+    
+    Collections.addAll(result, super.getOptions());
     
     return result.toArray(new String[result.size()]);
   }

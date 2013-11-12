@@ -589,7 +589,7 @@ public class Instances extends AbstractList<Instance>
    *
    * @return enumeration of all the attributes.
    */
-  public /*@non_null pure@*/ Enumeration enumerateAttributes() {
+  public /*@non_null pure@*/ Enumeration<Attribute> enumerateAttributes() {
 
     return new WekaEnumeration(m_Attributes, m_ClassIndex);
   }
@@ -599,7 +599,7 @@ public class Instances extends AbstractList<Instance>
    *
    * @return enumeration of all instances in the dataset
    */
-  public /*@non_null pure@*/ Enumeration enumerateInstances() {
+  public /*@non_null pure@*/ Enumeration<Instance> enumerateInstances() {
 
     return new WekaEnumeration(m_Instances);
   }

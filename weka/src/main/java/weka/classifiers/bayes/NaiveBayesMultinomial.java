@@ -196,7 +196,7 @@ public class NaiveBayesMultinomial
     double[] docsPerClass = new double[m_numClasses];
     double[] wordsPerClass = new double[m_numClasses];
 	
-    java.util.Enumeration enumInsts = instances.enumerateInstances();
+    java.util.Enumeration<Instance> enumInsts = instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) 
       {
 	instance = (Instance) enumInsts.nextElement();

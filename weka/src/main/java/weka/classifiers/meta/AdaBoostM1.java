@@ -21,6 +21,7 @@
 
 package weka.classifiers.meta;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -240,9 +241,9 @@ public class AdaBoostM1
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector();
+    Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
 	"\tPercentage of weight mass to base training on.\n"
@@ -253,11 +254,8 @@ public class AdaBoostM1
 	"\tUse resampling for boosting.",
 	"Q", 0, "-Q"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
-    
+    newVector.addAll(Collections.list(super.listOptions()));
+ 
     return newVector.elements();
   }
 
@@ -318,6 +316,8 @@ public class AdaBoostM1
     setUseResampling(Utils.getFlag('Q', options));
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -326,11 +326,7 @@ public class AdaBoostM1
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
-    
-    result = new Vector();
+    Vector<String>        result = new Vector<String>();
 
     if (getUseResampling())
       result.add("-Q");
@@ -338,9 +334,7 @@ public class AdaBoostM1
     result.add("-P");
     result.add("" + getWeightThreshold());
     
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Collections.addAll(result, super.getOptions());
 
     return (String[]) result.toArray(new String[result.size()]);
   }
@@ -560,7 +554,7 @@ public class AdaBoostM1
     double oldSumOfWeights, newSumOfWeights;
 
     oldSumOfWeights = training.sumOfWeights();
-    Enumeration enu = training.enumerateInstances();
+    Enumeration<Instance> enu = training.enumerateInstances();
     while (enu.hasMoreElements()) {
       Instance instance = (Instance) enu.nextElement();
       if (!Utils.eq(m_Classifiers[m_NumIterationsPerformed].classifyInstance(instance), 

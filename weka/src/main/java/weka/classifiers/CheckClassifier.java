@@ -21,6 +21,7 @@
 
 package weka.classifiers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -184,13 +185,11 @@ public class CheckClassifier
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
-
+    result.addAll(Collections.list(super.listOptions()));
+    
     result.addElement(new Option(
         "\tFull name of the classifier analysed.\n"
         +"\teg: weka.classifiers.bayes.NaiveBayes\n"
@@ -203,9 +202,7 @@ public class CheckClassifier
           "\nOptions specific to classifier "
           + m_Classifier.getClass().getName()
           + ":"));
-      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
-      while (enu.hasMoreElements())
-        result.addElement(enu.nextElement());
+      result.addAll(Collections.list(((OptionHandler)m_Classifier).listOptions()));
     }
 
     return result.elements();
@@ -293,30 +290,25 @@ public class CheckClassifier
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
+    Vector<String>        result;
     String[]      options;
-    int           i;
+    
+    result = new Vector<String>();
 
-    result = new Vector();
-
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-
+    Collections.addAll(result, super.getOptions());
+    
     if (getClassifier() != null) {
       result.add("-W");
       result.add(getClassifier().getClass().getName());
     }
 
-    if ((m_Classifier != null) && (m_Classifier instanceof OptionHandler))
-      options = ((OptionHandler) m_Classifier).getOptions();
-    else
-      options = new String[0];
+    if ((m_Classifier != null) && (m_Classifier instanceof OptionHandler)) {
 
-    if (options.length > 0) {
-      result.add("--");
-      for (i = 0; i < options.length; i++)
-        result.add(options[i]);
+      options = ((OptionHandler) m_Classifier).getOptions();
+      if (options.length > 0) {   
+        result.add("--"); 
+        Collections.addAll(result, options);
+      }
     }
 
     return (String[]) result.toArray(new String[result.size()]);
@@ -494,7 +486,7 @@ public class CheckClassifier
       println("yes");
       if (m_Debug) {
         println("\n=== Full report ===");
-        Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
+        Enumeration<Option> enu = ((OptionHandler)m_Classifier).listOptions();
         while (enu.hasMoreElements()) {
           Option option = (Option) enu.nextElement();
           print(option.synopsis() + "\n"
@@ -948,16 +940,6 @@ public class CheckClassifier
       println("yes");
       result[0] = true;
 
-      if (false && m_Debug) {
-        println("\n=== Full report ===\n"
-            + evaluation1A.toSummaryString("\nFirst buildClassifier()",
-                true)
-                + "\n\n");
-        println(
-            evaluation1B.toSummaryString("\nSecond buildClassifier()",
-                true)
-                + "\n\n");
-      }
     }
     catch (Exception ex) {
       String msg = ex.getMessage().toLowerCase();

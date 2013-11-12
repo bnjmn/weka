@@ -44,7 +44,7 @@ public abstract class Check
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
     
     result.addElement(new Option(
@@ -223,7 +223,7 @@ public abstract class Check
       }
       catch (Exception ex) {
         String result = ex.getMessage() + "\n\n" + check.getClass().getName().replaceAll(".*\\.", "") + " Options:\n\n";
-        Enumeration enm = check.listOptions();
+        Enumeration<Option> enm = check.listOptions();
         while (enm.hasMoreElements()) {
           Option option = (Option) enm.nextElement();
           result += option.synopsis() + "\n" + option.description() + "\n";

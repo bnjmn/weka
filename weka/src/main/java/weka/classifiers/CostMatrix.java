@@ -161,8 +161,7 @@ public class CostMatrix implements Serializable, RevisionHandler {
 
     double sumOfWeightFactors = 0, sumOfMissClassWeights, sumOfWeights;
     double[] weightOfInstancesInClass, weightFactor, weightOfInstances;
-    Instances newData;
-
+    
     if (data.classIndex() < 0) {
       throw new Exception("Class index is not set!");
     }
@@ -552,7 +551,6 @@ public class CostMatrix implements Serializable, RevisionHandler {
           Double val = null;
           try {
             val = new Double(nextTok);
-            double value = val.doubleValue();
           } catch (Exception ex) {
             val = null;
           }

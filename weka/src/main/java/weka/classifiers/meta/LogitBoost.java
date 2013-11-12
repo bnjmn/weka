@@ -21,6 +21,7 @@
 
 package weka.classifiers.meta;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -282,9 +283,9 @@ public class LogitBoost
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(6);
+    Vector<Option> newVector = new Vector<Option>(6);
 
     newVector.addElement(new Option(
 	      "\tUse resampling instead of reweighting for boosting.",
@@ -310,10 +311,8 @@ public class LogitBoost
 	      +"\t(default 1)",
 	      "H", 1, "-H <num>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -424,6 +423,8 @@ public class LogitBoost
     }
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -433,28 +434,22 @@ public class LogitBoost
    */
   public String [] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 10];
-
-    int current = 0;
+    Vector<String> options = new Vector<String>();
+        
     if (getUseResampling()) {
-      options[current++] = "-Q";
+        options.add("-Q");
     } else {
-      options[current++] = "-P"; 
-      options[current++] = "" + getWeightThreshold();
+        options.add("-P"); 
+        options.add("" + getWeightThreshold());
     }
-    options[current++] = "-F"; options[current++] = "" + getNumFolds();
-    options[current++] = "-R"; options[current++] = "" + getNumRuns();
-    options[current++] = "-L"; options[current++] = "" + getLikelihoodThreshold();
-    options[current++] = "-H"; options[current++] = "" + getShrinkage();
+    options.add("-F"); options.add("" + getNumFolds());
+    options.add("-R"); options.add("" + getNumRuns());
+    options.add("-L"); options.add("" + getLikelihoodThreshold());
+    options.add("-H"); options.add("" + getShrinkage());
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
   
   /**

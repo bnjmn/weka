@@ -39,6 +39,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -307,13 +308,15 @@ public class CoverTree
    * 
    * @return 		an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
 	"\tSet base of the expansion constant\n"
 	+ "\t(default = 1.3).",
 	"B", 1, "-B <value>"));
+    
+    newVector.addAll(Collections.list(super.listOptions()));
     
     return newVector.elements();
   }
@@ -343,6 +346,8 @@ public class CoverTree
       setBase(Double.parseDouble(optionString));
     else
       setBase(1.3);      
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -351,16 +356,10 @@ public class CoverTree
    * @return 		an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String>	result;
-    String[]		options;
-    int			i;
+    Vector<String>	result = new Vector<String>();
     
-    result = new Vector<String>();
-    
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
+    Collections.addAll(result, super.getOptions());
+   
     result.add("-B");
     result.add("" + getBase());
 
@@ -1830,15 +1829,13 @@ public class CoverTree
    * 
    * @return 		an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
+  public Enumeration<String> enumerateMeasures() {
     Vector<String> newVector = new Vector<String>();
     newVector.addElement("measureTreeSize");
     newVector.addElement("measureNumLeaves");
     newVector.addElement("measureMaxDepth");
     if(m_Stats!=null) {
-      for(Enumeration e = m_Stats.enumerateMeasures(); e.hasMoreElements();) {
-        newVector.addElement((String)e.nextElement());
-      }
+      newVector.addAll(Collections.list(m_Stats.enumerateMeasures()));
     }
     return newVector.elements();
   }

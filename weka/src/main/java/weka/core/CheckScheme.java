@@ -21,6 +21,7 @@
 
 package weka.core;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -101,12 +102,10 @@ public abstract class CheckScheme
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
     
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+    result.addAll(Collections.list(super.listOptions()));
     
     result.addElement(new Option(
         "\tThe number of instances in the datasets (default 20).",

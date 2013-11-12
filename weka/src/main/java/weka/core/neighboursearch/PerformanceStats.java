@@ -261,7 +261,7 @@ public class PerformanceStats
    * 
    * @return An enumeration of the measure names.
    */
-  public Enumeration enumerateMeasures() {
+  public Enumeration<String> enumerateMeasures() {
     Vector<String> newVector = new Vector<String>();
     
     newVector.addElement("measureTotal_points_visited");

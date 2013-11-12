@@ -24,6 +24,7 @@ package weka.classifiers;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -189,9 +190,9 @@ public class BVDecompose
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(7);
+    Vector<Option> newVector = new Vector<Option>(7);
 
     newVector.addElement(new Option(
           "\tThe index of the class attribute.\n"+
@@ -226,10 +227,7 @@ public class BVDecompose
             "", 0, "\nOptions specific to learner "
             + m_Classifier.getClass().getName()
             + ":"));
-      Enumeration enu = ((OptionHandler)m_Classifier).listOptions();
-      while (enu.hasMoreElements()) {
-        newVector.addElement(enu.nextElement());
-      }
+      newVector.addAll(Collections.list(((OptionHandler)m_Classifier).listOptions()));
     }
     return newVector.elements();
   }
@@ -700,7 +698,7 @@ public class BVDecompose
         Utils.checkForRemainingOptions(args);
       } catch (Exception ex) {
         String result = ex.getMessage() + "\nBVDecompose Options:\n\n";
-        Enumeration enu = bvd.listOptions();
+        Enumeration<Option> enu = bvd.listOptions();
         while (enu.hasMoreElements()) {
           Option option = (Option) enu.nextElement();
           result += option.synopsis() + "\n" + option.description() + "\n";

@@ -22,6 +22,8 @@
 package weka.classifiers.functions;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -34,7 +36,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -345,12 +346,12 @@ public class SMO
       throws Exception {
 
       // Create header of instances object
-      FastVector atts = new FastVector(2);
-      atts.addElement(new Attribute("pred"));
-      FastVector attVals = new FastVector(2);
-      attVals.addElement(insts.classAttribute().value(cl1));
-      attVals.addElement(insts.classAttribute().value(cl2));
-      atts.addElement(new Attribute("class", attVals));
+      ArrayList<Attribute> atts = new ArrayList<Attribute>(2);
+      atts.add(new Attribute("pred"));
+      ArrayList<String> attVals = new ArrayList<String>(2);
+      attVals.add(insts.classAttribute().value(cl1));
+      attVals.add(insts.classAttribute().value(cl2));
+      atts.add(new Attribute("class", attVals));
       Instances data = new Instances("data", atts, insts.numInstances());
       data.setClassIndex(1);
 
@@ -1572,13 +1573,9 @@ public class SMO
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector result = new Vector();
-
-    Enumeration enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
 	"\tTurns off all checks - use with caution!\n"
@@ -1629,14 +1626,14 @@ public class SMO
 	+ "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
 	"K", 1, "-K <classname and parameters>"));
 
+    result.addAll(Collections.list(super.listOptions()));
+    
     result.addElement(new Option(
 	"",
 	"", 0, "\nOptions specific to kernel "
 	+ getKernel().getClass().getName() + ":"));
     
-    enm = ((OptionHandler) getKernel()).listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
+    result.addAll(Collections.list(((OptionHandler) getKernel()).listOptions()));
 
     return result.elements();
   }
@@ -1769,6 +1766,8 @@ public class SMO
     }
     
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -1777,14 +1776,8 @@ public class SMO
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    int       i;
-    Vector    result;
-    String[]  options;
-
-    result = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    
+    Vector<String> result = new Vector<String>();
 
     if (getChecksTurnedOff())
       result.add("-no-checks");
@@ -1812,6 +1805,8 @@ public class SMO
 
     result.add("-K");
     result.add("" + getKernel().getClass().getName() + " " + Utils.joinOptions(getKernel().getOptions()));
+    
+    Collections.addAll(result, super.getOptions());
     
     return (String[]) result.toArray(new String[result.size()]);	  
   }

@@ -21,6 +21,7 @@
 
 package weka.classifiers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -65,19 +66,17 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(2);
 
     newVector.addElement(new Option(
               "\tNumber of execution slots.\n"
               + "\t(default 1 - i.e. no parallelism)",
               "num-slots", 1, "-num-slots <num>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 

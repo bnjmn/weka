@@ -21,7 +21,6 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Aggregateable;
 import weka.core.Capabilities;
@@ -44,6 +43,7 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.RemoveUseless;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -228,10 +228,9 @@ public class Logistic extends AbstractClassifier
    *
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(4);
-    newVector.addElement(new Option("\tTurn on debugging output.",
-				    "D", 0, "-D"));
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(4);
+    
     newVector.addElement(new Option("\tUse conjugate gradient descent rather than BFGS updates.",
 				    "C", 0, "-C"));
     newVector.addElement(new Option("\tSet the ridge in the log-likelihood.",
@@ -239,6 +238,9 @@ public class Logistic extends AbstractClassifier
     newVector.addElement(new Option("\tSet the maximum number of iterations"+
 				    " (default -1, until convergence).",
 				    "M", 1, "-M <number>"));
+    
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
     
@@ -263,7 +265,6 @@ public class Logistic extends AbstractClassifier
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    setDebug(Utils.getFlag('D', options));
 
     setUseConjugateGradientDescent(Utils.getFlag('C', options));
 
@@ -278,6 +279,10 @@ public class Logistic extends AbstractClassifier
       m_MaxIts = Integer.parseInt(maxItsString);
     else 
       m_MaxIts = -1;
+    
+    super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
     
   /**
@@ -287,21 +292,19 @@ public class Logistic extends AbstractClassifier
    */
   public String [] getOptions() {
 	
-    String [] options = new String [6];
-    int current = 0;
-	
-    if (getDebug()) 
-      options[current++] = "-D";
+    Vector<String> options = new Vector<String>();
+    
     if (getUseConjugateGradientDescent()) {
-      options[current++] = "-C";
+      options.add("-C");
     }
-    options[current++] = "-R";
-    options[current++] = ""+m_Ridge;	
-    options[current++] = "-M";
-    options[current++] = ""+m_MaxIts;
-    while (current < options.length) 
-      options[current++] = "";
-    return options;
+    options.add("-R");
+    options.add(""+m_Ridge);	
+    options.add("-M");
+    options.add(""+m_MaxIts);
+    
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
    
   /**

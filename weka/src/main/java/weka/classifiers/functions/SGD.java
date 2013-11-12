@@ -22,6 +22,7 @@
 package weka.classifiers.functions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -433,6 +434,8 @@ public class SGD extends RandomizableClassifier implements
     newVector.add(new Option("\tDon't normalize the data", "N", 0, "-N"));
     newVector.add(new Option("\tDon't replace missing values", "M", 0, "-M"));
 
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -524,6 +527,8 @@ public class SGD extends RandomizableClassifier implements
 
     setDontNormalize(Utils.getFlag("N", options));
     setDontReplaceMissing(Utils.getFlag('M', options));
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -552,6 +557,8 @@ public class SGD extends RandomizableClassifier implements
       options.add("-M");
     }
 
+    Collections.addAll(options, super.getOptions());
+    
     return options.toArray(new String[1]);
   }
 

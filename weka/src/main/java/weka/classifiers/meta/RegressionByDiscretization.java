@@ -21,6 +21,8 @@
 
 package weka.classifiers.meta;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -30,7 +32,6 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -295,24 +296,24 @@ public class RegressionByDiscretization
       }
       
       // Compute new list of non-empty classes and mapping of indices
-      FastVector newClassVals = new FastVector(numNonEmptyClasses);
+      ArrayList<String> newClassVals = new ArrayList<String>(numNonEmptyClasses);
       m_OldIndexToNewIndex = new int[newTrain.numClasses()];
       for (int i = 0; i < newTrain.numClasses(); i++) {
         if (notEmptyClass[i]) {
          m_OldIndexToNewIndex[i] = newClassVals.size();
-          newClassVals.addElement(newTrain.classAttribute().value(i));
+          newClassVals.add(newTrain.classAttribute().value(i));
         }
       }
       
       // Compute new header information
       Attribute newClass = new Attribute(newTrain.classAttribute().name(), 
                                          newClassVals);
-      FastVector newAttributes = new FastVector(newTrain.numAttributes());
+      ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(newTrain.numAttributes());
       for (int i = 0; i < newTrain.numAttributes(); i++) {
         if (i != newTrain.classIndex()) {
-          newAttributes.addElement(newTrain.attribute(i).copy());
+          newAttributes.add((Attribute)newTrain.attribute(i).copy());
         } else {
-          newAttributes.addElement(newClass);
+          newAttributes.add(newClass);
         }
       }
       
@@ -508,9 +509,9 @@ public class RegressionByDiscretization
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(5);
+    Vector<Option> newVector = new Vector<Option>(5);
 
     newVector.addElement(new Option(
 	      "\tNumber of bins for equal-width discretization\n"
@@ -535,10 +536,7 @@ public class RegressionByDiscretization
 	     "\tWhat type of density estimator to use: 0=histogram/1=kernel/2=normal (default: 0).",
 	     "K", 1, "-K"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
   }
@@ -572,6 +570,8 @@ public class RegressionByDiscretization
       setEstimatorType(new SelectedTag(ESTIMATOR_HISTOGRAM, TAGS_ESTIMATOR));
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -581,37 +581,29 @@ public class RegressionByDiscretization
    */
   public String [] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 7];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-B";
-    options[current++] = "" + getNumBins();
+    options.add("-B");
+    options.add("" + getNumBins());
 
     if (getDeleteEmptyBins()) {
-      options[current++] = "-E";
+        options.add("-E");
     }
     
     if (getUseEqualFrequency()) {
-      options[current++] = "-F";
+        options.add("-F");
     }
 
     if (getMinimizeAbsoluteError()) {
-      options[current++] = "-A";
+        options.add("-A");
     }
     
-    options[current++] = "-K";
-    options[current++] = "" + m_estimatorType;
+    options.add("-K");
+    options.add("" + m_estimatorType);
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
+    Collections.addAll(options, super.getOptions());
 
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**

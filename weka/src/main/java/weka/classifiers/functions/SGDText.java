@@ -24,6 +24,7 @@ package weka.classifiers.functions;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,7 +39,6 @@ import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Aggregateable;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -871,6 +871,8 @@ public class SGDText extends RandomizableClassifier implements
         "\tThe stemmering algorihtm (classname plus parameters) to use.",
         "stemmer", 1, "-stemmer <spec>"));
 
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -1067,6 +1069,8 @@ public class SGDText extends RandomizableClassifier implements
         ((OptionHandler) stemmer).setOptions(stemmerSpec);
       setStemmer(stemmer);
     }
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -1202,12 +1206,12 @@ public class SGDText extends RandomizableClassifier implements
     m_svmProbs.setLearningRate(m_learningRate);
     m_svmProbs.setLambda(m_lambda);
     m_svmProbs.setEpochs(m_epochs);
-    FastVector atts = new FastVector(2);
-    atts.addElement(new Attribute("pred"));
-    FastVector attVals = new FastVector(2);
-    attVals.addElement(data.classAttribute().value(0));
-    attVals.addElement(data.classAttribute().value(1));
-    atts.addElement(new Attribute("class", attVals));
+    ArrayList<Attribute> atts = new ArrayList<Attribute>(2);
+    atts.add(new Attribute("pred"));
+    ArrayList<String> attVals = new ArrayList<String>(2);
+    attVals.add(data.classAttribute().value(0));
+    attVals.add(data.classAttribute().value(1));
+    atts.add(new Attribute("class", attVals));
     m_fitLogisticStructure = new Instances("data", atts, 0);
     m_fitLogisticStructure.setClassIndex(1);
 

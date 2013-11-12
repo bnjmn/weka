@@ -38,7 +38,7 @@ public interface AdditionalMeasureProducer {
    * double measureBlah()
    * @return an enumeration of the measure names
    */
-  Enumeration enumerateMeasures();
+  Enumeration<String> enumerateMeasures();
 
   /**
    * Returns the value of the named measure

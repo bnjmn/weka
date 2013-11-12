@@ -86,8 +86,8 @@ public class CheckSource
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
         "\tThe classifier (incl. options) that was used to generate\n"
@@ -402,7 +402,7 @@ public class CheckSource
   public static void main(String[] args) throws Exception{
     CheckSource         check;
     StringBuffer        text;
-    Enumeration         enm;
+    Enumeration<Option>         enm;
 
     check = new CheckSource();
     if (Utils.getFlag('h', args)) {

@@ -21,6 +21,7 @@
 package weka.core.neighboursearch;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -579,7 +580,7 @@ public abstract class NearestNeighbourSearch
    *
    * @return 		an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> newVector = new Vector<Option>();
 
     newVector.add(new Option(
@@ -793,16 +794,15 @@ public abstract class NearestNeighbourSearch
    * 
    * @return 		an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
+  public Enumeration<String> enumerateMeasures() {
     Vector<String> newVector; 
     if(m_Stats == null) {
       newVector = new Vector<String>(0);
     }
     else {
       newVector = new Vector<String>();
-      Enumeration en = m_Stats.enumerateMeasures();
-      while(en.hasMoreElements())
-        newVector.add((String)en.nextElement());
+      Enumeration<String> en = m_Stats.enumerateMeasures();
+      newVector.addAll(Collections.list(en));
     }
     return newVector.elements();
   }

@@ -23,6 +23,7 @@ package weka.classifiers.bayes;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -930,6 +931,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
         "\tThe stemmering algorihtm (classname plus parameters) to use.",
         "stemmer", 1, "-stemmer <spec>"));
 
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
 
@@ -1076,6 +1079,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
         ((OptionHandler) stemmer).setOptions(stemmerSpec);
       setStemmer(stemmer);
     }
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -1131,6 +1136,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       options.add(spec.trim());
     }
 
+    Collections.addAll(options, super.getOptions());
+    
     return options.toArray(new String[1]);
   }
 

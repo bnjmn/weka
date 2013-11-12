@@ -21,6 +21,7 @@
 
 package weka.classifiers.bayes;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -236,7 +237,7 @@ implements OptionHandler, WeightedInstancesHandler,
     m_ClassDistribution = new DiscreteEstimator(m_Instances.numClasses(), 
                                                 true);
     int attIndex = 0;
-    Enumeration enu = m_Instances.enumerateAttributes();
+    Enumeration<Attribute> enu = m_Instances.enumerateAttributes();
     while (enu.hasMoreElements()) {
       Attribute attribute = (Attribute) enu.nextElement();
 
@@ -292,7 +293,7 @@ implements OptionHandler, WeightedInstancesHandler,
     }
 
     // Compute counts
-    Enumeration enumInsts = m_Instances.enumerateInstances();
+    Enumeration<Instance> enumInsts = m_Instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) {
       Instance instance = 
 	(Instance) enumInsts.nextElement();
@@ -314,7 +315,7 @@ implements OptionHandler, WeightedInstancesHandler,
   public void updateClassifier(Instance instance) throws Exception {
 
     if (!instance.classIsMissing()) {
-      Enumeration enumAtts = m_Instances.enumerateAttributes();
+      Enumeration<Attribute> enumAtts = m_Instances.enumerateAttributes();
       int attIndex = 0;
       while (enumAtts.hasMoreElements()) {
 	Attribute attribute = (Attribute) enumAtts.nextElement();
@@ -349,7 +350,7 @@ implements OptionHandler, WeightedInstancesHandler,
     for (int j = 0; j < m_NumClasses; j++) {
       probs[j] = m_ClassDistribution.getProbability(j);
     }
-    Enumeration enumAtts = instance.enumerateAttributes();
+    Enumeration<Attribute> enumAtts = instance.enumerateAttributes();
     int attIndex = 0;
     while (enumAtts.hasMoreElements()) {
       Attribute attribute = (Attribute) enumAtts.nextElement();
@@ -388,9 +389,9 @@ implements OptionHandler, WeightedInstancesHandler,
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector<Option> newVector = new Vector<Option>(3);
 
     newVector.addElement(
               new Option("\tUse kernel density estimator rather than normal\n"
@@ -404,6 +405,8 @@ implements OptionHandler, WeightedInstancesHandler,
               new Option("\tDisplay model in old format (good when there are "
                          + "many classes)\n",
                          "O", 0, "-O"));
+    
+    newVector.addAll(Collections.list(super.listOptions()));
     
     return newVector.elements();
   }
@@ -433,6 +436,7 @@ implements OptionHandler, WeightedInstancesHandler,
    */
   public void setOptions(String[] options) throws Exception {
 
+    super.setOptions(options);
     boolean k = Utils.getFlag('K', options);
     boolean d = Utils.getFlag('D', options);
     if (k && d) {
@@ -452,25 +456,23 @@ implements OptionHandler, WeightedInstancesHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [3];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
+    Collections.addAll(options, super.getOptions());
+    
     if (m_UseKernelEstimator) {
-      options[current++] = "-K";
+      options.add("-K");
     }
 
     if (m_UseDiscretization) {
-      options[current++] = "-D";
+      options.add("-D");
     }
 
     if (m_displayModelInOldFormat) {
-      options[current++] = "-O";
+      options.add("-O");
     }
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -793,7 +795,7 @@ implements OptionHandler, WeightedInstancesHandler,
                       ": Prior probability = " + Utils.
                       doubleToString(m_ClassDistribution.getProbability(i),
                                      4, 2) + "\n\n");
-	  Enumeration enumAtts = m_Instances.enumerateAttributes();
+	  Enumeration<Attribute> enumAtts = m_Instances.enumerateAttributes();
 	  int attIndex = 0;
 	  while (enumAtts.hasMoreElements()) {
 	    Attribute attribute = (Attribute) enumAtts.nextElement();

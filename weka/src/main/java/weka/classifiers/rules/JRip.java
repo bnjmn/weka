@@ -21,6 +21,7 @@
 package weka.classifiers.rules;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -300,8 +301,8 @@ public class JRip
    *
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(3);
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(7);
     newVector.addElement(new Option("\tSet number of folds for REP\n" +
 				    "\tOne fold is used as pruning set.\n" +
 				    "\t(default 3)","F", 1, "-F <number of folds>"));
@@ -328,6 +329,9 @@ public class JRip
     newVector.addElement(new Option("\tWhether NOT use pruning\n"
 				    +"\t(default: use pruning)", "P", 
 				    0, "-P")); 
+    
+    newVector.addAll(Collections.list(super.listOptions()));
+    
     return newVector.elements();
   }
     
@@ -400,6 +404,10 @@ public class JRip
     m_Debug = Utils.getFlag('D', options);
     m_CheckErr = !Utils.getFlag('E', options);
     m_UsePruning = !Utils.getFlag('P', options);
+    
+    super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
     
   /**
@@ -409,34 +417,33 @@ public class JRip
    */
   public String [] getOptions() {
 
-    String [] options = new String [11];
-    int current = 0;
-    options[current++] = "-F"; options[current++] = "" + m_Folds;
-    options[current++] = "-N"; options[current++] = "" + m_MinNo;
-    options[current++] = "-O"; options[current++] = "" + m_Optimizations;
-    options[current++] = "-S"; options[current++] = "" + m_Seed;
+    Vector<String> options = new Vector<String>();
+    
+    options.add("-F"); options.add("" + m_Folds);
+    options.add("-N"); options.add("" + m_MinNo);
+    options.add("-O"); options.add("" + m_Optimizations);
+    options.add("-S"); options.add("" + m_Seed);
 	
     if(m_Debug)
-      options[current++] = "-D";
+        options.add("-D");
 
     if(!m_CheckErr)
-      options[current++] = "-E";
+        options.add("-E");
 	
     if(!m_UsePruning)
-      options[current++] = "-P";
+        options.add("-P");
 	
-    while(current < options.length)
-      options[current++] = "";
-	
-    return options;
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
 
   /**
    * Returns an enumeration of the additional measure names
    * @return an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
-    Vector newVector = new Vector(1);
+  public Enumeration<String> enumerateMeasures() {
+    Vector<String> newVector = new Vector<String>(1);
     newVector.addElement("measureNumRules");
     return newVector.elements();
   }

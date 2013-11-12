@@ -20,6 +20,7 @@
  */
 package weka.classifiers.bayes;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -233,7 +234,7 @@ public class BayesNet
     boolean bHasNonNominal = false;
     boolean bHasMissingValues = false;
 
-    Enumeration enu = instances.enumerateAttributes();		
+    Enumeration<Attribute> enu = instances.enumerateAttributes();		
     while (enu.hasMoreElements()) {
       Attribute attribute = (Attribute) enu.nextElement();
       if (attribute.type() != Attribute.NOMINAL) {
@@ -241,7 +242,7 @@ public class BayesNet
 	bHasNonNominal = true;
 	//throw new UnsupportedAttributeTypeException("BayesNet handles nominal variables only. Non-nominal variable in dataset detected.");
       }
-      Enumeration enum2 = instances.enumerateInstances();
+      Enumeration<Instance> enum2 = instances.enumerateInstances();
       while (enum2.hasMoreElements()) {
 	if (((Instance) enum2.nextElement()).isMissing(attribute)) {
 	  bHasMissingValues = true;
@@ -435,14 +436,27 @@ public class BayesNet
    * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(4);
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(4);
 
     newVector.addElement(new Option("\tDo not use ADTree data structure\n", "D", 0, "-D"));
     newVector.addElement(new Option("\tBIF file to compare with\n", "B", 1, "-B <BIF file>"));
     newVector.addElement(new Option("\tSearch algorithm\n", "Q", 1, "-Q weka.classifiers.bayes.net.search.SearchAlgorithm"));
     newVector.addElement(new Option("\tEstimator algorithm\n", "E", 1, "-E weka.classifiers.bayes.net.estimate.SimpleEstimator"));
-
+    newVector.addAll(Collections.list(super.listOptions()));
+    
+    newVector.addElement(new Option(
+      "",
+      "", 0, "\nOptions specific to search method "
+      + getSearchAlgorithm().getClass().getName() + ":"));
+    newVector.addAll(Collections.list(getSearchAlgorithm().listOptions()));
+    
+    newVector.addElement(new Option(
+      "",
+      "", 0, "\nOptions specific to estimator method "
+      + getEstimator().getClass().getName() + ":"));
+    newVector.addAll(Collections.list(getEstimator().listOptions()));
+    
     return newVector.elements();
   } // listOptions
 
@@ -474,6 +488,7 @@ public class BayesNet
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
+    super.setOptions(options);
     m_bUseADTree = !(Utils.getFlag('D', options));
 
     String sBIFFile = Utils.getOption('B', options);
@@ -555,40 +570,30 @@ public class BayesNet
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] searchOptions = m_SearchAlgorithm.getOptions();
-    String[] estimatorOptions = m_BayesNetEstimator.getOptions();
-    String[] options = new String[11 + searchOptions.length + estimatorOptions.length];
-    int current = 0;
-
+    Vector<String> options = new Vector<String>();
+    
+    Collections.addAll(options, super.getOptions());
+    
     if (!m_bUseADTree) {
-      options[current++] = "-D";
+      options.add("-D");
     }
 
     if (m_otherBayesNet != null) {
-      options[current++] = "-B";
-      options[current++] = ((BIFReader) m_otherBayesNet).getFileName();
+      options.add("-B");
+      options.add(((BIFReader) m_otherBayesNet).getFileName());
     }
 
-    options[current++] = "-Q";
-    options[current++] = "" + getSearchAlgorithm().getClass().getName();
-    options[current++] = "--";
-    for (int iOption = 0; iOption < searchOptions.length; iOption++) {
-      options[current++] = searchOptions[iOption];
-    }
+    options.add("-Q");
+    options.add("" + getSearchAlgorithm().getClass().getName());
+    options.add("--");
+    Collections.addAll(options, getSearchAlgorithm().getOptions());
+ 
+    options.add("-E");
+    options.add("" + getEstimator().getClass().getName());
+    options.add("--");
+    Collections.addAll(options, getEstimator().getOptions());
 
-    options[current++] = "-E";
-    options[current++] = "" + getEstimator().getClass().getName();
-    options[current++] = "--";
-    for (int iOption = 0; iOption < estimatorOptions.length; iOption++) {
-      options[current++] = estimatorOptions[iOption];
-    }
-
-    // Fill up rest with empty strings, not nulls!
-    while (current < options.length) {
-      options[current++] = "";
-    }
-
-    return options;
+    return options.toArray(new String[0]);
   } // getOptions
 
   /**
@@ -1013,8 +1018,8 @@ public class BayesNet
    * double measureBlah()
    * @return an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
-    Vector newVector = new Vector(4);
+  public Enumeration<String> enumerateMeasures() {
+    Vector<String> newVector = new Vector<String>(4);
     newVector.addElement("measureExtraArcs");
     newVector.addElement("measureMissingArcs");
     newVector.addElement("measureReversedArcs");

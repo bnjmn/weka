@@ -151,7 +151,7 @@ public interface Instance extends Copyable {
    * @throws UnassignedDatasetException if the instance doesn't have access to a
    *           dataset
    */
-  public Enumeration enumerateAttributes();
+  public Enumeration<Attribute> enumerateAttributes();
 
   /**
    * Tests if the headers of two instances are equivalent.

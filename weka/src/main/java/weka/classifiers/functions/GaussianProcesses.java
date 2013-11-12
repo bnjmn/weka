@@ -21,6 +21,7 @@
 package weka.classifiers.functions;
 
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -635,13 +636,9 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
     Vector<Option> result = new Vector<Option>();
-
-    Enumeration enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement((Option)enm.nextElement());
 
     result.addElement(new Option("\tLevel of Gaussian Noise wrt transformed target." + " (default 1)", "L", 1, "-L <double>"));
 
@@ -652,13 +649,13 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
                                  + "\t(default: weka.classifiers.functions.supportVector.PolyKernel)", "K", 1,
                                  "-K <classname and parameters>"));
 
+    result.addAll(Collections.list(super.listOptions()));
+
     result.addElement(new Option("", "", 0, "\nOptions specific to kernel " + getKernel().getClass().getName()
                                  + ":"));
-
-    enm = ((OptionHandler) getKernel()).listOptions();
-    while (enm.hasMoreElements())
-      result.addElement((Option)enm.nextElement());
-
+   
+    result.addAll(Collections.list(((OptionHandler) getKernel()).listOptions()));
+    
     return result.elements();
   }
 
@@ -755,6 +752,8 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     }
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**

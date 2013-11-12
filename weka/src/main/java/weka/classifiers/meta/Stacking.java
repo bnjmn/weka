@@ -22,6 +22,7 @@
 package weka.classifiers.meta;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -157,9 +158,9 @@ public class Stacking
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(2);
     newVector.addElement(new Option(
 	      metaOption(),
 	      "M", 0, "-M <scheme specification>"));
@@ -167,9 +168,14 @@ public class Stacking
 	      "\tSets the number of cross-validation folds.",
 	      "X", 1, "-X <number of folds>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
+    newVector.addAll(Collections.list(super.listOptions()));
+    
+    if (getMetaClassifier() instanceof OptionHandler) {
+      newVector.addElement(new Option(
+        "",
+        "", 0, "\nOptions specific to meta classifier "
+          + getMetaClassifier().getClass().getName() + ":"));
+      newVector.addAll(Collections.list(((OptionHandler)getMetaClassifier()).listOptions()));
     }
     return newVector.elements();
   }

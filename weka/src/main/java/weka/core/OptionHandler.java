@@ -37,7 +37,7 @@ public interface OptionHandler {
    *
    * @return an enumeration of all available options.
    */
-  Enumeration listOptions();
+  Enumeration<Option> listOptions();
 
   /**
    * Sets the OptionHandler's options using the given list. All options

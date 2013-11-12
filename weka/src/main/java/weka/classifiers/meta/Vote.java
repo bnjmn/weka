@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
@@ -204,16 +205,10 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
-    Enumeration enm;
-    Vector result;
-
-    result = new Vector();
-
-    enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
-
+  public Enumeration<Option> listOptions() {
+    
+    Vector<Option> result = new Vector<Option>();
+    
     result.addElement(new Option(
         "\tFull path to serialized classifier to include.\n"
             + "\tMay be specified multiple times to include\n"
@@ -224,6 +219,8 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
     result.addElement(new Option("\tThe combination rule to use\n"
         + "\t(default: AVG)", "R", 1, "-R " + Tag.toOptionList(TAGS_RULES)));
+    
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
@@ -236,10 +233,8 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   @Override
   public String[] getOptions() {
     int i;
-    Vector result;
+    Vector<String> result = new Vector<String>();
     String[] options;
-
-    result = new Vector();
 
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -429,7 +424,6 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       m_preBuiltClassifiers.clear();
       loadClassifiers(data);
 
-      int index = 0;
       if (m_Classifiers.length == 1
           && m_Classifiers[0] instanceof weka.classifiers.rules.ZeroR) {
         // remove the single ZeroR
@@ -471,12 +465,14 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
           new FileInputStream(toLoad)));
       Object c = is.readObject();
       if (!(c instanceof Classifier)) {
+        is.close();
         throw new Exception("\"" + path + "\" does not contain a classifier!");
       }
       Object header = null;
       header = is.readObject();
       if (header instanceof Instances) {
         if (data != null && !data.equalHeaders((Instances) header)) {
+          is.close();
           throw new Exception("\"" + path + "\" was trained with data that is "
               + "of a differnet structure than the incoming training data");
         }
@@ -485,7 +481,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
         System.out.println("[Vote] warning: no header instances for \"" + path
             + "\"");
       }
-
+      is.close();
       addPreBuiltClassifier((Classifier) c);
     }
   }

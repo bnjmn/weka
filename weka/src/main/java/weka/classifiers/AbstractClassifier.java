@@ -191,9 +191,9 @@ public abstract class AbstractClassifier
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(2);
 
     newVector.addElement(new Option(
           "\tIf set, classifier is run in debug mode and\n"
@@ -234,19 +234,16 @@ public abstract class AbstractClassifier
    */
   public String [] getOptions() {
 
-    String [] options = new String [2];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
     if (getDebug()) {
-      options[current++] = "-output-debug-info";
+      options.add("-output-debug-info");
     } 
     if (getDoNotCheckCapabilities()) {
-      options[current++] = "-do-not-check-capabilities";
+      options.add("-do-not-check-capabilities");
     }
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    
+    return options.toArray(new String[0]);
   }
 
   /**

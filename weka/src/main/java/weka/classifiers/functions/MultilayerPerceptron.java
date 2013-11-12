@@ -32,6 +32,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -2157,9 +2158,9 @@ public class MultilayerPerceptron
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     
-    Vector newVector = new Vector(14);
+    Vector<Option> newVector = new Vector<Option>(14);
 
     newVector.addElement(new Option(
 	      "\tLearning Rate for the backpropagation algorithm.\n"
@@ -2223,6 +2224,7 @@ public class MultilayerPerceptron
 	      +"\t(Set this to cause the learning rate to decay).",
 	      "D", 0,"-D"));
     
+    newVector.addAll(Collections.list(super.listOptions()));
     
     return newVector.elements();
   }
@@ -2381,6 +2383,8 @@ public class MultilayerPerceptron
       setDecay(false);
     }
     
+    super.setOptions(options);
+    
     Utils.checkForRemainingOptions(options);
   }
   
@@ -2391,42 +2395,40 @@ public class MultilayerPerceptron
    */
   public String [] getOptions() {
 
-    String [] options = new String [21];
-    int current = 0;
-    options[current++] = "-L"; options[current++] = "" + getLearningRate(); 
-    options[current++] = "-M"; options[current++] = "" + getMomentum();
-    options[current++] = "-N"; options[current++] = "" + getTrainingTime(); 
-    options[current++] = "-V"; options[current++] = "" +getValidationSetSize();
-    options[current++] = "-S"; options[current++] = "" + getSeed();
-    options[current++] = "-E"; options[current++] =""+getValidationThreshold();
-    options[current++] = "-H"; options[current++] = getHiddenLayers();
+    Vector<String> options = new Vector<String>();
+    
+    options.add("-L"); options.add("" + getLearningRate()); 
+    options.add("-M"); options.add("" + getMomentum());
+    options.add("-N"); options.add("" + getTrainingTime()); 
+    options.add("-V"); options.add("" +getValidationSetSize());
+    options.add("-S"); options.add("" + getSeed());
+    options.add("-E"); options.add(""+getValidationThreshold());
+    options.add("-H"); options.add(getHiddenLayers());
     if (getGUI()) {
-      options[current++] = "-G";
+        options.add("-G");
     }
     if (!getAutoBuild()) {
-      options[current++] = "-A";
+        options.add("-A");
     }
     if (!getNominalToBinaryFilter()) {
-      options[current++] = "-B";
+        options.add("-B");
     }
     if (!getNormalizeNumericClass()) {
-      options[current++] = "-C";
+        options.add("-C");
     }
     if (!getNormalizeAttributes()) {
-      options[current++] = "-I";
+        options.add("-I");
     }
     if (!getReset()) {
-      options[current++] = "-R";
+        options.add("-R");
     }
     if (getDecay()) {
-      options[current++] = "-D";
+        options.add("-D");
     }
 
+    Collections.addAll(options, super.getOptions());
     
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
   
   /**

@@ -22,6 +22,7 @@
 package weka.classifiers.meta;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
@@ -223,9 +224,9 @@ public class Bagging
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(3);
 
     newVector.addElement(new Option(
               "\tSize of each bag, as a percentage of the\n" 
@@ -238,10 +239,8 @@ public class Bagging
               "\tRepresent copies of instances using weights rather than explicitly.",
               "-represent-copies-using-weights", 0, "-represent-copies-using-weights"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+ 
     return newVector.elements();
   }
 
@@ -333,6 +332,8 @@ public class Bagging
     setRepresentCopiesUsingWeights(Utils.getFlag("represent-copies-using-weights", options));
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -343,30 +344,22 @@ public class Bagging
   @Override
   public String [] getOptions() {
 
-
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 4];
-
-    int current = 0;
-    options[current++] = "-P"; 
-    options[current++] = "" + getBagSizePercent();
+    Vector<String> options = new Vector<String>();
+    
+    options.add("-P"); 
+    options.add("" + getBagSizePercent());
 
     if (getCalcOutOfBag()) { 
-      options[current++] = "-O";
+        options.add("-O");
     }
 
     if (getRepresentCopiesUsingWeights()) {
-      options[current++] = "-represent-copies-using-weights";
+        options.add("-represent-copies-using-weights");
     }
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
-
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -473,9 +466,9 @@ public class Bagging
    * @return an enumeration of the measure names
    */
   @Override
-  public Enumeration enumerateMeasures() {
+  public Enumeration<String> enumerateMeasures() {
     
-    Vector newVector = new Vector(1);
+    Vector<String> newVector = new Vector<String>(1);
     newVector.addElement("measureOutOfBagError");
     return newVector.elements();
   }
@@ -562,7 +555,6 @@ public class Bagging
 					 "out-of-bag error is to be calculated!");
     }
 
-    int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
     m_random = new Random(m_Seed);
     
     m_inBag = null;

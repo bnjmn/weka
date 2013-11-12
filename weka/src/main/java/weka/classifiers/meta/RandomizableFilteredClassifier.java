@@ -21,20 +21,18 @@
 
 package weka.classifiers.meta;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Random;
 
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Randomizable;
-
 import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.RandomProjection;
 
 /**
  <!-- globalinfo-start -->
@@ -152,19 +150,25 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
           "\tRandom number seed.\n"
           + "\t(default 1)",
           "S", 1, "-S <num>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
+    newVector.addAll(Collections.list(super.listOptions()));
+    
+    if (getFilter() instanceof OptionHandler) {
+      newVector.addElement(new Option(
+        "",
+        "", 0, "\nOptions specific to filter "
+          + getFilter().getClass().getName() + ":"));
+      newVector.addAll(Collections.list(((OptionHandler)getFilter()).listOptions()));
     }
+    
     return newVector.elements();
   }
 
@@ -195,6 +199,8 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
     }
 
     super.setOptions(options);
+    
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -204,17 +210,14 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
    */
   public String [] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 2];
+    Vector<String> options = new Vector<String>();
+   
+    options.add("-S");
+    options.add("" + getSeed());
 
-    int current = 0;
-    options[current++] = "-S";
-    options[current++] = "" + getSeed();
-
-    System.arraycopy(superOptions, 0, options, current,
-        superOptions.length);
-
-    return options;
+    Collections.addAll(options, super.getOptions());
+    
+    return options.toArray(new String[0]);
   }
 
   /**
