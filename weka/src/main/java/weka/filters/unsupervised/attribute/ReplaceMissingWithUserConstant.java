@@ -649,7 +649,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
             }
             vals[i] = outputFormatPeek().attribute(i).indexOfValue(
               inst.stringValue(i));
-          } else if (inst.attribute(i).isNominal()) {
+          } else if (inst.attribute(i).isNominal() && i != inst.classIndex()) {
             vals[i] = inst.value(i) + 1;
           } else {
             vals[i] = inst.value(i);
