@@ -545,6 +545,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
         if (temp.isNominal()) {
           if (temp.indexOfValue(m_resolvedNominalStringConstant) < 0) {
             List<String> values = new ArrayList<String>();
+
             values.add(m_resolvedNominalStringConstant);
             for (int j = 0; j < temp.numValues(); j++) {
               values.add(temp.value(j));
@@ -604,7 +605,8 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
             // vals[i] = inst.attribute(i).numValues();
             int temp = inst.attribute(i).indexOfValue(
                 m_resolvedNominalStringConstant);
-            vals[i] = (temp >= 0) ? temp : inst.attribute(i).numValues();
+            //vals[i] = (temp >= 0) ? temp : inst.attribute(i).numValues();
+            vals[i] = (temp >= 0) ? temp : 0;
           } else if (inst.attribute(i).isString()) {
             // a bit of a hack here to try and detect if we're running in
             // streaming
@@ -630,22 +632,30 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
           vals[i] = inst.value(i);
         }
       } else {
-        if (inst.attribute(i).isString()) {
-          // a bit of a hack here to try and detect if we're running in
-          // streaming
-          // mode or batch mode. If the string attribute has only one value in
-          // the
-          // header then it is likely that we're running in streaming mode
-          // (where only one
-          // value, the current instance's value, is maintained in memory)
-          if (inst.attribute(i).numValues() <= 1) {
-            outputFormatPeek().attribute(i).setStringValue(inst.stringValue(i));
-          } else {
-            outputFormatPeek().attribute(i).addStringValue(inst.stringValue(i));
-          }
-          vals[i] = outputFormatPeek().attribute(i).indexOfValue(
+        if (m_selectedRange.isInRange(i)) {
+          // in range but not missing
+          if (inst.attribute(i).isString()) {
+            // a bit of a hack here to try and detect if we're running in
+            // streaming
+            // mode or batch mode. If the string attribute has only one value in
+            // the
+            // header then it is likely that we're running in streaming mode
+            // (where only one
+            // value, the current instance's value, is maintained in memory)
+            if (inst.attribute(i).numValues() <= 1) {
+              outputFormatPeek().attribute(i).setStringValue(inst.stringValue(i));
+            } else {
+              outputFormatPeek().attribute(i).addStringValue(inst.stringValue(i));
+            }
+            vals[i] = outputFormatPeek().attribute(i).indexOfValue(
               inst.stringValue(i));
+          } else if (inst.attribute(i).isNominal()) {
+            vals[i] = inst.value(i) + 1;
+          } else {
+            vals[i] = inst.value(i);
+          }          
         } else {
+          // missing but not in range
           vals[i] = inst.value(i);
         }
       }
