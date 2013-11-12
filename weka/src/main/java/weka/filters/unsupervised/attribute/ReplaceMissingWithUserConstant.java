@@ -545,10 +545,11 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
         if (temp.isNominal()) {
           if (temp.indexOfValue(m_resolvedNominalStringConstant) < 0) {
             List<String> values = new ArrayList<String>();
+            values.add(m_resolvedNominalStringConstant);
             for (int j = 0; j < temp.numValues(); j++) {
               values.add(temp.value(j));
             }
-            values.add(m_resolvedNominalStringConstant);
+
             Attribute newAtt = new Attribute(temp.name(), values);
             newAtt.setWeight(temp.weight());
             updatedNoms.add(newAtt);
