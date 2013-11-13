@@ -86,8 +86,8 @@ public class MarginCalculator implements Serializable, RevisionHandler {
     int[] order = getMaxCardOrder(bAdjacencyMatrix);
     bAdjacencyMatrix = fillIn(order, bAdjacencyMatrix);
     order = getMaxCardOrder(bAdjacencyMatrix);
-    Set[] cliques = getCliques(order, bAdjacencyMatrix);
-    Set[] separators = getSeparators(order, cliques);
+    Set<Integer>[] cliques = getCliques(order, bAdjacencyMatrix);
+    Set<Integer>[] separators = getSeparators(order, cliques);
     int[] parentCliques = getCliqueTree(order, cliques, separators);
     // report cliques
     int nNodes = bAdjacencyMatrix.length;
@@ -96,9 +96,9 @@ public class MarginCalculator implements Serializable, RevisionHandler {
         int iNode = order[i];
         if (cliques[iNode] != null) {
           System.out.print("Clique " + iNode + " (");
-          Iterator nodes = cliques[iNode].iterator();
+          Iterator<Integer> nodes = cliques[iNode].iterator();
           while (nodes.hasNext()) {
-            int iNode2 = (Integer) nodes.next();
+            int iNode2 = nodes.next();
             System.out.print(iNode2 + " " + bayesNet.getNodeName(iNode2));
             if (nodes.hasNext()) {
               System.out.print(",");
@@ -107,7 +107,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
           System.out.print(") S(");
           nodes = separators[iNode].iterator();
           while (nodes.hasNext()) {
-            int iNode2 = (Integer) nodes.next();
+            int iNode2 = nodes.next();
             System.out.print(iNode2 + " " + bayesNet.getNodeName(iNode2));
             if (nodes.hasNext()) {
               System.out.print(",");
@@ -144,8 +144,8 @@ public class MarginCalculator implements Serializable, RevisionHandler {
     }
   } // process
 
-  void initialize(JunctionTreeNode[] jtNodes, int[] order, Set[] cliques,
-    Set[] separators, int[] parentCliques) {
+  void initialize(JunctionTreeNode[] jtNodes, int[] order,
+    Set<Integer>[] cliques, Set<Integer>[] separators, int[] parentCliques) {
     int nNodes = order.length;
     for (int i = nNodes - 1; i >= 0; i--) {
       int iNode = order[i];
@@ -161,8 +161,9 @@ public class MarginCalculator implements Serializable, RevisionHandler {
     }
   } // initialize
 
-  JunctionTreeNode[] getJunctionTree(Set[] cliques, Set[] separators,
-    int[] parentCliques, int[] order, BayesNet bayesNet) {
+  JunctionTreeNode[] getJunctionTree(Set<Integer>[] cliques,
+    Set<Integer>[] separators, int[] parentCliques, int[] order,
+    BayesNet bayesNet) {
     int nNodes = order.length;
     JunctionTreeNode[] jtns = new JunctionTreeNode[nNodes];
     boolean[] bDone = new boolean[nNodes];
@@ -202,15 +203,15 @@ public class MarginCalculator implements Serializable, RevisionHandler {
     JunctionTreeNode m_childNode;
     BayesNet m_bayesNet;
 
-    JunctionTreeSeparator(Set separator, BayesNet bayesNet,
+    JunctionTreeSeparator(Set<Integer> separator, BayesNet bayesNet,
       JunctionTreeNode childNode, JunctionTreeNode parentNode) {
       // ////////////////////
       // initialize node set
       m_nNodes = new int[separator.size()];
       int iPos = 0;
       m_nCardinality = 1;
-      for (Iterator nodes = separator.iterator(); nodes.hasNext();) {
-        int iNode = (Integer) nodes.next();
+      for (Integer element : separator) {
+        int iNode = element;
         m_nNodes[iPos++] = iNode;
         m_nCardinality *= bayesNet.getCardinality(iNode);
       }
@@ -340,7 +341,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
       m_parentSeparator = parentSeparator;
     }
 
-    public Vector m_children;
+    public Vector<JunctionTreeNode> m_children;
 
     public void addChildClique(JunctionTreeNode child) {
       m_children.add(child);
@@ -356,8 +357,8 @@ public class MarginCalculator implements Serializable, RevisionHandler {
       for (int iNode = 0; iNode < m_nNodes.length; iNode++) {
         order[m_nNodes[iNode]] = iNode;
       }
-      for (Iterator child = m_children.iterator(); child.hasNext();) {
-        JunctionTreeNode childNode = (JunctionTreeNode) child.next();
+      for (JunctionTreeNode element : m_children) {
+        JunctionTreeNode childNode = element;
         JunctionTreeSeparator separator = childNode.m_parentSeparator;
         // Update the values
         for (int iPos = 0; iPos < m_nCardinality; iPos++) {
@@ -440,8 +441,8 @@ public class MarginCalculator implements Serializable, RevisionHandler {
         calcMarginalProbabilities();
       }
       if (recursively) {
-        for (Iterator child = m_children.iterator(); child.hasNext();) {
-          JunctionTreeNode childNode = (JunctionTreeNode) child.next();
+        for (Object element : m_children) {
+          JunctionTreeNode childNode = (JunctionTreeNode) element;
           childNode.initializeDown(true);
         }
       }
@@ -495,15 +496,16 @@ public class MarginCalculator implements Serializable, RevisionHandler {
         }
         buf.append('\n');
       }
-      for (Iterator child = m_children.iterator(); child.hasNext();) {
-        JunctionTreeNode childNode = (JunctionTreeNode) child.next();
+      for (Object element : m_children) {
+        JunctionTreeNode childNode = (JunctionTreeNode) element;
         buf.append("----------------\n");
         buf.append(childNode.toString());
       }
       return buf.toString();
     } // toString
 
-    void calculatePotentials(BayesNet bayesNet, Set clique, boolean[] bDone) {
+    void calculatePotentials(BayesNet bayesNet, Set<Integer> clique,
+      boolean[] bDone) {
       m_fi = new double[m_nCardinality];
 
       int[] values = new int[m_nNodes.length];
@@ -560,16 +562,16 @@ public class MarginCalculator implements Serializable, RevisionHandler {
       }
     } // calculatePotentials
 
-    JunctionTreeNode(Set clique, BayesNet bayesNet, boolean[] bDone) {
+    JunctionTreeNode(Set<Integer> clique, BayesNet bayesNet, boolean[] bDone) {
       m_bayesNet = bayesNet;
-      m_children = new Vector();
+      m_children = new Vector<JunctionTreeNode>();
       // ////////////////////
       // initialize node set
       m_nNodes = new int[clique.size()];
       int iPos = 0;
       m_nCardinality = 1;
-      for (Iterator nodes = clique.iterator(); nodes.hasNext();) {
-        int iNode = (Integer) nodes.next();
+      for (Integer integer : clique) {
+        int iNode = integer;
         m_nNodes[iPos++] = iNode;
         m_nCardinality *= bayesNet.getCardinality(iNode);
       }
@@ -677,8 +679,8 @@ public class MarginCalculator implements Serializable, RevisionHandler {
         }
         calcMarginalProbabilities();
       }
-      for (Iterator child = m_children.iterator(); child.hasNext();) {
-        JunctionTreeNode childNode = (JunctionTreeNode) child.next();
+      for (Object element : m_children) {
+        JunctionTreeNode childNode = (JunctionTreeNode) element;
         if (childNode != source) {
           childNode.initializeDown(true);
         }
@@ -713,7 +715,8 @@ public class MarginCalculator implements Serializable, RevisionHandler {
     return iCPTnew;
   } // getCPT
 
-  int[] getCliqueTree(int[] order, Set[] cliques, Set[] separators) {
+  int[] getCliqueTree(int[] order, Set<Integer>[] cliques,
+    Set<Integer>[] separators) {
     int nNodes = order.length;
     int[] parentCliques = new int[nNodes];
     // for (int i = nNodes - 1; i >= 0; i--) {
@@ -745,15 +748,16 @@ public class MarginCalculator implements Serializable, RevisionHandler {
    * @param cliques: set of cliques
    * @return set of separator sets
    */
-  Set[] getSeparators(int[] order, Set[] cliques) {
+  Set<Integer>[] getSeparators(int[] order, Set<Integer>[] cliques) {
     int nNodes = order.length;
-    Set[] separators = new HashSet[nNodes];
-    Set processedNodes = new HashSet();
+    @SuppressWarnings("unchecked")
+    Set<Integer>[] separators = new HashSet[nNodes];
+    Set<Integer> processedNodes = new HashSet<Integer>();
     // for (int i = nNodes - 1; i >= 0; i--) {
     for (int i = 0; i < nNodes; i++) {
       int iNode = order[i];
       if (cliques[iNode] != null) {
-        Set separator = new HashSet();
+        Set<Integer> separator = new HashSet<Integer>();
         separator.addAll(cliques[iNode]);
         separator.retainAll(processedNodes);
         separators[iNode] = separator;
@@ -770,9 +774,11 @@ public class MarginCalculator implements Serializable, RevisionHandler {
    * @param bAdjacencyMatrix: decomposable graph
    * @return set of cliques
    */
-  Set[] getCliques(int[] order, boolean[][] bAdjacencyMatrix) throws Exception {
+  Set<Integer>[] getCliques(int[] order, boolean[][] bAdjacencyMatrix)
+    throws Exception {
     int nNodes = bAdjacencyMatrix.length;
-    Set[] cliques = new HashSet[nNodes];
+    @SuppressWarnings("unchecked")
+    Set<Integer>[] cliques = new HashSet[nNodes];
     // int[] inverseOrder = new int[nNodes];
     // for (int iNode = 0; iNode < nNodes; iNode++) {
     // inverseOrder[order[iNode]] = iNode;
@@ -782,7 +788,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
       int iNode = order[i];
       if (iNode == 22) {
       }
-      Set clique = new HashSet();
+      Set<Integer> clique = new HashSet<Integer>();
       clique.add(iNode);
       for (int j = 0; j < i; j++) {
         int iNode2 = order[j];
@@ -813,10 +819,10 @@ public class MarginCalculator implements Serializable, RevisionHandler {
       int[] nNodeSet = new int[nNodes];
       for (int iNode = 0; iNode < nNodes; iNode++) {
         if (cliques[iNode] != null) {
-          Iterator it = cliques[iNode].iterator();
+          Iterator<Integer> it = cliques[iNode].iterator();
           int k = 0;
           while (it.hasNext()) {
-            nNodeSet[k++] = (Integer) it.next();
+            nNodeSet[k++] = it.next();
           }
           for (int i = 0; i < cliques[iNode].size(); i++) {
             for (int j = 0; j < cliques[iNode].size(); j++) {
