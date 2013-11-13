@@ -6,10 +6,10 @@
 PackageName=thresholdSelector
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-11-14
 
 # Title (required)
 Title=A metaclassifier that selecting a mid-point threshold on the probability output by a Classifier.
@@ -26,10 +26,13 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=A metaclassifier that selecting a mid-point threshold on the probability output by a Classifier. The midpoint threshold is set so that a given performance measure is optimized. Currently this is the F-measure. Performance is measured either on the training data, a hold-out set or using cross-validation. In addition, the probabilities returned by the base learner can have their range expanded so that the output probabilities will reside between 0 and 1 (this is useful if the scheme normally produces probabilities in a very narrow range).
+Description=A metaclassifier that selects a mid-point threshold on the probability output by a classifier. The midpoint threshold is set so that a given performance measure is optimized. Currently this is the F-measure by default. Performance is measured either on the training data, a hold-out set, or using cross-validation. In addition, the probabilities returned by the base learner can have their range expanded so that the output probabilities will reside between 0 and 1 (this is useful if the scheme normally produces probabilities in a very narrow range).
+
+# Changes in this release
+Changes=Cleaned up the code and adapted to get*Predictions() API change in WEKA.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/thresholdSelector1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/thresholdSelector1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/thresholdSelector
@@ -41,4 +44,4 @@ URL=http://weka.sourceforge.net/doc.packages/thresholdSelector
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.7.11)
