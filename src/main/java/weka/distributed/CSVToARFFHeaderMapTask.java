@@ -289,8 +289,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     public NumericStats(String attributeName) {
       super(attributeName);
 
-      m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = Double.MAX_VALUE;
-      m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = Double.MIN_VALUE;
+      m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = Double.NaN;
+      m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = Double.NaN;
     }
 
     /**
@@ -362,7 +362,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       double stdDev = 0;
       if (count > 0) {
         mean = sum / count;
-        stdDev = Double.POSITIVE_INFINITY;
+        // stdDev = Double.POSITIVE_INFINITY;
         if (count > 1) {
           stdDev = sumSq - (sum * sum) / count;
           stdDev /= (count - 1);
@@ -513,6 +513,15 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       return m_numMissing;
     }
 
+    /**
+     * Set the number of missing values for this attribute
+     * 
+     * @param missing the number of missing values
+     */
+    public void setNumMissing(double missing) {
+      m_numMissing = missing;
+    }
+
     @Override
     public Attribute makeAttribute() {
       ArrayList<String> vals = new ArrayList<String>();
@@ -594,6 +603,12 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
   /** A map of attribute names to summary statistics */
   protected Map<String, Stats> m_summaryStats = new HashMap<String, Stats>();
+
+  /**
+   * Whether to treat zeros as missing values when computing summary stats for
+   * numeric attributes
+   */
+  protected boolean m_treatZeroAsMissing;
 
   @Override
   public Enumeration<Option> listOptions() {
@@ -703,6 +718,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       setEnclosureCharacters(tmpStr);
     }
 
+    setTreatZerosAsMissing(Utils.getFlag("treat-zeros-as-missing", options));
+
     setComputeSummaryStats(!Utils.getFlag("no-summary-stats", options)); //$NON-NLS-1$
 
     while (true) {
@@ -758,6 +775,10 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       result.add("-no-summary-stats");
     }
 
+    if (getTreatZerosAsMissing()) {
+      result.add("-treat-zeros-as-missing");
+    }
+
     for (String spec : m_nominalLabelSpecs) {
       result.add("-L");
       result.add(spec);
@@ -769,6 +790,28 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     }
 
     return result.toArray(new String[result.size()]);
+  }
+
+  /**
+   * Set whether to treat zeros as missing values for numeric attributes when
+   * computing summary statistics.
+   * 
+   * @param t true if zeros are to be treated as missing values for the purposes
+   *          of computing summary stats.
+   */
+  public void setTreatZerosAsMissing(boolean t) {
+    m_treatZeroAsMissing = t;
+  }
+
+  /**
+   * Get whether to treat zeros as missing values for numeric attributes when
+   * computing summary statistics.
+   * 
+   * @return true if zeros are to be treated as missing values for the purposes
+   *         of computing summary stats.
+   */
+  public boolean getTreatZerosAsMissing() {
+    return m_treatZeroAsMissing;
   }
 
   /**
@@ -1121,8 +1164,10 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       m_Enclosures.charAt(0), '\\');
 
     m_attributeNames = attNames;
-    processRanges(attNames.size(), TYPE.UNDETERMINED);
-    processNominalSpecs(attNames.size());
+    if (attNames != null) {
+      processRanges(attNames.size(), TYPE.UNDETERMINED);
+      processNominalSpecs(attNames.size());
+    }
   }
 
   /**
@@ -1206,7 +1251,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-                value, null, false);
+                value, null, false, m_treatZeroAsMissing);
             }
           } catch (NumberFormatException ex) {
 
@@ -1227,7 +1272,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
               if (m_computeSummaryStats) {
                 updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  toAdd, true);
+                  toAdd, true, m_treatZeroAsMissing);
               }
             } else {
               m_attributeTypes[i] = TYPE.STRING;
@@ -1243,7 +1288,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
           }
           if (m_computeSummaryStats) {
             updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-              d.getTime(), null, false);
+              d.getTime(), null, false, m_treatZeroAsMissing);
           }
 
         } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
@@ -1256,13 +1301,13 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                toUpdate, true);
+                toUpdate, true, m_treatZeroAsMissing);
             }
           } else {
             m_nominalVals.get(i).add(fields[i]);
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                fields[i], true);
+                fields[i], true, m_treatZeroAsMissing);
             }
           }
         }
@@ -1271,7 +1316,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
         if (m_computeSummaryStats) {
           updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-            Utils.missingValue(), null, m_attributeTypes[i] == TYPE.NOMINAL);
+            Utils.missingValue(), null, m_attributeTypes[i] == TYPE.NOMINAL,
+            m_treatZeroAsMissing);
         }
       }
     }
@@ -1285,9 +1331,12 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @param value the value to update with (if the attribute is numeric)
    * @param nominalLabel holds the label for the attribute (if it is nominal)
    * @param isNominal true if the attribute is nominal
+   * @param treatZeroAsMissing treats zero as missing value for numeric
+   *          attributes
    */
   public static void updateSummaryStats(Map<String, Stats> summaryStats,
-    String attName, double value, String nominalLabel, boolean isNominal) {
+    String attName, double value, String nominalLabel, boolean isNominal,
+    boolean treatZeroAsMissing) {
     Stats s = summaryStats.get(attName);
 
     if (!isNominal) {
@@ -1298,7 +1347,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       }
 
       NumericStats ns = (NumericStats) s;
-      if (Utils.isMissingValue(value)) {
+      if (Utils.isMissingValue(value) || (treatZeroAsMissing && value == 0)) {
         ns.m_stats[ArffSummaryNumericMetric.MISSING.ordinal()]++;
       } else {
         ns.m_stats[ArffSummaryNumericMetric.COUNT.ordinal()]++;
