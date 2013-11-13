@@ -32,7 +32,7 @@ import weka.core.matrix.Matrix;
  * 
  */
 public class MultivariateGaussianEstimator implements MultivariateEstimator,
-    Cloneable {
+  Cloneable {
   // Distribution parameters
   protected double[] mean;
   protected double[][] covariance;
@@ -46,8 +46,9 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     clone.mean = this.mean;
     clone.covariance = this.covariance;
     clone.lnconstant = this.lnconstant;
-    if (this.chol != null)
+    if (this.chol != null) {
       clone.chol = new CholeskyDecomposition((Matrix) this.chol.getL().clone());
+    }
     return clone;
   }
 
@@ -135,12 +136,12 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
 
     if (weights != null) {
       double sum = 0;
-      for (int i = 0; i < weights.length; i++) {
-        if (Double.isNaN(weights[i]) || Double.isInfinite(weights[i])) {
+      for (double weight : weights) {
+        if (Double.isNaN(weight) || Double.isInfinite(weight)) {
           throw new IllegalArgumentException(
-              "Invalid numbers in the weight vector");
+            "Invalid numbers in the weight vector");
         }
-        sum += weights[i];
+        sum += weight;
       }
 
       if (Math.abs(sum - 1.0) > 1e-10) {
@@ -233,12 +234,8 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     return logDeterminant;
   }
 
-  private double[] mean(double[][] matrix, double[] weights) {
-    return weightedMean(matrix, weights, 0);
-  }
-
   private double[] weightedMean(double[][] matrix, double[] weights,
-      int columnSum) {
+    int columnSum) {
     int rows = matrix.length;
     if (rows == 0) {
       return new double[0];
@@ -296,10 +293,10 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
    * @return The covariance matrix.
    */
   private double[][] weightedCovariance(double[][] matrix, double[] weights,
-      double[] means) {
+    double[] means) {
     double sw = 1.0;
-    for (int i = 0; i < weights.length; i++) {
-      sw -= weights[i] * weights[i];
+    for (double weight : weights) {
+      sw -= weight * weight;
     }
 
     return weightedScatter(matrix, weights, means, sw, 0);
@@ -326,7 +323,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
    * @return The covariance matrix.
    */
   private double[][] weightedScatter(double[][] matrix, double[] weights,
-      double[] means, double divisor, int dimension) {
+    double[] means, double divisor, int dimension) {
     int rows = matrix.length;
     if (rows == 0) {
       return new double[0][0];
@@ -338,7 +335,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     if (dimension == 0) {
       if (means.length != cols) {
         throw new IllegalArgumentException(
-            "Length of the mean vector should equal the number of columns");
+          "Length of the mean vector should equal the number of columns");
       }
 
       cov = new double[cols][cols];
@@ -347,7 +344,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
           double s = 0.0;
           for (int k = 0; k < rows; k++) {
             s += weights[k] * (matrix[k][j] - means[j])
-                * (matrix[k][i] - means[i]);
+              * (matrix[k][i] - means[i]);
           }
           s /= divisor;
           cov[i][j] = s;
@@ -357,7 +354,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     } else if (dimension == 1) {
       if (means.length != rows) {
         throw new IllegalArgumentException(
-            "Length of the mean vector should equal the number of rows");
+          "Length of the mean vector should equal the number of rows");
       }
 
       cov = new double[rows][rows];
@@ -366,7 +363,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
           double s = 0.0;
           for (int k = 0; k < cols; k++) {
             s += weights[k] * (matrix[j][k] - means[j])
-                * (matrix[i][k] - means[i]);
+              * (matrix[i][k] - means[i]);
           }
           s /= divisor;
           cov[i][j] = s;
@@ -462,7 +459,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
    * @return The covariance matrix.
    */
   public static double[][] scatter(double[][] matrix, double[] means,
-      double divisor, int dimension) {
+    double divisor, int dimension) {
     int rows = matrix.length;
     if (rows == 0) {
       return new double[0][0];
@@ -474,7 +471,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     if (dimension == 0) {
       if (means.length != cols) {
         throw new IllegalArgumentException(
-            "Length of the mean vector should equal the number of columns");
+          "Length of the mean vector should equal the number of columns");
       }
 
       cov = new double[cols][cols];
@@ -492,7 +489,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     } else if (dimension == 1) {
       if (means.length != rows) {
         throw new IllegalArgumentException(
-            "Length of the mean vector should equal the number of rows");
+          "Length of the mean vector should equal the number of rows");
       }
 
       cov = new double[rows][rows];

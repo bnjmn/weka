@@ -20,9 +20,10 @@
 
 package weka.classifiers.evaluation;
 
+import java.util.ArrayList;
+
 import weka.classifiers.CostMatrix;
 import weka.core.Aggregateable;
-import weka.core.FastVector;
 import weka.core.Instances;
 
 /**
@@ -145,13 +146,13 @@ public class AggregateableEvaluation extends Evaluation implements
     m_TotalSizeOfRegions += evaluation.m_TotalSizeOfRegions;
     m_TotalCoverage += evaluation.m_TotalCoverage;
 
-    FastVector predsToAdd = evaluation.m_Predictions;
+    ArrayList<Prediction> predsToAdd = evaluation.m_Predictions;
     if (predsToAdd != null) {
       if (m_Predictions == null) {
-        m_Predictions = new FastVector();
+        m_Predictions = new ArrayList<Prediction>();
       }
       for (int i = 0; i < predsToAdd.size(); i++) {
-        m_Predictions.addElement(predsToAdd.elementAt(i));
+        m_Predictions.add(predsToAdd.get(i));
       }
     }
 

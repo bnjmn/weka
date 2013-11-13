@@ -59,7 +59,6 @@ import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.classifiers.xml.XMLClassifier;
 import weka.core.BatchPredictor;
 import weka.core.Drawable;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -366,7 +365,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   protected double m_MaxTarget;
 
   /** The list of predictions that have been generated (for computing AUC). */
-  protected FastVector m_Predictions;
+  protected ArrayList<Prediction> m_Predictions;
 
   /**
    * enables/disables the use of priors, e.g., if no training set is present in
@@ -387,11 +386,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   protected List<String> m_metricsToDisplay = new ArrayList<String>();
 
   public static final String[] BUILT_IN_EVAL_METRICS = { "Correct",
-      "Incorrect", "Kappa", "Total cost", "Average cost", "KB relative",
-      "KB information", "Correlation", "Complexity 0", "Complexity scheme",
-      "Complexity improvement", "MAE", "RMSE", "RAE", "RRSE", "Coverage",
-      "Region size", "TP rate", "FP rate", "Precision", "Recall", "F-measure",
-      "MCC", "ROC area", "PRC area" };
+    "Incorrect", "Kappa", "Total cost", "Average cost", "KB relative",
+    "KB information", "Correlation", "Complexity 0", "Complexity scheme",
+    "Complexity improvement", "MAE", "RMSE", "RAE", "RRSE", "Coverage",
+    "Region size", "TP rate", "FP rate", "Precision", "Recall", "F-measure",
+    "MCC", "ROC area", "PRC area" };
 
   /**
    * Utility method to get a list of the names of all built-in and plugin
@@ -406,7 +405,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       allEvals.add(s);
     }
     final List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric
-        .getPluginMetrics();
+      .getPluginMetrics();
 
     if (pluginMetrics != null) {
       for (AbstractEvaluationMetric m : pluginMetrics) {
@@ -520,8 +519,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public void setDiscardPredictions(boolean value) {
     m_DiscardPredictions = value;
-    if (m_DiscardPredictions)
+    if (m_DiscardPredictions) {
       m_Predictions = null;
+    }
   }
 
   /**
@@ -597,7 +597,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     if (m_pluginMetrics != null) {
       for (AbstractEvaluationMetric m : m_pluginMetrics) {
         if (m.getMetricName().equals(name)
-            || m.getClass().getName().equals(name)) {
+          || m.getClass().getName().equals(name)) {
           match = m;
           break;
         }
@@ -712,7 +712,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     for (int i = 0; i < m_ConfusionMatrix.length; i++) {
       newMatrix[i] = new double[m_ConfusionMatrix[i].length];
       System.arraycopy(m_ConfusionMatrix[i], 0, newMatrix[i], 0,
-          m_ConfusionMatrix[i].length);
+        m_ConfusionMatrix[i].length);
     }
     return newMatrix;
   }
@@ -735,8 +735,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    *           the class is not defined
    */
   public void crossValidateModel(Classifier classifier, Instances data,
-      int numFolds, Random random, Object... forPredictionsPrinting)
-      throws Exception {
+    int numFolds, Random random, Object... forPredictionsPrinting)
+    throws Exception {
 
     // Make a copy of the data we can reorder
     data = new Instances(data);
@@ -766,8 +766,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     }
     m_NumFolds = numFolds;
 
-    if (classificationOutput != null)
+    if (classificationOutput != null) {
       classificationOutput.printFooter();
+    }
   }
 
   /**
@@ -784,10 +785,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    *           the class is not defined
    */
   public void crossValidateModel(String classifierString, Instances data,
-      int numFolds, String[] options, Random random) throws Exception {
+    int numFolds, String[] options, Random random) throws Exception {
 
     crossValidateModel(AbstractClassifier.forName(classifierString, options),
-        data, numFolds, random);
+      data, numFolds, random);
   }
 
   /**
@@ -918,7 +919,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @return a string describing the results
    */
   public static String evaluateModel(String classifierString, String[] options)
-      throws Exception {
+    throws Exception {
 
     Classifier classifier;
 
@@ -929,7 +930,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       AbstractClassifier.forName(classifierString, null);
     } catch (Exception e) {
       throw new Exception("Can't find class with name " + classifierString
-          + '.');
+        + '.');
     }
     return evaluateModel(classifier, options);
   }
@@ -946,7 +947,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     try {
       if (args.length == 0) {
         throw new Exception("The first argument must be the class name"
-            + " of a classifier");
+          + " of a classifier");
       }
       String classifier = args[0];
       args[0] = "";
@@ -1075,7 +1076,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @return a string describing the results
    */
   public static String evaluateModel(Classifier classifier, String[] options)
-      throws Exception {
+    throws Exception {
 
     Instances train = null, tempTrain, test = null, template = null;
     int seed = 1, folds = 10, classIndex = -1;
@@ -1112,10 +1113,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
       // global info requested as well?
       boolean globalInfo = Utils.getFlag("synopsis", options)
-          || Utils.getFlag("info", options);
+        || Utils.getFlag("info", options);
 
       throw new Exception("\nHelp requested."
-          + makeOptionString(classifier, globalInfo));
+        + makeOptionString(classifier, globalInfo));
     }
 
     String metricsToDisable = Utils.getOption("disable", options);
@@ -1130,13 +1131,15 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     try {
       // do we get the input from XML instead of normal parameters?
       xml = Utils.getOption("xml", options);
-      if (!xml.equals(""))
+      if (!xml.equals("")) {
         options = new XMLOptions(xml).toArray();
+      }
 
       // is the input model only the XML-Options, i.e. w/o built model?
       optionsTmp = new String[options.length];
-      for (int i = 0; i < options.length; i++)
+      for (int i = 0; i < options.length; i++) {
         optionsTmp[i] = options[i];
+      }
 
       String tmpO = Utils.getOption('l', optionsTmp);
       // if (Utils.getOption('l', optionsTmp).toLowerCase().endsWith(".xml")) {
@@ -1156,14 +1159,14 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           // load options from serialized data ('-l' is automatically erased!)
           XMLClassifier xmlserial = new XMLClassifier();
           OptionHandler cl = (OptionHandler) xmlserial.read(Utils.getOption(
-              'l', options));
+            'l', options));
 
           // merge options
           optionsTmp = new String[options.length + cl.getOptions().length];
           System.arraycopy(cl.getOptions(), 0, optionsTmp, 0,
-              cl.getOptions().length);
+            cl.getOptions().length);
           System.arraycopy(options, 0, optionsTmp, cl.getOptions().length,
-              options.length);
+            options.length);
           options = optionsTmp;
         }
       }
@@ -1172,12 +1175,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       // Get basic options (options the same for all schemes)
       classIndexString = Utils.getOption('c', options);
       if (classIndexString.length() != 0) {
-        if (classIndexString.equals("first"))
+        if (classIndexString.equals("first")) {
           classIndex = 1;
-        else if (classIndexString.equals("last"))
+        } else if (classIndexString.equals("last")) {
           classIndex = -1;
-        else
+        } else {
           classIndex = Integer.parseInt(classIndexString);
+        }
       }
       trainFileName = Utils.getOption('t', options);
       objectInputFileName = Utils.getOption('l', options);
@@ -1194,16 +1198,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       if (trainFileName.length() == 0) {
         if (objectInputFileName.length() == 0) {
           throw new Exception(
-              "No training file and no object input file given.");
+            "No training file and no object input file given.");
         }
         if (testFileName.length() == 0) {
           throw new Exception("No training file and no test file given.");
         }
       } else if ((objectInputFileName.length() != 0)
-          && ((!(classifier instanceof UpdateableClassifier)) || (testFileName
-              .length() == 0))) {
+        && ((!(classifier instanceof UpdateableClassifier)) || (testFileName
+          .length() == 0))) {
         throw new Exception("Classifier not incremental, or no "
-            + "test file provided: can't " + "use both train and model file.");
+          + "test file provided: can't " + "use both train and model file.");
       }
       try {
         if (trainFileName.length() != 0) {
@@ -1243,38 +1247,43 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         if (classIndex != -1) {
           test.setClassIndex(classIndex - 1);
         } else {
-          if ((test.classIndex() == -1) || (classIndexString.length() != 0))
+          if ((test.classIndex() == -1) || (classIndexString.length() != 0)) {
             test.setClassIndex(test.numAttributes() - 1);
+          }
         }
         actualClassIndex = test.classIndex();
       } else {
         // percentage split
         splitPercentageString = Utils.getOption("split-percentage", options);
         if (splitPercentageString.length() != 0) {
-          if (foldsString.length() != 0)
+          if (foldsString.length() != 0) {
             throw new Exception(
-                "Percentage split cannot be used in conjunction with "
-                    + "cross-validation ('-x').");
+              "Percentage split cannot be used in conjunction with "
+                + "cross-validation ('-x').");
+          }
           splitPercentage = Double.parseDouble(splitPercentageString);
-          if ((splitPercentage <= 0) || (splitPercentage >= 100))
+          if ((splitPercentage <= 0) || (splitPercentage >= 100)) {
             throw new Exception("Percentage split value needs be >0 and <100.");
+          }
         } else {
           splitPercentage = -1;
         }
         preserveOrder = Utils.getFlag("preserve-order", options);
         if (preserveOrder) {
-          if (splitPercentage == -1)
+          if (splitPercentage == -1) {
             throw new Exception(
-                "Percentage split ('-percentage-split') is missing.");
+              "Percentage split ('-percentage-split') is missing.");
+          }
         }
         // create new train/test sources
         if (splitPercentage > 0) {
           testSetPresent = true;
           Instances tmpInst = trainSource.getDataSet(actualClassIndex);
-          if (!preserveOrder)
+          if (!preserveOrder) {
             tmpInst.randomize(new Random(seed));
+          }
           int trainSize = (int) Math.round(tmpInst.numInstances()
-              * splitPercentage / 100);
+            * splitPercentage / 100);
           int testSize = tmpInst.numInstances() - trainSize;
           Instances trainInst = new Instances(tmpInst, 0, trainSize);
           Instances testInst = new Instances(tmpInst, trainSize, testSize);
@@ -1284,8 +1293,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           if (classIndex != -1) {
             test.setClassIndex(classIndex - 1);
           } else {
-            if ((test.classIndex() == -1) || (classIndexString.length() != 0))
+            if ((test.classIndex() == -1) || (classIndexString.length() != 0)) {
               test.setClassIndex(test.numAttributes() - 1);
+            }
           }
           actualClassIndex = test.classIndex();
         }
@@ -1295,15 +1305,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         if (classIndex != -1) {
           train.setClassIndex(classIndex - 1);
         } else {
-          if ((train.classIndex() == -1) || (classIndexString.length() != 0))
+          if ((train.classIndex() == -1) || (classIndexString.length() != 0)) {
             train.setClassIndex(train.numAttributes() - 1);
+          }
         }
         actualClassIndex = train.classIndex();
         if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
           if ((testSetPresent) && !test.equalHeaders(train)) {
             throw new IllegalArgumentException(
-                "Train and test file not compatible!\n"
-                    + test.equalHeadersMsg(train));
+              "Train and test file not compatible!\n"
+                + test.equalHeadersMsg(train));
           }
         }
       }
@@ -1311,7 +1322,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         throw new Exception("No actual dataset provided to use as template");
       }
       costMatrix = handleCostOption(Utils.getOption('m', options),
-          template.numClasses());
+        template.numClasses());
 
       classStatistics = Utils.getFlag('i', options);
       noOutput = Utils.getFlag('o', options);
@@ -1330,10 +1341,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       if (classifications.length() > 0) {
         noOutput = true;
         classificationOutput = AbstractOutput.fromCommandline(classifications);
-        if (classificationOutput == null)
+        if (classificationOutput == null) {
           throw new Exception(
-              "Failed to instantiate class for classification output: "
-                  + classifications);
+            "Failed to instantiate class for classification output: "
+              + classifications);
+        }
         classificationOutput.setHeader(template);
       }
       // backwards compatible with old "-p range" and "-distribution" options
@@ -1341,25 +1353,29 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         noOutput = true;
         classificationOutput = new PlainText();
         classificationOutput.setHeader(template);
-        if (!classificationsOld.equals("0"))
+        if (!classificationsOld.equals("0")) {
           classificationOutput.setAttributes(classificationsOld);
+        }
         classificationOutput.setOutputDistribution(Utils.getFlag(
-            "distribution", options));
+          "distribution", options));
       }
       // -distribution flag needs -p option
       else {
-        if (Utils.getFlag("distribution", options))
+        if (Utils.getFlag("distribution", options)) {
           throw new Exception("Cannot print distribution without '-p' option!");
+        }
       }
       discardPredictions = Utils.getFlag("no-predictions", options);
-      if (discardPredictions && (classificationOutput != null))
+      if (discardPredictions && (classificationOutput != null)) {
         throw new Exception(
-            "Cannot discard predictions ('-no-predictions') and output predictions at the same time ('-classifications/-p')!");
+          "Cannot discard predictions ('-no-predictions') and output predictions at the same time ('-classifications/-p')!");
+      }
 
       // if no training file given, we don't have any priors
-      if ((!trainSetPresent) && (printComplexityStatistics))
+      if ((!trainSetPresent) && (printComplexityStatistics)) {
         throw new Exception(
-            "Cannot print complexity statistics ('-k') without training file ('-t')!");
+          "Cannot print complexity statistics ('-k') without training file ('-t')!");
+      }
 
       // If a model file is given, we can't process
       // scheme-specific options
@@ -1369,15 +1385,15 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
         // Set options for classifier
         if (classifier instanceof OptionHandler) {
-          for (int i = 0; i < options.length; i++) {
-            if (options[i].length() != 0) {
+          for (String option : options) {
+            if (option.length() != 0) {
               if (schemeOptionsText == null) {
                 schemeOptionsText = new StringBuffer();
               }
-              if (options[i].indexOf(' ') != -1) {
-                schemeOptionsText.append('"' + options[i] + "\" ");
+              if (option.indexOf(' ') != -1) {
+                schemeOptionsText.append('"' + option + "\" ");
               } else {
-                schemeOptionsText.append(options[i] + " ");
+                schemeOptionsText.append(option + " ");
               }
             }
           }
@@ -1388,7 +1404,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       Utils.checkForRemainingOptions(options);
     } catch (Exception e) {
       throw new Exception("\nWeka exception: " + e.getMessage()
-          + makeOptionString(classifier, false));
+        + makeOptionString(classifier, false));
     }
 
     if (objectInputFileName.length() != 0) {
@@ -1406,7 +1422,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           // test for compatibility with template
           if (!template.equalHeaders(savedStructure)) {
             throw new Exception("training and test set are not compatible\n"
-                + template.equalHeadersMsg(savedStructure));
+              + template.equalHeadersMsg(savedStructure));
           }
         }
         objectInputStream.close();
@@ -1420,17 +1436,17 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     // Setup up evaluation objects
     Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0),
-        costMatrix);
+      costMatrix);
     Evaluation testingEvaluation = new Evaluation(new Instances(template, 0),
-        costMatrix);
+      costMatrix);
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
       Instances mappedClassifierHeader = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-          .getModelHeader(new Instances(template, 0));
+        .getModelHeader(new Instances(template, 0));
 
       trainingEvaluation = new Evaluation(new Instances(mappedClassifierHeader,
-          0), costMatrix);
+        0), costMatrix);
       testingEvaluation = new Evaluation(new Instances(mappedClassifierHeader,
-          0), costMatrix);
+        0), costMatrix);
     }
     trainingEvaluation.setDiscardPredictions(discardPredictions);
     trainingEvaluation.dontDisplayMetrics(disableList);
@@ -1438,16 +1454,17 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     testingEvaluation.dontDisplayMetrics(disableList);
 
     // disable use of priors if no training file given
-    if (!trainSetPresent)
+    if (!trainSetPresent) {
       testingEvaluation.useNoPriors();
+    }
 
     // backup of fully setup classifier for cross-validation
     classifierBackup = AbstractClassifier.makeCopy(classifier);
 
     // Build the classifier if no object file provided
     if ((classifier instanceof UpdateableClassifier)
-        && (testSetPresent || noCrossValidation) && (costMatrix == null)
-        && (trainSetPresent) && !forceBatchTraining) {
+      && (testSetPresent || noCrossValidation) && (costMatrix == null)
+      && (trainSetPresent) && !forceBatchTraining) {
       // Build classifier incrementally
       trainingEvaluation.setPriors(train);
       testingEvaluation.setPriors(train);
@@ -1468,16 +1485,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       tempTrain = trainSource.getDataSet(actualClassIndex);
 
       if (classifier instanceof weka.classifiers.misc.InputMappedClassifier
-          && !trainingEvaluation.getHeader().equalHeaders(tempTrain)) {
+        && !trainingEvaluation.getHeader().equalHeaders(tempTrain)) {
         // we need to make a new dataset that maps the training instances to
         // the structure expected by the mapped classifier - this is only
         // to ensure that the structure and priors computed by the *testing*
         // evaluation object is correct with respect to the mapped classifier
         Instances mappedClassifierDataset = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-            .getModelHeader(new Instances(template, 0));
+          .getModelHeader(new Instances(template, 0));
         for (int zz = 0; zz < tempTrain.numInstances(); zz++) {
           Instance mapped = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-              .constructMappedInstance(tempTrain.instance(zz));
+            .constructMappedInstance(tempTrain.instance(zz));
           mappedClassifierDataset.add(mapped);
         }
         tempTrain = mappedClassifierDataset;
@@ -1502,7 +1519,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       OutputStream os = new FileOutputStream(objectOutputFileName);
       // binary
       if (!(objectOutputFileName.endsWith(".xml") || (objectOutputFileName
-          .endsWith(".koml") && KOML.isPresent()))) {
+        .endsWith(".koml") && KOML.isPresent()))) {
         if (objectOutputFileName.endsWith(".gz")) {
           os = new GZIPOutputStream(os);
         }
@@ -1568,15 +1585,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       } else {
         predsBuff.append("\n=== Predictions on test data ===\n\n");
       }
-      if (source != null)
+      if (source != null) {
         classificationOutput.print(classifier, source);
+      }
     }
 
     // Compute error estimate from training data
     if ((trainStatistics) && (trainSetPresent)) {
 
       if ((classifier instanceof UpdateableClassifier) && (testSetPresent)
-          && (costMatrix == null)) {
+        && (costMatrix == null)) {
 
         // Classifier was trained incrementally, so we have to
         // reset the source.
@@ -1594,7 +1612,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       } else {
         testTimeStart = System.currentTimeMillis();
         trainingEvaluation.evaluateModel(classifier,
-            trainSource.getDataSet(actualClassIndex));
+          trainSource.getDataSet(actualClassIndex));
         testTimeElapsed = System.currentTimeMillis() - testTimeStart;
       }
 
@@ -1604,30 +1622,33 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       } else {
         if (classificationOutput == null) {
           text.append("\nTime taken to build model: "
-              + Utils.doubleToString(trainTimeElapsed / 1000.0, 2) + " seconds");
+            + Utils.doubleToString(trainTimeElapsed / 1000.0, 2) + " seconds");
 
-          if (splitPercentage > 0)
+          if (splitPercentage > 0) {
             text.append("\nTime taken to test model on training split: ");
-          else
+          } else {
             text.append("\nTime taken to test model on training data: ");
+          }
           text.append(Utils.doubleToString(testTimeElapsed / 1000.0, 2)
-              + " seconds");
+            + " seconds");
 
-          if (splitPercentage > 0)
+          if (splitPercentage > 0) {
             text.append(trainingEvaluation.toSummaryString(
-                "\n\n=== Error on training" + " split ===\n",
-                printComplexityStatistics));
-          else
+              "\n\n=== Error on training" + " split ===\n",
+              printComplexityStatistics));
+          } else {
             text.append(trainingEvaluation.toSummaryString(
-                "\n\n=== Error on training" + " data ===\n",
-                printComplexityStatistics));
+              "\n\n=== Error on training" + " data ===\n",
+              printComplexityStatistics));
+          }
 
           if (template.classAttribute().isNominal()) {
             if (classStatistics) {
               text.append("\n\n" + trainingEvaluation.toClassDetailsString());
             }
-            if (!noCrossValidation)
+            if (!noCrossValidation) {
               text.append("\n\n" + trainingEvaluation.toMatrixString());
+            }
           }
         }
       }
@@ -1640,28 +1661,28 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
       if (classifier instanceof BatchPredictor) {
         testingEvaluation.evaluateModel(classifier,
-            testSource.getDataSet(test.classIndex()));
+          testSource.getDataSet(test.classIndex()));
       } else {
         test = testSource.getStructure(test.classIndex());
         Instance testInst;
         while (testSource.hasMoreElements(test)) {
           testInst = testSource.nextElement(test);
           testingEvaluation.evaluateModelOnceAndRecordPrediction(classifier,
-              testInst);
+            testInst);
         }
       }
 
       if (splitPercentage > 0) {
         if (classificationOutput == null) {
           text.append("\n\n"
-              + testingEvaluation.toSummaryString(
-                  "=== Error on test split ===\n", printComplexityStatistics));
+            + testingEvaluation.toSummaryString(
+              "=== Error on test split ===\n", printComplexityStatistics));
         }
       } else {
         if (classificationOutput == null) {
           text.append("\n\n"
-              + testingEvaluation.toSummaryString(
-                  "=== Error on test data ===\n", printComplexityStatistics));
+            + testingEvaluation.toSummaryString("=== Error on test data ===\n",
+              printComplexityStatistics));
         }
       }
 
@@ -1673,33 +1694,34 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         classifier = AbstractClassifier.makeCopy(classifierBackup);
         if (classificationOutput == null) {
           testingEvaluation.crossValidateModel(classifier,
-              trainSource.getDataSet(actualClassIndex), folds, random);
+            trainSource.getDataSet(actualClassIndex), folds, random);
           if (template.classAttribute().isNumeric()) {
             text.append("\n\n\n"
-                + testingEvaluation.toSummaryString(
-                    "=== Cross-validation ===\n", printComplexityStatistics));
+              + testingEvaluation.toSummaryString("=== Cross-validation ===\n",
+                printComplexityStatistics));
           } else {
             text.append("\n\n\n"
-                + testingEvaluation.toSummaryString("=== Stratified "
-                    + "cross-validation ===\n", printComplexityStatistics));
+              + testingEvaluation.toSummaryString("=== Stratified "
+                + "cross-validation ===\n", printComplexityStatistics));
           }
         } else {
           predsBuff = new StringBuffer();
           classificationOutput.setBuffer(predsBuff);
           predsBuff.append("\n=== Predictions under cross-validation ===\n\n");
           testingEvaluation.crossValidateModel(classifier,
-              trainSource.getDataSet(actualClassIndex), folds, random,
-              classificationOutput);
+            trainSource.getDataSet(actualClassIndex), folds, random,
+            classificationOutput);
         }
       }
     }
     if (template.classAttribute().isNominal()) {
       if (classStatistics && !noCrossValidation
-          && (classificationOutput == null)) {
+        && (classificationOutput == null)) {
         text.append("\n\n" + testingEvaluation.toClassDetailsString());
       }
-      if (!noCrossValidation && (classificationOutput == null))
+      if (!noCrossValidation && (classificationOutput == null)) {
         text.append("\n\n" + testingEvaluation.toMatrixString());
+      }
 
     }
 
@@ -1710,14 +1732,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     if ((thresholdFile.length() != 0) && template.classAttribute().isNominal()) {
       int labelIndex = 0;
-      if (thresholdLabel.length() != 0)
+      if (thresholdLabel.length() != 0) {
         labelIndex = template.classAttribute().indexOfValue(thresholdLabel);
-      if (labelIndex == -1)
+      }
+      if (labelIndex == -1) {
         throw new IllegalArgumentException("Class label '" + thresholdLabel
-            + "' is unknown!");
+          + "' is unknown!");
+      }
       ThresholdCurve tc = new ThresholdCurve();
       Instances result = tc.getCurve(testingEvaluation.predictions(),
-          labelIndex);
+        labelIndex);
       DataSink.write(thresholdFile, result);
     }
 
@@ -1734,16 +1758,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if an error occurs.
    */
   protected static CostMatrix handleCostOption(String costFileName,
-      int numClasses) throws Exception {
+    int numClasses) throws Exception {
 
     if ((costFileName != null) && (costFileName.length() != 0)) {
       System.out
-          .println("NOTE: The behaviour of the -m option has changed between WEKA 3.0"
-              + " and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
-              + " only. For cost-sensitive *prediction*, use one of the"
-              + " cost-sensitive metaschemes such as"
-              + " weka.classifiers.meta.CostSensitiveClassifier or"
-              + " weka.classifiers.meta.MetaCost");
+        .println("NOTE: The behaviour of the -m option has changed between WEKA 3.0"
+          + " and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
+          + " only. For cost-sensitive *prediction*, use one of the"
+          + " cost-sensitive metaschemes such as"
+          + " weka.classifiers.meta.CostSensitiveClassifier or"
+          + " weka.classifiers.meta.MetaCost");
 
       Reader costReader = null;
       try {
@@ -1796,7 +1820,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if model could not be evaluated successfully
    */
   public double[] evaluateModel(Classifier classifier, Instances data,
-      Object... forPredictionsPrinting) throws Exception {
+    Object... forPredictionsPrinting) throws Exception {
     // for predictions printing
     AbstractOutput classificationOutput = null;
 
@@ -1813,24 +1837,26 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         dataPred.instance(i).setClassMissing();
       }
       double[][] preds = ((BatchPredictor) classifier)
-          .distributionsForInstances(dataPred);
+        .distributionsForInstances(dataPred);
       for (int i = 0; i < data.numInstances(); i++) {
         double[] p = preds[i];
 
         predictions[i] = evaluationForSingleInstance(p, data.instance(i), true);
 
-        if (classificationOutput != null)
+        if (classificationOutput != null) {
           classificationOutput.printClassification(p, data.instance(i), i);
+        }
       }
     } else {
       // Need to be able to collect predictions if appropriate (for AUC)
 
       for (int i = 0; i < data.numInstances(); i++) {
         predictions[i] = evaluateModelOnceAndRecordPrediction(classifier,
-            data.instance(i));
-        if (classificationOutput != null)
+          data.instance(i));
+        if (classificationOutput != null) {
           classificationOutput.printClassification(classifier,
-              data.instance(i), i);
+            data.instance(i), i);
+        }
       }
     }
 
@@ -1847,7 +1873,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if model could not be evaluated successfully
    */
   public double evaluationForSingleInstance(double[] dist, Instance instance,
-      boolean storePredictions) throws Exception {
+    boolean storePredictions) throws Exception {
 
     double pred;
 
@@ -1858,19 +1884,21 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
       updateStatsForClassifier(dist, instance);
       if (storePredictions && !m_DiscardPredictions) {
-        if (m_Predictions == null)
-          m_Predictions = new FastVector();
-        m_Predictions.addElement(new NominalPrediction(instance.classValue(),
-            dist, instance.weight()));
+        if (m_Predictions == null) {
+          m_Predictions = new ArrayList<Prediction>();
+        }
+        m_Predictions.add(new NominalPrediction(instance.classValue(), dist,
+          instance.weight()));
       }
     } else {
       pred = dist[0];
       updateStatsForPredictor(pred, instance);
       if (storePredictions && !m_DiscardPredictions) {
-        if (m_Predictions == null)
-          m_Predictions = new FastVector();
-        m_Predictions.addElement(new NumericPrediction(instance.classValue(),
-            pred, instance.weight()));
+        if (m_Predictions == null) {
+          m_Predictions = new ArrayList<Prediction>();
+        }
+        m_Predictions.add(new NumericPrediction(instance.classValue(), pred,
+          instance.weight()));
       }
     }
 
@@ -1888,7 +1916,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    *           contains string attributes
    */
   protected double evaluationForSingleInstance(Classifier classifier,
-      Instance instance, boolean storePredictions) throws Exception {
+    Instance instance, boolean storePredictions) throws Exception {
 
     Instance classMissing = (Instance) instance.copy();
     classMissing.setDataset(instance.dataset());
@@ -1896,10 +1924,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
       instance = (Instance) instance.copy();
       instance = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-          .constructMappedInstance(instance);
+        .constructMappedInstance(instance);
       // System.out.println("Mapped instance " + instance);
       int mappedClass = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-          .getMappedClassIndex();
+        .getMappedClassIndex();
       classMissing.setMissing(mappedClass);
     } else {
       classMissing.setClassMissing();
@@ -1907,8 +1935,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     // System.out.println("instance (to predict)" + classMissing);
     double pred = evaluationForSingleInstance(
-        classifier.distributionForInstance(classMissing), instance,
-        storePredictions);
+      classifier.distributionForInstance(classMissing), instance,
+      storePredictions);
 
     // We don't need to do the following if the class is nominal because in that
     // case
@@ -1917,14 +1945,14 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       if (!instance.classIsMissing() && !Utils.isMissingValue(pred)) {
         if (classifier instanceof IntervalEstimator) {
           updateStatsForIntervalEstimator((IntervalEstimator) classifier,
-              classMissing, instance.classValue());
+            classMissing, instance.classValue());
         } else {
           m_CoverageStatisticsAvailable = false;
         }
         if (classifier instanceof ConditionalDensityEstimator) {
           updateStatsForConditionalDensityEstimator(
-              (ConditionalDensityEstimator) classifier, classMissing,
-              instance.classValue());
+            (ConditionalDensityEstimator) classifier, classMissing,
+            instance.classValue());
         } else {
           m_ComplexityStatisticsAvailable = false;
         }
@@ -1943,7 +1971,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    *           contains string attributes
    */
   public double evaluateModelOnceAndRecordPrediction(Classifier classifier,
-      Instance instance) throws Exception {
+    Instance instance) throws Exception {
 
     return evaluationForSingleInstance(classifier, instance, true);
   }
@@ -1958,7 +1986,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    *           contains string attributes
    */
   public double evaluateModelOnce(Classifier classifier, Instance instance)
-      throws Exception {
+    throws Exception {
 
     return evaluationForSingleInstance(classifier, instance, false);
   }
@@ -1972,7 +2000,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if model could not be evaluated successfully
    */
   public double evaluateModelOnce(double[] dist, Instance instance)
-      throws Exception {
+    throws Exception {
 
     return evaluationForSingleInstance(dist, instance, false);
   }
@@ -1986,7 +2014,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if model could not be evaluated successfully
    */
   public double evaluateModelOnceAndRecordPrediction(double[] dist,
-      Instance instance) throws Exception {
+    Instance instance) throws Exception {
 
     return evaluationForSingleInstance(dist, instance, true);
   }
@@ -1999,7 +2027,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if model could not be evaluated successfully
    */
   public void evaluateModelOnce(double prediction, Instance instance)
-      throws Exception {
+    throws Exception {
 
     evaluateModelOnce(makeDistribution(prediction), instance);
   }
@@ -2011,11 +2039,12 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    *         been collected. This should be null if no predictions have been
    *         collected.
    */
-  public FastVector predictions() {
-    if (m_DiscardPredictions)
+  public ArrayList<Prediction> predictions() {
+    if (m_DiscardPredictions) {
       return null;
-    else
+    } else {
       return m_Predictions;
+    }
   }
 
   /**
@@ -2029,7 +2058,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if code-generation fails
    */
   public static String wekaStaticWrapper(Sourcable classifier, String className)
-      throws Exception {
+    throws Exception {
 
     StringBuffer result = new StringBuffer();
     String staticClassifier = classifier.toSource(className);
@@ -2037,7 +2066,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     result.append("// Generated with Weka " + Version.VERSION + "\n");
     result.append("//\n");
     result
-        .append("// This code is public domain and comes with no warranty.\n");
+      .append("// This code is public domain and comes with no warranty.\n");
     result.append("//\n");
     result.append("// Timestamp: " + new Date() + "\n");
     result.append("\n");
@@ -2050,7 +2079,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     result.append("import weka.core.Instances;\n");
     result.append("import weka.core.RevisionUtils;\n");
     result
-        .append("import weka.classifiers.Classifier;\nimport weka.classifiers.AbstractClassifier;\n");
+      .append("import weka.classifiers.Classifier;\nimport weka.classifiers.AbstractClassifier;\n");
     result.append("\n");
     result.append("public class WekaWrapper\n");
     result.append("  extends AbstractClassifier {\n");
@@ -2075,7 +2104,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     result.append("   */\n");
     result.append("  public Capabilities getCapabilities() {\n");
     result.append(((Classifier) classifier).getCapabilities().toSource(
-        "result", 4));
+      "result", 4));
     result.append("    return result;\n");
     result.append("  }\n");
 
@@ -2087,7 +2116,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     result.append("   * @param i the training data\n");
     result.append("   */\n");
     result
-        .append("  public void buildClassifier(Instances i) throws Exception {\n");
+      .append("  public void buildClassifier(Instances i) throws Exception {\n");
     result.append("    // can classifier handle the data?\n");
     result.append("    getCapabilities().testWithFail(i);\n");
     result.append("  }\n");
@@ -2101,7 +2130,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     result.append("   * @return the classification result\n");
     result.append("   */\n");
     result
-        .append("  public double classifyInstance(Instance i) throws Exception {\n");
+      .append("  public double classifyInstance(Instance i) throws Exception {\n");
     result.append("    Object[] s = new Object[i.numAttributes()];\n");
     result.append("    \n");
     result.append("    for (int j = 0; j < s.length; j++) {\n");
@@ -2134,15 +2163,15 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     result.append("\n");
     result.append("  /**\n");
     result
-        .append("   * Returns only the classnames and what classifier it is based on.\n");
+      .append("   * Returns only the classnames and what classifier it is based on.\n");
     result.append("   *\n");
     result.append("   * @return a short description\n");
     result.append("   */\n");
     result.append("  public String toString() {\n");
     result.append("    return \"Auto-generated classifier wrapper, based on "
-        + classifier.getClass().getName() + " (generated with Weka "
-        + Version.VERSION + ").\\n" + "\" + this.getClass().getName() + \"/"
-        + className + "\";\n");
+      + classifier.getClass().getName() + " (generated with Weka "
+      + Version.VERSION + ").\\n" + "\" + this.getClass().getName() + \"/"
+      + className + "\";\n");
     result.append("  }\n");
 
     // main
@@ -2183,8 +2212,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double coverageOfTestCasesByPredictedRegions() {
 
-    if (!m_CoverageStatisticsAvailable)
+    if (!m_CoverageStatisticsAvailable) {
       return Double.NaN;
+    }
 
     return 100 * m_TotalCoverage / m_WithClass;
   }
@@ -2198,8 +2228,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double sizeOfPredictedRegions() {
 
-    if (m_NoPriors || !m_CoverageStatisticsAvailable)
+    if (m_NoPriors || !m_CoverageStatisticsAvailable) {
       return Double.NaN;
+    }
 
     return 100 * m_TotalSizeOfRegions / m_WithClass;
   }
@@ -2357,16 +2388,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     if (m_ClassIsNominal) {
       throw new Exception("Can't compute correlation coefficient: "
-          + "class is nominal!");
+        + "class is nominal!");
     }
 
     double correlation = 0;
     double varActual = m_SumSqrClass - m_SumClass * m_SumClass
-        / (m_WithClass - m_Unclassified);
+      / (m_WithClass - m_Unclassified);
     double varPredicted = m_SumSqrPredicted - m_SumPredicted * m_SumPredicted
-        / (m_WithClass - m_Unclassified);
+      / (m_WithClass - m_Unclassified);
     double varProd = m_SumClassPredicted - m_SumClass * m_SumPredicted
-        / (m_WithClass - m_Unclassified);
+      / (m_WithClass - m_Unclassified);
 
     if (varActual * varPredicted <= 0) {
       correlation = 0.0;
@@ -2396,8 +2427,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double meanPriorAbsoluteError() {
 
-    if (m_NoPriors)
+    if (m_NoPriors) {
       return Double.NaN;
+    }
 
     return m_SumPriorAbsErr / m_WithClass;
   }
@@ -2410,8 +2442,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double relativeAbsoluteError() throws Exception {
 
-    if (m_NoPriors)
+    if (m_NoPriors) {
       return Double.NaN;
+    }
 
     return 100 * meanAbsoluteError() / meanPriorAbsoluteError();
   }
@@ -2433,8 +2466,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double rootMeanPriorSquaredError() {
 
-    if (m_NoPriors)
+    if (m_NoPriors) {
       return Double.NaN;
+    }
 
     return Math.sqrt(m_SumPriorSqrErr / m_WithClass);
   }
@@ -2446,8 +2480,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double rootRelativeSquaredError() {
 
-    if (m_NoPriors)
+    if (m_NoPriors) {
       return Double.NaN;
+    }
 
     return 100.0 * rootMeanSquaredError() / rootMeanPriorSquaredError();
   }
@@ -2462,16 +2497,17 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     if (!m_ClassIsNominal) {
       throw new Exception("Can't compute entropy of class prior: "
-          + "class numeric!");
+        + "class numeric!");
     }
 
-    if (m_NoPriors)
+    if (m_NoPriors) {
       return Double.NaN;
+    }
 
     double entropy = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       entropy -= m_ClassPriors[i] / m_ClassPriorsSum
-          * Utils.log2(m_ClassPriors[i] / m_ClassPriorsSum);
+        * Utils.log2(m_ClassPriors[i] / m_ClassPriorsSum);
     }
     return entropy;
   }
@@ -2488,8 +2524,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       throw new Exception("Can't compute K&B Info score: " + "class numeric!");
     }
 
-    if (m_NoPriors)
+    if (m_NoPriors) {
       return Double.NaN;
+    }
 
     return m_SumKBInfo;
   }
@@ -2506,8 +2543,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       throw new Exception("Can't compute K&B Info score: class numeric!");
     }
 
-    if (m_NoPriors)
+    if (m_NoPriors) {
       return Double.NaN;
+    }
 
     return m_SumKBInfo / (m_WithClass - m_Unclassified);
   }
@@ -2524,8 +2562,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       throw new Exception("Can't compute K&B Info score: " + "class numeric!");
     }
 
-    if (m_NoPriors)
+    if (m_NoPriors) {
       return Double.NaN;
+    }
 
     return 100.0 * KBInformation() / priorEntropy();
   }
@@ -2537,8 +2576,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double SFPriorEntropy() {
 
-    if (m_NoPriors || !m_ComplexityStatisticsAvailable)
+    if (m_NoPriors || !m_ComplexityStatisticsAvailable) {
       return Double.NaN;
+    }
 
     return m_SumPriorEntropy;
   }
@@ -2550,8 +2590,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double SFMeanPriorEntropy() {
 
-    if (m_NoPriors || !m_ComplexityStatisticsAvailable)
+    if (m_NoPriors || !m_ComplexityStatisticsAvailable) {
       return Double.NaN;
+    }
 
     return m_SumPriorEntropy / m_WithClass;
   }
@@ -2563,8 +2604,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double SFSchemeEntropy() {
 
-    if (!m_ComplexityStatisticsAvailable)
+    if (!m_ComplexityStatisticsAvailable) {
       return Double.NaN;
+    }
 
     return m_SumSchemeEntropy;
   }
@@ -2576,8 +2618,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double SFMeanSchemeEntropy() {
 
-    if (!m_ComplexityStatisticsAvailable)
+    if (!m_ComplexityStatisticsAvailable) {
       return Double.NaN;
+    }
 
     return m_SumSchemeEntropy / (m_WithClass - m_Unclassified);
   }
@@ -2590,8 +2633,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double SFEntropyGain() {
 
-    if (m_NoPriors || !m_ComplexityStatisticsAvailable)
+    if (m_NoPriors || !m_ComplexityStatisticsAvailable) {
       return Double.NaN;
+    }
 
     return m_SumPriorEntropy - m_SumSchemeEntropy;
   }
@@ -2604,11 +2648,12 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    */
   public final double SFMeanEntropyGain() {
 
-    if (m_NoPriors || !m_ComplexityStatisticsAvailable)
+    if (m_NoPriors || !m_ComplexityStatisticsAvailable) {
       return Double.NaN;
+    }
 
     return (m_SumPriorEntropy - m_SumSchemeEntropy)
-        / (m_WithClass - m_Unclassified);
+      / (m_WithClass - m_Unclassified);
   }
 
   /**
@@ -2631,11 +2676,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         cumulativeCount += m_MarginCounts[i];
         margin = i * 2.0 / k_MarginResolution - 1.0;
         result = result + Utils.doubleToString(margin, 7, 3) + ' '
-            + Utils.doubleToString(cumulativeCount * 100 / m_WithClass, 7, 3)
-            + '\n';
+          + Utils.doubleToString(cumulativeCount * 100 / m_WithClass, 7, 3)
+          + '\n';
       } else if (i == 0) {
         result = Utils.doubleToString(-1.0, 7, 3) + ' '
-            + Utils.doubleToString(0, 7, 3) + '\n';
+          + Utils.doubleToString(0, 7, 3) + '\n';
       }
     }
     return result;
@@ -2682,7 +2727,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     if (printComplexityStatistics && m_NoPriors) {
       printComplexityStatistics = false;
       System.err
-          .println("Priors disabled, cannot print complexity statistics!");
+        .println("Priors disabled, cannot print complexity statistics!");
     }
 
     text.append(title + "\n");
@@ -2694,17 +2739,17 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           boolean displayKappa = m_metricsToDisplay.contains("kappa");
           boolean displayTotalCost = m_metricsToDisplay.contains("total cost");
           boolean displayAverageCost = m_metricsToDisplay
-              .contains("average cost");
+            .contains("average cost");
 
           if (displayCorrect) {
             text.append("Correctly Classified Instances     ");
             text.append(Utils.doubleToString(correct(), 12, 4) + "     "
-                + Utils.doubleToString(pctCorrect(), 12, 4) + " %\n");
+              + Utils.doubleToString(pctCorrect(), 12, 4) + " %\n");
           }
           if (displayIncorrect) {
             text.append("Incorrectly Classified Instances   ");
             text.append(Utils.doubleToString(incorrect(), 12, 4) + "     "
-                + Utils.doubleToString(pctIncorrect(), 12, 4) + " %\n");
+              + Utils.doubleToString(pctIncorrect(), 12, 4) + " %\n");
           }
           if (displayKappa) {
             text.append("Kappa statistic                    ");
@@ -2723,37 +2768,37 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           }
           if (printComplexityStatistics) {
             boolean displayKBRelative = m_metricsToDisplay
-                .contains("kb relative");
+              .contains("kb relative");
             boolean displayKBInfo = m_metricsToDisplay
-                .contains("kb information");
+              .contains("kb information");
             if (displayKBRelative) {
               text.append("K&B Relative Info Score            ");
               text.append(Utils.doubleToString(KBRelativeInformation(), 12, 4)
-                  + " %\n");
+                + " %\n");
             }
             if (displayKBInfo) {
               text.append("K&B Information Score              ");
               text.append(Utils.doubleToString(KBInformation(), 12, 4)
-                  + " bits");
+                + " bits");
               text.append(Utils.doubleToString(KBMeanInformation(), 12, 4)
-                  + " bits/instance\n");
+                + " bits/instance\n");
             }
           }
 
           if (m_pluginMetrics != null) {
             for (AbstractEvaluationMetric m : m_pluginMetrics) {
               if (m instanceof StandardEvaluationMetric
-                  && m.appliesToNominalClass() && !m.appliesToNumericClass()) {
+                && m.appliesToNominalClass() && !m.appliesToNumericClass()) {
                 String metricName = m.getMetricName().toLowerCase();
                 boolean display = m_metricsToDisplay.contains(metricName);
                 List<String> statNames = m.getStatisticNames();
                 for (String s : statNames) {
                   display = (display && m_metricsToDisplay.contains(s
-                      .toLowerCase()));
+                    .toLowerCase()));
                 }
                 if (display) {
                   String formattedS = ((StandardEvaluationMetric) m)
-                      .toSummaryString();
+                    .toSummaryString();
                   text.append(formattedS);
                 }
               }
@@ -2761,27 +2806,27 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           }
         } else {
           boolean displayCorrelation = m_metricsToDisplay
-              .contains("correlation");
+            .contains("correlation");
           if (displayCorrelation) {
             text.append("Correlation coefficient            ");
             text.append(Utils.doubleToString(correlationCoefficient(), 12, 4)
-                + "\n");
+              + "\n");
           }
 
           if (m_pluginMetrics != null) {
             for (AbstractEvaluationMetric m : m_pluginMetrics) {
               if (m instanceof StandardEvaluationMetric
-                  && !m.appliesToNominalClass() && m.appliesToNumericClass()) {
+                && !m.appliesToNominalClass() && m.appliesToNumericClass()) {
                 String metricName = m.getMetricName().toLowerCase();
                 boolean display = m_metricsToDisplay.contains(metricName);
                 List<String> statNames = m.getStatisticNames();
                 for (String s : statNames) {
                   display = (display && m_metricsToDisplay.contains(s
-                      .toLowerCase()));
+                    .toLowerCase()));
                 }
                 if (display) {
                   String formattedS = ((StandardEvaluationMetric) m)
-                      .toSummaryString();
+                    .toSummaryString();
                   text.append(formattedS);
                 }
               }
@@ -2790,29 +2835,30 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         }
         if (printComplexityStatistics && m_ComplexityStatisticsAvailable) {
           boolean displayComplexityOrder0 = m_metricsToDisplay
-              .contains("complexity 0");
+            .contains("complexity 0");
           boolean displayComplexityScheme = m_metricsToDisplay
-              .contains("complexity scheme");
+            .contains("complexity scheme");
           boolean displayComplexityImprovement = m_metricsToDisplay
-              .contains("complexity improvement");
+            .contains("complexity improvement");
           if (displayComplexityOrder0) {
             text.append("Class complexity | order 0         ");
-            text.append(Utils.doubleToString(SFPriorEntropy(), 12, 4) + " bits");
+            text
+              .append(Utils.doubleToString(SFPriorEntropy(), 12, 4) + " bits");
             text.append(Utils.doubleToString(SFMeanPriorEntropy(), 12, 4)
-                + " bits/instance\n");
+              + " bits/instance\n");
           }
           if (displayComplexityScheme) {
             text.append("Class complexity | scheme          ");
             text.append(Utils.doubleToString(SFSchemeEntropy(), 12, 4)
-                + " bits");
+              + " bits");
             text.append(Utils.doubleToString(SFMeanSchemeEntropy(), 12, 4)
-                + " bits/instance\n");
+              + " bits/instance\n");
           }
           if (displayComplexityImprovement) {
             text.append("Complexity improvement     (Sf)    ");
             text.append(Utils.doubleToString(SFEntropyGain(), 12, 4) + " bits");
             text.append(Utils.doubleToString(SFMeanEntropyGain(), 12, 4)
-                + " bits/instance\n");
+              + " bits/instance\n");
           }
         }
 
@@ -2820,17 +2866,17 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           for (AbstractEvaluationMetric m : m_pluginMetrics) {
             if (m instanceof InformationTheoreticEvaluationMetric) {
               if ((m_ClassIsNominal && m.appliesToNominalClass())
-                  || (!m_ClassIsNominal && m.appliesToNumericClass())) {
+                || (!m_ClassIsNominal && m.appliesToNumericClass())) {
                 String metricName = m.getMetricName().toLowerCase();
                 boolean display = m_metricsToDisplay.contains(metricName);
                 List<String> statNames = m.getStatisticNames();
                 for (String s : statNames) {
                   display = (display && m_metricsToDisplay.contains(s
-                      .toLowerCase()));
+                    .toLowerCase()));
                 }
                 if (display) {
                   String formattedS = ((InformationTheoreticEvaluationMetric) m)
-                      .toSummaryString();
+                    .toSummaryString();
                   text.append(formattedS);
                 }
               }
@@ -2850,34 +2896,34 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         if (displayRMSE) {
           text.append("Root mean squared error            ");
           text.append(Utils.doubleToString(rootMeanSquaredError(), 12, 4)
-              + "\n");
+            + "\n");
         }
         if (!m_NoPriors) {
           if (displayRAE) {
             text.append("Relative absolute error            ");
             text.append(Utils.doubleToString(relativeAbsoluteError(), 12, 4)
-                + " %\n");
+              + " %\n");
           }
           if (displayRRSE) {
             text.append("Root relative squared error        ");
             text.append(Utils.doubleToString(rootRelativeSquaredError(), 12, 4)
-                + " %\n");
+              + " %\n");
           }
         }
         if (m_pluginMetrics != null) {
           for (AbstractEvaluationMetric m : m_pluginMetrics) {
             if (m instanceof StandardEvaluationMetric
-                && m.appliesToNominalClass() && m.appliesToNumericClass()) {
+              && m.appliesToNominalClass() && m.appliesToNumericClass()) {
               String metricName = m.getMetricName().toLowerCase();
               boolean display = m_metricsToDisplay.contains(metricName);
               List<String> statNames = m.getStatisticNames();
               for (String s : statNames) {
                 display = (display && m_metricsToDisplay.contains(s
-                    .toLowerCase()));
+                  .toLowerCase()));
               }
               if (display) {
                 String formattedS = ((StandardEvaluationMetric) m)
-                    .toSummaryString();
+                  .toSummaryString();
                 text.append(formattedS);
               }
             }
@@ -2887,20 +2933,20 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         if (m_CoverageStatisticsAvailable) {
           boolean displayCoverage = m_metricsToDisplay.contains("coverage");
           boolean displayRegionSize = m_metricsToDisplay
-              .contains("region size");
+            .contains("region size");
 
           if (displayCoverage) {
             text.append("Coverage of cases ("
-                + Utils.doubleToString(m_ConfLevel, 4, 2) + " level)     ");
+              + Utils.doubleToString(m_ConfLevel, 4, 2) + " level)     ");
             text.append(Utils.doubleToString(
-                coverageOfTestCasesByPredictedRegions(), 12, 4) + " %\n");
+              coverageOfTestCasesByPredictedRegions(), 12, 4) + " %\n");
           }
           if (!m_NoPriors) {
             if (displayRegionSize) {
               text.append("Mean rel. region size ("
-                  + Utils.doubleToString(m_ConfLevel, 4, 2) + " level) ");
+                + Utils.doubleToString(m_ConfLevel, 4, 2) + " level) ");
               text.append(Utils.doubleToString(sizeOfPredictedRegions(), 12, 4)
-                  + " %\n");
+                + " %\n");
             }
           }
         }
@@ -2908,7 +2954,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       if (Utils.gr(unclassified(), 0)) {
         text.append("UnClassified Instances             ");
         text.append(Utils.doubleToString(unclassified(), 12, 4) + "     "
-            + Utils.doubleToString(pctUnclassified(), 12, 4) + " %\n");
+          + Utils.doubleToString(pctUnclassified(), 12, 4) + " %\n");
       }
       text.append("Total Number of Instances          ");
       text.append(Utils.doubleToString(m_WithClass, 12, 4) + "\n");
@@ -2948,8 +2994,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     StringBuffer text = new StringBuffer();
     char[] IDChars = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-        'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
-        'z' };
+      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
     int IDWidth;
     boolean fractional = false;
 
@@ -2977,13 +3022,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     }
 
     IDWidth = 1 + Math.max(
-        (int) (Math.log(maxval) / Math.log(10) + (fractional ? 3 : 0)),
-        (int) (Math.log(m_NumClasses) / Math.log(IDChars.length)));
+      (int) (Math.log(maxval) / Math.log(10) + (fractional ? 3 : 0)),
+      (int) (Math.log(m_NumClasses) / Math.log(IDChars.length)));
     text.append(title).append("\n");
     for (int i = 0; i < m_NumClasses; i++) {
       if (fractional) {
         text.append(" ").append(num2ShortID(i, IDChars, IDWidth - 3))
-            .append("   ");
+          .append("   ");
       } else {
         text.append(" ").append(num2ShortID(i, IDChars, IDWidth));
       }
@@ -2992,11 +3037,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     for (int i = 0; i < m_NumClasses; i++) {
       for (int j = 0; j < m_NumClasses; j++) {
         text.append(" ").append(
-            Utils.doubleToString(m_ConfusionMatrix[i][j], IDWidth,
-                (fractional ? 2 : 0)));
+          Utils.doubleToString(m_ConfusionMatrix[i][j], IDWidth,
+            (fractional ? 2 : 0)));
       }
       text.append(" | ").append(num2ShortID(i, IDChars, IDWidth)).append(" = ")
-          .append(m_ClassNames[i]).append("\n");
+        .append(m_ClassNames[i]).append("\n");
     }
     return text.toString();
   }
@@ -3041,15 +3086,15 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     boolean displayPRC = m_metricsToDisplay.contains("prc area");
 
     StringBuffer text = new StringBuffer(title + "\n                 "
-        + (displayTP ? "TP Rate  " : "") + (displayFP ? "FP Rate  " : "")
-        + (displayP ? "Precision  " : "") + (displayR ? "Recall   " : "")
-        + (displayFM ? "F-Measure  " : "") + (displayMCC ? "MCC      " : "")
-        + (displayROC ? "ROC Area  " : "") + (displayPRC ? "PRC Area  " : ""));
+      + (displayTP ? "TP Rate  " : "") + (displayFP ? "FP Rate  " : "")
+      + (displayP ? "Precision  " : "") + (displayR ? "Recall   " : "")
+      + (displayFM ? "F-Measure  " : "") + (displayMCC ? "MCC      " : "")
+      + (displayROC ? "ROC Area  " : "") + (displayPRC ? "PRC Area  " : ""));
 
     if (m_pluginMetrics != null && m_pluginMetrics.size() > 0) {
       for (AbstractEvaluationMetric m : m_pluginMetrics) {
         if (m instanceof InformationRetrievalEvaluationMetric
-            && m.appliesToNominalClass()) {
+          && m.appliesToNominalClass()) {
           String metricName = m.getMetricName().toLowerCase();
           if (m_metricsToDisplay.contains(metricName)) {
             List<String> statNames = m.getStatisticNames();
@@ -3090,7 +3135,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           text.append("?       ");
         } else {
           text.append(String
-              .format("%-9.3f", matthewsCorrelationCoefficient(i)));
+            .format("%-9.3f", matthewsCorrelationCoefficient(i)));
         }
       }
 
@@ -3114,14 +3159,14 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       if (m_pluginMetrics != null && m_pluginMetrics.size() > 0) {
         for (AbstractEvaluationMetric m : m_pluginMetrics) {
           if (m instanceof InformationRetrievalEvaluationMetric
-              && m.appliesToNominalClass()) {
+            && m.appliesToNominalClass()) {
             String metricName = m.getMetricName().toLowerCase();
             if (m_metricsToDisplay.contains(metricName)) {
               List<String> statNames = m.getStatisticNames();
               for (String name : statNames) {
                 if (m_metricsToDisplay.contains(name.toLowerCase())) {
                   double stat = ((InformationRetrievalEvaluationMetric) m)
-                      .getStatistic(name, i);
+                    .getStatistic(name, i);
                   if (name.length() < 7) {
                     name = Utils.padRight(name, 7);
                   }
@@ -3129,8 +3174,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
                     Utils.padRight("?", name.length());
                   } else {
                     text.append(
-                        String.format("%-" + name.length() + ".3f", stat))
-                        .append("  ");
+                      String.format("%-" + name.length() + ".3f", stat))
+                      .append("  ");
                   }
                 }
               }
@@ -3171,22 +3216,23 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     if (m_pluginMetrics != null && m_pluginMetrics.size() > 0) {
       for (AbstractEvaluationMetric m : m_pluginMetrics) {
         if (m instanceof InformationRetrievalEvaluationMetric
-            && m.appliesToNominalClass()) {
+          && m.appliesToNominalClass()) {
           String metricName = m.getMetricName().toLowerCase();
           if (m_metricsToDisplay.contains(metricName)) {
             List<String> statNames = m.getStatisticNames();
             for (String name : statNames) {
               if (m_metricsToDisplay.contains(name.toLowerCase())) {
                 double stat = ((InformationRetrievalEvaluationMetric) m)
-                    .getClassWeightedAverageStatistic(name);
+                  .getClassWeightedAverageStatistic(name);
                 if (name.length() < 7) {
                   name = Utils.padRight(name, 7);
                 }
                 if (Utils.isMissingValue(stat)) {
                   Utils.padRight("?", name.length());
                 } else {
-                  text.append(String.format("%-" + name.length() + ".3f", stat))
-                      .append("  ");
+                  text
+                    .append(String.format("%-" + name.length() + ".3f", stat))
+                    .append("  ");
                 }
               }
             }
@@ -3548,7 +3594,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double numFN = numFalseNegatives(classIndex);
     double n = (numTP * numTN) - (numFP * numFN);
     double d = (numTP + numFP) * (numTP + numFN) * (numTN + numFP)
-        * (numTN + numFN);
+      * (numTN + numFN);
     d = Math.sqrt(d);
     if (d == 0) {
       d = 1;
@@ -3786,7 +3832,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       for (int i = 0; i < train.numInstances(); i++) {
         if (!train.instance(i).classIsMissing()) {
           m_ClassPriors[0] += train.instance(i).classValue()
-              * train.instance(i).weight();
+            * train.instance(i).weight();
           m_ClassPriorsSum += train.instance(i).weight();
         }
       }
@@ -3799,7 +3845,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       for (int i = 0; i < train.numInstances(); i++) {
         if (!train.instance(i).classIsMissing()) {
           m_ClassPriors[(int) train.instance(i).classValue()] += train
-              .instance(i).weight();
+            .instance(i).weight();
           m_ClassPriorsSum += train.instance(i).weight();
         }
       }
@@ -3860,38 +3906,53 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       return false;
     }
     Evaluation cmp = (Evaluation) obj;
-    if (m_ClassIsNominal != cmp.m_ClassIsNominal)
+    if (m_ClassIsNominal != cmp.m_ClassIsNominal) {
       return false;
-    if (m_NumClasses != cmp.m_NumClasses)
+    }
+    if (m_NumClasses != cmp.m_NumClasses) {
       return false;
+    }
 
-    if (m_Incorrect != cmp.m_Incorrect)
+    if (m_Incorrect != cmp.m_Incorrect) {
       return false;
-    if (m_Correct != cmp.m_Correct)
+    }
+    if (m_Correct != cmp.m_Correct) {
       return false;
-    if (m_Unclassified != cmp.m_Unclassified)
+    }
+    if (m_Unclassified != cmp.m_Unclassified) {
       return false;
-    if (m_MissingClass != cmp.m_MissingClass)
+    }
+    if (m_MissingClass != cmp.m_MissingClass) {
       return false;
-    if (m_WithClass != cmp.m_WithClass)
+    }
+    if (m_WithClass != cmp.m_WithClass) {
       return false;
+    }
 
-    if (m_SumErr != cmp.m_SumErr)
+    if (m_SumErr != cmp.m_SumErr) {
       return false;
-    if (m_SumAbsErr != cmp.m_SumAbsErr)
+    }
+    if (m_SumAbsErr != cmp.m_SumAbsErr) {
       return false;
-    if (m_SumSqrErr != cmp.m_SumSqrErr)
+    }
+    if (m_SumSqrErr != cmp.m_SumSqrErr) {
       return false;
-    if (m_SumClass != cmp.m_SumClass)
+    }
+    if (m_SumClass != cmp.m_SumClass) {
       return false;
-    if (m_SumSqrClass != cmp.m_SumSqrClass)
+    }
+    if (m_SumSqrClass != cmp.m_SumSqrClass) {
       return false;
-    if (m_SumPredicted != cmp.m_SumPredicted)
+    }
+    if (m_SumPredicted != cmp.m_SumPredicted) {
       return false;
-    if (m_SumSqrPredicted != cmp.m_SumSqrPredicted)
+    }
+    if (m_SumSqrPredicted != cmp.m_SumSqrPredicted) {
       return false;
-    if (m_SumClassPredicted != cmp.m_SumClassPredicted)
+    }
+    if (m_SumClassPredicted != cmp.m_SumClassPredicted) {
       return false;
+    }
 
     if (m_ClassIsNominal) {
       for (int i = 0; i < m_NumClasses; i++) {
@@ -3915,7 +3976,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @return a string detailing the valid command line options
    */
   protected static String makeOptionString(Classifier classifier,
-      boolean globalInfo) {
+    boolean globalInfo) {
 
     StringBuffer optionsText = new StringBuffer("");
 
@@ -3925,44 +3986,44 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText.append("\tOutput help information.\n");
     optionsText.append("-synopsis or -info\n");
     optionsText.append("\tOutput synopsis for classifier (use in conjunction "
-        + " with -h)\n");
+      + " with -h)\n");
     optionsText.append("-t <name of training file>\n");
     optionsText.append("\tSets training file.\n");
     optionsText.append("-T <name of test file>\n");
     optionsText
-        .append("\tSets test file. If missing, a cross-validation will be performed\n");
+      .append("\tSets test file. If missing, a cross-validation will be performed\n");
     optionsText.append("\ton the training data.\n");
     optionsText.append("-c <class index>\n");
     optionsText.append("\tSets index of class attribute (default: last).\n");
     optionsText.append("-x <number of folds>\n");
     optionsText
-        .append("\tSets number of folds for cross-validation (default: 10).\n");
+      .append("\tSets number of folds for cross-validation (default: 10).\n");
     optionsText.append("-no-cv\n");
     optionsText.append("\tDo not perform any cross validation.\n");
     optionsText.append("-force-batch-training\n");
     optionsText
-        .append("\tAlways train classifier in batch mode, never incrementally.\n");
+      .append("\tAlways train classifier in batch mode, never incrementally.\n");
     optionsText.append("-split-percentage <percentage>\n");
     optionsText
-        .append("\tSets the percentage for the train/test set split, e.g., 66.\n");
+      .append("\tSets the percentage for the train/test set split, e.g., 66.\n");
     optionsText.append("-preserve-order\n");
     optionsText.append("\tPreserves the order in the percentage split.\n");
     optionsText.append("-s <random number seed>\n");
     optionsText
-        .append("\tSets random number seed for cross-validation or percentage split\n");
+      .append("\tSets random number seed for cross-validation or percentage split\n");
     optionsText.append("\t(default: 1).\n");
     optionsText.append("-m <name of file with cost matrix>\n");
     optionsText.append("\tSets file with cost matrix.\n");
     optionsText
-        .append("-disable <comma-separated list of evaluation metric names>\n");
+      .append("-disable <comma-separated list of evaluation metric names>\n");
     optionsText
-        .append("\tComma separated list of metric names not to print to the output.\n\t");
+      .append("\tComma separated list of metric names not to print to the output.\n\t");
     optionsText.append("Available metrics:\n\t");
     List<String> metricsToDisplay = new ArrayList<String>(
-        Arrays.asList(BUILT_IN_EVAL_METRICS));
+      Arrays.asList(BUILT_IN_EVAL_METRICS));
 
     List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric
-        .getPluginMetrics();
+      .getPluginMetrics();
     if (pluginMetrics != null) {
       for (AbstractEvaluationMetric m : pluginMetrics) {
         if (m instanceof InformationRetrievalEvaluationMetric) {
@@ -3991,15 +4052,15 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText.append("\n");
     optionsText.append("-l <name of input file>\n");
     optionsText
-        .append("\tSets model input file. In case the filename ends with '.xml',\n");
+      .append("\tSets model input file. In case the filename ends with '.xml',\n");
     optionsText
-        .append("\ta PMML file is loaded or, if that fails, options are loaded\n");
+      .append("\ta PMML file is loaded or, if that fails, options are loaded\n");
     optionsText.append("\tfrom the XML file.\n");
     optionsText.append("-d <name of output file>\n");
     optionsText
-        .append("\tSets model output file. In case the filename ends with '.xml',\n");
+      .append("\tSets model output file. In case the filename ends with '.xml',\n");
     optionsText
-        .append("\tonly the options are saved to the XML file, not the model.\n");
+      .append("\tonly the options are saved to the XML file, not the model.\n");
     optionsText.append("-v\n");
     optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-o\n");
@@ -4010,58 +4071,58 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText.append("-k\n");
     optionsText.append("\tOutputs information-theoretic statistics.\n");
     optionsText
-        .append("-classifications \"weka.classifiers.evaluation.output.prediction.AbstractOutput + options\"\n");
+      .append("-classifications \"weka.classifiers.evaluation.output.prediction.AbstractOutput + options\"\n");
     optionsText
-        .append("\tUses the specified class for generating the classification output.\n");
+      .append("\tUses the specified class for generating the classification output.\n");
     optionsText.append("\tE.g.: " + PlainText.class.getName() + "\n");
     optionsText.append("-p range\n");
     optionsText
-        .append("\tOutputs predictions for test instances (or the train instances if\n");
+      .append("\tOutputs predictions for test instances (or the train instances if\n");
     optionsText
-        .append("\tno test instances provided and -no-cv is used), along with the \n");
+      .append("\tno test instances provided and -no-cv is used), along with the \n");
     optionsText
-        .append("\tattributes in the specified range (and nothing else). \n");
+      .append("\tattributes in the specified range (and nothing else). \n");
     optionsText.append("\tUse '-p 0' if no attributes are desired.\n");
     optionsText.append("\tDeprecated: use \"-classifications ...\" instead.\n");
     optionsText.append("-distribution\n");
     optionsText
-        .append("\tOutputs the distribution instead of only the prediction\n");
+      .append("\tOutputs the distribution instead of only the prediction\n");
     optionsText
-        .append("\tin conjunction with the '-p' option (only nominal classes).\n");
+      .append("\tin conjunction with the '-p' option (only nominal classes).\n");
     optionsText.append("\tDeprecated: use \"-classifications ...\" instead.\n");
     optionsText.append("-r\n");
     optionsText.append("\tOnly outputs cumulative margin distribution.\n");
     if (classifier instanceof Sourcable) {
       optionsText.append("-z <class name>\n");
       optionsText.append("\tOnly outputs the source representation"
-          + " of the classifier,\n\tgiving it the supplied" + " name.\n");
+        + " of the classifier,\n\tgiving it the supplied" + " name.\n");
     }
     if (classifier instanceof Drawable) {
       optionsText.append("-g\n");
       optionsText.append("\tOnly outputs the graph representation"
-          + " of the classifier.\n");
+        + " of the classifier.\n");
     }
     optionsText.append("-xml filename | xml-string\n");
     optionsText
-        .append("\tRetrieves the options from the XML-data instead of the "
-            + "command line.\n");
+      .append("\tRetrieves the options from the XML-data instead of the "
+        + "command line.\n");
     optionsText.append("-threshold-file <file>\n");
     optionsText
-        .append("\tThe file to save the threshold data to.\n"
-            + "\tThe format is determined by the extensions, e.g., '.arff' for ARFF \n"
-            + "\tformat or '.csv' for CSV.\n");
+      .append("\tThe file to save the threshold data to.\n"
+        + "\tThe format is determined by the extensions, e.g., '.arff' for ARFF \n"
+        + "\tformat or '.csv' for CSV.\n");
     optionsText.append("-threshold-label <label>\n");
     optionsText
-        .append("\tThe class label to determine the threshold data for\n"
-            + "\t(default is the first label)\n");
+      .append("\tThe class label to determine the threshold data for\n"
+        + "\t(default is the first label)\n");
 
     // Get scheme-specific options
     if (classifier instanceof OptionHandler) {
       optionsText.append("\nOptions specific to "
-          + classifier.getClass().getName() + ":\n\n");
-      Enumeration enu = ((OptionHandler) classifier).listOptions();
+        + classifier.getClass().getName() + ":\n\n");
+      Enumeration<Option> enu = ((OptionHandler) classifier).listOptions();
       while (enu.hasMoreElements()) {
-        Option option = (Option) enu.nextElement();
+        Option option = enu.nextElement();
         optionsText.append(option.synopsis() + '\n');
         optionsText.append(option.description() + "\n");
       }
@@ -4092,11 +4153,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     methods = bi.getMethodDescriptors();
     Object[] args = {};
     String result = "\nSynopsis for " + classifier.getClass().getName()
-        + ":\n\n";
+      + ":\n\n";
 
-    for (int i = 0; i < methods.length; i++) {
-      String name = methods[i].getDisplayName();
-      Method meth = methods[i].getMethod();
+    for (MethodDescriptor method : methods) {
+      String name = method.getDisplayName();
+      Method meth = method.getMethod();
       if (name.equals("globalInfo")) {
         String globalInfo = (String) (meth.invoke(classifier, args));
         result += globalInfo;
@@ -4164,7 +4225,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if the class of the instance is not set
    */
   protected void updateStatsForClassifier(double[] predictedDistribution,
-      Instance instance) throws Exception {
+    Instance instance) throws Exception {
 
     int actualClass = (int) instance.classValue();
 
@@ -4193,10 +4254,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           // prediction (-m_CostMatrix.getElement(actualClass,actualClass)),
           // although often this will be zero
           m_TotalCost += instance.weight()
-              * m_CostMatrix.getMaxCost(actualClass, instance);
+            * m_CostMatrix.getMaxCost(actualClass, instance);
         } else {
           m_TotalCost += instance.weight()
-              * m_CostMatrix.getElement(actualClass, predictedClass, instance);
+            * m_CostMatrix.getElement(actualClass, predictedClass, instance);
         }
       }
 
@@ -4207,22 +4268,22 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
 
       double predictedProb = Math.max(MIN_SF_PROB,
-          predictedDistribution[actualClass]);
+        predictedDistribution[actualClass]);
       double priorProb = Math.max(MIN_SF_PROB, m_ClassPriors[actualClass]
-          / m_ClassPriorsSum);
+        / m_ClassPriorsSum);
       if (predictedProb >= priorProb) {
         m_SumKBInfo += (Utils.log2(predictedProb) - Utils.log2(priorProb))
-            * instance.weight();
+          * instance.weight();
       } else {
         m_SumKBInfo -= (Utils.log2(1.0 - predictedProb) - Utils
-            .log2(1.0 - priorProb)) * instance.weight();
+          .log2(1.0 - priorProb)) * instance.weight();
       }
 
       m_SumSchemeEntropy -= Utils.log2(predictedProb) * instance.weight();
       m_SumPriorEntropy -= Utils.log2(priorProb) * instance.weight();
 
       updateNumericScores(predictedDistribution,
-          makeDistribution(instance.classValue()), instance.weight());
+        makeDistribution(instance.classValue()), instance.weight());
 
       // Update coverage stats
       int[] indices = Utils.stableSort(predictedDistribution);
@@ -4254,13 +4315,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       for (AbstractEvaluationMetric m : m_pluginMetrics) {
         if (m instanceof StandardEvaluationMetric) {
           ((StandardEvaluationMetric) m).updateStatsForClassifier(
-              predictedDistribution, instance);
+            predictedDistribution, instance);
         } else if (m instanceof InformationRetrievalEvaluationMetric) {
           ((InformationRetrievalEvaluationMetric) m).updateStatsForClassifier(
-              predictedDistribution, instance);
+            predictedDistribution, instance);
         } else if (m instanceof InformationTheoreticEvaluationMetric) {
           ((InformationTheoreticEvaluationMetric) m).updateStatsForClassifier(
-              predictedDistribution, instance);
+            predictedDistribution, instance);
         }
       }
     }
@@ -4276,18 +4337,18 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if intervals could not be computed successfully
    */
   protected void updateStatsForIntervalEstimator(IntervalEstimator classifier,
-      Instance classMissing, double classValue) throws Exception {
+    Instance classMissing, double classValue) throws Exception {
 
     double[][] preds = classifier.predictIntervals(classMissing, m_ConfLevel);
-    if (m_Predictions != null)
-      ((NumericPrediction) m_Predictions.lastElement())
-          .setPredictionIntervals(preds);
-    for (int i = 0; i < preds.length; i++) {
-      m_TotalSizeOfRegions += (preds[i][1] - preds[i][0])
-          / (m_MaxTarget - m_MinTarget);
+    if (m_Predictions != null) {
+      ((NumericPrediction) m_Predictions.get(m_Predictions.size() - 1))
+        .setPredictionIntervals(preds);
     }
-    for (int i = 0; i < preds.length; i++) {
-      if ((preds[i][1] >= classValue) && (preds[i][0] <= classValue)) {
+    for (double[] pred : preds) {
+      m_TotalSizeOfRegions += (pred[1] - pred[0]) / (m_MaxTarget - m_MinTarget);
+    }
+    for (double[] pred : preds) {
+      if ((pred[1] >= classValue) && (pred[0] <= classValue)) {
         m_TotalCoverage += classMissing.weight();
         break;
       }
@@ -4297,7 +4358,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       for (AbstractEvaluationMetric m : m_pluginMetrics) {
         if (m instanceof IntervalBasedEvaluationMetric) {
           ((IntervalBasedEvaluationMetric) m).updateStatsForIntervalEstimator(
-              classifier, classMissing, classValue);
+            classifier, classMissing, classValue);
         }
       }
     }
@@ -4314,16 +4375,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if density could not be computed successfully
    */
   protected void updateStatsForConditionalDensityEstimator(
-      ConditionalDensityEstimator classifier, Instance classMissing,
-      double classValue) throws Exception {
+    ConditionalDensityEstimator classifier, Instance classMissing,
+    double classValue) throws Exception {
 
     if (m_PriorEstimator == null) {
       setNumericPriorsFromBuffer();
     }
     m_SumSchemeEntropy -= classifier.logDensity(classMissing, classValue)
-        * classMissing.weight() / Utils.log2;
+      * classMissing.weight() / Utils.log2;
     m_SumPriorEntropy -= m_PriorEstimator.logDensity(classValue)
-        * classMissing.weight() / Utils.log2;
+      * classMissing.weight() / Utils.log2;
   }
 
   /**
@@ -4335,7 +4396,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if the class of the instance is not set
    */
   protected void updateStatsForPredictor(double predictedValue,
-      Instance instance) throws Exception {
+    Instance instance) throws Exception {
 
     if (!instance.classIsMissing()) {
 
@@ -4347,26 +4408,27 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
       m_SumClass += instance.weight() * instance.classValue();
       m_SumSqrClass += instance.weight() * instance.classValue()
-          * instance.classValue();
+        * instance.classValue();
       m_SumClassPredicted += instance.weight() * instance.classValue()
-          * predictedValue;
+        * predictedValue;
       m_SumPredicted += instance.weight() * predictedValue;
       m_SumSqrPredicted += instance.weight() * predictedValue * predictedValue;
 
       updateNumericScores(makeDistribution(predictedValue),
-          makeDistribution(instance.classValue()), instance.weight());
+        makeDistribution(instance.classValue()), instance.weight());
 
-    } else
+    } else {
       m_MissingClass += instance.weight();
+    }
 
     if (m_pluginMetrics != null) {
       for (AbstractEvaluationMetric m : m_pluginMetrics) {
         if (m instanceof StandardEvaluationMetric) {
           ((StandardEvaluationMetric) m).updateStatsForPredictor(
-              predictedValue, instance);
+            predictedValue, instance);
         } else if (m instanceof InformationTheoreticEvaluationMetric) {
           ((InformationTheoreticEvaluationMetric) m).updateStatsForPredictor(
-              predictedValue, instance);
+            predictedValue, instance);
         }
       }
     }
@@ -4381,14 +4443,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @param weight the weight assigned to the instance
    */
   protected void updateMargins(double[] predictedDistribution, int actualClass,
-      double weight) {
+    double weight) {
 
     double probActual = predictedDistribution[actualClass];
     double probNext = 0;
 
-    for (int i = 0; i < m_NumClasses; i++)
-      if ((i != actualClass) && (predictedDistribution[i] > probNext))
+    for (int i = 0; i < m_NumClasses; i++) {
+      if ((i != actualClass) && (predictedDistribution[i] > probNext)) {
         probNext = predictedDistribution[i];
+      }
+    }
 
     double margin = probActual - probNext;
     int bin = (int) ((margin + 1.0) / 2.0 * k_MarginResolution);
@@ -4405,7 +4469,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @param weight the weight associated with this prediction
    */
   protected void updateNumericScores(double[] predicted, double[] actual,
-      double weight) {
+    double weight) {
 
     double diff;
     double sumErr = 0, sumAbsErr = 0, sumSqrErr = 0;
@@ -4455,7 +4519,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
       temp = new double[m_TrainClassWeights.length * 2];
       System.arraycopy(m_TrainClassWeights, 0, temp, 0,
-          m_TrainClassWeights.length);
+        m_TrainClassWeights.length);
       m_TrainClassWeights = temp;
     }
     m_TrainClassVals[m_NumTrainClassVals] = classValue;
