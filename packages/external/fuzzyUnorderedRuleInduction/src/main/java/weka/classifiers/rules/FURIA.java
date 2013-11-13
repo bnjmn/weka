@@ -24,6 +24,8 @@
 package weka.classifiers.rules;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -32,8 +34,8 @@ import weka.classifiers.AbstractClassifier;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Copyable;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -41,26 +43,25 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 
 /**
- <!-- globalinfo-start -->
- * FURIA: Fuzzy Unordered Rule Induction Algorithm<br/>
+ * <!-- globalinfo-start --> FURIA: Fuzzy Unordered Rule Induction Algorithm<br/>
  * <br/>
  * Details please see:<br/>
  * <br/>
- * Jens Christian Huehn, Eyke Huellermeier (2009). FURIA: An Algorithm for Unordered Fuzzy Rule Induction. Data Mining and Knowledge Discovery..<br/>
+ * Jens Christian Huehn, Eyke Huellermeier (2009). FURIA: An Algorithm for
+ * Unordered Fuzzy Rule Induction. Data Mining and Knowledge Discovery..<br/>
  * <br/>
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;article{Huehn2009,
  *    author = {Jens Christian Huehn and Eyke Huellermeier},
@@ -70,56 +71,71 @@ import weka.core.TechnicalInformation.Type;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -F &lt;number of folds&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -F &lt;number of folds&gt;
  *  Set number of folds for REP
  *  One fold is used as pruning set.
- *  (default 3)</pre>
+ *  (default 3)
+ * </pre>
  * 
- * <pre> -N &lt;min. weights&gt;
+ * <pre>
+ * -N &lt;min. weights&gt;
  *  Set the minimal weights of instances
  *  within a split.
- *  (default 2.0)</pre>
+ *  (default 2.0)
+ * </pre>
  * 
- * <pre> -O &lt;number of runs&gt;
+ * <pre>
+ * -O &lt;number of runs&gt;
  *  Set the number of runs of
- *  optimizations. (Default: 2)</pre>
+ *  optimizations. (Default: 2)
+ * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  Set whether turn on the
- *  debug mode (Default: false)</pre>
+ *  debug mode (Default: false)
+ * </pre>
  * 
- * <pre> -S &lt;seed&gt;
+ * <pre>
+ * -S &lt;seed&gt;
  *  The seed of randomization
- *  (Default: 1)</pre>
+ *  (Default: 1)
+ * </pre>
  * 
- * <pre> -E
+ * <pre>
+ * -E
  *  Whether NOT check the error rate&gt;=0.5
- *  in stopping criteria  (default: check)</pre>
+ *  in stopping criteria  (default: check)
+ * </pre>
  * 
- * <pre> -s
+ * <pre>
+ * -s
  *  The action performed for uncovered instances.
- *  (default: use stretching)</pre>
+ *  (default: use stretching)
+ * </pre>
  * 
- * <pre> -p
+ * <pre>
+ * -p
  *  The T-norm used as fuzzy AND-operator.
- *  (default: Product T-norm)</pre>
+ *  (default: Product T-norm)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Jens Christian H&uuml;hn (huehn@gmx.net)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class FURIA 
-  extends AbstractClassifier 
-  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
-             TechnicalInformationHandler {    
+public class FURIA extends AbstractClassifier implements OptionHandler,
+  AdditionalMeasureProducer, WeightedInstancesHandler,
+  TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -6589312996832147161L;
@@ -127,14 +143,14 @@ public class FURIA
   /** The limit of description length surplus in ruleset generation */
   private static double MAX_DL_SURPLUS = 64.0;
 
-  /** The class attribute of the data*/
-  private Attribute m_Class; 
+  /** The class attribute of the data */
+  private Attribute m_Class;
 
   /** The ruleset */
-  private FastVector m_Ruleset;
+  private ArrayList<Rule> m_Ruleset;
 
   /** The predicted class distribution */
-  private FastVector m_Distributions;
+  private ArrayList<double[]> m_Distributions;
 
   /** Runs of optimizations */
   private int m_Optimizations = 2;
@@ -151,7 +167,7 @@ public class FURIA
   /** The number of folds to split data into Grow and Prune for IREP */
   private int m_Folds = 3;
 
-  /** The minimal number of instance weights within a split*/
+  /** The minimal number of instance weights within a split */
   private double m_MinNo = 2.0;
 
   /** Whether in a debug mode */
@@ -160,298 +176,344 @@ public class FURIA
   /** Whether check the error rate >= 0.5 in stopping criteria */
   private boolean m_CheckErr = true;
 
-  /** The class distribution of the training data*/
+  /** The class distribution of the training data */
   private double[] aprioriDistribution;
 
   /** The RuleStats for the ruleset of each class value */
-  private FastVector m_RulesetStats;
-
+  private ArrayList<RuleStats> m_RulesetStats;
 
   /** What to do if instance is uncovered */
-  private int m_uncovAction  = UNCOVACTION_STRETCH;
+  private int m_uncovAction = UNCOVACTION_STRETCH;
 
   /** An uncovered instance is covered using rule stretching. */
-  private static final int UNCOVACTION_STRETCH     = 0;
+  private static final int UNCOVACTION_STRETCH = 0;
 
-  /** An uncovered instance is classified according to the training data class distribution. */
-  private static final int UNCOVACTION_APRIORI     = 1;
-  
+  /**
+   * An uncovered instance is classified according to the training data class
+   * distribution.
+   */
+  private static final int UNCOVACTION_APRIORI = 1;
+
   /** An uncovered instance is not classified at all. */
-  private static final int UNCOVACTION_REJECT      = 2;
-  
-  /** The tags explaining the uncovered action.  */
-  private static final Tag [] TAGS_UNCOVACTION = {
+  private static final int UNCOVACTION_REJECT = 2;
+
+  /** The tags explaining the uncovered action. */
+  private static final Tag[] TAGS_UNCOVACTION = {
     new Tag(UNCOVACTION_STRETCH, "Apply rule stretching (standard)"),
     new Tag(UNCOVACTION_APRIORI, "Vote for the most frequent class"),
-    new Tag(UNCOVACTION_REJECT, "Reject the decision and abstain")
-  };
-
+    new Tag(UNCOVACTION_REJECT, "Reject the decision and abstain") };
 
   /** Whether using product T-norm (or else min T-norm) */
-  private int m_tNorm  = TNORM_PROD;
+  private int m_tNorm = TNORM_PROD;
 
   /** The Product T-Norm flag. */
-  private static final int TNORM_PROD     = 0;
+  private static final int TNORM_PROD = 0;
 
   /** The Minimum T-Norm flag. */
-  private static final int TNORM_MIN     = 1;  
+  private static final int TNORM_MIN = 1;
 
   /** The tags describing the T-norms */
-  private static final Tag [] TAGS_TNORM = {
+  private static final Tag[] TAGS_TNORM = {
     new Tag(TNORM_PROD, "Product T-Norm (standard)"),
-    new Tag(TNORM_MIN, "Minimum T-Norm")
-  };
-
+    new Tag(TNORM_MIN, "Minimum T-Norm") };
 
   /**
    * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
   public String globalInfo() {
 
     return "FURIA: Fuzzy Unordered Rule Induction Algorithm\n\n"
-    + "Details please see:\n\n"
-    + getTechnicalInformation().toString() + "\n\n"; 
+      + "Details please see:\n\n" + getTechnicalInformation().toString()
+      + "\n\n";
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
+    TechnicalInformation result;
 
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "Jens Christian Huehn and Eyke Huellermeier");
-    result.setValue(Field.TITLE, "FURIA: An Algorithm for Unordered Fuzzy Rule Induction");
+    result.setValue(Field.TITLE,
+      "FURIA: An Algorithm for Unordered Fuzzy Rule Induction");
     result.setValue(Field.YEAR, "2009");
     result.setValue(Field.JOURNAL, "Data Mining and Knowledge Discovery");
     return result;
   }
 
   /**
-   * Returns an enumeration describing the available options
-   * Valid options are: <p>
-   *  
+   * Returns an enumeration describing the available options Valid options are:
+   * <p>
+   * 
    * -F number <br>
-   * The number of folds for reduced error pruning. One fold is
-   * used as the pruning set. (Default: 3) <p>
+   * The number of folds for reduced error pruning. One fold is used as the
+   * pruning set. (Default: 3)
+   * <p>
    * 
    * -N number <br>
-   * The minimal weights of instances within a split.
-   * (Default: 2) <p>
-   *    
+   * The minimal weights of instances within a split. (Default: 2)
+   * <p>
+   * 
    * -O number <br>
-   * Set the number of runs of optimizations. (Default: 2)<p>
-   *
+   * Set the number of runs of optimizations. (Default: 2)
+   * <p>
+   * 
    * -D <br>
    * Whether turn on the debug mode
-   *
+   * 
    * -S number <br>
-   * The seed of randomization used in FURIA.(Default: 1)<p>
-   *
+   * The seed of randomization used in FURIA.(Default: 1)
+   * <p>
+   * 
    * -E <br>
-   * Whether NOT check the error rate >= 0.5 in stopping criteria.
-   * (default: check)<p> 
-   *
+   * Whether NOT check the error rate >= 0.5 in stopping criteria. (default:
+   * check)
+   * <p>
+   * 
    * -s <br>
-   *  The action performed for uncovered instances.
-   *  (default: use rule stretching)<p>
-   *  
+   * The action performed for uncovered instances. (default: use rule
+   * stretching)
+   * <p>
+   * 
    * -p <br>
-   *  The T-Norm used as fuzzy AND-operator.
-   *  (default: Product T-Norm)<p>
-   *
+   * The T-Norm used as fuzzy AND-operator. (default: Product T-Norm)
+   * <p>
+   * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(8);
-    newVector.addElement(new Option("\tSet number of folds for REP\n" +
-	"\tOne fold is used as pruning set.\n" +
-	"\t(default 3)","F", 1, "-F <number of folds>"));
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(8);
+    newVector.addElement(new Option("\tSet number of folds for REP\n"
+      + "\tOne fold is used as pruning set.\n" + "\t(default 3)", "F", 1,
+      "-F <number of folds>"));
 
-    newVector.addElement(new Option("\tSet the minimal weights of instances\n" +
-	"\twithin a split.\n" +
-	"\t(default 2.0)","N", 1, "-N <min. weights>"));
+    newVector
+      .addElement(new Option("\tSet the minimal weights of instances\n"
+        + "\twithin a split.\n" + "\t(default 2.0)", "N", 1,
+        "-N <min. weights>"));
 
-    newVector.addElement(new Option("\tSet the number of runs of\n"+
-	"\toptimizations. (Default: 2)", "O",
-	1,"-O <number of runs>"));
+    newVector.addElement(new Option("\tSet the number of runs of\n"
+      + "\toptimizations. (Default: 2)", "O", 1, "-O <number of runs>"));
 
-    newVector.addElement(new Option("\tSet whether turn on the\n"+
-	"\tdebug mode (Default: false)", "D",
-	0,"-D"));
+    newVector.addElement(new Option("\tSet whether turn on the\n"
+      + "\tdebug mode (Default: false)", "D", 0, "-D"));
 
-    newVector.addElement(new Option("\tThe seed of randomization\n"+
-	"\t(Default: 1)", "S",
-	1,"-S <seed>"));
+    newVector.addElement(new Option("\tThe seed of randomization\n"
+      + "\t(Default: 1)", "S", 1, "-S <seed>"));
 
     newVector.addElement(new Option("\tWhether NOT check the error rate>=0.5\n"
-	+"\tin stopping criteria "
-	+"\t(default: check)", "E", 
-	0, "-E")); 
+      + "\tin stopping criteria " + "\t(default: check)", "E", 0, "-E"));
 
-    newVector.addElement(new Option("\tThe action performed for uncovered instances.\n"
-	+"\t(default: use stretching)", "s", 
-	1, "-s"));
+    newVector.addElement(new Option(
+      "\tThe action performed for uncovered instances.\n"
+        + "\t(default: use stretching)", "s", 1, "-s"));
 
-    newVector.addElement(new Option("\tThe T-norm used as fuzzy AND-operator.\n"
-	+"\t(default: Product T-norm)", "p", 
-	1, "-p"));
+    newVector.addElement(new Option(
+      "\tThe T-norm used as fuzzy AND-operator.\n"
+        + "\t(default: Product T-norm)", "p", 1, "-p"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -F &lt;number of folds&gt;
+   * <pre>
+   * -F &lt;number of folds&gt;
    *  Set number of folds for REP
    *  One fold is used as pruning set.
-   *  (default 3)</pre>
+   *  (default 3)
+   * </pre>
    * 
-   * <pre> -N &lt;min. weights&gt;
+   * <pre>
+   * -N &lt;min. weights&gt;
    *  Set the minimal weights of instances
    *  within a split.
-   *  (default 2.0)</pre>
+   *  (default 2.0)
+   * </pre>
    * 
-   * <pre> -O &lt;number of runs&gt;
+   * <pre>
+   * -O &lt;number of runs&gt;
    *  Set the number of runs of
-   *  optimizations. (Default: 2)</pre>
+   *  optimizations. (Default: 2)
+   * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  Set whether turn on the
-   *  debug mode (Default: false)</pre>
+   *  debug mode (Default: false)
+   * </pre>
    * 
-   * <pre> -S &lt;seed&gt;
+   * <pre>
+   * -S &lt;seed&gt;
    *  The seed of randomization
-   *  (Default: 1)</pre>
+   *  (Default: 1)
+   * </pre>
    * 
-   * <pre> -E
+   * <pre>
+   * -E
    *  Whether NOT check the error rate&gt;=0.5
-   *  in stopping criteria  (default: check)</pre>
+   *  in stopping criteria  (default: check)
+   * </pre>
    * 
-   * <pre> -s
+   * <pre>
+   * -s
    *  The action performed for uncovered instances.
-   *  (default: use stretching)</pre>
+   *  (default: use stretching)
+   * </pre>
    * 
-   * <pre> -p
+   * <pre>
+   * -p
    *  The T-norm used as fuzzy AND-operator.
-   *  (default: Product T-norm)</pre>
+   *  (default: Product T-norm)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     String numFoldsString = Utils.getOption('F', options);
-    if (numFoldsString.length() != 0) 
+    if (numFoldsString.length() != 0) {
       m_Folds = Integer.parseInt(numFoldsString);
-    else 
-      m_Folds = 3;   
+    } else {
+      m_Folds = 3;
+    }
 
     String minNoString = Utils.getOption('N', options);
-    if (minNoString.length() != 0) 
+    if (minNoString.length() != 0) {
       m_MinNo = Double.parseDouble(minNoString);
-    else 
+    } else {
       m_MinNo = 2.0;
+    }
 
     String seedString = Utils.getOption('S', options);
-    if (seedString.length() != 0)
+    if (seedString.length() != 0) {
       m_Seed = Long.parseLong(seedString);
-    else 
+    } else {
       m_Seed = 1;
+    }
 
     String runString = Utils.getOption('O', options);
-    if (runString.length() != 0)
+    if (runString.length() != 0) {
       m_Optimizations = Integer.parseInt(runString);
-    else 
+    } else {
       m_Optimizations = 2;
+    }
 
     String tNormString = Utils.getOption('p', options);
-    if (tNormString.length() != 0)
+    if (tNormString.length() != 0) {
       m_tNorm = Integer.parseInt(tNormString);
-    else 
+    } else {
       m_tNorm = TNORM_PROD;
+    }
 
     String uncovActionString = Utils.getOption('s', options);
-    if (uncovActionString.length() != 0)
+    if (uncovActionString.length() != 0) {
       m_uncovAction = Integer.parseInt(uncovActionString);
-    else 
+    } else {
       m_uncovAction = UNCOVACTION_STRETCH;
+    }
 
     m_Debug = Utils.getFlag('D', options);
 
     m_CheckErr = !Utils.getFlag('E', options);
+
+    super.setOptions(options);
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] options = new String [14];
-    int current = 0;
-    options[current++] = "-F"; options[current++] = "" + m_Folds;
-    options[current++] = "-N"; options[current++] = "" + m_MinNo;
-    options[current++] = "-O"; options[current++] = "" + m_Optimizations;
-    options[current++] = "-S"; options[current++] = "" + m_Seed;
-    options[current++] = "-p"; options[current++] = "" + m_tNorm;
-    options[current++] = "-s"; options[current++] = "" + m_uncovAction;
+    Vector<String> options = new Vector<String>();
 
-    if(m_Debug)
-      options[current++] = "-D";
+    options.add("-F");
+    options.add("" + m_Folds);
+    options.add("-N");
+    options.add("" + m_MinNo);
+    options.add("-O");
+    options.add("" + m_Optimizations);
+    options.add("-S");
+    options.add("" + m_Seed);
+    options.add("-p");
+    options.add("" + m_tNorm);
+    options.add("-s");
+    options.add("" + m_uncovAction);
 
-    if(!m_CheckErr)
-      options[current++] = "-E";
+    if (m_Debug) {
+      options.add("-D");
+    }
 
-    while(current < options.length)
-      options[current++] = "";
+    if (!m_CheckErr) {
+      options.add("-E");
+    }
 
-    return options;
+    Collections.addAll(options, super.getOptions());
+
+    return options.toArray(new String[0]);
   }
 
   /**
    * Returns an enumeration of the additional measure names
+   * 
    * @return an enumeration of the measure names
    */
-  public Enumeration enumerateMeasures() {
-    Vector newVector = new Vector(1);
+  @Override
+  public Enumeration<String> enumerateMeasures() {
+    Vector<String> newVector = new Vector<String>(1);
     newVector.addElement("measureNumRules");
     return newVector.elements();
   }
 
   /**
    * Returns the value of the named measure
+   * 
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @throws IllegalArgumentException if the named measure is not supported
    */
+  @Override
   public double getMeasure(String additionalMeasureName) {
-    if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) 
+    if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
       return m_Ruleset.size();
-    else 
-      throw new IllegalArgumentException(additionalMeasureName+" not supported (FURIA)");
-  }  
+    } else {
+      throw new IllegalArgumentException(additionalMeasureName
+        + " not supported (FURIA)");
+    }
+  }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String foldsTipText() {
     return "Determines the amount of data used for pruning. One fold is used for "
-    + "pruning, the rest for growing the rules.";
+      + "pruning, the rest for growing the rules.";
   }
 
   /**
@@ -459,8 +521,8 @@ public class FURIA
    * 
    * @param fold the number of folds
    */
-  public void setFolds(int fold) { 
-    m_Folds = fold; 
+  public void setFolds(int fold) {
+    m_Folds = fold;
   }
 
   /**
@@ -468,14 +530,15 @@ public class FURIA
    * 
    * @return the number of folds
    */
-  public int getFolds(){ 
-    return m_Folds; 
+  public int getFolds() {
+    return m_Folds;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minNoTipText() {
     return "The minimum total weight of the instances in a rule.";
@@ -495,14 +558,15 @@ public class FURIA
    * 
    * @return the minimum total weight of the instances in a rule
    */
-  public double getMinNo(){ 
+  public double getMinNo() {
     return m_MinNo;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String seedTipText() {
     return "The seed used for randomizing the data.";
@@ -522,14 +586,15 @@ public class FURIA
    * 
    * @return the seed value
    */
-  public long getSeed(){
+  public long getSeed() {
     return m_Seed;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String optimizationsTipText() {
     return "The number of optimization runs.";
@@ -555,9 +620,11 @@ public class FURIA
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
+  @Override
   public String debugTipText() {
     return "Whether debug information is output to the console.";
   }
@@ -567,6 +634,7 @@ public class FURIA
    * 
    * @param d whether debug information is output to the console
    */
+  @Override
   public void setDebug(boolean d) {
     m_Debug = d;
   }
@@ -576,18 +644,20 @@ public class FURIA
    * 
    * @return whether debug information is output to the console
    */
-  public boolean getDebug(){
+  @Override
+  public boolean getDebug() {
     return m_Debug;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String checkErrorRateTipText() {
-    return "Whether check for error rate >= 1/2 is included" +
-    " in stopping criterion.";
+    return "Whether check for error rate >= 1/2 is included"
+      + " in stopping criterion.";
   }
 
   /**
@@ -595,7 +665,7 @@ public class FURIA
    * 
    * @param d whether to check for error rate is in stopping criterion
    */
-  public void setCheckErrorRate(boolean d) { 
+  public void setCheckErrorRate(boolean d) {
     m_CheckErr = d;
   }
 
@@ -604,23 +674,24 @@ public class FURIA
    * 
    * @return true if checking for error rate is in stopping criterion
    */
-  public boolean getCheckErrorRate(){ 
-    return m_CheckErr; 
-  } 
+  public boolean getCheckErrorRate() {
+    return m_CheckErr;
+  }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String uncovActionTipText() {
     return "Selet the action that is performed for uncovered instances.";
   }
 
   /**
-   * Gets the action that is performed for uncovered instances.
-   * It can be UNCOVACTION_STRETCH, UNCOVACTION_APRIORI or
-   * UNCOVACTION_REJECT.
+   * Gets the action that is performed for uncovered instances. It can be
+   * UNCOVACTION_STRETCH, UNCOVACTION_APRIORI or UNCOVACTION_REJECT.
+   * 
    * @return the current TNorm.
    */
   public SelectedTag getUncovAction() {
@@ -628,9 +699,9 @@ public class FURIA
   }
 
   /**
-   * Sets the action that is performed for uncovered instances.   
-   * It can be UNCOVACTION_STRETCH, UNCOVACTION_APRIORI or
-   * UNCOVACTION_REJECT.
+   * Sets the action that is performed for uncovered instances. It can be
+   * UNCOVACTION_STRETCH, UNCOVACTION_APRIORI or UNCOVACTION_REJECT.
+   * 
    * @param newUncovAction the new action.
    */
   public void setUncovAction(SelectedTag newUncovAction) {
@@ -641,8 +712,9 @@ public class FURIA
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String TNormTipText() {
     return "Choose the T-Norm that is used as fuzzy AND-operator.";
@@ -650,7 +722,7 @@ public class FURIA
 
   /**
    * Gets the TNorm used. Will be either TNORM_PROD or TNORM_MIN.
-   *
+   * 
    * @return the current TNorm.
    */
   public SelectedTag getTNorm() {
@@ -659,7 +731,7 @@ public class FURIA
 
   /**
    * Sets the TNorm used. Will be either TNORM_PROD or TNORM_MIN.
-   *
+   * 
    * @param newTNorm the new TNorm.
    */
   public void setTNorm(SelectedTag newTNorm) {
@@ -668,41 +740,47 @@ public class FURIA
     }
   }
 
-
-  /** 
-   * Get the ruleset generated by FURIA 
-   *
+  /**
+   * Get the ruleset generated by FURIA
+   * 
    * @return the ruleset
    */
-  public FastVector getRuleset(){ return m_Ruleset; }
+  public ArrayList<Rule> getRuleset() {
+    return m_Ruleset;
+  }
 
-  /** 
+  /**
    * Get the statistics of the ruleset in the given position
-   *
+   * 
    * @param pos the position of the stats, assuming correct
    * @return the statistics of the ruleset in the given position
    */
   public RuleStats getRuleStats(int pos) {
-    return (RuleStats)m_RulesetStats.elementAt(pos);
+    return m_RulesetStats.get(pos);
   }
 
-  /** 
-   * The single antecedent in the rule, which is composed of an attribute and 
-   * the corresponding value.  There are two inherited classes, namely NumericAntd
-   * and NominalAntd in which the attributes are numeric and nominal respectively.
-   */    
-  protected abstract class Antd 
-  implements WeightedInstancesHandler, Copyable, Serializable {
+  /**
+   * The single antecedent in the rule, which is composed of an attribute and
+   * the corresponding value. There are two inherited classes, namely
+   * NumericAntd and NominalAntd in which the attributes are numeric and nominal
+   * respectively.
+   */
+  @SuppressWarnings("serial")
+  protected abstract class Antd implements WeightedInstancesHandler, Copyable,
+    Serializable {
 
     /** The attribute of the antecedent */
     public Attribute att;
 
-    /** The attribute value of the antecedent.  
-       For numeric attribute, value is either 0(1st bag) or 1(2nd bag) */
-    public double value; 
+    /**
+     * The attribute value of the antecedent. For numeric attribute, value is
+     * either 0(1st bag) or 1(2nd bag)
+     */
+    public double value;
 
-    /** The maximum infoGain achieved by this antecedent test 
-     * in the growing data */
+    /**
+     * The maximum infoGain achieved by this antecedent test in the growing data
+     */
     protected double maxInfoGain;
 
     /** The accurate rate of this antecedent test on the growing data */
@@ -714,20 +792,21 @@ public class FURIA
     /** The accurate data for this antecedent in the growing data */
     protected double accu;
 
-
-    /** Confidence / weight of this rule for the rule stretching procedure that
-     * is returned when this is the last antecedent of the rule.  */
+    /**
+     * Confidence / weight of this rule for the rule stretching procedure that
+     * is returned when this is the last antecedent of the rule.
+     */
     double weightOfTheRuleWhenItIsPrunedAfterThisAntecedent = 0;
 
-    /** Confidence / weight of this antecedent.  */
+    /** Confidence / weight of this antecedent. */
     public double m_confidence = 0.0;
 
-    /** 
+    /**
      * Constructor
      */
-    public Antd(Attribute a){
-      att=a;
-      value=Double.NaN; 
+    public Antd(Attribute a) {
+      att = a;
+      value = Double.NaN;
       maxInfoGain = 0;
       accuRate = Double.NaN;
       cover = Double.NaN;
@@ -735,32 +814,52 @@ public class FURIA
     }
 
     /* The abstract members for inheritance */
-    public abstract Instances[] splitData(Instances data, double defAcRt, 
-	double cla);
+    public abstract Instances[] splitData(Instances data, double defAcRt,
+      double cla);
+
     public abstract double covers(Instance inst);
+
+    @Override
     public abstract String toString();
 
-    /** 
+    /**
      * Implements Copyable
      * 
      * @return a copy of this object
      */
-    public abstract Object copy(); 
+    @Override
+    public abstract Object copy();
 
     /* Get functions of this antecedent */
-    public Attribute getAttr(){ return att; }
-    public double getAttrValue(){ return value; }
-    public double getMaxInfoGain(){ return maxInfoGain; }
-    public double getAccuRate(){ return accuRate; } 
-    public double getAccu(){ return accu; } 
-    public double getCover(){ return cover; } 
+    public Attribute getAttr() {
+      return att;
+    }
+
+    public double getAttrValue() {
+      return value;
+    }
+
+    public double getMaxInfoGain() {
+      return maxInfoGain;
+    }
+
+    public double getAccuRate() {
+      return accuRate;
+    }
+
+    public double getAccu() {
+      return accu;
+    }
+
+    public double getCover() {
+      return cover;
+    }
   }
 
-  /** 
+  /**
    * The antecedent with numeric attribute
    */
-  public class 
-  NumericAntd extends Antd {
+  public class NumericAntd extends Antd {
 
     /** for serialization */
     static final long serialVersionUID = 5699457269983735442L;
@@ -769,36 +868,38 @@ public class FURIA
     public double splitPoint;
 
     /** The edge point for the fuzzy set of this numeric antecedent */
-    public double supportBound; 
-    
-    /** A flag determining whether this antecedent was successfully fuzzified yet*/
+    public double supportBound;
+
+    /**
+     * A flag determining whether this antecedent was successfully fuzzified yet
+     */
     public boolean fuzzyYet = false;
 
-
-    /** 
+    /**
      * Constructor
      */
-    public NumericAntd(Attribute a){ 
+    public NumericAntd(Attribute a) {
       super(a);
       splitPoint = Double.NaN;
       supportBound = Double.NaN;
-    }    
+    }
 
-    /** 
+    /**
      * Get split point of this numeric antecedent
      * 
      * @return the split point of this numeric antecedent
      */
-    public double getSplitPoint(){ 
+    public double getSplitPoint() {
       return splitPoint;
     }
 
-    /** 
+    /**
      * Implements Copyable
      * 
      * @return a copy of this object
      */
-    public Object copy(){      
+    @Override
+    public Object copy() {
       NumericAntd na = new NumericAntd(getAttr());
       na.m_confidence = m_confidence;
       na.value = this.value;
@@ -808,148 +909,152 @@ public class FURIA
       return na;
     }
 
-
-
     /**
-     * Implements the splitData function.  
-     * This procedure is to split the data into two bags according 
-     * to the information gain of the numeric attribute value
-     * The maximum infoGain is also calculated.  
+     * Implements the splitData function. This procedure is to split the data
+     * into two bags according to the information gain of the numeric attribute
+     * value The maximum infoGain is also calculated.
      * 
      * @param insts the data to be split
      * @param defAcRt the default accuracy rate for data
      * @param cl the class label to be predicted
      * @return the array of data after split
      */
-    public Instances[] splitData(Instances insts, double defAcRt, 
-	double cl){
+    @Override
+    public Instances[] splitData(Instances insts, double defAcRt, double cl) {
       Instances data = insts;
-      int total=data.numInstances();// Total number of instances without 
+      int total = data.numInstances();// Total number of instances without
       // missing value for att
 
-      int split=1;                  // Current split position
-      int prev=0;                   // Previous split position
-      int finalSplit=split;         // Final split position
+      int split = 1; // Current split position
+      int prev = 0; // Previous split position
+      int finalSplit = split; // Final split position
       maxInfoGain = 0;
-      value = 0;	
+      value = 0;
 
-      double fstCover=0, sndCover=0, fstAccu=0, sndAccu=0;
+      double fstCover = 0, sndCover = 0, fstAccu = 0, sndAccu = 0;
 
       data.sort(att);
-      // Find the las instance without missing value 
-      for(int x=0; x<data.numInstances(); x++){
-	Instance inst = data.instance(x);
-	if(inst.isMissing(att)){
-	  total = x;
-	  break;
-	}
+      // Find the las instance without missing value
+      for (int x = 0; x < data.numInstances(); x++) {
+        Instance inst = data.instance(x);
+        if (inst.isMissing(att)) {
+          total = x;
+          break;
+        }
 
-	sndCover += inst.weight();
-	if(Utils.eq(inst.classValue(), cl))
-	  sndAccu += inst.weight();		
-      }	    
+        sndCover += inst.weight();
+        if (Utils.eq(inst.classValue(), cl)) {
+          sndAccu += inst.weight();
+        }
+      }
 
-      if(total == 0) return null; // Data all missing for the attribute
-      splitPoint = data.instance(total-1).value(att);	
+      if (total == 0) {
+        return null; // Data all missing for the attribute
+      }
+      splitPoint = data.instance(total - 1).value(att);
 
-      for(; split <= total; split++){
-	if((split == total) ||
-	    (data.instance(split).value(att) > // Can't split within
-	    data.instance(prev).value(att))){ // same value	    
+      for (; split <= total; split++) {
+        if ((split == total) || (data.instance(split).value(att) > // Can't
+                                                                   // split
+                                                                   // within
+          data.instance(prev).value(att))) { // same value
 
-	  for(int y=prev; y<split; y++){
-	    Instance inst = data.instance(y);
-	    fstCover += inst.weight(); 
-	    if(Utils.eq(data.instance(y).classValue(), cl)){
-	      fstAccu += inst.weight();  // First bag positive# ++
-	    }	     		   
-	  }
+          for (int y = prev; y < split; y++) {
+            Instance inst = data.instance(y);
+            fstCover += inst.weight();
+            if (Utils.eq(data.instance(y).classValue(), cl)) {
+              fstAccu += inst.weight(); // First bag positive# ++
+            }
+          }
 
-	  double fstAccuRate = (fstAccu+1.0)/(fstCover+1.0),
-	  sndAccuRate = (sndAccu+1.0)/(sndCover+1.0);
+          double fstAccuRate = (fstAccu + 1.0) / (fstCover + 1.0), sndAccuRate = (sndAccu + 1.0)
+            / (sndCover + 1.0);
 
-	  /* Which bag has higher information gain? */
-	  boolean isFirst; 
-	  double fstInfoGain, sndInfoGain;
-	  double accRate, infoGain, coverage, accurate;
+          /* Which bag has higher information gain? */
+          boolean isFirst;
+          double fstInfoGain, sndInfoGain;
+          double accRate, infoGain, coverage, accurate;
 
-	  fstInfoGain = 
-	    //Utils.eq(defAcRt, 1.0) ? 
-	    //fstAccu/(double)numConds : 
-	    fstAccu*(Utils.log2(fstAccuRate)-Utils.log2(defAcRt));
+          fstInfoGain =
+          // Utils.eq(defAcRt, 1.0) ?
+          // fstAccu/(double)numConds :
+          fstAccu * (Utils.log2(fstAccuRate) - Utils.log2(defAcRt));
 
-	  sndInfoGain = 
-	    //Utils.eq(defAcRt, 1.0) ? 
-	    //sndAccu/(double)numConds : 
-	    sndAccu*(Utils.log2(sndAccuRate)-Utils.log2(defAcRt));
+          sndInfoGain =
+          // Utils.eq(defAcRt, 1.0) ?
+          // sndAccu/(double)numConds :
+          sndAccu * (Utils.log2(sndAccuRate) - Utils.log2(defAcRt));
 
-	  if(fstInfoGain > sndInfoGain){
-	    isFirst = true;
-	    infoGain = fstInfoGain;
-	    accRate = fstAccuRate;
-	    accurate = fstAccu;
-	    coverage = fstCover;
-	  }
-	  else{
-	    isFirst = false;
-	    infoGain = sndInfoGain;
-	    accRate = sndAccuRate;
-	    accurate = sndAccu;
-	    coverage = sndCover;
-	  }
+          if (fstInfoGain > sndInfoGain) {
+            isFirst = true;
+            infoGain = fstInfoGain;
+            accRate = fstAccuRate;
+            accurate = fstAccu;
+            coverage = fstCover;
+          } else {
+            isFirst = false;
+            infoGain = sndInfoGain;
+            accRate = sndAccuRate;
+            accurate = sndAccu;
+            coverage = sndCover;
+          }
 
-	  /* Check whether so far the max infoGain */
-	  if(infoGain > maxInfoGain){
-	    splitPoint = data.instance(prev).value(att);
-	    value = (isFirst) ? 0 : 1;
-	    accuRate = accRate;
-	    accu = accurate;
-	    cover = coverage;
-	    maxInfoGain = infoGain;
-	    finalSplit = (isFirst) ? split : prev;
-	  }
+          /* Check whether so far the max infoGain */
+          if (infoGain > maxInfoGain) {
+            splitPoint = data.instance(prev).value(att);
+            value = (isFirst) ? 0 : 1;
+            accuRate = accRate;
+            accu = accurate;
+            cover = coverage;
+            maxInfoGain = infoGain;
+            finalSplit = (isFirst) ? split : prev;
+          }
 
-	  for(int y=prev; y<split; y++){
-	    Instance inst = data.instance(y);
-	    sndCover -= inst.weight(); 
-	    if(Utils.eq(data.instance(y).classValue(), cl)){
-	      sndAccu -= inst.weight();  // Second bag positive# --
-	    }	     		   
-	  }		    
-	  prev=split;
-	}
+          for (int y = prev; y < split; y++) {
+            Instance inst = data.instance(y);
+            sndCover -= inst.weight();
+            if (Utils.eq(data.instance(y).classValue(), cl)) {
+              sndAccu -= inst.weight(); // Second bag positive# --
+            }
+          }
+          prev = split;
+        }
       }
 
       /* Split the data */
       Instances[] splitData = new Instances[2];
       splitData[0] = new Instances(data, 0, finalSplit);
-      splitData[1] = new Instances(data, finalSplit, total-finalSplit);
+      splitData[1] = new Instances(data, finalSplit, total - finalSplit);
 
       return splitData;
     }
-
 
     /**
      * The degree of coverage for the instance given that antecedent
      * 
      * @param inst the instance in question
-     * @return the numeric value indicating the membership of the instance 
-     *         for this antecedent
+     * @return the numeric value indicating the membership of the instance for
+     *         this antecedent
      */
-    public double covers(Instance inst){
-      double isCover=0;
-      if(!inst.isMissing(att)){
-	if((int)value == 0){ // First bag
-	  if(inst.value(att) <= splitPoint)
-	    isCover=1;
-	  else if(fuzzyYet && (inst.value(att) > splitPoint) && (inst.value(att) < supportBound )) 
-	    isCover= 1-((inst.value(att) - splitPoint)/(supportBound-splitPoint));
-	}else{ 
-	  if(inst.value(att) >= splitPoint) // Second bag
-	    isCover=1;
-	  else if(fuzzyYet && inst.value(att) < splitPoint && (inst.value(att) > supportBound )) 
-	    isCover= 1-((splitPoint - inst.value(att)) /(splitPoint-supportBound));
-	}
+    @Override
+    public double covers(Instance inst) {
+      double isCover = 0;
+      if (!inst.isMissing(att)) {
+        if ((int) value == 0) { // First bag
+          if (inst.value(att) <= splitPoint) {
+            isCover = 1;
+          } else if (fuzzyYet && (inst.value(att) > splitPoint)
+            && (inst.value(att) < supportBound)) {
+            isCover = 1 - ((inst.value(att) - splitPoint) / (supportBound - splitPoint));
+          }
+        } else {
+          if (inst.value(att) >= splitPoint) {
+            isCover = 1;
+          } else if (fuzzyYet && inst.value(att) < splitPoint
+            && (inst.value(att) > supportBound)) {
+            isCover = 1 - ((splitPoint - inst.value(att)) / (splitPoint - supportBound));
+          }
+        }
       }
 
       return isCover;
@@ -957,111 +1062,117 @@ public class FURIA
 
     /**
      * Prints this antecedent
-     *
+     * 
      * @return a textual description of this antecedent
      */
+    @Override
     public String toString() {
-      if (value == 0){
-	if (fuzzyYet){
-	  return (att.name() + " in [-inf, -inf, " + Utils.doubleToString(splitPoint, 6) + ", " + Utils.doubleToString(supportBound, 6) + "]");
-	}
-	return (att.name() + " in [-inf, " + Utils.doubleToString(splitPoint, 6) + "]");
-      }else{
-	if (fuzzyYet){
-	  return (att.name() + " in [" + Utils.doubleToString(supportBound, 6) + ", " + Utils.doubleToString(splitPoint, 6) + ", inf, inf]");
-	}
-	return (att.name() + " in [" + Utils.doubleToString(splitPoint, 6) + ", inf]");
+      if (value == 0) {
+        if (fuzzyYet) {
+          return (att.name() + " in [-inf, -inf, "
+            + Utils.doubleToString(splitPoint, 6) + ", "
+            + Utils.doubleToString(supportBound, 6) + "]");
+        }
+        return (att.name() + " in [-inf, "
+          + Utils.doubleToString(splitPoint, 6) + "]");
+      } else {
+        if (fuzzyYet) {
+          return (att.name() + " in [" + Utils.doubleToString(supportBound, 6)
+            + ", " + Utils.doubleToString(splitPoint, 6) + ", inf, inf]");
+        }
+        return (att.name() + " in [" + Utils.doubleToString(splitPoint, 6) + ", inf]");
       }
 
     }
 
   }
 
-
-  /** 
+  /**
    * The antecedent with nominal attribute
    */
-  protected class NominalAntd 
-  extends Antd{
+  protected class NominalAntd extends Antd {
 
     /** for serialization */
     static final long serialVersionUID = -9102297038837585135L;
 
-    /* The parameters of infoGain calculated for each attribute value
-     * in the growing data */
-    private double[] accurate;
-    private double[] coverage;
+    /*
+     * The parameters of infoGain calculated for each attribute value in the
+     * growing data
+     */
+    private final double[] accurate;
+    private final double[] coverage;
 
-    /** 
+    /**
      * Constructor
      */
-    public NominalAntd(Attribute a){ 
-      super(a);    
+    public NominalAntd(Attribute a) {
+      super(a);
       int bag = att.numValues();
       accurate = new double[bag];
       coverage = new double[bag];
-    }   
+    }
 
-    /** 
+    /**
      * Implements Copyable
      * 
      * @return a copy of this object
      */
-    public Object copy(){
+    @Override
+    public Object copy() {
       Antd antec = new NominalAntd(getAttr());
       antec.m_confidence = m_confidence;
       antec.value = this.value;
-      return antec;	    
+      return antec;
     }
 
     /**
-     * Implements the splitData function.  
-     * This procedure is to split the data into bags according 
-     * to the nominal attribute value
-     * The infoGain for each bag is also calculated.  
+     * Implements the splitData function. This procedure is to split the data
+     * into bags according to the nominal attribute value The infoGain for each
+     * bag is also calculated.
      * 
      * @param data the data to be split
      * @param defAcRt the default accuracy rate for data
      * @param cl the class label to be predicted
      * @return the array of data after split
      */
-    public Instances[] splitData(Instances data, double defAcRt, 
-	double cl){
+    @Override
+    public Instances[] splitData(Instances data, double defAcRt, double cl) {
       int bag = att.numValues();
       Instances[] splitData = new Instances[bag];
 
-      for(int x=0; x<bag; x++){
-	splitData[x] = new Instances(data, data.numInstances());
-	accurate[x] = 0;
-	coverage[x] = 0;
+      for (int x = 0; x < bag; x++) {
+        splitData[x] = new Instances(data, data.numInstances());
+        accurate[x] = 0;
+        coverage[x] = 0;
       }
 
-      for(int x=0; x<data.numInstances(); x++){
-	Instance inst=data.instance(x);
-	if(!inst.isMissing(att)){
-	  int v = (int)inst.value(att);
-	  splitData[v].add(inst);
-	  coverage[v] += inst.weight();
-	  if((int)inst.classValue() == (int)cl)
-	    accurate[v] += inst.weight();
-	}
+      for (int x = 0; x < data.numInstances(); x++) {
+        Instance inst = data.instance(x);
+        if (!inst.isMissing(att)) {
+          int v = (int) inst.value(att);
+          splitData[v].add(inst);
+          coverage[v] += inst.weight();
+          if ((int) inst.classValue() == (int) cl) {
+            accurate[v] += inst.weight();
+          }
+        }
       }
 
-      for(int x=0; x<bag; x++){
-	double t = coverage[x]+1.0;
-	double p = accurate[x] + 1.0;		
-	double infoGain = 
-	  //Utils.eq(defAcRt, 1.0) ? 
-	  //accurate[x]/(double)numConds : 
-	  accurate[x]*(Utils.log2(p/t)-Utils.log2(defAcRt));
+      for (int x = 0; x < bag; x++) {
+        double t = coverage[x] + 1.0;
+        double p = accurate[x] + 1.0;
+        double infoGain =
+        // Utils.eq(defAcRt, 1.0) ?
+        // accurate[x]/(double)numConds :
+        accurate[x] * (Utils.log2(p / t) - Utils.log2(defAcRt));
 
-	if(infoGain > maxInfoGain){
-	  maxInfoGain = infoGain;
-	  cover = coverage[x];
-	  accu = accurate[x];
-	  accuRate = p/t;
-	  value = (double)x;
-	}
+        if (infoGain > maxInfoGain) {
+          maxInfoGain = infoGain;
+          cover = coverage[x];
+          accu = accurate[x];
+          accuRate = p / t;
+          value = x;
+        }
       }
 
       return splitData;
@@ -1071,53 +1182,54 @@ public class FURIA
      * Whether the instance is covered by this antecedent
      * 
      * @param inst the instance in question
-     * @return the boolean value indicating whether the instance is
-     *         covered by this antecedent
+     * @return the boolean value indicating whether the instance is covered by
+     *         this antecedent
      */
-    public double covers(Instance inst){
-      double isCover=0;
-      if(!inst.isMissing(att)){
-	if((int)inst.value(att) == (int)value)
-	  isCover=1;	    
+    @Override
+    public double covers(Instance inst) {
+      double isCover = 0;
+      if (!inst.isMissing(att)) {
+        if ((int) inst.value(att) == (int) value) {
+          isCover = 1;
+        }
       }
       return isCover;
     }
 
     /**
      * Prints this antecedent
-     *
+     * 
      * @return a textual description of this antecedent
      */
+    @Override
     public String toString() {
-      return (att.name() + " = " +att.value((int)value));
-    } 
+      return (att.name() + " = " + att.value((int) value));
+    }
   }
 
-
   /**
-   * This class implements a single rule that predicts specified class.  
-   *
-   * A rule consists of antecedents "AND"ed together and the consequent 
-   * (class value) for the classification.  
-   * In this class, the Information Gain (p*[log(p/t) - log(P/T)]) is used to
-   * select an antecedent and Reduced Error Prunning (REP) with the metric
-   * of accuracy rate p/(p+n) or (TP+TN)/(P+N) is used to prune the rule. 
-   */    
-  public class RipperRule 
-  extends Rule{
+   * This class implements a single rule that predicts specified class.
+   * 
+   * A rule consists of antecedents "AND"ed together and the consequent (class
+   * value) for the classification. In this class, the Information Gain
+   * (p*[log(p/t) - log(P/T)]) is used to select an antecedent and Reduced Error
+   * Prunning (REP) with the metric of accuracy rate p/(p+n) or (TP+TN)/(P+N) is
+   * used to prune the rule.
+   */
+  public class RipperRule extends Rule {
 
     /** for serialization */
     static final long serialVersionUID = -2410020717305262952L;
 
     /** The internal representation of the class label to be predicted */
-    double m_Consequent = -1;	
+    double m_Consequent = -1;
 
-    /** The vector of antecedents of this rule*/
-    public FastVector m_Antds = null;
+    /** The vector of antecedents of this rule */
+    public ArrayList<Antd> m_Antds = null;
 
     /** Constructor */
-    public RipperRule(){    
-      m_Antds = new FastVector();	
+    public RipperRule() {
+      m_Antds = new ArrayList<Antd>();
     }
 
     /**
@@ -1126,7 +1238,7 @@ public class FURIA
      * @param cl the internal representation of the class label to be predicted
      */
     public void setConsequent(double cl) {
-      m_Consequent = cl; 
+      m_Consequent = cl;
     }
 
     /**
@@ -1134,564 +1246,631 @@ public class FURIA
      * 
      * @return the internal representation of the class label to be predicted
      */
-    public double getConsequent() { 
-      return m_Consequent; 
+    @Override
+    public double getConsequent() {
+      return m_Consequent;
     }
 
     /**
      * Get a shallow copy of this rule
-     *
+     * 
      * @return the copy
      */
-    public Object copy(){
+    @Override
+    public Object copy() {
       RipperRule copy = new RipperRule();
       copy.setConsequent(getConsequent());
-      copy.m_Antds = (FastVector)this.m_Antds.copyElements();
+      copy.m_Antds = new ArrayList<Antd>();
+      for (Antd a : this.m_Antds) {
+        copy.m_Antds.add((Antd) a.copy());
+      }
       return copy;
     }
-
-
 
     /**
      * The degree of coverage instance covered by this rule
      * 
      * @param datum the instance in question
-     * @return the degree to which the instance 
-     *         is covered by this rule
+     * @return the degree to which the instance is covered by this rule
      */
-    public double coverageDegree(Instance datum){
+    public double coverageDegree(Instance datum) {
       double coverage = 1;
 
-      for(int i=0; i<m_Antds.size(); i++){
-	Antd antd = (Antd)m_Antds.elementAt(i);
-	if(m_tNorm == TNORM_PROD){
-	  // Product T-Norm
-	  if (antd instanceof NumericAntd)
-	    coverage *= ((NumericAntd)antd).covers(datum);
-	  else
-	    coverage *= antd.covers(datum);
-	}else{
-	  // Min T-Norm
-	  if (antd instanceof NumericAntd)
-	    coverage = Math.min(coverage, ((NumericAntd)antd).covers(datum));
-	  else
-	    coverage = Math.min(coverage, antd.covers(datum));
-	}
+      for (int i = 0; i < m_Antds.size(); i++) {
+        Antd antd = m_Antds.get(i);
+        if (m_tNorm == TNORM_PROD) {
+          // Product T-Norm
+          if (antd instanceof NumericAntd) {
+            coverage *= ((NumericAntd) antd).covers(datum);
+          } else {
+            coverage *= antd.covers(datum);
+          }
+        } else {
+          // Min T-Norm
+          if (antd instanceof NumericAntd) {
+            coverage = Math.min(coverage, ((NumericAntd) antd).covers(datum));
+          } else {
+            coverage = Math.min(coverage, antd.covers(datum));
+          }
+        }
 
       }
 
       return coverage;
-    } 
+    }
 
     /**
      * Whether the instance covered by this rule
      * 
      * @param datum the instance in question
-     * @return the boolean value indicating whether the instance 
-     *         is covered by this rule
+     * @return the boolean value indicating whether the instance is covered by
+     *         this rule
      */
-    public boolean covers(Instance datum){ 
-      if (coverageDegree(datum) == 0){
-	return false;
-      }else{
-	return true;
+    @Override
+    public boolean covers(Instance datum) {
+      if (coverageDegree(datum) == 0) {
+        return false;
+      } else {
+        return true;
       }
-    }       
+    }
 
     /**
      * Whether this rule has antecedents, i.e. whether it is a default rule
      * 
      * @return the boolean value indicating whether the rule has antecedents
      */
-    public boolean hasAntds(){
-      if (m_Antds == null)
-	return false;
-      else
-	return (m_Antds.size() > 0);
-    }      
-
-    /** 
-     * the number of antecedents of the rule
-     *
-     * @return the size of this rule
-     */
-    public double size(){ return (double)m_Antds.size(); }		
-
+    @Override
+    public boolean hasAntds() {
+      if (m_Antds == null) {
+        return false;
+      } else {
+        return (m_Antds.size() > 0);
+      }
+    }
 
     /**
-     * Private function to compute default number of accurate instances
-     * in the specified data for the consequent of the rule
+     * the number of antecedents of the rule
+     * 
+     * @return the size of this rule
+     */
+    @Override
+    public double size() {
+      return m_Antds.size();
+    }
+
+    /**
+     * Private function to compute default number of accurate instances in the
+     * specified data for the consequent of the rule
      * 
      * @param data the data in question
      * @return the default accuracy number
      */
-    private double computeDefAccu(Instances data){ 
-      double defAccu=0;
-      for(int i=0; i<data.numInstances(); i++){
-	Instance inst = data.instance(i);
-	if((int)inst.classValue() == (int)m_Consequent)
-	  defAccu += inst.weight();
+    private double computeDefAccu(Instances data) {
+      double defAccu = 0;
+      for (int i = 0; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
+        if ((int) inst.classValue() == (int) m_Consequent) {
+          defAccu += inst.weight();
+        }
       }
       return defAccu;
     }
 
-
     /**
      * Build one rule using the growing data
-     *
+     * 
      * @param data the growing data used to build the rule
      * @throws Exception if the consequent is not set yet
-     */    
+     */
+    @Override
     public void grow(Instances data) throws Exception {
-      if(m_Consequent == -1)
-	throw new Exception(" Consequent not set yet.");
+      if (m_Consequent == -1) {
+        throw new Exception(" Consequent not set yet.");
+      }
 
-      Instances growData = data;	         
+      Instances growData = data;
       double sumOfWeights = growData.sumOfWeights();
-      if(!Utils.gr(sumOfWeights, 0.0))
-	return;
+      if (!Utils.gr(sumOfWeights, 0.0)) {
+        return;
+      }
 
       /* Compute the default accurate rate of the growing data */
       double defAccu = computeDefAccu(growData);
-      double defAcRt = (defAccu+1.0)/(sumOfWeights+1.0); 
+      double defAcRt = (defAccu + 1.0) / (sumOfWeights + 1.0);
 
-      /* Keep the record of which attributes have already been used*/    
-      boolean[] used=new boolean [growData.numAttributes()];
-      for (int k=0; k<used.length; k++)
-	used[k]=false;
-      int numUnused=used.length;
+      /* Keep the record of which attributes have already been used */
+      boolean[] used = new boolean[growData.numAttributes()];
+      for (int k = 0; k < used.length; k++) {
+        used[k] = false;
+      }
+      int numUnused = used.length;
 
       // If there are already antecedents existing
-      for(int j=0; j < m_Antds.size(); j++){
-	Antd antdj = (Antd)m_Antds.elementAt(j);
-	if(!antdj.getAttr().isNumeric()){ 
-	  used[antdj.getAttr().index()]=true;
-	  numUnused--;
-	} 
-      }	    
+      for (int j = 0; j < m_Antds.size(); j++) {
+        Antd antdj = m_Antds.get(j);
+        if (!antdj.getAttr().isNumeric()) {
+          used[antdj.getAttr().index()] = true;
+          numUnused--;
+        }
+      }
 
-      double maxInfoGain;	    
-      while (Utils.gr(growData.numInstances(), 0.0) && 
-	  (numUnused > 0) 
-	  && Utils.sm(defAcRt, 1.0)
-      ){   
+      double maxInfoGain;
+      while (Utils.gr(growData.numInstances(), 0.0) && (numUnused > 0)
+        && Utils.sm(defAcRt, 1.0)) {
 
-	// We require that infoGain be positive
-	/*if(numAntds == originalSize)
-	  maxInfoGain = 0.0; // At least one condition allowed
-	  else
-	  maxInfoGain = Utils.eq(defAcRt, 1.0) ? 
-	  defAccu/(double)numAntds : 0.0; */
-	maxInfoGain = 0.0; 
+        // We require that infoGain be positive
+        /*
+         * if(numAntds == originalSize) maxInfoGain = 0.0; // At least one
+         * condition allowed else maxInfoGain = Utils.eq(defAcRt, 1.0) ?
+         * defAccu/(double)numAntds : 0.0;
+         */
+        maxInfoGain = 0.0;
 
-	/* Build a list of antecedents */
-	Antd oneAntd=null;
-	Instances coverData = null;
-	Enumeration enumAttr=growData.enumerateAttributes();	      
+        /* Build a list of antecedents */
+        Antd oneAntd = null;
+        Instances coverData = null;
+        Enumeration<Attribute> enumAttr = growData.enumerateAttributes();
 
-	/* Build one condition based on all attributes not used yet*/
-	while (enumAttr.hasMoreElements()){
-	  Attribute att= (Attribute)(enumAttr.nextElement());
+        /* Build one condition based on all attributes not used yet */
+        while (enumAttr.hasMoreElements()) {
+          Attribute att = (enumAttr.nextElement());
 
-	  if(m_Debug)
-	    System.err.println("\nOne condition: size = " 
-		+ growData.sumOfWeights());
+          if (m_Debug) {
+            System.err.println("\nOne condition: size = "
+              + growData.sumOfWeights());
+          }
 
-	  Antd antd =null;	
-	  if(att.isNumeric())
-	    antd = new NumericAntd(att);
-	  else
-	    antd = new NominalAntd(att);
+          Antd antd = null;
+          if (att.isNumeric()) {
+            antd = new NumericAntd(att);
+          } else {
+            antd = new NominalAntd(att);
+          }
 
-	  if(!used[att.index()]){
-	    /* Compute the best information gain for each attribute,
-	       it's stored in the antecedent formed by this attribute.
-	       This procedure returns the data covered by the antecedent*/
-	    Instances coveredData = computeInfoGain(growData, defAcRt,
-		antd);
-	    if(coveredData != null){
-	      double infoGain = antd.getMaxInfoGain();      
-	      if(m_Debug)
-		System.err.println("Test of \'"+antd.toString()+
-		    "\': infoGain = "+
-		    infoGain + " | Accuracy = " +
-		    antd.getAccuRate()+
-		    "="+antd.getAccu()
-		    +"/"+antd.getCover()+
-		    " def. accuracy: "+defAcRt);
+          if (!used[att.index()]) {
+            /*
+             * Compute the best information gain for each attribute, it's stored
+             * in the antecedent formed by this attribute. This procedure
+             * returns the data covered by the antecedent
+             */
+            Instances coveredData = computeInfoGain(growData, defAcRt, antd);
+            if (coveredData != null) {
+              double infoGain = antd.getMaxInfoGain();
+              if (m_Debug) {
+                System.err.println("Test of \'" + antd.toString()
+                  + "\': infoGain = " + infoGain + " | Accuracy = "
+                  + antd.getAccuRate() + "=" + antd.getAccu() + "/"
+                  + antd.getCover() + " def. accuracy: " + defAcRt);
+              }
 
-	      if(infoGain > maxInfoGain){         
-		oneAntd=antd;
-		coverData = coveredData;  
-		maxInfoGain = infoGain;
-	      }		    
-	    }
-	  }
-	}
+              if (infoGain > maxInfoGain) {
+                oneAntd = antd;
+                coverData = coveredData;
+                maxInfoGain = infoGain;
+              }
+            }
+          }
+        }
 
-	if(oneAntd == null) break; // Cannot find antds		
-	if(Utils.sm(oneAntd.getAccu(), m_MinNo)) break;// Too low coverage
+        if (oneAntd == null) {
+          break; // Cannot find antds
+        }
+        if (Utils.sm(oneAntd.getAccu(), m_MinNo)) {
+          break;// Too low coverage
+        }
 
-	//Numeric attributes can be used more than once
-	if(!oneAntd.getAttr().isNumeric()){ 
-	  used[oneAntd.getAttr().index()]=true;
-	  numUnused--;
-	}
+        // Numeric attributes can be used more than once
+        if (!oneAntd.getAttr().isNumeric()) {
+          used[oneAntd.getAttr().index()] = true;
+          numUnused--;
+        }
 
-	m_Antds.addElement(oneAntd);
+        m_Antds.add(oneAntd);
 
-
-	growData = coverData;// Grow data size is shrinking 	
-	defAcRt = oneAntd.getAccuRate();
+        growData = coverData;// Grow data size is shrinking
+        defAcRt = oneAntd.getAccuRate();
       }
     }
 
-
-    /** 
+    /**
      * Compute the best information gain for the specified antecedent
-     *  
+     * 
      * @param instances the data based on which the infoGain is computed
      * @param defAcRt the default accuracy rate of data
      * @param antd the specific antecedent
      * @return the data covered by the antecedent
      */
-    private Instances computeInfoGain(Instances instances, double defAcRt, 
-	Antd antd){
+    private Instances computeInfoGain(Instances instances, double defAcRt,
+      Antd antd) {
       Instances data = instances;
 
-      /* Split the data into bags.
-	 The information gain of each bag is also calculated in this procedure */
-      Instances[] splitData = antd.splitData(data, defAcRt, 
-	  m_Consequent); 
+      /*
+       * Split the data into bags. The information gain of each bag is also
+       * calculated in this procedure
+       */
+      Instances[] splitData = antd.splitData(data, defAcRt, m_Consequent);
 
       /* Get the bag of data to be used for next antecedents */
-      if(splitData != null)
-	return splitData[(int)antd.getAttrValue()];
-      else return null;
+      if (splitData != null) {
+        return splitData[(int) antd.getAttrValue()];
+      } else {
+        return null;
+      }
     }
 
     /**
-     * Prune all the possible final sequences of the rule using the 
-     * pruning data.  The measure used to prune the rule is based on
-     * flag given.
-     *
+     * Prune all the possible final sequences of the rule using the pruning
+     * data. The measure used to prune the rule is based on flag given.
+     * 
      * @param pruneData the pruning data used to prune the rule
-     * @param useWhole flag to indicate whether use the error rate of
-     *                 the whole pruning data instead of the data covered
-     */    
-    public void prune(Instances pruneData, boolean useWhole){
+     * @param useWhole flag to indicate whether use the error rate of the whole
+     *          pruning data instead of the data covered
+     */
+    public void prune(Instances pruneData, boolean useWhole) {
       Instances data = pruneData;
 
       double total = data.sumOfWeights();
-      if(!Utils.gr(total, 0.0))
-	return;
+      if (!Utils.gr(total, 0.0)) {
+        return;
+      }
 
       /* The default accurate # and rate on pruning data */
-      double defAccu=computeDefAccu(data);
+      double defAccu = computeDefAccu(data);
 
-      if(m_Debug)	
-	System.err.println("Pruning with " + defAccu + 
-	    " positive data out of " + total +
-	" instances");	
+      if (m_Debug) {
+        System.err.println("Pruning with " + defAccu + " positive data out of "
+          + total + " instances");
+      }
 
-      int size=m_Antds.size();
-      if(size == 0) return; // Default rule before pruning
+      int size = m_Antds.size();
+      if (size == 0) {
+        return; // Default rule before pruning
+      }
 
       double[] worthRt = new double[size];
       double[] coverage = new double[size];
       double[] worthValue = new double[size];
-      for(int w=0; w<size; w++){
-	worthRt[w]=coverage[w]=worthValue[w]=0.0;
+      for (int w = 0; w < size; w++) {
+        worthRt[w] = coverage[w] = worthValue[w] = 0.0;
       }
 
       /* Calculate accuracy parameters for all the antecedents in this rule */
       double tn = 0.0; // True negative if useWhole
-      for(int x=0; x<size; x++){
-	Antd antd=(Antd)m_Antds.elementAt(x);
-	Instances newData = data;
-	data = new Instances(newData, 0); // Make data empty
+      for (int x = 0; x < size; x++) {
+        Antd antd = m_Antds.get(x);
+        Instances newData = data;
+        data = new Instances(newData, 0); // Make data empty
 
-	for(int y=0; y<newData.numInstances(); y++){
-	  Instance ins=newData.instance(y);
+        for (int y = 0; y < newData.numInstances(); y++) {
+          Instance ins = newData.instance(y);
 
-	  if(antd.covers(ins)>0){   // Covered by this antecedent
-	    coverage[x] += ins.weight();
-	    data.add(ins);                 // Add to data for further pruning
-	    if((int)ins.classValue() == (int)m_Consequent) // Accurate prediction
-	      worthValue[x] += ins.weight();
-	  }
-	  else if(useWhole){ // Not covered
-	    if((int)ins.classValue() != (int)m_Consequent)
-	      tn += ins.weight();
-	  }			
-	}
+          if (antd.covers(ins) > 0) { // Covered by this antecedent
+            coverage[x] += ins.weight();
+            data.add(ins); // Add to data for further pruning
+            if ((int) ins.classValue() == (int) m_Consequent) {
+              worthValue[x] += ins.weight();
+            }
+          } else if (useWhole) { // Not covered
+            if ((int) ins.classValue() != (int) m_Consequent) {
+              tn += ins.weight();
+            }
+          }
+        }
 
-	if(useWhole){
-	  worthValue[x] += tn;
-	  worthRt[x] = worthValue[x] / total;
-	}
-	else // Note if coverage is 0, accuracy is 0.5
-	  worthRt[x] = (worthValue[x]+1.0)/(coverage[x]+2.0);
+        if (useWhole) {
+          worthValue[x] += tn;
+          worthRt[x] = worthValue[x] / total;
+        } else {
+          worthRt[x] = (worthValue[x] + 1.0) / (coverage[x] + 2.0);
+        }
       }
 
-      double maxValue = (defAccu+1.0)/(total+2.0);
+      double maxValue = (defAccu + 1.0) / (total + 2.0);
       int maxIndex = -1;
-      for(int i=0; i<worthValue.length; i++){
-	if(m_Debug){
-	  double denom = useWhole ? total : coverage[i];
-	  System.err.println(i+"(useAccuray? "+!useWhole+"): "
-	      + worthRt[i] + 
-	      "="+worthValue[i]+
-	      "/"+denom);
-	}
-	if(worthRt[i] > maxValue){ // Prefer to the 
-	  maxValue = worthRt[i]; // shorter rule
-	  maxIndex = i;
-	}
+      for (int i = 0; i < worthValue.length; i++) {
+        if (m_Debug) {
+          double denom = useWhole ? total : coverage[i];
+          System.err.println(i + "(useAccuray? " + !useWhole + "): "
+            + worthRt[i] + "=" + worthValue[i] + "/" + denom);
+        }
+        if (worthRt[i] > maxValue) { // Prefer to the
+          maxValue = worthRt[i]; // shorter rule
+          maxIndex = i;
+        }
       }
 
-      if (maxIndex==-1) return;
+      if (maxIndex == -1) {
+        return;
+      }
 
       /* Prune the antecedents according to the accuracy parameters */
-      for(int z=size-1;z>maxIndex;z--)
-	m_Antds.removeElementAt(z);       
+      for (int z = size - 1; z > maxIndex; z--) {
+        m_Antds.remove(z);
+      }
     }
 
     /**
      * Prints this rule
-     *
+     * 
      * @param classAttr the class attribute in the data
      * @return a textual description of this rule
      */
     public String toString(Attribute classAttr) {
-      StringBuffer text =  new StringBuffer();
-      if(m_Antds.size() > 0){
-	for(int j=0; j< (m_Antds.size()-1); j++)
-	  text.append("(" + ((Antd)(m_Antds.elementAt(j))).toString()+ ") and ");
-	text.append("("+((Antd)(m_Antds.lastElement())).toString() + ")");
+      StringBuffer text = new StringBuffer();
+      if (m_Antds.size() > 0) {
+        for (int j = 0; j < (m_Antds.size() - 1); j++) {
+          text.append("(" + (m_Antds.get(j)).toString() + ") and ");
+        }
+        text.append("(" + (m_Antds.get(m_Antds.size() - 1)).toString() + ")");
       }
-      text.append(" => " + classAttr.name() +
-	  "=" + classAttr.value((int)m_Consequent));
+      text.append(" => " + classAttr.name() + "="
+        + classAttr.value((int) m_Consequent));
 
       return text.toString();
     }
 
     /**
      * The fuzzification procedure
+     * 
      * @param data training data
-     * @param allWeightsAreOne flag whether all instances have weight 1. If this is the case branch-and-bound is possible for speed-up.
+     * @param allWeightsAreOne flag whether all instances have weight 1. If this
+     *          is the case branch-and-bound is possible for speed-up.
      */
-    public void fuzzify(Instances data, boolean allWeightsAreOne){
+    public void fuzzify(Instances data, boolean allWeightsAreOne) {
       // Determine whether there are numeric antecedents that can be fuzzified.
-      if (m_Antds == null) return;
-      int numNumericAntds = 0;
-      for (int i = 0; i < m_Antds.size(); i++){
-	if (m_Antds.elementAt(i) instanceof NumericAntd)
-	  numNumericAntds++;
+      if (m_Antds == null) {
+        return;
       }
-      if (numNumericAntds == 0)
-	return;
+      int numNumericAntds = 0;
+      for (int i = 0; i < m_Antds.size(); i++) {
+        if (m_Antds.get(i) instanceof NumericAntd) {
+          numNumericAntds++;
+        }
+      }
+      if (numNumericAntds == 0) {
+        return;
+      }
 
       double maxPurity = Double.NEGATIVE_INFINITY;
       boolean[] finishedAntecedents = new boolean[m_Antds.size()];
       int numFinishedAntecedents = 0;
 
       // Loop until all antecdents have been fuzzified
-      while (numFinishedAntecedents<m_Antds.size()){	
-	double maxPurityOfAllAntecedents = Double.NEGATIVE_INFINITY;
-	int bestAntecedentsIndex = -1;
-	double bestSupportBoundForAllAntecedents = Double.NaN;
+      while (numFinishedAntecedents < m_Antds.size()) {
+        double maxPurityOfAllAntecedents = Double.NEGATIVE_INFINITY;
+        int bestAntecedentsIndex = -1;
+        double bestSupportBoundForAllAntecedents = Double.NaN;
 
-	Instances relevantData = new Instances(data,0);
-	for (int j = 0; j < m_Antds.size(); j++){
-	  if(finishedAntecedents[j]) continue; 
+        Instances relevantData = new Instances(data, 0);
+        for (int j = 0; j < m_Antds.size(); j++) {
+          if (finishedAntecedents[j]) {
+            continue;
+          }
 
-	  relevantData = new Instances (data);
-	  /*
-	   * Remove instances which are not relevant, because they are not covered
-	   * by the _other_ antecedents.
-	   */
-	  for (int k = 0; k < m_Antds.size(); k++){
-	    if (k==j) continue;
-	    Antd exclusionAntd = ((Antd)m_Antds.elementAt(k));
-	    for (int y = 0; y < relevantData.numInstances(); y++){
-	      if (exclusionAntd.covers(relevantData.instance(y)) == 0){
-		relevantData.delete(y--);
-	      }
-	    }
-	  }
+          relevantData = new Instances(data);
+          /*
+           * Remove instances which are not relevant, because they are not
+           * covered by the _other_ antecedents.
+           */
+          for (int k = 0; k < m_Antds.size(); k++) {
+            if (k == j) {
+              continue;
+            }
+            Antd exclusionAntd = (m_Antds.get(k));
+            for (int y = 0; y < relevantData.numInstances(); y++) {
+              if (exclusionAntd.covers(relevantData.instance(y)) == 0) {
+                relevantData.delete(y--);
+              }
+            }
+          }
 
-	  // test whether this antecedent is numeric and whether there is data for making it fuzzy
-	  if (relevantData.attribute(((Antd)m_Antds.elementAt(j)).att.index()).isNumeric() && relevantData.numInstances()>0){
-	    // Get a working copy of this antecedent
-	    NumericAntd currentAntd = (NumericAntd) ((NumericAntd) m_Antds.elementAt(j)).copy();
-	    currentAntd.fuzzyYet=true;
+          // test whether this antecedent is numeric and whether there is data
+          // for making it fuzzy
+          if (relevantData.attribute(m_Antds.get(j).att.index()).isNumeric()
+            && relevantData.numInstances() > 0) {
+            // Get a working copy of this antecedent
+            NumericAntd currentAntd = (NumericAntd) ((NumericAntd) m_Antds
+              .get(j)).copy();
+            currentAntd.fuzzyYet = true;
 
-	    relevantData.deleteWithMissing(currentAntd.att.index());
+            relevantData.deleteWithMissing(currentAntd.att.index());
 
-	    double sumOfWeights = relevantData.sumOfWeights();
-	    if(!Utils.gr(sumOfWeights, 0.0))
-	      return;
+            double sumOfWeights = relevantData.sumOfWeights();
+            if (!Utils.gr(sumOfWeights, 0.0)) {
+              return;
+            }
 
-	    relevantData.sort(currentAntd.att.index());
+            relevantData.sort(currentAntd.att.index());
 
-	    double maxPurityForThisAntecedent = 0;
-	    double bestFoundSupportBound = Double.NaN;
+            double maxPurityForThisAntecedent = 0;
+            double bestFoundSupportBound = Double.NaN;
 
-	    double lastAccu = 0;
-	    double lastCover = 0;
-	    // Test all possible edge points
-	    if (currentAntd.value == 0){
-	      for (int k = 1; k < relevantData.numInstances(); k++){
-		// break the loop if there is no gain (only works when all instances have weight 1)
-		if ((lastAccu+(relevantData.numInstances()-k-1))/(lastCover+(relevantData.numInstances()-k-1)) < maxPurityForThisAntecedent && allWeightsAreOne){
-		  break;
-		}
+            double lastAccu = 0;
+            double lastCover = 0;
+            // Test all possible edge points
+            if (currentAntd.value == 0) {
+              for (int k = 1; k < relevantData.numInstances(); k++) {
+                // break the loop if there is no gain (only works when all
+                // instances have weight 1)
+                if ((lastAccu + (relevantData.numInstances() - k - 1))
+                  / (lastCover + (relevantData.numInstances() - k - 1)) < maxPurityForThisAntecedent
+                  && allWeightsAreOne) {
+                  break;
+                }
 
-		// Bag 1 
-		if (currentAntd.splitPoint < relevantData.instance(k).value(currentAntd.att.index())                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-		    && relevantData.instance(k).value(currentAntd.att.index()) != relevantData.instance(k-1).value(currentAntd.att.index())){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-		  currentAntd.supportBound = relevantData.instance(k).value(currentAntd.att.index());                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                // Bag 1
+                if (currentAntd.splitPoint < relevantData.instance(k).value(
+                  currentAntd.att.index())
+                  && relevantData.instance(k).value(currentAntd.att.index()) != relevantData
+                    .instance(k - 1).value(currentAntd.att.index())) {
+                  currentAntd.supportBound = relevantData.instance(k).value(
+                    currentAntd.att.index());
 
-		  // Calculate the purity of this fuzzification
-		  double[] accuArray = new double[relevantData.numInstances()];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-		  double[] coverArray =  new double[relevantData.numInstances()];                       
-		  for (int i = 0; i < relevantData.numInstances(); i++){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-		    coverArray[i] = relevantData.instance(i).weight();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-		    double coverValue = currentAntd.covers(relevantData.instance(i));
-		    if (coverArray[i] >= coverValue*relevantData.instance(i).weight()){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-		      coverArray[i] = coverValue*relevantData.instance(i).weight();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-		      if (relevantData.instance(i).classValue() == m_Consequent){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-			accuArray[i] = coverValue*relevantData.instance(i).weight();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-		      }                 
-		    }                   
-		  }                     
+                  // Calculate the purity of this fuzzification
+                  double[] accuArray = new double[relevantData.numInstances()];
+                  double[] coverArray = new double[relevantData.numInstances()];
+                  for (int i = 0; i < relevantData.numInstances(); i++) {
+                    coverArray[i] = relevantData.instance(i).weight();
+                    double coverValue = currentAntd.covers(relevantData
+                      .instance(i));
+                    if (coverArray[i] >= coverValue
+                      * relevantData.instance(i).weight()) {
+                      coverArray[i] = coverValue
+                        * relevantData.instance(i).weight();
+                      if (relevantData.instance(i).classValue() == m_Consequent) {
+                        accuArray[i] = coverValue
+                          * relevantData.instance(i).weight();
+                      }
+                    }
+                  }
 
-		  // Test whether this fuzzification is the best one for this antecedent.
-		  // Keep it if this is the case.
-		  double purity = (Utils.sum(accuArray)) / (Utils.sum(coverArray));                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
-		  if (purity >= maxPurityForThisAntecedent){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-		    maxPurityForThisAntecedent =purity;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-		    bestFoundSupportBound =  currentAntd.supportBound;     
-		  }           
-		  lastAccu = Utils.sum(accuArray);
-		  lastCover = Utils.sum(coverArray);
-		}                           
-	      }                             
-	    }else{                          
-	      for (int k = relevantData.numInstances()-2; k >=0; k--){
-		// break the loop if there is no gain (only works when all instances have weight 1)
-		if ((lastAccu+(k))/(lastCover+(k)) < maxPurityForThisAntecedent && allWeightsAreOne){
-		  break;
-		}
+                  // Test whether this fuzzification is the best one for this
+                  // antecedent.
+                  // Keep it if this is the case.
+                  double purity = (Utils.sum(accuArray))
+                    / (Utils.sum(coverArray));
+                  if (purity >= maxPurityForThisAntecedent) {
+                    maxPurityForThisAntecedent = purity;
+                    bestFoundSupportBound = currentAntd.supportBound;
+                  }
+                  lastAccu = Utils.sum(accuArray);
+                  lastCover = Utils.sum(coverArray);
+                }
+              }
+            } else {
+              for (int k = relevantData.numInstances() - 2; k >= 0; k--) {
+                // break the loop if there is no gain (only works when all
+                // instances have weight 1)
+                if ((lastAccu + (k)) / (lastCover + (k)) < maxPurityForThisAntecedent
+                  && allWeightsAreOne) {
+                  break;
+                }
 
-		//Bag 2                     
-		if (currentAntd.splitPoint > relevantData.instance(k).value(currentAntd.att.index())                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-		    && relevantData.instance(k).value(currentAntd.att.index()) != relevantData.instance(k+1).value(currentAntd.att.index())){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-		  currentAntd.supportBound = relevantData.instance(k).value(currentAntd.att.index());                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                // Bag 2
+                if (currentAntd.splitPoint > relevantData.instance(k).value(
+                  currentAntd.att.index())
+                  && relevantData.instance(k).value(currentAntd.att.index()) != relevantData
+                    .instance(k + 1).value(currentAntd.att.index())) {
+                  currentAntd.supportBound = relevantData.instance(k).value(
+                    currentAntd.att.index());
 
-		  // Calculate the purity of this fuzzification
-		  double[] accuArray = new double[relevantData.numInstances()];
-		  double[] coverArray =  new double[relevantData.numInstances()];
-		  for (int i = 0; i < relevantData.numInstances(); i++){
-		    coverArray[i] = relevantData.instance(i).weight();
-		    double coverValue = currentAntd.covers(relevantData.instance(i));
-		    if (coverArray[i] >= coverValue*relevantData.instance(i).weight()){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-		      coverArray[i] = coverValue*relevantData.instance(i).weight();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-		      if (relevantData.instance(i).classValue() == m_Consequent){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-			accuArray[i] = coverValue*relevantData.instance(i).weight();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-		      }                 
-		    }                   
-		  }                     
+                  // Calculate the purity of this fuzzification
+                  double[] accuArray = new double[relevantData.numInstances()];
+                  double[] coverArray = new double[relevantData.numInstances()];
+                  for (int i = 0; i < relevantData.numInstances(); i++) {
+                    coverArray[i] = relevantData.instance(i).weight();
+                    double coverValue = currentAntd.covers(relevantData
+                      .instance(i));
+                    if (coverArray[i] >= coverValue
+                      * relevantData.instance(i).weight()) {
+                      coverArray[i] = coverValue
+                        * relevantData.instance(i).weight();
+                      if (relevantData.instance(i).classValue() == m_Consequent) {
+                        accuArray[i] = coverValue
+                          * relevantData.instance(i).weight();
+                      }
+                    }
+                  }
 
-		  // Test whether this fuzzification is the best one for this antecedent.
-		  // Keep it if this is the case.
-		  double purity = (Utils.sum(accuArray)) / (Utils.sum(coverArray));                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-		  if (purity >= maxPurityForThisAntecedent){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-		    maxPurityForThisAntecedent =purity;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-		    bestFoundSupportBound =  currentAntd.supportBound;    
-		  }
-		  lastAccu = Utils.sum(accuArray);
-		  lastCover = Utils.sum(coverArray);
-		}                           
-	      }                             
+                  // Test whether this fuzzification is the best one for this
+                  // antecedent.
+                  // Keep it if this is the case.
+                  double purity = (Utils.sum(accuArray))
+                    / (Utils.sum(coverArray));
+                  if (purity >= maxPurityForThisAntecedent) {
+                    maxPurityForThisAntecedent = purity;
+                    bestFoundSupportBound = currentAntd.supportBound;
+                  }
+                  lastAccu = Utils.sum(accuArray);
+                  lastCover = Utils.sum(coverArray);
+                }
+              }
 
-	    }             
+            }
 
-	    // Test whether the best fuzzification for this antecedent is the best one of all
-	    // antecedents considered so far.
-	    // Keep it if this is the case.
-	    if (maxPurityForThisAntecedent>maxPurityOfAllAntecedents){
-	      bestAntecedentsIndex = j;
-	      bestSupportBoundForAllAntecedents = bestFoundSupportBound;
-	      maxPurityOfAllAntecedents = maxPurityForThisAntecedent;
-	    }
-	  }else{
-	    // Deal with a nominal antecedent. 
-	    // Since there is no fuzzification it is already finished.
-	    finishedAntecedents[j] = true;
-	    numFinishedAntecedents++;
-	    continue;
-	  }
-	}
+            // Test whether the best fuzzification for this antecedent is the
+            // best one of all
+            // antecedents considered so far.
+            // Keep it if this is the case.
+            if (maxPurityForThisAntecedent > maxPurityOfAllAntecedents) {
+              bestAntecedentsIndex = j;
+              bestSupportBoundForAllAntecedents = bestFoundSupportBound;
+              maxPurityOfAllAntecedents = maxPurityForThisAntecedent;
+            }
+          } else {
+            // Deal with a nominal antecedent.
+            // Since there is no fuzzification it is already finished.
+            finishedAntecedents[j] = true;
+            numFinishedAntecedents++;
+            continue;
+          }
+        }
 
-	// Make the fuzzification step for the current antecedent real. 
-	if (maxPurity <= maxPurityOfAllAntecedents){
-	  if (Double.isNaN(bestSupportBoundForAllAntecedents)){
-	    ((NumericAntd)m_Antds.elementAt(bestAntecedentsIndex)).supportBound =  ((NumericAntd)m_Antds.elementAt(bestAntecedentsIndex)).splitPoint;
-	  }else{
-	    ((NumericAntd)m_Antds.elementAt(bestAntecedentsIndex)).supportBound = bestSupportBoundForAllAntecedents;
-	    ((NumericAntd)m_Antds.elementAt(bestAntecedentsIndex)).fuzzyYet = true;
-	  }  
-	  maxPurity = maxPurityOfAllAntecedents;
-	}
-	finishedAntecedents[bestAntecedentsIndex] = true;
-	numFinishedAntecedents++;
+        // Make the fuzzification step for the current antecedent real.
+        if (maxPurity <= maxPurityOfAllAntecedents) {
+          if (Double.isNaN(bestSupportBoundForAllAntecedents)) {
+            ((NumericAntd) m_Antds.get(bestAntecedentsIndex)).supportBound = ((NumericAntd) m_Antds
+              .get(bestAntecedentsIndex)).splitPoint;
+          } else {
+            ((NumericAntd) m_Antds.get(bestAntecedentsIndex)).supportBound = bestSupportBoundForAllAntecedents;
+            ((NumericAntd) m_Antds.get(bestAntecedentsIndex)).fuzzyYet = true;
+          }
+          maxPurity = maxPurityOfAllAntecedents;
+        }
+        finishedAntecedents[bestAntecedentsIndex] = true;
+        numFinishedAntecedents++;
       }
 
     }
 
     /**
-     * Calculation of the rule weights / confidences for all beginning rule stumps.
+     * Calculation of the rule weights / confidences for all beginning rule
+     * stumps.
+     * 
      * @param data The training data
      */
     public void calculateConfidences(Instances data) {
       RipperRule tempRule = (RipperRule) this.copy();
 
-      while(tempRule.hasAntds()){
-	double acc = 0;
-	double cov = 0;
-	for (int i = 0; i < data.numInstances(); i++){
-	  double membershipValue = tempRule.coverageDegree(data.instance(i)) * data.instance(i).weight();
-	  cov += membershipValue;
-	  if (m_Consequent == data.instance(i).classValue()){
-	    acc += membershipValue;
-	  }
-	}
+      while (tempRule.hasAntds()) {
+        double acc = 0;
+        double cov = 0;
+        for (int i = 0; i < data.numInstances(); i++) {
+          double membershipValue = tempRule.coverageDegree(data.instance(i))
+            * data.instance(i).weight();
+          cov += membershipValue;
+          if (m_Consequent == data.instance(i).classValue()) {
+            acc += membershipValue;
+          }
+        }
 
-	// m-estimate
-	double m = 2.0;
-	((Antd)this.m_Antds.elementAt((int)tempRule.size()-1)).m_confidence = 
-	  (acc+m*(aprioriDistribution[(int)m_Consequent]/
-	      Utils.sum(aprioriDistribution))) / (cov+m);
-	tempRule.m_Antds.removeElementAt(tempRule.m_Antds.size()-1);
+        // m-estimate
+        double m = 2.0;
+        this.m_Antds.get((int) tempRule.size() - 1).m_confidence = (acc + m
+          * (aprioriDistribution[(int) m_Consequent] / Utils
+            .sum(aprioriDistribution)))
+          / (cov + m);
+        tempRule.m_Antds.remove(tempRule.m_Antds.size() - 1);
       }
     }
 
-
     /**
      * Get the rule confidence.
+     * 
      * @return rule confidence / weight
      */
-    public double getConfidence(){
-      if (!hasAntds()) 
-	return Double.NaN;
-      return ((Antd)m_Antds.lastElement()).m_confidence;
+    public double getConfidence() {
+      if (!hasAntds()) {
+        return Double.NaN;
+      }
+      return m_Antds.get(m_Antds.size() - 1).m_confidence;
     }
 
     /**
      * 
      */
+    @Override
     public String getRevision() {
       return "1.0";
     }
@@ -1700,9 +1879,10 @@ public class FURIA
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -1724,12 +1904,13 @@ public class FURIA
   }
 
   /**
-   * Builds the FURIA rule-based model 
-   *
+   * Builds the FURIA rule-based model
+   * 
    * @param instances the training data
    * @throws Exception if classifier can't be built successfully
    */
-  public void buildClassifier(Instances instances) throws Exception {  
+  @Override
+  public void buildClassifier(Instances instances) throws Exception {
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
@@ -1740,287 +1921,294 @@ public class FURIA
     // Learn the apriori distribution for later
     aprioriDistribution = new double[instances.classAttribute().numValues()];
     boolean allWeightsAreOne = true;
-    for (int i = 0 ; i < instances.numInstances(); i++){
-      aprioriDistribution[(int)instances.instance(i).classValue()]+=instances.instance(i).weight();
-      if (allWeightsAreOne && instances.instance(i).weight() != 1.0){
-	allWeightsAreOne = false;
-	break;
+    for (int i = 0; i < instances.numInstances(); i++) {
+      aprioriDistribution[(int) instances.instance(i).classValue()] += instances
+        .instance(i).weight();
+      if (allWeightsAreOne && instances.instance(i).weight() != 1.0) {
+        allWeightsAreOne = false;
+        break;
       }
     }
 
-
-    m_Random = instances.getRandomNumberGenerator(m_Seed); 
+    m_Random = instances.getRandomNumberGenerator(m_Seed);
     m_Total = RuleStats.numAllConditions(instances);
-    if(m_Debug)
-      System.err.println("Number of all possible conditions = "+m_Total);
+    if (m_Debug) {
+      System.err.println("Number of all possible conditions = " + m_Total);
+    }
 
     Instances data = new Instances(instances);
 
-    m_Class = data.classAttribute();	
-    m_Ruleset = new FastVector();
-    m_RulesetStats = new FastVector();
-    m_Distributions = new FastVector();
-
+    m_Class = data.classAttribute();
+    m_Ruleset = new ArrayList<Rule>();
+    m_RulesetStats = new ArrayList<RuleStats>();
+    m_Distributions = new ArrayList<double[]>();
 
     // Learn a rule set for each single class
-    oneClass:	
-      for(int y=0; y < data.numClasses(); y++){ // For each class	      
+    oneClass: for (int y = 0; y < data.numClasses(); y++) { // For each class
 
-	double classIndex = (double)y;
-	if(m_Debug){
-	  int ci = (int)classIndex;
-	  System.err.println("\n\nClass "+m_Class.value(ci)+"("+ci+"): "
-	      + aprioriDistribution[y] + "instances\n"+
-	  "=====================================\n");
-	}
-
-	if(Utils.eq(aprioriDistribution[y],0.0)) // No data for this class
-	  continue oneClass;		
-
-	// The expected FP/err is the proportion of the class    
-	double expFPRate = (aprioriDistribution[y] / Utils.sum(aprioriDistribution));
-
-
-	double classYWeights = 0, totalWeights = 0;
-	for(int j=0; j < data.numInstances(); j++){
-	  Instance datum = data.instance(j);
-	  totalWeights += datum.weight();
-	  if((int)datum.classValue() == y){
-	    classYWeights += datum.weight();
-	  }	          
-	}	
-
-	// DL of default rule, no theory DL, only data DL
-	double defDL;
-	if(classYWeights > 0)
-	  defDL = RuleStats.dataDL(expFPRate, 
-	      0.0,
-	      totalWeights,
-	      0.0,
-	      classYWeights);	    
-	else
-	  continue oneClass; // Subsumed by previous rules
-
-
-
-	if(Double.isNaN(defDL) || Double.isInfinite(defDL))
-	  throw new Exception("Should never happen: "+
-	  "defDL NaN or infinite!");
-	if(m_Debug)
-	  System.err.println("The default DL = "+defDL);
-
-	rulesetForOneClass(expFPRate, data, classIndex, defDL);
+      double classIndex = y;
+      if (m_Debug) {
+        int ci = (int) classIndex;
+        System.err.println("\n\nClass " + m_Class.value(ci) + "(" + ci + "): "
+          + aprioriDistribution[y] + "instances\n"
+          + "=====================================\n");
       }
 
-    // Remove redundant antecedents
-    for(int z=0; z < m_Ruleset.size(); z++){
-      RipperRule rule = (RipperRule)m_Ruleset.elementAt(z);
-      for(int j = 0; j < rule.m_Antds.size(); j++){
-	Antd outerAntd = (Antd)rule.m_Antds.elementAt(j);
-	for (int k = j+1; k < rule.m_Antds.size(); k++){
-	  Antd innerAntd = (Antd)rule.m_Antds.elementAt(k);  
-	  if (outerAntd.att.index() == innerAntd.att.index() && outerAntd.value==innerAntd.value){
-	    rule.m_Antds.setElementAt(rule.m_Antds.elementAt(k), j);
-	    rule.m_Antds.removeElementAt(k--);
-	  }
-	}
+      if (Utils.eq(aprioriDistribution[y], 0.0)) {
+        continue oneClass;
       }
-    } 
 
+      // The expected FP/err is the proportion of the class
+      double expFPRate = (aprioriDistribution[y] / Utils
+        .sum(aprioriDistribution));
 
-    // Fuzzify all rules
-    for(int z=0; z < m_RulesetStats.size(); z++){
-      RuleStats oneClass = (RuleStats)m_RulesetStats.elementAt(z);
-      for(int xyz=0; xyz < oneClass.getRulesetSize(); xyz++){
-	RipperRule rule = (RipperRule)((FastVector)oneClass.getRuleset()).elementAt(xyz);
+      double classYWeights = 0, totalWeights = 0;
+      for (int j = 0; j < data.numInstances(); j++) {
+        Instance datum = data.instance(j);
+        totalWeights += datum.weight();
+        if ((int) datum.classValue() == y) {
+          classYWeights += datum.weight();
+        }
+      }
 
-	// do the fuzzification for all known antecedents 
-	rule.fuzzify(data, allWeightsAreOne);
+      // DL of default rule, no theory DL, only data DL
+      double defDL;
+      if (classYWeights > 0) {
+        defDL = RuleStats.dataDL(expFPRate, 0.0, totalWeights, 0.0,
+          classYWeights);
+      } else {
+        continue oneClass; // Subsumed by previous rules
+      }
 
-	double[] classDist = oneClass.getDistributions(xyz);
-	// Check for sum=0, because otherwise it does not work
-	if (Utils.sum(classDist)>0) Utils.normalize(classDist);
-	if(classDist != null)
-	  m_Distributions.addElement(classDist);
-      }	
+      if (Double.isNaN(defDL) || Double.isInfinite(defDL)) {
+        throw new Exception("Should never happen: " + "defDL NaN or infinite!");
+      }
+      if (m_Debug) {
+        System.err.println("The default DL = " + defDL);
+      }
+
+      rulesetForOneClass(expFPRate, data, classIndex, defDL);
     }
 
+    // Remove redundant antecedents
+    for (int z = 0; z < m_Ruleset.size(); z++) {
+      RipperRule rule = (RipperRule) m_Ruleset.get(z);
+      for (int j = 0; j < rule.m_Antds.size(); j++) {
+        Antd outerAntd = rule.m_Antds.get(j);
+        for (int k = j + 1; k < rule.m_Antds.size(); k++) {
+          Antd innerAntd = rule.m_Antds.get(k);
+          if (outerAntd.att.index() == innerAntd.att.index()
+            && outerAntd.value == innerAntd.value) {
+            rule.m_Antds.set(j, rule.m_Antds.get(k));
+            rule.m_Antds.remove(k--);
+          }
+        }
+      }
+    }
+
+    // Fuzzify all rules
+    for (int z = 0; z < m_RulesetStats.size(); z++) {
+      RuleStats oneClass = m_RulesetStats.get(z);
+      for (int xyz = 0; xyz < oneClass.getRulesetSize(); xyz++) {
+        RipperRule rule = (RipperRule) (oneClass.getRuleset()).get(xyz);
+
+        // do the fuzzification for all known antecedents
+        rule.fuzzify(data, allWeightsAreOne);
+
+        double[] classDist = oneClass.getDistributions(xyz);
+        // Check for sum=0, because otherwise it does not work
+        if (Utils.sum(classDist) > 0) {
+          Utils.normalize(classDist);
+        }
+        if (classDist != null) {
+          m_Distributions.add(classDist);
+        }
+      }
+    }
 
     // if there was some problem during fuzzification, set the support bound
     // to the trivial fuzzification position
-    for(int z=0; z < m_Ruleset.size(); z++){
-      RipperRule rule = (RipperRule)m_Ruleset.elementAt(z);
-      for(int j = 0; j < rule.m_Antds.size(); j++){
-	Antd antd = (Antd)rule.m_Antds.elementAt(j);
-	if (antd instanceof NumericAntd) {
-	  NumericAntd numAntd = (NumericAntd) antd;
+    for (int z = 0; z < m_Ruleset.size(); z++) {
+      RipperRule rule = (RipperRule) m_Ruleset.get(z);
+      for (int j = 0; j < rule.m_Antds.size(); j++) {
+        Antd antd = rule.m_Antds.get(j);
+        if (antd instanceof NumericAntd) {
+          NumericAntd numAntd = (NumericAntd) antd;
 
+          if (!numAntd.fuzzyYet) {
+            for (int i = 0; i < data.numInstances(); i++) {
+              if ((numAntd.value == 1
+                && numAntd.splitPoint > data.instance(i).value(
+                  numAntd.att.index()) && (numAntd.supportBound < data
+                .instance(i).value(numAntd.att.index()) || !numAntd.fuzzyYet))
+                || (numAntd.value == 0
+                  && numAntd.splitPoint < data.instance(i).value(
+                    numAntd.att.index()) && (numAntd.supportBound > data
+                  .instance(i).value(numAntd.att.index()) || !numAntd.fuzzyYet))) {
+                numAntd.supportBound = data.instance(i).value(
+                  numAntd.att.index());
+                numAntd.fuzzyYet = true;
+              }
+            }
 
-	  if (!numAntd.fuzzyYet){
-	    for (int i = 0; i < data.numInstances(); i++){
-	      if ((numAntd.value == 1 && 
-		  numAntd.splitPoint > data.instance(i).value(numAntd.att.index()) &&
-		  (numAntd.supportBound < data.instance(i).value(numAntd.att.index()) ||
-		      !numAntd.fuzzyYet)
-	      )
-	      ||
-	      (numAntd.value == 0 && 
-		  numAntd.splitPoint < data.instance(i).value(numAntd.att.index()) &&
-		  (numAntd.supportBound > data.instance(i).value(numAntd.att.index()) ||
-		      !numAntd.fuzzyYet)
-	      )
-	      ){
-		numAntd.supportBound = data.instance(i).value(numAntd.att.index());
-		numAntd.fuzzyYet = true;
-	      }
-	    }
-
-	  }	  
-	}
+          }
+        }
       }
     }
 
-    //Determine confidences
-    for(int z=0; z < m_Ruleset.size(); z++){
-      RipperRule rule = (RipperRule)m_Ruleset.elementAt(z);
+    // Determine confidences
+    for (int z = 0; z < m_Ruleset.size(); z++) {
+      RipperRule rule = (RipperRule) m_Ruleset.get(z);
       rule.calculateConfidences(data);
     }
   }
 
   /**
-   * Classify the test instance with the rule learner and provide
-   * the class distributions 
-   *
+   * Classify the test instance with the rule learner and provide the class
+   * distributions
+   * 
    * @param datum the instance to be classified
    * @return the distribution
-   * @throws Exception 
+   * @throws Exception
    */
 
-  public double[] distributionForInstance(Instance datum) throws Exception{ 
-    //test for multiple overlap of rules
+  @Override
+  public double[] distributionForInstance(Instance datum) throws Exception {
+    // test for multiple overlap of rules
     double[] rulesCoveringForEachClass = new double[datum.numClasses()];
-    for(int i=0; i < m_Ruleset.size(); i++){
-      RipperRule rule = (RipperRule)m_Ruleset.elementAt(i);
+    for (int i = 0; i < m_Ruleset.size(); i++) {
+      RipperRule rule = (RipperRule) m_Ruleset.get(i);
 
-      /* In case that one class does not contain any instances (e.g. in UCI-dataset glass), 
-       * a default rule assigns all instances to the other class. Such a rule may be ignored here.
+      /*
+       * In case that one class does not contain any instances (e.g. in
+       * UCI-dataset glass), a default rule assigns all instances to the other
+       * class. Such a rule may be ignored here.
        */
-      if (!rule.hasAntds()) 
-	continue;
-
+      if (!rule.hasAntds()) {
+        continue;
+      }
 
       // Calculate the maximum degree of coverage
-      if(rule.covers(datum)){
-	rulesCoveringForEachClass[(int)rule.m_Consequent] += rule.coverageDegree(datum) * rule.getConfidence();
+      if (rule.covers(datum)) {
+        rulesCoveringForEachClass[(int) rule.m_Consequent] += rule
+          .coverageDegree(datum) * rule.getConfidence();
       }
 
     }
 
-
     // If no rule covered the example, then maybe start the rule stretching
-    if (Utils.sum(rulesCoveringForEachClass)==0){
+    if (Utils.sum(rulesCoveringForEachClass) == 0) {
 
-      // If rule stretching is not allowed,  
+      // If rule stretching is not allowed,
       // return either the apriori prediction
-      if (m_uncovAction == UNCOVACTION_APRIORI){
-	rulesCoveringForEachClass = aprioriDistribution;
-	if (Utils.sum(rulesCoveringForEachClass)>0)
-	  Utils.normalize(rulesCoveringForEachClass);
-	return rulesCoveringForEachClass;
+      if (m_uncovAction == UNCOVACTION_APRIORI) {
+        rulesCoveringForEachClass = aprioriDistribution;
+        if (Utils.sum(rulesCoveringForEachClass) > 0) {
+          Utils.normalize(rulesCoveringForEachClass);
+        }
+        return rulesCoveringForEachClass;
       }
       // or abstain from that decision at all.
-      if (m_uncovAction == UNCOVACTION_REJECT)
-	return rulesCoveringForEachClass;
+      if (m_uncovAction == UNCOVACTION_REJECT) {
+        return rulesCoveringForEachClass;
+      }
 
       // Copy the ruleset as backup
-      FastVector origRuleset = (FastVector) m_Ruleset.copyElements();
+      ArrayList<Rule> origRuleset = new ArrayList<Rule>();
+      for (Rule r : m_Ruleset) {
+        origRuleset.add((Rule) r.copy());
+      }
 
       // Find for every rule the first antecedent that does not
-      // cover the given instance. 
+      // cover the given instance.
       rulesCoveringForEachClass = new double[rulesCoveringForEachClass.length];
-      for(int i=0; i < m_Ruleset.size(); i++){
-	RipperRule rule = (RipperRule)m_Ruleset.elementAt(i);
-	double numAntdsBefore = rule.m_Antds.size();
+      for (int i = 0; i < m_Ruleset.size(); i++) {
+        RipperRule rule = (RipperRule) m_Ruleset.get(i);
+        double numAntdsBefore = rule.m_Antds.size();
 
-	int firstAntdToDelete = Integer.MAX_VALUE;
-	for (int j = 0; j < rule.m_Antds.size(); j++){
-	  if (((Antd)rule.m_Antds.elementAt(j)).covers(datum)==0){
-	    firstAntdToDelete = j;
-	    break;
-	  }
-	}
+        int firstAntdToDelete = Integer.MAX_VALUE;
+        for (int j = 0; j < rule.m_Antds.size(); j++) {
+          if (rule.m_Antds.get(j).covers(datum) == 0) {
+            firstAntdToDelete = j;
+            break;
+          }
+        }
 
-	// Prune antecedent such that it covers the instance
-	for (int j = firstAntdToDelete; j < rule.m_Antds.size(); j++){
-	  rule.m_Antds.removeElementAt(j--);
-	}
-	double numAntdsAfter = rule.m_Antds.size();
+        // Prune antecedent such that it covers the instance
+        for (int j = firstAntdToDelete; j < rule.m_Antds.size(); j++) {
+          rule.m_Antds.remove(j--);
+        }
+        double numAntdsAfter = rule.m_Antds.size();
 
-	// Empty rules shall not vote here
-	if (!rule.hasAntds())
-	  continue;
+        // Empty rules shall not vote here
+        if (!rule.hasAntds()) {
+          continue;
+        }
 
-	// Calculate the maximum degree of coverage and weight the rule
-	// by its confidence and the fraction of antecedents left after
-	// rule stretching
-	double secondWeight = (numAntdsAfter+1)/(numAntdsBefore+2) ;
-	if (rule.getConfidence() *secondWeight*rule.coverageDegree(datum) >= rulesCoveringForEachClass[(int)rule.getConsequent()]){
-	  rulesCoveringForEachClass[(int)rule.getConsequent()] = rule.getConfidence()*secondWeight*rule.coverageDegree(datum);
-	}
+        // Calculate the maximum degree of coverage and weight the rule
+        // by its confidence and the fraction of antecedents left after
+        // rule stretching
+        double secondWeight = (numAntdsAfter + 1) / (numAntdsBefore + 2);
+        if (rule.getConfidence() * secondWeight * rule.coverageDegree(datum) >= rulesCoveringForEachClass[(int) rule
+          .getConsequent()]) {
+          rulesCoveringForEachClass[(int) rule.getConsequent()] = rule
+            .getConfidence() * secondWeight * rule.coverageDegree(datum);
+        }
       }
 
       // Reestablish original ruleset
       m_Ruleset = origRuleset;
     }
 
-    //check for conflicts
+    // check for conflicts
     double[] maxClasses = new double[rulesCoveringForEachClass.length];
-    for (int i = 0; i < rulesCoveringForEachClass.length; i++){
-      if (rulesCoveringForEachClass[Utils.maxIndex(rulesCoveringForEachClass)] ==
-	rulesCoveringForEachClass[i] && rulesCoveringForEachClass[i]>0)
-	maxClasses[i] = 1;
+    for (int i = 0; i < rulesCoveringForEachClass.length; i++) {
+      if (rulesCoveringForEachClass[Utils.maxIndex(rulesCoveringForEachClass)] == rulesCoveringForEachClass[i]
+        && rulesCoveringForEachClass[i] > 0) {
+        maxClasses[i] = 1;
+      }
     }
 
-    //If there is a conflict, resolve it using the apriori distribution
-    if (Utils.sum(maxClasses)>0){
-      for (int i = 0; i < maxClasses.length; i++){
-	if (maxClasses[i] > 0 && aprioriDistribution[i] != rulesCoveringForEachClass[Utils.maxIndex(rulesCoveringForEachClass)])
-	  rulesCoveringForEachClass[i] -= 0.00001;
+    // If there is a conflict, resolve it using the apriori distribution
+    if (Utils.sum(maxClasses) > 0) {
+      for (int i = 0; i < maxClasses.length; i++) {
+        if (maxClasses[i] > 0
+          && aprioriDistribution[i] != rulesCoveringForEachClass[Utils
+            .maxIndex(rulesCoveringForEachClass)]) {
+          rulesCoveringForEachClass[i] -= 0.00001;
+        }
       }
     }
 
     // If no stretched rule was able to cover the instance,
     // then fall back to the apriori distribution
-    if (Utils.sum(rulesCoveringForEachClass)==0){
+    if (Utils.sum(rulesCoveringForEachClass) == 0) {
       rulesCoveringForEachClass = aprioriDistribution;
     }
 
-
-    if (Utils.sum(rulesCoveringForEachClass)>0)
+    if (Utils.sum(rulesCoveringForEachClass) > 0) {
       Utils.normalize(rulesCoveringForEachClass);
+    }
 
     return rulesCoveringForEachClass;
 
   }
 
-
-  /** Build a ruleset for the given class according to the given data
-   *
+  /**
+   * Build a ruleset for the given class according to the given data
+   * 
    * @param expFPRate the expected FP/(FP+FN) used in DL calculation
    * @param data the given data
    * @param classIndex the given class index
    * @param defDL the default DL in the data
    * @throws Exception if the ruleset can be built properly
    */
-  protected Instances rulesetForOneClass(double expFPRate, 
-      Instances data, 
-      double classIndex,
-      double defDL)
-  throws Exception {
+  protected Instances rulesetForOneClass(double expFPRate, Instances data,
+    double classIndex, double defDL) throws Exception {
 
-    Instances newData = data, growData, pruneData;  	
+    Instances newData = data, growData, pruneData;
     boolean stop = false;
-    FastVector ruleset = new FastVector();		
+    ArrayList<Rule> ruleset = new ArrayList<Rule>();
 
     double dl = defDL, minDL = defDL;
     RuleStats rstats = null;
@@ -2030,405 +2218,411 @@ public class FURIA
     boolean defHasPositive = true; // No longer used
     boolean hasPositive = defHasPositive;
 
-    /********************** Building stage ***********************/	
-    if(m_Debug)
+    /********************** Building stage ***********************/
+    if (m_Debug) {
       System.err.println("\n*** Building stage ***");
+    }
 
-
-    while((!stop) && hasPositive){ // Generate new rules until
+    while ((!stop) && hasPositive) { // Generate new rules until
       // stopping criteria met
       RipperRule oneRule;
 
       oneRule = new RipperRule();
-      oneRule.setConsequent(classIndex);  // Must set first
-      if(m_Debug)
-	System.err.println("\nNo pruning: growing a rule ...");
-      oneRule.grow(newData);             // Build the rule
-      if(m_Debug)
-	System.err.println("No pruning: one rule found:\n"+
-	    oneRule.toString(m_Class));
-
-
-      // Compute the DL of this ruleset
-      if(rstats == null){ // First rule
-	rstats = new RuleStats();
-	rstats.setNumAllConds(m_Total);
-	rstats.setData(newData);
+      oneRule.setConsequent(classIndex); // Must set first
+      if (m_Debug) {
+        System.err.println("\nNo pruning: growing a rule ...");
+      }
+      oneRule.grow(newData); // Build the rule
+      if (m_Debug) {
+        System.err.println("No pruning: one rule found:\n"
+          + oneRule.toString(m_Class));
       }
 
-      rstats.addAndUpdate(oneRule);		    
-      int last = rstats.getRuleset().size()-1; // Index of last rule
+      // Compute the DL of this ruleset
+      if (rstats == null) { // First rule
+        rstats = new RuleStats();
+        rstats.setNumAllConds(m_Total);
+        rstats.setData(newData);
+      }
+
+      rstats.addAndUpdate(oneRule);
+      int last = rstats.getRuleset().size() - 1; // Index of last rule
       dl += rstats.relativeDL(last, expFPRate, m_CheckErr);
 
-      if(Double.isNaN(dl) || Double.isInfinite(dl))
-	throw new Exception("Should never happen: dl in "+
-	"building stage NaN or infinite!");
-      if(m_Debug)
-	System.err.println("Before optimization("+last+
-	    "): the dl = "+dl+" | best: "+minDL);
+      if (Double.isNaN(dl) || Double.isInfinite(dl)) {
+        throw new Exception("Should never happen: dl in "
+          + "building stage NaN or infinite!");
+      }
+      if (m_Debug) {
+        System.err.println("Before optimization(" + last + "): the dl = " + dl
+          + " | best: " + minDL);
+      }
 
-      if(dl < minDL)
-	minDL = dl;  // The best dl so far	
+      if (dl < minDL) {
+        minDL = dl; // The best dl so far
+      }
 
-      rst = rstats.getSimpleStats(last);	    
-      if(m_Debug)
-	System.err.println("The rule covers: "+rst[0]+
-	    " | pos = " + rst[2] + 
-	    " | neg = " + rst[4]+
-	    "\nThe rule doesn't cover: "+rst[1]+
-	    " | pos = " + rst[5]);
+      rst = rstats.getSimpleStats(last);
+      if (m_Debug) {
+        System.err.println("The rule covers: " + rst[0] + " | pos = " + rst[2]
+          + " | neg = " + rst[4] + "\nThe rule doesn't cover: " + rst[1]
+          + " | pos = " + rst[5]);
+      }
 
       stop = checkStop(rst, minDL, dl);
 
-      if(!stop){	  		
-	ruleset.addElement(oneRule);          // Accepted 
-	newData = rstats.getFiltered(last)[1];// Data not covered
-	hasPositive = Utils.gr(rst[5], 0.0);  // Positives remaining?
-	if(m_Debug)
-	  System.err.println("One rule added: has positive? "
-	      +hasPositive);
-      }
-      else{
-	if(m_Debug)
-	  System.err.println("Quit rule");
-	rstats.removeLast(); // Remove last to be re-used
+      if (!stop) {
+        ruleset.add(oneRule); // Accepted
+        newData = rstats.getFiltered(last)[1];// Data not covered
+        hasPositive = Utils.gr(rst[5], 0.0); // Positives remaining?
+        if (m_Debug) {
+          System.err.println("One rule added: has positive? " + hasPositive);
+        }
+      } else {
+        if (m_Debug) {
+          System.err.println("Quit rule");
+        }
+        rstats.removeLast(); // Remove last to be re-used
       }
     }// while !stop
 
-
     /******************** Optimization stage *******************/
 
-    RuleStats finalRulesetStat = null; 
-    for(int z=0; z < m_Optimizations; z++){
-      if(m_Debug)
-	System.err.println("\n*** Optimization: run #"
-	    +z+" ***");
+    RuleStats finalRulesetStat = null;
+    for (int z = 0; z < m_Optimizations; z++) {
+      if (m_Debug) {
+        System.err.println("\n*** Optimization: run #" + z + " ***");
+      }
 
-      newData = data;		    
+      newData = data;
       finalRulesetStat = new RuleStats();
       finalRulesetStat.setData(newData);
       finalRulesetStat.setNumAllConds(m_Total);
-      int position=0;
+      int position = 0;
       stop = false;
-      boolean isResidual = false;	    
-      hasPositive = defHasPositive;		    
+      boolean isResidual = false;
+      hasPositive = defHasPositive;
       dl = minDL = defDL;
 
-      oneRule:    
-	while(!stop && hasPositive){			
+      oneRule: while (!stop && hasPositive) {
 
-	  isResidual = (position>=ruleset.size()); // Cover residual positive examples  
-	  // Re-do shuffling and stratification    
-	  //newData.randomize(m_Random);	
-	  newData = RuleStats.stratify(newData, m_Folds, m_Random);
-	  Instances[] part = RuleStats.partition(newData, m_Folds);
-	  growData=part[0];
-	  pruneData=part[1];
-	  //growData=newData.trainCV(m_Folds, m_Folds-1);
-	  //pruneData=newData.testCV(m_Folds, m_Folds-1);	   
-	  RipperRule finalRule;
+        isResidual = (position >= ruleset.size()); // Cover residual positive
+                                                   // examples
+        // Re-do shuffling and stratification
+        // newData.randomize(m_Random);
+        newData = RuleStats.stratify(newData, m_Folds, m_Random);
+        Instances[] part = RuleStats.partition(newData, m_Folds);
+        growData = part[0];
+        pruneData = part[1];
+        // growData=newData.trainCV(m_Folds, m_Folds-1);
+        // pruneData=newData.testCV(m_Folds, m_Folds-1);
+        RipperRule finalRule;
 
-	  if(m_Debug)
-	    System.err.println("\nRule #"+position +
-		"| isResidual?" + isResidual+
-		"| data size: "+newData.sumOfWeights());
+        if (m_Debug) {
+          System.err.println("\nRule #" + position + "| isResidual?"
+            + isResidual + "| data size: " + newData.sumOfWeights());
+        }
 
-	  if(isResidual){
-	    RipperRule newRule = new RipperRule();   
-	    newRule.setConsequent(classIndex);
-	    if(m_Debug)
-	      System.err.println("\nGrowing and pruning"+
-	      " a new rule ...");
-	    newRule.grow(newData);
-	    finalRule = newRule;
-	    if(m_Debug)
-	      System.err.println("\nNew rule found: "+
-		  newRule.toString(m_Class));
-	  }
-	  else{
-	    RipperRule oldRule = (RipperRule)ruleset.elementAt(position);
-	    boolean covers = false;
-	    // Test coverage of the next old rule
-	    for(int i=0; i<newData.numInstances(); i++)
-	      if(oldRule.covers(newData.instance(i))){
-		covers = true;
-		break;
-	      }
+        if (isResidual) {
+          RipperRule newRule = new RipperRule();
+          newRule.setConsequent(classIndex);
+          if (m_Debug) {
+            System.err.println("\nGrowing and pruning" + " a new rule ...");
+          }
+          newRule.grow(newData);
+          finalRule = newRule;
+          if (m_Debug) {
+            System.err
+              .println("\nNew rule found: " + newRule.toString(m_Class));
+          }
+        } else {
+          RipperRule oldRule = (RipperRule) ruleset.get(position);
+          boolean covers = false;
+          // Test coverage of the next old rule
+          for (int i = 0; i < newData.numInstances(); i++) {
+            if (oldRule.covers(newData.instance(i))) {
+              covers = true;
+              break;
+            }
+          }
 
-	    if(!covers){// Null coverage, no variants can be generated
-	      finalRulesetStat.addAndUpdate(oldRule);
-	      position++;
-	      continue oneRule;
-	    }  
+          if (!covers) {// Null coverage, no variants can be generated
+            finalRulesetStat.addAndUpdate(oldRule);
+            position++;
+            continue oneRule;
+          }
 
-	    // 2 variants 
-	    if(m_Debug)
-	      System.err.println("\nGrowing and pruning"+
-	      " Replace ..."); 
-	    RipperRule replace = new RipperRule();   
-	    replace.setConsequent(classIndex);
-	    replace.grow(growData);
+          // 2 variants
+          if (m_Debug) {
+            System.err.println("\nGrowing and pruning" + " Replace ...");
+          }
+          RipperRule replace = new RipperRule();
+          replace.setConsequent(classIndex);
+          replace.grow(growData);
 
-	    // Remove the pruning data covered by the following
-	    // rules, then simply compute the error rate of the
-	    // current rule to prune it.  According to Ripper,
-	    // it's equivalent to computing the error of the 
-	    // whole ruleset -- is it true?
-	    pruneData = RuleStats.rmCoveredBySuccessives(pruneData,ruleset, position);      	
-	    replace.prune(pruneData, true);
+          // Remove the pruning data covered by the following
+          // rules, then simply compute the error rate of the
+          // current rule to prune it. According to Ripper,
+          // it's equivalent to computing the error of the
+          // whole ruleset -- is it true?
+          pruneData = RuleStats.rmCoveredBySuccessives(pruneData, ruleset,
+            position);
+          replace.prune(pruneData, true);
 
-	    if(m_Debug)
-	      System.err.println("\nGrowing and pruning"+
-	      " Revision ..."); 
-	    RipperRule revision = (RipperRule)oldRule.copy(); 
+          if (m_Debug) {
+            System.err.println("\nGrowing and pruning" + " Revision ...");
+          }
+          RipperRule revision = (RipperRule) oldRule.copy();
 
-	    // For revision, first rm the data covered by the old rule
-	    Instances newGrowData = new Instances(growData, 0);
-	    for(int b=0; b<growData.numInstances(); b++){
-	      Instance inst = growData.instance(b);
-	      if(revision.covers(inst))
-		newGrowData.add(inst);
-	    }
-	    revision.grow(newGrowData);	      
-	    revision.prune(pruneData, true);
+          // For revision, first rm the data covered by the old rule
+          Instances newGrowData = new Instances(growData, 0);
+          for (int b = 0; b < growData.numInstances(); b++) {
+            Instance inst = growData.instance(b);
+            if (revision.covers(inst)) {
+              newGrowData.add(inst);
+            }
+          }
+          revision.grow(newGrowData);
+          revision.prune(pruneData, true);
 
-	    double[][] prevRuleStats = new double[position][6];
-	    for(int c=0; c < position; c++)
-	      prevRuleStats[c] = finalRulesetStat.getSimpleStats(c);
+          double[][] prevRuleStats = new double[position][6];
+          for (int c = 0; c < position; c++) {
+            prevRuleStats[c] = finalRulesetStat.getSimpleStats(c);
+          }
 
-	    // Now compare the relative DL of variants
-	    FastVector tempRules = (FastVector)ruleset.copyElements();
-	    tempRules.setElementAt(replace, position);
+          // Now compare the relative DL of variants
+          ArrayList<Rule> tempRules = new ArrayList<Rule>();
+          for (Rule r : ruleset) {
+            tempRules.add((Rule) r.copy());
+          }
+          tempRules.set(position, replace);
 
-	    RuleStats repStat = new RuleStats(data, tempRules);
-	    repStat.setNumAllConds(m_Total);
-	    repStat.countData(position, newData, prevRuleStats);
-	    //repStat.countData();
-	    rst = repStat.getSimpleStats(position);	    
-	    if(m_Debug)
-	      System.err.println("Replace rule covers: "+rst[0]+
-		  " | pos = " + rst[2] + 
-		  " | neg = " + rst[4]+
-		  "\nThe rule doesn't cover: "+rst[1]+
-		  " | pos = " + rst[5]);
+          RuleStats repStat = new RuleStats(data, tempRules);
+          repStat.setNumAllConds(m_Total);
+          repStat.countData(position, newData, prevRuleStats);
+          // repStat.countData();
+          rst = repStat.getSimpleStats(position);
+          if (m_Debug) {
+            System.err.println("Replace rule covers: " + rst[0] + " | pos = "
+              + rst[2] + " | neg = " + rst[4] + "\nThe rule doesn't cover: "
+              + rst[1] + " | pos = " + rst[5]);
+          }
 
-	    double repDL = repStat.relativeDL(position, expFPRate,
-		m_CheckErr);
+          double repDL = repStat.relativeDL(position, expFPRate, m_CheckErr);
 
-	    if(m_Debug)
-	      System.err.println("\nReplace: "+
-		  replace.toString(m_Class)
-		  +" |dl = "+repDL); 
+          if (m_Debug) {
+            System.err.println("\nReplace: " + replace.toString(m_Class)
+              + " |dl = " + repDL);
+          }
 
-	    if(Double.isNaN(repDL) || Double.isInfinite(repDL))
-	      throw new Exception("Should never happen: repDL"+
-		  "in optmz. stage NaN or "+
-	      "infinite!");
+          if (Double.isNaN(repDL) || Double.isInfinite(repDL)) {
+            throw new Exception("Should never happen: repDL"
+              + "in optmz. stage NaN or " + "infinite!");
+          }
 
-	    tempRules.setElementAt(revision, position);
-	    RuleStats revStat = new RuleStats(data, tempRules);
-	    revStat.setNumAllConds(m_Total);
-	    revStat.countData(position, newData, prevRuleStats);
-	    //revStat.countData();
-	    double revDL = revStat.relativeDL(position, expFPRate,
-		m_CheckErr);
+          tempRules.set(position, revision);
+          RuleStats revStat = new RuleStats(data, tempRules);
+          revStat.setNumAllConds(m_Total);
+          revStat.countData(position, newData, prevRuleStats);
+          // revStat.countData();
+          double revDL = revStat.relativeDL(position, expFPRate, m_CheckErr);
 
-	    if(m_Debug)
-	      System.err.println("Revision: "
-		  + revision.toString(m_Class)
-		  +" |dl = "+revDL);
+          if (m_Debug) {
+            System.err.println("Revision: " + revision.toString(m_Class)
+              + " |dl = " + revDL);
+          }
 
-	    if(Double.isNaN(revDL) || Double.isInfinite(revDL))
-	      throw new Exception("Should never happen: revDL"+
-		  "in optmz. stage NaN or "+
-	      "infinite!");
+          if (Double.isNaN(revDL) || Double.isInfinite(revDL)) {
+            throw new Exception("Should never happen: revDL"
+              + "in optmz. stage NaN or " + "infinite!");
+          }
 
-	    rstats = new RuleStats(data, ruleset);
-	    rstats.setNumAllConds(m_Total);
-	    rstats.countData(position, newData, prevRuleStats);
-	    //rstats.countData();
-	    double oldDL = rstats.relativeDL(position, expFPRate,
-		m_CheckErr);
+          rstats = new RuleStats(data, ruleset);
+          rstats.setNumAllConds(m_Total);
+          rstats.countData(position, newData, prevRuleStats);
+          // rstats.countData();
+          double oldDL = rstats.relativeDL(position, expFPRate, m_CheckErr);
 
-	    if(Double.isNaN(oldDL) || Double.isInfinite(oldDL))
-	      throw new Exception("Should never happen: oldDL"+
-		  "in optmz. stage NaN or "+
-	      "infinite!");
-	    if(m_Debug)
-	      System.err.println("Old rule: "+
-		  oldRule.toString(m_Class)
-		  +" |dl = "+oldDL); 
+          if (Double.isNaN(oldDL) || Double.isInfinite(oldDL)) {
+            throw new Exception("Should never happen: oldDL"
+              + "in optmz. stage NaN or " + "infinite!");
+          }
+          if (m_Debug) {
+            System.err.println("Old rule: " + oldRule.toString(m_Class)
+              + " |dl = " + oldDL);
+          }
 
-	    if(m_Debug)
-	      System.err.println("\nrepDL: "+repDL+ 
-		  "\nrevDL: "+revDL+
-		  "\noldDL: "+oldDL);
+          if (m_Debug) {
+            System.err.println("\nrepDL: " + repDL + "\nrevDL: " + revDL
+              + "\noldDL: " + oldDL);
+          }
 
-	    if((oldDL <= revDL) && (oldDL <= repDL))
-	      finalRule = oldRule; // Old the best
-	    else if(revDL <= repDL)
-	      finalRule = revision; // Revision the best
-	    else
-	      finalRule = replace; // Replace the best  
-	  }		
+          if ((oldDL <= revDL) && (oldDL <= repDL)) {
+            finalRule = oldRule; // Old the best
+          } else if (revDL <= repDL) {
+            finalRule = revision; // Revision the best
+          } else {
+            finalRule = replace; // Replace the best
+          }
+        }
 
-	  finalRulesetStat.addAndUpdate(finalRule);  	 
-	  rst = finalRulesetStat.getSimpleStats(position);
+        finalRulesetStat.addAndUpdate(finalRule);
+        rst = finalRulesetStat.getSimpleStats(position);
 
-	  if(isResidual){	
-	    dl += finalRulesetStat.relativeDL(position, 
-		expFPRate,
-		m_CheckErr);
+        if (isResidual) {
+          dl += finalRulesetStat.relativeDL(position, expFPRate, m_CheckErr);
 
-	    if(m_Debug)
-	      System.err.println("After optimization: the dl"
-		  +"="+dl+" | best: "+minDL);
+          if (m_Debug) {
+            System.err.println("After optimization: the dl" + "=" + dl
+              + " | best: " + minDL);
+          }
 
-	    if(dl < minDL)
-	      minDL = dl;  // The best dl so far
+          if (dl < minDL) {
+            minDL = dl; // The best dl so far
+          }
 
-	    stop = checkStop(rst, minDL, dl);
-	    if(!stop)
-	      ruleset.addElement(finalRule); // Accepted 
-	    else{
-	      finalRulesetStat.removeLast(); // Remove last to be re-used
-	      position--;
-	    }
-	  }
-	  else
-	    ruleset.setElementAt(finalRule, position); // Accepted 
+          stop = checkStop(rst, minDL, dl);
+          if (!stop) {
+            ruleset.add(finalRule); // Accepted
+          } else {
+            finalRulesetStat.removeLast(); // Remove last to be re-used
+            position--;
+          }
+        } else {
+          ruleset.set(position, finalRule); // Accepted
+        }
 
-	  if(m_Debug){
-	    System.err.println("The rule covers: "+rst[0]+
-		" | pos = " + rst[2] + 
-		" | neg = " + rst[4]+
-		"\nThe rule doesn't cover: "+rst[1]+
-		" | pos = " + rst[5]);		
-	    System.err.println("\nRuleset so far: ");
-	    for(int x=0; x<ruleset.size(); x++)
-	      System.err.println(x+": "+((RipperRule)ruleset.elementAt(x)).toString(m_Class));
-	    System.err.println();
-	  }
+        if (m_Debug) {
+          System.err.println("The rule covers: " + rst[0] + " | pos = "
+            + rst[2] + " | neg = " + rst[4] + "\nThe rule doesn't cover: "
+            + rst[1] + " | pos = " + rst[5]);
+          System.err.println("\nRuleset so far: ");
+          for (int x = 0; x < ruleset.size(); x++) {
+            System.err.println(x + ": "
+              + ((RipperRule) ruleset.get(x)).toString(m_Class));
+          }
+          System.err.println();
+        }
 
-	  //Data not covered	
-	  if(finalRulesetStat.getRulesetSize() > 0)// If any rules	
-	    newData = finalRulesetStat.getFiltered(position)[1]; 
-	  hasPositive = Utils.gr(rst[5], 0.0); //Positives remaining? 
-	  position++;
-	} // while !stop && hasPositive
+        // Data not covered
+        if (finalRulesetStat.getRulesetSize() > 0) {
+          newData = finalRulesetStat.getFiltered(position)[1];
+        }
+        hasPositive = Utils.gr(rst[5], 0.0); // Positives remaining?
+        position++;
+      } // while !stop && hasPositive
 
-      if(ruleset.size() > (position+1)){ // Hasn't gone through yet
-	for(int k=position+1; k<ruleset.size(); k++)
-	  finalRulesetStat.addAndUpdate((Rule)ruleset.elementAt(k));
+      if (ruleset.size() > (position + 1)) { // Hasn't gone through yet
+        for (int k = position + 1; k < ruleset.size(); k++) {
+          finalRulesetStat.addAndUpdate(ruleset.get(k));
+        }
       }
-      if(m_Debug)
-	System.err.println("\nDeleting rules to decrease"+
-	" DL of the whole ruleset ..."); 
+      if (m_Debug) {
+        System.err.println("\nDeleting rules to decrease"
+          + " DL of the whole ruleset ...");
+      }
       finalRulesetStat.reduceDL(expFPRate, m_CheckErr);
 
-      if(m_Debug){
-	int del = ruleset.size() -
-	finalRulesetStat.getRulesetSize(); 
-	System.err.println(del+" rules are deleted"+
-	" after DL reduction procedure");
+      if (m_Debug) {
+        int del = ruleset.size() - finalRulesetStat.getRulesetSize();
+        System.err.println(del + " rules are deleted"
+          + " after DL reduction procedure");
       }
       ruleset = finalRulesetStat.getRuleset();
-      rstats = finalRulesetStat;	      	    
+      rstats = finalRulesetStat;
 
     } // For each run of optimization
 
     // Concatenate the ruleset for this class to the whole ruleset
-    if(m_Debug){
+    if (m_Debug) {
       System.err.println("\nFinal ruleset: ");
-      for(int x=0; x<ruleset.size(); x++)
-	System.err.println(x+": "+((RipperRule)ruleset.elementAt(x)).toString(m_Class));
+      for (int x = 0; x < ruleset.size(); x++) {
+        System.err.println(x + ": "
+          + ((RipperRule) ruleset.get(x)).toString(m_Class));
+      }
       System.err.println();
     }
 
-
-    m_Ruleset.appendElements(ruleset);
-    m_RulesetStats.addElement(rstats);
+    m_Ruleset.addAll(ruleset);
+    m_RulesetStats.add(rstats);
 
     return null;
-  }   
+  }
 
   /**
    * Check whether the stopping criterion meets
-   *
+   * 
    * @param rst the statistic of the ruleset
    * @param minDL the min description length so far
    * @param dl the current description length of the ruleset
    * @return true if stop criterion meets, false otherwise
    */
-  private boolean checkStop(double[] rst, double minDL, double dl){
+  private boolean checkStop(double[] rst, double minDL, double dl) {
 
-
-    if(dl > minDL+MAX_DL_SURPLUS){
-      if(m_Debug)
-	System.err.println("DL too large: "+dl+" | "+minDL);
+    if (dl > minDL + MAX_DL_SURPLUS) {
+      if (m_Debug) {
+        System.err.println("DL too large: " + dl + " | " + minDL);
+      }
       return true;
+    } else if (!Utils.gr(rst[2], 0.0)) {// Covered positives
+      if (m_Debug) {
+        System.err.println("Too few positives.");
+      }
+      return true;
+    } else if ((rst[4] / rst[0]) >= 0.5) {// Err rate
+      if (m_CheckErr) {
+        if (m_Debug) {
+          System.err.println("Error too large: " + rst[4] + "/" + rst[0]);
+        }
+        return true;
+      } else {
+        return false;
+      }
+    } else {// Not stops
+      if (m_Debug) {
+        System.err.println("Continue.");
+      }
+      return false;
     }
-    else 
-      if(!Utils.gr(rst[2], 0.0)){// Covered positives
-	if(m_Debug)
-	  System.err.println("Too few positives.");
-	return true;
-      }	
-      else if((rst[4]/rst[0]) >= 0.5){// Err rate
-	if(m_CheckErr){
-	  if(m_Debug)
-	    System.err.println("Error too large: "+
-		rst[4] + "/" + rst[0]);
-	  return  true;
-	}
-	else
-	  return false;
-      }		
-      else{// Not stops
-	if(m_Debug)
-	  System.err.println("Continue.");
-	return  false;
-      }				
   }
 
   /**
    * Prints the all the rules of the rule learner.
-   *
+   * 
    * @return a textual description of the classifier
    */
+  @Override
   public String toString() {
-    if (m_Ruleset == null) 
+    if (m_Ruleset == null) {
       return "FURIA: No model built yet.";
-
-    StringBuffer sb = new StringBuffer("FURIA rules:\n"+
-    "===========\n\n"); 
-    for(int j=0; j<m_RulesetStats.size(); j++){
-      RuleStats rs = (RuleStats)m_RulesetStats.elementAt(j);
-      FastVector rules = rs.getRuleset();
-      for(int k=0; k<rules.size(); k++){
-	sb.append(((RipperRule)rules.elementAt(k)).toString(m_Class)
-	    + " (CF = " + Math.round(100.0*((RipperRule)rules.elementAt(k)).getConfidence())/100.0 +")\n");
-      }			    
     }
-    if(m_Debug){
+
+    StringBuffer sb = new StringBuffer("FURIA rules:\n" + "===========\n\n");
+    for (int j = 0; j < m_RulesetStats.size(); j++) {
+      RuleStats rs = m_RulesetStats.get(j);
+      ArrayList<Rule> rules = rs.getRuleset();
+      for (int k = 0; k < rules.size(); k++) {
+        sb.append(((RipperRule) rules.get(k)).toString(m_Class) + " (CF = "
+          + Math.round(100.0 * ((RipperRule) rules.get(k)).getConfidence())
+          / 100.0 + ")\n");
+      }
+    }
+    if (m_Debug) {
       System.err.println("Inside m_Ruleset");
-      for(int i=0; i<m_Ruleset.size(); i++)
-	System.err.println(((RipperRule)m_Ruleset.elementAt(i)).toString(m_Class));
+      for (int i = 0; i < m_Ruleset.size(); i++) {
+        System.err.println(((RipperRule) m_Ruleset.get(i)).toString(m_Class));
+      }
     }
-    sb.append("\nNumber of Rules : " 
-	+ m_Ruleset.size() + "\n");
-
-
-
+    sb.append("\nNumber of Rules : " + m_Ruleset.size() + "\n");
 
     return sb.toString();
   }
 
   /**
    * Main method.
-   *
+   * 
    * @param args the options for the classifier
-   * @throws Exception 
+   * @throws Exception
    */
   public static void main(String[] args) throws Exception {
     runClassifier(new FURIA(), args);
@@ -2437,6 +2631,7 @@ public class FURIA
   /**
    * 
    */
+  @Override
   public String getRevision() {
     return "$Revision$";
   }

@@ -6,10 +6,10 @@
 PackageName=fuzzyUnorderedRuleInduction
 
 # Version (required)
-Version=1.0.1
+Version=1.0.2
 
 #Date
-Date=2012-03-20
+Date=2013-11-14
 
 # Title (required)
 Title=Fuzzy Unordered Rule Induction Algorithm
@@ -28,8 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=FURIA: Fuzzy Unordered Rule Induction Algorithm. For details please see: Jens Christian Huehn, Eyke Huellermeier (2009). FURIA: An Algorithm for Unordered Fuzzy Rule Induction. Data Mining and Knowledge Discovery.
 
+Changes=Dropped FastVector and made changes required by dropping FastVector.
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/fuzzyUnorderedRuleInduction1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/fuzzyUnorderedRuleInduction1.0.2.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/fuzzyUnorderedRuleInduction
@@ -38,4 +40,4 @@ URL=http://weka.sourceforge.net/doc.packages/fuzzyUnorderedRuleInduction
 Related=RIPPER
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.7.11)
