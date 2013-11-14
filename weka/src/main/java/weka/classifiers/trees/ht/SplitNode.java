@@ -94,7 +94,7 @@ public class SplitNode extends HNode {
 
   @Override
   public LeafNode leafForInstance(Instance inst, SplitNode parent,
-      String parentBranch) {
+    String parentBranch) {
 
     String branch = branchForInstance(inst);
     if (branch != null) {
@@ -114,8 +114,6 @@ public class SplitNode extends HNode {
 
   @Override
   protected int dumpTree(int depth, int leafCount, StringBuffer buff) {
-
-    boolean first = true;
 
     for (Map.Entry<String, HNode> e : m_children.entrySet()) {
 
@@ -169,10 +167,10 @@ public class SplitNode extends HNode {
 
           if (conditionForBranch.indexOf("<=") < 0) {
             testAttName = conditionForBranch.substring(0,
-                conditionForBranch.indexOf("=")).trim();
+              conditionForBranch.indexOf("=")).trim();
           } else {
             testAttName = conditionForBranch.substring(0,
-                conditionForBranch.indexOf("<")).trim();
+              conditionForBranch.indexOf("<")).trim();
           }
           first = false;
           buff.append("N" + m_nodeNum + " [label=\"" + testAttName + "\"]\n");
@@ -187,11 +185,11 @@ public class SplitNode extends HNode {
           startIndex = conditionForBranch.indexOf(">") - 1;
         }
         conditionForBranch = conditionForBranch.substring(startIndex,
-            conditionForBranch.length()).trim();
+          conditionForBranch.length()).trim();
 
         buff.append(
-            "N" + m_nodeNum + "->" + "N" + child.m_nodeNum + "[label=\""
-                + conditionForBranch + "\"]\n").append("\n");
+          "N" + m_nodeNum + "->" + "N" + child.m_nodeNum + "[label=\""
+            + conditionForBranch + "\"]\n").append("\n");
 
       }
     }

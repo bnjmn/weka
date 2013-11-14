@@ -20,7 +20,6 @@
 
 package weka.classifiers.functions;
 
-
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -54,15 +53,12 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
 
 /**
- * <!-- globalinfo-start --> 
- * Implements Gaussian processes for
- * regression without hyperparameter-tuning. To make choosing an
- * appropriate noise level easier, this implementation applies
- * normalization/standardization to the target attribute as well (if
- * normalization/standardizaton is turned on). Missing values
- * are replaced by the global mean/mode. Nominal attributes are
- * converted to binary ones. 
- * <!-- globalinfo-end -->
+ * <!-- globalinfo-start --> Implements Gaussian processes for regression
+ * without hyperparameter-tuning. To make choosing an appropriate noise level
+ * easier, this implementation applies normalization/standardization to the
+ * target attribute as well (if normalization/standardizaton is turned on).
+ * Missing values are replaced by the global mean/mode. Nominal attributes are
+ * converted to binary ones. <!-- globalinfo-end -->
  * 
  * <!-- technical-bibtex-start --> BibTeX:
  * 
@@ -76,9 +72,11 @@ import weka.filters.unsupervised.attribute.Standardize;
  *       }
  * </pre>
  * 
- * <p/> <!-- technical-bibtex-end -->
+ * <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
  * <pre>
  *       -D
@@ -103,7 +101,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  * </pre>
  * 
  * <pre>
- *       
+ * 
  *       Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
  * </pre>
  * 
@@ -137,9 +135,9 @@ import weka.filters.unsupervised.attribute.Standardize;
  * @author Remco Bouckaert (remco@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class GaussianProcesses extends AbstractClassifier implements OptionHandler, IntervalEstimator,
-                                                                     ConditionalDensityEstimator,
-                                                                     TechnicalInformationHandler, WeightedInstancesHandler {
+public class GaussianProcesses extends AbstractClassifier implements
+  OptionHandler, IntervalEstimator, ConditionalDensityEstimator,
+  TechnicalInformationHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8620066949967678545L;
@@ -157,9 +155,10 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   public static final int FILTER_NONE = 2;
 
   /** The filter to apply to the training data */
-  public static final Tag[] TAGS_FILTER = { new Tag(FILTER_NORMALIZE, "Normalize training data"),
-                                            new Tag(FILTER_STANDARDIZE, "Standardize training data"),
-                                            new Tag(FILTER_NONE, "No normalization/standardization"), };
+  public static final Tag[] TAGS_FILTER = {
+    new Tag(FILTER_NORMALIZE, "Normalize training data"),
+    new Tag(FILTER_STANDARDIZE, "Standardize training data"),
+    new Tag(FILTER_NONE, "No normalization/standardization"), };
 
   /** The filter used to standardize/normalize all values. */
   protected Filter m_Filter = null;
@@ -171,8 +170,8 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   protected ReplaceMissingValues m_Missing;
 
   /**
-   * Turn off all checks and conversions? Turning them off assumes that data
-   * is purely numeric, doesn't contain any missing values, and has a numeric
+   * Turn off all checks and conversions? Turning them off assumes that data is
+   * purely numeric, doesn't contain any missing values, and has a numeric
    * class.
    */
   protected boolean m_checksTurnedOff = false;
@@ -205,8 +204,8 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   /**
    * Returns a string describing classifier
    * 
-   * @return a description suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
   public String globalInfo() {
 
@@ -228,6 +227,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation result;
 
@@ -235,7 +235,8 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     result.setValue(Field.AUTHOR, "David J.C. Mackay");
     result.setValue(Field.YEAR, "1998");
     result.setValue(Field.TITLE, "Introduction to Gaussian Processes");
-    result.setValue(Field.ADDRESS, "Dept. of Physics, Cambridge University, UK");
+    result
+      .setValue(Field.ADDRESS, "Dept. of Physics, Cambridge University, UK");
     result.setValue(Field.PS, "http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz");
 
     return result;
@@ -246,6 +247,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    * 
    * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = getKernel().getCapabilities();
     result.setOwner(this);
@@ -254,8 +256,9 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     result.enableAllAttributeDependencies();
     // with NominalToBinary we can also handle nominal attributes, but only
     // if the kernel can handle numeric attributes
-    if (result.handles(Capability.NUMERIC_ATTRIBUTES))
+    if (result.handles(Capability.NUMERIC_ATTRIBUTES)) {
       result.enable(Capability.NOMINAL_ATTRIBUTES);
+    }
     result.enable(Capability.MISSING_VALUES);
 
     // class
@@ -271,11 +274,10 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   /**
    * Method for building the classifier.
    * 
-   * @param insts
-   *            the set of training instances
-   * @throws Exception
-   *             if the classifier can't be built successfully
+   * @param insts the set of training instances
+   * @throws Exception if the classifier can't be built successfully
    */
+  @Override
   public void buildClassifier(Instances insts) throws Exception {
 
     /* check the set of training instances */
@@ -322,12 +324,12 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
 
     if (m_filterType == FILTER_STANDARDIZE) {
       m_Filter = new Standardize();
-      ((Standardize)m_Filter).setIgnoreClass(true);
+      ((Standardize) m_Filter).setIgnoreClass(true);
       m_Filter.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_Filter);
     } else if (m_filterType == FILTER_NORMALIZE) {
       m_Filter = new Normalize();
-      ((Normalize)m_Filter).setIgnoreClass(true);
+      ((Normalize) m_Filter).setIgnoreClass(true);
       m_Filter.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_Filter);
     } else {
@@ -375,7 +377,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     int n = insts.numInstances();
     m_L = new double[n][];
     for (int i = 0; i < n; i++) {
-      m_L[i] = new double[i+1];
+      m_L[i] = new double[i + 1];
     }
     double kv = 0;
     for (int i = 0; i < n; i++) {
@@ -387,17 +389,19 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
       m_L[i][i] = kv + m_delta * m_delta;
     }
 
-    // Save memory (can't use Kernel.clean() because of polynominal kernel with exponent 1)
+    // Save memory (can't use Kernel.clean() because of polynominal kernel with
+    // exponent 1)
     if (m_kernel instanceof CachedKernel) {
       m_kernel = Kernel.makeCopy(m_kernel);
-      ((CachedKernel)m_kernel).setCacheSize(-1);
+      ((CachedKernel) m_kernel).setCacheSize(-1);
       m_kernel.buildKernel(insts);
     }
 
     // Calculate inverse matrix exploiting symmetry of covariance matrix
-    // NB this replaces the kernel matrix with (the negative of) its inverse and does
+    // NB this replaces the kernel matrix with (the negative of) its inverse and
+    // does
     // not require any extra memory for a solution matrix
-    double [] tmprow = new double [n];
+    double[] tmprow = new double[n];
     double tmp2 = 0, tmp = 0;
     for (int i = 0; i < n; i++) {
       tmp = -m_L[i][i];
@@ -405,12 +409,12 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
       for (int j = 0; j < n; j++) {
         if (j != i) {
           if (j < i) {
-            tmprow[j] = m_L[i][j]; 
+            tmprow[j] = m_L[i][j];
             m_L[i][j] /= tmp;
             tmp2 = m_L[i][j];
             m_L[j][j] += tmp2 * tmp2 * tmp;
           } else if (j > i) {
-            tmprow[j] = m_L[j][i]; 
+            tmprow[j] = m_L[j][i];
             m_L[j][i] /= tmp;
             tmp2 = m_L[j][i];
             m_L[j][j] += tmp2 * tmp2 * tmp;
@@ -428,7 +432,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
             for (int k = 0; k < j; k++) {
               m_L[j][k] += tmprow[j] * m_L[i][k];
             }
-						
+
           }
           for (int k = i + 1; k < j; k++) {
             m_L[j][k] += tmprow[j] * m_L[k][i];
@@ -436,9 +440,9 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
         }
       }
     }
-		
-    m_t = new Matrix(insts.numInstances(), 1);		
-    double [] tt = new double[n]; 
+
+    m_t = new Matrix(insts.numInstances(), 1);
+    double[] tt = new double[n];
     for (int i = 0; i < n; i++) {
       tt[i] = insts.instance(i).classValue() - m_avg_target;
     }
@@ -454,20 +458,19 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
       }
       m_t.set(i, 0, s);
     }
-		
+
   } // buildClassifier
 
   /**
    * Classifies a given instance.
    * 
-   * @param inst
-   *            the instance to be classified
+   * @param inst the instance to be classified
    * @return the classification
-   * @throws Exception
-   *             if instance could not be classified successfully
+   * @throws Exception if instance could not be classified successfully
    */
+  @Override
   public double classifyInstance(Instance inst) throws Exception {
-		
+
     // Filter instance
     inst = filterInstance(inst);
 
@@ -510,8 +513,8 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   }
 
   /**
-   * Computes standard deviation for given instance, without
-   * transforming target back into original space.
+   * Computes standard deviation for given instance, without transforming target
+   * back into original space.
    */
   protected double computeStdDev(Instance inst, Matrix k) throws Exception {
 
@@ -522,11 +525,11 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     for (int i = 0; i < n; i++) {
       double t = 0;
       for (int j = 0; j < n; j++) {
-        t -= k.get(j,0) * (i>j? m_L[i][j] : m_L[j][i]);
-      }			
-      s += t * k.get(i,0);
+        t -= k.get(j, 0) * (i > j ? m_L[i][j] : m_L[j][i]);
+      }
+      s += t * k.get(i, 0);
     }
-		
+
     double sigma = m_delta;
     if (kappa > s) {
       sigma = Math.sqrt(kappa - s);
@@ -536,18 +539,16 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   }
 
   /**
-   * Computes a prediction interval for the given instance and confidence
-   * level.
+   * Computes a prediction interval for the given instance and confidence level.
    * 
-   * @param inst
-   *            the instance to make the prediction for
-   * @param confidenceLevel
-   *            the percentage of cases the interval should cover
+   * @param inst the instance to make the prediction for
+   * @param confidenceLevel the percentage of cases the interval should cover
    * @return a 1*2 array that contains the boundaries of the interval
-   * @throws Exception
-   *             if interval could not be estimated successfully
+   * @throws Exception if interval could not be estimated successfully
    */
-  public double[][] predictIntervals(Instance inst, double confidenceLevel) throws Exception {
+  @Override
+  public double[][] predictIntervals(Instance inst, double confidenceLevel)
+    throws Exception {
 
     inst = filterInstance(inst);
 
@@ -572,7 +573,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
 
     interval[0][0] = (interval[0][0] - m_Blin) / m_Alin;
     interval[0][1] = (interval[0][1] - m_Blin) / m_Alin;
-		
+
     return interval;
 
   }
@@ -580,11 +581,9 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   /**
    * Gives standard deviation of the prediction at the given instance.
    * 
-   * @param inst
-   *            the instance to get the standard deviation for
+   * @param inst the instance to get the standard deviation for
    * @return the standard deviation
-   * @throws Exception
-   *             if computation fails
+   * @throws Exception if computation fails
    */
   public double getStandardDeviation(Instance inst) throws Exception {
 
@@ -600,15 +599,17 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   }
 
   /**
-   * Returns natural logarithm of density estimate for given value based on given instance.
-   *   
+   * Returns natural logarithm of density estimate for given value based on
+   * given instance.
+   * 
    * @param instance the instance to make the prediction for.
    * @param value the value to make the prediction for.
    * @return the natural logarithm of the density estimate
    * @exception Exception if the density cannot be computed
    */
+  @Override
   public double logDensity(Instance inst, double value) throws Exception {
-    
+
     inst = filterInstance(inst);
 
     // Build K vector (and Kappa)
@@ -616,53 +617,60 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     for (int i = 0; i < m_NumTrain; i++) {
       k.set(i, 0, m_kernel.eval(-1, i, inst));
     }
-    
+
     double estimate = k.transpose().times(m_t).get(0, 0) + m_avg_target;
 
     double sigma = computeStdDev(inst, k);
-    
+
     // transform to GP space
     value = value * m_Alin + m_Blin;
     // center around estimate
     value = value - estimate;
-    double z = -Math.log(sigma * Math.sqrt(2 * Math.PI)) 
-      - value * value /(2.0*sigma*sigma); 
-    
+    double z = -Math.log(sigma * Math.sqrt(2 * Math.PI)) - value * value
+      / (2.0 * sigma * sigma);
+
     return z + Math.log(m_Alin);
   }
-  
+
   /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options.
    */
+  @Override
   public Enumeration<Option> listOptions() {
 
     Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option("\tLevel of Gaussian Noise wrt transformed target." + " (default 1)", "L", 1, "-L <double>"));
+    result.addElement(new Option(
+      "\tLevel of Gaussian Noise wrt transformed target." + " (default 1)",
+      "L", 1, "-L <double>"));
 
-    result.addElement(new Option("\tWhether to 0=normalize/1=standardize/2=neither. " + "(default 0=normalize)",
-                                 "N", 1, "-N"));
+    result.addElement(new Option(
+      "\tWhether to 0=normalize/1=standardize/2=neither. "
+        + "(default 0=normalize)", "N", 1, "-N"));
 
     result.addElement(new Option("\tThe Kernel to use.\n"
-                                 + "\t(default: weka.classifiers.functions.supportVector.PolyKernel)", "K", 1,
-                                 "-K <classname and parameters>"));
+      + "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
+      "K", 1, "-K <classname and parameters>"));
 
     result.addAll(Collections.list(super.listOptions()));
 
-    result.addElement(new Option("", "", 0, "\nOptions specific to kernel " + getKernel().getClass().getName()
-                                 + ":"));
-   
-    result.addAll(Collections.list(((OptionHandler) getKernel()).listOptions()));
-    
+    result.addElement(new Option("", "", 0, "\nOptions specific to kernel "
+      + getKernel().getClass().getName() + ":"));
+
+    result
+      .addAll(Collections.list(((OptionHandler) getKernel()).listOptions()));
+
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <!-- options-start --> Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
    * <pre>
    *       -D
@@ -692,7 +700,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    * </pre>
    * 
    * <pre>
-   *       
+   * 
    *       Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
    * </pre>
    * 
@@ -722,26 +730,27 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    * 
    * <!-- options-end -->
    * 
-   * @param options
-   *            the list of options as an array of strings
-   * @throws Exception
-   *             if an option is not supported
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     String tmpStr;
     String[] tmpOptions;
 
     tmpStr = Utils.getOption('L', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setNoise(Double.parseDouble(tmpStr));
-    else
+    } else {
       setNoise(1);
-		
+    }
+
     tmpStr = Utils.getOption('N', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setFilterType(new SelectedTag(Integer.parseInt(tmpStr), TAGS_FILTER));
-    else
+    } else {
       setFilterType(new SelectedTag(FILTER_NORMALIZE, TAGS_FILTER));
+    }
 
     tmpStr = Utils.getOption('K', options);
     tmpOptions = Utils.splitOptions(tmpStr);
@@ -752,7 +761,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     }
 
     super.setOptions(options);
-    
+
     Utils.checkForRemainingOptions(options);
   }
 
@@ -761,15 +770,10 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    int i;
-    Vector<String> result;
-    String[] options;
 
-    result = new Vector<String>();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.addElement(options[i]);
+    Vector<String> result = new Vector<String>();
 
     result.addElement("-L");
     result.addElement("" + getNoise());
@@ -778,9 +782,12 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
     result.addElement("" + m_filterType);
 
     result.addElement("-K");
-    result.addElement("" + m_kernel.getClass().getName() + " " + Utils.joinOptions(m_kernel.getOptions()));
+    result.addElement("" + m_kernel.getClass().getName() + " "
+      + Utils.joinOptions(m_kernel.getOptions()));
 
-    return (String[]) result.toArray(new String[result.size()]);
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -805,8 +812,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   /**
    * Sets the kernel to use.
    * 
-   * @param value
-   *            the new kernel
+   * @param value the new kernel
    */
   public void setKernel(Kernel value) {
     m_kernel = value;
@@ -837,8 +843,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    * Sets how the training data will be transformed. Should be one of
    * FILTER_NORMALIZE, FILTER_STANDARDIZE, FILTER_NONE.
    * 
-   * @param newType
-   *            the new filtering mode
+   * @param newType the new filtering mode
    */
   public void setFilterType(SelectedTag newType) {
 
@@ -854,8 +859,8 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    *         explorer/experimenter gui
    */
   public String noiseTipText() {
-    return "The level of Gaussian Noise (added to the diagonal of the Covariance Matrix), after the " +
-      "target has been normalized/standardized/left unchanged).";
+    return "The level of Gaussian Noise (added to the diagonal of the Covariance Matrix), after the "
+      + "target has been normalized/standardized/left unchanged).";
   }
 
   /**
@@ -870,8 +875,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   /**
    * Set the level of Gaussian Noise.
    * 
-   * @param v
-   *            Value to assign to noise.
+   * @param v Value to assign to noise.
    */
   public void setNoise(double v) {
     m_delta = v;
@@ -882,44 +886,48 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
    * 
    * @return a description of the classifier as a string
    */
+  @Override
   public String toString() {
 
     StringBuffer text = new StringBuffer();
 
-    if (m_t == null)
+    if (m_t == null) {
       return "Gaussian Processes: No model built yet.";
+    }
 
     try {
 
       text.append("Gaussian Processes\n\n");
       text.append("Kernel used:\n  " + m_kernel.toString() + "\n\n");
 
-      text.append("All values shown based on: " + 
-                  TAGS_FILTER[m_filterType].getReadable() + "\n\n");
-
+      text.append("All values shown based on: "
+        + TAGS_FILTER[m_filterType].getReadable() + "\n\n");
 
       text.append("Average Target Value : " + m_avg_target + "\n");
 
       text.append("Inverted Covariance Matrix:\n");
       double min = -m_L[0][0];
       double max = -m_L[0][0];
-      for (int i = 0; i < m_NumTrain; i++)
+      for (int i = 0; i < m_NumTrain; i++) {
         for (int j = 0; j <= i; j++) {
-          if (-m_L[i][j] < min)
+          if (-m_L[i][j] < min) {
             min = -m_L[i][j];
-          else if (-m_L[i][j] > max)
+          } else if (-m_L[i][j] > max) {
             max = -m_L[i][j];
+          }
         }
+      }
       text.append("    Lowest Value = " + min + "\n");
       text.append("    Highest Value = " + max + "\n");
       text.append("Inverted Covariance Matrix * Target-value Vector:\n");
       min = m_t.get(0, 0);
       max = m_t.get(0, 0);
       for (int i = 0; i < m_NumTrain; i++) {
-        if (m_t.get(i, 0) < min)
+        if (m_t.get(i, 0) < min) {
           min = m_t.get(i, 0);
-        else if (m_t.get(i, 0) > max)
+        } else if (m_t.get(i, 0) > max) {
           max = m_t.get(i, 0);
+        }
       }
       text.append("    Lowest Value = " + min + "\n");
       text.append("    Highest Value = " + max + "\n \n");
@@ -934,8 +942,7 @@ public class GaussianProcesses extends AbstractClassifier implements OptionHandl
   /**
    * Main method for testing this class.
    * 
-   * @param argv
-   *            the commandline parameters
+   * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
 

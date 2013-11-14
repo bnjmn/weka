@@ -44,15 +44,13 @@ import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- <!-- globalinfo-start --> 
- * Class for using linear regression for prediction.
+ * <!-- globalinfo-start --> Class for using linear regression for prediction.
  * Uses the Akaike criterion for model selection, and is able to deal with
  * weighted instances.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -94,7 +92,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  *  (use with caution).
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
@@ -365,11 +363,13 @@ public class LinearRegression extends AbstractClassifier implements
    */
   @Override
   public String toString() {
-    if (!m_ModelBuilt)
+    if (!m_ModelBuilt) {
       return "Linear Regression: No model built yet.";
+    }
 
-    if (m_Minimal)
+    if (m_Minimal) {
       return "Linear Regression: Model built.";
+    }
 
     try {
       StringBuilder text = new StringBuilder();
@@ -381,10 +381,11 @@ public class LinearRegression extends AbstractClassifier implements
       text.append(m_TransformedData.classAttribute().name() + " =\n\n");
       for (int i = 0; i < m_TransformedData.numAttributes(); i++) {
         if ((i != m_ClassIndex) && (m_SelectedAttributes[i])) {
-          if (!first)
+          if (!first) {
             text.append(" +\n");
-          else
+          } else {
             first = false;
+          }
           text.append(Utils.doubleToString(m_Coefficients[column], 12, 4)
             + " * ");
           text.append(m_TransformedData.attribute(i).name());
@@ -482,8 +483,7 @@ public class LinearRegression extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start --> 
-   * Valid options are:
+   * <!-- options-start --> Valid options are:
    * <p/>
    * 
    * <pre>
@@ -525,7 +525,7 @@ public class LinearRegression extends AbstractClassifier implements
    *  (use with caution).
    * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -584,15 +584,14 @@ public class LinearRegression extends AbstractClassifier implements
    */
   @Override
   public String[] getOptions() {
-    Vector<String> result;
-
-    result = new Vector<String>();
+    Vector<String> result = new Vector<String>();
 
     result.add("-S");
     result.add("" + getAttributeSelectionMethod().getSelectedTag().getID());
 
-    if (!getEliminateColinearAttributes())
+    if (!getEliminateColinearAttributes()) {
       result.add("-C");
+    }
 
     result.add("-R");
     result.add("" + getRidge());
@@ -603,11 +602,6 @@ public class LinearRegression extends AbstractClassifier implements
 
     if (getOutputAdditionalStats()) {
       result.add("-additional-stats");
-    }
-
-    String[] superOpts = super.getOptions();
-    for (String s : superOpts) {
-      result.add(s);
     }
 
     Collections.addAll(result, super.getOptions());
@@ -862,8 +856,8 @@ public class LinearRegression extends AbstractClassifier implements
     // Figure out current number of attributes + 1. (We treat this model
     // as the full model for the Akaike-based methods.)
     int numAttributes = 1;
-    for (int i = 0; i < m_SelectedAttributes.length; i++) {
-      if (m_SelectedAttributes[i]) {
+    for (boolean m_SelectedAttribute : m_SelectedAttributes) {
+      if (m_SelectedAttribute) {
         numAttributes++;
       }
     }
@@ -1036,14 +1030,14 @@ public class LinearRegression extends AbstractClassifier implements
 
     if (m_Debug) {
       System.out.print("doRegression(");
-      for (int i = 0; i < selectedAttributes.length; i++) {
-        System.out.print(" " + selectedAttributes[i]);
+      for (boolean selectedAttribute : selectedAttributes) {
+        System.out.print(" " + selectedAttribute);
       }
       System.out.println(" )");
     }
     int numAttributes = 0;
-    for (int i = 0; i < selectedAttributes.length; i++) {
-      if (selectedAttributes[i]) {
+    for (boolean selectedAttribute : selectedAttributes) {
+      if (selectedAttribute) {
         numAttributes++;
       }
     }

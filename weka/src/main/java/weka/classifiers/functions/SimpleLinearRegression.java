@@ -21,6 +21,7 @@
 
 package weka.classifiers.functions;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -37,26 +38,33 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
 /**
- <!-- globalinfo-start -->
- * Learns a simple linear regression model. Picks the attribute that results in the lowest squared error. Missing values are not allowed. Can only deal with numeric attributes.
+ * <!-- globalinfo-start --> Learns a simple linear regression model. Picks the
+ * attribute that results in the lowest squared error. Missing values are not
+ * allowed. Can only deal with numeric attributes.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -additional-stats
- *  Output additional statistics.</pre>
+ * <pre>
+ * -additional-stats
+ *  Output additional statistics.
+ * </pre>
  * 
- * <pre> -output-debug-info
+ * <pre>
+ * -output-debug-info
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- * <pre> -do-not-check-capabilities
+ * <pre>
+ * -do-not-check-capabilities
  *  If set, classifier capabilities are not checked before classifier is built
- *  (use with caution).</pre>
+ *  (use with caution).
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
@@ -149,16 +157,13 @@ public class SimpleLinearRegression extends AbstractClassifier implements
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
-    Vector newVector = new Vector();
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option("\tOutput additional statistics.",
       "additional-stats", 0, "-additional-stats"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
   }
@@ -167,21 +172,27 @@ public class SimpleLinearRegression extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -additional-stats
-   *  Output additional statistics.</pre>
+   * <pre>
+   * -additional-stats
+   *  Output additional statistics.
+   * </pre>
    * 
-   * <pre> -output-debug-info
+   * <pre>
+   * -output-debug-info
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   * <pre> -do-not-check-capabilities
+   * <pre>
+   * -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
-   *  (use with caution).</pre>
+   *  (use with caution).
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -202,18 +213,13 @@ public class SimpleLinearRegression extends AbstractClassifier implements
    */
   @Override
   public String[] getOptions() {
-    Vector<String> result;
-
-    result = new Vector<String>();
+    Vector<String> result = new Vector<String>();
 
     if (getOutputAdditionalStats()) {
       result.add("-additional-stats");
     }
 
-    String[] superOpts = super.getOptions();
-    for (String s : superOpts) {
-      result.add(s);
-    }
+    Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
   }
@@ -412,8 +418,9 @@ public class SimpleLinearRegression extends AbstractClassifier implements
 
     // Set parameters
     if (chosen == -1) {
-      if (!m_suppressErrorMessage)
+      if (!m_suppressErrorMessage) {
         System.err.println("----- no useful attribute found");
+      }
       m_attribute = null;
       m_attributeIndex = 0;
       m_slope = 0;
@@ -564,4 +571,3 @@ public class SimpleLinearRegression extends AbstractClassifier implements
     runClassifier(new SimpleLinearRegression(), argv);
   }
 }
-

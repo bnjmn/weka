@@ -38,7 +38,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class NominalConditionalSufficientStats extends
-    ConditionalSufficientStats implements Serializable {
+  ConditionalSufficientStats implements Serializable {
 
   /**
    * For serialization
@@ -93,15 +93,14 @@ public class NominalConditionalSufficientStats extends
   protected double m_totalWeight;
   protected double m_missingWeight;
 
-  @SuppressWarnings("unchecked")
   @Override
   public void update(double attVal, String classVal, double weight) {
     if (Utils.isMissingValue(attVal)) {
       m_missingWeight += weight;
     } else {
-      Integer attIndex = new Integer((int) attVal);
+      new Integer((int) attVal);
       ValueDistribution valDist = (ValueDistribution) m_classLookup
-          .get(classVal);
+        .get(classVal);
       if (valDist == null) {
         valDist = new ValueDistribution();
         valDist.add((int) attVal, weight);
@@ -116,7 +115,7 @@ public class NominalConditionalSufficientStats extends
 
   @Override
   public double probabilityOfAttValConditionedOnClass(double attVal,
-      String classVal) {
+    String classVal) {
     ValueDistribution valDist = (ValueDistribution) m_classLookup.get(classVal);
     if (valDist != null) {
       double prob = valDist.getWeight((int) attVal) / valDist.sum();
@@ -167,12 +166,12 @@ public class NominalConditionalSufficientStats extends
 
   @Override
   public SplitCandidate bestSplit(SplitMetric splitMetric,
-      Map<String, WeightMass> preSplitDist, String attName) {
+    Map<String, WeightMass> preSplitDist, String attName) {
 
     List<Map<String, WeightMass>> postSplitDists = classDistsAfterSplit();
     double merit = splitMetric.evaluateSplit(preSplitDist, postSplitDists);
     SplitCandidate candidate = new SplitCandidate(
-        new UnivariateNominalMultiwaySplit(attName), postSplitDists, merit);
+      new UnivariateNominalMultiwaySplit(attName), postSplitDists, merit);
 
     return candidate;
   }
