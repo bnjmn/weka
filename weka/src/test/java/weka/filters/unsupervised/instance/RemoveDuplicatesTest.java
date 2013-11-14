@@ -19,25 +19,27 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Instances;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 /**
- * Tests Resample. Run from the command line with:<p>
+ * Tests Resample. Run from the command line with:
+ * <p>
  * java weka.filters.unsupervised.instance.RemoveDuplicatesTest
- *
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 8034 $
  */
 public class RemoveDuplicatesTest extends AbstractFilterTest {
-  
-  public RemoveDuplicatesTest(String name) { super(name);  }
+
+  public RemoveDuplicatesTest(String name) {
+    super(name);
+  }
 
   /** Creates a default Resample */
+  @Override
   public Filter getFilter() {
     RemoveDuplicates f = new RemoveDuplicates();
     return f;
@@ -47,7 +49,7 @@ public class RemoveDuplicatesTest extends AbstractFilterTest {
     return new TestSuite(RemoveDuplicatesTest.class);
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
   }
 

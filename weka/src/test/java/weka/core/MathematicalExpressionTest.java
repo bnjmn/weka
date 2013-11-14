@@ -20,39 +20,42 @@
 package weka.core;
 
 import java.util.HashMap;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Tests MathematicalExpression. Run from the command line with:<p/>
+ * Tests MathematicalExpression. Run from the command line with:
+ * <p/>
  * java weka.core.MathematicalTest
- *
+ * 
  * @author mhall (mhall{[at]}pentaho{[dot]}org)
  * @version $Revision$
  */
-public class MathematicalExpressionTest 
-  extends TestCase {
+public class MathematicalExpressionTest extends TestCase {
 
   /**
    * Constructs the <code>MathematicalExpresionTest</code>.
-   *
+   * 
    * @param name the name of the test class
    */
-  public MathematicalExpressionTest(String name) { 
-    super(name); 
+  public MathematicalExpressionTest(String name) {
+    super(name);
   }
-  
+
   /**
    * Called by JUnit before each test method.
-   *
+   * 
    * @throws Exception if an error occurs
    */
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
   }
 
   /** Called by JUnit after each test method */
+  @Override
   protected void tearDown() throws Exception {
     super.tearDown();
   }
@@ -62,7 +65,7 @@ public class MathematicalExpressionTest
   }
 
   protected double getExpressionResult(String expression) throws Exception {
-    HashMap symbols = new HashMap();
+    HashMap<String, Double> symbols = new HashMap<String, Double>();
     symbols.put("A", new Double(4));
     symbols.put("B", new Double(2));
     symbols.put("C", new Double(2));
@@ -92,14 +95,14 @@ public class MathematicalExpressionTest
   public void testExpressionWithFunction() throws Exception {
     double result = getExpressionResult("pow(A,B*1)-C*2");
     assertEquals(12.0, result);
-  } 
+  }
 
   public void testExpressionWithIFELSE() throws Exception {
     double result = getExpressionResult("ifelse((C<1000|C>5000),(A+B),C+C)");
     assertEquals(6.0, result);
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
   }
 }

@@ -74,7 +74,7 @@ public class MergeNominalValuesTest extends AbstractFilterTest {
     Attribute mergedAtt = result.attribute(4);
     // All values should be merged for this attribute
     assertTrue("Attribute 5 has all values merged in result", mergedAtt
-        .value(0).equals("a_or_b_or_c_or_d"));
+      .value(0).equals("a_or_b_or_c_or_d"));
   }
 
   /**
@@ -100,12 +100,10 @@ public class MergeNominalValuesTest extends AbstractFilterTest {
     // Number of attributes and instances shouldn't change
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(m_Instances.numInstances(), result.numInstances());
-    // Check that the merging is correct
-    int mergedIndex = -1;
     for (int i = 0; i < result.numInstances(); i++) {
       if (m_Instances.instance(i).isMissing(4)) {
         assertTrue("Missing in input should give missing in result", result
-            .instance(i).isMissing(4));
+          .instance(i).isMissing(4));
       }
     }
   }
@@ -119,11 +117,12 @@ public class MergeNominalValuesTest extends AbstractFilterTest {
       Instances data = getFilteredClassifierData();
 
       for (int i = 0; i < data.numAttributes(); i++) {
-        if (data.classIndex() == i)
+        if (data.classIndex() == i) {
           continue;
+        }
         if (data.attribute(i).isNominal()) {
           ((MergeNominalValues) m_FilteredClassifier.getFilter())
-              .setAttributeIndices("" + (i + 1));
+            .setAttributeIndices("" + (i + 1));
           break;
         }
       }
