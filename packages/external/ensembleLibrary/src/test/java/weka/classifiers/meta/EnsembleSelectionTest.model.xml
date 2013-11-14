@@ -25,7 +25,7 @@
    </object>
    <object class="weka.classifiers.rules.ZeroR" name="1">
       <object array="yes" class="java.lang.String" name="options">
-         <object class="java.lang.String" name="0">-D</object>
+         <object class="java.lang.String" name="0">-output-debug-info</object>
       </object>
    </object>
 </object>
