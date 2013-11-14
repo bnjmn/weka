@@ -10,7 +10,7 @@ Search Method:
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 	Wrapper Subset Evaluator
 	Learning scheme: weka.classifiers.trees.J48
-	Scheme options: -C 0.25 -M 2              
+	Scheme options: -C 0.25 -M 2 
 	Subset evaluation: classification error
 	Number of folds for accuracy estimation: 5
 
