@@ -101,7 +101,7 @@ This package provides loaders and savers for HDFS, plus Hadoop jobs and tasks th
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>distributedWekaBase</artifactId>
-      <version>[1.0.0,)</version>
+      <version>[1.0.2,)</version>
     </dependency>
 
     <dependency>
