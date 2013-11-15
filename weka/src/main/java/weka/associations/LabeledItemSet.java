@@ -78,10 +78,10 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param itemSets the set of item sets to be pruned
    * @param minSupport the minimum number of transactions to be covered
    */
-  public static ArrayList<ItemSet> deleteItemSets(ArrayList<ItemSet> itemSets,
+  public static ArrayList<Object> deleteItemSets(ArrayList<Object> itemSets,
     int minSupport, int maxSupport) {
 
-    ArrayList<ItemSet> newVector = new ArrayList<ItemSet>(itemSets.size());
+    ArrayList<Object> newVector = new ArrayList<Object>(itemSets.size());
 
     for (int i = 0; i < itemSets.size(); i++) {
       LabeledItemSet current = (LabeledItemSet) itemSets.get(i);
@@ -141,13 +141,13 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param initialSize the initial size of the hashtable
    * @return the generated hashtable
    */
-  public static Hashtable<LabeledItemSet, Integer> getHashtable(
-    ArrayList<LabeledItemSet> itemSets, int initialSize) {
+  public static Hashtable<ItemSet, Integer> getHashtable(
+    ArrayList<Object> itemSets, int initialSize) {
 
-    Hashtable<LabeledItemSet, Integer> hashtable = new Hashtable<LabeledItemSet, Integer>(
+    Hashtable<ItemSet, Integer> hashtable = new Hashtable<ItemSet, Integer>(
       initialSize);
     for (int i = 0; i < itemSets.size(); i++) {
-      LabeledItemSet current = itemSets.get(i);
+      LabeledItemSet current = (LabeledItemSet) itemSets.get(i);
       hashtable.put(current, new Integer(current.m_classLabel));
     }
 
@@ -163,23 +163,23 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param itemSets the set of (k-1)-item sets
    * @param size the value of (k-1)
    */
-  public static ArrayList<LabeledItemSet> mergeAllItemSets(
-    ArrayList<LabeledItemSet> itemSets, int size, int totalTrans) {
+  public static ArrayList<Object> mergeAllItemSets(ArrayList<Object> itemSets,
+    int size, int totalTrans) {
 
-    ArrayList<LabeledItemSet> newVector = new ArrayList<LabeledItemSet>();
+    ArrayList<Object> newVector = new ArrayList<Object>();
     LabeledItemSet result;
     int numFound, k;
 
     for (int i = 0; i < itemSets.size(); i++) {
-      LabeledItemSet first = itemSets.get(i);
+      LabeledItemSet first = (LabeledItemSet) itemSets.get(i);
       out: for (int j = i + 1; j < itemSets.size(); j++) {
-        LabeledItemSet second = itemSets.get(j);
+        LabeledItemSet second = (LabeledItemSet) itemSets.get(j);
         while (first.m_classLabel != second.m_classLabel) {
           j++;
           if (j == itemSets.size()) {
             break out;
           }
-          second = itemSets.get(j);
+          second = (LabeledItemSet) itemSets.get(j);
         }
         result = new LabeledItemSet(totalTrans, first.m_classLabel);
         result.m_items = new int[first.m_items.length];
@@ -269,10 +269,10 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    *          instances
    * @exception Exception if singletons can't be generated successfully
    */
-  public static ArrayList<ItemSet> singletons(Instances instancesNoClass,
+  public static ArrayList<Object> singletons(Instances instancesNoClass,
     Instances classes) throws Exception {
 
-    ArrayList<ItemSet> setOfItemSets = new ArrayList<ItemSet>();
+    ArrayList<Object> setOfItemSets = new ArrayList<Object>();
     LabeledItemSet current;
 
     // make singletons
@@ -302,16 +302,14 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param kMinusOne the (k-1)-item sets to be used for pruning
    * @return the pruned set of item sets
    */
-  public static ArrayList<LabeledItemSet> pruneItemSets(
-    ArrayList<LabeledItemSet> toPrune,
-    Hashtable<LabeledItemSet, Integer> kMinusOne) {
+  public static ArrayList<Object> pruneItemSets(ArrayList<Object> toPrune,
+    Hashtable<ItemSet, Integer> kMinusOne) {
 
-    ArrayList<LabeledItemSet> newVector = new ArrayList<LabeledItemSet>(
-      toPrune.size());
+    ArrayList<Object> newVector = new ArrayList<Object>(toPrune.size());
     int help, j;
 
     for (int i = 0; i < toPrune.size(); i++) {
-      LabeledItemSet current = toPrune.get(i);
+      LabeledItemSet current = (LabeledItemSet) toPrune.get(i);
 
       for (j = 0; j < current.m_items.length; j++) {
         if (current.m_items[j] != -1) {
@@ -387,7 +385,7 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param instancesClass the values of the class attribute sorted according to
    *          instances
    */
-  public static void upDateCounters(ArrayList<ItemSet> itemSets,
+  public static void upDateCounters(ArrayList<Object> itemSets,
     Instances instancesNoClass, Instances instancesClass) {
 
     for (int i = 0; i < instancesNoClass.numInstances(); i++) {

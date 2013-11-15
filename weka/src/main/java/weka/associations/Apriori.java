@@ -220,7 +220,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
   protected int m_cycles;
 
   /** The set of all sets of itemsets L. */
-  protected ArrayList<ArrayList<ItemSet>> m_Ls;
+  protected ArrayList<ArrayList<Object>> m_Ls;
 
   /** The same information stored in hash tables. */
   protected ArrayList<Hashtable<ItemSet, Integer>> m_hashtables;
@@ -493,7 +493,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
     do {
       // Reserve space for variables
-      m_Ls = new ArrayList<ArrayList<ItemSet>>();
+      m_Ls = new ArrayList<ArrayList<Object>>();
       m_hashtables = new ArrayList<Hashtable<ItemSet, Integer>>();
       m_allTheRules = new ArrayList[6];
       m_allTheRules[0] = new ArrayList<Object>();
@@ -1130,7 +1130,8 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
         if (m_outputItemSets) {
           text.append("\nLarge Itemsets L(" + (i + 1) + "):\n");
           for (int j = 0; j < (m_Ls.get(i)).size(); j++) {
-            text.append((m_Ls.get(i)).get(j).toString(m_instances) + "\n");
+            text.append(((ItemSet) (m_Ls.get(i)).get(j)).toString(m_instances)
+              + "\n");
             text.append(((LabeledItemSet) (m_Ls.get(i)).get(j)).m_classLabel
               + "  ");
             text.append(((LabeledItemSet) (m_Ls.get(i)).get(j)).support()
@@ -1650,7 +1651,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   private void findLargeItemSets() throws Exception {
 
-    ArrayList<ItemSet> kMinusOneSets, kSets;
+    ArrayList<Object> kMinusOneSets, kSets;
     Hashtable<ItemSet, Integer> hashtable;
     int necSupport, i = 0;
 
@@ -1701,12 +1702,12 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
     // Build rules
     for (int j = 1; j < m_Ls.size(); j++) {
-      ArrayList<ItemSet> currentItemSets = m_Ls.get(j);
+      ArrayList<Object> currentItemSets = m_Ls.get(j);
       @SuppressWarnings("unchecked")
-      Enumeration<ItemSet> enumItemSets = new WekaEnumeration(currentItemSets);
+      Enumeration<AprioriItemSet> enumItemSets = new WekaEnumeration(
+        currentItemSets);
       while (enumItemSets.hasMoreElements()) {
-        AprioriItemSet currentItemSet = (AprioriItemSet) enumItemSets
-          .nextElement();
+        AprioriItemSet currentItemSet = enumItemSets.nextElement();
         // AprioriItemSet currentItemSet = new
         // AprioriItemSet((ItemSet)enumItemSets.nextElement());
         rules = currentItemSet.generateRulesBruteForce(m_minMetric,
@@ -1735,12 +1736,12 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     ArrayList<Object>[] rules;
     // Build rules
     for (int j = 1; j < m_Ls.size(); j++) {
-      ArrayList<ItemSet> currentItemSets = m_Ls.get(j);
+      ArrayList<Object> currentItemSets = m_Ls.get(j);
       @SuppressWarnings("unchecked")
-      Enumeration<ItemSet> enumItemSets = new WekaEnumeration(currentItemSets);
+      Enumeration<AprioriItemSet> enumItemSets = new WekaEnumeration(
+        currentItemSets);
       while (enumItemSets.hasMoreElements()) {
-        AprioriItemSet currentItemSet = (AprioriItemSet) enumItemSets
-          .nextElement();
+        AprioriItemSet currentItemSet = enumItemSets.nextElement();
         // AprioriItemSet currentItemSet = new
         // AprioriItemSet((ItemSet)enumItemSets.nextElement());
         rules = currentItemSet.generateRules(m_minMetric, m_hashtables, j + 1);
@@ -1768,7 +1769,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   private void findLargeCarItemSets() throws Exception {
 
-    ArrayList<ItemSet> kMinusOneSets, kSets;
+    ArrayList<Object> kMinusOneSets, kSets;
     Hashtable<ItemSet, Integer> hashtable;
     int necSupport, i = 0;
 
@@ -1823,12 +1824,12 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
     // Build rules
     for (int j = 0; j < m_Ls.size(); j++) {
-      ArrayList<ItemSet> currentLabeledItemSets = m_Ls.get(j);
+      ArrayList<Object> currentLabeledItemSets = m_Ls.get(j);
       @SuppressWarnings("unchecked")
-      Enumeration<ItemSet> enumLabeledItemSets = new WekaEnumeration(
+      Enumeration<LabeledItemSet> enumLabeledItemSets = new WekaEnumeration(
         currentLabeledItemSets);
       while (enumLabeledItemSets.hasMoreElements()) {
-        LabeledItemSet currentLabeledItemSet = (LabeledItemSet) enumLabeledItemSets
+        LabeledItemSet currentLabeledItemSet = enumLabeledItemSets
           .nextElement();
         rules = currentLabeledItemSet.generateRules(m_minMetric, false);
         for (int k = 0; k < rules[0].size(); k++) {

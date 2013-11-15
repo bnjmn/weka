@@ -504,10 +504,10 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-  public static ArrayList<ItemSet> singletons(Instances instances,
+  public static ArrayList<Object> singletons(Instances instances,
     boolean treatZeroAsMissing) throws Exception {
 
-    ArrayList<ItemSet> setOfItemSets = new ArrayList<ItemSet>();
+    ArrayList<Object> setOfItemSets = new ArrayList<Object>();
     AprioriItemSet current;
 
     for (int i = 0; i < instances.numAttributes(); i++) {
@@ -545,9 +545,9 @@ public class AprioriItemSet extends ItemSet implements Serializable,
     int numFound, k;
 
     for (int i = 0; i < itemSets.size(); i++) {
-      ItemSet first = (AprioriItemSet) itemSets.get(i);
+      ItemSet first = (ItemSet) itemSets.get(i);
       out: for (int j = i + 1; j < itemSets.size(); j++) {
-        ItemSet second = (AprioriItemSet) itemSets.get(j);
+        ItemSet second = (ItemSet) itemSets.get(j);
         result = new AprioriItemSet(totalTrans);
         result.m_items = new int[first.m_items.length];
 

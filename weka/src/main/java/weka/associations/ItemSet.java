@@ -176,13 +176,13 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param itemSets the set of item sets to be pruned
    * @param minSupport the minimum number of transactions to be covered
    */
-  public static ArrayList<ItemSet> deleteItemSets(ArrayList<ItemSet> itemSets,
+  public static ArrayList<Object> deleteItemSets(ArrayList<Object> itemSets,
     int minSupport, int maxSupport) {
 
-    ArrayList<ItemSet> newVector = new ArrayList<ItemSet>(itemSets.size());
+    ArrayList<Object> newVector = new ArrayList<Object>(itemSets.size());
 
     for (int i = 0; i < itemSets.size(); i++) {
-      ItemSet current = itemSets.get(i);
+      ItemSet current = (ItemSet) itemSets.get(i);
       if ((current.m_counter >= minSupport)
         && (current.m_counter <= maxSupport)) {
         newVector.add(current);
@@ -222,13 +222,13 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @return the generated hashtable
    */
   public static Hashtable<ItemSet, Integer> getHashtable(
-    ArrayList<ItemSet> itemSets, int initialSize) {
+    ArrayList<Object> itemSets, int initialSize) {
 
     Hashtable<ItemSet, Integer> hashtable = new Hashtable<ItemSet, Integer>(
       initialSize);
 
     for (int i = 0; i < itemSets.size(); i++) {
-      ItemSet current = itemSets.get(i);
+      ItemSet current = (ItemSet) itemSets.get(i);
       hashtable.put(current, new Integer(current.m_counter));
     }
     return hashtable;
@@ -259,17 +259,17 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param itemSets the set of (k-1)-item sets
    * @param size the value of (k-1)
    */
-  public static ArrayList<ItemSet> mergeAllItemSets(
-    ArrayList<ItemSet> itemSets, int size, int totalTrans) {
+  public static ArrayList<Object> mergeAllItemSets(ArrayList<Object> itemSets,
+    int size, int totalTrans) {
 
-    ArrayList<ItemSet> newVector = new ArrayList<ItemSet>();
+    ArrayList<Object> newVector = new ArrayList<Object>();
     ItemSet result;
     int numFound, k;
 
     for (int i = 0; i < itemSets.size(); i++) {
-      ItemSet first = itemSets.get(i);
+      ItemSet first = (ItemSet) itemSets.get(i);
       out: for (int j = i + 1; j < itemSets.size(); j++) {
-        ItemSet second = itemSets.get(j);
+        ItemSet second = (ItemSet) itemSets.get(j);
         result = new ItemSet(totalTrans);
         result.m_items = new int[first.m_items.length];
 
@@ -318,14 +318,14 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param kMinusOne the (k-1)-item sets to be used for pruning
    * @return the pruned set of item sets
    */
-  public static ArrayList<ItemSet> pruneItemSets(ArrayList<ItemSet> toPrune,
+  public static ArrayList<Object> pruneItemSets(ArrayList<Object> toPrune,
     Hashtable<ItemSet, Integer> kMinusOne) {
 
-    ArrayList<ItemSet> newVector = new ArrayList<ItemSet>(toPrune.size());
+    ArrayList<Object> newVector = new ArrayList<Object>(toPrune.size());
     int help, j;
 
     for (int i = 0; i < toPrune.size(); i++) {
-      ItemSet current = toPrune.get(i);
+      ItemSet current = (ItemSet) toPrune.get(i);
       for (j = 0; j < current.m_items.length; j++) {
         if (current.m_items[j] != -1) {
           help = current.m_items[j];
@@ -512,7 +512,7 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param itemSets the set of item sets which are to be updated
    * @param instances the instances to be used for updating the counters
    */
-  public static void upDateCounters(ArrayList<ItemSet> itemSets,
+  public static void upDateCounters(ArrayList<Object> itemSets,
     Instances instances) {
 
     for (int i = 0; i < instances.numInstances(); i++) {
@@ -531,7 +531,7 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param instances the instances to be used for updating the counters
    */
   public static void upDateCountersTreatZeroAsMissing(
-    ArrayList<ItemSet> itemSets, Instances instances) {
+    ArrayList<Object> itemSets, Instances instances) {
     for (int i = 0; i < instances.numInstances(); i++) {
       @SuppressWarnings("unchecked")
       Enumeration<ItemSet> enu = new WekaEnumeration(itemSets);
