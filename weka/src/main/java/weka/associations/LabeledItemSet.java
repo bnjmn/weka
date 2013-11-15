@@ -22,14 +22,15 @@
 package weka.associations;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.WekaEnumeration;
 
 /**
  * Class for storing a set of items together with a class label. Item sets are
@@ -45,7 +46,7 @@ import weka.core.RevisionUtils;
  */
 
 public class LabeledItemSet extends ItemSet implements Serializable,
-    RevisionHandler {
+  RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4158771925518299903L;
@@ -77,16 +78,17 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param itemSets the set of item sets to be pruned
    * @param minSupport the minimum number of transactions to be covered
    */
-  public static FastVector deleteItemSets(FastVector itemSets, int minSupport,
-      int maxSupport) {
+  public static ArrayList<ItemSet> deleteItemSets(ArrayList<ItemSet> itemSets,
+    int minSupport, int maxSupport) {
 
-    FastVector newVector = new FastVector(itemSets.size());
+    ArrayList<ItemSet> newVector = new ArrayList<ItemSet>(itemSets.size());
 
     for (int i = 0; i < itemSets.size(); i++) {
-      LabeledItemSet current = (LabeledItemSet) itemSets.elementAt(i);
+      LabeledItemSet current = (LabeledItemSet) itemSets.get(i);
       if ((current.m_ruleSupCounter >= minSupport)
-          && (current.m_ruleSupCounter <= maxSupport))
-        newVector.addElement(current);
+        && (current.m_ruleSupCounter <= maxSupport)) {
+        newVector.add(current);
+      }
     }
     return newVector;
   }
@@ -100,10 +102,12 @@ public class LabeledItemSet extends ItemSet implements Serializable,
   @Override
   public final boolean equals(Object itemSet) {
 
-    if (!(this.equalCondset(itemSet)))
+    if (!(this.equalCondset(itemSet))) {
       return false;
-    if (m_classLabel != ((LabeledItemSet) itemSet).m_classLabel)
+    }
+    if (m_classLabel != ((LabeledItemSet) itemSet).m_classLabel) {
       return false;
+    }
 
     return true;
   }
@@ -119,11 +123,14 @@ public class LabeledItemSet extends ItemSet implements Serializable,
     if ((itemSet == null) || !(itemSet.getClass().equals(this.getClass()))) {
       return false;
     }
-    if (m_items.length != ((ItemSet) itemSet).items().length)
+    if (m_items.length != ((ItemSet) itemSet).items().length) {
       return false;
-    for (int i = 0; i < m_items.length; i++)
-      if (m_items[i] != ((ItemSet) itemSet).itemAt(i))
+    }
+    for (int i = 0; i < m_items.length; i++) {
+      if (m_items[i] != ((ItemSet) itemSet).itemAt(i)) {
         return false;
+      }
+    }
     return true;
   }
 
@@ -134,11 +141,13 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param initialSize the initial size of the hashtable
    * @return the generated hashtable
    */
-  public static Hashtable getHashtable(FastVector itemSets, int initialSize) {
+  public static Hashtable<LabeledItemSet, Integer> getHashtable(
+    ArrayList<LabeledItemSet> itemSets, int initialSize) {
 
-    Hashtable hashtable = new Hashtable(initialSize);
+    Hashtable<LabeledItemSet, Integer> hashtable = new Hashtable<LabeledItemSet, Integer>(
+      initialSize);
     for (int i = 0; i < itemSets.size(); i++) {
-      LabeledItemSet current = (LabeledItemSet) itemSets.elementAt(i);
+      LabeledItemSet current = itemSets.get(i);
       hashtable.put(current, new Integer(current.m_classLabel));
     }
 
@@ -154,22 +163,23 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param itemSets the set of (k-1)-item sets
    * @param size the value of (k-1)
    */
-  public static FastVector mergeAllItemSets(FastVector itemSets, int size,
-      int totalTrans) {
+  public static ArrayList<LabeledItemSet> mergeAllItemSets(
+    ArrayList<LabeledItemSet> itemSets, int size, int totalTrans) {
 
-    FastVector newVector = new FastVector();
+    ArrayList<LabeledItemSet> newVector = new ArrayList<LabeledItemSet>();
     LabeledItemSet result;
     int numFound, k;
 
     for (int i = 0; i < itemSets.size(); i++) {
-      LabeledItemSet first = (LabeledItemSet) itemSets.elementAt(i);
+      LabeledItemSet first = itemSets.get(i);
       out: for (int j = i + 1; j < itemSets.size(); j++) {
-        LabeledItemSet second = (LabeledItemSet) itemSets.elementAt(j);
+        LabeledItemSet second = itemSets.get(j);
         while (first.m_classLabel != second.m_classLabel) {
           j++;
-          if (j == itemSets.size())
+          if (j == itemSets.size()) {
             break out;
-          second = (LabeledItemSet) itemSets.elementAt(j);
+          }
+          second = itemSets.get(j);
         }
         result = new LabeledItemSet(totalTrans, first.m_classLabel);
         result.m_items = new int[first.m_items.length];
@@ -179,30 +189,33 @@ public class LabeledItemSet extends ItemSet implements Serializable,
         k = 0;
         while (numFound < size) {
           if (first.m_items[k] == second.m_items[k]) {
-            if (first.m_items[k] != -1)
+            if (first.m_items[k] != -1) {
               numFound++;
+            }
             result.m_items[k] = first.m_items[k];
-          } else
+          } else {
             break out;
+          }
           k++;
         }
 
         // Check difference
         while (k < first.m_items.length) {
-          if ((first.m_items[k] != -1) && (second.m_items[k] != -1))
+          if ((first.m_items[k] != -1) && (second.m_items[k] != -1)) {
             break;
-          else {
-            if (first.m_items[k] != -1)
+          } else {
+            if (first.m_items[k] != -1) {
               result.m_items[k] = first.m_items[k];
-            else
+            } else {
               result.m_items[k] = second.m_items[k];
+            }
           }
           k++;
         }
         if (k == first.m_items.length) {
           result.m_ruleSupCounter = 0;
           result.m_counter = 0;
-          newVector.addElement(result);
+          newVector.add(result);
         }
       }
     }
@@ -223,12 +236,13 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    *         class attribute
    */
   public static Instances divide(Instances instances, boolean invert)
-      throws Exception {
+    throws Exception {
 
     Instances newInstances = new Instances(instances);
-    if (instances.classIndex() < 0)
+    if (instances.classIndex() < 0) {
       throw new Exception(
-          "For class association rule mining a class attribute has to be specified.");
+        "For class association rule mining a class attribute has to be specified.");
+    }
     if (invert) {
       for (int i = 0; i < newInstances.numAttributes(); i++) {
         if (i != newInstances.classIndex()) {
@@ -255,24 +269,26 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    *          instances
    * @exception Exception if singletons can't be generated successfully
    */
-  public static FastVector singletons(Instances instancesNoClass,
-      Instances classes) throws Exception {
+  public static ArrayList<ItemSet> singletons(Instances instancesNoClass,
+    Instances classes) throws Exception {
 
-    FastVector cSet, setOfItemSets = new FastVector();
+    ArrayList<ItemSet> setOfItemSets = new ArrayList<ItemSet>();
     LabeledItemSet current;
 
     // make singletons
     for (int i = 0; i < instancesNoClass.numAttributes(); i++) {
-      if (instancesNoClass.attribute(i).isNumeric())
+      if (instancesNoClass.attribute(i).isNumeric()) {
         throw new Exception("Can't handle numeric attributes!");
+      }
       for (int j = 0; j < instancesNoClass.attribute(i).numValues(); j++) {
         for (int k = 0; k < (classes.attribute(0)).numValues(); k++) {
           current = new LabeledItemSet(instancesNoClass.numInstances(), k);
           current.m_items = new int[instancesNoClass.numAttributes()];
-          for (int l = 0; l < instancesNoClass.numAttributes(); l++)
+          for (int l = 0; l < instancesNoClass.numAttributes(); l++) {
             current.m_items[l] = -1;
+          }
           current.m_items[i] = j;
-          setOfItemSets.addElement(current);
+          setOfItemSets.add(current);
         }
       }
     }
@@ -286,30 +302,33 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param kMinusOne the (k-1)-item sets to be used for pruning
    * @return the pruned set of item sets
    */
-  public static FastVector pruneItemSets(FastVector toPrune, Hashtable kMinusOne) {
+  public static ArrayList<LabeledItemSet> pruneItemSets(
+    ArrayList<LabeledItemSet> toPrune,
+    Hashtable<LabeledItemSet, Integer> kMinusOne) {
 
-    FastVector newVector = new FastVector(toPrune.size());
+    ArrayList<LabeledItemSet> newVector = new ArrayList<LabeledItemSet>(
+      toPrune.size());
     int help, j;
 
     for (int i = 0; i < toPrune.size(); i++) {
-      LabeledItemSet current = (LabeledItemSet) toPrune.elementAt(i);
+      LabeledItemSet current = toPrune.get(i);
 
       for (j = 0; j < current.m_items.length; j++) {
         if (current.m_items[j] != -1) {
           help = current.m_items[j];
           current.m_items[j] = -1;
           if (kMinusOne.get(current) != null
-              && (current.m_classLabel == (((Integer) kMinusOne.get(current))
-                  .intValue())))
+            && (current.m_classLabel == (kMinusOne.get(current).intValue()))) {
             current.m_items[j] = help;
-          else {
+          } else {
             current.m_items[j] = help;
             break;
           }
         }
       }
-      if (j == current.m_items.length)
-        newVector.addElement(current);
+      if (j == current.m_items.length) {
+        newVector.add(current);
+      }
     }
     return newVector;
   }
@@ -333,12 +352,13 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    *          instances
    */
   public final void upDateCounter(Instance instanceNoClass,
-      Instance instanceClass) {
+    Instance instanceClass) {
 
     if (containedBy(instanceNoClass)) {
       m_counter++;
-      if (this.m_classLabel == instanceClass.value(0))
+      if (this.m_classLabel == instanceClass.value(0)) {
         m_ruleSupCounter++;
+      }
     }
   }
 
@@ -350,11 +370,12 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    *          instances
    */
   public final void upDateCounterTreatZeroAsMissing(Instance instanceNoClass,
-      Instance instanceClass) {
+    Instance instanceClass) {
     if (containedByTreatZeroAsMissing(instanceNoClass)) {
       m_counter++;
-      if (this.m_classLabel == instanceClass.value(0))
+      if (this.m_classLabel == instanceClass.value(0)) {
         m_ruleSupCounter++;
+      }
     }
   }
 
@@ -366,14 +387,16 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param instancesClass the values of the class attribute sorted according to
    *          instances
    */
-  public static void upDateCounters(FastVector itemSets,
-      Instances instancesNoClass, Instances instancesClass) {
+  public static void upDateCounters(ArrayList<ItemSet> itemSets,
+    Instances instancesNoClass, Instances instancesClass) {
 
     for (int i = 0; i < instancesNoClass.numInstances(); i++) {
-      Enumeration enu = itemSets.elements();
-      while (enu.hasMoreElements())
-        ((LabeledItemSet) enu.nextElement()).upDateCounter(
-            instancesNoClass.instance(i), instancesClass.instance(i));
+      @SuppressWarnings("unchecked")
+      Enumeration<LabeledItemSet> enu = new WekaEnumeration(itemSets);
+      while (enu.hasMoreElements()) {
+        enu.nextElement().upDateCounter(instancesNoClass.instance(i),
+          instancesClass.instance(i));
+      }
     }
 
   }
@@ -386,13 +409,16 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    * @param instancesClass the values of the class attribute sorted according to
    *          instances
    */
-  public static void upDateCountersTreatZeroAsMissing(FastVector itemSets,
-      Instances instancesNoClass, Instances instancesClass) {
+  public static void upDateCountersTreatZeroAsMissing(
+    ArrayList<LabeledItemSet> itemSets, Instances instancesNoClass,
+    Instances instancesClass) {
     for (int i = 0; i < instancesNoClass.numInstances(); i++) {
-      Enumeration enu = itemSets.elements();
-      while (enu.hasMoreElements())
-        ((LabeledItemSet) enu.nextElement()).upDateCounterTreatZeroAsMissing(
-            instancesNoClass.instance(i), instancesClass.instance(i));
+      @SuppressWarnings("unchecked")
+      Enumeration<LabeledItemSet> enu = new WekaEnumeration(itemSets);
+      while (enu.hasMoreElements()) {
+        enu.nextElement().upDateCounterTreatZeroAsMissing(
+          instancesNoClass.instance(i), instancesClass.instance(i));
+      }
     }
   }
 
@@ -404,10 +430,14 @@ public class LabeledItemSet extends ItemSet implements Serializable,
    *          the minimum confidence value
    * @return a set of rules
    */
-  public final FastVector[] generateRules(double minConfidence, boolean noPrune) {
+  public final ArrayList<Object>[] generateRules(double minConfidence,
+    boolean noPrune) {
 
-    FastVector premises = new FastVector(), consequences = new FastVector(), conf = new FastVector();
-    FastVector[] rules = new FastVector[3];
+    ArrayList<Object> premises = new ArrayList<Object>();
+    ArrayList<Object> consequences = new ArrayList<Object>();
+    ArrayList<Object> conf = new ArrayList<Object>();
+    @SuppressWarnings("unchecked")
+    ArrayList<Object>[] rules = new ArrayList[3];
     ItemSet premise, consequence;
 
     // Generate all rules with class in the consequence.
@@ -421,16 +451,17 @@ public class LabeledItemSet extends ItemSet implements Serializable,
     consequence.setItemAt(m_classLabel, 0);
     consequence.setCounter(this.m_ruleSupCounter);
     premise.setCounter(this.m_counter);
-    premises.addElement(premise);
-    consequences.addElement(consequence);
-    conf.addElement(new Double((double) this.m_ruleSupCounter
-        / (double) this.m_counter));
+    premises.add(premise);
+    consequences.add(consequence);
+    conf.add(new Double((double) this.m_ruleSupCounter
+      / (double) this.m_counter));
 
     rules[0] = premises;
     rules[1] = consequences;
     rules[2] = conf;
-    if (!noPrune)
+    if (!noPrune) {
       pruneRules(rules, minConfidence);
+    }
 
     return rules;
   }

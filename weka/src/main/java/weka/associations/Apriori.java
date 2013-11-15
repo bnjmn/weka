@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Vector;
 
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -41,12 +41,12 @@ import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.WekaEnumeration;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
 /**
- <!-- globalinfo-start --> 
- * Class implementing an Apriori-type algorithm.
+ * <!-- globalinfo-start --> Class implementing an Apriori-type algorithm.
  * Iteratively reduces the minimum support until it finds the required number of
  * rules with the given minimum confidence.<br/>
  * The algorithm has an option to mine class association rules. It is adapted as
@@ -62,10 +62,9 @@ import weka.filters.unsupervised.attribute.Remove;
  * Rule Mining. In: Fourth International Conference on Knowledge Discovery and
  * Data Mining, 80-86, 1998.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start --> 
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
  * 
  * <pre>
  * &#64;inproceedings{Agrawal1994,
@@ -87,10 +86,9 @@ import weka.filters.unsupervised.attribute.Remove;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
+ * <!-- technical-bibtex-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -168,7 +166,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *  The class index. (default = last)
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
@@ -176,7 +174,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * @version $Revision$
  */
 public class Apriori extends AbstractAssociator implements OptionHandler,
-    AssociationRulesProducer, CARuleMiner, TechnicalInformationHandler {
+  AssociationRulesProducer, CARuleMiner, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 3277498842319212687L;
@@ -200,8 +198,8 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
   protected static final int CONVICTION = 3;
   /** Metric types. */
   public static final Tag[] TAGS_SELECTION = {
-      new Tag(CONFIDENCE, "Confidence"), new Tag(LIFT, "Lift"),
-      new Tag(LEVERAGE, "Leverage"), new Tag(CONVICTION, "Conviction") };
+    new Tag(CONFIDENCE, "Confidence"), new Tag(LIFT, "Lift"),
+    new Tag(LEVERAGE, "Leverage"), new Tag(CONVICTION, "Conviction") };
 
   /** The selected metric type. */
   protected int m_metricType = CONFIDENCE;
@@ -222,13 +220,13 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
   protected int m_cycles;
 
   /** The set of all sets of itemsets L. */
-  protected FastVector m_Ls;
+  protected ArrayList<ArrayList<ItemSet>> m_Ls;
 
   /** The same information stored in hash tables. */
-  protected FastVector m_hashtables;
+  protected ArrayList<Hashtable<ItemSet, Integer>> m_hashtables;
 
   /** The list of all generated rules. */
-  protected FastVector[] m_allTheRules;
+  protected ArrayList<Object>[] m_allTheRules;
 
   /**
    * The instances (transactions) to be used for generating the association
@@ -272,12 +270,11 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   public String globalInfo() {
     return "Class implementing an Apriori-type algorithm. Iteratively reduces "
-        + "the minimum support until it finds the required number of rules with "
-        + "the given minimum confidence.\n"
-        + "The algorithm has an option to mine class association rules. It is "
-        + "adapted as explained in the second reference.\n\n"
-        + "For more information see:\n\n"
-        + getTechnicalInformation().toString();
+      + "the minimum support until it finds the required number of rules with "
+      + "the given minimum confidence.\n"
+      + "The algorithm has an option to mine class association rules. It is "
+      + "adapted as explained in the second reference.\n\n"
+      + "For more information see:\n\n" + getTechnicalInformation().toString();
   }
 
   /**
@@ -295,9 +292,9 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "R. Agrawal and R. Srikant");
     result.setValue(Field.TITLE,
-        "Fast Algorithms for Mining Association Rules in Large Databases");
+      "Fast Algorithms for Mining Association Rules in Large Databases");
     result.setValue(Field.BOOKTITLE,
-        "20th International Conference on Very Large Data Bases");
+      "20th International Conference on Very Large Data Bases");
     result.setValue(Field.YEAR, "1994");
     result.setValue(Field.PAGES, "478-499");
     result.setValue(Field.PUBLISHER, "Morgan Kaufmann, Los Altos, CA");
@@ -305,10 +302,9 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     additional = result.add(Type.INPROCEEDINGS);
     additional.setValue(Field.AUTHOR, "Bing Liu and Wynne Hsu and Yiming Ma");
     additional.setValue(Field.TITLE,
-        "Integrating Classification and Association Rule Mining");
-    additional
-        .setValue(Field.BOOKTITLE,
-            "Fourth International Conference on Knowledge Discovery and Data Mining");
+      "Integrating Classification and Association Rule Mining");
+    additional.setValue(Field.BOOKTITLE,
+      "Fourth International Conference on Knowledge Discovery and Data Mining");
     additional.setValue(Field.YEAR, "1998");
     additional.setValue(Field.PAGES, "80-86");
     additional.setValue(Field.PUBLISHER, "AAAI Press");
@@ -353,7 +349,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * @throws Exception if something goes wrong
    */
   protected Instances removeMissingColumns(Instances instances)
-      throws Exception {
+    throws Exception {
 
     int numInstances = instances.numInstances();
     StringBuffer deleteString = new StringBuffer();
@@ -382,13 +378,13 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     }
     if (m_verbose) {
       System.err.println("Removed : " + removeCount
-          + " columns with all missing " + "values.");
+        + " columns with all missing " + "values.");
     }
     if (m_upperBoundMinSupport == 1.0 && maxCount != numInstances) {
       m_upperBoundMinSupport = (double) maxCount / (double) numInstances;
       if (m_verbose) {
         System.err.println("Setting upper bound min support to : "
-            + m_upperBoundMinSupport);
+          + m_upperBoundMinSupport);
       }
     }
 
@@ -435,12 +431,13 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * @param instances the instances to be used for generating the associations
    * @throws Exception if rules can't be built successfully
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void buildAssociations(Instances instances) throws Exception {
 
     double[] confidences, supports;
     int[] indices;
-    FastVector[] sortedRuleSet;
+    ArrayList<Object>[] sortedRuleSet;
     double necSupport = 0;
 
     instances = new Instances(instances);
@@ -448,8 +445,9 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     if (m_removeMissingCols) {
       instances = removeMissingColumns(instances);
     }
-    if (m_car && m_metricType != CONFIDENCE)
+    if (m_car && m_metricType != CONFIDENCE) {
       throw new Exception("For CAR-Mining metric type has to be confidence!");
+    }
 
     // only set class index if CAR is requested
     if (m_car) {
@@ -469,8 +467,8 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
     // make sure that the lower bound is equal to at least one instance
     double lowerBoundMinSupportToUse = (m_lowerBoundMinSupport
-        * instances.numInstances() < 1.0) ? 1.0 / instances.numInstances()
-        : m_lowerBoundMinSupport;
+      * instances.numInstances() < 1.0) ? 1.0 / instances.numInstances()
+      : m_lowerBoundMinSupport;
 
     if (m_car) {
       // m_instances does not contain the class attribute
@@ -478,8 +476,9 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
       // m_onlyClass contains only the class attribute
       m_onlyClass = LabeledItemSet.divide(instances, true);
-    } else
+    } else {
       m_instances = instances;
+    }
 
     if (m_car && m_numRules == Integer.MAX_VALUE) {
       // Set desired minimum support
@@ -489,38 +488,39 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
       // m_minSupport = m_upperBoundMinSupport - m_delta;
       m_minSupport = 1.0 - m_delta;
       m_minSupport = (m_minSupport < lowerBoundMinSupportToUse) ? lowerBoundMinSupportToUse
-          : m_minSupport;
+        : m_minSupport;
     }
 
     do {
       // Reserve space for variables
-      m_Ls = new FastVector();
-      m_hashtables = new FastVector();
-      m_allTheRules = new FastVector[6];
-      m_allTheRules[0] = new FastVector();
-      m_allTheRules[1] = new FastVector();
-      m_allTheRules[2] = new FastVector();
+      m_Ls = new ArrayList<ArrayList<ItemSet>>();
+      m_hashtables = new ArrayList<Hashtable<ItemSet, Integer>>();
+      m_allTheRules = new ArrayList[6];
+      m_allTheRules[0] = new ArrayList<Object>();
+      m_allTheRules[1] = new ArrayList<Object>();
+      m_allTheRules[2] = new ArrayList<Object>();
       // if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
-      m_allTheRules[3] = new FastVector();
-      m_allTheRules[4] = new FastVector();
-      m_allTheRules[5] = new FastVector();
+      m_allTheRules[3] = new ArrayList<Object>();
+      m_allTheRules[4] = new ArrayList<Object>();
+      m_allTheRules[5] = new ArrayList<Object>();
       // }
-      sortedRuleSet = new FastVector[6];
-      sortedRuleSet[0] = new FastVector();
-      sortedRuleSet[1] = new FastVector();
-      sortedRuleSet[2] = new FastVector();
+      sortedRuleSet = new ArrayList[6];
+      sortedRuleSet[0] = new ArrayList<Object>();
+      sortedRuleSet[1] = new ArrayList<Object>();
+      sortedRuleSet[2] = new ArrayList<Object>();
       // if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
-      sortedRuleSet[3] = new FastVector();
-      sortedRuleSet[4] = new FastVector();
-      sortedRuleSet[5] = new FastVector();
+      sortedRuleSet[3] = new ArrayList<Object>();
+      sortedRuleSet[4] = new ArrayList<Object>();
+      sortedRuleSet[5] = new ArrayList<Object>();
       // }
       if (!m_car) {
         // Find large itemsets and rules
         findLargeItemSets();
-        if (m_significanceLevel != -1 || m_metricType != CONFIDENCE)
+        if (m_significanceLevel != -1 || m_metricType != CONFIDENCE) {
           findRulesBruteForce();
-        else
+        } else {
           findRulesQuickly();
+        }
       } else {
         findLargeCarItemSets();
         findCarRulesQuickly();
@@ -538,63 +538,61 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
        * (double)((AprioriItemSet)m_allTheRules[1].elementAt(i)).support();
        * indices = Utils.stableSort(supports); for (int i = 0; i <
        * m_allTheRules[2].size(); i++) {
-       * sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[i]));
-       * sortedRuleSet[1].addElement(m_allTheRules[1].elementAt(indices[i]));
-       * sortedRuleSet[2].addElement(m_allTheRules[2].elementAt(indices[i])); if
+       * sortedRuleSet[0].add(m_allTheRules[0].get(indices[i]));
+       * sortedRuleSet[1].add(m_allTheRules[1].get(indices[i]));
+       * sortedRuleSet[2].add(m_allTheRules[2].get(indices[i])); if
        * (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
-       * sortedRuleSet[3].addElement(m_allTheRules[3].elementAt(indices[i]));
-       * sortedRuleSet[4].addElement(m_allTheRules[4].elementAt(indices[i]));
-       * sortedRuleSet[5].addElement(m_allTheRules[5].elementAt(indices[i])); }
-       * }
+       * sortedRuleSet[3].add(m_allTheRules[3].get(indices[i]));
+       * sortedRuleSet[4].add(m_allTheRules[4].get(indices[i]));
+       * sortedRuleSet[5].add(m_allTheRules[5].get(indices[i])); } }
        */
       int j = m_allTheRules[2].size() - 1;
       supports = new double[m_allTheRules[2].size()];
-      for (int i = 0; i < (j + 1); i++)
-        supports[j - i] = ((double) ((ItemSet) m_allTheRules[1]
-            .elementAt(j - i)).support()) * (-1);
+      for (int i = 0; i < (j + 1); i++) {
+        supports[j - i] = ((double) ((ItemSet) m_allTheRules[1].get(j - i))
+          .support()) * (-1);
+      }
       indices = Utils.stableSort(supports);
       for (int i = 0; i < (j + 1); i++) {
-        sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[j - i]));
-        sortedRuleSet[1].addElement(m_allTheRules[1].elementAt(indices[j - i]));
-        sortedRuleSet[2].addElement(m_allTheRules[2].elementAt(indices[j - i]));
+        sortedRuleSet[0].add(m_allTheRules[0].get(indices[j - i]));
+        sortedRuleSet[1].add(m_allTheRules[1].get(indices[j - i]));
+        sortedRuleSet[2].add(m_allTheRules[2].get(indices[j - i]));
         if (!m_car) {
           // if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
-          sortedRuleSet[3].addElement(m_allTheRules[3]
-              .elementAt(indices[j - i]));
-          sortedRuleSet[4].addElement(m_allTheRules[4]
-              .elementAt(indices[j - i]));
-          sortedRuleSet[5].addElement(m_allTheRules[5]
-              .elementAt(indices[j - i]));
+          sortedRuleSet[3].add(m_allTheRules[3].get(indices[j - i]));
+          sortedRuleSet[4].add(m_allTheRules[4].get(indices[j - i]));
+          sortedRuleSet[5].add(m_allTheRules[5].get(indices[j - i]));
         }
         // }
       }
 
       // Sort rules according to their confidence
-      m_allTheRules[0].removeAllElements();
-      m_allTheRules[1].removeAllElements();
-      m_allTheRules[2].removeAllElements();
+      m_allTheRules[0].clear();
+      m_allTheRules[1].clear();
+      m_allTheRules[2].clear();
       // if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
-      m_allTheRules[3].removeAllElements();
-      m_allTheRules[4].removeAllElements();
-      m_allTheRules[5].removeAllElements();
+      m_allTheRules[3].clear();
+      m_allTheRules[4].clear();
+      m_allTheRules[5].clear();
       // }
       confidences = new double[sortedRuleSet[2].size()];
       int sortType = 2 + m_metricType;
 
-      for (int i = 0; i < sortedRuleSet[2].size(); i++)
-        confidences[i] = ((Double) sortedRuleSet[sortType].elementAt(i))
-            .doubleValue();
+      for (int i = 0; i < sortedRuleSet[2].size(); i++) {
+        confidences[i] = ((Double) sortedRuleSet[sortType].get(i))
+          .doubleValue();
+      }
       indices = Utils.stableSort(confidences);
       for (int i = sortedRuleSet[0].size() - 1; (i >= (sortedRuleSet[0].size() - m_numRules))
-          && (i >= 0); i--) {
-        m_allTheRules[0].addElement(sortedRuleSet[0].elementAt(indices[i]));
-        m_allTheRules[1].addElement(sortedRuleSet[1].elementAt(indices[i]));
-        m_allTheRules[2].addElement(sortedRuleSet[2].elementAt(indices[i]));
+        && (i >= 0); i--) {
+        m_allTheRules[0].add(sortedRuleSet[0].get(indices[i]));
+        m_allTheRules[1].add(sortedRuleSet[1].get(indices[i]));
+        m_allTheRules[2].add(sortedRuleSet[2].get(indices[i]));
         // if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
         if (!m_car) {
-          m_allTheRules[3].addElement(sortedRuleSet[3].elementAt(indices[i]));
-          m_allTheRules[4].addElement(sortedRuleSet[4].elementAt(indices[i]));
-          m_allTheRules[5].addElement(sortedRuleSet[5].elementAt(indices[i]));
+          m_allTheRules[3].add(sortedRuleSet[3].get(indices[i]));
+          m_allTheRules[4].add(sortedRuleSet[4].get(indices[i]));
+          m_allTheRules[5].add(sortedRuleSet[5].get(indices[i]));
         }
         // }
       }
@@ -606,40 +604,42 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
       }
 
       if (m_minSupport == lowerBoundMinSupportToUse
-          || m_minSupport - m_delta > lowerBoundMinSupportToUse)
+        || m_minSupport - m_delta > lowerBoundMinSupportToUse) {
         m_minSupport -= m_delta;
-      else
+      } else {
         m_minSupport = lowerBoundMinSupportToUse;
+      }
 
       necSupport = Math.rint(m_minSupport * m_instances.numInstances());
 
       m_cycles++;
     } while ((m_allTheRules[0].size() < m_numRules)
-        && (Utils.grOrEq(m_minSupport, lowerBoundMinSupportToUse))
-        /* (necSupport >= lowerBoundNumInstancesSupport) */
-        /* (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport)) */&& (necSupport >= 1));
+      && (Utils.grOrEq(m_minSupport, lowerBoundMinSupportToUse))
+      /* (necSupport >= lowerBoundNumInstancesSupport) */
+      /* (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport)) */&& (necSupport >= 1));
     m_minSupport += m_delta;
   }
 
   private void pruneRulesForUpperBoundSupport() {
     int necMaxSupport = (int) (m_upperBoundMinSupport
-        * m_instances.numInstances() + 0.5);
+      * m_instances.numInstances() + 0.5);
 
-    FastVector[] prunedRules = new FastVector[6];
+    @SuppressWarnings("unchecked")
+    ArrayList<Object>[] prunedRules = new ArrayList[6];
     for (int i = 0; i < 6; i++) {
-      prunedRules[i] = new FastVector();
+      prunedRules[i] = new ArrayList<Object>();
     }
 
     for (int i = 0; i < m_allTheRules[0].size(); i++) {
-      if (((ItemSet) m_allTheRules[1].elementAt(i)).support() <= necMaxSupport) {
-        prunedRules[0].addElement(m_allTheRules[0].elementAt(i));
-        prunedRules[1].addElement(m_allTheRules[1].elementAt(i));
-        prunedRules[2].addElement(m_allTheRules[2].elementAt(i));
+      if (((ItemSet) m_allTheRules[1].get(i)).support() <= necMaxSupport) {
+        prunedRules[0].add(m_allTheRules[0].get(i));
+        prunedRules[1].add(m_allTheRules[1].get(i));
+        prunedRules[2].add(m_allTheRules[2].get(i));
 
         if (!m_car) {
-          prunedRules[3].addElement(m_allTheRules[3].elementAt(i));
-          prunedRules[4].addElement(m_allTheRules[4].elementAt(i));
-          prunedRules[5].addElement(m_allTheRules[5].elementAt(i));
+          prunedRules[3].add(m_allTheRules[3].get(i));
+          prunedRules[4].add(m_allTheRules[4].get(i));
+          prunedRules[5].add(m_allTheRules[5].get(i));
         }
       }
     }
@@ -662,7 +662,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * @throws Exception if rules can't be built successfully
    */
   @Override
-  public FastVector[] mineCARs(Instances data) throws Exception {
+  public ArrayList<Object>[] mineCARs(Instances data) throws Exception {
 
     m_car = true;
     buildAssociations(data);
@@ -697,45 +697,45 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
     String string1 = "\tThe required number of rules. (default = " + m_numRules
-        + ")", string2 = "\tThe minimum confidence of a rule. (default = "
-        + m_minMetric + ")", string3 = "\tThe delta by which the minimum support is decreased in\n", string4 = "\teach iteration. (default = "
-        + m_delta + ")", string5 = "\tThe lower bound for the minimum support. (default = "
-        + m_lowerBoundMinSupport + ")", string6 = "\tIf used, rules are tested for significance at\n", string7 = "\tthe given level. Slower. (default = no significance testing)", string8 = "\tIf set the itemsets found are also output. (default = no)", string9 = "\tIf set class association rules are mined. (default = no)", string10 = "\tThe class index. (default = last)", stringType = "\tThe metric type by which to rank rules. (default = "
-        + "confidence)", stringZeroAsMissing = "\tTreat zero (i.e. first value of nominal attributes) as "
-        + "missing", stringToStringDelimiters = "\tIf used, two characters to use as rule delimiters\n"
-        + "\tin the result of toString: the first to delimit fields,\n"
-        + "\tthe second to delimit items within fields.\n"
-        + "\t(default = traditional toString result)";
+      + ")", string2 = "\tThe minimum confidence of a rule. (default = "
+      + m_minMetric + ")", string3 = "\tThe delta by which the minimum support is decreased in\n", string4 = "\teach iteration. (default = "
+      + m_delta + ")", string5 = "\tThe lower bound for the minimum support. (default = "
+      + m_lowerBoundMinSupport + ")", string6 = "\tIf used, rules are tested for significance at\n", string7 = "\tthe given level. Slower. (default = no significance testing)", string8 = "\tIf set the itemsets found are also output. (default = no)", string9 = "\tIf set class association rules are mined. (default = no)", string10 = "\tThe class index. (default = last)", stringType = "\tThe metric type by which to rank rules. (default = "
+      + "confidence)", stringZeroAsMissing = "\tTreat zero (i.e. first value of nominal attributes) as "
+      + "missing", stringToStringDelimiters = "\tIf used, two characters to use as rule delimiters\n"
+      + "\tin the result of toString: the first to delimit fields,\n"
+      + "\tthe second to delimit items within fields.\n"
+      + "\t(default = traditional toString result)";
 
-    FastVector newVector = new FastVector(14);
+    Vector<Option> newVector = new Vector<Option>(14);
 
-    newVector.addElement(new Option(string1, "N", 1,
-        "-N <required number of rules output>"));
-    newVector.addElement(new Option(stringType, "T", 1,
-        "-T <0=confidence | 1=lift | " + "2=leverage | 3=Conviction>"));
-    newVector.addElement(new Option(string2, "C", 1,
-        "-C <minimum metric score of a rule>"));
-    newVector.addElement(new Option(string3 + string4, "D", 1,
-        "-D <delta for minimum support>"));
-    newVector.addElement(new Option("\tUpper bound for minimum support. "
-        + "(default = 1.0)", "U", 1, "-U <upper bound for minimum support>"));
-    newVector.addElement(new Option(string5, "M", 1,
-        "-M <lower bound for minimum support>"));
-    newVector.addElement(new Option(string6 + string7, "S", 1,
-        "-S <significance level>"));
-    newVector.addElement(new Option(string8, "I", 0, "-I"));
-    newVector.addElement(new Option("\tRemove columns that contain "
-        + "all missing values (default = no)", "R", 0, "-R"));
-    newVector.addElement(new Option("\tReport progress iteratively. (default "
-        + "= no)", "V", 0, "-V"));
-    newVector.addElement(new Option(string9, "A", 0, "-A"));
-    newVector.addElement(new Option(stringZeroAsMissing, "Z", 0, "-Z"));
-    newVector.addElement(new Option(stringToStringDelimiters, "B", 1,
-        "-B <toString delimiters>"));
-    newVector.addElement(new Option(string10, "c", 1, "-c <the class index>"));
+    newVector.add(new Option(string1, "N", 1,
+      "-N <required number of rules output>"));
+    newVector.add(new Option(stringType, "T", 1, "-T <0=confidence | 1=lift | "
+      + "2=leverage | 3=Conviction>"));
+    newVector.add(new Option(string2, "C", 1,
+      "-C <minimum metric score of a rule>"));
+    newVector.add(new Option(string3 + string4, "D", 1,
+      "-D <delta for minimum support>"));
+    newVector.add(new Option("\tUpper bound for minimum support. "
+      + "(default = 1.0)", "U", 1, "-U <upper bound for minimum support>"));
+    newVector.add(new Option(string5, "M", 1,
+      "-M <lower bound for minimum support>"));
+    newVector.add(new Option(string6 + string7, "S", 1,
+      "-S <significance level>"));
+    newVector.add(new Option(string8, "I", 0, "-I"));
+    newVector.add(new Option("\tRemove columns that contain "
+      + "all missing values (default = no)", "R", 0, "-R"));
+    newVector.add(new Option("\tReport progress iteratively. (default "
+      + "= no)", "V", 0, "-V"));
+    newVector.add(new Option(string9, "A", 0, "-A"));
+    newVector.add(new Option(stringZeroAsMissing, "Z", 0, "-Z"));
+    newVector.add(new Option(stringToStringDelimiters, "B", 1,
+      "-B <toString delimiters>"));
+    newVector.add(new Option(string10, "c", 1, "-c <the class index>"));
 
     return newVector.elements();
   }
@@ -744,8 +744,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start --> 
-   * Valid options are:
+   * <!-- options-start --> Valid options are:
    * <p/>
    * 
    * <pre>
@@ -823,7 +822,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    *  The class index. (default = last)
    * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -833,16 +832,16 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
     resetOptions();
     String numRulesString = Utils.getOption('N', options), minConfidenceString = Utils
-        .getOption('C', options), deltaString = Utils.getOption('D', options), maxSupportString = Utils
-        .getOption('U', options), minSupportString = Utils.getOption('M',
-        options), significanceLevelString = Utils.getOption('S', options), classIndexString = Utils
-        .getOption('c', options), toStringDelimitersString = Utils.getOption(
-        'B', options);
+      .getOption('C', options), deltaString = Utils.getOption('D', options), maxSupportString = Utils
+      .getOption('U', options), minSupportString = Utils
+      .getOption('M', options), significanceLevelString = Utils.getOption('S',
+      options), classIndexString = Utils.getOption('c', options), toStringDelimitersString = Utils
+      .getOption('B', options);
 
     String metricTypeString = Utils.getOption('T', options);
     if (metricTypeString.length() != 0) {
       setMetricType(new SelectedTag(Integer.parseInt(metricTypeString),
-          TAGS_SELECTION));
+        TAGS_SELECTION));
     }
 
     if (numRulesString.length() != 0) {
@@ -917,10 +916,12 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     options[current++] = "" + m_lowerBoundMinSupport;
     options[current++] = "-S";
     options[current++] = "" + m_significanceLevel;
-    if (m_car)
+    if (m_car) {
       options[current++] = "-A";
-    if (m_verbose)
+    }
+    if (m_verbose) {
       options[current++] = "-V";
+    }
 
     if (m_treatZeroAsMissing) {
       options[current++] = "-Z";
@@ -949,12 +950,13 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
     StringBuffer text = new StringBuffer();
 
-    if (m_Ls.size() <= 1)
+    if (m_Ls.size() <= 1) {
       return "\nNo large itemsets and rules found!\n";
+    }
     text.append("\nApriori\n=======\n\n");
     text.append("Minimum support: " + Utils.doubleToString(m_minSupport, 2)
-        + " (" + ((int) (m_minSupport * m_instances.numInstances() + 0.5))
-        + " instances)" + '\n');
+      + " (" + ((int) (m_minSupport * m_instances.numInstances() + 0.5))
+      + " instances)" + '\n');
     text.append("Minimum metric <");
     switch (m_metricType) {
     case CONFIDENCE:
@@ -972,40 +974,42 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     }
     text.append(Utils.doubleToString(m_minMetric, 2) + '\n');
 
-    if (m_significanceLevel != -1)
+    if (m_significanceLevel != -1) {
       text.append("Significance level: "
-          + Utils.doubleToString(m_significanceLevel, 2) + '\n');
+        + Utils.doubleToString(m_significanceLevel, 2) + '\n');
+    }
     text.append("Number of cycles performed: " + m_cycles + '\n');
     text.append("\nGenerated sets of large itemsets:\n");
     if (!m_car) {
       for (int i = 0; i < m_Ls.size(); i++) {
         text.append("\nSize of set of large itemsets L(" + (i + 1) + "): "
-            + ((FastVector) m_Ls.elementAt(i)).size() + '\n');
+          + (m_Ls.get(i)).size() + '\n');
         if (m_outputItemSets) {
           text.append("\nLarge Itemsets L(" + (i + 1) + "):\n");
-          for (int j = 0; j < ((FastVector) m_Ls.elementAt(i)).size(); j++)
-            text.append(((AprioriItemSet) ((FastVector) m_Ls.elementAt(i))
-                .elementAt(j)).toString(m_instances) + "\n");
+          for (int j = 0; j < (m_Ls.get(i)).size(); j++) {
+            text.append(((AprioriItemSet) (m_Ls.get(i)).get(j))
+              .toString(m_instances) + "\n");
+          }
         }
       }
 
       text.append("\nBest rules found:\n\n");
 
       if (m_toStringDelimiters != null) {
-        text.append("Number,Premise,Premise Support,Consequence,Consequence Support,Confidence,Lift,Leverage,LeverageT,Conviction\n");
+        text
+          .append("Number,Premise,Premise Support,Consequence,Consequence Support,Confidence,Lift,Leverage,LeverageT,Conviction\n");
       }
 
       for (int i = 0; i < m_allTheRules[0].size(); i++) {
         /*
          * text.append(Utils.doubleToString((double) i + 1, (int)
          * (Math.log(m_numRules) / Math.log(10) + 1), 0) + ". " +
-         * ((AprioriItemSet) m_allTheRules[0].elementAt(i))
-         * .toString(m_instances) + " ==> " + ((AprioriItemSet)
-         * m_allTheRules[1].elementAt(i)) .toString(m_instances));
-         * text.append("    " + ((m_metricType == CONFIDENCE) ? "<" : "") +
-         * "conf:(" + Utils.doubleToString( ((Double)
-         * m_allTheRules[2].elementAt(i)).doubleValue(), 2) + ")" +
-         * ((m_metricType == CONFIDENCE) ? ">" : ""));
+         * ((AprioriItemSet) m_allTheRules[0].get(i)) .toString(m_instances) +
+         * " ==> " + ((AprioriItemSet) m_allTheRules[1].get(i))
+         * .toString(m_instances)); text.append("    " + ((m_metricType ==
+         * CONFIDENCE) ? "<" : "") + "conf:(" + Utils.doubleToString( ((Double)
+         * m_allTheRules[2].get(i)).doubleValue(), 2) + ")" + ((m_metricType ==
+         * CONFIDENCE) ? ">" : ""));
          */
 
         String outerDelim;
@@ -1054,7 +1058,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
           implies = " ==> ";
 
           confOpen = "    " + (m_metricType == CONFIDENCE ? "<" : "")
-              + "conf:(";
+            + "conf:(";
           confClose = ")" + (m_metricType == CONFIDENCE ? ">" : "");
 
           liftOpen = (m_metricType == LIFT ? " <" : "") + " lift:(";
@@ -1072,24 +1076,24 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
         char idc = innerDelim.charAt(0);
 
         String n = Utils.doubleToString((double) i + 1,
-            (int) (Math.log(m_numRules) / Math.log(10) + 1), 0);
+          (int) (Math.log(m_numRules) / Math.log(10) + 1), 0);
 
-        String premise = ((AprioriItemSet) m_allTheRules[0].elementAt(i))
-            .toString(m_instances, odc, idc);
-        String consequence = ((AprioriItemSet) m_allTheRules[1].elementAt(i))
-            .toString(m_instances, odc, idc);
+        String premise = ((AprioriItemSet) m_allTheRules[0].get(i)).toString(
+          m_instances, odc, idc);
+        String consequence = ((AprioriItemSet) m_allTheRules[1].get(i))
+          .toString(m_instances, odc, idc);
 
         String confidence = Utils.doubleToString(
-            ((Double) m_allTheRules[2].elementAt(i)).doubleValue(), 2);
+          ((Double) m_allTheRules[2].get(i)).doubleValue(), 2);
         String lift = Utils.doubleToString(
-            ((Double) m_allTheRules[3].elementAt(i)).doubleValue(), 2);
+          ((Double) m_allTheRules[3].get(i)).doubleValue(), 2);
         String leverage = Utils.doubleToString(
-            ((Double) m_allTheRules[4].elementAt(i)).doubleValue(), 2);
+          ((Double) m_allTheRules[4].get(i)).doubleValue(), 2);
         String conviction = Utils.doubleToString(
-            ((Double) m_allTheRules[5].elementAt(i)).doubleValue(), 2);
+          ((Double) m_allTheRules[5].get(i)).doubleValue(), 2);
 
-        int leverageT = (int) (((Double) m_allTheRules[4].elementAt(i))
-            .doubleValue() * m_instances.numInstances());
+        int leverageT = (int) (((Double) m_allTheRules[4].get(i)).doubleValue() * m_instances
+          .numInstances());
 
         text.append(n).append(stop);
         text.append(premise).append(implies).append(consequence);
@@ -1098,24 +1102,23 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
         text.append(liftOpen).append(lift).append(liftClose);
         text.append(levOpen).append(leverage).append(levInner)
-            .append(leverageT).append(levClose);
+          .append(leverageT).append(levClose);
         text.append(convOpen).append(conviction).append(convClose);
 
         // if (/*m_metricType != CONFIDENCE ||*/ m_significanceLevel != -1) {
         /*
          * text.append((m_metricType == LIFT ? " <" : "") + " lift:(" +
          * Utils.doubleToString( ((Double)
-         * m_allTheRules[3].elementAt(i)).doubleValue(), 2) + ")" +
-         * (m_metricType == LIFT ? ">" : "")); text.append((m_metricType ==
-         * LEVERAGE ? " <" : "") + " lev:(" + Utils.doubleToString( ((Double)
-         * m_allTheRules[4].elementAt(i)).doubleValue(), 2) + ")");
-         * text.append(" [" + (int) (((Double)
-         * m_allTheRules[4].elementAt(i)).doubleValue() * m_instances
+         * m_allTheRules[3].get(i)).doubleValue(), 2) + ")" + (m_metricType ==
+         * LIFT ? ">" : "")); text.append((m_metricType == LEVERAGE ? " <" : "")
+         * + " lev:(" + Utils.doubleToString( ((Double)
+         * m_allTheRules[4].get(i)).doubleValue(), 2) + ")"); text.append(" [" +
+         * (int) (((Double) m_allTheRules[4].get(i)).doubleValue() * m_instances
          * .numInstances()) + "]" + (m_metricType == LEVERAGE ? ">" : ""));
          * text.append((m_metricType == CONVICTION ? " <" : "") + " conv:(" +
          * Utils.doubleToString( ((Double)
-         * m_allTheRules[5].elementAt(i)).doubleValue(), 2) + ")" +
-         * (m_metricType == CONVICTION ? ">" : ""));
+         * m_allTheRules[5].get(i)).doubleValue(), 2) + ")" + (m_metricType ==
+         * CONVICTION ? ">" : ""));
          */
         // }
         text.append('\n');
@@ -1123,33 +1126,33 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     } else {
       for (int i = 0; i < m_Ls.size(); i++) {
         text.append("\nSize of set of large itemsets L(" + (i + 1) + "): "
-            + ((FastVector) m_Ls.elementAt(i)).size() + '\n');
+          + (m_Ls.get(i)).size() + '\n');
         if (m_outputItemSets) {
           text.append("\nLarge Itemsets L(" + (i + 1) + "):\n");
-          for (int j = 0; j < ((FastVector) m_Ls.elementAt(i)).size(); j++) {
-            text.append(((ItemSet) ((FastVector) m_Ls.elementAt(i))
-                .elementAt(j)).toString(m_instances) + "\n");
-            text.append(((LabeledItemSet) ((FastVector) m_Ls.elementAt(i))
-                .elementAt(j)).m_classLabel + "  ");
-            text.append(((LabeledItemSet) ((FastVector) m_Ls.elementAt(i))
-                .elementAt(j)).support() + "\n");
+          for (int j = 0; j < (m_Ls.get(i)).size(); j++) {
+            text.append((m_Ls.get(i)).get(j).toString(m_instances) + "\n");
+            text.append(((LabeledItemSet) (m_Ls.get(i)).get(j)).m_classLabel
+              + "  ");
+            text.append(((LabeledItemSet) (m_Ls.get(i)).get(j)).support()
+              + "\n");
           }
         }
       }
       text.append("\nBest rules found:\n\n");
 
       if (m_toStringDelimiters != null) {
-        text.append("Number,Premise,Premise Support,Consequence,Consequence Support,Confidence\n");
+        text
+          .append("Number,Premise,Premise Support,Consequence,Consequence Support,Confidence\n");
       }
 
       for (int i = 0; i < m_allTheRules[0].size(); i++) {
         /*
          * text.append(Utils.doubleToString((double) i + 1, (int)
          * (Math.log(m_numRules) / Math.log(10) + 1), 0) + ". " + ((ItemSet)
-         * m_allTheRules[0].elementAt(i)).toString(m_instances) + " ==> " +
-         * ((ItemSet) m_allTheRules[1].elementAt(i)).toString(m_onlyClass) +
-         * "    conf:(" + Utils.doubleToString( ((Double)
-         * m_allTheRules[2].elementAt(i)).doubleValue(), 2) + ")");
+         * m_allTheRules[0].get(i)).toString(m_instances) + " ==> " + ((ItemSet)
+         * m_allTheRules[1].get(i)).toString(m_onlyClass) + "    conf:(" +
+         * Utils.doubleToString( ((Double)
+         * m_allTheRules[2].get(i)).doubleValue(), 2) + ")");
          */
 
         String outerDelim;
@@ -1185,19 +1188,19 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
         char idc = innerDelim.charAt(0);
 
         String n = Utils.doubleToString((double) i + 1,
-            (int) (Math.log(m_numRules) / Math.log(10) + 1), 0);
+          (int) (Math.log(m_numRules) / Math.log(10) + 1), 0);
 
-        String premise = ((ItemSet) m_allTheRules[0].elementAt(i)).toString(
-            m_instances, odc, idc);
-        String consequence = ((ItemSet) m_allTheRules[1].elementAt(i))
-            .toString(m_onlyClass, odc, idc);
+        String premise = ((ItemSet) m_allTheRules[0].get(i)).toString(
+          m_instances, odc, idc);
+        String consequence = ((ItemSet) m_allTheRules[1].get(i)).toString(
+          m_onlyClass, odc, idc);
 
         String confidence = Utils.doubleToString(
-            ((Double) m_allTheRules[2].elementAt(i)).doubleValue(), 2);
+          ((Double) m_allTheRules[2].get(i)).doubleValue(), 2);
 
         text.append(n).append(stop).append(premise).append(implies)
-            .append(consequence).append(confOpen).append(confidence)
-            .append(confClose);
+          .append(consequence).append(confOpen).append(confidence)
+          .append(confClose);
 
         text.append('\n');
       }
@@ -1263,7 +1266,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   public String upperBoundMinSupportTipText() {
     return "Upper bound for minimum support. Start iteratively decreasing "
-        + "minimum support from this value.";
+      + "minimum support from this value.";
   }
 
   /**
@@ -1393,17 +1396,17 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   public String metricTypeTipText() {
     return "Set the type of metric by which to rank rules. Confidence is "
-        + "the proportion of the examples covered by the premise that are also "
-        + "covered by the consequence (Class association rules can only be mined using confidence). Lift is confidence divided by the "
-        + "proportion of all examples that are covered by the consequence. This "
-        + "is a measure of the importance of the association that is independent "
-        + "of support. Leverage is the proportion of additional examples covered "
-        + "by both the premise and consequence above those expected if the "
-        + "premise and consequence were independent of each other. The total "
-        + "number of examples that this represents is presented in brackets "
-        + "following the leverage. Conviction is "
-        + "another measure of departure from independence. Conviction is given "
-        + "by P(premise)P(!consequence) / P(premise, !consequence).";
+      + "the proportion of the examples covered by the premise that are also "
+      + "covered by the consequence (Class association rules can only be mined using confidence). Lift is confidence divided by the "
+      + "proportion of all examples that are covered by the consequence. This "
+      + "is a measure of the importance of the association that is independent "
+      + "of support. Leverage is the proportion of additional examples covered "
+      + "by both the premise and consequence above those expected if the "
+      + "premise and consequence were independent of each other. The total "
+      + "number of examples that this represents is presented in brackets "
+      + "following the leverage. Conviction is "
+      + "another measure of departure from independence. Conviction is given "
+      + "by P(premise)P(!consequence) / P(premise, !consequence).";
   }
 
   /**
@@ -1438,7 +1441,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   public String minMetricTipText() {
     return "Minimum metric score. Consider only rules with scores higher than "
-        + "this value.";
+      + "this value.";
   }
 
   /**
@@ -1499,8 +1502,8 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   public String deltaTipText() {
     return "Iteratively decrease support by this factor. Reduces support "
-        + "until min support is reached or required number of rules has been "
-        + "generated.";
+      + "until min support is reached or required number of rules has been "
+      + "generated.";
   }
 
   /**
@@ -1617,7 +1620,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   public String treatZeroAsMissingTipText() {
     return "If enabled, zero (that is, the first value of a nominal) is "
-        + "treated in the same way as a missing value.";
+      + "treated in the same way as a missing value.";
   }
 
   /**
@@ -1647,15 +1650,14 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   private void findLargeItemSets() throws Exception {
 
-    FastVector kMinusOneSets, kSets;
-    Hashtable hashtable;
-    int necSupport, necMaxSupport, i = 0;
+    ArrayList<ItemSet> kMinusOneSets, kSets;
+    Hashtable<ItemSet, Integer> hashtable;
+    int necSupport, i = 0;
 
     // Find large itemsets
 
     // minimum support
     necSupport = (int) (m_minSupport * m_instances.numInstances() + 0.5);
-    necMaxSupport = (int) (m_upperBoundMinSupport * m_instances.numInstances() + 0.5);
 
     kSets = AprioriItemSet.singletons(m_instances, m_treatZeroAsMissing);
     if (m_treatZeroAsMissing) {
@@ -1664,17 +1666,18 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
       AprioriItemSet.upDateCounters(kSets, m_instances);
     }
     kSets = AprioriItemSet.deleteItemSets(kSets, necSupport,
-        m_instances.numInstances());
-    if (kSets.size() == 0)
+      m_instances.numInstances());
+    if (kSets.size() == 0) {
       return;
+    }
     do {
-      m_Ls.addElement(kSets);
+      m_Ls.add(kSets);
       kMinusOneSets = kSets;
       kSets = AprioriItemSet.mergeAllItemSets(kMinusOneSets, i,
-          m_instances.numInstances());
+        m_instances.numInstances());
       hashtable = AprioriItemSet.getHashtable(kMinusOneSets,
-          kMinusOneSets.size());
-      m_hashtables.addElement(hashtable);
+        kMinusOneSets.size());
+      m_hashtables.add(hashtable);
       kSets = AprioriItemSet.pruneItemSets(kSets, hashtable);
       if (m_treatZeroAsMissing) {
         AprioriItemSet.upDateCountersTreatZeroAsMissing(kSets, m_instances);
@@ -1682,7 +1685,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
         AprioriItemSet.upDateCounters(kSets, m_instances);
       }
       kSets = AprioriItemSet.deleteItemSets(kSets, necSupport,
-          m_instances.numInstances());
+        m_instances.numInstances());
       i++;
     } while (kSets.size() > 0);
   }
@@ -1694,28 +1697,29 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   private void findRulesBruteForce() throws Exception {
 
-    FastVector[] rules;
+    ArrayList<Object>[] rules;
 
     // Build rules
     for (int j = 1; j < m_Ls.size(); j++) {
-      FastVector currentItemSets = (FastVector) m_Ls.elementAt(j);
-      Enumeration enumItemSets = currentItemSets.elements();
+      ArrayList<ItemSet> currentItemSets = m_Ls.get(j);
+      @SuppressWarnings("unchecked")
+      Enumeration<ItemSet> enumItemSets = new WekaEnumeration(currentItemSets);
       while (enumItemSets.hasMoreElements()) {
         AprioriItemSet currentItemSet = (AprioriItemSet) enumItemSets
-            .nextElement();
+          .nextElement();
         // AprioriItemSet currentItemSet = new
         // AprioriItemSet((ItemSet)enumItemSets.nextElement());
         rules = currentItemSet.generateRulesBruteForce(m_minMetric,
-            m_metricType, m_hashtables, j + 1, m_instances.numInstances(),
-            m_significanceLevel);
+          m_metricType, m_hashtables, j + 1, m_instances.numInstances(),
+          m_significanceLevel);
         for (int k = 0; k < rules[0].size(); k++) {
-          m_allTheRules[0].addElement(rules[0].elementAt(k));
-          m_allTheRules[1].addElement(rules[1].elementAt(k));
-          m_allTheRules[2].addElement(rules[2].elementAt(k));
+          m_allTheRules[0].add(rules[0].get(k));
+          m_allTheRules[1].add(rules[1].get(k));
+          m_allTheRules[2].add(rules[2].get(k));
 
-          m_allTheRules[3].addElement(rules[3].elementAt(k));
-          m_allTheRules[4].addElement(rules[4].elementAt(k));
-          m_allTheRules[5].addElement(rules[5].elementAt(k));
+          m_allTheRules[3].add(rules[3].get(k));
+          m_allTheRules[4].add(rules[4].get(k));
+          m_allTheRules[5].add(rules[5].get(k));
         }
       }
     }
@@ -1728,26 +1732,27 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   private void findRulesQuickly() throws Exception {
 
-    FastVector[] rules;
+    ArrayList<Object>[] rules;
     // Build rules
     for (int j = 1; j < m_Ls.size(); j++) {
-      FastVector currentItemSets = (FastVector) m_Ls.elementAt(j);
-      Enumeration enumItemSets = currentItemSets.elements();
+      ArrayList<ItemSet> currentItemSets = m_Ls.get(j);
+      @SuppressWarnings("unchecked")
+      Enumeration<ItemSet> enumItemSets = new WekaEnumeration(currentItemSets);
       while (enumItemSets.hasMoreElements()) {
         AprioriItemSet currentItemSet = (AprioriItemSet) enumItemSets
-            .nextElement();
+          .nextElement();
         // AprioriItemSet currentItemSet = new
         // AprioriItemSet((ItemSet)enumItemSets.nextElement());
         rules = currentItemSet.generateRules(m_minMetric, m_hashtables, j + 1);
         for (int k = 0; k < rules[0].size(); k++) {
-          m_allTheRules[0].addElement(rules[0].elementAt(k));
-          m_allTheRules[1].addElement(rules[1].elementAt(k));
-          m_allTheRules[2].addElement(rules[2].elementAt(k));
+          m_allTheRules[0].add(rules[0].get(k));
+          m_allTheRules[1].add(rules[1].get(k));
+          m_allTheRules[2].add(rules[2].get(k));
 
           if (rules.length > 3) {
-            m_allTheRules[3].addElement(rules[3].elementAt(k));
-            m_allTheRules[4].addElement(rules[4].elementAt(k));
-            m_allTheRules[5].addElement(rules[5].elementAt(k));
+            m_allTheRules[3].add(rules[3].get(k));
+            m_allTheRules[4].add(rules[4].get(k));
+            m_allTheRules[5].add(rules[5].get(k));
           }
         }
       }
@@ -1763,9 +1768,9 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   private void findLargeCarItemSets() throws Exception {
 
-    FastVector kMinusOneSets, kSets;
-    Hashtable hashtable;
-    int necSupport, necMaxSupport, i = 0;
+    ArrayList<ItemSet> kMinusOneSets, kSets;
+    Hashtable<ItemSet, Integer> hashtable;
+    int necSupport, i = 0;
 
     // Find large itemsets
 
@@ -1778,9 +1783,8 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
       necSupport = Math.round((float) (nextMinSupport + 0.5));
     }
     if (Math.rint(nextMaxSupport) == nextMaxSupport) {
-      necMaxSupport = (int) nextMaxSupport;
     } else {
-      necMaxSupport = Math.round((float) (nextMaxSupport + 0.5));
+      Math.round((float) (nextMaxSupport + 0.5));
     }
 
     // find item sets of length one
@@ -1789,20 +1793,21 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
     // check if a item set of lentgh one is frequent, if not delete it
     kSets = LabeledItemSet.deleteItemSets(kSets, necSupport,
-        m_instances.numInstances());
-    if (kSets.size() == 0)
+      m_instances.numInstances());
+    if (kSets.size() == 0) {
       return;
+    }
     do {
-      m_Ls.addElement(kSets);
+      m_Ls.add(kSets);
       kMinusOneSets = kSets;
       kSets = LabeledItemSet.mergeAllItemSets(kMinusOneSets, i,
-          m_instances.numInstances());
+        m_instances.numInstances());
       hashtable = LabeledItemSet.getHashtable(kMinusOneSets,
-          kMinusOneSets.size());
+        kMinusOneSets.size());
       kSets = LabeledItemSet.pruneItemSets(kSets, hashtable);
       LabeledItemSet.upDateCounters(kSets, m_instances, m_onlyClass);
       kSets = LabeledItemSet.deleteItemSets(kSets, necSupport,
-          m_instances.numInstances());
+        m_instances.numInstances());
       i++;
     } while (kSets.size() > 0);
   }
@@ -1814,20 +1819,22 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    */
   private void findCarRulesQuickly() throws Exception {
 
-    FastVector[] rules;
+    ArrayList<Object>[] rules;
 
     // Build rules
     for (int j = 0; j < m_Ls.size(); j++) {
-      FastVector currentLabeledItemSets = (FastVector) m_Ls.elementAt(j);
-      Enumeration enumLabeledItemSets = currentLabeledItemSets.elements();
+      ArrayList<ItemSet> currentLabeledItemSets = m_Ls.get(j);
+      @SuppressWarnings("unchecked")
+      Enumeration<ItemSet> enumLabeledItemSets = new WekaEnumeration(
+        currentLabeledItemSets);
       while (enumLabeledItemSets.hasMoreElements()) {
         LabeledItemSet currentLabeledItemSet = (LabeledItemSet) enumLabeledItemSets
-            .nextElement();
+          .nextElement();
         rules = currentLabeledItemSet.generateRules(m_minMetric, false);
         for (int k = 0; k < rules[0].size(); k++) {
-          m_allTheRules[0].addElement(rules[0].elementAt(k));
-          m_allTheRules[1].addElement(rules[1].elementAt(k));
-          m_allTheRules[2].addElement(rules[2].elementAt(k));
+          m_allTheRules[0].add(rules[0].get(k));
+          m_allTheRules[1].add(rules[1].get(k));
+          m_allTheRules[2].add(rules[2].get(k));
         }
       }
     }
@@ -1839,7 +1846,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
    * @return all the rules
    * @see #m_allTheRules
    */
-  public FastVector[] getAllTheRules() {
+  public ArrayList<Object>[] getAllTheRules() {
     return m_allTheRules;
   }
 
@@ -1855,12 +1862,12 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
 
         AprioriItemSet premiseSet = (AprioriItemSet) m_allTheRules[0].get(i);
         AprioriItemSet consequenceSet = (AprioriItemSet) m_allTheRules[1]
-            .get(i);
+          .get(i);
         for (int j = 0; j < m_instances.numAttributes(); j++) {
           if (premiseSet.m_items[j] != -1) {
             try {
               Item newItem = new NominalItem(m_instances.attribute(j),
-                  premiseSet.m_items[j]);
+                premiseSet.m_items[j]);
               premise.add(newItem);
             } catch (Exception ex) {
               ex.printStackTrace();
@@ -1870,7 +1877,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
           if (consequenceSet.m_items[j] != -1) {
             try {
               Item newItem = new NominalItem(m_instances.attribute(j),
-                  consequenceSet.m_items[j]);
+                consequenceSet.m_items[j]);
               consequence.add(newItem);
             } catch (Exception ex) {
               ex.printStackTrace();
@@ -1905,8 +1912,8 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
         }
 
         DefaultAssociationRule newRule = new DefaultAssociationRule(premise,
-            consequence, metric, premiseSupport, consequenceSupport,
-            totalSupport, totalTrans);
+          consequence, metric, premiseSupport, consequenceSupport,
+          totalSupport, totalTrans);
 
         rules.add(newRule);
       }

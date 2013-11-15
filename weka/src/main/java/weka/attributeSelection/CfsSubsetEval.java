@@ -50,21 +50,24 @@ import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 
 /**
- <!-- globalinfo-start -->
- * CfsSubsetEval :<br/>
+ * <!-- globalinfo-start --> CfsSubsetEval :<br/>
  * <br/>
- * Evaluates the worth of a subset of attributes by considering the individual predictive ability of each feature along with the degree of redundancy between them.<br/>
+ * Evaluates the worth of a subset of attributes by considering the individual
+ * predictive ability of each feature along with the degree of redundancy
+ * between them.<br/>
  * <br/>
- * Subsets of features that are highly correlated with the class while having low intercorrelation are preferred.<br/>
+ * Subsets of features that are highly correlated with the class while having
+ * low intercorrelation are preferred.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * M. A. Hall (1998). Correlation-based Feature Subset Selection for Machine Learning. Hamilton, New Zealand.
+ * M. A. Hall (1998). Correlation-based Feature Subset Selection for Machine
+ * Learning. Hamilton, New Zealand.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;phdthesis{Hall1998,
  *    address = {Hamilton, New Zealand},
@@ -75,39 +78,49 @@ import weka.filters.supervised.attribute.Discretize;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
+ * <!-- technical-bibtex-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -M
- *  Treat missing values as a separate value.</pre>
+ * <pre>
+ * -M
+ *  Treat missing values as a separate value.
+ * </pre>
  * 
- * <pre> -L
- *  Don't include locally predictive attributes.</pre>
+ * <pre>
+ * -L
+ *  Don't include locally predictive attributes.
+ * </pre>
  * 
- * <pre> -Z
- *  Precompute the full correlation matrix at the outset, rather than compute correlations lazily (as needed) during the search. Use this in conjuction with parallel processing in order to speed up a backward search.</pre>
+ * <pre>
+ * -Z
+ *  Precompute the full correlation matrix at the outset, rather than compute correlations lazily (as needed) during the search. Use this in conjuction with parallel processing in order to speed up a backward search.
+ * </pre>
  * 
- * <pre> -P &lt;int&gt;
+ * <pre>
+ * -P &lt;int&gt;
  *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
  * </pre>
  * 
- * <pre> -E &lt;int&gt;
+ * <pre>
+ * -E &lt;int&gt;
  *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
  * </pre>
  * 
- * <pre> -D
- *  Output debugging info.</pre>
+ * <pre>
+ * -D
+ *  Output debugging info.
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  * @see Discretize
  */
-public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, ThreadSafe,
-    OptionHandler, TechnicalInformationHandler {
+public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
+  ThreadSafe, OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 747878400813276317L;
@@ -170,12 +183,11 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
    */
   public String globalInfo() {
     return "CfsSubsetEval :\n\nEvaluates the worth of a subset of attributes "
-        + "by considering the individual predictive ability of each feature "
-        + "along with the degree of redundancy between them.\n\n"
-        + "Subsets of features that are highly correlated with the class "
-        + "while having low intercorrelation are preferred.\n\n"
-        + "For more information see:\n\n"
-        + getTechnicalInformation().toString();
+      + "by considering the individual predictive ability of each feature "
+      + "along with the degree of redundancy between them.\n\n"
+      + "Subsets of features that are highly correlated with the class "
+      + "while having low intercorrelation are preferred.\n\n"
+      + "For more information see:\n\n" + getTechnicalInformation().toString();
   }
 
   /**
@@ -193,7 +205,7 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
     result.setValue(Field.AUTHOR, "M. A. Hall");
     result.setValue(Field.YEAR, "1998");
     result.setValue(Field.TITLE,
-        "Correlation-based Feature Subset Selection for Machine Learning");
+      "Correlation-based Feature Subset Selection for Machine Learning");
     result.setValue(Field.SCHOOL, "University of Waikato");
     result.setValue(Field.ADDRESS, "Hamilton, New Zealand");
 
@@ -214,22 +226,22 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
    * 
    **/
   @Override
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(3);
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(6);
     newVector.addElement(new Option("\tTreat missing values as a separate "
-        + "value.", "M", 0, "-M"));
+      + "value.", "M", 0, "-M"));
     newVector.addElement(new Option(
-        "\tDon't include locally predictive attributes" + ".", "L", 0, "-L"));
+      "\tDon't include locally predictive attributes" + ".", "L", 0, "-L"));
 
     newVector.addElement(new Option(
-        "\t" + preComputeCorrelationMatrixTipText(), "Z", 0, "-Z"));
+      "\t" + preComputeCorrelationMatrixTipText(), "Z", 0, "-Z"));
 
     newVector.addElement(new Option(
-        "\t" + poolSizeTipText() + " (default 1)\n", "P", 1, "-P <int>"));
+      "\t" + poolSizeTipText() + " (default 1)\n", "P", 1, "-P <int>"));
     newVector.addElement(new Option("\t" + numThreadsTipText()
-        + " (default 1)\n", "E", 1, "-E <int>"));
+      + " (default 1)\n", "E", 1, "-E <int>"));
     newVector.addElement(new Option("\tOutput debugging info" + ".", "D", 0,
-        "-D"));
+      "-D"));
     return newVector.elements();
   }
 
@@ -237,30 +249,40 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
    * Parses and sets a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -M
-   *  Treat missing values as a separate value.</pre>
+   * <pre>
+   * -M
+   *  Treat missing values as a separate value.
+   * </pre>
    * 
-   * <pre> -L
-   *  Don't include locally predictive attributes.</pre>
+   * <pre>
+   * -L
+   *  Don't include locally predictive attributes.
+   * </pre>
    * 
-   * <pre> -Z
-   *  Precompute the full correlation matrix at the outset, rather than compute correlations lazily (as needed) during the search. Use this in conjuction with parallel processing in order to speed up a backward search.</pre>
+   * <pre>
+   * -Z
+   *  Precompute the full correlation matrix at the outset, rather than compute correlations lazily (as needed) during the search. Use this in conjuction with parallel processing in order to speed up a backward search.
+   * </pre>
    * 
-   * <pre> -P &lt;int&gt;
+   * <pre>
+   * -P &lt;int&gt;
    *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
    * </pre>
    * 
-   * <pre> -E &lt;int&gt;
+   * <pre>
+   * -E &lt;int&gt;
    *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
    * </pre>
    * 
-   * <pre> -D
-   *  Output debugging info.</pre>
+   * <pre>
+   * -D
+   *  Output debugging info.
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -295,9 +317,9 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
    */
   public String preComputeCorrelationMatrixTipText() {
     return "Precompute the full correlation matrix at the outset, "
-        + "rather than compute correlations lazily (as needed) "
-        + "during the search. Use this in conjuction with "
-        + "parallel processing in order to speed up a backward " + "search.";
+      + "rather than compute correlations lazily (as needed) "
+      + "during the search. Use this in conjuction with "
+      + "parallel processing in order to speed up a backward " + "search.";
   }
 
   /**
@@ -378,9 +400,9 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
    */
   public String locallyPredictiveTipText() {
     return "Identify locally predictive attributes. Iteratively adds "
-        + "attributes with the highest correlation with the class as long "
-        + "as there is not already an attribute in the subset that has a "
-        + "higher correlation with the attribute in question";
+      + "attributes with the highest correlation with the class as long "
+      + "as there is not already an attribute in the subset that has a "
+      + "higher correlation with the attribute in question";
   }
 
   /**
@@ -409,8 +431,8 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
    */
   public String missingSeparateTipText() {
     return "Treat missing as a separate value. Otherwise, counts for missing "
-        + "values are distributed across other values in proportion to their "
-        + "frequency.";
+      + "values are distributed across other values in proportion to their "
+      + "frequency.";
   }
 
   /**
@@ -466,36 +488,32 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
    */
   @Override
   public String[] getOptions() {
-    String[] options = new String[8];
-    int current = 0;
+
+    Vector<String> options = new Vector<String>();
 
     if (getMissingSeparate()) {
-      options[current++] = "-M";
+      options.add("-M");
     }
 
     if (!getLocallyPredictive()) {
-      options[current++] = "-L";
+      options.add("-L");
     }
 
     if (getPreComputeCorrelationMatrix()) {
-      options[current++] = "-Z";
+      options.add("-Z");
     }
 
-    options[current++] = "-P";
-    options[current++] = "" + getPoolSize();
+    options.add("-P");
+    options.add("" + getPoolSize());
 
-    options[current++] = "-E";
-    options[current++] = "" + getNumThreads();
+    options.add("-E");
+    options.add("" + getNumThreads());
 
     if (getDebug()) {
-      options[current++] = "-D";
+      options.add("-D");
     }
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -594,7 +612,7 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
         for (int j = 0; j < m_corr_matrix[i].length; j++) {
           count++;
           if (count == numEntriesPerThread
-              || (i == m_corr_matrix.length - 1 && j == m_corr_matrix[i].length - 1)) {
+            || (i == m_corr_matrix.length - 1 && j == m_corr_matrix[i].length - 1)) {
             final int sR = startRow;
             final int sC = startCol;
             final int eR = i;
@@ -609,11 +627,11 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
               public Void call() throws Exception {
                 if (m_debug) {
                   System.err
-                      .println("Starting correlation computation task...");
+                    .println("Starting correlation computation task...");
                 }
                 for (int i = sR; i <= eR; i++) {
                   for (int j = (i == sR ? sC : 0); j < (i == eR ? eC
-                      : m_corr_matrix[i].length); j++) {
+                    : m_corr_matrix[i].length); j++) {
                     if (m_corr_matrix[i][j] == -999) {
                       float corr = correlate(i, j);
                       m_corr_matrix[i][j] = corr;
@@ -622,9 +640,9 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
                 }
                 if (m_debug) {
                   System.err
-                      .println("Percentage of correlation matrix computed: "
-                          + Utils.doubleToString(((double) m_numFilled.get()
-                              / m_numEntries * 100.0), 2) + "%");
+                    .println("Percentage of correlation matrix computed: "
+                      + Utils.doubleToString(((double) m_numFilled.get()
+                        / m_numEntries * 100.0), 2) + "%");
                 }
 
                 return null;
@@ -748,7 +766,7 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
   }
 
   private double symmUncertCorr(int att1, int att2) {
-    int i, j, k, ii, jj;
+    int i, j, ii, jj;
     int ni, nj;
     double sum = 0.0;
     double sumi[], sumj[];
@@ -817,7 +835,7 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
 
     // distribute missing counts
     if (!m_missingSeparate && (sumi[ni - 1] < m_numInstances)
-        && (sumj[nj - 1] < m_numInstances)) {
+      && (sumj[nj - 1] < m_numInstances)) {
       double[] i_copy = new double[sumi.length];
       double[] j_copy = new double[sumj.length];
       double[][] counts_copy = new double[sumi.length][sumj.length];
@@ -869,7 +887,7 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
         for (i = 0; i < ni - 1; i++) {
           for (j = 0; j < nj - 1; j++) {
             temp = (counts_copy[i][j] / (sum - total_missing))
-                * counts_copy[ni - 1][nj - 1];
+              * counts_copy[ni - 1][nj - 1];
 
             counts[i][j] += temp;
             sumi[i] += temp;
@@ -939,13 +957,13 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
     double temp;
     Instance inst;
     int mx = (int) m_trainInstances
-        .meanOrMode(m_trainInstances.attribute(att1));
+      .meanOrMode(m_trainInstances.attribute(att1));
     double my = m_trainInstances.meanOrMode(m_trainInstances.attribute(att2));
     double stdv_num = 0.0;
     double diff1, diff2;
     double r = 0.0, rr;
     int nx = (!m_missingSeparate) ? m_trainInstances.attribute(att1)
-        .numValues() : m_trainInstances.attribute(att1).numValues() + 1;
+      .numValues() : m_trainInstances.attribute(att1).numValues() + 1;
 
     double[] prior_nom = new double[nx];
     double[] stdvs_nom = new double[nx];
@@ -1054,16 +1072,16 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
     double temp1, temp2;
     Instance inst;
     int mx = (int) m_trainInstances
-        .meanOrMode(m_trainInstances.attribute(att1));
+      .meanOrMode(m_trainInstances.attribute(att1));
     int my = (int) m_trainInstances
-        .meanOrMode(m_trainInstances.attribute(att2));
+      .meanOrMode(m_trainInstances.attribute(att2));
     double diff1, diff2;
     double r = 0.0, rr;
     int nx = (!m_missingSeparate) ? m_trainInstances.attribute(att1)
-        .numValues() : m_trainInstances.attribute(att1).numValues() + 1;
+      .numValues() : m_trainInstances.attribute(att1).numValues() + 1;
 
     int ny = (!m_missingSeparate) ? m_trainInstances.attribute(att2)
-        .numValues() : m_trainInstances.attribute(att2).numValues() + 1;
+      .numValues() : m_trainInstances.attribute(att2).numValues() + 1;
 
     double[][] prior_nom = new double[nx][ny];
     double[] sumx = new double[nx];
@@ -1341,9 +1359,9 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
 
     if (m_debug) {
       System.err.println("Percentage of correlation matrix computed "
-          + "over the search: "
-          + Utils.doubleToString(
-              ((double) m_numFilled.get() / m_numEntries * 100.0), 2) + "%");
+        + "over the search: "
+        + Utils.doubleToString(
+          ((double) m_numFilled.get() / m_numEntries * 100.0), 2) + "%");
     }
 
     int j = 0;
@@ -1355,8 +1373,8 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
 
     BitSet bestGroup = new BitSet(m_numAttribs);
 
-    for (int i = 0; i < attributeSet.length; i++) {
-      bestGroup.set(attributeSet[i]);
+    for (int element : attributeSet) {
+      bestGroup.set(element);
     }
 
     addLocallyPredictive(bestGroup);
@@ -1407,4 +1425,3 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator, Thre
     runEvaluator(new CfsSubsetEval(), args);
   }
 }
-

@@ -61,7 +61,7 @@ import weka.filters.supervised.attribute.Discretize;
  * @see Discretize
  */
 public class GainRatioAttributeEval extends ASEvaluation implements
-    AttributeEvaluator, OptionHandler {
+  AttributeEvaluator, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8504656625598579926L;
@@ -71,9 +71,6 @@ public class GainRatioAttributeEval extends ASEvaluation implements
 
   /** The class index */
   private int m_classIndex;
-
-  /** The number of attributes */
-  private int m_numAttribs;
 
   /** The number of instances */
   private int m_numInstances;
@@ -92,9 +89,9 @@ public class GainRatioAttributeEval extends ASEvaluation implements
    */
   public String globalInfo() {
     return "GainRatioAttributeEval :\n\nEvaluates the worth of an attribute "
-        + "by measuring the gain ratio with respect to the class.\n\n"
-        + "GainR(Class, Attribute) = (H(Class) - H(Class | Attribute)) / "
-        + "H(Attribute).\n";
+      + "by measuring the gain ratio with respect to the class.\n\n"
+      + "GainR(Class, Attribute) = (H(Class) - H(Class | Attribute)) / "
+      + "H(Attribute).\n";
   }
 
   /**
@@ -110,10 +107,10 @@ public class GainRatioAttributeEval extends ASEvaluation implements
    * @return an enumeration of all the available options.
    **/
   @Override
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(1);
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(1);
     newVector.addElement(new Option("\ttreat missing values as a seperate "
-        + "value.", "M", 0, "-M"));
+      + "value.", "M", 0, "-M"));
     return newVector.elements();
   }
 
@@ -148,8 +145,8 @@ public class GainRatioAttributeEval extends ASEvaluation implements
    */
   public String missingMergeTipText() {
     return "Distribute counts for missing values. Counts are distributed "
-        + "across other values in proportion to their frequency. Otherwise, "
-        + "missing is treated as a separate value.";
+      + "across other values in proportion to their frequency. Otherwise, "
+      + "missing is treated as a separate value.";
   }
 
   /**
@@ -178,14 +175,11 @@ public class GainRatioAttributeEval extends ASEvaluation implements
   @Override
   public String[] getOptions() {
     String[] options = new String[1];
-    int current = 0;
 
     if (!getMissingMerge()) {
-      options[current++] = "-M";
-    }
-
-    while (current < options.length) {
-      options[current++] = "";
+      options[0] = "-M";
+    } else {
+      options[0] = "";
     }
 
     return options;
@@ -230,7 +224,6 @@ public class GainRatioAttributeEval extends ASEvaluation implements
 
     m_trainInstances = data;
     m_classIndex = m_trainInstances.classIndex();
-    m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
     Discretize disTransform = new Discretize();
     disTransform.setUseBetterEncoding(true);
@@ -319,8 +312,7 @@ public class GainRatioAttributeEval extends ASEvaluation implements
     }
 
     // distribute missing counts
-    if (m_missing_merge && (sumi[ni - 1] < sum)
-        && (sumj[nj - 1] < sum)) {
+    if (m_missing_merge && (sumi[ni - 1] < sum) && (sumj[nj - 1] < sum)) {
       double[] i_copy = new double[sumi.length];
       double[] j_copy = new double[sumj.length];
       double[][] counts_copy = new double[sumi.length][sumj.length];
@@ -372,7 +364,7 @@ public class GainRatioAttributeEval extends ASEvaluation implements
         for (i = 0; i < ni - 1; i++) {
           for (j = 0; j < nj - 1; j++) {
             temp = (counts_copy[i][j] / (sum - total_missing))
-                * counts_copy[ni - 1][nj - 1];
+              * counts_copy[ni - 1][nj - 1];
             counts[i][j] += temp;
             sumi[i] += temp;
             sumj[j] += temp;

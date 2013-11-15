@@ -22,6 +22,7 @@
 package weka.attributeSelection;
 
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -46,20 +47,21 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-/** 
- <!-- globalinfo-start -->
- * WrapperSubsetEval:<br/>
+/**
+ * <!-- globalinfo-start --> WrapperSubsetEval:<br/>
  * <br/>
- * Evaluates attribute sets by using a learning scheme. Cross validation is used to estimate the accuracy of the learning scheme for a set of attributes.<br/>
+ * Evaluates attribute sets by using a learning scheme. Cross validation is used
+ * to estimate the accuracy of the learning scheme for a set of attributes.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Ron Kohavi, George H. John (1997). Wrappers for feature subset selection. Artificial Intelligence. 97(1-2):273-324.
+ * Ron Kohavi, George H. John (1997). Wrappers for feature subset selection.
+ * Artificial Intelligence. 97(1-2):273-324.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;article{Kohavi1997,
  *    author = {Ron Kohavi and George H. John},
@@ -74,59 +76,70 @@ import weka.filters.unsupervised.attribute.Remove;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -B &lt;base learner&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -B &lt;base learner&gt;
  *  class name of base learner to use for  accuracy estimation.
  *  Place any classifier options LAST on the command line
  *  following a "--". eg.:
  *   -B weka.classifiers.bayes.NaiveBayes ... -- -K
- *  (default: weka.classifiers.rules.ZeroR)</pre>
+ *  (default: weka.classifiers.rules.ZeroR)
+ * </pre>
  * 
- * <pre> -F &lt;num&gt;
+ * <pre>
+ * -F &lt;num&gt;
  *  number of cross validation folds to use for estimating accuracy.
- *  (default=5)</pre>
+ *  (default=5)
+ * </pre>
  * 
- * <pre> -R &lt;seed&gt;
+ * <pre>
+ * -R &lt;seed&gt;
  *  Seed for cross validation accuracy testimation.
- *  (default = 1)</pre>
+ *  (default = 1)
+ * </pre>
  * 
- * <pre> -T &lt;num&gt;
+ * <pre>
+ * -T &lt;num&gt;
  *  threshold by which to execute another cross validation
  *  (standard deviation---expressed as a percentage of the mean).
- *  (default: 0.01 (1%))</pre>
+ *  (default: 0.01 (1%))
+ * </pre>
  * 
- * <pre> -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
+ * <pre>
+ * -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
  *  Performance evaluation measure to use for selecting attributes.
- *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
+ *  (Default = accuracy for discrete class and rmse for numeric class)
+ * </pre>
  * 
- * <pre> -IRclass &lt;label | index&gt;
+ * <pre>
+ * -IRclass &lt;label | index&gt;
  *  Optional class value (label or 1-based index) to use in conjunction with
  *  IR statistics (f-meas, auc or auprc). Omitting this option will use
- *  the class-weighted average.</pre>
+ *  the class-weighted average.
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to scheme weka.classifiers.rules.ZeroR:
  * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class WrapperSubsetEval
-  extends ASEvaluation
-  implements SubsetEvaluator,
-             OptionHandler, 
-             TechnicalInformationHandler {
-  
+public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
+  OptionHandler, TechnicalInformationHandler {
+
   /** for serialization */
   static final long serialVersionUID = -4573057658746728675L;
 
@@ -136,8 +149,6 @@ public class WrapperSubsetEval
   private int m_classIndex;
   /** number of attributes in the training data */
   private int m_numAttribs;
-  /** number of instances in the training data */
-  private int m_numInstances;
   /** holds an evaluation object */
   private Evaluation m_Evaluation;
   /** holds the base classifier object */
@@ -146,12 +157,12 @@ public class WrapperSubsetEval
   private int m_folds;
   /** random number seed */
   private int m_seed;
-  /** 
-   * the threshold by which to do further cross validations when
-   * estimating the accuracy of a subset
+  /**
+   * the threshold by which to do further cross validations when estimating the
+   * accuracy of a subset
    */
   private double m_threshold;
-  
+
   public static final int EVAL_DEFAULT = 1;
   public static final int EVAL_ACCURACY = 2;
   public static final int EVAL_RMSE = 3;
@@ -159,53 +170,55 @@ public class WrapperSubsetEval
   public static final int EVAL_FMEASURE = 5;
   public static final int EVAL_AUC = 6;
   public static final int EVAL_AUPRC = 7;
-  
+
   public static final Tag[] TAGS_EVALUATION = {
-    new Tag(EVAL_DEFAULT, "Default: accuracy (discrete class); RMSE (numeric class)"),
+    new Tag(EVAL_DEFAULT,
+      "Default: accuracy (discrete class); RMSE (numeric class)"),
     new Tag(EVAL_ACCURACY, "Accuracy (discrete class only)"),
     new Tag(EVAL_RMSE, "RMSE (of the class probabilities for discrete class)"),
     new Tag(EVAL_MAE, "MAE (of the class probabilities for discrete class)"),
     new Tag(EVAL_FMEASURE, "F-measure (discrete class only)"),
     new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)"),
-    new Tag(EVAL_AUPRC, "AUPRC (area under the precision-recall curve - discrete class only)")
-  };
-  
+    new Tag(EVAL_AUPRC,
+      "AUPRC (area under the precision-recall curve - discrete class only)") };
+
   /** The evaluation measure to use */
   protected int m_evaluationMeasure = EVAL_DEFAULT;
-  
-  /** 
-   * If >= 0, and an IR metric is being used, then evaluate with 
-   * respect to this class value (0-based index) 
+
+  /**
+   * If >= 0, and an IR metric is being used, then evaluate with respect to this
+   * class value (0-based index)
    */
   protected int m_IRClassVal = -1;
-  
+
   /** User supplied option for IR class value (either name or 1-based index) */
   protected String m_IRClassValS = "";
 
   /**
    * Returns a string describing this attribute evaluator
-   * @return a description of the evaluator suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the evaluator suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
     return "WrapperSubsetEval:\n\n"
-      +"Evaluates attribute sets by using a learning scheme. Cross "
-      +"validation is used to estimate the accuracy of the learning "
-      +"scheme for a set of attributes.\n\n"
-      + "For more information see:\n\n"
+      + "Evaluates attribute sets by using a learning scheme. Cross "
+      + "validation is used to estimate the accuracy of the learning "
+      + "scheme for a set of attributes.\n\n" + "For more information see:\n\n"
       + getTechnicalInformation().toString();
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
+    TechnicalInformation result;
+
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "Ron Kohavi and George H. John");
     result.setValue(Field.YEAR, "1997");
@@ -216,132 +229,146 @@ public class WrapperSubsetEval
     result.setValue(Field.PAGES, "273-324");
     result.setValue(Field.NOTE, "Special issue on relevance");
     result.setValue(Field.ISSN, "0004-3702");
-    
+
     return result;
   }
 
   /**
    * Constructor. Calls restOptions to set default options
    **/
-  public WrapperSubsetEval () {
+  public WrapperSubsetEval() {
     resetOptions();
   }
 
-
   /**
    * Returns an enumeration describing the available options.
+   * 
    * @return an enumeration of all the available options.
    **/
-  public Enumeration listOptions () {
-    Vector newVector = new Vector(4);
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(4);
     newVector.addElement(new Option(
-	"\tclass name of base learner to use for \taccuracy estimation.\n"
-	+ "\tPlace any classifier options LAST on the command line\n"
-	+ "\tfollowing a \"--\". eg.:\n"
-	+ "\t\t-B weka.classifiers.bayes.NaiveBayes ... -- -K\n"
-	+ "\t(default: weka.classifiers.rules.ZeroR)", 
-	"B", 1, "-B <base learner>"));
-    
+      "\tclass name of base learner to use for \taccuracy estimation.\n"
+        + "\tPlace any classifier options LAST on the command line\n"
+        + "\tfollowing a \"--\". eg.:\n"
+        + "\t\t-B weka.classifiers.bayes.NaiveBayes ... -- -K\n"
+        + "\t(default: weka.classifiers.rules.ZeroR)", "B", 1,
+      "-B <base learner>"));
+
     newVector.addElement(new Option(
-	"\tnumber of cross validation folds to use for estimating accuracy.\n" 
-	+ "\t(default=5)", 
-	"F", 1, "-F <num>"));
-    
+      "\tnumber of cross validation folds to use for estimating accuracy.\n"
+        + "\t(default=5)", "F", 1, "-F <num>"));
+
+    newVector
+      .addElement(new Option(
+        "\tSeed for cross validation accuracy testimation.\n"
+          + "\t(default = 1)", "R", 1, "-R <seed>"));
+
     newVector.addElement(new Option(
-	"\tSeed for cross validation accuracy testimation.\n"
-	+ "\t(default = 1)", 
-	"R", 1,"-R <seed>"));
-    
-    newVector.addElement(new Option(
-	"\tthreshold by which to execute another cross validation\n" 
-	+ "\t(standard deviation---expressed as a percentage of the mean).\n"
-	+ "\t(default: 0.01 (1%))", 
-	"T", 1, "-T <num>"));
-    
-    newVector.addElement(new Option(
-        "\tPerformance evaluation measure to use for selecting attributes.\n" +
-        "\t(Default = accuracy for discrete class and rmse for numeric class)",
+      "\tthreshold by which to execute another cross validation\n"
+        + "\t(standard deviation---expressed as a percentage of the mean).\n"
+        + "\t(default: 0.01 (1%))", "T", 1, "-T <num>"));
+
+    newVector
+      .addElement(new Option(
+        "\tPerformance evaluation measure to use for selecting attributes.\n"
+          + "\t(Default = accuracy for discrete class and rmse for numeric class)",
         "E", 1, "-E <acc | rmse | mae | f-meas | auc | auprc>"));
-    
-    newVector.addElement(new Option(
+
+    newVector
+      .addElement(new Option(
         "\tOptional class value (label or 1-based index) to use in conjunction with\n"
-        + "\tIR statistics (f-meas, auc or auprc). Omitting this option will use\n" +
-        "\tthe class-weighted average.", "IRclass", 1, "-IRclass <label | index>"));
+          + "\tIR statistics (f-meas, auc or auprc). Omitting this option will use\n"
+          + "\tthe class-weighted average.", "IRclass", 1,
+        "-IRclass <label | index>"));
 
-    if ((m_BaseClassifier != null) && 
-	(m_BaseClassifier instanceof OptionHandler)) {
-      newVector.addElement(new Option("", "", 0, "\nOptions specific to scheme " 
-				      + m_BaseClassifier.getClass().getName() 
-				      + ":"));
-      Enumeration enu = ((OptionHandler)m_BaseClassifier).listOptions();
-
-      while (enu.hasMoreElements()) {
-        newVector.addElement(enu.nextElement());
-      }
+    if ((m_BaseClassifier != null)
+      && (m_BaseClassifier instanceof OptionHandler)) {
+      newVector.addElement(new Option("", "", 0,
+        "\nOptions specific to scheme " + m_BaseClassifier.getClass().getName()
+          + ":"));
+      newVector.addAll(Collections.list(((OptionHandler) m_BaseClassifier)
+        .listOptions()));
     }
 
-    return  newVector.elements();
+    return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -B &lt;base learner&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -B &lt;base learner&gt;
    *  class name of base learner to use for  accuracy estimation.
    *  Place any classifier options LAST on the command line
    *  following a "--". eg.:
    *   -B weka.classifiers.bayes.NaiveBayes ... -- -K
-   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   *  (default: weka.classifiers.rules.ZeroR)
+   * </pre>
    * 
-   * <pre> -F &lt;num&gt;
+   * <pre>
+   * -F &lt;num&gt;
    *  number of cross validation folds to use for estimating accuracy.
-   *  (default=5)</pre>
+   *  (default=5)
+   * </pre>
    * 
-   * <pre> -R &lt;seed&gt;
+   * <pre>
+   * -R &lt;seed&gt;
    *  Seed for cross validation accuracy testimation.
-   *  (default = 1)</pre>
+   *  (default = 1)
+   * </pre>
    * 
-   * <pre> -T &lt;num&gt;
+   * <pre>
+   * -T &lt;num&gt;
    *  threshold by which to execute another cross validation
    *  (standard deviation---expressed as a percentage of the mean).
-   *  (default: 0.01 (1%))</pre>
+   *  (default: 0.01 (1%))
+   * </pre>
    * 
-   * <pre> -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
+   * <pre>
+   * -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
    *  Performance evaluation measure to use for selecting attributes.
-   *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
+   *  (Default = accuracy for discrete class and rmse for numeric class)
+   * </pre>
    * 
-   * <pre> -IRclass &lt;label | index&gt;
+   * <pre>
+   * -IRclass &lt;label | index&gt;
    *  Optional class value (label or 1-based index) to use in conjunction with
    *  IR statistics (f-meas, auc or auprc). Omitting this option will use
-   *  the class-weighted average.</pre>
+   *  the class-weighted average.
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to scheme weka.classifiers.rules.ZeroR:
    * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
-  public void setOptions (String[] options)
-    throws Exception {
+  @Override
+  public void setOptions(String[] options) throws Exception {
     String optionString;
     resetOptions();
     optionString = Utils.getOption('B', options);
 
-    if (optionString.length() == 0)
+    if (optionString.length() == 0) {
       optionString = ZeroR.class.getName();
-    setClassifier(AbstractClassifier.forName(optionString, 
-				     Utils.partitionOptions(options)));
+    }
+    setClassifier(AbstractClassifier.forName(optionString,
+      Utils.partitionOptions(options)));
     optionString = Utils.getOption('F', options);
 
     if (optionString.length() != 0) {
@@ -353,11 +380,11 @@ public class WrapperSubsetEval
       setSeed(Integer.parseInt(optionString));
     }
 
-    //       optionString = Utils.getOption('S',options);
-    //       if (optionString.length() != 0)
-    //         {
-    //  	 seed = Integer.parseInt(optionString);
-    //         }
+    // optionString = Utils.getOption('S',options);
+    // if (optionString.length() != 0)
+    // {
+    // seed = Integer.parseInt(optionString);
+    // }
     optionString = Utils.getOption('T', options);
 
     if (optionString.length() != 0) {
@@ -365,7 +392,7 @@ public class WrapperSubsetEval
       temp = Double.valueOf(optionString);
       setThreshold(temp.doubleValue());
     }
-    
+
     optionString = Utils.getOption('E', options);
     if (optionString.length() != 0) {
       if (optionString.equals("acc")) {
@@ -384,57 +411,60 @@ public class WrapperSubsetEval
         throw new IllegalArgumentException("Invalid evaluation measure");
       }
     }
-    
+
     optionString = Utils.getOption("IRClass", options);
     if (optionString.length() > 0) {
       setIRClassValue(optionString);
     }
   }
-  
+
   /**
-   * Set the class value (label or index) to use with IR metric
-   * evaluation of subsets. Leaving this unset will result in 
-   * the class weighted average for the IR metric being used.
+   * Set the class value (label or index) to use with IR metric evaluation of
+   * subsets. Leaving this unset will result in the class weighted average for
+   * the IR metric being used.
    * 
-   * @param val the class label or 1-based index of the class label
-   * to use when evaluating subsets with an IR metric
+   * @param val the class label or 1-based index of the class label to use when
+   *          evaluating subsets with an IR metric
    */
   public void setIRClassValue(String val) {
     m_IRClassValS = val;
   }
-  
+
   /**
-   * Get the class value (label or index) to use with IR metric
-   * evaluation of subsets. Leaving this unset will result in 
-   * the class weighted average for the IR metric being used.
+   * Get the class value (label or index) to use with IR metric evaluation of
+   * subsets. Leaving this unset will result in the class weighted average for
+   * the IR metric being used.
    * 
-   * @return the class label or 1-based index of the class label
-   * to use when evaluating subsets with an IR metric
+   * @return the class label or 1-based index of the class label to use when
+   *         evaluating subsets with an IR metric
    */
   public String getIRClassValue() {
     return m_IRClassValS;
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String IRClassValueTipText() {
-    return "The class label, or 1-based index of the class label, to use " +
-    		"when evaluating subsets with an IR metric (such as f-measure " +
-    		"or AUC. Leaving this unset will result in the class frequency " +
-    		"weighted average of the metric being used.";
+    return "The class label, or 1-based index of the class label, to use "
+      + "when evaluating subsets with an IR metric (such as f-measure "
+      + "or AUC. Leaving this unset will result in the class frequency "
+      + "weighted average of the metric being used.";
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String evaluationMeasureTipText() {
     return "The measure used to evaluate the performance of attribute combinations.";
   }
+
   /**
    * Gets the currently set performance evaluation measure used for selecting
    * attributes for the decision table
@@ -446,8 +476,8 @@ public class WrapperSubsetEval
   }
 
   /**
-   * Sets the performance evaluation measure to use for selecting attributes
-   * for the decision table
+   * Sets the performance evaluation measure to use for selecting attributes for
+   * the decision table
    * 
    * @param newMethod the new performance evaluation metric to use
    */
@@ -456,11 +486,12 @@ public class WrapperSubsetEval
       m_evaluationMeasure = newMethod.getSelectedTag().getID();
     }
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String thresholdTipText() {
     return "Repeat xval if stdev of mean exceeds this value.";
@@ -468,27 +499,27 @@ public class WrapperSubsetEval
 
   /**
    * Set the value of the threshold for repeating cross validation
-   *
+   * 
    * @param t the value of the threshold
    */
-  public void setThreshold (double t) {
+  public void setThreshold(double t) {
     m_threshold = t;
   }
 
-
   /**
    * Get the value of the threshold
-   *
+   * 
    * @return the threshold as a double
    */
-  public double getThreshold () {
-    return  m_threshold;
+  public double getThreshold() {
+    return m_threshold;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String foldsTipText() {
     return "Number of xval folds to use when estimating subset accuracy.";
@@ -496,27 +527,27 @@ public class WrapperSubsetEval
 
   /**
    * Set the number of folds to use for accuracy estimation
-   *
+   * 
    * @param f the number of folds
    */
-  public void setFolds (int f) {
+  public void setFolds(int f) {
     m_folds = f;
   }
 
-
   /**
    * Get the number of folds used for accuracy estimation
-   *
+   * 
    * @return the number of folds
    */
-  public int getFolds () {
-    return  m_folds;
+  public int getFolds() {
+    return m_folds;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String seedTipText() {
     return "Seed to use for randomly generating xval splits.";
@@ -524,27 +555,27 @@ public class WrapperSubsetEval
 
   /**
    * Set the seed to use for cross validation
-   *
+   * 
    * @param s the seed
    */
-  public void setSeed (int s) {
+  public void setSeed(int s) {
     m_seed = s;
   }
 
-
   /**
    * Get the random number seed used for cross validation
-   *
+   * 
    * @return the seed
    */
-  public int getSeed () {
-    return  m_seed;
+  public int getSeed() {
+    return m_seed;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String classifierTipText() {
     return "Classifier to use for estimating the accuracy of subsets";
@@ -552,35 +583,34 @@ public class WrapperSubsetEval
 
   /**
    * Set the classifier to use for accuracy estimation
-   *
+   * 
    * @param newClassifier the Classifier to use.
    */
-  public void setClassifier (Classifier newClassifier) {
+  public void setClassifier(Classifier newClassifier) {
     m_BaseClassifier = newClassifier;
   }
 
-
   /**
    * Get the classifier used as the base learner.
-   *
+   * 
    * @return the classifier used as the classifier
    */
-  public Classifier getClassifier () {
-    return  m_BaseClassifier;
+  public Classifier getClassifier() {
+    return m_BaseClassifier;
   }
-
 
   /**
    * Gets the current settings of WrapperSubsetEval.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions()
    */
-  public String[] getOptions () {
+  @Override
+  public String[] getOptions() {
     String[] classifierOptions = new String[0];
 
-    if ((m_BaseClassifier != null) && 
-	(m_BaseClassifier instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler)m_BaseClassifier).getOptions();
+    if ((m_BaseClassifier != null)
+      && (m_BaseClassifier instanceof OptionHandler)) {
+      classifierOptions = ((OptionHandler) m_BaseClassifier).getOptions();
     }
 
     String[] options = new String[13 + classifierOptions.length];
@@ -597,7 +627,7 @@ public class WrapperSubsetEval
     options[current++] = "" + getThreshold();
     options[current++] = "-R";
     options[current++] = "" + getSeed();
-    
+
     options[current++] = "-E";
     switch (m_evaluationMeasure) {
     case EVAL_DEFAULT:
@@ -620,26 +650,25 @@ public class WrapperSubsetEval
       options[current++] = "auprc";
       break;
     }
-    
+
     if (m_IRClassValS != null && m_IRClassValS.length() > 0) {
       options[current++] = "-IRClass";
       options[current++] = m_IRClassValS;
     }
-    
+
     options[current++] = "--";
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
+    System.arraycopy(classifierOptions, 0, options, current,
+      classifierOptions.length);
     current += classifierOptions.length;
 
     while (current < options.length) {
       options[current++] = "";
     }
 
-    return  options;
+    return options;
   }
 
-
-  protected void resetOptions () {
+  protected void resetOptions() {
     m_trainInstances = null;
     m_Evaluation = null;
     m_BaseClassifier = new ZeroR();
@@ -650,48 +679,50 @@ public class WrapperSubsetEval
 
   /**
    * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this evaluator
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
-    Capabilities	result;
-    
+    Capabilities result;
+
     if (getClassifier() == null) {
       result = super.getCapabilities();
       result.disableAll();
     } else {
       result = getClassifier().getCapabilities();
     }
-    
+
     // set dependencies
-    for (Capability cap: Capability.values())
+    for (Capability cap : Capability.values()) {
       result.enableDependency(cap);
-    
+    }
+
     // adjustment for class based on selected evaluation metric
     result.disable(Capability.NUMERIC_CLASS);
     result.disable(Capability.DATE_CLASS);
-    if (m_evaluationMeasure != EVAL_ACCURACY && m_evaluationMeasure != EVAL_FMEASURE &&
-        m_evaluationMeasure != EVAL_AUC && m_evaluationMeasure != EVAL_AUPRC) {
+    if (m_evaluationMeasure != EVAL_ACCURACY
+      && m_evaluationMeasure != EVAL_FMEASURE
+      && m_evaluationMeasure != EVAL_AUC && m_evaluationMeasure != EVAL_AUPRC) {
       result.enable(Capability.NUMERIC_CLASS);
       result.enable(Capability.DATE_CLASS);
     }
-    
+
     result.setMinimumNumberInstances(getFolds());
-    
+
     return result;
   }
 
   /**
-   * Generates a attribute evaluator. Has to initialize all fields of the 
+   * Generates a attribute evaluator. Has to initialize all fields of the
    * evaluator that are not being set via options.
-   *
-   * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
-   * generated successfully
+   * 
+   * @param data set of instances serving as training data
+   * @throws Exception if the evaluator has not been generated successfully
    */
-  public void buildEvaluator (Instances data)
-    throws Exception {
+  @Override
+  public void buildEvaluator(Instances data) throws Exception {
 
     // can evaluator handle data?
     getCapabilities().testWithFail(data);
@@ -699,8 +730,7 @@ public class WrapperSubsetEval
     m_trainInstances = data;
     m_classIndex = m_trainInstances.classIndex();
     m_numAttribs = m_trainInstances.numAttributes();
-    m_numInstances = m_trainInstances.numInstances();
-    
+
     if (m_IRClassValS != null && m_IRClassValS.length() > 0) {
       // try to parse as a number first
       try {
@@ -709,22 +739,21 @@ public class WrapperSubsetEval
         m_IRClassVal--;
       } catch (NumberFormatException e) {
         // now try as a named class label
-        m_IRClassVal = m_trainInstances.classAttribute().indexOfValue(m_IRClassValS);
+        m_IRClassVal = m_trainInstances.classAttribute().indexOfValue(
+          m_IRClassValS);
       }
     }
   }
 
-
   /**
    * Evaluates a subset of attributes
-   *
-   * @param subset a bitset representing the attribute subset to be 
-   * evaluated 
+   * 
+   * @param subset a bitset representing the attribute subset to be evaluated
    * @return the error rate
    * @throws Exception if the subset could not be evaluated
    */
-  public double evaluateSubset (BitSet subset)
-    throws Exception {
+  @Override
+  public double evaluateSubset(BitSet subset) throws Exception {
     double evalMetric = 0;
     double[] repError = new double[5];
     int numAttributes = 0;
@@ -759,8 +788,9 @@ public class WrapperSubsetEval
     // max of 5 repetitions of cross validation
     for (i = 0; i < 5; i++) {
       m_Evaluation = new Evaluation(trainCopy);
-      m_Evaluation.crossValidateModel(m_BaseClassifier, trainCopy, m_folds, Rnd);
-      
+      m_Evaluation
+        .crossValidateModel(m_BaseClassifier, trainCopy, m_folds, Rnd);
+
       switch (m_evaluationMeasure) {
       case EVAL_DEFAULT:
         repError[i] = m_Evaluation.errorRate();
@@ -775,21 +805,21 @@ public class WrapperSubsetEval
         repError[i] = m_Evaluation.meanAbsoluteError();
         break;
       case EVAL_FMEASURE:
-        if (m_IRClassVal < 0) { 
-        repError[i] = m_Evaluation.weightedFMeasure();
+        if (m_IRClassVal < 0) {
+          repError[i] = m_Evaluation.weightedFMeasure();
         } else {
           repError[i] = m_Evaluation.fMeasure(m_IRClassVal);
         }
         break;
       case EVAL_AUC:
-        if (m_IRClassVal < 0) { 
+        if (m_IRClassVal < 0) {
           repError[i] = m_Evaluation.weightedAreaUnderROC();
         } else {
           repError[i] = m_Evaluation.areaUnderROC(m_IRClassVal);
         }
         break;
       case EVAL_AUPRC:
-        if (m_IRClassVal < 0) { 
+        if (m_IRClassVal < 0) {
           repError[i] = m_Evaluation.weightedAreaUnderPRC();
         } else {
           repError[i] = m_Evaluation.areaUnderPRC(m_IRClassVal);
@@ -808,9 +838,9 @@ public class WrapperSubsetEval
       evalMetric += repError[j];
     }
 
-    evalMetric /= (double)i;
+    evalMetric /= i;
     m_Evaluation = null;
-    
+
     switch (m_evaluationMeasure) {
     case EVAL_DEFAULT:
     case EVAL_ACCURACY:
@@ -819,43 +849,41 @@ public class WrapperSubsetEval
       evalMetric = -evalMetric; // maximize
       break;
     }
-    
+
     return evalMetric;
   }
 
-
   /**
    * Returns a string describing the wrapper
-   *
+   * 
    * @return the description as a string
    */
-  public String toString () {
+  @Override
+  public String toString() {
     StringBuffer text = new StringBuffer();
 
     if (m_trainInstances == null) {
       text.append("\tWrapper subset evaluator has not been built yet\n");
-    }
-    else {
+    } else {
       text.append("\tWrapper Subset Evaluator\n");
-      text.append("\tLearning scheme: " 
-		  + getClassifier().getClass().getName() + "\n");
+      text.append("\tLearning scheme: " + getClassifier().getClass().getName()
+        + "\n");
       text.append("\tScheme options: ");
       String[] classifierOptions = new String[0];
 
       if (m_BaseClassifier instanceof OptionHandler) {
-        classifierOptions = ((OptionHandler)m_BaseClassifier).getOptions();
+        classifierOptions = ((OptionHandler) m_BaseClassifier).getOptions();
 
-        for (int i = 0; i < classifierOptions.length; i++) {
-          text.append(classifierOptions[i] + " ");
+        for (String classifierOption : classifierOptions) {
+          text.append(classifierOption + " ");
         }
       }
 
       text.append("\n");
       String IRClassL = "";
       if (m_IRClassVal >= 0) {
-        IRClassL = "(class value: " 
-            + m_trainInstances.classAttribute().value(m_IRClassVal)
-          + ")";
+        IRClassL = "(class value: "
+          + m_trainInstances.classAttribute().value(m_IRClassVal) + ")";
       }
       switch (m_evaluationMeasure) {
       case EVAL_DEFAULT:
@@ -881,92 +909,89 @@ public class WrapperSubsetEval
         }
         break;
       case EVAL_FMEASURE:
-        text.append("\tSubset evaluation: F-measure " 
-            + (m_IRClassVal >=0 ? IRClassL : "") + "\n");
+        text.append("\tSubset evaluation: F-measure "
+          + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
         break;
       case EVAL_AUC:
-        text.append("\tSubset evaluation: area under the ROC curve " 
-            + (m_IRClassVal >=0 ? IRClassL : "") + "\n");
+        text.append("\tSubset evaluation: area under the ROC curve "
+          + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
         break;
       case EVAL_AUPRC:
-        text.append("\tSubset evalation: area under the precision-recal curve " 
-            + (m_IRClassVal >=0 ? IRClassL : "") + "\n");
+        text.append("\tSubset evalation: area under the precision-recal curve "
+          + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
         break;
       }
-      
-      text.append("\tNumber of folds for accuracy estimation: " 
-          + m_folds 
-          + "\n");
+
+      text.append("\tNumber of folds for accuracy estimation: " + m_folds
+        + "\n");
     }
 
-    return  text.toString();
+    return text.toString();
   }
 
-
   /**
-   * decides whether to do another repeat of cross validation. If the
-   * standard deviation of the cross validations
-   * is greater than threshold% of the mean (default 1%) then another 
-   * repeat is done. 
-   *
+   * decides whether to do another repeat of cross validation. If the standard
+   * deviation of the cross validations is greater than threshold% of the mean
+   * (default 1%) then another repeat is done.
+   * 
    * @param repError an array of cross validation results
    * @param entries the number of cross validations done so far
    * @return true if another cv is to be done
    */
-  private boolean repeat (double[] repError, int entries) {
+  private boolean repeat(double[] repError, int entries) {
     int i;
     double mean = 0;
     double variance = 0;
-    
+
     // setting a threshold less than zero allows for "manual" exploration
     // and prevents multiple xval for each subset
-    if (m_threshold < 0) { 
-      return false; 
+    if (m_threshold < 0) {
+      return false;
     }
 
     if (entries == 1) {
-      return  true;
+      return true;
     }
 
     for (i = 0; i < entries; i++) {
       mean += repError[i];
     }
 
-    mean /= (double)entries;
+    mean /= entries;
 
     for (i = 0; i < entries; i++) {
-      variance += ((repError[i] - mean)*(repError[i] - mean));
+      variance += ((repError[i] - mean) * (repError[i] - mean));
     }
 
-    variance /= (double)entries;
+    variance /= entries;
 
     if (variance > 0) {
       variance = Math.sqrt(variance);
     }
 
-    if ((variance/mean) > m_threshold) {
-      return  true;
+    if ((variance / mean) > m_threshold) {
+      return true;
     }
 
-    return  false;
+    return false;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param args the options
    */
-  public static void main (String[] args) {
+  public static void main(String[] args) {
     runEvaluator(new WrapperSubsetEval(), args);
   }
 }
-

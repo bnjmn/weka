@@ -39,52 +39,71 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * GreedyStepwise :<br/>
+ * <!-- globalinfo-start --> GreedyStepwise :<br/>
  * <br/>
- * Performs a greedy forward or backward search through the space of attribute subsets. May start with no/all attributes or from an arbitrary point in the space. Stops when the addition/deletion of any remaining attributes results in a decrease in evaluation. Can also produce a ranked list of attributes by traversing the space from one side to the other and recording the order that attributes are selected.<br/>
+ * Performs a greedy forward or backward search through the space of attribute
+ * subsets. May start with no/all attributes or from an arbitrary point in the
+ * space. Stops when the addition/deletion of any remaining attributes results
+ * in a decrease in evaluation. Can also produce a ranked list of attributes by
+ * traversing the space from one side to the other and recording the order that
+ * attributes are selected.<br/>
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -C
- *  Use conservative forward search</pre>
+ * <pre>
+ * -C
+ *  Use conservative forward search
+ * </pre>
  * 
- * <pre> -B
+ * <pre>
+ * -B
  *  Use a backward search instead of a
- *  forward one.</pre>
+ *  forward one.
+ * </pre>
  * 
- * <pre> -P &lt;start set&gt;
+ * <pre>
+ * -P &lt;start set&gt;
  *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7.</pre>
+ *  Eg. 1,3,5-7.
+ * </pre>
  * 
- * <pre> -R
- *  Produce a ranked list of attributes.</pre>
+ * <pre>
+ * -R
+ *  Produce a ranked list of attributes.
+ * </pre>
  * 
- * <pre> -T &lt;threshold&gt;
+ * <pre>
+ * -T &lt;threshold&gt;
  *  Specify a theshold by which attributes
  *  may be discarded from the ranking.
- *  Use in conjuction with -R</pre>
+ *  Use in conjuction with -R
+ * </pre>
  * 
- * <pre> -N &lt;num to select&gt;
- *  Specify number of attributes to select</pre>
+ * <pre>
+ * -N &lt;num to select&gt;
+ *  Specify number of attributes to select
+ * </pre>
  * 
- * <pre> -num-slots &lt;int&gt;
+ * <pre>
+ * -num-slots &lt;int&gt;
  *  The number of execution slots, for example, the number of cores in the CPU. (default 1)
  * </pre>
  * 
- * <pre> -D
- *  Print debugging output</pre>
+ * <pre>
+ * -D
+ *  Print debugging output
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall
  * @version $Revision$
  */
 public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
-    StartSetHandler, OptionHandler {
+  StartSetHandler, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -6312951970168325471L;
@@ -179,13 +198,13 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    */
   public String globalInfo() {
     return "GreedyStepwise :\n\nPerforms a greedy forward or backward search "
-        + "through "
-        + "the space of attribute subsets. May start with no/all attributes or from "
-        + "an arbitrary point in the space. Stops when the addition/deletion of any "
-        + "remaining attributes results in a decrease in evaluation. "
-        + "Can also produce a ranked list of "
-        + "attributes by traversing the space from one side to the other and "
-        + "recording the order that attributes are selected.\n";
+      + "through "
+      + "the space of attribute subsets. May start with no/all attributes or from "
+      + "an arbitrary point in the space. Stops when the addition/deletion of any "
+      + "remaining attributes results in a decrease in evaluation. "
+      + "Can also produce a ranked list of "
+      + "attributes by traversing the space from one side to the other and "
+      + "recording the order that attributes are selected.\n";
   }
 
   /**
@@ -227,8 +246,8 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    */
   public String thresholdTipText() {
     return "Set threshold by which attributes can be discarded. Default value "
-        + "results in no attributes being discarded. Use in conjunction with "
-        + "generateRanking";
+      + "results in no attributes being discarded. Use in conjunction with "
+      + "generateRanking";
   }
 
   /**
@@ -259,8 +278,8 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    */
   public String numToSelectTipText() {
     return "Specify the number of attributes to retain. The default value "
-        + "(-1) indicates that all attributes are to be retained. Use either "
-        + "this option or a threshold to reduce the attribute set.";
+      + "(-1) indicates that all attributes are to be retained. Use either "
+      + "this option or a threshold to reduce the attribute set.";
   }
 
   /**
@@ -338,8 +357,8 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    */
   public String startSetTipText() {
     return "Set the start point for the search. This is specified as a comma "
-        + "seperated list off attribute indexes starting at 1. It can include "
-        + "ranges. Eg. 1,2,5-9,17.";
+      + "seperated list off attribute indexes starting at 1. It can include "
+      + "ranges. Eg. 1,2,5-9,17.";
   }
 
   /**
@@ -373,8 +392,8 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    */
   public String conservativeForwardSelectionTipText() {
     return "If true (and forward search is selected) then attributes "
-        + "will continue to be added to the best subset as long as merit does "
-        + "not degrade.";
+      + "will continue to be added to the best subset as long as merit does "
+      + "not degrade.";
   }
 
   /**
@@ -454,28 +473,28 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    * @return an enumeration of all the available options.
    **/
   @Override
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(5);
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(8);
 
     newVector.addElement(new Option("\tUse conservative forward search", "-C",
-        0, "-C"));
+      0, "-C"));
 
     newVector.addElement(new Option("\tUse a backward search instead of a"
-        + "\n\tforward one.", "-B", 0, "-B"));
+      + "\n\tforward one.", "-B", 0, "-B"));
     newVector.addElement(new Option("\tSpecify a starting set of attributes."
-        + "\n\tEg. 1,3,5-7.", "P", 1, "-P <start set>"));
+      + "\n\tEg. 1,3,5-7.", "P", 1, "-P <start set>"));
 
     newVector.addElement(new Option("\tProduce a ranked list of attributes.",
-        "R", 0, "-R"));
+      "R", 0, "-R"));
     newVector.addElement(new Option("\tSpecify a theshold by which attributes"
-        + "\n\tmay be discarded from the ranking."
-        + "\n\tUse in conjuction with -R", "T", 1, "-T <threshold>"));
+      + "\n\tmay be discarded from the ranking."
+      + "\n\tUse in conjuction with -R", "T", 1, "-T <threshold>"));
 
     newVector.addElement(new Option("\tSpecify number of attributes to select",
-        "N", 1, "-N <num to select>"));
+      "N", 1, "-N <num to select>"));
 
     newVector.addElement(new Option("\t" + numExecutionSlotsTipText()
-        + " (default 1)\n", "-num-slots", 1, "-num-slots <int>"));
+      + " (default 1)\n", "-num-slots", 1, "-num-slots <int>"));
 
     newVector.addElement(new Option("\tPrint debugging output", "D", 0, "-D"));
 
@@ -487,39 +506,54 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -C
-   *  Use conservative forward search</pre>
+   * <pre>
+   * -C
+   *  Use conservative forward search
+   * </pre>
    * 
-   * <pre> -B
+   * <pre>
+   * -B
    *  Use a backward search instead of a
-   *  forward one.</pre>
+   *  forward one.
+   * </pre>
    * 
-   * <pre> -P &lt;start set&gt;
+   * <pre>
+   * -P &lt;start set&gt;
    *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7.</pre>
+   *  Eg. 1,3,5-7.
+   * </pre>
    * 
-   * <pre> -R
-   *  Produce a ranked list of attributes.</pre>
+   * <pre>
+   * -R
+   *  Produce a ranked list of attributes.
+   * </pre>
    * 
-   * <pre> -T &lt;threshold&gt;
+   * <pre>
+   * -T &lt;threshold&gt;
    *  Specify a theshold by which attributes
    *  may be discarded from the ranking.
-   *  Use in conjuction with -R</pre>
+   *  Use in conjuction with -R
+   * </pre>
    * 
-   * <pre> -N &lt;num to select&gt;
-   *  Specify number of attributes to select</pre>
+   * <pre>
+   * -N &lt;num to select&gt;
+   *  Specify number of attributes to select
+   * </pre>
    * 
-   * <pre> -num-slots &lt;int&gt;
+   * <pre>
+   * -num-slots &lt;int&gt;
    *  The number of execution slots, for example, the number of cores in the CPU. (default 1)
    * </pre>
    * 
-   * <pre> -D
-   *  Print debugging output</pre>
+   * <pre>
+   * -D
+   *  Print debugging output
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -567,42 +601,39 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    */
   @Override
   public String[] getOptions() {
-    String[] options = new String[12];
-    int current = 0;
+
+    Vector<String> options = new Vector<String>();
 
     if (getSearchBackwards()) {
-      options[current++] = "-B";
+      options.add("-B");
     }
 
     if (getConservativeForwardSelection()) {
-      options[current++] = "-C";
+      options.add("-C");
     }
 
     if (!(getStartSet().equals(""))) {
-      options[current++] = "-P";
-      options[current++] = "" + startSetToString();
+      options.add("-P");
+      options.add("" + startSetToString());
     }
 
     if (getGenerateRanking()) {
-      options[current++] = "-R";
+      options.add("-R");
     }
-    options[current++] = "-T";
-    options[current++] = "" + getThreshold();
+    options.add("-T");
+    options.add("" + getThreshold());
 
-    options[current++] = "-N";
-    options[current++] = "" + getNumToSelect();
+    options.add("-N");
+    options.add("" + getNumToSelect());
 
-    options[current++] = "-num-slots";
-    options[current++] = "" + getNumExecutionSlots();
+    options.add("-num-slots");
+    options.add("" + getNumExecutionSlots());
 
     if (getDebuggingOutput()) {
-      options[current] = "-D";
+      options.add("-D");
     }
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -650,7 +681,7 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
   public String toString() {
     StringBuffer FString = new StringBuffer();
     FString.append("\tGreedy Stepwise ("
-        + ((m_backward) ? "backwards)" : "forwards)") + ".\n\tStart set: ");
+      + ((m_backward) ? "backwards)" : "forwards)") + ".\n\tStart set: ");
 
     if (m_starting == null) {
       if (m_backward) {
@@ -663,27 +694,27 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
     }
     if (!m_doneRanking) {
       FString.append("\tMerit of best subset found: "
-          + Utils.doubleToString(Math.abs(m_bestMerit), 8, 3) + "\n");
+        + Utils.doubleToString(Math.abs(m_bestMerit), 8, 3) + "\n");
     } else {
       if (m_backward) {
         FString
-            .append("\n\tRanking is the order that attributes were removed, "
-                + "starting \n\twith all attributes. The merit scores in the left"
-                + "\n\tcolumn are the goodness of the remaining attributes in the"
-                + "\n\tsubset after removing the corresponding in the right column"
-                + "\n\tattribute from the subset.\n");
+          .append("\n\tRanking is the order that attributes were removed, "
+            + "starting \n\twith all attributes. The merit scores in the left"
+            + "\n\tcolumn are the goodness of the remaining attributes in the"
+            + "\n\tsubset after removing the corresponding in the right column"
+            + "\n\tattribute from the subset.\n");
       } else {
         FString
-            .append("\n\tRanking is the order that attributes were added, starting "
-                + "\n\twith no attributes. The merit scores in the left column"
-                + "\n\tare the goodness of the subset after the adding the"
-                + "\n\tcorresponding attribute in the right column to the subset.\n");
+          .append("\n\tRanking is the order that attributes were added, starting "
+            + "\n\twith no attributes. The merit scores in the left column"
+            + "\n\tare the goodness of the subset after the adding the"
+            + "\n\tcorresponding attribute in the right column to the subset.\n");
       }
     }
 
     if ((m_threshold != -Double.MAX_VALUE) && (m_doneRanking)) {
       FString.append("\tThreshold for discarding attributes: "
-          + Utils.doubleToString(m_threshold, 8, 4) + "\n");
+        + Utils.doubleToString(m_threshold, 8, 4) + "\n");
     }
 
     return FString.toString();
@@ -724,7 +755,7 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
 
     if (!(m_ASEval instanceof SubsetEvaluator)) {
       throw new Exception(m_ASEval.getClass().getName() + " is not a "
-          + "Subset evaluator!");
+        + "Subset evaluator!");
     }
 
     m_startRange.setUpper(m_numAttribs - 1);
@@ -804,7 +835,7 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
 
             // make a copy if the evaluator is not thread safe
             final SubsetEvaluator theEvaluator = (ASEvaluator instanceof weka.core.ThreadSafe) ? ASEvaluator
-                : (SubsetEvaluator) ASEvaluation.makeCopies(m_ASEval, 1)[0];
+              : (SubsetEvaluator) ASEvaluation.makeCopies(m_ASEval, 1)[0];
 
             Future<Double[]> future = m_pool.submit(new Callable<Double[]>() {
               @Override
@@ -924,7 +955,7 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
 
     if (m_rankedAtts == null || m_rankedSoFar == -1) {
       throw new Exception("Search must be performed before attributes "
-          + "can be ranked.");
+        + "can be ranked.");
     }
 
     m_doRank = true;
@@ -956,8 +987,8 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
 
   private void determineNumToSelectFromThreshold(double[][] ranking) {
     int count = 0;
-    for (int i = 0; i < ranking.length; i++) {
-      if (ranking[i][1] > m_threshold) {
+    for (double[] element : ranking) {
+      if (element[1] > m_threshold) {
         count++;
       }
     }
@@ -1014,4 +1045,3 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
     return RevisionUtils.extract("$Revision$");
   }
 }
-

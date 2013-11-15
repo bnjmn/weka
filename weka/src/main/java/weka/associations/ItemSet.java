@@ -22,14 +22,15 @@
 package weka.associations;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.WekaEnumeration;
 
 /**
  * Class for storing a set of items. Item sets are stored in a lexicographic
@@ -131,13 +132,16 @@ public class ItemSet implements Serializable, RevisionHandler {
         }
       }
     } else {
-      for (int i = 0; i < instance.numAttributes(); i++)
+      for (int i = 0; i < instance.numAttributes(); i++) {
         if (m_items[i] > -1) {
-          if (instance.isMissing(i) || (int) instance.value(i) == 0)
+          if (instance.isMissing(i) || (int) instance.value(i) == 0) {
             return false;
-          if (m_items[i] != (int) instance.value(i))
+          }
+          if (m_items[i] != (int) instance.value(i)) {
             return false;
+          }
         }
+      }
     }
 
     return true;
@@ -150,13 +154,16 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @return true if the given instance contains this item set
    */
   public boolean containedBy(Instance instance) {
-    for (int i = 0; i < instance.numAttributes(); i++)
+    for (int i = 0; i < instance.numAttributes(); i++) {
       if (m_items[i] > -1) {
-        if (instance.isMissing(i))
+        if (instance.isMissing(i)) {
           return false;
-        if (m_items[i] != (int) instance.value(i))
+        }
+        if (m_items[i] != (int) instance.value(i)) {
           return false;
+        }
       }
+    }
 
     return true;
   }
@@ -169,16 +176,17 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param itemSets the set of item sets to be pruned
    * @param minSupport the minimum number of transactions to be covered
    */
-  public static FastVector deleteItemSets(FastVector itemSets, int minSupport,
-      int maxSupport) {
+  public static ArrayList<ItemSet> deleteItemSets(ArrayList<ItemSet> itemSets,
+    int minSupport, int maxSupport) {
 
-    FastVector newVector = new FastVector(itemSets.size());
+    ArrayList<ItemSet> newVector = new ArrayList<ItemSet>(itemSets.size());
 
     for (int i = 0; i < itemSets.size(); i++) {
-      ItemSet current = (ItemSet) itemSets.elementAt(i);
+      ItemSet current = itemSets.get(i);
       if ((current.m_counter >= minSupport)
-          && (current.m_counter <= maxSupport))
-        newVector.addElement(current);
+        && (current.m_counter <= maxSupport)) {
+        newVector.add(current);
+      }
     }
     return newVector;
   }
@@ -195,11 +203,14 @@ public class ItemSet implements Serializable, RevisionHandler {
     if ((itemSet == null) || !(itemSet.getClass().equals(this.getClass()))) {
       return false;
     }
-    if (m_items.length != ((ItemSet) itemSet).m_items.length)
+    if (m_items.length != ((ItemSet) itemSet).m_items.length) {
       return false;
-    for (int i = 0; i < m_items.length; i++)
-      if (m_items[i] != ((ItemSet) itemSet).m_items[i])
+    }
+    for (int i = 0; i < m_items.length; i++) {
+      if (m_items[i] != ((ItemSet) itemSet).m_items[i]) {
         return false;
+      }
+    }
     return true;
   }
 
@@ -210,12 +221,14 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param initialSize the initial size of the hashtable
    * @return the generated hashtable
    */
-  public static Hashtable getHashtable(FastVector itemSets, int initialSize) {
+  public static Hashtable<ItemSet, Integer> getHashtable(
+    ArrayList<ItemSet> itemSets, int initialSize) {
 
-    Hashtable hashtable = new Hashtable(initialSize);
+    Hashtable<ItemSet, Integer> hashtable = new Hashtable<ItemSet, Integer>(
+      initialSize);
 
     for (int i = 0; i < itemSets.size(); i++) {
-      ItemSet current = (ItemSet) itemSets.elementAt(i);
+      ItemSet current = itemSets.get(i);
       hashtable.put(current, new Integer(current.m_counter));
     }
     return hashtable;
@@ -231,8 +244,9 @@ public class ItemSet implements Serializable, RevisionHandler {
 
     long result = 0;
 
-    for (int i = m_items.length - 1; i >= 0; i--)
+    for (int i = m_items.length - 1; i >= 0; i--) {
       result += (i * m_items[i]);
+    }
     return (int) result;
   }
 
@@ -245,17 +259,17 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param itemSets the set of (k-1)-item sets
    * @param size the value of (k-1)
    */
-  public static FastVector mergeAllItemSets(FastVector itemSets, int size,
-      int totalTrans) {
+  public static ArrayList<ItemSet> mergeAllItemSets(
+    ArrayList<ItemSet> itemSets, int size, int totalTrans) {
 
-    FastVector newVector = new FastVector();
+    ArrayList<ItemSet> newVector = new ArrayList<ItemSet>();
     ItemSet result;
     int numFound, k;
 
     for (int i = 0; i < itemSets.size(); i++) {
-      ItemSet first = (ItemSet) itemSets.elementAt(i);
+      ItemSet first = itemSets.get(i);
       out: for (int j = i + 1; j < itemSets.size(); j++) {
-        ItemSet second = (ItemSet) itemSets.elementAt(j);
+        ItemSet second = itemSets.get(j);
         result = new ItemSet(totalTrans);
         result.m_items = new int[first.m_items.length];
 
@@ -264,30 +278,33 @@ public class ItemSet implements Serializable, RevisionHandler {
         k = 0;
         while (numFound < size) {
           if (first.m_items[k] == second.m_items[k]) {
-            if (first.m_items[k] != -1)
+            if (first.m_items[k] != -1) {
               numFound++;
+            }
             result.m_items[k] = first.m_items[k];
-          } else
+          } else {
             break out;
+          }
           k++;
         }
 
         // Check difference
         while (k < first.m_items.length) {
-          if ((first.m_items[k] != -1) && (second.m_items[k] != -1))
+          if ((first.m_items[k] != -1) && (second.m_items[k] != -1)) {
             break;
-          else {
-            if (first.m_items[k] != -1)
+          } else {
+            if (first.m_items[k] != -1) {
               result.m_items[k] = first.m_items[k];
-            else
+            } else {
               result.m_items[k] = second.m_items[k];
+            }
           }
           k++;
         }
         if (k == first.m_items.length) {
           result.m_counter = 0;
 
-          newVector.addElement(result);
+          newVector.add(result);
         }
       }
     }
@@ -301,14 +318,15 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param kMinusOne the (k-1)-item sets to be used for pruning
    * @return the pruned set of item sets
    */
-  public static FastVector pruneItemSets(FastVector toPrune, Hashtable kMinusOne) {
+  public static ArrayList<ItemSet> pruneItemSets(ArrayList<ItemSet> toPrune,
+    Hashtable<ItemSet, Integer> kMinusOne) {
 
-    FastVector newVector = new FastVector(toPrune.size());
+    ArrayList<ItemSet> newVector = new ArrayList<ItemSet>(toPrune.size());
     int help, j;
 
     for (int i = 0; i < toPrune.size(); i++) {
-      ItemSet current = (ItemSet) toPrune.elementAt(i);
-      for (j = 0; j < current.m_items.length; j++)
+      ItemSet current = toPrune.get(i);
+      for (j = 0; j < current.m_items.length; j++) {
         if (current.m_items[j] != -1) {
           help = current.m_items[j];
           current.m_items[j] = -1;
@@ -319,8 +337,10 @@ public class ItemSet implements Serializable, RevisionHandler {
             current.m_items[j] = help;
           }
         }
-      if (j == current.m_items.length)
-        newVector.addElement(current);
+      }
+      if (j == current.m_items.length) {
+        newVector.add(current);
+      }
     }
     return newVector;
   }
@@ -333,30 +353,31 @@ public class ItemSet implements Serializable, RevisionHandler {
    *          consequences.
    * @param minConfidence the minimum confidence the rules have to have
    */
-  public static void pruneRules(FastVector[] rules, double minConfidence) {
+  public static void pruneRules(ArrayList<Object>[] rules, double minConfidence) {
 
-    FastVector newPremises = new FastVector(rules[0].size()), newConsequences = new FastVector(
-        rules[1].size()), newConf = new FastVector(rules[2].size());
+    ArrayList<Object> newPremises = new ArrayList<Object>(rules[0].size()), newConsequences = new ArrayList<Object>(
+      rules[1].size()), newConf = new ArrayList<Object>(rules[2].size());
 
-    FastVector newLift = null, newLev = null, newConv = null;
+    ArrayList<Object> newLift = null, newLev = null, newConv = null;
     if (rules.length > 3) {
-      newLift = new FastVector(rules[3].size());
-      newLev = new FastVector(rules[4].size());
-      newConv = new FastVector(rules[5].size());
+      newLift = new ArrayList<Object>(rules[3].size());
+      newLev = new ArrayList<Object>(rules[4].size());
+      newConv = new ArrayList<Object>(rules[5].size());
     }
 
-    for (int i = 0; i < rules[0].size(); i++)
-      if (!(((Double) rules[2].elementAt(i)).doubleValue() < minConfidence)) {
-        newPremises.addElement(rules[0].elementAt(i));
-        newConsequences.addElement(rules[1].elementAt(i));
-        newConf.addElement(rules[2].elementAt(i));
+    for (int i = 0; i < rules[0].size(); i++) {
+      if (!(((Double) rules[2].get(i)).doubleValue() < minConfidence)) {
+        newPremises.add(rules[0].get(i));
+        newConsequences.add(rules[1].get(i));
+        newConf.add(rules[2].get(i));
 
         if (rules.length > 3) {
-          newLift.addElement(rules[3].elementAt(i));
-          newLev.addElement(rules[4].elementAt(i));
-          newConv.addElement(rules[5].elementAt(i));
+          newLift.add(rules[3].get(i));
+          newLev.add(rules[4].get(i));
+          newConv.add(rules[5].get(i));
         }
       }
+    }
     rules[0] = newPremises;
     rules[1] = newConsequences;
     rules[2] = newConf;
@@ -377,22 +398,25 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-  public static FastVector singletons(Instances instances) throws Exception {
+  public static ArrayList<ItemSet> singletons(Instances instances)
+    throws Exception {
 
-    FastVector setOfItemSets = new FastVector();
+    ArrayList<ItemSet> setOfItemSets = new ArrayList<ItemSet>();
     ItemSet current;
 
     for (int i = 0; i < instances.numAttributes(); i++) {
-      if (instances.attribute(i).isNumeric())
+      if (instances.attribute(i).isNumeric()) {
         throw new Exception("Can't handle numeric attributes!");
+      }
       for (int j = 0; j < instances.attribute(i).numValues(); j++) {
         current = new ItemSet(instances.numInstances());
         current.m_items = new int[instances.numAttributes()];
-        for (int k = 0; k < instances.numAttributes(); k++)
+        for (int k = 0; k < instances.numAttributes(); k++) {
           current.m_items[k] = -1;
+        }
         current.m_items[i] = j;
 
-        setOfItemSets.addElement(current);
+        setOfItemSets.add(current);
       }
     }
     return setOfItemSets;
@@ -418,11 +442,12 @@ public class ItemSet implements Serializable, RevisionHandler {
 
     StringBuffer text = new StringBuffer();
 
-    for (int i = 0; i < instances.numAttributes(); i++)
+    for (int i = 0; i < instances.numAttributes(); i++) {
       if (m_items[i] != -1) {
         text.append(instances.attribute(i).name() + '=');
         text.append(instances.attribute(i).value(m_items[i]) + ' ');
       }
+    }
     text.append(m_counter);
     return text.toString();
   }
@@ -439,12 +464,12 @@ public class ItemSet implements Serializable, RevisionHandler {
 
     StringBuffer text = new StringBuffer();
 
-    for (int i = 0; i < instances.numAttributes(); i++)
+    for (int i = 0; i < instances.numAttributes(); i++) {
       if (m_items[i] != -1) {
         text.append(instances.attribute(i).name()).append('=')
-            .append(instances.attribute(i).value(m_items[i]))
-            .append(innerDelim);
+          .append(instances.attribute(i).value(m_items[i])).append(innerDelim);
       }
+    }
 
     int n = text.length();
     if (n > 0) {
@@ -465,8 +490,9 @@ public class ItemSet implements Serializable, RevisionHandler {
    */
   public void upDateCounter(Instance instance) {
 
-    if (containedBy(instance))
+    if (containedBy(instance)) {
       m_counter++;
+    }
   }
 
   /**
@@ -486,12 +512,15 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param itemSets the set of item sets which are to be updated
    * @param instances the instances to be used for updating the counters
    */
-  public static void upDateCounters(FastVector itemSets, Instances instances) {
+  public static void upDateCounters(ArrayList<ItemSet> itemSets,
+    Instances instances) {
 
     for (int i = 0; i < instances.numInstances(); i++) {
-      Enumeration enu = itemSets.elements();
-      while (enu.hasMoreElements())
-        ((ItemSet) enu.nextElement()).upDateCounter(instances.instance(i));
+      @SuppressWarnings("unchecked")
+      Enumeration<ItemSet> enu = new WekaEnumeration(itemSets);
+      while (enu.hasMoreElements()) {
+        enu.nextElement().upDateCounter(instances.instance(i));
+      }
     }
   }
 
@@ -501,13 +530,15 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @param itemSets the set of item sets which are to be updated
    * @param instances the instances to be used for updating the counters
    */
-  public static void upDateCountersTreatZeroAsMissing(FastVector itemSets,
-      Instances instances) {
+  public static void upDateCountersTreatZeroAsMissing(
+    ArrayList<ItemSet> itemSets, Instances instances) {
     for (int i = 0; i < instances.numInstances(); i++) {
-      Enumeration enu = itemSets.elements();
-      while (enu.hasMoreElements())
-        ((ItemSet) enu.nextElement()).updateCounterTreatZeroAsMissing(instances
-            .instance(i));
+      @SuppressWarnings("unchecked")
+      Enumeration<ItemSet> enu = new WekaEnumeration(itemSets);
+      while (enu.hasMoreElements()) {
+        enu.nextElement()
+          .updateCounterTreatZeroAsMissing(instances.instance(i));
+      }
     }
   }
 
