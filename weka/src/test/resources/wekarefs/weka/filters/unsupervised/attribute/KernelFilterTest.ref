@@ -1,4 +1,4 @@
-@relation 'Kernel-weka.filters.unsupervised.attribute.KernelFilter-Kweka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0-kernel-factor1-Pweka.filters.unsupervised.attribute.Center'
+@relation 'Kernel-weka.filters.unsupervised.attribute.KernelFilter-Kweka.classifiers.functions.supportVector.PolyKernel -E 1.0 -C 250007-kernel-factor1-Pweka.filters.unsupervised.attribute.Center'
 
 @attribute 'Kernel 0' numeric
 @attribute 'Kernel 1' numeric
