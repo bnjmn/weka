@@ -21,73 +21,75 @@
 
 package weka.associations;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.TreeSet;
+
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.UnassignedClassException;
 
-import java.io.Serializable;
-import java.util.Hashtable;
-import java.util.TreeSet;
-
-
 /**
- * Class implementing the rule generation procedure of the predictive apriori algorithm for class association rules.
- *
- * For association rules in gerneral the method is described in:
- * T. Scheffer (2001). <i>Finding Association Rules That Trade Support 
- * Optimally against Confidence</i>. Proc of the 5th European Conf.
- * on Principles and Practice of Knowledge Discovery in Databases (PKDD'01),
- * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
- *
- * The implementation follows the paper expect for adding a rule to the output of the
- * <i>n</i> best rules. A rule is added if:
- * the expected predictive accuracy of this rule is among the <i>n</i> best and it is 
- * not subsumed by a rule with at least the same expected predictive accuracy
- * (out of an unpublished manuscript from T. Scheffer). 
- *
+ * Class implementing the rule generation procedure of the predictive apriori
+ * algorithm for class association rules.
+ * 
+ * For association rules in gerneral the method is described in: T. Scheffer
+ * (2001). <i>Finding Association Rules That Trade Support Optimally against
+ * Confidence</i>. Proc of the 5th European Conf. on Principles and Practice of
+ * Knowledge Discovery in Databases (PKDD'01), pp. 424-435. Freiburg, Germany:
+ * Springer-Verlag.
+ * <p>
+ * 
+ * The implementation follows the paper expect for adding a rule to the output
+ * of the <i>n</i> best rules. A rule is added if: the expected predictive
+ * accuracy of this rule is among the <i>n</i> best and it is not subsumed by a
+ * rule with at least the same expected predictive accuracy (out of an
+ * unpublished manuscript from T. Scheffer).
+ * 
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision$ */
-public class CaRuleGeneration
-  extends RuleGeneration
-  implements Serializable, RevisionHandler {
+ * @version $Revision$
+ */
+public class CaRuleGeneration extends RuleGeneration implements Serializable,
+  RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 3065752149646517703L;
 
   /**
    * Constructor
+   * 
    * @param itemSet the item set that forms the premise of the rule
    */
-  public CaRuleGeneration(ItemSet itemSet){
-    super(itemSet);  
+  public CaRuleGeneration(ItemSet itemSet) {
+    super(itemSet);
   }
 
   /**
    * Generates all rules for an item set. The item set is the premise.
-   * @param numRules the number of association rules the use wants to mine.
-   * This number equals the size <i>n</i> of the list of the
-   * best rules.
+   * 
+   * @param numRules the number of association rules the use wants to mine. This
+   *          number equals the size <i>n</i> of the list of the best rules.
    * @param midPoints the mid points of the intervals
    * @param priors Hashtable that contains the prior probabilities
    * @param expectation the minimum value of the expected predictive accuracy
-   * that is needed to get into the list of the best rules
+   *          that is needed to get into the list of the best rules
    * @param instances the instances for which association rules are generated
-   * @param best the list of the <i>n</i> best rules.
-   * The list is implemented as a TreeSet
+   * @param best the list of the <i>n</i> best rules. The list is implemented as
+   *          a TreeSet
    * @param genTime the maximum time of generation
    * @return all the rules with minimum confidence for the given item set
    */
-  public TreeSet generateRules(int numRules, double[] midPoints, Hashtable priors, double expectation, Instances instances, TreeSet best, int genTime) {
+  @Override
+  public TreeSet<RuleItem> generateRules(int numRules, double[] midPoints,
+    Hashtable<Double, Double> priors, double expectation, Instances instances,
+    TreeSet<RuleItem> best, int genTime) {
 
     boolean redundant = false;
-    FastVector consequences = new FastVector();
+    ArrayList<Object> consequences = new ArrayList<Object>();
     ItemSet premise;
-    RuleItem current = null, old = null;
-
-    Hashtable hashtable;
+    RuleItem current = null;
 
     m_change = false;
     m_midPoints = midPoints;
@@ -97,8 +99,8 @@ public class CaRuleGeneration
     m_count = genTime;
     m_instances = instances;
 
-    //create rule body
-    premise =null;
+    // create rule body
+    premise = null;
     premise = new ItemSet(m_totalTransactions);
     int[] premiseItems = new int[m_items.length];
     System.arraycopy(m_items, 0, premiseItems, 0, m_items.length);
@@ -107,116 +109,131 @@ public class CaRuleGeneration
 
     consequences = singleConsequence(instances);
 
-    //create n best rules
-    do{
-      if(premise == null || consequences.size() == 0)
-	return m_best;
+    // create n best rules
+    do {
+      if (premise == null || consequences.size() == 0) {
+        return m_best;
+      }
       m_minRuleCount = 1;
-      while(expectation((double)m_minRuleCount,premise.counter(),m_midPoints,m_priors) <= m_expectation){
-	m_minRuleCount++;
-	if(m_minRuleCount > premise.counter())
-	  return m_best;
+      while (expectation(m_minRuleCount, premise.counter(), m_midPoints,
+        m_priors) <= m_expectation) {
+        m_minRuleCount++;
+        if (m_minRuleCount > premise.counter()) {
+          return m_best;
+        }
       }
       redundant = false;
 
-      //create possible heads  
-      FastVector allRuleItems = new FastVector();
+      // create possible heads
+      ArrayList<Object> allRuleItems = new ArrayList<Object>();
       int h = 0;
-      while(h < consequences.size()){
-	RuleItem dummie = new RuleItem();
-	m_count++;
-	current = dummie.generateRuleItem(premise,(ItemSet)consequences.elementAt(h),instances,m_count,m_minRuleCount,m_midPoints,m_priors);
-	if(current != null)
-	  allRuleItems.addElement(current);
-	h++;
+      while (h < consequences.size()) {
+        RuleItem dummie = new RuleItem();
+        m_count++;
+        current = dummie.generateRuleItem(premise,
+          (ItemSet) consequences.get(h), instances, m_count, m_minRuleCount,
+          m_midPoints, m_priors);
+        if (current != null) {
+          allRuleItems.add(current);
+        }
+        h++;
       }
 
-      //update best
-      for(h =0; h< allRuleItems.size();h++){
-	current = (RuleItem)allRuleItems.elementAt(h);
-	if(m_best.size() < numRules){
-	  m_change =true;
-	  redundant = removeRedundant(current);  
-	}
-	else{
-	  m_expectation = ((RuleItem)(m_best.first())).accuracy();
-	  if(current.accuracy() > m_expectation){
-	    boolean remove = m_best.remove(m_best.first());
-	    m_change = true;
-	    redundant = removeRedundant(current);
-	    m_expectation = ((RuleItem)(m_best.first())).accuracy();
-	    while(expectation((double)m_minRuleCount, (current.premise()).counter(),m_midPoints,m_priors) < m_expectation){
-	      m_minRuleCount++;
-	      if(m_minRuleCount > (current.premise()).counter())
-		break;
-	    } 
-	  }  
-	}   
-      }   
-    }while(redundant); 
+      // update best
+      for (h = 0; h < allRuleItems.size(); h++) {
+        current = (RuleItem) allRuleItems.get(h);
+        if (m_best.size() < numRules) {
+          m_change = true;
+          redundant = removeRedundant(current);
+        } else {
+          m_expectation = (m_best.first()).accuracy();
+          if (current.accuracy() > m_expectation) {
+            m_best.remove(m_best.first());
+            m_change = true;
+            redundant = removeRedundant(current);
+            m_expectation = (m_best.first()).accuracy();
+            while (expectation(m_minRuleCount, (current.premise()).counter(),
+              m_midPoints, m_priors) < m_expectation) {
+              m_minRuleCount++;
+              if (m_minRuleCount > (current.premise()).counter()) {
+                break;
+              }
+            }
+          }
+        }
+      }
+    } while (redundant);
     return m_best;
   }
 
   /**
-   * Methods that decides whether or not rule a subsumes rule b.
-   * The defintion of subsumption is:
-   * Rule a subsumes rule b, if a subsumes b
-   * AND
-   * a has got least the same expected predictive accuracy as b.
+   * Methods that decides whether or not rule a subsumes rule b. The defintion
+   * of subsumption is: Rule a subsumes rule b, if a subsumes b AND a has got
+   * least the same expected predictive accuracy as b.
+   * 
    * @param a an association rule stored as a RuleItem
    * @param b an association rule stored as a RuleItem
    * @return true if rule a subsumes rule b or false otherwise.
-   */  
-  public static boolean aSubsumesB(RuleItem a, RuleItem b){
+   */
+  public static boolean aSubsumesB(RuleItem a, RuleItem b) {
 
-    if(!a.consequence().equals(b.consequence()))
+    if (!a.consequence().equals(b.consequence())) {
       return false;
-    if(a.accuracy() < b.accuracy())
+    }
+    if (a.accuracy() < b.accuracy()) {
       return false;
-    for(int k = 0; k < ((a.premise()).items()).length;k++){
-      if((a.premise()).itemAt(k) != (b.premise()).itemAt(k)){
-	if(((a.premise()).itemAt(k) != -1 && (b.premise()).itemAt(k) != -1) || (b.premise()).itemAt(k) == -1)
-	  return false;
+    }
+    for (int k = 0; k < ((a.premise()).items()).length; k++) {
+      if ((a.premise()).itemAt(k) != (b.premise()).itemAt(k)) {
+        if (((a.premise()).itemAt(k) != -1 && (b.premise()).itemAt(k) != -1)
+          || (b.premise()).itemAt(k) == -1) {
+          return false;
+        }
       }
-      /*if(a.m_consequence.m_items[k] != b.m_consequence.m_items[k]){
-            if((a.m_consequence.m_items[k] != -1 && b.m_consequence.m_items[k] != -1) || a.m_consequence.m_items[k] == -1)
-                return false;
-        }*/
+      /*
+       * if(a.m_consequence.m_items[k] != b.m_consequence.m_items[k]){
+       * if((a.m_consequence.m_items[k] != -1 && b.m_consequence.m_items[k] !=
+       * -1) || a.m_consequence.m_items[k] == -1) return false; }
+       */
     }
     return true;
 
   }
 
   /**
-   * Converts the header info of the given set of instances into a set 
-   * of item sets (singletons). The ordering of values in the header file 
-   * determines the lexicographic order.
-   *
+   * Converts the header info of the given set of instances into a set of item
+   * sets (singletons). The ordering of values in the header file determines the
+   * lexicographic order.
+   * 
    * @param instances the set of instances whose header info is to be used
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-  public static FastVector singletons(Instances instances) throws Exception {
+  public static ArrayList<Object> singletons(Instances instances)
+    throws Exception {
 
-    FastVector setOfItemSets = new FastVector();
+    ArrayList<Object> setOfItemSets = new ArrayList<Object>();
     ItemSet current;
 
-    if(instances.classIndex() == -1)
+    if (instances.classIndex() == -1) {
       throw new UnassignedClassException("Class index is negative (not set)!");
-    Attribute att = instances.classAttribute();
+    }
+    instances.classAttribute();
     for (int i = 0; i < instances.numAttributes(); i++) {
-      if (instances.attribute(i).isNumeric())
-	throw new Exception("Can't handle numeric attributes!");
-      if(i != instances.classIndex()){
-	for (int j = 0; j < instances.attribute(i).numValues(); j++) {
-	  current = new ItemSet(instances.numInstances());
-	  int[] currentItems = new int[instances.numAttributes()];
-	  for (int k = 0; k < instances.numAttributes(); k++)
-	    currentItems[k] = -1;
-	  currentItems[i] = j;
-	  current.setItem(currentItems);
-	  setOfItemSets.addElement(current);
-	}
+      if (instances.attribute(i).isNumeric()) {
+        throw new Exception("Can't handle numeric attributes!");
+      }
+      if (i != instances.classIndex()) {
+        for (int j = 0; j < instances.attribute(i).numValues(); j++) {
+          current = new ItemSet(instances.numInstances());
+          int[] currentItems = new int[instances.numAttributes()];
+          for (int k = 0; k < instances.numAttributes(); k++) {
+            currentItems[k] = -1;
+          }
+          currentItems[i] = j;
+          current.setItem(currentItems);
+          setOfItemSets.add(current);
+        }
       }
     }
     return setOfItemSets;
@@ -224,22 +241,24 @@ public class CaRuleGeneration
 
   /**
    * generates a consequence of length 1 for a class association rule.
+   * 
    * @param instances the instances under consideration
    * @return FastVector with consequences of length 1
-   */  
-  public static FastVector singleConsequence(Instances instances){
+   */
+  public static ArrayList<Object> singleConsequence(Instances instances) {
 
     ItemSet consequence;
-    FastVector consequences = new FastVector();
+    ArrayList<Object> consequences = new ArrayList<Object>();
 
     for (int j = 0; j < (instances.classAttribute()).numValues(); j++) {
       consequence = new ItemSet(instances.numInstances());
       int[] consequenceItems = new int[instances.numAttributes()];
       consequence.setItem(consequenceItems);
-      for (int k = 0; k < instances.numAttributes(); k++) 
-	consequence.setItemAt(-1,k);
-      consequence.setItemAt(j,instances.classIndex());
-      consequences.addElement(consequence);
+      for (int k = 0; k < instances.numAttributes(); k++) {
+        consequence.setItemAt(-1, k);
+      }
+      consequence.setItemAt(j, instances.classIndex());
+      consequences.add(consequence);
     }
     return consequences;
 
@@ -248,8 +267,9 @@ public class CaRuleGeneration
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
