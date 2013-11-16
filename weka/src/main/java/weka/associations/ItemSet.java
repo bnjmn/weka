@@ -398,10 +398,10 @@ public class ItemSet implements Serializable, RevisionHandler {
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-  public static ArrayList<ItemSet> singletons(Instances instances)
+  public static ArrayList<Object> singletons(Instances instances)
     throws Exception {
 
-    ArrayList<ItemSet> setOfItemSets = new ArrayList<ItemSet>();
+    ArrayList<Object> setOfItemSets = new ArrayList<Object>();
     ItemSet current;
 
     for (int i = 0; i < instances.numAttributes(); i++) {
