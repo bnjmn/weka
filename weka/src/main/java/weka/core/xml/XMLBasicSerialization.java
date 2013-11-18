@@ -132,12 +132,13 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @throws Exception if the DOM creation fails
    * @see javax.swing.DefaultListModel
    */
+  @SuppressWarnings("rawtypes")
   public Element writeDefaultListModel(Element parent, Object o, String name)
     throws Exception {
 
     Element node;
     int i;
-    DefaultListModel<?> model;
+    DefaultListModel model;
 
     // for debugging only
     if (DEBUG) {
@@ -146,7 +147,7 @@ public class XMLBasicSerialization extends XMLSerialization {
 
     m_CurrentNode = parent;
 
-    model = (DefaultListModel<?>) o;
+    model = (DefaultListModel) o;
     node = addElement(parent, name, o.getClass().getName(), false);
 
     for (i = 0; i < model.getSize(); i++) {
@@ -164,8 +165,9 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @throws Exception if instantiation fails
    * @see javax.swing.DefaultListModel
    */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public Object readDefaultListModel(Element node) throws Exception {
-    DefaultListModel<Object> model;
+    DefaultListModel model;
     Vector<Element> children;
     Element child;
     int i;
@@ -180,7 +182,7 @@ public class XMLBasicSerialization extends XMLSerialization {
     m_CurrentNode = node;
 
     children = XMLDocument.getChildTags(node);
-    model = new DefaultListModel<Object>();
+    model = new DefaultListModel();
 
     // determine highest index for size
     index = children.size() - 1;
