@@ -21,85 +21,111 @@
 
 package weka.associations;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Vector;
-import java.util.Enumeration;
-import java.io.Serializable;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Attribute;
-import weka.core.Utils;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.SingleIndex;
-import weka.core.Drawable;
-import weka.core.Capabilities.Capability;
+
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
+import weka.core.Drawable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * HotSpot learns a set of rules (displayed in a tree-like structure) that maximize/minimize a target variable/value of interest. With a nominal target, one might want to look for segments of the data where there is a high probability of a minority value occuring (given the constraint of a minimum support). For a numeric target, one might be interested in finding segments where this is higher on average than in the whole data set. For example, in a health insurance scenario, find which health insurance groups are at the highest risk (have the highest claim ratio), or, which groups have the highest average insurance payout.
+ <!-- globalinfo-start --> 
+ * HotSpot learns a set of rules (displayed in a
+ * tree-like structure) that maximize/minimize a target variable/value of
+ * interest. With a nominal target, one might want to look for segments of the
+ * data where there is a high probability of a minority value occuring (given
+ * the constraint of a minimum support). For a numeric target, one might be
+ * interested in finding segments where this is higher on average than in the
+ * whole data set. For example, in a health insurance scenario, find which
+ * health insurance groups are at the highest risk (have the highest claim
+ * ratio), or, which groups have the highest average insurance payout. This algorithm
+ * is similar in spirit to the PRIM bump hunting algorithm described by Friedman
+ * and Fisher (1999).
  * <p/>
  <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
  * 
- * <pre> -c &lt;num | first | last&gt;
- *  The target index. (default = last)</pre>
+ <!-- options-start --> 
+ * Valid options are:
+ * <p/>
  * 
- * <pre> -V &lt;num | first | last&gt;
- *  The target value (nominal target only, default = first)</pre>
+ * <pre>
+ * -c &lt;num | first | last&gt;
+ *  The target index. (default = last)
+ * </pre>
  * 
- * <pre> -L
- *  Minimize rather than maximize.</pre>
+ * <pre>
+ * -V &lt;num | first | last&gt;
+ *  The target value (nominal target only, default = first)
+ * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -L
+ *  Minimize rather than maximize.
+ * </pre>
+ * 
+ * <pre>
+ * -S &lt;num&gt;
  *  Minimum value count (nominal target)/segment size (numeric target).
  *  Values between 0 and 1 are 
  *  interpreted as a percentage of 
  *  the total population; values &gt; 1 are 
  *  interpreted as an absolute number of 
- *  instances (default = 0.3)</pre>
+ *  instances (default = 0.3)
+ * </pre>
  * 
- * <pre> -M &lt;num&gt;
- *  Maximum branching factor (default = 2)</pre>
+ * <pre>
+ * -M &lt;num&gt;
+ *  Maximum branching factor (default = 2)
+ * </pre>
  * 
- * <pre> -I &lt;num&gt;
+ * <pre>
+ * -I &lt;num&gt;
  *  Minimum improvement in target value in order 
- *  to add a new branch/test (default = 0.01 (1%))</pre>
+ *  to add a new branch/test (default = 0.01 (1%))
+ * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  Output debugging info (duplicate rule lookup 
- *  hash table stats)</pre>
+ *  hash table stats)
+ * </pre>
  * 
  <!-- options-end -->
- *
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
  * @version $Revision$
  */
-public class HotSpot
-  implements Associator, OptionHandler, RevisionHandler, 
-             CapabilitiesHandler, Drawable, AssociationRulesProducer, 
-             Serializable {
+public class HotSpot implements Associator, OptionHandler, RevisionHandler,
+  CapabilitiesHandler, Drawable, AssociationRulesProducer, Serializable {
 
   static final long serialVersionUID = 42972325096347677L;
 
   /** index of the target attribute */
   protected SingleIndex m_targetSI = new SingleIndex("last");
   protected int m_target;
-  
+
+  /** Holds the user-supplied support value (fraction or absolute num instances) */
+  protected String m_supportString = "0.33";
+
   /** Support as a fraction of the total training set */
   protected double m_support;
-  
+
   /** Support as an instance count */
   private int m_supportCount;
 
@@ -122,12 +148,15 @@ public class HotSpot
   /** The maximum depth of a path in the tree (or length of a rule) */
   protected int m_maxRuleLength = -1;
 
-  /** Treat zero as missing for nominal attributes (useful for basket data in sparse format) */
+  /**
+   * Treat zero as missing for nominal attributes (useful for basket data in
+   * sparse format)
+   */
   protected boolean m_treatZeroAsMissing;
 
   /** Number of instances in the full data */
   protected int m_numInstances;
-  
+
   /** Number of instances with non-missing target values in the full data */
   protected int m_numNonMissingTarget;
 
@@ -143,7 +172,7 @@ public class HotSpot
   protected int m_hits = 0;
 
   protected boolean m_debug;
-  
+
   /** Minimize, rather than maximize the target */
   protected boolean m_minimize;
 
@@ -152,7 +181,7 @@ public class HotSpot
 
   /** Rule lookup table */
   protected HashMap<HotSpotHashKey, String> m_ruleLookup;
-  
+
   /** True if a set of rules is to be output instead of a tree structure */
   protected boolean m_outputRules = false;
 
@@ -165,8 +194,9 @@ public class HotSpot
 
   /**
    * Returns a string describing this classifier
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
     return "HotSpot learns a set of rules (displayed in a tree-like structure) "
@@ -178,14 +208,17 @@ public class HotSpot
       + "on average than in the whole data set. For example, in a health "
       + "insurance scenario, find which health insurance groups are at "
       + "the highest risk (have the highest claim ratio), or, which groups "
-      + "have the highest average insurance payout.";
+      + "have the highest average insurance payout.  This algorithm "
+      + "is similar in spirit to the PRIM bump hunting algorithm described by Friedman "
+      + "and Fisher (1999).";
   }
-  
+
   /**
    * Returns default capabilities of HotSpot
-   *
-   * @return      the capabilities of HotSpot
+   * 
+   * @return the capabilities of HotSpot
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
     result.disableAll();
@@ -197,10 +230,9 @@ public class HotSpot
 
     // class
     result.enable(Capability.NO_CLASS);
-    //result.enable(Capability.NUMERIC_CLASS);
-   // result.enable(Capability.NOMINAL_CLASS);
+    // result.enable(Capability.NUMERIC_CLASS);
+    // result.enable(Capability.NOMINAL_CLASS);
 
-    
     return result;
   }
 
@@ -208,6 +240,11 @@ public class HotSpot
    * Hash key class for sets of attribute, value tests
    */
   protected class HotSpotHashKey implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 3962829200560373755L;
+
     // split values, one for each attribute (0 indicates att not used).
     // for nominal indexes, 1 is added so that 0 can indicate not used.
     protected double[] m_splitValues;
@@ -217,21 +254,22 @@ public class HotSpot
 
     protected boolean m_computed = false;
     protected int m_key;
-    
+
     public HotSpotHashKey(double[] splitValues, byte[] testTypes) {
       m_splitValues = splitValues.clone();
       m_testTypes = testTypes.clone();
     }
 
+    @Override
     public boolean equals(Object b) {
       if ((b == null) || !(b.getClass().equals(this.getClass()))) {
         return false;
       }
-      HotSpotHashKey comp = (HotSpotHashKey)b;
+      HotSpotHashKey comp = (HotSpotHashKey) b;
       boolean ok = true;
       for (int i = 0; i < m_splitValues.length; i++) {
-        if (m_splitValues[i] != comp.m_splitValues[i] ||
-            m_testTypes[i] != comp.m_testTypes[i]) {
+        if (m_splitValues[i] != comp.m_splitValues[i]
+          || m_testTypes[i] != comp.m_testTypes[i]) {
           ok = false;
           break;
         }
@@ -239,6 +277,7 @@ public class HotSpot
       return ok;
     }
 
+    @Override
     public int hashCode() {
 
       if (m_computed) {
@@ -259,15 +298,21 @@ public class HotSpot
 
   /**
    * Build the tree
-   *
+   * 
    * @param instances the training instances
    * @throws Exception if something goes wrong
    */
+  @Override
   public void buildAssociations(Instances instances) throws Exception {
-    
+
     // can associator handle the data?
     getCapabilities().testWithFail(instances);
-    
+
+    if (m_supportString == null || m_supportString.length() == 0) {
+      throw new Exception("No support value provided!");
+    }
+    m_support = Double.parseDouble(m_supportString);
+
     m_errorMessage = null;
     try {
       m_targetSI.setUpper(instances.numAttributes() - 1);
@@ -282,17 +327,18 @@ public class HotSpot
           break;
         }
       }
-      
+
       if (index == -1) {
-        throw new Exception("Can't find an attribute containing the string " + value);
+        throw new Exception("Can't find an attribute containing the string "
+          + value);
       }
-      
+
       m_target = index;
     }
-    
+
     Instances inst = new Instances(instances);
     inst.setClassIndex(m_target);
-//    inst.deleteWithMissingClass();
+    // inst.deleteWithMissingClass();
 
     if (inst.attribute(m_target).isNominal()) {
       m_targetIndexSI.setUpper(inst.attribute(m_target).numValues() - 1);
@@ -300,23 +346,6 @@ public class HotSpot
     } else {
       m_targetIndexSI.setUpper(1); // just to stop this SingleIndex from moaning
     }
-    
-    if (m_support <= 0) {
-      throw new Exception("Support must be greater than zero.");
-    }
-
-    m_numInstances = inst.numInstances();
-    if (m_support >= 1) {
-      m_supportCount = (int)m_support;
-      m_support = m_support / (double)m_numInstances;
-    }
-    m_supportCount = (int)Math.floor((m_support * m_numInstances) + 0.5d);
-    //    m_supportCount = (int)(m_support * m_numInstances);
-    if (m_supportCount < 1) {
-      m_supportCount = 1;
-    }
-
-    m_header = new Instances(inst, 0);
 
     if (inst.attribute(m_target).isNumeric()) {
       if (m_supportCount > m_numInstances) {
@@ -324,43 +353,71 @@ public class HotSpot
         return;
       }
       m_globalTarget = inst.meanOrMode(m_target);
-      m_numNonMissingTarget = inst.numInstances() - inst.attributeStats(m_target).missingCount;
+      m_numNonMissingTarget = inst.numInstances()
+        - inst.attributeStats(m_target).missingCount;
     } else {
       double[] probs = new double[inst.attributeStats(m_target).nominalCounts.length];
       for (int i = 0; i < probs.length; i++) {
-        probs[i] = (double)inst.attributeStats(m_target).nominalCounts[i];
+        probs[i] = inst.attributeStats(m_target).nominalCounts[i];
       }
-      m_globalSupport = (int)probs[m_targetIndex];
+      m_globalSupport = (int) probs[m_targetIndex];
       // check that global support is greater than min support
       if (m_globalSupport < m_supportCount) {
-        m_errorMessage = "Error: minimum support " + m_supportCount 
-          + " is too high. Target value " 
-          + m_header.attribute(m_target).value(m_targetIndex) + " has support " 
+        m_errorMessage = "Error: minimum support " + m_supportCount
+          + " is too high. Target value "
+          + m_header.attribute(m_target).value(m_targetIndex) + " has support "
           + m_globalSupport + ".";
       }
 
       // Utils.normalize(probs);
       for (int i = 0; i < probs.length; i++) {
-        probs[i] /= (double)inst.numInstances();
+        probs[i] /= inst.numInstances();
       }
       m_globalTarget = probs[m_targetIndex];
-      /*      System.err.println("Global target " + m_globalTarget); 
-              System.err.println("Min support count " + m_supportCount);  */
+      /*
+       * System.err.println("Global target " + m_globalTarget);
+       * System.err.println("Min support count " + m_supportCount);
+       */
     }
-    
+
+    if (m_support <= 0) {
+      throw new Exception("Support must be greater than zero.");
+    }
+
+    m_numInstances = inst.numInstances();
+    if (m_support >= 1) {
+      m_supportCount = (int) m_support;
+      if (inst.attribute(m_target).isNumeric()) {
+        m_support = m_support / m_numInstances;
+      } else {
+        // fraction of the global support in the case of a nominal target
+        m_support = m_support / m_globalSupport;
+      }
+    }
+    m_supportCount = inst.attribute(m_target).isNumeric() ? (int) Math
+      .floor((m_support * m_numInstances) + 0.5d) : (int) Math
+      .floor((m_support * m_globalSupport) + 0.5d);
+    // m_supportCount = (int)(m_support * m_numInstances);
+    if (m_supportCount < 1) {
+      m_supportCount = 1;
+    }
+
+    m_header = new Instances(inst, 0);
+
     m_ruleLookup = new HashMap<HotSpotHashKey, String>();
     double[] splitVals = new double[m_header.numAttributes()];
     byte[] tests = new byte[m_header.numAttributes()];
 
     m_head = new HotNode(inst, m_globalTarget, splitVals, tests, 0);
-    //    m_head = new HotNode(inst, m_globalTarget);
+    // m_head = new HotNode(inst, m_globalTarget);
   }
 
   /**
    * Return the tree as a string
-   *
+   * 
    * @return a String containing the tree
    */
+  @Override
   public String toString() {
     StringBuffer buff = new StringBuffer();
     buff.append("\nHot Spot\n========");
@@ -376,38 +433,43 @@ public class HotSpot
     buff.append("" + m_numInstances + " instances");
     buff.append("\nTarget attribute: " + m_header.attribute(m_target).name());
     if (m_header.attribute(m_target).isNominal()) {
-      buff.append("\nTarget value: " + m_header.attribute(m_target).value(m_targetIndex));
-      buff.append(" [value count in total population: " + m_globalSupport + " instances ("
-                  + Utils.doubleToString((m_globalTarget * 100.0), 2) + "%)]");
+      buff.append("\nTarget value: "
+        + m_header.attribute(m_target).value(m_targetIndex));
+      buff.append(" [value count in total population: " + m_globalSupport
+        + " instances (" + Utils.doubleToString((m_globalTarget * 100.0), 2)
+        + "%)]");
 
       buff.append("\nMinimum value count for segments: ");
     } else {
       buff.append("\nTarget average in total population: "
-          + Utils.doubleToString(m_globalTarget, 3));
+        + Utils.doubleToString(m_globalTarget, 3));
       buff.append("\nMinimum segment size: ");
     }
-    buff.append("" + m_supportCount + " instances (" 
-                + Utils.doubleToString((m_support * 100.0), 2) 
-                + "% of total population)");
+    buff
+      .append("" + m_supportCount + " instances ("
+        + Utils.doubleToString((m_support * 100.0), 2)
+        + "% of " + 
+        (m_header.attribute(m_target).isNominal() ? "target value " : "") + "total population)");
     buff.append("\nMaximum branching factor: " + m_maxBranchingFactor);
-    buff.append("\nMaximum rule length: " + 
-                (m_maxRuleLength < 0 ? "unbounded" : "" + m_maxRuleLength));
-    buff.append("\nMinimum improvement in target: " 
-                + Utils.doubleToString((m_minImprovement * 100.0), 2) + "%");
-    
+    buff.append("\nMaximum rule length: "
+      + (m_maxRuleLength < 0 ? "unbounded" : "" + m_maxRuleLength));
+    buff.append("\nMinimum improvement in target: "
+      + Utils.doubleToString((m_minImprovement * 100.0), 2) + "%");
+
     buff.append("\n\n");
     if (!m_outputRules) {
       buff.append(m_header.attribute(m_target).name());
       if (m_header.attribute(m_target).isNumeric()) {
         buff.append(" (" + Utils.doubleToString(m_globalTarget, 4) + ")");
       } else {
-        buff.append("=" + m_header.attribute(m_target).value(m_targetIndex) + " (");
-        buff.append("" + Utils.doubleToString((m_globalTarget * 100.0), 2) + "% [");
-        buff.append("" + m_globalSupport 
-            + "/" + m_numInstances + "])");
+        buff.append("=" + m_header.attribute(m_target).value(m_targetIndex)
+          + " (");
+        buff.append("" + Utils.doubleToString((m_globalTarget * 100.0), 2)
+          + "% [");
+        buff.append("" + m_globalSupport + "/" + m_numInstances + "])");
       }
     }
-    
+
     if (!m_outputRules) {
       m_head.dumpTree(0, buff);
     } else {
@@ -423,35 +485,36 @@ public class HotSpot
       }
     }
     buff.append("\n");
-      
+
     if (m_debug) {
       buff.append("\n=== Duplicate rule lookup hashtable stats ===\n");
-      buff.append("Insertions: "+ m_insertions);
-      buff.append("\nLookups : "+ m_lookups);
-      buff.append("\nHits: "+ m_hits);
+      buff.append("Insertions: " + m_insertions);
+      buff.append("\nLookups : " + m_lookups);
+      buff.append("\nHits: " + m_hits);
       buff.append("\n");
     }
-        
+
     return buff.toString();
   }
 
+  @Override
   public String graph() throws Exception {
     m_head.assignIDs(-1);
 
     StringBuffer text = new StringBuffer();
-    
+
     text.append("digraph HotSpot {\n");
     text.append("rankdir=LR;\n");
-    text.append("N0 [label=\"" 
-                + m_header.attribute(m_target).name());
-    
+    text.append("N0 [label=\"" + m_header.attribute(m_target).name());
+
     if (m_header.attribute(m_target).isNumeric()) {
       text.append("\\n(" + Utils.doubleToString(m_globalTarget, 4) + ")");
     } else {
-      text.append("=" + m_header.attribute(m_target).value(m_targetIndex) + "\\n(");
-      text.append("" + Utils.doubleToString((m_globalTarget * 100.0), 2) + "% [");
-      text.append("" + m_globalSupport 
-                  + "/" + m_numInstances + "])");
+      text.append("=" + m_header.attribute(m_target).value(m_targetIndex)
+        + "\\n(");
+      text.append("" + Utils.doubleToString((m_globalTarget * 100.0), 2)
+        + "% [");
+      text.append("" + m_globalSupport + "/" + m_numInstances + "])");
     }
     text.append("\" shape=plaintext]\n");
 
@@ -465,41 +528,49 @@ public class HotSpot
    * Inner class representing a node/leaf in the tree
    */
   protected class HotNode implements Serializable {
+
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = -4665984155566279901L;
+
     /**
      * An inner class holding data on a particular attribute value test
      */
-    protected class HotTestDetails 
-      implements Comparable<HotTestDetails>,
-                 Serializable {
+    protected class HotTestDetails implements Comparable<HotTestDetails>,
+      Serializable {
+
+      /**
+       * For serialization
+       */
+      private static final long serialVersionUID = -8403762320170624616L;
       public double m_merit;
-      public int m_support;
+      public int m_supportLevel;
       public int m_subsetSize;
       public int m_splitAttIndex;
       public double m_splitValue;
       public boolean m_lessThan;
 
-      public HotTestDetails(int attIndex, 
-                            double splitVal, 
-                            boolean lessThan,
-                            int support,
-                            int subsetSize,
-                            double merit) {
+      public HotTestDetails(int attIndex, double splitVal, boolean lessThan,
+        int support, int subsetSize, double merit) {
         m_merit = merit;
         m_splitAttIndex = attIndex;
         m_splitValue = splitVal;
         m_lessThan = lessThan;
-        m_support = support;
+        m_supportLevel = support;
         m_subsetSize = subsetSize;
       }
 
-      // reverse order for maximize as PriorityQueue has the least element at the head
+      // reverse order for maximize as PriorityQueue has the least element at
+      // the head
+      @Override
       public int compareTo(HotTestDetails comp) {
         int result = 0;
         if (m_minimize) {
           if (m_merit == comp.m_merit) {
             // larger support is better
-            if (m_support == comp.m_support) {
-            } else if (m_support > comp.m_support) {
+            if (m_supportLevel == comp.m_supportLevel) {
+            } else if (m_supportLevel > comp.m_supportLevel) {
               result = -1;
             } else {
               result = 1;
@@ -512,8 +583,8 @@ public class HotSpot
         } else {
           if (m_merit == comp.m_merit) {
             // larger support is better
-            if (m_support == comp.m_support) {
-            } else if (m_support > comp.m_support) {
+            if (m_supportLevel == comp.m_supportLevel) {
+            } else if (m_supportLevel > comp.m_supportLevel) {
               result = -1;
             } else {
               result = 1;
@@ -542,16 +613,16 @@ public class HotSpot
 
     /**
      * Constructor
-     *
+     * 
      * @param insts the instances at this node
      * @param targetValue the target value
-     * @param splitVals the values of attributes split on so far down this branch
-     * @param tests the types of tests corresponding to the split values (<=, =, >)
+     * @param splitVals the values of attributes split on so far down this
+     *          branch
+     * @param tests the types of tests corresponding to the split values (<=, =,
+     *          >)
      */
-    public HotNode(Instances insts, 
-                   double targetValue, 
-                   double[] splitVals,
-                   byte[] tests, int depth) {
+    public HotNode(Instances insts, double targetValue, double[] splitVals,
+      byte[] tests, int depth) {
 
       if (depth == m_maxRuleLength) {
         return;
@@ -585,17 +656,14 @@ public class HotSpot
             double[] newSplitVals = splitVals.clone();
             byte[] newTests = tests.clone();
             newSplitVals[temp.m_splitAttIndex] = temp.m_splitValue + 1;
-            newTests[temp.m_splitAttIndex] = 
-              (m_header.attribute(temp.m_splitAttIndex).isNominal())
-              ? (byte)2 // ==
-              : (temp.m_lessThan)
-              ? (byte)1
-              : (byte)3;
+            newTests[temp.m_splitAttIndex] = (m_header
+              .attribute(temp.m_splitAttIndex).isNominal()) ? (byte) 2 // ==
+              : (temp.m_lessThan) ? (byte) 1 : (byte) 3;
             HotSpotHashKey key = new HotSpotHashKey(newSplitVals, newTests);
             m_lookups++;
             if (!m_ruleLookup.containsKey(key)) {
               // insert it into the hash table
-              m_ruleLookup.put(key, "");            
+              m_ruleLookup.put(key, "");
               newCandidates.add(temp);
               keyList.add(key);
               m_insertions++;
@@ -607,9 +675,8 @@ public class HotSpot
           }
         }
 
-        m_children = new HotNode[(newCandidates.size() < m_maxBranchingFactor)
-                                 ? newCandidates.size()
-                                 : m_maxBranchingFactor];
+        m_children = new HotNode[(newCandidates.size() < m_maxBranchingFactor) ? newCandidates
+          .size() : m_maxBranchingFactor];
         // save the details of the tests at this node
         m_testDetails = new HotTestDetails[m_children.length];
         for (int i = 0; i < m_children.length; i++) {
@@ -625,8 +692,8 @@ public class HotSpot
         for (int i = 0; i < m_children.length; i++) {
           Instances subset = subset(insts, m_testDetails[i]);
           HotSpotHashKey tempKey = keyList.get(i);
-          m_children[i] = new HotNode(subset, m_testDetails[i].m_merit, 
-                                      tempKey.m_splitValues, tempKey.m_testTypes, depth + 1);
+          m_children[i] = new HotNode(subset, m_testDetails[i].m_merit,
+            tempKey.m_splitValues, tempKey.m_testTypes, depth + 1);
 
         }
       }
@@ -634,7 +701,7 @@ public class HotSpot
 
     /**
      * Create a subset of instances that correspond to the supplied test details
-     *
+     * 
      * @param insts the instances to create the subset from
      * @param test the details of the split
      */
@@ -666,14 +733,14 @@ public class HotSpot
 
     /**
      * Evaluate a numeric attribute for a potential split
-     *
+     * 
      * @param attIndex the index of the attribute
      * @param pq the priority queue of candidtate splits
      */
     private void evaluateNumeric(int attIndex, PriorityQueue<HotTestDetails> pq) {
       Instances tempInsts = m_insts;
       tempInsts.sort(attIndex);
-      
+
       // target sums/counts
       double targetLeft = 0;
       double targetRight = 0;
@@ -683,22 +750,20 @@ public class HotSpot
       for (int i = tempInsts.numInstances() - 1; i >= 0; i--) {
         if (!tempInsts.instance(i).isMissing(attIndex)) {
           if (!tempInsts.instance(i).isMissing(m_target)) {
-            targetRight += (tempInsts.attribute(m_target).isNumeric())
-            ? (tempInsts.instance(i).value(m_target))
-                : ((tempInsts.instance(i).value(m_target) == m_targetIndex)
-                    ? 1
-                    : 0);
+            targetRight += (tempInsts.attribute(m_target).isNumeric()) ? (tempInsts
+              .instance(i).value(m_target)) : ((tempInsts.instance(i).value(
+              m_target) == m_targetIndex) ? 1 : 0);
           }
         } else {
           numMissing++;
         }
       }
-      
+
       // are there still enough instances?
       if (tempInsts.numInstances() - numMissing <= m_supportCount) {
         return;
       }
-      
+
       double bestMerit = 0.0;
       double bestSplit = 0.0;
       double bestSupport = 0.0;
@@ -708,11 +773,14 @@ public class HotSpot
       // denominators
       double leftCount = 0;
       double rightCount = tempInsts.numInstances() - numMissing;
-            
-      /*      targetRight = (tempInsts.attribute(m_target).isNumeric())
-        ? tempInsts.attributeStats(m_target).numericStats.sum
-        : tempInsts.attributeStats(m_target).nominalCounts[m_targetIndex]; */
-      //      targetRight = tempInsts.attributeStats(attIndexnominalCounts[m_targetIndex];
+
+      /*
+       * targetRight = (tempInsts.attribute(m_target).isNumeric()) ?
+       * tempInsts.attributeStats(m_target).numericStats.sum :
+       * tempInsts.attributeStats(m_target).nominalCounts[m_targetIndex];
+       */
+      // targetRight =
+      // tempInsts.attributeStats(attIndexnominalCounts[m_targetIndex];
 
       // consider all splits
       for (int i = 0; i < tempInsts.numInstances() - numMissing; i++) {
@@ -723,17 +791,18 @@ public class HotSpot
             targetLeft += inst.value(m_target);
             targetRight -= inst.value(m_target);
           } else {
-            if ((int)inst.value(m_target) == m_targetIndex) {
+            if ((int) inst.value(m_target) == m_targetIndex) {
               targetLeft++;
               targetRight--;
-            }          
+            }
           }
           leftCount++;
           rightCount--;
 
           // move to the end of any ties
-          if (i < tempInsts.numInstances() - 1 &&
-              inst.value(attIndex) == tempInsts.instance(i + 1).value(attIndex)) {
+          if (i < tempInsts.numInstances() - 1
+            && inst.value(attIndex) == tempInsts.instance(i + 1)
+              .value(attIndex)) {
             continue;
           }
         }
@@ -741,17 +810,16 @@ public class HotSpot
         // evaluate split
         if (tempInsts.attribute(m_target).isNominal()) {
           if (targetLeft >= m_supportCount) {
-            double delta = (m_minimize) 
-              ? (bestMerit - (targetLeft / leftCount))
+            double delta = (m_minimize) ? (bestMerit - (targetLeft / leftCount))
               : ((targetLeft / leftCount) - bestMerit);
-            //            if (targetLeft / leftCount > bestMerit) {
+            // if (targetLeft / leftCount > bestMerit) {
             if (delta > 0) {
               bestMerit = targetLeft / leftCount;
               bestSplit = inst.value(attIndex);
               bestSupport = targetLeft;
               bestSubsetSize = leftCount;
               lessThan = true;
-              //            } else if (targetLeft / leftCount == bestMerit) {
+              // } else if (targetLeft / leftCount == bestMerit) {
             } else if (delta == 0) {
               // break ties in favour of higher support
               if (targetLeft > bestSupport) {
@@ -765,17 +833,16 @@ public class HotSpot
           }
 
           if (targetRight >= m_supportCount) {
-            double delta = (m_minimize) 
-              ? (bestMerit - (targetRight / rightCount))
+            double delta = (m_minimize) ? (bestMerit - (targetRight / rightCount))
               : ((targetRight / rightCount) - bestMerit);
-            //            if (targetRight / rightCount > bestMerit) {
+            // if (targetRight / rightCount > bestMerit) {
             if (delta > 0) {
               bestMerit = targetRight / rightCount;
               bestSplit = inst.value(attIndex);
               bestSupport = targetRight;
               bestSubsetSize = rightCount;
               lessThan = false;
-              //            } else if (targetRight / rightCount == bestMerit) {
+              // } else if (targetRight / rightCount == bestMerit) {
             } else if (delta == 0) {
               // break ties in favour of higher support
               if (targetRight > bestSupport) {
@@ -786,20 +853,19 @@ public class HotSpot
                 lessThan = false;
               }
             }
-          } 
+          }
         } else {
           if (leftCount >= m_supportCount) {
-            double delta = (m_minimize) 
-              ? (bestMerit - (targetLeft / leftCount))
+            double delta = (m_minimize) ? (bestMerit - (targetLeft / leftCount))
               : ((targetLeft / leftCount) - bestMerit);
-            //            if (targetLeft / leftCount > bestMerit) {
+            // if (targetLeft / leftCount > bestMerit) {
             if (delta > 0) {
               bestMerit = targetLeft / leftCount;
               bestSplit = inst.value(attIndex);
               bestSupport = leftCount;
               bestSubsetSize = leftCount;
               lessThan = true;
-              //            } else if (targetLeft / leftCount == bestMerit) {
+              // } else if (targetLeft / leftCount == bestMerit) {
             } else if (delta == 0) {
               // break ties in favour of higher support
               if (leftCount > bestSupport) {
@@ -813,17 +879,16 @@ public class HotSpot
           }
 
           if (rightCount >= m_supportCount) {
-            double delta = (m_minimize) 
-              ? (bestMerit - (targetRight / rightCount))
+            double delta = (m_minimize) ? (bestMerit - (targetRight / rightCount))
               : ((targetRight / rightCount) - bestMerit);
-            //            if (targetRight / rightCount > bestMerit) {
+            // if (targetRight / rightCount > bestMerit) {
             if (delta > 0) {
               bestMerit = targetRight / rightCount;
               bestSplit = inst.value(attIndex);
               bestSupport = rightCount;
               bestSubsetSize = rightCount;
               lessThan = false;
-              //            } else if (targetRight / rightCount == bestMerit) {
+              // } else if (targetRight / rightCount == bestMerit) {
             } else if (delta == 0) {
               // break ties in favour of higher support
               if (rightCount > bestSupport) {
@@ -834,39 +899,39 @@ public class HotSpot
                 lessThan = false;
               }
             }
-          }          
+          }
         }
       }
 
-      double delta = (m_minimize)
-        ? m_targetValue - bestMerit
-        : bestMerit - m_targetValue;
+      double delta = (m_minimize) ? m_targetValue - bestMerit : bestMerit
+        - m_targetValue;
 
       // Have we found a candidate split?
       if (bestSupport > 0 && (delta / m_targetValue >= m_minImprovement)) {
-        /*        System.err.println("Evaluating " + tempInsts.attribute(attIndex).name());
-        System.err.println("Merit : " + bestMerit);
-        System.err.println("Support : " + bestSupport); */
-        //        double suppFraction = bestSupport / m_numInstances;
+        /*
+         * System.err.println("Evaluating " +
+         * tempInsts.attribute(attIndex).name()); System.err.println("Merit : "
+         * + bestMerit); System.err.println("Support : " + bestSupport);
+         */
+        // double suppFraction = bestSupport / m_numInstances;
 
-        HotTestDetails newD = new HotTestDetails(attIndex, bestSplit, 
-                                                 lessThan, (int)bestSupport, 
-                                                 (int)bestSubsetSize, 
-                                                 bestMerit);
+        HotTestDetails newD = new HotTestDetails(attIndex, bestSplit, lessThan,
+          (int) bestSupport, (int) bestSubsetSize, bestMerit);
         pq.add(newD);
       }
     }
 
     /**
      * Evaluate a nominal attribute for a potential split
-     *
+     * 
      * @param attIndex the index of the attribute
      * @param pq the priority queue of candidtate splits
      */
     private void evaluateNominal(int attIndex, PriorityQueue<HotTestDetails> pq) {
       int[] counts = m_insts.attributeStats(attIndex).nominalCounts;
       boolean ok = false;
-      // only consider attribute values that result in subsets that meet/exceed min support
+      // only consider attribute values that result in subsets that meet/exceed
+      // min support
       int offset = (getTreatZeroAsMissing() ? 1 : 0);
       for (int i = 0 + offset; i < m_insts.attribute(attIndex).numValues(); i++) {
         if (counts[i] >= m_supportCount) {
@@ -875,50 +940,47 @@ public class HotSpot
         }
       }
       if (ok) {
-        double[] subsetMerit = 
-          new double[m_insts.attribute(attIndex).numValues()];
+        double[] subsetMerit = new double[m_insts.attribute(attIndex)
+          .numValues()];
 
         for (int i = 0; i < m_insts.numInstances(); i++) {
           Instance temp = m_insts.instance(i);
-          boolean missingAtt = (temp.isMissing(attIndex) || 
-                                (getTreatZeroAsMissing() ? (int)temp.value(attIndex) == 0 : false));
-          //          if (!temp.isMissing(attIndex) && !temp.isMissing(m_target)) {
+          boolean missingAtt = (temp.isMissing(attIndex) || (getTreatZeroAsMissing() ? (int) temp
+            .value(attIndex) == 0 : false));
+          // if (!temp.isMissing(attIndex) && !temp.isMissing(m_target)) {
           if (!missingAtt && !temp.isMissing(m_target)) {
-            int attVal = (int)temp.value(attIndex);
+            int attVal = (int) temp.value(attIndex);
             if (m_insts.attribute(m_target).isNumeric()) {
               subsetMerit[attVal] += temp.value(m_target);
             } else {
-              subsetMerit[attVal] += 
-                ((int)temp.value(m_target) == m_targetIndex)
-                ? 1.0
+              subsetMerit[attVal] += ((int) temp.value(m_target) == m_targetIndex) ? 1.0
                 : 0;
             }
           }
         }
-        
-        // add to queue if it meets min support and exceeds the merit for the full set
+
+        // add to queue if it meets min support and exceeds the merit for the
+        // full set
         for (int i = 0; i < m_insts.attribute(attIndex).numValues(); i++) {
-          // does the subset based on this value have enough instances, and, furthermore,
-          // does the target value (nominal only) occur enough times to exceed min support
-          if (counts[i] >= m_supportCount &&  
-              ((m_insts.attribute(m_target).isNominal())
-              ? (subsetMerit[i] >= m_supportCount) // nominal only test
-               : true)) { 
-            double merit = subsetMerit[i] / counts[i]; //subsetMerit[i][1];
-            double delta = (m_minimize)
-              ? m_targetValue - merit
-              : merit - m_targetValue;
+          // does the subset based on this value have enough instances, and,
+          // furthermore,
+          // does the target value (nominal only) occur enough times to exceed
+          // min support
+          if (counts[i] >= m_supportCount
+            && ((m_insts.attribute(m_target).isNominal()) ? (subsetMerit[i] >= m_supportCount) // nominal
+                                                                                               // only
+                                                                                               // test
+              : true)) {
+            double merit = subsetMerit[i] / counts[i]; // subsetMerit[i][1];
+            double delta = (m_minimize) ? m_targetValue - merit : merit
+              - m_targetValue;
 
             if (delta / m_targetValue >= m_minImprovement) {
-              double support =
-                (m_insts.attribute(m_target).isNominal())
-                ? subsetMerit[i]
+              double support = (m_insts.attribute(m_target).isNominal()) ? subsetMerit[i]
                 : counts[i];
 
-              HotTestDetails newD = new HotTestDetails(attIndex, (double)i, 
-                                                       false, (int)support,
-                                                       counts[i], 
-                                                       merit);
+              HotTestDetails newD = new HotTestDetails(attIndex, i, false,
+                (int) support, counts[i], merit);
               pq.add(newD);
             }
           }
@@ -930,8 +992,8 @@ public class HotSpot
       int currentLastID = lastID + 1;
       m_id = currentLastID;
       if (m_children != null) {
-        for (int i = 0; i < m_children.length; i++) {
-          currentLastID = m_children[i].assignIDs(currentLastID);
+        for (HotNode element : m_children) {
+          currentLastID = element.assignIDs(currentLastID);
         }
       }
       return currentLastID;
@@ -947,18 +1009,20 @@ public class HotSpot
         }
         buff.append(Utils.doubleToString(m_testDetails[i].m_splitValue, 4));
       } else {
-        buff.append(" = " + m_header.
-                    attribute(m_testDetails[i].m_splitAttIndex).
-                    value((int)m_testDetails[i].m_splitValue));
+        buff.append(" = "
+          + m_header.attribute(m_testDetails[i].m_splitAttIndex).value(
+            (int) m_testDetails[i].m_splitValue));
       }
 
       if (m_header.attribute(m_target).isNumeric()) {
-        buff.append(spacer + "(" + Utils.doubleToString(m_testDetails[i].m_merit, 4) + " ["
-                    + m_testDetails[i].m_support + "])");
+        buff.append(spacer + "("
+          + Utils.doubleToString(m_testDetails[i].m_merit, 4) + " ["
+          + m_testDetails[i].m_supportLevel + "])");
       } else {
-        buff.append(spacer + "(" + Utils.doubleToString((m_testDetails[i].m_merit * 100.0), 2) + "% ["
-                    + m_testDetails[i].m_support 
-                    + "/" + m_testDetails[i].m_subsetSize + "])");
+        buff.append(spacer + "("
+          + Utils.doubleToString((m_testDetails[i].m_merit * 100.0), 2) + "% ["
+          + m_testDetails[i].m_supportLevel + "/"
+          + m_testDetails[i].m_subsetSize + "])");
       }
     }
 
@@ -983,7 +1047,7 @@ public class HotSpot
      */
     protected void dumpTree(int depth, StringBuffer buff) {
       if (m_children == null) {
-        //        buff.append("\n");
+        // buff.append("\n");
       } else {
         for (int i = 0; i < m_children.length; i++) {
           buff.append("\n  ");
@@ -996,54 +1060,58 @@ public class HotSpot
         }
       }
     }
-    
-    private void addTestToRule(List<Item> currentPremise, int i) throws Exception {
+
+    private void addTestToRule(List<Item> currentPremise, int i)
+      throws Exception {
       if (m_header.attribute(m_testDetails[i].m_splitAttIndex).isNumeric()) {
-        NumericItem.Comparison comp = (m_testDetails[i].m_lessThan) 
-          ? NumericItem.Comparison.LESS_THAN_OR_EQUAL_TO
+        NumericItem.Comparison comp = (m_testDetails[i].m_lessThan) ? NumericItem.Comparison.LESS_THAN_OR_EQUAL_TO
           : NumericItem.Comparison.GREATER_THAN;
-        
-        NumericItem newItem = 
-          new NumericItem(m_header.attribute(m_testDetails[i].m_splitAttIndex),
-              m_testDetails[i].m_splitValue, comp);
-        
+
+        NumericItem newItem = new NumericItem(
+          m_header.attribute(m_testDetails[i].m_splitAttIndex),
+          m_testDetails[i].m_splitValue, comp);
+
         currentPremise.add(newItem);
       } else {
-        NominalItem newItem = 
-          new NominalItem(m_header.attribute(m_testDetails[i].m_splitAttIndex), 
-              (int)m_testDetails[i].m_splitValue);
+        NominalItem newItem = new NominalItem(
+          m_header.attribute(m_testDetails[i].m_splitAttIndex),
+          (int) m_testDetails[i].m_splitValue);
         currentPremise.add(newItem);
       }
     }
-    
-    private class HotSpotNumericTargetRule extends AssociationRule implements Serializable {
-      
+
+    private class HotSpotNumericTargetRule extends AssociationRule implements
+      Serializable {
+
       private static final long serialVersionUID = -1028053590504776204L;
-      
+
       Collection<Item> m_premise;
       Collection<Item> m_consequence;
       boolean m_numericTarget = true;
       int m_totalSupport;
-      int m_consequenceSupport;      
+      int m_consequenceSupport;
       int m_totalTransactions;
-      
+
       double m_averageTarget;
-      
+
       DefaultAssociationRule m_delegateForDiscreteTarget;
-      
-      public HotSpotNumericTargetRule(Collection<Item> premise, 
-          Collection<Item> consequence, int totalSupport, 
-          int consequenceSupport, int totalTransactions, double averageTarget) {
-        m_premise = premise; m_consequence = consequence;
-        m_totalSupport = totalSupport; m_consequenceSupport = consequenceSupport;
-        m_totalTransactions = totalTransactions; m_averageTarget = averageTarget;
-      }
-      
+
       public HotSpotNumericTargetRule(Collection<Item> premise,
-          Collection<Item> consequence, 
-          int premiseSupport, int consequenceSupport, int totalSupport,
-          int totalTransactions, double averageTarget) {
-        
+        Collection<Item> consequence, int totalSupport, int consequenceSupport,
+        int totalTransactions, double averageTarget) {
+        m_premise = premise;
+        m_consequence = consequence;
+        m_totalSupport = totalSupport;
+        m_consequenceSupport = consequenceSupport;
+        m_totalTransactions = totalTransactions;
+        m_averageTarget = averageTarget;
+      }
+
+      public HotSpotNumericTargetRule(Collection<Item> premise,
+        Collection<Item> consequence, int premiseSupport,
+        int consequenceSupport, int totalSupport, int totalTransactions,
+        double averageTarget) {
+
         m_numericTarget = false;
         m_premise = premise;
         m_consequence = consequence;
@@ -1053,30 +1121,35 @@ public class HotSpot
           m_totalTransactions = totalTransactions;
           m_averageTarget = averageTarget;
         } else {
-          m_delegateForDiscreteTarget = 
-            new DefaultAssociationRule(premise, consequence,
-                DefaultAssociationRule.METRIC_TYPE.CONFIDENCE,
-                premiseSupport, consequenceSupport, totalSupport,
-                totalTransactions);
+          m_delegateForDiscreteTarget = new DefaultAssociationRule(premise,
+            consequence, DefaultAssociationRule.METRIC_TYPE.CONFIDENCE,
+            premiseSupport, consequenceSupport, totalSupport, totalTransactions);
         }
       }
-            
-      public Collection<Item> getPremise() { return m_premise; }
-      
-      public Collection<Item> getConsequence() { return m_consequence; }
-      
-      public String getPrimaryMetricName() { 
-        return (m_numericTarget) 
-        ? "AverageTarget"
-            : m_delegateForDiscreteTarget.getPrimaryMetricName();
+
+      @Override
+      public Collection<Item> getPremise() {
+        return m_premise;
       }
 
-      public double getPrimaryMetricValue() { 
-        return (m_numericTarget) 
-        ? m_averageTarget
-            : m_delegateForDiscreteTarget.getPrimaryMetricValue();
+      @Override
+      public Collection<Item> getConsequence() {
+        return m_consequence;
       }
-      
+
+      @Override
+      public String getPrimaryMetricName() {
+        return (m_numericTarget) ? "AverageTarget"
+          : m_delegateForDiscreteTarget.getPrimaryMetricName();
+      }
+
+      @Override
+      public double getPrimaryMetricValue() {
+        return (m_numericTarget) ? m_averageTarget
+          : m_delegateForDiscreteTarget.getPrimaryMetricValue();
+      }
+
+      @Override
       public double getNamedMetricValue(String metricName) throws Exception {
         if (m_numericTarget) {
           if (metricName.equals("AverageTarget")) {
@@ -1090,77 +1163,80 @@ public class HotSpot
           return m_delegateForDiscreteTarget.getNamedMetricValue(metricName);
         }
       }
-      
-      public int getNumberOfMetricsForRule() { 
-        return DefaultAssociationRule.METRIC_TYPE.values().length + 1; 
+
+      @Override
+      public int getNumberOfMetricsForRule() {
+        return DefaultAssociationRule.METRIC_TYPE.values().length + 1;
       }
-      
+
+      @Override
       public String[] getMetricNamesForRule() {
         String[] result = new String[getNumberOfMetricsForRule()];
         result[0] = "AverageTarget";
         for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
-          result[i + 1] = DefaultAssociationRule.TAGS_SELECTION[i].getReadable();
+          result[i + 1] = DefaultAssociationRule.TAGS_SELECTION[i]
+            .getReadable();
         }
         return result;
       }
-      
+
+      @Override
       public double[] getMetricValuesForRule() throws Exception {
         double[] result = new double[getNumberOfMetricsForRule()];
-        result[0] = (m_numericTarget) 
-        ? getPrimaryMetricValue() 
-        : Utils.missingValue();
-        
+        result[0] = (m_numericTarget) ? getPrimaryMetricValue() : Utils
+          .missingValue();
+
         for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
           if (m_numericTarget) {
             result[i + 1] = Utils.missingValue();
           } else {
-            result[i + 1] = 
-              m_delegateForDiscreteTarget.
-                getNamedMetricValue(DefaultAssociationRule.
-                    TAGS_SELECTION[i].getReadable());
+            result[i + 1] = m_delegateForDiscreteTarget
+              .getNamedMetricValue(DefaultAssociationRule.TAGS_SELECTION[i]
+                .getReadable());
           }
         }
-        
+
         return result;
       }
-      
-      public int getPremiseSupport() { 
-        return (m_numericTarget)
-        ? m_totalSupport
-        : m_delegateForDiscreteTarget.getPremiseSupport();
+
+      @Override
+      public int getPremiseSupport() {
+        return (m_numericTarget) ? m_totalSupport : m_delegateForDiscreteTarget
+          .getPremiseSupport();
       }
-      
-      public int getConsequenceSupport() { 
-        return (m_numericTarget)
-        ? m_consequenceSupport
-        : m_delegateForDiscreteTarget.getConsequenceSupport();
+
+      @Override
+      public int getConsequenceSupport() {
+        return (m_numericTarget) ? m_consequenceSupport
+          : m_delegateForDiscreteTarget.getConsequenceSupport();
       }
-      
-      public int getTotalSupport() { 
-        return (m_numericTarget) 
-        ? m_totalSupport
-        : m_delegateForDiscreteTarget.getTotalSupport();
+
+      @Override
+      public int getTotalSupport() {
+        return (m_numericTarget) ? m_totalSupport : m_delegateForDiscreteTarget
+          .getTotalSupport();
       }
-      
-      public int getTotalTransactions() { 
-        return (m_numericTarget) 
-        ? m_totalTransactions
-        : m_delegateForDiscreteTarget.getTotalTransactions();
+
+      @Override
+      public int getTotalTransactions() {
+        return (m_numericTarget) ? m_totalTransactions
+          : m_delegateForDiscreteTarget.getTotalTransactions();
       }
-      
+
+      @Override
       public String toString() {
         StringBuffer result = new StringBuffer();
-        
+
         if (m_numericTarget) {
-        result.append(m_premise.toString()
-            + " ==> " + m_consequence.toString() + ": " + m_totalSupport 
-            + "   ");
+          result.append(m_premise.toString() + " ==> "
+            + m_consequence.toString() + ": " + m_totalSupport + "   ");
         } else {
           result.append(m_delegateForDiscreteTarget.toString());
         }
         return result.toString();
       }
-      
+
+      @Override
       public int compareTo(AssociationRule other) {
         int result = super.compareTo(other);
         if (m_minimize) {
@@ -1169,48 +1245,46 @@ public class HotSpot
         return result;
       }
     }
-    
-    protected void getRules(List<AssociationRule> rules, ArrayList<Item> currentPremise) 
-      throws Exception {
+
+    protected void getRules(List<AssociationRule> rules,
+      ArrayList<Item> currentPremise) throws Exception {
       if (m_children == null) {
 
       } else {
         for (int i = 0; i < m_children.length; i++) {
 
           // first clone the current rule
+          @SuppressWarnings("unchecked")
           ArrayList<Item> newPremise = (ArrayList<Item>) currentPremise.clone();
 
           // add the child details
           addTestToRule(newPremise, i);
 
           if (m_header.attribute(m_target).isNominal()) {
-            NominalItem consequenceItem = 
-              new NominalItem(m_header.attribute(m_target), m_targetIndex);
+            NominalItem consequenceItem = new NominalItem(
+              m_header.attribute(m_target), m_targetIndex);
             List<Item> consequence = new ArrayList<Item>();
             consequence.add(consequenceItem);
 
-            HotSpotNumericTargetRule newRule = 
-              new HotSpotNumericTargetRule(newPremise, consequence, 
-                  m_testDetails[i].m_subsetSize,
-                  m_globalSupport,
-                  m_testDetails[i].m_support,
-                  m_numInstances, Utils.missingValue());
-            
+            HotSpotNumericTargetRule newRule = new HotSpotNumericTargetRule(
+              newPremise, consequence, m_testDetails[i].m_subsetSize,
+              m_globalSupport, m_testDetails[i].m_supportLevel, m_numInstances,
+              Utils.missingValue());
+
             // add the rule to the list
             rules.add(newRule);
 
           } else {
-            NumericItem consequenceItem = 
-              new NumericItem(m_header.attribute(m_target), 
-                  m_testDetails[i].m_merit, NumericItem.Comparison.NONE);
+            NumericItem consequenceItem = new NumericItem(
+              m_header.attribute(m_target), m_testDetails[i].m_merit,
+              NumericItem.Comparison.NONE);
             List<Item> consequence = new ArrayList<Item>();
             consequence.add(consequenceItem);
-            
-            HotSpotNumericTargetRule newRule = 
-              new HotSpotNumericTargetRule(newPremise, consequence,
-                  m_testDetails[i].m_support, m_numNonMissingTarget, m_numInstances, 
-                  m_testDetails[i].m_merit);
-            
+
+            HotSpotNumericTargetRule newRule = new HotSpotNumericTargetRule(
+              newPremise, consequence, m_testDetails[i].m_supportLevel,
+              m_numNonMissingTarget, m_numInstances, m_testDetails[i].m_merit);
+
             rules.add(newRule);
           }
 
@@ -1223,17 +1297,18 @@ public class HotSpot
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String targetTipText() {
-    return "The target attribute of interest (\"first\", \"last\"," +
-    		"<index> or <attribute name> are valid values).";
+    return "The target attribute of interest (\"first\", \"last\","
+      + "<index> or <attribute name> are valid values).";
   }
 
   /**
    * Set the target index
-   *
+   * 
    * @param target the target index as a string (1-based)
    */
   public void setTarget(String target) {
@@ -1242,7 +1317,7 @@ public class HotSpot
 
   /**
    * Get the target index as a string
-   *
+   * 
    * @return the target index (1-based)
    */
   public String getTarget() {
@@ -1251,8 +1326,9 @@ public class HotSpot
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String targetIndexTipText() {
     return "The value of the target (nominal attributes only) of interest.";
@@ -1260,7 +1336,7 @@ public class HotSpot
 
   /**
    * For a nominal target, set the index of the value of interest (1-based)
-   *
+   * 
    * @param index the index of the nominal value of interest
    */
   public void setTargetIndex(String index) {
@@ -1269,7 +1345,7 @@ public class HotSpot
 
   /**
    * For a nominal target, get the index of the value of interest (1-based)
-   *
+   * 
    * @return the index of the nominal value of interest
    */
   public String getTargetIndex() {
@@ -1278,8 +1354,9 @@ public class HotSpot
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minimizeTargetTipText() {
     return "Minimize rather than maximize the target.";
@@ -1287,7 +1364,7 @@ public class HotSpot
 
   /**
    * Set whether to minimize the target rather than maximize
-   *
+   * 
    * @param m true if target is to be minimized
    */
   public void setMinimizeTarget(boolean m) {
@@ -1296,7 +1373,7 @@ public class HotSpot
 
   /**
    * Get whether to minimize the target rather than maximize
-   *
+   * 
    * @return true if target is to be minimized
    */
   public boolean getMinimizeTarget() {
@@ -1305,8 +1382,9 @@ public class HotSpot
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String supportTipText() {
     return "The minimum support. Values between 0 and 1 are interpreted "
@@ -1316,26 +1394,27 @@ public class HotSpot
 
   /**
    * Get the minimum support
-   *
+   * 
    * @return the minimum support
    */
-  public double getSupport() {
-    return m_support;
+  public String getSupport() {
+    return m_supportString;
   }
 
   /**
    * Set the minimum support
-   *
+   * 
    * @param s the minimum support
    */
-  public void setSupport(double s) {
-    m_support = s;
+  public void setSupport(String s) {
+    m_supportString = s;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String maxBranchingFactorTipText() {
     return "Maximum branching factor. The maximum number of children "
@@ -1344,7 +1423,7 @@ public class HotSpot
 
   /**
    * Set the maximum branching factor
-   *
+   * 
    * @param b the maximum branching factor
    */
   public void setMaxBranchingFactor(int b) {
@@ -1353,7 +1432,7 @@ public class HotSpot
 
   /**
    * Get the maximum branching factor
-   *
+   * 
    * @return the maximum branching factor
    */
   public int getMaxBranchingFactor() {
@@ -1362,17 +1441,18 @@ public class HotSpot
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String maxRuleLengthTipText() {
     return "Bound the length of a rule/path in the tree. "
-      +"-1 means unbounded";
+      + "-1 means unbounded";
   }
 
   /**
    * Set the maximum rule length
-   *
+   * 
    * @param l the maximum rule length
    */
   public void setMaxRuleLength(int l) {
@@ -1381,7 +1461,7 @@ public class HotSpot
 
   /**
    * Get the maximum rule length
-   *
+   * 
    * @return the maximum rule length
    */
   public int getMaxRuleLength() {
@@ -1390,8 +1470,9 @@ public class HotSpot
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String treatZeroAsMissingTipText() {
     return "Treat zero (first value) for nominal attributes "
@@ -1401,9 +1482,9 @@ public class HotSpot
 
   /**
    * Set whether to treat zero as missing.
-   *
-   * @param t true if zero (first value) for nominal
-   * attributes is to be treated like missing value.
+   * 
+   * @param t true if zero (first value) for nominal attributes is to be treated
+   *          like missing value.
    */
   public void setTreatZeroAsMissing(boolean t) {
     m_treatZeroAsMissing = t;
@@ -1411,9 +1492,9 @@ public class HotSpot
 
   /**
    * Get whether to treat zero as missing.
-   *
-   * @return true if zero (first value) for nominal
-   * attributes is to be treated like missing value.
+   * 
+   * @return true if zero (first value) for nominal attributes is to be treated
+   *         like missing value.
    */
   public boolean getTreatZeroAsMissing() {
     return m_treatZeroAsMissing;
@@ -1421,8 +1502,9 @@ public class HotSpot
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minImprovementTipText() {
     return "Minimum improvement in target value in order to "
@@ -1431,7 +1513,7 @@ public class HotSpot
 
   /**
    * Set the minimum improvement in the target necessary to add a test
-   *
+   * 
    * @param i the minimum improvement
    */
   public void setMinImprovement(double i) {
@@ -1440,7 +1522,7 @@ public class HotSpot
 
   /**
    * Get the minimum improvement in the target necessary to add a test
-   *
+   * 
    * @return the minimum improvement
    */
   public double getMinImprovement() {
@@ -1449,8 +1531,9 @@ public class HotSpot
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String debugTipText() {
     return "Output debugging info (duplicate rule lookup hash table stats).";
@@ -1458,7 +1541,7 @@ public class HotSpot
 
   /**
    * Set whether debugging info is output
-   *
+   * 
    * @param d true to output debugging info
    */
   public void setDebug(boolean d) {
@@ -1467,25 +1550,26 @@ public class HotSpot
 
   /**
    * Get whether debugging info is output
-   *
+   * 
    * @return true if outputing debugging info
    */
   public boolean getDebug() {
     return m_debug;
   }
-  
+
   public void setOutputRules(boolean r) {
     m_outputRules = r;
   }
-  
+
   public boolean getOutputRules() {
     return m_outputRules;
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String outputRulesTipText() {
     return "Output a rule set instead of a tree";
@@ -1493,43 +1577,44 @@ public class HotSpot
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector();
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>();
     newVector.addElement(new Option("\tThe target index. (default = last)",
-                                    "c", 1,
-                                    "-c <num | first | last | attribute name>"));
-    newVector.addElement(new Option("\tThe target value (nominal target only, default = first)",
-                                    "V", 1,
-                                    "-V <num | first | last>"));
-    newVector.addElement(new Option("\tMinimize rather than maximize.", "L", 0, "-L"));
-    newVector.addElement(new Option("\tMinimum value count (nominal target)/segment size "
-                                    + "(numeric target)."
-                                    +"\n\tValues between 0 and 1 are "
-                                    + "\n\tinterpreted as a percentage of "
-                                    + "\n\tthe total population; values > 1 are "
-                                    + "\n\tinterpreted as an absolute number of "
-                                    +"\n\tinstances (default = 0.3)",
-                                    "S", 1,
-                                    "-S <num>"));
+      "c", 1, "-c <num | first | last | attribute name>"));
+    newVector.addElement(new Option(
+      "\tThe target value (nominal target only, default = first)", "V", 1,
+      "-V <num | first | last>"));
+    newVector.addElement(new Option("\tMinimize rather than maximize.", "L", 0,
+      "-L"));
+    newVector.addElement(new Option(
+      "\tMinimum value count (nominal target)/segment size "
+        + "(numeric target)." + "\n\tValues between 0 and 1 are "
+        + "\n\tinterpreted as a percentage of "
+        + "\n\tthe total population (numeric) or total target value\n\t"
+        + "population size (nominal); values > 1 are "
+        + "\n\tinterpreted as an absolute number of "
+        + "\n\tinstances (default = 0.3)", "S", 1, "-S <num>"));
     newVector.addElement(new Option("\tMaximum branching factor (default = 2)",
-                                    "M", 1,
-                                    "-M <num>"));
-    newVector.addElement(new Option("\tMaximum rule length (default = -1, i.e. no maximum)",
-                                    "length", 1,
-                                    "-length <num>"));
-    newVector.addElement(new Option("\tMinimum improvement in target value in order "
-                                    + "\n\tto add a new branch/test (default = 0.01 (1%))",
-                                    "I", 1,
-                                    "-I <num>"));
-    newVector.addElement(new Option("\tTreat zero (first value) as missing for nominal attributes",
-        "Z", 0, "-Z"));
-    newVector.addElement(new Option("\tOutput a set of rules instead of a tree structure",
-        "R", 0, "-R"));
-    newVector.addElement(new Option("\tOutput debugging info (duplicate rule lookup "
-                                    + "\n\thash table stats)", "D", 0, "-D"));
+      "M", 1, "-M <num>"));
+    newVector.addElement(new Option(
+      "\tMaximum rule length (default = -1, i.e. no maximum)", "length", 1,
+      "-length <num>"));
+    newVector.addElement(new Option(
+      "\tMinimum improvement in target value in order "
+        + "\n\tto add a new branch/test (default = 0.01 (1%))", "I", 1,
+      "-I <num>"));
+    newVector.addElement(new Option(
+      "\tTreat zero (first value) as missing for nominal attributes", "Z", 0,
+      "-Z"));
+    newVector.addElement(new Option(
+      "\tOutput a set of rules instead of a tree structure", "R", 0, "-R"));
+    newVector.addElement(new Option(
+      "\tOutput debugging info (duplicate rule lookup "
+        + "\n\thash table stats)", "D", 0, "-D"));
     return newVector.elements();
   }
 
@@ -1538,6 +1623,7 @@ public class HotSpot
    */
   public void resetOptions() {
     m_support = 0.33;
+    m_supportString = "0.33";
     m_minImprovement = 0.01; // 1%
     m_maxBranchingFactor = 2;
     m_maxRuleLength = -1;
@@ -1550,44 +1636,61 @@ public class HotSpot
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -c &lt;num | first | last&gt;
-   *  The target index. (default = last)</pre>
+   <!-- options-start --> 
+   * Valid options are:
+   * <p/>
    * 
-   * <pre> -V &lt;num | first | last&gt;
-   *  The target value (nominal target only, default = first)</pre>
+   * <pre>
+   * -c &lt;num | first | last&gt;
+   *  The target index. (default = last)
+   * </pre>
    * 
-   * <pre> -L
-   *  Minimize rather than maximize.</pre>
+   * <pre>
+   * -V &lt;num | first | last&gt;
+   *  The target value (nominal target only, default = first)
+   * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -L
+   *  Minimize rather than maximize.
+   * </pre>
+   * 
+   * <pre>
+   * -S &lt;num&gt;
    *  Minimum value count (nominal target)/segment size (numeric target).
    *  Values between 0 and 1 are 
    *  interpreted as a percentage of 
    *  the total population; values &gt; 1 are 
    *  interpreted as an absolute number of 
-   *  instances (default = 0.3)</pre>
+   *  instances (default = 0.3)
+   * </pre>
    * 
-   * <pre> -M &lt;num&gt;
-   *  Maximum branching factor (default = 2)</pre>
+   * <pre>
+   * -M &lt;num&gt;
+   *  Maximum branching factor (default = 2)
+   * </pre>
    * 
-   * <pre> -I &lt;num&gt;
+   * <pre>
+   * -I &lt;num&gt;
    *  Minimum improvement in target value in order 
-   *  to add a new branch/test (default = 0.01 (1%))</pre>
+   *  to add a new branch/test (default = 0.01 (1%))
+   * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  Output debugging info (duplicate rule lookup 
-   *  hash table stats)</pre>
+   *  hash table stats)
+   * </pre>
    * 
    <!-- options-end -->
-   *
+   * 
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     resetOptions();
 
@@ -1595,7 +1698,7 @@ public class HotSpot
     if (tempString.length() != 0) {
       setTarget(tempString);
     }
-    
+
     tempString = Utils.getOption('V', options);
     if (tempString.length() != 0) {
       setTargetIndex(tempString);
@@ -1605,7 +1708,7 @@ public class HotSpot
 
     tempString = Utils.getOption('S', options);
     if (tempString.length() != 0) {
-      setSupport(Double.parseDouble(tempString));
+      setSupport(tempString);
     }
 
     tempString = Utils.getOption('M', options);
@@ -1630,26 +1733,33 @@ public class HotSpot
 
   /**
    * Gets the current settings of HotSpot.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
     String[] options = new String[16];
     int current = 0;
-    
-    options[current++] = "-c"; options[current++] = getTarget();
-    options[current++] = "-V"; options[current++] = getTargetIndex();
+
+    options[current++] = "-c";
+    options[current++] = getTarget();
+    options[current++] = "-V";
+    options[current++] = getTargetIndex();
     if (getMinimizeTarget()) {
       options[current++] = "-L";
     }
-    options[current++] = "-S"; options[current++] = "" + getSupport();
-    options[current++] = "-M"; options[current++] = "" + getMaxBranchingFactor();
-    options[current++] = "-length"; options[current++] = "" + getMaxRuleLength();
-    options[current++] = "-I"; options[current++] = "" + getMinImprovement();
+    options[current++] = "-S";
+    options[current++] = "" + getSupport();
+    options[current++] = "-M";
+    options[current++] = "" + getMaxBranchingFactor();
+    options[current++] = "-length";
+    options[current++] = "" + getMaxRuleLength();
+    options[current++] = "-I";
+    options[current++] = "" + getMinImprovement();
     if (getDebug()) {
       options[current++] = "-D";
     }
-    
+
     if (getOutputRules()) {
       options[current++] = "-R";
     }
@@ -1668,27 +1778,30 @@ public class HotSpot
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
-   *  Returns the type of graph this scheme
-   *  represents.
-   *  @return Drawable.TREE
-   */   
+   * Returns the type of graph this scheme represents.
+   * 
+   * @return Drawable.TREE
+   */
+  @Override
   public int graphType() {
     return Drawable.TREE;
   }
-  
+
   /**
    * Gets the list of mined association rules.
    * 
-   * @return the list of association rules discovered during mining.
-   * Returns null if mining hasn't been performed yet.
+   * @return the list of association rules discovered during mining. Returns
+   *         null if mining hasn't been performed yet.
    */
+  @Override
   public AssociationRules getAssociationRules() {
     List<AssociationRule> rulesToReturn = new ArrayList<AssociationRule>();
     try {
@@ -1697,40 +1810,42 @@ public class HotSpot
     } catch (Exception e) {
       e.printStackTrace();
     }
-        
+
     return new AssociationRules(rulesToReturn, this);
   }
-  
+
   /**
-   * Returns true if this AssociationRulesProducer can actually
-   * produce rules. Most implementing classes will always return
-   * true from this method (obviously :-)). However, an implementing
-   * class that actually acts as a wrapper around things that may
-   * or may not implement AssociationRulesProducer will want to
-   * return false if the thing they wrap can't produce rules.
+   * Returns true if this AssociationRulesProducer can actually produce rules.
+   * Most implementing classes will always return true from this method
+   * (obviously :-)). However, an implementing class that actually acts as a
+   * wrapper around things that may or may not implement
+   * AssociationRulesProducer will want to return false if the thing they wrap
+   * can't produce rules.
    * 
    * @return true if this producer can produce rules in its current
-   * configuration
+   *         configuration
    */
+  @Override
   public boolean canProduceRules() {
     return true;
   }
-  
+
   /**
-   * Gets a list of the names of the metrics output for
-   * each rule. This list should be the same (in terms of
-   * the names and order thereof) as that produced by
-   * AssociationRule.getMetricNamesForRule().
+   * Gets a list of the names of the metrics output for each rule. This list
+   * should be the same (in terms of the names and order thereof) as that
+   * produced by AssociationRule.getMetricNamesForRule().
    * 
-   * @return an array of the names of the metrics available
-   * for each rule learned by this producer.
+   * @return an array of the names of the metrics available for each rule
+   *         learned by this producer.
    */
+  @Override
   public String[] getRuleMetricNames() {
     String[] metricNames = new String[DefaultAssociationRule.TAGS_SELECTION.length + 1];
     metricNames[0] = "AverageTarget";
 
     for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
-      metricNames[i + 1] = DefaultAssociationRule.TAGS_SELECTION[i].getReadable();
+      metricNames[i + 1] = DefaultAssociationRule.TAGS_SELECTION[i]
+        .getReadable();
     }
 
     return metricNames;
@@ -1738,16 +1853,14 @@ public class HotSpot
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param args the options
    */
   public static void main(String[] args) {
     try {
-      HotSpot h = new HotSpot();
       AbstractAssociator.runAssociator(new HotSpot(), args);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
   }
 }
-

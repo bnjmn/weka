@@ -6,10 +6,10 @@
 PackageName=hotSpot
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2012-09-28
+Date=2013-11-18
 
 # Title (required)
 Title=HotSpot learns a set of rules (displayed in a tree-like structure) that maximize/minimize a target variable/value of interest.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=HotSpot learns a set of rules (displayed in a tree-like structure) that maximize/minimize a target variable/value of interest. With a nominal target, one might want to look for segments of the data where there is a high probability of a minority value occuring (given the constraint of a minimum support). For a numeric target, one might be interested in finding segments where this is higher on average than in the whole data set. For example, in a health insurance scenario, find which health insurance groups are at the highest risk (have the highest claim ratio), or, which groups have the highest average insurance payout.
 
-Changes=This releases adds an option to limit the length of rules or paths in the tree. It also adds an option to treat zero (first value) for nominal attributes as missing, which is useful for market basket data.
+Changes=This releases changes the interpretation of the -S option for nominal targets from a fraction of the total population to a fraction of the total population of the target value.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/hotSpot1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/hotSpot1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.dev/weka/associations/HotSpot.html
