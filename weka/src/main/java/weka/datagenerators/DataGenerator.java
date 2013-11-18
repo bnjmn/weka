@@ -24,6 +24,7 @@ package weka.datagenerators;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -88,9 +89,9 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    * 
    * @see #makeOptionString(DataGenerator)
    */
-  protected static HashSet m_OptionBlacklist;
+  protected static HashSet<String> m_OptionBlacklist;
   static {
-    m_OptionBlacklist = new HashSet();
+    m_OptionBlacklist = new HashSet<String>();
   }
 
   /**
@@ -108,33 +109,14 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   }
 
   /**
-   * creates a vector out of the enumeration from the listOptions of the super
-   * class. Only a "convenience" method.
-   * 
-   * @param enm the Enumeration to dump into a vector
-   * @return the elements of the enumeration in a vector
-   */
-  protected Vector enumToVector(Enumeration enm) {
-    Vector result;
-
-    result = new Vector();
-
-    while (enm.hasMoreElements())
-      result.add(enm.nextElement());
-
-    return result;
-  }
-
-  /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options
    */
   @Override
-  public Enumeration listOptions() {
-    Vector result;
+  public Enumeration<Option> listOptions() {
 
-    result = new Vector();
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option("\tPrints this help.", "h", 1, "-h"));
 
@@ -155,6 +137,16 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   }
 
   /**
+   * Convenience method. Turns the given enumeration of options into a vector.
+   */
+  public Vector<Option> enumToVector(Enumeration<Option> enu) {
+
+    Vector<Option> options = new Vector<Option>();
+    options.addAll(Collections.list(enu));
+    return options;
+  }
+
+  /**
    * Parses a list of options for this object.
    * <p/>
    * 
@@ -172,24 +164,27 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     options = removeBlacklist(options);
 
     tmpStr = Utils.getOption('r', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setRelationName(Utils.unquote(tmpStr));
-    else
+    } else {
       setRelationName("");
+    }
 
     tmpStr = Utils.getOption('o', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setOutput(new PrintWriter(new FileOutputStream(tmpStr)));
-    else if (getOutput() == null)
+    } else if (getOutput() == null) {
       throw new Exception("No Output defined!");
+    }
 
     setDebug(Utils.getFlag('d', options));
 
     tmpStr = Utils.getOption('S', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setSeed(Integer.parseInt(tmpStr));
-    else
+    } else {
       setSeed(defaultSeed());
+    }
   }
 
   /**
@@ -202,9 +197,7 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    */
   @Override
   public String[] getOptions() {
-    Vector result;
-
-    result = new Vector();
+    Vector<String> result = new Vector<String>();
 
     // to avoid endless loop
     if (!m_CreatingRelationName) {
@@ -212,13 +205,14 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
       result.add(Utils.quote(getRelationNameToUse()));
     }
 
-    if (getDebug())
+    if (getDebug()) {
       result.add("-d");
+    }
 
     result.add("-S");
     result.add("" + getSeed());
 
-    return (String[]) result.toArray(new String[result.size()]);
+    return result.toArray(new String[result.size()]);
   }
 
   /**
@@ -231,8 +225,9 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    * @see #defaultRelationName()
    */
   public Instances defineDataFormat() throws Exception {
-    if (getRelationName().length() == 0)
+    if (getRelationName().length() == 0) {
       setRelationName(defaultRelationName());
+    }
 
     return m_DatasetFormat;
   }
@@ -340,8 +335,9 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     options = getOptions();
     for (i = 0; i < options.length; i++) {
       option = options[i].trim();
-      if (i > 0)
+      if (i > 0) {
         result.append("_");
+      }
       result.append(option.replaceAll(" ", "_"));
     }
 
@@ -363,8 +359,9 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     String result;
 
     result = getRelationName();
-    if (result.length() == 0)
+    if (result.length() == 0) {
       result = defaultRelationName();
+    }
 
     return result;
   }
@@ -479,10 +476,11 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    * @return the dataset format of the dataset
    */
   public Instances getDatasetFormat() {
-    if (m_DatasetFormat != null)
+    if (m_DatasetFormat != null) {
       return new Instances(m_DatasetFormat, 0);
-    else
+    } else {
       return null;
+    }
   }
 
   /**
@@ -541,8 +539,9 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    * @return the random generator
    */
   public Random getRandom() {
-    if (m_Random == null)
+    if (m_Random == null) {
       m_Random = new Random(getSeed());
+    }
 
     return m_Random;
   }
@@ -572,8 +571,9 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    * @return the string representing the output data format
    */
   protected String toStringFormat() {
-    if (m_DatasetFormat == null)
+    if (m_DatasetFormat == null) {
       return "";
+    }
     return m_DatasetFormat.toString();
   }
 
@@ -614,28 +614,30 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    * @return the processed options array
    */
   protected String[] removeBlacklist(String[] options) {
-    Enumeration enm;
-    Hashtable pool;
+
+    Hashtable<String, Option> pool;
     Option option;
 
     // retrieve options that are on blacklist
-    enm = listOptions();
-    pool = new Hashtable();
+    Enumeration<Option> enm = listOptions();
+    pool = new Hashtable<String, Option>();
     while (enm.hasMoreElements()) {
-      option = (Option) enm.nextElement();
-      if (isOnBlacklist(option.name()))
+      option = enm.nextElement();
+      if (isOnBlacklist(option.name())) {
         pool.put(option.name(), option);
+      }
     }
 
     // remove options
-    enm = pool.keys();
-    while (enm.hasMoreElements()) {
-      option = (Option) pool.get(enm.nextElement());
+    Enumeration<String> enm2 = pool.keys();
+    while (enm2.hasMoreElements()) {
+      option = pool.get(enm2.nextElement());
       try {
-        if (option.numArguments() == 0)
+        if (option.numArguments() == 0) {
           Utils.getFlag(option.name(), options);
-        else
+        } else {
           Utils.getOption(option.name(), options);
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -652,7 +654,7 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    */
   protected static String makeOptionString(DataGenerator generator) {
     StringBuffer result;
-    Enumeration enm;
+    Enumeration<Option> enm;
     Option option;
 
     result = new StringBuffer();
@@ -660,10 +662,11 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
 
     enm = generator.listOptions();
     while (enm.hasMoreElements()) {
-      option = (Option) enm.nextElement();
+      option = enm.nextElement();
       // skip option if on blacklist
-      if (isOnBlacklist(option.name()))
+      if (isOnBlacklist(option.name())) {
         continue;
+      }
       result.append(option.synopsis() + "\n" + option.description() + "\n");
     }
 
@@ -681,7 +684,7 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     throws Exception {
 
     boolean printhelp;
-    Vector unknown;
+    Vector<String> unknown;
     int i;
 
     // help?
@@ -694,15 +697,17 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
         generator.setOptions(options);
 
         // check for left-over options, but don't raise exception
-        unknown = new Vector();
+        unknown = new Vector<String>();
         for (i = 0; i < options.length; i++) {
-          if (options[i].length() != 0)
+          if (options[i].length() != 0) {
             unknown.add(options[i]);
+          }
         }
         if (unknown.size() > 0) {
           System.out.print("Unknown options:");
-          for (i = 0; i < unknown.size(); i++)
+          for (i = 0; i < unknown.size(); i++) {
             System.out.print(" " + unknown.get(i));
+          }
           System.out.println();
         }
       } catch (Exception e) {
@@ -789,10 +794,11 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
       DataGenerator.makeData(datagenerator, options);
     } catch (Exception e) {
       if ((e.getMessage() != null)
-        && (e.getMessage().indexOf("Data Generator options") == -1))
+        && (e.getMessage().indexOf("Data Generator options") == -1)) {
         e.printStackTrace();
-      else
+      } else {
         System.err.println(e.getMessage());
+      }
     }
   }
 }

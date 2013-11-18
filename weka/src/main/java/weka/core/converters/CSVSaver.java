@@ -23,6 +23,7 @@ package weka.core.converters;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -38,44 +39,57 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Writes to a destination that is in CSV (comma-separated values) format. The column separator can be chosen (default is ',') as well as the value representing missing values (default is '?').
+ * <!-- globalinfo-start --> Writes to a destination that is in CSV
+ * (comma-separated values) format. The column separator can be chosen (default
+ * is ',') as well as the value representing missing values (default is '?').
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -F &lt;separator&gt;
+ * <pre>
+ * -F &lt;separator&gt;
  *  The field separator to be used.
  *  '\t' can be used as well.
- *  (default: ',')</pre>
+ *  (default: ',')
+ * </pre>
  * 
- * <pre> -M &lt;str&gt;
+ * <pre>
+ * -M &lt;str&gt;
  *  The string representing a missing value.
- *  (default: ?)</pre>
+ *  (default: ?)
+ * </pre>
  * 
- * <pre> -N
- *  Don't write a header row.</pre>
+ * <pre>
+ * -N
+ *  Don't write a header row.
+ * </pre>
  * 
- * <pre> -decimal &lt;num&gt;
+ * <pre>
+ * -decimal &lt;num&gt;
  *  The maximum number of digits to print after the decimal
- *  place for numeric values (default: 6)</pre>
+ *  place for numeric values (default: 6)
+ * </pre>
  * 
- * <pre> -i &lt;the input file&gt;
- *  The input file</pre>
+ * <pre>
+ * -i &lt;the input file&gt;
+ *  The input file
+ * </pre>
  * 
- * <pre> -o &lt;the output file&gt;
- *  The output file</pre>
+ * <pre>
+ * -o &lt;the output file&gt;
+ *  The output file
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
  * @version $Revision$
  * @see Saver
  */
 public class CSVSaver extends AbstractFileSaver implements BatchConverter,
-    IncrementalConverter, FileSourcedConverter {
+  IncrementalConverter, FileSourcedConverter {
 
   /** for serialization. */
   static final long serialVersionUID = 476636654410701807L;
@@ -88,7 +102,7 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
 
   /** Max number of decimal places for numeric values */
   protected int m_MaxDecimalPlaces = AbstractInstance.s_numericAfterDecimalPoint;
-  
+
   /** Set to true to not write the header row */
   protected boolean m_noHeaderRow = false;
 
@@ -107,8 +121,8 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
    */
   public String globalInfo() {
     return "Writes to a destination that is in CSV (comma-separated values) format. "
-        + "The column separator can be chosen (default is ',') as well as the value "
-        + "representing missing values (default is '?').";
+      + "The column separator can be chosen (default is ',') as well as the value "
+      + "representing missing values (default is '?').";
   }
 
   /**
@@ -117,57 +131,67 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option("\tThe field separator to be used.\n"
-        + "\t'\\t' can be used as well.\n" + "\t(default: ',')", "F", 1,
-        "-F <separator>"));
+      + "\t'\\t' can be used as well.\n" + "\t(default: ',')", "F", 1,
+      "-F <separator>"));
 
     result.addElement(new Option("\tThe string representing a missing value.\n"
-        + "\t(default: ?)", "M", 1, "-M <str>"));
-    
+      + "\t(default: ?)", "M", 1, "-M <str>"));
+
     result.addElement(new Option("\tDon't write a header row.", "N", 0, "-N"));
 
     result.addElement(new Option(
-        "\tThe maximum number of digits to print after the decimal\n"
-            + "\tplace for numeric values (default: 6)", "decimal", 1,
-        "-decimal <num>"));
+      "\tThe maximum number of digits to print after the decimal\n"
+        + "\tplace for numeric values (default: 6)", "decimal", 1,
+      "-decimal <num>"));
 
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement((Option) en.nextElement());
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
 
-  /** 
-   <!-- options-start -->
-   * Valid options are: <p/>
+  /**
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -F &lt;separator&gt;
+   * <pre>
+   * -F &lt;separator&gt;
    *  The field separator to be used.
    *  '\t' can be used as well.
-   *  (default: ',')</pre>
+   *  (default: ',')
+   * </pre>
    * 
-   * <pre> -M &lt;str&gt;
+   * <pre>
+   * -M &lt;str&gt;
    *  The string representing a missing value.
-   *  (default: ?)</pre>
+   *  (default: ?)
+   * </pre>
    * 
-   * <pre> -N
-   *  Don't write a header row.</pre>
+   * <pre>
+   * -N
+   *  Don't write a header row.
+   * </pre>
    * 
-   * <pre> -decimal &lt;num&gt;
+   * <pre>
+   * -decimal &lt;num&gt;
    *  The maximum number of digits to print after the decimal
-   *  place for numeric values (default: 6)</pre>
+   *  place for numeric values (default: 6)
+   * </pre>
    * 
-   * <pre> -i &lt;the input file&gt;
-   *  The input file</pre>
+   * <pre>
+   * -i &lt;the input file&gt;
+   *  The input file
+   * </pre>
    * 
-   * <pre> -o &lt;the output file&gt;
-   *  The output file</pre>
+   * <pre>
+   * -o &lt;the output file&gt;
+   *  The output file
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -177,17 +201,19 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     String tmpStr;
 
     tmpStr = Utils.getOption('F', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setFieldSeparator(tmpStr);
-    else
+    } else {
       setFieldSeparator(",");
+    }
 
     tmpStr = Utils.getOption('M', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setMissingValue(tmpStr);
-    else
+    } else {
       setMissingValue("?");
-    
+    }
+
     setNoHeaderRow(Utils.getFlag('N', options));
 
     tmpStr = Utils.getOption("decimal", options);
@@ -196,6 +222,8 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     }
 
     super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -205,18 +233,14 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
    */
   @Override
   public String[] getOptions() {
-    Vector<String> result;
-    String[] options;
-    int i;
-
-    result = new Vector<String>();
+    Vector<String> result = new Vector<String>();
 
     result.add("-F");
     result.add(getFieldSeparator());
 
     result.add("-M");
-    result.add(getMissingValue());    
-    
+    result.add(getMissingValue());
+
     if (getNoHeaderRow()) {
       result.add("-N");
     }
@@ -224,13 +248,11 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     result.add("-decimal");
     result.add("" + getMaxDecimalPlaces());
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
   }
-  
+
   /**
    * Returns the tip text for this property.
    * 
@@ -240,7 +262,7 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
   public String noHeaderRowTipText() {
     return "If true then the header row is not written";
   }
-  
+
   /**
    * Set whether to not write the header row
    * 
@@ -249,7 +271,7 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
   public void setNoHeaderRow(boolean b) {
     m_noHeaderRow = b;
   }
-  
+
   /**
    * Get whether to not write the header row
    * 
@@ -285,7 +307,7 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
    */
   public String maxDecimalPlacesTipText() {
     return "The maximum number of digits to print after the decimal "
-        + "point for numeric values";
+      + "point for numeric values";
   }
 
   /**
@@ -413,24 +435,29 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     Instances structure = getInstances();
     PrintWriter outW = null;
 
-    if (getRetrieval() == BATCH || getRetrieval() == NONE)
+    if (getRetrieval() == BATCH || getRetrieval() == NONE) {
       throw new IOException("Batch and incremental saving cannot be mixed.");
-    if (getWriter() != null)
+    }
+    if (getWriter() != null) {
       outW = new PrintWriter(getWriter());
+    }
 
     if (writeMode == WAIT) {
       if (structure == null) {
         setWriteMode(CANCEL);
-        if (inst != null)
+        if (inst != null) {
           System.err
-              .println("Structure(Header Information) has to be set in advance");
-      } else
+            .println("Structure(Header Information) has to be set in advance");
+        }
+      } else {
         setWriteMode(STRUCTURE_READY);
+      }
       writeMode = getWriteMode();
     }
     if (writeMode == CANCEL) {
-      if (outW != null)
+      if (outW != null) {
         outW.close();
+      }
       cancel();
     }
     if (writeMode == STRUCTURE_READY) {
@@ -462,13 +489,14 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
       writeMode = getWriteMode();
     }
     if (writeMode == WRITE) {
-      if (structure == null)
+      if (structure == null) {
         throw new IOException("No instances information available.");
+      }
       if (inst != null) {
         // write instance
-        if (retrieveFile() == null && outW == null)
+        if (retrieveFile() == null && outW == null) {
           System.out.println(inst);
-        else {
+        } else {
           outW.println(instanceToString(inst));
           // flushes every 100 instances
           m_incrementalCounter++;
@@ -500,14 +528,16 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
   @Override
   public void writeBatch() throws IOException {
 
-    if (getInstances() == null)
+    if (getInstances() == null) {
       throw new IOException("No instances to save");
-    if (getRetrieval() == INCREMENTAL)
+    }
+    if (getRetrieval() == INCREMENTAL) {
       throw new IOException("Batch and incremental saving cannot be mixed.");
+    }
     setRetrieval(BATCH);
     setWriteMode(WRITE);
     if (retrieveFile() == null && getWriter() == null) {
-      
+
       if (!getNoHeaderRow()) {
         // print out attribute names as first row
         for (int i = 0; i < getInstances().numAttributes(); i++) {
@@ -574,17 +604,19 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
         result.append(m_FieldSeparator);
       }
 
-      if (outInst.isMissing(i))
+      if (outInst.isMissing(i)) {
         field = m_MissingValue;
-      else
+      } else {
         field = outInst.toString(i, m_MaxDecimalPlaces);
+      }
 
       // make sure that custom field separators, like ";" get quoted correctly
       // as well (but only for single character field separators)
       if (m_FieldSeparator.length() == 1
-          && (field.indexOf(m_FieldSeparator) > -1) && !field.startsWith("'")
-          && !field.endsWith("'"))
+        && (field.indexOf(m_FieldSeparator) > -1) && !field.startsWith("'")
+        && !field.endsWith("'")) {
         field = "'" + field + "'";
+      }
 
       result.append(field);
     }
@@ -611,4 +643,3 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter,
     runFileSaver(new CSVSaver(), args);
   }
 }
-

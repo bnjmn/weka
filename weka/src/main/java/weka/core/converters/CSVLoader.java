@@ -55,8 +55,7 @@ import weka.core.Utils;
 import weka.core.converters.ArffLoader.ArffReader;
 
 /**
- <!-- globalinfo-start --> 
- * Reads a source that is in comma separated format
+ * <!-- globalinfo-start --> Reads a source that is in comma separated format
  * (the default). One can also change the column separator from comma to tab or
  * another character, specify string enclosures, specify whether aheader row is
  * present or not and specify which attributes are to beforced to be nominal or
@@ -73,10 +72,9 @@ import weka.core.converters.ArffLoader.ArffReader;
  * values of all nominal attributes using the -L (setNominalLabelSpecs) option.
  * *
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -154,7 +152,7 @@ import weka.core.converters.ArffLoader.ArffReader;
  *  (default: 100)
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -580,7 +578,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   }
 
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
     result
@@ -837,8 +835,9 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       getStructure();
     }
 
-    while (readData(true))
+    while (readData(true)) {
       ;
+    }
 
     m_dataDumper.flush();
     m_dataDumper.close();
@@ -861,8 +860,6 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     }
 
     boolean finished = false;
-    boolean moreDataToRead = false;
-
     do {
       String checked = getInstance(m_st);
       if (checked == null) {
@@ -1238,7 +1235,6 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
     boolean first = true;
     boolean wasSep;
-    boolean containedMissing = false;
     m_current.clear();
 
     int i = 0;
@@ -1253,19 +1249,17 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       if (tokenizer.ttype == m_FieldSeparator.charAt(0)
         || tokenizer.ttype == StreamTokenizer.TT_EOL) {
         m_current.add("?");
-        containedMissing = true;
         wasSep = true;
       } else {
         wasSep = false;
         if (tokenizer.sval.equals(m_MissingValue)
           || tokenizer.sval.trim().length() == 0) {
           m_current.add("?");
-          containedMissing = true;
         } else if (m_types[i] == TYPE.NUMERIC
           || m_types[i] == TYPE.UNDETERMINED) {
           // try to parse as a number
           try {
-            double val = Double.parseDouble(tokenizer.sval);
+            Double.parseDouble(tokenizer.sval);
             m_current.add(tokenizer.sval);
             m_types[i] = TYPE.NUMERIC;
           } catch (NumberFormatException e) {

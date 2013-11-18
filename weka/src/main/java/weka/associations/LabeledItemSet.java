@@ -389,11 +389,10 @@ public class LabeledItemSet extends ItemSet implements Serializable,
     Instances instancesNoClass, Instances instancesClass) {
 
     for (int i = 0; i < instancesNoClass.numInstances(); i++) {
-      @SuppressWarnings("unchecked")
-      Enumeration<LabeledItemSet> enu = new WekaEnumeration(itemSets);
+      Enumeration<Object> enu = new WekaEnumeration<Object>(itemSets);
       while (enu.hasMoreElements()) {
-        enu.nextElement().upDateCounter(instancesNoClass.instance(i),
-          instancesClass.instance(i));
+        ((LabeledItemSet) enu.nextElement()).upDateCounter(
+          instancesNoClass.instance(i), instancesClass.instance(i));
       }
     }
 
@@ -411,8 +410,8 @@ public class LabeledItemSet extends ItemSet implements Serializable,
     ArrayList<LabeledItemSet> itemSets, Instances instancesNoClass,
     Instances instancesClass) {
     for (int i = 0; i < instancesNoClass.numInstances(); i++) {
-      @SuppressWarnings("unchecked")
-      Enumeration<LabeledItemSet> enu = new WekaEnumeration(itemSets);
+      Enumeration<LabeledItemSet> enu = new WekaEnumeration<LabeledItemSet>(
+        itemSets);
       while (enu.hasMoreElements()) {
         enu.nextElement().upDateCounterTreatZeroAsMissing(
           instancesNoClass.instance(i), instancesClass.instance(i));

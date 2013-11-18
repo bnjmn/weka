@@ -421,7 +421,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   public final/* @ pure @ */Enumeration<Object> enumerateValues() {
 
     if (isNominal() || isString()) {
-      final Enumeration<?> ee = new WekaEnumeration(m_Values);
+      final Enumeration<Object> ee = new WekaEnumeration<Object>(m_Values);
       return new Enumeration<Object>() {
         @Override
         public boolean hasMoreElements() {

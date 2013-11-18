@@ -46,7 +46,7 @@ public class Memory implements RevisionHandler {
 
   /** the managed bean to use */
   protected static MemoryMXBean m_MemoryMXBean = ManagementFactory
-      .getMemoryMXBean();
+    .getMemoryMXBean();
 
   /** the last MemoryUsage object obtained */
   protected MemoryUsage m_MemoryUsage = null;
@@ -141,8 +141,9 @@ public class Memory implements RevisionHandler {
     m_MemoryUsage = m_MemoryMXBean.getHeapMemoryUsage();
     if (isEnabled()) {
       return ((m_MemoryUsage.getMax() - m_MemoryUsage.getUsed()) < 52428800);
-    } else
+    } else {
       return false;
+    }
   }
 
   /**
@@ -188,36 +189,38 @@ public class Memory implements RevisionHandler {
    * @see #m_Enabled
    */
   public void showOutOfMemory() {
-    if (!isEnabled() || (m_MemoryUsage == null))
+    if (!isEnabled() || (m_MemoryUsage == null)) {
       return;
+    }
 
     System.gc();
 
     String msg = "Not enough memory (less than 50MB left on heap). Please load a smaller "
-        + "dataset or use a larger heap size.\n"
-        + "- initial heap size:   "
-        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getInit()), 1)
-        + "MB\n"
-        + "- current memory (heap) used:  "
-        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getUsed()), 1)
-        + "MB\n"
-        + "- max. memory (heap) available: "
-        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getMax()), 1)
-        + "MB\n"
-        + "\n"
-        + "Note:\n"
-        + "The Java heap size can be specified with the -Xmx option.\n"
-        + "E.g., to use 128MB as heap size, the command line looks like this:\n"
-        + "   java -Xmx128m -classpath ...\n"
-        + "This does NOT work in the SimpleCLI, the above java command refers\n"
-        + "to the one with which Weka is started. See the Weka FAQ on the web\n"
-        + "for further info.";
+      + "dataset or use a larger heap size.\n"
+      + "- initial heap size:   "
+      + Utils.doubleToString(toMegaByte(m_MemoryUsage.getInit()), 1)
+      + "MB\n"
+      + "- current memory (heap) used:  "
+      + Utils.doubleToString(toMegaByte(m_MemoryUsage.getUsed()), 1)
+      + "MB\n"
+      + "- max. memory (heap) available: "
+      + Utils.doubleToString(toMegaByte(m_MemoryUsage.getMax()), 1)
+      + "MB\n"
+      + "\n"
+      + "Note:\n"
+      + "The Java heap size can be specified with the -Xmx option.\n"
+      + "E.g., to use 128MB as heap size, the command line looks like this:\n"
+      + "   java -Xmx128m -classpath ...\n"
+      + "This does NOT work in the SimpleCLI, the above java command refers\n"
+      + "to the one with which Weka is started. See the Weka FAQ on the web\n"
+      + "for further info.";
 
     System.err.println(msg);
 
-    if (getUseGUI())
+    if (getUseGUI()) {
       JOptionPane.showMessageDialog(null, msg, "OutOfMemory",
-          JOptionPane.WARNING_MESSAGE);
+        JOptionPane.WARNING_MESSAGE);
+    }
   }
 
   /**
@@ -226,24 +229,25 @@ public class Memory implements RevisionHandler {
    * @return true if user opts to continue, disabled or GUI is not present.
    */
   public boolean showMemoryIsLow() {
-    if (!isEnabled() || (m_MemoryUsage == null))
+    if (!isEnabled() || (m_MemoryUsage == null)) {
       return true;
+    }
 
     String msg = "Warning: memory is running low - available heap space is less than "
-        + "20% of maximum or 100MB (whichever is greater)\n\n"
-        + "- initial heap size:   "
-        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getInit()), 1)
-        + "MB\n"
-        + "- current memory (heap) used:  "
-        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getUsed()), 1)
-        + "MB\n"
-        + "- max. memory (heap) available: "
-        + Utils.doubleToString(toMegaByte(m_MemoryUsage.getMax()), 1)
-        + "MB\n\n"
-        + "Consider deleting some results before continuing.\nCheck the Weka FAQ "
-        + "on the web for suggestions on how to save memory.\n"
-        + "Note that Weka will shut down when less than 50MB remain."
-        + "\nDo you wish to continue regardless?\n\n";
+      + "20% of maximum or 100MB (whichever is greater)\n\n"
+      + "- initial heap size:   "
+      + Utils.doubleToString(toMegaByte(m_MemoryUsage.getInit()), 1)
+      + "MB\n"
+      + "- current memory (heap) used:  "
+      + Utils.doubleToString(toMegaByte(m_MemoryUsage.getUsed()), 1)
+      + "MB\n"
+      + "- max. memory (heap) available: "
+      + Utils.doubleToString(toMegaByte(m_MemoryUsage.getMax()), 1)
+      + "MB\n\n"
+      + "Consider deleting some results before continuing.\nCheck the Weka FAQ "
+      + "on the web for suggestions on how to save memory.\n"
+      + "Note that Weka will shut down when less than 50MB remain."
+      + "\nDo you wish to continue regardless?\n\n";
 
     System.err.println(msg);
 
@@ -255,7 +259,7 @@ public class Memory implements RevisionHandler {
         stuff[1] = dontShow;
 
         int result = JOptionPane.showConfirmDialog(null, stuff, "Memory",
-            JOptionPane.YES_NO_OPTION);
+          JOptionPane.YES_NO_OPTION);
 
         if (dontShow.isSelected()) {
           try {
@@ -275,6 +279,7 @@ public class Memory implements RevisionHandler {
   /**
    * stops all the current threads, to make a restart possible
    */
+  @SuppressWarnings("deprecation")
   public void stopThreads() {
     int i;
     Thread[] thGroup;
@@ -287,10 +292,11 @@ public class Memory implements RevisionHandler {
       t = thGroup[i];
       if (t != null) {
         if (t != Thread.currentThread()) {
-          if (t.getName().startsWith("Thread"))
+          if (t.getName().startsWith("Thread")) {
             t.stop();
-          else if (t.getName().startsWith("AWT-EventQueue"))
+          } else if (t.getName().startsWith("AWT-EventQueue")) {
             t.stop();
+          }
         }
       }
     }
@@ -318,10 +324,10 @@ public class Memory implements RevisionHandler {
   public static void main(String[] args) {
     Memory mem = new Memory();
     System.out.println("Initial memory: "
-        + Utils.doubleToString(Memory.toMegaByte(mem.getInitial()), 1) + "MB"
-        + " (" + mem.getInitial() + ")");
+      + Utils.doubleToString(Memory.toMegaByte(mem.getInitial()), 1) + "MB"
+      + " (" + mem.getInitial() + ")");
     System.out.println("Max memory: "
-        + Utils.doubleToString(Memory.toMegaByte(mem.getMax()), 1) + "MB"
-        + " (" + mem.getMax() + ")");
+      + Utils.doubleToString(Memory.toMegaByte(mem.getMax()), 1) + "MB" + " ("
+      + mem.getMax() + ")");
   }
 }

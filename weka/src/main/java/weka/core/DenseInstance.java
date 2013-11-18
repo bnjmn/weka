@@ -310,8 +310,9 @@ public class DenseInstance extends AbstractInstance {
     StringBuffer text = new StringBuffer();
 
     for (int i = 0; i < m_AttValues.length; i++) {
-      if (i > 0)
+      if (i > 0) {
         text.append(",");
+      }
       text.append(toString(i, afterDecimalPoint));
     }
 
@@ -345,7 +346,7 @@ public class DenseInstance extends AbstractInstance {
     System.arraycopy(m_AttValues, 0, newValues, 0, position);
     if (position < m_AttValues.length - 1) {
       System.arraycopy(m_AttValues, position + 1, newValues, position,
-          m_AttValues.length - (position + 1));
+        m_AttValues.length - (position + 1));
     }
     m_AttValues = newValues;
   }
@@ -364,7 +365,7 @@ public class DenseInstance extends AbstractInstance {
     System.arraycopy(m_AttValues, 0, newValues, 0, position);
     newValues[position] = Utils.missingValue();
     System.arraycopy(m_AttValues, position, newValues, position + 1,
-        m_AttValues.length - position);
+      m_AttValues.length - position);
     m_AttValues = newValues;
   }
 
@@ -456,26 +457,26 @@ public class DenseInstance extends AbstractInstance {
       copy.insertAttributeAt(0);
       copy.setDataset(inst.dataset());
       System.out.println("Copy with first attribute deleted and inserted: "
-          + copy);
+        + copy);
 
       // Enumerate attributes (leaving out the class attribute)
       System.out.println("Enumerating attributes (leaving out class):");
-      Enumeration enu = inst.enumerateAttributes();
+      Enumeration<Attribute> enu = inst.enumerateAttributes();
       while (enu.hasMoreElements()) {
-        Attribute att = (Attribute) enu.nextElement();
+        Attribute att = enu.nextElement();
         System.out.println(att);
       }
 
       // Headers are equivalent?
       System.out.println("Header of original and copy equivalent: "
-          + inst.equalHeaders(copy));
+        + inst.equalHeaders(copy));
 
       // Test for missing values
       System.out.println("Length of copy missing: " + copy.isMissing(length));
       System.out.println("Weight of copy missing: "
-          + copy.isMissing(weight.index()));
+        + copy.isMissing(weight.index()));
       System.out.println("Length of copy missing: "
-          + Utils.isMissingValue(copy.value(length)));
+        + Utils.isMissingValue(copy.value(length)));
 
       // Prints number of attributes and classes
       System.out.println("Number of attributes: " + copy.numAttributes());
@@ -495,7 +496,7 @@ public class DenseInstance extends AbstractInstance {
       System.out.println("Copy with class value set to \"third\": " + copy);
       copy.setMissing(1);
       System.out.println("Copy with second attribute set to be missing: "
-          + copy);
+        + copy);
       copy.setMissing(length);
       System.out.println("Copy with length set to be missing: " + copy);
       copy.setValue(0, 0);
@@ -509,14 +510,14 @@ public class DenseInstance extends AbstractInstance {
       System.out.println("Current weight of instance copy: " + copy.weight());
       copy.setWeight(2);
       System.out.println("Current weight of instance copy (set to 2): "
-          + copy.weight());
+        + copy.weight());
       System.out.println("Last value of copy: " + copy.toString(2));
       System.out.println("Value of position for copy: "
-          + copy.toString(position));
+        + copy.toString(position));
       System.out.println("Last value of copy (internal format): "
-          + copy.value(2));
+        + copy.value(2));
       System.out.println("Value of position for copy (internal format): "
-          + copy.value(position));
+        + copy.value(position));
     } catch (Exception e) {
       e.printStackTrace();
     }

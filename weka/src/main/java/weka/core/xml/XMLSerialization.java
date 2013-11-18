@@ -165,23 +165,22 @@ public class XMLSerialization implements RevisionHandler {
 
   /** the DOCTYPE for the serialization */
   public final static String DOCTYPE = "<!" + XMLDocument.DTD_DOCTYPE + " "
-      + ROOT_NODE + "\n" + "[\n" + "   <!" + XMLDocument.DTD_ELEMENT + " "
-      + TAG_OBJECT + " (" + XMLDocument.DTD_PCDATA + XMLDocument.DTD_SEPARATOR
-      + TAG_OBJECT + ")" + XMLDocument.DTD_ZERO_OR_MORE + ">\n" + "   <!"
-      + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_NAME + "      "
-      + XMLDocument.DTD_CDATA + " " + XMLDocument.DTD_REQUIRED + ">\n"
-      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_CLASS
-      + "     " + XMLDocument.DTD_CDATA + " " + XMLDocument.DTD_REQUIRED
-      + ">\n" + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " "
-      + ATT_PRIMITIVE + " " + XMLDocument.DTD_CDATA + " \""
-      + ATT_PRIMITIVE_DEFAULT + "\">\n" + "   <!" + XMLDocument.DTD_ATTLIST
-      + " " + TAG_OBJECT + " " + ATT_ARRAY + "     " + XMLDocument.DTD_CDATA
-      + " \"" + ATT_ARRAY_DEFAULT
-      + "\">   <!-- the dimensions of the array; no=0, yes=1 -->\n" + "   <!"
-      + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_NULL + "      "
-      + XMLDocument.DTD_CDATA + " \"" + ATT_NULL_DEFAULT + "\">\n" + "   <!"
-      + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_VERSION + "   "
-      + XMLDocument.DTD_CDATA + " \"" + Version.VERSION + "\">\n" + "]\n" + ">";
+    + ROOT_NODE + "\n" + "[\n" + "   <!" + XMLDocument.DTD_ELEMENT + " "
+    + TAG_OBJECT + " (" + XMLDocument.DTD_PCDATA + XMLDocument.DTD_SEPARATOR
+    + TAG_OBJECT + ")" + XMLDocument.DTD_ZERO_OR_MORE + ">\n" + "   <!"
+    + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_NAME + "      "
+    + XMLDocument.DTD_CDATA + " " + XMLDocument.DTD_REQUIRED + ">\n" + "   <!"
+    + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_CLASS + "     "
+    + XMLDocument.DTD_CDATA + " " + XMLDocument.DTD_REQUIRED + ">\n" + "   <!"
+    + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_PRIMITIVE + " "
+    + XMLDocument.DTD_CDATA + " \"" + ATT_PRIMITIVE_DEFAULT + "\">\n" + "   <!"
+    + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_ARRAY + "     "
+    + XMLDocument.DTD_CDATA + " \"" + ATT_ARRAY_DEFAULT
+    + "\">   <!-- the dimensions of the array; no=0, yes=1 -->\n" + "   <!"
+    + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_NULL + "      "
+    + XMLDocument.DTD_CDATA + " \"" + ATT_NULL_DEFAULT + "\">\n" + "   <!"
+    + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_VERSION + "   "
+    + XMLDocument.DTD_CDATA + " \"" + Version.VERSION + "\">\n" + "]\n" + ">";
 
   /**
    * List of fully qualified property names to suppress any warning messages for
@@ -202,7 +201,7 @@ public class XMLSerialization implements RevisionHandler {
    * 
    * @see #overrideClassname(Object)
    */
-  protected Hashtable<Class, String> m_ClassnameOverride = null;
+  protected Hashtable<Class<?>, String> m_ClassnameOverride = null;
 
   /**
    * initializes the serialization
@@ -242,7 +241,7 @@ public class XMLSerialization implements RevisionHandler {
     m_Properties = new PropertyHandler();
     m_CustomMethods = new XMLSerializationMethodHandler(this);
 
-    m_ClassnameOverride = new Hashtable<Class, String>();
+    m_ClassnameOverride = new Hashtable<Class<?>, String>();
     // java.io.File is sometimes represented as another class:
     // - Win32: sun.awt.shell.Win32ShellFolder2
     // - Linux: sun.awt.shell.DefaultShellFolder
@@ -292,14 +291,15 @@ public class XMLSerialization implements RevisionHandler {
 
     version = new Version();
     versionStr = getVersion();
-    if (versionStr.equals(""))
+    if (versionStr.equals("")) {
       System.out.println("WARNING: has no version!");
-    else if (version.isOlder(versionStr))
+    } else if (version.isOlder(versionStr)) {
       System.out.println("WARNING: loading a newer version (" + versionStr
-          + " > " + Version.VERSION + ")!");
-    else if (version.isNewer(versionStr))
+        + " > " + Version.VERSION + ")!");
+    } else if (version.isNewer(versionStr)) {
       System.out.println("NOTE: loading an older version (" + versionStr
-          + " < " + Version.VERSION + ")!");
+        + " < " + Version.VERSION + ")!");
+    }
   }
 
   /**
@@ -311,7 +311,8 @@ public class XMLSerialization implements RevisionHandler {
    * @return the PropertyDescriptors indexed by name of the property
    * @throws Exception if the introspection fails
    */
-  protected Hashtable getDescriptors(Object o) throws Exception {
+  protected Hashtable<String, PropertyDescriptor> getDescriptors(Object o)
+    throws Exception {
     BeanInfo info;
     PropertyDescriptor[] desc;
     int i;
@@ -324,18 +325,21 @@ public class XMLSerialization implements RevisionHandler {
     for (i = 0; i < desc.length; i++) {
       // get AND set method?
       if ((desc[i].getReadMethod() != null)
-          && (desc[i].getWriteMethod() != null)) {
+        && (desc[i].getWriteMethod() != null)) {
         // in ignore list, i.e. a general ignore without complete path?
-        if (m_Properties.isIgnored(desc[i].getDisplayName()))
+        if (m_Properties.isIgnored(desc[i].getDisplayName())) {
           continue;
+        }
 
         // in ignore list of the class?
-        if (m_Properties.isIgnored(o, desc[i].getDisplayName()))
+        if (m_Properties.isIgnored(o, desc[i].getDisplayName())) {
           continue;
+        }
 
         // not an allowed property
-        if (!m_Properties.isAllowed(o, desc[i].getDisplayName()))
+        if (!m_Properties.isAllowed(o, desc[i].getDisplayName())) {
           continue;
+        }
 
         result.put(desc[i].getDisplayName(), desc[i]);
       }
@@ -372,10 +376,11 @@ public class XMLSerialization implements RevisionHandler {
    * @return the value in string representation
    */
   protected String booleanToString(boolean b) {
-    if (b)
+    if (b) {
       return VAL_YES;
-    else
+    } else {
       return VAL_NO;
+    }
   }
 
   /**
@@ -387,16 +392,17 @@ public class XMLSerialization implements RevisionHandler {
    * @return the string as boolean
    */
   protected boolean stringToBoolean(String s) {
-    if (s.equals(""))
+    if (s.equals("")) {
       return false;
-    else if (s.equals(VAL_YES))
+    } else if (s.equals(VAL_YES)) {
       return true;
-    else if (s.equalsIgnoreCase("true"))
+    } else if (s.equalsIgnoreCase("true")) {
       return true;
-    else if (s.replaceAll("[0-9]*", "").equals(""))
+    } else if (s.replaceAll("[0-9]*", "").equals("")) {
       return (Integer.parseInt(s) != 0);
-    else
+    } else {
       return false;
+    }
   }
 
   /**
@@ -410,7 +416,7 @@ public class XMLSerialization implements RevisionHandler {
    * @return the generated node
    */
   protected Element addElement(Element parent, String name, String classname,
-      boolean primitive) {
+    boolean primitive) {
     return addElement(parent, name, classname, primitive, 0);
   }
 
@@ -426,7 +432,7 @@ public class XMLSerialization implements RevisionHandler {
    * @return the generated node
    */
   protected Element addElement(Element parent, String name, String classname,
-      boolean primitive, int array) {
+    boolean primitive, int array) {
     return addElement(parent, name, classname, primitive, array, false);
   }
 
@@ -443,14 +449,15 @@ public class XMLSerialization implements RevisionHandler {
    * @return the generated node
    */
   protected Element addElement(Element parent, String name, String classname,
-      boolean primitive, int array, boolean isnull) {
+    boolean primitive, int array, boolean isnull) {
     Element result;
 
-    if (parent == null)
+    if (parent == null) {
       result = m_Document.getDocument().getDocumentElement();
-    else
+    } else {
       result = (Element) parent.appendChild(m_Document.getDocument()
-          .createElement(TAG_OBJECT));
+        .createElement(TAG_OBJECT));
+    }
 
     // attributes
     // mandatory attributes:
@@ -458,8 +465,9 @@ public class XMLSerialization implements RevisionHandler {
     result.setAttribute(ATT_CLASS, classname);
 
     // add following attributes only if necessary, i.e., different from default:
-    if (!booleanToString(primitive).equals(ATT_PRIMITIVE_DEFAULT))
+    if (!booleanToString(primitive).equals(ATT_PRIMITIVE_DEFAULT)) {
       result.setAttribute(ATT_PRIMITIVE, booleanToString(primitive));
+    }
 
     // multi-dimensional array?
     if (array > 1) {
@@ -467,12 +475,14 @@ public class XMLSerialization implements RevisionHandler {
     }
     // backwards compatible: 0 -> no array ("no"), 1 -> 1-dim. array ("yes")
     else {
-      if (!booleanToString(array == 1).equals(ATT_ARRAY_DEFAULT))
+      if (!booleanToString(array == 1).equals(ATT_ARRAY_DEFAULT)) {
         result.setAttribute(ATT_ARRAY, booleanToString(array == 1));
+      }
     }
 
-    if (!booleanToString(isnull).equals(ATT_NULL_DEFAULT))
+    if (!booleanToString(isnull).equals(ATT_NULL_DEFAULT)) {
       result.setAttribute(ATT_NULL, booleanToString(isnull));
+    }
 
     return result;
   }
@@ -488,16 +498,16 @@ public class XMLSerialization implements RevisionHandler {
    * @see #m_ClassnameOverride
    */
   protected String overrideClassname(Object o) {
-    Enumeration enm;
+    Enumeration<Class<?>> enm;
     String result;
-    Class currentCls;
+    Class<?> currentCls;
 
     result = o.getClass().getName();
 
     // check overrides
     enm = m_ClassnameOverride.keys();
     while (enm.hasMoreElements()) {
-      currentCls = (Class) enm.nextElement();
+      currentCls = enm.nextElement();
       if (currentCls.isInstance(o)) {
         result = m_ClassnameOverride.get(currentCls);
         break;
@@ -521,16 +531,16 @@ public class XMLSerialization implements RevisionHandler {
    * @see #overrideClassname(Object)
    */
   protected String overrideClassname(String classname) {
-    Enumeration enm;
+    Enumeration<Class<?>> enm;
     String result;
-    Class currentCls;
+    Class<?> currentCls;
 
     result = classname;
 
     // check overrides
     enm = m_ClassnameOverride.keys();
     while (enm.hasMoreElements()) {
-      currentCls = (Class) enm.nextElement();
+      currentCls = enm.nextElement();
       if (currentCls.getName().equals(classname)) {
         result = m_ClassnameOverride.get(currentCls);
         break;
@@ -548,7 +558,7 @@ public class XMLSerialization implements RevisionHandler {
    * @return the descriptor if available, otherwise <code>null</code>
    */
   protected PropertyDescriptor determineDescriptor(String className,
-      String displayName) {
+    String displayName) {
     PropertyDescriptor result;
 
     result = null;
@@ -573,18 +583,19 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if the DOM creation fails
    */
   protected Element writeBooleanToXML(Element parent, boolean o, String name)
-      throws Exception {
+    throws Exception {
     Element node;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     m_CurrentNode = parent;
 
     node = addElement(parent, name, Boolean.TYPE.getName(), true);
     node.appendChild(node.getOwnerDocument().createTextNode(
-        new Boolean(o).toString()));
+      new Boolean(o).toString()));
 
     return node;
   }
@@ -600,18 +611,19 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if the DOM creation fails
    */
   protected Element writeByteToXML(Element parent, byte o, String name)
-      throws Exception {
+    throws Exception {
     Element node;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     m_CurrentNode = parent;
 
     node = addElement(parent, name, Byte.TYPE.getName(), true);
     node.appendChild(node.getOwnerDocument().createTextNode(
-        new Byte(o).toString()));
+      new Byte(o).toString()));
 
     return node;
   }
@@ -627,18 +639,19 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if the DOM creation fails
    */
   protected Element writeCharToXML(Element parent, char o, String name)
-      throws Exception {
+    throws Exception {
     Element node;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     m_CurrentNode = parent;
 
     node = addElement(parent, name, Character.TYPE.getName(), true);
     node.appendChild(node.getOwnerDocument().createTextNode(
-        new Character(o).toString()));
+      new Character(o).toString()));
 
     return node;
   }
@@ -654,18 +667,19 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if the DOM creation fails
    */
   protected Element writeDoubleToXML(Element parent, double o, String name)
-      throws Exception {
+    throws Exception {
     Element node;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     m_CurrentNode = parent;
 
     node = addElement(parent, name, Double.TYPE.getName(), true);
     node.appendChild(node.getOwnerDocument().createTextNode(
-        new Double(o).toString()));
+      new Double(o).toString()));
 
     return node;
   }
@@ -681,18 +695,19 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if the DOM creation fails
    */
   protected Element writeFloatToXML(Element parent, float o, String name)
-      throws Exception {
+    throws Exception {
     Element node;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     m_CurrentNode = parent;
 
     node = addElement(parent, name, Float.TYPE.getName(), true);
     node.appendChild(node.getOwnerDocument().createTextNode(
-        new Float(o).toString()));
+      new Float(o).toString()));
 
     return node;
   }
@@ -708,18 +723,19 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if the DOM creation fails
    */
   protected Element writeIntToXML(Element parent, int o, String name)
-      throws Exception {
+    throws Exception {
     Element node;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     m_CurrentNode = parent;
 
     node = addElement(parent, name, Integer.TYPE.getName(), true);
     node.appendChild(node.getOwnerDocument().createTextNode(
-        new Integer(o).toString()));
+      new Integer(o).toString()));
 
     return node;
   }
@@ -735,18 +751,19 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if the DOM creation fails
    */
   protected Element writeLongToXML(Element parent, long o, String name)
-      throws Exception {
+    throws Exception {
     Element node;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     m_CurrentNode = parent;
 
     node = addElement(parent, name, Long.TYPE.getName(), true);
     node.appendChild(node.getOwnerDocument().createTextNode(
-        new Long(o).toString()));
+      new Long(o).toString()));
 
     return node;
   }
@@ -762,18 +779,19 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if the DOM creation fails
    */
   protected Element writeShortToXML(Element parent, short o, String name)
-      throws Exception {
+    throws Exception {
     Element node;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     m_CurrentNode = parent;
 
     node = addElement(parent, name, Short.TYPE.getName(), true);
     node.appendChild(node.getOwnerDocument().createTextNode(
-        new Short(o).toString()));
+      new Short(o).toString()));
 
     return node;
   }
@@ -785,11 +803,12 @@ public class XMLSerialization implements RevisionHandler {
    * @param c the array class to inspect
    * @return whether the array consists of primitive elements
    */
-  protected boolean isPrimitiveArray(Class c) {
-    if (c.getComponentType().isArray())
+  protected boolean isPrimitiveArray(Class<?> c) {
+    if (c.getComponentType().isArray()) {
       return isPrimitiveArray(c.getComponentType());
-    else
+    } else {
       return c.getComponentType().isPrimitive();
+    }
   }
 
   /**
@@ -811,11 +830,11 @@ public class XMLSerialization implements RevisionHandler {
    * @see #m_ClassnameOverride
    */
   public Element writeToXML(Element parent, Object o, String name)
-      throws Exception {
+    throws Exception {
     String classname;
     Element node;
-    Hashtable memberlist;
-    Enumeration enm;
+    Hashtable<String, PropertyDescriptor> memberlist;
+    Enumeration<String> enm;
     Object member;
     String memberName;
     Method method;
@@ -829,8 +848,9 @@ public class XMLSerialization implements RevisionHandler {
     node = null;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), name);
+    }
 
     // special handling of null-objects
     if (o == null) {
@@ -843,8 +863,9 @@ public class XMLSerialization implements RevisionHandler {
 
     // get information about object
     array = 0;
-    if (o.getClass().isArray())
+    if (o.getClass().isArray()) {
       array = Utils.getArrayDimensions(o);
+    }
     if (array > 0) {
       classname = Utils.getArrayClass(o.getClass()).getName();
       primitive = isPrimitiveArray(o.getClass());
@@ -853,13 +874,15 @@ public class XMLSerialization implements RevisionHandler {
       // (for primitives the getClass() method returns the corresponding
       // Object-Class!)
       desc = null;
-      if (parent != null)
+      if (parent != null) {
         desc = determineDescriptor(parent.getAttribute(ATT_CLASS), name);
+      }
 
-      if (desc != null)
+      if (desc != null) {
         primitive = desc.getPropertyType().isPrimitive();
-      else
+      } else {
         primitive = o.getClass().isPrimitive();
+      }
 
       // for primitives: retrieve primitive type, otherwise the object's real
       // class. For non-primitives we can't use the descriptor, since that
@@ -875,18 +898,19 @@ public class XMLSerialization implements RevisionHandler {
     // fix class/primitive if parent is array of primitives, thanks to
     // reflection the elements of the array are objects and not primitives!
     if ((parent != null) && (!parent.getAttribute(ATT_ARRAY).equals(""))
-        && (!parent.getAttribute(ATT_ARRAY).equals(VAL_NO))
-        && (stringToBoolean(parent.getAttribute(ATT_PRIMITIVE)))) {
+      && (!parent.getAttribute(ATT_ARRAY).equals(VAL_NO))
+      && (stringToBoolean(parent.getAttribute(ATT_PRIMITIVE)))) {
       primitive = true;
       classname = parent.getAttribute(ATT_CLASS);
       obj = null;
     }
 
     // perhaps we need to override the classname
-    if (obj != null)
+    if (obj != null) {
       classname = overrideClassname(obj); // for non-arrays
-    else
+    } else {
       classname = overrideClassname(classname); // for arrays
+    }
 
     // create node for current object
     node = addElement(parent, name, classname, primitive, array);
@@ -914,11 +938,11 @@ public class XMLSerialization implements RevisionHandler {
             // these five entities are recognized by every XML processor
             // see http://www.xml.com/pub/a/2001/03/14/trxml10.html
             tmpStr = tmpStr.replaceAll("&", "&amp;").replaceAll("\"", "&quot;")
-                .replaceAll("'", "&apos;").replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;");
+              .replaceAll("'", "&apos;").replaceAll("<", "&lt;")
+              .replaceAll(">", "&gt;");
             // in addition, replace some other entities as well
             tmpStr = tmpStr.replaceAll("\n", "&#10;").replaceAll("\r", "&#13;")
-                .replaceAll("\t", "&#9;");
+              .replaceAll("\t", "&#9;");
 
             if (o instanceof java.io.File) {
               // hack to force separators to be always saved as /
@@ -934,15 +958,17 @@ public class XMLSerialization implements RevisionHandler {
 
             // in ignore list?
             if ((m_Properties.isIgnored(memberName))
-                || (m_Properties.isIgnored(getPath(node) + "." + memberName))
-                || (m_Properties.isIgnored(o, getPath(node) + "." + memberName)))
+              || (m_Properties.isIgnored(getPath(node) + "." + memberName))
+              || (m_Properties.isIgnored(o, getPath(node) + "." + memberName))) {
               continue;
+            }
 
             // is it allowed?
-            if (!m_Properties.isAllowed(o, memberName))
+            if (!m_Properties.isAllowed(o, memberName)) {
               continue;
+            }
 
-            desc = (PropertyDescriptor) memberlist.get(memberName);
+            desc = memberlist.get(memberName);
             method = desc.getReadMethod();
             member = method.invoke(o, (Object[]) null);
             invokeWriteToXML(node, member, memberName);
@@ -966,9 +992,9 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if invocation or turning into XML fails
    */
   protected Element invokeWriteToXML(Element parent, Object o, String name)
-      throws Exception {
+    throws Exception {
     Method method;
-    Class[] methodClasses;
+    Class<?>[] methodClasses;
     Object[] methodArgs;
     boolean array;
     Element node;
@@ -981,22 +1007,24 @@ public class XMLSerialization implements RevisionHandler {
     m_CurrentNode = parent;
 
     // default, if null
-    if (o == null)
+    if (o == null) {
       useDefault = true;
+    }
 
     try {
       if (!useDefault) {
         array = o.getClass().isArray();
 
         // display name?
-        if (m_CustomMethods.write().contains(name))
+        if (m_CustomMethods.write().contains(name)) {
           method = m_CustomMethods.write().get(o.getClass());
-        else
+        } else
         // class?
-        if ((!array) && (m_CustomMethods.write().contains(o.getClass())))
+        if ((!array) && (m_CustomMethods.write().contains(o.getClass()))) {
           method = m_CustomMethods.write().get(o.getClass());
-        else
+        } else {
           method = null;
+        }
 
         useDefault = (method == null);
       }
@@ -1018,8 +1046,9 @@ public class XMLSerialization implements RevisionHandler {
         node = writeToXML(parent, o, name);
       }
     } catch (Exception e) {
-      if (DEBUG)
+      if (DEBUG) {
         e.printStackTrace();
+      }
 
       if (m_CurrentNode != null) {
         System.out.println("Happened near: " + getPath(m_CurrentNode));
@@ -1080,7 +1109,7 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if introsepction fails
    */
   protected PropertyDescriptor getDescriptorByName(Object o, String name)
-      throws Exception {
+    throws Exception {
     PropertyDescriptor result;
     PropertyDescriptor[] desc;
     int i;
@@ -1105,27 +1134,28 @@ public class XMLSerialization implements RevisionHandler {
    * @return the class if it could be retrieved
    * @throws Exception if it class retrieval fails
    */
-  protected Class determineClass(String name) throws Exception {
-    Class result;
+  protected Class<?> determineClass(String name) throws Exception {
+    Class<?> result;
 
-    if (name.equals(Boolean.TYPE.getName()))
+    if (name.equals(Boolean.TYPE.getName())) {
       result = Boolean.TYPE;
-    else if (name.equals(Byte.TYPE.getName()))
+    } else if (name.equals(Byte.TYPE.getName())) {
       result = Byte.TYPE;
-    else if (name.equals(Character.TYPE.getName()))
+    } else if (name.equals(Character.TYPE.getName())) {
       result = Character.TYPE;
-    else if (name.equals(Double.TYPE.getName()))
+    } else if (name.equals(Double.TYPE.getName())) {
       result = Double.TYPE;
-    else if (name.equals(Float.TYPE.getName()))
+    } else if (name.equals(Float.TYPE.getName())) {
       result = Float.TYPE;
-    else if (name.equals(Integer.TYPE.getName()))
+    } else if (name.equals(Integer.TYPE.getName())) {
       result = Integer.TYPE;
-    else if (name.equals(Long.TYPE.getName()))
+    } else if (name.equals(Long.TYPE.getName())) {
       result = Long.TYPE;
-    else if (name.equals(Short.TYPE.getName()))
+    } else if (name.equals(Short.TYPE.getName())) {
       result = Short.TYPE;
-    else
+    } else {
       result = Class.forName(name);
+    }
 
     return result;
   }
@@ -1145,31 +1175,32 @@ public class XMLSerialization implements RevisionHandler {
   protected Object getPrimitive(Element node) throws Exception {
     Object result;
     Object tmpResult;
-    Class cls;
+    Class<?> cls;
 
     cls = determineClass(node.getAttribute(ATT_CLASS));
     tmpResult = Array.newInstance(cls, 1);
 
-    if (cls == Boolean.TYPE)
+    if (cls == Boolean.TYPE) {
       Array.set(tmpResult, 0, new Boolean(XMLDocument.getContent(node)));
-    else if (cls == Byte.TYPE)
+    } else if (cls == Byte.TYPE) {
       Array.set(tmpResult, 0, new Byte(XMLDocument.getContent(node)));
-    else if (cls == Character.TYPE)
+    } else if (cls == Character.TYPE) {
       Array.set(tmpResult, 0, new Character(XMLDocument.getContent(node)
-          .charAt(0)));
-    else if (cls == Double.TYPE)
+        .charAt(0)));
+    } else if (cls == Double.TYPE) {
       Array.set(tmpResult, 0, new Double(XMLDocument.getContent(node)));
-    else if (cls == Float.TYPE)
+    } else if (cls == Float.TYPE) {
       Array.set(tmpResult, 0, new Float(XMLDocument.getContent(node)));
-    else if (cls == Integer.TYPE)
+    } else if (cls == Integer.TYPE) {
       Array.set(tmpResult, 0, new Integer(XMLDocument.getContent(node)));
-    else if (cls == Long.TYPE)
+    } else if (cls == Long.TYPE) {
       Array.set(tmpResult, 0, new Long(XMLDocument.getContent(node)));
-    else if (cls == Short.TYPE)
+    } else if (cls == Short.TYPE) {
       Array.set(tmpResult, 0, new Short(XMLDocument.getContent(node)));
-    else
+    } else {
       throw new Exception("Cannot get primitive for class '" + cls.getName()
-          + "'!");
+        + "'!");
+    }
 
     result = Array.get(tmpResult, 0);
 
@@ -1185,8 +1216,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   public boolean readBooleanFromXML(Element node) throws Exception {
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1202,8 +1234,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   public byte readByteFromXML(Element node) throws Exception {
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1219,8 +1252,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   public char readCharFromXML(Element node) throws Exception {
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1236,8 +1270,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   public double readDoubleFromXML(Element node) throws Exception {
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1253,8 +1288,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   public float readFloatFromXML(Element node) throws Exception {
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1270,8 +1306,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   public int readIntFromXML(Element node) throws Exception {
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1287,8 +1324,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   public long readLongFromXML(Element node) throws Exception {
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1304,8 +1342,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   public short readShortFromXML(Element node) throws Exception {
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1323,40 +1362,44 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if something goes wrong
    */
   public Object readFromXML(Object o, String name, Element child)
-      throws Exception {
+    throws Exception {
     Object result;
-    Hashtable descriptors;
+    Hashtable<String, PropertyDescriptor> descriptors;
     PropertyDescriptor descriptor;
     String methodName;
     Method method;
     Object[] methodArgs;
     Object tmpResult;
-    Class paramClass;
+    Class<?> paramClass;
 
     result = o;
     descriptors = getDescriptors(result);
     methodName = child.getAttribute(ATT_NAME);
 
     // in ignore list?
-    if (m_Properties.isIgnored(getPath(child)))
+    if (m_Properties.isIgnored(getPath(child))) {
       return result;
+    }
 
     // in ignore list of class?
-    if (m_Properties.isIgnored(result, getPath(child)))
+    if (m_Properties.isIgnored(result, getPath(child))) {
       return result;
+    }
 
     // is it allowed?
-    if (!m_Properties.isAllowed(result, methodName))
+    if (!m_Properties.isAllowed(result, methodName)) {
       return result;
+    }
 
-    descriptor = (PropertyDescriptor) descriptors.get(methodName);
+    descriptor = descriptors.get(methodName);
 
     // unknown property?
     if (descriptor == null) {
       if (!m_CustomMethods.read().contains(methodName)
-          && !SUPPRESS_PROPERTY_WARNINGS.contains(name + "." + methodName))
+        && !SUPPRESS_PROPERTY_WARNINGS.contains(name + "." + methodName)) {
         System.out.println("WARNING: unknown property '" + name + "."
-            + methodName + "'!");
+          + methodName + "'!");
+      }
       return result;
     }
 
@@ -1368,8 +1411,9 @@ public class XMLSerialization implements RevisionHandler {
     // array?
     if (paramClass.isArray()) {
       // no data?
-      if (Array.getLength(tmpResult) == 0)
+      if (Array.getLength(tmpResult) == 0) {
         return result;
+      }
       methodArgs[0] = tmpResult;
     }
     // non-array
@@ -1396,10 +1440,11 @@ public class XMLSerialization implements RevisionHandler {
     int i;
 
     // have we reached the innermost dimension?
-    if (stringToBoolean(node.getAttribute(ATT_ARRAY)))
+    if (stringToBoolean(node.getAttribute(ATT_ARRAY))) {
       children = XMLDocument.getChildTags(node);
-    else
+    } else {
       children = null;
+    }
 
     if (children != null) {
       tmpVector = new Vector<Integer>();
@@ -1410,8 +1455,9 @@ public class XMLSerialization implements RevisionHandler {
 
         // further dimensions
         if (tmp != null) {
-          for (i = tmp.length - 1; i >= 0; i--)
+          for (i = tmp.length - 1; i >= 0; i--) {
             tmpVector.add(new Integer(tmp[i]));
+          }
         }
 
         // add current dimension
@@ -1422,8 +1468,9 @@ public class XMLSerialization implements RevisionHandler {
 
       // generate result
       result = new int[tmpVector.size()];
-      for (i = 0; i < result.length; i++)
+      for (i = 0; i < result.length; i++) {
         result[i] = tmpVector.get(tmpVector.size() - i - 1).intValue();
+      }
     } else {
       result = null;
     }
@@ -1448,14 +1495,15 @@ public class XMLSerialization implements RevisionHandler {
     Vector<Element> children;
     Object result;
     int i;
-    Constructor constructor;
-    Class[] methodClasses;
+    Constructor<?> constructor;
+    Class<?>[] methodClasses;
     Object[] methodArgs;
     Element child;
 
     // for debugging only
-    if (DEBUG)
+    if (DEBUG) {
       trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
 
     m_CurrentNode = node;
 
@@ -1468,8 +1516,9 @@ public class XMLSerialization implements RevisionHandler {
     isnull = stringToBoolean(node.getAttribute(ATT_NULL));
 
     // special handling of null
-    if (isnull)
+    if (isnull) {
       return result;
+    }
 
     children = XMLDocument.getChildTags(node);
     cls = determineClass(classname);
@@ -1480,7 +1529,7 @@ public class XMLSerialization implements RevisionHandler {
       for (i = 0; i < children.size(); i++) {
         child = children.get(i);
         Array.set(result, Integer.parseInt(child.getAttribute(ATT_NAME)),
-            invokeReadFromXML(child));
+          invokeReadFromXML(child));
       }
     }
     // non-array
@@ -1509,7 +1558,7 @@ public class XMLSerialization implements RevisionHandler {
               // sorry, can't instantiate!
               result = null;
               System.out.println("ERROR: Can't instantiate '" + classname
-                  + "'!");
+                + "'!");
             }
           }
         }
@@ -1517,8 +1566,9 @@ public class XMLSerialization implements RevisionHandler {
       // normal get/set methods
       else {
         result = cls.newInstance();
-        for (i = 0; i < children.size(); i++)
+        for (i = 0; i < children.size(); i++) {
           result = readFromXML(result, name, children.get(i));
+        }
       }
     }
 
@@ -1535,7 +1585,7 @@ public class XMLSerialization implements RevisionHandler {
    */
   protected Object invokeReadFromXML(Element node) throws Exception {
     Method method;
-    Class[] methodClasses;
+    Class<?>[] methodClasses;
     Object[] methodArgs;
     boolean array;
     boolean useDefault;
@@ -1546,24 +1596,26 @@ public class XMLSerialization implements RevisionHandler {
 
     try {
       // special handling of null values
-      if (stringToBoolean(node.getAttribute(ATT_NULL)))
+      if (stringToBoolean(node.getAttribute(ATT_NULL))) {
         useDefault = true;
+      }
 
       if (!useDefault) {
         array = stringToBoolean(node.getAttribute(ATT_ARRAY));
 
         // display name?
-        if (m_CustomMethods.read().contains(node.getAttribute(ATT_NAME)))
+        if (m_CustomMethods.read().contains(node.getAttribute(ATT_NAME))) {
           method = m_CustomMethods.read().get(node.getAttribute(ATT_NAME));
-        else
+        } else
         // class name?
         if ((!array)
-            && (m_CustomMethods.read().contains(determineClass(node
-                .getAttribute(ATT_CLASS)))))
+          && (m_CustomMethods.read().contains(determineClass(node
+            .getAttribute(ATT_CLASS))))) {
           method = m_CustomMethods.read().get(
-              determineClass(node.getAttribute(ATT_CLASS)));
-        else
+            determineClass(node.getAttribute(ATT_CLASS)));
+        } else {
           method = null;
+        }
 
         useDefault = (method == null);
       }
@@ -1581,8 +1633,9 @@ public class XMLSerialization implements RevisionHandler {
         return readFromXML(node);
       }
     } catch (Exception e) {
-      if (DEBUG)
+      if (DEBUG) {
         e.printStackTrace();
+      }
 
       if (m_CurrentNode != null) {
         System.out.println("Happened near: " + getPath(m_CurrentNode));
@@ -1628,14 +1681,15 @@ public class XMLSerialization implements RevisionHandler {
    * @throws Exception if object instantiation fails
    */
   public Object fromXML(Document document) throws Exception {
-    if (!document.getDocumentElement().getNodeName().equals(ROOT_NODE))
+    if (!document.getDocumentElement().getNodeName().equals(ROOT_NODE)) {
       throw new Exception("Expected '" + ROOT_NODE
-          + "' as root element, but found '"
-          + document.getDocumentElement().getNodeName() + "'!");
+        + "' as root element, but found '"
+        + document.getDocumentElement().getNodeName() + "'!");
+    }
     m_Document.setDocument(readPreProcess(document));
     checkVersion();
     return readPostProcess(invokeReadFromXML(m_Document.getDocument()
-        .getDocumentElement()));
+      .getDocumentElement()));
   }
 
   /**
@@ -1744,17 +1798,17 @@ public class XMLSerialization implements RevisionHandler {
         // read
         FileInputStream fi = new FileInputStream(args[0]);
         ObjectInputStream oi = new ObjectInputStream(
-            new BufferedInputStream(fi));
+          new BufferedInputStream(fi));
         Object o = oi.readObject();
         oi.close();
         // print to stdout
         // new XMLSerialization().write(System.out, o);
         new XMLSerialization().write(new BufferedOutputStream(
-            new FileOutputStream(args[0] + ".xml")), o);
+          new FileOutputStream(args[0] + ".xml")), o);
         // print to binary file
         FileOutputStream fo = new FileOutputStream(args[0] + ".exp");
         ObjectOutputStream oo = new ObjectOutputStream(
-            new BufferedOutputStream(fo));
+          new BufferedOutputStream(fo));
         oo.writeObject(o);
         oo.close();
       }

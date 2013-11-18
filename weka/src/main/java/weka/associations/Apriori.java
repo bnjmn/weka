@@ -1703,11 +1703,11 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     // Build rules
     for (int j = 1; j < m_Ls.size(); j++) {
       ArrayList<Object> currentItemSets = m_Ls.get(j);
-      @SuppressWarnings("unchecked")
-      Enumeration<AprioriItemSet> enumItemSets = new WekaEnumeration(
+      Enumeration<Object> enumItemSets = new WekaEnumeration<Object>(
         currentItemSets);
       while (enumItemSets.hasMoreElements()) {
-        AprioriItemSet currentItemSet = enumItemSets.nextElement();
+        AprioriItemSet currentItemSet = (AprioriItemSet) enumItemSets
+          .nextElement();
         // AprioriItemSet currentItemSet = new
         // AprioriItemSet((ItemSet)enumItemSets.nextElement());
         rules = currentItemSet.generateRulesBruteForce(m_minMetric,
@@ -1737,11 +1737,11 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     // Build rules
     for (int j = 1; j < m_Ls.size(); j++) {
       ArrayList<Object> currentItemSets = m_Ls.get(j);
-      @SuppressWarnings("unchecked")
-      Enumeration<AprioriItemSet> enumItemSets = new WekaEnumeration(
+      Enumeration<Object> enumItemSets = new WekaEnumeration<Object>(
         currentItemSets);
       while (enumItemSets.hasMoreElements()) {
-        AprioriItemSet currentItemSet = enumItemSets.nextElement();
+        AprioriItemSet currentItemSet = (AprioriItemSet) enumItemSets
+          .nextElement();
         // AprioriItemSet currentItemSet = new
         // AprioriItemSet((ItemSet)enumItemSets.nextElement());
         rules = currentItemSet.generateRules(m_minMetric, m_hashtables, j + 1);
@@ -1825,11 +1825,10 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
     // Build rules
     for (int j = 0; j < m_Ls.size(); j++) {
       ArrayList<Object> currentLabeledItemSets = m_Ls.get(j);
-      @SuppressWarnings("unchecked")
-      Enumeration<LabeledItemSet> enumLabeledItemSets = new WekaEnumeration(
+      Enumeration<Object> enumLabeledItemSets = new WekaEnumeration<Object>(
         currentLabeledItemSets);
       while (enumLabeledItemSets.hasMoreElements()) {
-        LabeledItemSet currentLabeledItemSet = enumLabeledItemSets
+        LabeledItemSet currentLabeledItemSet = (LabeledItemSet) enumLabeledItemSets
           .nextElement();
         rules = currentLabeledItemSet.generateRules(m_minMetric, false);
         for (int k = 0; k < rules[0].size(); k++) {

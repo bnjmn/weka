@@ -191,7 +191,7 @@ public class BinarySparseInstance extends SparseInstance {
       indices = newInd;
     }
     return new BinarySparseInstance(1.0, indices, numAttributes()
-        + inst.numAttributes());
+      + inst.numAttributes());
   }
 
   /**
@@ -225,7 +225,7 @@ public class BinarySparseInstance extends SparseInstance {
         int[] tempIndices = new int[m_Indices.length - 1];
         System.arraycopy(m_Indices, 0, tempIndices, 0, index);
         System.arraycopy(m_Indices, index + 1, tempIndices, index,
-            m_Indices.length - index - 1);
+          m_Indices.length - index - 1);
         m_Indices = tempIndices;
       }
     } else {
@@ -234,7 +234,7 @@ public class BinarySparseInstance extends SparseInstance {
         System.arraycopy(m_Indices, 0, tempIndices, 0, index + 1);
         tempIndices[index + 1] = attIndex;
         System.arraycopy(m_Indices, index + 1, tempIndices, index + 2,
-            m_Indices.length - index - 1);
+          m_Indices.length - index - 1);
         m_Indices = tempIndices;
       }
     }
@@ -257,7 +257,7 @@ public class BinarySparseInstance extends SparseInstance {
       int[] tempIndices = new int[m_Indices.length - 1];
       System.arraycopy(m_Indices, 0, tempIndices, 0, indexOfIndex);
       System.arraycopy(m_Indices, indexOfIndex + 1, tempIndices, indexOfIndex,
-          m_Indices.length - indexOfIndex - 1);
+        m_Indices.length - indexOfIndex - 1);
       m_Indices = tempIndices;
     }
   }
@@ -298,9 +298,9 @@ public class BinarySparseInstance extends SparseInstance {
         text.append(m_Indices[i] + " 1");
       } else {
         if (m_Dataset.attribute(m_Indices[i]).isNominal()
-            || m_Dataset.attribute(m_Indices[i]).isString()) {
+          || m_Dataset.attribute(m_Indices[i]).isString()) {
           text.append(m_Indices[i] + " "
-              + Utils.quote(m_Dataset.attribute(m_Indices[i]).value(1)));
+            + Utils.quote(m_Dataset.attribute(m_Indices[i]).value(1)));
         } else {
           text.append(m_Indices[i] + " 1");
         }
@@ -309,8 +309,8 @@ public class BinarySparseInstance extends SparseInstance {
     text.append('}');
     if (m_Weight != 1.0) {
       text.append(",{"
-          + Utils.doubleToString(m_Weight,
-              AbstractInstance.s_numericAfterDecimalPoint) + "}");
+        + Utils.doubleToString(m_Weight,
+          AbstractInstance.s_numericAfterDecimalPoint) + "}");
     }
     return text.toString();
   }
@@ -346,7 +346,6 @@ public class BinarySparseInstance extends SparseInstance {
   @Override
   public final double valueSparse(int indexOfIndex) {
 
-    int index = m_Indices[indexOfIndex]; // Throws if out of bounds
     return 1;
   }
 
@@ -522,7 +521,7 @@ public class BinarySparseInstance extends SparseInstance {
       copy.insertAttributeAt(0);
       copy.setDataset(inst.dataset());
       System.out.println("Copy with first attribute deleted and inserted: "
-          + copy);
+        + copy);
 
       // Same for second attribute
       copy.setDataset(null);
@@ -530,7 +529,7 @@ public class BinarySparseInstance extends SparseInstance {
       copy.insertAttributeAt(1);
       copy.setDataset(inst.dataset());
       System.out.println("Copy with second attribute deleted and inserted: "
-          + copy);
+        + copy);
 
       // Same for last attribute
       copy.setDataset(null);
@@ -538,26 +537,26 @@ public class BinarySparseInstance extends SparseInstance {
       copy.insertAttributeAt(2);
       copy.setDataset(inst.dataset());
       System.out.println("Copy with third attribute deleted and inserted: "
-          + copy);
+        + copy);
 
       // Enumerate attributes (leaving out the class attribute)
       System.out.println("Enumerating attributes (leaving out class):");
-      Enumeration enu = inst.enumerateAttributes();
+      Enumeration<Attribute> enu = inst.enumerateAttributes();
       while (enu.hasMoreElements()) {
-        Attribute att = (Attribute) enu.nextElement();
+        Attribute att = enu.nextElement();
         System.out.println(att);
       }
 
       // Headers are equivalent?
       System.out.println("Header of original and copy equivalent: "
-          + inst.equalHeaders(copy));
+        + inst.equalHeaders(copy));
 
       // Test for missing values
       System.out.println("Length of copy missing: " + copy.isMissing(length));
       System.out.println("Weight of copy missing: "
-          + copy.isMissing(weight.index()));
+        + copy.isMissing(weight.index()));
       System.out.println("Length of copy missing: "
-          + Utils.isMissingValue(copy.value(length)));
+        + Utils.isMissingValue(copy.value(length)));
 
       // Prints number of attributes and classes
       System.out.println("Number of attributes: " + copy.numAttributes());
@@ -577,7 +576,7 @@ public class BinarySparseInstance extends SparseInstance {
       System.out.println("Copy with class value set to \"second\": " + copy);
       copy.setMissing(1);
       System.out.println("Copy with second attribute set to be missing: "
-          + copy);
+        + copy);
       copy.setMissing(length);
       System.out.println("Copy with length set to be missing: " + copy);
       copy.setValue(0, 0);
@@ -591,14 +590,14 @@ public class BinarySparseInstance extends SparseInstance {
       System.out.println("Current weight of instance copy: " + copy.weight());
       copy.setWeight(2);
       System.out.println("Current weight of instance copy (set to 2): "
-          + copy.weight());
+        + copy.weight());
       System.out.println("Last value of copy: " + copy.toString(2));
       System.out.println("Value of position for copy: "
-          + copy.toString(position));
+        + copy.toString(position));
       System.out.println("Last value of copy (internal format): "
-          + copy.value(2));
+        + copy.value(2));
       System.out.println("Value of position for copy (internal format): "
-          + copy.value(position));
+        + copy.value(position));
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -36,7 +36,7 @@ import java.io.LineNumberReader;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class Version implements Comparable, RevisionHandler {
+public class Version implements Comparable<String>, RevisionHandler {
 
   /** the version file */
   public final static String VERSION_FILE = "weka/core/version.txt";
@@ -61,7 +61,7 @@ public class Version implements Comparable, RevisionHandler {
   static {
     try {
       InputStream inR = (new Version()).getClass().getClassLoader()
-          .getResourceAsStream(VERSION_FILE);
+        .getResourceAsStream(VERSION_FILE);
       // InputStream inR = ClassLoader.getSystemResourceAsStream(VERSION_FILE);
       LineNumberReader lnr = new LineNumberReader(new InputStreamReader(inR));
 
@@ -78,13 +78,13 @@ public class Version implements Comparable, RevisionHandler {
       lnr.close();
     } catch (Exception e) {
       System.err.println(Version.class.getName()
-          + ": Unable to load version information!");
+        + ": Unable to load version information!");
     }
   }
 
   /** the complete version */
   public static String VERSION = MAJOR + "." + MINOR + "." + REVISION
-      + (POINT > 0 ? "." + POINT : "") + (SNAPSHOT ? SNAPSHOT_STRING : "");
+    + (POINT > 0 ? "." + POINT : "") + (SNAPSHOT ? SNAPSHOT_STRING : "");
 
   /**
    * parses the version and stores the result in the arrays
@@ -95,7 +95,7 @@ public class Version implements Comparable, RevisionHandler {
    * @param rev the revision version
    */
   private static boolean parseVersion(String version, int[] maj, int[] min,
-      int[] rev, int[] point) {
+    int[] rev, int[] point) {
     int major = 0;
     int minor = 0;
     int revision = 0;
@@ -117,7 +117,7 @@ public class Version implements Comparable, RevisionHandler {
           tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
           if (tmpStr.indexOf(".") > 0) {
             revision = Integer
-                .parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
+              .parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
             tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
 
             if (!tmpStr.equals("")) {
@@ -133,16 +133,18 @@ public class Version implements Comparable, RevisionHandler {
             }
           }
         } else {
-          if (!tmpStr.equals(""))
+          if (!tmpStr.equals("")) {
             minor = Integer.parseInt(tmpStr);
-          else
+          } else {
             minor = 0;
+          }
         }
       } else {
-        if (!tmpStr.equals(""))
+        if (!tmpStr.equals("")) {
           major = Integer.parseInt(tmpStr);
-        else
+        } else {
           major = 0;
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -167,7 +169,7 @@ public class Version implements Comparable, RevisionHandler {
    *         provided version
    */
   @Override
-  public int compareTo(Object o) {
+  public int compareTo(String o) {
     int result;
     int major;
     int minor;
@@ -179,20 +181,12 @@ public class Version implements Comparable, RevisionHandler {
     int[] point = new int[1];
 
     // do we have a string?
-    if (o instanceof String) {
-      parseVersion((String) o, maj, min, rev, point);
-      major = maj[0];
-      minor = min[0];
-      revision = rev[0];
-      pnt = point[0];
-    } else {
-      System.out.println(this.getClass().getName()
-          + ": no version-string for comparTo povided!");
-      major = -1;
-      minor = -1;
-      revision = -1;
-      pnt = -1;
-    }
+
+    parseVersion(o, maj, min, rev, point);
+    major = maj[0];
+    minor = min[0];
+    revision = rev[0];
+    pnt = point[0];
 
     if (MAJOR < major) {
       result = -1;
@@ -231,7 +225,7 @@ public class Version implements Comparable, RevisionHandler {
    */
   @Override
   public boolean equals(Object o) {
-    return (compareTo(o) == 0);
+    return (compareTo((String) o) == 0);
   }
 
   /**
@@ -241,7 +235,7 @@ public class Version implements Comparable, RevisionHandler {
    * @param o the version-string to compare with
    * @return TRUE if this version is older than the given one
    */
-  public boolean isOlder(Object o) {
+  public boolean isOlder(String o) {
     return (compareTo(o) == -1);
   }
 
@@ -252,7 +246,7 @@ public class Version implements Comparable, RevisionHandler {
    * @param o the version-string to compare with
    * @return TRUE if this version is newer than the given one
    */
-  public boolean isNewer(Object o) {
+  public boolean isNewer(String o) {
     return (compareTo(o) == 1);
   }
 

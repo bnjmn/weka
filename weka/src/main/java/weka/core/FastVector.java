@@ -105,7 +105,7 @@ public class FastVector<E> extends ArrayList<E> implements Copyable,
    * @return an enumeration of this vector
    */
   public final Enumeration<E> elements() {
-    return new WekaEnumeration(this);
+    return new WekaEnumeration<E>(this);
   }
 
   /**
@@ -116,7 +116,7 @@ public class FastVector<E> extends ArrayList<E> implements Copyable,
    * @return an enumeration of this vector
    */
   public final Enumeration<E> elements(int index) {
-    return new WekaEnumeration(this, index);
+    return new WekaEnumeration<E>(this, index);
   }
 
   /**
