@@ -24,6 +24,7 @@ package weka.filters;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -43,13 +44,16 @@ public abstract class SimpleFilter extends Filter implements OptionHandler {
   /** for serialization */
   private static final long serialVersionUID = 5702974949137433141L;
 
-  /** Whether debugging is on */
+  /** Whether the filter is run in debug mode. */
   protected boolean m_Debug = false;
 
+  /** Whether capabilities should not be checked when input format is set. */
+  protected boolean m_DoNotCheckCapabilities = false;
+
   /**
-   * Returns a string describing this classifier.
+   * Returns a string describing this filter.
    * 
-   * @return a description of the classifier suitable for displaying in the
+   * @return a description of the filter suitable for displaying in the
    *         explorer/experimenter gui
    */
   public abstract String globalInfo();
@@ -61,27 +65,44 @@ public abstract class SimpleFilter extends Filter implements OptionHandler {
    */
   @Override
   public Enumeration<Option> listOptions() {
-    Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option("\tTurns on output of debugging information.",
-      "D", 0, "-D"));
+    Vector<Option> newVector = new Vector<Option>(2);
 
-    return result.elements();
+    newVector.addElement(new Option(
+      "\tIf set, filter is run in debug mode and\n"
+        + "\tmay output additional info to the console", "output-debug-info",
+      0, "-output-debug-info"));
+    newVector.addElement(new Option(
+      "\tIf set, filter capabilities are not checked when input format is set\n"
+        + "\t(use with caution).", "-do-not-check-capabilities", 0,
+      "-do-not-check-capabilities"));
+
+    return newVector.elements();
   }
 
   /**
-   * Parses a list of options for this object. Also resets the state of the
-   * filter (this reset doesn't affect the options).
+   * Parses a given list of options. Valid options are:
+   * <p>
+   * 
+   * -D <br>
+   * If set, filter is run in debug mode and may output additional info to the
+   * console.
+   * <p>
+   * 
+   * -do-not-check-capabilities <br>
+   * If set, filter capabilities are not checked when input format is set (use
+   * with caution).
+   * <p>
    * 
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   * @see #reset()
+   * @exception Exception if an option is not supported
    */
   @Override
   public void setOptions(String[] options) throws Exception {
-    reset();
 
-    setDebug(Utils.getFlag('D', options));
+    setDebug(Utils.getFlag("output-debug-info", options));
+    setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
+      options));
   }
 
   /**
@@ -91,32 +112,36 @@ public abstract class SimpleFilter extends Filter implements OptionHandler {
    */
   @Override
   public String[] getOptions() {
-    Vector<String> result;
 
-    result = new Vector<String>();
+    Vector<String> options = new Vector<String>();
 
     if (getDebug()) {
-      result.add("-D");
+      options.add("-output-debug-info");
+    }
+    if (getDoNotCheckCapabilities()) {
+      options.add("-do-not-check-capabilities");
     }
 
-    return result.toArray(new String[result.size()]);
+    return options.toArray(new String[0]);
   }
 
   /**
-   * Sets the debugging mode
+   * Set debugging mode.
    * 
-   * @param value if true, debugging information is output
+   * @param debug true if debug output should be printed
    */
-  public void setDebug(boolean value) {
-    m_Debug = value;
+  public void setDebug(boolean debug) {
+
+    m_Debug = debug;
   }
 
   /**
-   * Returns the current debugging mode state.
+   * Get whether debugging is turned on.
    * 
-   * @return true if debugging mode is on
+   * @return true if debugging output is on
    */
   public boolean getDebug() {
+
     return m_Debug;
   }
 
@@ -127,7 +152,59 @@ public abstract class SimpleFilter extends Filter implements OptionHandler {
    *         explorer/experimenter gui
    */
   public String debugTipText() {
-    return "Turns on output of debugging information.";
+    return "If set to true, filter may output additional info to "
+      + "the console.";
+  }
+
+  /**
+   * Set whether not to check capabilities.
+   * 
+   * @param doNotCheckCapabilities true if capabilities are not to be checked.
+   */
+  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
+
+    m_DoNotCheckCapabilities = doNotCheckCapabilities;
+  }
+
+  /**
+   * Get whether capabilities checking is turned off.
+   * 
+   * @return true if capabilities checking is turned off.
+   */
+  public boolean getDoNotCheckCapabilities() {
+
+    return m_DoNotCheckCapabilities;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String doNotCheckCapabilitiesTipText() {
+    return "If set, filter capabilities are not checked when input format is set"
+      + " (Use with caution to reduce runtime).";
+  }
+
+  /**
+   * Returns the Capabilities of this filter. Maximally permissive capabilities
+   * are allowed by default. Derived filters should override this method and
+   * first disable all capabilities and then enable just those capabilities that
+   * make sense for the scheme.
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
+   */
+  @Override
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // Do we want to effectively turn off the testWithFail
+    // method in Capabilities to save runtime()?
+    result.setTestWithFailAlwaysSucceeds(getDoNotCheckCapabilities());
+
+    return result;
   }
 
   /**
