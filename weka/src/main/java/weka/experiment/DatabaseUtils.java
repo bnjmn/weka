@@ -259,7 +259,7 @@ public class DatabaseUtils implements Serializable, RevisionHandler {
       "false").equals("true");
     m_checkForLowerCaseNames = PROPERTIES.getProperty("checkLowerCaseNames",
       "false").equals("true");
-    m_setAutoCommit = PROPERTIES.getProperty("setAutoCommit", "false").equals(
+    m_setAutoCommit = PROPERTIES.getProperty("setAutoCommit", "true").equals(
       "true");
     m_createIndex = PROPERTIES.getProperty("createIndex", "false").equals(
       "true");
