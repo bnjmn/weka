@@ -22,6 +22,7 @@
 package weka.filters.supervised.attribute;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -47,47 +48,66 @@ import weka.filters.SimpleBatchFilter;
 import weka.filters.SupervisedFilter;
 
 /**
- <!-- globalinfo-start -->
- * Merges values of all nominal attributes among the specified attributes, excluding the class attribute, using the CHAID method, but without considering to re-split merged subsets. It implements Steps 1 and 2 described by Kass (1980), see<br/>
+ * <!-- globalinfo-start --> Merges values of all nominal attributes among the
+ * specified attributes, excluding the class attribute, using the CHAID method,
+ * but without considering to re-split merged subsets. It implements Steps 1 and
+ * 2 described by Kass (1980), see<br/>
  * <br/>
- * Gordon V. Kass (1980). An Exploratory Technique for Investigating Large Quantities of Categorical Data. Applied Statistics. 29(2):119-127.<br/>
+ * Gordon V. Kass (1980). An Exploratory Technique for Investigating Large
+ * Quantities of Categorical Data. Applied Statistics. 29(2):119-127.<br/>
  * <br/>
- * Once attribute values have been merged, a chi-squared test using the Bonferroni correction is applied to check if the resulting attribute is a valid predictor, based on the Bonferroni multiplier in Equation 3.2 in Kass (1980). If an attribute does not pass this test, all remaining values (if any) are merged. Nevertheless, useless predictors can slip through without being fully merged, e.g. identifier attributes.<br/>
+ * Once attribute values have been merged, a chi-squared test using the
+ * Bonferroni correction is applied to check if the resulting attribute is a
+ * valid predictor, based on the Bonferroni multiplier in Equation 3.2 in Kass
+ * (1980). If an attribute does not pass this test, all remaining values (if
+ * any) are merged. Nevertheless, useless predictors can slip through without
+ * being fully merged, e.g. identifier attributes.<br/>
  * <br/>
- * The code applies the Yates correction when the chi-squared statistic is computed.<br/>
+ * The code applies the Yates correction when the chi-squared statistic is
+ * computed.<br/>
  * <br/>
- * Note that the algorithm is quadratic in the number of attribute values for an attribute.
+ * Note that the algorithm is quadratic in the number of attribute values for an
+ * attribute.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -D
- *  Turns on output of debugging information.</pre>
+ * <pre>
+ * -D
+ *  Turns on output of debugging information.
+ * </pre>
  * 
- * <pre> -L &lt;double&gt;
+ * <pre>
+ * -L &lt;double&gt;
  *  The significance level (default: 0.05).
  * </pre>
  * 
- * <pre> -R &lt;range&gt;
+ * <pre>
+ * -R &lt;range&gt;
  *  Sets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'
  *  E.g.: first-5,7,9,20-last
- *  (default: first-last)</pre>
+ *  (default: first-last)
+ * </pre>
  * 
- * <pre> -V
- *  Invert matching sense (i.e. act on all attributes not specified in list)</pre>
+ * <pre>
+ * -V
+ *  Invert matching sense (i.e. act on all attributes not specified in list)
+ * </pre>
  * 
- * <pre> -O
- *  Use short identifiers for merged subsets.</pre>
+ * <pre>
+ * -O
+ *  Use short identifiers for merged subsets.
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Eibe Frank
  * @version $Revision$
  */
 public class MergeNominalValues extends SimpleBatchFilter implements
-    SupervisedFilter, WeightedInstancesHandler, TechnicalInformationHandler {
+  SupervisedFilter, WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 7447337831221353842L;
@@ -119,17 +139,17 @@ public class MergeNominalValues extends SimpleBatchFilter implements
   @Override
   public String globalInfo() {
     return "Merges values of all nominal attributes among the specified attributes, excluding "
-        + "the class attribute, using the CHAID method, but without considering to re-split "
-        + "merged subsets. It implements Steps 1 and 2 described by Kass (1980), see\n\n"
-        + getTechnicalInformation().toString()
-        + "\n\n"
-        + "Once attribute values have been merged, a chi-squared test using the Bonferroni "
-        + "correction is applied to check if the resulting attribute is a valid predictor, "
-        + "based on the Bonferroni multiplier in Equation 3.2 in Kass (1980). If an attribute does "
-        + "not pass this test, all remaining values (if any) are merged. Nevertheless, useless "
-        + "predictors can slip through without being fully merged, e.g. identifier attributes.\n\n"
-        + "The code applies the Yates correction when the chi-squared statistic is computed.\n\n"
-        + "Note that the algorithm is quadratic in the number of attribute values for an attribute.";
+      + "the class attribute, using the CHAID method, but without considering to re-split "
+      + "merged subsets. It implements Steps 1 and 2 described by Kass (1980), see\n\n"
+      + getTechnicalInformation().toString()
+      + "\n\n"
+      + "Once attribute values have been merged, a chi-squared test using the Bonferroni "
+      + "correction is applied to check if the resulting attribute is a valid predictor, "
+      + "based on the Bonferroni multiplier in Equation 3.2 in Kass (1980). If an attribute does "
+      + "not pass this test, all remaining values (if any) are merged. Nevertheless, useless "
+      + "predictors can slip through without being fully merged, e.g. identifier attributes.\n\n"
+      + "The code applies the Yates correction when the chi-squared statistic is computed.\n\n"
+      + "Note that the algorithm is quadratic in the number of attribute values for an attribute.";
   }
 
   /**
@@ -146,9 +166,9 @@ public class MergeNominalValues extends SimpleBatchFilter implements
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "Gordon V. Kass");
     result
-        .setValue(
-            Field.TITLE,
-            "An Exploratory Technique for Investigating Large Quantities of Categorical Data");
+      .setValue(
+        Field.TITLE,
+        "An Exploratory Technique for Investigating Large Quantities of Categorical Data");
     result.setValue(Field.JOURNAL, "Applied Statistics");
     result.setValue(Field.YEAR, "1980");
     result.setValue(Field.VOLUME, "29");
@@ -164,32 +184,28 @@ public class MergeNominalValues extends SimpleBatchFilter implements
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
-    Vector<Option> result;
-    Enumeration enm;
+  public Enumeration<Option> listOptions() {
 
-    result = new Vector<Option>();
-
-    enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement((Option) enm.nextElement());
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option("\tThe significance level (default: 0.05).\n",
-        "-L", 1, "-L <double>"));
+      "-L", 1, "-L <double>"));
 
     result
-        .addElement(new Option(
-            "\tSets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'\n"
-                + "\tE.g.: first-5,7,9,20-last\n" + "\t(default: first-last)",
-            "R", 1, "-R <range>"));
+      .addElement(new Option(
+        "\tSets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'\n"
+          + "\tE.g.: first-5,7,9,20-last\n" + "\t(default: first-last)", "R",
+        1, "-R <range>"));
 
     result
-        .addElement(new Option(
-            "\tInvert matching sense (i.e. act on all attributes not specified in list)",
-            "V", 0, "-V"));
+      .addElement(new Option(
+        "\tInvert matching sense (i.e. act on all attributes not specified in list)",
+        "V", 0, "-V"));
 
     result.addElement(new Option("\tUse short identifiers for merged subsets.",
-        "O", 0, "-O"));
+      "O", 0, "-O"));
+
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
@@ -203,16 +219,13 @@ public class MergeNominalValues extends SimpleBatchFilter implements
   public String[] getOptions() {
 
     Vector<String> result = new Vector<String>();
-    String[] options = super.getOptions();
-    for (int i = 0; i < options.length; i++) {
-      result.add(options[i]);
-    }
 
     result.add("-L");
     result.add("" + getSignificanceLevel());
 
-    if (!getAttributeIndices().equals(""))
+    if (!getAttributeIndices().equals("")) {
       ;
+    }
     {
       result.add("-R");
       result.add(getAttributeIndices());
@@ -226,6 +239,8 @@ public class MergeNominalValues extends SimpleBatchFilter implements
       result.add("-O");
     }
 
+    Collections.addAll(result, super.getOptions());
+
     return result.toArray(new String[result.size()]);
   }
 
@@ -233,28 +248,37 @@ public class MergeNominalValues extends SimpleBatchFilter implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -D
-   *  Turns on output of debugging information.</pre>
+   * <pre>
+   * -D
+   *  Turns on output of debugging information.
+   * </pre>
    * 
-   * <pre> -L &lt;double&gt;
+   * <pre>
+   * -L &lt;double&gt;
    *  The significance level (default: 0.05).
    * </pre>
    * 
-   * <pre> -R &lt;range&gt;
+   * <pre>
+   * -R &lt;range&gt;
    *  Sets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'
    *  E.g.: first-5,7,9,20-last
-   *  (default: first-last)</pre>
+   *  (default: first-last)
+   * </pre>
    * 
-   * <pre> -V
-   *  Invert matching sense (i.e. act on all attributes not specified in list)</pre>
+   * <pre>
+   * -V
+   *  Invert matching sense (i.e. act on all attributes not specified in list)
+   * </pre>
    * 
-   * <pre> -O
-   *  Use short identifiers for merged subsets.</pre>
+   * <pre>
+   * -O
+   *  Use short identifiers for merged subsets.
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -281,6 +305,8 @@ public class MergeNominalValues extends SimpleBatchFilter implements
     setUseShortIdentifiers(Utils.getFlag('O', options));
 
     super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -323,9 +349,9 @@ public class MergeNominalValues extends SimpleBatchFilter implements
   public String attributeIndicesTipText() {
 
     return "Specify range of attributes to act on (or its inverse)."
-        + " This is a comma separated list of attribute indices, with"
-        + " \"first\" and \"last\" valid values. Specify an inclusive"
-        + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
   }
 
   /**
@@ -372,7 +398,7 @@ public class MergeNominalValues extends SimpleBatchFilter implements
   public String invertSelectionTipText() {
 
     return "Determines whether selected attributes are to be acted "
-        + "on or all other attributes are used instead.";
+      + "on or all other attributes are used instead.";
   }
 
   /**
@@ -452,8 +478,8 @@ public class MergeNominalValues extends SimpleBatchFilter implements
 
     // Allocate arrays to store frequencies
     double[][][] freqs = new double[inputFormat.numAttributes()][][];
-    for (int i = 0; i < m_SelectedAttributes.length; i++) {
-      int current = m_SelectedAttributes[i];
+    for (int m_SelectedAttribute : m_SelectedAttributes) {
+      int current = m_SelectedAttribute;
       Attribute att = inputFormat.attribute(current);
       if ((current != inputFormat.classIndex()) && (att.isNominal())) {
         freqs[current] = new double[att.numValues()][inputFormat.numClasses()];
@@ -462,13 +488,13 @@ public class MergeNominalValues extends SimpleBatchFilter implements
 
     // Go through all the instances and compute frequencies
     for (Instance inst : inputFormat) {
-      for (int i = 0; i < m_SelectedAttributes.length; i++) {
-        int current = m_SelectedAttributes[i];
+      for (int m_SelectedAttribute : m_SelectedAttributes) {
+        int current = m_SelectedAttribute;
         if ((current != inputFormat.classIndex())
-            && (inputFormat.attribute(current).isNominal())) {
+          && (inputFormat.attribute(current).isNominal())) {
           if (!inst.isMissing(current) && !inst.classIsMissing()) {
             freqs[current][(int) inst.value(current)][(int) inst.classValue()] += inst
-                .weight();
+              .weight();
           }
         }
       }
@@ -477,10 +503,10 @@ public class MergeNominalValues extends SimpleBatchFilter implements
     // For each attribute in turn merge values
     m_AttToBeModified = new boolean[inputFormat.numAttributes()];
     m_Indicators = new int[inputFormat.numAttributes()][];
-    for (int i = 0; i < m_SelectedAttributes.length; i++) {
-      int current = m_SelectedAttributes[i];
+    for (int m_SelectedAttribute : m_SelectedAttributes) {
+      int current = m_SelectedAttribute;
       if ((current != inputFormat.classIndex())
-          && (inputFormat.attribute(current).isNominal())) {
+        && (inputFormat.attribute(current).isNominal())) {
 
         if (m_Debug) {
           System.err.println(inputFormat.attribute(current));
@@ -568,9 +594,9 @@ public class MergeNominalValues extends SimpleBatchFilter implements
     double multiplier = 1.0;
     for (int i = 0; i < r; i++) {
       sum += multiplier
-          * Math
-              .exp((c * Math.log(r - i) - (SpecialFunctions.lnFactorial(i) + SpecialFunctions
-                  .lnFactorial(r - i))));
+        * Math
+          .exp((c * Math.log(r - i) - (SpecialFunctions.lnFactorial(i) + SpecialFunctions
+            .lnFactorial(r - i))));
       multiplier *= -1.0;
     }
     return sum;
@@ -618,10 +644,10 @@ public class MergeNominalValues extends SimpleBatchFilter implements
         int df = (counts[0].length - 1) * (counts.length - 1);
         double originalSig = Statistics.chiSquaredProbability(val, df);
         double adjustedSig = originalSig
-            * BFfactor(indicators.length, counts.length);
+          * BFfactor(indicators.length, counts.length);
         if (m_Debug) {
           System.err.println("Original p-value: " + originalSig
-              + "\tAdjusted p-value: " + adjustedSig);
+            + "\tAdjusted p-value: " + adjustedSig);
         }
         if (!(adjustedSig <= m_SigLevel)) {
 
@@ -715,7 +741,7 @@ public class MergeNominalValues extends SimpleBatchFilter implements
 
     // Generate the output and return it
     Instances result = new Instances(getOutputFormat(),
-        instances.numInstances());
+      instances.numInstances());
     for (int i = 0; i < instances.numInstances(); i++) {
       Instance inst = instances.instance(i);
       double[] newData = new double[instances.numAttributes()];
@@ -757,4 +783,3 @@ public class MergeNominalValues extends SimpleBatchFilter implements
     runFilter(new MergeNominalValues(), args);
   }
 }
-

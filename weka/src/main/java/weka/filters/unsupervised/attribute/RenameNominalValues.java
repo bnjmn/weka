@@ -19,7 +19,6 @@
  *
  */
 
-
 package weka.filters.unsupervised.attribute;
 
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -48,36 +46,43 @@ import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- <!-- globalinfo-start -->
- * Renames the values of nominal attributes.
+ * <!-- globalinfo-start --> Renames the values of nominal attributes.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -R
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -R
  *  Attributes to act on. Can be either a range
  *  string (e.g. 1,2,6-10) OR a comma-separated list of named attributes
- *  (default none)</pre>
+ *  (default none)
+ * </pre>
  * 
- * <pre> -V
- *  Invert matching sense (i.e. act on all attributes other than those specified)</pre>
+ * <pre>
+ * -V
+ *  Invert matching sense (i.e. act on all attributes other than those specified)
+ * </pre>
  * 
- * <pre> -N
+ * <pre>
+ * -N
  *  Nominal labels and their replacement values.
- *  E.g. red:blue, black:white, fred:bob</pre>
+ *  E.g. red:blue, black:white, fred:bob
+ * </pre>
  * 
- * <pre> -I
- *  Ignore case when matching nominal values</pre>
+ * <pre>
+ * -I
+ *  Ignore case when matching nominal values
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
 public class RenameNominalValues extends Filter implements UnsupervisedFilter,
-    StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -2121767582746512209L;
@@ -123,7 +128,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
-    
+
     int classIndex = instanceInfo.classIndex();
 
     // setup the map
@@ -141,8 +146,8 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
         }
 
         m_renameMap.put(
-            m_ignoreCase ? parts[0].toLowerCase().trim() : parts[0].trim(),
-            parts[1].trim());
+          m_ignoreCase ? parts[0].toLowerCase().trim() : parts[0].trim(),
+          parts[1].trim());
       }
     }
 
@@ -168,7 +173,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
         Attribute found = instanceInfo.attribute(n);
         if (found == null) {
           throw new WekaException("Unable to find attribute '" + n
-              + "' in the incoming instances'");
+            + "' in the incoming instances'");
         }
         if (first) {
           indexes.append("" + (found.index() + 1));
@@ -185,7 +190,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
       m_selectedCols = tempRange;
     }
 
-    FastVector<Attribute> attributes = new FastVector<Attribute>();
+    ArrayList<Attribute> attributes = new ArrayList<Attribute>();
     for (int i = 0; i < instanceInfo.numAttributes(); i++) {
       if (m_selectedCols.isInRange(i)) {
         if (instanceInfo.attribute(i).isNominal()) {
@@ -194,7 +199,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
             String origV = instanceInfo.attribute(i).value(j);
 
             String replace = m_ignoreCase ? m_renameMap
-                .get(origV.toLowerCase()) : m_renameMap.get(origV);
+              .get(origV.toLowerCase()) : m_renameMap.get(origV);
             if (replace != null && !valsForAtt.contains(replace)) {
               valsForAtt.add(replace);
             } else {
@@ -202,7 +207,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
             }
           }
           Attribute newAtt = new Attribute(instanceInfo.attribute(i).name(),
-              valsForAtt);
+            valsForAtt);
           attributes.add(newAtt);
         } else {
           // ignore any selected attributes that are not nominal
@@ -216,7 +221,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
     }
 
     Instances outputFormat = new Instances(instanceInfo.relationName(),
-        attributes, 0);
+      attributes, 0);
     outputFormat.setClassIndex(classIndex);
     setOutputFormat(outputFormat);
 
@@ -262,7 +267,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
           } else {
             String currentS = instance.attribute(i).value((int) currentV);
             String replace = m_ignoreCase ? m_renameMap.get(currentS
-                .toLowerCase()) : m_renameMap.get(currentS);
+              .toLowerCase()) : m_renameMap.get(currentS);
             if (replace == null) {
               vals[i] = currentV;
             } else {
@@ -318,7 +323,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
    */
   public String selectedAttributesTipText() {
     return "The attributes (index range string or explicit "
-        + "comma-separated attribute names) to work on";
+      + "comma-separated attribute names) to work on";
   }
 
   public void setSelectedAttributes(String atts) {
@@ -337,7 +342,7 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
    */
   public String valueReplacementsTipText() {
     return "A comma separated list of values to replace and their "
-        + "replacements. E.g. red:green, blue:purple, fred:bob";
+      + "replacements. E.g. red:green, blue:purple, fred:bob";
   }
 
   public void setValueReplacements(String v) {
@@ -357,8 +362,8 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
   public String invertSelectionTipText() {
 
     return "Determines whether to apply the operation to the specified."
-        + " attributes, or all attributes but the specified ones."
-        + " If set to true, all attributes but the speficied ones will be affected.";
+      + " attributes, or all attributes but the specified ones."
+      + " If set to true, all attributes but the speficied ones will be affected.";
   }
 
   /**
@@ -402,50 +407,59 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
   }
 
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector<Option> newVector = new Vector<Option>(4);
     newVector
-        .addElement(new Option(
-            "\tAttributes to act on. Can be either a range\n"
-                + "\tstring (e.g. 1,2,6-10) OR a comma-separated list of named attributes\n\t"
-                + "(default none)", "R", 1, "-R"));
+      .addElement(new Option(
+        "\tAttributes to act on. Can be either a range\n"
+          + "\tstring (e.g. 1,2,6-10) OR a comma-separated list of named attributes\n\t"
+          + "(default none)", "R", 1, "-R"));
     newVector
-        .addElement(new Option(
-            "\tInvert matching sense (i.e. act on all attributes other than those specified)",
-            "V", 0, "-V"));
+      .addElement(new Option(
+        "\tInvert matching sense (i.e. act on all attributes other than those specified)",
+        "V", 0, "-V"));
     newVector.addElement(new Option(
-        "\tNominal labels and their replacement values.\n\t"
-            + "E.g. red:blue, black:white, fred:bob", "N", 1, "-N"));
+      "\tNominal labels and their replacement values.\n\t"
+        + "E.g. red:blue, black:white, fred:bob", "N", 1, "-N"));
     newVector.addElement(new Option(
-        "\tIgnore case when matching nominal values", "I", 0, "-I"));
+      "\tIgnore case when matching nominal values", "I", 0, "-I"));
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p>
+   * Parses a given list of options.
+   * <p>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -R
+   * <pre>
+   * -R
    *  Attributes to act on. Can be either a range
    *  string (e.g. 1,2,6-10) OR a comma-separated list of named attributes
-   *  (default none)</pre>
+   *  (default none)
+   * </pre>
    * 
-   * <pre> -V
-   *  Invert matching sense (i.e. act on all attributes other than those specified)</pre>
+   * <pre>
+   * -V
+   *  Invert matching sense (i.e. act on all attributes other than those specified)
+   * </pre>
    * 
-   * <pre> -N
+   * <pre>
+   * -N
    *  Nominal labels and their replacement values.
-   *  E.g. red:blue, black:white, fred:bob</pre>
+   *  E.g. red:blue, black:white, fred:bob
+   * </pre>
    * 
-   * <pre> -I
-   *  Ignore case when matching nominal values</pre>
+   * <pre>
+   * -I
+   *  Ignore case when matching nominal values
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
@@ -463,10 +477,13 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
 
     setInvertSelection(Utils.getFlag('V', options));
     setIgnoreCase(Utils.getFlag('I', options));
+
+    Utils.checkForRemainingOptions(options);
   }
 
   @Override
   public String[] getOptions() {
+
     List<String> opts = new ArrayList<String>();
 
     if (getSelectedAttributes() != null && getSelectedAttributes().length() > 0) {
@@ -509,4 +526,3 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
     runFilter(new RenameNominalValues(), argv);
   }
 }
-

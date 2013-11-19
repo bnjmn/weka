@@ -21,6 +21,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -29,7 +30,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -150,7 +150,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * matrix
    */
   public static final Tag[] TAGS_DSTRS_TYPE = { new Tag(SPARSE1, "Sparse1"),
-      new Tag(SPARSE2, "Sparse2"), new Tag(GAUSSIAN, "Gaussian"), };
+    new Tag(SPARSE2, "Sparse2"), new Tag(GAUSSIAN, "Gaussian"), };
 
   /**
    * Stores the distribution to use for calculating the random matrix
@@ -188,9 +188,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector<Option> newVector = new Vector<Option>(5);
 
     newVector.addElement(new Option(
       "\tThe number of dimensions (attributes) the data should be reduced to\n"
@@ -283,10 +283,11 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     } else {
       setPercent(0);
       mString = Utils.getOption('N', options);
-      if (mString.length() != 0)
+      if (mString.length() != 0) {
         setNumberOfAttributes(Integer.parseInt(mString));
-      else
+      } else {
         setNumberOfAttributes(10);
+      }
     }
 
     mString = Utils.getOption('R', options);
@@ -296,24 +297,27 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
 
     mString = Utils.getOption('D', options);
     if (mString.length() != 0) {
-      if (mString.equalsIgnoreCase("sparse1"))
+      if (mString.equalsIgnoreCase("sparse1")) {
         setDistribution(new SelectedTag(SPARSE1, TAGS_DSTRS_TYPE));
-      else if (mString.equalsIgnoreCase("sparse2"))
+      } else if (mString.equalsIgnoreCase("sparse2")) {
         setDistribution(new SelectedTag(SPARSE2, TAGS_DSTRS_TYPE));
-      else if (mString.equalsIgnoreCase("gaussian"))
+      } else if (mString.equalsIgnoreCase("gaussian")) {
         setDistribution(new SelectedTag(GAUSSIAN, TAGS_DSTRS_TYPE));
+      }
     }
 
-    if (Utils.getFlag('M', options))
+    if (Utils.getFlag('M', options)) {
       setReplaceMissingValues(true);
-    else
+    } else {
       setReplaceMissingValues(false);
+    }
 
     // if(Utils.getFlag('G', options))
     // setUseGaussian(true);
     // else
     // setUseGaussian(false);
 
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -324,37 +328,32 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   @Override
   public String[] getOptions() {
 
-    String[] options = new String[10];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
     // if (getUseGaussian()) {
     // options[current++] = "-G";
     // }
 
     if (getReplaceMissingValues()) {
-      options[current++] = "-M";
+      options.add("-M");
     }
 
     if (getPercent() == 0) {
-      options[current++] = "-N";
-      options[current++] = "" + getNumberOfAttributes();
+      options.add("-N");
+      options.add("" + getNumberOfAttributes());
     } else {
-      options[current++] = "-P";
-      options[current++] = "" + getPercent();
+      options.add("-P");
+      options.add("" + getPercent());
     }
 
-    options[current++] = "-R";
-    options[current++] = "" + getSeed();
+    options.add("-R");
+    options.add("" + getSeed());
 
     SelectedTag t = getDistribution();
-    options[current++] = "-D";
-    options[current++] = "" + t.getSelectedTag().getReadable();
+    options.add("-D");
+    options.add("" + t.getSelectedTag().getReadable());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -456,8 +455,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * @param newPercent the percentage of attributes
    */
   public void setPercent(double newPercent) {
-    if (newPercent > 0)
+    if (newPercent > 0) {
       newPercent /= 100;
+    }
     m_percent = newPercent;
   }
 
@@ -614,10 +614,11 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     for (int i = 0; i < instanceInfo.numAttributes(); i++) {
       if (i != instanceInfo.classIndex()
         && instanceInfo.attribute(i).isNominal()) {
-        if (instanceInfo.classIndex() >= 0)
+        if (instanceInfo.classIndex() >= 0) {
           m_ntob = new weka.filters.supervised.attribute.NominalToBinary();
-        else
+        } else {
           m_ntob = new weka.filters.unsupervised.attribute.NominalToBinary();
+        }
 
         break;
       }
@@ -629,10 +630,11 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     boolean temp = true;
     if (m_replaceMissing != null) {
       m_replaceMissing = new weka.filters.unsupervised.attribute.ReplaceMissingValues();
-      if (m_replaceMissing.setInputFormat(instanceInfo))
+      if (m_replaceMissing.setInputFormat(instanceInfo)) {
         temp = true;
-      else
+      } else {
         temp = false;
+      }
     }
 
     if (m_ntob != null) {
@@ -673,21 +675,25 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     boolean replaceDone = false;
     if (m_replaceMissing != null) {
       if (m_replaceMissing.input(instance)) {
-        if (m_OutputFormatDefined == false)
+        if (m_OutputFormatDefined == false) {
           setOutputFormat();
+        }
         newInstance = m_replaceMissing.output();
         replaceDone = true;
-      } else
+      } else {
         return false;
+      }
       ;
     }
 
     if (m_ntob != null) {
-      if (replaceDone == false)
+      if (replaceDone == false) {
         newInstance = instance;
+      }
       if (m_ntob.input(newInstance)) {
-        if (m_OutputFormatDefined == false)
+        if (m_OutputFormatDefined == false) {
           setOutputFormat();
+        }
         newInstance = m_ntob.output();
         newInstance = convertInstance(newInstance);
         push(newInstance);
@@ -696,8 +702,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
         return false;
       }
     } else {
-      if (replaceDone == false)
+      if (replaceDone == false) {
         newInstance = instance;
+      }
       newInstance = convertInstance(newInstance);
       push(newInstance);
       return true;
@@ -723,8 +730,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
         Instance newInstance, instance;
 
         while ((instance = m_replaceMissing.output()) != null) {
-          if (!m_OutputFormatDefined)
+          if (!m_OutputFormatDefined) {
             setOutputFormat();
+          }
           if (m_ntob != null) {
             m_ntob.input(instance);
           } else {
@@ -737,8 +745,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
           if (m_ntob.batchFinished()) {
             // Instance newInstance, instance;
             while ((instance = m_ntob.output()) != null) {
-              if (!m_OutputFormatDefined)
+              if (!m_OutputFormatDefined) {
                 setOutputFormat();
+              }
               newInstance = convertInstance(instance);
               push(newInstance);
             }
@@ -754,8 +763,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
       if (m_ntob.batchFinished()) {
         Instance newInstance, instance;
         while ((instance = m_ntob.output()) != null) {
-          if (!m_OutputFormatDefined)
+          if (!m_OutputFormatDefined) {
             setOutputFormat();
+          }
           newInstance = convertInstance(instance);
           push(newInstance);
         }
@@ -771,8 +781,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     Instances currentFormat;
     if (m_ntob != null) {
       currentFormat = m_ntob.getOutputFormat();
-    } else
+    } else {
       currentFormat = getInputFormat();
+    }
 
     if (m_percent > 0) {
       m_k = (int) ((getInputFormat().numAttributes() - 1) * m_percent);
@@ -784,20 +795,21 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
 
     Instances newFormat;
     int newClassIndex = -1;
-    FastVector attributes = new FastVector();
+    ArrayList<Attribute> attributes = new ArrayList<Attribute>();
     for (int i = 0; i < m_k; i++) {
-      attributes.addElement(new Attribute("K" + (i + 1)));
+      attributes.add(new Attribute("K" + (i + 1)));
     }
     if (currentFormat.classIndex() != -1) { // if classindex is set
       // attributes.removeElementAt(attributes.size()-1);
-      attributes.addElement(currentFormat.attribute(currentFormat.classIndex())
-        .copy());
+      attributes.add((Attribute) currentFormat.attribute(
+        currentFormat.classIndex()).copy());
       newClassIndex = attributes.size() - 1;
     }
 
     newFormat = new Instances(currentFormat.relationName(), attributes, 0);
-    if (newClassIndex != -1)
+    if (newClassIndex != -1) {
       newFormat.setClassIndex(newClassIndex);
+    }
     m_OutputFormatDefined = true;
 
     m_random = new Random();
@@ -805,14 +817,18 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
 
     m_rmatrix = new double[m_k][currentFormat.numAttributes()];
     if (m_distribution == GAUSSIAN) {
-      for (int i = 0; i < m_rmatrix.length; i++)
-        for (int j = 0; j < m_rmatrix[i].length; j++)
+      for (int i = 0; i < m_rmatrix.length; i++) {
+        for (int j = 0; j < m_rmatrix[i].length; j++) {
           m_rmatrix[i][j] = m_random.nextGaussian();
+        }
+      }
     } else {
       boolean useDstrWithZero = (m_distribution == SPARSE1);
-      for (int i = 0; i < m_rmatrix.length; i++)
-        for (int j = 0; j < m_rmatrix[i].length; j++)
+      for (int i = 0; i < m_rmatrix.length; i++) {
+        for (int j = 0; j < m_rmatrix[i].length; j++) {
           m_rmatrix[i][j] = rndmNum(useDstrWithZero);
+        }
+      }
     }
 
     setOutputFormat(newFormat);
@@ -883,10 +899,11 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * @return the generated number
    */
   protected double rndmNum(boolean useDstrWithZero) {
-    if (useDstrWithZero)
+    if (useDstrWithZero) {
       return sqrt3 * vals[weightedDistribution(weights)];
-    else
+    } else {
       return vals2[weightedDistribution(weights2)];
+    }
   }
 
   /**
@@ -898,15 +915,17 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   protected int weightedDistribution(int[] weights) {
     int sum = 0;
 
-    for (int i = 0; i < weights.length; i++)
-      sum += weights[i];
+    for (int weight : weights) {
+      sum += weight;
+    }
 
     int val = (int) Math.floor(m_random.nextDouble() * sum);
 
     for (int i = 0; i < weights.length; i++) {
       val -= weights[i];
-      if (val < 0)
+      if (val < 0) {
         return i;
+      }
     }
     return -1;
   }

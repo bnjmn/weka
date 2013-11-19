@@ -21,54 +21,62 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Utils;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.DenseInstance;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
 import weka.core.RevisionUtils;
-
+import weka.core.Utils;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.UnsupervisedFilter;
 
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.Enumeration;
-
 /**
- <!-- globalinfo-start -->
- * Merges all values of the specified nominal attribute that are sufficiently infrequent.
+ * <!-- globalinfo-start --> Merges all values of the specified nominal
+ * attribute that are sufficiently infrequent.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
- *  Turns on output of debugging information.</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -N &lt;int&gt;
+ * <pre>
+ * -D
+ *  Turns on output of debugging information.
+ * </pre>
+ * 
+ * <pre>
+ * -N &lt;int&gt;
  *  The minimum frequency for a value to remain (default: 2).
  * </pre>
  * 
- * <pre> -R &lt;range&gt;
+ * <pre>
+ * -R &lt;range&gt;
  *  Sets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'
  *  E.g.: first-5,7,9,20-last
- *  (default: 1,2)</pre>
+ *  (default: 1,2)
+ * </pre>
  * 
- * <pre> -V
- *  Invert matching sense (i.e. act on all attributes not specified in list)</pre>
+ * <pre>
+ * -V
+ *  Invert matching sense (i.e. act on all attributes not specified in list)
+ * </pre>
  * 
- <!-- options-end -->
- *
- * @author Eibe Frank 
+ * <!-- options-end -->
+ * 
+ * @author Eibe Frank
  * @version $Revision: ???? $
  */
-public class MergeInfrequentNominalValues extends SimpleBatchFilter implements UnsupervisedFilter {
+public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
+  UnsupervisedFilter {
 
   /** for serialization */
   static final long serialVersionUID = 4444337331921333847L;
@@ -90,99 +98,106 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
   /**
    * Returns a string describing this filter.
-   *
-   * @return      a description of the filter suitable for
-   *              displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
+  @Override
   public String globalInfo() {
-    return 
-        "Merges all values of the specified nominal attribute that are sufficiently infrequent.";
+    return "Merges all values of the specified nominal attribute that are sufficiently infrequent.";
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector<Option>        result;
-    Enumeration   enm;
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    result = new Vector<Option>();
-
-    enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement((Option)enm.nextElement());
-    
-    result.addElement(new Option("\tThe minimum frequency for a value to remain (default: 2).\n",
-                                 "-N", 1, "-N <int>"));
+    Vector<Option> result = new Vector<Option>(3);
 
     result.addElement(new Option(
-	"\tSets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'\n"
-	+ "\tE.g.: first-5,7,9,20-last\n"
-	+ "\t(default: 1,2)",
-	"R", 1, "-R <range>"));
-    result.addElement(new Option(
+      "\tThe minimum frequency for a value to remain (default: 2).\n", "-N", 1,
+      "-N <int>"));
+
+    result
+      .addElement(new Option(
+        "\tSets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'\n"
+          + "\tE.g.: first-5,7,9,20-last\n" + "\t(default: 1,2)", "R", 1,
+        "-R <range>"));
+    result
+      .addElement(new Option(
         "\tInvert matching sense (i.e. act on all attributes not specified in list)",
         "V", 0, "-V"));
 
+    result.addAll(Collections.list(super.listOptions()));
+
     return result.elements();
-  }	  
+  }
 
   /**
    * Gets the current settings of the filter.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
 
     Vector<String> result = new Vector<String>();
-    String[] options = super.getOptions();
-    for (int i = 0; i < options.length; i++) {
-      result.add(options[i]);
-    }
-    
+
     result.add("-N");
     result.add("" + getMinimumFrequency());
 
-    result.add("-R"); 
+    result.add("-R");
     result.add(getAttributeIndices());
 
     if (getInvertSelection()) {
       result.add("-V");
     }
 
-    return (String[]) result.toArray(new String[result.size()]);	  
-  }	  
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
+  }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -D
-   *  Turns on output of debugging information.</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -N &lt;int&gt;
+   * <pre>
+   * -D
+   *  Turns on output of debugging information.
+   * </pre>
+   * 
+   * <pre>
+   * -N &lt;int&gt;
    *  The minimum frequency for a value to remain (default: 2).
    * </pre>
    * 
-   * <pre> -R &lt;range&gt;
+   * <pre>
+   * -R &lt;range&gt;
    *  Sets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'
    *  E.g.: first-5,7,9,20-last
-   *  (default: 1,2)</pre>
+   *  (default: 1,2)
+   * </pre>
    * 
-   * <pre> -V
-   *  Invert matching sense (i.e. act on all attributes not specified in list)</pre>
+   * <pre>
+   * -V
+   *  Invert matching sense (i.e. act on all attributes not specified in list)
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported 
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    
+
     String minFrequencyString = Utils.getOption('N', options);
     if (minFrequencyString.length() != 0) {
       setMinimumFrequency(Integer.parseInt(minFrequencyString));
@@ -200,13 +215,15 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
     setInvertSelection(Utils.getFlag('V', options));
 
     super.setOptions(options);
-  }	  
-  
+
+    Utils.checkForRemainingOptions(options);
+  }
+
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minimumFrequencyTipText() {
 
@@ -215,17 +232,17 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
   /**
    * Gets the minimum frequency.
-   *
+   * 
    * @return int the minimum frequency.
    */
   public int getMinimumFrequency() {
 
     return m_MinimumFrequency;
   }
-    
+
   /**
    * Sets the minimum frequency.
-   *
+   * 
    * @param the minimum frequency as an integer.
    */
   public void setMinimumFrequency(int minF) {
@@ -235,9 +252,9 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String attributeIndicesTipText() {
 
@@ -249,7 +266,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
   /**
    * Get the current range selection.
-   *
+   * 
    * @return a string containing a comma separated list of ranges
    */
   public String getAttributeIndices() {
@@ -259,11 +276,11 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
   /**
    * Set which attributes are to be acted on (or not, if invert is true)
-   *
-   * @param rangeList a string representing the list of attributes.  Since
-   * the string will typically come from a user, attributes are indexed from
-   * 1. <br>
-   * eg: first-3,5,6-last
+   * 
+   * @param rangeList a string representing the list of attributes. Since the
+   *          string will typically come from a user, attributes are indexed
+   *          from 1. <br>
+   *          eg: first-3,5,6-last
    */
   public void setAttributeIndices(String rangeList) {
 
@@ -272,31 +289,32 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
   /**
    * Set which attributes are to be acted on (or not, if invert is true)
-   *
+   * 
    * @param attributes an array containing indexes of attributes to select.
-   * Since the array will typically come from a program, attributes are indexed
-   * from 0.
+   *          Since the array will typically come from a program, attributes are
+   *          indexed from 0.
    */
   public void setAttributeIndicesArray(int[] attributes) {
-    
+
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
 
   /**
    * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String invertSelectionTipText() {
 
-    return "Determines whether selected attributes are to be acted " + 
-      "on or all other attributes are used instead.";
+    return "Determines whether selected attributes are to be acted "
+      + "on or all other attributes are used instead.";
   }
 
   /**
-   * Get whether the supplied attributes are to be acted on or all other attributes.
-   *
+   * Get whether the supplied attributes are to be acted on or all other
+   * attributes.
+   * 
    * @return true if the supplied attributes will be kept
    */
   public boolean getInvertSelection() {
@@ -306,7 +324,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
   /**
    * Set whether selected attributes should be acted on or all other attributes.
-   *
+   * 
    * @param invert the new invert setting
    */
   public void setInvertSelection(boolean invert) {
@@ -317,17 +335,18 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
   /**
    * We need access to the full input data in determineOutputFormat.
    */
+  @Override
   public boolean allowAccessToFullInputFormat() {
     return true;
   }
 
   /**
-   * Determines the output format based on the input format and returns 
-   * this.
-   *
-   * @param inputFormat     the input format to base the output format on
-   * @return                the output format
+   * Determines the output format based on the input format and returns this.
+   * 
+   * @param inputFormat the input format to base the output format on
+   * @return the output format
    */
+  @Override
   protected Instances determineOutputFormat(Instances inputFormat) {
 
     // Set the upper limit of the range
@@ -338,22 +357,22 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
     // Allocate arrays to store frequencies
     int[][] freqs = new int[inputFormat.numAttributes()][];
-    for (int i = 0; i < m_SelectedAttributes.length; i++) {
-      int current = m_SelectedAttributes[i];
+    for (int m_SelectedAttribute : m_SelectedAttributes) {
+      int current = m_SelectedAttribute;
       Attribute att = inputFormat.attribute(current);
       if ((current != inputFormat.classIndex()) && (att.isNominal())) {
         freqs[current] = new int[att.numValues()];
       }
     }
-    
+
     // Go through all the instances and compute frequencies
     for (Instance inst : inputFormat) {
-      for (int i = 0; i < m_SelectedAttributes.length; i++) {
-        int current = m_SelectedAttributes[i];
-        if ((current != inputFormat.classIndex()) &&
-            (inputFormat.attribute(current).isNominal())) {
+      for (int m_SelectedAttribute : m_SelectedAttributes) {
+        int current = m_SelectedAttribute;
+        if ((current != inputFormat.classIndex())
+          && (inputFormat.attribute(current).isNominal())) {
           if (!inst.isMissing(current)) {
-            freqs[current][(int)inst.value(current)]++;
+            freqs[current][(int) inst.value(current)]++;
           }
         }
       }
@@ -361,14 +380,14 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
 
     // Get the number of infrequent values for the corresponding attributes
     int[] numInfrequentValues = new int[inputFormat.numAttributes()];
-    for (int i = 0; i < m_SelectedAttributes.length; i++) {
-      int current = m_SelectedAttributes[i];
+    for (int m_SelectedAttribute : m_SelectedAttributes) {
+      int current = m_SelectedAttribute;
       Attribute att = inputFormat.attribute(current);
       if ((current != inputFormat.classIndex()) && (att.isNominal())) {
         for (int k = 0; k < att.numValues(); k++) {
           if (m_Debug) {
-            System.err.println("Attribute: " + att.name() + " Value: " + 
-                               att.value(k) + " Freq.: " + freqs[current][k]);
+            System.err.println("Attribute: " + att.name() + " Value: "
+              + att.value(k) + " Freq.: " + freqs[current][k]);
           }
           if (freqs[current][k] < m_MinimumFrequency) {
             numInfrequentValues[current]++;
@@ -381,8 +400,8 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
     // Also, compute mapping of indices.
     m_AttToBeModified = new boolean[inputFormat.numAttributes()];
     m_NewValues = new int[inputFormat.numAttributes()][];
-    for (int i = 0; i < m_SelectedAttributes.length; i++) {
-      int current = m_SelectedAttributes[i];
+    for (int m_SelectedAttribute : m_SelectedAttributes) {
+      int current = m_SelectedAttribute;
       Attribute att = inputFormat.attribute(current);
       if ((numInfrequentValues[current] > 1)) {
 
@@ -401,7 +420,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
         }
       }
     }
-    
+
     // Create new header
     ArrayList<Attribute> atts = new ArrayList<Attribute>();
     for (int i = 0; i < inputFormat.numAttributes(); i++) {
@@ -411,7 +430,6 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
         ArrayList<String> vals = new ArrayList<String>();
         StringBuilder sb = new StringBuilder();
         vals.add(""); // Placeholder
-        int[] map = new int[att.numValues()];
         for (int j = 0; j < att.numValues(); j++) {
           if (m_NewValues[current][j] == 0) {
             if (sb.length() != 0) {
@@ -425,7 +443,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
         vals.set(0, sb.toString()); // Replace empty string
         atts.add(new Attribute(att.name() + "_merged_infrequent_values", vals));
       } else {
-        atts.add((Attribute)att.copy());
+        atts.add((Attribute) att.copy());
       }
     }
 
@@ -435,15 +453,16 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
     return data;
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
-    Capabilities 	result;
-    
+    Capabilities result;
+
     result = super.getCapabilities();
     result.disableAll();
 
@@ -455,34 +474,36 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
   /**
    * Processes the given data.
-   *
-   * @param instances   the data to process
-   * @return            the modified data
-   * @throws Exception  in case the processing goes wrong
+   * 
+   * @param instances the data to process
+   * @return the modified data
+   * @throws Exception in case the processing goes wrong
    */
+  @Override
   protected Instances process(Instances instances) throws Exception {
 
     // Generate the output and return it
-    Instances result = new Instances(getOutputFormat(), instances.numInstances());
+    Instances result = new Instances(getOutputFormat(),
+      instances.numInstances());
     for (int i = 0; i < instances.numInstances(); i++) {
       Instance inst = instances.instance(i);
       double[] newData = new double[instances.numAttributes()];
       for (int j = 0; j < instances.numAttributes(); j++) {
         if (m_AttToBeModified[j] && !inst.isMissing(j)) {
-          newData[j] = m_NewValues[j][(int)inst.value(j)];
+          newData[j] = m_NewValues[j][(int) inst.value(j)];
         } else {
           newData[j] = inst.value(j);
         }
       }
       DenseInstance instNew = new DenseInstance(1.0, newData);
       instNew.setDataset(result);
-      
+
       // copy possible strings, relational values...
       copyValues(instNew, false, inst.dataset(), getOutputFormat());
 
@@ -491,23 +512,23 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
     }
     return result;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision: 8034 $");
   }
 
   /**
    * runs the filter with the given arguments
-   *
-   * @param args      the commandline arguments
+   * 
+   * @param args the commandline arguments
    */
   public static void main(String[] args) {
     runFilter(new MergeInfrequentNominalValues(), args);
   }
 }
-
