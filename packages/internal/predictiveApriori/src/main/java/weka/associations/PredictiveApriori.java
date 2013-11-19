@@ -735,8 +735,8 @@ public class PredictiveApriori extends AbstractAssociator implements
     // Build rules
     for (int j = 0; j < m_Ls.size(); j++) {
       ArrayList<Object> currentItemSets = m_Ls.get(j);
-      @SuppressWarnings("unchecked")
-      Enumeration<Object> enumItemSets = new WekaEnumeration(currentItemSets);
+      Enumeration<Object> enumItemSets = new WekaEnumeration<Object>(
+        currentItemSets);
       while (enumItemSets.hasMoreElements()) {
         currentItemSet = new RuleGeneration(
           (ItemSet) enumItemSets.nextElement());
@@ -812,8 +812,8 @@ public class PredictiveApriori extends AbstractAssociator implements
     // Build rules
     for (int j = 0; j < m_Ls.size(); j++) {
       ArrayList<Object> currentItemSets = m_Ls.get(j);
-      @SuppressWarnings("unchecked")
-      Enumeration<Object> enumItemSets = new WekaEnumeration(currentItemSets);
+      Enumeration<Object> enumItemSets = new WekaEnumeration<Object>(
+        currentItemSets);
       while (enumItemSets.hasMoreElements()) {
         currentLItemSet = new CaRuleGeneration(
           (ItemSet) enumItemSets.nextElement());
