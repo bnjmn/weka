@@ -6,10 +6,10 @@
 PackageName=classAssociationRules
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2012-11-19
 
 # Title (required)
 Title=Class association rules algorithms (including an implementation of the CBA algorithm).
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Class association rules algorithms (including an implementation of the CBA algorithm). For more information see:<br><br> W. Li, J. Han, J.Pei: CMAR: Accurate and Efficient Classification Based on Multiple Class-Association Rules. In ICDM'01:369-376,2001.<br><br>B. Liu, W. Hsu, Y. Ma: Integrating Classification and Association Rule Mining. In KDD'98:80-86,1998.
 
 # Changes
-#Changes=
+Changes=Made minimal modifications required to compile against changes in associations package.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/classAssociationRules1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/classAssociationRules1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/classAssociationRules
@@ -41,4 +41,4 @@ URL=http://weka.sourceforge.net/doc.packages/classAssociationRules
 #Related=predictiveApriori
 
 # Dependencies
-Depends=weka (>=3.7.3), predictiveApriori (>=1.0.0)
+Depends=weka (>=3.7.11), predictiveApriori (>=1.0.3)
