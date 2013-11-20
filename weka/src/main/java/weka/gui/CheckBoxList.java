@@ -605,7 +605,7 @@ public class CheckBoxList extends JList {
    * it.
    */
   @Override
-  public void setListData(Vector<?> listData) {
+  public void setListData(@SuppressWarnings("rawtypes") Vector listData) {
     setModel(new CheckBoxListModel(listData));
   }
 
