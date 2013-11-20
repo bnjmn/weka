@@ -47,7 +47,7 @@ public class BeanInstance implements Serializable {
   /** for serialization */
   private static final long serialVersionUID = -7575653109025406342L;
 
-  private static ArrayList<Vector> TABBED_COMPONENTS = new ArrayList<Vector>();
+  private static ArrayList<Vector<BeanInstance>> TABBED_COMPONENTS = new ArrayList<Vector<BeanInstance>>();
 
   /*
    * static { Vector initial = new Vector(); TABBED_COMPONENTS.add(initial); }
@@ -59,7 +59,7 @@ public class BeanInstance implements Serializable {
    */
   public static void init() {
     TABBED_COMPONENTS.clear();
-    TABBED_COMPONENTS.add(new Vector());
+    TABBED_COMPONENTS.add(new Vector<BeanInstance>());
   }
 
   /**
@@ -83,14 +83,14 @@ public class BeanInstance implements Serializable {
    * @param container a <code>JComponent</code> value
    */
   public static void removeAllBeansFromContainer(JComponent container,
-      Integer... tab) {
+    Integer... tab) {
 
     int index = 0;
     if (tab.length > 0) {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
     }
@@ -98,7 +98,7 @@ public class BeanInstance implements Serializable {
     if (container != null) {
       if (components != null) {
         for (int i = 0; i < components.size(); i++) {
-          BeanInstance tempInstance = (BeanInstance) components.elementAt(i);
+          BeanInstance tempInstance = components.elementAt(i);
           Object tempBean = tempInstance.getBean();
           if (Beans.isInstanceOf(tempBean, JComponent.class)) {
             container.remove((JComponent) tempBean);
@@ -115,13 +115,13 @@ public class BeanInstance implements Serializable {
    * @param container a <code>JComponent</code> value
    */
   public static void addAllBeansToContainer(JComponent container,
-      Integer... tab) {
+    Integer... tab) {
     int index = 0;
     if (tab.length > 0) {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
     }
@@ -129,7 +129,7 @@ public class BeanInstance implements Serializable {
     if (container != null) {
       if (components != null) {
         for (int i = 0; i < components.size(); i++) {
-          BeanInstance tempInstance = (BeanInstance) components.elementAt(i);
+          BeanInstance tempInstance = components.elementAt(i);
           Object tempBean = tempInstance.getBean();
           if (Beans.isInstanceOf(tempBean, JComponent.class)) {
             container.add((JComponent) tempBean);
@@ -149,8 +149,8 @@ public class BeanInstance implements Serializable {
    * 
    * @return a vector of beans
    */
-  public static Vector getBeanInstances(Integer... tab) {
-    Vector returnV = null;
+  public static Vector<BeanInstance> getBeanInstances(Integer... tab) {
+    Vector<BeanInstance> returnV = null;
     int index = 0;
     if (tab.length > 0) {
       index = tab[0].intValue();
@@ -171,13 +171,13 @@ public class BeanInstance implements Serializable {
    * @param beanInstances a <code>Vector</code> value
    * @param container a <code>JComponent</code> value
    */
-  public static void setBeanInstances(Vector beanInstances,
-      JComponent container, Integer... tab) {
+  public static void setBeanInstances(Vector<BeanInstance> beanInstances,
+    JComponent container, Integer... tab) {
     removeAllBeansFromContainer(container, tab);
 
     if (container != null) {
       for (int i = 0; i < beanInstances.size(); i++) {
-        Object bean = ((BeanInstance) beanInstances.elementAt(i)).getBean();
+        Object bean = beanInstances.elementAt(i).getBean();
         if (Beans.isInstanceOf(bean, JComponent.class)) {
           container.add((JComponent) bean);
         }
@@ -205,12 +205,13 @@ public class BeanInstance implements Serializable {
    * @param beanInstances the vector of bean instances to add
    * @param container
    */
-  public static void addBeanInstances(Vector beanInstances, JComponent container) {
+  public static void addBeanInstances(Vector<BeanInstance> beanInstances,
+    JComponent container) {
     // reset(container);
 
     if (container != null) {
       for (int i = 0; i < beanInstances.size(); i++) {
-        Object bean = ((BeanInstance) beanInstances.elementAt(i)).getBean();
+        Object bean = beanInstances.elementAt(i).getBean();
         if (Beans.isInstanceOf(bean, JComponent.class)) {
           container.add((JComponent) bean);
         }
@@ -248,7 +249,7 @@ public class BeanInstance implements Serializable {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
     }
@@ -258,7 +259,7 @@ public class BeanInstance implements Serializable {
       FontMetrics fm = gx.getFontMetrics();
       int hf = fm.getAscent();
       for (int i = 0; i < components.size(); i++) {
-        BeanInstance bi = (BeanInstance) components.elementAt(i);
+        BeanInstance bi = components.elementAt(i);
         if (!(bi.getBean() instanceof Visible)) {
           continue;
         }
@@ -270,7 +271,7 @@ public class BeanInstance implements Serializable {
         int labelwidth = fm.stringWidth(label);
         if (labelwidth < width) {
           gx.drawString(label, (cx + (width / 2)) - (labelwidth / 2), cy
-              + height + hf + 2);
+            + height + hf + 2);
         } else {
           // split label
 
@@ -292,16 +293,16 @@ public class BeanInstance implements Serializable {
             String right = label.substring(closestI, label.length());
             if (left.length() > 1 && right.length() > 1) {
               gx.drawString(left, (cx + (width / 2))
-                  - (fm.stringWidth(left) / 2), cy + height + (hf * 1) + 2);
+                - (fm.stringWidth(left) / 2), cy + height + (hf * 1) + 2);
               gx.drawString(right, (cx + (width / 2))
-                  - (fm.stringWidth(right) / 2), cy + height + (hf * 2) + 2);
+                - (fm.stringWidth(right) / 2), cy + height + (hf * 2) + 2);
             } else {
               gx.drawString(label, (cx + (width / 2))
-                  - (fm.stringWidth(label) / 2), cy + height + (hf * 1) + 2);
+                - (fm.stringWidth(label) / 2), cy + height + (hf * 1) + 2);
             }
           } else {
             gx.drawString(label, (cx + (width / 2))
-                - (fm.stringWidth(label) / 2), cy + height + (hf * 1) + 2);
+              - (fm.stringWidth(label) / 2), cy + height + (hf * 1) + 2);
           }
         }
       }
@@ -323,12 +324,12 @@ public class BeanInstance implements Serializable {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
 
       for (int i = 0; i < components.size(); i++) {
-        BeanInstance t = (BeanInstance) components.elementAt(i);
+        BeanInstance t = components.elementAt(i);
         if (t.getBean() instanceof Startable) {
           startPoints.add(t);
         }
@@ -353,12 +354,12 @@ public class BeanInstance implements Serializable {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
 
       for (int i = 0; i < components.size(); i++) {
-        BeanInstance t = (BeanInstance) components.elementAt(i);
+        BeanInstance t = components.elementAt(i);
 
         if (t.getBean() instanceof BeanCommon) {
           String bN = ((BeanCommon) t).getCustomName();
@@ -387,7 +388,7 @@ public class BeanInstance implements Serializable {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
     }
@@ -395,7 +396,7 @@ public class BeanInstance implements Serializable {
     Rectangle tempBounds = new Rectangle();
     for (int i = 0; i < components.size(); i++) {
 
-      BeanInstance t = (BeanInstance) components.elementAt(i);
+      BeanInstance t = components.elementAt(i);
       JComponent temp = (JComponent) t.getBean();
 
       tempBounds = temp.getBounds(tempBounds);
@@ -413,13 +414,14 @@ public class BeanInstance implements Serializable {
    * @param boundingBox the bounding rectangle
    * @return a Vector of BeanInstances
    */
-  public static Vector findInstances(Rectangle boundingBox, Integer... tab) {
+  public static Vector<BeanInstance> findInstances(Rectangle boundingBox,
+    Integer... tab) {
     int index = 0;
     if (tab.length > 0) {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
     }
@@ -428,18 +430,13 @@ public class BeanInstance implements Serializable {
     FontMetrics fm = null;
 
     int centerX, centerY;
-    int startX, startY, endX, endY;
-    startX = (int) boundingBox.getX();
-    startY = (int) boundingBox.getY();
-    endX = (int) boundingBox.getMaxX();
-    endY = (int) boundingBox.getMaxY();
     int minX = Integer.MAX_VALUE;
     int minY = Integer.MAX_VALUE;
     int maxX = Integer.MIN_VALUE;
     int maxY = Integer.MIN_VALUE;
-    Vector result = new Vector();
+    Vector<BeanInstance> result = new Vector<BeanInstance>();
     for (int i = 0; i < components.size(); i++) {
-      BeanInstance t = (BeanInstance) components.elementAt(i);
+      BeanInstance t = components.elementAt(i);
       centerX = t.getX() + (t.getWidth() / 2);
       centerY = t.getY() + (t.getHeight() / 2);
       if (boundingBox.contains(centerX, centerY)) {
@@ -458,7 +455,6 @@ public class BeanInstance implements Serializable {
           label = ((Visible) t.getBean()).getVisual().getText();
         }
         int labelwidth = fm.stringWidth(label);
-        int heightMultiplier = (labelwidth > t.getWidth()) ? 2 : 1;
         /*
          * if (label.length() == 0) { heightMultiplier = 0; }
          */
@@ -500,7 +496,7 @@ public class BeanInstance implements Serializable {
    * @param y the y coordinate of the bean
    */
   public BeanInstance(JComponent container, Object bean, int x, int y,
-      Integer... tab) {
+    Integer... tab) {
     m_bean = bean;
     m_x = x;
     m_y = y;
@@ -517,7 +513,7 @@ public class BeanInstance implements Serializable {
    * @param y th y coordinate of the bean
    */
   public BeanInstance(JComponent container, String beanName, int x, int y,
-      Integer... tab) {
+    Integer... tab) {
     m_x = x;
     m_y = y;
 
@@ -543,13 +539,13 @@ public class BeanInstance implements Serializable {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
     }
 
     for (int i = 0; i < components.size(); i++) {
-      if ((BeanInstance) components.elementAt(i) == this) {
+      if (components.elementAt(i) == this) {
         System.out.println("Removing bean");
         components.removeElementAt(i);
       }
@@ -561,15 +557,16 @@ public class BeanInstance implements Serializable {
     }
   }
 
-  public static void appendBeans(JComponent container, Vector beans, int tab) {
+  public static void appendBeans(JComponent container,
+    Vector<BeanInstance> beans, int tab) {
     if (TABBED_COMPONENTS.size() > 0 && tab < TABBED_COMPONENTS.size()) {
-      Vector components = TABBED_COMPONENTS.get(tab);
+      Vector<BeanInstance> components = TABBED_COMPONENTS.get(tab);
       //
 
       for (int i = 0; i < beans.size(); i++) {
         components.add(beans.get(i));
         if (container != null) {
-          Object bean = ((BeanInstance) beans.elementAt(i)).getBean();
+          Object bean = beans.elementAt(i).getBean();
           if (Beans.isInstanceOf(bean, JComponent.class)) {
             container.add((JComponent) bean);
           }
@@ -597,7 +594,7 @@ public class BeanInstance implements Serializable {
       index = tab[0].intValue();
     }
 
-    Vector components = null;
+    Vector<BeanInstance> components = null;
     if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
       components = TABBED_COMPONENTS.get(index);
     }

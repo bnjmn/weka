@@ -94,7 +94,7 @@ public class BeanVisual extends JPanel {
   // protected IconHolder m_visualHolder;
 
   // protected JLabel m_textLabel;
-  private final boolean m_stationary = true;
+  // private final boolean m_stationary = true;
 
   private final PropertyChangeSupport m_pcs = new PropertyChangeSupport(this);
 
@@ -123,7 +123,7 @@ public class BeanVisual extends JPanel {
     Dimension d = m_visualLabel.getPreferredSize();
     // this.setSize((int)d.getWidth()+50, (int)d.getHeight()+50);
     Dimension d2 = new Dimension((int) d.getWidth() + 10,
-        (int) d.getHeight() + 10);
+      (int) d.getHeight() + 10);
     setMinimumSize(d2);
     setPreferredSize(d2);
     setMaximumSize(d2);
@@ -150,7 +150,7 @@ public class BeanVisual extends JPanel {
       Dimension d = m_visualLabel.getPreferredSize();
       // this.setSize((int)d.getWidth()+50, (int)d.getHeight()+50);
       Dimension d2 = new Dimension((int) d.getWidth() + 10,
-          (int) d.getHeight() + 10);
+        (int) d.getHeight() + 10);
       setMinimumSize(d2);
       setPreferredSize(d2);
       setMaximumSize(d2);
@@ -167,7 +167,7 @@ public class BeanVisual extends JPanel {
       height *= percent;
 
       pic = pic
-          .getScaledInstance((int) width, (int) height, Image.SCALE_SMOOTH);
+        .getScaledInstance((int) width, (int) height, Image.SCALE_SMOOTH);
 
       return pic;
     }
@@ -191,7 +191,7 @@ public class BeanVisual extends JPanel {
     boolean success = true;
     // java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
     java.net.URL imageURL = this.getClass().getClassLoader()
-        .getResource(iconPath);
+      .getResource(iconPath);
     if (imageURL == null) {
       // System.err.println("Warning: unable to load "+iconPath);
     } else {
@@ -282,9 +282,9 @@ public class BeanVisual extends JPanel {
 
     Point closest = new Point();
     int cx = (Math.abs(x - sourceMidX) < Math.abs(y - sourceMidY)) ? sourceMidX
-        : ((x < sourceMidX) ? sourceX : sourceX + sourceWidth);
+      : ((x < sourceMidX) ? sourceX : sourceX + sourceWidth);
     int cy = (Math.abs(y - sourceMidY) < Math.abs(x - sourceMidX)) ? sourceMidY
-        : ((y < sourceMidY) ? sourceY : sourceY + sourceHeight);
+      : ((y < sourceMidY) ? sourceY : sourceY + sourceHeight);
     closest.setLocation(cx, cy);
     return closest;
   }
@@ -400,7 +400,7 @@ public class BeanVisual extends JPanel {
   @Override
   public void paintComponent(Graphics gx) {
     ((Graphics2D) gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-        RenderingHints.VALUE_ANTIALIAS_ON);
+      RenderingHints.VALUE_ANTIALIAS_ON);
 
     super.paintComponent(gx);
     if (m_displayConnectors) {
@@ -425,7 +425,7 @@ public class BeanVisual extends JPanel {
    * @exception ClassNotFoundException if an error occurs
    */
   private void readObject(ObjectInputStream ois) throws IOException,
-      ClassNotFoundException {
+    ClassNotFoundException {
     try {
       ois.defaultReadObject();
       remove(m_visualLabel);
@@ -434,7 +434,7 @@ public class BeanVisual extends JPanel {
       add(m_visualLabel, BorderLayout.CENTER);
       Dimension d = m_visualLabel.getPreferredSize();
       Dimension d2 = new Dimension((int) d.getWidth() + 10,
-          (int) d.getHeight() + 10);
+        (int) d.getHeight() + 10);
       setMinimumSize(d2);
       setPreferredSize(d2);
       setMaximumSize(d2);

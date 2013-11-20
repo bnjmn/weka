@@ -51,8 +51,8 @@ import weka.core.xml.XStream;
  */
 @KFStep(category = "DataSinks", toolTipText = "Save a batch or incremental model to file")
 public class SerializedModelSaver extends JPanel implements BeanCommon,
-    Visible, BatchClassifierListener, IncrementalClassifierListener,
-    BatchClustererListener, EnvironmentHandler, Serializable {
+  Visible, BatchClassifierListener, IncrementalClassifierListener,
+  BatchClustererListener, EnvironmentHandler, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = 3956528599473814287L;
@@ -61,8 +61,8 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    * Default visual for data sources
    */
   protected BeanVisual m_visual = new BeanVisual("AbstractDataSink",
-      BeanVisual.ICON_PATH + "SerializedModelSaver.gif", BeanVisual.ICON_PATH
-          + "SerializedModelSaver_animated.gif");
+    BeanVisual.ICON_PATH + "SerializedModelSaver.gif", BeanVisual.ICON_PATH
+      + "SerializedModelSaver_animated.gif");
 
   /**
    * Non null if this object is a target for any events. Provides for the
@@ -114,16 +114,16 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
   static {
     s_fileFormatsAvailable = new ArrayList<Tag>();
     s_fileFormatsAvailable.add(new Tag(BINARY,
-        "Binary serialized model file (*" + FILE_EXTENSION + ")", "", false));
+      "Binary serialized model file (*" + FILE_EXTENSION + ")", "", false));
     if (KOML.isPresent()) {
       s_fileFormatsAvailable.add(new Tag(KOMLV, "XML serialized model file (*"
-          + KOML.FILE_EXTENSION + FILE_EXTENSION + ")", "", false));
+        + KOML.FILE_EXTENSION + FILE_EXTENSION + ")", "", false));
     }
 
     if (XStream.isPresent()) {
       s_fileFormatsAvailable.add(new Tag(XSTREAM,
-          "XML serialized model file (*" + XStream.FILE_EXTENSION
-              + FILE_EXTENSION + ")", "", false));
+        "XML serialized model file (*" + XStream.FILE_EXTENSION
+          + FILE_EXTENSION + ")", "", false));
     }
   }
 
@@ -171,7 +171,7 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
   @Override
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "SerializedModelSaver.gif",
-        BeanVisual.ICON_PATH + "SerializedModelSaver_animated.gif");
+      BeanVisual.ICON_PATH + "SerializedModelSaver_animated.gif");
     m_visual.setText("SerializedModelSaver");
   }
 
@@ -228,7 +228,7 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    */
   @Override
   public synchronized void connectionNotification(String eventName,
-      Object source) {
+    Object source) {
     if (connectionAllowed(eventName)) {
       m_listenee = source;
     }
@@ -244,7 +244,7 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    */
   @Override
   public synchronized void disconnectionNotification(String eventName,
-      Object source) {
+    Object source) {
     if (m_listenee == source) {
       m_listenee = null;
     }
@@ -291,7 +291,7 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    */
   protected String sanitizeFilename(String filename) {
     return filename.replaceAll("\\\\", "_").replaceAll(":", "_")
-        .replaceAll("/", "_");
+      .replaceAll("/", "_");
   }
 
   /**
@@ -302,36 +302,36 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
   @Override
   public void acceptClusterer(BatchClustererEvent ce) {
     if (ce.getTestSet() == null
-        || ce.getTestOrTrain() == BatchClustererEvent.TEST
-        || ce.getTestSet().isStructureOnly()) {
+      || ce.getTestOrTrain() == BatchClustererEvent.TEST
+      || ce.getTestSet().isStructureOnly()) {
       return;
     }
 
     Instances trainHeader = new Instances(ce.getTestSet().getDataSet(), 0);
     String titleString = ce.getClusterer().getClass().getName();
     titleString = titleString.substring(titleString.lastIndexOf('.') + 1,
-        titleString.length());
+      titleString.length());
 
     String prefix = "";
     String relationName = (m_includeRelationName) ? trainHeader.relationName()
-        : "";
+      : "";
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
       stop(); // stop all processing
       String message = "[SerializedModelSaver] " + statusMessagePrefix()
-          + " Can't save model. Reason: " + ex.getMessage();
+        + " Can't save model. Reason: " + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+          + "ERROR (See log for details)");
       } else {
         System.err.println(message);
       }
       return;
     }
     String fileName = "" + prefix + relationName + titleString + "_"
-        + ce.getSetNumber() + "_" + ce.getMaxSetNumber();
+      + ce.getSetNumber() + "_" + ce.getMaxSetNumber();
     fileName = sanitizeFilename(fileName);
 
     String dirName = m_directory.getPath();
@@ -340,11 +340,11 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
     } catch (Exception ex) {
       stop(); // stop all processing
       String message = "[SerializedModelSaver] " + statusMessagePrefix()
-          + " Can't save model. Reason: " + ex.getMessage();
+        + " Can't save model. Reason: " + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+          + "ERROR (See log for details)");
       } else {
         System.err.println(message);
       }
@@ -368,22 +368,22 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       Instances header = ce.getStructure();
       String titleString = ce.getClassifier().getClass().getName();
       titleString = titleString.substring(titleString.lastIndexOf('.') + 1,
-          titleString.length());
+        titleString.length());
 
       String prefix = "";
       String relationName = (m_includeRelationName) ? header.relationName()
-          : "";
+        : "";
 
       try {
         prefix = m_env.substitute(m_filenamePrefix);
       } catch (Exception ex) {
         stop(); // stop processing
         String message = "[SerializedModelSaver] " + statusMessagePrefix()
-            + " Can't save model. Reason: " + ex.getMessage();
+          + " Can't save model. Reason: " + ex.getMessage();
         if (m_logger != null) {
           m_logger.logMessage(message);
           m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
+            + "ERROR (See log for details)");
         } else {
           System.err.println(message);
         }
@@ -399,11 +399,11 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       } catch (Exception ex) {
         stop(); // stop processing
         String message = "[SerializedModelSaver] " + statusMessagePrefix()
-            + " Can't save model. Reason: " + ex.getMessage();
+          + " Can't save model. Reason: " + ex.getMessage();
         if (m_logger != null) {
           m_logger.logMessage(message);
           m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
+            + "ERROR (See log for details)");
         } else {
           System.err.println(message);
         }
@@ -433,28 +433,28 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
     if (ce.getClassifier() instanceof weka.classifiers.misc.InputMappedClassifier) {
       try {
         trainHeader = ((weka.classifiers.misc.InputMappedClassifier) ce
-            .getClassifier()).getModelHeader(trainHeader);
+          .getClassifier()).getModelHeader(trainHeader);
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
     String titleString = ce.getClassifier().getClass().getName();
     titleString = titleString.substring(titleString.lastIndexOf('.') + 1,
-        titleString.length());
+      titleString.length());
 
     String prefix = "";
     String relationName = (m_includeRelationName) ? trainHeader.relationName()
-        : "";
+      : "";
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
       stop(); // stop processing
       String message = "[SerializedModelSaver] " + statusMessagePrefix()
-          + " Can't save model. Reason: " + ex.getMessage();
+        + " Can't save model. Reason: " + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+          + "ERROR (See log for details)");
       } else {
         System.err.println(message);
       }
@@ -462,7 +462,7 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
     }
 
     String fileName = "" + prefix + relationName + titleString + "_"
-        + ce.getSetNumber() + "_" + ce.getMaxSetNumber();
+      + ce.getSetNumber() + "_" + ce.getMaxSetNumber();
     fileName = sanitizeFilename(fileName);
 
     String dirName = m_directory.getPath();
@@ -471,11 +471,11 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
     } catch (Exception ex) {
       stop(); // stop processing
       String message = "[SerializedModelSaver] " + statusMessagePrefix()
-          + " Can't save model. Reason: " + ex.getMessage();
+        + " Can't save model. Reason: " + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+          + "ERROR (See log for details)");
       } else {
         System.err.println(message);
       }
@@ -517,9 +517,9 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       System.err.println("[SerializedModelSaver] Problem saving model");
       if (m_logger != null) {
         m_logger.logMessage("[SerializedModelSaver] " + statusMessagePrefix()
-            + " Problem saving model");
+          + " Problem saving model");
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+          + "ERROR (See log for details)");
       }
     }
   }
@@ -533,9 +533,9 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    *          (optional)
    */
   public static void saveBinary(File saveTo, Object model, Instances header)
-      throws IOException {
+    throws IOException {
     ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(
-        new FileOutputStream(saveTo)));
+      new FileOutputStream(saveTo)));
     os.writeObject(model);
     // now the header
     if (header != null) {
@@ -553,8 +553,8 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    *          (optional)
    */
   public static void saveKOML(File saveTo, Object model, Instances header)
-      throws Exception {
-    Vector v = new Vector();
+    throws Exception {
+    Vector<Object> v = new Vector<Object>();
     v.add(model);
     if (header != null) {
       v.add(header);
@@ -572,8 +572,8 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    *          (optional)
    */
   public static void saveXStream(File saveTo, Object model, Instances header)
-      throws Exception {
-    Vector v = new Vector();
+    throws Exception {
+    Vector<Object> v = new Vector<Object>();
     v.add(model);
     if (header != null) {
       v.add(header);
@@ -731,7 +731,7 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
   // Custom de-serialization in order to set default
   // environment variables on de-serialization
   private void readObject(ObjectInputStream aStream) throws IOException,
-      ClassNotFoundException {
+    ClassNotFoundException {
     aStream.defaultReadObject();
 
     // set a default environment to use

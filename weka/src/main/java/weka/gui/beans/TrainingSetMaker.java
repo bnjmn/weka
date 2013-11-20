@@ -33,8 +33,8 @@ import weka.core.Instances;
  * @version $Revision$
  */
 public class TrainingSetMaker extends AbstractTrainingSetProducer implements
-    DataSourceListener, TestSetListener, EventConstraints, Serializable,
-    StructureProducer {
+  DataSourceListener, TestSetListener, EventConstraints, Serializable,
+  StructureProducer {
 
   /** for serialization */
   private static final long serialVersionUID = -6152577265471535786L;
@@ -43,7 +43,7 @@ public class TrainingSetMaker extends AbstractTrainingSetProducer implements
 
   public TrainingSetMaker() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "TrainingSetMaker.gif",
-        BeanVisual.ICON_PATH + "TrainingSetMaker_animated.gif");
+      BeanVisual.ICON_PATH + "TrainingSetMaker_animated.gif");
     m_visual.setText("TrainingSetMaker");
   }
 
@@ -131,24 +131,25 @@ public class TrainingSetMaker extends AbstractTrainingSetProducer implements
    * 
    * @param tse a <code>TrainingSetEvent</code> value
    */
+  @SuppressWarnings("unchecked")
   protected void notifyTrainingSetProduced(TrainingSetEvent tse) {
-    Vector l;
+    Vector<TrainingSetListener> l;
     synchronized (this) {
-      l = (Vector) m_listeners.clone();
+      l = (Vector<TrainingSetListener>) m_listeners.clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
         if (m_receivedStopNotification) {
           if (m_logger != null) {
             m_logger.logMessage("T[rainingSetMaker] " + statusMessagePrefix()
-                + " stopping.");
+              + " stopping.");
             m_logger.statusMessage(statusMessagePrefix() + "INTERRUPTED");
           }
           m_receivedStopNotification = false;
           break;
         }
         System.err.println("Notifying listeners (training set maker)");
-        ((TrainingSetListener) l.elementAt(i)).acceptTrainingSet(tse);
+        l.elementAt(i).acceptTrainingSet(tse);
       }
     }
   }

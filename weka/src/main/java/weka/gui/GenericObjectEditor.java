@@ -130,10 +130,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
 
   /** The Class of objects being edited. */
-  protected Class m_ClassType;
+  protected Class<?> m_ClassType;
 
   /** The model containing the list of names to select from. */
-  protected Hashtable m_ObjectNames;
+  protected Hashtable<String, HierarchyPropertyParser> m_ObjectNames;
 
   /** The GUI component for editing values, created when needed. */
   protected GOEPanel m_EditorComponent;
@@ -190,50 +190,46 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
             EDITOR_PROPERTIES = creator.getOutputProperties();
           } catch (Exception e) {
             JOptionPane.showMessageDialog(null,
-                "Could not determine the properties for the generic object\n"
-                    + "editor. This exception was produced:\n" + e.toString(),
-                "GenericObjectEditor", JOptionPane.ERROR_MESSAGE);
+              "Could not determine the properties for the generic object\n"
+                + "editor. This exception was produced:\n" + e.toString(),
+              "GenericObjectEditor", JOptionPane.ERROR_MESSAGE);
           }
         } else {
           // Allow a properties file in the current directory to override
           try {
             EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-            java.util.Enumeration keys = EDITOR_PROPERTIES.propertyNames();
+            java.util.Enumeration<?> keys = EDITOR_PROPERTIES.propertyNames();
             if (!keys.hasMoreElements()) {
               throw new Exception("Failed to read a property file for the "
-                  + "generic object editor");
+                + "generic object editor");
             }
           } catch (Exception ex) {
             JOptionPane
-                .showMessageDialog(
-                    null,
-                    "Could not read a configuration file for the generic object\n"
-                        + "editor. An example file is included with the Weka distribution.\n"
-                        + "This file should be named \""
-                        + PROPERTY_FILE
-                        + "\" and\n"
-                        + "should be placed either in your user home (which is set\n"
-                        + "to \""
-                        + System.getProperties().getProperty("user.home")
-                        + "\")\n"
-                        + "or the directory that java was started from\n",
-                    "GenericObjectEditor", JOptionPane.ERROR_MESSAGE);
+              .showMessageDialog(
+                null,
+                "Could not read a configuration file for the generic object\n"
+                  + "editor. An example file is included with the Weka distribution.\n"
+                  + "This file should be named \"" + PROPERTY_FILE + "\" and\n"
+                  + "should be placed either in your user home (which is set\n"
+                  + "to \"" + System.getProperties().getProperty("user.home")
+                  + "\")\n" + "or the directory that java was started from\n",
+                "GenericObjectEditor", JOptionPane.ERROR_MESSAGE);
           }
         }
       }
 
       if (EDITOR_PROPERTIES == null) {
         JOptionPane.showMessageDialog(null,
-            "Could not initialize the GenericPropertiesCreator. ",
-            "GenericObjectEditor", JOptionPane.ERROR_MESSAGE);
+          "Could not initialize the GenericPropertiesCreator. ",
+          "GenericObjectEditor", JOptionPane.ERROR_MESSAGE);
       } else {
         PluginManager.addFromProperties(EDITOR_PROPERTIES);
       }
     } catch (Exception e) {
       JOptionPane.showMessageDialog(null,
-          "Could not initialize the GenericPropertiesCreator. "
-              + "This exception was produced:\n" + e.toString(),
-          "GenericObjectEditor", JOptionPane.ERROR_MESSAGE);
+        "Could not initialize the GenericPropertiesCreator. "
+          + "This exception was produced:\n" + e.toString(),
+        "GenericObjectEditor", JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -302,19 +298,22 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
      */
     protected void initCapabilities() {
       String classname;
-      Class cls;
+      Class<?> cls;
       Object obj;
 
-      if (m_Capabilities != null)
+      if (m_Capabilities != null) {
         return;
-      if (!isLeaf())
+      }
+      if (!isLeaf()) {
         return;
+      }
 
       classname = getClassnameFromPath(new TreePath(getPath()));
       try {
         cls = Class.forName(classname);
-        if (!ClassDiscovery.hasInterface(CapabilitiesHandler.class, cls))
+        if (!ClassDiscovery.hasInterface(CapabilitiesHandler.class, cls)) {
           return;
+        }
 
         obj = cls.newInstance();
         m_Capabilities = ((CapabilitiesHandler) obj).getCapabilities();
@@ -338,12 +337,13 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         initCapabilities();
         if (m_Capabilities != null) {
           if (m_Capabilities.supportsMaybe(m_CapabilitiesFilter)
-              && !m_Capabilities.supports(m_CapabilitiesFilter))
+            && !m_Capabilities.supports(m_CapabilitiesFilter)) {
             result = "<html><font color=\"" + MAYBE_SUPPORT + "\">" + result
-                + "</font></i><html>";
-          else if (!m_Capabilities.supports(m_CapabilitiesFilter))
+              + "</font></i><html>";
+          } else if (!m_Capabilities.supports(m_CapabilitiesFilter)) {
             result = "<html><font color=\"" + NO_SUPPORT + "\">" + result
-                + "</font></i><html>";
+              + "</font></i><html>";
+          }
         }
       }
 
@@ -405,21 +405,22 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
       getContentPane().add(panel, BorderLayout.NORTH);
       m_InfoLabel.setText("<html>"
-          + m_ClassType.getName().replaceAll(".*\\.", "") + "s"
-          + " have to support <i>at least</i> the following capabilities <br>"
-          + "(the ones highlighted <font color=\"" + GOETreeNode.NO_SUPPORT
-          + "\">" + GOETreeNode.NO_SUPPORT
-          + "</font> don't meet these requirements <br>"
-          + "the ones highlighted  <font color=\"" + GOETreeNode.MAYBE_SUPPORT
-          + "\">" + GOETreeNode.MAYBE_SUPPORT + "</font> possibly meet them):"
-          + "</html>");
+        + m_ClassType.getName().replaceAll(".*\\.", "") + "s"
+        + " have to support <i>at least</i> the following capabilities <br>"
+        + "(the ones highlighted <font color=\"" + GOETreeNode.NO_SUPPORT
+        + "\">" + GOETreeNode.NO_SUPPORT
+        + "</font> don't meet these requirements <br>"
+        + "the ones highlighted  <font color=\"" + GOETreeNode.MAYBE_SUPPORT
+        + "\">" + GOETreeNode.MAYBE_SUPPORT + "</font> possibly meet them):"
+        + "</html>");
       panel.add(m_InfoLabel, BorderLayout.CENTER);
 
       // list
       getContentPane().add(new JScrollPane(m_List), BorderLayout.CENTER);
       model = (CheckBoxListModel) m_List.getModel();
-      for (Capability cap : Capability.values())
+      for (Capability cap : Capability.values()) {
         model.addElement(cap);
+      }
 
       // buttons
       panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -430,8 +431,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         @Override
         public void actionPerformed(ActionEvent e) {
           updateCapabilities();
-          if (m_CapabilitiesFilter == null)
+          if (m_CapabilitiesFilter == null) {
             m_CapabilitiesFilter = new Capabilities(null);
+          }
           m_CapabilitiesFilter.assign(m_Capabilities);
           m_Self.setVisible(false);
           showPopup();
@@ -462,8 +464,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
       model = (CheckBoxListModel) m_List.getModel();
 
-      for (Capability cap : Capability.values())
+      for (Capability cap : Capability.values()) {
         model.setChecked(model.indexOf(cap), m_Capabilities.handles(cap));
+      }
     }
 
     /**
@@ -479,10 +482,11 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       model = (CheckBoxListModel) m_List.getModel();
 
       for (Capability cap : Capability.values()) {
-        if (model.getChecked(model.indexOf(cap)))
+        if (model.getChecked(model.indexOf(cap))) {
           m_Capabilities.enable(cap);
-        else
+        } else {
           m_Capabilities.disable(cap);
+        }
       }
     }
 
@@ -492,10 +496,11 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
      * @param value the capabilities to use
      */
     public void setCapabilities(Capabilities value) {
-      if (value != null)
+      if (value != null) {
         m_Capabilities.assign(value);
-      else
+      } else {
         m_Capabilities = new Capabilities(null);
+      }
 
       updateList();
     }
@@ -532,8 +537,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
      * closes any JPopupMenu automatically.
      */
     public void showPopup() {
-      if (getPopup() != null)
+      if (getPopup() != null) {
         getPopup().setVisible(true);
+      }
     }
   }
 
@@ -661,10 +667,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       Dimension scrollerSize = m_scroller.getPreferredSize();
       int height = (int) scrollerSize.getHeight();
       int width = (int) scrollerSize.getWidth();
-      if (width > maxWidth)
+      if (width > maxWidth) {
         width = maxWidth;
-      if (height > maxHeight)
+      }
+      if (height > maxHeight) {
         height = maxHeight;
+      }
 
       // commit any size changes
       m_scroller.setPreferredSize(new Dimension(width, height));
@@ -712,12 +720,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
       m_ChildPropertySheet = new PropertySheetPanel();
       m_ChildPropertySheet
-          .addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-              m_Support.firePropertyChange("", null, null);
-            }
-          });
+        .addPropertyChangeListener(new PropertyChangeListener() {
+          @Override
+          public void propertyChange(PropertyChangeEvent evt) {
+            m_Support.firePropertyChange("", null, null);
+          }
+        });
 
       m_OpenBut = new JButton("Open...");
       m_OpenBut.setToolTipText("Load a configured object");
@@ -756,7 +764,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
           m_ChildPropertySheet.closingOK();
           m_Backup = copyObject(m_Object);
           if ((getTopLevelAncestor() != null)
-              && (getTopLevelAncestor() instanceof Window)) {
+            && (getTopLevelAncestor() instanceof Window)) {
             Window w = (Window) getTopLevelAncestor();
             w.dispose();
           }
@@ -781,7 +789,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
             updateChildPropertySheet();
           }
           if ((getTopLevelAncestor() != null)
-              && (getTopLevelAncestor() instanceof Window)) {
+            && (getTopLevelAncestor() instanceof Window)) {
             Window w = (Window) getTopLevelAncestor();
             w.dispose();
           }
@@ -832,8 +840,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
      */
     protected void setCancelButton(boolean flag) {
 
-      if (m_cancelBut != null)
+      if (m_cancelBut != null) {
         m_cancelBut.setEnabled(flag);
+      }
     }
 
     /**
@@ -851,7 +860,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         File selected = m_FileChooser.getSelectedFile();
         try {
           ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(
-              new FileInputStream(selected)));
+            new FileInputStream(selected)));
           Object obj = oi.readObject();
           oi.close();
           if (!m_ClassType.isAssignableFrom(obj.getClass())) {
@@ -860,8 +869,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
           return obj;
         } catch (Exception ex) {
           JOptionPane.showMessageDialog(this, "Couldn't read object: "
-              + selected.getName() + "\n" + ex.getMessage(),
-              "Open object file", JOptionPane.ERROR_MESSAGE);
+            + selected.getName() + "\n" + ex.getMessage(), "Open object file",
+            JOptionPane.ERROR_MESSAGE);
         }
       }
       return null;
@@ -882,13 +891,13 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         File sFile = m_FileChooser.getSelectedFile();
         try {
           ObjectOutputStream oo = new ObjectOutputStream(
-              new BufferedOutputStream(new FileOutputStream(sFile)));
+            new BufferedOutputStream(new FileOutputStream(sFile)));
           oo.writeObject(object);
           oo.close();
         } catch (Exception ex) {
           JOptionPane.showMessageDialog(this, "Couldn't write to file: "
-              + sFile.getName() + "\n" + ex.getMessage(), "Save object",
-              JOptionPane.ERROR_MESSAGE);
+            + sFile.getName() + "\n" + ex.getMessage(), "Save object",
+            JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -912,7 +921,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
       Object result = null;
       try {
-        result = GenericObjectEditor.this.makeCopy(source);
+        result = GenericObjectEditor.makeCopy(source);
         setCancelButton(true);
 
       } catch (Exception ex) {
@@ -990,7 +999,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
       // Adjust size of containing window if possible
       if ((getTopLevelAncestor() != null)
-          && (getTopLevelAncestor() instanceof Window)) {
+        && (getTopLevelAncestor() instanceof Window)) {
         ((Window) getTopLevelAncestor()).pack();
       }
     }
@@ -1019,14 +1028,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    */
   public static void registerEditors() {
     Properties props;
-    Enumeration enm;
+    Enumeration<?> enm;
     String name;
     String value;
-    Class baseCls;
-    Class cls;
-
-    if (m_EditorsRegistered)
+    if (m_EditorsRegistered) {
       return;
+    }
 
     System.err.println("---Registering Weka Editors---");
     m_EditorsRegistered = true;
@@ -1049,8 +1056,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   public static void registerEditor(String name, String value) {
-    Class baseCls;
-    Class cls;
+    Class<?> baseCls;
+    Class<?> cls;
 
     try {
       // array class?
@@ -1064,7 +1071,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       PropertyEditorManager.registerEditor(cls, Class.forName(value));
     } catch (Exception e) {
       System.err
-          .println("Problem registering " + name + "/" + value + ": " + e);
+        .println("Problem registering " + name + "/" + value + ": " + e);
     }
   }
 
@@ -1104,10 +1111,11 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @return string the root element
    */
   protected static String getRootFromClass(String clsname, String separator) {
-    if (clsname.indexOf(separator) > -1)
+    if (clsname.indexOf(separator) > -1) {
       return clsname.substring(0, clsname.indexOf(separator));
-    else
+    } else {
       return null;
+    }
   }
 
   /**
@@ -1121,23 +1129,24 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @return for each distinct root element in the classnames, one entry in the
    *         hashtable (with the root element as key)
    */
-  public static Hashtable sortClassesByRoot(String classes) {
-    Hashtable roots;
-    Hashtable result;
-    Enumeration enm;
+  public static Hashtable<String, String> sortClassesByRoot(String classes) {
+    Hashtable<String, Vector<String>> roots;
+    Hashtable<String, String> result;
+    Enumeration<String> enm;
     int i;
     StringTokenizer tok;
     String clsname;
-    Vector list;
+    Vector<String> list;
     HierarchyPropertyParser hpp;
     String separator;
     String root;
     String tmpStr;
 
-    if (classes == null)
+    if (classes == null) {
       return null;
+    }
 
-    roots = new Hashtable();
+    roots = new Hashtable<String, Vector<String>>();
     hpp = new HierarchyPropertyParser();
     separator = hpp.getSeperator();
 
@@ -1147,31 +1156,33 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     while (tok.hasMoreElements()) {
       clsname = tok.nextToken();
       root = getRootFromClass(clsname, separator);
-      if (root == null)
+      if (root == null) {
         continue;
+      }
 
       // already stored?
       if (!roots.containsKey(root)) {
-        list = new Vector();
+        list = new Vector<String>();
         roots.put(root, list);
       } else {
-        list = (Vector) roots.get(root);
+        list = roots.get(root);
       }
 
       list.add(clsname);
     }
 
     // build result
-    result = new Hashtable();
+    result = new Hashtable<String, String>();
     enm = roots.keys();
     while (enm.hasMoreElements()) {
-      root = (String) enm.nextElement();
-      list = (Vector) roots.get(root);
+      root = enm.nextElement();
+      list = roots.get(root);
       tmpStr = "";
       for (i = 0; i < list.size(); i++) {
-        if (i > 0)
+        if (i > 0) {
           tmpStr += ",";
-        tmpStr += (String) list.get(i);
+        }
+        tmpStr += list.get(i);
       }
       result.put(root, tmpStr);
     }
@@ -1185,9 +1196,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @return the hashtable containing the HierarchyPropertyParsers for the root
    *         elements
    */
-  protected Hashtable getClassesFromProperties() {
+  protected Hashtable<String, HierarchyPropertyParser> getClassesFromProperties() {
 
-    Hashtable hpps = new Hashtable();
+    Hashtable<String, HierarchyPropertyParser> hpps = new Hashtable<String, HierarchyPropertyParser>();
     String className = m_ClassType.getName();
     Set<String> cls = PluginManager.getPluginNamesOfType(className);
     if (cls == null) {
@@ -1203,7 +1214,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     String listS = b.substring(0, b.length() - 1);
     // Hashtable typeOptions =
     // sortClassesByRoot(EDITOR_PROPERTIES.getProperty(className));
-    Hashtable typeOptions = sortClassesByRoot(listS);
+    Hashtable<String, String> typeOptions = sortClassesByRoot(listS);
     if (typeOptions == null) {
       /*
        * System.err.println("Warning: No configuration property found in\n" +
@@ -1211,10 +1222,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
        */
     } else {
       try {
-        Enumeration enm = typeOptions.keys();
+        Enumeration<String> enm = typeOptions.keys();
         while (enm.hasMoreElements()) {
-          String root = (String) enm.nextElement();
-          String typeOption = (String) typeOptions.get(root);
+          String root = enm.nextElement();
+          String typeOption = typeOptions.get(root);
           HierarchyPropertyParser hpp = new HierarchyPropertyParser();
           hpp.build(typeOption, ", ");
           hpps.put(root, hpp);
@@ -1239,9 +1250,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     if (m_Object != null) {
       String className = m_Object.getClass().getName();
       String root = getRootFromClass(className,
-          new HierarchyPropertyParser().getSeperator());
-      HierarchyPropertyParser hpp = (HierarchyPropertyParser) m_ObjectNames
-          .get(root);
+        new HierarchyPropertyParser().getSeperator());
+      HierarchyPropertyParser hpp = m_ObjectNames.get(root);
       if (hpp != null) {
         if (!hpp.contains(className)) {
           hpp.add(className);
@@ -1268,7 +1278,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * 
    * @param type a value of type 'Class'
    */
-  public void setClassType(Class type) {
+  public void setClassType(Class<?> type) {
 
     m_ClassType = type;
     m_ObjectNames = getClassesFromProperties();
@@ -1285,17 +1295,18 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       return;
     }
 
-    Hashtable hpps = getClassesFromProperties();
+    Hashtable<String, HierarchyPropertyParser> hpps = getClassesFromProperties();
     HierarchyPropertyParser hpp = null;
-    Enumeration enm = hpps.elements();
+    Enumeration<HierarchyPropertyParser> enm = hpps.elements();
 
     try {
       while (enm.hasMoreElements()) {
-        hpp = (HierarchyPropertyParser) enm.nextElement();
+        hpp = enm.nextElement();
         if (hpp.depth() > 0) {
           hpp.goToRoot();
-          while (!hpp.isLeafReached())
+          while (!hpp.isLeafReached()) {
             hpp.goToChild(0);
+          }
 
           String defaultValue = hpp.fullValue();
           setValue(Class.forName(defaultValue).newInstance());
@@ -1327,8 +1338,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
     setObject(o);
 
-    if (m_EditorComponent != null)
+    if (m_EditorComponent != null) {
       m_EditorComponent.repaint();
+    }
 
     updateObjectNames();
   }
@@ -1344,8 +1356,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     boolean trueChange;
     if (getValue() != null) {
       trueChange = (!c.equals(getValue()));
-    } else
+    } else {
       trueChange = true;
+    }
 
     m_Backup = m_Object;
 
@@ -1435,10 +1448,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
       gfx.setFont(originalFont);
       if ((m_Object instanceof OptionHandler)
-          && !(m_Object instanceof CustomDisplayStringProvider)) {
+        && !(m_Object instanceof CustomDisplayStringProvider)) {
         gfx.drawString(
-            " " + Utils.joinOptions(((OptionHandler) m_Object).getOptions()),
-            repwidth + 2, fm.getAscent() + vpad);
+          " " + Utils.joinOptions(((OptionHandler) m_Object).getOptions()),
+          repwidth + 2, fm.getAscent() + vpad);
       }
     }
   }
@@ -1536,6 +1549,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     m_ObjectPropertyPanel = new PropertyPanel(this, true);
 
     JPanel customPanel = new JPanel() {
+
+      /** ID added to avoid warning */
+      private static final long serialVersionUID = 1024049543672124980L;
+
       @Override
       public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
@@ -1590,14 +1607,16 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
     // recreate class name from path
     int start = 0;
-    if (m_ObjectNames.size() > 1)
+    if (m_ObjectNames.size() > 1) {
       start = 1;
+    }
 
     for (int i = start; i < path.getPathCount(); i++) {
-      if (i > start)
+      if (i > start) {
         classname.append(".");
+      }
       classname.append((String) ((GOETreeNode) path.getPathComponent(i))
-          .getUserObject());
+        .getUserObject());
     }
 
     return classname.toString();
@@ -1619,7 +1638,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       tree.setSelectionPath(new TreePath(m_treeNodeOfCurrentObject.getPath()));
     }
     tree.getSelectionModel().setSelectionMode(
-        TreeSelectionModel.SINGLE_TREE_SELECTION);
+      TreeSelectionModel.SINGLE_TREE_SELECTION);
 
     // create the popup
     final JPopupMenu popup = new JTreePopupMenu(tree);
@@ -1630,8 +1649,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       public void valueChanged(TreeSelectionEvent e) {
         GOETreeNode node = (GOETreeNode) tree.getLastSelectedPathComponent();
 
-        if (node == null)
+        if (node == null) {
           return;
+        }
 
         if (node.isLeaf()) {
           classSelected(getClassnameFromPath(tree.getSelectionPath()));
@@ -1649,27 +1669,29 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @param hpps the hierarchy of objects to mirror in the tree
    * @return a JTree representation of the hierarchy
    */
-  protected JTree createTree(Hashtable hpps) {
+  protected JTree createTree(Hashtable<String, HierarchyPropertyParser> hpps) {
     GOETreeNode superRoot;
-    Enumeration enm;
+    Enumeration<HierarchyPropertyParser> enm;
     HierarchyPropertyParser hpp;
 
-    if (hpps.size() > 1)
+    if (hpps.size() > 1) {
       superRoot = new GOETreeNode("root");
-    else
+    } else {
       superRoot = null;
+    }
 
     enm = hpps.elements();
     while (enm.hasMoreElements()) {
-      hpp = (HierarchyPropertyParser) enm.nextElement();
+      hpp = enm.nextElement();
       hpp.goToRoot();
       GOETreeNode root = new GOETreeNode(hpp.getValue());
       addChildrenToTree(root, hpp);
 
-      if (superRoot == null)
+      if (superRoot == null) {
         superRoot = root;
-      else
+      } else {
         superRoot.add(root);
+      }
     }
 
     JTree tree = new JTree(superRoot);
@@ -1692,7 +1714,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         hpp.goToChild(i);
         GOETreeNode child = new GOETreeNode(hpp.getValue());
         if ((m_Object != null)
-            && m_Object.getClass().getName().equals(hpp.fullValue())) {
+          && m_Object.getClass().getName().equals(hpp.fullValue())) {
           m_treeNodeOfCurrentObject = child;
         }
         tree.add(child);
@@ -1723,14 +1745,15 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null, "Could not create an example of\n"
-          + className + "\n" + "from the current classpath",
-          "Class load failed", JOptionPane.ERROR_MESSAGE);
+        + className + "\n" + "from the current classpath", "Class load failed",
+        JOptionPane.ERROR_MESSAGE);
       ex.printStackTrace();
       try {
-        if (m_Backup != null)
+        if (m_Backup != null) {
           setValue(m_Backup);
-        else
+        } else {
           setDefaultValue();
+        }
       } catch (Exception e) {
         System.err.println(ex.getMessage());
         ex.printStackTrace();
@@ -1785,10 +1808,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    */
   public static Vector<String> getClassnames(String property) {
     Vector<String> result;
-    String value;
-    String[] items;
-    int i;
-
     Set<String> r = PluginManager.getPluginNamesOfType(property);
 
     result = new Vector<String>();
@@ -1826,10 +1845,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         if (args.length > 1) {
           initial = Class.forName(args[1]).newInstance();
           ce.setValue(initial);
-        } else
+        } else {
           ce.setDefaultValue();
-      } else
+        }
+      } else {
         ce.setValue(initial);
+      }
 
       PropertyDialog pd = new PropertyDialog((Frame) null, ce, 100, 100);
       pd.addWindowListener(new WindowAdapter() {

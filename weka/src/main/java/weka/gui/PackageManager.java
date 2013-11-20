@@ -129,7 +129,7 @@ public class PackageManager extends JPanel {
   /** Button for installing the selected package */
   protected JButton m_installBut = new JButton("Install");
   protected JCheckBox m_forceBut = new JCheckBox(
-      "Ignore dependencies/conflicts");
+    "Ignore dependencies/conflicts");
 
   /** Button for uninstalling the selected package */
   protected JButton m_uninstallBut = new JButton("Uninstall");
@@ -167,7 +167,7 @@ public class PackageManager extends JPanel {
 
   /** Widget for specifying a URL or path to an unofficial package to install */
   protected FileEnvironmentField m_unofficialChooser = new FileEnvironmentField(
-      "File/URL", Environment.getSystemWide());
+    "File/URL", Environment.getSystemWide());
   protected JFrame m_unofficialFrame = null;
 
   public static boolean s_atLeastOnePackageUpgradeHasOccurredInThisSession = false;
@@ -289,7 +289,7 @@ public class PackageManager extends JPanel {
         numPackages = 100;
       }
       m_progress = new javax.swing.ProgressMonitor(PackageManager.this,
-          "Establising cache...", "", 0, numPackages);
+        "Establising cache...", "", 0, numPackages);
       ProgressPrintStream pps = new ProgressPrintStream(this);
       m_error = WekaPackageManager.establishCacheIfNeeded(pps);
 
@@ -302,8 +302,8 @@ public class PackageManager extends JPanel {
       m_progress.close();
       if (m_error != null) {
         displayErrorDialog("There was a problem establishing the package\n"
-            + "meta data cache. We'll try to use the repository" + "directly.",
-            m_error);
+          + "meta data cache. We'll try to use the repository" + "directly.",
+          m_error);
       }
     }
   }
@@ -313,7 +313,7 @@ public class PackageManager extends JPanel {
     @Override
     public Void doInBackground() {
       Map<String, String> localPackageNameList = WekaPackageManager
-          .getPackageList(true);
+        .getPackageList(true);
 
       if (localPackageNameList == null) {
         // quietly return and see if we can continue anyway
@@ -321,7 +321,7 @@ public class PackageManager extends JPanel {
       }
 
       Map<String, String> repositoryPackageNameList = WekaPackageManager
-          .getPackageList(false);
+        .getPackageList(false);
 
       if (repositoryPackageNameList == null) {
         // quietly return and see if we can continue anyway
@@ -329,7 +329,7 @@ public class PackageManager extends JPanel {
       }
 
       if (repositoryPackageNameList.keySet().size() < localPackageNameList
-          .keySet().size()) {
+        .keySet().size()) {
         // package(s) have disappeared from the repository.
         // Force a cache refresh...
         RefreshCache r = new RefreshCache();
@@ -358,19 +358,19 @@ public class PackageManager extends JPanel {
         // a difference here indicates a newer version on the server
         if (!localVersion.equals(repoVersion)) {
           updatedPackagesBuff.append(localPackage + " (" + repoVersion
-              + ")<br>");
+            + ")<br>");
         }
       }
 
       if (newPackagesBuff.length() > 0 || updatedPackagesBuff.length() > 0) {
         String information = "<html><font size=-2>There are new and/or updated packages available "
-            + "on the server (do a cache refresh for more " + "information):";
+          + "on the server (do a cache refresh for more " + "information):";
         if (newPackagesBuff.length() > 0) {
           information += "<br><br><b>New:</b><br>" + newPackagesBuff.toString();
         }
         if (updatedPackagesBuff.length() > 0) {
           information += "<br><br><b>Updated:</b><br>"
-              + updatedPackagesBuff.toString() + "<br><br>";
+            + updatedPackagesBuff.toString() + "<br><br>";
         }
         information += "</font></html>";
         m_newPackagesAvailableL.setToolTipText(information);
@@ -394,7 +394,7 @@ public class PackageManager extends JPanel {
         // We're using the new refresh mechanism - extract the number
         // of KB read from the message
         String kbs = progressMessage.replace(
-            "[DefaultPackageManager] downloaded ", "");
+          "[DefaultPackageManager] downloaded ", "");
         kbs = kbs.replace(" KB", "");
         m_progressCount = Integer.parseInt(kbs);
       } else {
@@ -445,8 +445,8 @@ public class PackageManager extends JPanel {
       m_progress.setValue(m_progress.getMinimum());
       if (m_error != null) {
         displayErrorDialog("There was a problem refreshing the package\n"
-            + "meta data cache. We'll try to use the repository" + "directly.",
-            m_error);
+          + "meta data cache. We'll try to use the repository" + "directly.",
+          m_error);
         m_detailLabel.setText("");
       } else {
         m_detailLabel.setText("Cache refresh completed");
@@ -473,21 +473,21 @@ public class PackageManager extends JPanel {
 
   private void pleaseCloseAppWindowsPopUp() {
     if (!Utils
-        .getDontShowDialog("weka.gui.PackageManager.PleaseCloseApplicationWindows")) {
+      .getDontShowDialog("weka.gui.PackageManager.PleaseCloseApplicationWindows")) {
       JCheckBox dontShow = new JCheckBox("Do not show this message again");
       Object[] stuff = new Object[2];
       stuff[0] = "Please close any open Weka application windows\n"
-          + "(Explorer, Experimenter, KnowledgeFlow, SimpleCLI)\n"
-          + "before proceeding.\n";
+        + "(Explorer, Experimenter, KnowledgeFlow, SimpleCLI)\n"
+        + "before proceeding.\n";
       stuff[1] = dontShow;
 
       JOptionPane.showMessageDialog(PackageManager.this, stuff,
-          "Weka Package Manager", JOptionPane.OK_OPTION);
+        "Weka Package Manager", JOptionPane.OK_OPTION);
 
       if (dontShow.isSelected()) {
         try {
           Utils
-              .setDontShowDialog("weka.gui.PackageManager.PleaseCloseApplicationWindows");
+            .setDontShowDialog("weka.gui.PackageManager.PleaseCloseApplicationWindows");
         } catch (Exception ex) {
           // quietly ignore
         }
@@ -542,7 +542,7 @@ public class PackageManager extends JPanel {
         String packageName = m_packageNamesToUninstall.get(zz);
 
         boolean explorerPropertiesExist = WekaPackageManager
-            .installedPackageResourceExists(packageName, "Explorer.props");
+          .installedPackageResourceExists(packageName, "Explorer.props");
 
         if (!m_forceBut.isSelected()) {
           List<Package> compromised = new ArrayList<Package>();
@@ -554,7 +554,7 @@ public class PackageManager extends JPanel {
           } catch (Exception e) {
             e.printStackTrace();
             displayErrorDialog("Can't determine which packages are installed!",
-                e);
+              e);
             // return null; // can't proceed
             m_unsuccessfulUninstalls.add(packageName);
             continue;
@@ -566,8 +566,8 @@ public class PackageManager extends JPanel {
             } catch (Exception e) {
               e.printStackTrace();
               displayErrorDialog(
-                  "Problem determining dependencies for package : "
-                      + p.getName(), e);
+                "Problem determining dependencies for package : " + p.getName(),
+                e);
               // return null; // can't proceed
               m_unsuccessfulUninstalls.add(packageName);
               continue;
@@ -585,15 +585,15 @@ public class PackageManager extends JPanel {
           if (compromised.size() > 0) {
             StringBuffer message = new StringBuffer();
             message.append("The following installed packages depend on "
-                + packageName + " :\n\n");
+              + packageName + " :\n\n");
             for (Package p : compromised) {
               message.append("\t" + p.getName() + "\n");
             }
 
             message.append("\nDo you wish to proceed?");
             int result = JOptionPane.showConfirmDialog(PackageManager.this,
-                message.toString(), "Weka Package Manager",
-                JOptionPane.YES_NO_OPTION);
+              message.toString(), "Weka Package Manager",
+              JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.NO_OPTION) {
               // bail out here
@@ -633,20 +633,20 @@ public class PackageManager extends JPanel {
         m_detailLabel.setText("Packages removed successfully.");
 
         if (!Utils
-            .getDontShowDialog("weka.gui.PackageManager.RestartAfterUninstall")) {
+          .getDontShowDialog("weka.gui.PackageManager.RestartAfterUninstall")) {
           JCheckBox dontShow = new JCheckBox("Do not show this message again");
           Object[] stuff = new Object[2];
           stuff[0] = "Weka might need to be restarted for\n"
-              + "the changes to come into effect.\n";
+            + "the changes to come into effect.\n";
           stuff[1] = dontShow;
 
           JOptionPane.showMessageDialog(PackageManager.this, stuff,
-              "Weka Package Manager", JOptionPane.OK_OPTION);
+            "Weka Package Manager", JOptionPane.OK_OPTION);
 
           if (dontShow.isSelected()) {
             try {
               Utils
-                  .setDontShowDialog("weka.gui.PackageManager.RestartAfterUninstall");
+                .setDontShowDialog("weka.gui.PackageManager.RestartAfterUninstall");
             } catch (Exception ex) {
               // quietly ignore
             }
@@ -658,9 +658,9 @@ public class PackageManager extends JPanel {
           failedPackageNames.append(p + "\n");
         }
         displayErrorDialog(
-            "The following package(s) could not be uninstalled\n"
-                + "for some reason (check the log)\n"
-                + failedPackageNames.toString(), "");
+          "The following package(s) could not be uninstalled\n"
+            + "for some reason (check the log)\n"
+            + failedPackageNames.toString(), "");
         m_detailLabel.setText("Finished uninstalling.");
       }
 
@@ -685,7 +685,7 @@ public class PackageManager extends JPanel {
   }
 
   class UnofficialInstallTask extends SwingWorker<Void, Void> implements
-      Progressable {
+    Progressable {
 
     private String m_target;
     private int m_progressCount = 0;
@@ -732,46 +732,47 @@ public class PackageManager extends JPanel {
 
       try {
         if (toInstall.toLowerCase().startsWith("http://")
-            || toInstall.toLowerCase().startsWith("https://")) {
+          || toInstall.toLowerCase().startsWith("https://")) {
           String packageName = WekaPackageManager.installPackageFromURL(
-              new URL(toInstall), pps);
+            new URL(toInstall), pps);
           installedPackage = WekaPackageManager
-              .getInstalledPackageInfo(packageName);
+            .getInstalledPackageInfo(packageName);
         } else if (toInstall.toLowerCase().endsWith(".zip")) {
           String packageName = WekaPackageManager.installPackageFromArchive(
-              toInstall, pps);
+            toInstall, pps);
           installedPackage = WekaPackageManager
-              .getInstalledPackageInfo(packageName);
+            .getInstalledPackageInfo(packageName);
         } else {
           displayErrorDialog("Unable to install package " + "\nfrom "
-              + toInstall + ". Unrecognized as a URL or zip archive.",
-              (String) null);
+            + toInstall + ". Unrecognized as a URL or zip archive.",
+            (String) null);
           m_errorOccurred = true;
+          pps.close();
           return null;
         }
       } catch (Exception ex) {
         displayErrorDialog("Unable to install package " + "\nfrom " + m_target
-            + ". Check the log for error messages.", ex);
+          + ". Check the log for error messages.", ex);
         m_errorOccurred = true;
         return null;
       }
 
       if (installedPackage != null) {
         if (!Utils
-            .getDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade")) {
+          .getDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade")) {
           JCheckBox dontShow = new JCheckBox("Do not show this message again");
           Object[] stuff = new Object[2];
           stuff[0] = "Weka will need to be restared after installation for\n"
-              + "the changes to come into effect.\n";
+            + "the changes to come into effect.\n";
           stuff[1] = dontShow;
 
           JOptionPane.showMessageDialog(PackageManager.this, stuff,
-              "Weka Package Manager", JOptionPane.OK_OPTION);
+            "Weka Package Manager", JOptionPane.OK_OPTION);
 
           if (dontShow.isSelected()) {
             try {
               Utils
-                  .setDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade");
+                .setDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade");
             } catch (Exception ex) {
               // quietly ignore
             }
@@ -780,17 +781,17 @@ public class PackageManager extends JPanel {
 
         try {
           File packageRoot = new File(WekaPackageManager.getPackageHome()
-              + File.separator + installedPackage.getName());
+            + File.separator + installedPackage.getName());
           boolean loadCheck = WekaPackageManager.loadCheck(installedPackage,
-              packageRoot, pps);
+            packageRoot, pps);
 
           if (!loadCheck) {
             displayErrorDialog("Package was installed correctly but could not "
-                + "be loaded. Check log for details", (String) null);
+              + "be loaded. Check log for details", (String) null);
           }
         } catch (Exception ex) {
           displayErrorDialog("Unable to install package " + "\nfrom "
-              + m_target + ".", ex);
+            + m_target + ".", ex);
           m_errorOccurred = true;
         }
 
@@ -892,11 +893,11 @@ public class PackageManager extends JPanel {
         Object versionToInstall = m_versionsToInstall.get(zz);
         try {
           packageToInstall = WekaPackageManager.getRepositoryPackageInfo(
-              packageName, versionToInstall.toString());
+            packageName, versionToInstall.toString());
         } catch (Exception e) {
           e.printStackTrace();
           displayErrorDialog("Unable to obtain package info for package: "
-              + packageName, e);
+            + packageName, e);
           // return null; // bail out here
           m_unsuccessfulInstalls.add(packageToInstall);
           continue;
@@ -904,9 +905,9 @@ public class PackageManager extends JPanel {
 
         // check for any special installation instructions
         Object specialInstallMessage = packageToInstall
-            .getPackageMetaDataElement("MessageToDisplayOnInstallation");
+          .getPackageMetaDataElement("MessageToDisplayOnInstallation");
         if (specialInstallMessage != null
-            && specialInstallMessage.toString().length() > 0) {
+          && specialInstallMessage.toString().length() > 0) {
           String siM = specialInstallMessage.toString();
           try {
             siM = Environment.getSystemWide().substitute(siM);
@@ -914,23 +915,23 @@ public class PackageManager extends JPanel {
             // quietly ignore
           }
           JOptionPane.showMessageDialog(PackageManager.this, packageToInstall
-              + "\n\n" + siM, "Weka Package Manager", JOptionPane.OK_OPTION);
+            + "\n\n" + siM, "Weka Package Manager", JOptionPane.OK_OPTION);
         }
 
         if (!m_forceBut.isSelected()) {
           try {
             if (!packageToInstall.isCompatibleBaseSystem()) {
               List<Dependency> baseSysDep = packageToInstall
-                  .getBaseSystemDependency();
+                .getBaseSystemDependency();
               StringBuffer depList = new StringBuffer();
               for (Dependency bd : baseSysDep) {
                 depList.append(bd.getTarget().toString() + " ");
               }
 
               JOptionPane.showMessageDialog(PackageManager.this,
-                  "Unable to install package " + "\n" + packageName
-                      + " because it requires" + "\n" + depList.toString(),
-                  "Weka Package Manager", JOptionPane.ERROR_MESSAGE);
+                "Unable to install package " + "\n" + packageName
+                  + " because it requires" + "\n" + depList.toString(),
+                "Weka Package Manager", JOptionPane.ERROR_MESSAGE);
               // bail out here
               // return null;
               m_unsuccessfulInstalls.add(packageToInstall);
@@ -939,23 +940,22 @@ public class PackageManager extends JPanel {
           } catch (Exception e) {
             e.printStackTrace();
             displayErrorDialog("Problem determining dependency on base system"
-                + " for package: " + packageName, e);
+              + " for package: " + packageName, e);
             // return null; // can't proceed
             m_unsuccessfulInstalls.add(packageToInstall);
             continue;
           }
 
           // check to see if package is already installed
-          boolean upOrDowngrading = false;
           if (packageToInstall.isInstalled()) {
             Package installedVersion = null;
             try {
               installedVersion = WekaPackageManager
-                  .getInstalledPackageInfo(packageName);
+                .getInstalledPackageInfo(packageName);
             } catch (Exception e) {
               e.printStackTrace();
               displayErrorDialog("Problem obtaining package info for package: "
-                  + packageName, e);
+                + packageName, e);
               // return null; // can't proceed
               m_unsuccessfulInstalls.add(packageToInstall);
               continue;
@@ -963,10 +963,9 @@ public class PackageManager extends JPanel {
 
             if (!packageToInstall.equals(installedVersion)) {
               int result = JOptionPane.showConfirmDialog(PackageManager.this,
-                  "Package " + installedVersion
-                      + " is already installed. Replace with "
-                      + packageToInstall + "?", "Weka Package Manager",
-                  JOptionPane.YES_NO_OPTION);
+                "Package " + installedVersion
+                  + " is already installed. Replace with " + packageToInstall
+                  + "?", "Weka Package Manager", JOptionPane.YES_NO_OPTION);
               if (result == JOptionPane.NO_OPTION) {
                 // bail out here
                 // return null;
@@ -975,21 +974,21 @@ public class PackageManager extends JPanel {
               }
 
               if (!Utils
-                  .getDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade")) {
+                .getDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade")) {
                 JCheckBox dontShow = new JCheckBox(
-                    "Do not show this message again");
+                  "Do not show this message again");
                 Object[] stuff = new Object[2];
                 stuff[0] = "Weka will need to be restared after installation for\n"
-                    + "the changes to come into effect.\n";
+                  + "the changes to come into effect.\n";
                 stuff[1] = dontShow;
 
                 JOptionPane.showMessageDialog(PackageManager.this, stuff,
-                    "Weka Package Manager", JOptionPane.OK_OPTION);
+                  "Weka Package Manager", JOptionPane.OK_OPTION);
 
                 if (dontShow.isSelected()) {
                   try {
                     Utils
-                        .setDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade");
+                      .setDontShowDialog("weka.gui.PackageManager.RestartAfterUpgrade");
                   } catch (Exception ex) {
                     // quietly ignore
                   }
@@ -997,9 +996,9 @@ public class PackageManager extends JPanel {
               }
             } else {
               int result = JOptionPane.showConfirmDialog(PackageManager.this,
-                  "Package " + installedVersion
-                      + " is already installed. Install again?",
-                  "Weka Package Manager", JOptionPane.YES_NO_OPTION);
+                "Package " + installedVersion
+                  + " is already installed. Install again?",
+                "Weka Package Manager", JOptionPane.YES_NO_OPTION);
               if (result == JOptionPane.NO_OPTION) {
                 // bail out here
                 // return null;
@@ -1015,12 +1014,12 @@ public class PackageManager extends JPanel {
           List<Dependency> dependencies = null;
           try {
             dependencies = WekaPackageManager.getAllDependenciesForPackage(
-                packageToInstall, conflicts);
+              packageToInstall, conflicts);
           } catch (Exception e) {
             e.printStackTrace();
             displayErrorDialog(
-                "Problem determinining dependencies for package: "
-                    + packageToInstall.getName(), e);
+              "Problem determinining dependencies for package: "
+                + packageToInstall.getName(), e);
             // return null; // can't proceed
             m_unsuccessfulInstalls.add(packageToInstall);
             continue;
@@ -1029,7 +1028,7 @@ public class PackageManager extends JPanel {
           if (conflicts.size() > 0) {
             StringBuffer message = new StringBuffer();
             message.append("Package " + packageName
-                + " requires the following packages:\n\n");
+              + " requires the following packages:\n\n");
             Iterator<Dependency> depI = dependencies.iterator();
             while (depI.hasNext()) {
               Dependency d = depI.next();
@@ -1050,9 +1049,9 @@ public class PackageManager extends JPanel {
               }
             }
 
-            JOptionPane.showConfirmDialog(PackageManager.this,
-                message.toString(), "Weka Package Manager",
-                JOptionPane.OK_OPTION);
+            JOptionPane
+              .showConfirmDialog(PackageManager.this, message.toString(),
+                "Weka Package Manager", JOptionPane.OK_OPTION);
 
             // bail out here
             // return null;
@@ -1074,24 +1073,24 @@ public class PackageManager extends JPanel {
             Dependency toCheck = depI.next();
             if (toCheck.getTarget().getPackage().isInstalled()) {
               String toCheckName = toCheck.getTarget().getPackage()
-                  .getPackageMetaDataElement("PackageName").toString();
+                .getPackageMetaDataElement("PackageName").toString();
               try {
                 Package installedVersion = WekaPackageManager
-                    .getInstalledPackageInfo(toCheckName);
+                  .getInstalledPackageInfo(toCheckName);
                 if (!toCheck.getTarget().checkConstraint(installedVersion)) {
                   needsUpgrade.add(toCheck.getTarget());
                   Package mostRecent = toCheck.getTarget().getPackage();
                   if (toCheck.getTarget() instanceof org.pentaho.packageManagement.VersionPackageConstraint) {
                     mostRecent = WekaPackageManager
-                        .mostRecentVersionWithRespectToConstraint(toCheck
-                            .getTarget());
+                      .mostRecentVersionWithRespectToConstraint(toCheck
+                        .getTarget());
                   }
                   finalListToInstall.add(mostRecent);
                 }
               } catch (Exception ex) {
                 ex.printStackTrace();
                 displayErrorDialog("An error has occurred while checking "
-                    + "package dependencies", ex);
+                  + "package dependencies", ex);
                 // bail out here
                 // return null;
                 depsOk = false;
@@ -1102,14 +1101,14 @@ public class PackageManager extends JPanel {
                 Package mostRecent = toCheck.getTarget().getPackage();
                 if (toCheck.getTarget() instanceof org.pentaho.packageManagement.VersionPackageConstraint) {
                   mostRecent = WekaPackageManager
-                      .mostRecentVersionWithRespectToConstraint(toCheck
-                          .getTarget());
+                    .mostRecentVersionWithRespectToConstraint(toCheck
+                      .getTarget());
                 }
                 finalListToInstall.add(mostRecent);
               } catch (Exception ex) {
                 ex.printStackTrace();
                 displayErrorDialog("An error has occurred while checking "
-                    + "package dependencies", ex);
+                  + "package dependencies", ex);
                 // bail out here
                 // return null;
                 depsOk = false;
@@ -1130,9 +1129,9 @@ public class PackageManager extends JPanel {
               temp.append(pc + "\n");
             }
             int result = JOptionPane.showConfirmDialog(PackageManager.this,
-                "The following packages will be upgraded in order to install:\n\n"
-                    + temp.toString(), "Weka Package Manager",
-                JOptionPane.YES_NO_OPTION);
+              "The following packages will be upgraded in order to install:\n\n"
+                + temp.toString(), "Weka Package Manager",
+              JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.NO_OPTION) {
               // bail out here
@@ -1150,7 +1149,7 @@ public class PackageManager extends JPanel {
             } catch (Exception e) {
               e.printStackTrace();
               displayErrorDialog(
-                  "Unable to determine what packages are installed!", e);
+                "Unable to determine what packages are installed!", e);
               // return null; // can't proceed
               m_unsuccessfulInstalls.add(packageToInstall);
               continue;
@@ -1175,7 +1174,7 @@ public class PackageManager extends JPanel {
               boolean checkIt = true;
               for (int j = 0; j < needsUpgrade.size(); j++) {
                 if (tempPName
-                    .equals(needsUpgrade.get(j).getPackage().getName())) {
+                  .equals(needsUpgrade.get(j).getPackage().getName())) {
                   checkIt = false;
                   break;
                 }
@@ -1188,7 +1187,7 @@ public class PackageManager extends JPanel {
                 } catch (Exception e) {
                   e.printStackTrace();
                   displayErrorDialog("An error has occurred while checking "
-                      + "package dependencies", e);
+                    + "package dependencies", e);
                   // return null; // can't continue
                   depsOk = false;
                   break;
@@ -1197,14 +1196,14 @@ public class PackageManager extends JPanel {
                   conflictsAfterUpgrade = true;
 
                   tempM
-                      .append("Package "
-                          + tempP.getName()
-                          + " will have a compatibility"
-                          + "problem with the following packages after upgrading them:\n");
+                    .append("Package "
+                      + tempP.getName()
+                      + " will have a compatibility"
+                      + "problem with the following packages after upgrading them:\n");
                   Iterator<Dependency> dI = problem.iterator();
                   while (dI.hasNext()) {
                     tempM.append("\t" + dI.next().getTarget().getPackage()
-                        + "\n");
+                      + "\n");
                   }
                 }
               }
@@ -1217,9 +1216,9 @@ public class PackageManager extends JPanel {
 
             if (conflictsAfterUpgrade) {
               JOptionPane.showConfirmDialog(PackageManager.this,
-                  tempM.toString() + "\n"
-                      + "Unable to continue with installation.",
-                  "Weka Package Manager", JOptionPane.OK_OPTION);
+                tempM.toString() + "\n"
+                  + "Unable to continue with installation.",
+                "Weka Package Manager", JOptionPane.OK_OPTION);
 
               // return null; //bail out here
               m_unsuccessfulInstalls.add(packageToInstall);
@@ -1230,15 +1229,14 @@ public class PackageManager extends JPanel {
           if (finalListToInstall.size() > 0) {
             StringBuffer message = new StringBuffer();
             message.append("To install " + packageName
-                + " the following packages will"
-                + " be installed/upgraded:\n\n");
+              + " the following packages will" + " be installed/upgraded:\n\n");
             for (Package p : finalListToInstall) {
               message.append("\t" + p + "\n");
             }
 
             int result = JOptionPane.showConfirmDialog(PackageManager.this,
-                message.toString(), "Weka Package Manager",
-                JOptionPane.YES_NO_OPTION);
+              message.toString(), "Weka Package Manager",
+              JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.NO_OPTION) {
               // bail out here
@@ -1247,7 +1245,7 @@ public class PackageManager extends JPanel {
               continue;
             }
             m_progress.setMaximum(m_progress.getMaximum()
-                + (finalListToInstall.size() * 30));
+              + (finalListToInstall.size() * 30));
           }
 
           // OK, now we can download and install everything
@@ -1255,12 +1253,12 @@ public class PackageManager extends JPanel {
           // first install the final list of dependencies
           try {
             boolean tempB = WekaPackageManager.installPackages(
-                finalListToInstall, pps);
+              finalListToInstall, pps);
             s_atLeastOnePackageUpgradeHasOccurredInThisSession = (s_atLeastOnePackageUpgradeHasOccurredInThisSession || tempB);
           } catch (Exception e) {
             e.printStackTrace();
             displayErrorDialog("An error has occurred while installing "
-                + "dependent packages", e);
+              + "dependent packages", e);
             // return null;
             m_unsuccessfulInstalls.add(packageToInstall);
             continue;
@@ -1270,7 +1268,7 @@ public class PackageManager extends JPanel {
           // m_progress.setMaximum(finalListToInstall.size() * 10 + 10);
           try {
             boolean tempB = WekaPackageManager.installPackageFromRepository(
-                packageName, versionToInstall.toString(), pps);
+              packageName, versionToInstall.toString(), pps);
             s_atLeastOnePackageUpgradeHasOccurredInThisSession = (s_atLeastOnePackageUpgradeHasOccurredInThisSession || tempB);
           } catch (Exception e) {
             e.printStackTrace();
@@ -1285,7 +1283,7 @@ public class PackageManager extends JPanel {
           // etc.
           try {
             boolean tempB = WekaPackageManager.installPackageFromRepository(
-                packageName, versionToInstall.toString(), pps);
+              packageName, versionToInstall.toString(), pps);
             s_atLeastOnePackageUpgradeHasOccurredInThisSession = (s_atLeastOnePackageUpgradeHasOccurredInThisSession || tempB);
           } catch (Exception e) {
             e.printStackTrace();
@@ -1322,9 +1320,9 @@ public class PackageManager extends JPanel {
           failedPackageNames.append(p.getName() + "\n");
         }
         displayErrorDialog(
-            "The following package(s) could not be installed\n"
-                + "for some reason (check the log)\n"
-                + failedPackageNames.toString(), "");
+          "The following package(s) could not be installed\n"
+            + "for some reason (check the log)\n"
+            + failedPackageNames.toString(), "");
         m_detailLabel.setText("Install complete.");
       }
 
@@ -1365,16 +1363,21 @@ public class PackageManager extends JPanel {
    */
 
   protected class ComboBoxEditor extends DefaultCellEditor {
+
+    /** Added ID to avoid warning. */
+    private static final long serialVersionUID = 5240331667759901966L;
+
     public ComboBoxEditor() {
       super(new JComboBox(new String[] { "one", "two" }));
     }
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
-        boolean isSelected, int row, int column) {
+      boolean isSelected, int row, int column) {
       String packageName = m_table.getValueAt(row,
-          getColumnIndex(PACKAGE_COLUMN)).toString();
+        getColumnIndex(PACKAGE_COLUMN)).toString();
       List<Object> catAndVers = m_packageLookupInfo.get(packageName);
+      @SuppressWarnings("unchecked")
       List<Object> repVersions = (List<Object>) catAndVers.get(1);
 
       String[] versions = repVersions.toArray(new String[1]);
@@ -1392,10 +1395,10 @@ public class PackageManager extends JPanel {
   protected boolean m_cacheEstablished = false;
   protected boolean m_cacheRefreshInProgress = false;
   public static String PAGE_HEADER = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n"
-      + "<html>\n<head>\n<title>Waikato Environment for Knowledge Analysis (WEKA)</title>\n"
-      + "<!-- CSS Stylesheet -->\n<style>body\n{\nbackground: #ededed;\ncolor: #666666;\n"
-      + "font: 14px Tahoma, Helvetica, sans-serif;;\nmargin: 5px 10px 5px 10px;\npadding: 0px;\n"
-      + "}\n</style>\n\n</head>\n<body bgcolor=\"#ededed\" text=\"#666666\">\n";
+    + "<html>\n<head>\n<title>Waikato Environment for Knowledge Analysis (WEKA)</title>\n"
+    + "<!-- CSS Stylesheet -->\n<style>body\n{\nbackground: #ededed;\ncolor: #666666;\n"
+    + "font: 14px Tahoma, Helvetica, sans-serif;;\nmargin: 5px 10px 5px 10px;\npadding: 0px;\n"
+    + "}\n</style>\n\n</head>\n<body bgcolor=\"#ededed\" text=\"#666666\">\n";
 
   private static String initialPage() {
     StringBuffer initialPage = new StringBuffer();
@@ -1413,7 +1416,7 @@ public class PackageManager extends JPanel {
         URLConnection conn = null;
         URL homeURL = new URL(BROWSER_HOME);
         org.pentaho.packageManagement.PackageManager pm = WekaPackageManager
-            .getUnderlyingPackageManager();
+          .getUnderlyingPackageManager();
         if (pm.setProxyAuthentication(homeURL)) {
           conn = homeURL.openConnection(pm.getProxy());
         } else {
@@ -1426,7 +1429,7 @@ public class PackageManager extends JPanel {
         // way to set a timeout in JEditorPane
         conn.setConnectTimeout(10000); // 10 seconds
         BufferedReader bi = new BufferedReader(new InputStreamReader(
-            conn.getInputStream()));
+          conn.getInputStream()));
         while (bi.readLine() != null) {
           //
         }
@@ -1449,11 +1452,11 @@ public class PackageManager extends JPanel {
 
     if (WekaPackageManager.m_noPackageMetaDataAvailable) {
       JOptionPane
-          .showMessageDialog(
-              this,
-              "The package manager is unavailable "
-                  + "due to the fact that there is no cached package meta data and we are offline",
-              "Package manager unavailable", JOptionPane.INFORMATION_MESSAGE);
+        .showMessageDialog(
+          this,
+          "The package manager is unavailable "
+            + "due to the fact that there is no cached package meta data and we are offline",
+          "Package manager unavailable", JOptionPane.INFORMATION_MESSAGE);
       return;
     }
 
@@ -1526,14 +1529,14 @@ public class PackageManager extends JPanel {
     officialHolder.add(installP, BorderLayout.EAST);
 
     m_installBut.setToolTipText("Install the selected official package(s) "
-        + "from the list");
+      + "from the list");
     m_uninstallBut
-        .setToolTipText("Uninstall the selected package(s) from the list");
+      .setToolTipText("Uninstall the selected package(s) from the list");
     m_unofficialBut
-        .setToolTipText("Install an unofficial package from a file or URL");
+      .setToolTipText("Install an unofficial package from a file or URL");
     m_unofficialChooser.resetFileFilters();
     m_unofficialChooser.addFileFilter(new ExtensionFileFilter(".zip",
-        "Package archive file"));
+      "Package archive file"));
 
     m_unofficialBut.addActionListener(new ActionListener() {
       @Override
@@ -1602,22 +1605,22 @@ public class PackageManager extends JPanel {
           List<String> packageNames = new ArrayList<String>();
           List<Object> versions = new ArrayList<Object>();
           StringBuffer confirmList = new StringBuffer();
-          for (int i = 0; i < selectedRows.length; i++) {
-            String packageName = m_table.getValueAt(selectedRows[i],
-                getColumnIndex(PACKAGE_COLUMN)).toString();
+          for (int selectedRow : selectedRows) {
+            String packageName = m_table.getValueAt(selectedRow,
+              getColumnIndex(PACKAGE_COLUMN)).toString();
             packageNames.add(packageName);
-            Object packageVersion = m_table.getValueAt(selectedRows[i],
-                getColumnIndex(REPOSITORY_COLUMN));
+            Object packageVersion = m_table.getValueAt(selectedRow,
+              getColumnIndex(REPOSITORY_COLUMN));
             versions.add(packageVersion);
             confirmList.append(packageName + " " + packageVersion.toString()
-                + "\n");
+              + "\n");
           }
 
           JTextArea jt = new JTextArea("The following packages will be "
-              + "installed/upgraded:\n\n" + confirmList.toString(), 10, 40);
+            + "installed/upgraded:\n\n" + confirmList.toString(), 10, 40);
           int result = JOptionPane.showConfirmDialog(PackageManager.this,
-              new JScrollPane(jt), "Weka Package Manager",
-              JOptionPane.YES_NO_OPTION);
+            new JScrollPane(jt), "Weka Package Manager",
+            JOptionPane.YES_NO_OPTION);
 
           if (result == JOptionPane.YES_OPTION) {
             pleaseCloseAppWindowsPopUp();
@@ -1642,9 +1645,9 @@ public class PackageManager extends JPanel {
           List<String> packageNames = new ArrayList<String>();
           StringBuffer confirmList = new StringBuffer();
 
-          for (int i = 0; i < selectedRows.length; i++) {
-            String packageName = m_table.getValueAt(selectedRows[i],
-                getColumnIndex(PACKAGE_COLUMN)).toString();
+          for (int selectedRow : selectedRows) {
+            String packageName = m_table.getValueAt(selectedRow,
+              getColumnIndex(PACKAGE_COLUMN)).toString();
             Package p = null;
             try {
               p = WekaPackageManager.getRepositoryPackageInfo(packageName);
@@ -1668,10 +1671,10 @@ public class PackageManager extends JPanel {
 
           if (packageNames.size() > 0) {
             JTextArea jt = new JTextArea("The following packages will be "
-                + "uninstalled:\n" + confirmList.toString(), 10, 40);
+              + "uninstalled:\n" + confirmList.toString(), 10, 40);
             int result = JOptionPane.showConfirmDialog(PackageManager.this,
-                new JScrollPane(jt), "Weka Package Manager",
-                JOptionPane.YES_NO_OPTION);
+              new JScrollPane(jt), "Weka Package Manager",
+              JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
               pleaseCloseAppWindowsPopUp();
@@ -1696,7 +1699,7 @@ public class PackageManager extends JPanel {
     JPanel progressP = new JPanel();
     progressP.setLayout(new BorderLayout());
     progressP.setBorder(BorderFactory
-        .createTitledBorder("Install/Uninstall/Refresh progress"));
+      .createTitledBorder("Install/Uninstall/Refresh progress"));
     progressP.add(m_progress, BorderLayout.NORTH);
     progressP.add(m_detailLabel, BorderLayout.CENTER);
     butPanel.add(progressP, BorderLayout.CENTER);
@@ -1735,8 +1738,7 @@ public class PackageManager extends JPanel {
     });
 
     m_model = new DefaultTableModel(new String[] { PACKAGE_COLUMN,
-        CATEGORY_COLUMN, INSTALLED_COLUMN, REPOSITORY_COLUMN, LOADED_COLUMN },
-        15) {
+      CATEGORY_COLUMN, INSTALLED_COLUMN, REPOSITORY_COLUMN, LOADED_COLUMN }, 15) {
 
       private static final long serialVersionUID = -2886328542412471039L;
 
@@ -1762,26 +1764,26 @@ public class PackageManager extends JPanel {
     m_table.setShowHorizontalLines(false);
     m_table.getColumn("Repository version").setCellEditor(new ComboBoxEditor());
     m_table.getSelectionModel().addListSelectionListener(
-        new ListSelectionListener() {
-          @Override
-          public void valueChanged(ListSelectionEvent e) {
-            if (!e.getValueIsAdjusting() && !m_cacheRefreshInProgress) {
-              ListSelectionModel lm = (ListSelectionModel) e.getSource();
-              boolean infoDisplayed = false;
-              for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
-                if (lm.isSelectedIndex(i)) {
-                  if (!infoDisplayed) {
-                    // display package info for the first one in the list
-                    displayPackageInfo(i);
-                    infoDisplayed = true;
-                    break;
-                  }
+      new ListSelectionListener() {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+          if (!e.getValueIsAdjusting() && !m_cacheRefreshInProgress) {
+            ListSelectionModel lm = (ListSelectionModel) e.getSource();
+            boolean infoDisplayed = false;
+            for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
+              if (lm.isSelectedIndex(i)) {
+                if (!infoDisplayed) {
+                  // display package info for the first one in the list
+                  displayPackageInfo(i);
+                  infoDisplayed = true;
+                  break;
                 }
               }
-              updateInstallUninstallButtonEnablement();
             }
+            updateInstallUninstallButtonEnablement();
           }
-        });
+        }
+      });
 
     JTableHeader header = m_table.getTableHeader();
     header.addMouseListener(new MouseAdapter() {
@@ -1833,7 +1835,7 @@ public class PackageManager extends JPanel {
         if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
           try {
             if (event.getURL().toExternalForm().endsWith(".zip")
-                || event.getURL().toExternalForm().endsWith(".jar")) {
+              || event.getURL().toExternalForm().endsWith(".jar")) {
               // don't render archives!
             } else {
               if (m_browserHistory.size() == 0) {
@@ -1869,7 +1871,7 @@ public class PackageManager extends JPanel {
 
     // create the new packages available icon
     m_newPackagesAvailableL = new JLabel(new ImageIcon(
-        loadImage("weka/gui/images/information.gif")));
+      loadImage("weka/gui/images/information.gif")));
 
     // Start loading the home page
     Thread homePageThread = new HomePageThread();
@@ -1949,15 +1951,15 @@ public class PackageManager extends JPanel {
       // that the list contains at least one package to be installed
       // and uninstalled we don't have to check any further
 
-      for (int i = 0; i < selectedRows.length; i++) {
+      for (int selectedRow : selectedRows) {
         if (!enableInstall || !enableUninstall) {
           enableInstall = true; // we should always be able to install an
                                 // already installed package
-          String packageName = m_table.getValueAt(selectedRows[i],
-              getColumnIndex(PACKAGE_COLUMN)).toString();
+          String packageName = m_table.getValueAt(selectedRow,
+            getColumnIndex(PACKAGE_COLUMN)).toString();
           try {
             Package p = WekaPackageManager
-                .getRepositoryPackageInfo(packageName);
+              .getRepositoryPackageInfo(packageName);
             if (!enableUninstall) {
               enableUninstall = p.isInstalled();
             }
@@ -2016,7 +2018,7 @@ public class PackageManager extends JPanel {
         String loadStatus = "";
         if (p.isInstalled()) {
           File packageRoot = new File(WekaPackageManager.getPackageHome()
-              .toString() + File.separator + p.getName());
+            .toString() + File.separator + p.getName());
           boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
           loadStatus = (loaded) ? "Yes" : "No - check log";
         }
@@ -2048,13 +2050,13 @@ public class PackageManager extends JPanel {
         if (p.isInstalled()) {
           try {
             Package installed = WekaPackageManager.getInstalledPackageInfo(p
-                .getName());
+              .getName());
             installedV = installed.getPackageMetaDataElement("Version")
-                .toString();
+              .toString();
           } catch (Exception ex) {
             ex.printStackTrace();
             displayErrorDialog("An error has occurred while trying to obtain"
-                + " installed package info", ex);
+              + " installed package info", ex);
           }
         }
         m_model.setValueAt(installedV, row, getColumnIndex(INSTALLED_COLUMN));
@@ -2089,6 +2091,7 @@ public class PackageManager extends JPanel {
           Object repositoryV = "-----";
           if (catAndVers != null) {
             // handle non-repository packages
+            @SuppressWarnings("unchecked")
             List<Object> repVersions = (List<Object>) catAndVers.get(1);
             repositoryV = repVersions.get(0);
           }
@@ -2098,14 +2101,14 @@ public class PackageManager extends JPanel {
           m_model.setValueAt(category, row, getColumnIndex(CATEGORY_COLUMN));
           m_model.setValueAt(installedV, row, getColumnIndex(INSTALLED_COLUMN));
           m_model.setValueAt(repositoryV, row,
-              getColumnIndex(REPOSITORY_COLUMN));
+            getColumnIndex(REPOSITORY_COLUMN));
           if (catAndVers != null) {
             String loadStatus = (String) catAndVers.get(2);
             m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
           } else {
             // handle non-repository packages
             File packageRoot = new File(WekaPackageManager.getPackageHome()
-                .toString() + File.separator + p.getName());
+              .toString() + File.separator + p.getName());
             boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
             String loadStatus = (loaded) ? "Yes" : "No - check log";
             m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
@@ -2134,6 +2137,7 @@ public class PackageManager extends JPanel {
 
           String installedV = "";
           List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
+          @SuppressWarnings("unchecked")
           List<Object> repVersions = (List<Object>) catAndVers.get(1);
           Object repositoryV = repVersions.get(0);
           // String repString = getRepVersions(p.getName(), repositoryV);
@@ -2142,7 +2146,7 @@ public class PackageManager extends JPanel {
           m_model.setValueAt(category, row, getColumnIndex(CATEGORY_COLUMN));
           m_model.setValueAt(installedV, row, getColumnIndex(INSTALLED_COLUMN));
           m_model.setValueAt(repositoryV, row,
-              getColumnIndex(REPOSITORY_COLUMN));
+            getColumnIndex(REPOSITORY_COLUMN));
           String loadStatus = (String) catAndVers.get(2);
           m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
           row++;
@@ -2155,16 +2159,16 @@ public class PackageManager extends JPanel {
 
   private void displayPackageInfo(int i) {
     String packageName = m_table.getValueAt(i, getColumnIndex(PACKAGE_COLUMN))
-        .toString();
+      .toString();
 
     boolean repositoryPackage = true;
     try {
-      Package repP = WekaPackageManager.getRepositoryPackageInfo(packageName);
+      WekaPackageManager.getRepositoryPackageInfo(packageName);
     } catch (Exception ex) {
       repositoryPackage = false;
     }
     String versionURL = WekaPackageManager.getPackageRepositoryURL().toString()
-        + "/" + packageName + "/index.html";
+      + "/" + packageName + "/index.html";
 
     try {
       URL back = m_infoPane.getPage();
@@ -2237,13 +2241,13 @@ public class PackageManager extends JPanel {
       String loadStatus = "";
       if (p.isInstalled()) {
         File packageRoot = new File(WekaPackageManager.getPackageHome()
-            .toString());
+          .toString());
         boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
         loadStatus = (loaded) ? "Yes" : "No - check log";
       }
 
       List<Object> versions = WekaPackageManager
-          .getRepositoryPackageVersions(packageName);
+        .getRepositoryPackageVersions(packageName);
       List<Object> catAndVers = new ArrayList<Object>();
       catAndVers.add(category);
       catAndVers.add(versions);
@@ -2260,7 +2264,7 @@ public class PackageManager extends JPanel {
       // from the repository
       ex.printStackTrace();
       System.err.println("A problem has occurred whilst trying to get all "
-          + "package information. Trying a cache refresh...");
+        + "package information. Trying a cache refresh...");
       WekaPackageManager.refreshCache(System.out);
       try {
         // try again
@@ -2291,13 +2295,13 @@ public class PackageManager extends JPanel {
       options[0] = "OK";
     }
     int result = JOptionPane.showOptionDialog(this, message,
-        "Weka Package Manager", JOptionPane.YES_NO_OPTION,
-        JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+      "Weka Package Manager", JOptionPane.YES_NO_OPTION,
+      JOptionPane.ERROR_MESSAGE, null, options, options[0]);
 
     if (result == 1) {
       JTextArea jt = new JTextArea(stackTrace, 10, 40);
       JOptionPane.showMessageDialog(PackageManager.this, new JScrollPane(jt),
-          "Weka Package Manager", JOptionPane.OK_OPTION);
+        "Weka Package Manager", JOptionPane.OK_OPTION);
     }
   }
 
@@ -2316,7 +2320,7 @@ public class PackageManager extends JPanel {
 
   public static void main(String[] args) {
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-        "Logging started");
+      "Logging started");
     LookAndFeel.setLookAndFeel();
 
     PackageManager pm = new PackageManager();
@@ -2327,7 +2331,7 @@ public class PackageManager extends JPanel {
         offline = " (offline)";
       }
       final javax.swing.JFrame jf = new javax.swing.JFrame(
-          "Weka Package Manager" + offline);
+        "Weka Package Manager" + offline);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(pm, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {

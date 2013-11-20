@@ -151,21 +151,21 @@ public class GenericPropertiesCreator {
    * the hashtable that stores the excludes: key -&gt; Hashtable(prefix -&gt;
    * Vector of classnames)
    */
-  protected Hashtable m_Excludes;
+  protected Hashtable<String, Hashtable<String, Vector<String>>> m_Excludes;
 
   static {
     try {
       GenericPropertiesCreator creator = new GenericPropertiesCreator();
       GLOBAL_CREATOR = creator;
       if (creator.useDynamic()
-          && !WekaPackageManager.m_initialPackageLoadingInProcess) {
+        && !WekaPackageManager.m_initialPackageLoadingInProcess) {
         creator.execute(false, true);
         GLOBAL_INPUT_PROPERTIES = creator.getInputProperties();
         GLOBAL_OUTPUT_PROPERTIES = creator.getOutputProperties();
       } else {
         // Read the static information from the GenericObjectEditor.props
         GLOBAL_OUTPUT_PROPERTIES = Utils
-            .readProperties("weka/gui/GenericObjectEditor.props");
+          .readProperties("weka/gui/GenericObjectEditor.props");
       }
     } catch (Exception e) {
       // TODO Auto-generated catch block
@@ -239,7 +239,7 @@ public class GenericPropertiesCreator {
     m_InputProperties = null;
     m_OutputProperties = null;
     m_ExplicitPropsFile = true;
-    m_Excludes = new Hashtable();
+    m_Excludes = new Hashtable<String, Hashtable<String, Vector<String>>>();
   }
 
   /**
@@ -334,41 +334,44 @@ public class GenericPropertiesCreator {
    * @see #m_InputFilename
    */
   protected void loadInputProperties() {
-    if (VERBOSE)
+    if (VERBOSE) {
       System.out.println("Loading '" + getInputFilename() + "'...");
+    }
     m_InputProperties = new Properties();
     try {
       File f = new File(getInputFilename());
-      if (getExplicitPropsFile() && f.exists())
+      if (getExplicitPropsFile() && f.exists()) {
         m_InputProperties.load(new FileInputStream(getInputFilename()));
-      else
+      } else {
         m_InputProperties = Utils.readProperties(getInputFilename());
+      }
 
       // excludes
       m_Excludes.clear();
       Properties p = Utils.readProperties(EXCLUDE_FILE);
-      Enumeration enm = p.propertyNames();
+      Enumeration<?> enm = p.propertyNames();
       while (enm.hasMoreElements()) {
         String name = enm.nextElement().toString();
         // new Hashtable for key
-        Hashtable t = new Hashtable();
+        Hashtable<String, Vector<String>> t = new Hashtable<String, Vector<String>>();
         m_Excludes.put(name, t);
-        t.put(EXCLUDE_INTERFACE, new Vector());
-        t.put(EXCLUDE_CLASS, new Vector());
-        t.put(EXCLUDE_SUPERCLASS, new Vector());
+        t.put(EXCLUDE_INTERFACE, new Vector<String>());
+        t.put(EXCLUDE_CLASS, new Vector<String>());
+        t.put(EXCLUDE_SUPERCLASS, new Vector<String>());
 
         // process entries
         StringTokenizer tok = new StringTokenizer(p.getProperty(name), ",");
         while (tok.hasMoreTokens()) {
           String item = tok.nextToken();
           // get list
-          Vector list = new Vector();
-          if (item.startsWith(EXCLUDE_INTERFACE + ":"))
-            list = (Vector) t.get(EXCLUDE_INTERFACE);
-          else if (item.startsWith(EXCLUDE_CLASS + ":"))
-            list = (Vector) t.get(EXCLUDE_CLASS);
-          else if (item.startsWith(EXCLUDE_SUPERCLASS))
-            list = (Vector) t.get(EXCLUDE_SUPERCLASS);
+          Vector<String> list = new Vector<String>();
+          if (item.startsWith(EXCLUDE_INTERFACE + ":")) {
+            list = t.get(EXCLUDE_INTERFACE);
+          } else if (item.startsWith(EXCLUDE_CLASS + ":")) {
+            list = t.get(EXCLUDE_CLASS);
+          } else if (item.startsWith(EXCLUDE_SUPERCLASS)) {
+            list = t.get(EXCLUDE_SUPERCLASS);
+          }
           // add to list
           list.add(item.substring(item.indexOf(":") + 1));
         }
@@ -384,8 +387,9 @@ public class GenericPropertiesCreator {
    * @return true if the dynamic approach is to be used
    */
   public boolean useDynamic() {
-    if (getInputProperties() == null)
+    if (getInputProperties() == null) {
       loadInputProperties();
+    }
 
     // check our classloader against the system one - if different then
     // return false (as dynamic classloading only works for classes discoverable
@@ -402,7 +406,7 @@ public class GenericPropertiesCreator {
      */
 
     return Boolean.parseBoolean(getInputProperties().getProperty(USE_DYNAMIC,
-        "true"));
+      "true"));
   }
 
   /**
@@ -426,9 +430,9 @@ public class GenericPropertiesCreator {
    */
   protected boolean isValidClassname(String key, String classname) {
     boolean result;
-    Class cls;
-    Class clsCurrent;
-    Vector list;
+    Class<?> cls;
+    Class<?> clsCurrent;
+    Vector<String> list;
     int i;
 
     result = true;
@@ -444,8 +448,7 @@ public class GenericPropertiesCreator {
 
       // interface
       if ((clsCurrent != null) && result) {
-        list = (Vector) ((Hashtable) m_Excludes.get(key))
-            .get(EXCLUDE_INTERFACE);
+        list = m_Excludes.get(key).get(EXCLUDE_INTERFACE);
         for (i = 0; i < list.size(); i++) {
           try {
             cls = Class.forName(list.get(i).toString());
@@ -461,8 +464,7 @@ public class GenericPropertiesCreator {
 
       // superclass
       if ((clsCurrent != null) && result) {
-        list = (Vector) ((Hashtable) m_Excludes.get(key))
-            .get(EXCLUDE_SUPERCLASS);
+        list = m_Excludes.get(key).get(EXCLUDE_SUPERCLASS);
         for (i = 0; i < list.size(); i++) {
           try {
             cls = Class.forName(list.get(i).toString());
@@ -478,12 +480,13 @@ public class GenericPropertiesCreator {
 
       // class
       if ((clsCurrent != null) && result) {
-        list = (Vector) ((Hashtable) m_Excludes.get(key)).get(EXCLUDE_CLASS);
+        list = m_Excludes.get(key).get(EXCLUDE_CLASS);
         for (i = 0; i < list.size(); i++) {
           try {
             cls = Class.forName(list.get(i).toString());
-            if (cls.getName().equals(clsCurrent.getName()))
+            if (cls.getName().equals(clsCurrent.getName())) {
               result = false;
+            }
           } catch (Exception e) {
             // we ignore this Exception
           }
@@ -502,23 +505,24 @@ public class GenericPropertiesCreator {
    * @see #m_OutputProperties
    */
   protected void generateOutputProperties() throws Exception {
-    Enumeration keys;
+    Enumeration<?> keys;
     String key;
     String value;
     String pkg;
     StringTokenizer tok;
-    Vector classes;
-    HashSet names;
+    Vector<String> classes;
+    HashSet<String> names;
     int i;
 
     m_OutputProperties = new Properties();
     keys = m_InputProperties.propertyNames();
     while (keys.hasMoreElements()) {
       key = keys.nextElement().toString();
-      if (key.equals(USE_DYNAMIC))
+      if (key.equals(USE_DYNAMIC)) {
         continue;
+      }
       tok = new StringTokenizer(m_InputProperties.getProperty(key), ",");
-      names = new HashSet();
+      names = new HashSet<String>();
 
       // get classes for all packages
       while (tok.hasMoreTokens()) {
@@ -528,32 +532,36 @@ public class GenericPropertiesCreator {
           classes = ClassDiscovery.find(Class.forName(key), pkg);
         } catch (Exception e) {
           System.out.println("Problem with '" + key + "': " + e);
-          classes = new Vector();
+          classes = new Vector<String>();
         }
 
         for (i = 0; i < classes.size(); i++) {
           // skip non-public classes
-          if (!isValidClassname(classes.get(i).toString()))
+          if (!isValidClassname(classes.get(i).toString())) {
             continue;
+          }
           // some classes should not be listed for some keys
-          if (!isValidClassname(key, classes.get(i).toString()))
+          if (!isValidClassname(key, classes.get(i).toString())) {
             continue;
+          }
           names.add(classes.get(i));
         }
       }
 
       // generate list
       value = "";
-      classes = new Vector();
+      classes = new Vector<String>();
       classes.addAll(names);
       Collections.sort(classes, new StringCompare());
       for (i = 0; i < classes.size(); i++) {
-        if (!value.equals(""))
+        if (!value.equals("")) {
           value += ",";
+        }
         value += classes.get(i).toString();
       }
-      if (VERBOSE)
+      if (VERBOSE) {
         System.out.println(pkg + " -> " + value);
+      }
 
       // set value
       m_OutputProperties.setProperty(key, value);
@@ -568,12 +576,13 @@ public class GenericPropertiesCreator {
    * @see #m_OutputFilename
    */
   protected void storeOutputProperties() throws Exception {
-    if (VERBOSE)
+    if (VERBOSE) {
       System.out.println("Saving '" + getOutputFilename() + "'...");
+    }
     m_OutputProperties
-        .store(
-            new FileOutputStream(getOutputFilename()),
-            " Customises the list of options given by the GenericObjectEditor\n# for various superclasses.");
+      .store(
+        new FileOutputStream(getOutputFilename()),
+        " Customises the list of options given by the GenericObjectEditor\n# for various superclasses.");
   }
 
   /**
@@ -620,8 +629,9 @@ public class GenericPropertiesCreator {
     generateOutputProperties();
 
     // write properties file
-    if (store)
+    if (store) {
       storeOutputProperties();
+    }
   }
 
   /**
@@ -656,7 +666,7 @@ public class GenericPropertiesCreator {
       c.setOutputFilename(args[1]);
     } else {
       System.out.println("usage: " + GenericPropertiesCreator.class.getName()
-          + " [<input.props>] [<output.props>]");
+        + " [<input.props>] [<output.props>]");
       System.exit(1);
     }
 

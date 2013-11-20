@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
@@ -36,7 +37,6 @@ import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Range;
@@ -60,8 +60,8 @@ import weka.gui.Logger;
  */
 @KFStep(category = "Tools", toolTipText = "Label instances according to substring matches in String attributes")
 public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
-    Serializable, InstanceListener, TrainingSetListener, TestSetListener,
-    DataSourceListener, EventConstraints, EnvironmentHandler, DataSource {
+  Serializable, InstanceListener, TrainingSetListener, TestSetListener,
+  DataSourceListener, EventConstraints, EnvironmentHandler, DataSource {
 
   /**
    * For serialization
@@ -124,7 +124,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
      * @param selectedAtts the attributes to apply the rule to
      */
     public Match(String match, boolean regex, boolean ignoreCase,
-        String selectedAtts) {
+      String selectedAtts) {
       m_match = match;
       m_regex = regex;
       m_ignoreCase = ignoreCase;
@@ -135,7 +135,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       String[] parts = setup.split("@@MR@@");
       if (parts.length < 4 || parts.length > 5) {
         throw new IllegalArgumentException("Malformed match definition: "
-            + setup);
+          + setup);
       }
 
       m_attsToApplyTo = parts[0].trim();
@@ -278,7 +278,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       // Try a range first for the attributes
       String tempRangeS = attsToApplyToS;
       tempRangeS = tempRangeS.replace("/first", "first").replace("/last",
-          "last");
+        "last");
       Range tempR = new Range();
       tempR.setRanges(attsToApplyToS);
       try {
@@ -306,7 +306,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
             } else {
               if (m_logger != null) {
                 String msg = m_statusMessagePrefix + "Can't find attribute '"
-                    + att + "in the incoming instances - ignoring";
+                  + att + "in the incoming instances - ignoring";
                 m_logger.logMessage(msg);
               }
             }
@@ -322,14 +322,14 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
 
       // validate the types of the selected atts
       Set<Integer> indexes = new HashSet<Integer>();
-      for (int i = 0; i < m_selectedAtts.length; i++) {
-        if (structure.attribute(m_selectedAtts[i]).isString()) {
-          indexes.add(m_selectedAtts[i]);
+      for (int m_selectedAtt : m_selectedAtts) {
+        if (structure.attribute(m_selectedAtt).isString()) {
+          indexes.add(m_selectedAtt);
         } else {
           if (m_logger != null) {
             String msg = m_statusMessagePrefix + "Attribute '"
-                + structure.attribute(m_selectedAtts[i]).name()
-                + "is not a string attribute - " + "ignoring";
+              + structure.attribute(m_selectedAtt).name()
+              + "is not a string attribute - " + "ignoring";
             m_logger.logMessage(msg);
           }
         }
@@ -493,8 +493,8 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
    * Default visual filters
    */
   protected BeanVisual m_visual = new BeanVisual("SubstringLabeler",
-      BeanVisual.ICON_PATH + "DefaultFilter.gif", BeanVisual.ICON_PATH
-          + "DefaultFilter_animated.gif");
+    BeanVisual.ICON_PATH + "DefaultFilter.gif", BeanVisual.ICON_PATH
+      + "DefaultFilter_animated.gif");
 
   /**
    * Constructor
@@ -514,16 +514,16 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
    */
   public String globalInfo() {
     return "Matches substrings in String attributes using "
-        + "either literal or regular expression matches. "
-        + "The value of a new attribute is set to reflect"
-        + " the status of the match. The new attribute can "
-        + "be either binary (in which case values indicate "
-        + "match or no match) or multi-valued nominal, "
-        + "in which case a label must be associated with each "
-        + "distinct matching rule. In the case of labeled matches, "
-        + "the user can opt to have non matching instances output "
-        + "with missing value set for the new attribute or not"
-        + " output at all (i.e. consumed by the step).";
+      + "either literal or regular expression matches. "
+      + "The value of a new attribute is set to reflect"
+      + " the status of the match. The new attribute can "
+      + "be either binary (in which case values indicate "
+      + "match or no match) or multi-valued nominal, "
+      + "in which case a label must be associated with each "
+      + "distinct matching rule. In the case of labeled matches, "
+      + "the user can opt to have non matching instances output "
+      + "with missing value set for the new attribute or not"
+      + " output at all (i.e. consumed by the step).";
   }
 
   /**
@@ -703,7 +703,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
   @Override
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultFilter.gif",
-        BeanVisual.ICON_PATH + "DefaultFilter_animated.gif");
+      BeanVisual.ICON_PATH + "DefaultFilter_animated.gif");
     m_visual.setText("SubstringLabeler");
   }
 
@@ -808,7 +808,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
   @Override
   public boolean connectionAllowed(String eventName) {
     if (!eventName.equals("instance") && !eventName.equals("dataSet")
-        && !eventName.equals("trainingSet") && !eventName.equals("testSet")) {
+      && !eventName.equals("trainingSet") && !eventName.equals("testSet")) {
       return false;
     }
 
@@ -873,7 +873,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       int labelCount = 0;
       // StringBuffer labelList = new StringBuffer();
       HashSet<String> uniqueLabels = new HashSet<String>();
-      FastVector labelVec = new FastVector();
+      Vector<String> labelVec = new Vector<String>();
       for (Match m : m_matchRules) {
         if (m.getLabel() != null && m.getLabel().length() > 0) {
           if (!uniqueLabels.contains(m.getLabel())) {
@@ -897,7 +897,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       }
 
       m_outputStructure = (Instances) (new SerializedObject(inputStructure)
-          .getObject());
+        .getObject());
       Attribute newAtt = null;
       if (m_hasLabels) {
         newAtt = new Attribute(m_attName, labelVec);
@@ -910,7 +910,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       }
 
       m_outputStructure.insertAttributeAt(newAtt,
-          m_outputStructure.numAttributes());
+        m_outputStructure.numAttributes());
 
       /*
        * // make the output structure m_addFilter = new Add();
@@ -947,7 +947,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
         makeOutputStructure(structure);
       } catch (Exception ex) {
         String msg = statusMessagePrefix()
-            + "ERROR: unable to create output instances structure.";
+          + "ERROR: unable to create output instances structure.";
         if (m_log != null) {
           m_log.statusMessage(msg);
           m_log.logMessage("[SubstringLabeler] " + ex.getMessage());
@@ -978,7 +978,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       }
 
       if (inst == null || out != null
-          || e.getStatus() == InstanceEvent.BATCH_FINISHED) { // consumed
+        || e.getStatus() == InstanceEvent.BATCH_FINISHED) { // consumed
         // notify listeners
         m_ie.setInstance(out);
         m_ie.setStatus(e.getStatus());
@@ -1036,7 +1036,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       if (label != null) {
         if (m_hasLabels) {
           vals[newAttIndex] = m_outputStructure.attribute(m_attName)
-              .indexOfValue(label);
+            .indexOfValue(label);
         } else {
           vals[newAttIndex] = 1;
         }
@@ -1076,7 +1076,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       makeOutputStructure(new Instances(e.getDataSet(), 0));
     } catch (Exception ex) {
       String msg = statusMessagePrefix()
-          + "ERROR: unable to create output instances structure.";
+        + "ERROR: unable to create output instances structure.";
       if (m_log != null) {
         m_log.statusMessage(msg);
         m_log.logMessage("[SubstringLabeler] " + ex.getMessage());

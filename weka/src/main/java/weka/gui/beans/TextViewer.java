@@ -23,6 +23,7 @@ package weka.gui.beans;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -61,9 +62,9 @@ import weka.gui.SaveBuffer;
  * @version $Revision$
  */
 public class TextViewer extends JPanel implements TextListener,
-    DataSourceListener, TrainingSetListener, TestSetListener, Visible,
-    UserRequestAcceptor, BeanContextChild, BeanCommon, EventConstraints,
-    HeadlessEventCollector {
+  DataSourceListener, TrainingSetListener, TestSetListener, Visible,
+  UserRequestAcceptor, BeanContextChild, BeanCommon, EventConstraints,
+  HeadlessEventCollector {
 
   /** for serialization */
   private static final long serialVersionUID = 104838186352536832L;
@@ -98,23 +99,16 @@ public class TextViewer extends JPanel implements TextListener,
    * BeanContextChild support
    */
   protected BeanContextChildSupport m_bcSupport = new BeanContextChildSupport(
-      this);
+    this);
 
   /**
    * Objects listening for text events
    */
-  private final Vector m_textListeners = new Vector();
-
-  private transient Logger m_log = null;
+  private final Vector<TextListener> m_textListeners = new Vector<TextListener>();
 
   public TextViewer() {
-    /*
-     * setUpResultHistory(); setLayout(new BorderLayout()); add(m_visual,
-     * BorderLayout.CENTER);
-     */
-    java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment
-        .getLocalGraphicsEnvironment();
-    if (!ge.isHeadless()) {
+    java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+    if (!GraphicsEnvironment.isHeadless()) {
       appearanceFinal();
     } else {
       m_headlessEvents = new ArrayList<EventObject>();
@@ -126,8 +120,7 @@ public class TextViewer extends JPanel implements TextListener,
     removeAll();
     if (m_visual == null) {
       m_visual = new BeanVisual("TextViewer", BeanVisual.ICON_PATH
-          + "DefaultText.gif", BeanVisual.ICON_PATH
-          + "DefaultText_animated.gif");
+        + "DefaultText.gif", BeanVisual.ICON_PATH + "DefaultText_animated.gif");
     }
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
@@ -161,9 +154,8 @@ public class TextViewer extends JPanel implements TextListener,
   }
 
   private void setUpResultHistory() {
-    java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment
-        .getLocalGraphicsEnvironment();
-    if (!ge.isHeadless()) {
+    java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+    if (!GraphicsEnvironment.isHeadless()) {
       if (m_outText == null) {
         m_outText = new JTextArea(20, 80);
         m_history = new ResultHistoryPanel(m_outText);
@@ -177,7 +169,7 @@ public class TextViewer extends JPanel implements TextListener,
         @Override
         public void mouseClicked(MouseEvent e) {
           if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
-              || e.isAltDown()) {
+            || e.isAltDown()) {
             int index = m_history.getList().locationToIndex(e.getPoint());
             if (index != -1) {
               String name = m_history.getNameAtIndex(index);
@@ -271,7 +263,7 @@ public class TextViewer extends JPanel implements TextListener,
   @Override
   public synchronized void acceptDataSet(DataSetEvent e) {
     TextEvent nt = new TextEvent(e.getSource(), e.getDataSet().toString(), e
-        .getDataSet().relationName());
+      .getDataSet().relationName());
     acceptText(nt);
   }
 
@@ -283,7 +275,7 @@ public class TextViewer extends JPanel implements TextListener,
   @Override
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
     TextEvent nt = new TextEvent(e.getSource(), e.getTrainingSet().toString(),
-        e.getTrainingSet().relationName());
+      e.getTrainingSet().relationName());
     acceptText(nt);
   }
 
@@ -295,7 +287,7 @@ public class TextViewer extends JPanel implements TextListener,
   @Override
   public synchronized void acceptTestSet(TestSetEvent e) {
     TextEvent nt = new TextEvent(e.getSource(), e.getTestSet().toString(), e
-        .getTestSet().relationName());
+      .getTestSet().relationName());
     acceptText(nt);
   }
 
@@ -394,7 +386,7 @@ public class TextViewer extends JPanel implements TextListener,
   @Override
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultText.gif",
-        BeanVisual.ICON_PATH + "DefaultText_animated.gif");
+      BeanVisual.ICON_PATH + "DefaultText_animated.gif");
   }
 
   /**
@@ -431,8 +423,8 @@ public class TextViewer extends JPanel implements TextListener,
    * @return an <code>Enumeration</code> value
    */
   @Override
-  public Enumeration enumerateRequests() {
-    Vector newVector = new Vector(0);
+  public Enumeration<String> enumerateRequests() {
+    Vector<String> newVector = new Vector<String>(0);
 
     newVector.addElement("Show results");
 
@@ -455,7 +447,7 @@ public class TextViewer extends JPanel implements TextListener,
       m_history.clearResults();
     } else {
       throw new IllegalArgumentException(request
-          + " not supported (TextViewer)");
+        + " not supported (TextViewer)");
     }
   }
 
@@ -478,7 +470,7 @@ public class TextViewer extends JPanel implements TextListener,
    */
   @Override
   public void removePropertyChangeListener(String name,
-      PropertyChangeListener pcl) {
+    PropertyChangeListener pcl) {
     m_bcSupport.removePropertyChangeListener(name, pcl);
   }
 
@@ -501,7 +493,7 @@ public class TextViewer extends JPanel implements TextListener,
    */
   @Override
   public void removeVetoableChangeListener(String name,
-      VetoableChangeListener vcl) {
+    VetoableChangeListener vcl) {
     m_bcSupport.removeVetoableChangeListener(name, vcl);
   }
 
@@ -517,9 +509,8 @@ public class TextViewer extends JPanel implements TextListener,
     if (m_design) {
       appearanceDesign();
     } else {
-      java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment
-          .getLocalGraphicsEnvironment();
-      if (!ge.isHeadless()) {
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+      if (!GraphicsEnvironment.isHeadless()) {
         appearanceFinal();
       }
     }
@@ -530,14 +521,15 @@ public class TextViewer extends JPanel implements TextListener,
    * 
    * @param ge a <code>TextEvent</code> value
    */
+  @SuppressWarnings("unchecked")
   private void notifyTextListeners(TextEvent ge) {
-    Vector l;
+    Vector<TextListener> l;
     synchronized (this) {
-      l = (Vector) m_textListeners.clone();
+      l = (Vector<TextListener>) m_textListeners.clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
-        ((TextListener) l.elementAt(i)).acceptText(ge);
+        l.elementAt(i).acceptText(ge);
       }
     }
   }
@@ -577,7 +569,6 @@ public class TextViewer extends JPanel implements TextListener,
    */
   @Override
   public void setLog(Logger logger) {
-    m_log = logger;
   }
 
   /**
@@ -691,7 +682,7 @@ public class TextViewer extends JPanel implements TextListener,
       final TextViewer tv = new TextViewer();
 
       tv.acceptText(new TextEvent(tv, "Here is some test text from the main "
-          + "method of this class.", "The Title"));
+        + "method of this class.", "The Title"));
       jf.getContentPane().add(tv, java.awt.BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
