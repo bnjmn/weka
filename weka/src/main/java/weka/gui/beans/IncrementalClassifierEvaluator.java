@@ -24,10 +24,8 @@ package weka.gui.beans;
 import java.util.LinkedList;
 import java.util.Vector;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instance;
-import weka.core.Instances;
 import weka.core.Utils;
 
 /**
@@ -37,19 +35,17 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
-    IncrementalClassifierListener, EventConstraints {
+  IncrementalClassifierListener, EventConstraints {
 
   /** for serialization */
   private static final long serialVersionUID = -3105419818939541291L;
 
   private transient Evaluation m_eval;
 
-  private transient Classifier m_classifier;
+  private final Vector<ChartListener> m_listeners = new Vector<ChartListener>();
+  private final Vector<TextListener> m_textListeners = new Vector<TextListener>();
 
-  private final Vector m_listeners = new Vector();
-  private final Vector m_textListeners = new Vector();
-
-  private Vector m_dataLegend = new Vector();
+  private Vector<String> m_dataLegend = new Vector<String>();
 
   private final ChartEvent m_ce = new ChartEvent(this);
   private double[] m_dataPoint = new double[1];
@@ -74,8 +70,8 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
 
   public IncrementalClassifierEvaluator() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
-        + "IncrementalClassifierEvaluator.gif", BeanVisual.ICON_PATH
-        + "IncrementalClassifierEvaluator_animated.gif");
+      + "IncrementalClassifierEvaluator.gif", BeanVisual.ICON_PATH
+      + "IncrementalClassifierEvaluator_animated.gif");
     m_visual.setText("IncrementalClassifierEvaluator");
   }
 
@@ -127,10 +123,10 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
         m_eval = new Evaluation(ce.getStructure());
         m_eval.useNoPriors();
 
-        m_dataLegend = new Vector();
+        m_dataLegend = new Vector<String>();
         m_reset = true;
         m_dataPoint = new double[0];
-        Instances inst = ce.getStructure();
+        ce.getStructure();
         System.err.println("NEW BATCH");
         m_instanceCount = 0;
 
@@ -141,10 +137,9 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
           m_windowedPreds = new LinkedList<double[]>();
 
           if (m_logger != null) {
-            m_logger
-                .logMessage(statusMessagePrefix()
-                    + "[IncrementalClassifierEvaluator] Chart output using windowed "
-                    + "evaluation over " + m_windowSize + " instances");
+            m_logger.logMessage(statusMessagePrefix()
+              + "[IncrementalClassifierEvaluator] Chart output using windowed "
+              + "evaluation over " + m_windowSize + " instances");
           }
         }
 
@@ -293,10 +288,10 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
         }
 
         if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED
-            || inst == null) {
+          || inst == null) {
           if (m_logger != null) {
             m_logger.logMessage("[IncrementalClassifierEvaluator]"
-                + statusMessagePrefix() + " Finished processing.");
+              + statusMessagePrefix() + " Finished processing.");
           }
           m_throughput.finished(m_logger);
 
@@ -308,19 +303,19 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
           if (m_textListeners.size() > 0) {
             String textTitle = ce.getClassifier().getClass().getName();
             textTitle = textTitle.substring(textTitle.lastIndexOf('.') + 1,
-                textTitle.length());
+              textTitle.length());
             String results = "=== Performance information ===\n\n"
-                + "Scheme:   " + textTitle + "\n" + "Relation: "
-                + m_eval.getHeader().relationName() + "\n\n"
-                + m_eval.toSummaryString();
+              + "Scheme:   " + textTitle + "\n" + "Relation: "
+              + m_eval.getHeader().relationName() + "\n\n"
+              + m_eval.toSummaryString();
             if (m_eval.getHeader().classIndex() >= 0
-                && m_eval.getHeader().classAttribute().isNominal()
-                && (m_outputInfoRetrievalStats)) {
+              && m_eval.getHeader().classAttribute().isNominal()
+              && (m_outputInfoRetrievalStats)) {
               results += "\n" + m_eval.toClassDetailsString();
             }
 
             if (m_eval.getHeader().classIndex() >= 0
-                && m_eval.getHeader().classAttribute().isNominal()) {
+              && m_eval.getHeader().classAttribute().isNominal()) {
               results += "\n" + m_eval.toMatrixString();
             }
             textTitle = "Results: " + textTitle;
@@ -332,10 +327,10 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
     } catch (Exception ex) {
       if (m_logger != null) {
         m_logger.logMessage("[IncrementalClassifierEvaluator]"
-            + statusMessagePrefix() + " Error processing prediction "
-            + ex.getMessage());
+          + statusMessagePrefix() + " Error processing prediction "
+          + ex.getMessage());
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR: problem processing prediction (see log for details)");
+          + "ERROR: problem processing prediction (see log for details)");
       }
       ex.printStackTrace();
       stop();
@@ -358,7 +353,7 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
 
     if (m_listenee instanceof EventConstraints) {
       if (!((EventConstraints) m_listenee)
-          .eventGeneratable("incrementalClassifier")) {
+        .eventGeneratable("incrementalClassifier")) {
         return false;
       }
     }
@@ -388,14 +383,15 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
     return false;
   }
 
+  @SuppressWarnings("unchecked")
   private void notifyChartListeners(ChartEvent ce) {
-    Vector l;
+    Vector<ChartListener> l;
     synchronized (this) {
-      l = (Vector) m_listeners.clone();
+      l = (Vector<ChartListener>) m_listeners.clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
-        ((ChartListener) l.elementAt(i)).acceptDataPoint(ce);
+        l.elementAt(i).acceptDataPoint(ce);
       }
     }
   }
@@ -405,16 +401,17 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
    * 
    * @param te a <code>TextEvent</code> value
    */
+  @SuppressWarnings("unchecked")
   private void notifyTextListeners(TextEvent te) {
-    Vector l;
+    Vector<TextListener> l;
     synchronized (this) {
-      l = (Vector) m_textListeners.clone();
+      l = (Vector<TextListener>) m_textListeners.clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
         // System.err.println("Notifying text listeners "
         // +"(ClassifierPerformanceEvaluator)");
-        ((TextListener) l.elementAt(i)).acceptText(te);
+        l.elementAt(i).acceptText(te);
       }
     }
   }
@@ -472,7 +469,7 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
    */
   public String outputPerClassInfoRetrievalStatsTipText() {
     return "Output per-class info retrieval stats. If set to true, predictions get "
-        + "stored so that stats such as AUC can be computed. Note: this consumes some memory.";
+      + "stored so that stats such as AUC can be computed. Note: this consumes some memory.";
   }
 
   /**
@@ -506,7 +503,7 @@ public class IncrementalClassifierEvaluator extends AbstractEvaluator implements
    */
   public String chartingEvalWindowSizeTipText() {
     return "For charting only, specify a sliding window size over which to compute "
-        + "performance stats. <= 0 means eval on whole stream";
+      + "performance stats. <= 0 means eval on whole stream";
   }
 
   /**

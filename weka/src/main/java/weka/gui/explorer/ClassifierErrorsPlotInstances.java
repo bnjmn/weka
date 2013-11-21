@@ -29,7 +29,6 @@ import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.evaluation.Prediction;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -87,10 +86,10 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
   protected boolean m_pointSizeProportionalToMargin;
 
   /** for storing the plot shapes. */
-  protected FastVector m_PlotShapes;
+  protected ArrayList<Integer> m_PlotShapes;
 
   /** for storing the plot sizes. */
-  protected FastVector m_PlotSizes;
+  protected ArrayList<Object> m_PlotSizes;
 
   /** the classifier being used. */
   protected Classifier m_Classifier;
@@ -108,8 +107,8 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
   protected void initialize() {
     super.initialize();
 
-    m_PlotShapes = new FastVector();
-    m_PlotSizes = new FastVector();
+    m_PlotShapes = new ArrayList<Integer>();
+    m_PlotSizes = new ArrayList<Object>();
     m_Classifier = null;
     m_ClassIndex = -1;
     m_Evaluation = null;
@@ -125,7 +124,7 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
    * 
    * @return the vector of plot shapes.
    */
-  public FastVector getPlotShapes() {
+  public ArrayList<Integer> getPlotShapes() {
     return m_PlotShapes;
   }
 
@@ -134,7 +133,7 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
    * 
    * @return the vector of plot sizes.
    */
-  public FastVector getPlotSizes() {
+  public ArrayList<Object> getPlotSizes() {
     return m_PlotSizes;
   }
 
@@ -143,7 +142,7 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
    * 
    * @param plotShapes
    */
-  public void setPlotShapes(FastVector plotShapes) {
+  public void setPlotShapes(ArrayList<Integer> plotShapes) {
     m_PlotShapes = plotShapes;
   }
 
@@ -152,7 +151,7 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
    * 
    * @param plotSizes the plot sizes to use
    */
-  public void setPlotSizes(FastVector plotSizes) {
+  public void setPlotSizes(ArrayList<Object> plotSizes) {
     m_PlotSizes = plotSizes;
   }
 
@@ -278,11 +277,11 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
    */
   @Override
   protected void determineFormat() {
-    FastVector hv;
+    ArrayList<Attribute> hv;
     Attribute predictedClass;
     Attribute classAt;
     Attribute margin = null;
-    FastVector attVals;
+    ArrayList<String> attVals;
     int i;
 
     if (!m_SaveForVisualization) {
@@ -290,13 +289,13 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
       return;
     }
 
-    hv = new FastVector();
+    hv = new ArrayList<Attribute>();
 
     classAt = m_Instances.attribute(m_ClassIndex);
     if (classAt.isNominal()) {
-      attVals = new FastVector();
+      attVals = new ArrayList<String>();
       for (i = 0; i < classAt.numValues(); i++) {
-        attVals.addElement(classAt.value(i));
+        attVals.add(classAt.value(i));
       }
       predictedClass = new Attribute("predicted " + classAt.name(), attVals);
       margin = new Attribute("prediction margin");
@@ -309,9 +308,9 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
         if (classAt.isNominal()) {
           hv.add(margin);
         }
-        hv.addElement(predictedClass);
+        hv.add(predictedClass);
       }
-      hv.addElement(m_Instances.attribute(i).copy());
+      hv.add((Attribute) m_Instances.attribute(i).copy());
     }
 
     m_PlotInstances = new Instances(m_Instances.relationName() + "_predicted",
@@ -387,26 +386,24 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
           if (toPredict.classAttribute().isNominal()) {
             if (toPredict.isMissing(toPredict.classIndex())
               || Utils.isMissingValue(pred)) {
-              m_PlotShapes.addElement(new Integer(Plot2D.MISSING_SHAPE));
+              m_PlotShapes.add(new Integer(Plot2D.MISSING_SHAPE));
             } else if (pred != toPredict.classValue()) {
               // set to default error point shape
-              m_PlotShapes.addElement(new Integer(Plot2D.ERROR_SHAPE));
+              m_PlotShapes.add(new Integer(Plot2D.ERROR_SHAPE));
             } else {
               // otherwise set to constant (automatically assigned) point shape
-              m_PlotShapes
-                .addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+              m_PlotShapes.add(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
             }
 
             if (m_pointSizeProportionalToMargin) {
               // margin
-              m_PlotSizes.addElement(new Double(probActual - probNext));
+              m_PlotSizes.add(new Double(probActual - probNext));
             } else {
               int sizeAdj = 0;
               if (pred != toPredict.classValue()) {
                 sizeAdj = 1;
               }
-              m_PlotSizes.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE
-                + sizeAdj));
+              m_PlotSizes.add(new Integer(Plot2D.DEFAULT_SHAPE_SIZE + sizeAdj));
             }
           } else {
             // store the error (to be converted to a point size later)
@@ -414,14 +411,13 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
             if (!toPredict.isMissing(toPredict.classIndex())
               && !Utils.isMissingValue(pred)) {
               errd = new Double(pred - toPredict.classValue());
-              m_PlotShapes
-                .addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+              m_PlotShapes.add(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
             } else {
               // missing shape if actual class not present or prediction is
               // missing
-              m_PlotShapes.addElement(new Integer(Plot2D.MISSING_SHAPE));
+              m_PlotShapes.add(new Integer(Plot2D.MISSING_SHAPE));
             }
-            m_PlotSizes.addElement(errd);
+            m_PlotSizes.add(errd);
           }
         }
       }
@@ -539,24 +535,23 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
         if (toPredict.classAttribute().isNominal()) {
           if (toPredict.isMissing(toPredict.classIndex())
             || Utils.isMissingValue(pred)) {
-            m_PlotShapes.addElement(new Integer(Plot2D.MISSING_SHAPE));
+            m_PlotShapes.add(new Integer(Plot2D.MISSING_SHAPE));
           } else if (pred != toPredict.classValue()) {
             // set to default error point shape
-            m_PlotShapes.addElement(new Integer(Plot2D.ERROR_SHAPE));
+            m_PlotShapes.add(new Integer(Plot2D.ERROR_SHAPE));
           } else {
             // otherwise set to constant (automatically assigned) point shape
-            m_PlotShapes.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+            m_PlotShapes.add(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
           }
           if (m_pointSizeProportionalToMargin) {
             // margin
-            m_PlotSizes.addElement(new Double(probActual - probNext));
+            m_PlotSizes.add(new Double(probActual - probNext));
           } else {
             int sizeAdj = 0;
             if (pred != toPredict.classValue()) {
               sizeAdj = 1;
             }
-            m_PlotSizes.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE
-              + sizeAdj));
+            m_PlotSizes.add(new Integer(Plot2D.DEFAULT_SHAPE_SIZE + sizeAdj));
           }
         } else {
           // store the error (to be converted to a point size later)
@@ -565,13 +560,13 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
             && !Utils.isMissingValue(pred)) {
 
             errd = new Double(pred - toPredict.classValue());
-            m_PlotShapes.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+            m_PlotShapes.add(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
           } else {
             // missing shape if actual class not present or prediction is
             // missing
-            m_PlotShapes.addElement(new Integer(Plot2D.MISSING_SHAPE));
+            m_PlotShapes.add(new Integer(Plot2D.MISSING_SHAPE));
           }
-          m_PlotSizes.addElement(errd);
+          m_PlotSizes.add(errd);
         }
       }
     } catch (Exception ex) {
@@ -601,7 +596,7 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
 
       // find min/max errors
       for (i = 0; i < m_PlotSizes.size(); i++) {
-        errd = (Double) m_PlotSizes.elementAt(i);
+        errd = (Double) m_PlotSizes.get(i);
         if (errd != null) {
           err = Math.abs(errd.doubleValue());
           if (err < minErr) {
@@ -616,19 +611,19 @@ public class ClassifierErrorsPlotInstances extends AbstractPlotInstances {
 
     // scale errors
     for (i = 0; i < m_PlotSizes.size(); i++) {
-      errd = (Double) m_PlotSizes.elementAt(i);
+      errd = (Double) m_PlotSizes.get(i);
       if (errd != null) {
         err = Math.abs(errd.doubleValue());
         if (maxErr - minErr > 0) {
           temp = (((err - minErr) / (maxErr - minErr)) * (m_MaximumPlotSizeNumeric
             - m_MinimumPlotSizeNumeric + 1));
-          m_PlotSizes.setElementAt(new Integer((int) temp)
-            + m_MinimumPlotSizeNumeric, i);
+          m_PlotSizes
+            .set(i, new Integer((int) temp) + m_MinimumPlotSizeNumeric);
         } else {
-          m_PlotSizes.setElementAt(new Integer(m_MinimumPlotSizeNumeric), i);
+          m_PlotSizes.set(i, new Integer(m_MinimumPlotSizeNumeric));
         }
       } else {
-        m_PlotSizes.setElementAt(new Integer(m_MinimumPlotSizeNumeric), i);
+        m_PlotSizes.set(i, new Integer(m_MinimumPlotSizeNumeric));
       }
     }
   }
