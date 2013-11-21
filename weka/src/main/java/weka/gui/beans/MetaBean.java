@@ -65,9 +65,9 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
   private transient JWindow m_previewWindow = null;
   private transient javax.swing.Timer m_previewTimer = null;
 
-  protected Vector<BeanInstance> m_subFlow = new Vector<BeanInstance>();
-  protected Vector<BeanInstance> m_inputs = new Vector<BeanInstance>();
-  protected Vector<BeanInstance> m_outputs = new Vector<BeanInstance>();
+  protected Vector<Object> m_subFlow = new Vector<Object>();
+  protected Vector<Object> m_inputs = new Vector<Object>();
+  protected Vector<Object> m_outputs = new Vector<Object>();
 
   // the internal connections for the grouping
   protected Vector<BeanConnection> m_associatedConnections = new Vector<BeanConnection>();
@@ -115,34 +115,34 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
     return m_associatedConnections;
   }
 
-  public void setSubFlow(Vector<BeanInstance> sub) {
+  public void setSubFlow(Vector<Object> sub) {
     m_subFlow = sub;
   }
 
-  public Vector<BeanInstance> getSubFlow() {
+  public Vector<Object> getSubFlow() {
     return m_subFlow;
   }
 
-  public void setInputs(Vector<BeanInstance> inputs) {
+  public void setInputs(Vector<Object> inputs) {
     m_inputs = inputs;
   }
 
-  public Vector<BeanInstance> getInputs() {
+  public Vector<Object> getInputs() {
     return m_inputs;
   }
 
-  public void setOutputs(Vector<BeanInstance> outputs) {
+  public void setOutputs(Vector<Object> outputs) {
     m_outputs = outputs;
   }
 
-  public Vector<BeanInstance> getOutputs() {
+  public Vector<Object> getOutputs() {
     return m_outputs;
   }
 
-  private Vector<BeanInstance> getBeans(Vector<BeanInstance> beans, int type) {
-    Vector<BeanInstance> comps = new Vector<BeanInstance>();
+  private Vector<Object> getBeans(Vector<Object> beans, int type) {
+    Vector<Object> comps = new Vector<Object>();
     for (int i = 0; i < beans.size(); i++) {
-      BeanInstance temp = beans.elementAt(i);
+      BeanInstance temp = (BeanInstance) beans.elementAt(i);
       // need to check for sub MetaBean!
       if (temp.getBean() instanceof MetaBean) {
         switch (type) {
@@ -163,11 +163,11 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
     return comps;
   }
 
-  private boolean beanSetContains(Vector<BeanInstance> set, BeanInstance toCheck) {
+  private boolean beanSetContains(Vector<Object> set, BeanInstance toCheck) {
     boolean ok = false;
 
     for (int i = 0; i < set.size(); i++) {
-      BeanInstance temp = set.elementAt(i);
+      BeanInstance temp = (BeanInstance) set.elementAt(i);
       if (toCheck == temp) {
         ok = true;
         break;
@@ -193,7 +193,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
    * 
    * @return a Vector of all the beans in the sub flow
    */
-  public Vector<BeanInstance> getBeansInSubFlow() {
+  public Vector<Object> getBeansInSubFlow() {
     return getBeans(m_subFlow, 0);
   }
 
@@ -202,7 +202,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
    * 
    * @return a Vector of all the beans in the inputs
    */
-  public Vector<BeanInstance> getBeansInInputs() {
+  public Vector<Object> getBeansInInputs() {
     return getBeans(m_inputs, 1);
   }
 
@@ -211,14 +211,14 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
    * 
    * @return a Vector of all the beans in the outputs
    */
-  public Vector<BeanInstance> getBeansInOutputs() {
+  public Vector<Object> getBeansInOutputs() {
     return getBeans(m_outputs, 2);
   }
 
-  private Vector<BeanInfo> getBeanInfos(Vector<BeanInstance> beans, int type) {
+  private Vector<BeanInfo> getBeanInfos(Vector<Object> beans, int type) {
     Vector<BeanInfo> infos = new Vector<BeanInfo>();
     for (int i = 0; i < beans.size(); i++) {
-      BeanInstance temp = beans.elementAt(i);
+      BeanInstance temp = (BeanInstance) beans.elementAt(i);
       if (temp.getBean() instanceof MetaBean) {
         switch (type) {
         case 0:
@@ -298,7 +298,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
     int targetY = toShiftTo.getY();
 
     for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance temp = m_subFlow.elementAt(i);
+      BeanInstance temp = (BeanInstance) m_subFlow.elementAt(i);
       if (save) {
         // save offsets from this point
         Point p = new Point(temp.getX() - targetX, temp.getY() - targetY);
@@ -311,7 +311,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
 
   public void restoreBeans(int x, int y) {
     for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance temp = m_subFlow.elementAt(i);
+      BeanInstance temp = (BeanInstance) m_subFlow.elementAt(i);
       Point p = m_originalCoords.elementAt(i);
       JComponent c = (JComponent) temp.getBean();
       c.getPreferredSize();
@@ -343,7 +343,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
   @Override
   public boolean eventGeneratable(String eventName) {
     for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance output = m_subFlow.elementAt(i);
+      BeanInstance output = (BeanInstance) m_subFlow.elementAt(i);
       if (output.getBean() instanceof EventConstraints) {
         if (((EventConstraints) output.getBean()).eventGeneratable(eventName)) {
           return true;
@@ -478,7 +478,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
   public String getStartMessage() {
     String message = "Start loading";
     for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance temp = m_subFlow.elementAt(i);
+      BeanInstance temp = (BeanInstance) m_subFlow.elementAt(i);
       if (temp.getBean() instanceof Startable) {
         String s = ((Startable) temp.getBean()).getStartMessage();
         if (s.startsWith("$")) {
@@ -495,7 +495,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
   public void start() {
     TreeMap<Integer, Startable> startables = new TreeMap<Integer, Startable>();
     for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance temp = m_subFlow.elementAt(i);
+      BeanInstance temp = (BeanInstance) m_subFlow.elementAt(i);
       if (temp.getBean() instanceof Startable) {
         Startable s = (Startable) temp.getBean();
         String beanName = s.getClass().getName();
@@ -608,7 +608,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
       newVector.addElement(text);
     }
     for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance temp = m_subFlow.elementAt(i);
+      BeanInstance temp = (BeanInstance) m_subFlow.elementAt(i);
       if (temp.getBean() instanceof UserRequestAcceptor) {
         String prefix = "";
         if ((temp.getBean() instanceof BeanCommon)) {
@@ -725,7 +725,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
     String req = request.substring(request.indexOf(')') + 1, request.length())
       .trim();
 
-    Object target = (m_subFlow.elementAt(index).getBean());
+    Object target = ((BeanInstance) m_subFlow.elementAt(index)).getBean();
     if (target instanceof Startable
       && req.equals(((Startable) target).getStartMessage())) {
       try {
@@ -754,7 +754,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
 
   public void removePropertyChangeListenersSubFlow(PropertyChangeListener pcl) {
     for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance temp = m_subFlow.elementAt(i);
+      BeanInstance temp = (BeanInstance) m_subFlow.elementAt(i);
       if (temp.getBean() instanceof Visible) {
         ((Visible) (temp.getBean())).getVisual().removePropertyChangeListener(
           pcl);
@@ -767,7 +767,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
 
   public void addPropertyChangeListenersSubFlow(PropertyChangeListener pcl) {
     for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance temp = m_subFlow.elementAt(i);
+      BeanInstance temp = (BeanInstance) m_subFlow.elementAt(i);
       if (temp.getBean() instanceof Visible) {
         ((Visible) (temp.getBean())).getVisual().addPropertyChangeListener(pcl);
       }
@@ -785,7 +785,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
    */
   public boolean canAcceptConnection(Class<?> listenerClass) {
     for (int i = 0; i < m_inputs.size(); i++) {
-      BeanInstance input = m_inputs.elementAt(i);
+      BeanInstance input = (BeanInstance) m_inputs.elementAt(i);
       if (listenerClass.isInstance(input.getBean())) {
         return true;
       }
@@ -803,7 +803,7 @@ public class MetaBean extends JPanel implements BeanCommon, Visible,
     Class<?> listenerClass = esd.getListenerType(); // class of the listener
     Vector<BeanInstance> targets = new Vector<BeanInstance>();
     for (int i = 0; i < m_inputs.size(); i++) {
-      BeanInstance input = m_inputs.elementAt(i);
+      BeanInstance input = (BeanInstance) m_inputs.elementAt(i);
       if (listenerClass.isInstance(input.getBean())) {
         targets.add(input);
       }

@@ -120,9 +120,9 @@ public class PluginManager {
    * @throws Exception if a problem occurs
    */
   public static synchronized void addFromProperties(File propsFile)
-      throws Exception {
+    throws Exception {
     BufferedInputStream bi = new BufferedInputStream(new FileInputStream(
-        propsFile));
+      propsFile));
     addFromProperties(bi);
   }
 
@@ -133,7 +133,7 @@ public class PluginManager {
    * @throws Exception if a problem occurs
    */
   public static synchronized void addFromProperties(InputStream propsStream)
-      throws Exception {
+    throws Exception {
     Properties expProps = new Properties();
 
     expProps.load(propsStream);
@@ -150,9 +150,9 @@ public class PluginManager {
    * @throws Exception if a problem occurs
    */
   public static synchronized void addFromProperties(Properties props)
-      throws Exception {
-    Set keys = props.keySet();
-    Iterator keysI = keys.iterator();
+    throws Exception {
+    Set<Object> keys = props.keySet();
+    Iterator<Object> keysI = keys.iterator();
     while (keysI.hasNext()) {
       String baseType = (String) keysI.next();
       String implementations = props.getProperty(baseType);
@@ -201,7 +201,7 @@ public class PluginManager {
    *          implementation
    */
   public static void addPlugin(String interfaceName, String name,
-      String concreteType) {
+    String concreteType) {
     if (PLUGINS.get(interfaceName) == null) {
       Map<String, String> pluginsOfInterfaceType = new TreeMap<String, String>();
       pluginsOfInterfaceType.put(name, concreteType);
@@ -247,17 +247,17 @@ public class PluginManager {
    * @throws Exception if the plugin can't be found or instantiated
    */
   public static Object getPluginInstance(String interfaceType, String name)
-      throws Exception {
+    throws Exception {
     if (PLUGINS.get(interfaceType) == null
-        || PLUGINS.get(interfaceType).size() == 0) {
+      || PLUGINS.get(interfaceType).size() == 0) {
       throw new Exception("No plugins of interface type: " + interfaceType
-          + " available!!");
+        + " available!!");
     }
 
     Map<String, String> pluginsOfInterfaceType = PLUGINS.get(interfaceType);
     if (pluginsOfInterfaceType.get(name) == null) {
       throw new Exception("Can't find named plugin '" + name + "' of type '"
-          + interfaceType + "'!");
+        + interfaceType + "'!");
     }
 
     String concreteImpl = pluginsOfInterfaceType.get(name);

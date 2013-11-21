@@ -47,7 +47,7 @@ import weka.gui.beans.xml.XMLBeans;
 public class FlowRunner implements RevisionHandler {
 
   /** The potential flow(s) to execute */
-  protected Vector<BeanInstance> m_beans;
+  protected Vector<Object> m_beans;
 
   protected int m_runningCount = 0;
 
@@ -151,7 +151,7 @@ public class FlowRunner implements RevisionHandler {
 
   public synchronized void stopAllFlows() {
     for (int i = 0; i < m_beans.size(); i++) {
-      BeanInstance temp = m_beans.elementAt(i);
+      BeanInstance temp = (BeanInstance) m_beans.elementAt(i);
       if (temp.getBean() instanceof BeanCommon) {
         // try to stop any execution
         ((BeanCommon) temp.getBean()).stop();
@@ -174,7 +174,7 @@ public class FlowRunner implements RevisionHandler {
       while (true) {
         boolean busy = false;
         for (int i = 0; i < m_beans.size(); i++) {
-          BeanInstance temp = m_beans.elementAt(i);
+          BeanInstance temp = (BeanInstance) m_beans.elementAt(i);
           if (temp.getBean() instanceof BeanCommon) {
             if (((BeanCommon) temp.getBean()).isBusy()) {
               busy = true;
@@ -233,7 +233,7 @@ public class FlowRunner implements RevisionHandler {
 
     InputStream is = new FileInputStream(fileName);
     ObjectInputStream ois = new ObjectInputStream(is);
-    m_beans = (Vector<BeanInstance>) ois.readObject();
+    m_beans = (Vector<Object>) ois.readObject();
 
     // don't need the graphical connections
     ois.close();
@@ -262,7 +262,7 @@ public class FlowRunner implements RevisionHandler {
     BeanInstance.init();
     XMLBeans xml = new XMLBeans(null, null, 0);
     Vector<?> v = (Vector<?>) xml.read(new File(fileName));
-    m_beans = (Vector<BeanInstance>) v.get(XMLBeans.INDEX_BEANINSTANCES);
+    m_beans = (Vector<Object>) v.get(XMLBeans.INDEX_BEANINSTANCES);
 
     if (m_env != null) {
       String parentDir = (new File(fileName)).getParent();
@@ -280,7 +280,7 @@ public class FlowRunner implements RevisionHandler {
    * 
    * @return the Vector holding the flow(s)
    */
-  public Vector<BeanInstance> getFlows() {
+  public Vector<Object> getFlows() {
     return m_beans;
   }
 
@@ -289,7 +289,7 @@ public class FlowRunner implements RevisionHandler {
    * 
    * @param beans the Vector holding the flows to run
    */
-  public void setFlows(Vector<BeanInstance> beans) {
+  public void setFlows(Vector<Object> beans) {
     m_beans = beans;
   }
 
@@ -346,7 +346,7 @@ public class FlowRunner implements RevisionHandler {
 
     // register the log (if set) with the beans
     for (int i = 0; i < m_beans.size(); i++) {
-      BeanInstance tempB = m_beans.elementAt(i);
+      BeanInstance tempB = (BeanInstance) m_beans.elementAt(i);
       if (m_log != null && m_registerLog) {
         if (tempB.getBean() instanceof BeanCommon) {
           ((BeanCommon) tempB.getBean()).setLog(m_log);
@@ -372,7 +372,7 @@ public class FlowRunner implements RevisionHandler {
     TreeMap<Integer, Startable> startables = new TreeMap<Integer, Startable>();
     // look for a Startable bean...
     for (int i = 0; i < m_beans.size(); i++) {
-      BeanInstance tempB = m_beans.elementAt(i);
+      BeanInstance tempB = (BeanInstance) m_beans.elementAt(i);
       boolean launch = true;
 
       if (tempB.getBean() instanceof Startable) {

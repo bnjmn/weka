@@ -183,7 +183,7 @@ public class BeanConnection implements Serializable {
    * connection from a source that is in the listToCheck
    */
   private static boolean checkTargetConstraint(BeanInstance candidate,
-    Vector<BeanInstance> listToCheck, Integer... tab) {
+    Vector<Object> listToCheck, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
@@ -195,7 +195,7 @@ public class BeanConnection implements Serializable {
       BeanConnection bc = connections.elementAt(i);
       if (bc.getTarget() == candidate) {
         for (int j = 0; j < listToCheck.size(); j++) {
-          BeanInstance tempSource = listToCheck.elementAt(j);
+          BeanInstance tempSource = (BeanInstance) listToCheck.elementAt(j);
           if (bc.getSource() == tempSource) {
             return false;
           }
@@ -214,7 +214,7 @@ public class BeanConnection implements Serializable {
    * @return a Vector of BeanConnections
    */
   public static Vector<BeanConnection> associatedConnections(
-    Vector<BeanInstance> subFlow, Integer... tab) {
+    Vector<Object> subFlow, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
@@ -230,7 +230,7 @@ public class BeanConnection implements Serializable {
       boolean sourceInSubFlow = false;
       boolean targetInSubFlow = false;
       for (int j = 0; j < subFlow.size(); j++) {
-        BeanInstance toCheck = subFlow.elementAt(j);
+        BeanInstance toCheck = (BeanInstance) subFlow.elementAt(j);
         if (toCheck == tempSource) {
           sourceInSubFlow = true;
         }
@@ -253,11 +253,10 @@ public class BeanConnection implements Serializable {
    * @param subset the sub-flow to examine
    * @return a Vector of inputs to the sub-flow
    */
-  public static Vector<BeanInstance> inputs(Vector<BeanInstance> subset,
-    Integer... tab) {
-    Vector<BeanInstance> result = new Vector<BeanInstance>();
+  public static Vector<Object> inputs(Vector<Object> subset, Integer... tab) {
+    Vector<Object> result = new Vector<Object>();
     for (int i = 0; i < subset.size(); i++) {
-      BeanInstance temp = subset.elementAt(i);
+      BeanInstance temp = (BeanInstance) subset.elementAt(i);
       // if (checkForSource(temp, subset)) {
       // now check target constraint
       if (checkTargetConstraint(temp, subset, tab)) {
@@ -273,7 +272,7 @@ public class BeanConnection implements Serializable {
    * it is the target of a connection from a source that is in the listToCheck
    */
   private static boolean checkForTarget(BeanInstance candidate,
-    Vector<BeanInstance> listToCheck, Integer... tab) {
+    Vector<Object> listToCheck, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
@@ -289,7 +288,7 @@ public class BeanConnection implements Serializable {
 
       // check to see if source is in list
       for (int j = 0; j < listToCheck.size(); j++) {
-        BeanInstance tempSource = listToCheck.elementAt(j);
+        BeanInstance tempSource = (BeanInstance) listToCheck.elementAt(j);
         if (bc.getSource() == tempSource) {
           return true;
         }
@@ -299,9 +298,9 @@ public class BeanConnection implements Serializable {
   }
 
   private static boolean isInList(BeanInstance candidate,
-    Vector<BeanInstance> listToCheck) {
+    Vector<Object> listToCheck) {
     for (int i = 0; i < listToCheck.size(); i++) {
-      BeanInstance temp = listToCheck.elementAt(i);
+      BeanInstance temp = (BeanInstance) listToCheck.elementAt(i);
       if (candidate == temp) {
         return true;
       }
@@ -314,7 +313,7 @@ public class BeanConnection implements Serializable {
    * connection only to target(s) that are in the listToCheck
    */
   private static boolean checkSourceConstraint(BeanInstance candidate,
-    Vector<BeanInstance> listToCheck, Integer... tab) {
+    Vector<Object> listToCheck, Integer... tab) {
     int tabIndex = 0;
     if (tab.length > 0) {
       tabIndex = tab[0].intValue();
@@ -332,7 +331,7 @@ public class BeanConnection implements Serializable {
           return true;
         }
         for (int j = 0; j < listToCheck.size(); j++) {
-          BeanInstance tempTarget = listToCheck.elementAt(j);
+          BeanInstance tempTarget = (BeanInstance) listToCheck.elementAt(j);
           if (bc.getTarget() == tempTarget) {
             result = false;
           }
@@ -349,11 +348,10 @@ public class BeanConnection implements Serializable {
    * @param subset the sub-flow to examine
    * @return a Vector of outputs of the sub-flow
    */
-  public static Vector<BeanInstance> outputs(Vector<BeanInstance> subset,
-    Integer... tab) {
-    Vector<BeanInstance> result = new Vector<BeanInstance>();
+  public static Vector<Object> outputs(Vector<Object> subset, Integer... tab) {
+    Vector<Object> result = new Vector<Object>();
     for (int i = 0; i < subset.size(); i++) {
-      BeanInstance temp = subset.elementAt(i);
+      BeanInstance temp = (BeanInstance) subset.elementAt(i);
       if (checkForTarget(temp, subset, tab)) {
         // now check source constraint
         if (checkSourceConstraint(temp, subset, tab)) {
@@ -553,7 +551,7 @@ public class BeanConnection implements Serializable {
 
     Vector<BeanConnection> connections = TABBED_CONNECTIONS.get(tabIndex);
 
-    Vector<BeanInstance> instancesToRemoveFor = new Vector<BeanInstance>();
+    Vector<Object> instancesToRemoveFor = new Vector<Object>();
     if (instance.getBean() instanceof MetaBean) {
       instancesToRemoveFor = ((MetaBean) instance.getBean())
         .getBeansInSubFlow();
@@ -562,7 +560,8 @@ public class BeanConnection implements Serializable {
     }
     Vector<BeanConnection> removeVector = new Vector<BeanConnection>();
     for (int j = 0; j < instancesToRemoveFor.size(); j++) {
-      BeanInstance tempInstance = instancesToRemoveFor.elementAt(j);
+      BeanInstance tempInstance = (BeanInstance) instancesToRemoveFor
+        .elementAt(j);
       for (int i = 0; i < connections.size(); i++) {
         // In cases where this instance is the target, deregister it
         // as a listener for the source

@@ -129,8 +129,8 @@ public class SQLViewerPerspective extends JPanel implements
        * .getNumTabs() - 1), loaderComp, 50, 50, m_mainPerspective.getNumTabs()
        * - 1);
        */
-      Vector<BeanInstance> beans = BeanInstance
-        .getBeanInstances(m_mainPerspective.getNumTabs() - 1);
+      Vector<Object> beans = BeanInstance.getBeanInstances(m_mainPerspective
+        .getNumTabs() - 1);
       Vector<BeanConnection> connections = BeanConnection
         .getConnections(m_mainPerspective.getNumTabs() - 1);
       singleton.integrateFlow(beans, connections, true, false);
