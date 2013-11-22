@@ -132,7 +132,6 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @throws Exception if the DOM creation fails
    * @see javax.swing.DefaultListModel
    */
-  @SuppressWarnings("rawtypes")
   public Element writeDefaultListModel(Element parent, Object o, String name)
     throws Exception {
 
@@ -165,7 +164,6 @@ public class XMLBasicSerialization extends XMLSerialization {
    * @throws Exception if instantiation fails
    * @see javax.swing.DefaultListModel
    */
-  @SuppressWarnings({ "rawtypes", "unchecked" })
   public Object readDefaultListModel(Element node) throws Exception {
     DefaultListModel model;
     Vector<Element> children;

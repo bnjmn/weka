@@ -253,6 +253,7 @@ public abstract class AbstractClassifierTest extends TestCase {
    * 
    * @exception Exception if an error occurs reading the example instances.
    */
+  @SuppressWarnings("unchecked")
   @Override
   protected void setUp() throws Exception {
     m_Classifier = getClassifier();
@@ -296,6 +297,7 @@ public abstract class AbstractClassifierTest extends TestCase {
   }
 
   /** Called by JUnit after each test method */
+  @SuppressWarnings("unchecked")
   @Override
   protected void tearDown() {
     m_Classifier = null;

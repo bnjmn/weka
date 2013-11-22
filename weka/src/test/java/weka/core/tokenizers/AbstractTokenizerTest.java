@@ -122,6 +122,7 @@ public abstract class AbstractTokenizerTest extends TestCase {
    * 
    * @exception Exception if an error occurs reading the example instances.
    */
+  @SuppressWarnings("unchecked")
   @Override
   protected void setUp() throws Exception {
     m_Tokenizer = getTokenizer();

@@ -232,7 +232,6 @@ public class RemoteExperiment extends Experiment {
   private final ArrayList<RemoteExperimentListener> m_listeners = new ArrayList<RemoteExperimentListener>();
 
   /** Holds the names of machines with remoteEngine servers running */
-  @SuppressWarnings("rawtypes")
   protected DefaultListModel m_remoteHosts = new DefaultListModel();
 
   /** The queue of available hosts */
@@ -452,7 +451,7 @@ public class RemoteExperiment extends Experiment {
    * @param ds the list of datasets to use
    */
   @Override
-  public void setDatasets(@SuppressWarnings("rawtypes") DefaultListModel ds) {
+  public void setDatasets(DefaultListModel ds) {
     super.setDatasets(ds);
     m_baseExperiment.setDatasets(ds);
   }
@@ -499,7 +498,6 @@ public class RemoteExperiment extends Experiment {
    * 
    * @throws Exception if an error occurs
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void initialize() throws Exception {
     if (m_baseExperiment == null) {
@@ -546,7 +544,6 @@ public class RemoteExperiment extends Experiment {
       for (int i = 0; i < m_baseExperiment.getDatasets().size(); i++) {
         m_subExperiments[i] = (Experiment) so.getObject();
         // one for each data set
-        @SuppressWarnings("rawtypes")
         DefaultListModel temp = new DefaultListModel();
         temp.addElement(m_baseExperiment.getDatasets().get(i));
         m_subExperiments[i].setDatasets(temp);
@@ -845,7 +842,6 @@ public class RemoteExperiment extends Experiment {
    * 
    * @param hostname the host name to add to the list
    */
-  @SuppressWarnings("unchecked")
   public void addRemoteHost(String hostname) {
     m_remoteHosts.addElement(hostname);
   }
@@ -855,7 +851,6 @@ public class RemoteExperiment extends Experiment {
    * 
    * @return the list of remote host names
    */
-  @SuppressWarnings("rawtypes")
   public DefaultListModel getRemoteHosts() {
     return m_remoteHosts;
   }
@@ -865,7 +860,7 @@ public class RemoteExperiment extends Experiment {
    * 
    * @param list the list of remote host names
    */
-  public void setRemoteHosts(@SuppressWarnings("rawtypes") DefaultListModel list) {
+  public void setRemoteHosts(DefaultListModel list) {
     m_remoteHosts = list;
   }
 

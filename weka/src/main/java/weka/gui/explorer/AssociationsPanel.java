@@ -84,7 +84,7 @@ import weka.gui.visualize.plugins.TreeVisualizePlugin;
  * @version $Revision$
  */
 public class AssociationsPanel extends JPanel implements
-    CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
+  CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
 
   /** for serialization */
   static final long serialVersionUID = -6867871711865476971L;
@@ -120,7 +120,7 @@ public class AssociationsPanel extends JPanel implements
    * Whether to store any graph or xml rules output in the history list
    */
   protected JCheckBox m_storeOutput = new JCheckBox(
-      "Store output for visualization");
+    "Store output for visualization");
 
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -154,14 +154,14 @@ public class AssociationsPanel extends JPanel implements
       }
     });
     m_History.setBorder(BorderFactory
-        .createTitledBorder("Result list (right-click for options)"));
+      .createTitledBorder("Result list (right-click for options)"));
     m_History.setHandleRightClicks(false);
     // see if we can popup a menu for the selected result
     m_History.getList().addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
         if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
-            || e.isAltDown()) {
+          || e.isAltDown()) {
           int index = m_History.getList().locationToIndex(e.getPoint());
           if (index != -1) {
             String name = m_History.getNameAtIndex(index);
@@ -184,12 +184,12 @@ public class AssociationsPanel extends JPanel implements
         Associator associator = (Associator) m_AssociatorEditor.getValue();
         Capabilities currentSchemeCapabilities = null;
         if (associator != null && currentFilter != null
-            && (associator instanceof CapabilitiesHandler)) {
+          && (associator instanceof CapabilitiesHandler)) {
           currentSchemeCapabilities = ((CapabilitiesHandler) associator)
-              .getCapabilities();
+            .getCapabilities();
 
           if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
-              && !currentSchemeCapabilities.supports(currentFilter)) {
+            && !currentSchemeCapabilities.supports(currentFilter)) {
             m_StartBut.setEnabled(false);
           }
         }
@@ -224,14 +224,14 @@ public class AssociationsPanel extends JPanel implements
     // check for any visualization plugins so that we
     // can add a checkbox for storing graphs or rules
     boolean showStoreOutput = (GenericObjectEditor.getClassnames(
-        AssociationRuleVisualizePlugin.class.getName()).size() > 0 || GenericObjectEditor
-        .getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
+      AssociationRuleVisualizePlugin.class.getName()).size() > 0 || GenericObjectEditor
+      .getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
 
     // Layout the GUI
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createTitledBorder("Associator"),
-        BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+      BorderFactory.createTitledBorder("Associator"),
+      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     p1.setLayout(new BorderLayout());
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
@@ -328,7 +328,7 @@ public class AssociationsPanel extends JPanel implements
     String[] attribNames = new String[m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
       String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i))
-          + ") ";
+        + ") ";
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_StartBut.setEnabled(m_RunThread == null);
@@ -360,7 +360,7 @@ public class AssociationsPanel extends JPanel implements
           Associator associator = (Associator) m_AssociatorEditor.getValue();
           StringBuffer outBuff = new StringBuffer();
           String name = (new SimpleDateFormat("HH:mm:ss - "))
-              .format(new Date());
+            .format(new Date());
           String cname = associator.getClass().getName();
           if (cname.startsWith("weka.associations.")) {
             name += cname.substring("weka.associations.".length());
@@ -368,10 +368,11 @@ public class AssociationsPanel extends JPanel implements
             name += cname;
           }
           String cmd = m_AssociatorEditor.getValue().getClass().getName();
-          if (m_AssociatorEditor.getValue() instanceof OptionHandler)
+          if (m_AssociatorEditor.getValue() instanceof OptionHandler) {
             cmd += " "
-                + Utils.joinOptions(((OptionHandler) m_AssociatorEditor
-                    .getValue()).getOptions());
+              + Utils.joinOptions(((OptionHandler) m_AssociatorEditor
+                .getValue()).getOptions());
+          }
           try {
 
             // Output some header information
@@ -393,7 +394,7 @@ public class AssociationsPanel extends JPanel implements
             if (inst.numAttributes() < 100) {
               for (int i = 0; i < inst.numAttributes(); i++) {
                 outBuff.append("              " + inst.attribute(i).name()
-                    + '\n');
+                  + '\n');
               }
             } else {
               outBuff.append("              [list of attributes omitted]\n");
@@ -423,7 +424,7 @@ public class AssociationsPanel extends JPanel implements
                   // xmlRules =
                   // ((weka.associations.XMLRulesProducer)associator).xmlRules();
                   rulesList = ((weka.associations.AssociationRulesProducer) associator)
-                      .getAssociationRules();
+                    .getAssociationRules();
                 } catch (Exception ex) {
                 }
               }
@@ -444,7 +445,7 @@ public class AssociationsPanel extends JPanel implements
               Associator configCopy = associator.getClass().newInstance();
               if (configCopy instanceof OptionHandler) {
                 ((OptionHandler) configCopy)
-                    .setOptions(((OptionHandler) associator).getOptions());
+                  .setOptions(((OptionHandler) associator).getOptions());
               }
               visVect.add(configCopy);
             } catch (Exception ex) {
@@ -486,6 +487,7 @@ public class AssociationsPanel extends JPanel implements
   /**
    * Stops the currently running Associator (if any).
    */
+  @SuppressWarnings("deprecation")
   protected void stopAssociator() {
 
     if (m_RunThread != null) {
@@ -520,7 +522,7 @@ public class AssociationsPanel extends JPanel implements
    */
   protected void visualizeTree(String dottyString, String treeName) {
     final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Classifier Tree Visualizer: " + treeName);
+      "Weka Classifier Tree Visualizer: " + treeName);
     jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     TreeVisualizer tv = new TreeVisualizer(null, dottyString, new PlaceNode2());
@@ -544,6 +546,7 @@ public class AssociationsPanel extends JPanel implements
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
+  @SuppressWarnings("unchecked")
   protected void historyRightClickPopup(String name, int x, int y) {
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
@@ -602,7 +605,7 @@ public class AssociationsPanel extends JPanel implements
 
     Vector<Object> visVect = null;
     if (selectedName != null) {
-      visVect = (Vector) m_History.getNamedObject(selectedName);
+      visVect = (Vector<Object>) m_History.getNamedObject(selectedName);
     }
 
     // check for the associator itself
@@ -615,7 +618,7 @@ public class AssociationsPanel extends JPanel implements
 
       final Associator model = temp_model;
       JMenuItem reApplyConfig = new JMenuItem(
-          "Re-apply this model's configuration");
+        "Re-apply this model's configuration");
       if (model != null) {
         reApplyConfig.addActionListener(new ActionListener() {
           @Override
@@ -637,19 +640,19 @@ public class AssociationsPanel extends JPanel implements
     if (visVect != null) {
       for (Object o : visVect) {
         if (o instanceof AssociationRules) {
-          Vector pluginsVector = GenericObjectEditor
-              .getClassnames(AssociationRuleVisualizePlugin.class.getName());
+          Vector<String> pluginsVector = GenericObjectEditor
+            .getClassnames(AssociationRuleVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (String) (pluginsVector.elementAt(i));
+            String className = (pluginsVector.elementAt(i));
             try {
               AssociationRuleVisualizePlugin plugin = (AssociationRuleVisualizePlugin) Class
-                  .forName(className).newInstance();
+                .forName(className).newInstance();
               if (plugin == null) {
                 continue;
               }
               availablePlugins = true;
               JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(
-                  (AssociationRules) o, selectedName);
+                (AssociationRules) o, selectedName);
               if (pluginMenuItem != null) {
                 visPlugins.add(pluginMenuItem);
               }
@@ -658,18 +661,19 @@ public class AssociationsPanel extends JPanel implements
             }
           }
         } else if (o instanceof String) {
-          Vector pluginsVector = GenericObjectEditor
-              .getClassnames(TreeVisualizePlugin.class.getName());
+          Vector<String> pluginsVector = GenericObjectEditor
+            .getClassnames(TreeVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (String) (pluginsVector.elementAt(i));
+            String className = (pluginsVector.elementAt(i));
             try {
               TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(
-                  className).newInstance();
-              if (plugin == null)
+                className).newInstance();
+              if (plugin == null) {
                 continue;
+              }
               availablePlugins = true;
               JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(
-                  (String) o, selectedName);
+                (String) o, selectedName);
               // Version version = new Version();
               if (pluginMenuItem != null) {
                 /*
@@ -711,10 +715,11 @@ public class AssociationsPanel extends JPanel implements
       return;
     }
 
-    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter()) {
       tempInst = new Instances(m_Instances, 0);
-    else
+    } else {
       tempInst = new Instances(m_Instances);
+    }
     tempInst.setClassIndex(-1);
 
     try {
@@ -731,12 +736,12 @@ public class AssociationsPanel extends JPanel implements
     Associator associator = (Associator) m_AssociatorEditor.getValue();
     Capabilities currentSchemeCapabilities = null;
     if (associator != null && currentFilter != null
-        && (associator instanceof CapabilitiesHandler)) {
+      && (associator instanceof CapabilitiesHandler)) {
       currentSchemeCapabilities = ((CapabilitiesHandler) associator)
-          .getCapabilities();
+        .getCapabilities();
 
       if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
-          && !currentSchemeCapabilities.supports(currentFilter)) {
+        && !currentSchemeCapabilities.supports(currentFilter)) {
         m_StartBut.setEnabled(false);
       }
     }
@@ -749,10 +754,11 @@ public class AssociationsPanel extends JPanel implements
    */
   @Override
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    if (e.getFilter() == null)
+    if (e.getFilter() == null) {
       updateCapabilitiesFilter(null);
-    else
+    } else {
       updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+    }
   }
 
   /**
@@ -805,7 +811,7 @@ public class AssociationsPanel extends JPanel implements
 
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame(
-          "Weka Explorer: Associator");
+        "Weka Explorer: Associator");
       jf.getContentPane().setLayout(new BorderLayout());
       final AssociationsPanel sp = new AssociationsPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -824,7 +830,7 @@ public class AssociationsPanel extends JPanel implements
       if (args.length == 1) {
         System.err.println("Loading instances from " + args[0]);
         java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-            args[0]));
+          args[0]));
         Instances i = new Instances(r);
         sp.setInstances(i);
       }

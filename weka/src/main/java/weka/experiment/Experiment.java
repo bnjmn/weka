@@ -200,7 +200,6 @@ public class Experiment implements Serializable, OptionHandler, RevisionHandler 
   protected int m_RunUpper = 10;
 
   /** An array of dataset files */
-  @SuppressWarnings("rawtypes")
   protected DefaultListModel m_Datasets = new DefaultListModel();
 
   /** True if the exp should also iterate over a property of the RP */
@@ -682,7 +681,6 @@ public class Experiment implements Serializable, OptionHandler, RevisionHandler 
    * 
    * @return the datasets in the experiment.
    */
-  @SuppressWarnings("rawtypes")
   public DefaultListModel getDatasets() {
     return m_Datasets;
   }
@@ -692,7 +690,7 @@ public class Experiment implements Serializable, OptionHandler, RevisionHandler 
    * 
    * @param ds the list of datasets to use
    */
-  public void setDatasets(@SuppressWarnings("rawtypes") DefaultListModel ds) {
+  public void setDatasets(DefaultListModel ds) {
     m_Datasets = ds;
   }
 
@@ -966,7 +964,6 @@ public class Experiment implements Serializable, OptionHandler, RevisionHandler 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void setOptions(String[] options) throws Exception {
 
@@ -1205,7 +1202,6 @@ public class Experiment implements Serializable, OptionHandler, RevisionHandler 
    * 
    * @param args command line arguments to the Experiment.
    */
-  @SuppressWarnings("unchecked")
   public static void main(String[] args) {
 
     try {
