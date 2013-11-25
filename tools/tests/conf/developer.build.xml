@@ -323,6 +323,15 @@
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="isolationForest"/>
     </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="multiLayerPerceptrons"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="supervisedAttributeScaling"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="kernelLogisticRegression"/>
+    </antcall>
   </target>
 
   <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
@@ -524,6 +533,11 @@
 
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="classifierErrors"/>
+    </antcall>
+
+    <antcall target="${packageCommand}_external">
+      <param name="packageName" value="classAssociationRules"/>
+      <param name="cp" value="../../${packages_internal}/predictiveApriori/build/classes"/>
     </antcall>
 
 <!-- commented out to save time (again no tests for this stuff) -->
