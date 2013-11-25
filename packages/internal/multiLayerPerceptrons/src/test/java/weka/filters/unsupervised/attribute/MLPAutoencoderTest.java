@@ -69,6 +69,7 @@ public class MLPAutoencoderTest
   /** Creates a default MLPAutoencoder */
   public Filter getFilter() {
     MLPAutoencoder f = new MLPAutoencoder();
+    f.setWeightsFile(new java.io.File("."));
     return f;
   }
 
