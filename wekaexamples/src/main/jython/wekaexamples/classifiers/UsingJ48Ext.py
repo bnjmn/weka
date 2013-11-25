@@ -8,6 +8,7 @@ import weka.core.Instances as Instances
 import weka.classifiers.trees.J48 as J48
 import weka.classifiers.Evaluation as Evaluation
 import weka.core.Range as Range
+import weka.classifiers.evaluation.output.prediction.PlainText as PlainText
 
 """
 An example of using Weka classifiers (i.e., J48) from within Jython.
@@ -20,7 +21,7 @@ Commandline parameter(s):
 
     first parameter must be the ARFF file one wants to process with J48
 
-Note: needs Weka 3.6.x to run (due to changes in the 
+Note: needs Weka 3.7.x to run (due to changes in the
       weka.classifiers.Evaluation class)
 
 """
@@ -40,12 +41,15 @@ data.setClassIndex(data.numAttributes() - 1)
 
 # create the model
 evaluation = Evaluation(data)
-buffer = StringBuffer()  # buffer for the predictions
+output = PlainText()  # plain text output for predictions
+output.setHeader(data)
+buffer = StringBuffer() # buffer to use
+output.setBuffer(buffer)
 attRange = Range()  # no additional attributes output
 outputDistribution = Boolean(False)  # we don't want distribution
 j48 = J48()
 j48.buildClassifier(data)  # only a trained classifier can be evaluated
-evaluation.evaluateModel(j48, data, [buffer, attRange, outputDistribution])
+evaluation.evaluateModel(j48, data, [output, attRange, outputDistribution])
 
 # print out the built model
 print "--> Generated model:\n"
