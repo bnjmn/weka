@@ -25,6 +25,7 @@ package wekaexamples.classifiers.trees;
 import weka.classifiers.Evaluation
 import weka.classifiers.trees.J48
 import weka.core.converters.ConverterUtils.DataSource
+import weka.classifiers.evaluation.output.prediction.PlainText
 import weka.core.Instances
 import weka.core.Range
 
@@ -50,12 +51,15 @@ data.setClassIndex(data.numAttributes() - 1)
 
 // create the model
 evaluation = new Evaluation(data)
-buffer = new StringBuffer()  // buffer for predictions
+output = new PlainText()  // plain text output for predictions
+output.setHeader(data)
+buffer = new StringBuffer() // buffer to use
+output.setBuffer(buffer)
 attRange = new Range()  // no additional attributes to output
 outputDistribution = false  // we don't want distribution
 j48 = new J48()
 j48.buildClassifier(data)
-evaluation.evaluateModel(j48, data, buffer, attRange, outputDistribution)
+evaluation.evaluateModel(j48, data, output, attRange, outputDistribution)
 
 // print out the built model
 println "--> Generated model:\n"

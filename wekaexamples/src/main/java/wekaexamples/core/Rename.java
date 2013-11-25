@@ -22,37 +22,36 @@
 
 package wekaexamples.core;
 
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
 
-import java.util.Vector;
-
 /**
  * Renames all the labels of nominal attributes to numbers, they way they
- * appear, e.g., attribute a1 has the labels "what", "so" and "ever" are
- * renamed to "0", "1" and "2".
- *
+ * appear, e.g., attribute a1 has the labels "what", "so" and "ever" are renamed
+ * to "0", "1" and "2".
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
 public class Rename {
-  
+
   /**
-   * Takes two parameters as input:
-   * 1. input arff file
-   * 2. output arff file (transformed)
-   * 3. (optional) the attribute index (1-based), otherwise all attributes
-   *    except class are changed
-   * Assumption: last attribute is class attribute
+   * Takes two parameters as input: 1. input arff file 2. output arff file
+   * (transformed) 3. (optional) the attribute index (1-based), otherwise all
+   * attributes except class are changed Assumption: last attribute is class
+   * attribute
    * 
-   * @param args	the commandline arguments
-   * @throws Exception	if something goes wrong
+   * @param args the commandline arguments
+   * @throws Exception if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    if (args.length < 2)
+    if (args.length < 2) {
       throw new Exception("Needs at least input and output ARFF file!");
+    }
 
     // read arff file
     Instances arff = DataSource.read(args[0]);
@@ -61,21 +60,21 @@ public class Rename {
     // determine attributes to modify
     Integer[] indices = null;
     if (args.length > 2) {
-      indices    = new Integer[1];
+      indices = new Integer[1];
       indices[0] = new Integer(Integer.parseInt(args[2]) - 1);
-    }
-    else {
-      Vector v = new Vector();
+    } else {
+      Vector<Integer> v = new Vector<Integer>();
       for (int i = 0; i < arff.numAttributes() - 2; i++) {
-        if (arff.attribute(i).isNominal())
+        if (arff.attribute(i).isNominal()) {
           v.add(new Integer(i));
+        }
       }
-      indices = (Integer[]) v.toArray(new Integer[v.size()]);
+      indices = v.toArray(new Integer[v.size()]);
     }
-    
+
     // rename labels of all nominal attributes
-    for (int i = 0; i < indices.length; i++) {
-      int attInd = indices[i].intValue();
+    for (Integer indice : indices) {
+      int attInd = indice.intValue();
       Attribute att = arff.attribute(attInd);
       for (int n = 0; n < att.numValues(); n++) {
         arff.renameAttributeValue(att, att.value(n), "" + n);

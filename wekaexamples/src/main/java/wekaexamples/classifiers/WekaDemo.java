@@ -22,6 +22,10 @@
 
 package wekaexamples.classifiers;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -30,14 +34,10 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.Vector;
-
 /**
  * A little demo java program for using WEKA.<br/>
  * Check out the Evaluation class for more details.
- *
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  * @see Evaluation
@@ -45,7 +45,7 @@ import java.util.Vector;
 public class WekaDemo {
   /** the classifier used internally */
   protected Classifier m_Classifier = null;
-  
+
   /** the filter to use */
   protected Filter m_Filter = null;
 
@@ -67,8 +67,9 @@ public class WekaDemo {
 
   /**
    * sets the classifier to use
-   * @param name        the classname of the classifier
-   * @param options     the options for the classifier
+   * 
+   * @param name the classname of the classifier
+   * @param options the options for the classifier
    */
   public void setClassifier(String name, String[] options) throws Exception {
     m_Classifier = AbstractClassifier.forName(name, options);
@@ -76,13 +77,15 @@ public class WekaDemo {
 
   /**
    * sets the filter to use
-   * @param name        the classname of the filter
-   * @param options     the options for the filter
+   * 
+   * @param name the classname of the filter
+   * @param options the options for the filter
    */
   public void setFilter(String name, String[] options) throws Exception {
     m_Filter = (Filter) Class.forName(name).newInstance();
-    if (m_Filter instanceof OptionHandler)
+    if (m_Filter instanceof OptionHandler) {
       ((OptionHandler) m_Filter).setOptions(options);
+    }
   }
 
   /**
@@ -90,8 +93,8 @@ public class WekaDemo {
    */
   public void setTraining(String name) throws Exception {
     m_TrainingFile = name;
-    m_Training     = new Instances(
-                        new BufferedReader(new FileReader(m_TrainingFile)));
+    m_Training = new Instances(new BufferedReader(
+      new FileReader(m_TrainingFile)));
     m_Training.setClassIndex(m_Training.numAttributes() - 1);
   }
 
@@ -102,53 +105,49 @@ public class WekaDemo {
     // run filter
     m_Filter.setInputFormat(m_Training);
     Instances filtered = Filter.useFilter(m_Training, m_Filter);
-    
+
     // train classifier on complete file for tree
     m_Classifier.buildClassifier(filtered);
-    
+
     // 10fold CV with seed=1
     m_Evaluation = new Evaluation(filtered);
-    m_Evaluation.crossValidateModel(
-        m_Classifier, filtered, 10, m_Training.getRandomNumberGenerator(1));
+    m_Evaluation.crossValidateModel(m_Classifier, filtered, 10,
+      m_Training.getRandomNumberGenerator(1));
   }
 
   /**
    * outputs some data about the classifier
    */
+  @Override
   public String toString() {
-    StringBuffer        result;
+    StringBuffer result;
 
     result = new StringBuffer();
     result.append("Weka - Demo\n===========\n\n");
 
-    result.append("Classifier...: " 
-        + Utils.toCommandLine(m_Classifier) + "\n");
-    if (m_Filter instanceof OptionHandler)
-      result.append("Filter.......: " 
-          + m_Filter.getClass().getName() + " " 
-          + Utils.joinOptions(((OptionHandler) m_Filter).getOptions()) + "\n");
-    else
-      result.append("Filter.......: "
-          + m_Filter.getClass().getName() + "\n");
-    result.append("Training file: " 
-        + m_TrainingFile + "\n");
+    result.append("Classifier...: " + Utils.toCommandLine(m_Classifier) + "\n");
+    if (m_Filter instanceof OptionHandler) {
+      result.append("Filter.......: " + m_Filter.getClass().getName() + " "
+        + Utils.joinOptions(((OptionHandler) m_Filter).getOptions()) + "\n");
+    } else {
+      result.append("Filter.......: " + m_Filter.getClass().getName() + "\n");
+    }
+    result.append("Training file: " + m_TrainingFile + "\n");
     result.append("\n");
 
     result.append(m_Classifier.toString() + "\n");
     result.append(m_Evaluation.toSummaryString() + "\n");
     try {
       result.append(m_Evaluation.toMatrixString() + "\n");
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     try {
       result.append(m_Evaluation.toClassDetailsString() + "\n");
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
-    
+
     return result.toString();
   }
 
@@ -156,32 +155,27 @@ public class WekaDemo {
    * returns the usage of the class
    */
   public static String usage() {
-    return
-        "\nusage:\n  " + WekaDemo.class.getName() 
-        + "  CLASSIFIER <classname> [options] \n"
-        + "  FILTER <classname> [options]\n"
-        + "  DATASET <trainingfile>\n\n"
-        + "e.g., \n"
-        + "  java -classpath \".:weka.jar\" WekaDemo \n"
-        + "    CLASSIFIER weka.classifiers.trees.J48 -U \n"
-        + "    FILTER weka.filters.unsupervised.instance.Randomize \n"
-        + "    DATASET iris.arff\n";
+    return "\nusage:\n  " + WekaDemo.class.getName()
+      + "  CLASSIFIER <classname> [options] \n"
+      + "  FILTER <classname> [options]\n" + "  DATASET <trainingfile>\n\n"
+      + "e.g., \n" + "  java -classpath \".:weka.jar\" WekaDemo \n"
+      + "    CLASSIFIER weka.classifiers.trees.J48 -U \n"
+      + "    FILTER weka.filters.unsupervised.instance.Randomize \n"
+      + "    DATASET iris.arff\n";
   }
-  
+
   /**
    * runs the program, the command line looks like this:<br/>
-   * WekaDemo CLASSIFIER classname [options] 
-   *          FILTER classname [options] 
-   *          DATASET filename 
-   * <br/>
+   * WekaDemo CLASSIFIER classname [options] FILTER classname [options] DATASET
+   * filename <br/>
    * e.g., <br/>
-   *   java -classpath ".:weka.jar" WekaDemo \<br/>
-   *     CLASSIFIER weka.classifiers.trees.J48 -U \<br/>
-   *     FILTER weka.filters.unsupervised.instance.Randomize \<br/>
-   *     DATASET iris.arff<br/>
+   * java -classpath ".:weka.jar" WekaDemo \<br/>
+   * CLASSIFIER weka.classifiers.trees.J48 -U \<br/>
+   * FILTER weka.filters.unsupervised.instance.Randomize \<br/>
+   * DATASET iris.arff<br/>
    */
   public static void main(String[] args) throws Exception {
-    WekaDemo         demo;
+    WekaDemo demo;
 
     if (args.length < 6) {
       System.out.println(WekaDemo.usage());
@@ -192,8 +186,8 @@ public class WekaDemo {
     String classifier = "";
     String filter = "";
     String dataset = "";
-    Vector classifierOptions = new Vector();
-    Vector filterOptions = new Vector();
+    Vector<String> classifierOptions = new Vector<String>();
+    Vector<String> filterOptions = new Vector<String>();
 
     int i = 0;
     String current = "";
@@ -204,43 +198,41 @@ public class WekaDemo {
         current = args[i];
         i++;
         newPart = true;
-      }
-      else if (args[i].equals("FILTER")) {
+      } else if (args[i].equals("FILTER")) {
         current = args[i];
         i++;
         newPart = true;
-      }
-      else if (args[i].equals("DATASET")) {
+      } else if (args[i].equals("DATASET")) {
         current = args[i];
         i++;
         newPart = true;
       }
 
       if (current.equals("CLASSIFIER")) {
-        if (newPart)
+        if (newPart) {
           classifier = args[i];
-        else
+        } else {
           classifierOptions.add(args[i]);
-      }
-      else if (current.equals("FILTER")) {
-        if (newPart)
+        }
+      } else if (current.equals("FILTER")) {
+        if (newPart) {
           filter = args[i];
-        else
+        } else {
           filterOptions.add(args[i]);
-      }
-      else if (current.equals("DATASET")) {
-        if (newPart)
+        }
+      } else if (current.equals("DATASET")) {
+        if (newPart) {
           dataset = args[i];
+        }
       }
 
       // next parameter
       i++;
       newPart = false;
-    } 
-    while (i < args.length);
+    } while (i < args.length);
 
     // everything provided?
-    if ( classifier.equals("") || filter.equals("") || dataset.equals("") ) {
+    if (classifier.equals("") || filter.equals("") || dataset.equals("")) {
       System.out.println("Not all parameters provided!");
       System.out.println(WekaDemo.usage());
       System.exit(2);
@@ -248,12 +240,10 @@ public class WekaDemo {
 
     // run
     demo = new WekaDemo();
-    demo.setClassifier(
-        classifier, 
-        (String[]) classifierOptions.toArray(new String[classifierOptions.size()]));
-    demo.setFilter(
-        filter,
-        (String[]) filterOptions.toArray(new String[filterOptions.size()]));
+    demo.setClassifier(classifier,
+      classifierOptions.toArray(new String[classifierOptions.size()]));
+    demo.setFilter(filter,
+      filterOptions.toArray(new String[filterOptions.size()]));
     demo.setTraining(dataset);
     demo.execute();
     System.out.println(demo.toString());

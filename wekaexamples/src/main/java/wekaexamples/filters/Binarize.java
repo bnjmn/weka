@@ -22,23 +22,23 @@
 
 package wekaexamples.filters;
 
-import weka.core.Instances;
-import weka.core.converters.ArffSaver;
-import weka.filters.unsupervised.attribute.MergeTwoValues;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.Enumeration;
 
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
+import weka.filters.unsupervised.attribute.MergeTwoValues;
+
 /**
- * Generates binary ARFF files out of a nominal one, i.e., it takes the
- * input ARFF file and creates for all attribute values, files that contain
- * the "value" and "not_value" as values then. E.g., in case of the
- * weather data in generates three files for the "outlook" attribute: <br/>
- * - weather_sunny.arff   : sunny, not_sunny <br/>
+ * Generates binary ARFF files out of a nominal one, i.e., it takes the input
+ * ARFF file and creates for all attribute values, files that contain the
+ * "value" and "not_value" as values then. E.g., in case of the weather data in
+ * generates three files for the "outlook" attribute: <br/>
+ * - weather_sunny.arff : sunny, not_sunny <br/>
  * - weather_overcast.arff: overcast, not_overcast <br/>
- * - weather_rainy.arff   : rainy, not_rainy <br/>
+ * - weather_rainy.arff : rainy, not_rainy <br/>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @author Jens Grivolla
@@ -46,46 +46,45 @@ import java.util.Enumeration;
  * @version $Revision$
  */
 public class Binarize {
-  
+
   /**
    * takes 2 arguments: <br/>
    * - the input ARFF file <br/>
    * - the attribute index (starting with 1) <br/>
    */
   public static void main(String[] args) throws Exception {
-    Instances       input;
-    Instances       output;
-    ArffSaver       saver;
-    int             i;
-    Enumeration     enm;
-    String          currValue;
-    String          value;
-    int             attIndex;
-    String          filename;
-    int             renamed;
-    MergeTwoValues  merge;
-    int             index;
+    Instances input;
+    Instances output;
+    ArffSaver saver;
+    int i;
+    Enumeration<Object> enm;
+    String currValue;
+    String value;
+    int attIndex;
+    String filename;
+    int renamed;
+    MergeTwoValues merge;
+    int index;
 
     // input file provided
     if (args.length != 2) {
-      System.out.println(
-          "\nUsage: " + Binarize.class.getClass().getName() 
-                      + " <input> <attribute-index>\n");
+      System.out.println("\nUsage: " + Binarize.class.getClass().getName()
+        + " <input> <attribute-index>\n");
       System.exit(1);
     }
 
     // load input
     input = new Instances(new BufferedReader(new FileReader(args[0])));
     input.setClassIndex(input.numAttributes() - 1);
-    
+
     // generate output_files
     attIndex = Integer.parseInt(args[1]) - 1;
     for (i = 0; i < input.attribute(attIndex).numValues(); i++) {
-      output    = new Instances(input);
+      output = new Instances(input);
       currValue = input.attribute(attIndex).value(i);
 
       // rename values
-      enm     = input.attribute(attIndex).enumerateValues();
+      enm = input.attribute(attIndex).enumerateValues();
       renamed = -1;
       while (enm.hasMoreElements()) {
         value = enm.nextElement().toString();
@@ -94,10 +93,9 @@ public class Binarize {
           // rename the first not-value, others are merged with this one then
           if (renamed == -1) {
             renamed = index;
-            output.renameAttributeValue(
-                output.attribute(attIndex), value, "not_" + currValue);
-          }
-          else {
+            output.renameAttributeValue(output.attribute(attIndex), value,
+              "not_" + currValue);
+          } else {
             merge = new MergeTwoValues();
             merge.setAttributeIndex(args[1]);
             merge.setFirstValueIndex("" + (renamed + 1));
@@ -105,19 +103,17 @@ public class Binarize {
             merge.setInputFormat(output);
             output = MergeTwoValues.useFilter(output, merge);
             // rename value (since merge creates combined name)
-            output.renameAttributeValue(
-                output.attribute(attIndex), 
-                "not_" + currValue + "_" + value, 
-                "not_" + currValue);
+            output.renameAttributeValue(output.attribute(attIndex), "not_"
+              + currValue + "_" + value, "not_" + currValue);
           }
         }
       }
 
       // save file
-      output.setRelationName(
-          input.relationName() + "-" + currValue + "-and-not_" + currValue);
-      filename = args[0].replaceAll(
-                    ".[Aa][Rr][Ff][Ff]$", "-" + currValue + ".arff");
+      output.setRelationName(input.relationName() + "-" + currValue
+        + "-and-not_" + currValue);
+      filename = args[0].replaceAll(".[Aa][Rr][Ff][Ff]$", "-" + currValue
+        + ".arff");
       saver = new ArffSaver();
       saver.setInstances(output);
       saver.setFile(new File(filename));
