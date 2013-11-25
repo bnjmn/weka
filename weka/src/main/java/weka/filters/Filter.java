@@ -717,10 +717,12 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("import weka.core.Attribute;\n");
     result.append("import weka.core.Capabilities;\n");
     result.append("import weka.core.Capabilities.Capability;\n");
-    result.append("import weka.core.FastVector;\n");
+    result.append("import weka.core.DenseInstance;\n");
     result.append("import weka.core.Instance;\n");
     result.append("import weka.core.Instances;\n");
+    result.append("import weka.core.Utils;\n");
     result.append("import weka.filters.Filter;\n");
+    result.append("import java.util.ArrayList;\n");
     result.append("\n");
     result.append("public class WekaWrapper\n");
     result.append("  extends Filter {\n");
@@ -768,7 +770,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("\n");
     result.append("    for (i = 0 ; i < obj.length; i++) {\n");
     result.append("      if (obj[i] == null)\n");
-    result.append("        values[i] = Instance.missingValue();\n");
+    result.append("        values[i] = Utils.missingValue();\n");
     result.append("      else if (format.attribute(i).isNumeric())\n");
     result.append("        values[i] = (Double) obj[i];\n");
     result.append("      else if (format.attribute(i).isNominal())\n");
@@ -777,7 +779,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("    }\n");
     result.append("\n");
     result.append("    // create new instance\n");
-    result.append("    result = new Instance(1.0, values);\n");
+    result.append("    result = new DenseInstance(1.0, values);\n");
     result.append("    result.setDataset(format);\n");
     result.append("\n");
     result.append("    return result;\n");
@@ -847,20 +849,21 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("    super.setInputFormat(instanceInfo);\n");
     result.append("    \n");
     result.append("    // generate output format\n");
-    result.append("    FastVector atts = new FastVector();\n");
-    result.append("    FastVector attValues;\n");
+    result
+      .append("    ArrayList<Attribute> atts = new ArrayList<Attribute>();\n");
+    result.append("    ArrayList<String> attValues;\n");
     for (i = 0; i < output.numAttributes(); i++) {
       result.append("    // " + output.attribute(i).name() + "\n");
       if (output.attribute(i).isNumeric()) {
-        result.append("    atts.addElement(new Attribute(\""
+        result.append("    atts.add(new Attribute(\""
           + output.attribute(i).name() + "\"));\n");
       } else if (output.attribute(i).isNominal()) {
-        result.append("    attValues = new FastVector();\n");
+        result.append("    attValues = new ArrayList<String>();\n");
         for (n = 0; n < output.attribute(i).numValues(); n++) {
-          result.append("    attValues.addElement(\""
-            + output.attribute(i).value(n) + "\");\n");
+          result.append("    attValues.add(\"" + output.attribute(i).value(n)
+            + "\");\n");
         }
-        result.append("    atts.addElement(new Attribute(\""
+        result.append("    atts.add(new Attribute(\""
           + output.attribute(i).name() + "\", attValues));\n");
       } else {
         throw new UnsupportedAttributeTypeException("Attribute type '"
