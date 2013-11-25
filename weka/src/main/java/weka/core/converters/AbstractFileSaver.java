@@ -140,7 +140,7 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
    */
   @Override
   public String[] getFileExtensions() {
-    return new String[] { getFileExtension(), FILE_EXTENSION_COMPRESSED };
+    return new String[] { getFileExtension() };
   }
 
   /**
