@@ -1,4 +1,4 @@
-@relation FilterTest-weka.filters.supervised.attribute.Discretize-Rfirst-last
+@relation FilterTest-weka.filters.supervised.attribute.Discretize-Rfirst-last-precision6
 
 @attribute StringAtt1 string
 @attribute NominalAtt1 {r,g,b}
