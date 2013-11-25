@@ -444,7 +444,7 @@ public class PrefuseGraph implements Serializable, GraphVisualizePlugin {
    */
   @Override
   public String getMaxVersion() {
-    return "3.7.0";
+    return "3.8.0";
   }
 
   /**

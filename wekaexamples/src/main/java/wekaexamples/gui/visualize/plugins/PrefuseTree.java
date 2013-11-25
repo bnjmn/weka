@@ -573,7 +573,7 @@ public class PrefuseTree implements Serializable, TreeVisualizePlugin {
    */
   @Override
   public String getMaxVersion() {
-    return "3.7.0";
+    return "3.8.0";
   }
 
   /**
