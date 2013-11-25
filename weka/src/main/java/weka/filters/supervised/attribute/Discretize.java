@@ -23,6 +23,9 @@ package weka.filters.supervised.attribute;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import weka.core.Attribute;
@@ -48,23 +51,19 @@ import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> An instance filter that discretizes a range of
- * numeric attributes in the dataset into nominal attributes. Discretization is
- * by Fayyad &amp; Irani's MDL method (the default).<br/>
+ <!-- globalinfo-start -->
+ * An instance filter that discretizes a range of numeric attributes in the dataset into nominal attributes. Discretization is by Fayyad &amp; Irani's MDL method (the default).<br/>
  * <br/>
  * For more information, see:<br/>
  * <br/>
- * Usama M. Fayyad, Keki B. Irani: Multi-interval discretization of
- * continuousvalued attributes for classification learning. In: Thirteenth
- * International Joint Conference on Articial Intelligence, 1022-1027, 1993.<br/>
+ * Usama M. Fayyad, Keki B. Irani: Multi-interval discretization of continuousvalued attributes for classification learning. In: Thirteenth International Joint Conference on Articial Intelligence, 1022-1027, 1993.<br/>
  * <br/>
- * Igor Kononenko: On Biases in Estimating Multi-Valued Attributes. In: 14th
- * International Joint Conference on Articial Intelligence, 1034-1040, 1995.
+ * Igor Kononenko: On Biases in Estimating Multi-Valued Attributes. In: 14th International Joint Conference on Articial Intelligence, 1034-1040, 1995.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;inproceedings{Fayyad1993,
  *    author = {Usama M. Fayyad and Keki B. Irani},
@@ -86,43 +85,35 @@ import weka.filters.SupervisedFilter;
  * }
  * </pre>
  * <p/>
- * <!-- technical-bibtex-end -->
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -R &lt;col1,col2-col4,...&gt;
+ * <pre> -R &lt;col1,col2-col4,...&gt;
  *  Specifies list of columns to Discretize. First and last are valid indexes.
- *  (default none)
- * </pre>
+ *  (default none)</pre>
  * 
- * <pre>
- * -V
- *  Invert matching sense of column indexes.
- * </pre>
+ * <pre> -V
+ *  Invert matching sense of column indexes.</pre>
  * 
- * <pre>
- * -D
- *  Output binary attributes for discretized attributes.
- * </pre>
+ * <pre> -D
+ *  Output binary attributes for discretized attributes.</pre>
  * 
- * <pre>
- * -Y
- *  Use bin numbers rather than ranges for discretized attributes.
- * </pre>
+ * <pre> -Y
+ *  Use bin numbers rather than ranges for discretized attributes.</pre>
  * 
- * <pre>
- * -E
- *  Use better encoding of split point for MDL.
- * </pre>
+ * <pre> -E
+ *  Use better encoding of split point for MDL.</pre>
  * 
- * <pre>
- * -K
- *  Use Kononenko's MDL criterion.
- * </pre>
+ * <pre> -K
+ *  Use Kononenko's MDL criterion.</pre>
  * 
- * <!-- options-end -->
+ * <pre> -precision &lt;integer&gt;
+ *  Precision for bin boundary labels.
+ *  (default = 6 decimal places).</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -151,6 +142,9 @@ public class Discretize extends Filter implements SupervisedFilter,
 
   /** Use Kononenko's MDL criterion instead of Fayyad et al.'s */
   protected boolean m_UseKononenko = false;
+
+  /** Precision for bin range labels */
+  protected int m_BinRangePrecision = 6;
 
   /** Constructor - initialises the filter */
   public Discretize() {
@@ -189,6 +183,11 @@ public class Discretize extends Filter implements SupervisedFilter,
     newVector.addElement(new Option("\tUse Kononenko's MDL criterion.", "K", 0,
       "-K"));
 
+    newVector
+      .addElement(new Option("\tPrecision for bin boundary labels.\n\t"
+        + "(default = 6 decimal places).", "precision", 1,
+        "-precision <integer>"));
+
     return newVector.elements();
   }
 
@@ -196,41 +195,33 @@ public class Discretize extends Filter implements SupervisedFilter,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -R &lt;col1,col2-col4,...&gt;
+   * <pre> -R &lt;col1,col2-col4,...&gt;
    *  Specifies list of columns to Discretize. First and last are valid indexes.
-   *  (default none)
-   * </pre>
+   *  (default none)</pre>
    * 
-   * <pre>
-   * -V
-   *  Invert matching sense of column indexes.
-   * </pre>
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
    * 
-   * <pre>
-   * -D
-   *  Output binary attributes for discretized attributes.
-   * </pre>
+   * <pre> -D
+   *  Output binary attributes for discretized attributes.</pre>
    * 
-   * <pre>
-   * -Y
-   *  Use bin numbers rather than ranges for discretized attributes.
-   * </pre>
+   * <pre> -Y
+   *  Use bin numbers rather than ranges for discretized attributes.</pre>
    * 
-   * <pre>
-   * -E
-   *  Use better encoding of split point for MDL.
-   * </pre>
+   * <pre> -E
+   *  Use better encoding of split point for MDL.</pre>
    * 
-   * <pre>
-   * -K
-   *  Use Kononenko's MDL criterion.
-   * </pre>
+   * <pre> -K
+   *  Use Kononenko's MDL criterion.</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -precision &lt;integer&gt;
+   *  Precision for bin boundary labels.
+   *  (default = 6 decimal places).</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -251,6 +242,11 @@ public class Discretize extends Filter implements SupervisedFilter,
       setAttributeIndices("first-last");
     }
 
+    String precisionS = Utils.getOption("precision", options);
+    if (precisionS.length() > 0) {
+      setBinRangePrecision(Integer.parseInt(precisionS));
+    }
+
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
@@ -266,32 +262,32 @@ public class Discretize extends Filter implements SupervisedFilter,
   @Override
   public String[] getOptions() {
 
-    String[] options = new String[12];
-    int current = 0;
+    List<String> options = new ArrayList<String>();
 
     if (getMakeBinary()) {
-      options[current++] = "-D";
+      options.add("-D");
     }
     if (getUseBinNumbers()) {
-      options[current++] = "-Y";
+      options.add("-Y");
     }
     if (getUseBetterEncoding()) {
-      options[current++] = "-E";
+      options.add("-E");
     }
     if (getUseKononenko()) {
-      options[current++] = "-K";
+      options.add("-K");
     }
     if (getInvertSelection()) {
-      options[current++] = "-V";
+      options.add("-V");
     }
     if (!getAttributeIndices().equals("")) {
-      options[current++] = "-R";
-      options[current++] = getAttributeIndices();
+      options.add("-R");
+      options.add(getAttributeIndices());
     }
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+
+    options.add("-precision");
+    options.add("" + getBinRangePrecision());
+
+    return options.toArray(new String[options.size()]);
   }
 
   /**
@@ -449,6 +445,38 @@ public class Discretize extends Filter implements SupervisedFilter,
       "http://ai.fri.uni-lj.si/papers/kononenko95-ijcai.ps.gz");
 
     return result;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String binRangePrecisionTipText() {
+    return "The number of decimal places for cut points to use when generating bin labels";
+  }
+
+  /**
+   * Set the precision for bin boundaries. Only affects the boundary values used
+   * in the labels for the converted attributes; internal cutpoints are at full
+   * double precision.
+   * 
+   * @param p the precision for bin boundaries
+   */
+  public void setBinRangePrecision(int p) {
+    m_BinRangePrecision = p;
+  }
+
+  /**
+   * Get the precision for bin boundaries. Only affects the boundary values used
+   * in the labels for the converted attributes; internal cutpoints are at full
+   * double precision.
+   * 
+   * @return the precision for bin boundaries
+   */
+  public int getBinRangePrecision() {
+    return m_BinRangePrecision;
   }
 
   /**
@@ -710,7 +738,7 @@ public class Discretize extends Filter implements SupervisedFilter,
         sb.append(',');
       }
 
-      sb.append(binRangeString(cutPoints, j));
+      sb.append(binRangeString(cutPoints, j, m_BinRangePrecision));
     }
 
     return sb.toString();
@@ -721,20 +749,21 @@ public class Discretize extends Filter implements SupervisedFilter,
    * 
    * @param cutPoints The attribute's cut points; never null.
    * @param j The bin number (zero based); never out of range.
+   * @param precision the precision for the range values
    * 
    * @return The bin range string.
    */
-  private static String binRangeString(double[] cutPoints, int j) {
+  private static String binRangeString(double[] cutPoints, int j, int precision) {
     assert cutPoints != null;
 
     int n = cutPoints.length;
     assert 0 <= j && j <= n;
 
     return j == 0 ? "" + "(" + "-inf" + "-"
-      + Utils.doubleToString(cutPoints[0], 6) + "]" : j == n ? "" + "("
-      + Utils.doubleToString(cutPoints[n - 1], 6) + "-" + "inf" + ")" : ""
-      + "(" + Utils.doubleToString(cutPoints[j - 1], 6) + "-"
-      + Utils.doubleToString(cutPoints[j], 6) + "]";
+      + Utils.doubleToString(cutPoints[0], precision) + "]" : j == n ? "" + "("
+      + Utils.doubleToString(cutPoints[n - 1], precision) + "-" + "inf" + ")"
+      : "" + "(" + Utils.doubleToString(cutPoints[j - 1], precision) + "-"
+        + Utils.doubleToString(cutPoints[j], precision) + "]";
   }
 
   /** Generate the cutpoints for each attribute */
@@ -1014,6 +1043,8 @@ public class Discretize extends Filter implements SupervisedFilter,
     for (int i = 0, m = getInputFormat().numAttributes(); i < m; ++i) {
       if ((m_DiscretizeCols.isInRange(i))
         && (getInputFormat().attribute(i).isNumeric())) {
+
+        Set<String> cutPointsCheck = new HashSet<String>();
         double[] cutPoints = m_CutPoints[i];
         if (!m_MakeBinary) {
           ArrayList<String> attribValues;
@@ -1028,7 +1059,14 @@ public class Discretize extends Filter implements SupervisedFilter,
               }
             } else {
               for (int j = 0, n = cutPoints.length; j <= n; ++j) {
-                attribValues.add("'" + binRangeString(cutPoints, j) + "'");
+                String newBinRangeString = binRangeString(cutPoints, j,
+                  m_BinRangePrecision);
+                if (cutPointsCheck.contains(newBinRangeString)) {
+                  throw new IllegalArgumentException(
+                    "A duplicate bin range was detected. "
+                      + "Try increasing the bin range precision.");
+                }
+                attribValues.add("'" + newBinRangeString + "'");
               }
             }
           }
@@ -1055,8 +1093,17 @@ public class Discretize extends Filter implements SupervisedFilter,
                 attribValues.add("'B2of2'");
               } else {
                 double[] binaryCutPoint = { cutPoints[j] };
-                attribValues.add("'" + binRangeString(binaryCutPoint, 0) + "'");
-                attribValues.add("'" + binRangeString(binaryCutPoint, 1) + "'");
+                String newBinRangeString1 = binRangeString(binaryCutPoint, 0,
+                  m_BinRangePrecision);
+                String newBinRangeString2 = binRangeString(binaryCutPoint, 1,
+                  m_BinRangePrecision);
+                if (newBinRangeString1.equals(newBinRangeString2)) {
+                  throw new IllegalArgumentException(
+                    "A duplicate bin range was detected. "
+                      + "Try increasing the bin range precision.");
+                }
+                attribValues.add("'" + newBinRangeString1 + "'");
+                attribValues.add("'" + newBinRangeString2 + "'");
               }
               Attribute newAtt = new Attribute(getInputFormat().attribute(i)
                 .name() + "_" + (j + 1), attribValues);
@@ -1161,3 +1208,4 @@ public class Discretize extends Filter implements SupervisedFilter,
     runFilter(new Discretize(), argv);
   }
 }
+
