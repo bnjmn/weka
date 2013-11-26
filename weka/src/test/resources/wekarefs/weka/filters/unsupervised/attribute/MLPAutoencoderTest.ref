@@ -1,4 +1,4 @@
-@relation FilterTest-weka.filters.unsupervised.attribute.RemoveType-V-Tnumeric-weka.filters.unsupervised.attribute.ReplaceMissingValues_autoencoded-weka.filters.unsupervised.attribute.MLPAutoencoder-N2-L0.01-O1.0E-6-P1-E1-weights-file/Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/packages/internal/multiLayerPerceptrons-S1
+@relation FilterTest-weka.filters.unsupervised.attribute.RemoveType-V-Tnumeric-weka.filters.unsupervised.attribute.ReplaceMissingValues_autoencoded-weka.filters.unsupervised.attribute.MLPAutoencoder-N2-L0.01-O1.0E-6-P1-E1-weights-file.-S1
 
 @attribute hidden_unit_0output numeric
 @attribute hidden_unit_1output numeric
