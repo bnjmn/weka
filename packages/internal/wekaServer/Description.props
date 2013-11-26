@@ -1,0 +1,66 @@
+# Description file for WekaServer
+# 
+
+# Package name (required)
+PackageName=wekaServer
+
+# Version (required)
+Version=1.0.3
+
+#Date (year-month-day)
+Date=2012-11-01
+
+# Title (required)
+Title=Simple server for executing Weka tasks.
+
+# Category (recommended)
+Category=Server
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 2
+
+# Description (required)
+Description=Provides a simple servlet-based server for execution of data mining tasks.
+
+#Changes=Updated to be compatible with Weka >= 3.7.11
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaServer1.0.3.zip?download
+
+# URL for further information
+URL=http://wiki.pentaho.com/display/DATAMINING/Weka+Server
+
+# Changes in this release
+Changes=Fixed a problem with the finished/stale task purging thread that sometimes resulted in running tasks getting purged. Now has a command line option to set the purge checking interval (or to disable purging entirely by specifying a negative interval).
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.11)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+#MessageToDisplayOnInstall=Funky package requires some extra\n\
+# stuff to be installed after installing this package. You will\n\
+# need to blah, blah, blah in order to blah, blah, blah...
+
+# Prevent package from being loaded by Weka if the named
+# files/directories are not present (relative to the package's
+# root directory). Useful for packages that require the user
+# to manually install some third-party library(s). (optional)
+#DoNotLoadIfFileNotPresent=
+
+# Log message to be displayed if package can't be loaded due to
+# missing files/directories. (optional)
+#DoNotLoadIfFileNotPresentMessage=

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+    <info organisation="${ivy.artifact.group}" module="${ivy.artifact.id}" revision="${project.revision}" />
+    
+    <configurations>
+        <conf name="default"/>
+        <conf name="test" visibility="private"/>
+        <conf name="source" />          
+    </configurations>
+    
+    <publications>
+            <artifact name="${ivy.artifact.id}" type="jar" conf="default"/>
+            <artifact name="${ivy.artifact.id}" m:classifier="sources" type="source" ext="jar" conf="source"/>
+    </publications>   
+    
+    <dependencies defaultconf="default->default">
+        <!-- this is an example dependency.  Add the dependencies for your project here -->
+
+        <dependency org="javax.activation" name="activation" rev="${dependency.activation.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="commons-codec" name="commons-codec" rev="${dependency.commons-codec.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="commons-httpclient" name="commons-httpclient" rev="${dependency.commons-httpclient.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="commons-logging" name="commons-logging" rev="${dependency.commons-logging.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="com.toedter" name="jcalendar" rev="${dependency.jcalendar.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="org.mortbay.jetty" name="jetty" rev="${dependency.jetty.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="org.mortbay.jetty" name="jetty-plus" rev="${dependency.jetty.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="org.mortbay.jetty" name="jetty-util" rev="${dependency.jetty.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="com.jgoodies" name="jgoodies-common" rev="${dependency.jgoodies-common.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="com.jgoodies" name="jgoodies-looks" rev="${dependency.jgoodies-looks.revision}" transitive="false" conf="default->default" changing="false" />
+        <dependency org="org.mortbay.jetty" name="servlet-api-2.5" rev="${dependency.servlet-api.revision}" transitive="false" conf="default->default" changing="false" />
+
+
+<!--    <dependency org="pentaho.weka" name="pdm-3.7-ce" rev="${dependency.weka.revision}" transitive="false" conf="default->default" changing="true" /> -->
+
+<!--        <dependency org="commons-logging" name="commons-logging" rev="1.1" transitive="false"/> -->
+    </dependencies>
+</ivy-module>
