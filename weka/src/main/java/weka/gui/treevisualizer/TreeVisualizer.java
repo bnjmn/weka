@@ -121,10 +121,10 @@ public class TreeVisualizer extends PrintablePanel implements
   private FontMetrics m_fontSize;
 
   /** The number of Nodes in the tree. */
-  private int m_numNodes;
+  private final int m_numNodes;
 
   /** The number of levels in the tree. */
-  private int m_numLevels;
+  private final int m_numLevels;
 
   /**
    * An array with the Nodes sorted into it and display information about the
@@ -544,12 +544,11 @@ public class TreeVisualizer extends PrintablePanel implements
 
     m_scaling = 0;
 
-    // m_numNodes = m_topNode.getCount(m_topNode,0); //note the second argument
-    // NOT USED
-    // must be a zero, this is a
+    m_numNodes = Node.getCount(m_topNode, 0); // note the second
+    // argument must be a zero, this is a
     // recursive function
 
-    // m_numLevels = m_topNode.getHeight(m_topNode,0); NOT USED
+    m_numLevels = Node.getHeight(m_topNode, 0);
 
     m_nodes = new NodeInfo[m_numNodes];
     m_edges = new EdgeInfo[m_numNodes - 1];
