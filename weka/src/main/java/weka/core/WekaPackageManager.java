@@ -15,7 +15,7 @@
 
 /*
  *    WekaPackageManager.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2013 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -73,39 +73,81 @@ import weka.gui.explorer.ExplorerDefaults;
  */
 public class WekaPackageManager {
 
+  /** The default folder name for Weka bits and bobs */
   private static String WEKAFILES_DIR_NAME = "wekafiles";
+
+  /** Default path to where Weka's configuration and packages are stored */
   public static File WEKA_HOME = new File(System.getProperty("user.home")
     + File.separator + WEKAFILES_DIR_NAME);
-  public static File PACKAGES_DIR = new File(System.getProperty("user.home")
-    + File.separator + WEKAFILES_DIR_NAME + File.separator + "packages");
 
+  /** The default packages directory */
+  public static File PACKAGES_DIR = new File(WEKA_HOME.toString()
+    + File.separator + "packages");
+
+  /** The default props dir name */
   private static String PROPERTIES_DIR_NAME = "props";
+
+  /** The default properties directory */
   public static File PROPERTIES_DIR = new File(WEKA_HOME.toString()
     + File.separator + PROPERTIES_DIR_NAME);
 
+  /** The underlying package manager */
   private static PackageManager PACKAGE_MANAGER = PackageManager.create();
-  private static URL REP_URL; // current repository URL to use
+
+  /** Current repository URL to use */
+  private static URL REP_URL;
+
+  /** Location of the repository cache */
   private static URL CACHE_URL;
+
+  /** True if a cache build is required */
   private static boolean INITIAL_CACHE_BUILD_NEEDED = false;
+
+  /** The name of the file that contains the list of packages in the repository */
   private static String PACKAGE_LIST_FILENAME = "packageListWithVersion.txt";
 
+  /** Primary repository */
   private static String PRIMARY_REPOSITORY = "http://weka.sourceforge.net/packageMetaData";
+
+  /** Backup mirror of the repository */
   private static String REP_MIRROR;
+
+  /**
+   * True if the user has specified a custom repository via a property in
+   * PackageManager.props
+   */
   private static boolean USER_SET_REPO = false;
 
+  /** The package manager's property file */
   private static String PACKAGE_MANAGER_PROPS_FILE_NAME = "PackageManager.props";
+
+  /** Operating offline? */
   public static boolean m_offline;
+
+  /** Load packages? */
   private static boolean m_loadPackages = true;
 
+  /** Established WEKA_HOME successfully? */
   protected static boolean m_wekaHomeEstablished;
+
+  /** Packages loaded OK? */
   protected static boolean m_packagesLoaded;
+
+  /** Package loading in progress? */
   public static boolean m_initialPackageLoadingInProcess = false;
+
+  /* True if an initial cache build is needed and working offline */
   public static boolean m_noPackageMetaDataAvailable;
 
   static {
     establishWekaHome();
   }
 
+  /**
+   * Establish WEKA_HOME if needed
+   * 
+   * @return true if WEKA_HOME was successfully established
+   */
   protected static boolean establishWekaHome() {
     if (m_wekaHomeEstablished) {
       return true;
@@ -295,6 +337,9 @@ public class WekaPackageManager {
     return ok;
   }
 
+  /**
+   * Establish the location of a mirror
+   */
   protected static void establishMirror() {
     if (m_offline) {
       return;
@@ -341,6 +386,12 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Write to the weka log
+   * 
+   * @param level logging level
+   * @param message message to write
+   */
   protected static void log(weka.core.logging.Logger.Level level, String message) {
     try {
       File logFile = new File(WEKA_HOME.toString() + File.separator
@@ -357,6 +408,12 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Remove any ExplorerDefaults properties specified in the supplied package
+   * 
+   * @param installedPackageName the package specifying properties that should
+   *          be removed from ExplorerDefaults
+   */
   public static void removeExplorerProps(String installedPackageName) {
     try {
       Properties expProps = new Properties();
@@ -391,6 +448,11 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Process a package's GenericPropertiesCreator.props file
+   * 
+   * @param propsFile the props file to process
+   */
   protected static void processGenericPropertiesCreatorProps(File propsFile) {
     try {
       Properties expProps = new Properties();
@@ -427,6 +489,11 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Process a package's Explorer.props file
+   * 
+   * @param propsFile the properties file to process
+   */
   protected static void processExplorerProps(File propsFile) {
     try {
       Properties expProps = new Properties();
@@ -480,6 +547,11 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Process a package's GUIEditors.props file
+   * 
+   * @param propsFile the properties file to process
+   */
   protected static void processGUIEditorsProps(File propsFile) {
     GenericObjectEditor.registerEditors();
     try {
@@ -503,6 +575,11 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Process a package's PluginManager.props file
+   * 
+   * @param propsFile the properties file to process
+   */
   protected static void processPluginManagerProps(File propsFile) {
     try {
       PluginManager.addFromProperties(propsFile);
@@ -510,6 +587,15 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Recursively load the jars and process properties in a package directory
+   * 
+   * @param directory the package directory to process
+   * @param verbose true for verbose output
+   * @param goePropsFiles store any GenericObjectEditor.props files for
+   *          post-processing after all jars have been loaded
+   * @throws Exception if a problem occurs
+   */
   protected static void loadPackageDirectory(File directory, boolean verbose,
     List<File> goePropsFiles) throws Exception {
     File[] contents = directory.listFiles();
@@ -560,6 +646,15 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Check whether a package should be loaded or not. Checks for missing
+   * classes, unset environment variables, missing dependencies etc.
+   * 
+   * @param toLoad the package to check
+   * @param packageRoot the root directory of the package
+   * @param progress for reporting loading progress
+   * @return true if the package is good to load
+   */
   public static boolean loadCheck(Package toLoad, File packageRoot,
     PrintStream... progress) {
 
@@ -808,10 +903,23 @@ public class WekaPackageManager {
     return result;
   }
 
+  /**
+   * Load all packages
+   * 
+   * @param verbose true if loading progress should be output
+   */
   public static synchronized void loadPackages(boolean verbose) {
     loadPackages(verbose, true);
   }
 
+  /**
+   * Load all packages
+   * 
+   * @param verbose true if loading progress should be output
+   * @param refreshGOEProperties true if the GOE properties should be refreshed
+   *          after loading (i.e. a re-run of the class discovery mechanism,
+   *          re-initialization of the Knowledge Flow etc.)
+   */
   public static synchronized void loadPackages(boolean verbose,
     boolean refreshGOEProperties) {
 
@@ -885,6 +993,10 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Refresh the generic object editor properties via re-running of the dynamic
+   * class discovery process.
+   */
   public static void refreshGOEProperties() {
     ClassDiscovery.clearClassCache();
     GenericPropertiesCreator.regenerateGlobalOutputProperties();
@@ -1041,6 +1153,12 @@ public class WekaPackageManager {
     return result;
   }
 
+  /**
+   * Establish the local copy of the package meta data if needed
+   * 
+   * @param progress for reporting progress
+   * @return any Exception raised or null if all is good
+   */
   public static Exception establishCacheIfNeeded(PrintStream... progress) {
     if (m_offline) {
       return null;
@@ -1063,6 +1181,12 @@ public class WekaPackageManager {
     return problem;
   }
 
+  /**
+   * Check for new packages on the server and refresh the local cache if needed
+   * 
+   * @param progress to report progress to
+   * @return any Exception raised or null if all is good
+   */
   public static Exception checkForNewPackages(PrintStream... progress) {
 
     if (m_offline) {
@@ -1139,6 +1263,12 @@ public class WekaPackageManager {
     return problem;
   }
 
+  /**
+   * Refresh the local copy of the package meta data
+   * 
+   * @param progress to report progress to
+   * @return any Exception raised or null if all is successful
+   */
   public static Exception refreshCache(PrintStream... progress) {
     Exception problem = null;
     if (CACHE_URL == null) {
@@ -1193,6 +1323,13 @@ public class WekaPackageManager {
     return problem;
   }
 
+  /**
+   * Check if a named resource exists in an installed package
+   * 
+   * @param packageName the name of the package in question
+   * @param resourceName the name of the resource to check for
+   * @return true if the resource exists in the package
+   */
   public static boolean installedPackageResourceExists(String packageName,
     String resourceName) {
 
@@ -1202,6 +1339,10 @@ public class WekaPackageManager {
     return new File(fullResourcePath).exists();
   }
 
+  /**
+   * Determines whether to use the local cache or online repository for meta
+   * data
+   */
   private static void useCacheOrOnlineRepository() {
     if (REP_MIRROR == null) {
       establishMirror();
@@ -1255,6 +1396,14 @@ public class WekaPackageManager {
     return result;
   }
 
+  /**
+   * Install the supplied list of packages
+   * 
+   * @param toInstall packages to install
+   * @param progress to report progress to
+   * @return true if successful
+   * @throws Exception if a problem occurs
+   */
   public static boolean installPackages(List<Package> toInstall,
     PrintStream... progress) throws Exception {
 
@@ -1296,62 +1445,139 @@ public class WekaPackageManager {
     return atLeastOneUpgrade;
   }
 
+  /**
+   * Get the versions of the supplied package available on the server
+   * 
+   * @param packageName the package name to get available versions for
+   * @return a list of available versions
+   * @throws Exception if a problem occurs
+   */
   public static List<Object> getRepositoryPackageVersions(String packageName)
     throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getRepositoryPackageVersions(packageName);
   }
 
+  /**
+   * Get the package repository URL
+   * 
+   * @return the package repository URL
+   */
   public static URL getPackageRepositoryURL() {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getPackageRepositoryURL();
   }
 
+  /**
+   * Get a list of all packages
+   * 
+   * @return a list of all packages
+   * @throws Exception if a problem occurs
+   */
   public static List<Package> getAllPackages() throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getAllPackages();
   }
 
+  /**
+   * Get a list of all available packages (i.e. those not yet installed(.
+   * 
+   * @return a list of all available packages
+   * @throws Exception if a problem occurs
+   */
   public static List<Package> getAvailablePackages() throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getAvailablePackages();
   }
 
+  /**
+   * Get a list of installed packages
+   * 
+   * @return a list of installed packages
+   * @throws Exception if a problem occurs
+   */
   public static List<Package> getInstalledPackages() throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getInstalledPackages();
   }
 
+  /**
+   * Get a list of dependencies for a given package
+   * 
+   * @param target the package to get the dependencies for
+   * @param conflicts will hold any conflicts
+   * @return a list of dependencies for the target package
+   * @throws Exception if a problem occurs
+   */
   public static List<Dependency> getAllDependenciesForPackage(Package target,
     Map<String, List<Dependency>> conflicts) throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getAllDependenciesForPackage(target, conflicts);
   }
 
+  /**
+   * Extract meta data from a package archive
+   * 
+   * @param packageArchivePath the path to the package archive
+   * @return the meta data for the package
+   * @throws Exception if a problem occurs
+   */
   public static Package getPackageArchiveInfo(String packageArchivePath)
     throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getPackageArchiveInfo(packageArchivePath);
   }
 
+  /**
+   * Get meta data for an installed package
+   * 
+   * @param packageName the name of the package
+   * @return the meta data for the package
+   * @throws Exception if a problem occurs
+   */
   public static Package getInstalledPackageInfo(String packageName)
     throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getInstalledPackageInfo(packageName);
   }
 
+  /**
+   * Get meta data for the latest version of a package from the repository
+   * 
+   * @param packageName the name of the package
+   * @return the meta data for the package
+   * @throws Exception if a problem occurs
+   */
   public static Package getRepositoryPackageInfo(String packageName)
     throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getRepositoryPackageInfo(packageName);
   }
 
+  /**
+   * Get meta data for a specific version of a package from the repository
+   * 
+   * @param packageName the name of the package
+   * @param version the version to get meta data for
+   * @return the meta data for the package
+   * @throws Exception if a problem occurs
+   */
   public static Package getRepositoryPackageInfo(String packageName,
     String version) throws Exception {
     useCacheOrOnlineRepository();
     return PACKAGE_MANAGER.getRepositoryPackageInfo(packageName, version);
   }
 
+  /**
+   * Install a named package by retrieving the location of the archive from the
+   * meta data stored in the repository
+   * 
+   * @param packageName the name of the package to install
+   * @param version the version of the package to install
+   * @param progress for reporting progress
+   * @return true if the package was installed successfully
+   * @throws Exception if a problem occurs
+   */
   public static boolean installPackageFromRepository(String packageName,
     String version, PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();
@@ -1399,6 +1625,14 @@ public class WekaPackageManager {
     return isAnUpgrade;
   }
 
+  /**
+   * Install a package from an archive
+   * 
+   * @param packageArchivePath the path to the package archive file to install
+   * @param progress for reporting progress
+   * @return true if the package was installed successfully
+   * @throws Exception if a problem occurs
+   */
   public static String installPackageFromArchive(String packageArchivePath,
     PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();
@@ -1437,6 +1671,14 @@ public class WekaPackageManager {
     return toInstall.getName();
   }
 
+  /**
+   * Insstall a package from the supplied URL
+   * 
+   * @param packageURL the URL to the package archive to install
+   * @param progress for reporting progress
+   * @return true if the package was installed successfully
+   * @throws Exception if a problem occurs
+   */
   public static String installPackageFromURL(URL packageURL,
     PrintStream... progress) throws Exception {
     useCacheOrOnlineRepository();
@@ -1469,6 +1711,15 @@ public class WekaPackageManager {
     return packageName;
   }
 
+  /**
+   * Uninstall a named package
+   * 
+   * @param packageName the name of the package to remove
+   * @param updateKnowledgeFlow true if any Knowledge Flow beans provided by the
+   *          package should be deregistered from the KnoweledgeFlow
+   * @param progress for reporting progress
+   * @throws Exception if a problem occurs
+   */
   public static void uninstallPackage(String packageName,
     boolean updateKnowledgeFlow, PrintStream... progress) throws Exception {
 
@@ -1508,6 +1759,12 @@ public class WekaPackageManager {
     }
   }
 
+  /**
+   * Print meta data on a package
+   * 
+   * @param packagePath the path to the package to print meta data for
+   * @throws Exception if a problem occurs
+   */
   protected static void printPackageArchiveInfo(String packagePath)
     throws Exception {
     Map<?, ?> packageProps = getPackageArchiveInfo(packagePath)
@@ -1515,6 +1772,12 @@ public class WekaPackageManager {
     printPackageInfo(packageProps);
   }
 
+  /**
+   * Print meta data for an installed package
+   * 
+   * @param packageName the name of the package to print meta data for
+   * @throws Exception if a problem occurs
+   */
   protected static void printInstalledPackageInfo(String packageName)
     throws Exception {
     Map<?, ?> packageProps = getInstalledPackageInfo(packageName)
@@ -1522,6 +1785,13 @@ public class WekaPackageManager {
     printPackageInfo(packageProps);
   }
 
+  /**
+   * Print meta data for a package listed in the repository
+   * 
+   * @param packageName the name of the package to print meta data for
+   * @param version the version of the package
+   * @throws Exception if a problem occurs
+   */
   protected static void printRepositoryPackageInfo(String packageName,
     String version) throws Exception {
     Map<?, ?> packageProps = getRepositoryPackageInfo(packageName, version)
@@ -1880,6 +2150,11 @@ public class WekaPackageManager {
         + "\t-uninstall-package packageName\n" + "\t-refresh-cache");
   }
 
+  /**
+   * Main method for using the package manager from the command line
+   * 
+   * @param args command line arguments
+   */
   public static void main(String[] args) {
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
       "Logging started");
