@@ -6,10 +6,10 @@
 PackageName=alternatingDecisionTrees
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2013-07-02
+Date=2013-11-28
 
 # Title (required)
 Title=Binary-class alternating decision trees and multi-class alternating decision trees.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Binary-class and multi-class alternating decision trees. For more information see: <br/><br/>Freund, Y., Mason, L.: The alternating decision tree learning algorithm. In: Proceeding of the Sixteenth International Conference on Machine Learning, Bled, Slovenia, 124-133, 1999.<br/><br/>Geoffrey Holmes, Bernhard Pfahringer, Richard Kirkby, Eibe Frank, Mark Hall: Multiclass alternating decision trees. In: ECML, 161-172, 2001.
 
-Changes=This release makes ADTree implement RandomizableClassifier, which means ensembles can be build using RandomCommittee when random path expansions is turned on. Additionally, the seed for random number generation now depends on the input data.
+Changes=This release includes a minor bug fix for the graph() routines in both ADTree and LADTree
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/alternatingDecisionTrees1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/alternatingDecisionTrees1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/alternatingDecisionTrees

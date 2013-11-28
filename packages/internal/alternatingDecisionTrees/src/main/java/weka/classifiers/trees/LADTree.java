@@ -1115,13 +1115,13 @@ public class LADTree
       text.append("S" + splitOrder + "P" + predOrder + "->" + "S" + split.orderAdded +
 		  " [style=dotted]\n");
       text.append("S" + split.orderAdded + " [label=\"" + split.orderAdded + ": " +
-		  split.attributeString() + "\"]\n");
+		  Utils.backQuoteChars(split.attributeString()) + "\"]\n");
 
       for (int i=0; i<split.getNumOfBranches(); i++) {
 	PredictionNode child = split.getChildForBranch(i);
 	if (child != null) {
 	  text.append("S" + split.orderAdded + "->" + "S" + split.orderAdded + "P" + i +
-		      " [label=\"" + split.comparisonString(i) + "\"]\n");
+		      " [label=\"" + Utils.backQuoteChars(split.comparisonString(i)) + "\"]\n");
 	  graphTraverse(child, text, split.orderAdded, i);
 	}
       }

@@ -924,13 +924,13 @@ public class ADTree
       text.append("S" + splitOrder + "P" + predOrder + "->" + "S" + split.orderAdded +
 		  " [style=dotted]\n");
       text.append("S" + split.orderAdded + " [label=\"" + split.orderAdded + ": " +
-		  split.attributeString(m_trainInstances) + "\"]\n");
+		  Utils.backQuoteChars(split.attributeString(m_trainInstances)) + "\"]\n");
 
       for (int i=0; i<split.getNumOfBranches(); i++) {
 	PredictionNode child = split.getChildForBranch(i);
 	if (child != null) {
 	  text.append("S" + split.orderAdded + "->" + "S" + split.orderAdded + "P" + i +
-		      " [label=\"" + split.comparisonString(i, m_trainInstances) + "\"]\n");
+		      " [label=\"" + Utils.backQuoteChars(split.comparisonString(i, m_trainInstances)) + "\"]\n");
 	  graphTraverse(child, text, split.orderAdded, i,
 			split.instancesDownBranch(i, instances));
 	}
