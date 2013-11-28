@@ -42,6 +42,7 @@ import java.util.Vector;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.logging.Logger;
 
 /**
  * DatabaseUtils provides utility functions for accessing the experiment
@@ -237,7 +238,11 @@ public class DatabaseUtils implements Serializable, RevisionHandler {
         } catch (Exception e) {
           result = false;
         }
-        if (m_Debug || (!result && !DRIVERS_ERRORS.contains(driver))) {
+        if (!result && !DRIVERS_ERRORS.contains(driver)) {
+          Logger.log(Logger.Level.WARNING,
+            "Trying to add database driver (JDBC): " + driver + " - "
+              + "Warning, not in CLASSPATH?");
+        } else if (m_Debug) {
           System.err.println("Trying to add database driver (JDBC): " + driver
             + " - " + (result ? "Success!" : "Warning, not in CLASSPATH?"));
         }
