@@ -33,6 +33,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 
@@ -874,8 +875,8 @@ public class LMTNode extends LogisticBase {
         + getModelParameters() + "\" " + "shape=box style=filled");
       text.append("]\n");
     } else {
-      text.append("N" + m_id + " [label=\"" + m_localModel.leftSide(m_train)
-        + "\" ");
+      text.append("N" + m_id + " [label=\""
+        + Utils.quote(m_localModel.leftSide(m_train)) + "\" ");
       text.append("]\n");
       graphTree(text);
     }
@@ -892,7 +893,7 @@ public class LMTNode extends LogisticBase {
 
     for (int i = 0; i < m_sons.length; i++) {
       text.append("N" + m_id + "->" + "N" + m_sons[i].m_id + " [label=\""
-        + m_localModel.rightSide(i, m_train).trim() + "\"]\n");
+        + Utils.quote(m_localModel.rightSide(i, m_train).trim()) + "\"]\n");
       if (m_sons[i].m_isLeaf) {
         text.append("N" + m_sons[i].m_id + " [label=\"LM_"
           + m_sons[i].m_leafModelNum + ":" + m_sons[i].getModelParameters()
@@ -900,7 +901,7 @@ public class LMTNode extends LogisticBase {
         text.append("]\n");
       } else {
         text.append("N" + m_sons[i].m_id + " [label=\""
-          + m_sons[i].m_localModel.leftSide(m_train) + "\" ");
+          + Utils.quote(m_sons[i].m_localModel.leftSide(m_train)) + "\" ");
         text.append("]\n");
         m_sons[i].graphTree(text);
       }
