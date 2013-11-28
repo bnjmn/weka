@@ -371,12 +371,13 @@ public class REPTree extends AbstractClassifier implements OptionHandler,
       num++;
       if (m_Attribute == -1) {
         text.append("N" + Integer.toHexString(Tree.this.hashCode())
-          + " [label=\"" + num + Utils.quote(leafString(parent)) + "\""
-          + "shape=box]\n");
+          + " [label=\"" + num + Utils.backQuoteChars(leafString(parent))
+          + "\"" + "shape=box]\n");
       } else {
         text.append("N" + Integer.toHexString(Tree.this.hashCode())
           + " [label=\"" + num + ": "
-          + Utils.quote(m_Info.attribute(m_Attribute).name()) + "\"]\n");
+          + Utils.backQuoteChars(m_Info.attribute(m_Attribute).name())
+          + "\"]\n");
         for (int i = 0; i < m_Successors.length; i++) {
           text.append("N" + Integer.toHexString(Tree.this.hashCode()) + "->"
             + "N" + Integer.toHexString(m_Successors[i].hashCode())
@@ -389,7 +390,7 @@ public class REPTree extends AbstractClassifier implements OptionHandler,
             }
           } else {
             text.append(" = "
-              + Utils.quote(m_Info.attribute(m_Attribute).value(i)));
+              + Utils.backQuoteChars(m_Info.attribute(m_Attribute).value(i)));
           }
           text.append("\"]\n");
           num = m_Successors[i].toGraph(text, num, this);
