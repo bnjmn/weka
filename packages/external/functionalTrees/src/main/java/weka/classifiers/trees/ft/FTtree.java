@@ -641,7 +641,7 @@ public abstract class FTtree
       }else {
         text.append("N" + m_id 
                     + " [label=\"" + 
-                    m_localModel.leftSide(m_train) + "\" ");
+                    Utils.backQuoteChars(m_localModel.leftSide(m_train)) + "\" ");
         text.append("]\n");
         graphTree(text);
       }
@@ -660,7 +660,7 @@ public abstract class FTtree
       text.append("N" + m_id  
                   + "->" + 
                   "N" + m_sons[i].m_id +
-                  " [label=\"" + m_localModel.rightSide(i,m_train).trim() + 
+                  " [label=\"" + Utils.backQuoteChars(m_localModel.rightSide(i,m_train).trim()) + 
                   "\"]\n");
       if (m_sons[i].m_isLeaf && m_sons[i].m_hasConstr) {
         text.append("N" +m_sons[i].m_id + " [label=\"FT_"+m_sons[i].m_leafModelNum+":"+
@@ -672,7 +672,7 @@ public abstract class FTtree
           text.append("]\n");
         }else{
           text.append("N" + m_sons[i].m_id +
-                      " [label=\""+m_sons[i].m_localModel.leftSide(m_train) + 
+                      " [label=\""+ Utils.backQuoteChars(m_sons[i].m_localModel.leftSide(m_train)) + 
                       "\" ");
           text.append("]\n");
           m_sons[i].graphTree(text);
