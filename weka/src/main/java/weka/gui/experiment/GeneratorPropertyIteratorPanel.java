@@ -41,6 +41,7 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -118,7 +119,8 @@ public class GeneratorPropertyIteratorPanel extends JPanel implements
     setLayout(new BorderLayout());
     add(buttons, BorderLayout.NORTH);
     // add(Box.createHorizontalGlue());
-    m_ArrayEditor.setBorder(BorderFactory.createEtchedBorder());
+    ((JComponent) m_ArrayEditor.getCustomEditor()).setBorder(BorderFactory
+      .createEtchedBorder());
     m_ArrayEditor.addPropertyChangeListener(new PropertyChangeListener() {
       @Override
       public void propertyChange(PropertyChangeEvent e) {
@@ -126,7 +128,7 @@ public class GeneratorPropertyIteratorPanel extends JPanel implements
         m_Exp.setPropertyArray(m_ArrayEditor.getValue());
       }
     });
-    add(m_ArrayEditor, BorderLayout.CENTER);
+    add(m_ArrayEditor.getCustomEditor(), BorderLayout.CENTER);
   }
 
   /**
@@ -198,7 +200,7 @@ public class GeneratorPropertyIteratorPanel extends JPanel implements
       Array.set(m_Exp.getPropertyArray(), 0, value);
       // Pass it to the arrayeditor
       m_ArrayEditor.setValue(m_Exp.getPropertyArray());
-      m_ArrayEditor.repaint();
+      m_ArrayEditor.getCustomEditor().repaint();
       System.err.println("Set new array to array editor");
     } else {
       System.err.println("Cancelled");
@@ -228,7 +230,7 @@ public class GeneratorPropertyIteratorPanel extends JPanel implements
       if (m_StatusBox.getSelectedIndex() == 0) {
         m_Exp.setUsePropertyIterator(false);
         m_ConfigureBut.setEnabled(false);
-        m_ArrayEditor.setEnabled(false);
+        m_ArrayEditor.getCustomEditor().setEnabled(false);
         m_ArrayEditor.setValue(null);
         validate();
       } else {
@@ -240,7 +242,7 @@ public class GeneratorPropertyIteratorPanel extends JPanel implements
         } else {
           m_Exp.setUsePropertyIterator(true);
           m_ConfigureBut.setEnabled(true);
-          m_ArrayEditor.setEnabled(true);
+          m_ArrayEditor.getCustomEditor().setEnabled(true);
         }
         validate();
       }
