@@ -876,7 +876,7 @@ public class LMTNode extends LogisticBase {
       text.append("]\n");
     } else {
       text.append("N" + m_id + " [label=\""
-        + Utils.quote(m_localModel.leftSide(m_train)) + "\" ");
+        + Utils.backQuoteChars(m_localModel.leftSide(m_train)) + "\" ");
       text.append("]\n");
       graphTree(text);
     }
@@ -893,7 +893,8 @@ public class LMTNode extends LogisticBase {
 
     for (int i = 0; i < m_sons.length; i++) {
       text.append("N" + m_id + "->" + "N" + m_sons[i].m_id + " [label=\""
-        + Utils.quote(m_localModel.rightSide(i, m_train).trim()) + "\"]\n");
+        + Utils.backQuoteChars(m_localModel.rightSide(i, m_train).trim())
+        + "\"]\n");
       if (m_sons[i].m_isLeaf) {
         text.append("N" + m_sons[i].m_id + " [label=\"LM_"
           + m_sons[i].m_leafModelNum + ":" + m_sons[i].getModelParameters()
@@ -901,7 +902,8 @@ public class LMTNode extends LogisticBase {
         text.append("]\n");
       } else {
         text.append("N" + m_sons[i].m_id + " [label=\""
-          + Utils.quote(m_sons[i].m_localModel.leftSide(m_train)) + "\" ");
+          + Utils.backQuoteChars(m_sons[i].m_localModel.leftSide(m_train))
+          + "\" ");
         text.append("]\n");
         m_sons[i].graphTree(text);
       }
