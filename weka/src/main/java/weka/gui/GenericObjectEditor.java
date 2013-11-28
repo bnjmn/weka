@@ -81,6 +81,7 @@ import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.WekaPackageManager;
+import weka.core.logging.Logger;
 import weka.gui.CheckBoxList.CheckBoxListModel;
 import weka.gui.beans.PluginManager;
 
@@ -926,8 +927,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
       } catch (Exception ex) {
         setCancelButton(false);
-        System.err.println("GenericObjectEditor: Problem making backup object");
-        System.err.println(ex);
+        Logger.log(weka.core.logging.Logger.Level.WARNING,
+          "GenericObjectEditor: Problem making backup object");
+        Logger.log(weka.core.logging.Logger.Level.WARNING, ex);
       }
       return result;
     }
@@ -1035,7 +1037,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       return;
     }
 
-    System.err.println("---Registering Weka Editors---");
+    Logger.log(weka.core.logging.Logger.Level.INFO,
+      "---Registering Weka Editors---");
     m_EditorsRegistered = true;
 
     // load properties
@@ -1070,8 +1073,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       // register
       PropertyEditorManager.registerEditor(cls, Class.forName(value));
     } catch (Exception e) {
-      System.err
-        .println("Problem registering " + name + "/" + value + ": " + e);
+      Logger.log(weka.core.logging.Logger.Level.WARNING, "Problem registering "
+        + name + "/" + value + ": " + e);
     }
   }
 
@@ -1231,7 +1234,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
           hpps.put(root, hpp);
         }
       } catch (Exception ex) {
-        System.err.println("Invalid property: " + typeOptions);
+        Logger.log(weka.core.logging.Logger.Level.WARNING, "Invalid property: "
+          + typeOptions);
       }
     }
     return hpps;
@@ -1291,7 +1295,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public void setDefaultValue() {
 
     if (m_ClassType == null) {
-      System.err.println("No ClassType set up for GenericObjectEditor!!");
+      Logger.log(weka.core.logging.Logger.Level.WARNING,
+        "No ClassType set up for GenericObjectEditor!!");
       return;
     }
 
@@ -1313,7 +1318,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         }
       }
     } catch (Exception ex) {
-      System.err.println("Problem loading the first class: " + hpp.fullValue());
+      Logger.log(weka.core.logging.Logger.Level.WARNING,
+        "Problem loading the first class: " + hpp.fullValue());
       ex.printStackTrace();
     }
   }
@@ -1328,11 +1334,13 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public void setValue(Object o) {
 
     if (m_ClassType == null) {
-      System.err.println("No ClassType set up for GenericObjectEditor!!");
+      Logger.log(weka.core.logging.Logger.Level.WARNING,
+        "No ClassType set up for GenericObjectEditor!!");
       return;
     }
     if (!m_ClassType.isAssignableFrom(o.getClass())) {
-      System.err.println("setValue object not of correct type!");
+      Logger.log(weka.core.logging.Logger.Level.WARNING,
+        "setValue object not of correct type!");
       return;
     }
 
@@ -1755,7 +1763,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
           setDefaultValue();
         }
       } catch (Exception e) {
-        System.err.println(ex.getMessage());
+        Logger.log(weka.core.logging.Logger.Level.WARNING, ex.getMessage());
         ex.printStackTrace();
       }
     }
