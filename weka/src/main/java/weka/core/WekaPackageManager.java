@@ -60,6 +60,7 @@ import org.pentaho.packageManagement.PackageManager;
 import weka.core.converters.ConverterUtils;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
+import weka.gui.beans.BeansProperties;
 import weka.gui.beans.KnowledgeFlowApp;
 import weka.gui.beans.PluginManager;
 import weka.gui.explorer.ExplorerDefaults;
@@ -597,7 +598,8 @@ public class WekaPackageManager {
    * @throws Exception if a problem occurs
    */
   protected static void loadPackageDirectory(File directory, boolean verbose,
-    List<File> goePropsFiles) throws Exception {
+    List<File> goePropsFiles, boolean avoidTriggeringFullClassDiscovery)
+    throws Exception {
     File[] contents = directory.listFiles();
 
     // make sure that jar files and lib directory get processed first
@@ -610,7 +612,8 @@ public class WekaPackageManager {
       } else if (content.isDirectory()
         && content.getName().equalsIgnoreCase("lib")) {
         // add any jar files in the lib directory to the classpath
-        loadPackageDirectory(content, verbose, goePropsFiles);
+        loadPackageDirectory(content, verbose, goePropsFiles,
+          avoidTriggeringFullClassDiscovery);
       }
     }
 
@@ -620,9 +623,11 @@ public class WekaPackageManager {
         // KnowledgeFlow plugin -- add the Beans.props file to the list of
         // bean plugin props
 
-        KnowledgeFlowApp.addToPluginBeanProps(content);
-        KnowledgeFlowApp.disposeSingleton();
+        BeansProperties.addToPluginBeanProps(content);
 
+        if (!avoidTriggeringFullClassDiscovery) {
+          KnowledgeFlowApp.disposeSingleton();
+        }
       } else if (content.isFile()
         && content.getPath().endsWith("Explorer.props")) {
         // Explorer tabs plugin
@@ -909,19 +914,22 @@ public class WekaPackageManager {
    * @param verbose true if loading progress should be output
    */
   public static synchronized void loadPackages(boolean verbose) {
-    loadPackages(verbose, true);
+    loadPackages(verbose, true, true);
   }
 
   /**
    * Load all packages
    * 
    * @param verbose true if loading progress should be output
+   * @param avoidTriggeringFullClassDiscovery true if we should avoid processing
+   *          any properties files that might cause a full class discovery run,
+   *          and may involve instantiating GUI classes.
    * @param refreshGOEProperties true if the GOE properties should be refreshed
    *          after loading (i.e. a re-run of the class discovery mechanism,
    *          re-initialization of the Knowledge Flow etc.)
    */
   public static synchronized void loadPackages(boolean verbose,
-    boolean refreshGOEProperties) {
+    boolean avoidTriggeringFullClassDiscovery, boolean refreshGOEProperties) {
 
     List<File> goePropsFiles = new ArrayList<File>();
     if (!m_loadPackages) {
@@ -961,7 +969,8 @@ public class WekaPackageManager {
                   System.out.println("[Weka] loading package "
                     + content.getName());
                 }
-                loadPackageDirectory(content, verbose, goePropsFiles);
+                loadPackageDirectory(content, verbose, goePropsFiles,
+                  avoidTriggeringFullClassDiscovery);
               }
             }
           } catch (Exception ex) {
@@ -980,8 +989,10 @@ public class WekaPackageManager {
     // all implementations of base types, and this can cause problems
     // if processed at the time of package loading and there are
     // dependencies between packages
-    for (File f : goePropsFiles) {
-      processGenericPropertiesCreatorProps(f);
+    if (!avoidTriggeringFullClassDiscovery) {
+      for (File f : goePropsFiles) {
+        processGenericPropertiesCreatorProps(f);
+      }
     }
 
     // do we need to regenerate the list of available schemes for
@@ -1434,7 +1445,7 @@ public class WekaPackageManager {
       boolean loadIt = loadCheck(p, packageDir, progress);
 
       if (loadIt & !isAnUpgrade) {
-        loadPackageDirectory(packageDir, false, gpcFiles);
+        loadPackageDirectory(packageDir, false, gpcFiles, false);
       }
     }
 
@@ -1618,7 +1629,7 @@ public class WekaPackageManager {
         + File.separator + packageName);
       loadIt = checkForMissingFiles(toLoad, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageDir, false, null);
+        loadPackageDirectory(packageDir, false, null, false);
       }
     }
 
@@ -1664,7 +1675,7 @@ public class WekaPackageManager {
         + File.separator + toInstall.getName());
       loadIt = checkForMissingFiles(toInstall, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageRoot, false, null);
+        loadPackageDirectory(packageRoot, false, null, false);
       }
     }
 
@@ -1705,7 +1716,7 @@ public class WekaPackageManager {
         + File.separator + installed.getName());
       loadIt = checkForMissingFiles(installed, packageRoot, progress);
       if (loadIt) {
-        loadPackageDirectory(packageRoot, false, null);
+        loadPackageDirectory(packageRoot, false, null, false);
       }
     }
     return packageName;
