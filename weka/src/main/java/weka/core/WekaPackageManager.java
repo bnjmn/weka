@@ -629,16 +629,19 @@ public class WekaPackageManager {
           KnowledgeFlowApp.disposeSingleton();
         }
       } else if (content.isFile()
-        && content.getPath().endsWith("Explorer.props")) {
+        && content.getPath().endsWith("Explorer.props")
+        && !avoidTriggeringFullClassDiscovery) {
         // Explorer tabs plugin
         // process the keys in the properties file and append/add values
         processExplorerProps(content);
       } else if (content.isFile()
-        && content.getPath().endsWith("GUIEditors.props")) {
+        && content.getPath().endsWith("GUIEditors.props")
+        && !avoidTriggeringFullClassDiscovery) {
         // Editor for a particular component
         processGUIEditorsProps(content);
       } else if (content.isFile()
-        && content.getPath().endsWith("GenericPropertiesCreator.props")) {
+        && content.getPath().endsWith("GenericPropertiesCreator.props")
+        && !avoidTriggeringFullClassDiscovery) {
         if (goePropsFiles != null) {
           goePropsFiles.add(content);
         } else {
