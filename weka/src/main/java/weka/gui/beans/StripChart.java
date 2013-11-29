@@ -367,7 +367,7 @@ public class StripChart extends JPanel implements ChartListener,
 
     // background color
     key = this.getClass().getName() + ".backgroundColour";
-    color = KnowledgeFlowApp.BEAN_PROPERTIES.getProperty(key);
+    color = BeansProperties.BEAN_PROPERTIES.getProperty(key);
     m_BackgroundColor = Color.BLACK;
     if (color != null) {
       m_BackgroundColor = VisualizeUtils
@@ -376,7 +376,7 @@ public class StripChart extends JPanel implements ChartListener,
 
     // legend color (border)
     key = m_legendPanel.getClass().getName() + ".borderColour";
-    color = KnowledgeFlowApp.BEAN_PROPERTIES.getProperty(key);
+    color = BeansProperties.BEAN_PROPERTIES.getProperty(key);
     m_LegendPanelBorderColor = Color.BLUE;
     if (color != null) {
       m_LegendPanelBorderColor = VisualizeUtils.processColour(color,

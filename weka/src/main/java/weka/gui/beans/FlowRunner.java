@@ -85,7 +85,7 @@ public class FlowRunner implements RevisionHandler {
   public FlowRunner(boolean loadProps, boolean registerLog) {
     if (loadProps) {
       // make sure that properties and plugins are loaded
-      KnowledgeFlowApp.loadProperties();
+      BeansProperties.loadProperties();
     }
     m_registerLog = registerLog;
   }

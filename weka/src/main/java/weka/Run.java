@@ -79,7 +79,7 @@ public class Run {
       boolean noScan = false;
       boolean noLoad = false;
       if (args[0].equals("-list-packages")) {
-        weka.core.WekaPackageManager.loadPackages(true, false);
+        weka.core.WekaPackageManager.loadPackages(true, true, false);
         return;
       } else if (args[0].equals("-no-load")) {
         noLoad = true;
@@ -98,7 +98,7 @@ public class Run {
       }
 
       if (!noLoad) {
-        weka.core.WekaPackageManager.loadPackages(false, false);
+        weka.core.WekaPackageManager.loadPackages(false, true, false);
       }
 
       int schemeIndex = 0;
