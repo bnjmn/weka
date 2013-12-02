@@ -21,36 +21,43 @@
 
 package weka.attributeSelection;
 
+import java.util.BitSet;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-/** 
- <!-- globalinfo-start -->
- * RandomSearch : <br/>
+/**
+ * <!-- globalinfo-start --> RandomSearch : <br/>
  * <br/>
- * Performs a Random search in the space of attribute subsets. If no start set is supplied, Random search starts from a random point and reports the best subset found. If a start set is supplied, Random searches randomly for subsets that are as good or better than the start point with the same or or fewer attributes. Using RandomSearch in conjunction with a start set containing all attributes equates to the LVF algorithm of Liu and Setiono (ICML-96).<br/>
+ * Performs a Random search in the space of attribute subsets. If no start set
+ * is supplied, Random search starts from a random point and reports the best
+ * subset found. If a start set is supplied, Random searches randomly for
+ * subsets that are as good or better than the start point with the same or or
+ * fewer attributes. Using RandomSearch in conjunction with a start set
+ * containing all attributes equates to the LVF algorithm of Liu and Setiono
+ * (ICML-96).<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * H. Liu, R. Setiono: A probabilistic approach to feature selection - A filter solution. In: 13th International Conference on Machine Learning, 319-327, 1996.
+ * H. Liu, R. Setiono: A probabilistic approach to feature selection - A filter
+ * solution. In: 13th International Conference on Machine Learning, 319-327,
+ * 1996.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;inproceedings{Liu1996,
  *    author = {H. Liu and R. Setiono},
@@ -61,12 +68,13 @@ import java.util.Vector;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -P &lt;start set&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -P &lt;start set&gt;
  *  Specify a starting set of attributes.
  *  Eg. 1,3,5-7.
  *  If a start point is supplied,
@@ -74,37 +82,43 @@ import java.util.Vector;
  *  point and then randomly looks for
  *  subsets that are as good as or better
  *  than the start point with the same
- *  or lower cardinality.</pre>
+ *  or lower cardinality.
+ * </pre>
  * 
- * <pre> -F &lt;percent&gt; 
+ * <pre>
+ * -F &lt;percent&gt; 
  *  Percent of search space to consider.
- *  (default = 25%).</pre>
+ *  (default = 25%).
+ * </pre>
  * 
- * <pre> -V
+ * <pre>
+ * -V
  *  Output subsets as the search progresses.
- *  (default = false).</pre>
- *
- * <pre> -seed &lt;num&gt;
- *  Random seed
- *  (default = 1)</pre>
+ *  (default = false).
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <pre>
+ * -seed &lt;num&gt;
+ *  Random seed
+ *  (default = 1)
+ * </pre>
+ * 
+ * <!-- options-end -->
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class RandomSearch 
-  extends ASSearch 
-  implements StartSetHandler, OptionHandler, TechnicalInformationHandler {
+public class RandomSearch extends ASSearch implements StartSetHandler,
+  OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 7479392617377425484L;
-  
-  /** 
+
+  /**
    * holds a starting set as an array of attributes.
    */
   private int[] m_starting;
-  
+
   /** holds the start set as a range */
   private Range m_startRange;
 
@@ -114,19 +128,19 @@ public class RandomSearch
   /** the merit of the best subset found */
   private double m_bestMerit;
 
-  /** 
-   * only accept a feature set as being "better" than the best if its
-   * merit is better or equal to the best, and it contains as many or fewer
-   * features than the best (this allows LVF to be implemented).
+  /**
+   * only accept a feature set as being "better" than the best if its merit is
+   * better or equal to the best, and it contains as many or fewer features than
+   * the best (this allows LVF to be implemented).
    */
   private boolean m_onlyConsiderBetterAndSmaller;
 
- /** does the data have a class */
+  /** does the data have a class */
   private boolean m_hasClass;
- 
+
   /** holds the class index */
   private int m_classIndex;
- 
+
   /** number of attributes in the data */
   private int m_numAttribs;
 
@@ -147,88 +161,89 @@ public class RandomSearch
 
   /**
    * Returns a string describing this search method
-   * @return a description of the search suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the search suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
     return "RandomSearch : \n\nPerforms a Random search in "
-      +"the space of attribute subsets. If no start set is supplied, Random "
-      +"search starts from a random point and reports the best subset found. "
-      +"If a start set is supplied, Random searches randomly for subsets "
-      +"that are as good or better than the start point with the same or "
-      +"or fewer attributes. Using RandomSearch in conjunction with a start "
-      +"set containing all attributes equates to the LVF algorithm of Liu "
-      +"and Setiono (ICML-96).\n\n"
-      + "For more information see:\n\n"
+      + "the space of attribute subsets. If no start set is supplied, Random "
+      + "search starts from a random point and reports the best subset found. "
+      + "If a start set is supplied, Random searches randomly for subsets "
+      + "that are as good or better than the start point with the same or "
+      + "or fewer attributes. Using RandomSearch in conjunction with a start "
+      + "set containing all attributes equates to the LVF algorithm of Liu "
+      + "and Setiono (ICML-96).\n\n" + "For more information see:\n\n"
       + getTechnicalInformation().toString();
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
+    TechnicalInformation result;
+
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "H. Liu and R. Setiono");
-    result.setValue(Field.TITLE, "A probabilistic approach to feature selection - A filter solution");
-    result.setValue(Field.BOOKTITLE, "13th International Conference on Machine Learning");
+    result.setValue(Field.TITLE,
+      "A probabilistic approach to feature selection - A filter solution");
+    result.setValue(Field.BOOKTITLE,
+      "13th International Conference on Machine Learning");
     result.setValue(Field.YEAR, "1996");
     result.setValue(Field.PAGES, "319-327");
-    
+
     return result;
   }
 
   /**
    * Constructor
    */
-  public RandomSearch () {
+  public RandomSearch() {
     resetOptions();
   }
 
   /**
    * Returns an enumeration describing the available options.
+   * 
    * @return an enumeration of all the available options.
    **/
-  public Enumeration listOptions () {
-    Vector newVector = new Vector(3);
-    
-    newVector.addElement(new Option("\tSpecify a starting set of attributes." 
-				    + "\n\tEg. 1,3,5-7."
-				    +"\n\tIf a start point is supplied,"
-				    +"\n\trandom search evaluates the start"
-				    +"\n\tpoint and then randomly looks for"
-				    +"\n\tsubsets that are as good as or better"
-				    +"\n\tthan the start point with the same"
-				    +"\n\tor lower cardinality."
-				    ,"P",1
-				    , "-P <start set>"));
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(4);
+
+    newVector.addElement(new Option("\tSpecify a starting set of attributes."
+      + "\n\tEg. 1,3,5-7." + "\n\tIf a start point is supplied,"
+      + "\n\trandom search evaluates the start"
+      + "\n\tpoint and then randomly looks for"
+      + "\n\tsubsets that are as good as or better"
+      + "\n\tthan the start point with the same" + "\n\tor lower cardinality.",
+      "P", 1, "-P <start set>"));
 
     newVector.addElement(new Option("\tPercent of search space to consider."
-				    +"\n\t(default = 25%)."
-				    , "F", 1
-				    , "-F <percent> "));
-    newVector.addElement(new Option("\tOutput subsets as the search progresses."
-				    +"\n\t(default = false)."
-				    , "V", 0
-				    , "-V"));
+      + "\n\t(default = 25%).", "F", 1, "-F <percent> "));
+    newVector.addElement(new Option(
+      "\tOutput subsets as the search progresses." + "\n\t(default = false).",
+      "V", 0, "-V"));
 
-    newVector.addElement(new Option("\tRandom seed\n\t(default = 1)", 
-                                    "seed", 1, "-seed <num>"));
-    return  newVector.elements();
+    newVector.addElement(new Option("\tRandom seed\n\t(default = 1)", "seed",
+      1, "-seed <num>"));
+    return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -P &lt;start set&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -P &lt;start set&gt;
    *  Specify a starting set of attributes.
    *  Eg. 1,3,5-7.
    *  If a start point is supplied,
@@ -236,33 +251,38 @@ public class RandomSearch
    *  point and then randomly looks for
    *  subsets that are as good as or better
    *  than the start point with the same
-   *  or lower cardinality.</pre>
+   *  or lower cardinality.
+   * </pre>
    * 
-   * <pre> -F &lt;percent&gt; 
+   * <pre>
+   * -F &lt;percent&gt; 
    *  Percent of search space to consider.
-   *  (default = 25%).</pre>
+   *  (default = 25%).
+   * </pre>
    * 
-   * <pre> -V
+   * <pre>
+   * -V
    *  Output subsets as the search progresses.
-   *  (default = false).</pre>
+   *  (default = false).
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
-   *
+   * 
    **/
-  public void setOptions (String[] options)
-    throws Exception {
+  @Override
+  public void setOptions(String[] options) throws Exception {
     String optionString;
     resetOptions();
-    
+
     optionString = Utils.getOption('P', options);
     if (optionString.length() != 0) {
       setStartSet(optionString);
     }
 
-    optionString = Utils.getOption('F',options);
+    optionString = Utils.getOption('F', options);
     if (optionString.length() != 0) {
       setSearchPercent((new Double(optionString)).doubleValue());
     }
@@ -272,87 +292,93 @@ public class RandomSearch
       setSeed(Integer.parseInt(optionString));
     }
 
-    setVerbose(Utils.getFlag('V',options));
+    setVerbose(Utils.getFlag('V', options));
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of RandomSearch.
+   * 
    * @return an array of strings suitable for passing to setOptions()
    */
-  public String[] getOptions () {
-    String[] options = new String[7];
-    int current = 0;
+  @Override
+  public String[] getOptions() {
+
+    Vector<String> options = new Vector<String>();
 
     if (m_verbose) {
-      options[current++] = "-V";
+      options.add("-V");
     }
 
     if (!(getStartSet().equals(""))) {
-      options[current++] = "-P";
-      options[current++] = "" + startSetToString();
+      options.add("-P");
+      options.add("" + startSetToString());
     }
 
-    options[current++] = "-F";
-    options[current++] = "" + getSearchPercent();
+    options.add("-F");
+    options.add("" + getSearchPercent());
 
-    options[current++] = "-seed";
-    options[current++] = "" + getSeed();
+    options.add("-seed");
+    options.add("" + getSeed());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-
-    return  options;
+    return options.toArray(new String[0]);
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String startSetTipText() {
     return "Set the start point for the search. This is specified as a comma "
-      +"seperated list off attribute indexes starting at 1. It can include "
-      +"ranges. Eg. 1,2,5-9,17. If specified, Random searches for subsets "
-      +"of attributes that are as good as or better than the start set with "
-      +"the same or lower cardinality.";
+      + "seperated list off attribute indexes starting at 1. It can include "
+      + "ranges. Eg. 1,2,5-9,17. If specified, Random searches for subsets "
+      + "of attributes that are as good as or better than the start set with "
+      + "the same or lower cardinality.";
   }
 
   /**
-   * Sets a starting set of attributes for the search. It is the
-   * search method's responsibility to report this start set (if any)
-   * in its toString() method.
+   * Sets a starting set of attributes for the search. It is the search method's
+   * responsibility to report this start set (if any) in its toString() method.
+   * 
    * @param startSet a string containing a list of attributes (and or ranges),
-   * eg. 1,2,6,10-15. "" indicates no start point.
-   * If a start point is supplied, random search evaluates the
-   * start point and then looks for subsets that are as good as or better 
-   * than the start point with the same or lower cardinality.
+   *          eg. 1,2,6,10-15. "" indicates no start point. If a start point is
+   *          supplied, random search evaluates the start point and then looks
+   *          for subsets that are as good as or better than the start point
+   *          with the same or lower cardinality.
    * @throws Exception if start set can't be set.
    */
-  public void setStartSet (String startSet) throws Exception {
+  @Override
+  public void setStartSet(String startSet) throws Exception {
     m_startRange.setRanges(startSet);
   }
 
   /**
    * Returns a list of attributes (and or attribute ranges) as a String
+   * 
    * @return a list of attributes (and or attribute ranges)
    */
-  public String getStartSet () {
+  @Override
+  public String getStartSet() {
     return m_startRange.getRanges();
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String verboseTipText() {
     return "Print progress information. Sends progress info to the terminal "
-      +"as the search progresses.";
+      + "as the search progresses.";
   }
 
   /**
    * set whether or not to output new best subsets as the search proceeds
+   * 
    * @param v true if output is to be verbose
    */
   public void setVerbose(boolean v) {
@@ -361,6 +387,7 @@ public class RandomSearch
 
   /**
    * get whether or not output is verbose
+   * 
    * @return true if output is set to verbose
    */
   public boolean getVerbose() {
@@ -369,8 +396,9 @@ public class RandomSearch
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String searchPercentTipText() {
     return "Percentage of the search space to explore.";
@@ -378,6 +406,7 @@ public class RandomSearch
 
   /**
    * set the percentage of the search space to consider
+   * 
    * @param p percent of the search space ( 0 < p <= 100)
    */
   public void setSearchPercent(double p) {
@@ -390,11 +419,12 @@ public class RandomSearch
       p = 100;
     }
 
-    m_searchSize = (p/100.0);
+    m_searchSize = (p / 100.0);
   }
 
   /**
    * get the percentage of the search space to consider
+   * 
    * @return the percent of the search space explored
    */
   public double getSearchPercent() {
@@ -403,54 +433,53 @@ public class RandomSearch
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String seedTipText() {
     return "Seed for the random number generator";
   }
-  
+
   public void setSeed(int seed) {
     m_seed = seed;
   }
-  
+
   public int getSeed() {
     return m_seed;
   }
 
   /**
-   * converts the array of starting attributes to a string. This is
-   * used by getOptions to return the actual attributes specified
-   * as the starting set. This is better than using m_startRanges.getRanges()
-   * as the same start set can be specified in different ways from the
-   * command line---eg 1,2,3 == 1-3. This is to ensure that stuff that
-   * is stored in a database is comparable.
+   * converts the array of starting attributes to a string. This is used by
+   * getOptions to return the actual attributes specified as the starting set.
+   * This is better than using m_startRanges.getRanges() as the same start set
+   * can be specified in different ways from the command line---eg 1,2,3 == 1-3.
+   * This is to ensure that stuff that is stored in a database is comparable.
+   * 
    * @return a comma seperated list of individual attribute numbers as a String
    */
   private String startSetToString() {
     StringBuffer FString = new StringBuffer();
     boolean didPrint;
-    
+
     if (m_starting == null) {
       return getStartSet();
     }
 
     for (int i = 0; i < m_starting.length; i++) {
       didPrint = false;
-      
-      if ((m_hasClass == false) || 
-	  (m_hasClass == true && i != m_classIndex)) {
-	FString.append((m_starting[i] + 1));
-	didPrint = true;
+
+      if ((m_hasClass == false) || (m_hasClass == true && i != m_classIndex)) {
+        FString.append((m_starting[i] + 1));
+        didPrint = true;
       }
-      
+
       if (i == (m_starting.length - 1)) {
-	FString.append("");
-      }
-      else {
-	if (didPrint) {
-	  FString.append(",");
-	  }
+        FString.append("");
+      } else {
+        if (didPrint) {
+          FString.append(",");
+        }
       }
     }
 
@@ -459,203 +488,199 @@ public class RandomSearch
 
   /**
    * prints a description of the search
+   * 
    * @return a description of the search as a string
    */
+  @Override
   public String toString() {
     StringBuffer text = new StringBuffer();
-    
+
     text.append("\tRandom search.\n\tStart set: ");
     if (m_starting == null) {
       text.append("no attributes\n");
+    } else {
+      text.append(startSetToString() + "\n");
     }
-    else {
-      text.append(startSetToString()+"\n");
-    }
-    text.append("\tNumber of iterations: "+m_iterations+" ("
-		+(m_searchSize * 100.0)+"% of the search space)\n");
+    text.append("\tNumber of iterations: " + m_iterations + " ("
+      + (m_searchSize * 100.0) + "% of the search space)\n");
     text.append("\tMerit of best subset found: "
-		+Utils.doubleToString(Math.abs(m_bestMerit),8,3)+"\n");
+      + Utils.doubleToString(Math.abs(m_bestMerit), 8, 3) + "\n");
 
     return text.toString();
   }
 
   /**
    * Searches the attribute subset space randomly.
-   *
+   * 
    * @param ASEval the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @throws Exception if the search can't be completed
    */
-   public int[] search (ASEvaluation ASEval, Instances data)
-     throws Exception {
-     double best_merit;
-     int sizeOfBest = m_numAttribs;
-     BitSet temp;
-     m_bestGroup = new BitSet(m_numAttribs);
-     
-     m_onlyConsiderBetterAndSmaller = false;
-     if (!(ASEval instanceof SubsetEvaluator)) {
-       throw  new Exception(ASEval.getClass().getName() 
-			    + " is not a " 
-			    + "Subset evaluator!");
-     }
+  @Override
+  public int[] search(ASEvaluation ASEval, Instances data) throws Exception {
+    double best_merit;
+    int sizeOfBest = m_numAttribs;
+    BitSet temp;
+    m_bestGroup = new BitSet(m_numAttribs);
 
-     m_random = new Random(m_seed);
-     
-     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
-       m_hasClass = false;
-     }
-     else {
-       m_hasClass = true;
-       m_classIndex = data.classIndex();
-     }
-     
-     SubsetEvaluator ASEvaluator = (SubsetEvaluator)ASEval;
-     m_numAttribs = data.numAttributes();
+    m_onlyConsiderBetterAndSmaller = false;
+    if (!(ASEval instanceof SubsetEvaluator)) {
+      throw new Exception(ASEval.getClass().getName() + " is not a "
+        + "Subset evaluator!");
+    }
 
-     m_startRange.setUpper(m_numAttribs-1);
-     if (!(getStartSet().equals(""))) {
-       m_starting = m_startRange.getSelection();
-     }
+    m_random = new Random(m_seed);
 
-     // If a starting subset has been supplied, then initialise the bitset
-     if (m_starting != null) {
-       for (int i = 0; i < m_starting.length; i++) {
-	 if ((m_starting[i]) != m_classIndex) {
-	   m_bestGroup.set(m_starting[i]);
-	 }
-       }
-       m_onlyConsiderBetterAndSmaller = true;
-       best_merit = ASEvaluator.evaluateSubset(m_bestGroup);
-       sizeOfBest = countFeatures(m_bestGroup);
-     } else {
-       // do initial random subset
-       m_bestGroup = generateRandomSubset();
-       best_merit = ASEvaluator.evaluateSubset(m_bestGroup);
-     }
-     
-     if (m_verbose) {
-       System.out.println("Initial subset ("
-			  +Utils.doubleToString(Math.
-						abs(best_merit),8,5)
-			  +"): "+printSubset(m_bestGroup));
-     }
+    if (ASEval instanceof UnsupervisedSubsetEvaluator) {
+      m_hasClass = false;
+    } else {
+      m_hasClass = true;
+      m_classIndex = data.classIndex();
+    }
 
-     int i;
-     if (m_hasClass) {
-       i = m_numAttribs -1;
-     } else {
-       i = m_numAttribs;
-     }
-     m_iterations = (int)((m_searchSize * Math.pow(2, i)));
-     
-     int tempSize;
-     double tempMerit;
-     // main loop
-     for (i=0;i<m_iterations;i++) {
-       temp = generateRandomSubset();
-       if (m_onlyConsiderBetterAndSmaller) {
-	 tempSize = countFeatures(temp);
-	 if (tempSize <= sizeOfBest) {
-	   tempMerit = ASEvaluator.evaluateSubset(temp);
-	   if (tempMerit >= best_merit) {
-	     sizeOfBest = tempSize;
-	     m_bestGroup = temp;
-	     best_merit = tempMerit;
-	     if (m_verbose) {
-	       System.out.print("New best subset ("
-				  +Utils.doubleToString(Math.
-							abs(best_merit),8,5)
-				  +"): "+printSubset(m_bestGroup) + " :");
-	       System.out.println(Utils.
-				  doubleToString((((double)i)/
-						  ((double)m_iterations)*
-						  100.0),5,1)
-				  +"% done");
-	     }
-	   }
-	 }
-       } else {
-	 tempMerit = ASEvaluator.evaluateSubset(temp);
-	 if (tempMerit > best_merit) {
-	   m_bestGroup = temp;
-	   best_merit = tempMerit;
-	   if (m_verbose) {
-	     System.out.print("New best subset ("
-				+Utils.doubleToString(Math.abs(best_merit),8,5)
-				+"): "+printSubset(m_bestGroup) + " :");
-	     System.out.println(Utils.
-				doubleToString((((double)i)/
-						((double)m_iterations)
-						*100.0),5,1)
-				+"% done");
-	   }
-	 }
-       }
-     }
-     m_bestMerit = best_merit;
-     return attributeList(m_bestGroup);
-   }
+    SubsetEvaluator ASEvaluator = (SubsetEvaluator) ASEval;
+    m_numAttribs = data.numAttributes();
+
+    m_startRange.setUpper(m_numAttribs - 1);
+    if (!(getStartSet().equals(""))) {
+      m_starting = m_startRange.getSelection();
+    }
+
+    // If a starting subset has been supplied, then initialise the bitset
+    if (m_starting != null) {
+      for (int element : m_starting) {
+        if ((element) != m_classIndex) {
+          m_bestGroup.set(element);
+        }
+      }
+      m_onlyConsiderBetterAndSmaller = true;
+      best_merit = ASEvaluator.evaluateSubset(m_bestGroup);
+      sizeOfBest = countFeatures(m_bestGroup);
+    } else {
+      // do initial random subset
+      m_bestGroup = generateRandomSubset();
+      best_merit = ASEvaluator.evaluateSubset(m_bestGroup);
+    }
+
+    if (m_verbose) {
+      System.out.println("Initial subset ("
+        + Utils.doubleToString(Math.abs(best_merit), 8, 5) + "): "
+        + printSubset(m_bestGroup));
+    }
+
+    int i;
+    if (m_hasClass) {
+      i = m_numAttribs - 1;
+    } else {
+      i = m_numAttribs;
+    }
+    m_iterations = (int) ((m_searchSize * Math.pow(2, i)));
+
+    int tempSize;
+    double tempMerit;
+    // main loop
+    for (i = 0; i < m_iterations; i++) {
+      temp = generateRandomSubset();
+      if (m_onlyConsiderBetterAndSmaller) {
+        tempSize = countFeatures(temp);
+        if (tempSize <= sizeOfBest) {
+          tempMerit = ASEvaluator.evaluateSubset(temp);
+          if (tempMerit >= best_merit) {
+            sizeOfBest = tempSize;
+            m_bestGroup = temp;
+            best_merit = tempMerit;
+            if (m_verbose) {
+              System.out.print("New best subset ("
+                + Utils.doubleToString(Math.abs(best_merit), 8, 5) + "): "
+                + printSubset(m_bestGroup) + " :");
+              System.out.println(Utils.doubleToString((((double) i)
+                / ((double) m_iterations) * 100.0), 5, 1)
+                + "% done");
+            }
+          }
+        }
+      } else {
+        tempMerit = ASEvaluator.evaluateSubset(temp);
+        if (tempMerit > best_merit) {
+          m_bestGroup = temp;
+          best_merit = tempMerit;
+          if (m_verbose) {
+            System.out.print("New best subset ("
+              + Utils.doubleToString(Math.abs(best_merit), 8, 5) + "): "
+              + printSubset(m_bestGroup) + " :");
+            System.out.println(Utils.doubleToString((((double) i)
+              / ((double) m_iterations) * 100.0), 5, 1)
+              + "% done");
+          }
+        }
+      }
+    }
+    m_bestMerit = best_merit;
+    return attributeList(m_bestGroup);
+  }
 
   /**
    * prints a subset as a series of attribute numbers
+   * 
    * @param temp the subset to print
    * @return a subset as a String of attribute numbers
    */
   private String printSubset(BitSet temp) {
     StringBuffer text = new StringBuffer();
 
-    for (int j=0;j<m_numAttribs;j++) {
+    for (int j = 0; j < m_numAttribs; j++) {
       if (temp.get(j)) {
-        text.append((j+1)+" ");
+        text.append((j + 1) + " ");
       }
     }
     return text.toString();
   }
 
   /**
-   * converts a BitSet into a list of attribute indexes 
+   * converts a BitSet into a list of attribute indexes
+   * 
    * @param group the BitSet to convert
    * @return an array of attribute indexes
    **/
-  private int[] attributeList (BitSet group) {
+  private int[] attributeList(BitSet group) {
     int count = 0;
-    
+
     // count how many were selected
     for (int i = 0; i < m_numAttribs; i++) {
       if (group.get(i)) {
-	count++;
+        count++;
       }
     }
-    
+
     int[] list = new int[count];
     count = 0;
-    
+
     for (int i = 0; i < m_numAttribs; i++) {
       if (group.get(i)) {
-	list[count++] = i;
+        list[count++] = i;
       }
     }
-    
-    return  list;
+
+    return list;
   }
 
   /**
    * generates a random subset
+   * 
    * @return a random subset as a BitSet
    */
   private BitSet generateRandomSubset() {
     BitSet temp = new BitSet(m_numAttribs);
     double r;
 
-    for (int i=0;i<m_numAttribs;i++) {
+    for (int i = 0; i < m_numAttribs; i++) {
       r = m_random.nextDouble();
       if (r <= 0.5) {
-	if (m_hasClass && i == m_classIndex) {
-	} else {
-	  temp.set(i);
-	}
+        if (m_hasClass && i == m_classIndex) {
+        } else {
+          temp.set(i);
+        }
       }
     }
     return temp;
@@ -663,14 +688,15 @@ public class RandomSearch
 
   /**
    * counts the number of features in a subset
+   * 
    * @param featureSet the feature set for which to count the features
    * @return the number of features in the subset
    */
   private int countFeatures(BitSet featureSet) {
     int count = 0;
-    for (int i=0;i<m_numAttribs;i++) {
+    for (int i = 0; i < m_numAttribs; i++) {
       if (featureSet.get(i)) {
-	count++;
+        count++;
       }
     }
     return count;
@@ -687,12 +713,13 @@ public class RandomSearch
     m_onlyConsiderBetterAndSmaller = false;
     m_verbose = false;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }

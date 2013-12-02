@@ -6,10 +6,10 @@
 PackageName=attributeSelectionSearchMethods
 
 # Version (required)
-Version=1.0.6
+Version=1.0.7
 
 #Date
-Date=2013-06-24
+Date=2013-12-03
 
 # Title (required)
 Title=Four search methods for attribute selection: ExhaustiveSearch, GeneticSearch, RandomSearch and RankSearch.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=This package provides four search methods for attribute selection: ExhaustiveSearch, GeneticSearch, RandomSearch and RankSearch. See:<br/><br/> David E. Goldberg (1989). Genetic algorithms in search, optimization and machine learning. Addison-Wesley.<br/><br/>Mark Hall, Geoffrey Holmes (2003). Benchmarking attribute selection techniques for discrete class data mining. IEEE Transactions on Knowledge and Data Engineering. 15(6):1437-1447.
 
-Changes=Added an option to terminate the evaluation of the ranked list after n non-improving additions the current subset in RankSearch; added an option to output debugging info; added an option to set a threshold on minimum improvement in merit; added an option to, at a given point in the ranking, exclude the current attribute(s) if it does not improve the merit.
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/attributeSelectionSearchMethods1.0.6.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/attributeSelectionSearchMethods1.0.7.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.dev/weka/attributeSelection/

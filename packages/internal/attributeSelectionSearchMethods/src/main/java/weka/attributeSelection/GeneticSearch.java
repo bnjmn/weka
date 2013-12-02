@@ -19,19 +19,7 @@
  *
  */
 
-package  weka.attributeSelection;
-
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
+package weka.attributeSelection;
 
 import java.io.Serializable;
 import java.util.BitSet;
@@ -40,20 +28,33 @@ import java.util.Hashtable;
 import java.util.Random;
 import java.util.Vector;
 
-/** 
- <!-- globalinfo-start -->
- * GeneticSearch:<br/>
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+
+/**
+ * <!-- globalinfo-start --> GeneticSearch:<br/>
  * <br/>
- * Performs a search using the simple genetic algorithm described in Goldberg (1989).<br/>
+ * Performs a search using the simple genetic algorithm described in Goldberg
+ * (1989).<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * David E. Goldberg (1989). Genetic algorithms in search, optimization and machine learning. Addison-Wesley.
+ * David E. Goldberg (1989). Genetic algorithms in search, optimization and
+ * machine learning. Addison-Wesley.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;book{Goldberg1989,
  *    author = {David E. Goldberg},
@@ -64,56 +65,69 @@ import java.util.Vector;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -P &lt;start set&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -P &lt;start set&gt;
  *  Specify a starting set of attributes.
  *  Eg. 1,3,5-7.If supplied, the starting set becomes
  *  one member of the initial random
- *  population.</pre>
+ *  population.
+ * </pre>
  * 
- * <pre> -Z &lt;population size&gt;
+ * <pre>
+ * -Z &lt;population size&gt;
  *  Set the size of the population (even number).
- *  (default = 20).</pre>
+ *  (default = 20).
+ * </pre>
  * 
- * <pre> -G &lt;number of generations&gt;
+ * <pre>
+ * -G &lt;number of generations&gt;
  *  Set the number of generations.
- *  (default = 20)</pre>
+ *  (default = 20)
+ * </pre>
  * 
- * <pre> -C &lt;probability of crossover&gt;
+ * <pre>
+ * -C &lt;probability of crossover&gt;
  *  Set the probability of crossover.
- *  (default = 0.6)</pre>
+ *  (default = 0.6)
+ * </pre>
  * 
- * <pre> -M &lt;probability of mutation&gt;
+ * <pre>
+ * -M &lt;probability of mutation&gt;
  *  Set the probability of mutation.
- *  (default = 0.033)</pre>
+ *  (default = 0.033)
+ * </pre>
  * 
- * <pre> -R &lt;report frequency&gt;
+ * <pre>
+ * -R &lt;report frequency&gt;
  *  Set frequency of generation reports.
  *  e.g, setting the value to 5 will 
  *  report every 5th generation
- *  (default = number of generations)</pre>
+ *  (default = number of generations)
+ * </pre>
  * 
- * <pre> -S &lt;seed&gt;
+ * <pre>
+ * -S &lt;seed&gt;
  *  Set the random number seed.
- *  (default = 1)</pre>
+ *  (default = 1)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class GeneticSearch 
-  extends ASSearch 
-  implements StartSetHandler, OptionHandler, TechnicalInformationHandler {
+public class GeneticSearch extends ASSearch implements StartSetHandler,
+  OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -1618264232838472679L;
-  
-  /** 
+
+  /**
    * holds a starting set as an array of attributes. Becomes one member of the
    * initial random population
    */
@@ -121,18 +135,18 @@ public class GeneticSearch
 
   /** holds the start set for the search as a Range */
   private Range m_startRange;
-  
- /** does the data have a class */
+
+  /** does the data have a class */
   private boolean m_hasClass;
- 
+
   /** holds the class index */
   private int m_classIndex;
- 
+
   /** number of attributes in the data */
   private int m_numAttribs;
 
   /** the current population */
-  private GABitSet [] m_population;
+  private GABitSet[] m_population;
 
   /** the number of individual solutions */
   private int m_popSize;
@@ -147,7 +161,7 @@ public class GeneticSearch
   private int m_lookupTableSize;
 
   /** the lookup table */
-  private Hashtable m_lookupTable;
+  private Hashtable<BitSet, GABitSet> m_lookupTable;
 
   /** random number generation */
   private Random m_random;
@@ -181,53 +195,56 @@ public class GeneticSearch
   /**
    * A bitset for the genetic algorithm
    */
-  protected class GABitSet 
-    implements Cloneable, Serializable, RevisionHandler {
-    
+  protected class GABitSet implements Cloneable, Serializable, RevisionHandler {
+
     /** for serialization */
     static final long serialVersionUID = -2930607837482622224L;
-    
+
     /** the bitset */
     private BitSet m_chromosome;
 
     /** holds raw merit */
     private double m_objective = -Double.MAX_VALUE;
-    
+
     /** the fitness */
     private double m_fitness;
-    
+
     /**
      * Constructor
      */
-    public GABitSet () {
+    public GABitSet() {
       m_chromosome = new BitSet();
     }
 
     /**
      * makes a copy of this GABitSet
+     * 
      * @return a copy of the object
      * @throws CloneNotSupportedException if something goes wrong
      */
+    @Override
     public Object clone() throws CloneNotSupportedException {
       GABitSet temp = new GABitSet();
-      
+
       temp.setObjective(this.getObjective());
       temp.setFitness(this.getFitness());
-      temp.setChromosome((BitSet)(this.m_chromosome.clone()));
+      temp.setChromosome((BitSet) (this.m_chromosome.clone()));
       return temp;
-      //return super.clone();
+      // return super.clone();
     }
 
     /**
      * sets the objective merit value
+     * 
      * @param objective the objective value of this population member
      */
     public void setObjective(double objective) {
       m_objective = objective;
     }
-      
+
     /**
      * gets the objective merit
+     * 
      * @return the objective merit of this population member
      */
     public double getObjective() {
@@ -236,6 +253,7 @@ public class GeneticSearch
 
     /**
      * sets the scaled fitness
+     * 
      * @param fitness the scaled fitness of this population member
      */
     public void setFitness(double fitness) {
@@ -244,6 +262,7 @@ public class GeneticSearch
 
     /**
      * gets the scaled fitness
+     * 
      * @return the scaled fitness of this population member
      */
     public double getFitness() {
@@ -252,6 +271,7 @@ public class GeneticSearch
 
     /**
      * get the chromosome
+     * 
      * @return the chromosome of this population member
      */
     public BitSet getChromosome() {
@@ -260,6 +280,7 @@ public class GeneticSearch
 
     /**
      * set the chromosome
+     * 
      * @param c the chromosome to be set for this population member
      */
     public void setChromosome(BitSet c) {
@@ -268,6 +289,7 @@ public class GeneticSearch
 
     /**
      * unset a bit in the chromosome
+     * 
      * @param bit the bit to be cleared
      */
     public void clear(int bit) {
@@ -276,6 +298,7 @@ public class GeneticSearch
 
     /**
      * set a bit in the chromosome
+     * 
      * @param bit the bit to be set
      */
     public void set(int bit) {
@@ -284,18 +307,20 @@ public class GeneticSearch
 
     /**
      * get the value of a bit in the chromosome
+     * 
      * @param bit the bit to query
      * @return the value of the bit
      */
     public boolean get(int bit) {
       return m_chromosome.get(bit);
     }
-    
+
     /**
      * Returns the revision string.
      * 
-     * @return		the revision
+     * @return the revision
      */
+    @Override
     public String getRevision() {
       return RevisionUtils.extract("$Revision$");
     }
@@ -303,90 +328,98 @@ public class GeneticSearch
 
   /**
    * Returns an enumeration describing the available options.
+   * 
    * @return an enumeration of all the available options.
    **/
-  public Enumeration listOptions () {
-    Vector newVector = new Vector(6);
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(7);
 
-    newVector.addElement(new Option("\tSpecify a starting set of attributes." 
-                                    + "\n\tEg. 1,3,5-7."
-                                    +"If supplied, the starting set becomes"
-                                    +"\n\tone member of the initial random"
-                                    +"\n\tpopulation."
-                                    ,"P",1
-                                    , "-P <start set>"));
-    newVector.addElement(new Option("\tSet the size of the population (even number)."
-                                    +"\n\t(default = 20)."
-                                    , "Z", 1
-                                    , "-Z <population size>"));
+    newVector.addElement(new Option("\tSpecify a starting set of attributes."
+      + "\n\tEg. 1,3,5-7." + "If supplied, the starting set becomes"
+      + "\n\tone member of the initial random" + "\n\tpopulation.", "P", 1,
+      "-P <start set>"));
+    newVector
+      .addElement(new Option("\tSet the size of the population (even number)."
+        + "\n\t(default = 20).", "Z", 1, "-Z <population size>"));
     newVector.addElement(new Option("\tSet the number of generations."
-                                    +"\n\t(default = 20)" 
-                                    , "G", 1, "-G <number of generations>"));
+      + "\n\t(default = 20)", "G", 1, "-G <number of generations>"));
     newVector.addElement(new Option("\tSet the probability of crossover."
-                                    +"\n\t(default = 0.6)" 
-                                    , "C", 1, "-C <probability of"
-                                    +" crossover>"));    
+      + "\n\t(default = 0.6)", "C", 1, "-C <probability of" + " crossover>"));
     newVector.addElement(new Option("\tSet the probability of mutation."
-                                    +"\n\t(default = 0.033)" 
-                                    , "M", 1, "-M <probability of mutation>"));
+      + "\n\t(default = 0.033)", "M", 1, "-M <probability of mutation>"));
 
     newVector.addElement(new Option("\tSet frequency of generation reports."
-                                    +"\n\te.g, setting the value to 5 will "
-                                    +"\n\treport every 5th generation"
-                                    +"\n\t(default = number of generations)" 
-                                    , "R", 1, "-R <report frequency>"));
+      + "\n\te.g, setting the value to 5 will "
+      + "\n\treport every 5th generation"
+      + "\n\t(default = number of generations)", "R", 1,
+      "-R <report frequency>"));
     newVector.addElement(new Option("\tSet the random number seed."
-                                    +"\n\t(default = 1)" 
-                                    , "S", 1, "-S <seed>"));
-    return  newVector.elements();
+      + "\n\t(default = 1)", "S", 1, "-S <seed>"));
+    return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -P &lt;start set&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -P &lt;start set&gt;
    *  Specify a starting set of attributes.
    *  Eg. 1,3,5-7.If supplied, the starting set becomes
    *  one member of the initial random
-   *  population.</pre>
+   *  population.
+   * </pre>
    * 
-   * <pre> -Z &lt;population size&gt;
+   * <pre>
+   * -Z &lt;population size&gt;
    *  Set the size of the population (even number).
-   *  (default = 20).</pre>
+   *  (default = 20).
+   * </pre>
    * 
-   * <pre> -G &lt;number of generations&gt;
+   * <pre>
+   * -G &lt;number of generations&gt;
    *  Set the number of generations.
-   *  (default = 20)</pre>
+   *  (default = 20)
+   * </pre>
    * 
-   * <pre> -C &lt;probability of crossover&gt;
+   * <pre>
+   * -C &lt;probability of crossover&gt;
    *  Set the probability of crossover.
-   *  (default = 0.6)</pre>
+   *  (default = 0.6)
+   * </pre>
    * 
-   * <pre> -M &lt;probability of mutation&gt;
+   * <pre>
+   * -M &lt;probability of mutation&gt;
    *  Set the probability of mutation.
-   *  (default = 0.033)</pre>
+   *  (default = 0.033)
+   * </pre>
    * 
-   * <pre> -R &lt;report frequency&gt;
+   * <pre>
+   * -R &lt;report frequency&gt;
    *  Set frequency of generation reports.
    *  e.g, setting the value to 5 will 
    *  report every 5th generation
-   *  (default = number of generations)</pre>
+   *  (default = number of generations)
+   * </pre>
    * 
-   * <pre> -S &lt;seed&gt;
+   * <pre>
+   * -S &lt;seed&gt;
    *  Set the random number seed.
-   *  (default = 1)</pre>
+   *  (default = 1)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
-   *
+   * 
    **/
-  public void setOptions (String[] options)
-    throws Exception {
+  @Override
+  public void setOptions(String[] options) throws Exception {
     String optionString;
     resetOptions();
 
@@ -425,76 +458,81 @@ public class GeneticSearch
     if (optionString.length() != 0) {
       setSeed(Integer.parseInt(optionString));
     }
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of ReliefFAttributeEval.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions()
    */
-  public String[] getOptions () {
-    String[] options = new String[14];
-    int current = 0;
+  @Override
+  public String[] getOptions() {
+
+    Vector<String> options = new Vector<String>();
 
     if (!(getStartSet().equals(""))) {
-      options[current++] = "-P";
-      options[current++] = ""+startSetToString();
+      options.add("-P");
+      options.add("" + startSetToString());
     }
-    options[current++] = "-Z";
-    options[current++] = "" + getPopulationSize();
-    options[current++] = "-G";
-    options[current++] = "" + getMaxGenerations();
-    options[current++] = "-C";
-    options[current++] = "" + getCrossoverProb();
-    options[current++] = "-M";
-    options[current++] = "" + getMutationProb();
-    options[current++] = "-R";
-    options[current++] = "" + getReportFrequency();
-    options[current++] = "-S";
-    options[current++] = "" + getSeed();
+    options.add("-Z");
+    options.add("" + getPopulationSize());
+    options.add("-G");
+    options.add("" + getMaxGenerations());
+    options.add("-C");
+    options.add("" + getCrossoverProb());
+    options.add("-M");
+    options.add("" + getMutationProb());
+    options.add("-R");
+    options.add("" + getReportFrequency());
+    options.add("-S");
+    options.add("" + getSeed());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return  options;
+    return options.toArray(new String[0]);
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String startSetTipText() {
     return "Set a start point for the search. This is specified as a comma "
-      +"seperated list off attribute indexes starting at 1. It can include "
-      +"ranges. Eg. 1,2,5-9,17. The start set becomes one of the population "
-      +"members of the initial population.";
+      + "seperated list off attribute indexes starting at 1. It can include "
+      + "ranges. Eg. 1,2,5-9,17. The start set becomes one of the population "
+      + "members of the initial population.";
   }
 
   /**
-   * Sets a starting set of attributes for the search. It is the
-   * search method's responsibility to report this start set (if any)
-   * in its toString() method.
+   * Sets a starting set of attributes for the search. It is the search method's
+   * responsibility to report this start set (if any) in its toString() method.
+   * 
    * @param startSet a string containing a list of attributes (and or ranges),
-   * eg. 1,2,6,10-15.
+   *          eg. 1,2,6,10-15.
    * @throws Exception if start set can't be set.
    */
-  public void setStartSet (String startSet) throws Exception {
+  @Override
+  public void setStartSet(String startSet) throws Exception {
     m_startRange.setRanges(startSet);
   }
 
   /**
    * Returns a list of attributes (and or attribute ranges) as a String
+   * 
    * @return a list of attributes (and or attribute ranges)
    */
-  public String getStartSet () {
+  @Override
+  public String getStartSet() {
     return m_startRange.getRanges();
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String seedTipText() {
     return "Set the random seed.";
@@ -502,6 +540,7 @@ public class GeneticSearch
 
   /**
    * set the seed for random number generation
+   * 
    * @param s seed value
    */
   public void setSeed(int s) {
@@ -510,26 +549,29 @@ public class GeneticSearch
 
   /**
    * get the value of the random number generator's seed
+   * 
    * @return the seed for random number generation
    */
   public int getSeed() {
     return m_seed;
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String reportFrequencyTipText() {
     return "Set how frequently reports are generated. Default is equal to "
-      +"the number of generations meaning that a report will be printed for "
-      +"initial and final generations. Setting the value to 5 will result in "
-      +"a report being printed every 5 generations.";
+      + "the number of generations meaning that a report will be printed for "
+      + "initial and final generations. Setting the value to 5 will result in "
+      + "a report being printed every 5 generations.";
   }
 
   /**
    * set how often reports are generated
+   * 
    * @param f generate reports every f generations
    */
   public void setReportFrequency(int f) {
@@ -538,6 +580,7 @@ public class GeneticSearch
 
   /**
    * get how often repports are generated
+   * 
    * @return how often reports are generated
    */
   public int getReportFrequency() {
@@ -546,8 +589,9 @@ public class GeneticSearch
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String mutationProbTipText() {
     return "Set the probability of mutation occuring.";
@@ -555,6 +599,7 @@ public class GeneticSearch
 
   /**
    * set the probability of mutation
+   * 
    * @param m the probability for mutation occuring
    */
   public void setMutationProb(double m) {
@@ -563,6 +608,7 @@ public class GeneticSearch
 
   /**
    * get the probability of mutation
+   * 
    * @return the probability of mutation occuring
    */
   public double getMutationProb() {
@@ -571,18 +617,20 @@ public class GeneticSearch
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String crossoverProbTipText() {
     return "Set the probability of crossover. This is the probability that "
-      +"two population members will exchange genetic material."; 
+      + "two population members will exchange genetic material.";
   }
 
   /**
    * set the probability of crossover
-   * @param c the probability that two population members will exchange
-   * genetic material
+   * 
+   * @param c the probability that two population members will exchange genetic
+   *          material
    */
   public void setCrossoverProb(double c) {
     m_pCrossover = c;
@@ -590,6 +638,7 @@ public class GeneticSearch
 
   /**
    * get the probability of crossover
+   * 
    * @return the probability of crossover
    */
   public double getCrossoverProb() {
@@ -598,8 +647,9 @@ public class GeneticSearch
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String maxGenerationsTipText() {
     return "Set the number of generations to evaluate.";
@@ -607,6 +657,7 @@ public class GeneticSearch
 
   /**
    * set the number of generations to evaluate
+   * 
    * @param m the number of generations
    */
   public void setMaxGenerations(int m) {
@@ -615,6 +666,7 @@ public class GeneticSearch
 
   /**
    * get the number of generations
+   * 
    * @return the maximum number of generations
    */
   public int getMaxGenerations() {
@@ -623,27 +675,31 @@ public class GeneticSearch
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String populationSizeTipText() {
     return "Set the population size (even number), this is the number of individuals "
-      +"(attribute sets) in the population.";
+      + "(attribute sets) in the population.";
   }
 
   /**
    * set the population size
+   * 
    * @param p the size of the population
    */
   public void setPopulationSize(int p) {
-    if (p % 2 == 0)
+    if (p % 2 == 0) {
       m_popSize = p;
-    else
+    } else {
       System.err.println("Population size needs to be an even number!");
+    }
   }
 
   /**
    * get the size of the population
+   * 
    * @return the population size
    */
   public int getPopulationSize() {
@@ -652,34 +708,35 @@ public class GeneticSearch
 
   /**
    * Returns a string describing this search method
-   * @return a description of the search suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the search suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "GeneticSearch:\n\nPerforms a search using the simple genetic "
+    return "GeneticSearch:\n\nPerforms a search using the simple genetic "
       + "algorithm described in Goldberg (1989).\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
+      + "For more information see:\n\n" + getTechnicalInformation().toString();
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation        result;
-    
+    TechnicalInformation result;
+
     result = new TechnicalInformation(Type.BOOK);
     result.setValue(Field.AUTHOR, "David E. Goldberg");
     result.setValue(Field.YEAR, "1989");
-    result.setValue(Field.TITLE, "Genetic algorithms in search, optimization and machine learning");
+    result.setValue(Field.TITLE,
+      "Genetic algorithms in search, optimization and machine learning");
     result.setValue(Field.ISBN, "0201157675");
     result.setValue(Field.PUBLISHER, "Addison-Wesley");
-    
+
     return result;
   }
 
@@ -691,38 +748,36 @@ public class GeneticSearch
   }
 
   /**
-   * converts the array of starting attributes to a string. This is
-   * used by getOptions to return the actual attributes specified
-   * as the starting set. This is better than using m_startRanges.getRanges()
-   * as the same start set can be specified in different ways from the
-   * command line---eg 1,2,3 == 1-3. This is to ensure that stuff that
-   * is stored in a database is comparable.
+   * converts the array of starting attributes to a string. This is used by
+   * getOptions to return the actual attributes specified as the starting set.
+   * This is better than using m_startRanges.getRanges() as the same start set
+   * can be specified in different ways from the command line---eg 1,2,3 == 1-3.
+   * This is to ensure that stuff that is stored in a database is comparable.
+   * 
    * @return a comma seperated list of individual attribute numbers as a String
    */
   private String startSetToString() {
     StringBuffer FString = new StringBuffer();
     boolean didPrint;
-    
+
     if (m_starting == null) {
       return getStartSet();
     }
 
     for (int i = 0; i < m_starting.length; i++) {
       didPrint = false;
-      
-      if ((m_hasClass == false) || 
-          (m_hasClass == true && i != m_classIndex)) {
+
+      if ((m_hasClass == false) || (m_hasClass == true && i != m_classIndex)) {
         FString.append((m_starting[i] + 1));
         didPrint = true;
       }
-      
+
       if (i == (m_starting.length - 1)) {
         FString.append("");
-      }
-      else {
+      } else {
         if (didPrint) {
           FString.append(",");
-          }
+        }
       }
     }
 
@@ -731,70 +786,69 @@ public class GeneticSearch
 
   /**
    * returns a description of the search
+   * 
    * @return a description of the search as a String
    */
+  @Override
   public String toString() {
     StringBuffer GAString = new StringBuffer();
     GAString.append("\tGenetic search.\n\tStart set: ");
 
     if (m_starting == null) {
       GAString.append("no attributes\n");
+    } else {
+      GAString.append(startSetToString() + "\n");
     }
-    else {
-      GAString.append(startSetToString()+"\n");
-    }
-    GAString.append("\tPopulation size: "+m_popSize);
-    GAString.append("\n\tNumber of generations: "+m_maxGenerations);
+    GAString.append("\tPopulation size: " + m_popSize);
+    GAString.append("\n\tNumber of generations: " + m_maxGenerations);
     GAString.append("\n\tProbability of crossover: "
-                +Utils.doubleToString(m_pCrossover,6,3));
+      + Utils.doubleToString(m_pCrossover, 6, 3));
     GAString.append("\n\tProbability of mutation: "
-                +Utils.doubleToString(m_pMutation,6,3));
-    GAString.append("\n\tReport frequency: "+m_reportFrequency);
-    GAString.append("\n\tRandom number seed: "+m_seed+"\n");
+      + Utils.doubleToString(m_pMutation, 6, 3));
+    GAString.append("\n\tReport frequency: " + m_reportFrequency);
+    GAString.append("\n\tRandom number seed: " + m_seed + "\n");
     GAString.append(m_generationReports.toString());
     return GAString.toString();
   }
 
   /**
    * Searches the attribute subset space using a genetic algorithm.
-   *
+   * 
    * @param ASEval the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @throws Exception if the search can't be completed
    */
-   public int[] search (ASEvaluation ASEval, Instances data)
-    throws Exception {
+  @Override
+  public int[] search(ASEvaluation ASEval, Instances data) throws Exception {
 
-     m_best = null;
-     m_generationReports = new StringBuffer();
+    m_best = null;
+    m_generationReports = new StringBuffer();
 
-     if (!(ASEval instanceof SubsetEvaluator)) {
-       throw  new Exception(ASEval.getClass().getName() 
-                            + " is not a " 
-                            + "Subset evaluator!");
-     }
-     
+    if (!(ASEval instanceof SubsetEvaluator)) {
+      throw new Exception(ASEval.getClass().getName() + " is not a "
+        + "Subset evaluator!");
+    }
+
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
-    }
-    else {
+    } else {
       m_hasClass = true;
       m_classIndex = data.classIndex();
     }
 
-    SubsetEvaluator ASEvaluator = (SubsetEvaluator)ASEval;
+    SubsetEvaluator ASEvaluator = (SubsetEvaluator) ASEval;
     m_numAttribs = data.numAttributes();
 
-    m_startRange.setUpper(m_numAttribs-1);
+    m_startRange.setUpper(m_numAttribs - 1);
     if (!(getStartSet().equals(""))) {
       m_starting = m_startRange.getSelection();
     }
 
     // initial random population
-    m_lookupTable = new Hashtable(m_lookupTableSize);
+    m_lookupTable = new Hashtable<BitSet, GABitSet>(m_lookupTableSize);
     m_random = new Random(m_seed);
-    m_population = new GABitSet [m_popSize];
+    m_population = new GABitSet[m_popSize];
 
     // set up random initial population
     initPopulation();
@@ -805,7 +859,7 @@ public class GeneticSearch
     m_generationReports.append(populationReport(0));
 
     boolean converged;
-    for (int i=1;i<=m_maxGenerations;i++) {
+    for (int i = 1; i <= m_maxGenerations; i++) {
       generation();
       evaluatePopulation(ASEvaluator);
       populationStatistics();
@@ -813,9 +867,8 @@ public class GeneticSearch
       // find the best pop member and check for convergence
       converged = checkBest();
 
-      if ((i == m_maxGenerations) || 
-          ((i % m_reportFrequency) == 0) ||
-          (converged == true)) {
+      if ((i == m_maxGenerations) || ((i % m_reportFrequency) == 0)
+        || (converged == true)) {
         m_generationReports.append(populationReport(i));
         if (converged == true) {
           break;
@@ -823,14 +876,15 @@ public class GeneticSearch
       }
     }
     return attributeList(m_best.getChromosome());
-   }
+  }
 
   /**
-   * converts a BitSet into a list of attribute indexes 
+   * converts a BitSet into a list of attribute indexes
+   * 
    * @param group the BitSet to convert
    * @return an array of attribute indexes
    **/
-  private int[] attributeList (BitSet group) {
+  private int[] attributeList(BitSet group) {
     int count = 0;
 
     // count how many were selected
@@ -849,19 +903,20 @@ public class GeneticSearch
       }
     }
 
-    return  list;
+    return list;
   }
 
   /**
-   * checks to see if any population members in the current
-   * population are better than the best found so far. Also checks
-   * to see if the search has converged---that is there is no difference
-   * in fitness between the best and worse population member
+   * checks to see if any population members in the current population are
+   * better than the best found so far. Also checks to see if the search has
+   * converged---that is there is no difference in fitness between the best and
+   * worse population member
+   * 
    * @return true is the search has converged
    * @throws Exception if something goes wrong
    */
   private boolean checkBest() throws Exception {
-    int i,count,lowestCount = m_numAttribs;
+    int i, count, lowestCount = m_numAttribs;
     double b = -Double.MAX_VALUE;
     GABitSet localbest = null;
     BitSet temp;
@@ -870,7 +925,7 @@ public class GeneticSearch
 
     if (m_maxFitness - m_minFitness > 0) {
       // find the best in this population
-      for (i=0;i<m_popSize;i++) {
+      for (i = 0; i < m_popSize; i++) {
         if (m_population[i].getObjective() > b) {
           b = m_population[i].getObjective();
           localbest = m_population[i];
@@ -887,9 +942,10 @@ public class GeneticSearch
       }
     } else {
       // look for the smallest subset
-      for (i=0;i<m_popSize;i++) {
+      for (i = 0; i < m_popSize; i++) {
         temp = m_population[i].getChromosome();
-        count = countFeatures(temp);;
+        count = countFeatures(temp);
+        ;
 
         if (count < lowestCount) {
           lowestCount = count;
@@ -907,15 +963,15 @@ public class GeneticSearch
 
     // compare to the best found so far
     if (m_best == null) {
-      m_best = (GABitSet)localbest.clone();
+      m_best = (GABitSet) localbest.clone();
       m_bestFeatureCount = count;
     } else if (b > m_best.getObjective()) {
-      m_best = (GABitSet)localbest.clone();
+      m_best = (GABitSet) localbest.clone();
       m_bestFeatureCount = count;
     } else if (Utils.eq(m_best.getObjective(), b)) {
       // see if the localbest has fewer features than the best so far
       if (count < m_bestFeatureCount) {
-        m_best = (GABitSet)localbest.clone();
+        m_best = (GABitSet) localbest.clone();
         m_bestFeatureCount = count;
       }
     }
@@ -924,12 +980,13 @@ public class GeneticSearch
 
   /**
    * counts the number of features in a subset
+   * 
    * @param featureSet the feature set for which to count the features
    * @return the number of features in the subset
    */
   private int countFeatures(BitSet featureSet) {
     int count = 0;
-    for (int i=0;i<m_numAttribs;i++) {
+    for (int i = 0; i < m_numAttribs; i++) {
       if (featureSet.get(i)) {
         count++;
       }
@@ -939,19 +996,22 @@ public class GeneticSearch
 
   /**
    * performs a single generation---selection, crossover, and mutation
+   * 
    * @throws Exception if an error occurs
    */
-  private void generation () throws Exception {
-    int i,j=0;
+  private void generation() throws Exception {
+    int i, j = 0;
     double best_fit = -Double.MAX_VALUE;
     int old_count = 0;
     int count;
-    GABitSet [] newPop = new GABitSet [m_popSize];
-    int parent1,parent2;
+    GABitSet[] newPop = new GABitSet[m_popSize];
+    int parent1, parent2;
 
-    /** first ensure that the population best is propogated into the new
-        generation */
-    for (i=0;i<m_popSize;i++) {
+    /**
+     * first ensure that the population best is propogated into the new
+     * generation
+     */
+    for (i = 0; i < m_popSize; i++) {
       if (m_population[i].getFitness() > best_fit) {
         j = i;
         best_fit = m_population[i].getFitness();
@@ -965,28 +1025,28 @@ public class GeneticSearch
         }
       }
     }
-    newPop[0] = (GABitSet)(m_population[j].clone());
+    newPop[0] = (GABitSet) (m_population[j].clone());
     newPop[1] = newPop[0];
 
-    for (j=2;j<m_popSize;j+=2) {
+    for (j = 2; j < m_popSize; j += 2) {
       parent1 = select();
       parent2 = select();
-      newPop[j] = (GABitSet)(m_population[parent1].clone());
-      newPop[j+1] = (GABitSet)(m_population[parent2].clone());
+      newPop[j] = (GABitSet) (m_population[parent1].clone());
+      newPop[j + 1] = (GABitSet) (m_population[parent2].clone());
       // if parents are equal mutate one bit
       if (parent1 == parent2) {
         int r;
         if (m_hasClass) {
-          while ((r = m_random.nextInt(m_numAttribs)) == m_classIndex);
-        }
-        else {
+          while ((r = m_random.nextInt(m_numAttribs)) == m_classIndex) {
+            ;
+          }
+        } else {
           r = m_random.nextInt(m_numAttribs);
         }
-        
+
         if (newPop[j].get(r)) {
           newPop[j].clear(r);
-        }
-        else {
+        } else {
           newPop[j].set(r);
         }
       } else {
@@ -996,21 +1056,19 @@ public class GeneticSearch
           if (r < m_pCrossover) {
             // cross point
             int cp = Math.abs(m_random.nextInt());
-            
-            cp %= (m_numAttribs-2);
-            cp ++;
-            
-            for (i=0;i<cp;i++) {
+
+            cp %= (m_numAttribs - 2);
+            cp++;
+
+            for (i = 0; i < cp; i++) {
               if (m_population[parent1].get(i)) {
-                newPop[j+1].set(i);
-              }
-              else {
-                newPop[j+1].clear(i);
+                newPop[j + 1].set(i);
+              } else {
+                newPop[j + 1].clear(i);
               }
               if (m_population[parent2].get(i)) {
                 newPop[j].set(i);
-              }
-              else {
+              } else {
                 newPop[j].clear(i);
               }
             }
@@ -1018,25 +1076,23 @@ public class GeneticSearch
         }
 
         // mutate
-        for (int k=0;k<2;k++) {
-          for (i=0;i<m_numAttribs;i++) {
+        for (int k = 0; k < 2; k++) {
+          for (i = 0; i < m_numAttribs; i++) {
             r = m_random.nextDouble();
             if (r < m_pMutation) {
               if (m_hasClass && (i == m_classIndex)) {
                 // ignore class attribute
-              }
-              else {
-                if (newPop[j+k].get(i)) {
-                  newPop[j+k].clear(i);
-                }
-                else {
-                  newPop[j+k].set(i);
+              } else {
+                if (newPop[j + k].get(i)) {
+                  newPop[j + k].clear(i);
+                } else {
+                  newPop[j + k].set(i);
                 }
               }
             }
           }
         }
-                  
+
       }
     }
 
@@ -1045,64 +1101,63 @@ public class GeneticSearch
 
   /**
    * selects a population member to be considered for crossover
+   * 
    * @return the index of the selected population member
    */
   private int select() {
     int i;
-    double r,partsum;
+    double r, partsum;
 
     partsum = 0;
     r = m_random.nextDouble() * m_sumFitness;
-    for (i=0;i<m_popSize;i++) {
+    for (i = 0; i < m_popSize; i++) {
       partsum += m_population[i].getFitness();
       if (partsum >= r || (i == m_popSize - 1)) {
         break;
       }
     }
-    
+
     // if none was found, take first
-    if (i == m_popSize)
+    if (i == m_popSize) {
       i = 0;
-    
+    }
+
     return i;
   }
 
   /**
-   * evaluates an entire population. Population members are looked up in
-   * a hash table and if they are not found then they are evaluated using
-   * ASEvaluator.
+   * evaluates an entire population. Population members are looked up in a hash
+   * table and if they are not found then they are evaluated using ASEvaluator.
+   * 
    * @param ASEvaluator the subset evaluator to use for evaluating population
-   * members
+   *          members
    * @throws Exception if something goes wrong during evaluation
    */
-  private void evaluatePopulation (SubsetEvaluator ASEvaluator)
-    throws Exception {
+  private void evaluatePopulation(SubsetEvaluator ASEvaluator) throws Exception {
     int i;
     double merit;
 
-    for (i=0;i<m_popSize;i++) {
+    for (i = 0; i < m_popSize; i++) {
       // if its not in the lookup table then evaluate and insert
-      if (m_lookupTable.containsKey(m_population[i]
-                                    .getChromosome()) == false) {
+      if (m_lookupTable.containsKey(m_population[i].getChromosome()) == false) {
         merit = ASEvaluator.evaluateSubset(m_population[i].getChromosome());
         m_population[i].setObjective(merit);
-        m_lookupTable.put(m_population[i].getChromosome(),m_population[i]);
+        m_lookupTable.put(m_population[i].getChromosome(), m_population[i]);
       } else {
-        GABitSet temp = (GABitSet)m_lookupTable.
-          get(m_population[i].getChromosome());
+        GABitSet temp = m_lookupTable.get(m_population[i].getChromosome());
         m_population[i].setObjective(temp.getObjective());
       }
     }
   }
 
   /**
-   * creates random population members for the initial population. Also
-   * sets the first population member to be a start set (if any) 
-   * provided by the user
+   * creates random population members for the initial population. Also sets the
+   * first population member to be a start set (if any) provided by the user
+   * 
    * @throws Exception if the population can't be created
    */
-  private void initPopulation () throws Exception {
-    int i,j,bit;
+  private void initPopulation() throws Exception {
+    int i, j, bit;
     int num_bits;
     boolean ok;
     int start = 0;
@@ -1110,7 +1165,7 @@ public class GeneticSearch
     // add the start set as the first population member (if specified)
     if (m_starting != null) {
       m_population[0] = new GABitSet();
-      for (i=0;i<m_starting.length;i++) {
+      for (i = 0; i < m_starting.length; i++) {
         if ((m_starting[i]) != m_classIndex) {
           m_population[0].set(m_starting[i]);
         }
@@ -1118,11 +1173,11 @@ public class GeneticSearch
       start = 1;
     }
 
-    for (i=start;i<m_popSize;i++) {
+    for (i = start; i < m_popSize; i++) {
       m_population[i] = new GABitSet();
-      
+
       num_bits = m_random.nextInt();
-      num_bits = num_bits % m_numAttribs-1;
+      num_bits = num_bits % m_numAttribs - 1;
       if (num_bits < 0) {
         num_bits *= -1;
       }
@@ -1130,7 +1185,7 @@ public class GeneticSearch
         num_bits = 1;
       }
 
-      for (j=0;j<num_bits;j++) {
+      for (j = 0; j < num_bits; j++) {
         ok = false;
         do {
           bit = m_random.nextInt();
@@ -1142,12 +1197,11 @@ public class GeneticSearch
             if (bit != m_classIndex) {
               ok = true;
             }
-          }
-          else {
+          } else {
             ok = true;
           }
         } while (!ok);
-        
+
         if (bit > m_numAttribs) {
           throw new Exception("Problem in population init");
         }
@@ -1161,16 +1215,14 @@ public class GeneticSearch
    */
   private void populationStatistics() {
     int i;
-    
-    m_sumFitness = m_minFitness = m_maxFitness = 
-      m_population[0].getObjective();
 
-    for (i=1;i<m_popSize;i++) {
+    m_sumFitness = m_minFitness = m_maxFitness = m_population[0].getObjective();
+
+    for (i = 1; i < m_popSize; i++) {
       m_sumFitness += m_population[i].getObjective();
       if (m_population[i].getObjective() > m_maxFitness) {
         m_maxFitness = m_population[i].getObjective();
-      }
-      else if (m_population[i].getObjective() < m_minFitness) {
+      } else if (m_population[i].getObjective() < m_minFitness) {
         m_minFitness = m_population[i].getObjective();
       }
     }
@@ -1186,93 +1238,71 @@ public class GeneticSearch
     double b = 0;
     double fmultiple = 2.0;
     double delta;
-    
+
     // prescale
-    if (m_minFitness > ((fmultiple * m_avgFitness - m_maxFitness) / 
-                        (fmultiple - 1.0))) {
+    if (m_minFitness > ((fmultiple * m_avgFitness - m_maxFitness) / (fmultiple - 1.0))) {
       delta = m_maxFitness - m_avgFitness;
       a = ((fmultiple - 1.0) * m_avgFitness / delta);
       b = m_avgFitness * (m_maxFitness - fmultiple * m_avgFitness) / delta;
-    }
-    else {
+    } else {
       delta = m_avgFitness - m_minFitness;
       a = m_avgFitness / delta;
       b = -m_minFitness * m_avgFitness / delta;
     }
-      
+
     // scalepop
     m_sumFitness = 0;
-    for (j=0;j<m_popSize;j++) {
-      if (a == Double.POSITIVE_INFINITY || a == Double.NEGATIVE_INFINITY ||
-          b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY) {
+    for (j = 0; j < m_popSize; j++) {
+      if (a == Double.POSITIVE_INFINITY || a == Double.NEGATIVE_INFINITY
+        || b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY) {
         m_population[j].setFitness(m_population[j].getObjective());
       } else {
-        m_population[j].
-          setFitness(Math.abs((a * m_population[j].getObjective() + b)));
+        m_population[j]
+          .setFitness(Math.abs((a * m_population[j].getObjective() + b)));
       }
       m_sumFitness += m_population[j].getFitness();
     }
   }
-  
+
   /**
    * generates a report on the current population
+   * 
    * @return a report as a String
    */
-  private String populationReport (int genNum) {
+  private String populationReport(int genNum) {
     int i;
     StringBuffer temp = new StringBuffer();
 
     if (genNum == 0) {
       temp.append("\nInitial population\n");
-    }
-    else {
-      temp.append("\nGeneration: "+genNum+"\n");
+    } else {
+      temp.append("\nGeneration: " + genNum + "\n");
     }
     temp.append("merit   \tscaled  \tsubset\n");
-    
-    for (i=0;i<m_popSize;i++) {
-      temp.append(Utils.doubleToString(Math.
-                                       abs(m_population[i].getObjective()),
-                                       8,5)
-                  +"\t"
-                  +Utils.doubleToString(m_population[i].getFitness(),
-                                        8,5)
-                  +"\t");
 
-      temp.append(printPopMember(m_population[i].getChromosome())+"\n");
+    for (i = 0; i < m_popSize; i++) {
+      temp.append(Utils.doubleToString(
+        Math.abs(m_population[i].getObjective()), 8, 5)
+        + "\t"
+        + Utils.doubleToString(m_population[i].getFitness(), 8, 5) + "\t");
+
+      temp.append(printPopMember(m_population[i].getChromosome()) + "\n");
     }
     return temp.toString();
   }
 
   /**
    * prints a population member as a series of attribute numbers
+   * 
    * @param temp the chromosome of a population member
    * @return a population member as a String of attribute numbers
    */
   private String printPopMember(BitSet temp) {
     StringBuffer text = new StringBuffer();
 
-    for (int j=0;j<m_numAttribs;j++) {
+    for (int j = 0; j < m_numAttribs; j++) {
       if (temp.get(j)) {
-        text.append((j+1)+" ");
-      }
-    }
-    return text.toString();
-  }
-
-  /**
-   * prints a population member's chromosome
-   * @param temp the chromosome of a population member
-   * @return a population member's chromosome as a String
-   */
-  private String printPopChrom(BitSet temp) {
-    StringBuffer text = new StringBuffer();
-
-    for (int j=0;j<m_numAttribs;j++) {
-      if (temp.get(j)) {
-        text.append("1");
-      } else {
-        text.append("0");
+        text.append((j + 1) + " ");
       }
     }
     return text.toString();
@@ -1281,7 +1311,7 @@ public class GeneticSearch
   /**
    * reset to default values for options
    */
-  private void resetOptions () {
+  private void resetOptions() {
     m_population = null;
     m_popSize = 20;
     m_lookupTableSize = 1001;
@@ -1293,12 +1323,13 @@ public class GeneticSearch
     m_startRange = new Range();
     m_seed = 1;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
