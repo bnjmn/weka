@@ -1073,7 +1073,8 @@ public final class Utils implements RevisionHandler {
   public static Object forName(Class<?> classType, String className,
     String[] options) throws Exception {
 
-    List<String> matches = Run.findSchemeMatch(classType, className, false);
+    List<String> matches = Run.findSchemeMatch(classType, className, false,
+      true);
     if (matches.size() == 0) {
       throw new Exception("Can't find class called: " + className);
     }
