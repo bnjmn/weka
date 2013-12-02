@@ -6,10 +6,10 @@
 PackageName=alternatingDecisionTrees
 
 # Version (required)
-Version=1.0.5
+Version=1.0.6
 
 #Date
-Date=2013-11-28
+Date=2013-12-03
 
 # Title (required)
 Title=Binary-class alternating decision trees and multi-class alternating decision trees.
@@ -26,12 +26,12 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Binary-class and multi-class alternating decision trees. For more information see: <br/><br/>Freund, Y., Mason, L.: The alternating decision tree learning algorithm. In: Proceeding of the Sixteenth International Conference on Machine Learning, Bled, Slovenia, 124-133, 1999.<br/><br/>Geoffrey Holmes, Bernhard Pfahringer, Richard Kirkby, Eibe Frank, Mark Hall: Multiclass alternating decision trees. In: ECML, 161-172, 2001.
+Description=Binary- and multi-class alternating decision trees. For more information see: <br/><br/>Freund, Y., Mason, L.: The alternating decision tree learning algorithm. In: Proceeding of the Sixteenth International Conference on Machine Learning, Bled, Slovenia, 124-133, 1999.<br/><br/>Geoffrey Holmes, Bernhard Pfahringer, Richard Kirkby, Eibe Frank, Mark Hall: Multiclass alternating decision trees. In: ECML, 161-172, 2001.
 
-Changes=This release includes a minor bug fix for the graph() routines in both ADTree and LADTree
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/alternatingDecisionTrees1.0.5.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/alternatingDecisionTrees1.0.6.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/alternatingDecisionTrees

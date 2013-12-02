@@ -26,33 +26,30 @@ import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
-import java.util.Enumeration;
-
 /**
  * Class representing a two-way split on a numeric attribute, of the form:
  * either 'is < some_value' or 'is >= some_value'.
- *
+ * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class TwoWayNumericSplit
-  extends Splitter {
+public class TwoWayNumericSplit extends Splitter {
 
   /** for serialization */
   private static final long serialVersionUID = 449769177903158283L;
 
   /** The index of the attribute the split depends on */
-  private int attIndex;
+  private final int attIndex;
 
   /** The attribute value that is compared against */
-  private double splitPoint;
+  private final double splitPoint;
 
   /** The children of this split */
-  private PredictionNode[] children;
+  private final PredictionNode[] children;
 
   /**
    * Creates a new two-way numeric splitter.
-   *
+   * 
    * @param _attIndex the index of the attribute this split depeneds on
    * @param _splitPoint the attribute value that the splitter splits on
    */
@@ -62,147 +59,170 @@ public class TwoWayNumericSplit
     splitPoint = _splitPoint;
     children = new PredictionNode[2];
   }
-  
+
   /**
    * Gets the number of branches of the split.
-   *
+   * 
    * @return the number of branches (always = 2)
    */
-  public int getNumOfBranches() { 
-    
+  @Override
+  public int getNumOfBranches() {
+
     return 2;
   }
 
   /**
-   * Gets the index of the branch that an instance applies to. Returns -1 if no branches
-   * apply.
-   *
+   * Gets the index of the branch that an instance applies to. Returns -1 if no
+   * branches apply.
+   * 
    * @param inst the instance
    * @return the branch index
    */
+  @Override
   public int branchInstanceGoesDown(Instance inst) {
-    
-    if (inst.isMissing(attIndex)) return -1;
-    else if (inst.value(attIndex) < splitPoint) return 0;
-    else return 1;
+
+    if (inst.isMissing(attIndex)) {
+      return -1;
+    } else if (inst.value(attIndex) < splitPoint) {
+      return 0;
+    } else {
+      return 1;
+    }
   }
 
   /**
-   * Gets the subset of instances that apply to a particluar branch of the split. If the
-   * branch index is -1, the subset will consist of those instances that don't apply to
-   * any branch.
-   *
+   * Gets the subset of instances that apply to a particluar branch of the
+   * split. If the branch index is -1, the subset will consist of those
+   * instances that don't apply to any branch.
+   * 
    * @param branch the index of the branch
-   * @param instances the instances from which to find the subset 
+   * @param instances the instances from which to find the subset
    * @return the set of instances that apply
    */
+  @Override
   public ReferenceInstances instancesDownBranch(int branch, Instances instances) {
-    
+
     ReferenceInstances filteredInstances = new ReferenceInstances(instances, 1);
     if (branch == -1) {
-      for (Enumeration e = instances.enumerateInstances(); e.hasMoreElements(); ) {
-	Instance inst = (Instance) e.nextElement();
-	if (inst.isMissing(attIndex)) filteredInstances.addReference(inst);
+      for (Instance instance : instances) {
+        Instance inst = instance;
+        if (inst.isMissing(attIndex)) {
+          filteredInstances.addReference(inst);
+        }
       }
     } else if (branch == 0) {
-      for (Enumeration e = instances.enumerateInstances(); e.hasMoreElements(); ) {
-	Instance inst = (Instance) e.nextElement();
-	if (!inst.isMissing(attIndex) && inst.value(attIndex) < splitPoint)
-	  filteredInstances.addReference(inst);
+      for (Instance instance : instances) {
+        Instance inst = instance;
+        if (!inst.isMissing(attIndex) && inst.value(attIndex) < splitPoint) {
+          filteredInstances.addReference(inst);
+        }
       }
     } else {
-      for (Enumeration e = instances.enumerateInstances(); e.hasMoreElements(); ) {
-	Instance inst = (Instance) e.nextElement();
-	if (!inst.isMissing(attIndex) && inst.value(attIndex) >= splitPoint)
-	  filteredInstances.addReference(inst);
+      for (Instance instance : instances) {
+        Instance inst = instance;
+        if (!inst.isMissing(attIndex) && inst.value(attIndex) >= splitPoint) {
+          filteredInstances.addReference(inst);
+        }
       }
     }
     return filteredInstances;
   }
-  
+
   /**
-   * Gets the string describing the attributes the split depends on.
-   * i.e. the left hand side of the description of the split.
-   *
+   * Gets the string describing the attributes the split depends on. i.e. the
+   * left hand side of the description of the split.
+   * 
    * @param dataset the dataset that the split is based on
    * @return a string describing the attributes
-   */  
+   */
+  @Override
   public String attributeString(Instances dataset) {
-  
+
     return dataset.attribute(attIndex).name();
   }
 
   /**
-   * Gets the string describing the comparision the split depends on for a particular
-   * branch. i.e. the right hand side of the description of the split.
-   *
+   * Gets the string describing the comparision the split depends on for a
+   * particular branch. i.e. the right hand side of the description of the
+   * split.
+   * 
    * @param branchNum the branch of the split
    * @param dataset the dataset that the split is based on
    * @return a string describing the comparison
    */
+  @Override
   public String comparisonString(int branchNum, Instances dataset) {
-    
-    return ((branchNum == 0 ? "< " : ">= ") + Utils.doubleToString(splitPoint, 3));
+
+    return ((branchNum == 0 ? "< " : ">= ") + Utils.doubleToString(splitPoint,
+      3));
   }
 
   /**
    * Tests whether two splitters are equivalent.
-   *
+   * 
    * @param compare the splitter to compare with
    * @return whether or not they match
    */
+  @Override
   public boolean equalTo(Splitter compare) {
-    
+
     if (compare instanceof TwoWayNumericSplit) { // test object type
       TwoWayNumericSplit compareSame = (TwoWayNumericSplit) compare;
-      return (attIndex == compareSame.attIndex &&
-	      splitPoint == compareSame.splitPoint);
-    } else return false;
+      return (attIndex == compareSame.attIndex && splitPoint == compareSame.splitPoint);
+    } else {
+      return false;
+    }
   }
 
   /**
    * Sets the child for a branch of the split.
-   *
+   * 
    * @param branchNum the branch to set the child for
    * @param childPredictor the new child
    */
+  @Override
   public void setChildForBranch(int branchNum, PredictionNode childPredictor) {
-    
+
     children[branchNum] = childPredictor;
   }
 
   /**
    * Gets the child for a branch of the split.
-   *
+   * 
    * @param branchNum the branch to get the child for
    * @return the child
    */
+  @Override
   public PredictionNode getChildForBranch(int branchNum) {
-    
+
     return children[branchNum];
   }
 
   /**
    * Clones this node. Performs a deep copy, recursing through the tree.
-   *
+   * 
    * @return a clone
    */
+  @Override
   public Object clone() {
-    
+
     TwoWayNumericSplit clone = new TwoWayNumericSplit(attIndex, splitPoint);
     clone.orderAdded = orderAdded;
-    if (children[0] != null)
+    if (children[0] != null) {
       clone.setChildForBranch(0, (PredictionNode) children[0].clone());
-    if (children[1] != null)
+    }
+    if (children[1] != null) {
       clone.setChildForBranch(1, (PredictionNode) children[1].clone());
+    }
     return clone;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
