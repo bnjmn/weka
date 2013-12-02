@@ -76,7 +76,7 @@ public class Run {
    * @return a list of fully qualified matching scheme names
    */
   public static List<String> findSchemeMatch(Class<?> classType,
-    String schemeToFind, boolean matchAnywhere) {
+    String schemeToFind, boolean matchAnywhere, boolean notJustRunnables) {
     weka.core.ClassDiscovery.clearCache();
     ArrayList<String> matches = weka.core.ClassDiscovery.find(schemeToFind);
     ArrayList<String> prunedMatches = new ArrayList<String>();
@@ -88,7 +88,8 @@ public class Run {
             .getClassLoader(), matches.get(i));
           if (classType == null
             || classType.isAssignableFrom(scheme.getClass())) {
-            if (scheme instanceof weka.classifiers.Classifier
+            if (notJustRunnables
+              || scheme instanceof weka.classifiers.Classifier
               || scheme instanceof weka.clusterers.Clusterer
               || scheme instanceof weka.associations.Associator
               || scheme instanceof weka.attributeSelection.ASEvaluation
@@ -119,7 +120,7 @@ public class Run {
    */
   public static List<String> findSchemeMatch(String schemeToFind,
     boolean matchAnywhere) {
-    return findSchemeMatch(null, schemeToFind, matchAnywhere);
+    return findSchemeMatch(null, schemeToFind, matchAnywhere, false);
   }
 
   /**
