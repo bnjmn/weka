@@ -22,6 +22,9 @@
 package weka;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import weka.core.Utils;
 
 /**
  * Helper class that executes Weka schemes from the command line. Performs
@@ -64,6 +67,62 @@ public class Run {
   }
 
   /**
+   * Find a scheme that matches the supplied suffix
+   * 
+   * @param classType matching schemes must be of this class type
+   * @param schemeToFind the name of the scheme to find
+   * @param matchAnywhere if true, the name is matched anywhere in the
+   *          non-package part of candidate schemes
+   * @return a list of fully qualified matching scheme names
+   */
+  public static List<String> findSchemeMatch(Class<?> classType,
+    String schemeToFind, boolean matchAnywhere) {
+    weka.core.ClassDiscovery.clearCache();
+    ArrayList<String> matches = weka.core.ClassDiscovery.find(schemeToFind);
+    ArrayList<String> prunedMatches = new ArrayList<String>();
+    // prune list for anything that isn't a runnable scheme
+    for (int i = 0; i < matches.size(); i++) {
+      if (matches.get(i).endsWith(schemeToFind) || matchAnywhere) {
+        try {
+          Object scheme = java.beans.Beans.instantiate((new Run()).getClass()
+            .getClassLoader(), matches.get(i));
+          if (classType == null
+            || classType.isAssignableFrom(scheme.getClass())) {
+            if (scheme instanceof weka.classifiers.Classifier
+              || scheme instanceof weka.clusterers.Clusterer
+              || scheme instanceof weka.associations.Associator
+              || scheme instanceof weka.attributeSelection.ASEvaluation
+              || scheme instanceof weka.filters.Filter
+              || scheme instanceof weka.core.converters.AbstractFileLoader
+              || scheme instanceof weka.core.converters.AbstractFileSaver
+              || scheme instanceof weka.core.CommandlineRunnable) {
+              prunedMatches.add(matches.get(i));
+            }
+          }
+        } catch (Exception ex) {
+          // ignore any classes that we can't instantiate due to no no-arg
+          // constructor
+        }
+      }
+    }
+
+    return prunedMatches;
+  }
+
+  /**
+   * Find a scheme that matches the supplied suffix
+   * 
+   * @param schemeToFind the name of the scheme to find
+   * @param matchAnywhere if true, the name is matched anywhere in the
+   *          non-package part of candidate schemes
+   * @return a list of fully qualified matching scheme names
+   */
+  public static List<String> findSchemeMatch(String schemeToFind,
+    boolean matchAnywhere) {
+    return findSchemeMatch(null, schemeToFind, matchAnywhere);
+  }
+
+  /**
    * Main method for this class. -help or -h prints usage info.
    * 
    * @param args
@@ -74,39 +133,36 @@ public class Run {
       if (args.length == 0 || args[0].equalsIgnoreCase("-h")
         || args[0].equalsIgnoreCase("-help")) {
         System.err
-          .println("Usage:\n\tweka.Run [-no-scan] [-no-load] <scheme name [scheme options]>");
+          .println("Usage:\n\tweka.Run [-no-scan] [-no-load] [-match-anywhere] <scheme name [scheme options]>");
         return;
       }
       boolean noScan = false;
       boolean noLoad = false;
-      if (args[0].equals("-list-packages")) {
+      boolean matchAnywhere = false;
+
+      if (Utils.getFlag("list-packages", args)) {
         weka.core.WekaPackageManager.loadPackages(true, true, false);
         return;
-      } else if (args[0].equals("-no-load")) {
+      }
+
+      int schemeIndex = 0;
+      if (Utils.getFlag("no-load", args)) {
         noLoad = true;
-        if (args.length > 1) {
-          if (args[1].equals("-no-scan")) {
-            noScan = true;
-          }
-        }
-      } else if (args[0].equals("-no-scan")) {
+        schemeIndex++;
+      }
+
+      if (Utils.getFlag("no-scan", args)) {
         noScan = true;
-        if (args.length > 1) {
-          if (args[1].equals("-no-load")) {
-            noLoad = true;
-          }
-        }
+        schemeIndex++;
+      }
+
+      if (Utils.getFlag("match-anywhere", args)) {
+        matchAnywhere = true;
+        schemeIndex++;
       }
 
       if (!noLoad) {
         weka.core.WekaPackageManager.loadPackages(false, true, false);
-      }
-
-      int schemeIndex = 0;
-      if (noLoad && noScan) {
-        schemeIndex = 2;
-      } else if (noLoad || noScan) {
-        schemeIndex = 1;
       }
 
       String schemeToRun = null;
@@ -123,29 +179,7 @@ public class Run {
       }
 
       if (!noScan) {
-        weka.core.ClassDiscovery.clearClassCache();
-        ArrayList<String> matches = weka.core.ClassDiscovery.find(schemeToRun);
-        ArrayList<String> prunedMatches = new ArrayList<String>();
-        // prune list for anything that isn't a runnable scheme
-        for (int i = 0; i < matches.size(); i++) {
-          try {
-            Object scheme = java.beans.Beans.instantiate((new Run()).getClass()
-              .getClassLoader(), matches.get(i));
-            if (scheme instanceof weka.classifiers.Classifier
-              || scheme instanceof weka.clusterers.Clusterer
-              || scheme instanceof weka.associations.Associator
-              || scheme instanceof weka.attributeSelection.ASEvaluation
-              || scheme instanceof weka.filters.Filter
-              || scheme instanceof weka.core.converters.AbstractFileLoader
-              || scheme instanceof weka.core.converters.AbstractFileSaver
-              || scheme instanceof weka.core.CommandlineRunnable) {
-              prunedMatches.add(matches.get(i));
-            }
-          } catch (Exception ex) {
-            // ignore any classes that we can't instantiate due to no no-arg
-            // constructor
-          }
-        }
+        List<String> prunedMatches = findSchemeMatch(schemeToRun, matchAnywhere);
 
         if (prunedMatches.size() == 0) {
           System.err.println("Can't find scheme " + schemeToRun
