@@ -31,9 +31,12 @@ import java.lang.reflect.Array;
 import java.net.URL;
 import java.text.BreakIterator;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
+
+import weka.Run;
 
 /**
  * Class implementing some simple utility methods.
@@ -1070,16 +1073,25 @@ public final class Utils implements RevisionHandler {
   public static Object forName(Class<?> classType, String className,
     String[] options) throws Exception {
 
+    List<String> matches = Run.findSchemeMatch(classType, className, false);
+    if (matches.size() == 0) {
+      throw new Exception("Can't find class called: " + className);
+    }
+
+    if (matches.size() > 1) {
+      throw new Exception("More than one possibility matched '" + className
+        + "'");
+    }
+
+    className = matches.get(0);
+
     Class<?> c = null;
     try {
       c = Class.forName(className);
     } catch (Exception ex) {
       throw new Exception("Can't find class called: " + className);
     }
-    if (!classType.isAssignableFrom(c)) {
-      throw new Exception(classType.getName() + " is not assignable from "
-        + className);
-    }
+
     Object o = c.newInstance();
     if ((o instanceof OptionHandler) && (options != null)) {
       ((OptionHandler) o).setOptions(options);
