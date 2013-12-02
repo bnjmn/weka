@@ -1080,8 +1080,12 @@ public final class Utils implements RevisionHandler {
     }
 
     if (matches.size() > 1) {
-      throw new Exception("More than one possibility matched '" + className
-        + "'");
+      StringBuffer sb = new StringBuffer("More than one possibility matched '"
+        + className + "':\n");
+      for (String s : matches) {
+        sb.append("  " + s + '\n');
+      }
+      throw new Exception(sb.toString());
     }
 
     className = matches.get(0);
