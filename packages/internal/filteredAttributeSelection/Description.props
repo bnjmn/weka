@@ -6,10 +6,10 @@
 PackageName=filteredAttributeSelection
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-12-04
 
 # Title (required)
 Title=Two meta attribute selection evaluators (one attribute-based and the other subset-based) for filtering data before performing attribute selection.
@@ -28,8 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=This package provides two meta attribute selection evaluators that can apply an arbitrary filter to the input data before executing the actual attribute selection scheme. One filters data and then passes it to an attribute evaluator (FilteredAttributeEval), and the other filters data and then passes it to a subset evaluator (FilteredSubsetEval).
 
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/filteredAttributeSelection1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/filteredAttributeSelection1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/filteredAttributeSelection
