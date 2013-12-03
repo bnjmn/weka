@@ -491,10 +491,6 @@ public class FlowRunner implements RevisionHandler {
 
   /**
    * Main method for testing this class.
-   * <p>
-   * <br>
-   * Usage:<br>
-   * <br>
    * 
    * <pre>
    * Usage:\n\nFlowRunner <serialized kf file>
