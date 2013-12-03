@@ -37,7 +37,6 @@ import weka.core.CommandlineRunnable;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
-import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -73,7 +72,7 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
   protected HDFSConfig m_config = new HDFSConfig();
 
   /** Set to true once the first instance has been seen in incremental mode */
-  protected boolean m_incrementalInit = false;
+  protected boolean m_incrementalInit;
 
   /**
    * Holds the relation name of the incoming data if user has opted to have the
@@ -134,8 +133,9 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     }
 
     // set dependencies
-    for (Capability cap : Capability.values())
+    for (Capability cap : Capability.values()) {
       result.enableDependency(cap);
+    }
 
     result.setOwner(this);
 
@@ -143,7 +143,7 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
   }
 
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
@@ -212,8 +212,8 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     }
 
     result.add("-saver"); //$NON-NLS-1$
-    String saverSpec = m_delegate.getClass().getName(); //$NON-NLS-1$
-    if (m_delegate instanceof OptionHandler) {
+    String saverSpec = m_delegate.getClass().getName();
+    if (m_delegate != null) {
       saverSpec += " " //$NON-NLS-1$
         + Utils.joinOptions(((OptionHandler) m_delegate).getOptions());
     }
@@ -289,6 +289,11 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     return m_hdfsPath;
   }
 
+  /**
+   * The tip text for this property
+   * 
+   * @return the tool tip text for this property
+   */
   public String saverTipText() {
     return "The base saver (file type) to use for saving"; //$NON-NLS-1$
   }
@@ -327,23 +332,20 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     try {
       url = m_env.substitute(url);
     } catch (Exception ex) {
+      // ignored
     }
 
     url = url.replace("hdfs://", "");
     if (url.endsWith("/")) { //$NON-NLS-1$
-      url += (DistributedJobConfig.isEmpty(m_filePrefix) ? "" : m_filePrefix); //$NON-NLS-1$
-      url += (DistributedJobConfig.isEmpty(m_relationNamePartOfFilename) ? "" //$NON-NLS-1$
-        : m_relationNamePartOfFilename);
+      url += DistributedJobConfig.isEmpty(m_filePrefix) ? "" : m_filePrefix; //$NON-NLS-1$
+      url += DistributedJobConfig.isEmpty(m_relationNamePartOfFilename) ? "" //$NON-NLS-1$
+        : m_relationNamePartOfFilename;
     } else {
       String namePart = url.substring(url.lastIndexOf('/') + 1, url.length());
       url = url.substring(0, url.lastIndexOf('/') + 1);
       if (!DistributedJobConfig.isEmpty(m_filePrefix)) {
-        url += (m_filePrefix + namePart);
-      } // else if
-        // (!DistributedJobConfig.isEmpty(m_relationNamePartOfFilename)) {
-        // url += (m_relationNamePartOfFilename + namePart);
-      // }
-      else {
+        url += m_filePrefix + namePart;
+      } else {
         url += namePart;
       }
     }
@@ -351,6 +353,7 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     try {
       url = m_env.substitute(url);
     } catch (Exception ex) {
+      // ignored
     }
 
     if (!url.toLowerCase().endsWith(m_delegate.getFileExtension())) {
@@ -415,7 +418,6 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
 
   @Override
   public void writeIncremental(Instance inst) throws IOException {
-    Instances structure = getInstances();
     // int writeMode = m_delegate.getWriteMode();
 
     if (getRetrieval() == BATCH || getRetrieval() == NONE) {
@@ -524,8 +526,7 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
   }
 
   @Override
-  public void run(Object toRun, String[] options)
-    throws IllegalArgumentException {
+  public void run(Object toRun, String[] options) {
 
     if (!(toRun instanceof HDFSSaver)) {
       throw new IllegalArgumentException("Object to run is not an HDFSaver!"); //$NON-NLS-1$
