@@ -52,7 +52,7 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
   private static final long serialVersionUID = 3437000574208204515L;
 
   /** Final result is covariance rather than correlation? */
-  protected boolean m_covariance = false;
+  protected boolean m_covariance;
 
   /** Whether to replace any missing values with the mean or just ignore */
   protected boolean m_replaceMissingWithMean = true;
@@ -85,7 +85,7 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
   protected double[] m_means;
 
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> opts = new Vector<Option>();
 
     opts.add(new Option(
@@ -387,6 +387,11 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
     }
   }
 
+  /**
+   * Main method for testing this class
+   * 
+   * @param args command line arguments
+   */
   public static void main(String[] args) {
     try {
       Instances orig = new Instances(new java.io.BufferedReader(
