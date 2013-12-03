@@ -67,7 +67,7 @@ import weka.classifiers.functions.NonNegativeLogisticRegression;
  * &#64;inproceedings{Yang2006,
  *    author = {L. Yang and R. Jin and R. Sukthankar and Y. Liu},
  *    booktitle = {Proceedings of the National Conference on Artificial Intelligence},
- *    pages = {543–548},
+ *    pages = {543-548},
  *    publisher = {AAAI Press},
  *    title = {An efficient algorithm for local distance metric learning},
  *    year = {2006}
