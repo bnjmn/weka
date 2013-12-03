@@ -123,6 +123,7 @@ public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
    * @param seed the random seed to use
    * @throws Exception if a problem occurs
    */
+  @SuppressWarnings({ "cast", "deprecation" })
   public void prunePredictions(double retain, long seed) throws Exception {
     if (m_Predictions == null || m_Predictions.size() == 0) {
       return;
@@ -144,7 +145,7 @@ public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
     for (int i = m_Predictions.size() - 1; i >= 0; i--) {
       int index = r.nextInt(i + 1);
       // downSampled.addElement(m_Predictions.elementAt(index));
-      
+
       // cast necessary for 3.7.10 compatibility
       downSampled.add((Prediction) m_Predictions.get(index));
 
