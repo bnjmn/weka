@@ -469,7 +469,7 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
    * Get the name of the reducer class (if any) to use. Weka jobs may set this
    * automatically
    * 
-   * @param return the name of the combiner class to use
+   * @return the name of the combiner class to use
    */
   public String getCombinerClass() {
     return getProperty(COMBINER_CLASS);
