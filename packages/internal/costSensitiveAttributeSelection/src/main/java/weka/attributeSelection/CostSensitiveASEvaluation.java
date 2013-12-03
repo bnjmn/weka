@@ -19,41 +19,40 @@
  *
  */
 
-package  weka.attributeSelection;
-
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.classifiers.CostMatrix;
-import weka.core.WeightedInstancesHandler;
-import weka.core.RevisionUtils;
+package weka.attributeSelection;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
-import java.util.ArrayList;
+
+import weka.classifiers.CostMatrix;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 
 /**
  * Abstract base class for cost-sensitive subset and attribute evaluators.
- *
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public abstract class CostSensitiveASEvaluation
-  extends ASEvaluation
-  implements OptionHandler, Serializable {
+public abstract class CostSensitiveASEvaluation extends ASEvaluation implements
+  OptionHandler, Serializable {
 
   /** for serialization */
   static final long serialVersionUID = -7045833833363396977L;
@@ -63,17 +62,16 @@ public abstract class CostSensitiveASEvaluation
   /** use explicit cost matrix */
   public static final int MATRIX_SUPPLIED = 2;
   /** Specify possible sources of the cost matrix */
-  public static final Tag [] TAGS_MATRIX_SOURCE = {
+  public static final Tag[] TAGS_MATRIX_SOURCE = {
     new Tag(MATRIX_ON_DEMAND, "Load cost matrix on demand"),
-    new Tag(MATRIX_SUPPLIED, "Use explicit cost matrix")
-  };
+    new Tag(MATRIX_SUPPLIED, "Use explicit cost matrix") };
 
   /** Indicates the current cost matrix source */
   protected int m_MatrixSource = MATRIX_ON_DEMAND;
 
-  /** 
+  /**
    * The directory used when loading cost files on demand, null indicates
-   * current directory 
+   * current directory
    */
   protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
 
@@ -91,102 +89,110 @@ public abstract class CostSensitiveASEvaluation
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(4);
-
-    newVector.addElement(new Option(
-                                    "\tFile name of a cost matrix to use. If this is not supplied,\n"
-                                    +"\ta cost matrix will be loaded on demand. The name of the\n"
-                                    +"\ton-demand file is the relation name of the training data\n"
-                                    +"\tplus \".cost\", and the path to the on-demand file is\n"
-                                    +"\tspecified with the -N option.",
-                                    "C", 1, "-C <cost file name>"));
-    newVector.addElement(new Option(
-                                    "\tName of a directory to search for cost files when loading\n"
-                                    +"\tcosts on demand (default current directory).",
-                                    "N", 1, "-N <directory>"));
-    newVector.addElement(new Option(
-                                    "\tThe cost matrix in Matlab single line format.",
-                                    "cost-matrix", 1, "-cost-matrix <matrix>"));
-    newVector.addElement(new Option(
-                                    "\tThe seed to use for random number generation.",
-                                    "S", 1, "-S <integer>"));
+    Vector<Option> newVector = new Vector<Option>(5);
 
     newVector.addElement(new Option(
-                                    "\tFull name of base evaluator. Options after -- are "
-                                    +"passed to the evaluator.\n"
-                                    + "\t(default: " + defaultEvaluatorString() +")",
-                                    "W", 1, "-W"));
+      "\tFile name of a cost matrix to use. If this is not supplied,\n"
+        + "\ta cost matrix will be loaded on demand. The name of the\n"
+        + "\ton-demand file is the relation name of the training data\n"
+        + "\tplus \".cost\", and the path to the on-demand file is\n"
+        + "\tspecified with the -N option.", "C", 1, "-C <cost file name>"));
+    newVector.addElement(new Option(
+      "\tName of a directory to search for cost files when loading\n"
+        + "\tcosts on demand (default current directory).", "N", 1,
+      "-N <directory>"));
+    newVector.addElement(new Option(
+      "\tThe cost matrix in Matlab single line format.", "cost-matrix", 1,
+      "-cost-matrix <matrix>"));
+    newVector
+      .addElement(new Option("\tThe seed to use for random number generation.",
+        "S", 1, "-S <integer>"));
+
+    newVector.addElement(new Option(
+      "\tFull name of base evaluator. Options after -- are "
+        + "passed to the evaluator.\n" + "\t(default: "
+        + defaultEvaluatorString() + ")", "W", 1, "-W"));
 
     if (m_evaluator instanceof OptionHandler) {
-      newVector.addElement(new Option(
-                                      "",
-                                      "", 0, "\nOptions specific to evaluator "
-                                      + m_evaluator.getClass().getName() + ":"));
-      Enumeration enu = ((OptionHandler)m_evaluator).listOptions();
-      while (enu.hasMoreElements()) {
-        newVector.addElement(enu.nextElement());
-      }
-    }
+      newVector.addElement(new Option("", "", 0,
+        "\nOptions specific to evaluator " + m_evaluator.getClass().getName()
+          + ":"));
 
+      newVector.addAll(Collections.list(((OptionHandler) m_evaluator)
+        .listOptions()));
+    }
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -C &lt;cost file name&gt;
+   * Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -C &lt;cost file name&gt;
    *  File name of a cost matrix to use. If this is not supplied,
    *  a cost matrix will be loaded on demand. The name of the
    *  on-demand file is the relation name of the training data
    *  plus ".cost", and the path to the on-demand file is
-   *  specified with the -N option.</pre>
+   *  specified with the -N option.
+   * </pre>
    * 
-   * <pre> -N &lt;directory&gt;
+   * <pre>
+   * -N &lt;directory&gt;
    *  Name of a directory to search for cost files when loading
-   *  costs on demand (default current directory).</pre>
+   *  costs on demand (default current directory).
+   * </pre>
    * 
-   * <pre> -cost-matrix &lt;matrix&gt;
-   *  The cost matrix in Matlab single line format.</pre>
+   * <pre>
+   * -cost-matrix &lt;matrix&gt;
+   *  The cost matrix in Matlab single line format.
+   * </pre>
    * 
-   * <pre> -S &lt;integer&gt;
-   *  The seed to use for random number generation.</pre>
+   * <pre>
+   * -S &lt;integer&gt;
+   *  The seed to use for random number generation.
+   * </pre>
    * 
-   * <pre> -W
+   * <pre>
+   * -W
    *  Full name of base evaluator.
-   *  (default: weka.attributeSelection.CfsSubsetEval)</pre>
-   *
-   * Options after -- are passed to the designated evaluator.<p>
-   *
+   *  (default: weka.attributeSelection.CfsSubsetEval)
+   * </pre>
+   * 
+   * Options after -- are passed to the designated evaluator.
+   * <p>
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     String costFile = Utils.getOption('C', options);
     if (costFile.length() != 0) {
       try {
-	setCostMatrix(new CostMatrix(new BufferedReader(
-                                                        new FileReader(costFile))));
+        setCostMatrix(new CostMatrix(new BufferedReader(
+          new FileReader(costFile))));
       } catch (Exception ex) {
-	// now flag as possible old format cost matrix. Delay cost matrix
-	// loading until buildClassifer is called
-	setCostMatrix(null);
+        // now flag as possible old format cost matrix. Delay cost matrix
+        // loading until buildClassifer is called
+        setCostMatrix(null);
       }
-      setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED,
-                                          TAGS_MATRIX_SOURCE));
+      setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED, TAGS_MATRIX_SOURCE));
       m_CostFile = costFile;
     } else {
-      setCostMatrixSource(new SelectedTag(MATRIX_ON_DEMAND, 
-                                          TAGS_MATRIX_SOURCE));
+      setCostMatrixSource(new SelectedTag(MATRIX_ON_DEMAND, TAGS_MATRIX_SOURCE));
     }
-    
+
     String demandDir = Utils.getOption('N', options);
     if (demandDir.length() != 0) {
       setOnDemandDirectory(new File(demandDir));
@@ -197,8 +203,7 @@ public abstract class CostSensitiveASEvaluation
       StringWriter writer = new StringWriter();
       CostMatrix.parseMatlab(cost_matrix).write(writer);
       setCostMatrix(new CostMatrix(new StringReader(writer.toString())));
-      setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED,
-                                          TAGS_MATRIX_SOURCE));
+      setCostMatrixSource(new SelectedTag(MATRIX_SUPPLIED, TAGS_MATRIX_SOURCE));
     }
 
     String seed = Utils.getOption('S', options);
@@ -209,29 +214,26 @@ public abstract class CostSensitiveASEvaluation
     }
 
     String evaluatorName = Utils.getOption('W', options);
-    
-    if (evaluatorName.length() > 0) { 
-      
-      // This is just to set the evaluator in case the option 
-      // parsing fails.
+
+    if (evaluatorName.length() > 0) {
       setEvaluator(ASEvaluation.forName(evaluatorName, null));
       setEvaluator(ASEvaluation.forName(evaluatorName,
-                                        Utils.partitionOptions(options)));
+        Utils.partitionOptions(options)));
     } else {
-      
-      // This is just to set the classifier in case the option 
-      // parsing fails.
       setEvaluator(ASEvaluation.forName(defaultEvaluatorString(), null));
       setEvaluator(ASEvaluation.forName(defaultEvaluatorString(),
-                                        Utils.partitionOptions(options)));
+        Utils.partitionOptions(options)));
     }
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the subset evaluator.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
     ArrayList<String> options = new ArrayList<String>();
 
@@ -239,8 +241,7 @@ public abstract class CostSensitiveASEvaluation
       if (m_CostFile != null) {
         options.add("-C");
         options.add("" + m_CostFile);
-      }
-      else {
+      } else {
         options.add("-cost-matrix");
         options.add(getCostMatrix().toMatlab());
       }
@@ -256,12 +257,10 @@ public abstract class CostSensitiveASEvaluation
     options.add(m_evaluator.getClass().getName());
 
     if (m_evaluator instanceof OptionHandler) {
-      String[] evaluatorOptions = ((OptionHandler)m_evaluator).getOptions();
+      String[] evaluatorOptions = ((OptionHandler) m_evaluator).getOptions();
       if (evaluatorOptions.length > 0) {
         options.add("--");
-        for (int i = 0; i < evaluatorOptions.length; i++) {
-          options.add(evaluatorOptions[i]);
-        }
+        Collections.addAll(options, evaluatorOptions);
       }
     }
 
@@ -269,8 +268,8 @@ public abstract class CostSensitiveASEvaluation
   }
 
   /**
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
 
@@ -279,7 +278,7 @@ public abstract class CostSensitiveASEvaluation
 
   /**
    * Return the name of the default evaluator.
-   *
+   * 
    * @return the name of the default evaluator
    */
   public String defaultEvaluatorString() {
@@ -287,8 +286,8 @@ public abstract class CostSensitiveASEvaluation
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String costMatrixSourceTipText() {
 
@@ -296,14 +295,14 @@ public abstract class CostSensitiveASEvaluation
       + "to use the supplied explicit cost matrix (the setting of the "
       + "costMatrix property), or to load a cost matrix from a file when "
       + "required (this file will be loaded from the directory set by the "
-      + "onDemandDirectory property and will be named relation_name" 
+      + "onDemandDirectory property and will be named relation_name"
       + CostMatrix.FILE_EXTENSION + ").";
   }
 
   /**
    * Gets the source location method of the cost matrix. Will be one of
    * MATRIX_ON_DEMAND or MATRIX_SUPPLIED.
-   *
+   * 
    * @return the cost matrix source.
    */
   public SelectedTag getCostMatrixSource() {
@@ -314,19 +313,19 @@ public abstract class CostSensitiveASEvaluation
   /**
    * Sets the source location of the cost matrix. Values other than
    * MATRIX_ON_DEMAND or MATRIX_SUPPLIED will be ignored.
-   *
+   * 
    * @param newMethod the cost matrix location method.
    */
   public void setCostMatrixSource(SelectedTag newMethod) {
-    
+
     if (newMethod.getTags() == TAGS_MATRIX_SOURCE) {
       m_MatrixSource = newMethod.getSelectedTag().getID();
     }
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String onDemandDirectoryTipText() {
 
@@ -335,9 +334,9 @@ public abstract class CostSensitiveASEvaluation
   }
 
   /**
-   * Returns the directory that will be searched for cost files when
-   * loading on demand.
-   *
+   * Returns the directory that will be searched for cost files when loading on
+   * demand.
+   * 
    * @return The cost file search directory.
    */
   public File getOnDemandDirectory() {
@@ -346,9 +345,9 @@ public abstract class CostSensitiveASEvaluation
   }
 
   /**
-   * Sets the directory that will be searched for cost files when
-   * loading on demand.
-   *
+   * Sets the directory that will be searched for cost files when loading on
+   * demand.
+   * 
    * @param newDir The cost file search directory.
    */
   public void setOnDemandDirectory(File newDir) {
@@ -364,22 +363,22 @@ public abstract class CostSensitiveASEvaluation
   /**
    * Gets the evaluator specification string, which contains the class name of
    * the evaluator and any options to the evaluator
-   *
+   * 
    * @return the evaluator string.
    */
   protected String getEvaluatorSpec() {
-    
+
     ASEvaluation ase = getEvaluator();
     if (ase instanceof OptionHandler) {
       return ase.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)ase).getOptions());
+        + Utils.joinOptions(((OptionHandler) ase).getOptions());
     }
     return ase.getClass().getName();
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String costMatrixTipText() {
     return "Sets the cost matrix explicitly. This matrix is used if the "
@@ -388,29 +387,30 @@ public abstract class CostSensitiveASEvaluation
 
   /**
    * Gets the misclassification cost matrix.
-   *
+   * 
    * @return the cost matrix
    */
   public CostMatrix getCostMatrix() {
-    
+
     return m_CostMatrix;
   }
-  
+
   /**
    * Sets the misclassification cost matrix.
-   *
+   * 
    * @param newCostMatrix the cost matrix
    */
   public void setCostMatrix(CostMatrix newCostMatrix) {
-    
+
     m_CostMatrix = newCostMatrix;
     m_MatrixSource = MATRIX_SUPPLIED;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String seedTipText() {
     return "The random number seed to be used.";
@@ -418,8 +418,8 @@ public abstract class CostSensitiveASEvaluation
 
   /**
    * Set the seed for random number generation.
-   *
-   * @param seed the seed 
+   * 
+   * @param seed the seed
    */
   public void setSeed(int seed) {
 
@@ -428,18 +428,19 @@ public abstract class CostSensitiveASEvaluation
 
   /**
    * Gets the seed for the random number generations.
-   *
+   * 
    * @return the seed for the random number generation
    */
   public int getSeed() {
-    
+
     return m_seed;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String evaluatorTipText() {
     return "The base evaluator to be used.";
@@ -447,18 +448,19 @@ public abstract class CostSensitiveASEvaluation
 
   /**
    * Set the base evaluator.
-   *
+   * 
    * @param newEvaluator the evaluator to use.
    * @throws IllegalArgumentException if the evaluator is of the wrong type
    */
-  public void setEvaluator(ASEvaluation newEvaluator) throws IllegalArgumentException {
+  public void setEvaluator(ASEvaluation newEvaluator)
+    throws IllegalArgumentException {
 
     m_evaluator = newEvaluator;
   }
 
   /**
    * Get the evaluator used as the base evaluator.
-   *
+   * 
    * @return the evaluator used as the base evaluator
    */
   public ASEvaluation getEvaluator() {
@@ -468,9 +470,10 @@ public abstract class CostSensitiveASEvaluation
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result;
 
@@ -485,18 +488,18 @@ public abstract class CostSensitiveASEvaluation
     result.disableAllClasses();
     result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
-    
+
     return result;
   }
 
   /**
-   * Generates a attribute evaluator. Has to initialize all fields of the 
+   * Generates a attribute evaluator. Has to initialize all fields of the
    * evaluator that are not being set via options.
-   *
-   * @param data set of instances serving as training data 
-   * @exception Exception if the evaluator has not been 
-   * generated successfully
+   * 
+   * @param data set of instances serving as training data
+   * @exception Exception if the evaluator has not been generated successfully
    */
+  @Override
   public void buildEvaluator(Instances data) throws Exception {
     // can evaluator handle the data?
     getCapabilities().testWithFail(data);
@@ -515,15 +518,14 @@ public abstract class CostSensitiveASEvaluation
       if (!costFile.exists()) {
         throw new Exception("On-demand cost file doesn't exist: " + costFile);
       }
-      setCostMatrix(new CostMatrix(new BufferedReader(
-                                                      new FileReader(costFile))));
+      setCostMatrix(new CostMatrix(new BufferedReader(new FileReader(costFile))));
     } else if (m_CostMatrix == null) {
       // try loading an old format cost file
       m_CostMatrix = new CostMatrix(data.numClasses());
-      m_CostMatrix.readOldFormat(new BufferedReader(
-                                                    new FileReader(m_CostFile)));
+      m_CostMatrix
+        .readOldFormat(new BufferedReader(new FileReader(m_CostFile)));
     }
-    
+
     Random random = null;
     if (!(m_evaluator instanceof WeightedInstancesHandler)) {
       random = new Random(m_seed);
@@ -533,15 +535,15 @@ public abstract class CostSensitiveASEvaluation
   }
 
   /**
-   * Provides a chance for a attribute evaluator to do any special
-   * post processing of the selected attribute set.
-   *
+   * Provides a chance for a attribute evaluator to do any special post
+   * processing of the selected attribute set.
+   * 
    * @param attributeSet the set of attributes found by the search
    * @return a possibly ranked list of postprocessed attributes
    * @exception Exception if postprocessing fails for some reason
    */
-  public int [] postProcess(int [] attributeSet) 
-    throws Exception {
+  @Override
+  public int[] postProcess(int[] attributeSet) throws Exception {
     return m_evaluator.postProcess(attributeSet);
   }
 
@@ -550,30 +552,28 @@ public abstract class CostSensitiveASEvaluation
    * 
    * @return a string representation of the classifier
    */
+  @Override
   public String toString() {
 
     if (m_evaluator == null) {
       return "CostSensitiveASEvaluation: No model built yet.";
     }
-  
-    String result = (m_evaluator instanceof AttributeEvaluator)
-      ? "CostSensitiveAttributeEval using "
+
+    String result = (m_evaluator instanceof AttributeEvaluator) ? "CostSensitiveAttributeEval using "
       : "CostSensitiveSubsetEval using ";
 
-    result += "\n\n" + getEvaluatorSpec()
-      + "\n\nEvaluator\n"
-      + m_evaluator.toString()
-      + "\n\nCost Matrix\n"
-      + m_CostMatrix.toString();
-    
+    result += "\n\n" + getEvaluatorSpec() + "\n\nEvaluator\n"
+      + m_evaluator.toString() + "\n\nCost Matrix\n" + m_CostMatrix.toString();
+
     return result;
   }
 
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
