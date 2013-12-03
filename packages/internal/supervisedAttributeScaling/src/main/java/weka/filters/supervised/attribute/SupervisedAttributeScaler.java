@@ -57,7 +57,7 @@ import weka.classifiers.functions.NonNegativeLogisticRegression;
  * <br/>
  * The approach is based on the Probabilistic Global Distance Metric Learning method included in the experimental comparison in<br/>
  * <br/>
- * L. Yang, R. Jin, R. Sukthankar, Y. Liu: An efficient algorithm for local distance metric learning. In: Proceedings of the National Conference on Artificial Intelligence, 543–548, 2006.
+ * L. Yang, R. Jin, R. Sukthankar, Y. Liu: An efficient algorithm for local distance metric learning. In: Proceedings of the National Conference on Artificial Intelligence, 543-548, 2006.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -157,7 +157,7 @@ public class SupervisedAttributeScaler extends SimpleBatchFilter
     result.setValue(Field.TITLE, "An efficient algorithm for local distance metric learning");
     result.setValue(Field.BOOKTITLE, "Proceedings of the National Conference on Artificial Intelligence");
     result.setValue(Field.YEAR, "2006");
-    result.setValue(Field.PAGES, "543–548");
+    result.setValue(Field.PAGES, "543-548");
     result.setValue(Field.PUBLISHER, "AAAI Press");
     
     return result;
