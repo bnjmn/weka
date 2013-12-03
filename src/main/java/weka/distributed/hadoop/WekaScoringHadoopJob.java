@@ -55,16 +55,16 @@ import distributed.hadoop.HDFSUtils;
  * clusterer.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version: $Revision$
+ * @version $Revision$
  */
 public class WekaScoringHadoopJob extends HadoopJob implements
   CommandlineRunnable {
 
-  /** For serialization */
-  private static final long serialVersionUID = 2899919003194014468L;
-
   /** The subdirectory of the output directory to save the job outputs to */
   protected static final String OUTPUT_SUBDIR = "/scoring";
+
+  /** For serialization */
+  private static final long serialVersionUID = 2899919003194014468L;
 
   /** The columns from the original input data to output in the scoring results */
   protected String m_colsRange = "first-last";
