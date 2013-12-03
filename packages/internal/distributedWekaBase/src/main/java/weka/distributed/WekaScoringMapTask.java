@@ -48,6 +48,9 @@ import weka.core.Utils;
  */
 public class WekaScoringMapTask implements Serializable {
 
+  /** For serialization */
+  private static final long serialVersionUID = 146378352037860956L;
+
   /** Model to use */
   protected ScoringModel m_model;
 
@@ -75,6 +78,9 @@ public class WekaScoringMapTask implements Serializable {
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
   protected abstract static class ScoringModel implements Serializable {
+
+    /** For serialization */
+    private static final long serialVersionUID = 6418927792442398048L;
 
     /** The header of the training data used to train the model */
     protected Instances m_modelHeader;
@@ -167,6 +173,9 @@ public class WekaScoringMapTask implements Serializable {
    */
   protected static class ClassifierScoringModel extends ScoringModel {
 
+    /** For serialization */
+    private static final long serialVersionUID = -5823090343185762045L;
+
     /** The wrapped classifier */
     protected Classifier m_model;
 
@@ -223,6 +232,9 @@ public class WekaScoringMapTask implements Serializable {
    */
   protected static class ClustererScoringModel extends ScoringModel {
 
+    /** For serialization */
+    private static final long serialVersionUID = 6415571646466462751L;
+
     /** The wrapped clusterer */
     protected Clusterer m_model;
 
@@ -266,7 +278,6 @@ public class WekaScoringMapTask implements Serializable {
 
     @Override
     public double[] distributionForInstance(Instance inst) throws Exception {
-      // TODO Auto-generated method stub
       return m_model.distributionForInstance(inst);
     }
 
@@ -311,8 +322,8 @@ public class WekaScoringMapTask implements Serializable {
         // type mismatch
         m_attributeMap[i] = -1;
         m_missingMismatch.put(modAtt.name(),
-          "type mismatch - " + "model: " + modAtt.typeToString(modAtt)
-            + " != incoming: " + incomingAtt.typeToString(incomingAtt));
+          "type mismatch - " + "model: " + Attribute.typeToString(modAtt)
+            + " != incoming: " + Attribute.typeToString(incomingAtt));
         problemCount++;
       } else {
         m_attributeMap[i] = incomingAtt.index();
