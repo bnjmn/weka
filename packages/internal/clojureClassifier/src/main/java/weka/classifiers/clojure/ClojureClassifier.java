@@ -35,38 +35,48 @@ import weka.core.Utils;
 import clojure.lang.IFn;
 
 /**
- <!-- globalinfo-start -->
- * A wrapper classifier for executing a classifier implemented in Clojure. The Clojure implementation is expected to have at least the following two functions:<br/>
+ * <!-- globalinfo-start --> A wrapper classifier for executing a classifier
+ * implemented in Clojure. The Clojure implementation is expected to have at
+ * least the following two functions:<br/>
  * <br/>
  * learn-classifier [insts options-string]<br/>
  * distribution-for-instance [inst model]<br/>
  * <br/>
- * The learn-classifier function takes an Instances object and an options string (which can be null). It is expected to return the learned model as some kind of serializable data structure. The distribution-for-instance function takes a Instance to be predicted and the model as arguments and returns the prediction as an array of doubles.<br/>
+ * The learn-classifier function takes an Instances object and an options string
+ * (which can be null). It is expected to return the learned model as some kind
+ * of serializable data structure. The distribution-for-instance function takes
+ * a Instance to be predicted and the model as arguments and returns the
+ * prediction as an array of doubles.<br/>
  * <br/>
- * The Clojure implementation can optionally provide a model-to-string [model header] function to return a textual description of the model. See the weka-clj.simple classifier included in the source code of the clojureClassifier package
+ * The Clojure implementation can optionally provide a model-to-string [model
+ * header] function to return a textual description of the model. See the
+ * weka-clj.simple classifier included in the source code of the
+ * clojureClassifier package
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -N &lt;namespace&gt;
- *  Namespace of the Clojure classifier to use.</pre>
+ * <pre>
+ * -N &lt;namespace&gt;
+ *  Namespace of the Clojure classifier to use.
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
 public class ClojureClassifier extends AbstractClassifier implements
-    OptionHandler, Serializable {
+  OptionHandler, Serializable {
 
   /** For serialization */
   private static final long serialVersionUID = 7912299994165292964L;
 
-  /** 
-   * The namespace of the Clojure classifier to use (weka-clj.simple is a simple majority 
-   * class classifier included with the clojureClassifier package) 
+  /**
+   * The namespace of the Clojure classifier to use (weka-clj.simple is a simple
+   * majority class classifier included with the clojureClassifier package)
    */
   protected String m_namespace = "weka-clj.simple";
 
@@ -86,30 +96,30 @@ public class ClojureClassifier extends AbstractClassifier implements
 
   public String globalInfo() {
     return "A wrapper classifier for executing a classifier implemented in Clojure. "
-        + "The Clojure implementation is expected to have at least the following "
-        + "two functions:\n\nlearn-classifier [insts options-string]\n"
-        + "distribution-for-instance [inst model]\n\n"
-        + "The learn-classifier function takes an Instances object and an options "
-        + "string (which can be null). It is expected to return the learned model "
-        + "as some kind of serializable data structure. The distribution-for-instance "
-        + "function takes a Instance to be predicted and the model as arguments and "
-        + "returns the prediction as an array of doubles.\n\nThe Clojure implementation "
-        + "can optionally provide a model-to-string [model header] function to return "
-        + "a textual description of the model. See the weka-clj.simple classifier "
-        + "included in the source code of the clojureClassifier package.\n\nYour own "
-	+ "Clojure classifier only needs to be available on the classpath to be "
-	+ "accessible to the ClojureClassifier. The easiest thing to do is to place "
-	+ "the jar file containing your Clojure implementation in the lib directory "
-	+ "of the clojureClassifier package (i.e. in ${user.home}/wekafiles/packages/"
-	+ "clojureClassifier/lib";
+      + "The Clojure implementation is expected to have at least the following "
+      + "two functions:\n\nlearn-classifier [insts options-string]\n"
+      + "distribution-for-instance [inst model]\n\n"
+      + "The learn-classifier function takes an Instances object and an options "
+      + "string (which can be null). It is expected to return the learned model "
+      + "as some kind of serializable data structure. The distribution-for-instance "
+      + "function takes a Instance to be predicted and the model as arguments and "
+      + "returns the prediction as an array of doubles.\n\nThe Clojure implementation "
+      + "can optionally provide a model-to-string [model header] function to return "
+      + "a textual description of the model. See the weka-clj.simple classifier "
+      + "included in the source code of the clojureClassifier package.\n\nYour own "
+      + "Clojure classifier only needs to be available on the classpath to be "
+      + "accessible to the ClojureClassifier. The easiest thing to do is to place "
+      + "the jar file containing your Clojure implementation in the lib directory "
+      + "of the clojureClassifier package (i.e. in ${user.home}/wekafiles/packages/"
+      + "clojureClassifier/lib";
   }
 
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
     result.add(new Option("\tNamespace of the Clojure classifier to use.", "N",
-        1, "-N <namespace>"));
+      1, "-N <namespace>"));
 
     return result.elements();
   }
@@ -154,8 +164,8 @@ public class ClojureClassifier extends AbstractClassifier implements
    */
   public String namespaceTipText() {
     return "The namespace of the Clojure classifier to use. weka-clj.simple"
-	+ " is a simple Clojure implementation of majority class classifier "
-	+ "included with the package.";
+      + " is a simple Clojure implementation of majority class classifier "
+      + "included with the package.";
   }
 
   /**
@@ -223,27 +233,28 @@ public class ClojureClassifier extends AbstractClassifier implements
 
   @Override
   public void buildClassifier(Instances insts) throws Exception {
-    
+
     if (m_namespace == null || m_namespace.length() == 0) {
       throw new Exception("No namespace for Clojure classifier specified!");
     }
-    
+
     m_header = new Instances(insts, 0);
 
     ClassLoader prevCL = Thread.currentThread().getContextClassLoader();
-    Thread.currentThread().setContextClassLoader(ClojureClassifier.class.getClassLoader());
+    Thread.currentThread().setContextClassLoader(
+      ClojureClassifier.class.getClassLoader());
     Clojure.require(m_namespace);
     m_clojureRequire = true;
 
     if (Clojure.eval("(resolve (symbol \"" + m_namespace
-        + "/learn-classifier\"))") == null) {
+      + "/learn-classifier\"))") == null) {
       throw new Exception("Namespace " + m_namespace
-          + " does not have a learn-classifier function!");
+        + " does not have a learn-classifier function!");
     }
 
     IFn learnFn = (IFn) Clojure.eval(m_namespace + "/learn-classifier");
     m_model = learnFn.invoke(insts, m_schemeOptions);
-    
+
     Thread.currentThread().setContextClassLoader(prevCL);
   }
 
@@ -253,14 +264,14 @@ public class ClojureClassifier extends AbstractClassifier implements
     if (m_model == null) {
       throw new Exception("No model built yet!");
     }
-    
+
     if (m_namespace == null || m_namespace.length() == 0) {
       throw new Exception("No namespace for Clojure classifier specified!");
     }
 
-
     ClassLoader prevCL = Thread.currentThread().getContextClassLoader();
-    Thread.currentThread().setContextClassLoader(ClojureClassifier.class.getClassLoader());
+    Thread.currentThread().setContextClassLoader(
+      ClojureClassifier.class.getClassLoader());
     if (!m_clojureRequire) {
       Clojure.require(m_namespace);
       m_clojureRequire = true;
@@ -268,21 +279,21 @@ public class ClojureClassifier extends AbstractClassifier implements
 
     if (m_distributionForInstanceFunction == null) {
       if (Clojure.eval("(resolve (symbol \"" + m_namespace
-          + "/distribution-for-instance\"))") == null) {
+        + "/distribution-for-instance\"))") == null) {
         throw new Exception("Namespace " + m_namespace
-            + " does not have a distribution-for-instance function!");
+          + " does not have a distribution-for-instance function!");
       }
 
       m_distributionForInstanceFunction = (IFn) Clojure.eval(m_namespace
-          + "/distribution-for-instance");
+        + "/distribution-for-instance");
     }
 
     Object result = m_distributionForInstanceFunction.invoke(inst, m_model);
     if (!(result instanceof double[])) {
       throw new Exception(
-          "distribution-for-instance function should return an array of doubles");
+        "distribution-for-instance function should return an array of doubles");
     }
-    
+
     Thread.currentThread().setContextClassLoader(prevCL);
 
     return (double[]) result;
@@ -293,26 +304,26 @@ public class ClojureClassifier extends AbstractClassifier implements
     if (m_model == null) {
       return "No model built yet";
     }
-    
+
     if (m_namespace == null || m_namespace.length() == 0) {
       return "No namspace for Clojure classifier specified.";
     }
 
-
     ClassLoader prevCL = Thread.currentThread().getContextClassLoader();
-    Thread.currentThread().setContextClassLoader(ClojureClassifier.class.getClassLoader());
+    Thread.currentThread().setContextClassLoader(
+      ClojureClassifier.class.getClassLoader());
     if (!m_clojureRequire) {
       Clojure.require(m_namespace);
       m_clojureRequire = true;
     }
 
     if (Clojure.eval("(resolve (symbol \"" + m_namespace
-        + "/model-to-string\"))") != null) {
+      + "/model-to-string\"))") != null) {
       IFn stringFn = (IFn) Clojure.eval(m_namespace + "/model-to-string");
-      
-      String result = stringFn.invoke(m_model, m_header).toString(); 
+
+      String result = stringFn.invoke(m_model, m_header).toString();
       Thread.currentThread().setContextClassLoader(prevCL);
-      
+
       return result;
     }
 
@@ -321,35 +332,34 @@ public class ClojureClassifier extends AbstractClassifier implements
     return m_model.toString();
   }
 
-//  public static void main(String[] args) {
-//    try {
-//      Instances train = new Instances(new java.io.FileReader(args[0]));
-//      train.setClassIndex(train.numAttributes() - 1);
-//
-//      ClojureClassifier classifier = new ClojureClassifier();
-//      classifier.setNamespace("weka-clj.simple");
-//
-//      classifier.buildClassifier(train);
-//      System.out.println("Clojure classifier:\n\n" + classifier.toString());
-//
-//      // predict for the first instance
-//      double[] preds = classifier.distributionForInstance(train.instance(0));
-//      for (int i = 0; i < preds.length; i++) {
-//        System.out.print(" " + preds[i]);
-//      }
-//      System.out.println();
-//    } catch (Exception ex) {
-//      ex.printStackTrace();
-//    }
-//  }
-  
+  // public static void main(String[] args) {
+  // try {
+  // Instances train = new Instances(new java.io.FileReader(args[0]));
+  // train.setClassIndex(train.numAttributes() - 1);
+  //
+  // ClojureClassifier classifier = new ClojureClassifier();
+  // classifier.setNamespace("weka-clj.simple");
+  //
+  // classifier.buildClassifier(train);
+  // System.out.println("Clojure classifier:\n\n" + classifier.toString());
+  //
+  // // predict for the first instance
+  // double[] preds = classifier.distributionForInstance(train.instance(0));
+  // for (int i = 0; i < preds.length; i++) {
+  // System.out.print(" " + preds[i]);
+  // }
+  // System.out.println();
+  // } catch (Exception ex) {
+  // ex.printStackTrace();
+  // }
+  // }
+
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv the options
    */
   public static void main(String[] args) {
     runClassifier(new ClojureClassifier(), args);
   }
 }
-
