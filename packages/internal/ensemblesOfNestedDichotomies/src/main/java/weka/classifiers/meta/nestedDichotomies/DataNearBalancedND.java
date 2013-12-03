@@ -20,43 +20,45 @@
  */
 package weka.classifiers.meta.nestedDichotomies;
 
-import weka.classifiers.Classifier;
+import java.util.Hashtable;
+import java.util.Random;
+
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.instance.RemoveWithValues;
 
-import java.util.Hashtable;
-import java.util.Random;
-
-
 /**
- <!-- globalinfo-start -->
- * A meta classifier for handling multi-class datasets with 2-class classifiers by building a random data-balanced tree structure.<br/>
+ * <!-- globalinfo-start --> A meta classifier for handling multi-class datasets
+ * with 2-class classifiers by building a random data-balanced tree structure.<br/>
  * <br/>
  * For more info, check<br/>
  * <br/>
- * Lin Dong, Eibe Frank, Stefan Kramer: Ensembles of Balanced Nested Dichotomies for Multi-class Problems. In: PKDD, 84-95, 2005.<br/>
+ * Lin Dong, Eibe Frank, Stefan Kramer: Ensembles of Balanced Nested Dichotomies
+ * for Multi-class Problems. In: PKDD, 84-95, 2005.<br/>
  * <br/>
- * Eibe Frank, Stefan Kramer: Ensembles of nested dichotomies for multi-class problems. In: Twenty-first International Conference on Machine Learning, 2004.
+ * Eibe Frank, Stefan Kramer: Ensembles of nested dichotomies for multi-class
+ * problems. In: Twenty-first International Conference on Machine Learning,
+ * 2004.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;inproceedings{Dong2005,
  *    author = {Lin Dong and Eibe Frank and Stefan Kramer},
@@ -76,123 +78,151 @@ import java.util.Random;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -S &lt;num&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- * <pre> -W
+ * <pre>
+ * -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.trees.J48)</pre>
+ *  (default: weka.classifiers.trees.J48)
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to classifier weka.classifiers.trees.J48:
  * </pre>
  * 
- * <pre> -U
- *  Use unpruned tree.</pre>
+ * <pre>
+ * -U
+ *  Use unpruned tree.
+ * </pre>
  * 
- * <pre> -C &lt;pruning confidence&gt;
+ * <pre>
+ * -C &lt;pruning confidence&gt;
  *  Set confidence threshold for pruning.
- *  (default 0.25)</pre>
+ *  (default 0.25)
+ * </pre>
  * 
- * <pre> -M &lt;minimum number of instances&gt;
+ * <pre>
+ * -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf.
- *  (default 2)</pre>
+ *  (default 2)
+ * </pre>
  * 
- * <pre> -R
- *  Use reduced error pruning.</pre>
+ * <pre>
+ * -R
+ *  Use reduced error pruning.
+ * </pre>
  * 
- * <pre> -N &lt;number of folds&gt;
+ * <pre>
+ * -N &lt;number of folds&gt;
  *  Set number of folds for reduced error
  *  pruning. One fold is used as pruning set.
- *  (default 3)</pre>
+ *  (default 3)
+ * </pre>
  * 
- * <pre> -B
- *  Use binary splits only.</pre>
+ * <pre>
+ * -B
+ *  Use binary splits only.
+ * </pre>
  * 
- * <pre> -S
- *  Don't perform subtree raising.</pre>
+ * <pre>
+ * -S
+ *  Don't perform subtree raising.
+ * </pre>
  * 
- * <pre> -L
- *  Do not clean up after the tree has been built.</pre>
+ * <pre>
+ * -L
+ *  Do not clean up after the tree has been built.
+ * </pre>
  * 
- * <pre> -A
- *  Laplace smoothing for predicted probabilities.</pre>
+ * <pre>
+ * -A
+ *  Laplace smoothing for predicted probabilities.
+ * </pre>
  * 
- * <pre> -Q &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
+ * <pre>
+ * -Q &lt;seed&gt;
+ *  Seed for random data shuffling (default 1).
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Lin Dong
  * @author Eibe Frank
  */
-public class DataNearBalancedND 
-  extends RandomizableSingleClassifierEnhancer
+public class DataNearBalancedND extends RandomizableSingleClassifierEnhancer
   implements TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5117477294209496368L;
-  
+
   /** The filtered classifier in which the base classifier is wrapped. */
   protected FilteredClassifier m_FilteredClassifier;
-    
+
   /** The hashtable for this node. */
-  protected Hashtable m_classifiers=new Hashtable();
+  protected Hashtable<String, Classifier> m_classifiers = new Hashtable<String, Classifier>();
 
   /** The first successor */
   protected DataNearBalancedND m_FirstSuccessor = null;
 
   /** The second successor */
   protected DataNearBalancedND m_SecondSuccessor = null;
-  
+
   /** The classes that are grouped together at the current node */
   protected Range m_Range = null;
-    
+
   /** Is Hashtable given from END? */
   protected boolean m_hashtablegiven = false;
-    
+
   /**
    * Constructor.
    */
   public DataNearBalancedND() {
-    
+
     m_Classifier = new weka.classifiers.trees.J48();
   }
-  
+
   /**
    * String describing default classifier.
    * 
    * @return the default classifier classname
    */
+  @Override
   protected String defaultClassifierString() {
-    
+
     return "weka.classifiers.trees.J48";
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
+    TechnicalInformation result;
+    TechnicalInformation additional;
+
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "Lin Dong and Eibe Frank and Stefan Kramer");
-    result.setValue(Field.TITLE, "Ensembles of Balanced Nested Dichotomies for Multi-class Problems");
+    result.setValue(Field.TITLE,
+      "Ensembles of Balanced Nested Dichotomies for Multi-class Problems");
     result.setValue(Field.BOOKTITLE, "PKDD");
     result.setValue(Field.YEAR, "2005");
     result.setValue(Field.PAGES, "84-95");
@@ -200,11 +230,13 @@ public class DataNearBalancedND
 
     additional = result.add(Type.INPROCEEDINGS);
     additional.setValue(Field.AUTHOR, "Eibe Frank and Stefan Kramer");
-    additional.setValue(Field.TITLE, "Ensembles of nested dichotomies for multi-class problems");
-    additional.setValue(Field.BOOKTITLE, "Twenty-first International Conference on Machine Learning");
+    additional.setValue(Field.TITLE,
+      "Ensembles of nested dichotomies for multi-class problems");
+    additional.setValue(Field.BOOKTITLE,
+      "Twenty-first International Conference on Machine Learning");
     additional.setValue(Field.YEAR, "2004");
     additional.setValue(Field.PUBLISHER, "ACM");
-    
+
     return result;
   }
 
@@ -213,15 +245,15 @@ public class DataNearBalancedND
    * 
    * @param table the hashtable to use
    */
-  public void setHashtable(Hashtable table) {
+  public void setHashtable(Hashtable<String, Classifier> table) {
 
     m_hashtablegiven = true;
     m_classifiers = table;
   }
-    
+
   /**
    * Generates a classifier for the current node and proceeds recursively.
-   *
+   * 
    * @param data contains the (multi-class) instances
    * @param classes contains the indices of the classes that are present
    * @param rand the random number generator to use
@@ -231,10 +263,9 @@ public class DataNearBalancedND
    * @throws Exception if anything goes worng
    */
   private void generateClassifierForNode(Instances data, Range classes,
-                                         Random rand, Classifier classifier, Hashtable table,
-                                         double[] instsNumAllClasses) 
-    throws Exception {
-	
+    Random rand, Classifier classifier, Hashtable<String, Classifier> table,
+    double[] instsNumAllClasses) throws Exception {
+
     // Get the indices
     int[] indices = classes.getSelection();
 
@@ -248,11 +279,11 @@ public class DataNearBalancedND
 
     // Pick the classes for the current split
     double total = 0;
-    for (int j = 0; j < indices.length; j++) {
-      total += instsNumAllClasses[indices[j]];
+    for (int indice : indices) {
+      total += instsNumAllClasses[indice];
     }
     double halfOfTotal = total / 2;
-	
+
     // Go through the list of classes until the either the left or
     // right subset exceeds half the total weight
     double sumLeft = 0, sumRight = 0;
@@ -282,13 +313,13 @@ public class DataNearBalancedND
     int[] secondInds = new int[second];
     System.arraycopy(indices, 0, firstInds, 0, first);
     System.arraycopy(indices, first, secondInds, 0, second);
-    	
+
     // Sort the indices (important for hash key)!
     int[] sortedFirst = Utils.sort(firstInds);
     int[] sortedSecond = Utils.sort(secondInds);
     int[] firstCopy = new int[first];
     int[] secondCopy = new int[second];
-       for (int k = 0; k < sortedFirst.length; k++) {
+    for (int k = 0; k < sortedFirst.length; k++) {
       firstCopy[k] = firstInds[sortedFirst[k]];
     }
     firstInds = firstCopy;
@@ -296,7 +327,7 @@ public class DataNearBalancedND
       secondCopy[k] = secondInds[sortedSecond[k]];
     }
     secondInds = secondCopy;
-		
+
     // Unify indices to improve hashing
     if (firstInds[0] > secondInds[0]) {
       int[] help = secondInds;
@@ -312,7 +343,7 @@ public class DataNearBalancedND
 
     Range secondRange = new Range(Range.indicesToRangeList(secondInds));
     secondRange.setUpper(data.numClasses() - 1);
-       
+
     // Change the class labels and build the classifier
     MakeIndicator filter = new MakeIndicator();
     filter.setAttributeIndex("" + (data.classIndex() + 1));
@@ -321,23 +352,26 @@ public class DataNearBalancedND
     filter.setInputFormat(data);
     m_FilteredClassifier = new FilteredClassifier();
     if (data.numInstances() > 0) {
-      m_FilteredClassifier.setClassifier(AbstractClassifier.makeCopies(classifier, 1)[0]);
+      m_FilteredClassifier.setClassifier(AbstractClassifier.makeCopies(
+        classifier, 1)[0]);
     } else {
       m_FilteredClassifier.setClassifier(new weka.classifiers.rules.ZeroR());
     }
     m_FilteredClassifier.setFilter(filter);
 
     // Save reference to hash table at current node
-    m_classifiers=table;
-	
-    if (!m_classifiers.containsKey( getString(firstInds) + "|" + getString(secondInds))) {
+    m_classifiers = table;
+
+    if (!m_classifiers.containsKey(getString(firstInds) + "|"
+      + getString(secondInds))) {
       m_FilteredClassifier.buildClassifier(data);
-      m_classifiers.put(getString(firstInds) + "|" + getString(secondInds), m_FilteredClassifier);
+      m_classifiers.put(getString(firstInds) + "|" + getString(secondInds),
+        m_FilteredClassifier);
     } else {
-      m_FilteredClassifier=(FilteredClassifier)m_classifiers.get(getString(firstInds) + "|" + 
-								 getString(secondInds));	
+      m_FilteredClassifier = (FilteredClassifier) m_classifiers
+        .get(getString(firstInds) + "|" + getString(secondInds));
     }
-				
+
     // Create two successors if necessary
     m_FirstSuccessor = new DataNearBalancedND();
     if (first == 1) {
@@ -349,9 +383,8 @@ public class DataNearBalancedND
       rwv.setAttributeIndex("" + (data.classIndex() + 1));
       rwv.setInputFormat(data);
       Instances firstSubset = Filter.useFilter(data, rwv);
-      m_FirstSuccessor.generateClassifierForNode(firstSubset, m_Range, 
-                                                 rand, classifier, m_classifiers,
-                                                 instsNumAllClasses);
+      m_FirstSuccessor.generateClassifierForNode(firstSubset, m_Range, rand,
+        classifier, m_classifiers, instsNumAllClasses);
     }
     m_SecondSuccessor = new DataNearBalancedND();
     if (second == 1) {
@@ -364,18 +397,18 @@ public class DataNearBalancedND
       rwv.setInputFormat(data);
       Instances secondSubset = Filter.useFilter(data, rwv);
       m_SecondSuccessor = new DataNearBalancedND();
-      
-      m_SecondSuccessor.generateClassifierForNode(secondSubset, secondRange, 
-                                                  rand, classifier, m_classifiers,
-                                                  instsNumAllClasses);
+
+      m_SecondSuccessor.generateClassifierForNode(secondSubset, secondRange,
+        rand, classifier, m_classifiers, instsNumAllClasses);
     }
   }
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
@@ -386,16 +419,17 @@ public class DataNearBalancedND
 
     // instances
     result.setMinimumNumberInstances(1);
-    
+
     return result;
   }
-    
+
   /**
    * Builds tree recursively.
-   *
+   * 
    * @param data contains the (multi-class) instances
    * @throws Exception if the building fails
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     // can classifier handle the data?
@@ -404,18 +438,18 @@ public class DataNearBalancedND
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+
     Random random = data.getRandomNumberGenerator(m_Seed);
-	
+
     if (!m_hashtablegiven) {
-      m_classifiers = new Hashtable();
+      m_classifiers = new Hashtable<String, Classifier>();
     }
-	
+
     // Check which classes are present in the
     // data and construct initial list of classes
     boolean[] present = new boolean[data.numClasses()];
     for (int i = 0; i < data.numInstances(); i++) {
-      present[(int)data.instance(i).classValue()] = true;
+      present[(int) data.instance(i).classValue()] = true;
     }
     StringBuffer list = new StringBuffer();
     for (int i = 0; i < present.length; i++) {
@@ -430,24 +464,27 @@ public class DataNearBalancedND
     // Determine the number of instances in each class
     double[] instsNum = new double[data.numClasses()];
     for (int i = 0; i < data.numInstances(); i++) {
-      instsNum[(int)data.instance(i).classValue()] += data.instance(i).weight();
+      instsNum[(int) data.instance(i).classValue()] += data.instance(i)
+        .weight();
     }
-      
+
     Range newRange = new Range(list.toString());
     newRange.setUpper(data.numClasses() - 1);
-	
-    generateClassifierForNode(data, newRange, random, m_Classifier, m_classifiers, instsNum);
+
+    generateClassifierForNode(data, newRange, random, m_Classifier,
+      m_classifiers, instsNum);
   }
-    
+
   /**
    * Predicts the class distribution for a given instance
-   *
+   * 
    * @param inst the (multi-class) instance to be classified
    * @return the class distribution
    * @throws Exception if computing fails
    */
+  @Override
   public double[] distributionForInstance(Instance inst) throws Exception {
-	
+
     double[] newDist = new double[inst.numClasses()];
     if (m_FirstSuccessor == null) {
       for (int i = 0; i < inst.numClasses(); i++) {
@@ -470,32 +507,32 @@ public class DataNearBalancedND
           newDist[i] = dist[0] * secondDist[i];
         }
       }
-      if  (!Utils.eq(Utils.sum(newDist), 1)) {
+      if (!Utils.eq(Utils.sum(newDist), 1)) {
         System.err.println(Utils.sum(newDist));
-        for (int j = 0; j < dist.length; j++) {
-          System.err.print(dist[j] + " ");
+        for (double element : dist) {
+          System.err.print(element + " ");
         }
         System.err.println();
-        for (int j = 0; j < newDist.length; j++) {
-          System.err.print(newDist[j] + " ");
+        for (double element : newDist) {
+          System.err.print(element + " ");
         }
         System.err.println();
         System.err.println(inst);
         System.err.println(m_FilteredClassifier);
-        //System.err.println(m_Data);
+        // System.err.println(m_Data);
         System.err.println("bad");
       }
       return newDist;
     }
   }
-    
+
   /**
    * Returns the list of indices as a string.
    * 
    * @param indices the indices to return as string
    * @return the indices as string
    */
-  public String getString(int [] indices) {
+  public String getString(int[] indices) {
 
     StringBuffer string = new StringBuffer();
     for (int i = 0; i < indices.length; i++) {
@@ -506,37 +543,36 @@ public class DataNearBalancedND
     }
     return string.toString();
   }
-	
+
   /**
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-	    
-    return 
-        "A meta classifier for handling multi-class datasets with 2-class "
+
+    return "A meta classifier for handling multi-class datasets with 2-class "
       + "classifiers by building a random data-balanced tree structure.\n\n"
-      + "For more info, check\n\n"
-      + getTechnicalInformation().toString();
+      + "For more info, check\n\n" + getTechnicalInformation().toString();
   }
-	
+
   /**
    * Outputs the classifier as a string.
    * 
    * @return a string representation of the classifier
    */
+  @Override
   public String toString() {
-	    
+
     if (m_classifiers == null) {
       return "DataNearBalancedND: No model built yet.";
     }
     StringBuffer text = new StringBuffer();
     text.append("DataNearBalancedND");
     treeToString(text, 0);
-	    
+
     return text.toString();
   }
-	
+
   /**
    * Returns string description of the tree.
    * 
@@ -545,7 +581,7 @@ public class DataNearBalancedND
    * @return the next node number
    */
   private int treeToString(StringBuffer text, int nn) {
-	    
+
     nn++;
     text.append("\n\nNode number: " + nn + "\n\n");
     if (m_FilteredClassifier != null) {
@@ -559,23 +595,23 @@ public class DataNearBalancedND
     }
     return nn;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-    	
+
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv the options
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runClassifier(new DataNearBalancedND(), argv);
   }
 }
-
