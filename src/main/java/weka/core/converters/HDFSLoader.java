@@ -58,7 +58,7 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
   protected AbstractFileLoader m_delegate = new CSVLoader();
 
   /** The path in HDFS to load from */
-  protected String m_hdfsPath = "/"; //$NON-NLS-1$
+  protected String m_hdfsPath = "/";
 
   /** Configuration of HDFS hostname and port */
   protected HDFSConfig m_config = new HDFSConfig();
@@ -84,22 +84,22 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
    * @return textual help information
    */
   public String globalInfo() {
-    return "Read files from HDFS using a base loader."; //$NON-NLS-1$
+    return "Read files from HDFS using a base loader.";
   }
 
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option("\tThe path to source file in HDFS.", //$NON-NLS-1$
-      "source", 1, "-source <path>")); //$NON-NLS-1$ //$NON-NLS-2$
+    result.addElement(new Option("\tThe path to source file in HDFS.",
+      "source", 1, "-source <path>"));
 
     result
       .addElement(new Option(
-        "\tThe fully qualified name of the underlying loader to use, followed by its options\n\t" //$NON-NLS-1$
-          + ". E.g. \"weka.core.converters.CSVLoader -N first\".\n\t" //$NON-NLS-1$
-          + "(default: weka.core.converters.CSVLoader", "loader", 1, //$NON-NLS-1$ //$NON-NLS-2$
-        "-loader <loader>")); //$NON-NLS-1$
+        "\tThe fully qualified name of the underlying loader to use, followed by its options\n\t"
+          + ". E.g. \"weka.core.converters.CSVLoader -N first\".\n\t"
+          + "(default: weka.core.converters.CSVLoader", "loader", 1,
+        "-loader <loader>"));
 
     Enumeration<Option> hdfsOpts = new HDFSConfig().listOptions();
     while (hdfsOpts.hasMoreElements()) {
@@ -112,18 +112,18 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
   @Override
   public void setOptions(String[] options) throws Exception {
     m_config = new HDFSConfig();
-    String path = Utils.getOption("source", options); //$NON-NLS-1$
+    String path = Utils.getOption("source", options);
 
     if (!DistributedJobConfig.isEmpty(path)) {
       setHDFSPath(path);
     }
 
-    String loaderSpec = Utils.getOption("loader", options); //$NON-NLS-1$
+    String loaderSpec = Utils.getOption("loader", options);
 
     if (!DistributedJobConfig.isEmpty(loaderSpec)) {
       String[] split = Utils.splitOptions(loaderSpec);
       String loaderClass = split[0];
-      split[0] = ""; //$NON-NLS-1$
+      split[0] = "";
 
       setLoader((AbstractFileLoader) Utils.forName(AbstractFileLoader.class,
         loaderClass, split));
@@ -136,13 +136,13 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
   public String[] getOptions() {
     Vector<String> result = new Vector<String>();
 
-    result.add("-source"); //$NON-NLS-1$
+    result.add("-source");
     result.add(getHDFSPath());
 
-    result.add("-loader"); //$NON-NLS-1$
+    result.add("-loader");
     String loaderSpec = m_delegate.getClass().getName();
     if (m_delegate instanceof OptionHandler) {
-      loaderSpec += " " //$NON-NLS-1$
+      loaderSpec += " "
         + Utils.joinOptions(((OptionHandler) m_delegate).getOptions());
     }
     result.add(loaderSpec);
@@ -163,8 +163,13 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
     return m_config;
   }
 
+  /**
+   * Tip text for this property
+   * 
+   * @return the tip text for this property
+   */
   public String HDFSPathTipText() {
-    return "Set the path to load from in HDFS"; //$NON-NLS-1$
+    return "Set the path to load from in HDFS";
   }
 
   /**
@@ -191,7 +196,7 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
    * @return the tip text for this property
    */
   public String loaderTipText() {
-    return "The base loader (file type) to use"; //$NON-NLS-1$
+    return "The base loader (file type) to use";
   }
 
   /**
@@ -225,9 +230,9 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
     } catch (Exception ex) {
     }
 
-    if (!url.toLowerCase().startsWith("hdfs://")) { //$NON-NLS-1$
-      url = "hdfs://" + m_config.getHDFSHost() + ":" + m_config.getHDFSPort() //$NON-NLS-1$ //$NON-NLS-2$
-        + (m_hdfsPath.startsWith("/") ? m_hdfsPath : "/" + m_hdfsPath); //$NON-NLS-1$ //$NON-NLS-2$
+    if (!url.toLowerCase().startsWith("hdfs://")) {
+      url = "hdfs://" + m_config.getHDFSHost() + ":" + m_config.getHDFSPort()
+        + (m_hdfsPath.startsWith("/") ? m_hdfsPath : "/" + m_hdfsPath);
     }
 
     try {
@@ -240,8 +245,7 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
 
   @Override
   public String getRevision() {
-    // TODO Auto-generated method stub
-    return null;
+    return "$Revision$";
   }
 
   @Override
@@ -264,12 +268,12 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
           HDFSConfig.constructHostURL(m_config, m_env));
 
         // the default of 10 is nutty
-        conf.set(HDFSConfig.IPC_CLIENT_CONNECT_MAX_RETRIES, "" + 2); //$NON-NLS-1$
+        conf.set(HDFSConfig.IPC_CLIENT_CONNECT_MAX_RETRIES, "" + 2);
         FileSystem fs = FileSystem.get(conf);
 
         if (!fs.exists(pt)) {
-          throw new IOException("The source file - \"" + url //$NON-NLS-1$
-            + "\" does not seem to exist in HDFS"); //$NON-NLS-1$
+          throw new IOException("The source file - \"" + url
+            + "\" does not seem to exist in HDFS");
         }
 
         m_delegate.reset();
@@ -277,8 +281,8 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
         m_delegate.setSource(fin);
         m_structure = m_delegate.getStructure();
       } catch (java.net.ConnectException ce) {
-        throw new StructureNotReadyException("Unable to connect to host " //$NON-NLS-1$
-          + m_config.getHDFSHost() + ":" + m_config.getHDFSPort()); //$NON-NLS-1$
+        throw new StructureNotReadyException("Unable to connect to host "
+          + m_config.getHDFSHost() + ":" + m_config.getHDFSPort());
       }
     }
 
@@ -290,7 +294,7 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
 
     if (getRetrieval() == INCREMENTAL) {
       throw new IOException(
-        "Cannot mix getting instances in both incremental and batch modes"); //$NON-NLS-1$
+        "Cannot mix getting instances in both incremental and batch modes");
     }
     setRetrieval(BATCH);
 
@@ -305,12 +309,12 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
         HDFSConfig.constructHostURL(m_config, m_env));
 
       // the default of 10 is nutty
-      conf.set(HDFSConfig.IPC_CLIENT_CONNECT_MAX_RETRIES, "" + 2); //$NON-NLS-1$
+      conf.set(HDFSConfig.IPC_CLIENT_CONNECT_MAX_RETRIES, "" + 2);
       FileSystem fs = FileSystem.get(conf);
 
       if (!fs.exists(pt)) {
-        throw new Exception("The source file - \"" + url //$NON-NLS-1$
-          + "\" does not seem to exist in HDFS"); //$NON-NLS-1$
+        throw new Exception("The source file - \"" + url
+          + "\" does not seem to exist in HDFS");
       }
 
       m_delegate.reset();
@@ -368,12 +372,11 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
   }
 
   @Override
-  public void run(Object toRun, String[] options)
-    throws IllegalArgumentException {
+  public void run(Object toRun, String[] options) {
 
     if (!(toRun instanceof HDFSLoader)) {
       throw new IllegalArgumentException(
-        "Object to excecute is not an HDFSLoader!"); //$NON-NLS-1$
+        "Object to excecute is not an HDFSLoader!");
     }
     DFSConverterUtils.runLoader((HDFSLoader) toRun, options);
   }
