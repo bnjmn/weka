@@ -20,42 +20,46 @@
  */
 package weka.classifiers.trees;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Vector;
+
 import weka.classifiers.RandomizableClassifier;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Utils;
-import weka.core.ContingencyTables;
-import weka.core.Option;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.ContingencyTables;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.PartitionGenerator;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
-import weka.core.PartitionGenerator;
+import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.Queue;
-import java.util.LinkedList;
-
-import java.io.Serializable;
-
 /**
- <!-- globalinfo-start -->
- * Class for generating a single Extra-Tree. Use with the RandomCommittee meta classifier to generate an Extra-Trees forest for classification or regression. This classifier requires all predictors to be numeric. Missing values are not allowed. Instance weights are taken into account. For more information, see<br/>
+ * <!-- globalinfo-start --> Class for generating a single Extra-Tree. Use with
+ * the RandomCommittee meta classifier to generate an Extra-Trees forest for
+ * classification or regression. This classifier requires all predictors to be
+ * numeric. Missing values are not allowed. Instance weights are taken into
+ * account. For more information, see<br/>
  * <br/>
- * Pierre Geurts, Damien Ernst, Louis Wehenkel (2006). Extremely randomized trees. Machine Learning. 63(1):3-42.
+ * Pierre Geurts, Damien Ernst, Louis Wehenkel (2006). Extremely randomized
+ * trees. Machine Learning. 63(1):3-42.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;article{Geurts2006,
  *    author = {Pierre Geurts and Damien Ernst and Louis Wehenkel},
@@ -68,33 +72,41 @@ import java.io.Serializable;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -K &lt;number of attributes&gt;
- *  Number of attributes to randomly choose at a node. If values is -1, (m - 1) will be used for regression problems, and Math.rint(sqrt(m - 1)) for classification problems, where m is the number of predictors, as specified in Geurts et al. (default -1).</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -N &lt;minimum number of instances&gt;
- *  The minimum number of instances required at a node for splitting to be considered. If value is -1, 5 will be used for regression problems and 2 for classification problems, as specified in Geurts et al. (default -1).</pre>
+ * <pre>
+ * -K &lt;number of attributes&gt;
+ *  Number of attributes to randomly choose at a node. If values is -1, (m - 1) will be used for regression problems, and Math.rint(sqrt(m - 1)) for classification problems, where m is the number of predictors, as specified in Geurts et al. (default -1).
+ * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -N &lt;minimum number of instances&gt;
+ *  The minimum number of instances required at a node for splitting to be considered. If value is -1, 5 will be used for regression problems and 2 for classification problems, as specified in Geurts et al. (default -1).
+ * </pre>
+ * 
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class ExtraTree extends RandomizableClassifier 
-  implements Serializable, OptionHandler, TechnicalInformationHandler, 
-             WeightedInstancesHandler, PartitionGenerator   {
+public class ExtraTree extends RandomizableClassifier implements Serializable,
+  OptionHandler, TechnicalInformationHandler, WeightedInstancesHandler,
+  PartitionGenerator {
 
   // We want this to make the classifier uniquely identifiable
   static final long serialVersionUID = 7354290459723928536L;
@@ -110,8 +122,9 @@ public class ExtraTree extends RandomizableClassifier
 
   /**
    * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
   public String globalInfo() {
 
@@ -123,31 +136,34 @@ public class ExtraTree extends RandomizableClassifier
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
+    TechnicalInformation result;
+
     result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Pierre Geurts and Damien Ernst and Louis Wehenkel");
+    result.setValue(Field.AUTHOR,
+      "Pierre Geurts and Damien Ernst and Louis Wehenkel");
     result.setValue(Field.TITLE, "Extremely randomized trees");
     result.setValue(Field.JOURNAL, "Machine Learning");
     result.setValue(Field.YEAR, "2006");
     result.setValue(Field.VOLUME, "63");
     result.setValue(Field.PAGES, "3-42");
     result.setValue(Field.NUMBER, "1");
-    
+
     return result;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String kTipText() {
     return "Number of attributes to randomly choose at a node. If values is -1, "
@@ -178,8 +194,9 @@ public class ExtraTree extends RandomizableClassifier
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String nminTipText() {
     return "The minimum number of instances required at a node for splitting "
@@ -212,20 +229,18 @@ public class ExtraTree extends RandomizableClassifier
    * 
    * @return an enumeration over all possible options
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>();
 
-    newVector.addElement(new Option("\t" + kTipText() + " (default -1).", "K", 1,
-        "-K <number of attributes>"));
+    newVector.addElement(new Option("\t" + kTipText() + " (default -1).", "K",
+      1, "-K <number of attributes>"));
 
-    newVector.addElement(new Option("\t" + nminTipText() + " (default -1).", "N", 1,
-        "-N <minimum number of instances>"));
+    newVector.addElement(new Option("\t" + nminTipText() + " (default -1).",
+      "N", 1, "-N <minimum number of instances>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement((Option)enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
   }
@@ -235,10 +250,10 @@ public class ExtraTree extends RandomizableClassifier
    * 
    * @return the options for the current setup
    */
+  @Override
   public String[] getOptions() {
+
     Vector<String> result;
-    String[] options;
-    int i;
 
     result = new Vector<String>();
 
@@ -248,42 +263,46 @@ public class ExtraTree extends RandomizableClassifier
     result.add("-N");
     result.add("" + getNmin());
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++) {
-      result.add(options[i]);
-    }
+    Collections.addAll(result, super.getOptions());
 
-    return (String[]) result.toArray(new String[result.size()]);
+    return result.toArray(new String[result.size()]);
   }
 
   /**
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -K &lt;number of attributes&gt;
-   *  Number of attributes to randomly choose at a node. If values is -1, (m - 1) will be used for regression problems, and Math.rint(sqrt(m - 1)) for classification problems, where m is the number of predictors, as specified in Geurts et al. (default -1).</pre>
+   * <pre>
+   * -K &lt;number of attributes&gt;
+   *  Number of attributes to randomly choose at a node. If values is -1, (m - 1) will be used for regression problems, and Math.rint(sqrt(m - 1)) for classification problems, where m is the number of predictors, as specified in Geurts et al. (default -1).
+   * </pre>
    * 
-   * <pre> -N &lt;minimum number of instances&gt;
-   *  The minimum number of instances required at a node for splitting to be considered. If value is -1, 5 will be used for regression problems and 2 for classification problems, as specified in Geurts et al. (default -1).</pre>
+   * <pre>
+   * -N &lt;minimum number of instances&gt;
+   *  The minimum number of instances required at a node for splitting to be considered. If value is -1, 5 will be used for regression problems and 2 for classification problems, as specified in Geurts et al. (default -1).
+   * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
    * <!-- options-end -->
    * 
-   * @param options
-   *            the list of options as an array of strings
-   * @throws Exception
-   *             if an option is not supported
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     String tmpStr;
 
@@ -311,6 +330,9 @@ public class ExtraTree extends RandomizableClassifier
    */
   protected class Tree implements Serializable {
 
+    /** ID added to avoid warning */
+    private static final long serialVersionUID = 2396257956703850154L;
+
     // The prediction
     protected double[] m_dist;
 
@@ -319,10 +341,10 @@ public class ExtraTree extends RandomizableClassifier
 
     // The split point
     protected double m_splitPoint;
-    
+
     // The successors
     protected Tree[] m_successors;
-    
+
     /**
      * Constructs a tree from data.
      */
@@ -339,8 +361,8 @@ public class ExtraTree extends RandomizableClassifier
         } else {
           m_dist = new double[data.numClasses()];
           for (int i = 0; i < data.numInstances(); i++) {
-            m_dist[(int)data.instance(i).classValue()] += 
-              data.instance(i).weight();
+            m_dist[(int) data.instance(i).classValue()] += data.instance(i)
+              .weight();
           }
           Utils.normalize(m_dist);
         }
@@ -352,16 +374,16 @@ public class ExtraTree extends RandomizableClassifier
           if (data.classAttribute().isNumeric()) {
             actualK = data.numAttributes() - 1;
           } else {
-            actualK = (int)Math.rint(Math.sqrt(data.numAttributes() - 1));
+            actualK = (int) Math.rint(Math.sqrt(data.numAttributes() - 1));
           }
         }
 
         // Consider K possible attributes
         int k = 0;
         double bestQuality = -Double.MAX_VALUE;
-        while ((k < actualK) && (al.size() > 0)) { 
+        while ((k < actualK) && (al.size() > 0)) {
           k++;
-      
+
           // Choose attribute index
           int randIndex = rand.nextInt(al.size());
           int attIndex = al.get(randIndex);
@@ -391,7 +413,7 @@ public class ExtraTree extends RandomizableClassifier
             m_splitPoint = splitPoint;
           }
         }
-        
+
         // Split data and recurse
         m_successors = new Tree[2];
         for (int i = 0; i < 2; i++) {
@@ -400,7 +422,8 @@ public class ExtraTree extends RandomizableClassifier
             if ((i == 0) && (data.instance(j).value(m_attIndex) < m_splitPoint)) {
               tempData.add(data.instance(j));
             }
-            if ((i == 1) && (data.instance(j).value(m_attIndex) >= m_splitPoint)) {
+            if ((i == 1)
+              && (data.instance(j).value(m_attIndex) >= m_splitPoint)) {
               tempData.add(data.instance(j));
             }
           }
@@ -413,7 +436,8 @@ public class ExtraTree extends RandomizableClassifier
     /**
      * Compute quality of split.
      */
-    protected double splitQuality(Instances data, int attIndex, double splitPoint) {
+    protected double splitQuality(Instances data, int attIndex,
+      double splitPoint) {
 
       // Compute required basic statistics
       double[][] dist = new double[2][data.numClasses()];
@@ -425,11 +449,11 @@ public class ExtraTree extends RandomizableClassifier
         double weight = inst.weight();
         if (data.classAttribute().isNominal()) {
           if ((inst.value(attIndex) < splitPoint)) {
-            dist[0][(int)inst.classValue()] += weight;
+            dist[0][(int) inst.classValue()] += weight;
           }
           if ((inst.value(attIndex) >= splitPoint)) {
-            dist[1][(int)inst.classValue()] += weight;
-          } 
+            dist[1][(int) inst.classValue()] += weight;
+          }
         } else {
           sumOfWeights += weight;
           mean += weight * inst.classValue();
@@ -439,7 +463,7 @@ public class ExtraTree extends RandomizableClassifier
           }
           if ((inst.value(attIndex) >= splitPoint)) {
             dist[1][0] += weight * inst.classValue();
-          } 
+          }
         }
       }
 
@@ -471,7 +495,7 @@ public class ExtraTree extends RandomizableClassifier
           if ((inst.value(attIndex) >= splitPoint)) {
             double diff = (inst.classValue() - dist[1][0]);
             var[1] += weight * diff * diff;
-          } 
+          }
           double diffGlobal = (inst.classValue() - mean);
           priorVar += weight * diffGlobal * diffGlobal;
         }
@@ -487,10 +511,10 @@ public class ExtraTree extends RandomizableClassifier
      * Returns leaf node info.
      */
     protected double[] distributionForInstance(Instance inst) {
-      
+
       // Are we at a leaf?
       if (m_successors == null) {
-          return m_dist;
+        return m_dist;
       } else {
         double val = inst.value(m_attIndex);
         if (val < m_splitPoint) {
@@ -507,7 +531,7 @@ public class ExtraTree extends RandomizableClassifier
     protected ArrayList<Integer> eligibleAttributes(Instances data) {
 
       ArrayList<Integer> al = null;
-      
+
       // Set specific value for Nmin
       int actual_min = m_n_min;
       if (m_n_min == -1) {
@@ -520,7 +544,7 @@ public class ExtraTree extends RandomizableClassifier
 
       // Check for minimum number of instances (actually, sum of weights)
       if (data.sumOfWeights() >= actual_min) {
-        
+
         // Check for constant class attribute
         double val = data.instance(0).classValue();
         boolean allTheSame = true;
@@ -531,7 +555,7 @@ public class ExtraTree extends RandomizableClassifier
           }
         }
         if (!allTheSame) {
-          
+
           // Check which attributes are eligible
           for (int j = 0; j < data.numAttributes(); j++) {
             if (j != data.classIndex()) {
@@ -555,9 +579,10 @@ public class ExtraTree extends RandomizableClassifier
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -569,13 +594,14 @@ public class ExtraTree extends RandomizableClassifier
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
-    
+
     return result;
   }
 
   /**
    * Builds one tree.
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     // can classifier handle the data?
@@ -584,25 +610,27 @@ public class ExtraTree extends RandomizableClassifier
     m_tree = new Tree(data, data.getRandomNumberGenerator(m_Seed));
   }
 
-  /** 
+  /**
    * Returns the distribution.
    */
+  @Override
   public double[] distributionForInstance(Instance inst) {
-    
+
     return m_tree.distributionForInstance(inst);
   }
 
   /**
    * Returns classifier description.
    */
+  @Override
   public String toString() {
 
     if (m_tree == null) {
       return "No tree has been built yet.";
     } else {
       try {
-        return "Extra-Tree with K = " + getK() + " and Nmin = " + getNmin() +
-          " (" + numElements() + " nodes in tree)";
+        return "Extra-Tree with K = " + getK() + " and Nmin = " + getNmin()
+          + " (" + numElements() + " nodes in tree)";
       } catch (Exception e) {
         return "Could not compute number of nodes in tree.";
       }
@@ -612,38 +640,40 @@ public class ExtraTree extends RandomizableClassifier
   /**
    * Builds the classifier to generate a partition.
    */
+  @Override
   public void generatePartition(Instances data) throws Exception {
-    
+
     buildClassifier(data);
   }
-	
+
   /**
-   * Computes array that indicates node membership. Array locations
-   * are allocated based on breadth-first exploration of the tree.
+   * Computes array that indicates node membership. Array locations are
+   * allocated based on breadth-first exploration of the tree.
    */
+  @Override
   public double[] getMembershipValues(Instance instance) throws Exception {
 
     // Set up array for membership values
     double[] a = new double[numElements()];
-      
+
     // Initialize queues
-    Queue<Double> queueOfWeights =  new LinkedList<Double>();
+    Queue<Double> queueOfWeights = new LinkedList<Double>();
     Queue<Tree> queueOfNodes = new LinkedList<Tree>();
     queueOfWeights.add(instance.weight());
     queueOfNodes.add(m_tree);
     int index = 0;
-    
+
     // While the queue is not empty
     while (!queueOfNodes.isEmpty()) {
-      
+
       a[index++] = queueOfWeights.poll();
       Tree node = queueOfNodes.poll();
-      
+
       // Is node a leaf?
       if (node.m_successors == null) {
-          continue;
+        continue;
       }
-      
+
       // Compute weight distribution
       double[] weights = new double[node.m_successors.length];
       if (instance.value(node.m_attIndex) < node.m_splitPoint) {
@@ -658,21 +688,22 @@ public class ExtraTree extends RandomizableClassifier
     }
     return a;
   }
-  
+
   /**
    * Returns the number of elements in the partition.
    */
+  @Override
   public int numElements() throws Exception {
 
     int numNodes = 0;
-    Queue<Tree> queueOfNodes = new LinkedList<Tree>(); 
+    Queue<Tree> queueOfNodes = new LinkedList<Tree>();
     queueOfNodes.add(m_tree);
-    while (!queueOfNodes.isEmpty()) { 
+    while (!queueOfNodes.isEmpty()) {
       Tree node = queueOfNodes.poll();
       numNodes++;
       if (node.m_successors != null) {
-        for (int i = 0; i < node.m_successors.length; i++) {
-          queueOfNodes.add(node.m_successors[i]);
+        for (Tree m_successor : node.m_successors) {
+          queueOfNodes.add(m_successor);
         }
       }
     }
@@ -682,8 +713,9 @@ public class ExtraTree extends RandomizableClassifier
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
@@ -696,4 +728,3 @@ public class ExtraTree extends RandomizableClassifier
     runClassifier(new ExtraTree(), args);
   }
 }
-
