@@ -56,13 +56,46 @@ import weka.filters.StreamableFilter;
 import distributed.core.DistributedJobConfig;
 
 /**
- * <!-- globalinfo-start -->
+ <!-- globalinfo-start -->
+ * Performs a principal components analysis and transformation of the data.<br/>
+ * Dimensionality reduction is accomplished by choosing enough eigenvectors to account for some percentage of the variance in the original data -- default 0.95 (95%).<br/>
+ * Based on code of the attribute selection scheme 'PrincipalComponents' by Mark Hall and Gabi Schmidberger.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * <!-- globalinfo-end -->
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <!-- options-start -->
+ * <pre> -header &lt;path to ARFF header&gt;
+ *  Path to the ARFF header used when the matrix
+ *  was constructed. Must contain summary attributes.</pre>
  * 
- * <!-- options-end -->
+ * <pre> -matrix &lt;path to matrix file&gt;
+ *  Path to the correlation/covariance matrix.</pre>
+ * 
+ * <pre> -covariance
+ *  Matrix is a covariance matrix (rather than correlation).</pre>
+ * 
+ * <pre> -keep-class
+ *  Keep the class (if set). Set this if the
+ *  class was retained when computing the matrix (i.e. there is a column
+ *  in the matrix corresponding to the class).</pre>
+ * 
+ * <pre> -R &lt;num&gt;
+ *  Retain enough PC attributes to account
+ *  for this proportion of variance in the original data.
+ *  (default: 0.95)</pre>
+ * 
+ * <pre> -A &lt;num&gt;
+ *  Maximum number of attributes to include in 
+ *  transformed attribute names.
+ *  (-1 = include all, default: 5)</pre>
+ * 
+ * <pre> -M &lt;num&gt;
+ *  Maximum number of PC attributes to retain.
+ *  (-1 = include all, default: -1)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -226,7 +259,8 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
    * @throws Exception if a problem occurs
    */
   public PreConstructedPCA(Instances header, Matrix matrix,
-    List<NumericStats> stats, boolean keepClassIfSet, boolean isCovariance) throws Exception {
+    List<NumericStats> stats, boolean keepClassIfSet, boolean isCovariance)
+    throws Exception {
     m_matrix = matrix;
     m_header = header;
     m_stats = stats;
@@ -257,7 +291,7 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
@@ -300,37 +334,39 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
    * Parses a list of options for this object.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -C
-   *  Center (rather than standardize) the
-   *  data and compute PCA using the covariance (rather
-   *   than the correlation) matrix.
-   * </pre>
+   * <pre> -header &lt;path to ARFF header&gt;
+   *  Path to the ARFF header used when the matrix
+   *  was constructed. Must contain summary attributes.</pre>
    * 
-   * <pre>
-   * -R &lt;num&gt;
+   * <pre> -matrix &lt;path to matrix file&gt;
+   *  Path to the correlation/covariance matrix.</pre>
+   * 
+   * <pre> -covariance
+   *  Matrix is a covariance matrix (rather than correlation).</pre>
+   * 
+   * <pre> -keep-class
+   *  Keep the class (if set). Set this if the
+   *  class was retained when computing the matrix (i.e. there is a column
+   *  in the matrix corresponding to the class).</pre>
+   * 
+   * <pre> -R &lt;num&gt;
    *  Retain enough PC attributes to account
    *  for this proportion of variance in the original data.
-   *  (default: 0.95)
-   * </pre>
+   *  (default: 0.95)</pre>
    * 
-   * <pre>
-   * -A &lt;num&gt;
+   * <pre> -A &lt;num&gt;
    *  Maximum number of attributes to include in 
    *  transformed attribute names.
-   *  (-1 = include all, default: 5)
-   * </pre>
+   *  (-1 = include all, default: 5)</pre>
    * 
-   * <pre>
-   * -M &lt;num&gt;
+   * <pre> -M &lt;num&gt;
    *  Maximum number of PC attributes to retain.
-   *  (-1 = include all, default: -1)
-   * </pre>
+   *  (-1 = include all, default: -1)</pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -745,11 +781,19 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
     }
   }
 
+  /**
+   * Remove useless attributes and adjust matrix accordingly
+   * 
+   * @param matrix the matrix to adjust
+   * @param stats summary statistics for the attributes represented in the
+   *          matrix
+   * @param useless a set in which to store the indexes of attributes/columns
+   *          deemed useless
+   * @return the adjusted matrix
+   */
   protected static double[][] removeUseless(double[][] matrix,
     List<NumericStats> stats, Set<Integer> useless) {
 
-    // scan for useless attributes and adjust the matrix if necessary
-    boolean first = true;
     for (int i = 0; i < stats.size(); i++) {
       NumericStats s = stats.get(i);
       double count = s.getStats()[ArffSummaryNumericMetric.COUNT.ordinal()];
@@ -1054,7 +1098,6 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
   protected Instance convertInstance(Instance instance) throws Exception {
     Instance result;
     double[] newVals;
-    Instance tempInst;
     double cumulative;
     int i;
     int j;
@@ -1062,7 +1105,6 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
     int numAttsLowerBound;
 
     newVals = new double[m_outputNumAtts];
-    tempInst = (Instance) instance.copy();
     double[] vals = instance.toDoubleArray();
     int valsSize = m_stats.size() - (m_useless != null ? m_useless.size() : 0);
     double[] vals2 = new double[valsSize];
@@ -1172,7 +1214,7 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
    * @param matrix that is decribed as a string
    * @return a String describing a matrix
    */
-  private String matrixToString(double[][] matrix) {
+  private static String matrixToString(double[][] matrix) {
     StringBuffer result = new StringBuffer();
     int last = matrix.length - 1;
 
@@ -1407,3 +1449,4 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
     m_sortedEigens = null;
   }
 }
+
