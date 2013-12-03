@@ -6,10 +6,10 @@
 PackageName=denormalize
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-12-03
 
 # Title (required)
 Title=An instance filter that collapses instances with a common grouping ID value into a single instance.
@@ -28,8 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=An instance filter that collapses instances with a common grouping ID value into a single instance. Useful for converting transactional data into a format that Weka's association rule learners can handle. IMPORTANT: assumes that the incoming batch of instances has been sorted on the grouping attribute. The values of nominal attributes are converted to indicator attributes. These can be either binary (with f and t values) or unary with missing values used to indicate absence. The later is Weka's old market basket format, which is useful for Apriori. Numeric attributes can be aggregated within groups by computing the average, sum, minimum or maximum.
 
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/denormalize1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/denormalize1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/denormalize

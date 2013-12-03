@@ -19,36 +19,35 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.classifiers.meta.FilteredClassifier;
-import weka.core.Instances;
-import weka.core.TestInstances;
-import weka.core.SparseInstance;
-import weka.filters.AbstractFilterTest;
-import weka.filters.Filter;
-import weka.filters.unsupervised.instance.Denormalize;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
 
 /**
- * Tests Denormalize. Run from the command line with:<p>
+ * Tests Denormalize. Run from the command line with:
+ * <p>
  * java weka.filters.unsupervised.instance.DenormalizeTest
- *
+ * 
  * @author Mark Hall
  * @version $Revision$
  */
 public class DenormalizeTest extends AbstractFilterTest {
-  
-  public DenormalizeTest(String name) { super(name);  }
-  
+
+  public DenormalizeTest(String name) {
+    super(name);
+  }
+
+  @Override
   public void setUp() throws Exception {
     super.setUp();
-    
+
     m_Instances.setClassIndex(1);
     m_FilteredClassifier = null;
   }
-  
+
   /** Creates an example Denormalize */
+  @Override
   public Filter getFilter() {
     Denormalize f = new Denormalize();
     f.setGroupingAttribute("2");
@@ -59,7 +58,7 @@ public class DenormalizeTest extends AbstractFilterTest {
     return new TestSuite(DenormalizeTest.class);
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
   }
 
