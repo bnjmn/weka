@@ -503,6 +503,7 @@ public class FlowRunner implements RevisionHandler {
    * @param args command line arguments
    */
   public static void main(String[] args) {
+    System.setProperty("apple.awt.UIElement", "true");
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
       "Logging started");
     if (args.length < 1) {
