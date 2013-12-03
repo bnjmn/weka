@@ -58,6 +58,13 @@ import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
 import distributed.hadoop.HDFSUtils;
 
+/**
+ * Hadoop job for constructing a correlation matrix. Has an option to use the
+ * matrix constructed for performing (a non-distributed) PCA analysis.
+ * 
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision$
+ */
 public class CorrelationMatrixHadoopJob extends HadoopJob implements
   TextProducer, CommandlineRunnable {
 
@@ -89,7 +96,7 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
   protected boolean m_runArffJob = true;
 
   /** Whether to run a PCA analysis after the job completes */
-  protected boolean m_runPCA = false;
+  protected boolean m_runPCA;
 
   /** Holds the textual PCA summary string (if PCA is run) */
   protected String m_pcaSummary = "";
@@ -448,14 +455,6 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       } catch (Exception ex) {
         throw new DistributedWekaException(ex);
       }
-
-      // for (int i = 0; i < headerI.numAttributes(); i++) {
-      // if (!headerI.attribute(i).isNumeric() && i != headerI.classIndex()) {
-      // throw new DistributedWekaException(
-      // "Correlation matrix job requires all numeric "
-      // + "attributes (appart from the class).");
-      // }
-      // }
     }
 
     // add the aggregated ARFF header to the distributed cache
@@ -829,15 +828,19 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
     return m_pcaSummary;
   }
 
+  /**
+   * Main method for executing this job from the command line
+   * 
+   * @param args arguments to the job
+   */
   public static void main(String[] args) {
 
     CorrelationMatrixHadoopJob job = new CorrelationMatrixHadoopJob();
     job.run(job, args);
-
   }
 
   @Override
-  public void run(Object toRun, String[] args) throws IllegalArgumentException {
+  public void run(Object toRun, String[] args) {
 
     if (!(toRun instanceof CorrelationMatrixHadoopJob)) {
       throw new IllegalArgumentException(
