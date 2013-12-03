@@ -6,10 +6,10 @@
 PackageName=isolationForest
 
 # Version (required)
-Version=1.0.1
+Version=1.0.2
 
 #Date
-Date=2013-02-08
+Date=2013-12-03
 
 # Title (required)
 Title=Class for building and using a classifier built on the Isolation Forest anomaly detection algorithm.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Class for building and using a classifier built on the Isolation Forest anomaly detection algorithm. For more information see Fei Tony Liu, Kai Ming Ting and Zhi-Hua Zhou. 2008. Proceedings of the 2008 Eighth IEEE International Conference on Data Mining, pages 413-422.
 
-Changes=One bug fix and one other change: Euler-Mascheroni constant was to be used instead of Math.E, and official implementation uses log2(n), where n is the number of datapoints, not log2(subsample size) as stated in the paper.
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/isolationForest1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/isolationForest1.0.2.zip?download
 
 # URL for further information
 URL=http://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf
