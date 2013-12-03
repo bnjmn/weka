@@ -59,7 +59,8 @@ public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
    * @param costMatrix the cost matrix to use
    * @throws Exception if a problem occurs
    */
-  public AggregateableEvaluationWithPriors(Instances data, CostMatrix costMatrix) throws Exception {
+  public AggregateableEvaluationWithPriors(Instances data, CostMatrix costMatrix)
+    throws Exception {
     super(data, costMatrix);
   }
 
@@ -115,6 +116,13 @@ public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
     }
   }
 
+  /**
+   * Randomly downsample the predictions
+   * 
+   * @param retain the fraction of the predictions to retain
+   * @param seed the random seed to use
+   * @throws Exception if a problem occurs
+   */
   public void prunePredictions(double retain, long seed) throws Exception {
     if (m_Predictions == null || m_Predictions.size() == 0) {
       return;
@@ -130,16 +138,22 @@ public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
       r.nextInt();
     }
 
-    FastVector downSampled = new FastVector(numToRetain);
+    FastVector<Prediction> downSampled = new FastVector<Prediction>(numToRetain);
+    FastVector<Prediction> tmpV = new FastVector<Prediction>();
+    tmpV.addAll(m_Predictions);
     for (int i = m_Predictions.size() - 1; i >= 0; i--) {
       int index = r.nextInt(i + 1);
-      downSampled.addElement(m_Predictions.elementAt(index));
+      // downSampled.addElement(m_Predictions.elementAt(index));
+      
+      // cast necessary for 3.7.10 compatibility
+      downSampled.add((Prediction) m_Predictions.get(index));
 
       if (downSampled.size() == numToRetain) {
         break;
       }
 
-      m_Predictions.swap(i, index);
+      // m_Predictions.swap(i, index);
+      tmpV.swap(i, index);
     }
 
     m_Predictions = downSampled;
