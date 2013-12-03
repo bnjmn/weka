@@ -6,10 +6,10 @@
 PackageName=chiSquaredAttributeEval
 
 # Version (required)
-Version=1.0.3
+Version=1.0.4
 
 #Date
-Date=2012-03-20
+Date=2013-12-03
 
 # Title (required)
 Title=Attribute evaluator that evaluates the worth of an attribute by computing the value of the chi-squared statistic with respect to the class.
@@ -28,8 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Evaluates the worth of an attribute by computing the value of the chi-squared statistic with respect to the class.
 
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/chiSquaredAttributeEval1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/chiSquaredAttributeEval1.0.4.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/chiSquaredAttributeEval
