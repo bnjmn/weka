@@ -35,6 +35,7 @@ import weka.core.Instances;
  * @version $Revision$
  * 
  */
+@SuppressWarnings("deprecation")
 public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
 
   /**
