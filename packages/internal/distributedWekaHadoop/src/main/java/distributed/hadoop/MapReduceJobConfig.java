@@ -58,9 +58,6 @@ import distributed.core.DistributedJobConfig;
 public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
   OptionHandler {
 
-  /** For serialization */
-  private static final long serialVersionUID = -1721850598954532369L;
-
   /** Internal key for the number of mappers to use */
   public static final String NUM_MAPPERS = "numMappers";
 
@@ -78,6 +75,9 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
 
   /** Internal key for the name of the reducer class */
   public static final String REDUCER_CLASS = "reducerClass";
+
+  /** Internal key for the name of the combiner class */
+  public static final String COMBINER_CLASS = "combinerClass";
 
   /** Internal key for the name of the input format class to use */
   public static final String INPUT_FORMAT_CLASS = "inputFormatClass";
@@ -107,10 +107,13 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
   public static final String MAPRED_MAX_SPLIT_SIZE = "mapredMaxSplitSize";
 
   /** Internal key for the Hadoop property for the job tracker host */
-  protected static String HADOOP_JOB_TRACKER_HOST = "mapred.job.tracker";
+  protected static final String HADOOP_JOB_TRACKER_HOST = "mapred.job.tracker";
 
   /** Internal key for the Hadoop property for the maximum block size */
-  protected static String HADOOP_MAPRED_MAX_SPLIT_SIZE = "mapred.max.split.size";
+  protected static final String HADOOP_MAPRED_MAX_SPLIT_SIZE = "mapred.max.split.size";
+
+  /** For serialization */
+  private static final long serialVersionUID = -1721850598954532369L;
 
   /** HDFSConfig for HDFS properties */
   protected HDFSConfig m_hdfsConfig = new HDFSConfig();
@@ -453,6 +456,26 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
   }
 
   /**
+   * Set the name of the reducer class (if any) to use. Weka jobs may set this
+   * automatically
+   * 
+   * @param combinerClass the name of the combiner class to use
+   */
+  public void setCombinerClass(String combinerClass) {
+    setProperty(COMBINER_CLASS, combinerClass);
+  }
+
+  /**
+   * Get the name of the reducer class (if any) to use. Weka jobs may set this
+   * automatically
+   * 
+   * @param return the name of the combiner class to use
+   */
+  public String getCombinerClass() {
+    return getProperty(COMBINER_CLASS);
+  }
+
+  /**
    * Set the name of the input format class to use. Weka jobs set this
    * automatically.
    * 
@@ -732,6 +755,7 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     }
     mapperClass = environmentSubstitute(mapperClass, env);
 
+    @SuppressWarnings("unchecked")
     Class<? extends Mapper> mc = (Class<? extends Mapper>) Class
       .forName(mapperClass);
 
@@ -744,10 +768,22 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     } else if (job.getNumReduceTasks() > 0) {
       reducerClass = environmentSubstitute(reducerClass, env);
 
+      @SuppressWarnings("unchecked")
       Class<? extends Reducer> rc = (Class<? extends Reducer>) Class
         .forName(reducerClass);
 
       job.setReducerClass(rc);
+    }
+
+    String combinerClass = getCombinerClass();
+    if (!DistributedJobConfig.isEmpty(combinerClass)) {
+      combinerClass = environmentSubstitute(combinerClass, env);
+
+      @SuppressWarnings("unchecked")
+      Class<? extends Reducer> cc = (Class<? extends Reducer>) Class
+        .forName(combinerClass);
+
+      job.setCombinerClass(cc);
     }
 
     String inputFormatClass = getInputFormatClass();
@@ -756,6 +792,7 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     }
     inputFormatClass = environmentSubstitute(inputFormatClass, env);
 
+    @SuppressWarnings("unchecked")
     Class<? extends InputFormat> ifc = (Class<? extends InputFormat>) Class
       .forName(inputFormatClass);
 
@@ -767,6 +804,7 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     }
     outputFormatClass = environmentSubstitute(outputFormatClass, env);
 
+    @SuppressWarnings("unchecked")
     Class<? extends OutputFormat> ofc = (Class<? extends OutputFormat>) Class
       .forName(outputFormatClass);
     job.setOutputFormatClass(ofc);
