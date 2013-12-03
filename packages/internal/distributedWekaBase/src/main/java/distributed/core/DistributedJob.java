@@ -45,6 +45,9 @@ public abstract class DistributedJob implements EnvironmentHandler,
   /** Property key for specifying weka packages to use in the job */
   public static final String WEKA_ADDITIONAL_PACKAGES_KEY = "weka.distributed.job.additional.packages";
 
+  /** For serialization */
+  private static final long serialVersionUID = 1752660860796976806L;
+
   /** Job name */
   protected String m_jobName = "Job";
 
@@ -61,7 +64,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
   protected transient Environment m_env = Environment.getSystemWide();
 
   /** True if the current job should abort */
-  protected boolean m_stopRunningJob = false;
+  protected boolean m_stopRunningJob;
 
   /** Enum of job status states */
   public static enum JobStatus {
