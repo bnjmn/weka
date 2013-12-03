@@ -23,6 +23,7 @@ package weka.attributeSelection;
 
 import java.io.File;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -45,64 +46,82 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
 /**
- <!-- globalinfo-start -->
- * Classifier subset evaluator:<br/>
+ * <!-- globalinfo-start --> Classifier subset evaluator:<br/>
  * <br/>
- * Evaluates attribute subsets on training data or a seperate hold out testing set. Uses a classifier to estimate the 'merit' of a set of attributes.
+ * Evaluates attribute subsets on training data or a seperate hold out testing
+ * set. Uses a classifier to estimate the 'merit' of a set of attributes.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -B &lt;classifier&gt;
+ * <pre>
+ * -B &lt;classifier&gt;
  *  class name of the classifier to use for accuracy estimation.
  *  Place any classifier options LAST on the command line
  *  following a "--". eg.:
  *   -B weka.classifiers.bayes.NaiveBayes ... -- -K
- *  (default: weka.classifiers.rules.ZeroR)</pre>
+ *  (default: weka.classifiers.rules.ZeroR)
+ * </pre>
  * 
- * <pre> -T
- *  Use the training data to estimate accuracy.</pre>
+ * <pre>
+ * -T
+ *  Use the training data to estimate accuracy.
+ * </pre>
  * 
- * <pre> -H &lt;filename&gt;
+ * <pre>
+ * -H &lt;filename&gt;
  *  Name of the hold out/test set to 
- *  estimate accuracy on.</pre>
+ *  estimate accuracy on.
+ * </pre>
  * 
- * <pre> -percentage-split
+ * <pre>
+ * -percentage-split
  *  Perform a percentage split on the training data.
- *  Use in conjunction with -T.</pre>
+ *  Use in conjunction with -T.
+ * </pre>
  * 
- * <pre> -P
- *  Split percentage to use (default = 90).</pre>
+ * <pre>
+ * -P
+ *  Split percentage to use (default = 90).
+ * </pre>
  * 
- * <pre> -S
- *  Random seed for percentage split (default = 1).</pre>
+ * <pre>
+ * -S
+ *  Random seed for percentage split (default = 1).
+ * </pre>
  * 
- * <pre> -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
+ * <pre>
+ * -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
  *  Performance evaluation measure to use for selecting attributes.
- *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
+ *  (Default = accuracy for discrete class and rmse for numeric class)
+ * </pre>
  * 
- * <pre> -IRclass &lt;label | index&gt;
+ * <pre>
+ * -IRclass &lt;label | index&gt;
  *  Optional class value (label or 1-based index) to use in conjunction with
  *  IR statistics (f-meas, auc or auprc). Omitting this option will use
- *  the class-weighted average.</pre>
+ *  the class-weighted average.
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to scheme weka.classifiers.rules.ZeroR:
  * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
 public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
-    OptionHandler, ErrorBasedMeritEvaluator {
+  OptionHandler, ErrorBasedMeritEvaluator {
 
   /** for serialization */
   static final long serialVersionUID = 7532217899385278710L;
@@ -117,21 +136,21 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
   private int m_numAttribs;
 
   /** number of training instances */
-  private int m_numInstances;
+  // private int m_numInstances; NOT USED
 
   /** holds the template classifier to use for error estimates */
   private Classifier m_ClassifierTemplate = new ZeroR();
-  
+
   /**
-   *  Holds the classifier used when evaluating single hold-out instances - this
-   * is used by RaceSearch and the trained classifier may need to persist between
-   * calls to that particular method.
+   * Holds the classifier used when evaluating single hold-out instances - this
+   * is used by RaceSearch and the trained classifier may need to persist
+   * between calls to that particular method.
    */
   private Classifier m_Classifier = new ZeroR();
 
   /** the file that containts hold out/test instances */
   private File m_holdOutFile = new File("Click to set hold out or "
-      + "test instances");
+    + "test instances");
 
   /** the instances to test on */
   private Instances m_holdOutInstances = null;
@@ -157,15 +176,15 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
   public static final int EVAL_AUPRC = 7;
 
   public static final Tag[] TAGS_EVALUATION = {
-      new Tag(EVAL_DEFAULT,
-          "Default: accuracy (discrete class); RMSE (numeric class)"),
-      new Tag(EVAL_ACCURACY, "Accuracy (discrete class only)"),
-      new Tag(EVAL_RMSE, "RMSE (of the class probabilities for discrete class)"),
-      new Tag(EVAL_MAE, "MAE (of the class probabilities for discrete class)"),
-      new Tag(EVAL_FMEASURE, "F-measure (discrete class only)"),
-      new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)"),
-      new Tag(EVAL_AUPRC,
-          "AUPRC (area under the precision-recall curve - discrete class only)") };
+    new Tag(EVAL_DEFAULT,
+      "Default: accuracy (discrete class); RMSE (numeric class)"),
+    new Tag(EVAL_ACCURACY, "Accuracy (discrete class only)"),
+    new Tag(EVAL_RMSE, "RMSE (of the class probabilities for discrete class)"),
+    new Tag(EVAL_MAE, "MAE (of the class probabilities for discrete class)"),
+    new Tag(EVAL_FMEASURE, "F-measure (discrete class only)"),
+    new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)"),
+    new Tag(EVAL_AUPRC,
+      "AUPRC (area under the precision-recall curve - discrete class only)") };
 
   /** The evaluation measure to use */
   protected int m_evaluationMeasure = EVAL_DEFAULT;
@@ -187,7 +206,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    */
   public String globalInfo() {
     return "Classifier subset evaluator:\n\nEvaluates attribute subsets on training data or a seperate "
-        + "hold out testing set. Uses a classifier to estimate the 'merit' of a set of attributes.";
+      + "hold out testing set. Uses a classifier to estimate the 'merit' of a set of attributes.";
   }
 
   /**
@@ -196,53 +215,53 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    * @return an enumeration of all the available options.
    **/
   @Override
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(5);
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(8);
 
     newVector.addElement(new Option(
-        "\tclass name of the classifier to use for accuracy estimation.\n"
-            + "\tPlace any classifier options LAST on the command line\n"
-            + "\tfollowing a \"--\". eg.:\n"
-            + "\t\t-B weka.classifiers.bayes.NaiveBayes ... -- -K\n"
-            + "\t(default: weka.classifiers.rules.ZeroR)", "B", 1,
-        "-B <classifier>"));
+      "\tclass name of the classifier to use for accuracy estimation.\n"
+        + "\tPlace any classifier options LAST on the command line\n"
+        + "\tfollowing a \"--\". eg.:\n"
+        + "\t\t-B weka.classifiers.bayes.NaiveBayes ... -- -K\n"
+        + "\t(default: weka.classifiers.rules.ZeroR)", "B", 1,
+      "-B <classifier>"));
 
     newVector.addElement(new Option("\tUse the training data to estimate"
-        + " accuracy.", "T", 0, "-T"));
+      + " accuracy.", "T", 0, "-T"));
 
     newVector.addElement(new Option("\tName of the hold out/test set to "
-        + "\n\testimate accuracy on.", "H", 1, "-H <filename>"));
+      + "\n\testimate accuracy on.", "H", 1, "-H <filename>"));
 
     newVector.addElement(new Option("\tPerform a percentage split on the "
-        + "training data.\n\tUse in conjunction with -T.", "percentage-split",
-        0, "-percentage-split"));
+      + "training data.\n\tUse in conjunction with -T.", "percentage-split", 0,
+      "-percentage-split"));
 
     newVector.addElement(new Option(
-        "\tSplit percentage to use (default = 90).", "P", 1, "-P"));
+      "\tSplit percentage to use (default = 90).", "P", 1, "-P"));
     newVector.addElement(new Option(
-        "\tRandom seed for percentage split (default = 1).", "S", 1, "-S"));
+      "\tRandom seed for percentage split (default = 1).", "S", 1, "-S"));
 
     newVector
-        .addElement(new Option(
-            "\tPerformance evaluation measure to use for selecting attributes.\n"
-                + "\t(Default = accuracy for discrete class and rmse for numeric class)",
-            "E", 1, "-E <acc | rmse | mae | f-meas | auc | auprc>"));
+      .addElement(new Option(
+        "\tPerformance evaluation measure to use for selecting attributes.\n"
+          + "\t(Default = accuracy for discrete class and rmse for numeric class)",
+        "E", 1, "-E <acc | rmse | mae | f-meas | auc | auprc>"));
 
     newVector
-        .addElement(new Option(
-            "\tOptional class value (label or 1-based index) to use in conjunction with\n"
-                + "\tIR statistics (f-meas, auc or auprc). Omitting this option will use\n"
-                + "\tthe class-weighted average.", "IRclass", 1,
-            "-IRclass <label | index>"));
+      .addElement(new Option(
+        "\tOptional class value (label or 1-based index) to use in conjunction with\n"
+          + "\tIR statistics (f-meas, auc or auprc). Omitting this option will use\n"
+          + "\tthe class-weighted average.", "IRclass", 1,
+        "-IRclass <label | index>"));
 
-    if ((m_ClassifierTemplate != null) && (m_ClassifierTemplate instanceof OptionHandler)) {
+    if ((m_ClassifierTemplate != null)
+      && (m_ClassifierTemplate instanceof OptionHandler)) {
+
       newVector.addElement(new Option("", "", 0, "\nOptions specific to "
-          + "scheme " + m_ClassifierTemplate.getClass().getName() + ":"));
-      Enumeration enu = ((OptionHandler) m_ClassifierTemplate).listOptions();
+        + "scheme " + m_ClassifierTemplate.getClass().getName() + ":"));
 
-      while (enu.hasMoreElements()) {
-        newVector.addElement(enu.nextElement());
-      }
+      newVector.addAll(Collections.list(((OptionHandler) m_ClassifierTemplate)
+        .listOptions()));
     }
 
     return newVector.elements();
@@ -252,51 +271,69 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -B &lt;classifier&gt;
+   * <pre>
+   * -B &lt;classifier&gt;
    *  class name of the classifier to use for accuracy estimation.
    *  Place any classifier options LAST on the command line
    *  following a "--". eg.:
    *   -B weka.classifiers.bayes.NaiveBayes ... -- -K
-   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   *  (default: weka.classifiers.rules.ZeroR)
+   * </pre>
    * 
-   * <pre> -T
-   *  Use the training data to estimate accuracy.</pre>
+   * <pre>
+   * -T
+   *  Use the training data to estimate accuracy.
+   * </pre>
    * 
-   * <pre> -H &lt;filename&gt;
+   * <pre>
+   * -H &lt;filename&gt;
    *  Name of the hold out/test set to 
-   *  estimate accuracy on.</pre>
+   *  estimate accuracy on.
+   * </pre>
    * 
-   * <pre> -percentage-split
+   * <pre>
+   * -percentage-split
    *  Perform a percentage split on the training data.
-   *  Use in conjunction with -T.</pre>
+   *  Use in conjunction with -T.
+   * </pre>
    * 
-   * <pre> -P
-   *  Split percentage to use (default = 90).</pre>
+   * <pre>
+   * -P
+   *  Split percentage to use (default = 90).
+   * </pre>
    * 
-   * <pre> -S
-   *  Random seed for percentage split (default = 1).</pre>
+   * <pre>
+   * -S
+   *  Random seed for percentage split (default = 1).
+   * </pre>
    * 
-   * <pre> -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
+   * <pre>
+   * -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
    *  Performance evaluation measure to use for selecting attributes.
-   *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
+   *  (Default = accuracy for discrete class and rmse for numeric class)
+   * </pre>
    * 
-   * <pre> -IRclass &lt;label | index&gt;
+   * <pre>
+   * -IRclass &lt;label | index&gt;
    *  Optional class value (label or 1-based index) to use in conjunction with
    *  IR statistics (f-meas, auc or auprc). Omitting this option will use
-   *  the class-weighted average.</pre>
+   *  the class-weighted average.
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to scheme weka.classifiers.rules.ZeroR:
    * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -307,10 +344,11 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     resetOptions();
 
     optionString = Utils.getOption('B', options);
-    if (optionString.length() == 0)
+    if (optionString.length() == 0) {
       optionString = ZeroR.class.getName();
+    }
     setClassifier(AbstractClassifier.forName(optionString,
-        Utils.partitionOptions(options)));
+      Utils.partitionOptions(options)));
 
     optionString = Utils.getOption('H', options);
     if (optionString.length() != 0) {
@@ -349,13 +387,13 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     if (optionString.length() > 0) {
       setIRClassValue(optionString);
     }
-    
+
     optionString = Utils.getOption("S", options);
     if (optionString.length() > 0) {
       setSeed(Integer.parseInt(optionString));
     }
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
@@ -363,23 +401,23 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    *         explorer/experimenter gui
    */
   public String seedTipText() {
-    return "The random seed to use for randomizing the training data " +
-    		"prior to performing a percentage split"; 
+    return "The random seed to use for randomizing the training data "
+      + "prior to performing a percentage split";
   }
-  
+
   /**
-   * Set the random seed used to randomize the data before performing
-   * a percentage split
+   * Set the random seed used to randomize the data before performing a
+   * percentage split
    * 
    * @param s the seed to use
    */
   public void setSeed(int s) {
     m_seed = s;
   }
-  
+
   /**
-   * Get the random seed used to randomize the data before performing
-   * a percentage split
+   * Get the random seed used to randomize the data before performing a
+   * percentage split
    * 
    * @param s the seed to use
    */
@@ -477,9 +515,9 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    */
   public String IRClassValueTipText() {
     return "The class label, or 1-based index of the class label, to use "
-        + "when evaluating subsets with an IR metric (such as f-measure "
-        + "or AUC. Leaving this unset will result in the class frequency "
-        + "weighted average of the metric being used.";
+      + "when evaluating subsets with an IR metric (such as f-measure "
+      + "or AUC. Leaving this unset will result in the class frequency "
+      + "weighted average of the metric being used.";
   }
 
   /**
@@ -606,74 +644,67 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    */
   @Override
   public String[] getOptions() {
-    String[] classifierOptions = new String[0];
 
-    if ((m_ClassifierTemplate != null) && (m_ClassifierTemplate instanceof OptionHandler)) {
-      classifierOptions = ((OptionHandler) m_ClassifierTemplate).getOptions();
-    }
-
-    String[] options = new String[15 + classifierOptions.length];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
     if (getClassifier() != null) {
-      options[current++] = "-B";
-      options[current++] = getClassifier().getClass().getName();
+      options.add("-B");
+      options.add(getClassifier().getClass().getName());
     }
 
     if (getUseTraining()) {
-      options[current++] = "-T";
+      options.add("-T");
     }
-    options[current++] = "-H";
-    options[current++] = getHoldOutFile().getPath();
+    options.add("-H");
+    options.add(getHoldOutFile().getPath());
 
     if (getUsePercentageSplit()) {
-      options[current++] = "-percentage-split";
-      options[current++] = "-P";
-      options[current++] = m_splitPercent;
-      options[current++] = "-S";
-      options[current++] = "" + getSeed();
+      options.add("-percentage-split");
+      options.add("-P");
+      options.add(m_splitPercent);
+      options.add("-S");
+      options.add("" + getSeed());
     }
 
-    options[current++] = "-E";
+    options.add("-E");
     switch (m_evaluationMeasure) {
     case EVAL_DEFAULT:
     case EVAL_ACCURACY:
-      options[current++] = "acc";
+      options.add("acc");
       break;
     case EVAL_RMSE:
-      options[current++] = "rmse";
+      options.add("rmse");
       break;
     case EVAL_MAE:
-      options[current++] = "mae";
+      options.add("mae");
       break;
     case EVAL_FMEASURE:
-      options[current++] = "f-meas";
+      options.add("f-meas");
       break;
     case EVAL_AUC:
-      options[current++] = "auc";
+      options.add("auc");
       break;
     case EVAL_AUPRC:
-      options[current++] = "auprc";
+      options.add("auprc");
       break;
     }
 
     if (m_IRClassValS != null && m_IRClassValS.length() > 0) {
-      options[current++] = "-IRClass";
-      options[current++] = m_IRClassValS;
+      options.add("-IRClass");
+      options.add(m_IRClassValS);
     }
 
-    if (classifierOptions.length > 0) {
-      options[current++] = "--";
-      System.arraycopy(classifierOptions, 0, options, current,
-          classifierOptions.length);
-      current += classifierOptions.length;
+    if ((m_ClassifierTemplate != null)
+      && (m_ClassifierTemplate instanceof OptionHandler)) {
+      String[] classifierOptions = ((OptionHandler) m_ClassifierTemplate)
+        .getOptions();
+      if (classifierOptions.length > 0) {
+        options.add("--");
+        Collections.addAll(options, classifierOptions);
+      }
     }
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -694,8 +725,9 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     }
 
     // set dependencies
-    for (Capability cap : Capability.values())
+    for (Capability cap : Capability.values()) {
       result.enableDependency(cap);
+    }
 
     return result;
   }
@@ -716,19 +748,19 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     m_trainingInstances = new Instances(data);
     m_classIndex = m_trainingInstances.classIndex();
     m_numAttribs = m_trainingInstances.numAttributes();
-    m_numInstances = m_trainingInstances.numInstances();
+    // m_numInstances = m_trainingInstances.numInstances(); NOT USED
 
     // load the testing data
     if (!m_useTraining
-        && (!getHoldOutFile().getPath().startsWith("Click to set"))) {
+      && (!getHoldOutFile().getPath().startsWith("Click to set"))) {
       java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-          getHoldOutFile().getPath()));
+        getHoldOutFile().getPath()));
       m_holdOutInstances = new Instances(r);
       m_holdOutInstances.setClassIndex(m_trainingInstances.classIndex());
       if (m_trainingInstances.equalHeaders(m_holdOutInstances) == false) {
         throw new Exception("Hold out/test set is not compatable with "
-            + "training data.\n"
-            + m_trainingInstances.equalHeadersMsg(m_holdOutInstances));
+          + "training data.\n"
+          + m_trainingInstances.equalHeadersMsg(m_holdOutInstances));
       }
     } else if (m_usePercentageSplit) {
       int splitPercentage = 90; // default
@@ -739,11 +771,11 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
 
       m_trainingInstances.randomize(new Random(m_seed));
       int trainSize = Math.round(m_trainingInstances.numInstances()
-          * splitPercentage / 100);
+        * splitPercentage / 100);
       int testSize = m_trainingInstances.numInstances() - trainSize;
 
       m_holdOutInstances = new Instances(m_trainingInstances, trainSize,
-          testSize);
+        testSize);
       m_trainingInstances = new Instances(m_trainingInstances, 0, trainSize);
     }
 
@@ -756,7 +788,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
       } catch (NumberFormatException e) {
         // now try as a named class label
         m_IRClassVal = m_trainingInstances.classAttribute().indexOfValue(
-            m_IRClassValS);
+          m_IRClassValS);
       }
     }
   }
@@ -780,8 +812,8 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     if (m_ClassifierTemplate instanceof OptionHandler) {
       cOpts = ((OptionHandler) m_ClassifierTemplate).getOptions();
     }
-    Classifier classifier = AbstractClassifier.forName(m_ClassifierTemplate.getClass()
-        .getName(), cOpts);
+    Classifier classifier = AbstractClassifier.forName(m_ClassifierTemplate
+      .getClass().getName(), cOpts);
 
     Remove delTransform = new Remove();
     delTransform.setInvertSelection(true);
@@ -791,7 +823,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     if (!m_useTraining) {
       if (m_holdOutInstances == null) {
         throw new Exception("Must specify a set of hold out/test instances "
-            + "with -H");
+          + "with -H");
       }
       // copy the test instances
       testCopy = new Instances(m_holdOutInstances);
@@ -895,7 +927,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    */
   @Override
   public double evaluateSubset(BitSet subset, Instances holdOut)
-      throws Exception {
+    throws Exception {
     int i, j;
     double evalMetric = 0;
     int numAttributes = 0;
@@ -906,12 +938,12 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     if (m_ClassifierTemplate instanceof OptionHandler) {
       cOpts = ((OptionHandler) m_ClassifierTemplate).getOptions();
     }
-    Classifier classifier = AbstractClassifier.forName(m_ClassifierTemplate.getClass()
-        .getName(), cOpts);
+    Classifier classifier = AbstractClassifier.forName(m_ClassifierTemplate
+      .getClass().getName(), cOpts);
 
     if (m_trainingInstances.equalHeaders(holdOut) == false) {
       throw new Exception("evaluateSubset : Incompatable instance types.\n"
-          + m_trainingInstances.equalHeadersMsg(holdOut));
+        + m_trainingInstances.equalHeadersMsg(holdOut));
     }
 
     Remove delTransform = new Remove();
@@ -1013,22 +1045,20 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
    */
   @Override
   public double evaluateSubset(BitSet subset, Instance holdOut, boolean retrain)
-      throws Exception {
+    throws Exception {
 
     if (m_evaluationMeasure != EVAL_DEFAULT) {
       throw new Exception(
-          "Can only use default evaluation measure in the method");
+        "Can only use default evaluation measure in the method");
     }
     int i, j;
     double error;
     int numAttributes = 0;
     Instances trainCopy = null;
     Instance testCopy = null;
-    Evaluation evaluation = null;
-
     if (m_trainingInstances.equalHeaders(holdOut.dataset()) == false) {
       throw new Exception("evaluateSubset : Incompatable instance types.\n"
-          + m_trainingInstances.equalHeadersMsg(holdOut.dataset()));
+        + m_trainingInstances.equalHeadersMsg(holdOut.dataset()));
     }
 
     Remove delTransform = new Remove();
@@ -1100,15 +1130,15 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     } else {
       text.append("\tClassifier Subset Evaluator\n");
       text.append("\tLearning scheme: " + getClassifier().getClass().getName()
-          + "\n");
+        + "\n");
       text.append("\tScheme options: ");
       String[] classifierOptions = new String[0];
 
       if (m_ClassifierTemplate instanceof OptionHandler) {
         classifierOptions = ((OptionHandler) m_ClassifierTemplate).getOptions();
 
-        for (int i = 0; i < classifierOptions.length; i++) {
-          text.append(classifierOptions[i] + " ");
+        for (String classifierOption : classifierOptions) {
+          text.append(classifierOption + " ");
         }
       }
 
@@ -1131,7 +1161,7 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
       String IRClassL = "";
       if (m_IRClassVal >= 0) {
         IRClassL = "(class value: "
-            + m_trainingInstances.classAttribute().value(m_IRClassVal) + ")";
+          + m_trainingInstances.classAttribute().value(m_IRClassVal) + ")";
       }
       switch (m_evaluationMeasure) {
       case EVAL_DEFAULT:
@@ -1158,15 +1188,15 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
         break;
       case EVAL_FMEASURE:
         text.append("\tSubset evaluation: F-measure "
-            + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
+          + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
         break;
       case EVAL_AUC:
         text.append("\tSubset evaluation: area under the ROC curve "
-            + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
+          + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
         break;
       case EVAL_AUPRC:
         text.append("\tSubset evalation: area under the precision-recal curve "
-            + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
+          + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
         break;
       }
     }
@@ -1207,4 +1237,3 @@ public class ClassifierSubsetEval extends HoldOutSubsetEvaluator implements
     runEvaluator(new ClassifierSubsetEval(), args);
   }
 }
-
