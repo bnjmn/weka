@@ -20,74 +20,89 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.PLSFilter;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 /**
- <!-- globalinfo-start -->
- * A wrapper classifier for the PLSFilter, utilizing the PLSFilter's ability to perform predictions.
+ * <!-- globalinfo-start --> A wrapper classifier for the PLSFilter, utilizing
+ * the PLSFilter's ability to perform predictions.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -filter &lt;filter specification&gt;
+ * <pre>
+ * -filter &lt;filter specification&gt;
  *  The PLS filter to use. Full classname of filter to include,  followed by scheme options.
- *  (default: weka.filters.supervised.attribute.PLSFilter)</pre>
+ *  (default: weka.filters.supervised.attribute.PLSFilter)
+ * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to filter weka.filters.supervised.attribute.PLSFilter ('-filter'):
  * </pre>
  * 
- * <pre> -D
- *  Turns on output of debugging information.</pre>
+ * <pre>
+ * -D
+ *  Turns on output of debugging information.
+ * </pre>
  * 
- * <pre> -C &lt;num&gt;
+ * <pre>
+ * -C &lt;num&gt;
  *  The number of components to compute.
- *  (default: 20)</pre>
+ *  (default: 20)
+ * </pre>
  * 
- * <pre> -U
+ * <pre>
+ * -U
  *  Updates the class attribute as well.
- *  (default: off)</pre>
+ *  (default: off)
+ * </pre>
  * 
- * <pre> -M
+ * <pre>
+ * -M
  *  Turns replacing of missing values on.
- *  (default: off)</pre>
+ *  (default: off)
+ * </pre>
  * 
- * <pre> -A &lt;SIMPLS|PLS1&gt;
+ * <pre>
+ * -A &lt;SIMPLS|PLS1&gt;
  *  The algorithm to use.
- *  (default: PLS1)</pre>
+ *  (default: PLS1)
+ * </pre>
  * 
- * <pre> -P &lt;none|center|standardize&gt;
+ * <pre>
+ * -P &lt;none|center|standardize&gt;
  *  The type of preprocessing that is applied to the data.
- *  (default: center)</pre>
+ *  (default: center)
+ * </pre>
  * 
- <!-- options-end -->
- *
- * @author  fracpete (fracpete at waikato dot ac dot nz)
+ * <!-- options-end -->
+ * 
+ * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class PLSClassifier
-  extends AbstractClassifier {
-  
+public class PLSClassifier extends AbstractClassifier {
+
   /** for serialization */
   private static final long serialVersionUID = 4819775160590973256L;
 
@@ -96,149 +111,152 @@ public class PLSClassifier
 
   /** the actual filter to use */
   protected PLSFilter m_ActualFilter = null;
-  
+
   /**
    * Returns a string describing classifier
    * 
-   * @return a description suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
   public String globalInfo() {
-    return 
-        "A wrapper classifier for the PLSFilter, utilizing the PLSFilter's "
+    return "A wrapper classifier for the PLSFilter, utilizing the PLSFilter's "
       + "ability to perform predictions.";
   }
 
   /**
    * Gets an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions(){
-    Vector        	result;
-    Enumeration   	en;
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    result = new Vector();
+    Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
-	"\tThe PLS filter to use. Full classname of filter to include, "
-	+ "\tfollowed by scheme options.\n"
-	+ "\t(default: weka.filters.supervised.attribute.PLSFilter)",
-	"filter", 1, "-filter <filter specification>"));
+      "\tThe PLS filter to use. Full classname of filter to include, "
+        + "\tfollowed by scheme options.\n"
+        + "\t(default: weka.filters.supervised.attribute.PLSFilter)", "filter",
+      1, "-filter <filter specification>"));
 
-    en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+    result.addAll(Collections.list(super.listOptions()));
 
     if (getFilter() instanceof OptionHandler) {
-      result.addElement(new Option(
-	  "",
-	  "", 0, "\nOptions specific to filter "
-	  + getFilter().getClass().getName() + " ('-filter'):"));
-      
-      en = ((OptionHandler) getFilter()).listOptions();
-      while (en.hasMoreElements())
-	result.addElement(en.nextElement());
+      result.addElement(new Option("", "", 0, "\nOptions specific to filter "
+        + getFilter().getClass().getName() + " ('-filter'):"));
+
+      result.addAll(Collections.list(((OptionHandler) getFilter())
+        .listOptions()));
     }
 
     return result.elements();
   }
-  
+
   /**
    * returns the options of the current setup
-   *
-   * @return		the current options
+   * 
+   * @return the current options
    */
-  public String[] getOptions(){
-    int       	i;
-    Vector    	result;
-    String[]  	options;
+  @Override
+  public String[] getOptions() {
 
-    result = new Vector();
+    Vector<String> result = new Vector<String>();
 
     result.add("-filter");
-    if (getFilter() instanceof OptionHandler)
-      result.add(
-  	    getFilter().getClass().getName() 
-	  + " " 
-	  + Utils.joinOptions(((OptionHandler) getFilter()).getOptions()));
-    else
-      result.add(
-	  getFilter().getClass().getName());
+    if (getFilter() instanceof OptionHandler) {
+      result.add(getFilter().getClass().getName() + " "
+        + Utils.joinOptions(((OptionHandler) getFilter()).getOptions()));
+    } else {
+      result.add(getFilter().getClass().getName());
+    }
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Collections.addAll(result, super.getOptions());
 
-    return (String[]) result.toArray(new String[result.size()]);	  
+    return result.toArray(new String[result.size()]);
   }
 
   /**
-   * Parses the options for this object. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses the options for this object.
+   * <p/>
    * 
-   * <pre> -filter &lt;filter specification&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -filter &lt;filter specification&gt;
    *  The PLS filter to use. Full classname of filter to include,  followed by scheme options.
-   *  (default: weka.filters.supervised.attribute.PLSFilter)</pre>
+   *  (default: weka.filters.supervised.attribute.PLSFilter)
+   * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to filter weka.filters.supervised.attribute.PLSFilter ('-filter'):
    * </pre>
    * 
-   * <pre> -D
-   *  Turns on output of debugging information.</pre>
+   * <pre>
+   * -D
+   *  Turns on output of debugging information.
+   * </pre>
    * 
-   * <pre> -C &lt;num&gt;
+   * <pre>
+   * -C &lt;num&gt;
    *  The number of components to compute.
-   *  (default: 20)</pre>
+   *  (default: 20)
+   * </pre>
    * 
-   * <pre> -U
+   * <pre>
+   * -U
    *  Updates the class attribute as well.
-   *  (default: off)</pre>
+   *  (default: off)
+   * </pre>
    * 
-   * <pre> -M
+   * <pre>
+   * -M
    *  Turns replacing of missing values on.
-   *  (default: off)</pre>
+   *  (default: off)
+   * </pre>
    * 
-   * <pre> -A &lt;SIMPLS|PLS1&gt;
+   * <pre>
+   * -A &lt;SIMPLS|PLS1&gt;
    *  The algorithm to use.
-   *  (default: PLS1)</pre>
+   *  (default: PLS1)
+   * </pre>
    * 
-   * <pre> -P &lt;none|center|standardize&gt;
+   * <pre>
+   * -P &lt;none|center|standardize&gt;
    *  The type of preprocessing that is applied to the data.
-   *  (default: center)</pre>
+   *  (default: center)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
-   * @param options	the options to use
-   * @throws Exception	if setting of options fails
+   * <!-- options-end -->
+   * 
+   * @param options the options to use
+   * @throws Exception if setting of options fails
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    String[]	tmpOptions;
-    
-    super.setOptions(options);
-    
-    tmpStr     = Utils.getOption("filter", options);
-    tmpOptions = Utils.splitOptions(tmpStr);
+
+    String tmpStr = Utils.getOption("filter", options);
+    String[] tmpOptions = Utils.splitOptions(tmpStr);
     if (tmpOptions.length != 0) {
-      tmpStr        = tmpOptions[0];
+      tmpStr = tmpOptions[0];
       tmpOptions[0] = "";
       setFilter((Filter) Utils.forName(Filter.class, tmpStr, tmpOptions));
     }
+
+    super.setOptions(options);
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String filterTipText() {
     return "The PLS filter to be used (only used for setup).";
@@ -246,31 +264,33 @@ public class PLSClassifier
 
   /**
    * Set the PLS filter (only used for setup).
-   *
-   * @param value	the kernel filter.
-   * @throws Exception	if not PLSFilter
+   * 
+   * @param value the kernel filter.
+   * @throws Exception if not PLSFilter
    */
   public void setFilter(Filter value) throws Exception {
-    if (!(value instanceof PLSFilter))
+    if (!(value instanceof PLSFilter)) {
       throw new Exception("Filter has to be PLSFilter!");
-    else
+    } else {
       m_Filter = (PLSFilter) value;
+    }
   }
 
   /**
    * Get the PLS filter.
-   *
-   * @return 		the PLS filter
+   * 
+   * @return the PLS filter
    */
   public Filter getFilter() {
     return m_Filter;
   }
-  
+
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return		the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = getFilter().getCapabilities();
 
@@ -279,16 +299,17 @@ public class PLSClassifier
 
     // other
     result.setMinimumNumberInstances(1);
-    
+
     return result;
   }
 
   /**
    * builds the classifier
    * 
-   * @param data        the training instances
-   * @throws Exception  if something goes wrong
+   * @param data the training instances
+   * @throws Exception if something goes wrong
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
@@ -296,7 +317,7 @@ public class PLSClassifier
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+
     // initialize filter
     m_ActualFilter = (PLSFilter) Filter.makeCopy(m_Filter);
     m_ActualFilter.setPerformPrediction(false);
@@ -306,57 +327,63 @@ public class PLSClassifier
   }
 
   /**
-   * Classifies the given test instance. The instance has to belong to a
-   * dataset when it's being classified.
-   *
-   * @param instance 	the instance to be classified
-   * @return 		the predicted most likely class for the instance or 
-   * 			Utils.missingValue() if no prediction is made
-   * @throws Exception 	if an error occurred during the prediction
+   * Classifies the given test instance. The instance has to belong to a dataset
+   * when it's being classified.
+   * 
+   * @param instance the instance to be classified
+   * @return the predicted most likely class for the instance or
+   *         Utils.missingValue() if no prediction is made
+   * @throws Exception if an error occurred during the prediction
    */
+  @Override
   public double classifyInstance(Instance instance) throws Exception {
-    double	result;
-    Instance	pred;
-    
+    double result;
+    Instance pred;
+
     m_ActualFilter.input(instance);
     m_ActualFilter.batchFinished();
-    pred   = m_ActualFilter.output();
+    pred = m_ActualFilter.output();
     result = pred.classValue();
-    
+
     return result;
   }
 
   /**
    * returns a string representation of the classifier
    * 
-   * @return		a string representation of the classifier
+   * @return a string representation of the classifier
    */
+  @Override
   public String toString() {
-    String	result;
-    
-    result =   this.getClass().getName() + "\n" 
-             + this.getClass().getName().replaceAll(".", "=") + "\n\n";
+    String result;
+
+    result = this.getClass().getName() + "\n"
+      + this.getClass().getName().replaceAll(".", "=") + "\n\n";
     result += "# Components..........: " + m_Filter.getNumComponents() + "\n";
-    result += "Algorithm.............: " + m_Filter.getAlgorithm().getSelectedTag().getReadable() + "\n";
-    result += "Replace missing values: " + (m_Filter.getReplaceMissing() ? "yes" : "no") + "\n";
-    result += "Preprocessing.........: " + m_Filter.getPreprocessing().getSelectedTag().getReadable() + "\n";
-    
+    result += "Algorithm.............: "
+      + m_Filter.getAlgorithm().getSelectedTag().getReadable() + "\n";
+    result += "Replace missing values: "
+      + (m_Filter.getReplaceMissing() ? "yes" : "no") + "\n";
+    result += "Preprocessing.........: "
+      + m_Filter.getPreprocessing().getSelectedTag().getReadable() + "\n";
+
     return result;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-  
+
   /**
    * Main method for running this classifier from commandline.
    * 
-   * @param args 	the options
+   * @param args the options
    */
   public static void main(String[] args) {
     runClassifier(new PLSClassifier(), args);
