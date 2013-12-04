@@ -6,10 +6,10 @@
 PackageName=localOutlierFactor
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2013-07-23
+Date=2013-12-03
 
 # Title (required)
 Title=Filter implementing the Local Outlier Factor (LOF) outlier/anomaly detection algorithm.
@@ -26,12 +26,12 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=A filter that applies the LOF (Local Outlier Factor) algorithm to compute an "outlier" score for each instance in the data. Can use multiple cores/cpus to speed up the LOF computation for large datasets. Nearest neighbor search methods and distance functions are pluggable.<br/><br/>For more information, see:<br/><br/> Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000). LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record. 29(2):93-104.
+Description=A filter that applies the LOF (Local Outlier Factor) algorithm to compute an "outlier" score for each instance in the data. Can use multiple cores/cpus to speed up the LOF computation for large datasets. Nearest neighbor search methods and distance functions are pluggable. Also contains a classifier that uses LOF. The class attribute (ignored at training time) is expected to have two values, where the second is for "normal" examples. If normal and outlier instances are known in the data then this classifier allows LOF to be evaluated using Weka's evaluation routines for classifiers.<br/><br/>For more information, see:<br/><br/> Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000). LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record. 29(2):93-104.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/localOutlierFactor1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/localOutlierFactor1.0.5.zip?download
 
-Changes=This release adds a classifier that uses LOF. The class attribute (ignored at training time) is expected to have two values, where the second is for "normal" examples. If normal and outlier instances are known in the data then this classifier allows LOF to be evaluated using Weka's evaluation routines for classifiers.
+Changes=Code clean-up: generic type arguments, clean-up of option handling.
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/localOutlierFactor

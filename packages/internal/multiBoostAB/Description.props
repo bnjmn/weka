@@ -6,10 +6,10 @@
 PackageName=multiBoostAB
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-12-03
 
 # Title (required)
 Title=Class for boosting a classifier using the MultiBoosting method.
@@ -28,8 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description= Class for boosting a classifier using the MultiBoosting method.<br/><br/>MultiBoosting is an extension to the highly successful AdaBoost technique for forming decision committees. MultiBoosting can be viewed as combining AdaBoost with wagging. It is able to harness both AdaBoost's high bias and variance reduction with wagging's superior variance reduction. Using C4.5 as the base learning algorithm, Multi-boosting is demonstrated to produce decision committees with lower error than either AdaBoost or wagging significantly more often than the reverse over a large representative cross-section of UCI data sets. It offers the further advantage over AdaBoost of suiting parallel execution.<br/><br/>For more information, see<br/><br/>Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. Vol.40(No.2).
 
+Changes=Code clean-up: generic type arguments, clean-up of option handling.
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/multiBoostAB1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/multiBoostAB1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/multiBoostAB

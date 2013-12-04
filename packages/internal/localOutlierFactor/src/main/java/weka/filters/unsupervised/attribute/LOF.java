@@ -57,8 +57,7 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.filters.Filter;
 
 /**
- <!-- globalinfo-start -->
- * A filter that applies the LOF (Local Outlier
+ * <!-- globalinfo-start --> A filter that applies the LOF (Local Outlier
  * Factor) algorithm to compute an "outlier" score for each instance in the
  * data. Can use multiple cores/cpus to speed up the LOF computation for large
  * datasets. Nearest neighbor search methods and distance functions are
@@ -70,10 +69,9 @@ import weka.filters.Filter;
  * LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record.
  * 29(2):93-104.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start --> 
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
  * 
  * <pre>
  * &#64;article{Breunig2000,
@@ -88,10 +86,9 @@ import weka.filters.Filter;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
+ * <!-- technical-bibtex-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -117,13 +114,13 @@ import weka.filters.Filter;
  *  (default 1 - i.e. no parallelism)
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
 public class LOF extends Filter implements OptionHandler,
-    WeightedInstancesHandler, TechnicalInformationHandler, EnvironmentHandler {
+  WeightedInstancesHandler, TechnicalInformationHandler, EnvironmentHandler {
 
   /** For serialization */
   private static final long serialVersionUID = 3843951651734143371L;
@@ -173,11 +170,11 @@ public class LOF extends Filter implements OptionHandler,
    */
   public String globalInfo() {
     return "A filter that applies the LOF (Local Outlier Factor) algorithm "
-        + "to compute an \"outlier\" score for each instance in the data. Can use "
-        + "multiple cores/cpus to speed up the LOF computation for large datasets. "
-        + "Nearest neighbor search methods and distance functions are pluggable."
-        + "\n\nFor more information, see:\n\n"
-        + getTechnicalInformation().toString();
+      + "to compute an \"outlier\" score for each instance in the data. Can use "
+      + "multiple cores/cpus to speed up the LOF computation for large datasets. "
+      + "Nearest neighbor search methods and distance functions are pluggable."
+      + "\n\nFor more information, see:\n\n"
+      + getTechnicalInformation().toString();
   }
 
   /**
@@ -223,9 +220,9 @@ public class LOF extends Filter implements OptionHandler,
 
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "Markus M. Breunig and Hans-Peter "
-        + "Kriegel and Raymond T. Ng and Jorg Sander");
+      + "Kriegel and Raymond T. Ng and Jorg Sander");
     result.setValue(Field.TITLE,
-        "LOF: Identifying Density-Based Local Outliers");
+      "LOF: Identifying Density-Based Local Outliers");
     result.setValue(Field.JOURNAL, "ACM SIGMOD Record");
     result.setValue(Field.YEAR, "2000");
     result.setValue(Field.VOLUME, "29");
@@ -241,23 +238,22 @@ public class LOF extends Filter implements OptionHandler,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
-    // TODO Auto-generated method stub
+  public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>();
     newVector.add(new Option("\tLower bound on the k nearest neighbors "
-        + "for finding max LOF (minPtsLB)\n\t(default = 10)", "min", 1,
-        "-min <num>"));
+      + "for finding max LOF (minPtsLB)\n\t(default = 10)", "min", 1,
+      "-min <num>"));
     newVector.add(new Option("\tUpper bound on the k nearest neighbors "
-        + "for finding max LOF (minPtsUB)\n\t(default = 40)", "max", 1,
-        "-max <num>"));
+      + "for finding max LOF (minPtsUB)\n\t(default = 40)", "max", 1,
+      "-max <num>"));
     newVector.addElement(new Option(
-        "\tThe nearest neighbour search algorithm to use "
-            + "(default: weka.core.neighboursearch.LinearNNSearch).\n", "A", 0,
-        "-A"));
+      "\tThe nearest neighbour search algorithm to use "
+        + "(default: weka.core.neighboursearch.LinearNNSearch).\n", "A", 0,
+      "-A"));
     newVector.addElement(new Option("\tNumber of execution slots.\n"
-        + "\t(default 1 - i.e. no parallelism)", "num-slots", 1,
-        "-num-slots <num>"));
+      + "\t(default 1 - i.e. no parallelism)", "num-slots", 1,
+      "-num-slots <num>"));
 
     return newVector.elements();
   }
@@ -266,8 +262,7 @@ public class LOF extends Filter implements OptionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start --> 
-   * Valid options are:
+   * <!-- options-start --> Valid options are:
    * <p/>
    * 
    * <pre>
@@ -293,7 +288,7 @@ public class LOF extends Filter implements OptionHandler,
    *  (default 1 - i.e. no parallelism)
    * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -315,13 +310,13 @@ public class LOF extends Filter implements OptionHandler,
       String nnSearchClassSpec[] = Utils.splitOptions(nnSearchClass);
       if (nnSearchClassSpec.length == 0) {
         throw new Exception("Invalid NearestNeighbourSearch algorithm "
-            + "specification string.");
+          + "specification string.");
       }
       String className = nnSearchClassSpec[0];
       nnSearchClassSpec[0] = "";
 
       setNNSearch((NearestNeighbourSearch) Utils.forName(
-          NearestNeighbourSearch.class, className, nnSearchClassSpec));
+        NearestNeighbourSearch.class, className, nnSearchClassSpec));
     } else {
       this.setNNSearch(new LinearNNSearch());
     }
@@ -341,21 +336,21 @@ public class LOF extends Filter implements OptionHandler,
    */
   @Override
   public String[] getOptions() {
-    String[] options = new String[8];
 
-    int current = 0;
-    options[current++] = "-min";
-    options[current++] = getMinPointsLowerBound();
-    options[current++] = "-max";
-    options[current++] = getMinPointsUpperBound();
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-A";
-    options[current++] = m_nnTemplate.getClass().getName() + " "
-        + Utils.joinOptions(m_nnTemplate.getOptions());
-    options[current++] = "-num-slots";
-    options[current++] = getNumExecutionSlots();
+    options.add("-min");
+    options.add(getMinPointsLowerBound());
+    options.add("-max");
+    options.add(getMinPointsUpperBound());
 
-    return options;
+    options.add("-A");
+    options.add(m_nnTemplate.getClass().getName() + " "
+      + Utils.joinOptions(m_nnTemplate.getOptions()));
+    options.add("-num-slots");
+    options.add(getNumExecutionSlots());
+
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -366,7 +361,7 @@ public class LOF extends Filter implements OptionHandler,
    */
   public String minPointsLowerBoundTipText() {
     return "The lower bound (minPtsLB) to use on the range for k "
-        + "when determining the maximum LOF value";
+      + "when determining the maximum LOF value";
   }
 
   /**
@@ -397,7 +392,7 @@ public class LOF extends Filter implements OptionHandler,
    */
   public String minPointsUpperBoundTipText() {
     return "The upper bound (minPtsUB) to use on the range for k "
-        + "when determining the maximum LOF value";
+      + "when determining the maximum LOF value";
   }
 
   /**
@@ -428,7 +423,7 @@ public class LOF extends Filter implements OptionHandler,
    */
   public String NNSearchTipText() {
     return "The nearest neighbour search algorithm to use "
-        + "(Default: weka.core.neighboursearch.LinearNNSearch).";
+      + "(Default: weka.core.neighboursearch.LinearNNSearch).";
   }
 
   /**
@@ -457,7 +452,7 @@ public class LOF extends Filter implements OptionHandler,
    */
   public String numExecutionSlotsTipText() {
     return "The number of execution slots (threads) to use for "
-        + "finding LOF values.";
+      + "finding LOF values.";
   }
 
   /**
@@ -569,7 +564,7 @@ public class LOF extends Filter implements OptionHandler,
       try {
         // can't do much if the only attribute in the data is the class
         if (getInputFormat().classIndex() >= 0
-            && getInputFormat().numAttributes() == 1) {
+          && getInputFormat().numAttributes() == 1) {
           Instances input = getInputFormat();
           for (int i = 0; i < input.numInstances(); i++) {
             Instance inst = makeOutputInstance(input.instance(i), 1.0);
@@ -608,7 +603,7 @@ public class LOF extends Filter implements OptionHandler,
     atts.add(new Attribute("LOF"));
 
     Instances outputFormat = new Instances(getInputFormat().relationName(),
-        atts, 0);
+      atts, 0);
     outputFormat.setClassIndex(getInputFormat().classIndex());
     setOutputFormat(outputFormat);
   }
@@ -673,7 +668,7 @@ public class LOF extends Filter implements OptionHandler,
 
       int indexOfKDistanceForK = k - 1;
       while (indexOfKDistanceForK < currentN.m_distances.length - 1
-          && currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
+        && currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
         indexOfKDistanceForK++;
       }
 
@@ -740,7 +735,7 @@ public class LOF extends Filter implements OptionHandler,
     }
     if (m_ubK <= m_lbK) {
       System.err.println("Upper bound on k can't be < lower bound - "
-          + "setting equal to the lower bound");
+        + "setting equal to the lower bound");
       m_ubK = m_lbK + 1; // upper bound is inclusive (our loops are exclusive)
     }
 
@@ -771,7 +766,7 @@ public class LOF extends Filter implements OptionHandler,
     protected NearestNeighbourSearch m_search;
 
     public NNFinder(Instances training, int start, int end,
-        NearestNeighbourSearch search) {
+      NearestNeighbourSearch search) {
       m_nnTrain = training;
       m_start = start;
       m_end = end;
@@ -784,7 +779,7 @@ public class LOF extends Filter implements OptionHandler,
         for (int i = m_start; i < m_end; i++) {
           Instance current = m_nnTrain.get(i);
           DecisionTableHashKey key = new DecisionTableHashKey(current,
-              current.numAttributes(), !m_classSet);
+            current.numAttributes(), !m_classSet);
           Neighborhood n = new Neighborhood();
           if (addToKDistanceContainer(key, n)) {
             Instances nn = null;
@@ -839,7 +834,7 @@ public class LOF extends Filter implements OptionHandler,
           // distance at the k-th nearest neighbor
           int indexOfKDistanceForK = m_k - 1;
           while (indexOfKDistanceForK < currentN.m_distances.length - 1
-              && currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
+            && currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
             indexOfKDistanceForK++;
           }
 
@@ -852,7 +847,7 @@ public class LOF extends Filter implements OptionHandler,
 
             cardinality += b.weight();
             sumReachability += reachability(current, b,
-                currentN.m_distances[j], m_k);
+              currentN.m_distances[j], m_k);
           }
 
           currentN.m_lrd[m_k - m_lbK] = cardinality / sumReachability;
@@ -921,8 +916,8 @@ public class LOF extends Filter implements OptionHandler,
 
     if (m_failed > 0) {
       throw new Exception(
-          "Can't continue - some tasks failed during the nearest "
-              + "neighbour phase");
+        "Can't continue - some tasks failed during the nearest "
+          + "neighbour phase");
     }
     // m_kDistanceContainer = Collections.unmodifiableMap(m_kDistanceContainer);
 
@@ -943,7 +938,7 @@ public class LOF extends Filter implements OptionHandler,
 
     if (m_failed > 0) {
       throw new Exception("Can't continue - some tasks failed during the LOF "
-          + "phase");
+        + "phase");
     }
     m_executorPool.shutdown();
 
@@ -960,7 +955,7 @@ public class LOF extends Filter implements OptionHandler,
   }
 
   protected synchronized boolean addToKDistanceContainer(
-      DecisionTableHashKey key, Neighborhood n) {
+    DecisionTableHashKey key, Neighborhood n) {
 
     if (!m_kDistanceContainer.containsKey(key)) {
       m_kDistanceContainer.put(key, n);
@@ -971,7 +966,7 @@ public class LOF extends Filter implements OptionHandler,
   }
 
   protected synchronized void completedTask(String taskType, boolean success,
-      int totalTasks) {
+    int totalTasks) {
     if (!success) {
       System.err.println("A " + taskType + " task failed!");
       m_failed++;
@@ -982,7 +977,7 @@ public class LOF extends Filter implements OptionHandler,
     if (m_completed + m_failed == totalTasks) {
       if (m_failed > 0) {
         System.err.println("Problem executing " + taskType
-            + " tasks - some iterations failed.");
+          + " tasks - some iterations failed.");
       }
 
       block(false, totalTasks);
@@ -1011,8 +1006,8 @@ public class LOF extends Filter implements OptionHandler,
     }
 
     m_executorPool = new ThreadPoolExecutor(m_numExecutionSlots,
-        m_numExecutionSlots, 120, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<Runnable>());
+      m_numExecutionSlots, 120, TimeUnit.SECONDS,
+      new LinkedBlockingQueue<Runnable>());
   }
 
   protected synchronized void trimZeroDistances(Neighborhood n) {
@@ -1047,7 +1042,7 @@ public class LOF extends Filter implements OptionHandler,
     for (int i = 0; i < training.numInstances(); i++) {
       Instance current = training.get(i);
       DecisionTableHashKey key = new DecisionTableHashKey(current,
-          current.numAttributes(), !m_classSet);
+        current.numAttributes(), !m_classSet);
       if (!m_kDistanceContainer.containsKey(key)) {
         // allow for a few more neighbors than m_ubK in case of ties
         int nnFactor = 2;
@@ -1084,7 +1079,7 @@ public class LOF extends Filter implements OptionHandler,
         // distance at the k-th nearest neighbor
         int indexOfKDistanceForK = k - 1;
         while (indexOfKDistanceForK < currentN.m_distances.length - 1
-            && currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
+          && currentN.m_distances[indexOfKDistanceForK] == currentN.m_distances[indexOfKDistanceForK + 1]) {
           indexOfKDistanceForK++;
         }
 
@@ -1096,7 +1091,7 @@ public class LOF extends Filter implements OptionHandler,
           Instance b = currentN.m_neighbors.instance(j);
           cardinality += b.weight();
           sumReachability += reachability(current, b, currentN.m_distances[j],
-              k);
+            k);
         }
 
         currentN.m_lrd[k - m_lbK] = cardinality / sumReachability;
@@ -1174,7 +1169,7 @@ public class LOF extends Filter implements OptionHandler,
 
     int indexOfKDistanceForK = k - 1;
     while (indexOfKDistanceForK < neighborhoodA.m_distances.length - 1
-        && neighborhoodA.m_distances[indexOfKDistanceForK] == neighborhoodA.m_distances[indexOfKDistanceForK + 1]) {
+      && neighborhoodA.m_distances[indexOfKDistanceForK] == neighborhoodA.m_distances[indexOfKDistanceForK + 1]) {
       indexOfKDistanceForK++;
     }
 
@@ -1191,8 +1186,8 @@ public class LOF extends Filter implements OptionHandler,
     }
 
     return sumlrdb
-        / (neighborhoodA.m_tempCardinality[k - m_lbK] * neighborhoodA.m_lrd[k
-            - m_lbK]);
+      / (neighborhoodA.m_tempCardinality[k - m_lbK] * neighborhoodA.m_lrd[k
+        - m_lbK]);
   }
 
   /**

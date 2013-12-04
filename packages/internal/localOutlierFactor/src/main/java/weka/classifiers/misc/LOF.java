@@ -22,6 +22,7 @@
 package weka.classifiers.misc;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -45,19 +46,31 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.filters.Filter;
 
 /**
- <!-- globalinfo-start -->
- * A Classifier that applies the LOF (Local Outlier Factor) algorithm to compute an "outlier" score for each instance in the data. The data is expected to have a unary or binary class attribute, which is ignored at training time. The distributionForInstance() method returns the outlier score in the first element of the distribution. If the class attribute is binary, then the second element holds one minus this score. To evaluate performance of this method for a dataset where outliers/anomalies are known, simply code the outliers using the class attribute: normal cases should correspond to the second value of the class attribute; outliers to the first one.<br/>
+ * <!-- globalinfo-start --> A Classifier that applies the LOF (Local Outlier
+ * Factor) algorithm to compute an "outlier" score for each instance in the
+ * data. The data is expected to have a unary or binary class attribute, which
+ * is ignored at training time. The distributionForInstance() method returns the
+ * outlier score in the first element of the distribution. If the class
+ * attribute is binary, then the second element holds one minus this score. To
+ * evaluate performance of this method for a dataset where outliers/anomalies
+ * are known, simply code the outliers using the class attribute: normal cases
+ * should correspond to the second value of the class attribute; outliers to the
+ * first one.<br/>
  * <br/>
- * Can use multiple cores/cpus to speed up the LOF computation for large datasets. Nearest neighbor search methods and distance functions are pluggable.<br/>
+ * Can use multiple cores/cpus to speed up the LOF computation for large
+ * datasets. Nearest neighbor search methods and distance functions are
+ * pluggable.<br/>
  * <br/>
  * For more information, see:<br/>
  * <br/>
- * Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000). LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record. 29(2):93-104.
+ * Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000).
+ * LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record.
+ * 29(2):93-104.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;article{Breunig2000,
  *    author = {Markus M. Breunig and Hans-Peter Kriegel and Raymond T. Ng and Jorg Sander},
@@ -71,36 +84,43 @@ import weka.filters.Filter;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -min &lt;num&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -min &lt;num&gt;
  *  Lower bound on the k nearest neighbors for finding max LOF (minPtsLB)
- *  (default = 10)</pre>
+ *  (default = 10)
+ * </pre>
  * 
- * <pre> -max &lt;num&gt;
+ * <pre>
+ * -max &lt;num&gt;
  *  Upper bound on the k nearest neighbors for finding max LOF (minPtsUB)
- *  (default = 40)</pre>
+ *  (default = 40)
+ * </pre>
  * 
- * <pre> -A
+ * <pre>
+ * -A
  *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
  * </pre>
  * 
- * <pre> -num-slots &lt;num&gt;
+ * <pre>
+ * -num-slots &lt;num&gt;
  *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)</pre>
+ *  (default 1 - i.e. no parallelism)
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
- *
+ * 
  */
 public class LOF extends AbstractClassifier implements Serializable,
-    CapabilitiesHandler, OptionHandler, TechnicalInformationHandler,
-    RevisionHandler {
+  CapabilitiesHandler, OptionHandler, TechnicalInformationHandler,
+  RevisionHandler {
 
   /**
    * For serialization
@@ -131,19 +151,19 @@ public class LOF extends AbstractClassifier implements Serializable,
    */
   public String globalInfo() {
     return "A Classifier that applies the LOF (Local Outlier Factor) algorithm "
-        + "to compute an \"outlier\" score for each instance in the data. "
-        + "The data is expected to have a unary or binary class attribute, which "
-        + "is ignored at training time. The distributionForInstance() method returns "
-        + "the outlier score in the first element of the distribution. If the class "
-        + "attribute is binary, then the second element holds one minus this score. "
-        + "To evaluate performance of this method for a dataset where outliers/anomalies "
-        + "are known, simply code the outliers using the class attribute: normal cases "
-        + "should correspond to the second value of the class attribute; outliers to the "
-        + "first one.\n\nCan use "
-        + "multiple cores/cpus to speed up the LOF computation for large datasets. "
-        + "Nearest neighbor search methods and distance functions are pluggable."
-        + "\n\nFor more information, see:\n\n"
-        + getTechnicalInformation().toString();
+      + "to compute an \"outlier\" score for each instance in the data. "
+      + "The data is expected to have a unary or binary class attribute, which "
+      + "is ignored at training time. The distributionForInstance() method returns "
+      + "the outlier score in the first element of the distribution. If the class "
+      + "attribute is binary, then the second element holds one minus this score. "
+      + "To evaluate performance of this method for a dataset where outliers/anomalies "
+      + "are known, simply code the outliers using the class attribute: normal cases "
+      + "should correspond to the second value of the class attribute; outliers to the "
+      + "first one.\n\nCan use "
+      + "multiple cores/cpus to speed up the LOF computation for large datasets. "
+      + "Nearest neighbor search methods and distance functions are pluggable."
+      + "\n\nFor more information, see:\n\n"
+      + getTechnicalInformation().toString();
   }
 
   /**
@@ -159,9 +179,9 @@ public class LOF extends AbstractClassifier implements Serializable,
 
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "Markus M. Breunig and Hans-Peter "
-        + "Kriegel and Raymond T. Ng and Jorg Sander");
+      + "Kriegel and Raymond T. Ng and Jorg Sander");
     result.setValue(Field.TITLE,
-        "LOF: Identifying Density-Based Local Outliers");
+      "LOF: Identifying Density-Based Local Outliers");
     result.setValue(Field.JOURNAL, "ACM SIGMOD Record");
     result.setValue(Field.YEAR, "2000");
     result.setValue(Field.VOLUME, "29");
@@ -203,23 +223,24 @@ public class LOF extends AbstractClassifier implements Serializable,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration listOptions() {
-    // TODO Auto-generated method stub
+  public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>();
     newVector.add(new Option("\tLower bound on the k nearest neighbors "
-        + "for finding max LOF (minPtsLB)\n\t(default = 10)", "min", 1,
-        "-min <num>"));
+      + "for finding max LOF (minPtsLB)\n\t(default = 10)", "min", 1,
+      "-min <num>"));
     newVector.add(new Option("\tUpper bound on the k nearest neighbors "
-        + "for finding max LOF (minPtsUB)\n\t(default = 40)", "max", 1,
-        "-max <num>"));
+      + "for finding max LOF (minPtsUB)\n\t(default = 40)", "max", 1,
+      "-max <num>"));
     newVector.addElement(new Option(
-        "\tThe nearest neighbour search algorithm to use "
-            + "(default: weka.core.neighboursearch.LinearNNSearch).\n", "A", 0,
-        "-A"));
+      "\tThe nearest neighbour search algorithm to use "
+        + "(default: weka.core.neighboursearch.LinearNNSearch).\n", "A", 0,
+      "-A"));
     newVector.addElement(new Option("\tNumber of execution slots.\n"
-        + "\t(default 1 - i.e. no parallelism)", "num-slots", 1,
-        "-num-slots <num>"));
+      + "\t(default 1 - i.e. no parallelism)", "num-slots", 1,
+      "-num-slots <num>"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
   }
@@ -228,26 +249,33 @@ public class LOF extends AbstractClassifier implements Serializable,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -min &lt;num&gt;
+   * <pre>
+   * -min &lt;num&gt;
    *  Lower bound on the k nearest neighbors for finding max LOF (minPtsLB)
-   *  (default = 10)</pre>
+   *  (default = 10)
+   * </pre>
    * 
-   * <pre> -max &lt;num&gt;
+   * <pre>
+   * -max &lt;num&gt;
    *  Upper bound on the k nearest neighbors for finding max LOF (minPtsUB)
-   *  (default = 40)</pre>
+   *  (default = 40)
+   * </pre>
    * 
-   * <pre> -A
+   * <pre>
+   * -A
    *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
    * </pre>
    * 
-   * <pre> -num-slots &lt;num&gt;
+   * <pre>
+   * -num-slots &lt;num&gt;
    *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)</pre>
+   *  (default 1 - i.e. no parallelism)
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -269,13 +297,13 @@ public class LOF extends AbstractClassifier implements Serializable,
       String nnSearchClassSpec[] = Utils.splitOptions(nnSearchClass);
       if (nnSearchClassSpec.length == 0) {
         throw new Exception("Invalid NearestNeighbourSearch algorithm "
-            + "specification string.");
+          + "specification string.");
       }
       String className = nnSearchClassSpec[0];
       nnSearchClassSpec[0] = "";
 
       setNNSearch((NearestNeighbourSearch) Utils.forName(
-          NearestNeighbourSearch.class, className, nnSearchClassSpec));
+        NearestNeighbourSearch.class, className, nnSearchClassSpec));
     } else {
       this.setNNSearch(new LinearNNSearch());
     }
@@ -284,6 +312,8 @@ public class LOF extends AbstractClassifier implements Serializable,
     if (slotsS.length() > 0) {
       setNumExecutionSlots(slotsS);
     }
+
+    super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
   }
@@ -295,21 +325,23 @@ public class LOF extends AbstractClassifier implements Serializable,
    */
   @Override
   public String[] getOptions() {
-    String[] options = new String[8];
 
-    int current = 0;
-    options[current++] = "-min";
-    options[current++] = getMinPointsLowerBound();
-    options[current++] = "-max";
-    options[current++] = getMinPointsUpperBound();
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-A";
-    options[current++] = m_nnTemplate.getClass().getName() + " "
-        + Utils.joinOptions(m_nnTemplate.getOptions());
-    options[current++] = "-num-slots";
-    options[current++] = getNumExecutionSlots();
+    options.add("-min");
+    options.add(getMinPointsLowerBound());
+    options.add("-max");
+    options.add(getMinPointsUpperBound());
 
-    return options;
+    options.add("-A");
+    options.add(m_nnTemplate.getClass().getName() + " "
+      + Utils.joinOptions(m_nnTemplate.getOptions()));
+    options.add("-num-slots");
+    options.add(getNumExecutionSlots());
+
+    Collections.addAll(options, super.getOptions());
+
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -320,7 +352,7 @@ public class LOF extends AbstractClassifier implements Serializable,
    */
   public String minPointsLowerBoundTipText() {
     return "The lower bound (minPtsLB) to use on the range for k "
-        + "when determining the maximum LOF value";
+      + "when determining the maximum LOF value";
   }
 
   /**
@@ -351,7 +383,7 @@ public class LOF extends AbstractClassifier implements Serializable,
    */
   public String minPointsUpperBoundTipText() {
     return "The upper bound (minPtsUB) to use on the range for k "
-        + "when determining the maximum LOF value";
+      + "when determining the maximum LOF value";
   }
 
   /**
@@ -382,7 +414,7 @@ public class LOF extends AbstractClassifier implements Serializable,
    */
   public String NNSearchTipText() {
     return "The nearest neighbour search algorithm to use "
-        + "(Default: weka.core.neighboursearch.LinearNNSearch).";
+      + "(Default: weka.core.neighboursearch.LinearNNSearch).";
   }
 
   /**
@@ -411,7 +443,7 @@ public class LOF extends AbstractClassifier implements Serializable,
    */
   public String numExecutionSlotsTipText() {
     return "The number of execution slots (threads) to use for "
-        + "finding LOF values.";
+      + "finding LOF values.";
   }
 
   /**
@@ -523,4 +555,3 @@ public class LOF extends AbstractClassifier implements Serializable,
     runClassifier(new LOF(), args);
   }
 }
-
