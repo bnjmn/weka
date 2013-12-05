@@ -159,9 +159,6 @@ public class StringLocator extends AttributeLocator {
       }
     }
 
-    // Change reference!
-    instance.setDataset(destDataset);
-
     // recurse if necessary
     int[] srcIndices = srcLoc.getLocatorIndices();
     int[] destIndices = destLoc.getLocatorIndices();
