@@ -285,6 +285,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
     if (instance != null) {
       if (instance.dataset() != null) {
+        instance = (Instance) instance.copy(); // Don't modify incoming
+        // instance!
         copyValues(instance, false);
       }
       instance.setDataset(m_OutputFormat);
@@ -310,6 +312,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
+      instance = (Instance) instance.copy(); // Don't modify incoming
+      // instance!
       copyValues(instance, true);
       m_InputFormat.add(instance);
     }
