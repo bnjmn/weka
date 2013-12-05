@@ -21,21 +21,24 @@
 package weka.classifiers.mi.miti;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.ArrayList;
 
 import weka.core.Attribute;
 import weka.core.Instance;
 
 /**
  * Represents a split in the decision tree.
- *
+ * 
  * @author Luke Bjerring
  * @version $Revision$
  */
 public class Split implements Serializable {
+
+  /** ID added to avoid warning */
+  private static final long serialVersionUID = 147371323803237346L;
 
   // The attribute used for the split
   public Attribute attribute;
@@ -53,60 +56,57 @@ public class Split implements Serializable {
    * Finds the best split based on the given arguments.
    */
   public static Split getBestSplitPoint(final Attribute a,
-                                        ArrayList<Instance> enabled,
-                                        HashMap<Instance, Bag> instanceBags,
-                                        AlgorithmConfiguration settings) {
+    ArrayList<Instance> enabled, HashMap<Instance, Bag> instanceBags,
+    AlgorithmConfiguration settings) {
 
     // Get the split method
     IBestSplitMeasure bsm;
-    if (settings.method == weka.classifiers.mi.MITI.SPLITMETHOD_GINI)
+    if (settings.method == weka.classifiers.mi.MITI.SPLITMETHOD_GINI) {
       bsm = new Gini();
-    else if (settings.method == weka.classifiers.mi.MITI.SPLITMETHOD_SSBEPP)
+    } else if (settings.method == weka.classifiers.mi.MITI.SPLITMETHOD_SSBEPP) {
       bsm = new SSBEPP();
-    else
+    } else {
       bsm = new MaxBEPP();
-    
+    }
+
     // Nominal values get a different method
     if (a.isNominal()) {
-      return getBestNominalSplitPoint(a,
-                                      enabled,
-                                      instanceBags,
-                                      settings,
-                                      bsm);
+      return getBestNominalSplitPoint(a, enabled, instanceBags, settings, bsm);
     }
-    
+
     // Order the data by the attribute we're looking at
     Collections.sort(enabled, new Comparator<Instance>() {
-        @Override
-          public int compare(Instance arg0, Instance arg1) {
-          return Double.compare(arg0.value(a), arg1.value(a));
-        }
-      });
+      @Override
+      public int compare(Instance arg0, Instance arg1) {
+        return Double.compare(arg0.value(a), arg1.value(a));
+      }
+    });
 
     Split split = null;
-    
+
     SufficientStatistics ss;
-    if (!settings.useBagStatistics)
+    if (!settings.useBagStatistics) {
       ss = new SufficientInstanceStatistics(enabled, instanceBags);
-    else
+    } else {
       ss = new SufficientBagStatistics(enabled, instanceBags,
-                                       settings.bagCountMultiplier);
-    
+        settings.bagCountMultiplier);
+    }
+
     // Iterate through all splits, and score them, keeping the best one
     for (int i = 0; i < enabled.size() - 1; i++) {
-      
+
       ss.updateStats(enabled.get(i), instanceBags);
-      
+
       if (enabled.get(i).value(a) == enabled.get(i + 1).value(a)) {
         continue;
       }
-      
+
       double splitPoint = (enabled.get(i).value(a) + enabled.get(i + 1)
-                           .value(a)) / 2;
-      
+        .value(a)) / 2;
+
       double score = bsm.getScore(ss, settings.kBEPPConstant,
-                                  settings.unbiasedEstimate);
-      
+        settings.unbiasedEstimate);
+
       if (split == null) {
         split = new Split();
         split.attribute = a;
@@ -114,13 +114,13 @@ public class Split implements Serializable {
         split.splitPoint = splitPoint;
         continue;
       }
-      
+
       if (score > split.score) {
         split.score = score;
         split.splitPoint = splitPoint;
       }
     }
-    
+
     return split;
   }
 
@@ -128,23 +128,20 @@ public class Split implements Serializable {
    * Computes split for a nominal attribute based on given arguments.
    */
   private static Split getBestNominalSplitPoint(Attribute a,
-                                                ArrayList<Instance> enabled, HashMap<Instance, Bag> instanceBags,
-                                                AlgorithmConfiguration settings,
-                                                IBestSplitMeasure bsm)
-  {
+    ArrayList<Instance> enabled, HashMap<Instance, Bag> instanceBags,
+    AlgorithmConfiguration settings, IBestSplitMeasure bsm) {
     Split s = new Split();
     s.isNominal = true;
     s.attribute = a;
     SufficientStatistics[] ss = new SufficientStatistics[a.numValues()];
     if (!settings.useBagStatistics) {
       for (int i = 0; i < a.numValues(); i++) {
-        ss[i] = new SufficientInstanceStatistics(enabled,
-                                                 instanceBags);
+        ss[i] = new SufficientInstanceStatistics(enabled, instanceBags);
       }
     } else {
       for (int i = 0; i < a.numValues(); i++) {
         ss[i] = new SufficientBagStatistics(enabled, instanceBags,
-                                            settings.bagCountMultiplier);
+          settings.bagCountMultiplier);
       }
     }
     for (Instance i : enabled) {
@@ -156,8 +153,8 @@ public class Split implements Serializable {
       totals[i] = ss[i].totalCountLeft();
       positiveCounts[i] = ss[i].positiveCountLeft();
     }
-    s.score = bsm.getScore(totals, positiveCounts,
-                           settings.kBEPPConstant, settings.unbiasedEstimate);
+    s.score = bsm.getScore(totals, positiveCounts, settings.kBEPPConstant,
+      settings.unbiasedEstimate);
     return s;
   }
 }

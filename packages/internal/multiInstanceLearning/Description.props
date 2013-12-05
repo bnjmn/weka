@@ -6,10 +6,10 @@
 PackageName=multiInstanceLearning
 
 # Version (required)
-Version=1.0.7
+Version=1.0.8
 
 #Date
-Date=2013-07-30
+Date=2013-12-05
 
 # Title (required)
 Title=A collection of multi-instance learning classifiers.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=A collection of multi-instance learning classifiers. Includes the Citation KNN method, several variants of the diverse density method, support vector machines for multi-instance learning, simple wrappers for applying standard propositional learners to multi-instance data, decision tree and rule learners, and some other methods.
 
-Changes=Tiny change required in TLC because the PartitionMembership filter is now in the supervised package.
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceLearning1.0.7.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceLearning1.0.8.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/multiInstanceLearning

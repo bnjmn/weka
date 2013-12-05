@@ -6,10 +6,10 @@
 PackageName=multiInstanceFilters
 
 # Version (required)
-Version=1.0.5
+Version=1.0.6
 
 #Date
-Date=2013-07-30
+Date=2013-12-05
 
 # Title (required)
 Title=A collection of filters for manipulating multi-instance data.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=A collection of filters for manipulating multi-instance data. Includes PropositionalToMultiInstance, MultiInstanceToPropositional, MILESFilter and RELAGGS. For more information see:<br/><br/>M.-A. Krogel, S. Wrobel: Facets of Aggregation Approaches to Propositionalization. In: Work-in-Progress Track at the Thirteenth International Conference on Inductive Logic Programming (ILP), 2003.<br/><br/>Y. Chen, J. Bi, J.Z. Wang (2006). MILES: Multiple-instance learning via embedded instance selection. IEEE PAMI. 28(12):1931-1947.<br/><br/>James Foulds, Eibe Frank: Revisiting multiple-instance learning via embedded instance selection. In: 21st Australasian Joint Conference on Artificial Intelligence, 300-310, 2008.
 
-Changes=MultiInstanceToPropositional now works properly using default instance weighting method when run from the command-line.
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceFilters1.0.5.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/multiInstanceFilters1.0.6.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/multiInstanceFilters

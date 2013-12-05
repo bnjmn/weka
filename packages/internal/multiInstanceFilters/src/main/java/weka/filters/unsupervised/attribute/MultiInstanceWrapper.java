@@ -20,55 +20,58 @@
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Instance; 
+import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
 import weka.filters.supervised.attribute.PartitionMembership;
-import weka.filters.unsupervised.attribute.MultiInstanceToPropositional;
-import weka.filters.unsupervised.attribute.Remove;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Applies a single-instance filter to multi-instance data by converting each bag to a collection of instances, using the filter MultiInstanceToPropositional with default parameters, where each instance is labeled with its bag's class label. Aggregates resulting data using sum/mode. The resulting data can be processed by a single-instance classifier.
+ * <!-- globalinfo-start --> Applies a single-instance filter to multi-instance
+ * data by converting each bag to a collection of instances, using the filter
+ * MultiInstanceToPropositional with default parameters, where each instance is
+ * labeled with its bag's class label. Aggregates resulting data using sum/mode.
+ * The resulting data can be processed by a single-instance classifier.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -F &lt;filter name and options&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -F &lt;filter name and options&gt;
  *  The single-instance filter to use, including all arguments.
- *  (default: weka.filters.unsupervised.attribute.PartitionMembership)</pre>
+ *  (default: weka.filters.unsupervised.attribute.PartitionMembership)
+ * </pre>
  * 
- * <pre> -A
+ * <pre>
+ * -A
  *  Use average of numeric attribute values across bag instead of sum.
  * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Eibe Frank (eibe@.cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class MultiInstanceWrapper extends Filter 
-  implements OptionHandler, MultiInstanceCapabilitiesHandler {
+public class MultiInstanceWrapper extends Filter implements OptionHandler,
+  MultiInstanceCapabilitiesHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -3232591375578585231L;
-  
+
   /** The filter to apply */
   protected Filter m_Filter = new PartitionMembership();
 
@@ -78,68 +81,82 @@ public class MultiInstanceWrapper extends Filter
   /** The filter used to remove the bag index */
   protected MultiFilter m_MF = null;
 
-  /** Whether to use average instead of sum of attribute values for numeric attributes */
+  /**
+   * Whether to use average instead of sum of attribute values for numeric
+   * attributes
+   */
   protected boolean m_UseAverage = false;
-  
+
   /**
    * Returns a string describing this filter
-   *
-   * @return a description of the filter suitable for displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
 
-    return "Applies a single-instance filter to multi-instance data by converting each bag " +
-      "to a collection of instances, using the filter MultiInstanceToPropositional with default " +
-      "parameters, where each instance is labeled with its bag's class label. Aggregates resulting " +
-      "data using sum/mode. The resulting data can be processed by a single-instance classifier.";
+    return "Applies a single-instance filter to multi-instance data by converting each bag "
+      + "to a collection of instances, using the filter MultiInstanceToPropositional with default "
+      + "parameters, where each instance is labeled with its bag's class label. Aggregates resulting "
+      + "data using sum/mode. The resulting data can be processed by a single-instance classifier.";
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector result = new Vector();
+    Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option("\tThe single-instance filter to use, including all arguments.\n"
-                                 + "\t(default: weka.filters.unsupervised.attribute.PartitionMembership)",
-                                 "F", 1, "-F <filter name and options>"));
+    result
+      .addElement(new Option(
+        "\tThe single-instance filter to use, including all arguments.\n"
+          + "\t(default: weka.filters.unsupervised.attribute.PartitionMembership)",
+        "F", 1, "-F <filter name and options>"));
 
-    result.addElement(new Option("\tUse average of numeric attribute values across bag instead of sum.\n",
-                                 "A", 0, "-A"));
+    result.addElement(new Option(
+      "\tUse average of numeric attribute values across bag instead of sum.\n",
+      "A", 0, "-A"));
 
     return result.elements();
   }
 
   /**
-   * Parses the options for this object. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses the options for this object.
+   * <p/>
    * 
-   * <pre> -F &lt;filter name and options&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -F &lt;filter name and options&gt;
    *  The single-instance filter to use, including all arguments.
-   *  (default: weka.filters.unsupervised.attribute.PartitionMembership)</pre>
+   *  (default: weka.filters.unsupervised.attribute.PartitionMembership)
+   * </pre>
    * 
-   * <pre> -A
+   * <pre>
+   * -A
    *  Use average of numeric attribute values across bag instead of sum.
    * </pre>
    * 
-   <!-- options-end -->
-   *
-   * @param options	the options to use
-   * @throws Exception	if setting of options fails
+   * <!-- options-end -->
+   * 
+   * @param options the options to use
+   * @throws Exception if setting of options fails
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     // Set filter specification
     String filterString = Utils.getOption('F', options);
     if (filterString.length() > 0) {
-      String [] filterSpec = Utils.splitOptions(filterString);
+      String[] filterSpec = Utils.splitOptions(filterString);
       if (filterSpec.length == 0) {
-	throw new IllegalArgumentException("Invalid filter specification string");
+        throw new IllegalArgumentException(
+          "Invalid filter specification string");
       }
       String filterName = filterSpec[0];
       filterSpec[0] = "";
@@ -149,31 +166,34 @@ public class MultiInstanceWrapper extends Filter
     }
 
     setUseAverage(Utils.getFlag('A', options));
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the classifier.
-   *
-   * @return 		an array of strings suitable for passing to setOptions
+   * 
+   * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
 
-    String [] options = new String [getUseAverage() ? 3 : 2];
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-F";
-    options[current++] = "" + getFilterSpec();
+    options.add("-F");
+    options.add("" + getFilterSpec());
 
     if (getUseAverage()) {
-      options[current++] = "-A";
+      options.add("-A");
     }
-    return options;
+    return options.toArray(new String[0]);
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String filterTipText() {
 
@@ -182,7 +202,7 @@ public class MultiInstanceWrapper extends Filter
 
   /**
    * Sets the filter
-   *
+   * 
    * @param filter the filter with all options set.
    */
   public void setFilter(Filter filter) {
@@ -192,34 +212,35 @@ public class MultiInstanceWrapper extends Filter
 
   /**
    * Gets the filter used.
-   *
+   * 
    * @return the filter
    */
   public Filter getFilter() {
 
     return m_Filter;
   }
-  
+
   /**
-   * Gets the filter specification string, which contains the class name of
-   * the filter and any options to the filter
-   *
+   * Gets the filter specification string, which contains the class name of the
+   * filter and any options to the filter
+   * 
    * @return the filter string.
    */
   protected String getFilterSpec() {
-    
+
     Filter c = getFilter();
     if (c instanceof OptionHandler) {
       return c.getClass().getName() + " "
-	+ Utils.joinOptions(((OptionHandler)c).getOptions());
+        + Utils.joinOptions(((OptionHandler) c).getOptions());
     }
     return c.getClass().getName();
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String useAverageTipText() {
 
@@ -228,7 +249,7 @@ public class MultiInstanceWrapper extends Filter
 
   /**
    * Sets whether sum is used.
-   *
+   * 
    * @param useAverage true if average should be used instead of sum
    */
   public void setUseAverage(boolean useAverage) {
@@ -238,7 +259,7 @@ public class MultiInstanceWrapper extends Filter
 
   /**
    * Gets whether average is used.
-   *
+   * 
    * @return true if sum is used instead of mean
    */
   public boolean getUseAverage() {
@@ -246,12 +267,13 @@ public class MultiInstanceWrapper extends Filter
     return m_UseAverage;
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
 
     Capabilities result = super.getCapabilities();
@@ -262,50 +284,50 @@ public class MultiInstanceWrapper extends Filter
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.RELATIONAL_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
-    
+
     // other
     result.enable(Capability.ONLY_MULTIINSTANCE);
-    
+
     return result;
   }
 
   /**
-   * Returns the capabilities of this multi-instance filter for the
-   * relational data (i.e., the bags).
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * Returns the capabilities of this multi-instance filter for the relational
+   * data (i.e., the bags).
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getMultiInstanceCapabilities() {
     Capabilities result = m_Filter.getCapabilities();
 
     // The class will be attached
     result.enable(Capability.NO_CLASS);
-    
+
     // other
     result.setMinimumNumberInstances(0);
-    
+
     return result;
   }
 
   /**
    * Sets the format of the input instances.
-   *
-   * @param instanceInfo an Instances object containing the input 
-   * instance structure (any instances contained in the object are 
-   * ignored - only the structure is required).
+   * 
+   * @param instanceInfo an Instances object containing the input instance
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return false the outputFormat may not be collected immediately
-   * @throws Exception if the input format can't be set 
-   * successfully
+   * @throws Exception if the input format can't be set successfully
    */
-  public boolean setInputFormat(Instances instanceInfo) 
-    throws Exception {
+  @Override
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    super.setInputFormat(instanceInfo);   
+    super.setInputFormat(instanceInfo);
 
     m_MItoP = null;
     m_MF = null;
@@ -313,16 +335,15 @@ public class MultiInstanceWrapper extends Filter
     return false;
   }
 
-
   /**
-   * Input an instance for filtering. Filter requires all
-   * training instances be read before producing output.
-   *
+   * Input an instance for filtering. Filter requires all training instances be
+   * read before producing output.
+   * 
    * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
+   * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input format has been set.
    */
+  @Override
   public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
@@ -340,17 +361,18 @@ public class MultiInstanceWrapper extends Filter
 
       // Filter data using appropriate filter, removing the bag index
       Instances convertedInstances = m_MF.getOutputFormat();
-      Instances tempInstances = new Instances(convertedInstances, convertedInstances.numInstances());
+      Instances tempInstances = new Instances(convertedInstances,
+        convertedInstances.numInstances());
       for (Instance inst : SIdata) {
         m_MF.input(inst);
         tempInstances.add(m_MF.output());
       }
 
       double[] newVals = new double[tempInstances.numAttributes() + 1];
-      newVals[0] = (double)instance.value(0);
+      newVals[0] = instance.value(0);
       for (int i = 1; i < newVals.length; i++) {
         if (i - 1 == tempInstances.classIndex()) {
-          newVals[i] = instance.classValue(); 
+          newVals[i] = instance.classValue();
         } else {
           if (!getUseAverage() && tempInstances.attribute(i - 1).isNumeric()) {
             for (Instance tempInst : tempInstances) {
@@ -371,14 +393,15 @@ public class MultiInstanceWrapper extends Filter
   }
 
   /**
-   * Signify that this batch of input to the filter is finished. 
-   * If the filter requires all instances prior to filtering,
-   * output() may now be called to retrieve the filtered instances.
-   *
+   * Signify that this batch of input to the filter is finished. If the filter
+   * requires all instances prior to filtering, output() may now be called to
+   * retrieve the filtered instances.
+   * 
    * @return true if there are instances pending output
    * @throws IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() throws Exception{
+  @Override
+  public boolean batchFinished() throws Exception {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -394,7 +417,7 @@ public class MultiInstanceWrapper extends Filter
       m_MF = new MultiFilter();
       Filter[] twoFilters = new Filter[2];
       twoFilters[0] = new Remove();
-      ((Remove)twoFilters[0]).setAttributeIndices("1");
+      ((Remove) twoFilters[0]).setAttributeIndices("1");
       twoFilters[1] = m_Filter;
       m_MF.setFilters(twoFilters);
       m_MF.setInputFormat(SIdata);
@@ -405,8 +428,10 @@ public class MultiInstanceWrapper extends Filter
       m_MF.batchFinished();
 
       Instances convertedInstances = m_MF.getOutputFormat();
-      Instances tempInstances = new Instances(convertedInstances, convertedInstances.numInstances());
-      convertedInstances.insertAttributeAt((Attribute)getInputFormat().attribute(0).copy(), 0);
+      Instances tempInstances = new Instances(convertedInstances,
+        convertedInstances.numInstances());
+      convertedInstances.insertAttributeAt((Attribute) getInputFormat()
+        .attribute(0).copy(), 0);
       setOutputFormat(convertedInstances);
 
       int origInstanceIndex = 0;
@@ -418,7 +443,8 @@ public class MultiInstanceWrapper extends Filter
 
         // Figure out size of current bag
         int bagSize = 1;
-        Instances relation = getInputFormat().instance(origInstanceIndex).relationalValue(1);
+        Instances relation = getInputFormat().instance(origInstanceIndex)
+          .relationalValue(1);
         if (relation != null) {
           bagSize = relation.numInstances();
         }
@@ -429,18 +455,24 @@ public class MultiInstanceWrapper extends Filter
           newVals[0] = getInputFormat().instance(origInstanceIndex).value(0);
           for (int i = 1; i < newVals.length; i++) {
             if (i - 1 == tempInstances.classIndex()) {
-              newVals[i] = tempInstances.instance(0).classValue(); // All class values should be the same
+              newVals[i] = tempInstances.instance(0).classValue(); // All class
+                                                                   // values
+                                                                   // should be
+                                                                   // the same
             } else {
-              if (!getUseAverage() && tempInstances.attribute(i - 1).isNumeric()) {
+              if (!getUseAverage()
+                && tempInstances.attribute(i - 1).isNumeric()) {
                 for (Instance tempInst : tempInstances) {
                   newVals[i] += tempInst.value(i - 1);
                 }
               } else {
-                newVals[i] = tempInstances.meanOrMode(i - 1); // Use mean or mode
+                newVals[i] = tempInstances.meanOrMode(i - 1); // Use mean or
+                                                              // mode
               }
             }
           }
-          DenseInstance insT = new DenseInstance(getInputFormat().instance(origInstanceIndex++).weight(), newVals);
+          DenseInstance insT = new DenseInstance(getInputFormat().instance(
+            origInstanceIndex++).weight(), newVals);
           insT.setDataset(convertedInstances);
           push(insT);
           tempInstances.delete();
@@ -454,12 +486,13 @@ public class MultiInstanceWrapper extends Filter
     m_NewBatch = true;
     return (numPendingOutput() != 0);
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
 
     return RevisionUtils.extract("$Revision$");
@@ -467,12 +500,11 @@ public class MultiInstanceWrapper extends Filter
 
   /**
    * runs the filter with the given arguments
-   *
-   * @param args      the commandline arguments
+   * 
+   * @param args the commandline arguments
    */
   public static void main(String[] args) {
 
     runFilter(new MultiInstanceWrapper(), args);
   }
 }
-
