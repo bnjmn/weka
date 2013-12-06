@@ -6,10 +6,10 @@
 PackageName=RBFNetwork
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2012-12-18
+Date=2013-12-06
 
 # Title (required)
 Title= Classes that implement radial basis function networks.
@@ -26,12 +26,12 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description= There are currently three classes in this package: RBFNetwork, which trains the hidden layer in an unsupervised manner, and RBFRegressor and RBFClassifier, which are fully supervised. RBFNetwork implements a normalized Gaussian radial basis function network. It uses the k-means clustering algorithm to provide the basis functions and learns either a logistic regression (discrete class problems) or linear regression (numeric class problems) on top of that. Symmetric multivariate Gaussians are fit to the data from each cluster. If the class is nominal it uses the given number of clusters per class.It standardizes all numeric attributes to zero mean and unit variance. RBFRegressor implements Gaussian radial basis function networks for regression, trained in a fully supervised manner using WEKA's Optimization class by minimizing squared error with the BFGS method. It is possible to use conjugate gradient descent rather than BFGS updates, which is faster for cases with many parameters, and normalized basis functions instead of unnormalized ones. RBFClassifier is the equivalent of RBFRegressor for classification problems.
+Description= There are currently three classes in this package: RBFNetwork, which trains the hidden layer in an unsupervised manner, and RBFRegressor and RBFClassifier, which are fully supervised. RBFNetwork implements a normalized Gaussian radial basis function network. It uses the k-means clustering algorithm to provide the basis functions and learns either a logistic regression (discrete class problems) or linear regression (numeric class problems) on top of that. Symmetric multivariate Gaussians are fit to the data from each cluster. If the class is nominal it uses the given number of clusters per class. It standardizes all numeric attributes to zero mean and unit variance. RBFRegressor implements Gaussian radial basis function networks for regression, trained in a fully supervised manner using WEKA's Optimization class by minimizing squared error with the BFGS method. It is possible to use conjugate gradient descent rather than BFGS updates, which is faster for cases with many parameters, and normalized basis functions instead of unnormalized ones. RBFClassifier is the equivalent of RBFRegressor for classification problems.
 
-Changes=RBFClassifier and RBFRegressor can now take advantage of multiple cores. RBFClassifier is significantly faster. Code redundancy has been eliminated by moving common code into new abstract RBFModel class.
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/RBFNetwork1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/RBFNetwork1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/RBFNetwork

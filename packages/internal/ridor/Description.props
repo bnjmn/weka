@@ -6,10 +6,10 @@
 PackageName=ridor
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-12-06
 
 # Title (required)
 Title=An implementation of a RIpple-DOwn Rule learner.
@@ -26,10 +26,12 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=An implementation of a RIpple-DOwn Rule learner.<br/><br/>It generates a default rule first and then the exceptions for the default rule with the least (weighted) error rate.  Then it generates the "best" exceptions for each exception and iterates until pure.  Thus it performs a tree-like expansion of exceptions.The exceptions are a set of rules that predict classes other than the default. IREP is used to generate the exceptions.<br/><br/>For more information about Ripple-Down Rules, see:<br/><br/>Brian R. Gaines, Paul Compton (1995). Induction of Ripple-Down Rules Applied to Modeling Large Databases. J. Intell. Inf. Syst. 5(3):211-228.
+Description=An implementation of a RIpple-DOwn Rule learner.<br/><br/>It generates a default rule first and then the exceptions for the default rule with the least (weighted) error rate.  Then it generates the "best" exceptions for each exception and iterates until pure.  Thus it performs a tree-like expansion of exceptions. The exceptions are a set of rules that predict classes other than the default. IREP is used to generate the exceptions.<br/><br/>For more information about Ripple-Down Rules, see:<br/><br/>Brian R. Gaines, Paul Compton (1995). Induction of Ripple-Down Rules Applied to Modeling Large Databases. J. Intell. Inf. Syst. 5(3):211-228.
+
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/ridor1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/ridor1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/ridor

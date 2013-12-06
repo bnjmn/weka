@@ -6,10 +6,10 @@
 PackageName=sequentialInformationalBottleneckClusterer
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-12-06
 
 # Title (required)
 Title=Cluster data using the sequential information bottleneck algorithm.
@@ -26,10 +26,12 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Cluster data using the sequential information bottleneck algorithm.<br/><br/>Note: only hard clustering scheme is supported. sIB assign for each instance the cluster that have the minimum cost/distance to the instance. The trade-off beta is set to infinite so 1/beta is zero.<br/><br/>For more information, see:<br/><br/>Noam Slonim, Nir Friedman, Naftali Tishby: Unsupervised document classification using sequential information maximization. In: Proceedings of the 25th International ACM SIGIR Conference on Research and Development in Information Retrieval, 129-136, 2002.
+Description=Clusters data using the sequential information bottleneck algorithm.<br/><br/>Note: only hard clustering scheme is supported. sIB assigns for each instance the cluster that has the minimum cost/distance to the instance. The trade-off beta is set to infinite so 1/beta is zero.<br/><br/>For more information, see:<br/><br/>Noam Slonim, Nir Friedman, Naftali Tishby: Unsupervised document classification using sequential information maximization. In: Proceedings of the 25th International ACM SIGIR Conference on Research and Development in Information Retrieval, 129-136, 2002.
+
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/sequentialInformationalBottleneckClusterer1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/sequentialInformationalBottleneckClusterer1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/sequentialInformationalBottleneckClusterer

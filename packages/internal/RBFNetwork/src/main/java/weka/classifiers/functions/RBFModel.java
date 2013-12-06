@@ -20,62 +20,56 @@
 
 package weka.classifiers.functions;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableClassifier;
-
 import weka.clusterers.SimpleKMeans;
-
-import weka.core.Instance;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.Option;
-import weka.core.Matrix;
-import weka.core.Optimization;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.ConjugateGradientOptimization;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Optimization;
+import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-
-
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.RemoveUseless;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.Filter;
-
-import java.util.Random;
-import java.util.Vector;
-import java.util.Enumeration;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.concurrent.Future;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Callable;
 
 /**
- * Abstract super class that can be extended by sub classes that learn RBF models.
- *
+ * Abstract super class that can be extended by sub classes that learn RBF
+ * models.
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 8966 $
  */
 public abstract class RBFModel extends RandomizableClassifier {
-  
+
   /** For serialization */
   private static final long serialVersionUID = -7847473336438394611L;
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -85,21 +79,22 @@ public abstract class RBFModel extends RandomizableClassifier {
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
-    
+
     return result;
   }
-  
+
   /**
-   * Simple wrapper class needed to use the BFGS method
-   * implemented in weka.core.Optimization.
+   * Simple wrapper class needed to use the BFGS method implemented in
+   * weka.core.Optimization.
    */
   protected class OptEng extends Optimization {
 
     /**
      * Returns the squared error given parameter values x.
      */
-    protected double objectiveFunction(double[] x){
-      
+    @Override
+    protected double objectiveFunction(double[] x) {
+
       m_RBFParameters = x;
       return calculateSE();
     }
@@ -107,8 +102,9 @@ public abstract class RBFModel extends RandomizableClassifier {
     /**
      * Returns the gradient given parameter values x.
      */
-    protected double[] evaluateGradient(double[] x){
-      
+    @Override
+    protected double[] evaluateGradient(double[] x) {
+
       m_RBFParameters = x;
       return calculateGradient();
     }
@@ -116,22 +112,24 @@ public abstract class RBFModel extends RandomizableClassifier {
     /**
      * The revision string.
      */
+    @Override
     public String getRevision() {
       return RevisionUtils.extract("$Revision: 8966 $");
     }
   }
-  
+
   /**
-   * Simple wrapper class needed to use the CGD method
-   * implemented in weka.core.ConjugateGradientOptimization.
+   * Simple wrapper class needed to use the CGD method implemented in
+   * weka.core.ConjugateGradientOptimization.
    */
   protected class OptEngCGD extends ConjugateGradientOptimization {
 
     /**
      * Returns the squared error given parameter values x.
      */
-    protected double objectiveFunction(double[] x){
-      
+    @Override
+    protected double objectiveFunction(double[] x) {
+
       m_RBFParameters = x;
       return calculateSE();
     }
@@ -139,8 +137,9 @@ public abstract class RBFModel extends RandomizableClassifier {
     /**
      * Returns the gradient given parameter values x.
      */
-    protected double[] evaluateGradient(double[] x){
-      
+    @Override
+    protected double[] evaluateGradient(double[] x) {
+
       m_RBFParameters = x;
       return calculateGradient();
     }
@@ -148,6 +147,7 @@ public abstract class RBFModel extends RandomizableClassifier {
     /**
      * The revision string.
      */
+    @Override
     public String getRevision() {
       return RevisionUtils.extract("$Revision: 8966 $");
     }
@@ -157,18 +157,18 @@ public abstract class RBFModel extends RandomizableClassifier {
   public static final int USE_GLOBAL_SCALE = 1;
   public static final int USE_SCALE_PER_UNIT = 2;
   public static final int USE_SCALE_PER_UNIT_AND_ATTRIBUTE = 3;
-  public static final Tag [] TAGS_SCALE = {
+  public static final Tag[] TAGS_SCALE = {
     new Tag(USE_GLOBAL_SCALE, "Use global scale"),
     new Tag(USE_SCALE_PER_UNIT, "Use scale per unit"),
-    new Tag(USE_SCALE_PER_UNIT_AND_ATTRIBUTE, "Use scale per unit and attribute")
-  };
-  
+    new Tag(USE_SCALE_PER_UNIT_AND_ATTRIBUTE,
+      "Use scale per unit and attribute") };
+
   // The chosen scale optimization option
   protected int m_scaleOptimizationOption = USE_SCALE_PER_UNIT;
 
   // The number of units
   protected int m_numUnits = 2;
-  
+
   // The class index of the dataset
   protected int m_classIndex = -1;
 
@@ -206,21 +206,21 @@ public abstract class RBFModel extends RandomizableClassifier {
   protected Filter m_Filter = null;
 
   // The offsets for the different components in the parameter vector
-  protected int OFFSET_WEIGHTS = -1; 
+  protected int OFFSET_WEIGHTS = -1;
   protected int OFFSET_SCALES = -1;
   protected int OFFSET_CENTERS = -1;
   protected int OFFSET_ATTRIBUTE_WEIGHTS = -1;
-    
-  // An attribute filter 
+
+  // An attribute filter
   protected RemoveUseless m_AttFilter;
-    
-  // The filter used to make attributes numeric. 
+
+  // The filter used to make attributes numeric.
   protected NominalToBinary m_NominalToBinary;
-    
-  // The filter used to get rid of missing values. 
+
+  // The filter used to get rid of missing values.
   protected ReplaceMissingValues m_ReplaceMissingValues;
 
-  // A ZeroR model in case no model can be built from the data 
+  // A ZeroR model in case no model can be built from the data
   protected Classifier m_ZeroR;
 
   // Thread pool
@@ -229,13 +229,14 @@ public abstract class RBFModel extends RandomizableClassifier {
   // The number of classes in the data
   protected int m_numClasses = -1;
 
-  // Two values need to convert target/class values back into original scale (in regression case)
+  // Two values need to convert target/class values back into original scale (in
+  // regression case)
   protected double m_x1 = 1.0;
   protected double m_x0 = 0.0;
 
   /**
-   * Method used to pre-process the data, perform clustering, and
-   * set the initial parameter vector.
+   * Method used to pre-process the data, perform clustering, and set the
+   * initial parameter vector.
    */
   protected Instances initializeClassifier(Instances data) throws Exception {
 
@@ -248,23 +249,26 @@ public abstract class RBFModel extends RandomizableClassifier {
     // Make sure data is shuffled
     Random random = new Random(m_Seed);
     if (data.numInstances() > 2) {
-      random = data.getRandomNumberGenerator(m_Seed); 
+      random = data.getRandomNumberGenerator(m_Seed);
     }
     data.randomize(random);
 
-    double y0 = data.instance(0).classValue(); // This stuff is not relevant in classification case
+    double y0 = data.instance(0).classValue(); // This stuff is not relevant in
+                                               // classification case
     int index = 1;
-    while (index < data.numInstances() && data.instance(index).classValue() == y0) {
+    while (index < data.numInstances()
+      && data.instance(index).classValue() == y0) {
       index++;
     }
     if (index == data.numInstances()) {
       // degenerate case, all class values are equal
       // we don't want to deal with this, too much hassle
-      throw new Exception("All class values are the same. At least two class values should be different");
+      throw new Exception(
+        "All class values are the same. At least two class values should be different");
     }
     double y1 = data.instance(index).classValue();
-    
-    // Replace missing values	
+
+    // Replace missing values
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(data);
     data = Filter.useFilter(data, m_ReplaceMissingValues);
@@ -276,14 +280,13 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     // only class? -> build ZeroR model
     if (data.numAttributes() == 1) {
-      System.err.println(
-	  "Cannot build model (only class attribute present in data after removing useless attributes!), "
-	  + "using ZeroR model instead!");
+      System.err
+        .println("Cannot build model (only class attribute present in data after removing useless attributes!), "
+          + "using ZeroR model instead!");
       m_ZeroR = new weka.classifiers.rules.ZeroR();
       m_ZeroR.buildClassifier(data);
       return data;
-    }
-    else {
+    } else {
       m_ZeroR = null;
     }
 
@@ -291,16 +294,18 @@ public abstract class RBFModel extends RandomizableClassifier {
     m_NominalToBinary = new NominalToBinary();
     m_NominalToBinary.setInputFormat(data);
     data = Filter.useFilter(data, m_NominalToBinary);
-    
+
     m_Filter = new Normalize();
-    ((Normalize)m_Filter).setIgnoreClass(true);
+    ((Normalize) m_Filter).setIgnoreClass(true);
     m_Filter.setInputFormat(data);
-    data = Filter.useFilter(data, m_Filter); 
-    double z0 = data.instance(0).classValue(); // This stuff is not relevant in classification case
+    data = Filter.useFilter(data, m_Filter);
+    double z0 = data.instance(0).classValue(); // This stuff is not relevant in
+                                               // classification case
     double z1 = data.instance(index).classValue();
-    m_x1 = (y0 - y1) / (z0 - z1); // no division by zero, since y0 != y1 guaranteed => z0 != z1 ???
+    m_x1 = (y0 - y1) / (z0 - z1); // no division by zero, since y0 != y1
+                                  // guaranteed => z0 != z1 ???
     m_x0 = (y0 - m_x1 * z0); // = y1 - m_x1 * z1
-    
+
     m_classIndex = data.classIndex();
     m_numClasses = data.numClasses();
     m_numAttributes = data.numAttributes();
@@ -321,7 +326,7 @@ public abstract class RBFModel extends RandomizableClassifier {
     if (centers.numInstances() < m_numUnits) {
       m_numUnits = centers.numInstances();
     }
-    
+
     // Set up arrays
     OFFSET_WEIGHTS = 0;
     if (m_useAttributeWeights) {
@@ -331,10 +336,10 @@ public abstract class RBFModel extends RandomizableClassifier {
       OFFSET_ATTRIBUTE_WEIGHTS = -1;
       OFFSET_CENTERS = (m_numUnits + 1) * m_numClasses;
     }
-    OFFSET_SCALES = OFFSET_CENTERS  + m_numUnits * m_numAttributes;
+    OFFSET_SCALES = OFFSET_CENTERS + m_numUnits * m_numAttributes;
 
     switch (m_scaleOptimizationOption) {
-    case USE_GLOBAL_SCALE: 
+    case USE_GLOBAL_SCALE:
       m_RBFParameters = new double[OFFSET_SCALES + 1];
       break;
     case USE_SCALE_PER_UNIT_AND_ATTRIBUTE:
@@ -353,7 +358,8 @@ public abstract class RBFModel extends RandomizableClassifier {
         double dist = 0;
         for (int k = 0; k < centers.numAttributes(); k++) {
           if (k != centers.classIndex()) {
-            double diff = centers.instance(i).value(k) - centers.instance(j).value(k);
+            double diff = centers.instance(i).value(k)
+              - centers.instance(j).value(k);
             dist += diff * diff;
           }
         }
@@ -365,7 +371,7 @@ public abstract class RBFModel extends RandomizableClassifier {
         maxMinDist = minDist;
       }
     }
-   
+
     // Initialize parameters
     if (m_scaleOptimizationOption == USE_GLOBAL_SCALE) {
       m_RBFParameters[OFFSET_SCALES] = Math.sqrt(maxMinDist);
@@ -381,9 +387,11 @@ public abstract class RBFModel extends RandomizableClassifier {
         }
         if (j != data.classIndex()) {
           if (m_scaleOptimizationOption == USE_SCALE_PER_UNIT_AND_ATTRIBUTE) {
-            m_RBFParameters[OFFSET_SCALES + (i * m_numAttributes + j)] = Math.sqrt(maxMinDist);
+            m_RBFParameters[OFFSET_SCALES + (i * m_numAttributes + j)] = Math
+              .sqrt(maxMinDist);
           }
-          m_RBFParameters[OFFSET_CENTERS + (i * m_numAttributes) + j] = centers.instance(i).value(k);
+          m_RBFParameters[OFFSET_CENTERS + (i * m_numAttributes) + j] = centers
+            .instance(i).value(k);
           k++;
         }
       }
@@ -398,7 +406,7 @@ public abstract class RBFModel extends RandomizableClassifier {
     }
 
     initializeOutputLayer(random);
-    
+
     return data;
   }
 
@@ -410,6 +418,7 @@ public abstract class RBFModel extends RandomizableClassifier {
   /**
    * Builds the RBF network regressor based on the given dataset.
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     // Set up the initial arrays
@@ -421,7 +430,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     // Initialise thread pool
     m_Pool = Executors.newFixedThreadPool(m_poolSize);
-      
+
     // Apply optimization class to train the network
     Optimization opt = null;
     if (!m_useCGD) {
@@ -440,23 +449,24 @@ public abstract class RBFModel extends RandomizableClassifier {
     }
 
     m_RBFParameters = opt.findArgmin(m_RBFParameters, b);
-    while(m_RBFParameters == null){
+    while (m_RBFParameters == null) {
       m_RBFParameters = opt.getVarbValues();
       if (m_Debug) {
         System.out.println("200 iterations finished, not enough!");
       }
       m_RBFParameters = opt.findArgmin(m_RBFParameters, b);
     }
-    if (m_Debug) {	
-      System.out.println("SE (normalized space) after optimization: " + opt.getMinFunction()); 
+    if (m_Debug) {
+      System.out.println("SE (normalized space) after optimization: "
+        + opt.getMinFunction());
     }
-    
+
     m_data = new Instances(m_data, 0); // Save memory
 
     // Shut down thread pool
     m_Pool.shutdown();
-  } 
-  
+  }
+
   /**
    * Calculates error for single instance.
    */
@@ -473,7 +483,8 @@ public abstract class RBFModel extends RandomizableClassifier {
   protected abstract void postprocessGradient(double[] grad);
 
   /**
-   * Calculates the (penalized) squared error based on the current parameter vector.
+   * Calculates the (penalized) squared error based on the current parameter
+   * vector.
    */
   protected double calculateSE() {
 
@@ -486,23 +497,25 @@ public abstract class RBFModel extends RandomizableClassifier {
 
       // Determine batch to be processed
       final int lo = j * chunksize;
-      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data.numInstances();
+      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data
+        .numInstances();
 
       // Create and submit new job, where each instance in batch is processed
-      Future<Double> futureSE = m_Pool.submit(new Callable() {
-          public Double call() {
-            final double[] outputs = new double[m_numUnits];
-            double SE = 0;
-            for (int k = lo; k < hi; k++) {
-              final Instance inst = m_data.instance(k);
-              
-              // Calculate necessary input/output values and error term
-              calculateOutputs(inst, outputs, null);
-              SE += calculateError(outputs, inst);
-            }
-            return SE;
+      Future<Double> futureSE = m_Pool.submit(new Callable<Double>() {
+        @Override
+        public Double call() {
+          final double[] outputs = new double[m_numUnits];
+          double SE = 0;
+          for (int k = lo; k < hi; k++) {
+            final Instance inst = m_data.instance(k);
+
+            // Calculate necessary input/output values and error term
+            calculateOutputs(inst, outputs, null);
+            SE += calculateError(outputs, inst);
           }
-        });
+          return SE;
+        }
+      });
       results.add(futureSE);
     }
 
@@ -533,26 +546,30 @@ public abstract class RBFModel extends RandomizableClassifier {
 
       // Determine batch to be processed
       final int lo = j * chunksize;
-      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data.numInstances();
+      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data
+        .numInstances();
 
       // Create and submit new job, where each instance in batch is processed
-      Future<double[]> futureGrad = m_Pool.submit(new Callable() {
-          public double[] call() {
+      Future<double[]> futureGrad = m_Pool.submit(new Callable<double[]>() {
+        @Override
+        public double[] call() {
 
-            final double[] outputs = new double[m_numUnits];
-            final double[] deltaHidden = new double[m_numUnits];
-            final double[] derivativesOutput = new double[1];
-            final double[] derivativesHidden = new double[m_numUnits];
-            final double[] localGrad = new double[m_RBFParameters.length];
-            for (int k = lo; k < hi; k++) {
-              final Instance inst = m_data.instance(k);
-              calculateOutputs(inst, outputs, derivativesHidden);
-              updateGradient(localGrad, inst, outputs, derivativesOutput, deltaHidden);
-              updateGradientForHiddenUnits(localGrad, inst, derivativesHidden, deltaHidden);
-            }
-            return localGrad;
+          final double[] outputs = new double[m_numUnits];
+          final double[] deltaHidden = new double[m_numUnits];
+          final double[] derivativesOutput = new double[1];
+          final double[] derivativesHidden = new double[m_numUnits];
+          final double[] localGrad = new double[m_RBFParameters.length];
+          for (int k = lo; k < hi; k++) {
+            final Instance inst = m_data.instance(k);
+            calculateOutputs(inst, outputs, derivativesHidden);
+            updateGradient(localGrad, inst, outputs, derivativesOutput,
+              deltaHidden);
+            updateGradientForHiddenUnits(localGrad, inst, derivativesHidden,
+              deltaHidden);
           }
-        });
+          return localGrad;
+        }
+      });
       results.add(futureGrad);
     }
 
@@ -561,7 +578,7 @@ public abstract class RBFModel extends RandomizableClassifier {
     try {
       for (Future<double[]> futureGrad : results) {
         double[] lg = futureGrad.get();
-        for (int  i = 0; i < lg.length; i++) {
+        for (int i = 0; i < lg.length; i++) {
           grad[i] += lg[i];
         }
       }
@@ -578,12 +595,14 @@ public abstract class RBFModel extends RandomizableClassifier {
   /**
    * Update the gradient for the weights in the output layer.
    */
-  protected abstract void updateGradient(double[] grad, Instance inst, double[] outputs, double[] sigmoidDerivativeOutput, double[] deltaHidden);
+  protected abstract void updateGradient(double[] grad, Instance inst,
+    double[] outputs, double[] sigmoidDerivativeOutput, double[] deltaHidden);
 
   /**
    * Update the gradient for the weights in the hidden layer.
    */
-  protected void updateGradientForHiddenUnits(double[] grad, Instance inst, double[] derivativesHidden, double[] deltaHidden) {
+  protected void updateGradientForHiddenUnits(double[] grad, Instance inst,
+    double[] derivativesHidden, double[] deltaHidden) {
 
     // Finalize deltaHidden
     for (int i = 0; i < m_numUnits; i++) {
@@ -592,7 +611,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     // Update gradient for hidden units
     for (int i = 0; i < m_numUnits; i++) {
-      
+
       // Skip calculations if update too small
       if (deltaHidden[i] <= m_tolerance && deltaHidden[i] >= -m_tolerance) {
         continue;
@@ -601,22 +620,30 @@ public abstract class RBFModel extends RandomizableClassifier {
       // Update gradient for centers and possibly scale
       switch (m_scaleOptimizationOption) {
       case USE_GLOBAL_SCALE: { // Just one global scale parameter
-        grad[OFFSET_SCALES] +=  derivativeOneScale(grad, deltaHidden, m_RBFParameters[OFFSET_SCALES], inst, i);
-        break; }
-      case USE_SCALE_PER_UNIT_AND_ATTRIBUTE: { // One scale parameter for each unit and attribute
+        grad[OFFSET_SCALES] += derivativeOneScale(grad, deltaHidden,
+          m_RBFParameters[OFFSET_SCALES], inst, i);
+        break;
+      }
+      case USE_SCALE_PER_UNIT_AND_ATTRIBUTE: { // One scale parameter for each
+                                               // unit and attribute
         derivativeScalePerAttribute(grad, deltaHidden, inst, i);
-        break; }
+        break;
+      }
       default: { // Only one scale parameter per unit
-        grad[OFFSET_SCALES + i] +=  derivativeOneScale(grad, deltaHidden, m_RBFParameters[OFFSET_SCALES + i], inst, i);
-        break; }
+        grad[OFFSET_SCALES + i] += derivativeOneScale(grad, deltaHidden,
+          m_RBFParameters[OFFSET_SCALES + i], inst, i);
+        break;
+      }
       }
     }
   }
 
   /**
-   * Calculates partial derivatives in the case of different sigma per attribute and unit.
+   * Calculates partial derivatives in the case of different sigma per attribute
+   * and unit.
    */
-  protected void derivativeScalePerAttribute(double[] grad, double[] deltaHidden, Instance inst, int unitIndex) {
+  protected void derivativeScalePerAttribute(double[] grad,
+    double[] deltaHidden, Instance inst, int unitIndex) {
 
     double constant = deltaHidden[unitIndex];
     int offsetC = OFFSET_CENTERS + (unitIndex * m_numAttributes);
@@ -624,31 +651,43 @@ public abstract class RBFModel extends RandomizableClassifier {
     double attWeight = 1.0;
     for (int j = 0; j < m_classIndex; j++) {
       double diff = (inst.value(j) - m_RBFParameters[offsetC + j]);
-      double scalePart = (m_RBFParameters[offsetS + j] * m_RBFParameters[offsetS + j]);
+      double scalePart = (m_RBFParameters[offsetS + j] * m_RBFParameters[offsetS
+        + j]);
       if (m_useAttributeWeights) {
-        attWeight = m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j] * m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
-        grad[OFFSET_ATTRIBUTE_WEIGHTS + j] -= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j] * constant * diff * diff / scalePart;
+        attWeight = m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j]
+          * m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
+        grad[OFFSET_ATTRIBUTE_WEIGHTS + j] -= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS
+          + j]
+          * constant * diff * diff / scalePart;
       }
-      grad[offsetS + j] += constant * attWeight * diff * diff / (scalePart * m_RBFParameters[offsetS + j]);
+      grad[offsetS + j] += constant * attWeight * diff * diff
+        / (scalePart * m_RBFParameters[offsetS + j]);
       grad[offsetC + j] += constant * attWeight * diff / scalePart;
     }
     for (int j = m_classIndex + 1; j < m_numAttributes; j++) {
       double diff = (inst.value(j) - m_RBFParameters[offsetC + j]);
-      double scalePart = (m_RBFParameters[offsetS + j] * m_RBFParameters[offsetS + j]);
+      double scalePart = (m_RBFParameters[offsetS + j] * m_RBFParameters[offsetS
+        + j]);
       if (m_useAttributeWeights) {
-        attWeight = m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j] * m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
-        grad[OFFSET_ATTRIBUTE_WEIGHTS + j] -= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j] * constant * diff * diff / scalePart;
+        attWeight = m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j]
+          * m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
+        grad[OFFSET_ATTRIBUTE_WEIGHTS + j] -= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS
+          + j]
+          * constant * diff * diff / scalePart;
       }
-      grad[offsetS + j] += constant * attWeight * diff * diff / (scalePart * m_RBFParameters[offsetS + j]);
+      grad[offsetS + j] += constant * attWeight * diff * diff
+        / (scalePart * m_RBFParameters[offsetS + j]);
       grad[offsetC + j] += constant * attWeight * diff / scalePart;
     }
   }
 
   /**
-   * Calculates partial derivatives in the case of one sigma (either globally or per unit).
+   * Calculates partial derivatives in the case of one sigma (either globally or
+   * per unit).
    */
-  protected double derivativeOneScale(double[] grad, double[] deltaHidden,  double scale, Instance inst, int unitIndex) {  
-  
+  protected double derivativeOneScale(double[] grad, double[] deltaHidden,
+    double scale, Instance inst, int unitIndex) {
+
     double constant = deltaHidden[unitIndex] / (scale * scale);
     double sumDiffSquared = 0;
     int offsetC = OFFSET_CENTERS + (unitIndex * m_numAttributes);
@@ -657,8 +696,11 @@ public abstract class RBFModel extends RandomizableClassifier {
       double diff = (inst.value(j) - m_RBFParameters[offsetC + j]);
       double diffSquared = diff * diff;
       if (m_useAttributeWeights) {
-        attWeight = m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j] * m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
-        grad[OFFSET_ATTRIBUTE_WEIGHTS + j] -= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j] * constant * diffSquared;
+        attWeight = m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j]
+          * m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
+        grad[OFFSET_ATTRIBUTE_WEIGHTS + j] -= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS
+          + j]
+          * constant * diffSquared;
       }
       sumDiffSquared += attWeight * diffSquared;
       grad[offsetC + j] += constant * attWeight * diff;
@@ -667,8 +709,11 @@ public abstract class RBFModel extends RandomizableClassifier {
       double diff = (inst.value(j) - m_RBFParameters[offsetC + j]);
       double diffSquared = diff * diff;
       if (m_useAttributeWeights) {
-        attWeight = m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j] * m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
-        grad[OFFSET_ATTRIBUTE_WEIGHTS + j] -= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j] * constant * diffSquared;
+        attWeight = m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j]
+          * m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
+        grad[OFFSET_ATTRIBUTE_WEIGHTS + j] -= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS
+          + j]
+          * constant * diffSquared;
       }
       sumDiffSquared += attWeight * diffSquared;
       grad[offsetC + j] += constant * attWeight * diff;
@@ -678,23 +723,26 @@ public abstract class RBFModel extends RandomizableClassifier {
 
   /**
    * Calculates the array of outputs of the hidden units, normalized if that
-   * option has been chosen.
-   * Also calculates derivatives if d != null.
+   * option has been chosen. Also calculates derivatives if d != null.
    */
   protected void calculateOutputs(Instance inst, double[] o, double[] d) {
-  
+
     for (int i = 0; i < m_numUnits; i++) {
-    
+
       double sumSquaredDiff = 0;
       switch (m_scaleOptimizationOption) {
-      case USE_GLOBAL_SCALE:  // Just one global scale parameter
-        sumSquaredDiff = sumSquaredDiffOneScale(m_RBFParameters[OFFSET_SCALES], inst, i);
-        break; 
-      case USE_SCALE_PER_UNIT_AND_ATTRIBUTE: { // One scale parameter for each unit and attribute
+      case USE_GLOBAL_SCALE: // Just one global scale parameter
+        sumSquaredDiff = sumSquaredDiffOneScale(m_RBFParameters[OFFSET_SCALES],
+          inst, i);
+        break;
+      case USE_SCALE_PER_UNIT_AND_ATTRIBUTE: { // One scale parameter for each
+                                               // unit and attribute
         sumSquaredDiff = sumSquaredDiffScalePerAttribute(inst, i);
-        break; }
-      default:  // Only one scale parameter per unit
-        sumSquaredDiff = sumSquaredDiffOneScale(m_RBFParameters[OFFSET_SCALES + i], inst, i);
+        break;
+      }
+      default: // Only one scale parameter per unit
+        sumSquaredDiff = sumSquaredDiffOneScale(m_RBFParameters[OFFSET_SCALES
+          + i], inst, i);
       }
       if (!m_useNormalizedBasisFunctions) {
         o[i] = Math.exp(-sumSquaredDiff);
@@ -705,11 +753,11 @@ public abstract class RBFModel extends RandomizableClassifier {
         o[i] = -sumSquaredDiff;
       }
     }
-    
+
     if (m_useNormalizedBasisFunctions) {
       double max = o[Utils.maxIndex(o)];
       double sum = 0.0;
-      for(int i = 0; i < o.length; i++) {
+      for (int i = 0; i < o.length; i++) {
         o[i] = Math.exp(o[i] - max);
         sum += o[i];
       }
@@ -725,10 +773,11 @@ public abstract class RBFModel extends RandomizableClassifier {
   }
 
   /**
-   * The exponent of the RBF in the case of a different sigma per attribute and unit.
+   * The exponent of the RBF in the case of a different sigma per attribute and
+   * unit.
    */
   protected double sumSquaredDiffScalePerAttribute(Instance inst, int unitIndex) {
-   
+
     int offsetS = OFFSET_SCALES + unitIndex * m_numAttributes;
     int offsetC = OFFSET_CENTERS + unitIndex * m_numAttributes;
     double sumSquaredDiff = 0;
@@ -737,22 +786,25 @@ public abstract class RBFModel extends RandomizableClassifier {
       if (m_useAttributeWeights) {
         diff *= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
       }
-      sumSquaredDiff += diff * diff / (2 * m_RBFParameters[offsetS + j] * m_RBFParameters[offsetS + j]);
+      sumSquaredDiff += diff * diff
+        / (2 * m_RBFParameters[offsetS + j] * m_RBFParameters[offsetS + j]);
     }
     for (int j = m_classIndex + 1; j < m_numAttributes; j++) {
       double diff = m_RBFParameters[offsetC + j] - inst.value(j);
       if (m_useAttributeWeights) {
         diff *= m_RBFParameters[OFFSET_ATTRIBUTE_WEIGHTS + j];
       }
-      sumSquaredDiff += diff * diff / (2 * m_RBFParameters[offsetS + j] * m_RBFParameters[offsetS + j]);
+      sumSquaredDiff += diff * diff
+        / (2 * m_RBFParameters[offsetS + j] * m_RBFParameters[offsetS + j]);
     }
     return sumSquaredDiff;
-  }    
-    
+  }
+
   /**
    * The exponent of the RBF in the case of a fixed sigma per unit.
    */
-  protected double sumSquaredDiffOneScale(double scale, Instance inst, int unitIndex) {
+  protected double sumSquaredDiffOneScale(double scale, Instance inst,
+    int unitIndex) {
 
     int offsetC = OFFSET_CENTERS + unitIndex * m_numAttributes;
     double sumSquaredDiff = 0;
@@ -772,18 +824,19 @@ public abstract class RBFModel extends RandomizableClassifier {
     }
     return sumSquaredDiff / (2 * scale * scale);
   }
-  
+
   /**
-   * Gets output "distribution" based on  hidden layer outputs.
+   * Gets output "distribution" based on hidden layer outputs.
    */
   protected abstract double[] getDistribution(double[] outputs);
 
   /**
-   * Calculates the output of the network after the instance has been
-   * piped through the fliters to replace missing values, etc.
+   * Calculates the output of the network after the instance has been piped
+   * through the fliters to replace missing values, etc.
    */
+  @Override
   public double[] distributionForInstance(Instance inst) throws Exception {
-      
+
     m_ReplaceMissingValues.input(inst);
     inst = m_ReplaceMissingValues.output();
     m_AttFilter.input(inst);
@@ -806,12 +859,12 @@ public abstract class RBFModel extends RandomizableClassifier {
 
   /**
    * This will return a string describing the classifier.
+   * 
    * @return The string.
    */
   public String globalInfo() {
 
-    return 
-      "Class implementing radial basis function networks for classification,"
+    return "Class implementing radial basis function networks for classification,"
       + " trained in a fully supervised manner using WEKA's Optimization"
       + " class by minimizing squared error with the BFGS method. Note that"
       + " all attributes are normalized into the [0,1] scale."
@@ -841,7 +894,7 @@ public abstract class RBFModel extends RandomizableClassifier {
       + " NominalToBinary filter and missing values are replaced globally"
       + " using ReplaceMissingValues.";
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -857,7 +910,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return m_tolerance;
   }
-  
+
   /**
    * Sets the tolerance parameter for the delta values.
    */
@@ -865,7 +918,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     m_tolerance = newTolerance;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -881,7 +934,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return m_numUnits;
   }
-  
+
   /**
    * Sets the number of functions.
    */
@@ -889,7 +942,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     m_numUnits = newNumFunctions;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -905,7 +958,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return m_ridge;
   }
-  
+
   /**
    * Sets the value of the ridge parameter.
    */
@@ -913,7 +966,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     m_ridge = newRidge;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -929,7 +982,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return m_useCGD;
   }
-  
+
   /**
    * Sets whether to use CGD.
    */
@@ -937,7 +990,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     m_useCGD = newUseCGD;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -953,7 +1006,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return m_useAttributeWeights;
   }
-  
+
   /**
    * Sets whether to use attribute weights.
    */
@@ -961,7 +1014,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     m_useAttributeWeights = newUseAttributeWeights;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -977,15 +1030,16 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return m_useNormalizedBasisFunctions;
   }
-  
+
   /**
    * Sets whether to use normalized basis functions.
    */
-  public void setUseNormalizedBasisFunctions(boolean newUseNormalizedBasisFunctions) {
+  public void setUseNormalizedBasisFunctions(
+    boolean newUseNormalizedBasisFunctions) {
 
     m_useNormalizedBasisFunctions = newUseNormalizedBasisFunctions;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -993,7 +1047,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return "The number of sigma parameters to use.";
   }
-  
+
   /**
    * Gets the scale optimisation method to use.
    */
@@ -1001,12 +1055,12 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return new SelectedTag(m_scaleOptimizationOption, TAGS_SCALE);
   }
-  
+
   /**
    * Sets the scale optimization option to use.
    */
   public void setScaleOptimizationOption(SelectedTag newMethod) {
-    
+
     if (newMethod.getTags() == TAGS_SCALE) {
       m_scaleOptimizationOption = newMethod.getSelectedTag().getID();
     }
@@ -1027,7 +1081,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return m_numThreads;
   }
-  
+
   /**
    * Sets the number of threads
    */
@@ -1051,7 +1105,7 @@ public abstract class RBFModel extends RandomizableClassifier {
 
     return m_poolSize;
   }
-  
+
   /**
    * Sets the number of threads
    */
@@ -1062,97 +1116,100 @@ public abstract class RBFModel extends RandomizableClassifier {
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(9);
-
-    newVector.addElement(new Option(
-                                    "\tNumber of Gaussian basis functions (default is 2).\n", 
-                                    "N", 1, "-N <int>"));
+    Vector<Option> newVector = new Vector<Option>(9);
 
     newVector.addElement(new Option(
-                                    "\tRidge factor for quadratic penalty on output weights (default is 0.01).\n", 
-                                    "R", 1, "-R <double>"));
+      "\tNumber of Gaussian basis functions (default is 2).\n", "N", 1,
+      "-N <int>"));
+
+    newVector
+      .addElement(new Option(
+        "\tRidge factor for quadratic penalty on output weights (default is 0.01).\n",
+        "R", 1, "-R <double>"));
     newVector.addElement(new Option(
-                                    "\tTolerance parameter for delta values (default is 1.0e-6).\n", 
-                                    "L", 1, "-L <double>"));
-    newVector.addElement(new Option(
-                                    "\tThe scale optimization option: global scale (1), one scale per unit (2), scale per unit and attribute (3) (default is 2).\n", 
-                                    "C", 1, "-C <1|2|3>"));
+      "\tTolerance parameter for delta values (default is 1.0e-6).\n", "L", 1,
+      "-L <double>"));
+    newVector
+      .addElement(new Option(
+        "\tThe scale optimization option: global scale (1), one scale per unit (2), scale per unit and attribute (3) (default is 2).\n",
+        "C", 1, "-C <1|2|3>"));
 
     newVector.addElement(new Option(
-                                    "\tUse conjugate gradient descent (recommended for many attributes).\n", 
-                                    "G", 0, "-G"));
+      "\tUse conjugate gradient descent (recommended for many attributes).\n",
+      "G", 0, "-G"));
 
+    newVector.addElement(new Option("\tUse normalized basis functions.\n", "O",
+      0, "-O"));
+    newVector
+      .addElement(new Option("\tUse attribute weights.\n", "A", 0, "-A"));
     newVector.addElement(new Option(
-                                    "\tUse normalized basis functions.\n", 
-                                    "O", 0, "-O"));
-    newVector.addElement(new Option(
-                                    "\tUse attribute weights.\n", 
-                                    "A", 0, "-A"));
-    newVector.addElement(new Option(
-                                    "\t" + poolSizeTipText() + " (default 1)\n", 
-                                    "P", 1, "-P <int>"));
-    newVector.addElement(new Option(
-                                    "\t" + numThreadsTipText() + " (default 1)\n", 
-                                    "E", 1, "-E <int>"));
+      "\t" + poolSizeTipText() + " (default 1)\n", "P", 1, "-P <int>"));
+    newVector.addElement(new Option("\t" + numThreadsTipText()
+      + " (default 1)\n", "E", 1, "-E <int>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -N
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -N
    *  Number of Gaussian basis functions (default is 2).
    * </pre>
    * 
-   * <pre> -R
+   * <pre>
+   * -R
    *  Ridge factor for quadratic penalty on output weights (default is 0.01).
    * </pre>
    * 
-   * <pre> -C
+   * <pre>
+   * -C
    *  The scale optimization option: global scale (1), one scale per unit (2), scale per unit and attribute (3) (default is 2).
    * </pre>
    * 
-   * <pre> -G
+   * <pre>
+   * -G
    *  Use conjugate gradient descent (recommended for many attributes).
    * </pre>
    * 
-   * <pre> -O
+   * <pre>
+   * -O
    *  Use normalized basis functions.
    * </pre>
    * 
-   * <pre> -A
+   * <pre>
+   * -A
    *  Use attribute weights.
    * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   * <!-- options-end -->
    * 
-   <!-- options-end -->
-   *
-   * Options after -- are passed to the designated classifier.<p>
-   *
+   * Options after -- are passed to the designated classifier.
+   * <p>
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     String numFunctions = Utils.getOption('N', options);
@@ -1169,7 +1226,8 @@ public abstract class RBFModel extends RandomizableClassifier {
     }
     String scale = Utils.getOption('C', options);
     if (scale.length() != 0) {
-      setScaleOptimizationOption(new SelectedTag(Integer.parseInt(scale), TAGS_SCALE));
+      setScaleOptimizationOption(new SelectedTag(Integer.parseInt(scale),
+        TAGS_SCALE));
     } else {
       setScaleOptimizationOption(new SelectedTag(USE_SCALE_PER_UNIT, TAGS_SCALE));
     }
@@ -1196,57 +1254,52 @@ public abstract class RBFModel extends RandomizableClassifier {
     }
 
     super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 15];
+    Vector<String> options = new Vector<String>();
 
-    int current = 0;
-    options[current++] = "-N"; 
-    options[current++] = "" + getNumFunctions();
+    options.add("-N");
+    options.add("" + getNumFunctions());
 
-    options[current++] = "-R"; 
-    options[current++] = "" + getRidge();
+    options.add("-R");
+    options.add("" + getRidge());
 
-    options[current++] = "-L"; 
-    options[current++] = "" + getTolerance();
+    options.add("-L");
+    options.add("" + getTolerance());
 
-    options[current++] = "-C"; 
-    options[current++] = "" + getScaleOptimizationOption().getSelectedTag().getID();
+    options.add("-C");
+    options.add("" + getScaleOptimizationOption().getSelectedTag().getID());
 
     if (m_useCGD) {
-      options[current++] = "-G";
+      options.add("-G");
     }
 
     if (m_useNormalizedBasisFunctions) {
-      options[current++] = "-O";
+      options.add("-O");
     }
 
     if (m_useAttributeWeights) {
-      options[current++] = "-A";
+      options.add("-A");
     }
 
-    options[current++] = "-P"; 
-    options[current++] = "" + getPoolSize();
+    options.add("-P");
+    options.add("" + getPoolSize());
 
-    options[current++] = "-E"; 
-    options[current++] = "" + getNumThreads();
+    options.add("-E");
+    options.add("" + getNumThreads());
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
+    Collections.addAll(options, super.getOptions());
 
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
 }
-

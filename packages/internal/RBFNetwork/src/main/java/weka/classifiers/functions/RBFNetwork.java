@@ -20,8 +20,12 @@
  */
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.clusterers.MakeDensityBasedClusterer;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Capabilities;
@@ -36,36 +40,48 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ClusterMembership;
 import weka.filters.unsupervised.attribute.Standardize;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 /**
- <!-- globalinfo-start -->
- * Class that implements a normalized Gaussian radial basisbasis function network.<br/>
- * It uses the k-means clustering algorithm to provide the basis functions and learns either a logistic regression (discrete class problems) or linear regression (numeric class problems) on top of that. Symmetric multivariate Gaussians are fit to the data from each cluster. If the class is nominal it uses the given number of clusters per class.It standardizes all numeric attributes to zero mean and unit variance.
+ * <!-- globalinfo-start --> Class that implements a normalized Gaussian radial
+ * basisbasis function network.<br/>
+ * It uses the k-means clustering algorithm to provide the basis functions and
+ * learns either a logistic regression (discrete class problems) or linear
+ * regression (numeric class problems) on top of that. Symmetric multivariate
+ * Gaussians are fit to the data from each cluster. If the class is nominal it
+ * uses the given number of clusters per class.It standardizes all numeric
+ * attributes to zero mean and unit variance.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -B &lt;number&gt;
- *  Set the number of clusters (basis functions) to generate. (default = 2).</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -S &lt;seed&gt;
- *  Set the random seed to be used by K-means. (default = 1).</pre>
+ * <pre>
+ * -B &lt;number&gt;
+ *  Set the number of clusters (basis functions) to generate. (default = 2).
+ * </pre>
  * 
- * <pre> -R &lt;ridge&gt;
- *  Set the ridge value for the logistic or linear regression.</pre>
+ * <pre>
+ * -S &lt;seed&gt;
+ *  Set the random seed to be used by K-means. (default = 1).
+ * </pre>
  * 
- * <pre> -M &lt;number&gt;
- *  Set the maximum number of iterations for the logistic regression. (default -1, until convergence).</pre>
+ * <pre>
+ * -R &lt;ridge&gt;
+ *  Set the ridge value for the logistic or linear regression.
+ * </pre>
  * 
- * <pre> -W &lt;number&gt;
- *  Set the minimum standard deviation for the clusters. (default 0.1).</pre>
+ * <pre>
+ * -M &lt;number&gt;
+ *  Set the maximum number of iterations for the logistic regression. (default -1, until convergence).
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <pre>
+ * -W &lt;number&gt;
+ *  Set the minimum standard deviation for the clusters. (default 0.1).
+ * </pre>
+ * 
+ * <!-- options-end -->
+ * 
  * @author Mark Hall
  * @author Eibe Frank
  * @version $Revision$
@@ -74,7 +90,7 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3669814959712675720L;
-  
+
   /** The logistic regression for classification problems */
   private Logistic m_logistic;
 
@@ -104,14 +120,15 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /** a ZeroR model in case no model can be built from the data */
   private Classifier m_ZeroR;
-    
+
   /**
    * Returns a string describing this classifier
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Class that implements a normalized Gaussian radial basis" 
+    return "Class that implements a normalized Gaussian radial basis"
       + "basis function network.\n"
       + "It uses the k-means clustering algorithm to provide the basis "
       + "functions and learns either a logistic regression (discrete "
@@ -120,17 +137,18 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
       + "the data from each cluster. If the class is "
       + "nominal it uses the given number of clusters per class."
       + "It standardizes all numeric "
-      + "attributes to zero mean and unit variance." ;
+      + "attributes to zero mean and unit variance.";
   }
 
   /**
-   * Returns default capabilities of the classifier, i.e.,  and "or" of
-   * Logistic and LinearRegression.
-   *
-   * @return      the capabilities of this classifier
-   * @see         Logistic
-   * @see         LinearRegression
+   * Returns default capabilities of the classifier, i.e., and "or" of Logistic
+   * and LinearRegression.
+   * 
+   * @return the capabilities of this classifier
+   * @see Logistic
+   * @see LinearRegression
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = new Logistic().getCapabilities();
     result.or(new LinearRegression().getCapabilities());
@@ -142,10 +160,11 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Builds the classifier
-   *
+   * 
    * @param instances the training data
    * @throws Exception if the classifier could not be built successfully
    */
+  @Override
   public void buildClassifier(Instances instances) throws Exception {
 
     // can classifier handle the data?
@@ -154,20 +173,19 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
     // remove instances with missing class
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
-    
+
     // only class? -> build ZeroR model
     if (instances.numAttributes() == 1) {
-      System.err.println(
-	  "Cannot build model (only class attribute present in data!), "
-	  + "using ZeroR model instead!");
+      System.err
+        .println("Cannot build model (only class attribute present in data!), "
+          + "using ZeroR model instead!");
       m_ZeroR = new weka.classifiers.rules.ZeroR();
       m_ZeroR.buildClassifier(instances);
       return;
-    }
-    else {
+    } else {
       m_ZeroR = null;
     }
-    
+
     m_standardize = new Standardize();
     m_standardize.setInputFormat(instances);
     instances = Filter.useFilter(instances, m_standardize);
@@ -192,8 +210,8 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
     } else {
       m_logistic = null;
       m_linear = new LinearRegression();
-      m_linear.setAttributeSelectionMethod(new SelectedTag(LinearRegression.SELECTION_NONE,
-							   LinearRegression.TAGS_SELECTION));
+      m_linear.setAttributeSelectionMethod(new SelectedTag(
+        LinearRegression.SELECTION_NONE, LinearRegression.TAGS_SELECTION));
       m_linear.setRidge(m_ridge);
       m_linear.buildClassifier(transformed);
     }
@@ -201,95 +219,98 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Computes the distribution for a given instance
-   *
+   * 
    * @param instance the instance for which distribution is computed
    * @return the distribution
    * @throws Exception if the distribution can't be computed successfully
    */
-  public double [] distributionForInstance(Instance instance) 
-    throws Exception {
+  @Override
+  public double[] distributionForInstance(Instance instance) throws Exception {
 
     // default model?
     if (m_ZeroR != null) {
       return m_ZeroR.distributionForInstance(instance);
     }
-    
+
     m_standardize.input(instance);
     m_basisFilter.input(m_standardize.output());
     Instance transformed = m_basisFilter.output();
-    
-    return ((instance.classAttribute().isNominal()
-	     ? m_logistic.distributionForInstance(transformed)
-	     : m_linear.distributionForInstance(transformed)));
+
+    return ((instance.classAttribute().isNominal() ? m_logistic
+      .distributionForInstance(transformed) : m_linear
+      .distributionForInstance(transformed)));
   }
-  
+
   /**
    * Returns a description of this classifier as a String
-   *
+   * 
    * @return a description of this classifier
    */
+  @Override
   public String toString() {
 
     // only ZeroR model?
     if (m_ZeroR != null) {
       StringBuffer buf = new StringBuffer();
       buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
-      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
-      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "")
+        .replaceAll(".", "=")
+        + "\n\n");
+      buf
+        .append("Warning: No model could be built, hence ZeroR model is used:\n\n");
       buf.append(m_ZeroR.toString());
       return buf.toString();
     }
-    
+
     if (m_basisFilter == null) {
       return "No classifier built yet!";
     }
 
     StringBuffer sb = new StringBuffer();
     sb.append("Radial basis function network\n");
-    sb.append((m_linear == null) 
-	      ? "(Logistic regression "
-	      : "(Linear regression ");
+    sb.append((m_linear == null) ? "(Logistic regression "
+      : "(Linear regression ");
     sb.append("applied to K-means clusters as basis functions):\n\n");
-    sb.append((m_linear == null)
-	      ? m_logistic.toString()
-	      : m_linear.toString());
+    sb.append((m_linear == null) ? m_logistic.toString() : m_linear.toString());
     return sb.toString();
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String maxItsTipText() {
     return "Maximum number of iterations for the logistic regression to perform. "
-      +"Only applied to discrete class problems.";
+      + "Only applied to discrete class problems.";
   }
 
   /**
    * Get the value of MaxIts.
-   *
+   * 
    * @return Value of MaxIts.
    */
   public int getMaxIts() {
-	
+
     return m_maxIts;
   }
-    
+
   /**
    * Set the value of MaxIts.
-   *
+   * 
    * @param newMaxIts Value to assign to MaxIts.
    */
   public void setMaxIts(int newMaxIts) {
-	
+
     m_maxIts = newMaxIts;
-  }    
+  }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String ridgeTipText() {
     return "Set the Ridge value for the logistic or linear regression.";
@@ -297,16 +318,16 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Sets the ridge value for logistic or linear regression.
-   *
+   * 
    * @param ridge the ridge
    */
   public void setRidge(double ridge) {
     m_ridge = ridge;
   }
-    
+
   /**
    * Gets the ridge value.
-   *
+   * 
    * @return the ridge
    */
   public double getRidge() {
@@ -315,8 +336,9 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String numClustersTipText() {
     return "The number of clusters for K-Means to generate.";
@@ -324,7 +346,7 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Set the number of clusters for K-means to generate.
-   *
+   * 
    * @param numClusters the number of clusters to generate.
    */
   public void setNumClusters(int numClusters) {
@@ -335,7 +357,7 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Return the number of clusters to generate.
-   *
+   * 
    * @return the number of clusters to generate.
    */
   public int getNumClusters() {
@@ -344,16 +366,17 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String clusteringSeedTipText() {
     return "The random seed to pass on to K-means.";
   }
-  
+
   /**
    * Set the random seed to be passed on to K-means.
-   *
+   * 
    * @param seed a seed value.
    */
   public void setClusteringSeed(int seed) {
@@ -362,7 +385,7 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Get the random seed used by K-means.
-   *
+   * 
    * @return the seed value.
    */
   public int getClusteringSeed() {
@@ -371,8 +394,9 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minStdDevTipText() {
     return "Sets the minimum standard deviation for the clusters.";
@@ -380,6 +404,7 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Get the MinStdDev value.
+   * 
    * @return the MinStdDev value.
    */
   public double getMinStdDev() {
@@ -388,67 +413,81 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
 
   /**
    * Set the MinStdDev value.
+   * 
    * @param newMinStdDev The new MinStdDev value.
    */
   public void setMinStdDev(double newMinStdDev) {
     m_minStdDev = newMinStdDev;
   }
 
-  
   /**
    * Returns an enumeration describing the available options
-   *
+   * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(4);
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>(5);
 
-    newVector.addElement(new Option("\tSet the number of clusters (basis functions) "
-				    +"to generate. (default = 2).",
-				    "B", 1, "-B <number>"));
-    newVector.addElement(new Option("\tSet the random seed to be used by K-means. "
-				    +"(default = 1).",
-				    "S", 1, "-S <seed>"));
-    newVector.addElement(new Option("\tSet the ridge value for the logistic or "
-				    +"linear regression.",
-				    "R", 1, "-R <ridge>"));
+    newVector.addElement(new Option(
+      "\tSet the number of clusters (basis functions) "
+        + "to generate. (default = 2).", "B", 1, "-B <number>"));
+    newVector.addElement(new Option(
+      "\tSet the random seed to be used by K-means. " + "(default = 1).", "S",
+      1, "-S <seed>"));
+    newVector.addElement(new Option(
+      "\tSet the ridge value for the logistic or " + "linear regression.", "R",
+      1, "-R <ridge>"));
     newVector.addElement(new Option("\tSet the maximum number of iterations "
-				    +"for the logistic regression."
-				    + " (default -1, until convergence).",
-				    "M", 1, "-M <number>"));
+      + "for the logistic regression." + " (default -1, until convergence).",
+      "M", 1, "-M <number>"));
     newVector.addElement(new Option("\tSet the minimum standard "
-				    +"deviation for the clusters."
-				    + " (default 0.1).",
-				    "W", 1, "-W <number>"));
+      + "deviation for the clusters." + " (default 0.1).", "W", 1,
+      "-W <number>"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
+
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -B &lt;number&gt;
-   *  Set the number of clusters (basis functions) to generate. (default = 2).</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -S &lt;seed&gt;
-   *  Set the random seed to be used by K-means. (default = 1).</pre>
+   * <pre>
+   * -B &lt;number&gt;
+   *  Set the number of clusters (basis functions) to generate. (default = 2).
+   * </pre>
    * 
-   * <pre> -R &lt;ridge&gt;
-   *  Set the ridge value for the logistic or linear regression.</pre>
+   * <pre>
+   * -S &lt;seed&gt;
+   *  Set the random seed to be used by K-means. (default = 1).
+   * </pre>
    * 
-   * <pre> -M &lt;number&gt;
-   *  Set the maximum number of iterations for the logistic regression. (default -1, until convergence).</pre>
+   * <pre>
+   * -R &lt;ridge&gt;
+   *  Set the ridge value for the logistic or linear regression.
+   * </pre>
    * 
-   * <pre> -W &lt;number&gt;
-   *  Set the minimum standard deviation for the clusters. (default 0.1).</pre>
+   * <pre>
+   * -M &lt;number&gt;
+   *  Set the maximum number of iterations for the logistic regression. (default -1, until convergence).
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <pre>
+   * -W &lt;number&gt;
+   *  Set the minimum standard deviation for the clusters. (default 0.1).
+   * </pre>
+   * 
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     setDebug(Utils.getFlag('D', options));
 
@@ -458,7 +497,7 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
     } else {
       m_ridge = 1.0e-8;
     }
-	
+
     String maxItsString = Utils.getOption('M', options);
     if (maxItsString.length() != 0) {
       m_maxIts = Integer.parseInt(maxItsString);
@@ -479,51 +518,55 @@ public class RBFNetwork extends AbstractClassifier implements OptionHandler {
     if (stdString.length() != 0) {
       setMinStdDev(Double.parseDouble(stdString));
     }
+
+    super.setOptions(options);
+
     Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
-	
-    String [] options = new String [10];
-    int current = 0;
-    
-    options[current++] = "-B";
-    options[current++] = "" + m_numClusters;
-    options[current++] = "-S";
-    options[current++] = "" + m_clusteringSeed;
-    options[current++] = "-R";
-    options[current++] = ""+m_ridge;	
-    options[current++] = "-M";
-    options[current++] = ""+m_maxIts;
-    options[current++] = "-W";
-    options[current++] = ""+m_minStdDev;
+  @Override
+  public String[] getOptions() {
 
-    while (current < options.length) 
-      options[current++] = "";
-    return options;
+    Vector<String> options = new Vector<String>();
+
+    options.add("-B");
+    options.add("" + m_numClusters);
+    options.add("-S");
+    options.add("" + m_clusteringSeed);
+    options.add("-R");
+    options.add("" + m_ridge);
+    options.add("-M");
+    options.add("" + m_maxIts);
+    options.add("-W");
+    options.add("" + m_minStdDev);
+
+    Collections.addAll(options, super.getOptions());
+
+    return options.toArray(new String[0]);
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * Main method for testing this class.
-   *
-   * @param argv should contain the command line arguments to the
-   * scheme (see Evaluation)
+   * 
+   * @param argv should contain the command line arguments to the scheme (see
+   *          Evaluation)
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runClassifier(new RBFNetwork(), argv);
   }
 }

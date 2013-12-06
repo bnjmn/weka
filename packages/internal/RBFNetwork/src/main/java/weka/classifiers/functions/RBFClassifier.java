@@ -20,103 +20,135 @@
 
 package weka.classifiers.functions;
 
-import weka.core.Instance;
-import weka.core.Utils;
+import java.util.Arrays;
+import java.util.Random;
+
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-
-import java.util.Random;
-import java.util.Arrays;
+import weka.core.Instance;
+import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Class implementing radial basis function networks for classification, trained in a fully supervised manner using WEKA's Optimization class by minimizing squared error with the BFGS method. Note that all attributes are normalized into the [0,1] scale. The initial centers for the Gaussian radial basis functions are found using WEKA's SimpleKMeans. The initial sigma values are set to the maximum distance between any center and its nearest neighbour in the set of centers. There are several parameters. The ridge parameter is used to penalize the size of the weights in the output layer. The number of basis functions can also be specified. Note that large numbers produce long training times. Another option determines whether one global sigma value is used for all units (fastest), whether one value is used per unit (common practice, it seems, and set as the default), or a different value is learned for every unit/attribute combination. It is also possible to learn attribute weights for the distance function. (The square of the value shown in the output is used.)  Finally, it is possible to use conjugate gradient descent rather than BFGS updates, which can be faster for cases with many parameters, and to use normalized basis functions instead of unnormalized ones. To improve speed, an approximate version of the logistic function is used as the activation function in the output layer. Also, if delta values in the backpropagation step are  within the user-specified tolerance, the gradient is not updated for that particular instance, which saves some additional time. Paralled calculation of squared error and gradient is possible when multiple CPU cores are present. Data is split into batches and processed in separate threads in this case. Note that this only improves runtime for larger datasets. Nominal attributes are processed using the unsupervised  NominalToBinary filter and missing values are replaced globally using ReplaceMissingValues.
+ * <!-- globalinfo-start --> Class implementing radial basis function networks
+ * for classification, trained in a fully supervised manner using WEKA's
+ * Optimization class by minimizing squared error with the BFGS method. Note
+ * that all attributes are normalized into the [0,1] scale. The initial centers
+ * for the Gaussian radial basis functions are found using WEKA's SimpleKMeans.
+ * The initial sigma values are set to the maximum distance between any center
+ * and its nearest neighbour in the set of centers. There are several
+ * parameters. The ridge parameter is used to penalize the size of the weights
+ * in the output layer. The number of basis functions can also be specified.
+ * Note that large numbers produce long training times. Another option
+ * determines whether one global sigma value is used for all units (fastest),
+ * whether one value is used per unit (common practice, it seems, and set as the
+ * default), or a different value is learned for every unit/attribute
+ * combination. It is also possible to learn attribute weights for the distance
+ * function. (The square of the value shown in the output is used.) Finally, it
+ * is possible to use conjugate gradient descent rather than BFGS updates, which
+ * can be faster for cases with many parameters, and to use normalized basis
+ * functions instead of unnormalized ones. To improve speed, an approximate
+ * version of the logistic function is used as the activation function in the
+ * output layer. Also, if delta values in the backpropagation step are within
+ * the user-specified tolerance, the gradient is not updated for that particular
+ * instance, which saves some additional time. Paralled calculation of squared
+ * error and gradient is possible when multiple CPU cores are present. Data is
+ * split into batches and processed in separate threads in this case. Note that
+ * this only improves runtime for larger datasets. Nominal attributes are
+ * processed using the unsupervised NominalToBinary filter and missing values
+ * are replaced globally using ReplaceMissingValues.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -N &lt;int&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -N &lt;int&gt;
  *  Number of Gaussian basis functions (default is 2).
  * </pre>
  * 
- * <pre> -R &lt;double&gt;
+ * <pre>
+ * -R &lt;double&gt;
  *  Ridge factor for quadratic penalty on output weights (default is 0.01).
  * </pre>
  * 
- * <pre> -L &lt;double&gt;
+ * <pre>
+ * -L &lt;double&gt;
  *  Tolerance parameter for delta values (default is 1.0e-6).
  * </pre>
  * 
- * <pre> -C &lt;1|2|3&gt;
+ * <pre>
+ * -C &lt;1|2|3&gt;
  *  The scale optimization option: global scale (1), one scale per unit (2), scale per unit and attribute (3) (default is 2).
  * </pre>
  * 
- * <pre> -G
+ * <pre>
+ * -G
  *  Use conjugate gradient descent (recommended for many attributes).
  * </pre>
  * 
- * <pre> -O
+ * <pre>
+ * -O
  *  Use normalized basis functions.
  * </pre>
  * 
- * <pre> -A
+ * <pre>
+ * -A
  *  Use attribute weights.
  * </pre>
  * 
- * <pre> -P &lt;int&gt;
+ * <pre>
+ * -P &lt;int&gt;
  *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
  * </pre>
  * 
- * <pre> -E &lt;int&gt;
+ * <pre>
+ * -E &lt;int&gt;
  *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
  * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ * <!-- options-end -->
  * 
- <!-- options-end -->
- *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
 public class RBFClassifier extends RBFModel {
-  
+
   /** For serialization */
   private static final long serialVersionUID = -7847475556438394611L;
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
-    
+
     return result;
   }
 
   /**
    * Initialise output layer.
    */
+  @Override
   protected void initializeOutputLayer(Random random) {
 
-    for (int i = 0; i < m_numUnits + 1; i++) {      
+    for (int i = 0; i < m_numUnits + 1; i++) {
       for (int j = 0; j < m_numClasses; j++) {
-        m_RBFParameters[OFFSET_WEIGHTS + (j * (m_numUnits + 1)) + i] = 0.1 * random.nextGaussian();
+        m_RBFParameters[OFFSET_WEIGHTS + (j * (m_numUnits + 1)) + i] = 0.1 * random
+          .nextGaussian();
       }
     }
   }
@@ -124,17 +156,19 @@ public class RBFClassifier extends RBFModel {
   /**
    * Calculates error for single instance.
    */
+  @Override
   protected double calculateError(double[] outputs, Instance inst) {
-    
+
     // Want to calculate squared error
     double SE = 0;
 
     // For all class values
     for (int i = 0; i < m_numClasses; i++) {
-      
-      // Get target (make them slightly different from 0/1 for better convergence)
-      final double target = ((int)inst.value(m_classIndex) == i) ? 0.99 : 0.01;
-      
+
+      // Get target (make them slightly different from 0/1 for better
+      // convergence)
+      final double target = ((int) inst.value(m_classIndex) == i) ? 0.99 : 0.01;
+
       // Add to squared error
       final double err = getOutput(i, outputs, null) - target;
       SE += err * err;
@@ -143,30 +177,36 @@ public class RBFClassifier extends RBFModel {
   }
 
   /**
-   * Postprocess squared error if desired. Returns argument unmodified by default.
+   * Postprocess squared error if desired. Returns argument unmodified by
+   * default.
    */
+  @Override
   protected double postprocessError(double error) {
 
     // Calculate squared sum of weights
     double squaredSumOfWeights = 0;
     for (int k = 0; k < m_numUnits; k++) {
       for (int i = 0; i < m_numClasses; i++) {
-        squaredSumOfWeights += m_RBFParameters[OFFSET_WEIGHTS + (i * (m_numUnits + 1)) + k] *  m_RBFParameters[OFFSET_WEIGHTS + (i * (m_numUnits + 1)) + k];
+        squaredSumOfWeights += m_RBFParameters[OFFSET_WEIGHTS
+          + (i * (m_numUnits + 1)) + k]
+          * m_RBFParameters[OFFSET_WEIGHTS + (i * (m_numUnits + 1)) + k];
       }
     }
-    
+
     return (error + m_ridge * squaredSumOfWeights) / m_data.numInstances();
   }
 
   /**
    * Postprocess gradient if desired.
    */
+  @Override
   protected void postprocessGradient(double[] grad) {
-    
+
     // For each output weight, include effect of ridge
     for (int k = 0; k < m_numUnits; k++) {
       for (int i = 0; i < m_numClasses; i++) {
-        grad[OFFSET_WEIGHTS  + (i * (m_numUnits + 1)) + k] += m_ridge * 2 * m_RBFParameters[OFFSET_WEIGHTS + (i * (m_numUnits + 1)) + k];
+        grad[OFFSET_WEIGHTS + (i * (m_numUnits + 1)) + k] += m_ridge * 2
+          * m_RBFParameters[OFFSET_WEIGHTS + (i * (m_numUnits + 1)) + k];
       }
     }
 
@@ -179,19 +219,22 @@ public class RBFClassifier extends RBFModel {
   /**
    * Update the gradient for the weights in the output layer.
    */
-  protected void updateGradient(double[] grad, Instance inst, double[] outputs, double[] sigmoidDerivativeOutput, double[] deltaHidden) {
+  @Override
+  protected void updateGradient(double[] grad, Instance inst, double[] outputs,
+    double[] sigmoidDerivativeOutput, double[] deltaHidden) {
 
     // Initialise deltaHidden
     Arrays.fill(deltaHidden, 0.0);
-    
+
     // For all output units
     for (int j = 0; j < m_numClasses; j++) {
 
       // Get output from output unit j
-      double pred = getOutput(j, outputs, sigmoidDerivativeOutput); 
+      double pred = getOutput(j, outputs, sigmoidDerivativeOutput);
 
-      // Get target (make them slightly different from 0/1 for better convergence)
-      double target = ((int)inst.value(m_classIndex) == j) ? 0.99 : 0.01;
+      // Get target (make them slightly different from 0/1 for better
+      // convergence)
+      double target = ((int) inst.value(m_classIndex) == j) ? 0.99 : 0.01;
 
       // Calculate delta from output unit
       double deltaOut = (pred - target) * sigmoidDerivativeOutput[0];
@@ -208,42 +251,52 @@ public class RBFClassifier extends RBFModel {
       for (int i = 0; i < m_numUnits; i++) {
         deltaHidden[i] += deltaOut * m_RBFParameters[offsetOW + i];
       }
-      
+
       // Update gradient for output weights
       for (int i = 0; i < m_numUnits; i++) {
         grad[offsetOW + i] += deltaOut * outputs[i];
       }
-      
+
       // Update gradient for bias
       grad[offsetOW + m_numUnits] += deltaOut;
     }
   }
-  
+
   /**
-   * Calculates the output of the network based on the given 
-   * hidden layer outputs. Also calculates the derivative
-   * if d != null.
+   * Calculates the output of the network based on the given hidden layer
+   * outputs. Also calculates the derivative if d != null.
    */
   protected double getOutput(int unit, double[] outputs, double[] d) {
-    
+
     double result = 0;
     for (int i = 0; i < m_numUnits; i++) {
-      result +=  m_RBFParameters[OFFSET_WEIGHTS + (unit * (m_numUnits + 1)) + i] * outputs[i];
+      result += m_RBFParameters[OFFSET_WEIGHTS + (unit * (m_numUnits + 1)) + i]
+        * outputs[i];
     }
-    result += m_RBFParameters[OFFSET_WEIGHTS + (unit * (m_numUnits + 1)) + m_numUnits];
+    result += m_RBFParameters[OFFSET_WEIGHTS + (unit * (m_numUnits + 1))
+      + m_numUnits];
     return sigmoid(-result, d, 0);
-  }    
-  
+  }
+
   /**
-   * Computes approximate exponential function. Derivative is 
-   * stored in second argument at given index if d != null.
+   * Computes approximate exponential function. Derivative is stored in second
+   * argument at given index if d != null.
    */
   protected double approxExp(double x, double[] d, int index) {
 
     double y = 1.0 + x / 4096.0;
-    x = y * y; x *= x; x *= x; x *= x;
-    x *= x; x *= x; x *= x; x *= x;
-    x *= x; x *= x; x *= x; x *= x;
+    x = y * y;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
 
     // Compute derivative if desired
     if (d != null) {
@@ -254,16 +307,25 @@ public class RBFClassifier extends RBFModel {
   }
 
   /**
-   * Computes approximate sigmoid function. Derivative is 
-   * stored in second argument at given index if d != null.
+   * Computes approximate sigmoid function. Derivative is stored in second
+   * argument at given index if d != null.
    */
   protected double sigmoid(double x, double[] d, int index) {
 
     // Compute approximate sigmoid
     double y = 1.0 + x / 4096.0;
-    x = y * y; x *= x; x *= x; x *= x;
-    x *= x; x *= x; x *= x; x *= x;
-    x *= x; x *= x; x *= x; x *= x;
+    x = y * y;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
     double output = 1.0 / (1.0 + x);
 
     // Compute derivative if desired
@@ -275,8 +337,9 @@ public class RBFClassifier extends RBFModel {
   }
 
   /**
-   * Gets output "distribution" based on  hidden layer outputs.
+   * Gets output "distribution" based on hidden layer outputs.
    */
+  @Override
   protected double[] getDistribution(double[] outputs) {
 
     double[] dist = new double[m_numClasses];
@@ -296,6 +359,7 @@ public class RBFClassifier extends RBFModel {
   /**
    * Outputs the network as a string.
    */
+  @Override
   public String toString() {
 
     if (m_RBFParameters == null) {
@@ -303,33 +367,36 @@ public class RBFClassifier extends RBFModel {
     }
 
     String s = "";
-    
+
     for (int i = 0; i < m_numUnits; i++) {
       if (i > 0) {
         s += "\n\n";
       }
       s += "Output weights for different classes:\n";
       for (int j = 0; j < m_numClasses; j++) {
-        s += m_RBFParameters[OFFSET_WEIGHTS + (j * (m_numUnits + 1)) + i] + "\t";
+        s += m_RBFParameters[OFFSET_WEIGHTS + (j * (m_numUnits + 1)) + i]
+          + "\t";
       }
       s += "\n\nUnit center:\n";
       for (int j = 0; j < m_numAttributes; j++) {
         if (j != m_classIndex) {
-          s += m_RBFParameters[OFFSET_CENTERS + (i * m_numAttributes) + j] + "\t";
+          s += m_RBFParameters[OFFSET_CENTERS + (i * m_numAttributes) + j]
+            + "\t";
         }
       }
       if (m_scaleOptimizationOption == USE_SCALE_PER_UNIT_AND_ATTRIBUTE) {
         s += "\n\nUnit scales:\n";
         for (int j = 0; j < m_numAttributes; j++) {
           if (j != m_classIndex) {
-            s += m_RBFParameters[OFFSET_SCALES + (i * m_numAttributes) + j] + "\t";
+            s += m_RBFParameters[OFFSET_SCALES + (i * m_numAttributes) + j]
+              + "\t";
           }
         }
       } else if (m_scaleOptimizationOption == USE_SCALE_PER_UNIT) {
         s += "\n\nUnit scale:\n";
         s += m_RBFParameters[OFFSET_SCALES + i] + "\t";
       }
-    }  
+    }
     if (m_scaleOptimizationOption == USE_GLOBAL_SCALE) {
       s += "\n\nScale:\n";
       s += m_RBFParameters[OFFSET_SCALES] + "\t";
@@ -345,19 +412,19 @@ public class RBFClassifier extends RBFModel {
 
     s += "\n\nBias weights for different classes:\n";
     for (int j = 0; j < m_numClasses; j++) {
-      s += m_RBFParameters[OFFSET_WEIGHTS + (j * (m_numUnits + 1)) + m_numUnits] + "\t";
+      s += m_RBFParameters[OFFSET_WEIGHTS + (j * (m_numUnits + 1)) + m_numUnits]
+        + "\t";
     }
 
     return s;
   }
 
   /**
-   * Main method to run the code from the command-line using
-   * the standard WEKA options.
+   * Main method to run the code from the command-line using the standard WEKA
+   * options.
    */
   public static void main(String[] argv) {
 
     runClassifier(new RBFClassifier(), argv);
   }
 }
-

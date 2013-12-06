@@ -21,40 +21,40 @@
 
 package weka.classifiers.meta;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Class for boosting a 2-class classifier using the Real Adaboost method.<br/>
+ * <!-- globalinfo-start --> Class for boosting a 2-class classifier using the
+ * Real Adaboost method.<br/>
  * <br/>
  * For more information, see<br/>
  * <br/>
- * J. Friedman, T. Hastie, R. Tibshirani (2000). Additive Logistic Regression: a Statistical View of Boosting. Annals of Statistics. 95(2):337-407.
+ * J. Friedman, T. Hastie, R. Tibshirani (2000). Additive Logistic Regression: a
+ * Statistical View of Boosting. Annals of Statistics. 95(2):337-407.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;article{Friedman2000,
  *    author = {J. Friedman and T. Hastie and R. Tibshirani},
@@ -67,56 +67,60 @@ import java.util.Vector;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -P &lt;num&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -P &lt;num&gt;
  *  Percentage of weight mass to base training on.
- *  (default 100, reduce to around 90 speed up)</pre>
+ *  (default 100, reduce to around 90 speed up)
+ * </pre>
  * 
- * <pre> -Q
- *  Use resampling for boosting.</pre>
+ * <pre>
+ * -Q
+ *  Use resampling for boosting.
+ * </pre>
  * 
- * <pre> -H &lt;num&gt;
+ * <pre>
+ * -H &lt;num&gt;
  *  Shrinkage parameter.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -I &lt;num&gt;
+ * <pre>
+ * -I &lt;num&gt;
  *  Number of iterations.
- *  (default 10)</pre>
+ *  (default 10)
+ * </pre>
  * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
+ * <pre>
+ * -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ *  (default: weka.classifiers.trees.DecisionStump)
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to classifier weka.classifiers.trees.DecisionStump:
  * </pre>
  * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ * <!-- options-end -->
  * 
- <!-- options-end -->
- *
- * Options after -- are passed to the designated classifier.<p>
- *
+ * Options after -- are passed to the designated classifier.
+ * <p>
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision$
  */
-public class RealAdaBoost 
-  extends RandomizableIteratedSingleClassifierEnhancer 
+public class RealAdaBoost extends RandomizableIteratedSingleClassifierEnhancer
   implements WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -133,52 +137,55 @@ public class RealAdaBoost
 
   /** Use boosting with reweighting? */
   protected boolean m_UseResampling;
-  
+
   /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_ZeroR;
 
   /** Sum of weights on training data */
   protected double m_SumOfWeights;
-    
+
   /**
    * Constructor.
    */
   public RealAdaBoost() {
-    
+
     m_Classifier = new weka.classifiers.trees.DecisionStump();
-  }
-    
-  /**
-   * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
- 
-    return "Class for boosting a 2-class classifier using the Real Adaboost method.\n\n"
-      + "For more information, see\n\n"
-      + getTechnicalInformation().toString();
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns a string describing classifier
+   * 
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
+   */
+  public String globalInfo() {
+
+    return "Class for boosting a 2-class classifier using the Real Adaboost method.\n\n"
+      + "For more information, see\n\n" + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
+    TechnicalInformation result;
 
     result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "J. Friedman and T. Hastie and R. Tibshirani");
-    result.setValue(Field.TITLE, "Additive Logistic Regression: a Statistical View of Boosting");
+    result
+      .setValue(Field.AUTHOR, "J. Friedman and T. Hastie and R. Tibshirani");
+    result.setValue(Field.TITLE,
+      "Additive Logistic Regression: a Statistical View of Boosting");
     result.setValue(Field.JOURNAL, "Annals of Statistics");
     result.setValue(Field.VOLUME, "95");
     result.setValue(Field.NUMBER, "2");
     result.setValue(Field.PAGES, "337-407");
     result.setValue(Field.YEAR, "2000");
-    
+
     return result;
   }
 
@@ -187,133 +194,133 @@ public class RealAdaBoost
    * 
    * @return the default classifier classname
    */
+  @Override
   protected String defaultClassifierString() {
-    
+
     return "weka.classifiers.trees.DecisionStump";
   }
 
   /**
-   * Select only instances with weights that contribute to 
-   * the specified quantile of the weight distribution
-   *
+   * Select only instances with weights that contribute to the specified
+   * quantile of the weight distribution
+   * 
    * @param data the input instances
-   * @param quantile the specified quantile eg 0.9 to select 
-   * 90% of the weight mass
+   * @param quantile the specified quantile eg 0.9 to select 90% of the weight
+   *          mass
    * @return the selected instances
    */
-  protected Instances selectWeightQuantile(Instances data, double quantile) { 
+  protected Instances selectWeightQuantile(Instances data, double quantile) {
 
     int numInstances = data.numInstances();
     Instances trainData = new Instances(data, numInstances);
-    double [] weights = new double [numInstances];
+    double[] weights = new double[numInstances];
 
     double sumOfWeights = 0;
-    for(int i = 0; i < numInstances; i++) {
+    for (int i = 0; i < numInstances; i++) {
       weights[i] = data.instance(i).weight();
       sumOfWeights += weights[i];
     }
     double weightMassToSelect = sumOfWeights * quantile;
-    int [] sortedIndices = Utils.sort(weights);
+    int[] sortedIndices = Utils.sort(weights);
 
     // Select the instances
     sumOfWeights = 0;
-    for(int i = numInstances - 1; i >= 0; i--) {
-      Instance instance = (Instance)data.instance(sortedIndices[i]).copy();
+    for (int i = numInstances - 1; i >= 0; i--) {
+      Instance instance = (Instance) data.instance(sortedIndices[i]).copy();
       trainData.add(instance);
       sumOfWeights += weights[sortedIndices[i]];
-      if ((sumOfWeights > weightMassToSelect) && 
-	  (i > 0) && 
-	  (weights[sortedIndices[i]] != weights[sortedIndices[i - 1]])) {
-	break;
+      if ((sumOfWeights > weightMassToSelect) && (i > 0)
+        && (weights[sortedIndices[i]] != weights[sortedIndices[i - 1]])) {
+        break;
       }
     }
     if (m_Debug) {
-      System.err.println("Selected " + trainData.numInstances()
-			 + " out of " + numInstances);
+      System.err.println("Selected " + trainData.numInstances() + " out of "
+        + numInstances);
     }
     return trainData;
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector();
-
-    newVector.addElement(new Option(
-	"\tPercentage of weight mass to base training on.\n"
-	+"\t(default 100, reduce to around 90 speed up)",
-	"P", 1, "-P <num>"));
-    
-    newVector.addElement(new Option(
-	"\tUse resampling for boosting.",
-	"Q", 0, "-Q"));
+    Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
-	      "\tShrinkage parameter.\n"
-	      +"\t(default 1)",
-	      "H", 1, "-H <num>"));
+      "\tPercentage of weight mass to base training on.\n"
+        + "\t(default 100, reduce to around 90 speed up)", "P", 1, "-P <num>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
-    
+    newVector.addElement(new Option("\tUse resampling for boosting.", "Q", 0,
+      "-Q"));
+
+    newVector.addElement(new Option("\tShrinkage parameter.\n"
+      + "\t(default 1)", "H", 1, "-H <num>"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
+
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -P &lt;num&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -P &lt;num&gt;
    *  Percentage of weight mass to base training on.
-   *  (default 100, reduce to around 90 speed up)</pre>
+   *  (default 100, reduce to around 90 speed up)
+   * </pre>
    * 
-   * <pre> -Q
-   *  Use resampling for boosting.</pre>
+   * <pre>
+   * -Q
+   *  Use resampling for boosting.
+   * </pre>
    * 
-   * <pre> -H &lt;num&gt;
+   * <pre>
+   * -H &lt;num&gt;
    *  Shrinkage parameter.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -I &lt;num&gt;
+   * <pre>
+   * -I &lt;num&gt;
    *  Number of iterations.
-   *  (default 10)</pre>
+   *  (default 10)
+   * </pre>
    * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -W
+   * <pre>
+   * -W
    *  Full name of base classifier.
-   *  (default: weka.classifiers.trees.DecisionStump)</pre>
+   *  (default: weka.classifiers.trees.DecisionStump)
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to classifier weka.classifiers.trees.DecisionStump:
    * </pre>
    * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   * <!-- options-end -->
    * 
-   <!-- options-end -->
-   *
-   * Options after -- are passed to the designated classifier.<p>
-   *
+   * Options after -- are passed to the designated classifier.
+   * <p>
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     String thresholdString = Utils.getOption('P', options);
@@ -325,79 +332,79 @@ public class RealAdaBoost
 
     String shrinkageString = Utils.getOption('H', options);
     if (shrinkageString.length() != 0) {
-      setShrinkage(new Double(shrinkageString).
-	doubleValue());
+      setShrinkage(new Double(shrinkageString).doubleValue());
     } else {
       setShrinkage(1.0);
     }
-      
+
     setUseResampling(Utils.getFlag('Q', options));
 
     super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
-    
-    result = new Vector();
 
-    if (getUseResampling())
+    Vector<String> result = new Vector<String>();
+
+    if (getUseResampling()) {
       result.add("-Q");
+    }
 
     result.add("-P");
     result.add("" + getWeightThreshold());
 
     result.add("-H");
     result.add("" + getShrinkage());
-    
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
 
-    return (String[]) result.toArray(new String[result.size()]);
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String shrinkageTipText() {
     return "Shrinkage parameter (use small value like 0.1 to reduce "
       + "overfitting).";
   }
-			 
+
   /**
    * Get the value of Shrinkage.
-   *
+   * 
    * @return Value of Shrinkage.
    */
   public double getShrinkage() {
-    
+
     return m_Shrinkage;
   }
-  
+
   /**
    * Set the value of Shrinkage.
-   *
+   * 
    * @param newShrinkage Value to assign to Shrinkage.
    */
   public void setShrinkage(double newShrinkage) {
-    
+
     m_Shrinkage = newShrinkage;
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String weightThresholdTipText() {
     return "Weight threshold for weight pruning.";
@@ -405,7 +412,7 @@ public class RealAdaBoost
 
   /**
    * Set weight threshold
-   *
+   * 
    * @param threshold the percentage of weight mass used for training
    */
   public void setWeightThreshold(int threshold) {
@@ -415,18 +422,19 @@ public class RealAdaBoost
 
   /**
    * Get the degree of weight thresholding
-   *
+   * 
    * @return the percentage of weight mass used for training
    */
   public int getWeightThreshold() {
 
     return m_WeightThreshold;
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String useResamplingTipText() {
     return "Whether resampling is used instead of reweighting.";
@@ -434,7 +442,7 @@ public class RealAdaBoost
 
   /**
    * Set resampling mode
-   *
+   * 
    * @param r true if resampling should be done
    */
   public void setUseResampling(boolean r) {
@@ -444,7 +452,7 @@ public class RealAdaBoost
 
   /**
    * Get whether resampling is turned on
-   *
+   * 
    * @return true if resampling output is on
    */
   public boolean getUseResampling() {
@@ -454,29 +462,32 @@ public class RealAdaBoost
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
     // class
     result.disableAllClasses();
     result.disableAllClassDependencies();
-    if (super.getCapabilities().handles(Capability.BINARY_CLASS))
+    if (super.getCapabilities().handles(Capability.BINARY_CLASS)) {
       result.enable(Capability.BINARY_CLASS);
-    
+    }
+
     return result;
   }
 
   /**
    * Boosting method.
-   *
-   * @param data the training data to be used for generating the
-   * boosted classifier.
+   * 
+   * @param data the training data to be used for generating the boosted
+   *          classifier.
    * @throws Exception if the classifier could not be built successfully
    */
 
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     super.buildClassifier(data);
@@ -487,11 +498,11 @@ public class RealAdaBoost
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+
     m_SumOfWeights = data.sumOfWeights();
 
-    if ((!m_UseResampling) && 
-	(m_Classifier instanceof WeightedInstancesHandler)) {
+    if ((!m_UseResampling)
+      && (m_Classifier instanceof WeightedInstancesHandler)) {
       buildClassifierWithWeights(data);
     } else {
       buildClassifierUsingResampling(data);
@@ -500,16 +511,15 @@ public class RealAdaBoost
 
   /**
    * Boosting method. Boosts using resampling
-   *
-   * @param data the training data to be used for generating the
-   * boosted classifier.
+   * 
+   * @param data the training data to be used for generating the boosted
+   *          classifier.
    * @throws Exception if the classifier could not be built successfully
    */
-  protected void buildClassifierUsingResampling(Instances data) 
+  protected void buildClassifierUsingResampling(Instances data)
     throws Exception {
 
     Instances trainData, sample, training, trainingWeightsNotNormalized;
-    double sumProbs;
     int numInstances = data.numInstances();
     Random randomInstance = new Random(m_Seed);
     double minLoss = Double.MAX_VALUE;
@@ -517,12 +527,12 @@ public class RealAdaBoost
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
     trainingWeightsNotNormalized = new Instances(data, 0, numInstances);
-    
+
     // Do boostrap iterations
-    for (m_NumIterationsPerformed = -1; m_NumIterationsPerformed < m_Classifiers.length; 
-	 m_NumIterationsPerformed++) {
+    for (m_NumIterationsPerformed = -1; m_NumIterationsPerformed < m_Classifiers.length; m_NumIterationsPerformed++) {
       if (m_Debug) {
-	System.err.println("Training classifier " + (m_NumIterationsPerformed + 1));
+        System.err.println("Training classifier "
+          + (m_NumIterationsPerformed + 1));
       }
 
       training = new Instances(trainingWeightsNotNormalized);
@@ -530,20 +540,20 @@ public class RealAdaBoost
 
       // Select instances to train the classifier on
       if (m_WeightThreshold < 100) {
-	trainData = selectWeightQuantile(training, 
-					 (double)m_WeightThreshold / 100);
+        trainData = selectWeightQuantile(training,
+          (double) m_WeightThreshold / 100);
       } else {
-	trainData = new Instances(training);
+        trainData = new Instances(training);
       }
-      
+
       // Resample
       double[] weights = new double[trainData.numInstances()];
       for (int i = 0; i < weights.length; i++) {
-	weights[i] = trainData.instance(i).weight();
+        weights[i] = trainData.instance(i).weight();
       }
 
       sample = trainData.resampleWithWeights(randomInstance, weights);
-      
+
       // Build classifier
       if (m_NumIterationsPerformed == -1) {
         m_ZeroR = new weka.classifiers.rules.ZeroR();
@@ -551,7 +561,7 @@ public class RealAdaBoost
       } else {
         m_Classifiers[m_NumIterationsPerformed].buildClassifier(sample);
       }
- 
+
       // Update instance weights
       setWeights(trainingWeightsNotNormalized, m_NumIterationsPerformed);
 
@@ -579,18 +589,17 @@ public class RealAdaBoost
    * @param training the training instances
    * @throws Exception if something goes wrong
    */
-  protected void setWeights(Instances training, int iteration) 
-    throws Exception {
+  protected void setWeights(Instances training, int iteration) throws Exception {
 
-    for (Instance instance: training) {
+    for (Instance instance : training) {
       double reweight = 1;
       double prob = 1, shrinkage = m_Shrinkage;
 
       if (iteration == -1) {
-        prob = m_ZeroR.distributionForInstance(instance)[0]; 
+        prob = m_ZeroR.distributionForInstance(instance)[0];
         shrinkage = 1.0;
       } else {
-        prob = m_Classifiers[iteration].distributionForInstance(instance)[0]; 
+        prob = m_Classifiers[iteration].distributionForInstance(instance)[0];
 
         // Make sure that probabilities are never 0 or 1 using ad-hoc smoothing
         prob = (m_SumOfWeights * prob + 1) / (m_SumOfWeights + 2);
@@ -611,26 +620,24 @@ public class RealAdaBoost
    * @param training the training instances
    * @throws Exception if something goes wrong
    */
-  protected void normalizeWeights(Instances training, double oldSumOfWeights) 
+  protected void normalizeWeights(Instances training, double oldSumOfWeights)
     throws Exception {
 
     // Renormalize weights
     double newSumOfWeights = training.sumOfWeights();
-    for (Instance instance: training) {
+    for (Instance instance : training) {
       instance.setWeight(instance.weight() * oldSumOfWeights / newSumOfWeights);
     }
   }
 
   /**
-   * Boosting method. Boosts any classifier that can handle weighted
-   * instances.
-   *
-   * @param data the training data to be used for generating the
-   * boosted classifier.
+   * Boosting method. Boosts any classifier that can handle weighted instances.
+   * 
+   * @param data the training data to be used for generating the boosted
+   *          classifier.
    * @throws Exception if the classifier could not be built successfully
    */
-  protected void buildClassifierWithWeights(Instances data) 
-    throws Exception {
+  protected void buildClassifierWithWeights(Instances data) throws Exception {
 
     Instances trainData, training, trainingWeightsNotNormalized;
     int numInstances = data.numInstances();
@@ -640,12 +647,12 @@ public class RealAdaBoost
     // Create a copy of the data so that when the weights are diddled
     // with it doesn't mess up the weights for anyone else
     trainingWeightsNotNormalized = new Instances(data, 0, numInstances);
-    
+
     // Do boostrap iterations
-    for (m_NumIterationsPerformed = -1; m_NumIterationsPerformed < m_Classifiers.length; 
-	 m_NumIterationsPerformed++) {
+    for (m_NumIterationsPerformed = -1; m_NumIterationsPerformed < m_Classifiers.length; m_NumIterationsPerformed++) {
       if (m_Debug) {
-	System.err.println("Training classifier " + (m_NumIterationsPerformed + 1));
+        System.err.println("Training classifier "
+          + (m_NumIterationsPerformed + 1));
       }
 
       training = new Instances(trainingWeightsNotNormalized);
@@ -653,10 +660,10 @@ public class RealAdaBoost
 
       // Select instances to train the classifier on
       if (m_WeightThreshold < 100) {
-	trainData = selectWeightQuantile(training, 
-					 (double)m_WeightThreshold / 100);
+        trainData = selectWeightQuantile(training,
+          (double) m_WeightThreshold / 100);
       } else {
-	trainData = new Instances(training, 0, numInstances);
+        trainData = new Instances(training, 0, numInstances);
       }
 
       // Build classifier
@@ -664,12 +671,13 @@ public class RealAdaBoost
         m_ZeroR = new weka.classifiers.rules.ZeroR();
         m_ZeroR.buildClassifier(data);
       } else {
-        if (m_Classifiers[m_NumIterationsPerformed] instanceof Randomizable)
-          ((Randomizable) m_Classifiers[m_NumIterationsPerformed]).setSeed(randomInstance.nextInt());
+        if (m_Classifiers[m_NumIterationsPerformed] instanceof Randomizable) {
+          ((Randomizable) m_Classifiers[m_NumIterationsPerformed])
+            .setSeed(randomInstance.nextInt());
+        }
         m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
       }
 
- 
       // Update instance weights
       setWeights(trainingWeightsNotNormalized, m_NumIterationsPerformed);
 
@@ -690,27 +698,26 @@ public class RealAdaBoost
       minLoss = loss;
     }
   }
-  
+
   /**
    * Calculates the class membership probabilities for the given test instance.
-   *
+   * 
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @throws Exception if instance could not be classified
-   * successfully
+   * @throws Exception if instance could not be classified successfully
    */
-  public double [] distributionForInstance(Instance instance) 
-    throws Exception {
+  @Override
+  public double[] distributionForInstance(Instance instance) throws Exception {
 
-    double [] sums = new double [instance.numClasses()]; 
+    double[] sums = new double[instance.numClasses()];
     for (int i = -1; i < m_NumIterationsPerformed; i++) {
       double prob = 1, shrinkage = m_Shrinkage;
       if (i == -1) {
-        prob = m_ZeroR.distributionForInstance(instance)[0]; 
+        prob = m_ZeroR.distributionForInstance(instance)[0];
         shrinkage = 1.0;
       } else {
-        prob = m_Classifiers[i].distributionForInstance(instance)[0]; 
-        
+        prob = m_Classifiers[i].distributionForInstance(instance)[0];
+
         // Make sure that probabilities are never 0 or 1 using ad-hoc smoothing
         prob = (m_SumOfWeights * prob + 1) / (m_SumOfWeights + 2);
       }
@@ -722,44 +729,45 @@ public class RealAdaBoost
 
   /**
    * Returns description of the boosted classifier.
-   *
+   * 
    * @return description of the boosted classifier as a string
    */
+  @Override
   public String toString() {
-    
+
     StringBuffer text = new StringBuffer();
 
     if (m_ZeroR == null) {
       text.append("No model built yet.\n\n");
     } else {
       text.append("RealAdaBoost: Base classifiers: \n\n");
-      text.append(m_ZeroR.toString() + "\n\n");    
-      for (int i = 0; i < m_NumIterationsPerformed ; i++) {
+      text.append(m_ZeroR.toString() + "\n\n");
+      for (int i = 0; i < m_NumIterationsPerformed; i++) {
         text.append(m_Classifiers[i].toString() + "\n\n");
       }
-      text.append("Number of performed Iterations: " 
-                  + m_NumIterationsPerformed + "\n");
+      text.append("Number of performed Iterations: " + m_NumIterationsPerformed
+        + "\n");
     }
 
     return text.toString();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv the options
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runClassifier(new RealAdaBoost(), argv);
   }
 }
-
