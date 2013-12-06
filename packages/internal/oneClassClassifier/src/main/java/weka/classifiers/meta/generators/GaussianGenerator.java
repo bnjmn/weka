@@ -21,75 +21,76 @@
 package weka.classifiers.meta.generators;
 
 /**
- <!-- globalinfo-start -->
- * An artificial data generator that uses a single Gaussian distribution.<br/>
+ * <!-- globalinfo-start --> An artificial data generator that uses a single
+ * Gaussian distribution.<br/>
  * <br/>
  * If a mixture of Gaussians is required, use the EM Generator.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
- *  If set, generator is run in debug mode and
- *  may output additional info to the console</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -S &lt;seed&gt;
- *  Sets the seed of the random number generator of the generator (default: 1)</pre>
+ * <pre>
+ * -S &lt;seed&gt;
+ *  Sets the seed of the random number generator of the generator (default: 1)
+ * </pre>
  * 
- * <pre> -M &lt;num&gt;
+ * <pre>
+ * -M &lt;num&gt;
  *  Sets the mean of the generator
- *  (default: 0)</pre>
+ *  (default: 0)
+ * </pre>
  * 
- * <pre> -SD &lt;num&gt;
+ * <pre>
+ * -SD &lt;num&gt;
  *  Sets the standard deviation of the generator
- *  (default: 1)</pre>
+ *  (default: 1)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Kathryn Hempstalk (kah18 at cs.waikato.ac.nz)
  * @version $Revision$
  * @see EMGenerator
  */
-public class GaussianGenerator
-    extends RandomizableDistributionGenerator
-    implements NumericAttributeGenerator {
+public class GaussianGenerator extends RandomizableDistributionGenerator
+  implements NumericAttributeGenerator {
 
   /** for serialization. */
   private static final long serialVersionUID = 4860675869078046797L;
 
   /**
    * Returns a string describing this class' ability.
-   *
+   * 
    * @return A description of the class.
    */
+  @Override
   public String globalInfo() {
-    return 
-        "An artificial data generator that uses a single Gaussian distribution.\n"
-      + "\n"
-      + "If a mixture of Gaussians is required, use the EM Generator.";
+    return "An artificial data generator that uses a single Gaussian distribution.\n"
+      + "\n" + "If a mixture of Gaussians is required, use the EM Generator.";
   }
 
   /**
    * Generates a value that falls under this distribution.
-   *
+   * 
    * @return A generated value.
    */
+  @Override
   public double generate() {
     double gaussian = m_Random.nextGaussian();
     double value = m_Mean + (gaussian * m_StandardDeviation);
-    return value;		
+    return value;
   }
 
   /**
-   * Gets the probability that a value falls under
-   * this distribution.
-   *
+   * Gets the probability that a value falls under this distribution.
+   * 
    * @param valuex The value to get the probability of.
    * @return The probability of the given value.
    */
-  public double getProbabilityOf(double valuex) {	
+  @Override
+  public double getProbabilityOf(double valuex) {
     double twopisqrt = Math.sqrt(2 * Math.PI);
     double left = 1 / (m_StandardDeviation * twopisqrt);
     double diffsquared = Math.pow((valuex - m_Mean), 2);
@@ -103,13 +104,14 @@ public class GaussianGenerator
 
   /**
    * Gets the (natural) log of the probability of a given value.
-   *
+   * 
    * @param valuex The value to get the log probability of.
    * @return The (natural) log of the probability.
    */
+  @Override
   public double getLogProbabilityOf(double valuex) {
     double twopisqrt = Math.log(Math.sqrt(2 * Math.PI));
-    double left = - (Math.log(m_StandardDeviation) + twopisqrt);
+    double left = -(Math.log(m_StandardDeviation) + twopisqrt);
     double diffsquared = Math.pow((valuex - m_Mean), 2);
     double bottomright = 2 * Math.pow(m_StandardDeviation, 2);
     double brackets = -1 * (diffsquared / bottomright);

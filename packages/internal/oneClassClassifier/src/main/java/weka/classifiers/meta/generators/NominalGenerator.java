@@ -20,39 +20,36 @@
 
 package weka.classifiers.meta.generators;
 
+import java.util.Enumeration;
+
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.Enumeration;
-
 /**
- <!-- globalinfo-start -->
- * A generator for nominal attributes.<br/>
+ * <!-- globalinfo-start --> A generator for nominal attributes.<br/>
  * <br/>
- * Generates artificial data for nominal attributes.  Each attribute value is considered to be possible, i.e. the probability of any value is always non-zero.
+ * Generates artificial data for nominal attributes. Each attribute value is
+ * considered to be possible, i.e. the probability of any value is always
+ * non-zero.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
- *  If set, generator is run in debug mode and
- *  may output additional info to the console</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -S &lt;seed&gt;
- *  Sets the seed of the random number generator of the generator (default: 1)</pre>
+ * <pre>
+ * -S &lt;seed&gt;
+ *  Sets the seed of the random number generator of the generator (default: 1)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Kathryn Hempstalk (kah18 at cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class NominalGenerator
-  extends RandomizableGenerator
-  implements NominalAttributeGenerator{
-  
+public class NominalGenerator extends RandomizableGenerator implements
+  NominalAttributeGenerator {
 
   /** for serialization. */
   private static final long serialVersionUID = 5254947213887016283L;
@@ -64,12 +61,12 @@ public class NominalGenerator
 
   /**
    * Returns a string describing this class' ability.
-   *
+   * 
    * @return A description of the class.
    */
+  @Override
   public String globalInfo() {
-    return 
-        "A generator for nominal attributes.\n"
+    return "A generator for nominal attributes.\n"
       + "\n"
       + "Generates artificial data for nominal attributes.  Each attribute value "
       + "is considered to be possible, i.e. the probability of any value is "
@@ -78,67 +75,72 @@ public class NominalGenerator
 
   /**
    * Sets up the generator with the counts required for generation.
-   *
+   * 
    * @param someinstances The instances to count up.
    * @param att The attribute to count up with.
    */
+  @Override
   public void buildGenerator(Instances someinstances, Attribute att) {
-    m_AttCounts = new double[(int)att.numValues()];
-    for(int i = 0; i < m_AttCounts.length; i++) {
+    m_AttCounts = new double[att.numValues()];
+    for (int i = 0; i < m_AttCounts.length; i++) {
       m_AttCounts[i] = 1;
     }
 
-    //count up the number of each instance
-    Enumeration instancesEnum = someinstances.enumerateInstances();
+    // count up the number of each instance
+    Enumeration<Instance> instancesEnum = someinstances.enumerateInstances();
     int totalCounts = m_AttCounts.length;
-    while(instancesEnum.hasMoreElements()) {
-      Instance aninst = (Instance)instancesEnum.nextElement();
-      if(!aninst.isMissing(att)) {
-	m_AttCounts[(int)aninst.value(att)] += 1;
-	totalCounts++;
+    while (instancesEnum.hasMoreElements()) {
+      Instance aninst = instancesEnum.nextElement();
+      if (!aninst.isMissing(att)) {
+        m_AttCounts[(int) aninst.value(att)] += 1;
+        totalCounts++;
       }
     }
 
-    //calculate the probability of each.
-    for(int i = 0; i < m_AttCounts.length; i++) {
-      m_AttCounts[i] /= (double)totalCounts;	    
+    // calculate the probability of each.
+    for (int i = 0; i < m_AttCounts.length; i++) {
+      m_AttCounts[i] /= totalCounts;
     }
   }
 
   /**
    * Generates an index of a nominal attribute as artificial data.
-   *
+   * 
    * @return The index of the nominal attribute's value.
    */
-  public double generate() {	
+  @Override
+  public double generate() {
     double prob = m_Random.nextDouble();
-    //find the index of the attribute value with this position
+    // find the index of the attribute value with this position
     double probSoFar = 0;
-    for(int i = 0; i < m_AttCounts.length; i++) {
+    for (int i = 0; i < m_AttCounts.length; i++) {
       probSoFar += m_AttCounts[i];
-      if(prob <= probSoFar)
-	return i;
+      if (prob <= probSoFar) {
+        return i;
+      }
     }
     return 0;
   }
 
   /**
    * Gets the probability of a given attribute value (provided as an index).
-   *
+   * 
    * @param valuex The index to the attribute value.
    * @return The probability of this value.
    */
+  @Override
   public double getProbabilityOf(double valuex) {
-    return m_AttCounts[(int)valuex];
+    return m_AttCounts[(int) valuex];
   }
 
   /**
    * Gets the (natural) log of the probability of a given value.
-   *
+   * 
    * @param valuex The index of the nominal value.
    * @return The natural log of the probability of valuex.
    */
+  @Override
   public double getLogProbabilityOf(double valuex) {
     return Math.log(this.getProbabilityOf(valuex));
-  }       
+  }
 }

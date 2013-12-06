@@ -21,14 +21,21 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.FastVector;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -37,30 +44,26 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Classifier for incremental learning of large datasets by way of racing logit-boosted committees.<br/>
+ * <!-- globalinfo-start --> Classifier for incremental learning of large
+ * datasets by way of racing logit-boosted committees.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Eibe Frank, Geoffrey Holmes, Richard Kirkby, Mark Hall:  Racing committees for large datasets. In: Proceedings of the 5th International Conferenceon Discovery Science, 153-164, 2002.
+ * Eibe Frank, Geoffrey Holmes, Richard Kirkby, Mark Hall: Racing committees for
+ * large datasets. In: Proceedings of the 5th International Conferenceon
+ * Discovery Science, 153-164, 2002.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;inproceedings{Frank2002,
  *    author = {Eibe Frank and Geoffrey Holmes and Richard Kirkby and Mark Hall},
@@ -72,62 +75,75 @@ import java.util.Vector;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -C &lt;num&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -C &lt;num&gt;
  *  Minimum size of chunks.
- *  (default 500)</pre>
+ *  (default 500)
+ * </pre>
  * 
- * <pre> -M &lt;num&gt;
+ * <pre>
+ * -M &lt;num&gt;
  *  Maximum size of chunks.
- *  (default 2000)</pre>
+ *  (default 2000)
+ * </pre>
  * 
- * <pre> -V &lt;num&gt;
+ * <pre>
+ * -V &lt;num&gt;
  *  Size of validation set.
- *  (default 1000)</pre>
+ *  (default 1000)
+ * </pre>
  * 
- * <pre> -P &lt;pruning type&gt;
+ * <pre>
+ * -P &lt;pruning type&gt;
  *  Committee pruning to perform.
- *  0=none, 1=log likelihood (default)</pre>
+ *  0=none, 1=log likelihood (default)
+ * </pre>
  * 
- * <pre> -Q
- *  Use resampling for boosting.</pre>
+ * <pre>
+ * -Q
+ *  Use resampling for boosting.
+ * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
+ * <pre>
+ * -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ *  (default: weka.classifiers.trees.DecisionStump)
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to classifier weka.classifiers.trees.DecisionStump:
  * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- <!-- options-end -->
- *
- * Options after -- are passed to the designated learner.<p>
- *
+ * <!-- options-end -->
+ * 
+ * Options after -- are passed to the designated learner.
+ * <p>
+ * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision$
  */
-public class RacedIncrementalLogitBoost 
-  extends RandomizableSingleClassifierEnhancer
-  implements UpdateableClassifier, TechnicalInformationHandler {
-  
+public class RacedIncrementalLogitBoost extends
+  RandomizableSingleClassifierEnhancer implements UpdateableClassifier,
+  TechnicalInformationHandler {
+
   /** for serialization */
   static final long serialVersionUID = 908598343772170052L;
 
@@ -136,13 +152,12 @@ public class RacedIncrementalLogitBoost
   /** log likelihood pruning */
   public static final int PRUNETYPE_LOGLIKELIHOOD = 1;
   /** The pruning types */
-  public static final Tag [] TAGS_PRUNETYPE = {
+  public static final Tag[] TAGS_PRUNETYPE = {
     new Tag(PRUNETYPE_NONE, "No pruning"),
-    new Tag(PRUNETYPE_LOGLIKELIHOOD, "Log likelihood pruning")
-  };
+    new Tag(PRUNETYPE_LOGLIKELIHOOD, "Log likelihood pruning") };
 
-  /** The committees */   
-  protected FastVector m_committees;
+  /** The committees */
+  protected ArrayList<Committee> m_committees;
 
   /** The pruning type used */
   protected int m_PruningType = PRUNETYPE_LOGLIKELIHOOD;
@@ -160,7 +175,7 @@ public class RacedIncrementalLogitBoost
   protected Instances m_NumericClassData;
 
   /** The actual class attribute (for getting class names) */
-  protected Attribute m_ClassAttribute;  
+  protected Attribute m_ClassAttribute;
 
   /** The minimum chunk size used for training */
   protected int m_minChunkSize = 500;
@@ -171,36 +186,35 @@ public class RacedIncrementalLogitBoost
   /** The size of the validation set */
   protected int m_validationChunkSize = 1000;
 
-  /** The number of instances consumed */  
+  /** The number of instances consumed */
   protected int m_numInstancesConsumed;
 
-  /** The instances used for validation */    
+  /** The instances used for validation */
   protected Instances m_validationSet;
 
-  /** The instances currently in memory for training */   
+  /** The instances currently in memory for training */
   protected Instances m_currentSet;
 
-  /** The current best committee */   
+  /** The current best committee */
   protected Committee m_bestCommittee;
 
-  /** The default scheme used when committees aren't ready */    
+  /** The default scheme used when committees aren't ready */
   protected ZeroR m_zeroR = null;
 
-  /** Whether the validation set has recently been changed */ 
+  /** Whether the validation set has recently been changed */
   protected boolean m_validationSetChanged;
 
-  /** The maximum number of instances required for processing */   
+  /** The maximum number of instances required for processing */
   protected int m_maxBatchSizeRequired;
 
   /** The random number generator used */
   protected Random m_RandomInstance = null;
 
-    
   /**
    * Constructor.
    */
   public RacedIncrementalLogitBoost() {
-    
+
     m_Classifier = new weka.classifiers.trees.DecisionStump();
   }
 
@@ -209,27 +223,26 @@ public class RacedIncrementalLogitBoost
    * 
    * @return the default classifier classname
    */
+  @Override
   protected String defaultClassifierString() {
-    
+
     return "weka.classifiers.trees.DecisionStump";
   }
 
-
-  /** 
+  /**
    * Class representing a committee of LogitBoosted models
    */
-  protected class Committee 
-    implements Serializable, RevisionHandler {
-    
+  protected class Committee implements Serializable, RevisionHandler {
+
     /** for serialization */
     static final long serialVersionUID = 5559880306684082199L;
 
     protected int m_chunkSize;
-    
+
     /** number eaten from m_currentSet */
-    protected int m_instancesConsumed; 
-    
-    protected FastVector m_models;
+    protected int m_instancesConsumed;
+
+    protected ArrayList<Classifier[]> m_models;
     protected double m_lastValidationError;
     protected double m_lastLogLikelihood;
     protected boolean m_modelHasChanged;
@@ -237,8 +250,8 @@ public class RacedIncrementalLogitBoost
     protected double[][] m_validationFs;
     protected double[][] m_newValidationFs;
 
-    /** 
-     * constructor 
+    /**
+     * constructor
      * 
      * @param chunkSize the size of the chunk
      */
@@ -246,17 +259,17 @@ public class RacedIncrementalLogitBoost
 
       m_chunkSize = chunkSize;
       m_instancesConsumed = 0;
-      m_models = new FastVector();
+      m_models = new ArrayList<Classifier[]>();
       m_lastValidationError = 1.0;
       m_lastLogLikelihood = Double.MAX_VALUE;
       m_modelHasChanged = true;
       m_modelHasChangedLL = true;
       m_validationFs = new double[m_validationChunkSize][m_NumClasses];
       m_newValidationFs = new double[m_validationChunkSize][m_NumClasses];
-    } 
+    }
 
-    /** 
-     * update the committee 
+    /**
+     * update the committee
      * 
      * @return true if the committee has changed
      * @throws Exception if anything goes wrong
@@ -265,17 +278,19 @@ public class RacedIncrementalLogitBoost
 
       boolean hasChanged = false;
       while (m_currentSet.numInstances() - m_instancesConsumed >= m_chunkSize) {
-	Classifier[] newModel = boost(new Instances(m_currentSet, m_instancesConsumed, m_chunkSize));
-	for (int i=0; i<m_validationSet.numInstances(); i++) {
-	  m_newValidationFs[i] = updateFS(m_validationSet.instance(i), newModel, m_validationFs[i]);
-	}
-	m_models.addElement(newModel);
-	m_instancesConsumed += m_chunkSize;
-	hasChanged = true;
+        Classifier[] newModel = boost(new Instances(m_currentSet,
+          m_instancesConsumed, m_chunkSize));
+        for (int i = 0; i < m_validationSet.numInstances(); i++) {
+          m_newValidationFs[i] = updateFS(m_validationSet.instance(i),
+            newModel, m_validationFs[i]);
+        }
+        m_models.add(newModel);
+        m_instancesConsumed += m_chunkSize;
+        hasChanged = true;
       }
       if (hasChanged) {
-	m_modelHasChanged = true;
-	m_modelHasChangedLL = true;
+        m_modelHasChanged = true;
+        m_modelHasChangedLL = true;
       }
       return hasChanged;
     }
@@ -290,14 +305,15 @@ public class RacedIncrementalLogitBoost
     public void pruneLastModel() {
 
       if (m_models.size() > 0) {
-	m_models.removeElementAt(m_models.size()-1);
-	m_modelHasChanged = true;
-	m_modelHasChangedLL = true;
+        m_models.remove(m_models.size() - 1);
+        m_modelHasChanged = true;
+        m_modelHasChangedLL = true;
       }
     }
 
-    /** 
-     * decide to keep the last model in the committee 
+    /**
+     * decide to keep the last model in the committee
+     * 
      * @throws Exception if anything goes wrong
      */
     public void keepLastModel() throws Exception {
@@ -308,46 +324,49 @@ public class RacedIncrementalLogitBoost
       m_modelHasChangedLL = true;
     }
 
-    /** 
-     * calculate the log likelihood on the validation data 
+    /**
+     * calculate the log likelihood on the validation data
+     * 
      * @return the log likelihood
      * @throws Exception if computation fails
-     */        
+     */
     public double logLikelihood() throws Exception {
 
       if (m_modelHasChangedLL) {
 
-	Instance inst;
-	double llsum = 0.0;
-	for (int i=0; i<m_validationSet.numInstances(); i++) {
-	  inst = m_validationSet.instance(i);
-	  llsum += (logLikelihood(m_validationFs[i],(int) inst.classValue()));
-	}
-	m_lastLogLikelihood = llsum / (double) m_validationSet.numInstances();
-	m_modelHasChangedLL = false;
+        Instance inst;
+        double llsum = 0.0;
+        for (int i = 0; i < m_validationSet.numInstances(); i++) {
+          inst = m_validationSet.instance(i);
+          llsum += (logLikelihood(m_validationFs[i], (int) inst.classValue()));
+        }
+        m_lastLogLikelihood = llsum / m_validationSet.numInstances();
+        m_modelHasChangedLL = false;
       }
       return m_lastLogLikelihood;
     }
 
-    /** 
-     * calculate the log likelihood on the validation data after adding the last model 
+    /**
+     * calculate the log likelihood on the validation data after adding the last
+     * model
+     * 
      * @return the log likelihood
      * @throws Exception if computation fails
      */
     public double logLikelihoodAfter() throws Exception {
 
-	Instance inst;
-	double llsum = 0.0;
-	for (int i=0; i<m_validationSet.numInstances(); i++) {
-	  inst = m_validationSet.instance(i);
-	  llsum += (logLikelihood(m_newValidationFs[i],(int) inst.classValue()));
-	}
-	return llsum / (double) m_validationSet.numInstances();
+      Instance inst;
+      double llsum = 0.0;
+      for (int i = 0; i < m_validationSet.numInstances(); i++) {
+        inst = m_validationSet.instance(i);
+        llsum += (logLikelihood(m_newValidationFs[i], (int) inst.classValue()));
+      }
+      return llsum / m_validationSet.numInstances();
     }
 
-    
-    /** 
-     * calculates the log likelihood of an instance 
+    /**
+     * calculates the log likelihood of an instance
+     * 
      * @param Fs the Fs values
      * @param classIndex the class index
      * @return the log likelihood
@@ -358,8 +377,9 @@ public class RacedIncrementalLogitBoost
       return -Math.log(distributionForInstance(Fs)[classIndex]);
     }
 
-    /** 
-     * calculates the validation error of the committee 
+    /**
+     * calculates the validation error of the committee
+     * 
      * @return the validation error
      * @throws Exception if computation fails
      */
@@ -367,21 +387,23 @@ public class RacedIncrementalLogitBoost
 
       if (m_modelHasChanged) {
 
-	Instance inst;
-	int numIncorrect = 0;
-	for (int i=0; i<m_validationSet.numInstances(); i++) {
-	  inst = m_validationSet.instance(i);
-	  if (classifyInstance(m_validationFs[i]) != inst.classValue())
-	    numIncorrect++;
-	}
-	m_lastValidationError = (double) numIncorrect / (double) m_validationSet.numInstances();
-	m_modelHasChanged = false;
+        Instance inst;
+        int numIncorrect = 0;
+        for (int i = 0; i < m_validationSet.numInstances(); i++) {
+          inst = m_validationSet.instance(i);
+          if (classifyInstance(m_validationFs[i]) != inst.classValue()) {
+            numIncorrect++;
+          }
+        }
+        m_lastValidationError = (double) numIncorrect
+          / (double) m_validationSet.numInstances();
+        m_modelHasChanged = false;
       }
       return m_lastValidationError;
     }
 
-    /** 
-     * returns the chunk size used by the committee 
+    /**
+     * returns the chunk size used by the committee
      * 
      * @return the chunk size
      */
@@ -390,8 +412,8 @@ public class RacedIncrementalLogitBoost
       return m_chunkSize;
     }
 
-    /** 
-     * returns the number of models in the committee 
+    /**
+     * returns the number of models in the committee
      * 
      * @return the committee size
      */
@@ -400,85 +422,85 @@ public class RacedIncrementalLogitBoost
       return m_models.size();
     }
 
-    
-    /** 
-     * classifies an instance (given Fs values) with the committee 
+    /**
+     * classifies an instance (given Fs values) with the committee
      * 
      * @param Fs the Fs values
      * @return the classification
      * @throws Exception if anything goes wrong
      */
     public double classifyInstance(double[] Fs) throws Exception {
-      
-      double [] dist = distributionForInstance(Fs);
+
+      double[] dist = distributionForInstance(Fs);
 
       double max = 0;
       int maxIndex = 0;
-      
+
       for (int i = 0; i < dist.length; i++) {
-	if (dist[i] > max) {
-	  maxIndex = i;
-	  max = dist[i];
-	}
+        if (dist[i] > max) {
+          maxIndex = i;
+          max = dist[i];
+        }
       }
       if (max > 0) {
-	return maxIndex;
+        return maxIndex;
       } else {
-	return Utils.missingValue();
+        return Utils.missingValue();
       }
     }
 
-    /** 
-     * classifies an instance with the committee 
+    /**
+     * classifies an instance with the committee
      * 
      * @param instance the instance to classify
      * @return the classification
      * @throws Exception if anything goes wrong
      */
     public double classifyInstance(Instance instance) throws Exception {
-      
-      double [] dist = distributionForInstance(instance);
+
+      double[] dist = distributionForInstance(instance);
       switch (instance.classAttribute().type()) {
       case Attribute.NOMINAL:
-	double max = 0;
-	int maxIndex = 0;
-	
-	for (int i = 0; i < dist.length; i++) {
-	  if (dist[i] > max) {
-	    maxIndex = i;
-	    max = dist[i];
-	  }
-	}
-	if (max > 0) {
-	  return maxIndex;
-	} else {
-	  return Utils.missingValue();
-	}
+        double max = 0;
+        int maxIndex = 0;
+
+        for (int i = 0; i < dist.length; i++) {
+          if (dist[i] > max) {
+            maxIndex = i;
+            max = dist[i];
+          }
+        }
+        if (max > 0) {
+          return maxIndex;
+        } else {
+          return Utils.missingValue();
+        }
       case Attribute.NUMERIC:
-	return dist[0];
+        return dist[0];
       default:
-	return Utils.missingValue();
+        return Utils.missingValue();
       }
     }
 
-    /** 
-     * returns the distribution the committee generates for an instance (given Fs values) 
+    /**
+     * returns the distribution the committee generates for an instance (given
+     * Fs values)
      * 
      * @param Fs the Fs values
      * @return the distribution
      * @throws Exception if anything goes wrong
      */
     public double[] distributionForInstance(double[] Fs) throws Exception {
-      
-      double [] distribution = new double [m_NumClasses];
+
+      double[] distribution = new double[m_NumClasses];
       for (int j = 0; j < m_NumClasses; j++) {
-	distribution[j] = RtoP(Fs, j);
+        distribution[j] = RtoP(Fs, j);
       }
       return distribution;
     }
-    
-    /** 
-     * updates the Fs values given a new model in the committee 
+
+    /**
+     * updates the Fs values given a new model in the committee
      * 
      * @param instance the instance to use
      * @param newModel the new model
@@ -486,27 +508,28 @@ public class RacedIncrementalLogitBoost
      * @return the updated Fs values
      * @throws Exception if anything goes wrong
      */
-    public double[] updateFS(Instance instance, Classifier[] newModel, double[] Fs) throws Exception {
-      
-      instance = (Instance)instance.copy();
+    public double[] updateFS(Instance instance, Classifier[] newModel,
+      double[] Fs) throws Exception {
+
+      instance = (Instance) instance.copy();
       instance.setDataset(m_NumericClassData);
-      
-      double [] Fi = new double [m_NumClasses];
+
+      double[] Fi = new double[m_NumClasses];
       double Fsum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	Fi[j] = newModel[j].classifyInstance(instance);
-	Fsum += Fi[j];
+        Fi[j] = newModel[j].classifyInstance(instance);
+        Fsum += Fi[j];
       }
       Fsum /= m_NumClasses;
-      
+
       double[] newFs = new double[Fs.length];
       for (int j = 0; j < m_NumClasses; j++) {
-	newFs[j] = Fs[j] + ((Fi[j] - Fsum) * (m_NumClasses - 1) / m_NumClasses);
+        newFs[j] = Fs[j] + ((Fi[j] - Fsum) * (m_NumClasses - 1) / m_NumClasses);
       }
       return newFs;
     }
 
-    /** 
+    /**
      * returns the distribution the committee generates for an instance
      * 
      * @param instance the instance to get the distribution for
@@ -515,30 +538,30 @@ public class RacedIncrementalLogitBoost
      */
     public double[] distributionForInstance(Instance instance) throws Exception {
 
-      instance = (Instance)instance.copy();
+      instance = (Instance) instance.copy();
       instance.setDataset(m_NumericClassData);
-      double [] Fs = new double [m_NumClasses]; 
+      double[] Fs = new double[m_NumClasses];
       for (int i = 0; i < m_models.size(); i++) {
-	double [] Fi = new double [m_NumClasses];
-	double Fsum = 0;
-	Classifier[] model = (Classifier[]) m_models.elementAt(i);
-	for (int j = 0; j < m_NumClasses; j++) {
-	  Fi[j] = model[j].classifyInstance(instance);
-	  Fsum += Fi[j];
-	}
-	Fsum /= m_NumClasses;
-	for (int j = 0; j < m_NumClasses; j++) {
-	  Fs[j] += (Fi[j] - Fsum) * (m_NumClasses - 1) / m_NumClasses;
-	}
+        double[] Fi = new double[m_NumClasses];
+        double Fsum = 0;
+        Classifier[] model = m_models.get(i);
+        for (int j = 0; j < m_NumClasses; j++) {
+          Fi[j] = model[j].classifyInstance(instance);
+          Fsum += Fi[j];
+        }
+        Fsum /= m_NumClasses;
+        for (int j = 0; j < m_NumClasses; j++) {
+          Fs[j] += (Fi[j] - Fsum) * (m_NumClasses - 1) / m_NumClasses;
+        }
       }
-      double [] distribution = new double [m_NumClasses];
+      double[] distribution = new double[m_NumClasses];
       for (int j = 0; j < m_NumClasses; j++) {
-	distribution[j] = RtoP(Fs, j);
+        distribution[j] = RtoP(Fs, j);
       }
       return distribution;
     }
 
-    /** 
+    /**
      * performs a boosting iteration, returning a new model for the committee
      * 
      * @param data the data to boost on
@@ -546,124 +569,127 @@ public class RacedIncrementalLogitBoost
      * @throws Exception if anything goes wrong
      */
     protected Classifier[] boost(Instances data) throws Exception {
-      
-      Classifier[] newModel = AbstractClassifier.makeCopies(m_Classifier, m_NumClasses);
-      
+
+      Classifier[] newModel = AbstractClassifier.makeCopies(m_Classifier,
+        m_NumClasses);
+
       // Create a copy of the data with the class transformed into numeric
       Instances boostData = new Instances(data);
       boostData.deleteWithMissingClass();
       int numInstances = boostData.numInstances();
-      
+
       // Temporarily unset the class index
       int classIndex = data.classIndex();
       boostData.setClassIndex(-1);
       boostData.deleteAttributeAt(classIndex);
       boostData.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
       boostData.setClassIndex(classIndex);
-      double [][] trainFs = new double [numInstances][m_NumClasses];
-      double [][] trainYs = new double [numInstances][m_NumClasses];
+      double[][] trainFs = new double[numInstances][m_NumClasses];
+      double[][] trainYs = new double[numInstances][m_NumClasses];
       for (int j = 0; j < m_NumClasses; j++) {
-	for (int i = 0, k = 0; i < numInstances; i++, k++) {
-	  while (data.instance(k).classIsMissing()) k++;
-	  trainYs[i][j] = (data.instance(k).classValue() == j) ? 1 : 0;
-	}
+        for (int i = 0, k = 0; i < numInstances; i++, k++) {
+          while (data.instance(k).classIsMissing()) {
+            k++;
+          }
+          trainYs[i][j] = (data.instance(k).classValue() == j) ? 1 : 0;
+        }
       }
-      
+
       // Evaluate / increment trainFs from the classifiers
       for (int x = 0; x < m_models.size(); x++) {
-	for (int i = 0; i < numInstances; i++) {
-	  double [] pred = new double [m_NumClasses];
-	  double predSum = 0;
-	  Classifier[] model = (Classifier[]) m_models.elementAt(x);
-	  for (int j = 0; j < m_NumClasses; j++) {
-	    pred[j] = model[j].classifyInstance(boostData.instance(i));
-	    predSum += pred[j];
-	  }
-	  predSum /= m_NumClasses;
-	  for (int j = 0; j < m_NumClasses; j++) {
-	    trainFs[i][j] += (pred[j] - predSum) * (m_NumClasses-1) 
-	      / m_NumClasses;
-	  }
-	}
+        for (int i = 0; i < numInstances; i++) {
+          double[] pred = new double[m_NumClasses];
+          double predSum = 0;
+          Classifier[] model = m_models.get(x);
+          for (int j = 0; j < m_NumClasses; j++) {
+            pred[j] = model[j].classifyInstance(boostData.instance(i));
+            predSum += pred[j];
+          }
+          predSum /= m_NumClasses;
+          for (int j = 0; j < m_NumClasses; j++) {
+            trainFs[i][j] += (pred[j] - predSum) * (m_NumClasses - 1)
+              / m_NumClasses;
+          }
+        }
       }
 
       for (int j = 0; j < m_NumClasses; j++) {
-	
-	// Set instance pseudoclass and weights
-	for (int i = 0; i < numInstances; i++) {
-	  double p = RtoP(trainFs[i], j);
-	  Instance current = boostData.instance(i);
-	  double z, actual = trainYs[i][j];
-	  if (actual == 1) {
-	    z = 1.0 / p;
-	    if (z > Z_MAX) { // threshold
-	      z = Z_MAX;
-	    }
-	  } else if (actual == 0) {
-	    z = -1.0 / (1.0 - p);
-	    if (z < -Z_MAX) { // threshold
-	      z = -Z_MAX;
-	    }
-	  } else {
-	    z = (actual - p) / (p * (1 - p));
-	  }
 
-	  double w = (actual - p) / z;
-	  current.setValue(classIndex, z);
-	  current.setWeight(numInstances * w);
-	}
-	
-	Instances trainData = boostData;
-	if (m_UseResampling) {
-	  double[] weights = new double[boostData.numInstances()];
-	  for (int kk = 0; kk < weights.length; kk++) {
-	    weights[kk] = boostData.instance(kk).weight();
-	  }
-	  trainData = boostData.resampleWithWeights(m_RandomInstance, 
-						    weights);
-	}
-	
-	// Build the classifier
-	newModel[j].buildClassifier(trainData);
-      }      
-      
+        // Set instance pseudoclass and weights
+        for (int i = 0; i < numInstances; i++) {
+          double p = RtoP(trainFs[i], j);
+          Instance current = boostData.instance(i);
+          double z, actual = trainYs[i][j];
+          if (actual == 1) {
+            z = 1.0 / p;
+            if (z > Z_MAX) { // threshold
+              z = Z_MAX;
+            }
+          } else if (actual == 0) {
+            z = -1.0 / (1.0 - p);
+            if (z < -Z_MAX) { // threshold
+              z = -Z_MAX;
+            }
+          } else {
+            z = (actual - p) / (p * (1 - p));
+          }
+
+          double w = (actual - p) / z;
+          current.setValue(classIndex, z);
+          current.setWeight(numInstances * w);
+        }
+
+        Instances trainData = boostData;
+        if (m_UseResampling) {
+          double[] weights = new double[boostData.numInstances()];
+          for (int kk = 0; kk < weights.length; kk++) {
+            weights[kk] = boostData.instance(kk).weight();
+          }
+          trainData = boostData.resampleWithWeights(m_RandomInstance, weights);
+        }
+
+        // Build the classifier
+        newModel[j].buildClassifier(trainData);
+      }
+
       return newModel;
     }
 
-    /** 
+    /**
      * outputs description of the committee
      * 
      * @return a string representation of the classifier
      */
+    @Override
     public String toString() {
-      
+
       StringBuffer text = new StringBuffer();
-      
-      text.append("RacedIncrementalLogitBoost: Best committee on validation data\n");
+
+      text
+        .append("RacedIncrementalLogitBoost: Best committee on validation data\n");
       text.append("Base classifiers: \n");
-      
+
       for (int i = 0; i < m_models.size(); i++) {
-	text.append("\nModel "+(i+1));
-	Classifier[] cModels = (Classifier[]) m_models.elementAt(i);
-	for (int j = 0; j < m_NumClasses; j++) {
-	  text.append("\n\tClass " + (j + 1) 
-		      + " (" + m_ClassAttribute.name() 
-		      + "=" + m_ClassAttribute.value(j) + ")\n\n"
-		      + cModels[j].toString() + "\n");
-	}
+        text.append("\nModel " + (i + 1));
+        Classifier[] cModels = m_models.get(i);
+        for (int j = 0; j < m_NumClasses; j++) {
+          text.append("\n\tClass " + (j + 1) + " (" + m_ClassAttribute.name()
+            + "=" + m_ClassAttribute.value(j) + ")\n\n" + cModels[j].toString()
+            + "\n");
+        }
       }
-      text.append("Number of models: " +
-		  m_models.size() + "\n");      
+      text.append("Number of models: " + m_models.size() + "\n");
       text.append("Chunk size per model: " + m_chunkSize + "\n");
-      
+
       return text.toString();
     }
-    
+
     /**
      * Returns the revision string.
      * 
-     * @return		the revision
+     * @return the revision
      */
+    @Override
     public String getRevision() {
       return RevisionUtils.extract("$Revision$");
     }
@@ -671,9 +697,10 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
@@ -684,16 +711,17 @@ public class RacedIncrementalLogitBoost
 
     // instances
     result.setMinimumNumberInstances(0);
-    
+
     return result;
   }
 
- /**
+  /**
    * Builds the classifier.
-   *
+   * 
    * @param data the instances to train the classifier with
    * @throws Exception if something goes wrong
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     m_RandomInstance = new Random(m_Seed);
@@ -707,13 +735,12 @@ public class RacedIncrementalLogitBoost
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
     }
 
-    if (!(m_Classifier instanceof WeightedInstancesHandler) &&
-	!m_UseResampling) {
+    if (!(m_Classifier instanceof WeightedInstancesHandler) && !m_UseResampling) {
       m_UseResampling = true;
     }
 
@@ -734,9 +761,9 @@ public class RacedIncrementalLogitBoost
 
     // create the committees
     int cSize = m_minChunkSize;
-    m_committees = new FastVector();
+    m_committees = new ArrayList<Committee>();
     while (cSize <= m_maxChunkSize) {
-      m_committees.addElement(new Committee(cSize));
+      m_committees.add(new Committee(cSize));
       m_maxBatchSizeRequired = cSize;
       cSize *= 2;
     }
@@ -748,15 +775,18 @@ public class RacedIncrementalLogitBoost
     m_numInstancesConsumed = 0;
 
     // start eating what we've been given
-    for (int i=0; i<data.numInstances(); i++) updateClassifier(data.instance(i));
+    for (int i = 0; i < data.numInstances(); i++) {
+      updateClassifier(data.instance(i));
+    }
   }
 
- /**
+  /**
    * Updates the classifier.
-   *
+   * 
    * @param instance the next instance in the stream of training data
    * @throws Exception if something goes wrong
    */
+  @Override
   public void updateClassifier(Instance instance) throws Exception {
 
     m_numInstancesConsumed++;
@@ -767,79 +797,87 @@ public class RacedIncrementalLogitBoost
     } else {
       m_currentSet.add(instance);
       boolean hasChanged = false;
-      
+
       // update each committee
-      for (int i=0; i<m_committees.size(); i++) {
-	Committee c = (Committee) m_committees.elementAt(i);
-	if (c.update()) {
-	  
-	  hasChanged = true;
-	  
-	  if (m_PruningType == PRUNETYPE_LOGLIKELIHOOD) {
-	    double oldLL = c.logLikelihood();
-	    double newLL = c.logLikelihoodAfter();
-	    if (newLL >= oldLL && c.committeeSize() > 1) {
-	      c.pruneLastModel();
-	      if (m_Debug) System.out.println("Pruning " + c.chunkSize()+ " committee (" +
-					      oldLL + " < " + newLL + ")");
-	    } else c.keepLastModel();
-	  } else c.keepLastModel(); // no pruning
-	} 
+      for (int i = 0; i < m_committees.size(); i++) {
+        Committee c = m_committees.get(i);
+        if (c.update()) {
+
+          hasChanged = true;
+
+          if (m_PruningType == PRUNETYPE_LOGLIKELIHOOD) {
+            double oldLL = c.logLikelihood();
+            double newLL = c.logLikelihoodAfter();
+            if (newLL >= oldLL && c.committeeSize() > 1) {
+              c.pruneLastModel();
+              if (m_Debug) {
+                System.out.println("Pruning " + c.chunkSize() + " committee ("
+                  + oldLL + " < " + newLL + ")");
+              }
+            } else {
+              c.keepLastModel();
+            }
+          } else {
+            c.keepLastModel(); // no pruning
+          }
+        }
       }
       if (hasChanged) {
 
-	if (m_Debug) System.out.println("After consuming " + m_numInstancesConsumed
-					+ " instances... (" + m_validationSet.numInstances()
-					+ " + " + m_currentSet.numInstances()
-					+ " instances currently in memory)");
-	
-	// find best committee
-	double lowestError = 1.0;
-	for (int i=0; i<m_committees.size(); i++) {
-	  Committee c = (Committee) m_committees.elementAt(i);
+        if (m_Debug) {
+          System.out.println("After consuming " + m_numInstancesConsumed
+            + " instances... (" + m_validationSet.numInstances() + " + "
+            + m_currentSet.numInstances() + " instances currently in memory)");
+        }
 
-	  if (c.committeeSize() > 0) {
+        // find best committee
+        double lowestError = 1.0;
+        for (int i = 0; i < m_committees.size(); i++) {
+          Committee c = m_committees.get(i);
 
-	    double err = c.validationError();
-	    double ll = c.logLikelihood();
+          if (c.committeeSize() > 0) {
 
-	    if (m_Debug) System.out.println("Chunk size " + c.chunkSize() + " with "
-					    + c.committeeSize() + " models, has validation error of "
-					    + err + ", log likelihood of " + ll);
-	    if (err < lowestError) {
-	      lowestError = err;
-	      m_bestCommittee = c;
-	    }
-	  }
-	}
+            double err = c.validationError();
+            double ll = c.logLikelihood();
+
+            if (m_Debug) {
+              System.out.println("Chunk size " + c.chunkSize() + " with "
+                + c.committeeSize() + " models, has validation error of " + err
+                + ", log likelihood of " + ll);
+            }
+            if (err < lowestError) {
+              lowestError = err;
+              m_bestCommittee = c;
+            }
+          }
+        }
       }
       if (m_currentSet.numInstances() >= m_maxBatchSizeRequired) {
-	m_currentSet = new Instances(m_currentSet, m_maxBatchSizeRequired);
+        m_currentSet = new Instances(m_currentSet, m_maxBatchSizeRequired);
 
-	// reset consumation counts
-	for (int i=0; i<m_committees.size(); i++) {
-	  Committee c = (Committee) m_committees.elementAt(i);
-	  c.resetConsumed();
-	}
+        // reset consumation counts
+        for (int i = 0; i < m_committees.size(); i++) {
+          Committee c = m_committees.get(i);
+          c.resetConsumed();
+        }
       }
     }
   }
 
   /**
    * Convert from function responses to probabilities
-   *
+   * 
    * @param Fs an array containing the responses from each function
    * @param j the class value of interest
    * @return the probability prediction for j
    * @throws Exception if can't normalize
    */
-  protected static double RtoP(double []Fs, int j) 
-    throws Exception {
+  protected static double RtoP(double[] Fs, int j) throws Exception {
 
     double maxF = -Double.MAX_VALUE;
-    for (int i = 0; i < Fs.length; i++) {
-      if (Fs[i] > maxF) {
-	maxF = Fs[i];
+    for (double element : Fs) {
+      if (element > maxF) {
+        maxF = element;
       }
     }
     double sum = 0;
@@ -861,14 +899,16 @@ public class RacedIncrementalLogitBoost
    * @return the distribution
    * @throws Exception if anything goes wrong
    */
+  @Override
   public double[] distributionForInstance(Instance instance) throws Exception {
 
-    if (m_bestCommittee != null) return m_bestCommittee.distributionForInstance(instance);
-    else {
+    if (m_bestCommittee != null) {
+      return m_bestCommittee.distributionForInstance(instance);
+    } else {
       if (m_validationSetChanged || m_zeroR == null) {
-	m_zeroR = new ZeroR();
-	m_zeroR.buildClassifier(m_validationSet);
-	m_validationSetChanged = false;
+        m_zeroR = new ZeroR();
+        m_zeroR.buildClassifier(m_validationSet);
+        m_validationSetChanged = false;
       }
       return m_zeroR.distributionForInstance(instance);
     }
@@ -876,96 +916,98 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Returns an enumeration describing the available options
-   *
+   * 
    * @return an enumeration of all the available options
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Vector newVector = new Vector(9);
+    Vector<Option> newVector = new Vector<Option>(5);
 
-    newVector.addElement(new Option(
-	      "\tMinimum size of chunks.\n"
-	      +"\t(default 500)",
-	      "C", 1, "-C <num>"));
+    newVector.addElement(new Option("\tMinimum size of chunks.\n"
+      + "\t(default 500)", "C", 1, "-C <num>"));
 
-    newVector.addElement(new Option(
-	      "\tMaximum size of chunks.\n"
-	      +"\t(default 2000)",
-	      "M", 1, "-M <num>"));
+    newVector.addElement(new Option("\tMaximum size of chunks.\n"
+      + "\t(default 2000)", "M", 1, "-M <num>"));
 
-    newVector.addElement(new Option(
-	      "\tSize of validation set.\n"
-	      +"\t(default 1000)",
-	      "V", 1, "-V <num>"));
+    newVector.addElement(new Option("\tSize of validation set.\n"
+      + "\t(default 1000)", "V", 1, "-V <num>"));
 
-    newVector.addElement(new Option(
-	      "\tCommittee pruning to perform.\n"
-	      +"\t0=none, 1=log likelihood (default)",
-	      "P", 1, "-P <pruning type>"));
+    newVector.addElement(new Option("\tCommittee pruning to perform.\n"
+      + "\t0=none, 1=log likelihood (default)", "P", 1, "-P <pruning type>"));
 
-    newVector.addElement(new Option(
-	      "\tUse resampling for boosting.",
-	      "Q", 0, "-Q"));
+    newVector.addElement(new Option("\tUse resampling for boosting.", "Q", 0,
+      "-Q"));
 
+    newVector.addAll(Collections.list(super.listOptions()));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -C &lt;num&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -C &lt;num&gt;
    *  Minimum size of chunks.
-   *  (default 500)</pre>
+   *  (default 500)
+   * </pre>
    * 
-   * <pre> -M &lt;num&gt;
+   * <pre>
+   * -M &lt;num&gt;
    *  Maximum size of chunks.
-   *  (default 2000)</pre>
+   *  (default 2000)
+   * </pre>
    * 
-   * <pre> -V &lt;num&gt;
+   * <pre>
+   * -V &lt;num&gt;
    *  Size of validation set.
-   *  (default 1000)</pre>
+   *  (default 1000)
+   * </pre>
    * 
-   * <pre> -P &lt;pruning type&gt;
+   * <pre>
+   * -P &lt;pruning type&gt;
    *  Committee pruning to perform.
-   *  0=none, 1=log likelihood (default)</pre>
+   *  0=none, 1=log likelihood (default)
+   * </pre>
    * 
-   * <pre> -Q
-   *  Use resampling for boosting.</pre>
+   * <pre>
+   * -Q
+   *  Use resampling for boosting.
+   * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   * <pre> -W
+   * <pre>
+   * -W
    *  Full name of base classifier.
-   *  (default: weka.classifiers.trees.DecisionStump)</pre>
+   *  (default: weka.classifiers.trees.DecisionStump)
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to classifier weka.classifiers.trees.DecisionStump:
    * </pre>
    * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   * <!-- options-end -->
    * 
-   <!-- options-end -->
-   *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     String minChunkSize = Utils.getOption('C', options);
@@ -991,7 +1033,8 @@ public class RacedIncrementalLogitBoost
 
     String pruneType = Utils.getOption('P', options);
     if (pruneType.length() != 0) {
-      setPruningType(new SelectedTag(Integer.parseInt(pruneType), TAGS_PRUNETYPE));
+      setPruningType(new SelectedTag(Integer.parseInt(pruneType),
+        TAGS_PRUNETYPE));
     } else {
       setPruningType(new SelectedTag(PRUNETYPE_LOGLIKELIHOOD, TAGS_PRUNETYPE));
     }
@@ -999,94 +1042,98 @@ public class RacedIncrementalLogitBoost
     setUseResampling(Utils.getFlag('Q', options));
 
     super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 9];
-
-    int current = 0;
+    Vector<String> options = new Vector<String>();
 
     if (getUseResampling()) {
-      options[current++] = "-Q";
+      options.add("-Q");
     }
-    options[current++] = "-C"; options[current++] = "" + getMinChunkSize();
+    options.add("-C");
+    options.add("" + getMinChunkSize());
 
-    options[current++] = "-M"; options[current++] = "" + getMaxChunkSize();
+    options.add("-M");
+    options.add("" + getMaxChunkSize());
 
-    options[current++] = "-V"; options[current++] = "" + getValidationChunkSize();
+    options.add("-V");
+    options.add("" + getValidationChunkSize());
 
-    options[current++] = "-P"; options[current++] = "" + m_PruningType;
+    options.add("-P");
+    options.add("" + m_PruningType);
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
+    Collections.addAll(options, super.getOptions());
 
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
-  
+
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation result;
-    
+
     result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Eibe Frank and Geoffrey Holmes and Richard " +
-    		"Kirkby and Mark Hall");
+    result.setValue(Field.AUTHOR, "Eibe Frank and Geoffrey Holmes and Richard "
+      + "Kirkby and Mark Hall");
     result.setValue(Field.TITLE, " Racing committees for large datasets");
-    result.setValue(Field.BOOKTITLE, "Proceedings of the 5th International Conference" +
-    		"on Discovery Science");
+    result.setValue(Field.BOOKTITLE,
+      "Proceedings of the 5th International Conference"
+        + "on Discovery Science");
     result.setValue(Field.YEAR, "2002");
     result.setValue(Field.PAGES, "153-164");
     result.setValue(Field.PUBLISHER, "Springer");
-    
+
     return result;
   }
 
   /**
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
 
-    return "Classifier for incremental learning of large datasets by way of " +
-    		"racing logit-boosted committees.\n\nFor more information see:\n\n" +
-    		getTechnicalInformation().toString();
+    return "Classifier for incremental learning of large datasets by way of "
+      + "racing logit-boosted committees.\n\nFor more information see:\n\n"
+      + getTechnicalInformation().toString();
   }
 
   /**
    * Set the base learner.
-   *
-   * @param newClassifier 		the classifier to use.
-   * @throws IllegalArgumentException 	if base classifier cannot handle numeric 
-   * 					class
+   * 
+   * @param newClassifier the classifier to use.
+   * @throws IllegalArgumentException if base classifier cannot handle numeric
+   *           class
    */
+  @Override
   public void setClassifier(Classifier newClassifier) {
     Capabilities cap = newClassifier.getCapabilities();
-    
-    if (!cap.handles(Capability.NUMERIC_CLASS))
-      throw new IllegalArgumentException("Base classifier cannot handle numeric class!");
-      
+
+    if (!cap.handles(Capability.NUMERIC_CLASS)) {
+      throw new IllegalArgumentException(
+        "Base classifier cannot handle numeric class!");
+    }
+
     super.setClassifier(newClassifier);
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String minChunkSizeTipText() {
 
@@ -1095,7 +1142,7 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Set the minimum chunk size
-   *
+   * 
    * @param chunkSize the minimum chunk size
    */
   public void setMinChunkSize(int chunkSize) {
@@ -1105,7 +1152,7 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Get the minimum chunk size
-   *
+   * 
    * @return the chunk size
    */
   public int getMinChunkSize() {
@@ -1114,8 +1161,8 @@ public class RacedIncrementalLogitBoost
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String maxChunkSizeTipText() {
 
@@ -1124,7 +1171,7 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Set the maximum chunk size
-   *
+   * 
    * @param chunkSize the maximum chunk size
    */
   public void setMaxChunkSize(int chunkSize) {
@@ -1134,7 +1181,7 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Get the maximum chunk size
-   *
+   * 
    * @return the chunk size
    */
   public int getMaxChunkSize() {
@@ -1143,8 +1190,8 @@ public class RacedIncrementalLogitBoost
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String validationChunkSizeTipText() {
 
@@ -1153,7 +1200,7 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Set the validation chunk size
-   *
+   * 
    * @param chunkSize the validation chunk size
    */
   public void setValidationChunkSize(int chunkSize) {
@@ -1163,7 +1210,7 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Get the validation chunk size
-   *
+   * 
    * @return the chunk size
    */
   public int getValidationChunkSize() {
@@ -1172,8 +1219,8 @@ public class RacedIncrementalLogitBoost
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String pruningTypeTipText() {
 
@@ -1182,7 +1229,7 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Set the pruning type
-   *
+   * 
    * @param pruneType the pruning type
    */
   public void setPruningType(SelectedTag pruneType) {
@@ -1194,7 +1241,7 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Get the pruning type
-   *
+   * 
    * @return the type
    */
   public SelectedTag getPruningType() {
@@ -1203,8 +1250,8 @@ public class RacedIncrementalLogitBoost
   }
 
   /**
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String useResamplingTipText() {
 
@@ -1213,21 +1260,21 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Set resampling mode
-   *
+   * 
    * @param r true if resampling should be done
    */
   public void setUseResampling(boolean r) {
-    
+
     m_UseResampling = r;
   }
 
   /**
    * Get whether resampling is turned on
-   *
+   * 
    * @return true if resampling output is on
    */
   public boolean getUseResampling() {
-    
+
     return m_UseResampling;
   }
 
@@ -1240,8 +1287,9 @@ public class RacedIncrementalLogitBoost
 
     if (m_bestCommittee != null) {
       return m_bestCommittee.chunkSize();
+    } else {
+      return 0;
     }
-    else return 0;
   }
 
   /**
@@ -1253,8 +1301,9 @@ public class RacedIncrementalLogitBoost
 
     if (m_bestCommittee != null) {
       return m_bestCommittee.committeeSize();
+    } else {
+      return 0;
     }
-    else return 0;
   }
 
   /**
@@ -1266,13 +1315,14 @@ public class RacedIncrementalLogitBoost
 
     if (m_bestCommittee != null) {
       try {
-	return m_bestCommittee.validationError() * 100.0;
+        return m_bestCommittee.validationError() * 100.0;
       } catch (Exception e) {
-	System.err.println(e.getMessage());
-	return 100.0;
+        System.err.println(e.getMessage());
+        return 100.0;
       }
+    } else {
+      return 100.0;
     }
-    else return 100.0;
   }
 
   /**
@@ -1284,46 +1334,51 @@ public class RacedIncrementalLogitBoost
 
     if (m_bestCommittee != null) {
       try {
-	return m_bestCommittee.logLikelihood();
+        return m_bestCommittee.logLikelihood();
       } catch (Exception e) {
-	System.err.println(e.getMessage());
-	return Double.MAX_VALUE;
+        System.err.println(e.getMessage());
+        return Double.MAX_VALUE;
       }
+    } else {
+      return Double.MAX_VALUE;
     }
-    else return Double.MAX_VALUE;
   }
-  
+
   /**
    * Returns description of the boosted classifier.
-   *
+   * 
    * @return description of the boosted classifier as a string
    */
+  @Override
   public String toString() {
-        
+
     if (m_bestCommittee != null) {
       return m_bestCommittee.toString();
     } else {
-      if ((m_validationSetChanged || m_zeroR == null) && m_validationSet != null
-	  && m_validationSet.numInstances() > 0) {
-	m_zeroR = new ZeroR();
-	try {
-	  m_zeroR.buildClassifier(m_validationSet);
-	} catch (Exception e) {}
-	m_validationSetChanged = false;
+      if ((m_validationSetChanged || m_zeroR == null)
+        && m_validationSet != null && m_validationSet.numInstances() > 0) {
+        m_zeroR = new ZeroR();
+        try {
+          m_zeroR.buildClassifier(m_validationSet);
+        } catch (Exception e) {
+        }
+        m_validationSetChanged = false;
       }
       if (m_zeroR != null) {
-	return ("RacedIncrementalLogitBoost: insufficient data to build model, resorting to ZeroR:\n\n"
-		+ m_zeroR.toString());
+        return ("RacedIncrementalLogitBoost: insufficient data to build model, resorting to ZeroR:\n\n" + m_zeroR
+          .toString());
+      } else {
+        return ("RacedIncrementalLogitBoost: no model built yet.");
       }
-      else return ("RacedIncrementalLogitBoost: no model built yet.");
     }
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
@@ -1337,4 +1392,3 @@ public class RacedIncrementalLogitBoost
     runClassifier(new RacedIncrementalLogitBoost(), argv);
   }
 }
-

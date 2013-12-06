@@ -21,99 +21,113 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.RandomizableClassifier;
-import weka.classifiers.Classifier;
-import weka.classifiers.rules.ZeroR;
-import weka.classifiers.Evaluation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import weka.core.Instance;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.Option;
-import weka.core.Optimization;
-import weka.core.ConjugateGradientOptimization;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.Tag;
+import weka.classifiers.Classifier;
+import weka.classifiers.RandomizableClassifier;
+import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-
-import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.Standardize;
-import weka.filters.unsupervised.attribute.Remove;
+import weka.core.ConjugateGradientOptimization;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Optimization;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.RemoveUseless;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.Filter;
-
-import java.util.Random;
-import java.util.Vector;
-import java.util.Enumeration;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.concurrent.Future;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Callable;
+import weka.filters.unsupervised.attribute.Standardize;
 
 /**
- <!-- globalinfo-start -->
- * Trains a multilayer perceptron with one hidden layer using WEKA's Optimization class by minimizing the squared error plus a quadratic penalty with the BFGS method. Note that all attributes are standardized, including the target. There are several parameters. The ridge parameter is used to determine the penalty on the size of the weights. The number of hidden units can also be specified. Note that large numbers produce long training times. Finally, it is possible to use conjugate gradient descent rather than BFGS updates, which may be faster for cases with many parameters. To improve speed, an approximate version of the logistic function is used as the activation function. Also, if delta values in the backpropagation step are  within the user-specified tolerance, the gradient is not updated for that particular instance, which saves some additional time. Paralled calculation of squared error and gradient is possible when multiple CPU cores are present. Data is split into batches and processed in separate threads in this case. Note that this only improves runtime for larger datasets. Nominal attributes are processed using the unsupervised NominalToBinary filter and missing values are replaced globally using ReplaceMissingValues.
+ * <!-- globalinfo-start --> Trains a multilayer perceptron with one hidden
+ * layer using WEKA's Optimization class by minimizing the squared error plus a
+ * quadratic penalty with the BFGS method. Note that all attributes are
+ * standardized, including the target. There are several parameters. The ridge
+ * parameter is used to determine the penalty on the size of the weights. The
+ * number of hidden units can also be specified. Note that large numbers produce
+ * long training times. Finally, it is possible to use conjugate gradient
+ * descent rather than BFGS updates, which may be faster for cases with many
+ * parameters. To improve speed, an approximate version of the logistic function
+ * is used as the activation function. Also, if delta values in the
+ * backpropagation step are within the user-specified tolerance, the gradient is
+ * not updated for that particular instance, which saves some additional time.
+ * Paralled calculation of squared error and gradient is possible when multiple
+ * CPU cores are present. Data is split into batches and processed in separate
+ * threads in this case. Note that this only improves runtime for larger
+ * datasets. Nominal attributes are processed using the unsupervised
+ * NominalToBinary filter and missing values are replaced globally using
+ * ReplaceMissingValues.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -N &lt;int&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -N &lt;int&gt;
  *  Number of hidden units (default is 2).
  * </pre>
  * 
- * <pre> -R &lt;double&gt;
+ * <pre>
+ * -R &lt;double&gt;
  *  Ridge factor for quadratic penalty on weights (default is 0.01).
  * </pre>
  * 
- * <pre> -O &lt;double&gt;
+ * <pre>
+ * -O &lt;double&gt;
  *  Tolerance parameter for delta values (default is 1.0e-6).
  * </pre>
  * 
- * <pre> -G
+ * <pre>
+ * -G
  *  Use conjugate gradient descent (recommended for many attributes).
  * </pre>
  * 
- * <pre> -P &lt;int&gt;
+ * <pre>
+ * -P &lt;int&gt;
  *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
  * </pre>
  * 
- * <pre> -E &lt;int&gt;
+ * <pre>
+ * -E &lt;int&gt;
  *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
  * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ * <!-- options-end -->
  * 
- <!-- options-end -->
- *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
 public class MLPRegressor extends RandomizableClassifier {
-  
+
   /** For serialization */
   private static final long serialVersionUID = -4477474276438394655L;
 
   /**
    * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
+   * 
+   * @return the capabilities of this classifier
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -127,21 +141,22 @@ public class MLPRegressor extends RandomizableClassifier {
     // class
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
-    
+
     return result;
   }
-  
+
   /**
-   * Simple wrapper class needed to use the BFGS method
-   * implemented in weka.core.Optimization.
+   * Simple wrapper class needed to use the BFGS method implemented in
+   * weka.core.Optimization.
    */
   protected class OptEng extends Optimization {
 
     /**
      * Returns the squared error given parameter values x.
      */
-    protected double objectiveFunction(double[] x){
-      
+    @Override
+    protected double objectiveFunction(double[] x) {
+
       m_MLPParameters = x;
       return calculateSE();
     }
@@ -149,8 +164,9 @@ public class MLPRegressor extends RandomizableClassifier {
     /**
      * Returns the gradient given parameter values x.
      */
-    protected double[] evaluateGradient(double[] x){
-      
+    @Override
+    protected double[] evaluateGradient(double[] x) {
+
       m_MLPParameters = x;
       return calculateGradient();
     }
@@ -158,22 +174,24 @@ public class MLPRegressor extends RandomizableClassifier {
     /**
      * The revision string.
      */
+    @Override
     public String getRevision() {
       return RevisionUtils.extract("$Revision$");
     }
   }
-  
+
   /**
-   * Simple wrapper class needed to use the CGD method
-   * implemented in weka.core.ConjugateGradientOptimization.
+   * Simple wrapper class needed to use the CGD method implemented in
+   * weka.core.ConjugateGradientOptimization.
    */
   protected class OptEngCGD extends ConjugateGradientOptimization {
 
     /**
      * Returns the squared error given parameter values x.
      */
-    protected double objectiveFunction(double[] x){
-      
+    @Override
+    protected double objectiveFunction(double[] x) {
+
       m_MLPParameters = x;
       return calculateSE();
     }
@@ -181,8 +199,9 @@ public class MLPRegressor extends RandomizableClassifier {
     /**
      * Returns the gradient given parameter values x.
      */
-    protected double[] evaluateGradient(double[] x){
-      
+    @Override
+    protected double[] evaluateGradient(double[] x) {
+
       m_MLPParameters = x;
       return calculateGradient();
     }
@@ -190,6 +209,7 @@ public class MLPRegressor extends RandomizableClassifier {
     /**
      * The revision string.
      */
+    @Override
     public String getRevision() {
       return RevisionUtils.extract("$Revision$");
     }
@@ -197,7 +217,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
   // The number of hidden units
   protected int m_numUnits = 2;
-  
+
   // The class index of the dataset
   protected int m_classIndex = -1;
 
@@ -240,10 +260,10 @@ public class MLPRegressor extends RandomizableClassifier {
 
   // An attribute filter
   protected RemoveUseless m_AttFilter;
-    
+
   // The filter used to make attributes numeric.
   protected NominalToBinary m_NominalToBinary;
-    
+
   // The filter used to get rid of missing values.
   protected ReplaceMissingValues m_ReplaceMissingValues;
 
@@ -254,8 +274,8 @@ public class MLPRegressor extends RandomizableClassifier {
   protected transient ExecutorService m_Pool = null;
 
   /**
-   * Method used to pre-process the data, perform clustering, and
-   * set the initial parameter vector.
+   * Method used to pre-process the data, perform clustering, and set the
+   * initial parameter vector.
    */
   protected Instances initializeClassifier(Instances data) throws Exception {
 
@@ -268,23 +288,25 @@ public class MLPRegressor extends RandomizableClassifier {
     // Make sure data is shuffled
     Random random = new Random(m_Seed);
     if (data.numInstances() > 1) {
-      random = data.getRandomNumberGenerator(m_Seed); 
+      random = data.getRandomNumberGenerator(m_Seed);
     }
     data.randomize(random);
-    
+
     double y0 = data.instance(0).classValue();
     int index = 1;
-    while (index < data.numInstances() && data.instance(index).classValue() == y0) {
+    while (index < data.numInstances()
+      && data.instance(index).classValue() == y0) {
       index++;
     }
     if (index == data.numInstances()) {
       // degenerate case, all class values are equal
       // we don't want to deal with this, too much hassle
-      throw new Exception("All class values are the same. At least two class values should be different");
+      throw new Exception(
+        "All class values are the same. At least two class values should be different");
     }
     double y1 = data.instance(index).classValue();
 
-    // Replace missing values	
+    // Replace missing values
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(data);
     data = Filter.useFilter(data, m_ReplaceMissingValues);
@@ -296,14 +318,13 @@ public class MLPRegressor extends RandomizableClassifier {
 
     // only class? -> build ZeroR model
     if (data.numAttributes() == 1) {
-      System.err.println(
-	  "Cannot build model (only class attribute present in data after removing useless attributes!), "
-	  + "using ZeroR model instead!");
+      System.err
+        .println("Cannot build model (only class attribute present in data after removing useless attributes!), "
+          + "using ZeroR model instead!");
       m_ZeroR = new ZeroR();
       m_ZeroR.buildClassifier(data);
       return null;
-    }
-    else {
+    } else {
       m_ZeroR = null;
     }
 
@@ -311,25 +332,27 @@ public class MLPRegressor extends RandomizableClassifier {
     m_NominalToBinary = new NominalToBinary();
     m_NominalToBinary.setInputFormat(data);
     data = Filter.useFilter(data, m_NominalToBinary);
-    
+
     // Standardize data
     m_Filter = new Standardize();
-    ((Standardize)m_Filter).setIgnoreClass(true);
+    ((Standardize) m_Filter).setIgnoreClass(true);
     m_Filter.setInputFormat(data);
-    data = Filter.useFilter(data, m_Filter); 
+    data = Filter.useFilter(data, m_Filter);
     double z0 = data.instance(0).classValue();
     double z1 = data.instance(index).classValue();
-    m_x1 = (y0 - y1) / (z0 - z1); // no division by zero, since y0 != y1 guaranteed => z0 != z1 ???
+    m_x1 = (y0 - y1) / (z0 - z1); // no division by zero, since y0 != y1
+                                  // guaranteed => z0 != z1 ???
     m_x0 = (y0 - m_x1 * z0); // = y1 - m_x1 * z1
-    
+
     m_classIndex = data.classIndex();
     m_numAttributes = data.numAttributes();
 
     // Set up array
     OFFSET_WEIGHTS = 0;
     OFFSET_ATTRIBUTE_WEIGHTS = (m_numUnits + 1);
-    m_MLPParameters = new double[OFFSET_ATTRIBUTE_WEIGHTS + m_numUnits * m_numAttributes];
-    
+    m_MLPParameters = new double[OFFSET_ATTRIBUTE_WEIGHTS + m_numUnits
+      * m_numAttributes];
+
     // Initialize parameters
     int offsetOW = OFFSET_WEIGHTS;
     for (int i = 0; i < m_numUnits; i++) {
@@ -342,13 +365,14 @@ public class MLPRegressor extends RandomizableClassifier {
         m_MLPParameters[offsetW + j] = 0.1 * random.nextGaussian();
       }
     }
-    
+
     return data;
   }
 
   /**
    * Builds the MLP network classifier based on the given dataset.
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     // Set up the initial arrays
@@ -378,25 +402,27 @@ public class MLPRegressor extends RandomizableClassifier {
     }
 
     m_MLPParameters = opt.findArgmin(m_MLPParameters, b);
-    while(m_MLPParameters == null){
+    while (m_MLPParameters == null) {
       m_MLPParameters = opt.getVarbValues();
       if (m_Debug) {
         System.out.println("First set of iterations finished, not enough!");
       }
       m_MLPParameters = opt.findArgmin(m_MLPParameters, b);
     }
-    if (m_Debug) {	
-      System.out.println("SE (normalized space) after optimization: " + opt.getMinFunction()); 
+    if (m_Debug) {
+      System.out.println("SE (normalized space) after optimization: "
+        + opt.getMinFunction());
     }
-    
+
     m_data = new Instances(m_data, 0); // Save memory
 
     // Shut down thread pool
     m_Pool.shutdown();
-  } 
+  }
 
   /**
-   * Calculates the (penalized) squared error based on the current parameter vector.
+   * Calculates the (penalized) squared error based on the current parameter
+   * vector.
    */
   protected double calculateSE() {
 
@@ -409,26 +435,28 @@ public class MLPRegressor extends RandomizableClassifier {
 
       // Determine batch to be processed
       final int lo = j * chunksize;
-      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data.numInstances();
+      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data
+        .numInstances();
 
       // Create and submit new job, where each instance in batch is processed
-      Future<Double> futureSE = m_Pool.submit(new Callable() {
-          public Double call() {
-            final double[] outputs = new double[m_numUnits];
-            double SE = 0;
-            for (int k = lo; k < hi; k++) {
-              final Instance inst = m_data.instance(k);
-              
-              // Calculate necessary input/output values and error term
-              calculateOutputs(inst, outputs, null);
-                
-              // Add to squared error
-              final double err = getOutput(outputs) - inst.value(m_classIndex);
-              SE += err * err;
-            }
-            return SE;
+      Future<Double> futureSE = m_Pool.submit(new Callable<Double>() {
+        @Override
+        public Double call() {
+          final double[] outputs = new double[m_numUnits];
+          double SE = 0;
+          for (int k = lo; k < hi; k++) {
+            final Instance inst = m_data.instance(k);
+
+            // Calculate necessary input/output values and error term
+            calculateOutputs(inst, outputs, null);
+
+            // Add to squared error
+            final double err = getOutput(outputs) - inst.value(m_classIndex);
+            SE += err * err;
           }
-        });
+          return SE;
+        }
+      });
       results.add(futureSE);
     }
 
@@ -446,19 +474,23 @@ public class MLPRegressor extends RandomizableClassifier {
     double squaredSumOfWeights = 0;
     int offsetOW = OFFSET_WEIGHTS;
     for (int k = 0; k < m_numUnits; k++) {
-      squaredSumOfWeights += m_MLPParameters[offsetOW + k] * m_MLPParameters[offsetOW + k];
+      squaredSumOfWeights += m_MLPParameters[offsetOW + k]
+        * m_MLPParameters[offsetOW + k];
     }
     for (int k = 0; k < m_numUnits; k++) {
       int offsetW = OFFSET_ATTRIBUTE_WEIGHTS + k * m_numAttributes;
       for (int j = 0; j < m_classIndex; j++) {
-        squaredSumOfWeights += m_MLPParameters[offsetW + j] * m_MLPParameters[offsetW + j];
+        squaredSumOfWeights += m_MLPParameters[offsetW + j]
+          * m_MLPParameters[offsetW + j];
       }
       for (int j = m_classIndex + 1; j < m_numAttributes; j++) {
-        squaredSumOfWeights += m_MLPParameters[offsetW + j] * m_MLPParameters[offsetW + j];
+        squaredSumOfWeights += m_MLPParameters[offsetW + j]
+          * m_MLPParameters[offsetW + j];
       }
     }
-    
-    return ((m_ridge * squaredSumOfWeights) + (0.5 * SE)) / m_data.numInstances();
+
+    return ((m_ridge * squaredSumOfWeights) + (0.5 * SE))
+      / m_data.numInstances();
   }
 
   /**
@@ -475,25 +507,28 @@ public class MLPRegressor extends RandomizableClassifier {
 
       // Determine batch to be processed
       final int lo = j * chunksize;
-      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data.numInstances();
+      final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_data
+        .numInstances();
 
       // Create and submit new job, where each instance in batch is processed
-      Future<double[]> futureGrad = m_Pool.submit(new Callable() {
-          public double[] call() {
+      Future<double[]> futureGrad = m_Pool.submit(new Callable<double[]>() {
+        @Override
+        public double[] call() {
 
-            final double[] outputs = new double[m_numUnits];
-            final double[] deltaHidden = new double[m_numUnits];
-            final double[] sigmoidDerivativesHidden = new double[m_numUnits];
-            final double[] localGrad = new double[m_MLPParameters.length];
-            for (int k = lo; k < hi; k++) {
-              final Instance inst = m_data.instance(k);
-              calculateOutputs(inst, outputs, sigmoidDerivativesHidden);
-              updateGradient(localGrad, inst, outputs, deltaHidden);
-              updateGradientForHiddenUnits(localGrad, inst, sigmoidDerivativesHidden, deltaHidden);
-            }
-            return localGrad;
+          final double[] outputs = new double[m_numUnits];
+          final double[] deltaHidden = new double[m_numUnits];
+          final double[] sigmoidDerivativesHidden = new double[m_numUnits];
+          final double[] localGrad = new double[m_MLPParameters.length];
+          for (int k = lo; k < hi; k++) {
+            final Instance inst = m_data.instance(k);
+            calculateOutputs(inst, outputs, sigmoidDerivativesHidden);
+            updateGradient(localGrad, inst, outputs, deltaHidden);
+            updateGradientForHiddenUnits(localGrad, inst,
+              sigmoidDerivativesHidden, deltaHidden);
           }
-        });
+          return localGrad;
+        }
+      });
       results.add(futureGrad);
     }
 
@@ -502,7 +537,7 @@ public class MLPRegressor extends RandomizableClassifier {
     try {
       for (Future<double[]> futureGrad : results) {
         double[] lg = futureGrad.get();
-        for (int  i = 0; i < lg.length; i++) {
+        for (int i = 0; i < lg.length; i++) {
           grad[i] += lg[i];
         }
       }
@@ -536,13 +571,14 @@ public class MLPRegressor extends RandomizableClassifier {
   /**
    * Update the gradient for the weights in the output layer.
    */
-  protected void updateGradient(double[] grad, Instance inst, double[] outputs, double[] deltaHidden) {
+  protected void updateGradient(double[] grad, Instance inst, double[] outputs,
+    double[] deltaHidden) {
 
     // Initialise deltaHidden
     Arrays.fill(deltaHidden, 0.0);
 
-    // Get output 
-    double pred = getOutput(outputs); 
+    // Get output
+    double pred = getOutput(outputs);
 
     // Calculate delta from output unit
     double deltaOut = (pred - inst.value(m_classIndex));
@@ -564,7 +600,7 @@ public class MLPRegressor extends RandomizableClassifier {
     for (int i = 0; i < m_numUnits; i++) {
       grad[offsetOW + i] += deltaOut * outputs[i];
     }
-    
+
     // Update gradient for bias
     grad[offsetOW + m_numUnits] += deltaOut;
   }
@@ -572,7 +608,8 @@ public class MLPRegressor extends RandomizableClassifier {
   /**
    * Update the gradient for the weights in the hidden layer.
    */
-  protected void updateGradientForHiddenUnits(double[] grad, Instance inst,  double[] sigmoidDerivativesHidden, double[] deltaHidden) {
+  protected void updateGradientForHiddenUnits(double[] grad, Instance inst,
+    double[] sigmoidDerivativesHidden, double[] deltaHidden) {
 
     // Finalize deltaHidden
     for (int i = 0; i < m_numUnits; i++) {
@@ -581,12 +618,12 @@ public class MLPRegressor extends RandomizableClassifier {
 
     // Update gradient for hidden units
     for (int i = 0; i < m_numUnits; i++) {
-      
+
       // Skip calculations if update too small
       if (deltaHidden[i] <= m_tolerance && deltaHidden[i] >= -m_tolerance) {
         continue;
       }
-      
+
       // Update gradient for all weights, including bias at classIndex
       int offsetW = OFFSET_ATTRIBUTE_WEIGHTS + i * m_numAttributes;
       for (int l = 0; l < m_classIndex; l++) {
@@ -602,8 +639,7 @@ public class MLPRegressor extends RandomizableClassifier {
   /**
    * Calculates the array of outputs of the hidden units.
    */
-  protected void calculateOutputs(Instance inst, double[] o,
-                                  double[] d) {
+  protected void calculateOutputs(Instance inst, double[] o, double[] d) {
 
     for (int i = 0; i < m_numUnits; i++) {
       int offsetW = OFFSET_ATTRIBUTE_WEIGHTS + i * m_numAttributes;
@@ -611,40 +647,49 @@ public class MLPRegressor extends RandomizableClassifier {
       for (int j = 0; j < m_classIndex; j++) {
         sum += inst.value(j) * m_MLPParameters[offsetW + j];
       }
-      sum += m_MLPParameters[offsetW + m_classIndex]; 
+      sum += m_MLPParameters[offsetW + m_classIndex];
       for (int j = m_classIndex + 1; j < m_numAttributes; j++) {
         sum += inst.value(j) * m_MLPParameters[offsetW + j];
       }
       o[i] = sigmoid(-sum, d, i);
     }
   }
-  
+
   /**
-   * Calculates the output of output unit based on the given 
-   * hidden layer outputs.
+   * Calculates the output of output unit based on the given hidden layer
+   * outputs.
    */
   protected double getOutput(double[] outputs) {
 
     int offsetOW = OFFSET_WEIGHTS;
     double result = 0;
     for (int i = 0; i < m_numUnits; i++) {
-      result +=  m_MLPParameters[offsetOW + i] * outputs[i];
+      result += m_MLPParameters[offsetOW + i] * outputs[i];
     }
     result += m_MLPParameters[offsetOW + m_numUnits];
     return result;
-  }    
-  
+  }
+
   /**
-   * Computes approximate sigmoid function. Derivative is 
-   * stored in second argument at given index if d != null.
+   * Computes approximate sigmoid function. Derivative is stored in second
+   * argument at given index if d != null.
    */
   protected double sigmoid(double x, double[] d, int index) {
 
     // Compute approximate sigmoid
     double y = 1.0 + x / 4096.0;
-    x = y * y; x *= x; x *= x; x *= x;
-    x *= x; x *= x; x *= x; x *= x;
-    x *= x; x *= x; x *= x; x *= x;
+    x = y * y;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
+    x *= x;
     double output = 1.0 / (1.0 + x);
 
     // Compute derivative if desired
@@ -654,13 +699,14 @@ public class MLPRegressor extends RandomizableClassifier {
 
     return output;
   }
-  
+
   /**
-   * Calculates the output of the network after the instance has been
-   * piped through the fliters to replace missing values, etc.
+   * Calculates the output of the network after the instance has been piped
+   * through the fliters to replace missing values, etc.
    */
+  @Override
   public double classifyInstance(Instance inst) throws Exception {
-      
+
     m_ReplaceMissingValues.input(inst);
     inst = m_ReplaceMissingValues.output();
     m_AttFilter.input(inst);
@@ -683,12 +729,12 @@ public class MLPRegressor extends RandomizableClassifier {
 
   /**
    * This will return a string describing the classifier.
+   * 
    * @return The string.
    */
   public String globalInfo() {
 
-    return 
-      "Trains a multilayer perceptron with one hidden layer using WEKA's Optimization class"
+    return "Trains a multilayer perceptron with one hidden layer using WEKA's Optimization class"
       + " by minimizing the squared error plus a quadratic penalty with the BFGS method."
       + " Note that all attributes are standardized, including the target. There are several parameters. The"
       + " ridge parameter is used to determine the penalty on the size of the weights. The"
@@ -706,7 +752,7 @@ public class MLPRegressor extends RandomizableClassifier {
       + " NominalToBinary filter and missing values are replaced globally"
       + " using ReplaceMissingValues.";
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -722,7 +768,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     return m_tolerance;
   }
-  
+
   /**
    * Sets the tolerance parameter for the delta values.
    */
@@ -730,7 +776,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     m_tolerance = newTolerance;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -746,7 +792,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     return m_numUnits;
   }
-  
+
   /**
    * Sets the number of functions.
    */
@@ -754,7 +800,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     m_numUnits = newNumFunctions;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -770,7 +816,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     return m_ridge;
   }
-  
+
   /**
    * Sets the value of the ridge parameter.
    */
@@ -778,7 +824,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     m_ridge = newRidge;
   }
-  
+
   /**
    * @return a string to describe the option
    */
@@ -794,7 +840,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     return m_useCGD;
   }
-  
+
   /**
    * Sets whether to use CGD.
    */
@@ -818,7 +864,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     return m_numThreads;
   }
-  
+
   /**
    * Sets the number of threads
    */
@@ -842,7 +888,7 @@ public class MLPRegressor extends RandomizableClassifier {
 
     return m_poolSize;
   }
-  
+
   /**
    * Sets the number of threads
    */
@@ -853,86 +899,88 @@ public class MLPRegressor extends RandomizableClassifier {
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>(6);
 
     newVector.addElement(new Option(
-                                    "\tNumber of hidden units (default is 2).\n", 
-                                    "N", 1, "-N <int>"));
+      "\tNumber of hidden units (default is 2).\n", "N", 1, "-N <int>"));
 
     newVector.addElement(new Option(
-                                    "\tRidge factor for quadratic penalty on weights (default is 0.01).\n", 
-                                    "R", 1, "-R <double>"));
+      "\tRidge factor for quadratic penalty on weights (default is 0.01).\n",
+      "R", 1, "-R <double>"));
     newVector.addElement(new Option(
-                                    "\tTolerance parameter for delta values (default is 1.0e-6).\n", 
-                                    "O", 1, "-O <double>"));
+      "\tTolerance parameter for delta values (default is 1.0e-6).\n", "O", 1,
+      "-O <double>"));
     newVector.addElement(new Option(
-                                    "\tUse conjugate gradient descent (recommended for many attributes).\n", 
-                                    "G", 0, "-G"));
+      "\tUse conjugate gradient descent (recommended for many attributes).\n",
+      "G", 0, "-G"));
     newVector.addElement(new Option(
-                                    "\t" + poolSizeTipText() + " (default 1)\n", 
-                                    "P", 1, "-P <int>"));
-    newVector.addElement(new Option(
-                                    "\t" + numThreadsTipText() + " (default 1)\n", 
-                                    "E", 1, "-E <int>"));
+      "\t" + poolSizeTipText() + " (default 1)\n", "P", 1, "-P <int>"));
+    newVector.addElement(new Option("\t" + numThreadsTipText()
+      + " (default 1)\n", "E", 1, "-E <int>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement((Option)enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -N &lt;int&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -N &lt;int&gt;
    *  Number of hidden units (default is 2).
    * </pre>
    * 
-   * <pre> -R &lt;double&gt;
+   * <pre>
+   * -R &lt;double&gt;
    *  Ridge factor for quadratic penalty on weights (default is 0.01).
    * </pre>
    * 
-   * <pre> -O &lt;double&gt;
+   * <pre>
+   * -O &lt;double&gt;
    *  Tolerance parameter for delta values (default is 1.0e-6).
    * </pre>
    * 
-   * <pre> -G
+   * <pre>
+   * -G
    *  Use conjugate gradient descent (recommended for many attributes).
    * </pre>
    * 
-   * <pre> -P &lt;int&gt;
+   * <pre>
+   * -P &lt;int&gt;
    *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
    * </pre>
    * 
-   * <pre> -E &lt;int&gt;
+   * <pre>
+   * -E &lt;int&gt;
    *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
    * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   * <!-- options-end -->
    * 
-   <!-- options-end -->
-   *
-   * Options after -- are passed to the designated classifier.<p>
-   *
+   * Options after -- are passed to the designated classifier.
+   * <p>
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     String numFunctions = Utils.getOption('N', options);
@@ -968,52 +1016,48 @@ public class MLPRegressor extends RandomizableClassifier {
     }
 
     super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
+    Vector<String> options = new Vector<String>();
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 11];
+    options.add("-N");
+    options.add("" + getNumFunctions());
 
-    int current = 0;
-    options[current++] = "-N"; 
-    options[current++] = "" + getNumFunctions();
+    options.add("-R");
+    options.add("" + getRidge());
 
-    options[current++] = "-R"; 
-    options[current++] = "" + getRidge();
-
-    options[current++] = "-O"; 
-    options[current++] = "" + getTolerance();
+    options.add("-O");
+    options.add("" + getTolerance());
 
     if (m_useCGD) {
-      options[current++] = "-G";
+      options.add("-G");
     }
 
-    options[current++] = "-P"; 
-    options[current++] = "" + getPoolSize();
+    options.add("-P");
+    options.add("" + getPoolSize());
 
-    options[current++] = "-E"; 
-    options[current++] = "" + getNumThreads();
+    options.add("-E");
+    options.add("" + getNumThreads());
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
+    Collections.addAll(options, super.getOptions());
 
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
    * Outputs the network as a string.
    */
+  @Override
   public String toString() {
 
     if (m_ZeroR != null) {
@@ -1024,38 +1068,36 @@ public class MLPRegressor extends RandomizableClassifier {
       return "Classifier not built yet.";
     }
 
-    String s = "MLPRegressor with ridge value " + getRidge() +
-      " and " + getNumFunctions() + " hidden units (useCGD=" + 
-      getUseCGD() + ")\n\n";
-    
+    String s = "MLPRegressor with ridge value " + getRidge() + " and "
+      + getNumFunctions() + " hidden units (useCGD=" + getUseCGD() + ")\n\n";
+
     for (int i = 0; i < m_numUnits; i++) {
-      s += "Output unit weight for hidden unit " + i + ": " + 
-        m_MLPParameters[OFFSET_WEIGHTS + i] + "\n";
+      s += "Output unit weight for hidden unit " + i + ": "
+        + m_MLPParameters[OFFSET_WEIGHTS + i] + "\n";
       s += "\nHidden unit weights:\n\n";
       for (int j = 0; j < m_numAttributes; j++) {
         if (j != m_classIndex) {
-          s += m_MLPParameters[OFFSET_ATTRIBUTE_WEIGHTS + 
-                               (i * m_numAttributes) + j] 
+          s += m_MLPParameters[OFFSET_ATTRIBUTE_WEIGHTS + (i * m_numAttributes)
+            + j]
             + " " + m_data.attribute(j).name() + "\n";
         }
       }
-      s += "\nHidden unit bias: " + 
-        m_MLPParameters[OFFSET_ATTRIBUTE_WEIGHTS + 
-                        (i * m_numAttributes + m_classIndex)] + "\n\n";
-    }  
-    s += "Output unit bias: " + m_MLPParameters[OFFSET_WEIGHTS + 
-                                                m_numUnits] + "\n";
+      s += "\nHidden unit bias: "
+        + m_MLPParameters[OFFSET_ATTRIBUTE_WEIGHTS
+          + (i * m_numAttributes + m_classIndex)] + "\n\n";
+    }
+    s += "Output unit bias: " + m_MLPParameters[OFFSET_WEIGHTS + m_numUnits]
+      + "\n";
 
     return s;
   }
 
   /**
-   * Main method to run the code from the command-line using
-   * the standard WEKA options.
+   * Main method to run the code from the command-line using the standard WEKA
+   * options.
    */
   public static void main(String[] argv) {
 
     runClassifier(new MLPRegressor(), argv);
   }
 }
-

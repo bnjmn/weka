@@ -6,10 +6,10 @@
 PackageName=naiveBayesTree
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-12-06
 
 # Title (required)
 Title=Class for generating a decision tree with naive Bayes classifiers at the leaves.
@@ -28,8 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Class for generating a decision tree with naive Bayes classifiers at the leaves.<br/><br/>For more information, see<br/><br/>Ron Kohavi: Scaling Up the Accuracy of Naive-Bayes Classifiers: A Decision-Tree Hybrid. In: Second International Conference on Knoledge Discovery and Data Mining, 202-207, 1996.
 
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/naiveBayesTree1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/naiveBayesTree1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/naiveBayesTree

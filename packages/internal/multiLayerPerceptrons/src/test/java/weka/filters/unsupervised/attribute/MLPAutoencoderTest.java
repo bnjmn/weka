@@ -19,45 +19,42 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Instances;
-import weka.core.SelectedTag;
-import weka.core.Attribute;
-
-import weka.filters.AbstractFilterTest;
-import weka.filters.unsupervised.attribute.RemoveType;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import weka.core.Attribute;
+import weka.core.SelectedTag;
+import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
 
 /**
- * Tests MLPAutoencoder. Run from the command line with: <p/>
+ * Tests MLPAutoencoder. Run from the command line with:
+ * <p/>
  * java weka.filters.unsupervised.instance.MLPAutoencoderTest
- *
+ * 
  * @author Eibe Frank
  * @version $Revision: 8108 $
  */
-public class MLPAutoencoderTest 
-  extends AbstractFilterTest {
-  
-  public MLPAutoencoderTest(String name) { 
-    super(name);  
+public class MLPAutoencoderTest extends AbstractFilterTest {
+
+  public MLPAutoencoderTest(String name) {
+    super(name);
   }
 
-  /** Set class index and remove attributes*/
+  /** Set class index and remove attributes */
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
 
     m_Instances.setClassIndex(1);
 
     RemoveType rt = new RemoveType();
-    rt.setAttributeType(new SelectedTag(Attribute.NUMERIC, RemoveType.TAGS_ATTRIBUTETYPE));
+    rt.setAttributeType(new SelectedTag(Attribute.NUMERIC,
+      RemoveType.TAGS_ATTRIBUTETYPE));
     rt.setInvertSelection(true);
     rt.setInputFormat(m_Instances);
 
     m_Instances = RemoveType.useFilter(m_Instances, rt);
-    
+
     ReplaceMissingValues rmv = new ReplaceMissingValues();
     rmv.setInputFormat(m_Instances);
 
@@ -65,8 +62,9 @@ public class MLPAutoencoderTest
 
     m_FilteredClassifier = null; // Too much hassle...
   }
-  
+
   /** Creates a default MLPAutoencoder */
+  @Override
   public Filter getFilter() {
     MLPAutoencoder f = new MLPAutoencoder();
     f.setWeightsFile(new java.io.File("."));
@@ -77,7 +75,7 @@ public class MLPAutoencoderTest
     return new TestSuite(MLPAutoencoderTest.class);
   }
 
-  public static void main(String[] args){
+  public static void main(String[] args) {
     junit.textui.TestRunner.run(suite());
   }
 }

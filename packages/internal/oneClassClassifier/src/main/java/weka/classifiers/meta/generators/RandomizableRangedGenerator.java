@@ -20,21 +20,21 @@
 
 package weka.classifiers.meta.generators;
 
-import weka.core.Option;
-import weka.core.Utils;
-
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import weka.core.Option;
+import weka.core.Utils;
 
 /**
  * Abstract superclass for generators that take ranges and use a seeded random
  * number generator internally
  * 
- * @author  fracpete (fracpete at waikato dot ac dot nz)
+ * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public abstract class RandomizableRangedGenerator
-  extends RandomizableGenerator
+public abstract class RandomizableRangedGenerator extends RandomizableGenerator
   implements Ranged {
 
   /** for serialization. */
@@ -48,72 +48,68 @@ public abstract class RandomizableRangedGenerator
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements())
-      result.addElement(enu.nextElement());
+    Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option(
-	"\tSets the lower range of the generator\n"
-	+ "\t(default: 0)",
-	"L", 1, "-L <num>"));
+    result.addAll(Collections.list(super.listOptions()));
 
-    result.addElement(new Option(
-	"\tSets the upper range of the generator\n"
-	+ "\t(default: 1)",
-	"U", 1, "-U <num>"));
-    
+    result.addElement(new Option("\tSets the lower range of the generator\n"
+      + "\t(default: 0)", "L", 1, "-L <num>"));
+
+    result.addElement(new Option("\tSets the upper range of the generator\n"
+      + "\t(default: 1)", "U", 1, "-U <num>"));
+
     return result.elements();
   }
 
   /**
    * Parses a given list of options.
-   *
-   * @param options 	the list of options as an array of strings
-   * @throws Exception 	if an option is not supported
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    
+
+    String tmpStr;
+
     super.setOptions(options);
 
     tmpStr = Utils.getOption("L", options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setLowerRange(Double.parseDouble(tmpStr));
-    else
+    } else {
       setLowerRange(0.0);
+    }
 
     tmpStr = Utils.getOption("U", options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setUpperRange(Double.parseDouble(tmpStr));
-    else
+    } else {
       setUpperRange(1.0);
+    }
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
-    Vector<String>	result;
-    String[]		options;
-    int			i;
+  @Override
+  public String[] getOptions() {
 
-    result = new Vector<String>();
+    Vector<String> result = new Vector<String>();
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
+    Collections.addAll(result, super.getOptions());
+
     result.add("-L");
     result.add("" + m_LowerRange);
-    
+
     result.add("-U");
     result.add("" + m_UpperRange);
 
@@ -122,8 +118,8 @@ public abstract class RandomizableRangedGenerator
 
   /**
    * Gets the lower range of the generator.
-   *
-   * @return 		The lower range of this generator.
+   * 
+   * @return The lower range of this generator.
    */
   public double getLowerRange() {
     return m_LowerRange;
@@ -131,18 +127,19 @@ public abstract class RandomizableRangedGenerator
 
   /**
    * Sets the lower range.
-   *
-   * @param value 	The lower range of the generator.
+   * 
+   * @param value The lower range of the generator.
    */
+  @Override
   public void setLowerRange(double value) {
     m_LowerRange = value;
   }
-  
+
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String lowerRangeTipText() {
     return "The lower range.";
@@ -150,8 +147,8 @@ public abstract class RandomizableRangedGenerator
 
   /**
    * Gets the upper range of the generator.
-   *
-   * @return 		The upper range of this generator.
+   * 
+   * @return The upper range of this generator.
    */
   public double getUpperRange() {
     return m_UpperRange;
@@ -159,18 +156,19 @@ public abstract class RandomizableRangedGenerator
 
   /**
    * Sets the upper range.
-   *
-   * @param value 	The upper range of the generator.
+   * 
+   * @param value The upper range of the generator.
    */
+  @Override
   public void setUpperRange(double value) {
     m_UpperRange = value;
-  }    
-  
+  }
+
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String upperRangeTipText() {
     return "The upper range.";

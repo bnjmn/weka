@@ -20,54 +20,62 @@
 
 package weka.classifiers.meta.generators;
 
-import weka.core.Option;
-import weka.core.Utils;
-
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import weka.core.Option;
+import weka.core.Utils;
+
 /**
- <!-- globalinfo-start -->
- * A mixed Gaussian artificial data generator.<br/>
+ * <!-- globalinfo-start --> A mixed Gaussian artificial data generator.<br/>
  * <br/>
- * This generator only has two Gaussians, each sitting 3 standard deviations (by default) away from the mean of the main distribution.  Each model has half of the probability.  The idea is that the two sub-models form a boundary either side of the main distribution.
+ * This generator only has two Gaussians, each sitting 3 standard deviations (by
+ * default) away from the mean of the main distribution. Each model has half of
+ * the probability. The idea is that the two sub-models form a boundary either
+ * side of the main distribution.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
- *  If set, generator is run in debug mode and
- *  may output additional info to the console</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -S &lt;seed&gt;
- *  Sets the seed of the random number generator of the generator (default: 1)</pre>
+ * <pre>
+ * -S &lt;seed&gt;
+ *  Sets the seed of the random number generator of the generator (default: 1)
+ * </pre>
  * 
- * <pre> -M &lt;num&gt;
+ * <pre>
+ * -M &lt;num&gt;
  *  Sets the mean of the generator
- *  (default: 0)</pre>
+ *  (default: 0)
+ * </pre>
  * 
- * <pre> -SD &lt;num&gt;
+ * <pre>
+ * -SD &lt;num&gt;
  *  Sets the standard deviation of the generator
- *  (default: 1)</pre>
+ *  (default: 1)
+ * </pre>
  * 
- * <pre> -di &lt;distance&gt;
+ * <pre>
+ * -di &lt;distance&gt;
  *  Sets the difference between the mean and what will be used
- *  on the lower and higher distributions for the generator. (default: 3)</pre>
+ *  on the lower and higher distributions for the generator. (default: 3)
+ * </pre>
  * 
- * <pre> -da
+ * <pre>
+ * -da
  *  If set, the generator will use the absolute value of the
  *  difference. If not set, it will multiply the difference by
- *  the standard deviation.</pre>
+ *  the standard deviation.
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Kathryn Hempstalk (kah18 at cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class MixedGaussianGenerator
-  extends RandomizableDistributionGenerator 
+public class MixedGaussianGenerator extends RandomizableDistributionGenerator
   implements NumericAttributeGenerator {
 
   /** for serialization. */
@@ -79,20 +87,19 @@ public class MixedGaussianGenerator
   protected double m_Distance = 3;
 
   /**
-   * Whether the difference is absolute, or a modifier to the
-   * standard deviation.
+   * Whether the difference is absolute, or a modifier to the standard
+   * deviation.
    */
   protected boolean m_DistanceAbsolute = false;
 
   /**
    * Returns a string describing this class' ability.
-   *
+   * 
    * @return A description of the class.
    */
+  @Override
   public String globalInfo() {
-    return 
-        "A mixed Gaussian artificial data generator.\n"
-      + "\n"
+    return "A mixed Gaussian artificial data generator.\n" + "\n"
       + "This generator only has two Gaussians, each sitting "
       + "3 standard deviations (by default) away from the mean "
       + "of the main distribution.  Each model has half of the "
@@ -102,99 +109,102 @@ public class MixedGaussianGenerator
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector result = new Vector();   
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> result = new Vector<Option>();
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements())
-      result.addElement(enu.nextElement());
+    result.addAll(Collections.list(super.listOptions()));
 
     result.addElement(new Option(
-	"\tSets the difference between the mean and what will be used\n"
-	+ "\ton the lower and higher distributions for the generator."
-	+ "\t(default: 3)",
-	"di", 1, "-di <distance>"));
-    
+      "\tSets the difference between the mean and what will be used\n"
+        + "\ton the lower and higher distributions for the generator."
+        + "\t(default: 3)", "di", 1, "-di <distance>"));
+
     result.addElement(new Option(
-	"\tIf set, the generator will use the absolute value of the\n"
-	+ "\tdifference. If not set, it will multiply the difference by\n"
-	+ "\tthe standard deviation.",
-	"da", 0, "-da"));
+      "\tIf set, the generator will use the absolute value of the\n"
+        + "\tdifference. If not set, it will multiply the difference by\n"
+        + "\tthe standard deviation.", "da", 0, "-da"));
 
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -D
-   *  If set, generator is run in debug mode and
-   *  may output additional info to the console</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -S &lt;seed&gt;
-   *  Sets the seed of the random number generator of the generator (default: 1)</pre>
+   * <pre>
+   * -S &lt;seed&gt;
+   *  Sets the seed of the random number generator of the generator (default: 1)
+   * </pre>
    * 
-   * <pre> -M &lt;num&gt;
+   * <pre>
+   * -M &lt;num&gt;
    *  Sets the mean of the generator
-   *  (default: 0)</pre>
+   *  (default: 0)
+   * </pre>
    * 
-   * <pre> -SD &lt;num&gt;
+   * <pre>
+   * -SD &lt;num&gt;
    *  Sets the standard deviation of the generator
-   *  (default: 1)</pre>
+   *  (default: 1)
+   * </pre>
    * 
-   * <pre> -di &lt;distance&gt;
+   * <pre>
+   * -di &lt;distance&gt;
    *  Sets the difference between the mean and what will be used
-   *  on the lower and higher distributions for the generator. (default: 3)</pre>
+   *  on the lower and higher distributions for the generator. (default: 3)
+   * </pre>
    * 
-   * <pre> -da
+   * <pre>
+   * -da
    *  If set, the generator will use the absolute value of the
    *  difference. If not set, it will multiply the difference by
-   *  the standard deviation.</pre>
+   *  the standard deviation.
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    
+    String tmpStr;
+
     super.setOptions(options);
 
     setDistanceAbsolute(Utils.getFlag("da", options));
 
     tmpStr = Utils.getOption("di", options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setDistance(Double.parseDouble(tmpStr));
-    else
+    } else {
       setDistance(3.0);
+    }
   }
 
   /**
    * Gets the current settings of the generator.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
-    Vector<String>	result;
-    String[]		options;
-    int			i;
+  @Override
+  public String[] getOptions() {
 
-    result = new Vector<String>();
+    Vector<String> result = new Vector<String>();
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
-    if (getDistanceAbsolute()) 
+    Collections.addAll(result, super.getOptions());
+
+    if (getDistanceAbsolute()) {
       result.add("-da");
- 
+    }
+
     result.add("-di");
     result.add("" + m_Distance);
 
@@ -202,11 +212,11 @@ public class MixedGaussianGenerator
   }
 
   /**
-   * Gets the difference between the main distribution and each
-   * of the models.  The default difference is 3, and will
-   * cause each model to be 3 standard deviations away from the mean.
-   * One model is created either side of the mean.
-   *
+   * Gets the difference between the main distribution and each of the models.
+   * The default difference is 3, and will cause each model to be 3 standard
+   * deviations away from the mean. One model is created either side of the
+   * mean.
+   * 
    * @return The difference between the main distribution and a model.
    */
   public double getDistance() {
@@ -214,30 +224,29 @@ public class MixedGaussianGenerator
   }
 
   /**
-   * Sets the difference between the main distribution and the models.
-   * See getDistance() for a longer explanation.
-   *
+   * Sets the difference between the main distribution and the models. See
+   * getDistance() for a longer explanation.
+   * 
    * @param diff The new difference.
    */
   public void setDistance(double diff) {
     m_Distance = diff;
   }
-  
+
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String distanceTipText() {
     return "The difference between the main distribution and the models.";
   }
 
   /**
-   * Gets whether the difference will be an absolute value,
-   * or something that is used as a multiplier to the 
-   * standard deviation.
-   *
+   * Gets whether the difference will be an absolute value, or something that is
+   * used as a multiplier to the standard deviation.
+   * 
    * @return Whether the difference will be absolute or not.
    */
   public boolean getDistanceAbsolute() {
@@ -246,19 +255,19 @@ public class MixedGaussianGenerator
 
   /**
    * Sets the difference to be absolute (or not).
-   *
-   * @param newdiff Whether the difference should be absolute or
-   * a standard deviation modifier.
+   * 
+   * @param newdiff Whether the difference should be absolute or a standard
+   *          deviation modifier.
    */
   public void setDistanceAbsolute(boolean newdiff) {
     m_DistanceAbsolute = newdiff;
   }
-  
+
   /**
    * Returns the tip text for this property.
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String distanceAbsoluteTipText() {
     return "If true, then the distance is absolute.";
@@ -266,51 +275,55 @@ public class MixedGaussianGenerator
 
   /**
    * Generates a value that falls under this distribution.
-   *
+   * 
    * @return A generated value.
    */
+  @Override
   public double generate() {
     double difference = m_Distance;
-    if(!m_DistanceAbsolute)
+    if (!m_DistanceAbsolute) {
       difference = m_StandardDeviation * m_Distance;
+    }
 
-    if(m_Random.nextBoolean()) {
-      //lower distribution
+    if (m_Random.nextBoolean()) {
+      // lower distribution
       double gaussian = m_Random.nextGaussian();
       double value = (m_Mean - difference) + (gaussian * m_StandardDeviation);
-      return value;		
+      return value;
     } else {
-      //higher distribution
+      // higher distribution
       double gaussian = m_Random.nextGaussian();
       double value = (m_Mean + difference) + (gaussian * m_StandardDeviation);
       return value;
     }
   }
 
-
   /**
-   * Gets the probability that a value falls under
-   * this distribution.
+   * Gets the probability that a value falls under this distribution.
    * 
-   *
+   * 
    * @param valuex The value to get the probability of.
    * @return The probability of the given value.
    */
+  @Override
   public double getProbabilityOf(double valuex) {
     double difference = m_Distance;
-    if(!m_DistanceAbsolute)
+    if (!m_DistanceAbsolute) {
       difference = m_StandardDeviation * m_Distance;
+    }
 
-    double prob1 = 0.5 * this.getProbability(valuex, m_Mean - difference, m_StandardDeviation);
-    double prob2 = 0.5 * this.getProbability(valuex, m_Mean + difference, m_StandardDeviation);
+    double prob1 = 0.5 * this.getProbability(valuex, m_Mean - difference,
+      m_StandardDeviation);
+    double prob2 = 0.5 * this.getProbability(valuex, m_Mean + difference,
+      m_StandardDeviation);
     return prob1 + prob2;
   }
 
   /**
-   * Gets the probability that a value falls under
-   * a given Gaussian distribution.
+   * Gets the probability that a value falls under a given Gaussian
+   * distribution.
    * 
-   *
+   * 
    * @param valuex The value to get the probability of.
    * @param mean The mean of the Gaussian distribution.
    * @param stddev The standard deviation of the Gaussian distribution.
@@ -330,10 +343,11 @@ public class MixedGaussianGenerator
 
   /**
    * Gets the (natural) log of the probability of a given value.
-   *
+   * 
    * @param valuex The value to get the log probability of.
    * @return The (natural) log of the probability.
    */
+  @Override
   public double getLogProbabilityOf(double valuex) {
     return Math.log(this.getProbabilityOf(valuex));
   }

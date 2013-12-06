@@ -21,52 +21,53 @@
 package weka.classifiers.meta.generators;
 
 /**
- <!-- globalinfo-start -->
- * A uniform artificial data generator.<br/>
+ * <!-- globalinfo-start --> A uniform artificial data generator.<br/>
  * <br/>
- * This generator uses a uniform data model - all values have the same probability, and generated values must fall within the range given to the generator.
+ * This generator uses a uniform data model - all values have the same
+ * probability, and generated values must fall within the range given to the
+ * generator.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -D
- *  If set, generator is run in debug mode and
- *  may output additional info to the console</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -S &lt;seed&gt;
- *  Sets the seed of the random number generator of the generator (default: 1)</pre>
+ * <pre>
+ * -S &lt;seed&gt;
+ *  Sets the seed of the random number generator of the generator (default: 1)
+ * </pre>
  * 
- * <pre> -L &lt;num&gt;
+ * <pre>
+ * -L &lt;num&gt;
  *  Sets the lower range of the generator
- *  (default: 0)</pre>
+ *  (default: 0)
+ * </pre>
  * 
- * <pre> -U &lt;num&gt;
+ * <pre>
+ * -U &lt;num&gt;
  *  Sets the upper range of the generator
- *  (default: 1)</pre>
+ *  (default: 1)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Kathryn Hempstalk (kah18 at cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class UniformDataGenerator 
-  extends RandomizableRangedGenerator
-  implements NumericAttributeGenerator {
+public class UniformDataGenerator extends RandomizableRangedGenerator implements
+  NumericAttributeGenerator {
 
   /** for serialization. */
   private static final long serialVersionUID = -6390354660638644832L;
 
   /**
    * Returns a string describing this class' ability.
-   *
+   * 
    * @return A description of the class.
    */
+  @Override
   public String globalInfo() {
-    return 
-        "A uniform artificial data generator.\n"
-      + "\n"
+    return "A uniform artificial data generator.\n" + "\n"
       + "This generator uses a uniform data model - all values have "
       + "the same probability, and generated values must fall within "
       + "the range given to the generator.";
@@ -74,22 +75,23 @@ public class UniformDataGenerator
 
   /**
    * Generates a value that falls under this distribution.
-   *
+   * 
    * @return A generated value.
    */
+  @Override
   public double generate() {
-    double range = (m_UpperRange - m_LowerRange);	
+    double range = (m_UpperRange - m_LowerRange);
     return (m_Random.nextDouble() * range) + m_LowerRange;
   }
 
   /**
-   * Gets the probability that a value falls under
-   * this distribution.
+   * Gets the probability that a value falls under this distribution.
    * 
-   *
+   * 
    * @param somedata The value to get the probability of.
    * @return The probability of the given value.
    */
+  @Override
   public double getProbabilityOf(double somedata) {
     double range = (m_UpperRange - m_LowerRange);
     if (range <= 0 || somedata > m_UpperRange || somedata < m_LowerRange) {
@@ -101,13 +103,15 @@ public class UniformDataGenerator
 
   /**
    * Gets the (natural) log of the probability of a given value.
-   *
+   * 
    * @param somedata The value to get the log probability of.
    * @return The (natural) log of the probability.
-   */ 
+   */
+  @Override
   public double getLogProbabilityOf(double somedata) {
-    double range = (m_UpperRange - m_LowerRange);	
-    if ((range <= 0) || (((somedata < m_LowerRange) || (somedata > m_UpperRange)))) {	    
+    double range = (m_UpperRange - m_LowerRange);
+    if ((range <= 0)
+      || (((somedata < m_LowerRange) || (somedata > m_UpperRange)))) {
       return Math.log(Double.MIN_VALUE);
     }
     return -Math.log(range);
