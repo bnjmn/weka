@@ -127,8 +127,8 @@ public class RegressionSplitEvaluator implements SplitEvaluator, OptionHandler,
   /** The length of a result */
   private static final int RESULT_SIZE = 23;
 
-  private final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
-  private int m_numPluginStatistics = 0;
+  protected final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
+  protected int m_numPluginStatistics = 0;
 
   /**
    * No args constructor.

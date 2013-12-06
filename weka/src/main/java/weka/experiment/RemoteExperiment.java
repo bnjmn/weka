@@ -910,6 +910,7 @@ public class RemoteExperiment extends Experiment {
   public static void main(String[] args) {
 
     try {
+      weka.core.WekaPackageManager.loadPackages(false, true, false);
       RemoteExperiment exp = null;
 
       // get options from XML?

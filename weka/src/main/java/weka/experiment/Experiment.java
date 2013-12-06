@@ -1205,6 +1205,7 @@ public class Experiment implements Serializable, OptionHandler, RevisionHandler 
   public static void main(String[] args) {
 
     try {
+      weka.core.WekaPackageManager.loadPackages(false, true, false);
       Experiment exp = null;
       // get options from XML?
       String xmlOption = Utils.getOption("xml", args);

@@ -173,8 +173,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /** whether to skip determination of sizes (train/test/classifier). */
   private boolean m_NoSizeDetermination;
 
-  private final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
-  private int m_numPluginStatistics = 0;
+  protected final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
+  protected int m_numPluginStatistics = 0;
 
   /**
    * No args constructor.
@@ -187,6 +187,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       .getPluginMetrics();
     if (pluginMetrics != null) {
       for (AbstractEvaluationMetric m : pluginMetrics) {
+        System.err.println(m.getMetricName());
         if (m.appliesToNominalClass()) {
           m_pluginMetrics.add(m);
           m_numPluginStatistics += m.getStatisticNames().size();
@@ -661,7 +662,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       overall_length += 2;
     }
 
-    overall_length += m_pluginMetrics.size();
+    overall_length += m_numPluginStatistics;
 
     String[] resultNames = new String[overall_length];
     int current = 0;
@@ -804,7 +805,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       overall_length += 2;
     }
 
-    overall_length += m_pluginMetrics.size();
+    overall_length += m_numPluginStatistics;
 
     ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
     boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();

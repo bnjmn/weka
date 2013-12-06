@@ -2791,11 +2791,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
                 && m.appliesToNominalClass() && !m.appliesToNumericClass()) {
                 String metricName = m.getMetricName().toLowerCase();
                 boolean display = m_metricsToDisplay.contains(metricName);
-                List<String> statNames = m.getStatisticNames();
-                for (String s : statNames) {
-                  display = (display && m_metricsToDisplay.contains(s
-                    .toLowerCase()));
-                }
+                // For the GUI and the command line StandardEvaluationMetrics
+                // are an "all or nothing" jobby (because we need the user to
+                // supply how they should be displayed and formated via the
+                // toSummaryString() method
                 if (display) {
                   String formattedS = ((StandardEvaluationMetric) m)
                     .toSummaryString();
@@ -2966,6 +2965,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       // Should never occur since the class is known to be nominal
       // here
       System.err.println("Arggh - Must be a bug in Evaluation class");
+      ex.printStackTrace();
     }
 
     return text.toString();
