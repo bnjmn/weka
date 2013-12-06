@@ -9,7 +9,7 @@ PackageName=predictiveApriori
 Version=1.0.3
 
 #Date
-Date=2012-11-19
+Date=2013-11-19
 
 # Title (required)
 Title=Class implementing the predictive apriori algorithm for mining association rules.
