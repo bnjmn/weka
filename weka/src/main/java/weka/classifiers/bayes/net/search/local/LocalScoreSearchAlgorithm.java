@@ -138,7 +138,7 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
         fLogScore -= 0.5
           * m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents()
           * (instances.attribute(iAttribute).numValues() - 1)
-          * Math.log(instances.numInstances());
+          * Math.log(m_BayesNet.getNumInstances());
       }
         break;
       case (Scoreable.AIC): {
@@ -361,7 +361,7 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 
     case (Scoreable.MDL): {
       fLogScore -= 0.5 * nCardinality * (numValues - 1)
-        * Math.log(instances.numInstances());
+        * Math.log(m_BayesNet.getNumInstances());
 
       // it seems safe to assume that numInstances>0 here
     }
@@ -459,7 +459,7 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 
     case (Scoreable.MDL): {
       fLogScore -= 0.5 * nCardinality * (numValues - 1)
-        * Math.log(instances.numInstances());
+        * Math.log(m_BayesNet.getNumInstances());
 
       // it seems safe to assume that numInstances>0 here
     }
