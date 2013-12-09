@@ -179,8 +179,11 @@ public class GaussianProcesses extends AbstractClassifier implements
   /** Gaussian Noise Value. */
   protected double m_delta = 1;
 
+  /** The squared noise value. */
+  protected double m_deltaSquared = 1;
+
   /**
-   * The parameters of the linear transforamtion realized by the filter on the
+   * The parameters of the linear transformation realized by the filter on the
    * class attribute
    */
   protected double m_Alin;
@@ -288,9 +291,6 @@ public class GaussianProcesses extends AbstractClassifier implements
       // remove instances with missing class
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
-    }
-
-    if (!m_checksTurnedOff) {
       m_Missing = new ReplaceMissingValues();
       m_Missing.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_Missing);
@@ -373,20 +373,21 @@ public class GaussianProcesses extends AbstractClassifier implements
     }
     m_avg_target = sum / insts.numInstances();
 
+    // Store squared noise level
+    m_deltaSquared = m_delta * m_delta;
+
     // initialize kernel matrix/covariance matrix
     int n = insts.numInstances();
     m_L = new double[n][];
-    for (int i = 0; i < n; i++) {
-      m_L[i] = new double[i + 1];
-    }
     double kv = 0;
     for (int i = 0; i < n; i++) {
+      m_L[i] = new double[i + 1];
       for (int j = 0; j < i; j++) {
         kv = m_kernel.eval(i, j, insts.instance(i));
         m_L[i][j] = kv;
       }
       kv = m_kernel.eval(i, i, insts.instance(i));
-      m_L[i][i] = kv + m_delta * m_delta;
+      m_L[i][i] = kv + m_deltaSquared;
     }
 
     // Save memory (can't use Kernel.clean() because of polynominal kernel with
@@ -518,7 +519,7 @@ public class GaussianProcesses extends AbstractClassifier implements
    */
   protected double computeStdDev(Instance inst, Matrix k) throws Exception {
 
-    double kappa = m_kernel.eval(-1, -1, inst) + m_delta * m_delta;
+    double kappa = m_kernel.eval(-1, -1, inst) + m_deltaSquared;
 
     double s = 0;
     int n = m_L.length;
