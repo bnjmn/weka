@@ -244,10 +244,7 @@ public class LinearRegression extends AbstractClassifier implements
       // remove instances with missing class
       data = new Instances(data);
       data.deleteWithMissingClass();
-    }
 
-    // Preprocess instances
-    if (!m_checksTurnedOff) {
       m_TransformFilter = new NominalToBinary();
       m_TransformFilter.setInputFormat(data);
       data = Filter.useFilter(data, m_TransformFilter);
@@ -264,19 +261,15 @@ public class LinearRegression extends AbstractClassifier implements
     m_TransformedData = data;
 
     // Turn all attributes on for a start
-    m_SelectedAttributes = new boolean[data.numAttributes()];
-    for (int i = 0; i < data.numAttributes(); i++) {
-      if (i != m_ClassIndex) {
-        m_SelectedAttributes[i] = true;
-      }
-    }
     m_Coefficients = null;
 
     // Compute means and standard deviations
+    m_SelectedAttributes = new boolean[data.numAttributes()];
     m_Means = new double[data.numAttributes()];
     m_StdDevs = new double[data.numAttributes()];
     for (int j = 0; j < data.numAttributes(); j++) {
-      if (j != data.classIndex()) {
+      if (j != m_ClassIndex) {
+        m_SelectedAttributes[j] = true; // Turn attributes on for a start
         m_Means[j] = data.meanOrMode(j);
         m_StdDevs[j] = Math.sqrt(data.variance(j));
         if (m_StdDevs[j] == 0) {
