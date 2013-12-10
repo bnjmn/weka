@@ -252,6 +252,7 @@ public class BayesNet extends AbstractClassifier implements OptionHandler,
    */
   protected Instances normalizeDataSet(Instances instances) throws Exception {
 
+    m_nNonDiscreteAttribute = -1;
     Enumeration<Attribute> enu = instances.enumerateAttributes();
     while (enu.hasMoreElements()) {
       Attribute attribute = enu.nextElement();
@@ -260,9 +261,12 @@ public class BayesNet extends AbstractClassifier implements OptionHandler,
       }
     }
 
-    m_DiscretizeFilter = new Discretize();
-    m_DiscretizeFilter.setInputFormat(instances);
-    instances = Filter.useFilter(instances, m_DiscretizeFilter);
+    if ((m_nNonDiscreteAttribute > -1)
+      && (instances.attribute(m_nNonDiscreteAttribute).type() != Attribute.NOMINAL)) {
+      m_DiscretizeFilter = new Discretize();
+      m_DiscretizeFilter.setInputFormat(instances);
+      instances = Filter.useFilter(instances, m_DiscretizeFilter);
+    }
 
     m_MissingValuesFilter = new ReplaceMissingValues();
     m_MissingValuesFilter.setInputFormat(instances);
@@ -280,7 +284,8 @@ public class BayesNet extends AbstractClassifier implements OptionHandler,
    * @throws Exception if a filter (Discretize, ReplaceMissingValues) fails
    */
   protected Instance normalizeInstance(Instance instance) throws Exception {
-    if ((instance.attribute(m_nNonDiscreteAttribute).type() != Attribute.NOMINAL)) {
+    if ((m_nNonDiscreteAttribute > -1)
+      && (instance.attribute(m_nNonDiscreteAttribute).type() != Attribute.NOMINAL)) {
       m_DiscretizeFilter.input(instance);
       instance = m_DiscretizeFilter.output();
     }
