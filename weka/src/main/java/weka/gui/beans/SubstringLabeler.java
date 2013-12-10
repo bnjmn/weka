@@ -15,7 +15,7 @@
 
 /*
  *    SubstringLabeler.java
- *    Copyright (C) 2011-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2011-2013 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,23 +25,14 @@ import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
 
-import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Range;
-import weka.core.SerializedObject;
-import weka.core.Utils;
 import weka.filters.unsupervised.attribute.Add;
 import weka.gui.Logger;
 
@@ -68,381 +59,14 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
    */
   private static final long serialVersionUID = 6297059699297260134L;
 
-  /**
-   * Inner class encapsulating the logic for matching
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   */
-  protected static class Match {
-    /** The substring literal/regex to use for matching */
-    protected String m_match = "";
-
-    protected String m_label = "";
-
-    /** True if a regular expression match is to be used */
-    protected boolean m_regex;
-
-    /** True if case should be ignored when matching */
-    protected boolean m_ignoreCase;
-
-    /** Precompiled regex pattern */
-    protected Pattern m_regexPattern;
-
-    /** The attributes to apply the match-replace rule to */
-    protected String m_attsToApplyTo = "";
-
-    protected String m_matchS;
-    protected String m_labelS;
-
-    protected int[] m_selectedAtts;
-
-    protected String m_statusMessagePrefix;
-    protected Logger m_logger;
-
-    /**
-     * Constructor
-     */
-    public Match() {
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param setup an internally encoded representation of all the match
-     *          information for this rule
-     */
-    public Match(String setup) {
-      parseFromInternal(setup);
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param match the match string
-     * @param regex true if this is a regular expression match
-     * @param ignoreCase true if case is to be ignored
-     * @param selectedAtts the attributes to apply the rule to
-     */
-    public Match(String match, boolean regex, boolean ignoreCase,
-      String selectedAtts) {
-      m_match = match;
-      m_regex = regex;
-      m_ignoreCase = ignoreCase;
-      m_attsToApplyTo = selectedAtts;
-    }
-
-    protected void parseFromInternal(String setup) {
-      String[] parts = setup.split("@@MR@@");
-      if (parts.length < 4 || parts.length > 5) {
-        throw new IllegalArgumentException("Malformed match definition: "
-          + setup);
-      }
-
-      m_attsToApplyTo = parts[0].trim();
-      m_regex = parts[1].trim().toLowerCase().equals("t");
-      m_ignoreCase = parts[2].trim().toLowerCase().equals("t");
-      m_match = parts[3].trim();
-
-      if (m_match == null || m_match.length() == 0) {
-        throw new IllegalArgumentException("Must provide something to match!");
-      }
-
-      if (parts.length == 5) {
-        m_label = parts[4].trim();
-      }
-    }
-
-    /**
-     * Set the string/regex to use for matching
-     * 
-     * @param match the match string
-     */
-    public void setMatch(String match) {
-      m_match = match;
-    }
-
-    /**
-     * Get the string/regex to use for matching
-     * 
-     * @return the match string
-     */
-    public String getMatch() {
-      return m_match;
-    }
-
-    /**
-     * Set the label to assign if this rule matches, or empty string if binary
-     * flag attribute is being created.
-     * 
-     * @param label the label string or empty string
-     */
-    public void setLabel(String label) {
-      m_label = label;
-    }
-
-    /**
-     * Get the label to assign if this rule matches, or empty string if binary
-     * flag attribute is being created.
-     * 
-     * @return the label string or empty string
-     */
-    public String getLabel() {
-      return m_label;
-    }
-
-    /**
-     * Set whether this is a regular expression match or not
-     * 
-     * @param regex true if this is a regular expression match
-     */
-    public void setRegex(boolean regex) {
-      m_regex = regex;
-    }
-
-    /**
-     * Get whether this is a regular expression match or not
-     * 
-     * @return true if this is a regular expression match
-     */
-    public boolean getRegex() {
-      return m_regex;
-    }
-
-    /**
-     * Set whether to ignore case when matching
-     * 
-     * @param ignore true if case is to be ignored
-     */
-    public void setIgnoreCase(boolean ignore) {
-      m_ignoreCase = ignore;
-    }
-
-    /**
-     * Get whether to ignore case when matching
-     * 
-     * @return true if case is to be ignored
-     */
-    public boolean getIgnoreCase() {
-      return m_ignoreCase;
-    }
-
-    /**
-     * Set the attributes to apply the rule to
-     * 
-     * @param a the attributes to apply the rule to.
-     */
-    public void setAttsToApplyTo(String a) {
-      m_attsToApplyTo = a;
-    }
-
-    /**
-     * Get the attributes to apply the rule to
-     * 
-     * @return the attributes to apply the rule to.
-     */
-    public String getAttsToApplyTo() {
-      return m_attsToApplyTo;
-    }
-
-    /**
-     * Initialize this match rule by substituting any environment variables in
-     * the attributes, match and label strings. Sets up the attribute indices to
-     * apply to and validates that the selected attributes are all String
-     * attributes
-     * 
-     * @param env the environment variables
-     * @param structure the structure of the incoming instances
-     */
-    public void init(Environment env, Instances structure) {
-      m_matchS = m_match;
-      m_labelS = m_label;
-      String attsToApplyToS = m_attsToApplyTo;
-
-      try {
-        m_matchS = env.substitute(m_matchS);
-        m_labelS = env.substitute(m_labelS);
-        attsToApplyToS = env.substitute(attsToApplyToS);
-      } catch (Exception ex) {
-      }
-
-      if (m_regex) {
-        String match = m_matchS;
-        if (m_ignoreCase) {
-          match = match.toLowerCase();
-        }
-
-        // precompile regular expression for speed
-        m_regexPattern = Pattern.compile(match);
-      }
-
-      // Try a range first for the attributes
-      String tempRangeS = attsToApplyToS;
-      tempRangeS = tempRangeS.replace("/first", "first").replace("/last",
-        "last");
-      Range tempR = new Range();
-      tempR.setRanges(attsToApplyToS);
-      try {
-        tempR.setUpper(structure.numAttributes() - 1);
-        m_selectedAtts = tempR.getSelection();
-      } catch (IllegalArgumentException ex) {
-        // probably contains attribute names then
-        m_selectedAtts = null;
-      }
-
-      if (m_selectedAtts == null) {
-        // parse the comma separated list of attribute names
-        Set<Integer> indexes = new HashSet<Integer>();
-        String[] attParts = m_attsToApplyTo.split(",");
-        for (String att : attParts) {
-          att = att.trim();
-          if (att.toLowerCase().equals("/first")) {
-            indexes.add(0);
-          } else if (att.toLowerCase().equals("/last")) {
-            indexes.add((structure.numAttributes() - 1));
-          } else {
-            // try and find attribute
-            if (structure.attribute(att) != null) {
-              indexes.add(new Integer(structure.attribute(att).index()));
-            } else {
-              if (m_logger != null) {
-                String msg = m_statusMessagePrefix + "Can't find attribute '"
-                  + att + "in the incoming instances - ignoring";
-                m_logger.logMessage(msg);
-              }
-            }
-          }
-        }
-
-        m_selectedAtts = new int[indexes.size()];
-        int c = 0;
-        for (Integer i : indexes) {
-          m_selectedAtts[c++] = i.intValue();
-        }
-      }
-
-      // validate the types of the selected atts
-      Set<Integer> indexes = new HashSet<Integer>();
-      for (int m_selectedAtt : m_selectedAtts) {
-        if (structure.attribute(m_selectedAtt).isString()) {
-          indexes.add(m_selectedAtt);
-        } else {
-          if (m_logger != null) {
-            String msg = m_statusMessagePrefix + "Attribute '"
-              + structure.attribute(m_selectedAtt).name()
-              + "is not a string attribute - " + "ignoring";
-            m_logger.logMessage(msg);
-          }
-        }
-      }
-
-      // final array
-      m_selectedAtts = new int[indexes.size()];
-      int c = 0;
-      for (Integer i : indexes) {
-        m_selectedAtts[c++] = i.intValue();
-      }
-    }
-
-    /**
-     * Apply this rule to the supplied instance
-     * 
-     * @param inst the instance to apply to
-     * 
-     * @return the label (or empty string) if this rule matches (empty string is
-     *         used to indicate a match in the case that a binary flag attribute
-     *         is being created), or null if the rule doesn't match.
-     */
-    public String apply(Instance inst) {
-      for (int i = 0; i < m_selectedAtts.length; i++) {
-        if (!inst.isMissing(m_selectedAtts[i])) {
-          String value = inst.stringValue(m_selectedAtts[i]);
-
-          String result = apply(value);
-          if (result != null) {
-            // first match is good enough
-            return result;
-          }
-        }
-      }
-
-      return null;
-    }
-
-    /**
-     * Apply this rule to the supplied string
-     * 
-     * @param source the string to apply to
-     * @return the label (or empty string) if this rule matches (empty string is
-     *         used to indicate a match in the case that a binary flag attribute
-     *         is being created), or null if the rule doesn't match.
-     */
-    protected String apply(String source) {
-      String result = source;
-      String match = m_matchS;
-      boolean ruleMatches = false;
-      if (m_ignoreCase) {
-        result = result.toLowerCase();
-        match = match.toLowerCase();
-      }
-      if (result != null && result.length() > 0) {
-        if (m_regex) {
-          if (m_regexPattern.matcher(result).matches()) {
-            // if (result.matches(match)) {
-            ruleMatches = true;
-          }
-        } else {
-          ruleMatches = (result.indexOf(match) >= 0);
-        }
-      }
-
-      return (ruleMatches) ? m_label : null;
-    }
-
-    /**
-     * Return a textual description of this match rule
-     * 
-     * @return a textual description of this match rule
-     */
-    @Override
-    public String toString() {
-      // return a nicely formatted string for display
-      // that shows all the details
-
-      StringBuffer buff = new StringBuffer();
-      buff.append((m_regex) ? "Regex: " : "Substring: ");
-      buff.append(m_match).append("  ");
-      buff.append((m_ignoreCase) ? "[ignore case]" : "").append("  ");
-      if (m_label != null && m_label.length() > 0) {
-        buff.append("Label: ").append(m_label).append("  ");
-      }
-      buff.append("[Atts: " + m_attsToApplyTo + "]");
-
-      return buff.toString();
-    }
-
-    protected String toStringInternal() {
-
-      // return a string in internal format that is
-      // easy to parse all the data out of
-      StringBuffer buff = new StringBuffer();
-      buff.append(m_attsToApplyTo).append("@@MR@@");
-      buff.append((m_regex) ? "t" : "f").append("@@MR@@");
-      buff.append((m_ignoreCase) ? "t" : "f").append("@@MR@@");
-      buff.append(m_match).append("@@MR@@");
-      buff.append(m_label);
-
-      return buff.toString();
-    }
-  }
-
   /** Environment variables */
   protected transient Environment m_env;
 
   /** Internally encoded list of match rules */
   protected String m_matchDetails = "";
 
-  /** Temporary list of match-replace rules */
-  protected transient List<Match> m_matchRules;
+  /** Encapsulates our match rules */
+  protected transient SubstringLabelerRules m_matches;
 
   /** Logging */
   protected transient Logger m_log;
@@ -471,12 +95,6 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
    */
   protected boolean m_consumeNonMatchingInstances;
 
-  /**
-   * Whether the match rules all have labels or not. If not, then the new
-   * attribute is a binary match/no-match one
-   */
-  protected boolean m_hasLabels;
-
   /** Add filter for adding the new attribute */
   protected Add m_addFilter;
 
@@ -484,7 +102,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
   protected String m_attName = "Match";
 
   /** The output structure */
-  protected Instances m_outputStructure;
+  // protected Instances m_outputStructure;
 
   /** Instance event to use */
   protected InstanceEvent m_ie = new InstanceEvent(this);
@@ -858,73 +476,10 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
    */
   protected void makeOutputStructure(Instances inputStructure) throws Exception {
 
-    m_matchRules = new ArrayList<Match>();
-    if (m_matchDetails != null && m_matchDetails.length() > 0) {
-
-      String[] matchParts = m_matchDetails.split("@@match-rule@@");
-      for (String p : matchParts) {
-        Match m = new Match(p.trim());
-        m.m_statusMessagePrefix = statusMessagePrefix();
-        m.m_logger = m_log;
-        m.init(m_env, inputStructure);
-        m_matchRules.add(m);
-      }
-
-      int labelCount = 0;
-      // StringBuffer labelList = new StringBuffer();
-      HashSet<String> uniqueLabels = new HashSet<String>();
-      Vector<String> labelVec = new Vector<String>();
-      for (Match m : m_matchRules) {
-        if (m.getLabel() != null && m.getLabel().length() > 0) {
-          if (!uniqueLabels.contains(m.getLabel())) {
-            /*
-             * if (labelCount > 0) { labelList.append(","); }
-             */
-            // labelList.append(m.getLabel());
-            uniqueLabels.add(m.getLabel());
-            labelVec.addElement(m.getLabel());
-          }
-          labelCount++;
-        }
-      }
-
-      if (labelCount > 0) {
-        if (labelCount == m_matchRules.size()) {
-          m_hasLabels = true;
-        } else {
-          throw new Exception("Can't have only some rules with a label!");
-        }
-      }
-
-      m_outputStructure = (Instances) (new SerializedObject(inputStructure)
-        .getObject());
-      Attribute newAtt = null;
-      if (m_hasLabels) {
-        newAtt = new Attribute(m_attName, labelVec);
-      } else if (getNominalBinary()) {
-        labelVec.addElement("0");
-        labelVec.addElement("1");
-        newAtt = new Attribute(m_attName, labelVec);
-      } else {
-        newAtt = new Attribute(m_attName);
-      }
-
-      m_outputStructure.insertAttributeAt(newAtt,
-        m_outputStructure.numAttributes());
-
-      /*
-       * // make the output structure m_addFilter = new Add();
-       * m_addFilter.setAttributeName(m_attName); if (m_hasLabels) {
-       * m_addFilter.setNominalLabels(labelList.toString()); } else if
-       * (getNominalBinary()) { m_addFilter.setNominalLabels("0,1"); }
-       * m_addFilter.setInputFormat(inputStructure); m_outputStructure =
-       * Filter.useFilter(inputStructure, m_addFilter);
-       */
-
-      return;
-    }
-
-    m_outputStructure = new Instances(inputStructure);
+    m_matches = new SubstringLabelerRules(m_matchDetails, m_attName,
+      getConsumeNonMatching(), getNominalBinary(), inputStructure,
+      statusMessagePrefix(), m_log, m_env);
+    m_matches.makeOutputStructure();
   }
 
   protected transient StreamThroughput m_throughput;
@@ -965,7 +520,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
         }
       }
 
-      m_ie.setStructure(m_outputStructure);
+      m_ie.setStructure(m_matches.getOutputStructure());
       m_ie.m_formatNotificationOnly = e.m_formatNotificationOnly;
       notifyInstanceListeners(m_ie);
     } else {
@@ -973,7 +528,12 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
       Instance out = null;
       if (inst != null) {
         m_throughput.updateStart();
-        out = makeOutputInstance(inst, false);
+        try {
+          out = m_matches.makeOutputInstance(inst, false);
+        } catch (Exception e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
         m_throughput.updateEnd(m_log);
       }
 
@@ -992,71 +552,6 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
     }
 
     m_busy = false;
-  }
-
-  /**
-   * Process and input instance and return an output instance
-   * 
-   * @param inputI the incoming instance
-   * @param batch whether this is being processed as part of a batch of
-   *          instances
-   * 
-   * @return the output instance
-   */
-  protected Instance makeOutputInstance(Instance inputI, boolean batch) {
-    int newAttIndex = m_outputStructure.numAttributes() - 1;
-
-    Instance result = inputI;
-    if (m_matchRules.size() > 0) {
-      String label = null;
-      for (Match m : m_matchRules) {
-        label = m.apply(inputI);
-
-        if (label != null) {
-          break;
-        }
-      }
-
-      double[] vals = new double[m_outputStructure.numAttributes()];
-      for (int i = 0; i < inputI.numAttributes(); i++) {
-        if (!inputI.attribute(i).isString()) {
-          vals[i] = inputI.value(i);
-        } else {
-          if (!batch) {
-            vals[i] = 0;
-            String v = inputI.stringValue(i);
-            m_outputStructure.attribute(i).setStringValue(v);
-          } else {
-            String v = inputI.stringValue(i);
-            vals[i] = m_outputStructure.attribute(i).addStringValue(v);
-          }
-        }
-      }
-
-      if (label != null) {
-        if (m_hasLabels) {
-          vals[newAttIndex] = m_outputStructure.attribute(m_attName)
-            .indexOfValue(label);
-        } else {
-          vals[newAttIndex] = 1;
-        }
-      } else { // non match
-        if (m_hasLabels) {
-          if (!getConsumeNonMatching()) {
-            vals[newAttIndex] = Utils.missingValue();
-          } else {
-            return null;
-          }
-        } else {
-          vals[newAttIndex] = 0;
-        }
-      }
-
-      result = new DenseInstance(1.0, vals);
-      result.setDataset(m_outputStructure);
-    }
-
-    return result;
   }
 
   /**
@@ -1092,10 +587,16 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
 
     for (int i = 0; i < toProcess.numInstances(); i++) {
       Instance current = toProcess.instance(i);
-      Instance result = makeOutputInstance(current, true);
+      Instance result = null;
+      try {
+        result = m_matches.makeOutputInstance(current, true);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
 
       if (result != null) {
-        m_outputStructure.add(result);
+        // m_outputStructure.add(result);
+        m_matches.getOutputStructure().add(result);
       }
     }
 
@@ -1104,7 +605,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
     }
 
     // notify listeners
-    DataSetEvent d = new DataSetEvent(this, m_outputStructure);
+    DataSetEvent d = new DataSetEvent(this, m_matches.getInputStructure());
     notifyDataListeners(d);
 
     m_busy = false;
