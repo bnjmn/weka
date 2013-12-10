@@ -380,24 +380,26 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     String fileNameOnly = pathToHeader.substring(
       pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
 
-    StringBuilder classifierMapOptions = new StringBuilder();
+    List<String> classifierMapOptions = new ArrayList<String>();
+    classifierMapOptions.add("-arff-header");
+    classifierMapOptions.add(fileNameOnly);
 
-    classifierMapOptions.append("-arff-header").append(" ")
-      .append(fileNameOnly).append(" ");
     if (!DistributedJobConfig.isEmpty(m_classifierJob.getClassAttribute())) {
-      classifierMapOptions.append("-class").append(" ")
-        .append(m_classifierJob.getClassAttribute()).append(" ");
+      classifierMapOptions.add("-class");
+      classifierMapOptions.add(environmentSubstitute(m_classifierJob
+        .getClassAttribute()));
     }
 
     String classifierMapTaskOptions = m_classifierJob
       .getClassifierMapTaskOptions();
 
-    classifierMapOptions.append("-model-file-name").append(" ")
-      .append(m_classifierJob.getModelFileName()).append(" ");
+    classifierMapOptions.add("-model-file-name");
+    classifierMapOptions.add(environmentSubstitute(m_classifierJob
+      .getModelFileName()));
 
     if (!DistributedJobConfig.isEmpty(getSeparateTestSetPath())) {
-      classifierMapOptions.append("-test-set-path").append(" ")
-        .append(environmentSubstitute(getSeparateTestSetPath())).append(" ");
+      classifierMapOptions.add("-test-set-path");
+      classifierMapOptions.add(environmentSubstitute(getSeparateTestSetPath()));
     }
 
     if (!DistributedJobConfig.isEmpty(getSampleFractionForAUC())) {
@@ -415,13 +417,17 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
       }
 
       if (auc > 0) {
-        classifierMapOptions.append("-auc").append(" ").append("" + auc)
-          .append(" ");
+        classifierMapOptions.add("-auc");
+        classifierMapOptions.add("" + auc);
       }
     }
 
     if (!DistributedJobConfig.isEmpty(classifierMapTaskOptions)) {
-      classifierMapOptions.append(classifierMapTaskOptions);
+      String[] parts = Utils
+        .splitOptions(environmentSubstitute(classifierMapTaskOptions));
+      for (String s : parts) {
+        classifierMapOptions.add(s);
+      }
     }
 
     String[] mapOpts = Utils
@@ -440,7 +446,8 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     } else {
       jobName += " (separate test set) ";
     }
-    jobName += classifierMapOptions.toString();
+    jobName += Utils.joinOptions(classifierMapOptions
+      .toArray(new String[classifierMapOptions.size()]));
     setJobName(jobName);
 
     String outputPath = m_mrConfig.getOutputPath();
@@ -474,7 +481,8 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
 
     m_mrConfig.setUserSuppliedProperty(
       WekaClassifierHadoopMapper.CLASSIFIER_MAP_TASK_OPTIONS,
-      environmentSubstitute(classifierMapOptions.toString()));
+      environmentSubstitute(Utils.joinOptions(classifierMapOptions
+        .toArray(new String[classifierMapOptions.size()]))));
 
     // Need these for row parsing via open-csv
     m_mrConfig.setUserSuppliedProperty(
