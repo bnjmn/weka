@@ -20,58 +20,62 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.RandomizableClassifier;
-
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.Utils;
-import weka.core.Optimization;
-import weka.core.RevisionUtils;
-import weka.core.Option;
-
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Standardize;
-
-import java.util.Random;
 import java.util.Arrays;
-import java.util.Vector;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Set;
 import java.util.HashSet;
-import java.util.concurrent.Future;
+import java.util.Random;
+import java.util.Set;
+import java.util.Vector;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
+import weka.classifiers.RandomizableClassifier;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Optimization;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Class for learning a logistic regression model that has non-negative coefficients. The first class value is assumed to be the positive class value (i.e. 1.0).
+ * <!-- globalinfo-start --> Class for learning a logistic regression model that
+ * has non-negative coefficients. The first class value is assumed to be the
+ * positive class value (i.e. 1.0).
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- globalinfo-end -->
  * 
- * <pre> -P &lt;int&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -P &lt;int&gt;
  *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
  * </pre>
  * 
- * <pre> -E &lt;int&gt;
+ * <pre>
+ * -E &lt;int&gt;
  *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
  * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -D
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 8034 $
  */
@@ -100,13 +104,12 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
 
   /**
    * Returns a string describing this classifier.
-   *
-   * @return      a description of the classifier suitable for
-   *              displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-      "Class for learning a logistic regression model that has "
+    return "Class for learning a logistic regression model that has "
       + "non-negative coefficients. The first class value is assumed "
       + "to be the positive class value (i.e. 1.0).";
   }
@@ -133,7 +136,7 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
 
     return m_numThreads;
   }
-  
+
   /**
    * Sets the number of threads
    */
@@ -157,7 +160,7 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
 
     return m_poolSize;
   }
-  
+
   /**
    * Sets the number of threads
    */
@@ -168,57 +171,62 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>(2);
 
     newVector.addElement(new Option(
-                                    "\t" + poolSizeTipText() + " (default 1)\n", 
-                                    "P", 1, "-P <int>"));
-    newVector.addElement(new Option(
-                                    "\t" + numThreadsTipText() + " (default 1)\n", 
-                                    "E", 1, "-E <int>"));
+      "\t" + poolSizeTipText() + " (default 1)\n", "P", 1, "-P <int>"));
+    newVector.addElement(new Option("\t" + numThreadsTipText()
+      + " (default 1)\n", "E", 1, "-E <int>"));
 
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement((Option)enu.nextElement());
-    }
+    newVector.addAll(Collections.list(super.listOptions()));
+
     return newVector.elements();
   }
 
-
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -P &lt;int&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -P &lt;int&gt;
    *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
    * </pre>
    * 
-   * <pre> -E &lt;int&gt;
+   * <pre>
+   * -E &lt;int&gt;
    *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
    * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -D
+   * <pre>
+   * -D
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   <!-- options-end -->
-   *
-   * Options after -- are passed to the designated classifier.<p>
-   *
+   * <!-- options-end -->
+   * 
+   * Options after -- are passed to the designated classifier.
+   * <p>
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     String PoolSize = Utils.getOption('P', options);
@@ -235,41 +243,36 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
     }
 
     super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
+    Vector<String> options = new Vector<String>();
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 4];
+    options.add("-P");
+    options.add("" + getPoolSize());
 
-    int current = 0;
+    options.add("-E");
+    options.add("" + getNumThreads());
 
-    options[current++] = "-P"; 
-    options[current++] = "" + getPoolSize();
+    Collections.addAll(options, super.getOptions());
 
-    options[current++] = "-E"; 
-    options[current++] = "" + getNumThreads();
-
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
-
-    current += superOptions.length;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[0]);
   }
 
   /**
-   * Returns capabilities of the classifier (i.e. what type of
-   * data the classifier can handle).
+   * Returns capabilities of the classifier (i.e. what type of data the
+   * classifier can handle).
    */
+  @Override
   public Capabilities getCapabilities() {
 
     Capabilities result = super.getCapabilities();
@@ -286,20 +289,20 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
   }
 
   /**
-   * A subclass of Optimization.java that specifies
-   * the objective function and the gradient for this
-   * particular optimization problem.
+   * A subclass of Optimization.java that specifies the objective function and
+   * the gradient for this particular optimization problem.
    */
   protected class OptEng extends Optimization {
-    
+
     /**
      * Returns the negative log-likelihood for the given parameter vector.
      */
+    @Override
     protected double objectiveFunction(double[] weights) throws Exception {
-      
+
       // Set weights of model to weights that we want to evaluate
       m_weights = weights;
-      
+
       // Set up result set, and chunk size
       int chunksize = m_matrix.length / m_numThreads;
       Set<Future<Double>> results = new HashSet<Future<Double>>();
@@ -309,34 +312,35 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
 
         // Determine batch to be processed
         final int lo = j * chunksize;
-        final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_matrix.length;
+        final int hi = (j < m_numThreads - 1) ? (lo + chunksize)
+          : m_matrix.length;
 
         // Create and submit new job, where each instance in batch is processed
         Future<Double> futureNLL = m_Pool.submit(new Callable<Double>() {
-            public Double call() {
-              
-              // Calculate NLL
-              double NLL = 0;
-              for (int i = lo; i < hi; i++) {
-                
-                // Calculate weighted usm (weight for class assumed to be zero)
-                double weightedSum = 0;
-                for (int j = 0; j < m_matrix[i].length; j++) {
-                  weightedSum += m_weights[j] * m_matrix[i][j];
-                }
-                
-                // Update negative loglikelihood. Using NLL -= Math.log(class
-                // probability) gives overflow problems: need to be a bit
-                // careful, so we use the following.
-                NLL -= (-weightedSum * m_matrix[i][m_data.classIndex()]) - 
-                  Math.log(1.0 + Math.exp(-weightedSum));
+          @Override
+          public Double call() {
+
+            // Calculate NLL
+            double NLL = 0;
+            for (int i = lo; i < hi; i++) {
+
+              // Calculate weighted usm (weight for class assumed to be zero)
+              double weightedSum = 0;
+              for (int j = 0; j < m_matrix[i].length; j++) {
+                weightedSum += m_weights[j] * m_matrix[i][j];
               }
-              return NLL;
+
+              // Update negative loglikelihood. Using NLL -= Math.log(class
+              // probability) gives overflow problems: need to be a bit
+              // careful, so we use the following.
+              NLL -= (-weightedSum * m_matrix[i][m_data.classIndex()])
+                - Math.log(1.0 + Math.exp(-weightedSum));
             }
-          });
+            return NLL;
+          }
+        });
         results.add(futureNLL);
       }
-      
 
       // Calculate NLL
       double NLL = 0;
@@ -349,56 +353,60 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
       }
       return NLL;
     }
-    
+
     /**
      * Returns the gradient for the given parameter vector.
      */
+    @Override
     protected double[] evaluateGradient(double[] weights) throws Exception {
-      
+
       // Set weights of model to weights that we want to evaluate
       m_weights = weights;
-      
+
       // Set up result set, and chunk size
       int chunksize = m_matrix.length / m_numThreads;
       Set<Future<double[]>> results = new HashSet<Future<double[]>>();
-      
+
       // For each thread
       for (int j = 0; j < m_numThreads; j++) {
-        
+
         // Determine batch to be processed
         final int lo = j * chunksize;
-        final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : m_matrix.length;
+        final int hi = (j < m_numThreads - 1) ? (lo + chunksize)
+          : m_matrix.length;
 
         // Create and submit new job, where each instance in batch is processed
         Future<double[]> futureGrad = m_Pool.submit(new Callable<double[]>() {
-            public double[] call() {
-              
-              // Calculate gradient
-              double[] grad = new double[m_data.numAttributes()];
-              for (int i = lo; i < hi; i++) {
-                
-                // Calculate weighted sum (weight for class assumed to be zero)
-                double weightedSum = 0;
-                for (int j = 0; j < m_matrix[i].length; j++) {
-                  weightedSum += m_weights[j] * m_matrix[i][j];
-                }
-                
-                // Update gradient 
-                double classVal = m_matrix[i][m_data.classIndex()];
-                double expTerm = Math.exp(-weightedSum);
-                for (int j = 0; j < m_matrix[i].length; j++) {
-                  if (j != m_data.classIndex()) {
-                    if (classVal == 0.0) {
-                      grad[j] -= (expTerm / (1.0 + expTerm)) * m_matrix[i][j];
-                    } else {
-                      grad[j] += (1.0 / (1.0 + expTerm)) * m_matrix[i][j];; 
-                    }
+          @Override
+          public double[] call() {
+
+            // Calculate gradient
+            double[] grad = new double[m_data.numAttributes()];
+            for (int i = lo; i < hi; i++) {
+
+              // Calculate weighted sum (weight for class assumed to be zero)
+              double weightedSum = 0;
+              for (int j = 0; j < m_matrix[i].length; j++) {
+                weightedSum += m_weights[j] * m_matrix[i][j];
+              }
+
+              // Update gradient
+              double classVal = m_matrix[i][m_data.classIndex()];
+              double expTerm = Math.exp(-weightedSum);
+              for (int j = 0; j < m_matrix[i].length; j++) {
+                if (j != m_data.classIndex()) {
+                  if (classVal == 0.0) {
+                    grad[j] -= (expTerm / (1.0 + expTerm)) * m_matrix[i][j];
+                  } else {
+                    grad[j] += (1.0 / (1.0 + expTerm)) * m_matrix[i][j];
+                    ;
                   }
                 }
               }
-              return grad;
             }
-          });
+            return grad;
+          }
+        });
         results.add(futureGrad);
       }
 
@@ -407,7 +415,7 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
       try {
         for (Future<double[]> futureGrad : results) {
           double[] lg = futureGrad.get();
-          for (int  i = 0; i < lg.length; i++) {
+          for (int i = 0; i < lg.length; i++) {
             grad[i] += lg[i];
           }
         }
@@ -416,10 +424,11 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
       }
       return grad;
     }
-    
+
     /**
      * Need to implement this as well....
      */
+    @Override
     public String getRevision() {
       return RevisionUtils.extract("$Revision: 1111 $");
     }
@@ -428,6 +437,7 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
   /**
    * Method for building the classifier from training data.
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     // Can classifier handle the data?
@@ -469,7 +479,7 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
     // Store reference to data (header information only)
     m_data = new Instances(m_data, 0);
 
-    // Initialize weight vector 
+    // Initialize weight vector
     m_weights = new double[m_data.numAttributes()];
     for (int i = 0; i < m_weights.length; i++) {
       if (i != m_data.classIndex() && scalingFactors[i] > 0) {
@@ -478,26 +488,26 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
     }
 
     // We don't want to impose any constraints on the parameters
-    double[][] b = new double[2][m_weights.length]; 
-    for(int p = 0; p < m_weights.length; p++){
+    double[][] b = new double[2][m_weights.length];
+    for (int p = 0; p < m_weights.length; p++) {
       if (p == m_data.classIndex()) {
         b[0][p] = Double.NaN;
       } else {
-        b[0][p] = 0; 
+        b[0][p] = 0;
       }
-      b[1][p] = Double.NaN;   
+      b[1][p] = Double.NaN;
     }
 
     // Initialise thread pool
     m_Pool = Executors.newFixedThreadPool(m_poolSize);
 
     // Run BFGS-based optimisation
-    OptEng opt = new OptEng();	
+    OptEng opt = new OptEng();
     opt.setDebug(m_Debug);
     m_weights = opt.findArgmin(m_weights, b);
     while (m_weights == null) {
       m_weights = opt.getVarbValues();
-      if (m_Debug){
+      if (m_Debug) {
         System.out.println("First set of iterations finished, not enough!");
       }
       m_weights = opt.findArgmin(m_weights, b);
@@ -520,6 +530,7 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
   /**
    * Method for applying the classifier to a test instance.
    */
+  @Override
   public double[] distributionForInstance(Instance inst) throws Exception {
 
     double sum = 0;
@@ -537,6 +548,7 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
   /**
    * Outputs description of classifier as a string.
    */
+  @Override
   public String toString() {
 
     if (m_data == null) {
@@ -566,4 +578,3 @@ public class NonNegativeLogisticRegression extends RandomizableClassifier {
     runClassifier(new NonNegativeLogisticRegression(), args);
   }
 }
-

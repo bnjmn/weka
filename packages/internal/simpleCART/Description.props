@@ -6,10 +6,10 @@
 PackageName=simpleCART
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-12-11
 
 # Title (required)
 Title=Class implementing minimal cost-complexity pruning.
@@ -26,10 +26,12 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Class implementing minimal cost-complexity pruning.<br/>Note when dealing with missing values, use "fractional instances" method instead of surrogate split method.<br/><br/>For more information, see:<br/><br/>Leo Breiman, Jerome H. Friedman, Richard A. Olshen, Charles J. Stone (1984). Classification and Regression Trees. Wadsworth International Group, Belmont, California.
+Description=Class implementing minimal cost-complexity pruning.<br/>Note that when dealing with missing values, it uses the "fractional instances" method instead of the surrogate split method.<br/><br/>For more information, see:<br/><br/>Leo Breiman, Jerome H. Friedman, Richard A. Olshen, Charles J. Stone (1984). Classification and Regression Trees. Wadsworth International Group, Belmont, California.
+
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/simpleCART1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/simpleCART1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/simpleCART

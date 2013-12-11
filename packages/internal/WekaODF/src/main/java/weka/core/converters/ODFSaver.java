@@ -21,15 +21,8 @@
 
 package weka.core.converters;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -37,41 +30,53 @@ import javax.swing.table.DefaultTableModel;
 
 import org.jopendocument.dom.spreadsheet.SpreadSheet;
 
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+
 /**
- <!-- globalinfo-start -->
- * Writes to a destination that is in ODF spreadsheet format.<br/>
+ * <!-- globalinfo-start --> Writes to a destination that is in ODF spreadsheet
+ * format.<br/>
  * For instance for spreadsheets that can be read with OpenOffice.org.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- *
- * <pre> -M &lt;str&gt;
- *  The string representing a missing value.
- *  (default: ?)</pre>
- *
- * <pre> -i &lt;the input file&gt;
- *  The input file</pre>
- *
- * <pre> -o &lt;the output file&gt;
- *  The output file</pre>
- *
- <!-- options-end -->
- *
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- options-start --> Valid options are:
  * <p/>
- *
+ * 
+ * <pre>
+ * -M &lt;str&gt;
+ *  The string representing a missing value.
+ *  (default: ?)
+ * </pre>
+ * 
+ * <pre>
+ * -i &lt;the input file&gt;
+ *  The input file
+ * </pre>
+ * 
+ * <pre>
+ * -o &lt;the output file&gt;
+ *  The output file
+ * </pre>
+ * 
+ * <!-- options-end -->
+ * 
+ * <p/>
+ * 
  * For a tutorial on ODFDOM, see: <br/>
  * <a href="http://www.langintro.com/odfdom_tutorials/create_ods.html"
  * target="_blank">http://www.langintro.com/odfdom_tutorials/create_ods.html</a>
- *
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  * @see Saver
  */
-public class ODFSaver
-  extends AbstractFileSaver
-  implements BatchConverter {
+public class ODFSaver extends AbstractFileSaver implements BatchConverter {
 
   /** for serialization. */
   private static final long serialVersionUID = -7446832500561589653L;
@@ -88,93 +93,94 @@ public class ODFSaver
 
   /**
    * Returns a string describing this Saver.
-   *
-   * @return 		a description of the Saver suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the Saver suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return
-        "Writes to a destination that is in ODF spreadsheet format.\n"
+    return "Writes to a destination that is in ODF spreadsheet format.\n"
       + "For instance for spreadsheets that can be read with OpenOffice.org.";
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option(
-        "\tThe string representing a missing value.\n"
-        + "\t(default: ?)",
-        "M", 1, "-M <str>"));
+    result.addElement(new Option("\tThe string representing a missing value.\n"
+      + "\t(default: ?)", "M", 1, "-M <str>"));
 
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   *
-   * <pre> -M &lt;str&gt;
+   * Parses a given list of options.
+   * <p/>
+   * 
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -M &lt;str&gt;
    *  The string representing a missing value.
-   *  (default: ?)</pre>
-   *
-   * <pre> -i &lt;the input file&gt;
-   *  The input file</pre>
-   *
-   * <pre> -o &lt;the output file&gt;
-   *  The output file</pre>
-   *
-   <!-- options-end -->
-   *
+   *  (default: ?)
+   * </pre>
+   * 
+   * <pre>
+   * -i &lt;the input file&gt;
+   *  The input file
+   * </pre>
+   * 
+   * <pre>
+   * -o &lt;the output file&gt;
+   *  The output file
+   * </pre>
+   * 
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-
-    super.setOptions(options);
+    String tmpStr;
 
     tmpStr = Utils.getOption('M', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setMissingValue(tmpStr);
+    }
+
+    super.setOptions(options);
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector<String>	result;
-    String[]		options;
-    int			i;
 
-    result  = new Vector<String>();
+    Vector<String> result = new Vector<String>();
 
     result.add("-M");
     result.add(getMissingValue());
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
   }
 
   /**
    * Sets the placeholder for missing values.
-   *
-   * @param value	the placeholder
+   * 
+   * @param value the placeholder
    */
   public void setMissingValue(String value) {
     m_MissingValue = value;
@@ -182,8 +188,8 @@ public class ODFSaver
 
   /**
    * Returns the current placeholder for missing values.
-   *
-   * @return		the placeholder
+   * 
+   * @return the placeholder
    */
   public String getMissingValue() {
     return m_MissingValue;
@@ -191,9 +197,9 @@ public class ODFSaver
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   *         		displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String missingValueTipText() {
     return "The placeholder for missing values, default is '' (empty cell).";
@@ -202,6 +208,7 @@ public class ODFSaver
   /**
    * Resets the Saver.
    */
+  @Override
   public void resetOptions() {
     super.resetOptions();
 
@@ -211,28 +218,31 @@ public class ODFSaver
 
   /**
    * Returns a description of the file type.
-   *
+   * 
    * @return a short file description
    */
+  @Override
   public String getFileDescription() {
     return ODFLoader.FILE_DESCRIPTION;
   }
 
   /**
    * Gets all the file extensions used for this type of file.
-   *
+   * 
    * @return the file extensions
    */
+  @Override
   public String[] getFileExtensions() {
-    return new String[]{ODFLoader.FILE_EXTENSION};
+    return new String[] { ODFLoader.FILE_EXTENSION };
   }
 
   /**
    * Returns the Capabilities of this saver.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
@@ -254,47 +264,53 @@ public class ODFSaver
 
   /**
    * Writes a Batch of instances.
-   *
-   * @throws IOException 	throws IOException if saving in batch mode
-   * 				is not possible
+   * 
+   * @throws IOException throws IOException if saving in batch mode is not
+   *           possible
    */
+  @Override
   public void writeBatch() throws IOException {
-    if (getInstances() == null)
+    if (getInstances() == null) {
       throw new IOException("No instances to save");
+    }
 
-    if (getRetrieval() == INCREMENTAL)
+    if (getRetrieval() == INCREMENTAL) {
       throw new IOException("Batch and incremental saving cannot be mixed.");
+    }
 
     setRetrieval(BATCH);
     setWriteMode(WRITE);
 
     try {
       Instances data = getInstances();
-      DefaultTableModel model = new DefaultTableModel(data.numInstances() + 1, data.numAttributes());  // +1 for header
+      DefaultTableModel model = new DefaultTableModel(data.numInstances() + 1,
+        data.numAttributes()); // +1 for header
       // header
       String[] header = new String[data.numAttributes()];
-      for (int i = 0; i < data.numAttributes(); i++)
-	header[i] = data.attribute(i).name();
+      for (int i = 0; i < data.numAttributes(); i++) {
+        header[i] = data.attribute(i).name();
+      }
       model.setColumnIdentifiers(header);
       // data
       for (int n = 0; n < data.numInstances(); n++) {
-	Instance inst = data.instance(n);
-	for (int i = 0; i < data.numAttributes(); i++) {
-	  if (inst.isMissing(i))
-	    model.setValueAt(m_MissingValue, n, i);
-	  else if (inst.attribute(i).isNumeric())
-	    model.setValueAt(inst.value(i), n, i);
-	  else
-	    model.setValueAt(inst.stringValue(i), n, i);
-	}
+        Instance inst = data.instance(n);
+        for (int i = 0; i < data.numAttributes(); i++) {
+          if (inst.isMissing(i)) {
+            model.setValueAt(m_MissingValue, n, i);
+          } else if (inst.attribute(i).isNumeric()) {
+            model.setValueAt(inst.value(i), n, i);
+          } else {
+            model.setValueAt(inst.stringValue(i), n, i);
+          }
+        }
       }
       SpreadSheet spreadsheet = SpreadSheet.createEmpty(model);
-      if (retrieveFile() == null)
-	spreadsheet.getPackage().save(System.out);
-      else
+      if (retrieveFile() == null) {
+        spreadsheet.getPackage().save(System.out);
+      } else {
         spreadsheet.saveAs(retrieveFile());
-    }
-    catch (Exception e) {
+      }
+    } catch (Exception e) {
       throw new IOException(e);
     }
 
@@ -305,17 +321,18 @@ public class ODFSaver
 
   /**
    * Returns the revision string.
-   *
-   * @return		the revision
+   * 
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * Main method.
-   *
-   * @param args 	should contain the options of a Saver.
+   * 
+   * @param args should contain the options of a Saver.
    */
   public static void main(String[] args) {
     runFileSaver(new ODFSaver(), args);

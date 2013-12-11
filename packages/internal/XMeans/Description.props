@@ -6,10 +6,10 @@
 PackageName=XMeans
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2013-08-08
+Date=2013-12-11
 
 # Title (required)
 Title=Cluster data using the X-means algorithm.
@@ -26,12 +26,12 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Cluster data using the X-means algorithm.<br/><br/>X-Means is K-Means extended by an Improve-Structure part In this part of the algorithm the centers are attempted to be split in its region. The decision between the children of each center and itself is done comparing the BIC-values of the two structures.<br/><br/>For more information see:<br/><br/>Dan Pelleg, Andrew W. Moore: X-means: Extending K-means with Efficient Estimation of the Number of Clusters. In: Seventeenth International Conference on Machine Learning, 727-734, 2000.
+Description=Cluster data using the X-means algorithm.<br/><br/>X-Means is K-Means extended by an Improve-Structure part. In this part of the algorithm, the centers are attempted to be split. The decision between the children of each center and the center itself is done by comparing the BIC-values of the two structures.<br/><br/>For more information see:<br/><br/>Dan Pelleg, Andrew W. Moore: X-means: Extending K-means with Efficient Estimation of the Number of Clusters. In: Seventeenth International Conference on Machine Learning, 727-734, 2000.
 
-Changes=XMeans now actually saves cluster centers to a file when the -O option is set :-)
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/XMeans1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/XMeans1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/XMeans

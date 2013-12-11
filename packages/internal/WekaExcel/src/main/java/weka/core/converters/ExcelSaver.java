@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -37,48 +38,53 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 
 /**
- <!-- globalinfo-start -->
- * Writes to a destination that is in MS Excel spreadsheet format (97-2007).<br/>
- * For instance for spreadsheets that can be read with the Microsoft Office Suite.
+ * <!-- globalinfo-start --> Writes to a destination that is in MS Excel
+ * spreadsheet format (97-2007).<br/>
+ * For instance for spreadsheets that can be read with the Microsoft Office
+ * Suite.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- *
- * <pre> -M &lt;str&gt;
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -M &lt;str&gt;
  *  The string representing a missing value.
- *  (default: ?)</pre>
- *
- * <pre> -i &lt;the input file&gt;
- *  The input file</pre>
- *
- * <pre> -o &lt;the output file&gt;
- *  The output file</pre>
- *
- <!-- options-end -->
- *
+ *  (default: ?)
+ * </pre>
+ * 
+ * <pre>
+ * -i &lt;the input file&gt;
+ *  The input file
+ * </pre>
+ * 
+ * <pre>
+ * -o &lt;the output file&gt;
+ *  The output file
+ * </pre>
+ * 
+ * <!-- options-end -->
+ * 
  * <p/>
- *
+ * 
  * For a tutorial on Apache POI/HSSF, see: <br/>
  * <a href="http://poi.apache.org/spreadsheet/how-to.html"
  * target="_blank">http://poi.apache.org/spreadsheet/how-to.html</a>
- *
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  * @see Saver
  */
-public class ExcelSaver
-  extends AbstractFileSaver
-  implements BatchConverter {
+public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
 
   /** for serialization. */
   private static final long serialVersionUID = -7446832500561589653L;
@@ -98,93 +104,96 @@ public class ExcelSaver
 
   /**
    * Returns a string describing this Saver.
-   *
-   * @return 		a description of the Saver suitable for
-   * 			displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the Saver suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return
-        "Writes to a destination that is in MS Excel spreadsheet format (97-2007).\n"
+    return "Writes to a destination that is in MS Excel spreadsheet format (97-2007).\n"
       + "For instance for spreadsheets that can be read with the Microsoft Office Suite.";
   }
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
+  @Override
+  public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option(
-        "\tThe string representing a missing value.\n"
-        + "\t(default: ?)",
-        "M", 1, "-M <str>"));
+    result.addElement(new Option("\tThe string representing a missing value.\n"
+      + "\t(default: ?)", "M", 1, "-M <str>"));
 
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   *
-   * <pre> -M &lt;str&gt;
+   * Parses a given list of options.
+   * <p/>
+   * 
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -M &lt;str&gt;
    *  The string representing a missing value.
-   *  (default: ?)</pre>
-   *
-   * <pre> -i &lt;the input file&gt;
-   *  The input file</pre>
-   *
-   * <pre> -o &lt;the output file&gt;
-   *  The output file</pre>
-   *
-   <!-- options-end -->
-   *
+   *  (default: ?)
+   * </pre>
+   * 
+   * <pre>
+   * -i &lt;the input file&gt;
+   *  The input file
+   * </pre>
+   * 
+   * <pre>
+   * -o &lt;the output file&gt;
+   *  The output file
+   * </pre>
+   * 
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
+    String tmpStr;
+
+    tmpStr = Utils.getOption('M', options);
+    if (tmpStr.length() != 0) {
+      setMissingValue(tmpStr);
+    }
 
     super.setOptions(options);
 
-    tmpStr = Utils.getOption('M', options);
-    if (tmpStr.length() != 0)
-      setMissingValue(tmpStr);
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
+  @Override
   public String[] getOptions() {
-    Vector<String>	result;
-    String[]		options;
-    int			i;
 
-    result  = new Vector<String>();
+    Vector<String> result = new Vector<String>();
 
     result.add("-M");
     result.add(getMissingValue());
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
   }
 
   /**
    * Sets the placeholder for missing values.
-   *
-   * @param value	the placeholder
+   * 
+   * @param value the placeholder
    */
   public void setMissingValue(String value) {
     m_MissingValue = value;
@@ -192,8 +201,8 @@ public class ExcelSaver
 
   /**
    * Returns the current placeholder for missing values.
-   *
-   * @return		the placeholder
+   * 
+   * @return the placeholder
    */
   public String getMissingValue() {
     return m_MissingValue;
@@ -201,9 +210,9 @@ public class ExcelSaver
 
   /**
    * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   *         		displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String missingValueTipText() {
     return "The placeholder for missing values, default is '' (empty cell).";
@@ -212,6 +221,7 @@ public class ExcelSaver
   /**
    * Resets the Saver.
    */
+  @Override
   public void resetOptions() {
     super.resetOptions();
 
@@ -222,26 +232,29 @@ public class ExcelSaver
 
   /**
    * Returns a description of the file type.
-   *
+   * 
    * @return a short file description
    */
+  @Override
   public String getFileDescription() {
     return ExcelLoader.FILE_DESCRIPTION;
   }
 
   /**
    * Gets all the file extensions used for this type of file.
-   *
+   * 
    * @return the file extensions
    */
+  @Override
   public String[] getFileExtensions() {
-    return new String[]{ExcelLoader.FILE_EXTENSION, ExcelLoader.FILE_EXTENSION_OOXML};
+    return new String[] { ExcelLoader.FILE_EXTENSION,
+      ExcelLoader.FILE_EXTENSION_OOXML };
   }
 
   /**
    * Sets whether to use OOXML or binary format.
-   *
-   * @param value	if true then OOXML format is used
+   * 
+   * @param value if true then OOXML format is used
    */
   public void setUseOOXML(boolean value) {
     m_UseOOXML = value;
@@ -249,8 +262,8 @@ public class ExcelSaver
 
   /**
    * Returns whether to use OOXML or binary format.
-   *
-   * @return		true if OOXML is used
+   * 
+   * @return true if OOXML is used
    */
   public boolean retrieveUseOOXML() {
     return m_UseOOXML;
@@ -258,22 +271,26 @@ public class ExcelSaver
 
   /**
    * Sets the destination file.
-   *
+   * 
    * @param outputFile the destination file.
    * @throws IOException throws an IOException if file cannot be set
    */
+  @Override
   public void setFile(File outputFile) throws IOException {
     super.setFile(outputFile);
-    if (outputFile.getName().toLowerCase().endsWith(ExcelLoader.FILE_EXTENSION_OOXML))
+    if (outputFile.getName().toLowerCase()
+      .endsWith(ExcelLoader.FILE_EXTENSION_OOXML)) {
       setUseOOXML(true);
+    }
   }
 
   /**
    * Returns the Capabilities of this saver.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
@@ -295,16 +312,19 @@ public class ExcelSaver
 
   /**
    * Writes a Batch of instances.
-   *
-   * @throws IOException 	throws IOException if saving in batch mode
-   * 				is not possible
+   * 
+   * @throws IOException throws IOException if saving in batch mode is not
+   *           possible
    */
+  @Override
   public void writeBatch() throws IOException {
-    if (getInstances() == null)
+    if (getInstances() == null) {
       throw new IOException("No instances to save");
+    }
 
-    if (getRetrieval() == INCREMENTAL)
+    if (getRetrieval() == INCREMENTAL) {
       throw new IOException("Batch and incremental saving cannot be mixed.");
+    }
 
     setRetrieval(BATCH);
     setWriteMode(WRITE);
@@ -312,10 +332,11 @@ public class ExcelSaver
     try {
       Instances data = getInstances();
       Workbook workbook;
-      if (retrieveUseOOXML())
-	workbook = new XSSFWorkbook();
-      else
-	workbook = new HSSFWorkbook();
+      if (retrieveUseOOXML()) {
+        workbook = new XSSFWorkbook();
+      } else {
+        workbook = new HSSFWorkbook();
+      }
       Sheet sheet = workbook.createSheet();
       workbook.setSheetName(0, data.relationName());
       Row row;
@@ -325,52 +346,52 @@ public class ExcelSaver
       // header
       row = sheet.createRow(0);
       for (int i = 0; i < data.numAttributes(); i++) {
-	cell = row.createCell(i);
-	cell.setCellValue(data.attribute(i).name());
+        cell = row.createCell(i);
+        cell.setCellValue(data.attribute(i).name());
       }
 
       // data
       for (int n = 0; n < data.numInstances(); n++) {
-	row  = sheet.createRow(n + 1);
-	inst = data.instance(n);
-	for (int i = 0; i < data.numAttributes(); i++) {
-	  cell = row.createCell(i);
+        row = sheet.createRow(n + 1);
+        inst = data.instance(n);
+        for (int i = 0; i < data.numAttributes(); i++) {
+          cell = row.createCell(i);
 
-	  if (inst.isMissing(i)) {
-	    if (m_MissingValue.length() > 0)
-	      cell.setCellValue(m_MissingValue);
-	    else
-	      cell.setCellType(Cell.CELL_TYPE_BLANK);
-	    continue;
-	  }
+          if (inst.isMissing(i)) {
+            if (m_MissingValue.length() > 0) {
+              cell.setCellValue(m_MissingValue);
+            } else {
+              cell.setCellType(Cell.CELL_TYPE_BLANK);
+            }
+            continue;
+          }
 
-	  switch (data.attribute(i).type()) {
-	    case Attribute.NUMERIC:
-	      cell.setCellValue(inst.value(i));
-	      break;
+          switch (data.attribute(i).type()) {
+          case Attribute.NUMERIC:
+            cell.setCellValue(inst.value(i));
+            break;
 
-	    case Attribute.NOMINAL:
-	    case Attribute.STRING:
-	      cell.setCellValue(inst.stringValue(i));
-	      break;
+          case Attribute.NOMINAL:
+          case Attribute.STRING:
+            cell.setCellValue(inst.stringValue(i));
+            break;
 
-	    default:
-	      throw new IllegalStateException("Unhandled attribute type: " + data.attribute(i).type());
-	  }
-	}
+          default:
+            throw new IllegalStateException("Unhandled attribute type: "
+              + data.attribute(i).type());
+          }
+        }
       }
 
       // save
       if (retrieveFile() == null) {
         workbook.write(System.out);
-      }
-      else {
-	OutputStream out = new FileOutputStream(retrieveFile());
-	workbook.write(out);
+      } else {
+        OutputStream out = new FileOutputStream(retrieveFile());
+        workbook.write(out);
         out.close();
       }
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       throw new IOException(e);
     }
 
@@ -381,17 +402,18 @@ public class ExcelSaver
 
   /**
    * Returns the revision string.
-   *
-   * @return		the revision
+   * 
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * Main method.
-   *
-   * @param args 	should contain the options of a Saver.
+   * 
+   * @param args should contain the options of a Saver.
    */
   public static void main(String[] args) {
     runFileSaver(new ExcelSaver(), args);

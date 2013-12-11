@@ -6,10 +6,10 @@
 PackageName=simpleEducationalLearningSchemes
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2013-12-11
 
 # Title (required)
 Title=Simple learning schemes for educational purposes (Prism, Id3, IB1 and NaiveBayesSimple).
@@ -28,8 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Simple learning schemes for educational purposes (Prism, Id3, IB1 and NaiveBayesSimple).
 
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/simpleEducationalLearningSchemes1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/simpleEducationalLearningSchemes1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/simpleEducationalLearningSchemes

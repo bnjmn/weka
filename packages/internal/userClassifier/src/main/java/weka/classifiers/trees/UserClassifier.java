@@ -670,12 +670,13 @@ public class UserClassifier extends AbstractClassifier implements Drawable,
       return res;
     }
 
-    double most_likely = 0, highest = -1;
+    // double most_likely = 0; NOT USED
+    double highest = -1;
     double count = 0;
     for (int noa = 0; noa < m_top.m_training.numClasses(); noa++) {
       count += res[noa];
       if (res[noa] > highest) {
-        most_likely = noa;
+        // most_likely = noa; NOT USED
         highest = res[noa];
       }
     }

@@ -21,10 +21,14 @@
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance; 
+import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -33,32 +37,28 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
 import weka.filters.SimpleBatchFilter;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
-/** 
- <!-- globalinfo-start -->
- * A filter for wavelet transformation.<br/>
+/**
+ * <!-- globalinfo-start --> A filter for wavelet transformation.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
  * Wikipedia (2004). Discrete wavelet transform.<br/>
  * <br/>
- * Kristian Sandberg (2000). The Haar wavelet transform. University of Colorado at Boulder, USA.
+ * Kristian Sandberg (2000). The Haar wavelet transform. University of Colorado
+ * at Boulder, USA.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;misc{Wikipedia2004,
  *    author = {Wikipedia},
@@ -77,44 +77,55 @@ import java.util.Vector;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -D
- *  Turns on output of debugging information.</pre>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -A &lt;Haar&gt;
+ * <pre>
+ * -D
+ *  Turns on output of debugging information.
+ * </pre>
+ * 
+ * <pre>
+ * -A &lt;Haar&gt;
  *  The algorithm to use.
- *  (default: HAAR)</pre>
+ *  (default: HAAR)
+ * </pre>
  * 
- * <pre> -P &lt;Zero&gt;
+ * <pre>
+ * -P &lt;Zero&gt;
  *  The padding to use.
- *  (default: ZERO)</pre>
+ *  (default: ZERO)
+ * </pre>
  * 
- * <pre> -F &lt;filter specification&gt;
+ * <pre>
+ * -F &lt;filter specification&gt;
  *  The filter to use as preprocessing step (classname and options).
- *  (default: MultiFilter with ReplaceMissingValues and Normalize)</pre>
+ *  (default: MultiFilter with ReplaceMissingValues and Normalize)
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to filter weka.filters.MultiFilter ('-F'):
  * </pre>
  * 
- * <pre> -D
- *  Turns on output of debugging information.</pre>
+ * <pre>
+ * -D
+ *  Turns on output of debugging information.
+ * </pre>
  * 
- * <pre> -F &lt;classname [options]&gt;
- *  A filter to apply (can be specified multiple times).</pre>
+ * <pre>
+ * -F &lt;classname [options]&gt;
+ *  A filter to apply (can be specified multiple times).
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class Wavelet
-  extends SimpleBatchFilter 
-  implements TechnicalInformationHandler {
+public class Wavelet extends SimpleBatchFilter implements
+  TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3335106965521265631L;
@@ -122,137 +133,124 @@ public class Wavelet
   /** the type of algorithm: Haar wavelet */
   public static final int ALGORITHM_HAAR = 0;
   /** the types of algorithm */
-  public static final Tag[] TAGS_ALGORITHM = {
-    new Tag(ALGORITHM_HAAR, "Haar")
-  };
+  public static final Tag[] TAGS_ALGORITHM = { new Tag(ALGORITHM_HAAR, "Haar") };
 
   /** the type of padding: Zero padding */
   public static final int PADDING_ZERO = 0;
   /** the types of padding */
-  public static final Tag[] TAGS_PADDING = {
-    new Tag(PADDING_ZERO, "Zero")
-  };
+  public static final Tag[] TAGS_PADDING = { new Tag(PADDING_ZERO, "Zero") };
 
   /** an optional filter for preprocessing of the data */
   protected Filter m_Filter = null;
-  
+
   /** the type of algorithm */
   protected int m_Algorithm = ALGORITHM_HAAR;
-  
+
   /** the type of padding */
   protected int m_Padding = PADDING_ZERO;
-  
+
   /**
    * default constructor
    */
   public Wavelet() {
     super();
-    
+
     m_Filter = new MultiFilter();
-    ((MultiFilter) m_Filter).setFilters(
-	new Filter[]{
-	    new weka.filters.unsupervised.attribute.ReplaceMissingValues(),
-	    new weka.filters.unsupervised.attribute.Normalize()
-	    });
-  }
-  
-  /**
-   * Returns a string describing this classifier.
-   *
-   * @return      a description of the classifier suitable for
-   *              displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-    return 
-        "A filter for wavelet transformation.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
+    ((MultiFilter) m_Filter).setFilters(new Filter[] {
+      new weka.filters.unsupervised.attribute.ReplaceMissingValues(),
+      new weka.filters.unsupervised.attribute.Normalize() });
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns a string describing this classifier.
+   * 
+   * @return a description of the classifier suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  @Override
+  public String globalInfo() {
+    return "A filter for wavelet transformation.\n\n"
+      + "For more information see:\n\n" + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
+    TechnicalInformation result;
+    TechnicalInformation additional;
+
     result = new TechnicalInformation(Type.MISC);
     result.setValue(Field.AUTHOR, "Wikipedia");
     result.setValue(Field.YEAR, "2004");
     result.setValue(Field.TITLE, "Discrete wavelet transform");
-    result.setValue(Field.HTTP, "http://en.wikipedia.org/wiki/Discrete_wavelet_transform");
-    
+    result.setValue(Field.HTTP,
+      "http://en.wikipedia.org/wiki/Discrete_wavelet_transform");
+
     additional = result.add(Type.MISC);
     additional.setValue(Field.AUTHOR, "Kristian Sandberg");
     additional.setValue(Field.YEAR, "2000");
     additional.setValue(Field.TITLE, "The Haar wavelet transform");
     additional.setValue(Field.INSTITUTION, "Dept. of Applied Mathematics");
-    additional.setValue(Field.ADDRESS, "University of Colorado at Boulder, USA");
-    additional.setValue(Field.HTTP, "http://amath.colorado.edu/courses/5720/2000Spr/Labs/Haar/haar.html");
-    
+    additional
+      .setValue(Field.ADDRESS, "University of Colorado at Boulder, USA");
+    additional.setValue(Field.HTTP,
+      "http://amath.colorado.edu/courses/5720/2000Spr/Labs/Haar/haar.html");
+
     return result;
   }
 
   /**
    * Gets an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration listOptions() {
-    Vector		result;
-    Enumeration		enm;
-    String		param;
-    SelectedTag		tag;
-    int			i;
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    result = new Vector();
+    Vector<Option> result = new Vector<Option>();
 
-    enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
-
-    param = "";
-    for (i = 0; i < TAGS_ALGORITHM.length; i++) {
-      if (i > 0)
-	param += "|";
-      tag = new SelectedTag(TAGS_ALGORITHM[i].getID(), TAGS_ALGORITHM);
+    String param = "";
+    for (int i = 0; i < TAGS_ALGORITHM.length; i++) {
+      if (i > 0) {
+        param += "|";
+      }
+      SelectedTag tag = new SelectedTag(TAGS_ALGORITHM[i].getID(),
+        TAGS_ALGORITHM);
       param += tag.getSelectedTag().getReadable();
     }
-    result.addElement(new Option(
-	"\tThe algorithm to use.\n"
-	+ "\t(default: HAAR)",
-	"A", 1, "-A <" + param + ">"));
+    result.addElement(new Option("\tThe algorithm to use.\n"
+      + "\t(default: HAAR)", "A", 1, "-A <" + param + ">"));
 
     param = "";
-    for (i = 0; i < TAGS_PADDING.length; i++) {
-      if (i > 0)
-	param += "|";
-      tag = new SelectedTag(TAGS_PADDING[i].getID(), TAGS_PADDING);
+    for (int i = 0; i < TAGS_PADDING.length; i++) {
+      if (i > 0) {
+        param += "|";
+      }
+      SelectedTag tag = new SelectedTag(TAGS_PADDING[i].getID(), TAGS_PADDING);
       param += tag.getSelectedTag().getReadable();
     }
-    result.addElement(new Option(
-	"\tThe padding to use.\n"
-	+ "\t(default: ZERO)",
-	"P", 1, "-P <" + param + ">"));
+    result.addElement(new Option("\tThe padding to use.\n"
+      + "\t(default: ZERO)", "P", 1, "-P <" + param + ">"));
 
     result.addElement(new Option(
-	"\tThe filter to use as preprocessing step (classname and options).\n"
-	+ "\t(default: MultiFilter with ReplaceMissingValues and Normalize)",
-	"F", 1, "-F <filter specification>"));
+      "\tThe filter to use as preprocessing step (classname and options).\n"
+        + "\t(default: MultiFilter with ReplaceMissingValues and Normalize)",
+      "F", 1, "-F <filter specification>"));
+
+    result.addAll(Collections.list(super.listOptions()));
 
     if (getFilter() instanceof OptionHandler) {
-      result.addElement(new Option(
-	  "",
-	  "", 0, "\nOptions specific to filter "
-	  + getFilter().getClass().getName() + " ('-F'):"));
-      
-      enm = ((OptionHandler) getFilter()).listOptions();
-      while (enm.hasMoreElements())
-	result.addElement(enm.nextElement());
+      result.addElement(new Option("", "", 0, "\nOptions specific to filter "
+        + getFilter().getClass().getName() + " ('-F'):"));
+
+      result.addAll(Collections.list(((OptionHandler) getFilter())
+        .listOptions()));
     }
 
     return result.elements();
@@ -260,18 +258,13 @@ public class Wavelet
 
   /**
    * returns the options of the current setup
-   *
-   * @return      the current options
+   * 
+   * @return the current options
    */
+  @Override
   public String[] getOptions() {
-    int       i;
-    Vector    result;
-    String[]  options;
 
-    result = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    Vector<String> result = new Vector<String>();
 
     result.add("-A");
     result.add("" + getAlgorithm().getSelectedTag().getReadable());
@@ -280,96 +273,109 @@ public class Wavelet
     result.add("" + getPadding().getSelectedTag().getReadable());
 
     result.add("-F");
-    if (getFilter() instanceof OptionHandler)
-      result.add(
-	  getFilter().getClass().getName() 
-	+ " " 
-	+ Utils.joinOptions(((OptionHandler) getFilter()).getOptions()));
-    else
-      result.add(
-	  getFilter().getClass().getName());
+    if (getFilter() instanceof OptionHandler) {
+      result.add(getFilter().getClass().getName() + " "
+        + Utils.joinOptions(((OptionHandler) getFilter()).getOptions()));
+    } else {
+      result.add(getFilter().getClass().getName());
+    }
 
-    return (String[]) result.toArray(new String[result.size()]);	  
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**
-   * Parses the options for this object. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses the options for this object.
+   * <p/>
    * 
-   * <pre> -D
-   *  Turns on output of debugging information.</pre>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -A &lt;Haar&gt;
+   * <pre>
+   * -D
+   *  Turns on output of debugging information.
+   * </pre>
+   * 
+   * <pre>
+   * -A &lt;Haar&gt;
    *  The algorithm to use.
-   *  (default: HAAR)</pre>
+   *  (default: HAAR)
+   * </pre>
    * 
-   * <pre> -P &lt;Zero&gt;
+   * <pre>
+   * -P &lt;Zero&gt;
    *  The padding to use.
-   *  (default: ZERO)</pre>
+   *  (default: ZERO)
+   * </pre>
    * 
-   * <pre> -F &lt;filter specification&gt;
+   * <pre>
+   * -F &lt;filter specification&gt;
    *  The filter to use as preprocessing step (classname and options).
-   *  (default: MultiFilter with ReplaceMissingValues and Normalize)</pre>
+   *  (default: MultiFilter with ReplaceMissingValues and Normalize)
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to filter weka.filters.MultiFilter ('-F'):
    * </pre>
    * 
-   * <pre> -D
-   *  Turns on output of debugging information.</pre>
+   * <pre>
+   * -D
+   *  Turns on output of debugging information.
+   * </pre>
    * 
-   * <pre> -F &lt;classname [options]&gt;
-   *  A filter to apply (can be specified multiple times).</pre>
+   * <pre>
+   * -F &lt;classname [options]&gt;
+   *  A filter to apply (can be specified multiple times).
+   * </pre>
    * 
-   <!-- options-end -->
-   *
-   * @param options	the options to use
-   * @throws Exception	if the option setting fails
+   * <!-- options-end -->
+   * 
+   * @param options the options to use
+   * @throws Exception if the option setting fails
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    String[]	tmpOptions;
-    Filter	filter;
+    String tmpStr;
+    String[] tmpOptions;
+    Filter filter;
 
     super.setOptions(options);
 
     tmpStr = Utils.getOption("A", options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setAlgorithm(new SelectedTag(tmpStr, TAGS_ALGORITHM));
-    else
+    } else {
       setAlgorithm(new SelectedTag(ALGORITHM_HAAR, TAGS_ALGORITHM));
+    }
 
     tmpStr = Utils.getOption("P", options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setPadding(new SelectedTag(tmpStr, TAGS_PADDING));
-    else
+    } else {
       setPadding(new SelectedTag(PADDING_ZERO, TAGS_PADDING));
+    }
 
-    tmpStr     = Utils.getOption("F", options);
+    tmpStr = Utils.getOption("F", options);
     tmpOptions = Utils.splitOptions(tmpStr);
     if (tmpOptions.length != 0) {
-      tmpStr        = tmpOptions[0];
+      tmpStr = tmpOptions[0];
       tmpOptions[0] = "";
       setFilter((Filter) Utils.forName(Filter.class, tmpStr, tmpOptions));
-    }
-    else {
+    } else {
       filter = new MultiFilter();
-      ((MultiFilter) filter).setFilters(
-	  new Filter[]{
-	      new weka.filters.unsupervised.attribute.ReplaceMissingValues(),
-	      new weka.filters.unsupervised.attribute.Normalize()
-	      });
+      ((MultiFilter) filter).setFilters(new Filter[] {
+        new weka.filters.unsupervised.attribute.ReplaceMissingValues(),
+        new weka.filters.unsupervised.attribute.Normalize() });
       setFilter(filter);
     }
   }
-  
+
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String filterTipText() {
     return "The preprocessing filter to use.";
@@ -377,8 +383,8 @@ public class Wavelet
 
   /**
    * Set the preprocessing filter (only used for setup).
-   *
-   * @param value	the preprocessing filter.
+   * 
+   * @param value the preprocessing filter.
    */
   public void setFilter(Filter value) {
     m_Filter = value;
@@ -386,8 +392,8 @@ public class Wavelet
 
   /**
    * Get the preprocessing filter.
-   *
-   * @return 		the preprocessing filter
+   * 
+   * @return the preprocessing filter
    */
   public Filter getFilter() {
     return m_Filter;
@@ -396,17 +402,17 @@ public class Wavelet
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String algorithmTipText() {
     return "Sets the type of algorithm to use.";
   }
 
   /**
-   * Sets the type of algorithm to use 
-   *
-   * @param value 	the algorithm type
+   * Sets the type of algorithm to use
+   * 
+   * @param value the algorithm type
    */
   public void setAlgorithm(SelectedTag value) {
     if (value.getTags() == TAGS_ALGORITHM) {
@@ -415,9 +421,9 @@ public class Wavelet
   }
 
   /**
-   * Gets the type of algorithm to use 
-   *
-   * @return 		the current algorithm type.
+   * Gets the type of algorithm to use
+   * 
+   * @return the current algorithm type.
    */
   public SelectedTag getAlgorithm() {
     return new SelectedTag(m_Algorithm, TAGS_ALGORITHM);
@@ -426,17 +432,17 @@ public class Wavelet
   /**
    * Returns the tip text for this property
    * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String paddingTipText() {
     return "Sets the type of padding to use.";
   }
 
   /**
-   * Sets the type of Padding to use 
-   *
-   * @param value 	the Padding type
+   * Sets the type of Padding to use
+   * 
+   * @param value the Padding type
    */
   public void setPadding(SelectedTag value) {
     if (value.getTags() == TAGS_PADDING) {
@@ -445,62 +451,63 @@ public class Wavelet
   }
 
   /**
-   * Gets the type of Padding to use 
-   *
-   * @return 		the current Padding type.
+   * Gets the type of Padding to use
+   * 
+   * @return the current Padding type.
    */
   public SelectedTag getPadding() {
     return new SelectedTag(m_Padding, TAGS_PADDING);
   }
 
   /**
-   * returns the next bigger number that's a power of 2. If the number is 
+   * returns the next bigger number that's a power of 2. If the number is
    * already a power of 2 then this will be returned. The number will be at
    * least 2^2..
    * 
-   * @param n		the number to start from
-   * @return		the next bigger number
+   * @param n the number to start from
+   * @return the next bigger number
    */
   protected static int nextPowerOf2(int n) {
-    int		exp;
-    
+    int exp;
+
     exp = (int) StrictMath.ceil(StrictMath.log(n) / StrictMath.log(2.0));
     exp = StrictMath.max(2, exp);
-    
+
     return (int) StrictMath.pow(2, exp);
   }
-  
+
   /**
    * pads the data to conform to the necessary number of attributes
    * 
-   * @param data	the data to pad
-   * @return		the padded data
+   * @param data the data to pad
+   * @return the padded data
    */
   protected Instances pad(Instances data) {
-    Instances 		result;
-    int 		i;
-    int			n;
-    String 		prefix;
-    int			numAtts;
-    boolean		isLast;
-    int			index;
-    Vector<Integer>	padded;
-    int[]		indices;
-    FastVector		atts;
+    Instances result;
+    int i;
+    int n;
+    String prefix;
+    int numAtts;
+    boolean isLast;
+    int index;
+    Vector<Integer> padded;
+    int[] indices;
+    ArrayList<Attribute> atts;
 
     // determine number of padding attributes
     switch (m_Padding) {
-      case PADDING_ZERO:
-	if (data.classIndex() > -1)
-	  numAtts = (nextPowerOf2(data.numAttributes() - 1) + 1) - data.numAttributes();
-	else
-	  numAtts = nextPowerOf2(data.numAttributes()) - data.numAttributes();
-	break;
-	
-      default:
-	throw new IllegalStateException(
-	    "Padding " + new SelectedTag(m_Algorithm, TAGS_PADDING) 
-	    + " not implemented!");
+    case PADDING_ZERO:
+      if (data.classIndex() > -1) {
+        numAtts = (nextPowerOf2(data.numAttributes() - 1) + 1)
+          - data.numAttributes();
+      } else {
+        numAtts = nextPowerOf2(data.numAttributes()) - data.numAttributes();
+      }
+      break;
+
+    default:
+      throw new IllegalStateException("Padding "
+        + new SelectedTag(m_Algorithm, TAGS_PADDING) + " not implemented!");
     }
 
     result = new Instances(data);
@@ -512,123 +519,128 @@ public class Wavelet
       isLast = (data.classIndex() == data.numAttributes() - 1);
       padded = new Vector<Integer>();
       for (i = 0; i < numAtts; i++) {
-	if (isLast)
-	  index = result.numAttributes() - 1;
-	else
-	  index = result.numAttributes();
-	
-	result.insertAttributeAt(
-	    new Attribute(prefix + "_padding_" + (i+1)),
-	    index);
-	
-	// record index
-	padded.add(new Integer(index));
+        if (isLast) {
+          index = result.numAttributes() - 1;
+        } else {
+          index = result.numAttributes();
+        }
+
+        result.insertAttributeAt(new Attribute(prefix + "_padding_" + (i + 1)),
+          index);
+
+        // record index
+        padded.add(new Integer(index));
       }
-      
+
       // get padded indices
       indices = new int[padded.size()];
-      for (i = 0; i < padded.size(); i++)
-	indices[i] = padded.get(i);
-      
+      for (i = 0; i < padded.size(); i++) {
+        indices[i] = padded.get(i);
+      }
+
       // determine number of padding attributes
       switch (m_Padding) {
-	case PADDING_ZERO:
-	  for (i = 0; i < result.numInstances(); i++) {
-	    for (n = 0; n < indices.length; n++)
-	      result.instance(i).setValue(indices[n], 0);
-	  }
-	  break;
+      case PADDING_ZERO:
+        for (i = 0; i < result.numInstances(); i++) {
+          for (n = 0; n < indices.length; n++) {
+            result.instance(i).setValue(indices[n], 0);
+          }
+        }
+        break;
       }
     }
 
     // rename all attributes apart from class
     data = result;
-    atts = new FastVector();
+    atts = new ArrayList<Attribute>();
     n = 0;
     for (i = 0; i < data.numAttributes(); i++) {
       n++;
-      if (i == data.classIndex())
-	atts.addElement((Attribute) data.attribute(i).copy());
-      else
-	atts.addElement(new Attribute(prefix + "_" + n));
+      if (i == data.classIndex()) {
+        atts.add((Attribute) data.attribute(i).copy());
+      } else {
+        atts.add(new Attribute(prefix + "_" + n));
+      }
     }
 
     // create new dataset
     result = new Instances(data.relationName(), atts, data.numInstances());
     result.setClassIndex(data.classIndex());
-    for (i = 0; i < data.numInstances(); i++)
+    for (i = 0; i < data.numInstances(); i++) {
       result.add(new DenseInstance(1.0, data.instance(i).toDoubleArray()));
-    
+    }
+
     return result;
   }
-  
+
   /**
-   * Determines the output format based on the input format and returns 
-   * this. In case the output format cannot be returned immediately, i.e.,
-   * immediateOutputFormat() returns false, then this method will be called
-   * from batchFinished().
-   *
-   * @param inputFormat     the input format to base the output format on
-   * @return                the output format
-   * @throws Exception      in case the determination goes wrong
-   * @see   #hasImmediateOutputFormat()
-   * @see   #batchFinished()
+   * Determines the output format based on the input format and returns this. In
+   * case the output format cannot be returned immediately, i.e.,
+   * immediateOutputFormat() returns false, then this method will be called from
+   * batchFinished().
+   * 
+   * @param inputFormat the input format to base the output format on
+   * @return the output format
+   * @throws Exception in case the determination goes wrong
+   * @see #hasImmediateOutputFormat()
+   * @see #batchFinished()
    */
-  protected Instances determineOutputFormat(Instances inputFormat) 
+  @Override
+  protected Instances determineOutputFormat(Instances inputFormat)
     throws Exception {
 
     return pad(new Instances(inputFormat, 0));
   }
-  
+
   /**
    * processes the instances using the HAAR algorithm
-   *
-   * @param instances   the data to process
-   * @return            the modified data
-   * @throws Exception  in case the processing goes wrong
+   * 
+   * @param instances the data to process
+   * @return the modified data
+   * @throws Exception in case the processing goes wrong
    */
   protected Instances processHAAR(Instances instances) throws Exception {
-    Instances	result;
-    int		i;
-    int		n;
-    int		j;
-    int		clsIdx;
-    double[]	oldVal;
-    double[]	newVal;
-    int		level;
-    int		length;
-    double[]	clsVal;
-    Attribute	clsAtt;
+    Instances result;
+    int i;
+    int n;
+    int j;
+    int clsIdx;
+    double[] oldVal;
+    double[] newVal;
+    int level;
+    int length;
+    double[] clsVal;
+    Attribute clsAtt;
 
-    clsIdx  = instances.classIndex();
-    clsVal  = null;
-    clsAtt  = null;
+    clsIdx = instances.classIndex();
+    clsVal = null;
+    clsAtt = null;
     if (clsIdx > -1) {
-      clsVal  = instances.attributeToDoubleArray(clsIdx);
-      clsAtt  = (Attribute) instances.classAttribute().copy();
+      clsVal = instances.attributeToDoubleArray(clsIdx);
+      clsAtt = (Attribute) instances.classAttribute().copy();
       instances.setClassIndex(-1);
       instances.deleteAttributeAt(clsIdx);
     }
     result = new Instances(instances, 0);
-    level  = (int) StrictMath.ceil(
-			StrictMath.log(instances.numAttributes())
-			/ StrictMath.log(2.0));
-    
+    level = (int) StrictMath.ceil(StrictMath.log(instances.numAttributes())
+      / StrictMath.log(2.0));
+
     for (i = 0; i < instances.numInstances(); i++) {
       oldVal = instances.instance(i).toDoubleArray();
       newVal = new double[oldVal.length];
-      
+
       for (n = level; n > 0; n--) {
-	length = (int) StrictMath.pow(2, n - 1);
-	
-	for (j = 0; j < length; j++) {
-	  newVal[j]          = (oldVal[j*2] + oldVal[j*2 + 1]) / StrictMath.sqrt(2);
-	  newVal[j + length] = (oldVal[j*2] - oldVal[j*2 + 1]) / StrictMath.sqrt(2);
-	}
-	
-	System.arraycopy(newVal, 0, oldVal, 0, newVal.length);
+        length = (int) StrictMath.pow(2, n - 1);
+
+        for (j = 0; j < length; j++) {
+          newVal[j] = (oldVal[j * 2] + oldVal[j * 2 + 1]) / StrictMath.sqrt(2);
+          newVal[j + length] = (oldVal[j * 2] - oldVal[j * 2 + 1])
+            / StrictMath.sqrt(2);
+        }
+
+        System.arraycopy(newVal, 0, oldVal, 0, newVal.length);
       }
-      
+
       // add new transformed instance
       result.add(new DenseInstance(1, newVal));
     }
@@ -637,19 +649,21 @@ public class Wavelet
     if (clsIdx > -1) {
       result.insertAttributeAt(clsAtt, clsIdx);
       result.setClassIndex(clsIdx);
-      for (i = 0; i < clsVal.length; i++)
-	result.instance(i).setClassValue(clsVal[i]);
+      for (i = 0; i < clsVal.length; i++) {
+        result.instance(i).setClassValue(clsVal[i]);
+      }
     }
-    
+
     return result;
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this object
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -658,52 +672,55 @@ public class Wavelet
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
-  
+
   /**
-   * Processes the given data (may change the provided dataset) and returns
-   * the modified version. This method is called in batchFinished().
-   *
-   * @param instances   the data to process
-   * @return            the modified data
-   * @throws Exception  in case the processing goes wrong
-   * @see               #batchFinished()
+   * Processes the given data (may change the provided dataset) and returns the
+   * modified version. This method is called in batchFinished().
+   * 
+   * @param instances the data to process
+   * @return the modified data
+   * @throws Exception in case the processing goes wrong
+   * @see #batchFinished()
    */
+  @Override
   protected Instances process(Instances instances) throws Exception {
-    if (!isFirstBatchDone())
+    if (!isFirstBatchDone()) {
       m_Filter.setInputFormat(instances);
+    }
     instances = Filter.useFilter(instances, m_Filter);
-    
+
     switch (m_Algorithm) {
-      case ALGORITHM_HAAR:
-	return processHAAR(pad(instances));
-      default:
-	throw new IllegalStateException(
-	    "Algorithm type '" + m_Algorithm + "' is not recognized!");
+    case ALGORITHM_HAAR:
+      return processHAAR(pad(instances));
+    default:
+      throw new IllegalStateException("Algorithm type '" + m_Algorithm
+        + "' is not recognized!");
     }
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * runs the filter with the given arguments
-   *
-   * @param args      the commandline arguments
+   * 
+   * @param args the commandline arguments
    */
   public static void main(String[] args) {
     runFilter(new Wavelet(), args);

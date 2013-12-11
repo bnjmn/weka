@@ -645,6 +645,8 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
     }
 
     super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**

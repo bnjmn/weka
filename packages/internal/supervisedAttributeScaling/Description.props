@@ -6,10 +6,10 @@
 PackageName=supervisedAttributeScaling
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2013-06-27
+Date=2013-12-11
 
 # Title (required)
 Title=A simple filter to rescale attributes to reflect their discriminative power.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Package containing a class that rescales the attributes in a classification problem based on their discriminative power. This is useful as a pre-processing step for learning algorithms such as the k-nearest-neighbour method, to replace simple normalization. Each attribute is rescaled by multiplying it with a learned weight. All attributes excluding the class are assumed to be numeric and missing values are not permitted. To achieve the rescaling, this package also contains an implementation of non-negative logistic regression, which produces a logistic regression model with non-negative weights.
 
-Changes=
+Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/supervisedAttributeScaling1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/supervisedAttributeScaling1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/supervisedAttributeScaling

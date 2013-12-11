@@ -21,41 +21,45 @@
 
 package weka.attributeSelection;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Vector;
+
 import weka.classifiers.functions.SMO;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Vector;
-
-/** 
- <!-- globalinfo-start -->
- * SVMAttributeEval :<br/>
+/**
+ * <!-- globalinfo-start --> SVMAttributeEval :<br/>
  * <br/>
- * Evaluates the worth of an attribute by using an SVM classifier. Attributes are ranked by the square of the weight assigned by the SVM. Attribute selection for multiclass problems is handled by ranking attributes for each class seperately using a one-vs-all method and then "dealing" from the top of each pile to give a final ranking.<br/>
+ * Evaluates the worth of an attribute by using an SVM classifier. Attributes
+ * are ranked by the square of the weight assigned by the SVM. Attribute
+ * selection for multiclass problems is handled by ranking attributes for each
+ * class seperately using a one-vs-all method and then "dealing" from the top of
+ * each pile to give a final ranking.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * I. Guyon, J. Weston, S. Barnhill, V. Vapnik (2002). Gene selection for cancer classification using support vector machines. Machine Learning. 46:389-422.
+ * I. Guyon, J. Weston, S. Barnhill, V. Vapnik (2002). Gene selection for cancer
+ * classification using support vector machines. Machine Learning. 46:389-422.
  * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- globalinfo-end -->
+ * 
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;article{Guyon2002,
  *    author = {I. Guyon and J. Weston and S. Barnhill and V. Vapnik},
@@ -67,64 +71,75 @@ import java.util.Vector;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -X &lt;constant rate of elimination&gt;
+ * <!-- options-start --> Valid options are:
+ * <p/>
+ * 
+ * <pre>
+ * -X &lt;constant rate of elimination&gt;
  *  Specify the constant rate of attribute
  *  elimination per invocation of
  *  the support vector machine.
- *  Default = 1.</pre>
+ *  Default = 1.
+ * </pre>
  * 
- * <pre> -Y &lt;percent rate of elimination&gt;
+ * <pre>
+ * -Y &lt;percent rate of elimination&gt;
  *  Specify the percentage rate of attributes to
  *  elimination per invocation of
  *  the support vector machine.
  *  Trumps constant rate (above threshold).
- *  Default = 0.</pre>
+ *  Default = 0.
+ * </pre>
  * 
- * <pre> -Z &lt;threshold for percent elimination&gt;
+ * <pre>
+ * -Z &lt;threshold for percent elimination&gt;
  *  Specify the threshold below which 
  *  percentage attribute elimination
- *  reverts to the constant method.</pre>
+ *  reverts to the constant method.
+ * </pre>
  * 
- * <pre> -P &lt;epsilon&gt;
+ * <pre>
+ * -P &lt;epsilon&gt;
  *  Specify the value of P (epsilon
  *  parameter) to pass on to the
  *  support vector machine.
- *  Default = 1.0e-25</pre>
+ *  Default = 1.0e-25
+ * </pre>
  * 
- * <pre> -T &lt;tolerance&gt;
+ * <pre>
+ * -T &lt;tolerance&gt;
  *  Specify the value of T (tolerance
  *  parameter) to pass on to the
  *  support vector machine.
- *  Default = 1.0e-10</pre>
+ *  Default = 1.0e-10
+ * </pre>
  * 
- * <pre> -C &lt;complexity&gt;
+ * <pre>
+ * -C &lt;complexity&gt;
  *  Specify the value of C (complexity
  *  parameter) to pass on to the
  *  support vector machine.
- *  Default = 1.0</pre>
+ *  Default = 1.0
+ * </pre>
  * 
- * <pre> -N
+ * <pre>
+ * -N
  *  Whether the SVM should 0=normalize/1=standardize/2=neither.
- *  (default 0=normalize)</pre>
+ *  (default 0=normalize)
+ * </pre>
  * 
- <!-- options-end -->
- *
+ * <!-- options-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Kieran Holland
  * @version $Revision$
  */
-public class SVMAttributeEval 
-  extends ASEvaluation
-  implements AttributeEvaluator, 
-             OptionHandler, 
-             TechnicalInformationHandler {
-  
+public class SVMAttributeEval extends ASEvaluation implements
+  AttributeEvaluator, OptionHandler, TechnicalInformationHandler {
+
   /** for serialization */
   static final long serialVersionUID = -6489975709033967447L;
 
@@ -134,12 +149,15 @@ public class SVMAttributeEval
   /** Constant rate of attribute elimination per iteration */
   private int m_numToEliminate = 1;
 
-  /** Percentage rate of attribute elimination, trumps constant
-      rate (above threshold), ignored if = 0  */
+  /**
+   * Percentage rate of attribute elimination, trumps constant rate (above
+   * threshold), ignored if = 0
+   */
   private int m_percentToEliminate = 0;
 
-  /** Threshold below which percent elimination switches to
-      constant elimination */
+  /**
+   * Threshold below which percent elimination switches to constant elimination
+   */
   private int m_percentThreshold = 0;
 
   /** Complexity parameter to pass on to SMO */
@@ -156,8 +174,9 @@ public class SVMAttributeEval
 
   /**
    * Returns a string describing this attribute evaluator
-   * @return a description of the evaluator suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description of the evaluator suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
     return "SVMAttributeEval :\n\nEvaluates the worth of an attribute by "
@@ -166,28 +185,30 @@ public class SVMAttributeEval
       + "problems is handled by ranking attributes for each class seperately "
       + "using a one-vs-all method and then \"dealing\" from the top of "
       + "each pile to give a final ranking.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
+      + "For more information see:\n\n" + getTechnicalInformation().toString();
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
    * 
    * @return the technical information about this class
    */
+  @Override
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation        result;
-    
+    TechnicalInformation result;
+
     result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "I. Guyon and J. Weston and S. Barnhill and V. Vapnik");
+    result.setValue(Field.AUTHOR,
+      "I. Guyon and J. Weston and S. Barnhill and V. Vapnik");
     result.setValue(Field.YEAR, "2002");
-    result.setValue(Field.TITLE, "Gene selection for cancer classification using support vector machines");
+    result.setValue(Field.TITLE,
+      "Gene selection for cancer classification using support vector machines");
     result.setValue(Field.JOURNAL, "Machine Learning");
     result.setValue(Field.VOLUME, "46");
     result.setValue(Field.PAGES, "389-422");
-    
+
     return result;
   }
 
@@ -200,134 +221,118 @@ public class SVMAttributeEval
 
   /**
    * Returns an enumeration describing all the available options
-   *
+   * 
    * @return an enumeration of options
    */
-  public Enumeration listOptions() {
-    Vector newVector = new Vector(4);
+  @Override
+  public Enumeration<Option> listOptions() {
 
-    newVector.addElement(
-                         new Option(
-                                    "\tSpecify the constant rate of attribute\n"
-                                    + "\telimination per invocation of\n"
-                                    + "\tthe support vector machine.\n"
-                                    + "\tDefault = 1.",
-                                    "X",
-                                    1,
-                                    "-X <constant rate of elimination>"));
+    Vector<Option> newVector = new Vector<Option>(7);
 
-    newVector.addElement(
-                         new Option(
-                                    "\tSpecify the percentage rate of attributes to\n"
-                                    + "\telimination per invocation of\n"
-                                    + "\tthe support vector machine.\n"
-                                    + "\tTrumps constant rate (above threshold).\n"
-                                    + "\tDefault = 0.",
-                                    "Y",
-                                    1,
-                                    "-Y <percent rate of elimination>"));
+    newVector.addElement(new Option(
+      "\tSpecify the constant rate of attribute\n"
+        + "\telimination per invocation of\n"
+        + "\tthe support vector machine.\n" + "\tDefault = 1.", "X", 1,
+      "-X <constant rate of elimination>"));
 
-    newVector.addElement(
-                         new Option(
-                                    "\tSpecify the threshold below which \n"
-                                    + "\tpercentage attribute elimination\n"
-                                    + "\treverts to the constant method.",
-                                    "Z",
-                                    1,
-                                    "-Z <threshold for percent elimination>"));
+    newVector.addElement(new Option(
+      "\tSpecify the percentage rate of attributes to\n"
+        + "\telimination per invocation of\n"
+        + "\tthe support vector machine.\n"
+        + "\tTrumps constant rate (above threshold).\n" + "\tDefault = 0.",
+      "Y", 1, "-Y <percent rate of elimination>"));
 
+    newVector.addElement(new Option("\tSpecify the threshold below which \n"
+      + "\tpercentage attribute elimination\n"
+      + "\treverts to the constant method.", "Z", 1,
+      "-Z <threshold for percent elimination>"));
 
-    newVector.addElement(
-                         new Option(
-                                    "\tSpecify the value of P (epsilon\n"
-                                    + "\tparameter) to pass on to the\n"
-                                    + "\tsupport vector machine.\n"
-                                    + "\tDefault = 1.0e-25",
-                                    "P",
-                                    1,
-                                    "-P <epsilon>"));
+    newVector.addElement(new Option("\tSpecify the value of P (epsilon\n"
+      + "\tparameter) to pass on to the\n" + "\tsupport vector machine.\n"
+      + "\tDefault = 1.0e-25", "P", 1, "-P <epsilon>"));
 
-    newVector.addElement(
-                         new Option(
-                                    "\tSpecify the value of T (tolerance\n"
-                                    + "\tparameter) to pass on to the\n"
-                                    + "\tsupport vector machine.\n"
-                                    + "\tDefault = 1.0e-10",
-                                    "T",
-                                    1,
-                                    "-T <tolerance>"));
+    newVector.addElement(new Option("\tSpecify the value of T (tolerance\n"
+      + "\tparameter) to pass on to the\n" + "\tsupport vector machine.\n"
+      + "\tDefault = 1.0e-10", "T", 1, "-T <tolerance>"));
 
-    newVector.addElement(
-                         new Option(
-                                    "\tSpecify the value of C (complexity\n"
-                                    + "\tparameter) to pass on to the\n"
-                                    + "\tsupport vector machine.\n"
-                                    + "\tDefault = 1.0",
-                                    "C",
-                                    1,
-                                    "-C <complexity>"));
+    newVector.addElement(new Option("\tSpecify the value of C (complexity\n"
+      + "\tparameter) to pass on to the\n" + "\tsupport vector machine.\n"
+      + "\tDefault = 1.0", "C", 1, "-C <complexity>"));
 
     newVector.addElement(new Option("\tWhether the SVM should "
-                                    + "0=normalize/1=standardize/2=neither.\n"
-                                    + "\t(default 0=normalize)",
-                                    "N",
-                                    1,
-                                    "-N"));
+      + "0=normalize/1=standardize/2=neither.\n" + "\t(default 0=normalize)",
+      "N", 1, "-N"));
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Parses a given list of options.
+   * <p/>
    * 
-   * <pre> -X &lt;constant rate of elimination&gt;
+   * <!-- options-start --> Valid options are:
+   * <p/>
+   * 
+   * <pre>
+   * -X &lt;constant rate of elimination&gt;
    *  Specify the constant rate of attribute
    *  elimination per invocation of
    *  the support vector machine.
-   *  Default = 1.</pre>
+   *  Default = 1.
+   * </pre>
    * 
-   * <pre> -Y &lt;percent rate of elimination&gt;
+   * <pre>
+   * -Y &lt;percent rate of elimination&gt;
    *  Specify the percentage rate of attributes to
    *  elimination per invocation of
    *  the support vector machine.
    *  Trumps constant rate (above threshold).
-   *  Default = 0.</pre>
+   *  Default = 0.
+   * </pre>
    * 
-   * <pre> -Z &lt;threshold for percent elimination&gt;
+   * <pre>
+   * -Z &lt;threshold for percent elimination&gt;
    *  Specify the threshold below which 
    *  percentage attribute elimination
-   *  reverts to the constant method.</pre>
+   *  reverts to the constant method.
+   * </pre>
    * 
-   * <pre> -P &lt;epsilon&gt;
+   * <pre>
+   * -P &lt;epsilon&gt;
    *  Specify the value of P (epsilon
    *  parameter) to pass on to the
    *  support vector machine.
-   *  Default = 1.0e-25</pre>
+   *  Default = 1.0e-25
+   * </pre>
    * 
-   * <pre> -T &lt;tolerance&gt;
+   * <pre>
+   * -T &lt;tolerance&gt;
    *  Specify the value of T (tolerance
    *  parameter) to pass on to the
    *  support vector machine.
-   *  Default = 1.0e-10</pre>
+   *  Default = 1.0e-10
+   * </pre>
    * 
-   * <pre> -C &lt;complexity&gt;
+   * <pre>
+   * -C &lt;complexity&gt;
    *  Specify the value of C (complexity
    *  parameter) to pass on to the
    *  support vector machine.
-   *  Default = 1.0</pre>
+   *  Default = 1.0
+   * </pre>
    * 
-   * <pre> -N
+   * <pre>
+   * -N
    *  Whether the SVM should 0=normalize/1=standardize/2=neither.
-   *  (default 0=normalize)</pre>
+   *  (default 0=normalize)
+   * </pre>
    * 
-   <!-- options-end -->
-   *
+   * <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an error occurs
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     String optionString;
 
@@ -363,7 +368,8 @@ public class SVMAttributeEval
 
     optionString = Utils.getOption('N', options);
     if (optionString.length() != 0) {
-      setFilterType(new SelectedTag(Integer.parseInt(optionString), SMO.TAGS_FILTER));
+      setFilterType(new SelectedTag(Integer.parseInt(optionString),
+        SMO.TAGS_FILTER));
     } else {
       setFilterType(new SelectedTag(SMO.FILTER_NORMALIZE, SMO.TAGS_FILTER));
     }
@@ -373,47 +379,43 @@ public class SVMAttributeEval
 
   /**
    * Gets the current settings of SVMAttributeEval
-   *
-   * @return an array of strings suitable for passing to setOptions() 
+   * 
+   * @return an array of strings suitable for passing to setOptions()
    */
+  @Override
   public String[] getOptions() {
-    String[] options = new String[14];
-    int current = 0;
 
-    options[current++] = "-X";
-    options[current++] = "" + getAttsToEliminatePerIteration();
+    Vector<String> options = new Vector<String>();
 
-    options[current++] = "-Y";
-    options[current++] = "" + getPercentToEliminatePerIteration();
+    options.add("-X");
+    options.add("" + getAttsToEliminatePerIteration());
 
-    options[current++] = "-Z";
-    options[current++] = "" + getPercentThreshold();
-                
-    options[current++] = "-P";
-    options[current++] = "" + getEpsilonParameter();
+    options.add("-Y");
+    options.add("" + getPercentToEliminatePerIteration());
 
-    options[current++] = "-T";
-    options[current++] = "" + getToleranceParameter();          
+    options.add("-Z");
+    options.add("" + getPercentThreshold());
 
-    options[current++] = "-C";
-    options[current++] = "" + getComplexityParameter();         
+    options.add("-P");
+    options.add("" + getEpsilonParameter());
 
-    options[current++] = "-N";
-    options[current++] = "" + m_smoFilterType;          
+    options.add("-T");
+    options.add("" + getToleranceParameter());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    options.add("-C");
+    options.add("" + getComplexityParameter());
 
-    return options;
+    options.add("-N");
+    options.add("" + m_smoFilterType);
+
+    return options.toArray(new String[0]);
   }
 
-  //________________________________________________________________________
+  // ________________________________________________________________________
 
   /**
-   * Returns a tip text for this property suitable for display in the
-   * GUI
-   *
+   * Returns a tip text for this property suitable for display in the GUI
+   * 
    * @return tip text string describing this property
    */
   public String attsToEliminatePerIterationTipText() {
@@ -421,9 +423,8 @@ public class SVMAttributeEval
   }
 
   /**
-   * Returns a tip text for this property suitable for display in the
-   * GUI
-   *
+   * Returns a tip text for this property suitable for display in the GUI
+   * 
    * @return tip text string describing this property
    */
   public String percentToEliminatePerIterationTipText() {
@@ -431,9 +432,8 @@ public class SVMAttributeEval
   }
 
   /**
-   * Returns a tip text for this property suitable for display in the
-   * GUI
-   *
+   * Returns a tip text for this property suitable for display in the GUI
+   * 
    * @return tip text string describing this property
    */
   public String percentThresholdTipText() {
@@ -441,9 +441,8 @@ public class SVMAttributeEval
   }
 
   /**
-   * Returns a tip text for this property suitable for display in the
-   * GUI
-   *
+   * Returns a tip text for this property suitable for display in the GUI
+   * 
    * @return tip text string describing this property
    */
   public String epsilonParameterTipText() {
@@ -451,9 +450,8 @@ public class SVMAttributeEval
   }
 
   /**
-   * Returns a tip text for this property suitable for display in the
-   * GUI
-   *
+   * Returns a tip text for this property suitable for display in the GUI
+   * 
    * @return tip text string describing this property
    */
   public String toleranceParameterTipText() {
@@ -461,9 +459,8 @@ public class SVMAttributeEval
   }
 
   /**
-   * Returns a tip text for this property suitable for display in the
-   * GUI
-   *
+   * Returns a tip text for this property suitable for display in the GUI
+   * 
    * @return tip text string describing this property
    */
   public String complexityParameterTipText() {
@@ -471,20 +468,19 @@ public class SVMAttributeEval
   }
 
   /**
-   * Returns a tip text for this property suitable for display in the
-   * GUI
-   *
+   * Returns a tip text for this property suitable for display in the GUI
+   * 
    * @return tip text string describing this property
    */
   public String filterTypeTipText() {
     return "filtering used by the SVM";
   }
 
-  //________________________________________________________________________
+  // ________________________________________________________________________
 
   /**
    * Set the constant rate of attribute elimination per iteration
-   *
+   * 
    * @param cRate the constant rate of attribute elimination per iteration
    */
   public void setAttsToEliminatePerIteration(int cRate) {
@@ -493,7 +489,7 @@ public class SVMAttributeEval
 
   /**
    * Get the constant rate of attribute elimination per iteration
-   *
+   * 
    * @return the constant rate of attribute elimination per iteration
    */
   public int getAttsToEliminatePerIteration() {
@@ -502,7 +498,7 @@ public class SVMAttributeEval
 
   /**
    * Set the percentage of attributes to eliminate per iteration
-   *
+   * 
    * @param pRate percent of attributes to eliminate per iteration
    */
   public void setPercentToEliminatePerIteration(int pRate) {
@@ -511,7 +507,7 @@ public class SVMAttributeEval
 
   /**
    * Get the percentage rate of attribute elimination per iteration
-   *
+   * 
    * @return the percentage rate of attribute elimination per iteration
    */
   public int getPercentToEliminatePerIteration() {
@@ -519,9 +515,9 @@ public class SVMAttributeEval
   }
 
   /**
-   * Set the threshold below which percentage elimination reverts to
-   * constant elimination.
-   *
+   * Set the threshold below which percentage elimination reverts to constant
+   * elimination.
+   * 
    * @param pThresh percent of attributes to eliminate per iteration
    */
   public void setPercentThreshold(int pThresh) {
@@ -529,9 +525,9 @@ public class SVMAttributeEval
   }
 
   /**
-   * Get the threshold below which percentage elimination reverts to 
-   * constant elimination.
-   *
+   * Get the threshold below which percentage elimination reverts to constant
+   * elimination.
+   * 
    * @return the threshold below which percentage elimination stops
    */
   public int getPercentThreshold() {
@@ -540,7 +536,7 @@ public class SVMAttributeEval
 
   /**
    * Set the value of P for SMO
-   *
+   * 
    * @param svmP the value of P
    */
   public void setEpsilonParameter(double svmP) {
@@ -549,16 +545,16 @@ public class SVMAttributeEval
 
   /**
    * Get the value of P used with SMO
-   *
+   * 
    * @return the value of P
    */
   public double getEpsilonParameter() {
     return m_smoPParameter;
   }
-        
+
   /**
    * Set the value of T for SMO
-   *
+   * 
    * @param svmT the value of T
    */
   public void setToleranceParameter(double svmT) {
@@ -567,17 +563,16 @@ public class SVMAttributeEval
 
   /**
    * Get the value of T used with SMO
-   *
+   * 
    * @return the value of T
    */
   public double getToleranceParameter() {
     return m_smoTParameter;
   }
 
-
   /**
    * Set the value of C for SMO
-   *
+   * 
    * @param svmC the value of C
    */
   public void setComplexityParameter(double svmC) {
@@ -586,7 +581,7 @@ public class SVMAttributeEval
 
   /**
    * Get the value of C used with SMO
-   *
+   * 
    * @return the value of C
    */
   public double getComplexityParameter() {
@@ -595,11 +590,11 @@ public class SVMAttributeEval
 
   /**
    * The filtering mode to pass to SMO
-   *
+   * 
    * @param newType the new filtering mode
    */
   public void setFilterType(SelectedTag newType) {
-    
+
     if (newType.getTags() == SMO.TAGS_FILTER) {
       m_smoFilterType = newType.getSelectedTag().getID();
     }
@@ -607,7 +602,7 @@ public class SVMAttributeEval
 
   /**
    * Get the filtering mode passed to SMO
-   *
+   * 
    * @return the filtering mode
    */
   public SelectedTag getFilterType() {
@@ -615,93 +610,101 @@ public class SVMAttributeEval
     return new SelectedTag(m_smoFilterType, SMO.TAGS_FILTER);
   }
 
-  //________________________________________________________________________
+  // ________________________________________________________________________
 
   /**
    * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this evaluator
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
-    Capabilities        result;
-    
+    Capabilities result;
+
     result = new SMO().getCapabilities();
-    
+
     result.setOwner(this);
-    
+
     // only binary attributes are allowed, otherwise the NominalToBinary
     // filter inside SMO will increase the number of attributes which in turn
     // will lead to ArrayIndexOutOfBounds-Exceptions.
     result.disable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.BINARY_ATTRIBUTES);
     result.disableAllAttributeDependencies();
-    
+
     return result;
   }
 
   /**
    * Initializes the evaluator.
-   *
-   * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
-   * generated successfully
+   * 
+   * @param data set of instances serving as training data
+   * @throws Exception if the evaluator has not been generated successfully
    */
+  @Override
   public void buildEvaluator(Instances data) throws Exception {
     // can evaluator handle data?
     getCapabilities().testWithFail(data);
 
-    //System.out.println("Class attribute: " + data.attribute(data.classIndex()).name());
-    // Check settings           
+    // System.out.println("Class attribute: " +
+    // data.attribute(data.classIndex()).name());
+    // Check settings
     m_numToEliminate = (m_numToEliminate > 1) ? m_numToEliminate : 1;
-    m_percentToEliminate = (m_percentToEliminate < 100) ? m_percentToEliminate : 100;
-    m_percentToEliminate = (m_percentToEliminate > 0) ? m_percentToEliminate : 0;
-    m_percentThreshold = (m_percentThreshold < data.numAttributes()) ? m_percentThreshold : data.numAttributes() - 1;
+    m_percentToEliminate = (m_percentToEliminate < 100) ? m_percentToEliminate
+      : 100;
+    m_percentToEliminate = (m_percentToEliminate > 0) ? m_percentToEliminate
+      : 0;
+    m_percentThreshold = (m_percentThreshold < data.numAttributes()) ? m_percentThreshold
+      : data.numAttributes() - 1;
     m_percentThreshold = (m_percentThreshold > 0) ? m_percentThreshold : 0;
 
     // Get ranked attributes for each class seperately, one-vs-all
     int[][] attScoresByClass;
     int numAttr = data.numAttributes() - 1;
-    if(data.numClasses()>2) {
+    if (data.numClasses() > 2) {
       attScoresByClass = new int[data.numClasses()][numAttr];
       for (int i = 0; i < data.numClasses(); i++) {
         attScoresByClass[i] = rankBySVM(i, data);
       }
-    }
-    else {
+    } else {
       attScoresByClass = new int[1][numAttr];
       attScoresByClass[0] = rankBySVM(0, data);
     }
 
-    // Cycle through class-specific ranked lists, poping top one off for each class
-    // and adding it to the overall ranked attribute list if it's not there already
-    ArrayList ordered = new ArrayList(numAttr);
+    // Cycle through class-specific ranked lists, poping top one off for each
+    // class
+    // and adding it to the overall ranked attribute list if it's not there
+    // already
+    ArrayList<Integer> ordered = new ArrayList<Integer>(numAttr);
     for (int i = 0; i < numAttr; i++) {
-      for (int j = 0; j < (data.numClasses()>2 ? data.numClasses() : 1); j++) {
+      for (int j = 0; j < (data.numClasses() > 2 ? data.numClasses() : 1); j++) {
         Integer rank = new Integer(attScoresByClass[j][i]);
-        if (!ordered.contains(rank))
+        if (!ordered.contains(rank)) {
           ordered.add(rank);
+        }
       }
     }
     m_attScores = new double[data.numAttributes()];
-    Iterator listIt = ordered.iterator();
-    for (double i = (double) numAttr; listIt.hasNext(); i = i - 1.0) {
-      m_attScores[((Integer) listIt.next()).intValue()] = i;
+    Iterator<Integer> listIt = ordered.iterator();
+    for (double i = numAttr; listIt.hasNext(); i = i - 1.0) {
+      m_attScores[listIt.next().intValue()] = i;
     }
   }
 
   /**
-   * Get SVM-ranked attribute indexes (best to worst) selected for
-   * the class attribute indexed by classInd (one-vs-all).
+   * Get SVM-ranked attribute indexes (best to worst) selected for the class
+   * attribute indexed by classInd (one-vs-all).
    */
   private int[] rankBySVM(int classInd, Instances data) {
     // Holds a mapping into the original array of attribute indices
     int[] origIndices = new int[data.numAttributes()];
-    for (int i = 0; i < origIndices.length; i++)
+    for (int i = 0; i < origIndices.length; i++) {
       origIndices[i] = i;
-    
+    }
+
     // Count down of number of attributes remaining
-    int numAttrLeft = data.numAttributes()-1;
+    int numAttrLeft = data.numAttributes() - 1;
     // Ranked attribute indices for this class, one vs.all (highest->lowest)
     int[] attRanks = new int[numAttrLeft];
 
@@ -712,7 +715,7 @@ public class SVMAttributeEval
       filter.setValueIndex(classInd);
       filter.setInputFormat(data);
       Instances trainCopy = Filter.useFilter(data, filter);
-      double pctToElim = ((double) m_percentToEliminate) / 100.0;
+      double pctToElim = (m_percentToEliminate) / 100.0;
       while (numAttrLeft > 0) {
         int numToElim;
         if (pctToElim > 0) {
@@ -723,20 +726,22 @@ public class SVMAttributeEval
             numToElim = numAttrLeft - m_percentThreshold;
           }
         } else {
-          numToElim = (numAttrLeft >= m_numToEliminate) ? m_numToEliminate : numAttrLeft;
+          numToElim = (numAttrLeft >= m_numToEliminate) ? m_numToEliminate
+            : numAttrLeft;
         }
-        
+
         // Build the linear SVM with default parameters
         SMO smo = new SMO();
-                                
-        // SMO seems to get stuck if data not normalised when few attributes remain
+
+        // SMO seems to get stuck if data not normalised when few attributes
+        // remain
         // smo.setNormalizeData(numAttrLeft < 40);
         smo.setFilterType(new SelectedTag(m_smoFilterType, SMO.TAGS_FILTER));
         smo.setEpsilon(m_smoPParameter);
         smo.setToleranceParameter(m_smoTParameter);
         smo.setC(m_smoCParameter);
         smo.buildClassifier(trainCopy);
-                                
+
         // Find the attribute with maximum weight^2
         double[] weightsSparse = smo.sparseWeights()[0][1];
         int[] indicesSparse = smo.sparseIndices()[0][1];
@@ -755,15 +760,14 @@ public class SVMAttributeEval
           eliminated[minWeightIndex] = true;
           weights[minWeightIndex] = Double.MAX_VALUE;
         }
-                                
-        // Delete the worst attributes. 
-        weka.filters.unsupervised.attribute.Remove delTransform =
-          new weka.filters.unsupervised.attribute.Remove();
+
+        // Delete the worst attributes.
+        weka.filters.unsupervised.attribute.Remove delTransform = new weka.filters.unsupervised.attribute.Remove();
         delTransform.setInvertSelection(false);
         delTransform.setAttributeIndicesArray(featArray);
         delTransform.setInputFormat(trainCopy);
         trainCopy = Filter.useFilter(trainCopy, delTransform);
-                                
+
         // Update the array of remaining attribute indices
         int[] temp = new int[origIndices.length - numToElim];
         int k = 0;
@@ -773,10 +777,10 @@ public class SVMAttributeEval
           }
         }
         origIndices = temp;
-      }                 
+      }
       // Carefully handle all exceptions
     } catch (Exception e) {
-      e.printStackTrace();                      
+      e.printStackTrace();
     }
     return attRanks;
   }
@@ -789,20 +793,23 @@ public class SVMAttributeEval
   }
 
   /**
-   * Evaluates an attribute by returning the rank of the square of its coefficient in a
-   * linear support vector machine.
-   *
+   * Evaluates an attribute by returning the rank of the square of its
+   * coefficient in a linear support vector machine.
+   * 
    * @param attribute the index of the attribute to be evaluated
    * @throws Exception if the attribute could not be evaluated
    */
+  @Override
   public double evaluateAttribute(int attribute) throws Exception {
     return m_attScores[attribute];
   }
 
   /**
    * Return a description of the evaluator
+   * 
    * @return description as a string
    */
+  @Override
   public String toString() {
 
     StringBuffer text = new StringBuffer();
@@ -815,19 +822,20 @@ public class SVMAttributeEval
     text.append("\n");
     return text.toString();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param args the options
    */
   public static void main(String[] args) {

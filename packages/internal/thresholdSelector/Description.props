@@ -9,7 +9,7 @@ PackageName=thresholdSelector
 Version=1.0.3
 
 #Date
-Date=2013-11-14
+Date=2013-12-11
 
 # Title (required)
 Title=A metaclassifier that selecting a mid-point threshold on the probability output by a Classifier.

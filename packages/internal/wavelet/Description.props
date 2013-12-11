@@ -9,7 +9,7 @@ PackageName=wavelet
 Version=1.0.2
 
 #Date
-Date=2012-03-20
+Date=2013-12-11
 
 # Title (required)
 Title= A filter for wavelet transformation.
