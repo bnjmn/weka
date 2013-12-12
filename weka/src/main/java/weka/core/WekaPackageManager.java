@@ -917,7 +917,7 @@ public class WekaPackageManager {
    * @param verbose true if loading progress should be output
    */
   public static synchronized void loadPackages(boolean verbose) {
-    loadPackages(verbose, true, true);
+    loadPackages(verbose, false, true);
   }
 
   /**
