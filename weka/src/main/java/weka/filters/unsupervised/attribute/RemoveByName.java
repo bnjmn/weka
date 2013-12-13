@@ -91,7 +91,7 @@ public class RemoveByName extends SimpleStreamFilter {
   @Override
   public String globalInfo() {
     return "Removes attributes based on a regular expression matched against "
-      + "their names.";
+      + "their names but will not remove the class attribute.";
   }
 
   /**
@@ -260,23 +260,23 @@ public class RemoveByName extends SimpleStreamFilter {
   @Override
   protected Instances determineOutputFormat(Instances inputFormat)
     throws Exception {
-    Vector<Integer> indices;
-    int[] attributes;
-    int i;
 
     // determine indices
-    indices = new Vector<Integer>();
-    for (i = 0; i < inputFormat.numAttributes(); i++) {
-      // skip class
-      if (i == inputFormat.classIndex()) {
+    Vector<Integer> indices = new Vector<Integer>();
+    for (int i = 0; i < inputFormat.numAttributes(); i++) {
+      // always leave class if set
+      if ((i == inputFormat.classIndex())) {
+        if (getInvertSelection()) {
+          indices.add(i);
+        }
         continue;
       }
       if (inputFormat.attribute(i).name().matches(m_Expression)) {
         indices.add(i);
       }
     }
-    attributes = new int[indices.size()];
-    for (i = 0; i < indices.size(); i++) {
+    int[] attributes = new int[indices.size()];
+    for (int i = 0; i < indices.size(); i++) {
       attributes[i] = indices.get(i);
     }
 
