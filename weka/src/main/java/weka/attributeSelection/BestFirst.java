@@ -39,7 +39,8 @@ import weka.core.Tag;
 import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start --> BestFirst:<br/>
+ <!-- globalinfo-start --> 
+ * BestFirst:<br/>
  * <br/>
  * Searches the space of attribute subsets by greedy hillclimbing augmented with
  * a backtracking facility. Setting the number of consecutive non-improving
@@ -78,7 +79,7 @@ import weka.core.Utils;
  *  attributes in the data set. (default = 1)
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz) Martin Guetlein (cashing merit of
  *         expanded nodes)
@@ -353,7 +354,8 @@ public class BestFirst extends ASSearch implements OptionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start --> 
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -380,7 +382,7 @@ public class BestFirst extends ASSearch implements OptionHandler,
    *  attributes in the data set. (default = 1)
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -496,7 +498,8 @@ public class BestFirst extends ASSearch implements OptionHandler,
    *         explorer/experimenter gui
    */
   public String searchTerminationTipText() {
-    return "Set the amount of backtracking. Specify the number of ";
+    return "Specify the number of consecutive non-improving nodes to allow "
+      + "before terminating the search.";
   }
 
   /**
