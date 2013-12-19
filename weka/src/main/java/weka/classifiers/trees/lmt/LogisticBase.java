@@ -25,6 +25,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SimpleLinearRegression;
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
@@ -543,13 +544,16 @@ public class LogisticBase extends AbstractClassifier implements
     throws Exception {
 
     SimpleLinearRegression[] linearRegressionForEachClass = new SimpleLinearRegression[m_numClasses];
+
+    // Store weights
+    double[] oldWeights = new double[trainNumeric.numInstances()];
+    for (int i = 0; i < oldWeights.length; i++) {
+      oldWeights[i] = trainNumeric.instance(i).weight();
+    }
+
     for (int j = 0; j < m_numClasses; j++) {
       // Keep track of sum of weights
-      double[] weights = new double[trainNumeric.numInstances()];
       double weightSum = 0.0;
-
-      // make copy of data (need to save the weights)
-      Instances boostData = new Instances(trainNumeric);
 
       for (int i = 0; i < trainNumeric.numInstances(); i++) {
 
@@ -560,39 +564,49 @@ public class LogisticBase extends AbstractClassifier implements
         double w = (actual - p) / z;
 
         // set values for instance
-        Instance current = boostData.instance(i);
-        current.setValue(boostData.classIndex(), z);
-        current.setWeight(current.weight() * w);
+        Instance current = trainNumeric.instance(i);
+        current.setValue(trainNumeric.classIndex(), z);
+        current.setWeight(oldWeights[i] * w);
 
-        weights[i] = current.weight();
         weightSum += current.weight();
       }
 
-      Instances instancesCopy = new Instances(boostData);
+      Instances instancesCopy = trainNumeric;
 
       if (weightSum > 0) {
+
         // Only the (1-beta)th quantile of instances are sent to the base
         // classifier
         if (m_weightTrimBeta > 0) {
+
+          // Need to make an empty dataset
+          instancesCopy = new Instances(trainNumeric,
+            trainNumeric.numInstances());
+
+          // Get weights
+          double[] weights = new double[oldWeights.length];
+          for (int i = 0; i < oldWeights.length; i++) {
+            weights[i] = trainNumeric.instance(i).weight();
+          }
+
           double weightPercentage = 0.0;
-          int[] weightsOrder = new int[trainNumeric.numInstances()];
-          weightsOrder = Utils.sort(weights);
-          instancesCopy.delete();
+          int[] weightsOrder = Utils.sort(weights);
 
           for (int i = weightsOrder.length - 1; (i >= 0)
             && (weightPercentage < (1 - m_weightTrimBeta)); i--) {
-            instancesCopy.add(boostData.instance(weightsOrder[i]));
+            instancesCopy.add(trainNumeric.instance(weightsOrder[i]));
             weightPercentage += (weights[weightsOrder[i]] / weightSum);
 
           }
+
+          // Update the sum of weights
+          weightSum = instancesCopy.sumOfWeights();
         }
 
         // Scale the weights
-        weightSum = instancesCopy.sumOfWeights();
-        for (int i = 0; i < instancesCopy.numInstances(); i++) {
-          Instance current = instancesCopy.instance(i);
-          current.setWeight(current.weight() * instancesCopy.numInstances()
-            / weightSum);
+        double multiplier = instancesCopy.numInstances() / weightSum;
+        for (Instance current : instancesCopy) {
+          current.setWeight(current.weight() * multiplier);
         }
       }
 
@@ -606,6 +620,11 @@ public class LogisticBase extends AbstractClassifier implements
         .foundUsefulAttribute();
       if (!foundAttribute) {
         // could not fit simple regression function
+
+        // Restore weights
+        for (int i = 0; i < oldWeights.length; i++) {
+          trainNumeric.instance(i).setWeight(oldWeights[i]);
+        }
         return false;
       }
     }
@@ -636,6 +655,11 @@ public class LogisticBase extends AbstractClassifier implements
     for (int i = 0; i < trainYs.length; i++) {
       probs[i] = probs(trainFs[i]);
     }
+
+    // Restore weights
+    for (int i = 0; i < oldWeights.length; i++) {
+      trainNumeric.instance(i).setWeight(oldWeights[i]);
+    }
     return true;
   }
 
@@ -656,6 +680,50 @@ public class LogisticBase extends AbstractClassifier implements
       }
     }
     return classifiers;
+  }
+
+  /**
+   * Private class implementing a DenseInstance with an unsafe setValue()
+   * operation.
+   */
+  private class UnsafeInstance extends DenseInstance {
+
+    /**
+     * Added ID to avoid warning
+     */
+    private static final long serialVersionUID = 3210674215118962869L;
+
+    /**
+     * The constructor.
+     * 
+     * @param vals The instance whose value we want to copy.
+     */
+    public UnsafeInstance(Instance vals) {
+
+      super(vals.numAttributes());
+      for (int i = 0; i < vals.numAttributes(); i++) {
+        m_AttValues[i] = vals.value(i);
+      }
+      m_Weight = vals.weight();
+    }
+
+    /**
+     * Unsafe setValue() method.
+     */
+    @Override
+    public void setValue(int attIndex, double value) {
+
+      m_AttValues[attIndex] = value;
+    }
+
+    /**
+     * We need a copy method that doesn't do anything...
+     */
+    @Override
+    public Object copy() {
+
+      return this;
+    }
   }
 
   /**
@@ -681,7 +749,7 @@ public class LogisticBase extends AbstractClassifier implements
     Instances numericData = new Instances(m_numericDataHeader,
       data.numInstances());
     for (Instance inst : data) {
-      numericData.add(inst);
+      numericData.add(new UnsafeInstance(inst));
     }
 
     return numericData;
