@@ -23,7 +23,6 @@ package weka.classifiers.trees.lmt;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.SimpleLinearRegression;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -612,8 +611,6 @@ public class LogisticBase extends AbstractClassifier implements
 
       // fit simple regression function
       linearRegressionForEachClass[j] = new SimpleLinearRegression();
-      linearRegressionForEachClass[j].setSuppressErrorMessage(true);
-      linearRegressionForEachClass[j].setDoNotCheckCapabilities(true);
       linearRegressionForEachClass[j].buildClassifier(instancesCopy);
 
       boolean foundAttribute = linearRegressionForEachClass[j]
@@ -674,8 +671,7 @@ public class LogisticBase extends AbstractClassifier implements
     for (int j = 0; j < m_numClasses; j++) {
       for (int i = 0; i < m_numericDataHeader.numAttributes(); i++) {
         if (i != m_numericDataHeader.classIndex()) {
-          classifiers[j][i] = new SimpleLinearRegression(m_numericDataHeader,
-            i, 0, 0);
+          classifiers[j][i] = new SimpleLinearRegression(i, 0, 0);
         }
       }
     }

@@ -26,7 +26,6 @@ import java.util.Comparator;
 import java.util.Vector;
 
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.SimpleLinearRegression;
 import weka.classifiers.trees.j48.ClassifierSplitModel;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.core.Instance;
