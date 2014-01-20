@@ -1133,57 +1133,64 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
   public boolean runJob() throws DistributedWekaException {
 
     boolean success = true;
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
-      setJobStatus(JobStatus.RUNNING);
-
-      if (!initializeAndRunArffJob()) {
-        return false;
-      }
-
-      // complete the configuration of this job (for each iteration)
-      for (int i = 0; i < m_numIterations; i++) {
-        success = performIteration(i, true, null);
-
-        if (!success) {
-          statusMessage("Weka classifier job failed - check logs on Hadoop");
-          logMessage("Weka classifier job failed - check logs on Hadoop");
-          break;
-        }
-      }
-
-      setJobStatus(success ? JobStatus.FINISHED : JobStatus.FAILED);
-    } catch (Exception ex) {
-      setJobStatus(JobStatus.FAILED);
-      throw new DistributedWekaException(ex);
-    }
-
-    if (success) {
-      // grab the final classifier out of HDFS
-      Configuration conf = new Configuration();
-      m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
       try {
-        FileSystem fs = FileSystem.get(conf);
-        Path p = new Path(m_hdfsPathToAggregatedClassifier);
-        FSDataInputStream di = fs.open(p);
-        ObjectInputStream ois = null;
-        try {
-          ois = new ObjectInputStream(new BufferedInputStream(di));
-          Object classifier = ois.readObject();
-          ois.close();
-          ois = null;
+        setJobStatus(JobStatus.RUNNING);
 
-          m_finalClassifier = (Classifier) classifier;
-        } finally {
-          if (ois != null) {
-            ois.close();
+        if (!initializeAndRunArffJob()) {
+          return false;
+        }
+
+        // complete the configuration of this job (for each iteration)
+        for (int i = 0; i < m_numIterations; i++) {
+          success = performIteration(i, true, null);
+
+          if (!success) {
+            statusMessage("Weka classifier job failed - check logs on Hadoop");
+            logMessage("Weka classifier job failed - check logs on Hadoop");
+            break;
           }
         }
 
-      } catch (IOException e) {
-        throw new DistributedWekaException(e);
-      } catch (ClassNotFoundException e) {
-        throw new DistributedWekaException(e);
+        setJobStatus(success ? JobStatus.FINISHED : JobStatus.FAILED);
+      } catch (Exception ex) {
+        setJobStatus(JobStatus.FAILED);
+        throw new DistributedWekaException(ex);
       }
+
+      if (success) {
+        // grab the final classifier out of HDFS
+        Configuration conf = new Configuration();
+        m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
+        try {
+          FileSystem fs = FileSystem.get(conf);
+          Path p = new Path(m_hdfsPathToAggregatedClassifier);
+          FSDataInputStream di = fs.open(p);
+          ObjectInputStream ois = null;
+          try {
+            ois = new ObjectInputStream(new BufferedInputStream(di));
+            Object classifier = ois.readObject();
+            ois.close();
+            ois = null;
+
+            m_finalClassifier = (Classifier) classifier;
+          } finally {
+            if (ois != null) {
+              ois.close();
+            }
+          }
+
+        } catch (IOException e) {
+          throw new DistributedWekaException(e);
+        } catch (ClassNotFoundException e) {
+          throw new DistributedWekaException(e);
+        }
+      }
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
     }
 
     return success;
