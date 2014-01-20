@@ -360,38 +360,6 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
       url += m_delegate.getFileExtension();
     }
 
-    //    if (!url.toLowerCase().startsWith("hdfs://")) { //$NON-NLS-1$
-    //      url = "hdfs://" + m_config.getHDFSHost() + ":" + m_config.getHDFSPort() //$NON-NLS-1$ //$NON-NLS-2$
-    //        + (m_hdfsPath.startsWith("/") ? m_hdfsPath : "/" + m_hdfsPath); //$NON-NLS-1$ //$NON-NLS-2$
-    //
-    //      if (url.endsWith("/")) { //$NON-NLS-1$
-    //        url += (DistributedJobConfig.isEmpty(m_filePrefix) ? "" : m_filePrefix); //$NON-NLS-1$
-    //        url += (DistributedJobConfig.isEmpty(m_relationNamePartOfFilename) ? "" //$NON-NLS-1$
-    // : m_relationNamePartOfFilename);
-    // } else {
-    // String namePart = url.substring(url.lastIndexOf('/') + 1, url.length());
-    // url = url.substring(0, url.lastIndexOf('/') + 1);
-    // if (!DistributedJobConfig.isEmpty(m_filePrefix)) {
-    // url += (m_filePrefix + namePart);
-    // } // else if
-    // // (!DistributedJobConfig.isEmpty(m_relationNamePartOfFilename)) {
-    // // url += (m_relationNamePartOfFilename + namePart);
-    // // }
-    // else {
-    // url += namePart;
-    // }
-    // }
-    //
-    // try {
-    // url = m_env.substitute(url);
-    // } catch (Exception ex) {
-    // }
-    //
-    // if (!url.toLowerCase().endsWith(m_delegate.getFileExtension())) {
-    // url += m_delegate.getFileExtension();
-    // }
-    // }
-
     return url;
   }
 
@@ -425,33 +393,41 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     }
 
     if (!m_incrementalInit) {
-      String url = constructFinalPath();
-      Path pt = new Path(url);
-      Configuration conf = new Configuration();
+      ClassLoader orig = Thread.currentThread().getContextClassLoader();
 
-      if (!DistributedJobConfig.isEmpty(getDFSReplicationFactor())) {
-        m_config.setUserSuppliedProperty("dfs.replication", //$NON-NLS-1$
-          getDFSReplicationFactor());
+      try {
+        Thread.currentThread().setContextClassLoader(
+          this.getClass().getClassLoader());
+        String url = constructFinalPath();
+        Path pt = new Path(url);
+        Configuration conf = new Configuration();
+
+        if (!DistributedJobConfig.isEmpty(getDFSReplicationFactor())) {
+          m_config.setUserSuppliedProperty("dfs.replication", //$NON-NLS-1$
+            getDFSReplicationFactor());
+        }
+        // this makes sure that any user-supplied properties (such as
+        // dfs.replication) get set on the Configuration
+        m_config.configureForHadoop(conf, m_env);
+
+        // conf.set(HDFSConfig.HADOOP_FS_DEFAULT_NAME,
+        //        HDFSConfig.constructHostURL(m_config, m_env)); //$NON-NLS-1$
+
+        FileSystem fs = FileSystem.get(conf);
+        // if the file already exists delete it.
+        if (fs.exists(pt)) {
+          // remove the file
+          fs.delete(pt, true);
+        }
+
+        FSDataOutputStream fout = fs.create(pt);
+        m_delegate.setRetrieval(INCREMENTAL);
+        m_delegate.setInstances(getInstances());
+        m_delegate.setDestination(fout);
+        m_incrementalInit = true;
+      } finally {
+        Thread.currentThread().setContextClassLoader(orig);
       }
-      // this makes sure that any user-supplied properties (such as
-      // dfs.replication) get set on the Configuration
-      m_config.configureForHadoop(conf, m_env);
-
-      // conf.set(HDFSConfig.HADOOP_FS_DEFAULT_NAME,
-      //        HDFSConfig.constructHostURL(m_config, m_env)); //$NON-NLS-1$
-
-      FileSystem fs = FileSystem.get(conf);
-      // if the file already exists delete it.
-      if (fs.exists(pt)) {
-        // remove the file
-        fs.delete(pt, true);
-      }
-
-      FSDataOutputStream fout = fs.create(pt);
-      m_delegate.setRetrieval(INCREMENTAL);
-      m_delegate.setInstances(getInstances());
-      m_delegate.setDestination(fout);
-      m_incrementalInit = true;
     }
 
     m_delegate.writeIncremental(inst);
@@ -477,7 +453,10 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
 
     String url = constructFinalPath();
 
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
       Path pt = new Path(url);
       Configuration conf = new Configuration();
 
@@ -506,6 +485,8 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
       setWriteMode(CANCEL);
     } catch (Exception ex) {
       throw new IOException(ex);
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
     }
   }
 

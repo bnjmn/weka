@@ -261,7 +261,10 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
     if (m_structure == null) {
       String url = constructURL();
 
+      ClassLoader orig = Thread.currentThread().getContextClassLoader();
       try {
+        Thread.currentThread().setContextClassLoader(
+          this.getClass().getClassLoader());
         Path pt = new Path(url);
         Configuration conf = new Configuration();
         conf.set(HDFSConfig.HADOOP_FS_DEFAULT_NAME,
@@ -283,6 +286,8 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
       } catch (java.net.ConnectException ce) {
         throw new StructureNotReadyException("Unable to connect to host "
           + m_config.getHDFSHost() + ":" + m_config.getHDFSPort());
+      } finally {
+        Thread.currentThread().setContextClassLoader(orig);
       }
     }
 
@@ -300,7 +305,10 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
 
     Instances result = null;
 
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
       String url = constructURL();
       Path pt = new Path(url);
 
@@ -324,6 +332,8 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
 
     } catch (Exception ex) {
       throw new IOException(ex);
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
     }
 
     m_structure = new Instances(result, 0);
