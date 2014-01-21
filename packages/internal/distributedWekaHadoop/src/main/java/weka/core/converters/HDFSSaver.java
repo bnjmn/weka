@@ -384,6 +384,8 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     }
   }
 
+  protected transient ClassLoader m_orig;
+
   @Override
   public void writeIncremental(Instance inst) throws IOException {
     // int writeMode = m_delegate.getWriteMode();
@@ -393,7 +395,7 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     }
 
     if (!m_incrementalInit) {
-      ClassLoader orig = Thread.currentThread().getContextClassLoader();
+      m_orig = Thread.currentThread().getContextClassLoader();
 
       try {
         Thread.currentThread().setContextClassLoader(
@@ -425,8 +427,11 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
         m_delegate.setInstances(getInstances());
         m_delegate.setDestination(fout);
         m_incrementalInit = true;
-      } finally {
-        Thread.currentThread().setContextClassLoader(orig);
+      } catch (IOException ex) {
+        if (m_orig != null) {
+          Thread.currentThread().setContextClassLoader(m_orig);
+        }
+        throw ex;
       }
     }
 
@@ -435,6 +440,10 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     if (inst == null) {
       // done - delegate will close the stream
       m_incrementalInit = false;
+
+      if (m_orig != null) {
+        Thread.currentThread().setContextClassLoader(m_orig);
+      }
     }
   }
 

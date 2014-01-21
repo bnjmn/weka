@@ -527,29 +527,26 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
 
   @Override
   public boolean runJob() throws DistributedWekaException {
-    ClassLoader orig = Thread.currentThread().getContextClassLoader();
-
-    Thread.currentThread().setContextClassLoader(
-      this.getClass().getClassLoader());
-    if (!DistributedJobConfig.isEmpty(getPathToExistingHeader())) {
-      try {
-        handleExistingHeaderFile();
-
-        // done!!
-        return true;
-      } catch (DistributedWekaException ex) {
-        logMessage("Unable to laod existing header file from '"
-          + getPathToExistingHeader() + "' (reason: " + ex.getMessage()
-          + "). Running job to create header...");
-      } finally {
-        Thread.currentThread().setContextClassLoader(orig);
-      }
-    }
-
     boolean success = true;
     m_finalHeader = null;
 
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
+      if (!DistributedJobConfig.isEmpty(getPathToExistingHeader())) {
+        try {
+          handleExistingHeaderFile();
+
+          // done!!
+          return true;
+        } catch (DistributedWekaException ex) {
+          logMessage("Unable to laod existing header file from '"
+            + getPathToExistingHeader() + "' (reason: " + ex.getMessage()
+            + "). Running job to create header...");
+        }
+      }
+
       setJobStatus(JobStatus.RUNNING);
 
       if (m_env == null) {
