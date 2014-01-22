@@ -52,6 +52,10 @@ public class WekaClassifierMapTaskBeanInfo extends SimpleBeanInfo {
         WekaClassifierMapTask.class);
       pds.add(p1);
 
+      p1 = new PropertyDescriptor("forceVotedEnsembleCreation",
+        WekaClassifierMapTask.class);
+      pds.add(p1);
+
       p1 = new PropertyDescriptor("useReservoirSamplingWhenBatchLearning",
         WekaClassifierMapTask.class);
       pds.add(p1);

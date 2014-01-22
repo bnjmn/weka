@@ -43,7 +43,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
   Serializable {
 
   /** Property key for specifying weka packages to use in the job */
-  public static final String WEKA_ADDITIONAL_PACKAGES_KEY = "weka.distributed.job.additional.packages";
+  public static final String WEKA_ADDITIONAL_PACKAGES_KEY = "*weka.distributed.job.additional.packages";
 
   /** For serialization */
   private static final long serialVersionUID = 1752660860796976806L;

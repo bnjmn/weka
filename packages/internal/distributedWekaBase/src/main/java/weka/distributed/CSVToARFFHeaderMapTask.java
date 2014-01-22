@@ -124,7 +124,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     MIN("min") {
       @Override
       public double valueFromAttribute(Attribute att) {
-        String value = att.value(SUM.ordinal());
+        String value = att.value(MIN.ordinal());
         return toValue(value, toString());
       }
 
@@ -1557,12 +1557,12 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
             tempR.setUpper(numFields - 1);
 
             int[] rangeIndexes = tempR.getSelection();
-            for (int i = 0; i < rangeIndexes.length; i++) {
+            for (int rangeIndexe : rangeIndexes) {
               // these specs should correspond with nominal attribute specs
               // above -
               // so the type should already be set for this
-              if (m_attributeTypes[rangeIndexes[i]] == TYPE.NOMINAL) {
-                m_nominalDefaultVals.put(rangeIndexes[i], label);
+              if (m_attributeTypes[rangeIndexe] == TYPE.NOMINAL) {
+                m_nominalDefaultVals.put(rangeIndexe, label);
               }
             }
           } catch (IllegalArgumentException e) {

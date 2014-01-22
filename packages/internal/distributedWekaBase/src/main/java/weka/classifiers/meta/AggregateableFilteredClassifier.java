@@ -75,7 +75,7 @@ public class AggregateableFilteredClassifier extends SingleClassifierEnhancer
   }
 
   @Override
-  public Enumeration listOptions() {
+  public Enumeration<Option> listOptions() {
     Vector<Option> options = new Vector<Option>();
 
     options.add(new Option("\tPath to pre-constructed filter to use.",
