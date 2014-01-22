@@ -96,6 +96,7 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
   /** Holds the options to the header task */
   protected String m_wekaCsvToArffMapTaskOpts = "";
 
+  /** ARFF job */
   protected ArffHeaderHadoopJob m_arffHeaderJob = new ArffHeaderHadoopJob();
 
   /** Full path to the final model in HDFS */
@@ -128,7 +129,7 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
    */
   protected String m_numInstancesPerDataChunk = "";
 
-  /** The main configuration */
+  /** The configuration for the randomized data chunk creation phase */
   protected MapReduceJobConfig m_randomizeConfig = new MapReduceJobConfig();
 
   /** The final classifier produced by this job */
@@ -792,19 +793,19 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
     String fileNameOnly = pathToHeader.substring(
       pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
 
-    StringBuilder randomizeMapOptions = new StringBuilder();
-
-    randomizeMapOptions.append("-arff-header").append(" ").append(fileNameOnly)
-      .append(" ");
+    List<String> randomizeMapOptions = new ArrayList<String>();
+    randomizeMapOptions.add("-arff-header");
+    randomizeMapOptions.add(fileNameOnly);
 
     if (!DistributedJobConfig.isEmpty(getClassAttribute())) {
-      randomizeMapOptions.append("-class").append(" ")
-        .append(environmentSubstitute(getClassAttribute())).append(" ");
+      randomizeMapOptions.add("-class");
+      randomizeMapOptions.add(environmentSubstitute(getClassAttribute()));
     }
 
     m_randomizeConfig.setUserSuppliedProperty(
       RandomizedDataChunkHadoopMapper.RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS,
-      environmentSubstitute(randomizeMapOptions.toString()));
+      environmentSubstitute(Utils.joinOptions(randomizeMapOptions
+        .toArray(new String[randomizeMapOptions.size()]))));
 
     // Need these for row parsing via open-csv
     m_randomizeConfig.setUserSuppliedProperty(
@@ -1036,25 +1037,25 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
     String fileNameOnly = pathToHeader.substring(
       pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
 
-    StringBuilder classifierMapOptions = new StringBuilder();
+    List<String> classifierMapOptions = new ArrayList<String>();
 
-    classifierMapOptions.append("-arff-header").append(" ")
-      .append(fileNameOnly).append(" ");
+    classifierMapOptions.add("-arff-header");
+    classifierMapOptions.add(fileNameOnly);
 
     if (!DistributedJobConfig.isEmpty(getClassAttribute())) {
-      classifierMapOptions.append("-class").append(" ")
-        .append(environmentSubstitute(getClassAttribute())).append(" ");
+      classifierMapOptions.add("-class");
+      classifierMapOptions.add(environmentSubstitute(getClassAttribute()));
     }
 
     if (!DistributedJobConfig.isEmpty(getPathToPreconstructedFilter())) {
       String filterFilenameOnly = handlePreconstructedFilter(conf);
 
-      classifierMapOptions.append("-preconstructed-filter").append(" ")
-        .append(filterFilenameOnly).append(" ");
+      classifierMapOptions.add("-preconstructed-filter");
+      classifierMapOptions.add(filterFilenameOnly);
     }
 
     if (iteration > 0) {
-      classifierMapOptions.append("-continue-training-updateable").append(" ");
+      classifierMapOptions.add("-continue-training-updateable");
 
       if (stageIntermediateClassifier) {
         // Add the model from the previous iteration to the
@@ -1064,20 +1065,32 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
         stageIntermediateClassifier(conf);
       }
 
-      classifierMapOptions.append("-model-file-name").append(" ")
-        .append(environmentSubstitute(getModelFileName())).append(" ");
+      classifierMapOptions.add("-model-file-name");
+      classifierMapOptions.add(environmentSubstitute(getModelFileName()));
     }
 
     if (!DistributedJobConfig.isEmpty(getClassifierMapTaskOptions())) {
-      classifierMapOptions
-        .append(environmentSubstitute(getClassifierMapTaskOptions()));
+      try {
+        String cmo = environmentSubstitute(getClassifierMapTaskOptions());
+        String[] parts = Utils.splitOptions(cmo);
+        for (String p : parts) {
+          classifierMapOptions.add(p);
+        }
+      } catch (Exception ex) {
+        throw new DistributedWekaException(ex);
+      }
     }
     m_mrConfig.setUserSuppliedProperty(
       WekaClassifierHadoopMapper.CLASSIFIER_MAP_TASK_OPTIONS,
-      environmentSubstitute(classifierMapOptions.toString()));
+      environmentSubstitute(Utils.joinOptions(classifierMapOptions
+        .toArray(new String[classifierMapOptions.size()]))));
 
-    setJobName(jobName + " - iteration: " + (iteration + 1) + " "
-      + classifierMapOptions.toString());
+    setJobName(jobName
+      + " - iteration: "
+      + (iteration + 1)
+      + " "
+      + Utils.joinOptions(classifierMapOptions
+        .toArray(new String[classifierMapOptions.size()])));
 
     // Need these for row parsing via open-csv
     m_mrConfig.setUserSuppliedProperty(
@@ -1120,57 +1133,64 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
   public boolean runJob() throws DistributedWekaException {
 
     boolean success = true;
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
-      setJobStatus(JobStatus.RUNNING);
-
-      if (!initializeAndRunArffJob()) {
-        return false;
-      }
-
-      // complete the configuration of this job (for each iteration)
-      for (int i = 0; i < m_numIterations; i++) {
-        success = performIteration(i, true, null);
-
-        if (!success) {
-          statusMessage("Weka classifier job failed - check logs on Hadoop");
-          logMessage("Weka classifier job failed - check logs on Hadoop");
-          break;
-        }
-      }
-
-      setJobStatus(success ? JobStatus.FINISHED : JobStatus.FAILED);
-    } catch (Exception ex) {
-      setJobStatus(JobStatus.FAILED);
-      throw new DistributedWekaException(ex);
-    }
-
-    if (success) {
-      // grab the final classifier out of HDFS
-      Configuration conf = new Configuration();
-      m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
       try {
-        FileSystem fs = FileSystem.get(conf);
-        Path p = new Path(m_hdfsPathToAggregatedClassifier);
-        FSDataInputStream di = fs.open(p);
-        ObjectInputStream ois = null;
-        try {
-          ois = new ObjectInputStream(new BufferedInputStream(di));
-          Object classifier = ois.readObject();
-          ois.close();
-          ois = null;
+        setJobStatus(JobStatus.RUNNING);
 
-          m_finalClassifier = (Classifier) classifier;
-        } finally {
-          if (ois != null) {
-            ois.close();
+        if (!initializeAndRunArffJob()) {
+          return false;
+        }
+
+        // complete the configuration of this job (for each iteration)
+        for (int i = 0; i < m_numIterations; i++) {
+          success = performIteration(i, true, null);
+
+          if (!success) {
+            statusMessage("Weka classifier job failed - check logs on Hadoop");
+            logMessage("Weka classifier job failed - check logs on Hadoop");
+            break;
           }
         }
 
-      } catch (IOException e) {
-        throw new DistributedWekaException(e);
-      } catch (ClassNotFoundException e) {
-        throw new DistributedWekaException(e);
+        setJobStatus(success ? JobStatus.FINISHED : JobStatus.FAILED);
+      } catch (Exception ex) {
+        setJobStatus(JobStatus.FAILED);
+        throw new DistributedWekaException(ex);
       }
+
+      if (success) {
+        // grab the final classifier out of HDFS
+        Configuration conf = new Configuration();
+        m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
+        try {
+          FileSystem fs = FileSystem.get(conf);
+          Path p = new Path(m_hdfsPathToAggregatedClassifier);
+          FSDataInputStream di = fs.open(p);
+          ObjectInputStream ois = null;
+          try {
+            ois = new ObjectInputStream(new BufferedInputStream(di));
+            Object classifier = ois.readObject();
+            ois.close();
+            ois = null;
+
+            m_finalClassifier = (Classifier) classifier;
+          } finally {
+            if (ois != null) {
+              ois.close();
+            }
+          }
+
+        } catch (IOException e) {
+          throw new DistributedWekaException(e);
+        } catch (ClassNotFoundException e) {
+          throw new DistributedWekaException(e);
+        }
+      }
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
     }
 
     return success;

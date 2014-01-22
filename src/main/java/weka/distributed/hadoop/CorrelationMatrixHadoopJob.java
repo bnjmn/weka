@@ -58,6 +58,13 @@ import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
 import distributed.hadoop.HDFSUtils;
 
+/**
+ * Hadoop job for constructing a correlation matrix. Has an option to use the
+ * matrix constructed for performing (a non-distributed) PCA analysis.
+ * 
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision$
+ */
 public class CorrelationMatrixHadoopJob extends HadoopJob implements
   TextProducer, CommandlineRunnable {
 
@@ -89,7 +96,7 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
   protected boolean m_runArffJob = true;
 
   /** Whether to run a PCA analysis after the job completes */
-  protected boolean m_runPCA = false;
+  protected boolean m_runPCA;
 
   /** Holds the textual PCA summary string (if PCA is run) */
   protected String m_pcaSummary = "";
@@ -448,140 +455,140 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       } catch (Exception ex) {
         throw new DistributedWekaException(ex);
       }
-
-      // for (int i = 0; i < headerI.numAttributes(); i++) {
-      // if (!headerI.attribute(i).isNumeric() && i != headerI.classIndex()) {
-      // throw new DistributedWekaException(
-      // "Correlation matrix job requires all numeric "
-      // + "attributes (appart from the class).");
-      // }
-      // }
     }
 
-    // add the aggregated ARFF header to the distributed cache
-    String pathToHeader = environmentSubstitute(m_arffHeaderJob
-      .getAggregatedHeaderPath());
-    Configuration conf = new Configuration();
-
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
-      HDFSUtils.addFileToDistributedCache(m_mrConfig.getHDFSConfig(), conf,
-        pathToHeader, m_env);
-    } catch (IOException e) {
-      throw new DistributedWekaException(e);
-    }
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
 
-    String fileNameOnly = pathToHeader.substring(
-      pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
+      // add the aggregated ARFF header to the distributed cache
+      String pathToHeader = environmentSubstitute(m_arffHeaderJob
+        .getAggregatedHeaderPath());
+      Configuration conf = new Configuration();
 
-    StringBuilder correlationMapOptions = new StringBuilder();
+      try {
+        HDFSUtils.addFileToDistributedCache(m_mrConfig.getHDFSConfig(), conf,
+          pathToHeader, m_env);
+      } catch (IOException e) {
+        throw new DistributedWekaException(e);
+      }
 
-    correlationMapOptions.append("-arff-header").append(" ")
-      .append(fileNameOnly).append(" ");
+      String fileNameOnly = pathToHeader.substring(
+        pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
 
-    if (!DistributedJobConfig.isEmpty(getClassAttribute())) {
-      correlationMapOptions.append("-class").append(" ")
-        .append(environmentSubstitute(getClassAttribute())).append(" ");
-    }
+      StringBuilder correlationMapOptions = new StringBuilder();
 
-    if (!DistributedJobConfig.isEmpty(getCorrelationMapTaskOptions())) {
-      correlationMapOptions
-        .append(environmentSubstitute(getCorrelationMapTaskOptions()));
-    }
+      correlationMapOptions.append("-arff-header").append(" ")
+        .append(fileNameOnly).append(" ");
 
-    m_mrConfig.setUserSuppliedProperty(
-      CorrelationMatrixHadoopMapper.CORRELATION_MATRIX_MAP_TASK_OPTIONS,
-      environmentSubstitute(correlationMapOptions.toString()));
+      if (!DistributedJobConfig.isEmpty(getClassAttribute())) {
+        correlationMapOptions.append("-class").append(" ")
+          .append(environmentSubstitute(getClassAttribute())).append(" ");
+      }
 
-    // Need these for row parsing via open-csv
-    m_mrConfig.setUserSuppliedProperty(
-      CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
-      environmentSubstitute(getCSVMapTaskOptions()));
+      if (!DistributedJobConfig.isEmpty(getCorrelationMapTaskOptions())) {
+        correlationMapOptions
+          .append(environmentSubstitute(getCorrelationMapTaskOptions()));
+      }
 
-    setJobName(getJobName() + " " + correlationMapOptions.toString());
+      m_mrConfig.setUserSuppliedProperty(
+        CorrelationMatrixHadoopMapper.CORRELATION_MATRIX_MAP_TASK_OPTIONS,
+        environmentSubstitute(correlationMapOptions.toString()));
 
-    try {
-      installWekaLibrariesInHDFS(conf);
-    } catch (IOException ex) {
-      setJobStatus(JobStatus.FAILED);
-      throw new DistributedWekaException(ex);
-    }
+      // Need these for row parsing via open-csv
+      m_mrConfig.setUserSuppliedProperty(
+        CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
+        environmentSubstitute(getCSVMapTaskOptions()));
 
-    Job job = null;
-    try {
-      // set the number of reducers equal to Math.min(numMatrixRows,
-      // (reduceMax * numNodesInCluster)
-      int numNodesAvail = 1;
-      String numNodesInCluster = environmentSubstitute(getNumNodesInCluster());
-      if (!DistributedJobConfig.isEmpty(numNodesInCluster)) {
-        try {
-          numNodesAvail = Integer.parseInt(numNodesInCluster);
-        } catch (NumberFormatException n) {
-          logMessage("WARNING: unable to parse the number of available nodes - setting to 1");
+      setJobName(getJobName() + " " + correlationMapOptions.toString());
+
+      try {
+        installWekaLibrariesInHDFS(conf);
+      } catch (IOException ex) {
+        setJobStatus(JobStatus.FAILED);
+        throw new DistributedWekaException(ex);
+      }
+
+      Job job = null;
+      try {
+        // set the number of reducers equal to Math.min(numMatrixRows,
+        // (reduceMax * numNodesInCluster)
+        int numNodesAvail = 1;
+        String numNodesInCluster = environmentSubstitute(getNumNodesInCluster());
+        if (!DistributedJobConfig.isEmpty(numNodesInCluster)) {
+          try {
+            numNodesAvail = Integer.parseInt(numNodesInCluster);
+          } catch (NumberFormatException n) {
+            logMessage("WARNING: unable to parse the number of available nodes - setting to 1");
+          }
         }
+        String reduceTasksMaxPerNode = conf
+          .get("mapred.tasktracker.reduce.tasks.maximum");
+        int reduceMax = 2;
+
+        // allow our configuration to override the defaults for the cluster
+        if (!DistributedJobConfig.isEmpty(m_mrConfig
+          .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
+          reduceTasksMaxPerNode = environmentSubstitute(m_mrConfig
+            .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
+        }
+
+        // num rows in matrix is equal to num attributes in the arff
+        // header file (possibly -1 if the class gets ignored)
+        int classAdjust = -1;
+        if (getCorrelationMapTaskOptions().contains("-keep-class")) {
+          classAdjust = 0;
+        }
+
+        // The header generated by the ARFF job
+        Instances header = m_arffHeaderJob.getFinalHeader();
+        header = CSVToARFFHeaderReduceTask.stripSummaryAtts(header);
+        int rowsInMatrix = header.numAttributes() + classAdjust;
+
+        if (!DistributedJobConfig.isEmpty(reduceTasksMaxPerNode)) {
+          reduceMax = Integer
+            .parseInt(environmentSubstitute(reduceTasksMaxPerNode));
+        }
+
+        int numReducers = Math.min(rowsInMatrix, reduceMax * numNodesAvail);
+
+        logMessage("Setting number of reducers for correlation job to: "
+          + numReducers);
+        m_mrConfig.setNumberOfReducers("" + numReducers);
+
+        job = m_mrConfig.configureForHadoop(getJobName(), conf, m_env);
+
+        cleanOutputDirectory(job);
+      } catch (ClassNotFoundException ex) {
+        setJobStatus(JobStatus.FAILED);
+        throw new DistributedWekaException(ex);
+      } catch (IOException ex) {
+        setJobStatus(JobStatus.FAILED);
+        throw new DistributedWekaException(ex);
       }
-      String reduceTasksMaxPerNode = conf
-        .get("mapred.tasktracker.reduce.tasks.maximum");
-      int reduceMax = 2;
 
-      // allow our configuration to override the defaults for the cluster
-      if (!DistributedJobConfig.isEmpty(m_mrConfig
-        .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
-        reduceTasksMaxPerNode = environmentSubstitute(m_mrConfig
-          .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
+      statusMessage("Submitting job: " + getJobName());
+      logMessage("Submitting job: " + getJobName());
+
+      success = runJob(job);
+
+      if (!success) {
+        statusMessage("Correlation matrix job failed - check logs on Hadoop");
+        logMessage("Correlation matrix job failed - check logs on Hadoop");
+        setJobStatus(JobStatus.FAILED);
+        return false; // can't continue
       }
 
-      // num rows in matrix is equal to num attributes in the arff
-      // header file (possibly -1 if the class gets ignored)
-      int classAdjust = -1;
-      if (getCorrelationMapTaskOptions().contains("-keep-class")) {
-        classAdjust = 0;
-      }
+      // now we need to read the part-r-xxxxx files out of the output
+      // directory, construct a final Matrix and write it back to the
+      // output directory
+      finalMatrix(conf, fileNameOnly);
 
-      // The header generated by the ARFF job
-      Instances header = m_arffHeaderJob.getFinalHeader();
-      header = CSVToARFFHeaderReduceTask.stripSummaryAtts(header);
-      int rowsInMatrix = header.numAttributes() + classAdjust;
-
-      if (!DistributedJobConfig.isEmpty(reduceTasksMaxPerNode)) {
-        reduceMax = Integer
-          .parseInt(environmentSubstitute(reduceTasksMaxPerNode));
-      }
-
-      int numReducers = Math.min(rowsInMatrix, reduceMax * numNodesAvail);
-
-      logMessage("Setting number of reducers for correlation job to: "
-        + numReducers);
-      m_mrConfig.setNumberOfReducers("" + numReducers);
-
-      job = m_mrConfig.configureForHadoop(getJobName(), conf, m_env);
-
-      cleanOutputDirectory(job);
-    } catch (ClassNotFoundException ex) {
-      setJobStatus(JobStatus.FAILED);
-      throw new DistributedWekaException(ex);
-    } catch (IOException ex) {
-      setJobStatus(JobStatus.FAILED);
-      throw new DistributedWekaException(ex);
+      setJobStatus(success ? JobStatus.FINISHED : JobStatus.FAILED);
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
     }
-
-    statusMessage("Submitting job: " + getJobName());
-    logMessage("Submitting job: " + getJobName());
-
-    success = runJob(job);
-
-    if (!success) {
-      statusMessage("Correlation matrix job failed - check logs on Hadoop");
-      logMessage("Correlation matrix job failed - check logs on Hadoop");
-      setJobStatus(JobStatus.FAILED);
-      return false; // can't continue
-    }
-
-    // now we need to read the part-r-xxxxx files out of the output
-    // directory, construct a final Matrix and write it back to the
-    // output directory
-    finalMatrix(conf, fileNameOnly);
-
-    setJobStatus(success ? JobStatus.FINISHED : JobStatus.FAILED);
 
     return success;
   }
@@ -829,15 +836,19 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
     return m_pcaSummary;
   }
 
+  /**
+   * Main method for executing this job from the command line
+   * 
+   * @param args arguments to the job
+   */
   public static void main(String[] args) {
 
     CorrelationMatrixHadoopJob job = new CorrelationMatrixHadoopJob();
     job.run(job, args);
-
   }
 
   @Override
-  public void run(Object toRun, String[] args) throws IllegalArgumentException {
+  public void run(Object toRun, String[] args) {
 
     if (!(toRun instanceof CorrelationMatrixHadoopJob)) {
       throw new IllegalArgumentException(

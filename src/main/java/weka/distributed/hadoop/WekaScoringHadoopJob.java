@@ -55,16 +55,16 @@ import distributed.hadoop.HDFSUtils;
  * clusterer.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version: $Revision$
+ * @version $Revision$
  */
 public class WekaScoringHadoopJob extends HadoopJob implements
   CommandlineRunnable {
 
-  /** For serialization */
-  private static final long serialVersionUID = 2899919003194014468L;
-
   /** The subdirectory of the output directory to save the job outputs to */
   protected static final String OUTPUT_SUBDIR = "/scoring";
+
+  /** For serialization */
+  private static final long serialVersionUID = 2899919003194014468L;
 
   /** The columns from the original input data to output in the scoring results */
   protected String m_colsRange = "first-last";
@@ -396,59 +396,66 @@ public class WekaScoringHadoopJob extends HadoopJob implements
     }
 
     boolean success = false;
-    setJobStatus(JobStatus.RUNNING);
-
-    if (!initializeAndRunArffJob()) {
-      return false;
-    }
-
-    // set zero reducers - map only job
-    m_mrConfig.setNumberOfReducers("0");
-
-    String pathToHeader = environmentSubstitute(m_arffHeaderJob
-      .getAggregatedHeaderPath());
-    Configuration conf = new Configuration();
-
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
-      // add the arff header to the distributed cache
-      HDFSUtils.addFileToDistributedCache(m_mrConfig.getHDFSConfig(), conf,
-        pathToHeader, m_env);
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
+      setJobStatus(JobStatus.RUNNING);
 
-      String modelNameOnly = handleModelFile(conf);
-      String arffNameOnly = pathToHeader.substring(
-        pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
-      String colRange = environmentSubstitute(getColumnsToOutputInScoredData());
+      if (!initializeAndRunArffJob()) {
+        return false;
+      }
 
-      String mapOptions = "-arff-header "
-        + arffNameOnly
-        + " -model-file-name "
-        + modelNameOnly
-        + (!DistributedJobConfig.isEmpty(colRange) ? " -columns-to-output "
-          + colRange : "");
+      // set zero reducers - map only job
+      m_mrConfig.setNumberOfReducers("0");
 
-      m_mrConfig.setUserSuppliedProperty(
-        WekaScoringHadoopMapper.SCORING_MAP_TASK_OPTIONS, mapOptions);
+      String pathToHeader = environmentSubstitute(m_arffHeaderJob
+        .getAggregatedHeaderPath());
+      Configuration conf = new Configuration();
 
-      // Need these for row parsing via open-csv
-      m_mrConfig.setUserSuppliedProperty(
-        CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
-        environmentSubstitute(getCSVMapTaskOptions()));
+      try {
+        // add the arff header to the distributed cache
+        HDFSUtils.addFileToDistributedCache(m_mrConfig.getHDFSConfig(), conf,
+          pathToHeader, m_env);
 
-      installWekaLibrariesInHDFS(conf);
+        String modelNameOnly = handleModelFile(conf);
+        String arffNameOnly = pathToHeader.substring(
+          pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
+        String colRange = environmentSubstitute(getColumnsToOutputInScoredData());
 
-      Job job = null;
-      job = m_mrConfig.configureForHadoop(getJobName(), conf, m_env);
+        String mapOptions = "-arff-header "
+          + arffNameOnly
+          + " -model-file-name "
+          + modelNameOnly
+          + (!DistributedJobConfig.isEmpty(colRange) ? " -columns-to-output "
+            + colRange : "");
 
-      cleanOutputDirectory(job);
+        m_mrConfig.setUserSuppliedProperty(
+          WekaScoringHadoopMapper.SCORING_MAP_TASK_OPTIONS, mapOptions);
 
-      statusMessage("Submitting scoring job: " + getJobName());
-      logMessage("Submitting scoring job: " + getJobName());
+        // Need these for row parsing via open-csv
+        m_mrConfig.setUserSuppliedProperty(
+          CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
+          environmentSubstitute(getCSVMapTaskOptions()));
 
-      success = runJob(job);
-    } catch (IOException ex) {
-      throw new DistributedWekaException(ex);
-    } catch (ClassNotFoundException e) {
-      throw new DistributedWekaException(e);
+        installWekaLibrariesInHDFS(conf);
+
+        Job job = null;
+        job = m_mrConfig.configureForHadoop(getJobName(), conf, m_env);
+
+        cleanOutputDirectory(job);
+
+        statusMessage("Submitting scoring job: " + getJobName());
+        logMessage("Submitting scoring job: " + getJobName());
+
+        success = runJob(job);
+      } catch (IOException ex) {
+        throw new DistributedWekaException(ex);
+      } catch (ClassNotFoundException e) {
+        throw new DistributedWekaException(e);
+      }
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
     }
 
     return success;

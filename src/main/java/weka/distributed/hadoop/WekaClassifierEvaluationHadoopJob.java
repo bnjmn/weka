@@ -380,24 +380,26 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     String fileNameOnly = pathToHeader.substring(
       pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
 
-    StringBuilder classifierMapOptions = new StringBuilder();
+    List<String> classifierMapOptions = new ArrayList<String>();
+    classifierMapOptions.add("-arff-header");
+    classifierMapOptions.add(fileNameOnly);
 
-    classifierMapOptions.append("-arff-header").append(" ")
-      .append(fileNameOnly).append(" ");
     if (!DistributedJobConfig.isEmpty(m_classifierJob.getClassAttribute())) {
-      classifierMapOptions.append("-class").append(" ")
-        .append(m_classifierJob.getClassAttribute()).append(" ");
+      classifierMapOptions.add("-class");
+      classifierMapOptions.add(environmentSubstitute(m_classifierJob
+        .getClassAttribute()));
     }
 
     String classifierMapTaskOptions = m_classifierJob
       .getClassifierMapTaskOptions();
 
-    classifierMapOptions.append("-model-file-name").append(" ")
-      .append(m_classifierJob.getModelFileName()).append(" ");
+    classifierMapOptions.add("-model-file-name");
+    classifierMapOptions.add(environmentSubstitute(m_classifierJob
+      .getModelFileName()));
 
     if (!DistributedJobConfig.isEmpty(getSeparateTestSetPath())) {
-      classifierMapOptions.append("-test-set-path").append(" ")
-        .append(environmentSubstitute(getSeparateTestSetPath())).append(" ");
+      classifierMapOptions.add("-test-set-path");
+      classifierMapOptions.add(environmentSubstitute(getSeparateTestSetPath()));
     }
 
     if (!DistributedJobConfig.isEmpty(getSampleFractionForAUC())) {
@@ -415,13 +417,17 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
       }
 
       if (auc > 0) {
-        classifierMapOptions.append("-auc").append(" ").append("" + auc)
-          .append(" ");
+        classifierMapOptions.add("-auc");
+        classifierMapOptions.add("" + auc);
       }
     }
 
     if (!DistributedJobConfig.isEmpty(classifierMapTaskOptions)) {
-      classifierMapOptions.append(classifierMapTaskOptions);
+      String[] parts = Utils
+        .splitOptions(environmentSubstitute(classifierMapTaskOptions));
+      for (String s : parts) {
+        classifierMapOptions.add(s);
+      }
     }
 
     String[] mapOpts = Utils
@@ -440,7 +446,8 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     } else {
       jobName += " (separate test set) ";
     }
-    jobName += classifierMapOptions.toString();
+    jobName += Utils.joinOptions(classifierMapOptions
+      .toArray(new String[classifierMapOptions.size()]));
     setJobName(jobName);
 
     String outputPath = m_mrConfig.getOutputPath();
@@ -474,7 +481,8 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
 
     m_mrConfig.setUserSuppliedProperty(
       WekaClassifierHadoopMapper.CLASSIFIER_MAP_TASK_OPTIONS,
-      environmentSubstitute(classifierMapOptions.toString()));
+      environmentSubstitute(Utils.joinOptions(classifierMapOptions
+        .toArray(new String[classifierMapOptions.size()]))));
 
     // Need these for row parsing via open-csv
     m_mrConfig.setUserSuppliedProperty(
@@ -501,109 +509,116 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
   @Override
   public boolean runJob() throws DistributedWekaException {
     boolean success = true;
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
 
-    if (m_env == null) {
-      m_env = Environment.getSystemWide();
-    }
     try {
-      // number of iterations for multi-pass incremental classifiers
-      int numIterations = m_classifierJob.getNumIterations();
-
-      String classifierMapTaskOptions = environmentSubstitute(m_classifierJob
-        .getClassifierMapTaskOptions());
-      String[] cOpts = Utils.splitOptions(classifierMapTaskOptions);
-      int totalFolds = 1;
-      String numFolds = Utils.getOption("total-folds", cOpts.clone());
-      if (!DistributedJobConfig.isEmpty(numFolds)) {
-        totalFolds = Integer.parseInt(numFolds);
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
+      if (m_env == null) {
+        m_env = Environment.getSystemWide();
       }
+      try {
+        // number of iterations for multi-pass incremental classifiers
+        int numIterations = m_classifierJob.getNumIterations();
 
-      if (totalFolds > 1
-        && !DistributedJobConfig.isEmpty(getSeparateTestSetPath())) {
-        throw new DistributedWekaException(
-          "Total folds is > 1 and a separate test set "
-            + "has been specified - can only perform one or the other out "
-            + "of a cross-validation or separate test set evaluation");
-      }
-
-      // optimal number of reducers for the fold-based classifier
-      // building job
-      Configuration conf = new Configuration();
-      String reduceTasksMaxPerNode = conf
-        .get("mapred.tasktracker.reduce.tasks.maximum");
-
-      // allow our configuration to override the defaults for the cluster
-      if (!DistributedJobConfig.isEmpty(m_mrConfig
-        .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
-        reduceTasksMaxPerNode = environmentSubstitute(m_mrConfig
-          .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
-      }
-
-      int reduceMax = 2;
-      if (!DistributedJobConfig.isEmpty(reduceTasksMaxPerNode)) {
-        reduceMax = Integer
-          .parseInt(environmentSubstitute(reduceTasksMaxPerNode));
-      }
-      int numReducers = Math.min(totalFolds,
-        (reduceMax * getNumNodesInCluster()));
-      logMessage("Setting num reducers per node for fold-based model building to: "
-        + numReducers);
-      m_classifierJob.m_mrConfig.setNumberOfReducers("" + numReducers);
-      m_classifierJob.setLog(getLog());
-      m_classifierJob.setStatusMessagePrefix(m_statusMessagePrefix);
-      m_classifierJob.setEnvironment(m_env);
-
-      setJobStatus(JobStatus.RUNNING);
-      if (!m_classifierJob.initializeAndRunArffJob()) {
-        setJobStatus(JobStatus.FAILED);
-        return false;
-      }
-
-      String outputModelPath = environmentSubstitute(m_classifierJob.m_mrConfig
-        .getUserSuppliedProperty(WekaClassifierHadoopReducer.CLASSIFIER_WRITE_PATH));
-      if (DistributedJobConfig.isEmpty(outputModelPath)) {
-        throw new Exception("The output model path is not set!");
-      }
-
-      for (int i = 0; i < numIterations; i++) {
-        conf = new Configuration();
-        if (i > 0) {
-          stageClassifiersForFolds(totalFolds, outputModelPath, conf);
+        String classifierMapTaskOptions = environmentSubstitute(m_classifierJob
+          .getClassifierMapTaskOptions());
+        String[] cOpts = Utils.splitOptions(classifierMapTaskOptions);
+        int totalFolds = 1;
+        String numFolds = Utils.getOption("total-folds", cOpts.clone());
+        if (!DistributedJobConfig.isEmpty(numFolds)) {
+          totalFolds = Integer.parseInt(numFolds);
         }
 
+        if (totalFolds > 1
+          && !DistributedJobConfig.isEmpty(getSeparateTestSetPath())) {
+          throw new DistributedWekaException(
+            "Total folds is > 1 and a separate test set "
+              + "has been specified - can only perform one or the other out "
+              + "of a cross-validation or separate test set evaluation");
+        }
+
+        // optimal number of reducers for the fold-based classifier
+        // building job
+        Configuration conf = new Configuration();
+        String reduceTasksMaxPerNode = conf
+          .get("mapred.tasktracker.reduce.tasks.maximum");
+
+        // allow our configuration to override the defaults for the cluster
+        if (!DistributedJobConfig.isEmpty(m_mrConfig
+          .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
+          reduceTasksMaxPerNode = environmentSubstitute(m_mrConfig
+            .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
+        }
+
+        int reduceMax = 2;
+        if (!DistributedJobConfig.isEmpty(reduceTasksMaxPerNode)) {
+          reduceMax = Integer
+            .parseInt(environmentSubstitute(reduceTasksMaxPerNode));
+        }
+        int numReducers = Math.min(totalFolds,
+          (reduceMax * getNumNodesInCluster()));
+        logMessage("Setting num reducers per node for fold-based model building to: "
+          + numReducers);
+        m_classifierJob.m_mrConfig.setNumberOfReducers("" + numReducers);
+        m_classifierJob.setLog(getLog());
+        m_classifierJob.setStatusMessagePrefix(m_statusMessagePrefix);
         m_classifierJob.setEnvironment(m_env);
-        if (!m_classifierJob.performIteration(i, false, conf)) {
-          success = false;
-          statusMessage("Unable to continue - fold-based classifier job failed. "
-            + "Check Hadoop logs");
-          logMessage("Unable to continue - fold-based classifier job failed. "
-            + "Check Hadoop logs");
-          break;
+
+        setJobStatus(JobStatus.RUNNING);
+        if (!m_classifierJob.initializeAndRunArffJob()) {
+          setJobStatus(JobStatus.FAILED);
+          return false;
         }
-      }
 
-      if (!success) {
+        String outputModelPath = environmentSubstitute(m_classifierJob.m_mrConfig
+          .getUserSuppliedProperty(WekaClassifierHadoopReducer.CLASSIFIER_WRITE_PATH));
+        if (DistributedJobConfig.isEmpty(outputModelPath)) {
+          throw new Exception("The output model path is not set!");
+        }
+
+        for (int i = 0; i < numIterations; i++) {
+          conf = new Configuration();
+          if (i > 0) {
+            stageClassifiersForFolds(totalFolds, outputModelPath, conf);
+          }
+
+          m_classifierJob.setEnvironment(m_env);
+          if (!m_classifierJob.performIteration(i, false, conf)) {
+            success = false;
+            statusMessage("Unable to continue - fold-based classifier job failed. "
+              + "Check Hadoop logs");
+            logMessage("Unable to continue - fold-based classifier job failed. "
+              + "Check Hadoop logs");
+            break;
+          }
+        }
+
+        if (!success) {
+          setJobStatus(JobStatus.FAILED);
+          return false;
+        }
+
+        // launch phase 2
+
+        if (!runEvaluationPhase(outputModelPath)) {
+          success = false;
+          statusMessage("Evaluation phase failed. Check hadoop logs");
+          logMessage("Evaluation phase failed. Check hadoop logs");
+        }
+
+        setJobStatus(success ? JobStatus.FINISHED : JobStatus.FAILED);
+      } catch (Exception ex) {
         setJobStatus(JobStatus.FAILED);
-        return false;
+        throw new DistributedWekaException(ex);
       }
 
-      // launch phase 2
-
-      if (!runEvaluationPhase(outputModelPath)) {
-        success = false;
-        statusMessage("Evaluation phase failed. Check hadoop logs");
-        logMessage("Evaluation phase failed. Check hadoop logs");
+      if (success) {
+        // grab the results from HDFS
+        retrieveResults();
       }
-
-      setJobStatus(success ? JobStatus.FINISHED : JobStatus.FAILED);
-    } catch (Exception ex) {
-      setJobStatus(JobStatus.FAILED);
-      throw new DistributedWekaException(ex);
-    }
-
-    if (success) {
-      // grab the results from HDFS
-      retrieveResults();
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
     }
 
     return success;

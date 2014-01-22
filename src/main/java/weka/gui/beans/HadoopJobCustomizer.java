@@ -47,6 +47,7 @@ import weka.distributed.WekaClassifierMapTask;
 import weka.distributed.hadoop.ArffHeaderHadoopJob;
 import weka.distributed.hadoop.HadoopJob;
 import weka.gui.PropertySheetPanel;
+import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
 import distributed.hadoop.MapReduceJobConfig;
 
@@ -139,7 +140,9 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
         for (Map.Entry<String, String> e : properties.entrySet()) {
           String prop = e.getKey();
           String val = e.getValue();
-          if (!DistributedJobConfig.isEmpty(val)) {
+
+          // make sure to skip internal weka properties!!
+          if (!DistributedJobConfig.isEmpty(val) && !prop.startsWith("*")) {
             table.getModel().setValueAt(prop, row, 0);
             table.getModel().setValueAt(val, row, 1);
             ((InteractiveTableModel) table.getModel()).addEmptyRow();
@@ -456,7 +459,12 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
   protected List<String> getBaseConfig(HadoopJob job) {
     Map<String, String> userProps = m_propPanel.getProperties();
     for (Map.Entry<String, String> e : userProps.entrySet()) {
-      m_mrConfig.setUserSuppliedProperty(e.getKey(), e.getValue());
+
+      // skip this one! As we'll get it via the base job stuff below
+      if (e.getKey() != null
+        && !e.getKey().equals(DistributedJob.WEKA_ADDITIONAL_PACKAGES_KEY)) {
+        m_mrConfig.setUserSuppliedProperty(e.getKey(), e.getValue());
+      }
     }
 
     String[] baseJobOpts = job.getBaseOptionsOnly();

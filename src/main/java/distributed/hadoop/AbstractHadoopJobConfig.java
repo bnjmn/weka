@@ -41,6 +41,15 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
   public static final String JOBTRACKER_PORT = "jobtrackerPort";
 
   /**
+   * Get the tool tip text for this property
+   * 
+   * @return the tool tip text for this property
+   */
+  public String jobTrackerHostTipText() {
+    return "The host that the job tracker is running on";
+  }
+
+  /**
    * Set the job tracker host name to use
    * 
    * @param host the name of the host the job tracker is running on
@@ -56,6 +65,15 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
    */
   public String getJobTrackerHost() {
     return getProperty(JOBTRACKER_HOST);
+  }
+
+  /**
+   * Get the tool tip text for this property
+   * 
+   * @return the tool tip text for this property
+   */
+  public String jobTrackerPortTipText() {
+    return "The port that the job tracker is listening on";
   }
 
   /**
