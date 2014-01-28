@@ -15,7 +15,7 @@
 
 /*
  *    LogitBoost.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2014 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -155,7 +155,7 @@ public class LogitBoost
   protected int m_WeightThreshold = 100;
 
   /** A threshold for responses (Friedman suggests between 2 and 4) */
-  protected static final double Z_MAX = 3;
+  protected static final double DEFAULT_Z_MAX = 3;
 
   /** Dummy dataset with a numeric class */
   protected Instances m_NumericClassData;
@@ -181,6 +181,9 @@ public class LogitBoost
     
   /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_ZeroR;
+  
+  /** The Z max value to use */
+  protected double m_zMax = DEFAULT_Z_MAX;
     
   /**
    * Returns a string describing classifier
@@ -310,6 +313,8 @@ public class LogitBoost
 	      "\tShrinkage parameter.\n"
 	      +"\t(default 1)",
 	      "H", 1, "-H <num>"));
+    newVector.addElement(new Option("\tZ max threshold for responses." +
+    		"\n\t(default 3)", "Z", 1, "-Z <num>"));    
 
     newVector.addAll(Collections.list(super.listOptions()));
     
@@ -415,6 +420,11 @@ public class LogitBoost
     } else {
       setShrinkage(1.0);
     }
+    
+    String zString = Utils.getOption('Z', options);
+    if (zString.length() > 0) {
+      setZMax(Double.parseDouble(zString));
+    }
 
     setUseResampling(Utils.getFlag('Q', options));
     if (m_UseResampling && (thresholdString.length() != 0)) {
@@ -446,10 +456,39 @@ public class LogitBoost
     options.add("-R"); options.add("" + getNumRuns());
     options.add("-L"); options.add("" + getLikelihoodThreshold());
     options.add("-H"); options.add("" + getShrinkage());
+    options.add("-Z"); options.add("" + getZMax());
 
     Collections.addAll(options, super.getOptions());
     
     return options.toArray(new String[0]);
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String ZMaxTipText() {
+    return "Z max threshold for responses";
+  }
+  
+  /**
+   * Set the Z max threshold on the responses
+   * 
+   * @param zMax the threshold to use
+   */
+  public void setZMax(double zMax) {
+    m_zMax = zMax;
+  }
+  
+  /**
+   * Get the Z max threshold on the responses
+   * 
+   * @return the threshold to use
+   */
+  public double getZMax() {
+    return m_zMax;
   }
   
   /**
@@ -890,13 +929,13 @@ public class LogitBoost
 	double z, actual = trainYs[i][j];
 	if (actual == 1 - m_Offset) {
 	  z = 1.0 / p;
-	  if (z > Z_MAX) { // threshold
-	    z = Z_MAX;
+	  if (z > m_zMax) { // threshold
+	    z = m_zMax;
 	  }
 	} else {
 	  z = -1.0 / (1.0 - p);
-	  if (z < -Z_MAX) { // threshold
-	    z = -Z_MAX;
+	  if (z < -m_zMax) { // threshold
+	    z = -m_zMax;
 	  }
 	}
 	double w = (actual - p) / z;
