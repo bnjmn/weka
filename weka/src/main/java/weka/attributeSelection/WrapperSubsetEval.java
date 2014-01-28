@@ -48,7 +48,8 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
 /**
- * <!-- globalinfo-start --> WrapperSubsetEval:<br/>
+ <!-- globalinfo-start --> 
+ * WrapperSubsetEval:<br/>
  * <br/>
  * Evaluates attribute sets by using a learning scheme. Cross validation is used
  * to estimate the accuracy of the learning scheme for a set of attributes.<br/>
@@ -58,9 +59,10 @@ import weka.filters.unsupervised.attribute.Remove;
  * Ron Kohavi, George H. John (1997). Wrappers for feature subset selection.
  * Artificial Intelligence. 97(1-2):273-324.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
+ <!-- technical-bibtex-start --> 
+ * BibTeX:
  * 
  * <pre>
  * &#64;article{Kohavi1997,
@@ -76,9 +78,10 @@ import weka.filters.unsupervised.attribute.Remove;
  * }
  * </pre>
  * <p/>
- * <!-- technical-bibtex-end -->
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ *Valid options are:
  * <p/>
  * 
  * <pre>
@@ -132,7 +135,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *  may output additional info to the console
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
@@ -299,7 +302,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start --> 
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -353,7 +357,7 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
    *  may output additional info to the console
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -794,9 +798,15 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
       switch (m_evaluationMeasure) {
       case EVAL_DEFAULT:
         repError[i] = m_Evaluation.errorRate();
+        // if (m_trainInstances.classAttribute().isNominal()) {
+        // repError[i] = 1.0 - repError[i];
+        // }
         break;
       case EVAL_ACCURACY:
         repError[i] = m_Evaluation.errorRate();
+        // if (m_trainInstances.classAttribute().isNominal()) {
+        // repError[i] = 1.0 - repError[i];
+        // }
         break;
       case EVAL_RMSE:
         repError[i] = m_Evaluation.rootMeanSquaredError();
@@ -846,7 +856,13 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     case EVAL_ACCURACY:
     case EVAL_RMSE:
     case EVAL_MAE:
-      evalMetric = -evalMetric; // maximize
+      if (m_trainInstances.classAttribute().isNominal()
+        && (m_evaluationMeasure == EVAL_DEFAULT || m_evaluationMeasure == EVAL_ACCURACY)) {
+        evalMetric = 1 - evalMetric;
+      } else {
+        evalMetric = -evalMetric; // maximize
+      }
+
       break;
     }
 
@@ -891,7 +907,7 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
         if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
           text.append("\tSubset evaluation: RMSE\n");
         } else {
-          text.append("\tSubset evaluation: classification error\n");
+          text.append("\tSubset evaluation: classification accuracy\n");
         }
         break;
       case EVAL_RMSE:
