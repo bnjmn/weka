@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+    <info organisation="${ivy.artifact.group}" module="${ivy.artifact.id}" revision="${project.revision}" />
+    
+    <configurations>
+        <conf name="default"/>
+        <conf name="test" visibility="private"/>
+        <conf name="source" />          
+    </configurations>
+    
+    <publications>
+            <artifact name="${ivy.artifact.id}" type="jar" conf="default"/>
+            <artifact name="${ivy.artifact.id}" m:classifier="sources" type="source" ext="jar" conf="source"/>
+    </publications>   
+    
+    <dependencies defaultconf="default->default">
+        <!-- this is an example dependency.  Add the dependencies for your project here -->
+
+    <dependency org="pentaho.weka" name="pdm-3.7-ce" rev="${dependency.weka.revision}" transitive="false" conf="default->default" changing="true" />
+    <dependency org="dm-commons" name="dm-commons" rev="${dependency.dm-commons.revision}" transitive="false" conf="default->default" changing="true" />
+
+    <dependency org="net.rforge" name="REngine" rev="${dependency.rengine.revision}" transitive="false" conf="default->default" changing="true" />
+    <dependency org="javagd" name="javagd" rev="${dependency.javagd.revision}" transitive="false" conf="default->default" changing="true" />
+    <dependency org="net.sf.kxml" name="kxml2-min" rev="${dependency.kxml2-min.revision}" transitive="false" conf="default->default" changing="true" />
+    <dependency org="xpp3" name="xpp3_min" rev="${dependency.xpp3-min.revision}" transitive="false" conf="default->default" changing="true" />
+    <dependency org="com.thoughtworks.xstream" name="xstream" rev="${dependency.xstream.revision}" transitive="false" conf="default->default" changing="true" />
+    <dependency org="xmlpull" name="xmlpull" rev="${dependency.xmlpull.revision}" transitive="false" conf="default->default" changing="true" />
+
+    <dependency org="junit" name="junit" rev="4.5" conf="test->default" />
+    </dependencies>
+</ivy-module>

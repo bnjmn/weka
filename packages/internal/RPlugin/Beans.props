@@ -1,0 +1,7 @@
+# Specifies the tools to go into the Plugins toolbar
+weka.gui.beans.KnowledgeFlow.Plugins=weka.gui.beans.RScriptExecutor
+weka.gui.beans.KnowledgeFlow.Perspectives=weka.gui.beans.JavaGDPerspective
+weka.gui.beans.KnowledgeFlow.templates=weka/gui/beans/templates/R_example.kfml,\
+ weka/gui/beans/templates/R_example2.kfml
+weka.gui.beans.KnowledgeFlow.templates.desc=Running R scripts,\
+ Learning rpart via MLR in the Weka framework

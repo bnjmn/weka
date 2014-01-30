@@ -1,0 +1,70 @@
+# Template Description file for a Weka package
+# 
+
+# Package name (required)
+PackageName=RPlugin
+
+# Version (required)
+Version=1.1.0
+
+#Date (year-month-day)
+Date=2013-09-13
+
+# Title (required)
+Title=Execute R Scripts
+
+# Category (recommended)
+Category=R integration
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=LGPL 3.0
+
+# Description (required)
+Description=Provides a Knowledge Flow component for executing an R script and a wrapper classifier for the MLR (machine learning in R) R package. Also provides a Knowledge Flow perspective and Explorer plugin that implements an interactive R console and allows visualization of graphics produced by R. IMPORTANT: This package requires the R system (>= 3.0.0) to be installed on your computer before it can be used. Before using this package you must manually install the R package "rJava" by typing install.packages("rJava") from the R console. Furthermore, the environment variable R_HOME must be set to point to the installation directory for R and the R executable must be in the PATH environment variable. This package will attempt to locate the JRI native library (which is installed  as part of rJava) automatically under Windows and Mac OS X. For this to succeed  under Windows it is necessary for the R_LIBS_USER environment variable to be set to point to the user's personal R packages directory. Alternatively, the jri.native.library  java property can be set to point directly to the jri native library file, or the  java.library.path can be set to point to the directory that contains the jri native library file. More information on configuring Java to access JRI under various OS can be found at http://www.rforge.net/JRI/ \n\nExample Knowledge Flow template files demonstrating the R components can be found in ${WEKA_HOME}/packages/RPlugin/templates.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/RPlugin1.1.0.zip?download
+
+# URL for further information
+URL=http://markahall.blogspot.co.nz/2012/07/r-integration-in-weka.html
+
+# Changes in this release
+Changes=MLR (version 1.1-18) is now an official CRAN package - yay! This means that the MRL R package no longer has to be installed manually - the RPlugin will do this for you the first time that the MLRClassifier is used. MLR does require R version 3.0.0 or higher, so the RPlugin (or at least the MLR integration) will not function correctly with earlier releases of R. Some changes to the Weka MLRClassifier were needed to support the new version of MLR. Also improved the capabilities handling and data cleaning aspects of the MLRClassifier. It now checks and deals with nominal labels (including class labels) that don't occur in the training data.
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.5)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+MessageToDisplayOnInstallation=This package requires the R system to be installed on your\n\
+ computer before it can be used. Before using this package you must manually install\n\
+ the R package "rJava" by typing install.packages("rJava") from the R console.\n\
+ Furthermore, the environment variable R_HOME must be set to point to the installation\n\
+ directory for R and the R executable must be in the PATH environment variable.\n\
+ This package will attempt to locate the JRI native library (which is installed\n\
+ as part of rJava) automatically under Windows and Mac OS X. For this to succeed\n\
+ under Windows it is necessary for the R_LIBS_USER environment variable to be set to point\n\
+ to the user's personal R packages directory. Alternatively, the jri.native.library\n\
+ java property can be set to point directly to the jri native library file, or the\n\
+ java.library.path can be set to point to the directory that contains the jri native\n\
+ library file. More information on configuring Java to access JRI under various OS\n\
+ can be found at http://www.rforge.net/JRI/\n\n\
+ Example Knowledge Flow template files demonstrating the R components can be found in\n\
+ ${WEKA_HOME}/packages/RPlugin/templates.
+
+DoNotLoadIfEnvVarNotSet=R_HOME
+
+DoNotLoadIfEnvVarNotSetMessage=RPlugin can't be loaded because the environment variable R_HOME is not set
