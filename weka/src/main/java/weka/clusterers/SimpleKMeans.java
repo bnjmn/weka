@@ -154,29 +154,29 @@ public class SimpleKMeans extends RandomizableClusterer implements
   /**
    * replace missing values in training instances.
    */
-  private ReplaceMissingValues m_ReplaceMissingFilter;
+  protected ReplaceMissingValues m_ReplaceMissingFilter;
 
   /**
    * number of clusters to generate.
    */
-  private int m_NumClusters = 2;
+  protected int m_NumClusters = 2;
 
   /**
    * holds the cluster centroids.
    */
-  private Instances m_ClusterCentroids;
+  protected Instances m_ClusterCentroids;
 
   /**
    * Holds the standard deviations of the numeric attributes in each cluster.
    */
-  private Instances m_ClusterStdDevs;
+  protected Instances m_ClusterStdDevs;
 
   /**
    * For each cluster, holds the frequency counts for the values of each nominal
    * attribute.
    */
-  private int[][][] m_ClusterNominalCounts;
-  private int[][] m_ClusterMissingCounts;
+  protected int[][][] m_ClusterNominalCounts;
+  protected int[][] m_ClusterMissingCounts;
 
   /**
    * Stats on the full data set for comparison purposes. In case the attribute
@@ -184,40 +184,40 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * the median if Manhattan distance and if the attribute is nominal then it's
    * mode is saved.
    */
-  private double[] m_FullMeansOrMediansOrModes;
-  private double[] m_FullStdDevs;
-  private int[][] m_FullNominalCounts;
-  private int[] m_FullMissingCounts;
+  protected double[] m_FullMeansOrMediansOrModes;
+  protected double[] m_FullStdDevs;
+  protected int[][] m_FullNominalCounts;
+  protected int[] m_FullMissingCounts;
 
   /**
    * Display standard deviations for numeric atts.
    */
-  private boolean m_displayStdDevs;
+  protected boolean m_displayStdDevs;
 
   /**
    * Replace missing values globally?
    */
-  private boolean m_dontReplaceMissing = false;
+  protected boolean m_dontReplaceMissing = false;
 
   /**
    * The number of instances in each cluster.
    */
-  private int[] m_ClusterSizes;
+  protected int[] m_ClusterSizes;
 
   /**
    * Maximum number of iterations to be executed.
    */
-  private int m_MaxIterations = 500;
+  protected int m_MaxIterations = 500;
 
   /**
    * Keep track of the number of iterations completed before convergence.
    */
-  private int m_Iterations = 0;
+  protected int m_Iterations = 0;
 
   /**
    * Holds the squared errors for all clusters.
    */
-  private double[] m_squaredErrors;
+  protected double[] m_squaredErrors;
 
   /** the distance function used. */
   protected DistanceFunction m_DistanceFunction = new EuclideanDistance();
@@ -225,7 +225,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
   /**
    * Preserve order of instances.
    */
-  private boolean m_PreserveOrder = false;
+  protected boolean m_PreserveOrder = false;
 
   /**
    * Assignments obtained.
