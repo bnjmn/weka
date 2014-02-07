@@ -802,6 +802,21 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
       randomizeMapOptions.add(environmentSubstitute(getClassAttribute()));
     }
 
+    // make sure the random seed gets in there from the setting in
+    // the underlying classifier map task.
+    try {
+      String[] classifierOpts = Utils
+        .splitOptions(getClassifierMapTaskOptions());
+      String seedS = Utils.getOption("seed", classifierOpts);
+      if (!DistributedJobConfig.isEmpty(seedS)) {
+        seedS = environmentSubstitute(seedS);
+        randomizeMapOptions.add("-seed");
+        randomizeMapOptions.add(seedS);
+      }
+    } catch (Exception e1) {
+      e1.printStackTrace();
+    }
+
     m_randomizeConfig.setUserSuppliedProperty(
       RandomizedDataChunkHadoopMapper.RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS,
       environmentSubstitute(Utils.joinOptions(randomizeMapOptions
