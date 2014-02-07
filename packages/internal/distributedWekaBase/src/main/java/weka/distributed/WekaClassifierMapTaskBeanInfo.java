@@ -73,6 +73,9 @@ public class WekaClassifierMapTaskBeanInfo extends SimpleBeanInfo {
       p1 = new PropertyDescriptor("totalNumFolds", WekaClassifierMapTask.class);
       pds.add(p1);
 
+      p1 = new PropertyDescriptor("seed", WekaClassifierMapTask.class);
+      pds.add(p1);
+
       return pds.toArray(new PropertyDescriptor[pds.size()]);
     } catch (Exception ex) {
       ex.printStackTrace();
