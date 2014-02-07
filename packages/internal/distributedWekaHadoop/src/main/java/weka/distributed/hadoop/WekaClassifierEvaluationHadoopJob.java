@@ -187,6 +187,10 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
   public String[] getOptions() {
     List<String> options = new ArrayList<String>();
 
+    for (String o : super.getOptions()) {
+      options.add(o);
+    }
+
     if (!DistributedJobConfig.isEmpty(getSeparateTestSetPath())) {
       options.add("-test-set-path");
       options.add(getSeparateTestSetPath());
