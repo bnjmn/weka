@@ -51,7 +51,13 @@ public class NominalConditionalSufficientStats extends
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    * 
    */
-  protected class ValueDistribution {
+  protected class ValueDistribution implements Serializable {
+
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = -61711544350888154L;
+
     protected final Map<Integer, WeightMass> m_dist = new LinkedHashMap<Integer, WeightMass>();
 
     private double m_sum;
