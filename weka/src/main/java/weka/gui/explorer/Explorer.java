@@ -403,26 +403,26 @@ public class Explorer extends JPanel {
         @Override
         public void run() {
           while (true) {
-            try {
-              // System.out.println("Before sleeping.");
-              Thread.sleep(10);
+            // try {
+            // System.out.println("Before sleeping.");
+            // Thread.sleep(10);
 
-              if (m_Memory.isOutOfMemory()) {
-                // clean up
-                jf.dispose();
-                m_explorer = null;
-                System.gc();
+            if (m_Memory.isOutOfMemory()) {
+              // clean up
+              jf.dispose();
+              m_explorer = null;
+              System.gc();
 
-                // display error
-                System.err.println("\ndisplayed message:");
-                m_Memory.showOutOfMemory();
-                System.err.println("\nexiting");
-                System.exit(-1);
-              }
-
-            } catch (InterruptedException ex) {
-              ex.printStackTrace();
+              // display error
+              System.err.println("\ndisplayed message:");
+              m_Memory.showOutOfMemory();
+              System.err.println("\nexiting");
+              System.exit(-1);
             }
+
+            // } catch (InterruptedException ex) {
+            // ex.printStackTrace();
+            // }
           }
         }
       };

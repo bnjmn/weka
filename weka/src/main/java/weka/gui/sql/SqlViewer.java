@@ -639,25 +639,25 @@ public class SqlViewer extends JPanel implements ConnectionListener,
         @Override
         public void run() {
           while (true) {
-            try {
-              Thread.sleep(10);
+            // try {
+            // Thread.sleep(10);
 
-              if (m_Memory.isOutOfMemory()) {
-                // clean up
-                jf.dispose();
-                m_Viewer = null;
-                System.gc();
+            if (m_Memory.isOutOfMemory()) {
+              // clean up
+              jf.dispose();
+              m_Viewer = null;
+              System.gc();
 
-                // display error
-                System.err.println("\ndisplayed message:");
-                m_Memory.showOutOfMemory();
-                System.err.println("\nexiting");
-                System.exit(-1);
-              }
-
-            } catch (InterruptedException ex) {
-              ex.printStackTrace();
+              // display error
+              System.err.println("\ndisplayed message:");
+              m_Memory.showOutOfMemory();
+              System.err.println("\nexiting");
+              System.exit(-1);
             }
+
+            // } catch (InterruptedException ex) {
+            // ex.printStackTrace();
+            // }
           }
         }
       };

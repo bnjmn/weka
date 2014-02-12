@@ -38,6 +38,10 @@ import javax.swing.JOptionPane;
  */
 public class Memory implements RevisionHandler {
 
+  public static final long OUT_OF_MEMORY_THRESHOLD = 52428800L;
+
+  public static final long MAX_SLEEP_TIME = 10L;
+
   /** whether memory management is enabled */
   protected static boolean m_Enabled = true;
 
@@ -50,6 +54,9 @@ public class Memory implements RevisionHandler {
 
   /** the last MemoryUsage object obtained */
   protected MemoryUsage m_MemoryUsage = null;
+
+  /** the delay before testing for out of memory */
+  protected long m_SleepTime = MAX_SLEEP_TIME;
 
   /**
    * initializes the memory management without GUI support
@@ -138,9 +145,27 @@ public class Memory implements RevisionHandler {
    *         false)
    */
   public boolean isOutOfMemory() {
+    try {
+      Thread.sleep(m_SleepTime);
+    } catch (InterruptedException ex) {
+      ex.printStackTrace();
+    }
+
     m_MemoryUsage = m_MemoryMXBean.getHeapMemoryUsage();
     if (isEnabled()) {
-      return ((m_MemoryUsage.getMax() - m_MemoryUsage.getUsed()) < 52428800);
+
+      long avail = m_MemoryUsage.getMax() - m_MemoryUsage.getUsed();
+      if (avail > OUT_OF_MEMORY_THRESHOLD) {
+        long num = (avail - OUT_OF_MEMORY_THRESHOLD) / 5242880 + 1;
+
+        m_SleepTime = (long) (2.0 * (Math.log(num) + 2.5));
+        if (m_SleepTime > MAX_SLEEP_TIME) {
+          m_SleepTime = MAX_SLEEP_TIME;
+        }
+        // System.out.println("Delay = " + m_SleepTime);
+      }
+
+      return ((m_MemoryUsage.getMax() - m_MemoryUsage.getUsed()) < OUT_OF_MEMORY_THRESHOLD);
     } else {
       return false;
     }

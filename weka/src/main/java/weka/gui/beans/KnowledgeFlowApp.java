@@ -7245,26 +7245,26 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         @Override
         public void run() {
           while (true) {
-            try {
-              // System.out.println("Before sleeping");
-              this.sleep(10);
+            // try {
+            // System.out.println("Before sleeping");
+            // this.sleep(10);
 
-              if (m_Memory.isOutOfMemory()) {
-                // clean up
-                jf.dispose();
-                m_knowledgeFlow = null;
-                System.gc();
+            if (m_Memory.isOutOfMemory()) {
+              // clean up
+              jf.dispose();
+              m_knowledgeFlow = null;
+              System.gc();
 
-                // display error
-                System.err.println("\n[KnowledgeFlow] displayed message:");
-                m_Memory.showOutOfMemory();
-                System.err.println("\nexiting");
-                System.exit(-1);
-              }
-
-            } catch (InterruptedException ex) {
-              ex.printStackTrace();
+              // display error
+              System.err.println("\n[KnowledgeFlow] displayed message:");
+              m_Memory.showOutOfMemory();
+              System.err.println("\nexiting");
+              System.exit(-1);
             }
+
+            // } catch (InterruptedException ex) {
+            // ex.printStackTrace();
+            // }
           }
         }
       };

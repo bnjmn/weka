@@ -1582,50 +1582,50 @@ public class GUIChooser extends JFrame {
         @Override
         public void run() {
           while (true) {
-            try {
-              // System.out.println("before sleeping");
-              this.sleep(10);
+            // try {
+            // System.out.println("before sleeping");
+            // this.sleep(10);
 
-              if (m_Memory.isOutOfMemory()) {
-                // clean up
-                m_chooser.dispose();
-                if (m_chooser.m_ExperimenterFrame != null) {
-                  m_chooser.m_ExperimenterFrame.dispose();
-                  m_chooser.m_ExperimenterFrame = null;
-                }
-                if (m_chooser.m_ExplorerFrame != null) {
-                  m_chooser.m_ExplorerFrame.dispose();
-                  m_chooser.m_ExplorerFrame = null;
-                }
-                if (m_chooser.m_KnowledgeFlowFrame != null) {
-                  m_chooser.m_KnowledgeFlowFrame.dispose();
-                  m_chooser.m_KnowledgeFlowFrame = null;
-                }
-                if (m_chooser.m_SimpleCLI != null) {
-                  m_chooser.m_SimpleCLI.dispose();
-                  m_chooser.m_SimpleCLI = null;
-                }
-                if (m_chooser.m_ArffViewers.size() > 0) {
-                  for (int i = 0; i < m_chooser.m_ArffViewers.size(); i++) {
-                    ArffViewer av = m_chooser.m_ArffViewers.get(i);
-                    av.dispose();
-                  }
-                  m_chooser.m_ArffViewers.clear();
-                }
-                m_chooser = null;
-                System.gc();
-
-                // display error
-                m_chooser.m_LogWindow.setVisible(true);
-                m_chooser.m_LogWindow.toFront();
-                System.err.println("\ndisplayed message:");
-                m_Memory.showOutOfMemory();
-                System.err.println("\nexiting...");
-                System.exit(-1);
+            if (m_Memory.isOutOfMemory()) {
+              // clean up
+              m_chooser.dispose();
+              if (m_chooser.m_ExperimenterFrame != null) {
+                m_chooser.m_ExperimenterFrame.dispose();
+                m_chooser.m_ExperimenterFrame = null;
               }
-            } catch (InterruptedException ex) {
-              ex.printStackTrace();
+              if (m_chooser.m_ExplorerFrame != null) {
+                m_chooser.m_ExplorerFrame.dispose();
+                m_chooser.m_ExplorerFrame = null;
+              }
+              if (m_chooser.m_KnowledgeFlowFrame != null) {
+                m_chooser.m_KnowledgeFlowFrame.dispose();
+                m_chooser.m_KnowledgeFlowFrame = null;
+              }
+              if (m_chooser.m_SimpleCLI != null) {
+                m_chooser.m_SimpleCLI.dispose();
+                m_chooser.m_SimpleCLI = null;
+              }
+              if (m_chooser.m_ArffViewers.size() > 0) {
+                for (int i = 0; i < m_chooser.m_ArffViewers.size(); i++) {
+                  ArffViewer av = m_chooser.m_ArffViewers.get(i);
+                  av.dispose();
+                }
+                m_chooser.m_ArffViewers.clear();
+              }
+              m_chooser = null;
+              System.gc();
+
+              // display error
+              m_chooser.m_LogWindow.setVisible(true);
+              m_chooser.m_LogWindow.toFront();
+              System.err.println("\ndisplayed message:");
+              m_Memory.showOutOfMemory();
+              System.err.println("\nexiting...");
+              System.exit(-1);
             }
+            // } catch (InterruptedException ex) {
+            // ex.printStackTrace();
+            // }
           }
         }
       };
