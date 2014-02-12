@@ -40,6 +40,8 @@ public class Memory implements RevisionHandler {
 
   public static final long OUT_OF_MEMORY_THRESHOLD = 52428800L;
 
+  public static final long LOW_MEMORY_MINIMUM = 104857600L;
+
   public static final long MAX_SLEEP_TIME = 10L;
 
   /** whether memory management is enabled */
@@ -165,7 +167,7 @@ public class Memory implements RevisionHandler {
         // System.out.println("Delay = " + m_SleepTime);
       }
 
-      return ((m_MemoryUsage.getMax() - m_MemoryUsage.getUsed()) < OUT_OF_MEMORY_THRESHOLD);
+      return avail < OUT_OF_MEMORY_THRESHOLD;
     } else {
       return false;
     }
@@ -184,8 +186,8 @@ public class Memory implements RevisionHandler {
       long lowThreshold = (long) (0.2 * m_MemoryUsage.getMax());
 
       // min threshold of 100Mb
-      if (lowThreshold < 104857600) {
-        lowThreshold = 104857600;
+      if (lowThreshold < LOW_MEMORY_MINIMUM) {
+        lowThreshold = LOW_MEMORY_MINIMUM;
       }
 
       long avail = m_MemoryUsage.getMax() - m_MemoryUsage.getUsed();
