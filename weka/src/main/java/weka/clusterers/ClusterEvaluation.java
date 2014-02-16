@@ -60,6 +60,10 @@ import weka.filters.unsupervised.attribute.Remove;
  * Specify the test file to apply clusterer to.
  * <p/>
  * 
+ * -force-batch-training <br/>
+ * Always train the clusterer in batch mode, never incrementally.
+ * <p/>
+ * 
  * -d name of file to save clustering model to <br/>
  * Specify output file.
  * <p/>
@@ -569,7 +573,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     Range attributesToOutput = null;
     StringBuffer text = new StringBuffer();
     int theClass = -1; // class based evaluation of clustering
-    boolean updateable = (clusterer instanceof UpdateableClusterer);
+    boolean forceBatch = Utils.getFlag("force-batch-training", options);
+    boolean updateable = (clusterer instanceof UpdateableClusterer)
+      && !forceBatch;
     DataSource source = null;
     Instance inst;
 
@@ -1123,6 +1129,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     optionsText.append("\tSets training file.\n");
     optionsText.append("-T <name of test file>\n");
     optionsText.append("\tSets test file.\n");
+    optionsText.append("-force-batch-training\n");
+    optionsText
+      .append("\tAlways train the clusterer in batch mode, never incrementally.\n");
     optionsText.append("-l <name of input file>\n");
     optionsText.append("\tSets model input file.\n");
     optionsText.append("-d <name of output file>\n");
