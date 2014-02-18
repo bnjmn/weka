@@ -308,7 +308,8 @@ public class RScriptExecutor extends JPanel implements BeanCommon, Visible,
         .statusMessage("Converting incoming instances to R data frame...");
       m_logWrapper.logMessage("Converting incoming instances to R data frame");
     }
-    if (m_rScript != null && m_rScript.length() > 0) {
+    if ((m_rScript != null && m_rScript.length() > 0)
+      || (m_scriptFile != null && m_scriptFile.length() > 0)) {
       try {
 
         // transfer instances into an R data frame

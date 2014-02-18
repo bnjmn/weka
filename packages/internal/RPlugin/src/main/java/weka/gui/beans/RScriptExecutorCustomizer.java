@@ -199,6 +199,10 @@ public class RScriptExecutorCustomizer extends JPanel implements
       .setToolTipText("Load script file at run-time - overides editor script");
     scriptLoaderP.add(loadL);
     m_scriptLoader = new FileEnvironmentField(m_env);
+    if (m_executor.getScriptFile() != null
+      && m_executor.getScriptFile().length() > 0) {
+      m_scriptLoader.setText(m_executor.getScriptFile());
+    }
     scriptLoaderP.add(m_scriptLoader);
     editorPan.add(scriptLoaderP, BorderLayout.SOUTH);
 
@@ -381,7 +385,14 @@ public class RScriptExecutorCustomizer extends JPanel implements
       }
     }
 
+    if (!m_scriptLoader.getText().equals(m_executor.getScriptFile())) {
+      if (m_modifyL != null) {
+        m_modifyL.setModifiedStatus(RScriptExecutorCustomizer.this, true);
+      }
+    }
+
     m_executor.setRScript(m_scriptEditor.getText());
+    m_executor.setScriptFile(m_scriptLoader.getText());
   }
 
   public void closingCancel() {
