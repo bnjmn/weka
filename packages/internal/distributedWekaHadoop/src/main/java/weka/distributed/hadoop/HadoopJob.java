@@ -83,22 +83,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     + File.separator
     + "lib" + File.separator + "opencsv-2.3.jar";
 
-  /** The path to the colt.jar */
-  public static final String COLT_JAR = WekaPackageManager.PACKAGES_DIR
-    .toString()
-    + File.separator
-    + "distributedWekaBase"
-    + File.separator
-    + "lib" + File.separator + "colt-1.2.0.jar";
-
-  /** The path to the la4j.jar */
-  public static final String LA4J_JAR = WekaPackageManager.PACKAGES_DIR
-    .toString()
-    + File.separator
-    + "distributedWekaBase"
-    + File.separator
-    + "lib" + File.separator + "la4j-0.4.5.jar";
-
   /**
    * A default path to a weka.jar file. If the classpath contains a weka.jar
    * file (rather than a directory of weka classes) when Weka is started then
@@ -377,10 +361,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     installLibraries.add(DISTRIBUTED_WEKA_HADOOP_JAR);
     logMessage("Copying " + OPEN_CSV_JAR + " to HDFS");
     installLibraries.add(OPEN_CSV_JAR);
-    logMessage("Copying " + COLT_JAR + " to HDFS");
-    installLibraries.add(COLT_JAR);
-    logMessage("Copying " + LA4J_JAR + " to HDFS");
-    installLibraries.add(LA4J_JAR);
 
     HDFSUtils.copyFilesToWekaHDFSInstallationDirectory(installLibraries,
       m_mrConfig.getHDFSConfig(), m_env, true);
@@ -465,8 +445,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     cacheFiles.add(new File(DISTRIBUTED_WEKA_BASE_JAR).getName());
     cacheFiles.add(new File(DISTRIBUTED_WEKA_HADOOP_JAR).getName());
     cacheFiles.add(new File(OPEN_CSV_JAR).getName());
-    cacheFiles.add(new File(COLT_JAR).getName());
-    cacheFiles.add(new File(LA4J_JAR).getName());
 
     HDFSUtils.addWekaInstalledFilesToClasspath(m_mrConfig.getHDFSConfig(),
       conf, cacheFiles, m_env);
