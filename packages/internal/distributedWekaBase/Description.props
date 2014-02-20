@@ -5,10 +5,10 @@
 PackageName=distributedWekaBase
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date (year-month-day)
-Date=2013-10-30
+Date=2014-02-21
 
 # Title (required)
 Title=Generic configuration classes and distributed map/reduce type tasks for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides generic configuration classes and distributed map/reduce type tasks for Weka
 
 # Changes in this release
-Changes=ARFF header task now has options to allow a default label to be specified for a nominal attribute. This allows labels to be partially user-specified for a given nominal attribute, with all unspecified ones getting assigned to the default label. One use case is to reduce the number of classes in a multi-class problem by collapsing some into the default label.
+Changes=Fixed a few bugs with properties not being exposed in the GUI
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.3.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
