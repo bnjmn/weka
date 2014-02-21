@@ -50,15 +50,28 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- <!-- globalinfo-start -->
- * Cluster data using the capopy clustering algorithm, which requires just one pass over the data. Can run in eitherbatch or incremental mode. Results are generally not as good when running incrementally as the min/max for each numeric attribute is not known in advance. Has a heuristic (based on attribute std. deviations), that can be used in batch mode, for setting the T2 distance. The T2 distance determines how many canopies (clusters) are formed. When the user specifies a specific number (N) of clusters to generate, the algorithm will return the top N canopies (as determined by T2 density) when N &lt; number of canopies (this applies to both batch and incremental learning); when N &gt; number of canopies, the difference is made up by selecting training instances randomly (this can only be done when batch training). For more information see:<br/>
+ * <!-- globalinfo-start --> Cluster data using the capopy clustering algorithm,
+ * which requires just one pass over the data. Can run in eitherbatch or
+ * incremental mode. Results are generally not as good when running
+ * incrementally as the min/max for each numeric attribute is not known in
+ * advance. Has a heuristic (based on attribute std. deviations), that can be
+ * used in batch mode, for setting the T2 distance. The T2 distance determines
+ * how many canopies (clusters) are formed. When the user specifies a specific
+ * number (N) of clusters to generate, the algorithm will return the top N
+ * canopies (as determined by T2 density) when N &lt; number of canopies (this
+ * applies to both batch and incremental learning); when N &gt; number of
+ * canopies, the difference is made up by selecting training instances randomly
+ * (this can only be done when batch training). For more information see:<br/>
  * <br/>
- * A. McCallum, K. Nigam, L.H. Ungar: Efficient Clustering of High Dimensional Data Sets with Application to Reference Matching. In: Proceedings of the sixth ACM SIGKDD internation conference on knowledge discovery and data mining ACM-SIAM symposium on Discrete algorithms, 169-178, 2000.
+ * A. McCallum, K. Nigam, L.H. Ungar: Efficient Clustering of High Dimensional
+ * Data Sets with Application to Reference Matching. In: Proceedings of the
+ * sixth ACM SIGKDD internation conference on knowledge discovery and data
+ * mining ACM-SIAM symposium on Discrete algorithms, 169-178, 2000.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;inproceedings{McCallum2000,
  *    author = {A. McCallum and K. Nigam and L.H. Ungar},
@@ -69,34 +82,43 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
+ * <!-- technical-bibtex-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -N &lt;num&gt;
+ * <pre>
+ * -N &lt;num&gt;
  *  Number of clusters.
- *  (default 2).</pre>
+ *  (default 2).
+ * </pre>
  * 
- * <pre> -t2
+ * <pre>
+ * -t2
  *  The T2 distance to use. Values &lt; 0 indicate that
  *  a heuristic based on attribute std. deviation should be used to set this.
  *  Note that this heuristic can only be used when batch training
- *  (default = -1.0)</pre>
+ *  (default = -1.0)
+ * </pre>
  * 
- * <pre> -t1
+ * <pre>
+ * -t1
  *  The T1 distance to use. A value &lt; 0 is taken as a
- *  positive multiplier for T2. (default = -1.5)</pre>
+ *  positive multiplier for T2. (default = -1.5)
+ * </pre>
  * 
- * <pre> -M
+ * <pre>
+ * -M
  *  Don't replace missing values with mean/mode when running in batch mode.
  * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -266,32 +288,41 @@ public class Canopy extends RandomizableClusterer implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -N &lt;num&gt;
+   * <pre>
+   * -N &lt;num&gt;
    *  Number of clusters.
-   *  (default 2).</pre>
+   *  (default 2).
+   * </pre>
    * 
-   * <pre> -t2
+   * <pre>
+   * -t2
    *  The T2 distance to use. Values &lt; 0 indicate that
    *  a heuristic based on attribute std. deviation should be used to set this.
    *  Note that this heuristic can only be used when batch training
-   *  (default = -1.0)</pre>
+   *  (default = -1.0)
+   * </pre>
    * 
-   * <pre> -t1
+   * <pre>
+   * -t1
    *  The T1 distance to use. A value &lt; 0 is taken as a
-   *  positive multiplier for T2. (default = -1.5)</pre>
+   *  positive multiplier for T2. (default = -1.5)
+   * </pre>
    * 
-   * <pre> -M
+   * <pre>
+   * -M
    *  Don't replace missing values with mean/mode when running in batch mode.
    * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings throws Exception
    *          if an option is not supported
@@ -638,6 +669,8 @@ public class Canopy extends RandomizableClusterer implements
 
     // save memory
     m_trainingData = new Instances(m_canopies, 0);
+    m_canopyNumMissingForNumerics = null;
+    m_canopyT2Density = null;
   }
 
   /**
@@ -789,20 +822,20 @@ public class Canopy extends RandomizableClusterer implements
   public void setClusterCanopyAssignments(List<long[]> clusterCanopies) {
     m_clusterCanopies = clusterCanopies;
   }
-  
+
   /**
-   * Get the actual value of T2 (which may be different from the initial value if
-   * the heuristic is used)
+   * Get the actual value of T2 (which may be different from the initial value
+   * if the heuristic is used)
    * 
    * @return the actual value of T2
    */
   public double getActualT2() {
     return m_t2;
   }
-  
+
   /**
-   * Get the actual value of T1 (which may be different from the initial value if
-   * the heuristic is used)
+   * Get the actual value of T1 (which may be different from the initial value
+   * if the heuristic is used)
    * 
    * @return the actual value of T1
    */
@@ -1016,4 +1049,3 @@ public class Canopy extends RandomizableClusterer implements
     runClusterer(new Canopy(), args);
   }
 }
-
