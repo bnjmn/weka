@@ -44,6 +44,8 @@ import weka.core.Instances;
 import weka.core.ManhattanDistance;
 import weka.core.Option;
 import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
+import weka.core.Tag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
@@ -54,19 +56,15 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- * <!-- globalinfo-start --> Cluster data using the k means algorithm. Can use
- * either the Euclidean distance (default) or the Manhattan distance. If the
- * Manhattan distance is used, then centroids are computed as the component-wise
- * median rather than mean. For more information see:<br/>
+ <!-- globalinfo-start -->
+ * Cluster data using the k means algorithm. Can use either the Euclidean distance (default) or the Manhattan distance. If the Manhattan distance is used, then centroids are computed as the component-wise median rather than mean. For more information see:<br/>
  * <br/>
- * D. Arthur, S. Vassilvitskii: k-means++: the advantages of carefull seeding.
- * In: Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete
- * algorithms, 1027-1035, 2007.
+ * D. Arthur, S. Vassilvitskii: k-means++: the advantages of carefull seeding. In: Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete algorithms, 1027-1035, 2007.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;inproceedings{Arthur2007,
  *    author = {D. Arthur and S. Vassilvitskii},
@@ -77,67 +75,67 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * }
  * </pre>
  * <p/>
- * <!-- technical-bibtex-end -->
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -N &lt;num&gt;
- *  number of clusters.
- *  (default 2).
- * </pre>
+ * <pre> -N &lt;num&gt;
+ *  Number of clusters.
+ *  (default 2).</pre>
  * 
- * <pre>
- * -P
- *  Initialize using the k-means++ method.
- * </pre>
+ * <pre> -init
  * 
- * <pre>
- * -V
+ * Initialization method to use.
+ *  0 = random, 1 = k-means++, 2 = canopy, 3 = farthest first.
+ *  (default = 0)</pre>
+ * 
+ * <pre> -C
+ *  Use canopies to reduce the number of distance calculations.</pre>
+ * 
+ * <pre> -t2
+ *  The T2 distance to use when using canopy clustering. Values &lt; 0 indicate that
+ *  a heuristic based on attribute std. deviation should be used to set this.
+ *  (default = -1.0)</pre>
+ * 
+ * <pre> -t1
+ *  The T1 distance to use when using canopy clustering. A value &lt; 0 is taken as a
+ *  positive multiplier for T2. (default = -1.5)</pre>
+ * 
+ * <pre> -V
  *  Display std. deviations for centroids.
  * </pre>
  * 
- * <pre>
- * -M
- *  Replace missing values with mean/mode.
+ * <pre> -M
+ *  Don't replace missing values with mean/mode.
  * </pre>
  * 
- * <pre>
- * -A &lt;classname and options&gt;
+ * <pre> -A &lt;classname and options&gt;
  *  Distance function to use.
- *  (default: weka.core.EuclideanDistance)
- * </pre>
+ *  (default: weka.core.EuclideanDistance)</pre>
  * 
- * <pre>
- * -I &lt;num&gt;
+ * <pre> -I &lt;num&gt;
  *  Maximum number of iterations.
  * </pre>
  * 
- * <pre>
- * -O
+ * <pre> -O
  *  Preserve order of instances.
  * </pre>
  * 
- * <pre>
- * -fast
+ * <pre> -fast
  *  Enables faster distance calculations, using cut-off values.
  *  Disables the calculation/output of squared errors/distances.
  * </pre>
  * 
- * <pre>
- * -num-slots &lt;num&gt;
+ * <pre> -num-slots &lt;num&gt;
  *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)
- * </pre>
+ *  (default 1 - i.e. no parallelism)</pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 10)
- * </pre>
+ *  (default 10)</pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -160,6 +158,12 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * number of clusters to generate.
    */
   protected int m_NumClusters = 2;
+
+  /**
+   * Holds the initial start points, as supplied by the initialization method
+   * used
+   */
+  protected Instances m_initialStartPoints;
 
   /**
    * holds the cluster centroids.
@@ -235,9 +239,41 @@ public class SimpleKMeans extends RandomizableClusterer implements
   /** whether to use fast calculation of distances (using a cut-off). */
   protected boolean m_FastDistanceCalc = false;
 
-  /** Whether to initialize cluster centers using the k-means++ method */
-  protected boolean m_initializeWithKMeansPlusPlus = false;
+  public static final int RANDOM = 0;
+  public static final int KMEANS_PLUS_PLUS = 1;
+  public static final int CANOPY = 2;
+  public static final int FARTHEST_FIRST = 3;
 
+  /** Initialization methods */
+  public static final Tag[] TAGS_SELECTION = { new Tag(RANDOM, "Random"),
+    new Tag(KMEANS_PLUS_PLUS, "k-means++"), new Tag(CANOPY, "Canopy"),
+    new Tag(FARTHEST_FIRST, "Farthest first") };
+
+  /** The initialization method to use */
+  protected int m_initializationMethod = RANDOM;
+
+  /**
+   * Whether to reducet the number of distance calcs done by k-means with
+   * canopies
+   */
+  protected boolean m_speedUpDistanceCompWithCanopies = false;
+
+  /** Canopies that each centroid falls into (determined by T1 radius) */
+  protected List<long[]> m_centroidCanopyAssignments;
+
+  /** Canopies that each training instance falls into (determined by T1 radius) */
+  protected List<long[]> m_dataPointCanopyAssignments;
+
+  /** The canopy clusterer (if being used) */
+  protected Canopy m_canopyClusters;
+
+  /** The t2 radius to pass through to Canopy */
+  protected double m_t2 = Canopy.DEFAULT_T2;
+
+  /** The t1 radius to pass through to Canopy */
+  protected double m_t1 = Canopy.DEFAULT_T1;
+
+  /** Number of threads to run */
   protected int m_executionSlots = 1;
 
   /** For parallel execution mode */
@@ -383,7 +419,9 @@ public class SimpleKMeans extends RandomizableClusterer implements
       boolean converged = true;
       for (int i = m_start; i < m_end; i++) {
         Instance toCluster = m_inst.instance(i);
-        int newC = clusterInstance(toCluster);
+        long[] instanceCanopies = m_speedUpDistanceCompWithCanopies ? m_dataPointCanopyAssignments
+          .get(i) : null;
+        int newC = clusterInstance(toCluster, instanceCanopies);
         if (newC != m_clusterAssignments[i]) {
           converged = false;
         }
@@ -393,13 +431,29 @@ public class SimpleKMeans extends RandomizableClusterer implements
       return converged;
     }
 
-    protected int clusterInstance(Instance inst) {
+    protected int clusterInstance(Instance inst, long[] instanceCanopies) {
       double minDist = Integer.MAX_VALUE;
       int bestCluster = 0;
       for (int i = 0; i < m_NumClusters; i++) {
         double dist;
+
+        if (m_speedUpDistanceCompWithCanopies && instanceCanopies != null
+          && instanceCanopies.length > 0) {
+          try {
+            if (!Canopy.nonEmptyCanopySetIntersection(
+              m_centroidCanopyAssignments.get(i), instanceCanopies)) {
+              System.err.println("Skipping distance calc... "
+                + Canopy.printSingleAssignment(instanceCanopies));
+              continue;
+            }
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        }
+
         dist = m_DistanceFunction.distance(inst,
           m_ClusterCentroids.instance(i), minDist);
+
         if (dist < minDist) {
           minDist = dist;
           bestCluster = i;
@@ -454,6 +508,8 @@ public class SimpleKMeans extends RandomizableClusterer implements
    */
   @Override
   public void buildClusterer(Instances data) throws Exception {
+
+    m_canopyClusters = null;
 
     // can clusterer handle the data?
     getCapabilities().testWithFail(data);
@@ -516,9 +572,32 @@ public class SimpleKMeans extends RandomizableClusterer implements
       initInstances = instances;
     }
 
-    if (m_initializeWithKMeansPlusPlus) {
+    if (m_speedUpDistanceCompWithCanopies) {
+      m_canopyClusters = new Canopy();
+      m_canopyClusters.setNumClusters(m_NumClusters);
+      m_canopyClusters.setSeed(getSeed());
+      m_canopyClusters.setT2(getT2());
+      m_canopyClusters.setT1(getT1());
+      m_canopyClusters.buildClusterer(initInstances);
+      // System.err.println(m_canopyClusters);
+      m_centroidCanopyAssignments = new ArrayList<long[]>();
+      m_dataPointCanopyAssignments = new ArrayList<long[]>();
+    }
+
+    if (m_initializationMethod == KMEANS_PLUS_PLUS) {
       kMeansPlusPlusInit(initInstances);
+
+      m_initialStartPoints = new Instances(m_ClusterCentroids);
+    } else if (m_initializationMethod == CANOPY) {
+      canopyInit(initInstances);
+
+      m_initialStartPoints = new Instances(m_canopyClusters.getCanopies());
+    } else if (m_initializationMethod == FARTHEST_FIRST) {
+      farthestFirstInit(initInstances);
+
+      m_initialStartPoints = new Instances(m_ClusterCentroids);
     } else {
+      // random
       for (int j = initInstances.numInstances() - 1; j >= 0; j--) {
         instIndex = RandomO.nextInt(j + 1);
         hk = new DecisionTableHashKey(initInstances.instance(instIndex),
@@ -532,6 +611,16 @@ public class SimpleKMeans extends RandomizableClusterer implements
         if (m_ClusterCentroids.numInstances() == m_NumClusters) {
           break;
         }
+      }
+
+      m_initialStartPoints = new Instances(m_ClusterCentroids);
+    }
+
+    if (m_speedUpDistanceCompWithCanopies) {
+      // assign canopies to training data
+      for (int i = 0; i < instances.numInstances(); i++) {
+        m_dataPointCanopyAssignments.add(m_canopyClusters
+          .assignCanopies(instances.instance(i)));
       }
     }
 
@@ -550,6 +639,15 @@ public class SimpleKMeans extends RandomizableClusterer implements
     startExecutorPool();
 
     while (!converged) {
+      if (m_speedUpDistanceCompWithCanopies) {
+        // re-assign canopies to the current cluster centers
+        m_centroidCanopyAssignments.clear();
+        for (int kk = 0; kk < m_ClusterCentroids.numInstances(); kk++) {
+          m_centroidCanopyAssignments.add(m_canopyClusters
+            .assignCanopies(m_ClusterCentroids.instance(kk)));
+        }
+      }
+
       emptyClusterCount = 0;
       m_Iterations++;
       converged = true;
@@ -558,7 +656,12 @@ public class SimpleKMeans extends RandomizableClusterer implements
         || instances.numInstances() < 2 * m_executionSlots) {
         for (i = 0; i < instances.numInstances(); i++) {
           Instance toCluster = instances.instance(i);
-          int newC = clusterProcessedInstance(toCluster, false, true);
+          int newC = clusterProcessedInstance(
+            toCluster,
+            false,
+            true,
+            m_speedUpDistanceCompWithCanopies ? m_dataPointCanopyAssignments
+              .get(i) : null);
           if (newC != clusterAssignments[i]) {
             converged = false;
           }
@@ -624,7 +727,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
     // calculate errors
     if (!m_FastDistanceCalc) {
       for (i = 0; i < instances.numInstances(); i++) {
-        clusterProcessedInstance(instances.instance(i), true, false);
+        clusterProcessedInstance(instances.instance(i), true, false, null);
       }
     }
 
@@ -650,6 +753,44 @@ public class SimpleKMeans extends RandomizableClusterer implements
     m_executorPool.shutdown();
   }
 
+  /**
+   * Initialize with the canopy centers of the Canopy clustering method
+   * 
+   * @param data the training data
+   * @throws Exception if a problem occurs
+   */
+  protected void canopyInit(Instances data) throws Exception {
+    if (m_canopyClusters == null) {
+      m_canopyClusters = new Canopy();
+      m_canopyClusters.setNumClusters(m_NumClusters);
+      m_canopyClusters.setSeed(getSeed());
+      m_canopyClusters.setT2(getT2());
+      m_canopyClusters.setT1(getT1());
+      m_canopyClusters.buildClusterer(data);
+    }
+    m_ClusterCentroids = m_canopyClusters.getCanopies();
+  }
+
+  /**
+   * Initialize with the fartherst first centers
+   * 
+   * @param data the training data
+   * @throws Exception if a problem occurs
+   */
+  protected void farthestFirstInit(Instances data) throws Exception {
+    FarthestFirst ff = new FarthestFirst();
+    ff.setNumClusters(m_NumClusters);
+    ff.buildClusterer(data);
+
+    m_ClusterCentroids = ff.getClusterCentroids();
+  }
+
+  /**
+   * Initialize using the k-means++ method
+   * 
+   * @param data the training data
+   * @throws Exception if a problem occurs
+   */
   protected void kMeansPlusPlusInit(Instances data) throws Exception {
     Random randomO = new Random(getSeed());
     HashMap<DecisionTableHashKey, String> initC = new HashMap<DecisionTableHashKey, String>();
@@ -816,17 +957,34 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * @param instance the instance to assign a cluster to
    * @param updateErrors if true, update the within clusters sum of errors
    * @param useFastDistCalc whether to use the fast distance calculation or not
+   * @param instanceCanopies the canopies covering the instance to be clustered,
+   *          or null if not using the option to reduce the number of distance
+   *          computations via canopies
    * @return a cluster number
    */
   private int clusterProcessedInstance(Instance instance, boolean updateErrors,
-    boolean useFastDistCalc) {
+    boolean useFastDistCalc, long[] instanceCanopies) {
     double minDist = Integer.MAX_VALUE;
     int bestCluster = 0;
     for (int i = 0; i < m_NumClusters; i++) {
       double dist;
       if (useFastDistCalc) {
-        dist = m_DistanceFunction.distance(instance,
-          m_ClusterCentroids.instance(i), minDist);
+        if (m_speedUpDistanceCompWithCanopies && instanceCanopies != null
+          && instanceCanopies.length > 0) {
+          try {
+            if (!Canopy.nonEmptyCanopySetIntersection(
+              m_centroidCanopyAssignments.get(i), instanceCanopies)) {
+              continue;
+            }
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+          dist = m_DistanceFunction.distance(instance,
+            m_ClusterCentroids.instance(i), minDist);
+        } else {
+          dist = m_DistanceFunction.distance(instance,
+            m_ClusterCentroids.instance(i), minDist);
+        }
       } else {
         dist = m_DistanceFunction.distance(instance,
           m_ClusterCentroids.instance(i));
@@ -865,7 +1023,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
       inst = instance;
     }
 
-    return clusterProcessedInstance(inst, false, true);
+    return clusterProcessedInstance(inst, false, true, null);
   }
 
   /**
@@ -888,11 +1046,28 @@ public class SimpleKMeans extends RandomizableClusterer implements
   public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option("\tnumber of clusters.\n" + "\t(default 2).",
+    result.addElement(new Option("\tNumber of clusters.\n" + "\t(default 2).",
       "N", 1, "-N <num>"));
 
-    result.addElement(new Option("\tInitialize using the k-means++ method.\n",
-      "P", 0, "-P"));
+    result.addElement(new Option(
+      "\nInitialization method to use.\n\t0 = random, 1 = k-means++, "
+        + "2 = canopy, 3 = farthest first.\n\t(default = 0)", "init", 1,
+      "-init"));
+
+    result.addElement(new Option(
+      "\tUse canopies to reduce the number of distance calculations.", "C", 0,
+      "-C"));
+
+    result
+      .addElement(new Option(
+        "\tThe T2 distance to use when using canopy clustering. Values < 0 indicate that\n\t"
+          + "a heuristic based on attribute std. deviation should be used to set this.\n\t"
+          + "(default = -1.0)", "t2", 1, "-t2"));
+
+    result
+      .addElement(new Option(
+        "\tThe T1 distance to use when using canopy clustering. A value < 0 is taken as a\n\t"
+          + "positive multiplier for T2. (default = -1.5)", "t1", 1, "-t1"));
 
     result.addElement(new Option("\tDisplay std. deviations for centroids.\n",
       "V", 0, "-V"));
@@ -962,33 +1137,121 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String initializeUsingKMeansPlusPlusMethodTipText() {
-    return "Initialize cluster centers using the probabilistic "
-      + " farthest first method of the k-means++ algorithm";
+  public String initializationMethodTipText() {
+    return "The initialization method to use. Random, k-means++, Canopy or farthest first";
   }
 
   /**
-   * Set whether to initialize using the probabilistic farthest first like
-   * method of the k-means++ algorithm (rather than the standard random
-   * selection of initial cluster centers).
+   * Set the initialization method to use
    * 
-   * @param k true if the k-means++ method is to be used to select initial
-   *          cluster centers.
+   * @param method the initialization method to use
    */
-  public void setInitializeUsingKMeansPlusPlusMethod(boolean k) {
-    m_initializeWithKMeansPlusPlus = k;
+  public void setInitializationMethod(SelectedTag method) {
+    if (method.getTags() == TAGS_SELECTION) {
+      m_initializationMethod = method.getSelectedTag().getID();
+    }
   }
 
   /**
-   * Get whether to initialize using the probabilistic farthest first like
-   * method of the k-means++ algorithm (rather than the standard random
-   * selection of initial cluster centers).
+   * Get the initialization method to use
    * 
-   * @return true if the k-means++ method is to be used to select initial
-   *         cluster centers.
+   * @return method the initialization method to use
    */
-  public boolean getInitializeUsingKMeansPlusPlusMethod() {
-    return m_initializeWithKMeansPlusPlus;
+  public SelectedTag getInitializationMethod() {
+    return new SelectedTag(m_initializationMethod, TAGS_SELECTION);
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String reduceNumberOfDistanceCalcsViaCanopiesTipText() {
+    return "Use canopy clustering to reduce the number of distance calculations "
+      + "performed by k-means";
+  }
+
+  /**
+   * Set whether to use canopies to reduce the number of distance computations
+   * required
+   * 
+   * @param c true if canopies are to be used to reduce the number of distance
+   *          computations
+   */
+  public void setReduceNumberOfDistanceCalcsViaCanopies(boolean c) {
+    m_speedUpDistanceCompWithCanopies = c;
+  }
+
+  /**
+   * Get whether to use canopies to reduce the number of distance computations
+   * required
+   * 
+   * @return true if canopies are to be used to reduce the number of distance
+   *         computations
+   */
+  public boolean getReduceNumberOfDistanceCalcsViaCanopies() {
+    return m_speedUpDistanceCompWithCanopies;
+  }
+
+  /**
+   * Tip text for this property
+   * 
+   * @return the tip text for this property
+   */
+  public String t2TipText() {
+    return "The T2 distance to use when using canopy clustering. Values < 0 indicate that this should be set using "
+      + "a heuristic based on attribute standard deviation";
+  }
+
+  /**
+   * Set the t2 radius to use when canopy clustering is being used as start
+   * points and/or to reduce the number of distance calcs
+   * 
+   * @param t2 the t2 radius to use
+   */
+  public void setT2(double t2) {
+    m_t2 = t2;
+  }
+
+  /**
+   * Get the t2 radius to use when canopy clustering is being used as start
+   * points and/or to reduce the number of distance calcs
+   * 
+   * @return the t2 radius to use
+   */
+  public double getT2() {
+    return m_t2;
+  }
+
+  /**
+   * Tip text for this property
+   * 
+   * @return the tip text for this property
+   */
+  public String t1TipText() {
+    return "The T1 distance to use when using canopy clustering. Values < 0 are taken as a positive "
+      + "multiplier for the T2 distance";
+  }
+
+  /**
+   * Set the t1 radius to use when canopy clustering is being used as start
+   * points and/or to reduce the number of distance calcs
+   * 
+   * @param t1 the t1 radius to use
+   */
+  public void setT1(double t1) {
+    m_t1 = t1;
+  }
+
+  /**
+   * Get the t1 radius to use when canopy clustering is being used as start
+   * points and/or to reduce the number of distance calcs
+   * 
+   * @return the t1 radius to use
+   */
+  public double getT1() {
+    return m_t1;
   }
 
   /**
@@ -1212,65 +1475,65 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -N &lt;num&gt;
-   *  number of clusters.
-   *  (default 2).
-   * </pre>
+   * <pre> -N &lt;num&gt;
+   *  Number of clusters.
+   *  (default 2).</pre>
    * 
-   * <pre>
-   * -P
-   *  Initialize using the k-means++ method.
-   * </pre>
+   * <pre> -init
    * 
-   * <pre>
-   * -V
+   * Initialization method to use.
+   *  0 = random, 1 = k-means++, 2 = canopy, 3 = farthest first.
+   *  (default = 0)</pre>
+   * 
+   * <pre> -C
+   *  Use canopies to reduce the number of distance calculations.</pre>
+   * 
+   * <pre> -t2
+   *  The T2 distance to use when using canopy clustering. Values &lt; 0 indicate that
+   *  a heuristic based on attribute std. deviation should be used to set this.
+   *  (default = -1.0)</pre>
+   * 
+   * <pre> -t1
+   *  The T1 distance to use when using canopy clustering. A value &lt; 0 is taken as a
+   *  positive multiplier for T2. (default = -1.5)</pre>
+   * 
+   * <pre> -V
    *  Display std. deviations for centroids.
    * </pre>
    * 
-   * <pre>
-   * -M
-   *  Replace missing values with mean/mode.
+   * <pre> -M
+   *  Don't replace missing values with mean/mode.
    * </pre>
    * 
-   * <pre>
-   * -A &lt;classname and options&gt;
+   * <pre> -A &lt;classname and options&gt;
    *  Distance function to use.
-   *  (default: weka.core.EuclideanDistance)
-   * </pre>
+   *  (default: weka.core.EuclideanDistance)</pre>
    * 
-   * <pre>
-   * -I &lt;num&gt;
+   * <pre> -I &lt;num&gt;
    *  Maximum number of iterations.
    * </pre>
    * 
-   * <pre>
-   * -O
+   * <pre> -O
    *  Preserve order of instances.
    * </pre>
    * 
-   * <pre>
-   * -fast
+   * <pre> -fast
    *  Enables faster distance calculations, using cut-off values.
    *  Disables the calculation/output of squared errors/distances.
    * </pre>
    * 
-   * <pre>
-   * -num-slots &lt;num&gt;
+   * <pre> -num-slots &lt;num&gt;
    *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)
-   * </pre>
+   *  (default 1 - i.e. no parallelism)</pre>
    * 
-   * <pre>
-   * -S &lt;num&gt;
+   * <pre> -S &lt;num&gt;
    *  Random number seed.
-   *  (default 10)
-   * </pre>
+   *  (default 10)</pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -1280,7 +1543,24 @@ public class SimpleKMeans extends RandomizableClusterer implements
 
     m_displayStdDevs = Utils.getFlag("V", options);
     m_dontReplaceMissing = Utils.getFlag("M", options);
-    m_initializeWithKMeansPlusPlus = Utils.getFlag('P', options);
+
+    String initM = Utils.getOption("init", options);
+    if (initM.length() > 0) {
+      setInitializationMethod(new SelectedTag(Integer.parseInt(initM),
+        TAGS_SELECTION));
+    }
+
+    m_speedUpDistanceCompWithCanopies = Utils.getFlag('C', options);
+
+    String temp = Utils.getOption("t2", options);
+    if (temp.length() > 0) {
+      setT2(Double.parseDouble(temp));
+    }
+
+    temp = Utils.getOption("t1", options);
+    if (temp.length() > 0) {
+      setT1(Double.parseDouble(temp));
+    }
 
     String optionString = Utils.getOption('N', options);
 
@@ -1332,9 +1612,17 @@ public class SimpleKMeans extends RandomizableClusterer implements
 
     Vector<String> result = new Vector<String>();
 
-    if (m_initializeWithKMeansPlusPlus) {
-      result.add("-P");
+    result.add("-init");
+    result.add("" + getInitializationMethod().getSelectedTag().getID());
+
+    if (m_speedUpDistanceCompWithCanopies) {
+      result.add("-C");
     }
+
+    result.add("-t1");
+    result.add("" + getT1());
+    result.add("-t2");
+    result.add("" + getT2());
 
     if (m_displayStdDevs) {
       result.add("-V");
@@ -1393,7 +1681,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
           containsNumeric = true;
           double width = Math.log(Math.abs(m_ClusterCentroids.instance(i)
             .value(j))) / Math.log(10.0);
-          // System.err.println(m_ClusterCentroids.instance(i).value(j)+" "+width);
+
           if (width < 0) {
             width = 1;
           }
@@ -1487,11 +1775,44 @@ public class SimpleKMeans extends RandomizableClusterer implements
       }
     }
 
+    temp.append("\n\nInitial staring points (");
+    switch (m_initializationMethod) {
+    case FARTHEST_FIRST:
+      temp.append("farthest first");
+      break;
+    case KMEANS_PLUS_PLUS:
+      temp.append("k-means++");
+      break;
+    case CANOPY:
+      temp.append("canopy");
+      break;
+    default:
+      temp.append("random");
+    }
+    temp.append("):\n");
+    if (m_initializationMethod != CANOPY) {
+      temp.append("\n");
+      for (int i = 0; i < m_initialStartPoints.numInstances(); i++) {
+        temp.append("Cluster " + i + ": " + m_initialStartPoints.instance(i))
+          .append("\n");
+      }
+    } else {
+      temp.append(m_canopyClusters.toString(false));
+    }
+    
+    if (m_speedUpDistanceCompWithCanopies) {
+      temp.append("\nReduced number of distance calculations by using canopies.");
+      if (m_initializationMethod != CANOPY) {
+        temp.append("\nCanopy T2 radius: " + String.format("%-10.3f", m_canopyClusters.getActualT2()));
+        temp.append("\nCanopy T1 radius: " + String.format("%-10.3f", m_canopyClusters.getActualT1())).append("\n");
+      }
+    }
+
     if (!m_dontReplaceMissing) {
       temp.append("\nMissing values globally replaced with mean/mode");
     }
 
-    temp.append("\n\nCluster centroids:\n");
+    temp.append("\n\nFinal cluster centroids:\n");
     temp.append(pad("Cluster#", " ", (maxAttWidth + (maxWidth * 2 + 2))
       - "Cluster#".length(), true));
 
@@ -1789,3 +2110,4 @@ public class SimpleKMeans extends RandomizableClusterer implements
     runClusterer(new SimpleKMeans(), args);
   }
 }
+
