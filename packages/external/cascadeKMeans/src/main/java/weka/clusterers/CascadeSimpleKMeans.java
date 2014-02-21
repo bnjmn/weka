@@ -147,7 +147,8 @@ public class CascadeSimpleKMeans extends RandomizableClusterer implements Cluste
 
     kMeans.setDistanceFunction(distanceFunction);
     kMeans.setMaxIterations(maxIterations);
-    kMeans.setInitializeUsingKMeansPlusPlusMethod(initializeWithKMeansPlusPlus);
+    //    kMeans.setInitializeUsingKMeansPlusPlusMethod(initializeWithKMeansPlusPlus);
+    kMeans.setInitializationMethod(new weka.core.SelectedTag(SimpleKMeans.KMEANS_PLUS_PLUS, SimpleKMeans.TAGS_SELECTION));
 
     /**
      * step 1: iterate over all restarts and possible k values, record CH-scores
