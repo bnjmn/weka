@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>distributedWekaHadoop</artifactId>
-  <version>1.0.6-SNAPSHOT</version>
+  <version>1.0.6</version>
   <packaging>jar</packaging>
 
   <name>distributedWekaHadoop</name>
@@ -48,9 +48,9 @@ This package provides loaders and savers for HDFS, plus Hadoop jobs and tasks th
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/distributedWekaHadoop</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/distributedWekaHadoop</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/distributedWekaHadoop</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/distributedWekaHadoop-1.0.6</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/distributedWekaHadoop-1.0.6</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/distributedWekaHadoop-1.0.6</url>
   </scm>
 
   <profiles>
