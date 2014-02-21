@@ -41,24 +41,23 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- * <!-- globalinfo-start --> Cluster data using the FarthestFirst algorithm.<br/>
+ <!-- globalinfo-start -->
+ * Cluster data using the FarthestFirst algorithm.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Hochbaum, Shmoys (1985). A best possible heuristic for the k-center problem.
- * Mathematics of Operations Research. 10(2):180-184.<br/>
+ * Hochbaum, Shmoys (1985). A best possible heuristic for the k-center problem. Mathematics of Operations Research. 10(2):180-184.<br/>
  * <br/>
- * Sanjoy Dasgupta: Performance Guarantees for Hierarchical Clustering. In: 15th
- * Annual Conference on Computational Learning Theory, 351-363, 2002.<br/>
+ * Sanjoy Dasgupta: Performance Guarantees for Hierarchical Clustering. In: 15th Annual Conference on Computational Learning Theory, 351-363, 2002.<br/>
  * <br/>
  * Notes:<br/>
  * - works as a fast simple approximate clusterer<br/>
  * - modelled after SimpleKMeans, might be a useful initializer for it
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;article{Hochbaum1985,
  *    author = {Hochbaum and Shmoys},
@@ -80,23 +79,19 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * }
  * </pre>
  * <p/>
- * <!-- technical-bibtex-end -->
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -N &lt;num&gt;
- *  number of clusters. (default = 2).
- * </pre>
+ * <pre> -N &lt;num&gt;
+ *  number of clusters. (default = 2).</pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)
- * </pre>
+ *  (default 1)</pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @version $Revision$
@@ -483,6 +478,15 @@ public class FarthestFirst extends RandomizableClusterer implements
   }
 
   /**
+   * Get the centroids found by FarthestFirst
+   * 
+   * @return the centroids found by FarthestFirst
+   */
+  public Instances getClusterCentroids() {
+    return m_ClusterCentroids;
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options.
@@ -535,21 +539,17 @@ public class FarthestFirst extends RandomizableClusterer implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -N &lt;num&gt;
-   *  number of clusters. (default = 2).
-   * </pre>
+   * <pre> -N &lt;num&gt;
+   *  number of clusters. (default = 2).</pre>
    * 
-   * <pre>
-   * -S &lt;num&gt;
+   * <pre> -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)
-   * </pre>
+   *  (default 1)</pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -595,7 +595,7 @@ public class FarthestFirst extends RandomizableClusterer implements
   public String toString() {
     StringBuffer temp = new StringBuffer();
 
-    temp.append("\n FarthestFirst\n==============\n");
+    temp.append("\nFarthestFirst\n==============\n");
 
     temp.append("\nCluster centroids:\n");
     for (int i = 0; i < m_NumClusters; i++) {
@@ -635,3 +635,4 @@ public class FarthestFirst extends RandomizableClusterer implements
     runClusterer(new FarthestFirst(), argv);
   }
 }
+
