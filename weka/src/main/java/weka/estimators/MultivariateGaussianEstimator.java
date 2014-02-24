@@ -27,7 +27,7 @@ import weka.core.matrix.Matrix;
  * Implementation of Multivariate Distribution Estimation using Normal
  * Distribution. *
  * 
- * @author Uday Kamath, PhD candidate, George Mason University
+ * @author Uday Kamath, PhD, George Mason University
  * @version $Revision$
  * 
  */
@@ -48,7 +48,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     clone.lnconstant = this.lnconstant;
     if (this.chol != null) {
       clone.chol = new CholeskyDecomposition((Matrix) this.chol.getL().clone());
-    }
+    }  
     return clone;
   }
 
@@ -60,7 +60,8 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     this.mean = means;
     this.covariance = covariance;
     this.chol = new CholeskyDecomposition(new Matrix(covariance));
-  }
+   this.recalculate(this.mean, this.covariance, this.chol);  
+}
 
   /**
    * Log of twice number pi: log(2*pi).
@@ -95,7 +96,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator,
     for (int i = 0; i < value.length; i++) {
       subtractedMean[i] = value[i] - mean[i];
     }
-
+    value = subtractedMean.clone();
     double[][] L = this.chol.getL().getArray();
     int n = this.chol.getL().getRowDimension();
     // Solve L*Y = B;
