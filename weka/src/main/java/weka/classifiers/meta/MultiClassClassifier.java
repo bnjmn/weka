@@ -22,19 +22,20 @@
 package weka.classifiers.meta;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.classifiers.RandomizableSingleClassifierEnhancer;
+//import weka.classifiers.RandomizableSingleClassifierEnhancer;
+//import weka.classifiers.ParallelIteratedSingleClassifierEnhancer;
+import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -99,17 +100,19 @@ import weka.filters.unsupervised.instance.RemoveWithValues;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
+ * @author Bernhard Pfahringer (bernhard@waikato.ac.nz)
  * @version $Revision$
  */
 public class MultiClassClassifier 
-  extends RandomizableSingleClassifierEnhancer 
+//extends RandomizableSingleClassifierEnhancer 
+    extends RandomizableParallelIteratedSingleClassifierEnhancer 
   implements OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3879602011542849141L;
   
   /** The classifiers. */
-  protected Classifier [] m_Classifiers;
+  //protected Classifier [] m_Classifiers;
 
   /** Use pairwise coupling with 1-vs-1 */
   protected boolean m_pairwiseCoupling = false;
@@ -128,6 +131,16 @@ public class MultiClassClassifier
   
   /** A transformed dataset header used by the  1-against-1 method */
   protected Instances m_TwoClassDataset;
+
+  /** The original data needed inside getTrainingSet*/
+  protected Instances m_insts;
+  
+  /** All class-pairs, needed inside getTrainingSet*/
+  protected FastVector m_pairs;
+  
+  /** The code needed inside getTrainingSet */
+  protected Code m_code;
+  
 
   /** 
    * The multiplier when generating random codes. Will generate
@@ -416,6 +429,42 @@ public class MultiClassClassifier
     return result;
   }
 
+
+  protected Instances getTrainingSet(int i) throws Exception {
+    Instances newInsts = null;
+    if (m_Method == METHOD_1_AGAINST_1) {
+      RemoveWithValues classFilter = new RemoveWithValues();
+      classFilter.setAttributeIndex("" + (m_insts.classIndex() + 1));
+      classFilter.setModifyHeader(true);
+      classFilter.setInvertSelection(true);
+      classFilter.setNominalIndicesArr((int[])m_pairs.elementAt(i));
+      Instances tempInstances = new Instances(m_insts, 0);
+      tempInstances.setClassIndex(-1);
+      classFilter.setInputFormat(tempInstances);
+      newInsts = Filter.useFilter(m_insts, classFilter);
+      // allow for 0 instances in m_insts: incremental ...???
+      if (newInsts.numInstances() > 0 || m_insts.numInstances() == 0) {
+	newInsts.setClassIndex(m_insts.classIndex());
+	m_ClassFilters[i] = classFilter;
+	m_SumOfWeights[i] = newInsts.sumOfWeights();
+      } else {
+	m_Classifiers[i] = null;
+	m_ClassFilters[i] = null;
+      }
+    } else {
+      m_ClassFilters[i] = new MakeIndicator();
+      MakeIndicator classFilter = (MakeIndicator) m_ClassFilters[i];
+      classFilter.setAttributeIndex("" + (m_insts.classIndex() + 1));
+      classFilter.setValueIndices(m_code.getIndices(i));
+      classFilter.setNumeric(false);
+      classFilter.setInputFormat(m_insts);
+      newInsts = Filter.useFilter(m_insts, m_ClassFilters[i]);
+    }
+    return newInsts;
+  }
+
+
+
   /**
    * Builds the classifiers.
    *
@@ -424,17 +473,14 @@ public class MultiClassClassifier
    */
   public void buildClassifier(Instances insts) throws Exception {
 
-    Instances newInsts;
-
     // can classifier handle the data?
     getCapabilities().testWithFail(insts);
     
-    // zero training instances - could be incremental 
-    boolean zeroTrainingInstances = insts.numInstances() == 0;
-
     // remove instances with missing class
     insts = new Instances(insts);
     insts.deleteWithMissingClass();
+
+    m_insts = insts;
     
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
@@ -454,13 +500,14 @@ public class MultiClassClassifier
 
     } else if (m_Method == METHOD_1_AGAINST_1) {
       // generate fastvector of pairs
-      ArrayList<int[] >pairs = new ArrayList<int[]>();
+      FastVector pairs = new FastVector();
+      m_pairs = pairs;
       for (int i=0; i<insts.numClasses(); i++) {
 	for (int j=0; j<insts.numClasses(); j++) {
 	  if (j<=i) continue;
 	  int[] pair = new int[2];
 	  pair[0] = i; pair[1] = j;
-	  pairs.add(pair);
+	  pairs.addElement(pair);
 	}
       }
 
@@ -469,39 +516,19 @@ public class MultiClassClassifier
       m_ClassFilters = new Filter[numClassifiers];
       m_SumOfWeights = new double[numClassifiers];
 
-      // generate the classifiers
-      for (int i=0; i<numClassifiers; i++) {
-	RemoveWithValues classFilter = new RemoveWithValues();
-	classFilter.setAttributeIndex("" + (insts.classIndex() + 1));
-	classFilter.setModifyHeader(true);
-	classFilter.setInvertSelection(true);
-	classFilter.setNominalIndicesArr((int[])pairs.get(i));
-	Instances tempInstances = new Instances(insts, 0);
-	tempInstances.setClassIndex(-1);
-	classFilter.setInputFormat(tempInstances);
-	newInsts = Filter.useFilter(insts, classFilter);
-	if (newInsts.numInstances() > 0 || zeroTrainingInstances) {
-	  newInsts.setClassIndex(insts.classIndex());
-	  m_Classifiers[i].buildClassifier(newInsts);
-	  m_ClassFilters[i] = classFilter;
-          m_SumOfWeights[i] = newInsts.sumOfWeights();
-	} else {
-	  m_Classifiers[i] = null;
-	  m_ClassFilters[i] = null;
-	}
-      }
-
       // construct a two-class header version of the dataset
       m_TwoClassDataset = new Instances(insts, 0);
       int classIndex = m_TwoClassDataset.classIndex();
       m_TwoClassDataset.setClassIndex(-1);
       m_TwoClassDataset.deleteAttributeAt(classIndex);
-      ArrayList<String> classLabels = new ArrayList<String>();
-      classLabels.add("class0");
-      classLabels.add("class1");
+      FastVector classLabels = new FastVector();
+      classLabels.addElement("class0");
+      classLabels.addElement("class1");
       m_TwoClassDataset.insertAttributeAt(new Attribute("class", classLabels),
 					  classIndex);
       m_TwoClassDataset.setClassIndex(classIndex);
+
+      buildClassifiers();
 
     } else { // use error correcting code style methods
       Code code = null;
@@ -523,18 +550,13 @@ public class MultiClassClassifier
       numClassifiers = code.size();
       m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, numClassifiers);
       m_ClassFilters = new MakeIndicator[numClassifiers];
-      for (int i = 0; i < m_Classifiers.length; i++) {
-	m_ClassFilters[i] = new MakeIndicator();
-	MakeIndicator classFilter = (MakeIndicator) m_ClassFilters[i];
-	classFilter.setAttributeIndex("" + (insts.classIndex() + 1));
-	classFilter.setValueIndices(code.getIndices(i));
-	classFilter.setNumeric(false);
-	classFilter.setInputFormat(insts);
-	newInsts = Filter.useFilter(insts, m_ClassFilters[i]);
-	m_Classifiers[i].buildClassifier(newInsts);
-      }
+
+      m_code = code;
+      buildClassifiers();
     }
     m_ClassAttribute = insts.classAttribute();
+    m_insts = null;
+    m_code = null;
   }
 
   /**
@@ -684,9 +706,9 @@ public class MultiClassClassifier
    *
    * @return an enumeration of all the available options
    */
-  public Enumeration<Option> listOptions()  {
+  public Enumeration listOptions()  {
 
-    Vector<Option> vec = new Vector<Option>(3);
+    Vector vec = new Vector(4);
     
     vec.addElement(new Option(
        "\tSets the method to use. Valid values are 0 (1-against-all),\n"
@@ -699,8 +721,10 @@ public class MultiClassClassifier
         "\tUse pairwise coupling (only has an effect for 1-against1)",
         "P", 0, "-P"));
 
-    vec.addAll(Collections.list(super.listOptions()));
-    
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      vec.addElement(enu.nextElement());
+    }
     return vec.elements();
   }
 
@@ -771,8 +795,6 @@ public class MultiClassClassifier
     setUsePairwiseCoupling(Utils.getFlag('P', options));
 
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -782,21 +804,30 @@ public class MultiClassClassifier
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
-    
-    options.add("-M");
-    options.add("" + m_Method);
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 5];
+
+    int current = 0;
+
+
+    options[current++] = "-M";
+    options[current++] = "" + m_Method;
 
     if (getUsePairwiseCoupling()) {
-        options.add("-P");
+      options[current++] = "-P";
     }
     
-    options.add("-R");
-    options.add("" + m_RandomWidthFactor);
+    options[current++] = "-R";
+    options[current++] = "" + m_RandomWidthFactor;
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+
+    current += superOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**

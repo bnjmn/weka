@@ -15,7 +15,7 @@
 
 /*
  *    ParallelIteratedSingleClassifierEnhancer.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009-2014 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,9 +24,10 @@ package weka.classifiers;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import weka.core.Instances;
 import weka.core.Option;
@@ -38,6 +39,7 @@ import weka.core.Utils;
  * base learner.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @author Bernhard Pfahringer (bernhard@waikato.ac.nz)
  * @version $Revision$
  */
 public abstract class ParallelIteratedSingleClassifierEnhancer extends
@@ -48,18 +50,6 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
 
   /** The number of threads to have executing at any one time */
   protected int m_numExecutionSlots = 1;
-
-  /** Pool of threads to train models with */
-  protected transient ThreadPoolExecutor m_executorPool;
-
-  /** The number of classifiers completed so far */
-  protected int m_completed;
-
-  /**
-   * The number of classifiers that experienced a failure of some sort
-   * during construction
-   */
-  protected int m_failed;
 
   /**
    * Returns an enumeration describing the available options.
@@ -72,7 +62,8 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
 
     newVector.addElement(new Option(
               "\tNumber of execution slots.\n"
-              + "\t(default 1 - i.e. no parallelism)",
+              + "\t(default 1 - i.e. no parallelism)\n"
+              + "\t(use 0 to auto-detect number of cores)",
               "num-slots", 1, "-num-slots <num>"));
 
     newVector.addAll(Collections.list(super.listOptions()));
@@ -83,7 +74,7 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
   /**
    * Parses a given list of options. Valid options are:<p>
    *
-   * -Z num <br>
+   * -num-slots num <br>
    * Set the number of execution slots to use (default 1 - i.e. no parallelism). <p>
    *
    * Options after -- are passed to the designated classifier.<p>
@@ -162,41 +153,14 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
   public void buildClassifier(Instances data) throws Exception {
     super.buildClassifier(data);
 
-    if (m_numExecutionSlots < 1) {
-      throw new Exception("Number of execution slots needs to be >= 1!");
+    if (m_numExecutionSlots < 0) {
+      throw new Exception("Number of execution slots needs to be >= 0!");
     }
-
-    if (m_numExecutionSlots > 1) {
-      startExecutorPool();
-    }
-    m_completed = 0;
-    m_failed = 0;
   }
 
   /**
    * Start the pool of execution threads
    */
-  protected void startExecutorPool() {
-    if (m_executorPool != null) {
-      m_executorPool.shutdownNow();
-    }
-
-    m_executorPool = new ThreadPoolExecutor(m_numExecutionSlots, m_numExecutionSlots,
-        120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-  }
-
-  private synchronized void block(boolean tf) {
-    if (tf) {
-      try {
-        if (m_numExecutionSlots > 1 && m_completed + m_failed < m_Classifiers.length) {
-          wait();
-        }
-      } catch (InterruptedException ex) {
-      }
-    } else {
-      notifyAll();
-    }
-  }
 
   /**
    * Does the actual construction of the ensemble
@@ -204,72 +168,61 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
    * @throws Exception if something goes wrong during the training
    * process
    */
-  protected synchronized void buildClassifiers() throws Exception {
+  protected void buildClassifiers() throws Exception {
 
-    for (int i = 0; i < m_Classifiers.length; i++) {
-      if (m_numExecutionSlots > 1) {
+    if (m_numExecutionSlots != 1) {
+
+      int numCores = (m_numExecutionSlots == 0) 
+	  ? Runtime.getRuntime().availableProcessors()
+	  : m_numExecutionSlots;
+      ExecutorService executorPool = Executors.newFixedThreadPool(numCores);
+
+      final CountDownLatch doneSignal = new CountDownLatch(m_Classifiers.length);
+      final AtomicInteger numFailed = new AtomicInteger();
+
+      for (int i = 0; i < m_Classifiers.length; i++) {
+
         final Classifier currentClassifier = m_Classifiers[i];
+	// MultiClassClassifier may produce occasional NULL classifiers ...
+	if (currentClassifier == null) continue;
         final int iteration = i;
+
         if (m_Debug) {
           System.out.print("Training classifier (" + (i +1) + ")");
         }
         Runnable newTask = new Runnable() {
           public void run() {
             try {
-              currentClassifier.buildClassifier(getTrainingSet(iteration));
-              completedClassifier(iteration, true);
+	      currentClassifier.buildClassifier( getTrainingSet(iteration));
             } catch (Exception ex) {
               ex.printStackTrace();
-              completedClassifier(iteration, false);
-            }
+	      numFailed.incrementAndGet();
+	      if (m_Debug) {
+		System.err.println("Iteration " + iteration + " failed!");
+	      }
+            } finally {
+	      doneSignal.countDown();
+	    }
           }
         };
-
         // launch this task
-        m_executorPool.execute(newTask);
-      } else {
-        m_Classifiers[i].buildClassifier(getTrainingSet(i));
+        executorPool.submit(newTask);
       }
-    }
-
-    if (m_numExecutionSlots > 1 && m_completed + m_failed < m_Classifiers.length) {
-      block(true);
-    }
-  }
-
-  /**
-   * Records the completion of the training of a single classifier. Unblocks if
-   * all classifiers have been trained.
-   *
-   * @param iteration the iteration that has completed
-   * @param success whether the classifier trained successfully
-   */
-  protected synchronized void completedClassifier(int iteration,
-      boolean success) {
-
-    if (!success) {
-      m_failed++;
-      if (m_Debug) {
-        System.err.println("Iteration " + iteration + " failed!");
+      // wait for all tasks to finish, then shutdown pool
+      doneSignal.await();
+      executorPool.shutdownNow();
+      if (m_Debug && numFailed.intValue() > 0) {
+	System.err.println("Problem building classifiers - some iterations failed.");
       }
+
     } else {
-      m_completed++;
-    }
-
-    if (m_completed + m_failed == m_Classifiers.length) {
-      if (m_failed > 0) {
-        if (m_Debug) {
-          System.err.println("Problem building classifiers - some iterations failed.");
-        }
+      // simple single-threaded execution
+      for (int i = 0; i < m_Classifiers.length; i++) {
+	m_Classifiers[i].buildClassifier( getTrainingSet(i));
       }
-
-      // have to shut the pool down or program executes as a server
-      // and when running from the command line does not return to the
-      // prompt
-      m_executorPool.shutdown();
-      block(false);
     }
   }
+
 
   /**
    * Gets a training set for a particular iteration. Implementations need
