@@ -125,7 +125,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator, OptionHandler,
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 23;
+  private static final int RESULT_SIZE = 25;
 
   protected final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
   protected int m_numPluginStatistics = 0;
@@ -427,6 +427,8 @@ public class RegressionSplitEvaluator implements SplitEvaluator, OptionHandler,
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
@@ -489,6 +491,8 @@ public class RegressionSplitEvaluator implements SplitEvaluator, OptionHandler,
     resultNames[current++] = "Relative_absolute_error";
     resultNames[current++] = "Root_relative_squared_error";
     resultNames[current++] = "Correlation_coefficient";
+    resultNames[current++] = "Number_unclassified";
+    resultNames[current++] = "Percent_unclassified";
 
     // SF stats
     resultNames[current++] = "SF_prior_entropy";
@@ -598,6 +602,8 @@ public class RegressionSplitEvaluator implements SplitEvaluator, OptionHandler,
     result[current++] = new Double(eval.relativeAbsoluteError());
     result[current++] = new Double(eval.rootRelativeSquaredError());
     result[current++] = new Double(eval.correlationCoefficient());
+    result[current++] = new Double(eval.unclassified());
+    result[current++] = new Double(eval.pctUnclassified());
 
     result[current++] = new Double(eval.SFPriorEntropy());
     result[current++] = new Double(eval.SFSchemeEntropy());
