@@ -589,13 +589,14 @@ public class Bagging
           if (m_inBag[j][i])
             continue;
           
-          voteCount++;
-//          double pred = m_Classifiers[j].classifyInstance(m_data.instance(i));
           if (numeric) {
-            // votes[0] += pred;
-            votes[0] += m_Classifiers[j].classifyInstance(m_data.instance(i));
+            double pred = m_Classifiers[j].classifyInstance(m_data.instance(i));
+            if (!Utils.isMissingValue(pred)) {
+              votes[0] += pred;
+              voteCount++;
+            }
           } else {
-            //  votes[(int) pred]++;
+            voteCount++;
             double[] newProbs = m_Classifiers[j].distributionForInstance(m_data.instance(i));
             // average the probability estimates
             for (int k = 0; k < newProbs.length; k++) {
@@ -606,31 +607,37 @@ public class Bagging
         
         // "vote"
         if (numeric) {
-          vote = votes[0];
-          if (voteCount > 0) {
-            vote  /= voteCount;    // average
+          if (voteCount == 0) {
+            vote = Utils.missingValue();
+          } else {
+            vote = votes[0] / voteCount;    // average
           }
         } else {
           if (Utils.eq(Utils.sum(votes), 0)) {            
+            vote = Utils.missingValue();
           } else {
+            vote = Utils.maxIndex(votes);   // predicted class
             Utils.normalize(votes);
           }
-          vote = Utils.maxIndex(votes);   // predicted class
         }
         
         // error for instance
-        outOfBagCount += m_data.instance(i).weight();
-        if (numeric) {
-          errorSum += StrictMath.abs(vote - m_data.instance(i).classValue()) 
-          * m_data.instance(i).weight();
-        }
-        else {
-          if (vote != m_data.instance(i).classValue())
-            errorSum += m_data.instance(i).weight();
+        if (!Utils.isMissingValue(vote)) {
+          outOfBagCount += m_data.instance(i).weight();
+          if (numeric) {
+            errorSum += StrictMath.abs(vote - m_data.instance(i).classValue()) 
+              * m_data.instance(i).weight();
+          }
+          else {
+            if (vote != m_data.instance(i).classValue())
+              errorSum += m_data.instance(i).weight();
+          }
         }
       }
       
-      m_OutOfBagError = errorSum / outOfBagCount;
+      if (outOfBagCount > 0) {
+        m_OutOfBagError = errorSum / outOfBagCount;
+      }
     }
     else {
       m_OutOfBagError = 0;
@@ -653,9 +660,14 @@ public class Bagging
 
     double [] sums = new double [instance.numClasses()], newProbs; 
     
+    double numPreds = 0;
     for (int i = 0; i < m_NumIterations; i++) {
       if (instance.classAttribute().isNumeric() == true) {
-	sums[0] += m_Classifiers[i].classifyInstance(instance);
+        double pred = m_Classifiers[i].classifyInstance(instance);
+        if (!Utils.isMissingValue(pred)) {
+          sums[0] += pred;
+          numPreds++;
+        }
       } else {
 	newProbs = m_Classifiers[i].distributionForInstance(instance);
 	for (int j = 0; j < newProbs.length; j++)
@@ -663,7 +675,11 @@ public class Bagging
       }
     }
     if (instance.classAttribute().isNumeric() == true) {
-      sums[0] /= m_NumIterations;
+      if (numPreds == 0) {
+        sums[0] = Utils.missingValue();
+      } else {
+        sums[0] /= numPreds;
+      }
       return sums;
     } else if (Utils.eq(Utils.sum(sums), 0)) {
       return sums;

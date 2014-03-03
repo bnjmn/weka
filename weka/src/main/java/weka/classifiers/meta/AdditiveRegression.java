@@ -42,6 +42,7 @@ import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.UnassignedClassException;
 
 /**
  <!-- globalinfo-start -->
@@ -401,6 +402,9 @@ public class AdditiveRegression
     
     for (int i = 0; i < m_NumIterationsPerformed; i++) {
       double toAdd = m_Classifiers[i].classifyInstance(inst);
+      if (Utils.isMissingValue(toAdd)) {
+        throw new UnassignedClassException("AdditiveRegression: base learner predicted missing value.");
+      }
       toAdd *= getShrinkage();
       prediction += toAdd;
     }
@@ -425,6 +429,9 @@ public class AdditiveRegression
 
     for (int i = 0; i < newInst.numInstances(); i++) {
       pred = c.classifyInstance(newInst.instance(i));
+      if (Utils.isMissingValue(pred)) {
+        throw new UnassignedClassException("AdditiveRegression: base learner predicted missing value.");
+      }
       if (useShrinkage) {
 	pred *= getShrinkage();
       }

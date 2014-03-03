@@ -44,6 +44,7 @@ import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.UnassignedClassException;
 
 /**
  <!-- globalinfo-start -->
@@ -979,8 +980,12 @@ public class LogitBoost
       double [] pred = new double [m_NumClasses];
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	pred[j] = m_Shrinkage * m_Classifiers[j][m_NumGenerated]
+        double tempPred = m_Shrinkage * m_Classifiers[j][m_NumGenerated]
 	  .classifyInstance(data.instance(i));
+        if (Utils.isMissingValue(tempPred)) {
+          throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
+        }
+	pred[j] = tempPred;
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;
@@ -1061,7 +1066,11 @@ public class LogitBoost
     for (int i = 0; i < m_NumGenerated; i++) {
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	pred[j] = m_Shrinkage * m_Classifiers[j][i].classifyInstance(instance);
+	double tempPred = m_Shrinkage * m_Classifiers[j][i].classifyInstance(instance);
+        if (Utils.isMissingValue(tempPred)) {
+          throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
+        }
+        pred[j] = tempPred;
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;

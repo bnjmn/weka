@@ -476,9 +476,14 @@ public class RandomSubSpace
     
     double[] sums = new double [instance.numClasses()], newProbs; 
     
+    double numPreds = 0;
     for (int i = 0; i < m_NumIterations; i++) {
       if (instance.classAttribute().isNumeric() == true) {
-	sums[0] += m_Classifiers[i].classifyInstance(instance);
+        double pred = m_Classifiers[i].classifyInstance(instance);
+        if (!Utils.isMissingValue(pred)) {
+          sums[0] += pred;
+          numPreds++;
+        }
       } else {
 	newProbs = m_Classifiers[i].distributionForInstance(instance);
 	for (int j = 0; j < newProbs.length; j++)
@@ -486,7 +491,11 @@ public class RandomSubSpace
       }
     }
     if (instance.classAttribute().isNumeric() == true) {
-      sums[0] /= (double)m_NumIterations;
+      if (numPreds == 0) {
+        sums[0] = Utils.missingValue();
+      } else {
+        sums[0] /= numPreds;
+      }
       return sums;
     } else if (Utils.eq(Utils.sum(sums), 0)) {
       return sums;

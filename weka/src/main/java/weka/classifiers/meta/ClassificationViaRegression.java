@@ -34,6 +34,7 @@ import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.UnassignedClassException;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 
@@ -229,6 +230,9 @@ public class ClassificationViaRegression
       m_ClassFilters[i].batchFinished();
       newInst = m_ClassFilters[i].output();
       probs[i] = m_Classifiers[i].classifyInstance(newInst);
+      if (Utils.isMissingValue(probs[i])) {
+        throw new UnassignedClassException("ClassificationViaRegression: base learner predicted missing value.");
+      }
       if (probs[i] > 1) {
         probs[i] = 1;
       }
