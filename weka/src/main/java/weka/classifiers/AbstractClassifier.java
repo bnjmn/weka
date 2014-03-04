@@ -91,6 +91,7 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
         return Utils.missingValue();
       }
     case Attribute.NUMERIC:
+    case Attribute.DATE:
       return dist[0];
     default:
       return Utils.missingValue();
@@ -123,6 +124,7 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
       }
       return dist;
     case Attribute.NUMERIC:
+    case Attribute.DATE:
       dist[0] = classifyInstance(instance);
       return dist;
     default:
