@@ -550,7 +550,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
   /**
    * Classifies the given test instance, returning the median from all
-   * classifiers.
+   * classifiers. Can assume that class is numeric.
    * 
    * @param instance the instance to be classified
    * @return the predicted most likely class for the instance or
@@ -558,26 +558,33 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * @throws Exception if an error occurred during the prediction
    */
   protected double classifyInstanceMedian(Instance instance) throws Exception {
-    double[] results = new double[m_Classifiers.length
-        + m_preBuiltClassifiers.size()];
-    double result;
+    double[] results = new double[m_Classifiers.length + m_preBuiltClassifiers.size()];
 
-    for (int i = 0; i < m_Classifiers.length; i++)
-      results[i] = m_Classifiers[i].classifyInstance(instance);
 
-    for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
-      results[i + m_Classifiers.length] = m_preBuiltClassifiers.get(i)
-          .classifyInstance(instance);
+    int numResults = 0;
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      double pred = m_Classifiers[i].classifyInstance(instance);
+      if (!Utils.isMissingValue(pred)) {
+        results[numResults++] = pred;
+      }
     }
 
-    if (results.length == 0)
-      result = 0;
-    else if (results.length == 1)
-      result = results[0];
-    else
-      result = Utils.kthSmallestValue(results, results.length / 2);
+    for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
+      double pred = m_preBuiltClassifiers.get(i).classifyInstance(instance);
+      if (!Utils.isMissingValue(pred)) {
+        results[numResults++] = pred;
+      }
+    }
 
-    return result;
+    if (numResults == 0)
+      return Utils.missingValue();
+    else if (numResults == 1)
+      return results[0];
+    else {
+      double[] actualResults = new double[numResults];
+      System.arraycopy(results, 0, actualResults, 0, numResults);
+      return Utils.kthSmallestValue(actualResults, actualResults.length / 2);
+    }
   }
 
   /**
@@ -632,37 +639,51 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   protected double[] distributionForInstanceAverage(Instance instance)
       throws Exception {
 
-    double[] probs = (m_Classifiers.length > 0) ? getClassifier(0)
-        .distributionForInstance(instance) : m_preBuiltClassifiers.get(0)
-        .distributionForInstance(instance);
+    double[] probs = new double[instance.numClasses()];
 
-    probs = probs.clone();
-
-    for (int i = 1; i < m_Classifiers.length; i++) {
+    double numPredictions = 0;
+    for (int i = 0; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
-      for (int j = 0; j < dist.length; j++) {
-        probs[j] += dist[j];
+      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+        for (int j = 0; j < dist.length; j++) {
+          probs[j] += dist[j];
+        }
+        numPredictions++;
       }
     }
 
-    int index = (m_Classifiers.length > 0) ? 0 : 1;
-    for (int i = index; i < m_preBuiltClassifiers.size(); i++) {
-      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(
-          instance);
-      for (int j = 0; j < dist.length; j++) {
-        probs[j] += dist[j];
+    for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
+      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(instance);
+      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+        for (int j = 0; j < dist.length; j++) {
+          probs[j] += dist[j];
+        }
+        numPredictions++;
       }
     }
 
-    for (int j = 0; j < probs.length; j++) {
-      probs[j] /= (m_Classifiers.length + m_preBuiltClassifiers.size());
+    if (instance.classAttribute().isNumeric()) {
+      if (numPredictions == 0) {
+        probs[0] = Utils.missingValue();
+      } else {
+        for (int j = 0; j < probs.length; j++) {
+          probs[j] /= numPredictions;
+        }
+      }
+    } else {
+
+      // Should normalize "probability" distribution
+      if (Utils.sum(probs) > 0) {
+        Utils.normalize(probs);
+      }
     }
+
     return probs;
   }
 
   /**
    * Classifies a given instance using the Product of Probabilities combination
-   * rule.
+   * rule. Can assume that class is nominal.
    * 
    * @param instance the instance to be classified
    * @return the distribution
@@ -671,26 +692,40 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   protected double[] distributionForInstanceProduct(Instance instance)
       throws Exception {
 
-    double[] probs = (m_Classifiers.length > 0) ? getClassifier(0)
-        .distributionForInstance(instance) : m_preBuiltClassifiers.get(0)
-        .distributionForInstance(instance);
+    double[] probs = new double[instance.numClasses()];
+    for (int i = 0; i < probs.length; i++) {
+      probs[i] = 1.0;
+    }
 
-    probs = probs.clone();
-
-    for (int i = 1; i < m_Classifiers.length; i++) {
+    int numPredictions = 0;
+    for (int i = 0; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
-      for (int j = 0; j < dist.length; j++) {
-        probs[j] *= dist[j];
+      if (Utils.sum(dist) > 0) {
+        for (int j = 0; j < dist.length; j++) {
+          probs[j] *= dist[j];
+        }
+        numPredictions++;
       }
     }
 
-    int index = (m_Classifiers.length > 0) ? 0 : 1;
-    for (int i = index; i < m_preBuiltClassifiers.size(); i++) {
-      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(
-          instance);
-      for (int j = 0; j < dist.length; j++) {
-        probs[j] *= dist[j];
+    for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
+      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(instance);
+      if (Utils.sum(dist) > 0) {
+        for (int j = 0; j < dist.length; j++) {
+          probs[j] *= dist[j];
+        }
+        numPredictions++;
       }
+    }
+
+    // No predictions?
+    if (numPredictions == 0) {
+      return new double[instance.numClasses()];
+    }
+
+    // Should normalize to get "probabilities"
+    if (Utils.sum(probs) > 0) {
+      Utils.normalize(probs);
     }
 
     return probs;
@@ -698,6 +733,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
   /**
    * Classifies a given instance using the Majority Voting combination rule.
+   * Can assume that class is nominal.
    * 
    * @param instance the instance to be classified
    * @return the distribution
@@ -719,10 +755,11 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
       // Consider the cases when multiple classes happen to have the same
       // probability
-      for (int j = 0; j < probs.length; j++) {
-        if (probs[j] == probs[maxIndex])
-          votes[j]++;
-      }
+      if (probs[maxIndex] > 0) // Unclassified?
+        for (int j = 0; j < probs.length; j++) {
+          if (probs[j] == probs[maxIndex])
+            votes[j]++;
+        }
     }
 
     for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
@@ -736,16 +773,22 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
       // Consider the cases when multiple classes happen to have the same
       // probability
-      for (int j = 0; j < probs.length; j++) {
-        if (probs[j] == probs[maxIndex])
-          votes[j]++;
-      }
+      if (probs[maxIndex] > 0) // Unclassified?
+        for (int j = 0; j < probs.length; j++) {
+          if (probs[j] == probs[maxIndex])
+            votes[j]++;
+        }
     }
 
     int tmpMajorityIndex = 0;
     for (int k = 1; k < votes.length; k++) {
       if (votes[k] > votes[tmpMajorityIndex])
         tmpMajorityIndex = k;
+    }
+
+    // No votes received
+    if (votes[tmpMajorityIndex] == 0) {
+      return new double[instance.numClasses()];
     }
 
     // Consider the cases when multiple classes receive the same amount of votes
@@ -777,31 +820,46 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   protected double[] distributionForInstanceMax(Instance instance)
       throws Exception {
 
-    double[] max = (m_Classifiers.length > 0) ? getClassifier(0)
-        .distributionForInstance(instance) : m_preBuiltClassifiers.get(0)
-        .distributionForInstance(instance);
+    double[] probs = new double[instance.numClasses()];
 
-    max = max.clone();
-
-    for (int i = 1; i < m_Classifiers.length; i++) {
+    double numPredictions = 0;
+    for (int i = 0; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
-      for (int j = 0; j < dist.length; j++) {
-        if (max[j] < dist[j])
-          max[j] = dist[j];
+      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+        for (int j = 0; j < dist.length; j++) {
+          if ((probs[j] < dist[j]) || (numPredictions == 0)) {
+            probs[j] = dist[j];
+          }
+        }
+        numPredictions++;
       }
     }
 
-    int index = (m_Classifiers.length > 0) ? 0 : 1;
-    for (int i = index; i < m_preBuiltClassifiers.size(); i++) {
-      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(
-          instance);
-      for (int j = 0; j < dist.length; j++) {
-        if (max[j] < dist[j])
-          max[j] = dist[j];
+    for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
+      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(instance);
+      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+        for (int j = 0; j < dist.length; j++) {
+          if ((probs[j] < dist[j]) || (numPredictions == 0)) {
+            probs[j] = dist[j];
+          }
+        }
+        numPredictions++;
       }
     }
 
-    return max;
+    if (instance.classAttribute().isNumeric()) {
+      if (numPredictions == 0) {
+        probs[0] = Utils.missingValue();
+      }
+    } else {
+
+      // Should normalize "probability" distribution
+      if (Utils.sum(probs) > 0) {
+        Utils.normalize(probs);
+      }
+    }
+
+    return probs;
   }
 
   /**
@@ -814,31 +872,46 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   protected double[] distributionForInstanceMin(Instance instance)
       throws Exception {
 
-    double[] min = (m_Classifiers.length > 0) ? getClassifier(0)
-        .distributionForInstance(instance) : m_preBuiltClassifiers.get(0)
-        .distributionForInstance(instance);
+    double[] probs = new double[instance.numClasses()];
 
-    min = min.clone();
-
-    for (int i = 1; i < m_Classifiers.length; i++) {
+    double numPredictions = 0;
+    for (int i = 0; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
-      for (int j = 0; j < dist.length; j++) {
-        if (dist[j] < min[j])
-          min[j] = dist[j];
+      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+        for (int j = 0; j < dist.length; j++) {
+          if ((probs[j] > dist[j]) || (numPredictions == 0)) {
+            probs[j] = dist[j];
+          }
+        }
+        numPredictions++;
       }
     }
 
-    int index = (m_Classifiers.length > 0) ? 0 : 1;
-    for (int i = index; i < m_preBuiltClassifiers.size(); i++) {
-      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(
-          instance);
-      for (int j = 0; j < dist.length; j++) {
-        if (dist[j] < min[j])
-          min[j] = dist[j];
+    for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
+      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(instance);
+      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+        for (int j = 0; j < dist.length; j++) {
+          if ((probs[j] > dist[j]) || (numPredictions == 0)) {
+            probs[j] = dist[j];
+          }
+        }
+        numPredictions++;
       }
     }
 
-    return min;
+    if (instance.classAttribute().isNumeric()) {
+      if (numPredictions == 0) {
+        probs[0] = Utils.missingValue();
+      }
+    } else {
+
+      // Should normalize "probability" distribution
+      if (Utils.sum(probs) > 0) {
+        Utils.normalize(probs);
+      }
+    }
+
+    return probs;
   }
 
   /**
@@ -944,11 +1017,11 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
     switch (m_CombinationRule) {
     case AVERAGE_RULE:
-      result += "Average of Probabilities";
+      result += "Average";
       break;
 
     case PRODUCT_RULE:
-      result += "Product of Probabilities";
+      result += "Product";
       break;
 
     case MAJORITY_VOTING_RULE:
@@ -956,15 +1029,15 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       break;
 
     case MIN_RULE:
-      result += "Minimum Probability";
+      result += "Minimum";
       break;
 
     case MAX_RULE:
-      result += "Maximum Probability";
+      result += "Maximum";
       break;
 
     case MEDIAN_RULE:
-      result += "Median Probability";
+      result += "Median";
       break;
 
     default:
