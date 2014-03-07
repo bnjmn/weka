@@ -46,7 +46,8 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
 
 /**
- * <!-- globalinfo-start --> Performs a principal components analysis and
+ <!-- globalinfo-start --> 
+ * Performs a principal components analysis and
  * transformation of the data. Use in conjunction with a Ranker search.
  * Dimensionality reduction is accomplished by choosing enough eigenvectors to
  * account for some percentage of the variance in the original data---default
@@ -54,9 +55,10 @@ import weka.filters.unsupervised.attribute.Standardize;
  * eliminating some of the worst eigenvectors, and then transforming back to the
  * original space.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -85,7 +87,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  *  transformed attribute names. (-1 = include all)
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
@@ -224,7 +226,8 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start --> 
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -253,7 +256,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    *  transformed attribute names. (-1 = include all)
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -613,6 +616,43 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   }
 
   /**
+   * Return the header of the training data after all filtering - i.e missing
+   * values and nominal to binary.
+   * 
+   * @return the header of the training data after all filtering.
+   */
+  public Instances getFilteredInputFormat() {
+    return new Instances(m_trainInstances, 0);
+  }
+
+  /**
+   * Return the correlation/covariance matrix
+   * 
+   * @return the correlation or covariance matrix
+   */
+  public double[][] getCorrelationMatrix() {
+    return m_correlation;
+  }
+
+  /**
+   * Return the unsorted eigenvectors
+   * 
+   * @return the unsorted eigenvectors
+   */
+  public double[][] getUnsortedEigenVectors() {
+    return m_eigenvectors;
+  }
+
+  /**
+   * Return the eigenvalues corresponding to the eigenvectors
+   * 
+   * @return the eigenvalues
+   */
+  public double[] getEigenValues() {
+    return m_eigenvalues;
+  }
+
+  /**
    * Gets the transformed training data.
    * 
    * @return the transformed training data
@@ -820,7 +860,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * @param matrix that is decribed as a string
    * @return a String describing a matrix
    */
-  private String matrixToString(double[][] matrix) {
+  public static String matrixToString(double[][] matrix) {
     StringBuffer result = new StringBuffer();
     int last = matrix.length - 1;
 
