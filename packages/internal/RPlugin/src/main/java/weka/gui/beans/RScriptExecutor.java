@@ -318,7 +318,7 @@ public class RScriptExecutor extends JPanel implements BeanCommon, Visible,
         // now execute the user's script
         if ((m_scriptFile != null && m_scriptFile.length() > 0)
           || (m_rScript != null && m_rScript.length() > 0)) {
-          executeUserScript();
+          executeUserScript(eng);
         } else {
           if (m_logWrapper != null && !m_rWarning) {
             m_logWrapper.statusMessage("Finished.");
@@ -367,28 +367,33 @@ public class RScriptExecutor extends JPanel implements BeanCommon, Visible,
   /**
    * Execute the user's R script
    */
-  protected void executeUserScript() {
+  protected void executeUserScript(RSession eng) {
     m_busy = true;
-    RSession eng = null;
-    try {
-      if (m_logWrapper != null) {
-        m_logWrapper.statusMessage("Aquiring R session");
-        m_logWrapper.logMessage("Aquiring R session");
-      }
+    // RSession eng = null;
 
-      eng = RSession.acquireSession(this);
-      eng.setLog(this, m_logWrapper);
-      eng.clearConsoleBuffer(this);
-    } catch (Exception ex) {
-      stop();
-      if (m_logWrapper != null) {
-        m_logWrapper.statusMessage("Error. See log for details.");
-        m_logWrapper.logMessage("Error " + ex.getMessage());
+    if (eng == null) {
+      try {
+        if (m_logWrapper != null) {
+          m_logWrapper.statusMessage("Aquiring R session");
+          m_logWrapper.logMessage("Aquiring R session");
+        }
+
+        eng = RSession.acquireSession(this);
+        eng.setLog(this, m_logWrapper);
+        eng.clearConsoleBuffer(this);
+      } catch (Exception ex) {
+        stop();
+        if (m_logWrapper != null) {
+          m_logWrapper.statusMessage("Error. See log for details.");
+          m_logWrapper.logMessage("Error " + ex.getMessage());
+        }
+        ex.printStackTrace();
+        if (eng != null) {
+          RSession.releaseSession(this);
+        }
+        m_busy = false;
+        return;
       }
-      ex.printStackTrace();
-      RSession.releaseSession(this);
-      m_busy = false;
-      return;
     }
 
     String script = null;
@@ -484,7 +489,9 @@ public class RScriptExecutor extends JPanel implements BeanCommon, Visible,
       return;
     }
 
-    RSession.releaseSession(this);
+    if (eng != null) {
+      RSession.releaseSession(this);
+    }
     m_busy = false;
 
     if (m_logWrapper != null && !m_rWarning) {
@@ -857,7 +864,7 @@ public class RScriptExecutor extends JPanel implements BeanCommon, Visible,
       if ((m_rScript != null && m_rScript.length() > 0)
         || (m_scriptFile != null && m_scriptFile.length() > 0)) {
         m_rWarning = false;
-        executeUserScript();
+        executeUserScript(null);
       }
     }
   }

@@ -51,7 +51,7 @@ public class RUtils {
     q = q.replace(")", "_cp_").replace("[", "_ob_").replace("]", "_cb_");
     q = q.replace("{", "_obr_").replace("}", "_cbr_");
     q = q.replace("!", "_exl_").replace(";", "_semiC_");
-    q = q.replace("/", "_div_").replace("@", "_at_");
+    q = q.replace("/", "_div_").replace("@", "_at_").replace("+", "_plus_");
 
     return q;
   }
@@ -264,8 +264,7 @@ public class RUtils {
       double[] v = new double[attributeNames.length];
 
       for (int j = 0; j < attributeNames.length; j++) {
-        if (REXPDouble.isNA(values[j][i])
-          || REXPInteger.isNA((int) values[j][i])) {
+        if (REXPDouble.isNA(values[j][i])) {
           v[j] = Utils.missingValue();
         } else {
           v[j] = values[j][i];
