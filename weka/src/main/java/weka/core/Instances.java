@@ -590,7 +590,8 @@ public class Instances extends AbstractList<Instance> implements Serializable,
   }
 
   /**
-   * Returns an enumeration of all the attributes.
+   * Returns an enumeration of all the attributes. The class attribute (if set)
+   * is skipped by this enumeration.
    * 
    * @return enumeration of all the attributes.
    */
