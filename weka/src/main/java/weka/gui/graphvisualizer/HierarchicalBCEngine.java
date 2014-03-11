@@ -513,7 +513,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
     // ****Assigning nodes to each level
     int levelsCounter[] = new int[maxLevel + 1];
     nodeLevels = new int[maxLevel + 1][];
-    for (byte i = 0; i < nodesLevel.length; i++) {
+    for (int i = 0; i < nodesLevel.length; i++) {
       if (nodeLevels[nodesLevel[i]] == null) {
         nodeLevels[nodesLevel[i]] = new int[levelCounts[nodesLevel[i]]];
       }
