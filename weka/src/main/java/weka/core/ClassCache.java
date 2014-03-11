@@ -15,7 +15,7 @@
 
 /**
  * ClassCache.java
- * Copyright (C) 2010-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2010-2014 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -31,8 +31,10 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * A singleton that stores all classes on the classpath.
@@ -233,6 +235,32 @@ public class ClassCache implements RevisionHandler {
   }
 
   /**
+   * Analyzes the MANIFEST.MF file of a jar whether additional jars are
+   * listed in the "Class-Path" key.
+   * 
+   * @param manifest	the manifest to analyze
+   */
+  protected void initFromManifest(Manifest manifest) {
+    Attributes	atts;
+    String	cp;
+    String[]	parts;
+    
+    atts = manifest.getMainAttributes();
+    cp   = atts.getValue("Class-Path");
+    if (cp == null) {
+      return;
+    }
+    
+    parts = cp.split(" ");
+    for (String part: parts) {
+      if (part.trim().length() == 0) {
+	return;
+      }
+      initFromClasspathPart(part);
+    }
+  }
+
+  /**
    * Fills the class cache with classes from the specified jar.
    * 
    * @param file the jar to inspect
@@ -260,6 +288,7 @@ public class ClassCache implements RevisionHandler {
           add(entry.getName());
         }
       }
+      initFromManifest(jar.getManifest());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -289,11 +318,44 @@ public class ClassCache implements RevisionHandler {
   }
 
   /**
+   * Analyzes a part of the classpath.
+   * 
+   * @param part	the part to analyze
+   */
+  protected void initFromClasspathPart(String part) {
+    File		file;
+
+    file = null;
+    if (part.startsWith("file:")) {
+      part = part.replace(" ", "%20");
+      try {
+	file = new File(new java.net.URI(part));
+      } catch (URISyntaxException e) {
+	System.err.println("Failed to generate URI: " + part);
+	e.printStackTrace();
+      }
+    }
+    else {
+      file = new File(part);
+    }
+    if (file == null) {
+      System.err.println("Skipping: " + part);
+      return;
+    }
+
+    // find classes
+    if (file.isDirectory()) {
+      initFromDir(file);
+    } else if (file.exists()) {
+      initFromJar(file);
+    }
+  }
+
+  /**
    * Initializes the cache.
    */
   protected void initialize() {
     String part;
-    File file;
     URLClassLoader sysLoader;
     URL[] urls;
 
@@ -306,29 +368,8 @@ public class ClassCache implements RevisionHandler {
         System.out.println("Classpath-part: " + part);
       }
 
-      file = null;
       part = url.toString();
-      if (part.startsWith("file:")) {
-        part = part.replace(" ", "%20");
-        try {
-          file = new File(new java.net.URI(part));
-        } catch (URISyntaxException e) {
-          e.printStackTrace();
-        }
-      } else {
-        file = new File(part);
-      }
-      if (file == null) {
-        System.err.println("Skipping: " + part);
-        continue;
-      }
-
-      // find classes
-      if (file.isDirectory()) {
-        initFromDir(file);
-      } else if (file.exists()) {
-        initFromJar(file);
-      }
+      initFromClasspathPart(part);
     }
   }
 
