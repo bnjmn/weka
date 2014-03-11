@@ -21,6 +21,7 @@
 
 package weka.classifiers.trees.ht;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,12 @@ import weka.core.Instance;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public abstract class Split {
+public abstract class Split implements Serializable {
+
+  /**
+   * For serialization
+   */
+  private static final long serialVersionUID = 5390368487675958092L;
 
   /** name(s) of attribute(s) involved in the split */
   protected List<String> m_splitAttNames = new ArrayList<String>();
