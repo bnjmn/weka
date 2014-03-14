@@ -28,7 +28,8 @@ weka.gui.beans.KnowledgeFlow.Visualization=weka.gui.beans.DataVisualizer,\
  weka.gui.beans.TextViewer,\
  weka.gui.beans.GraphViewer,\
  weka.gui.beans.StripChart,\
- weka.gui.beans.ImageSaver
+ weka.gui.beans.ImageSaver,\
+ weka.gui.beans.ImageViewer
  weka.gui.beans.KnowledgeFlow.Tools=weka.gui.beans.Sorter,\
  weka.gui.beans.SubstringLabeler,\
  weka.gui.beans.SubstringReplacer
