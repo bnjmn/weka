@@ -46,7 +46,9 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
 import weka.distributed.CSVToARFFHeaderMapTask.NominalStats;
+import weka.distributed.CSVToARFFHeaderMapTask.NumericStats;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.distributed.WekaClassifierMapTask;
@@ -767,10 +769,17 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
           + className);
     }
 
-    NominalStats stats = NominalStats.attributeToStats(summaryClassAtt);
     int totalNumInstances = 0;
-    for (String label : stats.getLabels()) {
-      totalNumInstances += stats.getCount(label);
+
+    if (headerNoSummary.classAttribute().isNominal()) {
+      NominalStats stats = NominalStats.attributeToStats(summaryClassAtt);
+      for (String label : stats.getLabels()) {
+        totalNumInstances += stats.getCount(label);
+      }
+    } else {
+      NumericStats stats = NumericStats.attributeToStats(summaryClassAtt);
+      totalNumInstances = (int) stats.getStats()[ArffSummaryNumericMetric.COUNT
+        .ordinal()];
     }
 
     m_randomizeConfig
