@@ -36,6 +36,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.CorrelationMatrixRowReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.distributed.hadoop.CorrelationMatrixHadoopMapper.MatrixRowHolder;
@@ -66,6 +67,12 @@ public class CorrelationMatrixRowHadoopReducer extends
    */
   protected boolean m_covariance;
 
+  /**
+   * Whether the class is to be deleted (if set) or be part of the correlation
+   * analysis
+   */
+  protected boolean m_deleteClassIfSet = true;
+
   @Override
   public void setup(Context context) throws IOException {
     Configuration conf = context.getConfiguration();
@@ -82,6 +89,8 @@ public class CorrelationMatrixRowHadoopReducer extends
           .getFlag("ignore-missing", opts);
         m_covariance = Utils.getFlag("covariance", opts);
 
+        m_deleteClassIfSet = !Utils.getFlag("keep-class", opts);
+
         // name of the training ARFF header file
         String arffHeaderFileName = Utils.getOption("arff-header", opts);
         if (DistributedJobConfig.isEmpty(arffHeaderFileName)) {
@@ -91,6 +100,18 @@ public class CorrelationMatrixRowHadoopReducer extends
 
         m_headerWithSummaryAtts = WekaClassifierHadoopMapper
           .loadTrainingHeader(arffHeaderFileName);
+
+        Instances trainingHeader = CSVToARFFHeaderReduceTask
+          .stripSummaryAtts(m_headerWithSummaryAtts);
+        WekaClassifierHadoopMapper.setClassIndex(opts, trainingHeader, false);
+
+        // set any class index in the header with summary attributes. Summary
+        // atts always come after regular atts, so the class index in the
+        // stripped will be the same for the version with summary atts
+        if (trainingHeader.classIndex() >= 0) {
+          m_headerWithSummaryAtts.setClassIndex(trainingHeader.classIndex());
+        }
+
       } catch (Exception e) {
         throw new IOException(e);
       }
@@ -135,7 +156,7 @@ public class CorrelationMatrixRowHadoopReducer extends
       try {
         double[] aggregated = m_task.aggregate(rowsToAgg.get(0).getRowNumber(),
           rows, coOcc, m_headerWithSummaryAtts,
-          m_missingsWereReplacedWithMeans, m_covariance);
+          m_missingsWereReplacedWithMeans, m_covariance, m_deleteClassIfSet);
 
         // assemble Text key (row num) and Text row (space separated
         // values)

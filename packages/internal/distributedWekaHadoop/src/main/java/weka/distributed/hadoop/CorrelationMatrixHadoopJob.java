@@ -52,7 +52,9 @@ import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.CorrelationMatrixMapTask;
 import weka.distributed.DistributedWekaException;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.PreConstructedPCA;
+import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.beans.TextProducer;
 import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
@@ -729,8 +731,104 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       throw new DistributedWekaException(e);
     }
 
+    // write out the names of the attributes that are in the correlation
+    // matrix
+    writeCorrelationMatrixRowColumnLabels(conf, arffFileName);
+
     if (getRunPCA()) {
       runPCA(conf, arffFileName);
+    }
+  }
+
+  /**
+   * Write the names of the attributes that made it into the correlation matrix
+   * (i.e all numeric attributes, and the class (if set) if the user has opted
+   * to keep it as part of the analysis) into the output directory for the job
+   * 
+   * @param conf the Configuration to use
+   * @param arffFileName the name of the header file
+   * @throws DistributedWekaException if a problem occurs
+   */
+  protected void writeCorrelationMatrixRowColumnLabels(Configuration conf,
+    String arffFileName) throws DistributedWekaException {
+
+    String outputDir = m_mrConfig.getOutputPath();
+    Instances header = m_arffHeaderJob.getFinalHeader();
+
+    boolean keepClass = false;
+    if (!DistributedJobConfig.isEmpty(getCorrelationMapTaskOptions())) {
+      try {
+        String[] opts = Utils.splitOptions(getCorrelationMapTaskOptions());
+
+        CorrelationMatrixMapTask temp = new CorrelationMatrixMapTask();
+        temp.setOptions(opts);
+
+        keepClass = temp.getKeepClassAttributeIfSet();
+      } catch (Exception ex) {
+        throw new DistributedWekaException(ex);
+      }
+    }
+
+    Instances headerNoSummary = CSVToARFFHeaderReduceTask
+      .stripSummaryAtts(header);
+    String classAtt = getClassAttribute();
+    if (!DistributedJobConfig.isEmpty(classAtt)) {
+      classAtt = environmentSubstitute(classAtt);
+      try {
+        WekaClassifierHadoopMapper.setClassIndex(classAtt, headerNoSummary,
+          false);
+      } catch (Exception e) {
+        throw new DistributedWekaException(e);
+      }
+    }
+
+    StringBuilder rem = new StringBuilder();
+    if (headerNoSummary.classIndex() >= 0 && !keepClass) {
+      rem.append("" + (headerNoSummary.classIndex() + 1)).append(",");
+    }
+
+    // remove all nominal attributes
+    for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+      if (!headerNoSummary.attribute(i).isNumeric()) {
+        rem.append("" + (i + 1)).append(",");
+      }
+    }
+    if (rem.length() > 0) {
+      Remove remove = new Remove();
+      rem.deleteCharAt(rem.length() - 1); // remove the trailing ,
+      String attIndices = rem.toString();
+      remove.setAttributeIndices(attIndices);
+      remove.setInvertSelection(false);
+
+      try {
+        remove.setInputFormat(headerNoSummary);
+
+        headerNoSummary = Filter.useFilter(headerNoSummary, remove);
+      } catch (Exception ex) {
+        throw new DistributedWekaException(ex);
+      }
+    }
+
+    try {
+      FileSystem fs = FileSystem.get(conf);
+      Path p = new Path(outputDir + "/" + arffFileName + "_matrix_labels.txt");
+      FSDataOutputStream dos = fs.create(p, true);
+      BufferedWriter bw = null;
+      try {
+        bw = new BufferedWriter(new OutputStreamWriter(dos));
+        for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+          bw.write(headerNoSummary.attribute(i).name() + "\n");
+        }
+        bw.flush();
+        bw.close();
+        bw = null;
+      } finally {
+        if (bw != null) {
+          bw.close();
+        }
+      }
+    } catch (Exception ex) {
+      throw new DistributedWekaException(ex);
     }
   }
 
