@@ -432,7 +432,7 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
         List<double[]> toAgg = new ArrayList<double[]>();
         toAgg.add(matrix[i]);
         double[] computed = reduce.aggregate(i, toAgg, null, withSummary, true,
-          false);
+          false, true);
         for (int j = 0; j < matrix[i].length; j++) {
           System.err.print(computed[j] + " ");
         }

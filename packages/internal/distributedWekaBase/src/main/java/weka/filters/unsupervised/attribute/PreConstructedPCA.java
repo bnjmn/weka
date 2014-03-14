@@ -56,46 +56,63 @@ import weka.filters.StreamableFilter;
 import distributed.core.DistributedJobConfig;
 
 /**
- <!-- globalinfo-start -->
- * Performs a principal components analysis and transformation of the data.<br/>
- * Dimensionality reduction is accomplished by choosing enough eigenvectors to account for some percentage of the variance in the original data -- default 0.95 (95%).<br/>
- * Based on code of the attribute selection scheme 'PrincipalComponents' by Mark Hall and Gabi Schmidberger.
+ * <!-- globalinfo-start --> Performs a principal components analysis and
+ * transformation of the data.<br/>
+ * Dimensionality reduction is accomplished by choosing enough eigenvectors to
+ * account for some percentage of the variance in the original data -- default
+ * 0.95 (95%).<br/>
+ * Based on code of the attribute selection scheme 'PrincipalComponents' by Mark
+ * Hall and Gabi Schmidberger.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -header &lt;path to ARFF header&gt;
+ * <pre>
+ * -header &lt;path to ARFF header&gt;
  *  Path to the ARFF header used when the matrix
- *  was constructed. Must contain summary attributes.</pre>
+ *  was constructed. Must contain summary attributes.
+ * </pre>
  * 
- * <pre> -matrix &lt;path to matrix file&gt;
- *  Path to the correlation/covariance matrix.</pre>
+ * <pre>
+ * -matrix &lt;path to matrix file&gt;
+ *  Path to the correlation/covariance matrix.
+ * </pre>
  * 
- * <pre> -covariance
- *  Matrix is a covariance matrix (rather than correlation).</pre>
+ * <pre>
+ * -covariance
+ *  Matrix is a covariance matrix (rather than correlation).
+ * </pre>
  * 
- * <pre> -keep-class
+ * <pre>
+ * -keep-class
  *  Keep the class (if set). Set this if the
  *  class was retained when computing the matrix (i.e. there is a column
- *  in the matrix corresponding to the class).</pre>
+ *  in the matrix corresponding to the class).
+ * </pre>
  * 
- * <pre> -R &lt;num&gt;
+ * <pre>
+ * -R &lt;num&gt;
  *  Retain enough PC attributes to account
  *  for this proportion of variance in the original data.
- *  (default: 0.95)</pre>
+ *  (default: 0.95)
+ * </pre>
  * 
- * <pre> -A &lt;num&gt;
+ * <pre>
+ * -A &lt;num&gt;
  *  Maximum number of attributes to include in 
  *  transformed attribute names.
- *  (-1 = include all, default: 5)</pre>
+ *  (-1 = include all, default: 5)
+ * </pre>
  * 
- * <pre> -M &lt;num&gt;
+ * <pre>
+ * -M &lt;num&gt;
  *  Maximum number of PC attributes to retain.
- *  (-1 = include all, default: -1)</pre>
+ *  (-1 = include all, default: -1)
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -259,8 +276,7 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
    * @throws Exception if a problem occurs
    */
   public PreConstructedPCA(Instances header, Matrix matrix,
-    List<NumericStats> stats, boolean keepClassIfSet, boolean isCovariance)
-    throws Exception {
+    List<NumericStats> stats, boolean keepClassIfSet, boolean isCovariance) throws Exception {
     m_matrix = matrix;
     m_header = header;
     m_stats = stats;
@@ -334,39 +350,53 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
    * Parses a list of options for this object.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -header &lt;path to ARFF header&gt;
+   * <pre>
+   * -header &lt;path to ARFF header&gt;
    *  Path to the ARFF header used when the matrix
-   *  was constructed. Must contain summary attributes.</pre>
+   *  was constructed. Must contain summary attributes.
+   * </pre>
    * 
-   * <pre> -matrix &lt;path to matrix file&gt;
-   *  Path to the correlation/covariance matrix.</pre>
+   * <pre>
+   * -matrix &lt;path to matrix file&gt;
+   *  Path to the correlation/covariance matrix.
+   * </pre>
    * 
-   * <pre> -covariance
-   *  Matrix is a covariance matrix (rather than correlation).</pre>
+   * <pre>
+   * -covariance
+   *  Matrix is a covariance matrix (rather than correlation).
+   * </pre>
    * 
-   * <pre> -keep-class
+   * <pre>
+   * -keep-class
    *  Keep the class (if set). Set this if the
    *  class was retained when computing the matrix (i.e. there is a column
-   *  in the matrix corresponding to the class).</pre>
+   *  in the matrix corresponding to the class).
+   * </pre>
    * 
-   * <pre> -R &lt;num&gt;
+   * <pre>
+   * -R &lt;num&gt;
    *  Retain enough PC attributes to account
    *  for this proportion of variance in the original data.
-   *  (default: 0.95)</pre>
+   *  (default: 0.95)
+   * </pre>
    * 
-   * <pre> -A &lt;num&gt;
+   * <pre>
+   * -A &lt;num&gt;
    *  Maximum number of attributes to include in 
    *  transformed attribute names.
-   *  (-1 = include all, default: 5)</pre>
+   *  (-1 = include all, default: 5)
+   * </pre>
    * 
-   * <pre> -M &lt;num&gt;
+   * <pre>
+   * -M &lt;num&gt;
    *  Maximum number of PC attributes to retain.
-   *  (-1 = include all, default: -1)</pre>
+   *  (-1 = include all, default: -1)
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -1343,7 +1373,7 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
         List<double[]> toAgg = new ArrayList<double[]>();
         toAgg.add(matrix[i]);
         double[] computed = reduce.aggregate(i, toAgg, null, withSummary, true,
-          false);
+          false, true);
         matrix[i] = computed;
       }
 
@@ -1449,4 +1479,3 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
     m_sortedEigens = null;
   }
 }
-

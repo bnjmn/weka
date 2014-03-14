@@ -56,17 +56,24 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
    *          by means in the map tasks
    * @param covarianceInsteadOfCorrelation final matrix is to be a covariance
    *          one rather than correlation
+   * @param deleteClassIfSet true if the class attribute is to be deleted (if
+   *          set)
    * @return the aggregated row
    * @throws DistributedWekaException if a problem occurs
    */
   public double[] aggregate(int matrixRowNumber, List<double[]> toAggregate,
     List<int[]> coOccurrencesToAgg, Instances headerWithSummaryAtts,
     boolean missingsWereReplacedWithMeans,
-    boolean covarianceInsteadOfCorrelation) throws DistributedWekaException {
+    boolean covarianceInsteadOfCorrelation, boolean deleteClassIfSet)
+    throws DistributedWekaException {
 
     StringBuilder rem = new StringBuilder();
     Instances trainingHeader = CSVToARFFHeaderReduceTask
       .stripSummaryAtts(headerWithSummaryAtts);
+
+    if (trainingHeader.classIndex() >= 0 && deleteClassIfSet) {
+      rem.append("" + (trainingHeader.classIndex() + 1)).append(",");
+    }
 
     // remove all nominal attributes
     for (int i = 0; i < trainingHeader.numAttributes(); i++) {
