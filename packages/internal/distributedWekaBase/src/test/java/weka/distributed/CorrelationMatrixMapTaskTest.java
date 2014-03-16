@@ -214,14 +214,14 @@ public class CorrelationMatrixMapTaskTest {
   protected static final double TOL = 1e-6;
 
   protected void checkAgainstUtilsCorr(double[][] matrix, Instances orig,
-    Instances withSummary) throws Exception {
+    Instances withSummary, boolean deleteClassIfSet) throws Exception {
     CorrelationMatrixRowReduceTask reduce = new CorrelationMatrixRowReduceTask();
     double[][] finalM = new double[matrix.length][];
     for (int i = 0; i < matrix.length; i++) {
       List<double[]> toAgg = new ArrayList<double[]>();
       toAgg.add(matrix[i]);
       double[] computed = reduce.aggregate(i, toAgg, null, withSummary, true,
-        false, true);
+        false, deleteClassIfSet);
       // for (int j = 0; j < matrix[i].length; j++) {
       // System.err.print(computed[j] + " ");
       // }
@@ -281,7 +281,7 @@ public class CorrelationMatrixMapTaskTest {
     double[][] matrix = corrTask.getMatrix();
     assertTrue(matrix != null);
     assertEquals(7, matrix.length); // numeric class is not part of the matrix
-    checkAgainstUtilsCorr(matrix, orig, withSummary);
+    checkAgainstUtilsCorr(matrix, orig, withSummary, true);
   }
 
   @Test
@@ -304,7 +304,7 @@ public class CorrelationMatrixMapTaskTest {
     orig.setClassIndex(-1);
     assertTrue(matrix != null);
     assertEquals(8, matrix.length); // numeric class is part of the matrix
-    checkAgainstUtilsCorr(matrix, orig, withSummary);
+    checkAgainstUtilsCorr(matrix, orig, withSummary, false);
   }
 
   @Test
@@ -327,7 +327,7 @@ public class CorrelationMatrixMapTaskTest {
 
     assertEquals(4, matrix.length);
 
-    checkAgainstUtilsCorr(matrix, orig, withSummary);
+    checkAgainstUtilsCorr(matrix, orig, withSummary, true);
   }
 
   public static void main(String[] args) {
