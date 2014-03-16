@@ -5,10 +5,10 @@
 PackageName=distributedWekaBase
 
 # Version (required)
-Version=1.0.3
+Version=1.0.4
 
 #Date (year-month-day)
-Date=2014-02-21
+Date=2014-03-17
 
 # Title (required)
 Title=Generic configuration classes and distributed map/reduce type tasks for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides generic configuration classes and distributed map/reduce type tasks for Weka
 
 # Changes in this release
-Changes=Fixed a few bugs with properties not being exposed in the GUI
+Changes=Fixed a bug affecting the correlation tasks in the case where a class attribute was set in the data and the user had not opted to keep it as part of the correlation analysis.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.4.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
