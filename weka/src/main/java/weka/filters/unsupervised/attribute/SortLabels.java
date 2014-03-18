@@ -305,7 +305,7 @@ public class SortLabels extends SimpleStreamFilter {
     Vector<String> result = new Vector<String>();
 
     result.add("-R");
-    result.add(getAttributeIndices().getRanges());
+    result.add(getAttributeIndices());
 
     if (getInvertSelection()) {
       result.add("-V");
@@ -346,8 +346,8 @@ public class SortLabels extends SimpleStreamFilter {
    * 
    * @return current selection.
    */
-  public Range getAttributeIndices() {
-    return m_AttributeIndices;
+  public String getAttributeIndices() {
+    return m_AttributeIndices.getRanges();
   }
 
   /**
