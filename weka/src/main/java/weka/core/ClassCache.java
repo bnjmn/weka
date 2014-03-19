@@ -235,28 +235,30 @@ public class ClassCache implements RevisionHandler {
   }
 
   /**
-   * Analyzes the MANIFEST.MF file of a jar whether additional jars are
-   * listed in the "Class-Path" key.
+   * Analyzes the MANIFEST.MF file of a jar whether additional jars are listed
+   * in the "Class-Path" key.
    * 
-   * @param manifest	the manifest to analyze
+   * @param manifest the manifest to analyze
    */
   protected void initFromManifest(Manifest manifest) {
-    Attributes	atts;
-    String	cp;
-    String[]	parts;
-    
+    Attributes atts;
+    String cp;
+    String[] parts;
+
     atts = manifest.getMainAttributes();
-    cp   = atts.getValue("Class-Path");
+    cp = atts.getValue("Class-Path");
     if (cp == null) {
       return;
     }
-    
+
     parts = cp.split(" ");
-    for (String part: parts) {
+    for (String part : parts) {
       if (part.trim().length() == 0) {
-	return;
+        return;
       }
-      initFromClasspathPart(part);
+      if (part.toLowerCase().endsWith(".jar")) {
+        initFromClasspathPart(part);
+      }
     }
   }
 
@@ -320,22 +322,21 @@ public class ClassCache implements RevisionHandler {
   /**
    * Analyzes a part of the classpath.
    * 
-   * @param part	the part to analyze
+   * @param part the part to analyze
    */
   protected void initFromClasspathPart(String part) {
-    File		file;
+    File file;
 
     file = null;
     if (part.startsWith("file:")) {
       part = part.replace(" ", "%20");
       try {
-	file = new File(new java.net.URI(part));
+        file = new File(new java.net.URI(part));
       } catch (URISyntaxException e) {
-	System.err.println("Failed to generate URI: " + part);
-	e.printStackTrace();
+        System.err.println("Failed to generate URI: " + part);
+        e.printStackTrace();
       }
-    }
-    else {
+    } else {
       file = new File(part);
     }
     if (file == null) {
