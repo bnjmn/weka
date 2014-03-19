@@ -21,6 +21,8 @@
 
 package weka.classifiers.trees.lmt;
 
+import java.io.Serializable;
+
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -31,7 +33,7 @@ import weka.core.Instances;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 10169 $
  */
-public class SimpleLinearRegression {
+public class SimpleLinearRegression implements Serializable {
 
   /** for serialization */
   static final long serialVersionUID = 1779336022895414137L;
