@@ -40,16 +40,16 @@ public class BinC45ModelSelection extends ModelSelection {
   private static final long serialVersionUID = 179170923545122001L;
 
   /** Minimum number of instances in interval. */
-  private final int m_minNoObj;
+  protected final int m_minNoObj;
 
   /** Use MDL correction? */
-  private final boolean m_useMDLcorrection;
+  protected final boolean m_useMDLcorrection;
 
   /** The FULL training dataset. */
-  private Instances m_allData;
+  protected Instances m_allData;
 
   /** Do not relocate split point to actual data value */
-  private final boolean m_doNotMakeSplitPointActualValue;
+  protected final boolean m_doNotMakeSplitPointActualValue;
 
   /**
    * Initializes the split selection method with the given parameters.

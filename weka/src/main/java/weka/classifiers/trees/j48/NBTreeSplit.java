@@ -42,21 +42,21 @@ public class NBTreeSplit extends ClassifierSplitModel {
   private static final long serialVersionUID = 8922627123884975070L;
 
   /** Desired number of branches. */
-  private int m_complexityIndex;
+  protected int m_complexityIndex;
 
   /** Attribute to split on. */
-  private final int m_attIndex;
+  protected final int m_attIndex;
 
   /** The sum of the weights of the instances. */
-  private final double m_sumOfWeights;
+  protected final double m_sumOfWeights;
 
   /**
    * The weight of the instances incorrectly classified by the naive bayes
    * models arising from this split
    */
-  private double m_errors;
+  protected double m_errors;
 
-  private C45Split m_c45S;
+  protected C45Split m_c45S;
 
   /** The global naive bayes model for this node */
   NBTreeNoSplit m_globalNB;

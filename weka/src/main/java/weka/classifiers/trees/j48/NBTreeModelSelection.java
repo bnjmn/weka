@@ -40,10 +40,10 @@ public class NBTreeModelSelection extends ModelSelection {
   private static final long serialVersionUID = 990097748931976704L;
 
   /** Minimum number of objects in interval. */
-  private final int m_minNoObj;
+  protected final int m_minNoObj;
 
   /** All the training data */
-  private Instances m_allData; //
+  protected Instances m_allData; //
 
   /**
    * Initializes the split selection method with the given parameters.

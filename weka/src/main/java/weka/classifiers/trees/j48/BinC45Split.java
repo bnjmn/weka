@@ -40,31 +40,31 @@ public class BinC45Split extends ClassifierSplitModel {
   private static final long serialVersionUID = -1278776919563022474L;
 
   /** Attribute to split on. */
-  private final int m_attIndex;
+  protected final int m_attIndex;
 
   /** Minimum number of objects in a split. */
-  private final int m_minNoObj;
+  protected final int m_minNoObj;
 
   /** Use MDL correction? */
-  private final boolean m_useMDLcorrection;
+  protected final boolean m_useMDLcorrection;
 
   /** Value of split point. */
-  private double m_splitPoint;
+  protected double m_splitPoint;
 
   /** InfoGain of split. */
-  private double m_infoGain;
+  protected double m_infoGain;
 
   /** GainRatio of split. */
-  private double m_gainRatio;
+  protected double m_gainRatio;
 
   /** The sum of the weights of the instances. */
-  private final double m_sumOfWeights;
+  protected final double m_sumOfWeights;
 
   /** Static reference to splitting criterion. */
-  private static InfoGainSplitCrit m_infoGainCrit = new InfoGainSplitCrit();
+  protected static InfoGainSplitCrit m_infoGainCrit = new InfoGainSplitCrit();
 
   /** Static reference to splitting criterion. */
-  private static GainRatioSplitCrit m_gainRatioCrit = new GainRatioSplitCrit();
+  protected static GainRatioSplitCrit m_gainRatioCrit = new GainRatioSplitCrit();
 
   /**
    * Initializes the split model.
