@@ -811,6 +811,11 @@ public abstract class NormalizableDistance implements DistanceFunction,
     return m_Ranges;
   }
 
+  @Override
+  public void clean() {
+    m_Data = new Instances(m_Data, 0);
+  }
+
   /**
    * Returns an empty string.
    * 

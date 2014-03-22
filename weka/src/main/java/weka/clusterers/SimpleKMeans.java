@@ -56,15 +56,19 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- <!-- globalinfo-start -->
- * Cluster data using the k means algorithm. Can use either the Euclidean distance (default) or the Manhattan distance. If the Manhattan distance is used, then centroids are computed as the component-wise median rather than mean. For more information see:<br/>
+ * <!-- globalinfo-start --> Cluster data using the k means algorithm. Can use
+ * either the Euclidean distance (default) or the Manhattan distance. If the
+ * Manhattan distance is used, then centroids are computed as the component-wise
+ * median rather than mean. For more information see:<br/>
  * <br/>
- * D. Arthur, S. Vassilvitskii: k-means++: the advantages of carefull seeding. In: Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete algorithms, 1027-1035, 2007.
+ * D. Arthur, S. Vassilvitskii: k-means++: the advantages of carefull seeding.
+ * In: Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete
+ * algorithms, 1027-1035, 2007.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;inproceedings{Arthur2007,
  *    author = {D. Arthur and S. Vassilvitskii},
@@ -75,67 +79,88 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
+ * <!-- technical-bibtex-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -N &lt;num&gt;
+ * <pre>
+ * -N &lt;num&gt;
  *  Number of clusters.
- *  (default 2).</pre>
+ *  (default 2).
+ * </pre>
  * 
- * <pre> -init
+ * <pre>
+ * -init
  * 
  * Initialization method to use.
  *  0 = random, 1 = k-means++, 2 = canopy, 3 = farthest first.
- *  (default = 0)</pre>
+ *  (default = 0)
+ * </pre>
  * 
- * <pre> -C
- *  Use canopies to reduce the number of distance calculations.</pre>
+ * <pre>
+ * -C
+ *  Use canopies to reduce the number of distance calculations.
+ * </pre>
  * 
- * <pre> -t2
+ * <pre>
+ * -t2
  *  The T2 distance to use when using canopy clustering. Values &lt; 0 indicate that
  *  a heuristic based on attribute std. deviation should be used to set this.
- *  (default = -1.0)</pre>
+ *  (default = -1.0)
+ * </pre>
  * 
- * <pre> -t1
+ * <pre>
+ * -t1
  *  The T1 distance to use when using canopy clustering. A value &lt; 0 is taken as a
- *  positive multiplier for T2. (default = -1.5)</pre>
+ *  positive multiplier for T2. (default = -1.5)
+ * </pre>
  * 
- * <pre> -V
+ * <pre>
+ * -V
  *  Display std. deviations for centroids.
  * </pre>
  * 
- * <pre> -M
+ * <pre>
+ * -M
  *  Don't replace missing values with mean/mode.
  * </pre>
  * 
- * <pre> -A &lt;classname and options&gt;
+ * <pre>
+ * -A &lt;classname and options&gt;
  *  Distance function to use.
- *  (default: weka.core.EuclideanDistance)</pre>
+ *  (default: weka.core.EuclideanDistance)
+ * </pre>
  * 
- * <pre> -I &lt;num&gt;
+ * <pre>
+ * -I &lt;num&gt;
  *  Maximum number of iterations.
  * </pre>
  * 
- * <pre> -O
+ * <pre>
+ * -O
  *  Preserve order of instances.
  * </pre>
  * 
- * <pre> -fast
+ * <pre>
+ * -fast
  *  Enables faster distance calculations, using cut-off values.
  *  Disables the calculation/output of squared errors/distances.
  * </pre>
  * 
- * <pre> -num-slots &lt;num&gt;
+ * <pre>
+ * -num-slots &lt;num&gt;
  *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)</pre>
+ *  (default 1 - i.e. no parallelism)
+ * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 10)</pre>
+ *  (default 10)
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -751,6 +776,9 @@ public class SimpleKMeans extends RandomizableClusterer implements
     }
 
     m_executorPool.shutdown();
+
+    // save memory!
+    m_DistanceFunction.clean();
   }
 
   /**
@@ -1475,65 +1503,86 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -N &lt;num&gt;
+   * <pre>
+   * -N &lt;num&gt;
    *  Number of clusters.
-   *  (default 2).</pre>
+   *  (default 2).
+   * </pre>
    * 
-   * <pre> -init
+   * <pre>
+   * -init
    * 
    * Initialization method to use.
    *  0 = random, 1 = k-means++, 2 = canopy, 3 = farthest first.
-   *  (default = 0)</pre>
+   *  (default = 0)
+   * </pre>
    * 
-   * <pre> -C
-   *  Use canopies to reduce the number of distance calculations.</pre>
+   * <pre>
+   * -C
+   *  Use canopies to reduce the number of distance calculations.
+   * </pre>
    * 
-   * <pre> -t2
+   * <pre>
+   * -t2
    *  The T2 distance to use when using canopy clustering. Values &lt; 0 indicate that
    *  a heuristic based on attribute std. deviation should be used to set this.
-   *  (default = -1.0)</pre>
+   *  (default = -1.0)
+   * </pre>
    * 
-   * <pre> -t1
+   * <pre>
+   * -t1
    *  The T1 distance to use when using canopy clustering. A value &lt; 0 is taken as a
-   *  positive multiplier for T2. (default = -1.5)</pre>
+   *  positive multiplier for T2. (default = -1.5)
+   * </pre>
    * 
-   * <pre> -V
+   * <pre>
+   * -V
    *  Display std. deviations for centroids.
    * </pre>
    * 
-   * <pre> -M
+   * <pre>
+   * -M
    *  Don't replace missing values with mean/mode.
    * </pre>
    * 
-   * <pre> -A &lt;classname and options&gt;
+   * <pre>
+   * -A &lt;classname and options&gt;
    *  Distance function to use.
-   *  (default: weka.core.EuclideanDistance)</pre>
+   *  (default: weka.core.EuclideanDistance)
+   * </pre>
    * 
-   * <pre> -I &lt;num&gt;
+   * <pre>
+   * -I &lt;num&gt;
    *  Maximum number of iterations.
    * </pre>
    * 
-   * <pre> -O
+   * <pre>
+   * -O
    *  Preserve order of instances.
    * </pre>
    * 
-   * <pre> -fast
+   * <pre>
+   * -fast
    *  Enables faster distance calculations, using cut-off values.
    *  Disables the calculation/output of squared errors/distances.
    * </pre>
    * 
-   * <pre> -num-slots &lt;num&gt;
+   * <pre>
+   * -num-slots &lt;num&gt;
    *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)</pre>
+   *  (default 1 - i.e. no parallelism)
+   * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 10)</pre>
+   *  (default 10)
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -1799,12 +1848,17 @@ public class SimpleKMeans extends RandomizableClusterer implements
     } else {
       temp.append(m_canopyClusters.toString(false));
     }
-    
+
     if (m_speedUpDistanceCompWithCanopies) {
-      temp.append("\nReduced number of distance calculations by using canopies.");
+      temp
+        .append("\nReduced number of distance calculations by using canopies.");
       if (m_initializationMethod != CANOPY) {
-        temp.append("\nCanopy T2 radius: " + String.format("%-10.3f", m_canopyClusters.getActualT2()));
-        temp.append("\nCanopy T1 radius: " + String.format("%-10.3f", m_canopyClusters.getActualT1())).append("\n");
+        temp.append("\nCanopy T2 radius: "
+          + String.format("%-10.3f", m_canopyClusters.getActualT2()));
+        temp.append(
+          "\nCanopy T1 radius: "
+            + String.format("%-10.3f", m_canopyClusters.getActualT1())).append(
+          "\n");
       }
     }
 
@@ -2110,4 +2164,3 @@ public class SimpleKMeans extends RandomizableClusterer implements
     runClusterer(new SimpleKMeans(), args);
   }
 }
-
