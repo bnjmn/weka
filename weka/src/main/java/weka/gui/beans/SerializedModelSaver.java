@@ -338,7 +338,6 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
     try {
       dirName = m_env.substitute(dirName);
     } catch (Exception ex) {
-      stop(); // stop all processing
       String message = "[SerializedModelSaver] " + statusMessagePrefix()
         + " Can't save model. Reason: " + ex.getMessage();
       if (m_logger != null) {
@@ -377,7 +376,6 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       try {
         prefix = m_env.substitute(m_filenamePrefix);
       } catch (Exception ex) {
-        stop(); // stop processing
         String message = "[SerializedModelSaver] " + statusMessagePrefix()
           + " Can't save model. Reason: " + ex.getMessage();
         if (m_logger != null) {
@@ -397,7 +395,6 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       try {
         dirName = m_env.substitute(dirName);
       } catch (Exception ex) {
-        stop(); // stop processing
         String message = "[SerializedModelSaver] " + statusMessagePrefix()
           + " Can't save model. Reason: " + ex.getMessage();
         if (m_logger != null) {
@@ -448,7 +445,6 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
-      stop(); // stop processing
       String message = "[SerializedModelSaver] " + statusMessagePrefix()
         + " Can't save model. Reason: " + ex.getMessage();
       if (m_logger != null) {
@@ -469,7 +465,6 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
     try {
       dirName = m_env.substitute(dirName);
     } catch (Exception ex) {
-      stop(); // stop processing
       String message = "[SerializedModelSaver] " + statusMessagePrefix()
         + " Can't save model. Reason: " + ex.getMessage();
       if (m_logger != null) {
@@ -513,11 +508,10 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
         break;
       }
     } catch (Exception ex) {
-      stop(); // stop all processing
       System.err.println("[SerializedModelSaver] Problem saving model");
       if (m_logger != null) {
         m_logger.logMessage("[SerializedModelSaver] " + statusMessagePrefix()
-          + " Problem saving model");
+          + " Problem saving model. Reason: " + ex.getMessage());
         m_logger.statusMessage(statusMessagePrefix()
           + "ERROR (See log for details)");
       }
