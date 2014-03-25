@@ -546,11 +546,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Con }
+     * Create an instance of {@link Con1 }
      * 
      */
-    public Con createCon() {
-        return new Con();
+    public Con1 createCon() {
+        return new Con1();
     }
 
     /**

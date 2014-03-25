@@ -55,7 +55,7 @@ public class Neuron {
     @XmlElement(name = "Extension", namespace = "http://www.dmg.org/PMML-4_1", required = true)
     protected List<Extension> extension;
     @XmlElement(name = "Con", namespace = "http://www.dmg.org/PMML-4_1", required = true)
-    protected List<Con> con;
+    protected List<Con1> con;
     @XmlAttribute
     protected Double altitude;
     @XmlAttribute
@@ -112,13 +112,13 @@ public class Neuron {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Con }
+     * {@link Con1 }
      * 
      * 
      */
-    public List<Con> getCon() {
+    public List<Con1> getCon() {
         if (con == null) {
-            con = new ArrayList<Con>();
+            con = new ArrayList<Con1>();
         }
         return this.con;
     }
