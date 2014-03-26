@@ -276,21 +276,20 @@ public class Instances extends AbstractList<Instance> implements Serializable,
   public Instances stringFreeStructure() {
 
     ArrayList<Attribute> newAtts = new ArrayList<Attribute>();
-    for (int i = 0; i < m_Attributes.size(); i++) {
-      Attribute att = m_Attributes.get(i);
+    for (Attribute att : m_Attributes) {
       if (att.type() == Attribute.STRING) {
-        newAtts.add(new Attribute(att.name(), (List<String>) null, i));
+        newAtts.add(new Attribute(att.name(), (List<String>) null, att.index()));
       } else if (att.type() == Attribute.RELATIONAL) {
         newAtts.add(new Attribute(att.name(), new Instances(att.relation(), 0),
-          i));
+                                  att.index()));
       }
     }
     if (newAtts.size() == 0) {
       return new Instances(this, 0);
     }
     ArrayList<Attribute> atts = Utils.cast(m_Attributes.clone());
-    for (int i = 0; i < newAtts.size(); i++) {
-      atts.set(newAtts.get(i).index(), newAtts.get(i));
+    for (Attribute att : newAtts) {
+      atts.set(att.index(), att);
     }
     Instances result = new Instances(this, 0);
     result.m_Attributes = atts;
@@ -1038,11 +1037,11 @@ public class Instances extends AbstractList<Instance> implements Serializable,
 
     Attribute newAtt = attribute(att).copy(name);
     ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
-    for (int i = 0; i < numAttributes(); i++) {
-      if (i == att) {
+    for (Attribute attr : m_Attributes) {
+      if (attr.index() == att) {
         newVec.add(newAtt);
       } else {
-        newVec.add(attribute(i));
+        newVec.add(attr);
       }
     }
     m_Attributes = newVec;
@@ -1073,11 +1072,11 @@ public class Instances extends AbstractList<Instance> implements Serializable,
     ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
 
     newAtt.setValue(val, name);
-    for (int i = 0; i < numAttributes(); i++) {
-      if (i == att) {
+    for (Attribute attr : m_Attributes) {
+      if (attr.index() == att) {
         newVec.add(newAtt);
       } else {
-        newVec.add(attribute(i));
+        newVec.add(attr);
       }
     }
     m_Attributes = newVec;
@@ -1933,11 +1932,11 @@ public class Instances extends AbstractList<Instance> implements Serializable,
 
     // Create the vector of merged attributes
     ArrayList<Attribute> newAttributes = new ArrayList<Attribute>();
-    for (int i = 0; i < first.numAttributes(); i++) {
-      newAttributes.add(first.attribute(i));
+    for (Attribute att : first.m_Attributes) {
+      newAttributes.add(att);
     }
-    for (int i = 0; i < second.numAttributes(); i++) {
-      newAttributes.add(second.attribute(i));
+    for (Attribute att : second.m_Attributes) {
+      newAttributes.add((Attribute)att.copy()); // Need to copy because indices will change.
     }
 
     // Create the set of Instances
