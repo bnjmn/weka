@@ -21,50 +21,29 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Vector;
 
-import weka.classifiers.functions.supportVector.Kernel;
-import weka.classifiers.functions.supportVector.PolyKernel;
-import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.MathematicalExpression;
-import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.filters.AllFilter;
-import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start -->
- * * Transposes the data: instances become attributes and attributes become instances. If the first attribute in the original data is a nominal or string identifier attribute, this identifier attribute will be used to create attribute names in the transposed data. All attributes other than the identifier attribute must be numeric. The attribute names in the original data are used to create an identifier attribute of type string in the transposed data.<br/>
- * * <br/>
- * * This filter can only process one batch of data, e.g. it cannot be used in the the FilteredClassifier.<br/>
- * * <br/>
- * * This filter can only be applied when no class attribute has been set.<br/>
- * * <br/>
- * *  Date values will be turned into simple numeric values.<br/>
- * * <br/>
- * * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-start -->
+ * Transposes the data: instances become attributes and attributes become instances. If the first attribute in the original data is a nominal or string identifier attribute, this identifier attribute will be used to create attribute names in the transposed data. All attributes other than the identifier attribute must be numeric. The attribute names in the original data are used to create an identifier attribute of type string in the transposed data.<br/>
+ * <br/>
+ * This filter can only process one batch of data, e.g. it cannot be used in the the FilteredClassifier.<br/>
+ * <br/>
+ * This filter can only be applied when no class attribute has been set.<br/>
+ * <br/>
+ *  Date values will be turned into simple numeric values.<br/>
+ * <br/>
+ * <p/>
+ <!-- globalinfo-end -->
  * 
  * @author Eibe Frank
  * @version $Revision: 10215 $
@@ -130,13 +109,16 @@ public class Transpose extends SimpleBatchFilter implements UnsupervisedFilter {
    * @see #batchFinished()
    */
   @Override
-  protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
+  protected Instances determineOutputFormat(Instances inputFormat)
+    throws Exception {
 
-    ArrayList<Attribute> newAtts = new ArrayList<Attribute>(inputFormat.numInstances());
+    ArrayList<Attribute> newAtts = new ArrayList<Attribute>(
+      inputFormat.numInstances());
 
     newAtts.add(new Attribute("Identifier", (ArrayList<String>) null));
     for (int i = 0; i < inputFormat.numInstances(); i++) {
-      if (inputFormat.attribute(0).isNominal() || inputFormat.attribute(0).isString()) {
+      if (inputFormat.attribute(0).isNominal()
+        || inputFormat.attribute(0).isString()) {
 
         // We have a proper identifier
         newAtts.add(new Attribute(inputFormat.instance(i).stringValue(0)));
@@ -148,7 +130,8 @@ public class Transpose extends SimpleBatchFilter implements UnsupervisedFilter {
       newAtts.get(i).setWeight(inputFormat.instance(i).weight());
     }
 
-    return new Instances(inputFormat.relationName(), newAtts, inputFormat.numAttributes());
+    return new Instances(inputFormat.relationName(), newAtts,
+      inputFormat.numAttributes());
   }
 
   /**
@@ -164,31 +147,36 @@ public class Transpose extends SimpleBatchFilter implements UnsupervisedFilter {
   protected Instances process(Instances instances) throws Exception {
 
     if (isFirstBatchDone()) {
-      throw new Exception("The Transpose filter can only process one batch of instances.");
+      throw new Exception(
+        "The Transpose filter can only process one batch of instances.");
     }
 
     setOutputFormat(determineOutputFormat(instances));
 
     // Do we have an identifier in the original data?
-    int offset = (instances.attribute(0).isNominal() || instances.attribute(0).isString()) ? 1 : 0;
+    int offset = (instances.attribute(0).isNominal() || instances.attribute(0)
+      .isString()) ? 1 : 0;
 
     // Transpose data
-    double[][] newData = new double[instances.numAttributes() - offset][instances.numInstances() + 1];
+    double[][] newData = new double[instances.numAttributes() - offset][instances
+      .numInstances() + 1];
     for (int i = 0; i < instances.numInstances(); i++) {
       for (int j = offset; j < instances.numAttributes(); j++) {
-        newData[j - offset][0] = (double)getOutputFormat().attribute(0).addStringValue(instances.attribute(j).name());
+        newData[j - offset][0] = getOutputFormat().attribute(0).addStringValue(
+          instances.attribute(j).name());
         if (!instances.attribute(j).isNumeric()) {
-          throw new Exception("Only numeric attributes can be transposed: "+
-                              instances.attribute(j).name() + " is not numeric.");
+          throw new Exception("Only numeric attributes can be transposed: "
+            + instances.attribute(j).name() + " is not numeric.");
         }
         newData[j - offset][i + 1] = instances.instance(i).value(j);
       }
     }
-    
+
     // Create instances
     Instances result = getOutputFormat();
     for (int i = 0; i < newData.length; i++) {
-      result.add(new DenseInstance(instances.attribute(i + offset).weight(), newData[i]));
+      result.add(new DenseInstance(instances.attribute(i + offset).weight(),
+        newData[i]));
     }
 
     return result;
