@@ -1,0 +1,29 @@
+@relation 'FilterTest-weka.filters.unsupervised.attribute.Remove-R1,2,4,5-weka.filters.unsupervised.attribute.Transpose'
+
+@attribute Identifier string
+@attribute 1 numeric
+@attribute 2 numeric
+@attribute 3 numeric
+@attribute 4 numeric
+@attribute 5 numeric
+@attribute 6 numeric
+@attribute 7 numeric
+@attribute 8 numeric
+@attribute 9 numeric
+@attribute 10 numeric
+@attribute 11 numeric
+@attribute 12 numeric
+@attribute 13 numeric
+@attribute 14 numeric
+@attribute 15 numeric
+@attribute 16 numeric
+@attribute 17 numeric
+@attribute 18 numeric
+@attribute 19 numeric
+@attribute 20 numeric
+@attribute 21 numeric
+
+@data
+NumericAtt1,1,2,3,4,5,6,7,8,9,9.4,1.4,2.3,3.3,4.3,5.3,6.5,7.5,8.5,9.4,4.3,0
+NumericAtt2,-2.3,-3.3,-2.4,-5.3,-2.6,-7.3,-2.8,-9.3,-2,-9,-8.3,-7.3,?,-5.3,-5.6,-4.3,-3.8,-2.3,-1,0,3.4
+DateAtt1,986212800000,986212800000,986212800000,986212800000,986212800000,986299200000,986299200000,986299200000,988891200000,988891200000,988977600000,988977600000,988977600000,988977600000,989064000000,989064000000,991742400000,991742400000,991828800000,0,0
