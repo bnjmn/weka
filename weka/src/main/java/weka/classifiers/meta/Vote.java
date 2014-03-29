@@ -34,9 +34,9 @@ import java.util.Vector;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableMultipleClassifiersCombiner;
+import weka.core.Aggregateable;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.Aggregateable;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
@@ -53,64 +53,67 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start --> 
- * Class for combining classifiers. Different
- * combinations of probability estimates for classification are available.<br/>
+ <!-- globalinfo-start -->
+ * Class for combining classifiers. Different combinations of probability estimates for classification are available.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Ludmila I. Kuncheva (2004). Combining Pattern Classifiers: Methods and
- * Algorithms. John Wiley and Sons, Inc..<br/>
+ * Ludmila I. Kuncheva (2004). Combining Pattern Classifiers: Methods and Algorithms. John Wiley and Sons, Inc..<br/>
  * <br/>
- * J. Kittler, M. Hatef, Robert P.W. Duin, J. Matas (1998). On combining
- * classifiers. IEEE Transactions on Pattern Analysis and Machine Intelligence.
- * 20(3):226-239.
+ * J. Kittler, M. Hatef, Robert P.W. Duin, J. Matas (1998). On combining classifiers. IEEE Transactions on Pattern Analysis and Machine Intelligence. 20(3):226-239.
  * <p/>
  <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)
- * </pre>
- * 
- * <pre>
- * -B &lt;classifier specification&gt;
- *  Full class name of classifier to include, followed
- *  by scheme options. May be specified multiple times.
- *  (default: "weka.classifiers.rules.ZeroR")
- * </pre>
- * 
- * <pre>
- * -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console
- * </pre>
- * 
- * <pre>
- * -P &lt;path to serialized classifier&gt;
+ * <pre> -P &lt;path to serialized classifier&gt;
  *  Full path to serialized classifier to include.
  *  May be specified multiple times to include
  *  multiple serialized classifiers. Note: it does
  *  not make sense to use pre-built classifiers in
- *  a cross-validation.
+ *  a cross-validation.</pre>
+ * 
+ * <pre> -R &lt;AVG|PROD|MAJ|MIN|MAX|MED&gt;
+ *  The combination rule to use
+ *  (default: AVG)</pre>
+ * 
+ * <pre> -print
+ *  Print the individual models in the output</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -B &lt;classifier specification&gt;
+ *  Full class name of classifier to include, followed
+ *  by scheme options. May be specified multiple times.
+ *  (default: "weka.classifiers.rules.ZeroR")</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
  * </pre>
  * 
- * <pre>
- * -R &lt;AVG|PROD|MAJ|MIN|MAX|MED&gt;
- *  The combination rule to use
- *  (default: AVG)
- * </pre>
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
  * 
  <!-- options-end -->
  * 
- <!-- technical-bibtex-start --> 
+ <!-- technical-bibtex-start -->
  * BibTeX:
- * 
  * <pre>
  * &#64;book{Kuncheva2004,
  *    author = {Ludmila I. Kuncheva},
@@ -138,7 +141,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class Vote extends RandomizableMultipleClassifiersCombiner implements
-    TechnicalInformationHandler, EnvironmentHandler, Aggregateable<Classifier> {
+  TechnicalInformationHandler, EnvironmentHandler, Aggregateable<Classifier> {
 
   /** for serialization */
   static final long serialVersionUID = -637891196294399624L;
@@ -157,12 +160,12 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   public static final int MEDIAN_RULE = 6;
   /** combination rules */
   public static final Tag[] TAGS_RULES = {
-      new Tag(AVERAGE_RULE, "AVG", "Average of Probabilities"),
-      new Tag(PRODUCT_RULE, "PROD", "Product of Probabilities"),
-      new Tag(MAJORITY_VOTING_RULE, "MAJ", "Majority Voting"),
-      new Tag(MIN_RULE, "MIN", "Minimum Probability"),
-      new Tag(MAX_RULE, "MAX", "Maximum Probability"),
-      new Tag(MEDIAN_RULE, "MED", "Median") };
+    new Tag(AVERAGE_RULE, "AVG", "Average of Probabilities"),
+    new Tag(PRODUCT_RULE, "PROD", "Product of Probabilities"),
+    new Tag(MAJORITY_VOTING_RULE, "MAJ", "Majority Voting"),
+    new Tag(MIN_RULE, "MIN", "Minimum Probability"),
+    new Tag(MAX_RULE, "MAX", "Maximum Probability"),
+    new Tag(MEDIAN_RULE, "MED", "Median") };
 
   /** Combination Rule variable */
   protected int m_CombinationRule = AVERAGE_RULE;
@@ -182,9 +185,12 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
   /** Environment variables */
   protected transient Environment m_env = Environment.getSystemWide();
-  
+
   /** Structure of the training data */
   protected Instances m_structure;
+
+  /** Print the individual models in the output */
+  protected boolean m_printModels;
 
   /**
    * Returns a string describing classifier
@@ -194,9 +200,8 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    */
   public String globalInfo() {
     return "Class for combining classifiers. Different combinations of "
-        + "probability estimates for classification are available.\n\n"
-        + "For more information see:\n\n"
-        + getTechnicalInformation().toString();
+      + "probability estimates for classification are available.\n\n"
+      + "For more information see:\n\n" + getTechnicalInformation().toString();
   }
 
   /**
@@ -206,20 +211,23 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    */
   @Override
   public Enumeration<Option> listOptions() {
-    
+
     Vector<Option> result = new Vector<Option>();
-    
+
     result.addElement(new Option(
-        "\tFull path to serialized classifier to include.\n"
-            + "\tMay be specified multiple times to include\n"
-            + "\tmultiple serialized classifiers. Note: it does\n"
-            + "\tnot make sense to use pre-built classifiers in\n"
-            + "\ta cross-validation.", "P", 1, "-P <path to serialized "
-            + "classifier>"));
+      "\tFull path to serialized classifier to include.\n"
+        + "\tMay be specified multiple times to include\n"
+        + "\tmultiple serialized classifiers. Note: it does\n"
+        + "\tnot make sense to use pre-built classifiers in\n"
+        + "\ta cross-validation.", "P", 1, "-P <path to serialized "
+        + "classifier>"));
 
     result.addElement(new Option("\tThe combination rule to use\n"
-        + "\t(default: AVG)", "R", 1, "-R " + Tag.toOptionList(TAGS_RULES)));
-    
+      + "\t(default: AVG)", "R", 1, "-R " + Tag.toOptionList(TAGS_RULES)));
+
+    result.addElement(new Option("\tPrint the individual models in the output",
+      "print", 0, "-print"));
+
     result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
@@ -237,8 +245,9 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     String[] options;
 
     options = super.getOptions();
-    for (i = 0; i < options.length; i++)
+    for (i = 0; i < options.length; i++) {
       result.add(options[i]);
+    }
 
     result.add("-R");
     result.add("" + getCombinationRule());
@@ -248,50 +257,62 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       result.add(m_classifiersToLoad.get(i));
     }
 
-    return (String[]) result.toArray(new String[result.size()]);
+    if (m_printModels) {
+      result.add("-print");
+    }
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start --> 
-   * Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 1)
-   * </pre>
-   * 
-   * <pre>
-   * -B &lt;classifier specification&gt;
-   *  Full class name of classifier to include, followed
-   *  by scheme options. May be specified multiple times.
-   *  (default: "weka.classifiers.rules.ZeroR")
-   * </pre>
-   * 
-   * <pre>
-   * -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console
-   * </pre>
-   * 
-   * <pre>
-   * -P &lt;path to serialized classifier&gt;
+   * <pre> -P &lt;path to serialized classifier&gt;
    *  Full path to serialized classifier to include.
    *  May be specified multiple times to include
    *  multiple serialized classifiers. Note: it does
    *  not make sense to use pre-built classifiers in
-   *  a cross-validation.
+   *  a cross-validation.</pre>
+   * 
+   * <pre> -R &lt;AVG|PROD|MAJ|MIN|MAX|MED&gt;
+   *  The combination rule to use
+   *  (default: AVG)</pre>
+   * 
+   * <pre> -print
+   *  Print the individual models in the output</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -B &lt;classifier specification&gt;
+   *  Full class name of classifier to include, followed
+   *  by scheme options. May be specified multiple times.
+   *  (default: "weka.classifiers.rules.ZeroR")</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
    * </pre>
    * 
-   * <pre>
-   * -R &lt;AVG|PROD|MAJ|MIN|MAX|MED&gt;
-   *  The combination rule to use
-   *  (default: AVG)
-   * </pre>
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
    * 
    <!-- options-end -->
    * 
@@ -303,10 +324,11 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     String tmpStr;
 
     tmpStr = Utils.getOption('R', options);
-    if (tmpStr.length() != 0)
+    if (tmpStr.length() != 0) {
       setCombinationRule(new SelectedTag(tmpStr, TAGS_RULES));
-    else
+    } else {
       setCombinationRule(new SelectedTag(AVERAGE_RULE, TAGS_RULES));
+    }
 
     m_classifiersToLoad.clear();
     while (true) {
@@ -317,6 +339,8 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
       m_classifiersToLoad.add(loadString);
     }
+
+    setPrintModels(Utils.getFlag("print", options));
 
     super.setOptions(options);
   }
@@ -336,17 +360,17 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     result = new TechnicalInformation(Type.BOOK);
     result.setValue(Field.AUTHOR, "Ludmila I. Kuncheva");
     result.setValue(Field.TITLE,
-        "Combining Pattern Classifiers: Methods and Algorithms");
+      "Combining Pattern Classifiers: Methods and Algorithms");
     result.setValue(Field.YEAR, "2004");
     result.setValue(Field.PUBLISHER, "John Wiley and Sons, Inc.");
 
     additional = result.add(Type.ARTICLE);
     additional.setValue(Field.AUTHOR,
-        "J. Kittler and M. Hatef and Robert P.W. Duin and J. Matas");
+      "J. Kittler and M. Hatef and Robert P.W. Duin and J. Matas");
     additional.setValue(Field.YEAR, "1998");
     additional.setValue(Field.TITLE, "On combining classifiers");
     additional.setValue(Field.JOURNAL,
-        "IEEE Transactions on Pattern Analysis and Machine Intelligence");
+      "IEEE Transactions on Pattern Analysis and Machine Intelligence");
     additional.setValue(Field.VOLUME, "20");
     additional.setValue(Field.NUMBER, "3");
     additional.setValue(Field.PAGES, "226-239");
@@ -374,7 +398,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     if (m_preBuiltClassifiers.size() > 0) {
       if (m_Classifiers.length == 0) {
         result = (Capabilities) m_preBuiltClassifiers.get(0).getCapabilities()
-            .clone();
+          .clone();
       }
       for (int i = 1; i < m_preBuiltClassifiers.size(); i++) {
         result.and(m_preBuiltClassifiers.get(i).getCapabilities());
@@ -387,7 +411,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
     // class
     if ((m_CombinationRule == PRODUCT_RULE)
-        || (m_CombinationRule == MAJORITY_VOTING_RULE)) {
+      || (m_CombinationRule == MAJORITY_VOTING_RULE)) {
       result.disableAllClasses();
       result.disableAllClassDependencies();
       result.enable(Capability.NOMINAL_CLASS);
@@ -425,7 +449,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       loadClassifiers(data);
 
       if (m_Classifiers.length == 1
-          && m_Classifiers[0] instanceof weka.classifiers.rules.ZeroR) {
+        && m_Classifiers[0] instanceof weka.classifiers.rules.ZeroR) {
         // remove the single ZeroR
         m_Classifiers = new Classifier[0];
       }
@@ -459,10 +483,10 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       File toLoad = new File(path);
       if (!toLoad.isFile()) {
         throw new Exception("\"" + path
-            + "\" does not seem to be a valid file!");
+          + "\" does not seem to be a valid file!");
       }
       ObjectInputStream is = new ObjectInputStream(new BufferedInputStream(
-          new FileInputStream(toLoad)));
+        new FileInputStream(toLoad)));
       Object c = is.readObject();
       if (!(c instanceof Classifier)) {
         is.close();
@@ -474,12 +498,12 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
         if (data != null && !data.equalHeaders((Instances) header)) {
           is.close();
           throw new Exception("\"" + path + "\" was trained with data that is "
-              + "of a differnet structure than the incoming training data");
+            + "of a differnet structure than the incoming training data");
         }
       }
       if (header == null) {
         System.out.println("[Vote] warning: no header instances for \"" + path
-            + "\"");
+          + "\"");
       }
       is.close();
       addPreBuiltClassifier((Classifier) c);
@@ -527,10 +551,11 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       dist = distributionForInstance(instance);
       if (instance.classAttribute().isNominal()) {
         index = Utils.maxIndex(dist);
-        if (dist[index] == 0)
+        if (dist[index] == 0) {
           result = Utils.missingValue();
-        else
+        } else {
           result = index;
+        }
       } else if (instance.classAttribute().isNumeric()) {
         result = dist[0];
       } else {
@@ -542,7 +567,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       break;
     default:
       throw new IllegalStateException("Unknown combination rule '"
-          + m_CombinationRule + "'!");
+        + m_CombinationRule + "'!");
     }
 
     return result;
@@ -558,12 +583,12 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * @throws Exception if an error occurred during the prediction
    */
   protected double classifyInstanceMedian(Instance instance) throws Exception {
-    double[] results = new double[m_Classifiers.length + m_preBuiltClassifiers.size()];
-
+    double[] results = new double[m_Classifiers.length
+      + m_preBuiltClassifiers.size()];
 
     int numResults = 0;
-    for (int i = 0; i < m_Classifiers.length; i++) {
-      double pred = m_Classifiers[i].classifyInstance(instance);
+    for (Classifier m_Classifier : m_Classifiers) {
+      double pred = m_Classifier.classifyInstance(instance);
       if (!Utils.isMissingValue(pred)) {
         results[numResults++] = pred;
       }
@@ -576,11 +601,11 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       }
     }
 
-    if (numResults == 0)
+    if (numResults == 0) {
       return Utils.missingValue();
-    else if (numResults == 1)
+    } else if (numResults == 1) {
       return results[0];
-    else {
+    } else {
       double[] actualResults = new double[numResults];
       System.arraycopy(results, 0, actualResults, 0, numResults);
       return Utils.kthSmallestValue(actualResults, actualResults.length / 2);
@@ -619,11 +644,12 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       break;
     default:
       throw new IllegalStateException("Unknown combination rule '"
-          + m_CombinationRule + "'!");
+        + m_CombinationRule + "'!");
     }
 
-    if (!instance.classAttribute().isNumeric() && (Utils.sum(result) > 0))
+    if (!instance.classAttribute().isNumeric() && (Utils.sum(result) > 0)) {
       Utils.normalize(result);
+    }
 
     return result;
   }
@@ -637,14 +663,15 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * @throws Exception if instance could not be classified successfully
    */
   protected double[] distributionForInstanceAverage(Instance instance)
-      throws Exception {
+    throws Exception {
 
     double[] probs = new double[instance.numClasses()];
 
     double numPredictions = 0;
     for (int i = 0; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
-      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+      if (!instance.classAttribute().isNumeric()
+        || !Utils.isMissingValue(dist[0])) {
         for (int j = 0; j < dist.length; j++) {
           probs[j] += dist[j];
         }
@@ -653,8 +680,10 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     }
 
     for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
-      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(instance);
-      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(
+        instance);
+      if (!instance.classAttribute().isNumeric()
+        || !Utils.isMissingValue(dist[0])) {
         for (int j = 0; j < dist.length; j++) {
           probs[j] += dist[j];
         }
@@ -690,7 +719,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * @throws Exception if instance could not be classified successfully
    */
   protected double[] distributionForInstanceProduct(Instance instance)
-      throws Exception {
+    throws Exception {
 
     double[] probs = new double[instance.numClasses()];
     for (int i = 0; i < probs.length; i++) {
@@ -709,7 +738,8 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     }
 
     for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
-      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(instance);
+      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(
+        instance);
       if (Utils.sum(dist) > 0) {
         for (int j = 0; j < dist.length; j++) {
           probs[j] *= dist[j];
@@ -732,15 +762,15 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   }
 
   /**
-   * Classifies a given instance using the Majority Voting combination rule.
-   * Can assume that class is nominal.
+   * Classifies a given instance using the Majority Voting combination rule. Can
+   * assume that class is nominal.
    * 
    * @param instance the instance to be classified
    * @return the distribution
    * @throws Exception if instance could not be classified successfully
    */
   protected double[] distributionForInstanceMajorityVoting(Instance instance)
-      throws Exception {
+    throws Exception {
 
     double[] probs = new double[instance.classAttribute().numValues()];
     double[] votes = new double[probs.length];
@@ -749,17 +779,20 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       probs = getClassifier(i).distributionForInstance(instance);
       int maxIndex = 0;
       for (int j = 0; j < probs.length; j++) {
-        if (probs[j] > probs[maxIndex])
+        if (probs[j] > probs[maxIndex]) {
           maxIndex = j;
+        }
       }
 
       // Consider the cases when multiple classes happen to have the same
       // probability
-      if (probs[maxIndex] > 0) // Unclassified?
+      if (probs[maxIndex] > 0) {
         for (int j = 0; j < probs.length; j++) {
-          if (probs[j] == probs[maxIndex])
+          if (probs[j] == probs[maxIndex]) {
             votes[j]++;
+          }
         }
+      }
     }
 
     for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
@@ -767,23 +800,27 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       int maxIndex = 0;
 
       for (int j = 0; j < probs.length; j++) {
-        if (probs[j] > probs[maxIndex])
+        if (probs[j] > probs[maxIndex]) {
           maxIndex = j;
+        }
       }
 
       // Consider the cases when multiple classes happen to have the same
       // probability
-      if (probs[maxIndex] > 0) // Unclassified?
+      if (probs[maxIndex] > 0) {
         for (int j = 0; j < probs.length; j++) {
-          if (probs[j] == probs[maxIndex])
+          if (probs[j] == probs[maxIndex]) {
             votes[j]++;
+          }
         }
+      }
     }
 
     int tmpMajorityIndex = 0;
     for (int k = 1; k < votes.length; k++) {
-      if (votes[k] > votes[tmpMajorityIndex])
+      if (votes[k] > votes[tmpMajorityIndex]) {
         tmpMajorityIndex = k;
+      }
     }
 
     // No votes received
@@ -794,12 +831,13 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     // Consider the cases when multiple classes receive the same amount of votes
     Vector<Integer> majorityIndexes = new Vector<Integer>();
     for (int k = 0; k < votes.length; k++) {
-      if (votes[k] == votes[tmpMajorityIndex])
+      if (votes[k] == votes[tmpMajorityIndex]) {
         majorityIndexes.add(k);
+      }
     }
     // Resolve the ties according to a uniform random distribution
     int majorityIndex = majorityIndexes.get(m_Random.nextInt(majorityIndexes
-        .size()));
+      .size()));
 
     // set probs to 0
     probs = new double[probs.length];
@@ -818,14 +856,15 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * @throws Exception if instance could not be classified successfully
    */
   protected double[] distributionForInstanceMax(Instance instance)
-      throws Exception {
+    throws Exception {
 
     double[] probs = new double[instance.numClasses()];
 
     double numPredictions = 0;
     for (int i = 0; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
-      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+      if (!instance.classAttribute().isNumeric()
+        || !Utils.isMissingValue(dist[0])) {
         for (int j = 0; j < dist.length; j++) {
           if ((probs[j] < dist[j]) || (numPredictions == 0)) {
             probs[j] = dist[j];
@@ -836,8 +875,10 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     }
 
     for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
-      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(instance);
-      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(
+        instance);
+      if (!instance.classAttribute().isNumeric()
+        || !Utils.isMissingValue(dist[0])) {
         for (int j = 0; j < dist.length; j++) {
           if ((probs[j] < dist[j]) || (numPredictions == 0)) {
             probs[j] = dist[j];
@@ -870,14 +911,15 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * @throws Exception if instance could not be classified successfully
    */
   protected double[] distributionForInstanceMin(Instance instance)
-      throws Exception {
+    throws Exception {
 
     double[] probs = new double[instance.numClasses()];
 
     double numPredictions = 0;
     for (int i = 0; i < m_Classifiers.length; i++) {
       double[] dist = getClassifier(i).distributionForInstance(instance);
-      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+      if (!instance.classAttribute().isNumeric()
+        || !Utils.isMissingValue(dist[0])) {
         for (int j = 0; j < dist.length; j++) {
           if ((probs[j] > dist[j]) || (numPredictions == 0)) {
             probs[j] = dist[j];
@@ -888,8 +930,10 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     }
 
     for (int i = 0; i < m_preBuiltClassifiers.size(); i++) {
-      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(instance);
-      if (!instance.classAttribute().isNumeric() || !Utils.isMissingValue(dist[0])) {
+      double[] dist = m_preBuiltClassifiers.get(i).distributionForInstance(
+        instance);
+      if (!instance.classAttribute().isNumeric()
+        || !Utils.isMissingValue(dist[0])) {
         for (int j = 0; j < dist.length; j++) {
           if ((probs[j] > dist[j]) || (numPredictions == 0)) {
             probs[j] = dist[j];
@@ -939,8 +983,9 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    * @param newRule the combination rule method to use
    */
   public void setCombinationRule(SelectedTag newRule) {
-    if (newRule.getTags() == TAGS_RULES)
+    if (newRule.getTags() == TAGS_RULES) {
       m_CombinationRule = newRule.getSelectedTag().getID();
+    }
   }
 
   /**
@@ -951,11 +996,11 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    */
   public String preBuiltClassifiersTipText() {
     return "The pre-built serialized classifiers to include. Multiple "
-        + "serialized classifiers can be included alongside those "
-        + "that are built from scratch when this classifier runs. "
-        + "Note that it does not make sense to include pre-built "
-        + "classifiers in a cross-validation since they are static "
-        + "and their models do not change from fold to fold.";
+      + "serialized classifiers can be included alongside those "
+      + "that are built from scratch when this classifier runs. "
+      + "Note that it does not make sense to include pre-built "
+      + "classifiers in a cross-validation since they are static "
+      + "and their models do not change from fold to fold.";
   }
 
   /**
@@ -967,8 +1012,8 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   public void setPreBuiltClassifiers(File[] preBuilt) {
     m_classifiersToLoad.clear();
     if (preBuilt != null && preBuilt.length > 0) {
-      for (int i = 0; i < preBuilt.length; i++) {
-        String path = preBuilt[i].toString();
+      for (File element : preBuilt) {
+        String path = element.toString();
         m_classifiersToLoad.add(path);
       }
     }
@@ -991,6 +1036,34 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   }
 
   /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String printModelsTipText() {
+    return "Print the individual trees in the output";
+  }
+
+  /**
+   * Set whether to print the individual ensemble models in the output
+   * 
+   * @param print true if the individual models are to be printed
+   */
+  public void setPrintModels(boolean print) {
+    m_printModels = print;
+  }
+
+  /**
+   * Get whether to print the individual ensemble models in the output
+   * 
+   * @return true if the individual models are to be printed
+   */
+  public boolean getPrintTrees() {
+    return m_printModels;
+  }
+
+  /**
    * Output a representation of this classifier
    * 
    * @return a string representation of the classifier
@@ -1010,7 +1083,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
     for (Classifier c : m_preBuiltClassifiers) {
       result += "\t" + c.getClass().getName()
-          + Utils.joinOptions(((OptionHandler) c).getOptions()) + "\n";
+        + Utils.joinOptions(((OptionHandler) c).getOptions()) + "\n";
     }
 
     result += "using the '";
@@ -1042,12 +1115,25 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
     default:
       throw new IllegalStateException("Unknown combination rule '"
-          + m_CombinationRule + "'!");
+        + m_CombinationRule + "'!");
     }
 
     result += "' combination rule \n";
 
-    return result;
+    StringBuilder resultBuilder = null;
+    if (m_printModels) {
+      resultBuilder = new StringBuilder();
+      resultBuilder.append(result).append("\n");
+      for (Classifier c : m_Classifiers) {
+        resultBuilder.append(c).append("\n");
+      }
+
+      for (Classifier c : m_preBuiltClassifiers) {
+        resultBuilder.append(c).append("\n");
+      }
+    }
+
+    return resultBuilder == null ? result : resultBuilder.toString();
   }
 
   /**
@@ -1081,16 +1167,16 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
    */
   @Override
   public Classifier aggregate(Classifier toAggregate) throws Exception {
-    
-    if (m_structure == null && m_Classifiers.length == 1 && 
-        (m_Classifiers[0] instanceof weka.classifiers.rules.ZeroR)) {
+
+    if (m_structure == null && m_Classifiers.length == 1
+      && (m_Classifiers[0] instanceof weka.classifiers.rules.ZeroR)) {
       // remove the single untrained ZeroR
       setClassifiers(new Classifier[0]);
     }
-    
+
     // Can't do any training data compatibility checks unfortunately
     addPreBuiltClassifier(toAggregate);
-    
+
     return this;
   }
 
@@ -1104,7 +1190,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   public void finalizeAggregation() throws Exception {
     // nothing to do
   }
-  
+
   /**
    * Main method for testing this class.
    * 
@@ -1116,3 +1202,4 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
   }
 
 }
+
