@@ -2258,7 +2258,7 @@ public final class Utils implements RevisionHandler {
    * @param maxLineWidth the maximum permitted number of characters in a line
    * @return the processed string
    */
-  public String lineWrap(String input, int maxLineWidth) {
+  public static String lineWrap(String input, int maxLineWidth) {
     
     StringBuffer sb = new StringBuffer();
     BreakIterator biterator = BreakIterator.getLineInstance();
@@ -2272,7 +2272,7 @@ public final class Utils implements RevisionHandler {
         sb.append(toAdd);
         break;
       }
-      if (next - linestart > maxWidth) {
+      if (next - linestart > maxLineWidth) {
         sb.append(toAdd + '\n');
         linestart = previous;
       } else {
