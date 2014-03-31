@@ -299,10 +299,20 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       super(userObject, allowsChildren);
     }
 
+    /**
+     * Set the tool tip for this node
+     * 
+     * @param tip the tool tip for this node
+     */
     public void setToolTipText(String tip) {
       m_toolTipText = tip;
     }
 
+    /**
+     * Get the tool tip for this node
+     * 
+     * @return the tool tip for this node
+     */
     public String getToolTipText() {
       return m_toolTipText;
     }
