@@ -2249,6 +2249,45 @@ public final class Utils implements RevisionHandler {
   }
 
   /**
+   * Implements simple line breaking. Reformats the given string by
+   * introducing line breaks so that, ideally, no line exceeds the given number
+   * of characters. Line breaks are assumed to be indicated by newline characters.
+   * Existing line breaks are left in the input text.
+   *
+   * @param input the string to line wrap
+   * @param maxLineWidth the maximum permitted number of characters in a line
+   * @return the processed string
+   */
+  public String lineWrap(String input, int maxLineWidth) {
+    
+    StringBuffer sb = new StringBuffer();
+    BreakIterator biterator = BreakIterator.getLineInstance();
+    biterator.setText(input);
+    int linestart = 0;
+    int previous = 0;
+    while (true) {
+      int next = biterator.next();
+      String toAdd = input.substring(linestart, previous);
+      if (next == BreakIterator.DONE) {
+        sb.append(toAdd);
+        break;
+      }
+      if (next - linestart > maxWidth) {
+        sb.append(toAdd + '\n');
+        linestart = previous;
+      } else {
+        int newLineIndex = toAdd.lastIndexOf('\n');
+        if (newLineIndex != -1) {
+          sb.append(toAdd.substring(0, newLineIndex + 1));
+          linestart += newLineIndex + 1;
+        }
+      }
+      previous = next;
+    }
+    return sb.toString(); 
+  }
+
+  /**
    * Returns the revision string.
    * 
    * @return the revision
