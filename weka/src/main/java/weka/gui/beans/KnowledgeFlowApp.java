@@ -7019,44 +7019,40 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     }
 
+    // Max. number of characters per line (may overflow)
+    int lineWidth = 180;
+
+    result.append("<html>");
+
     if (gi != null && gi.length() > 0) {
-      String firstLine = "";
+
+      StringBuilder firstLine = new StringBuilder();
+      firstLine.append("<font color=blue>");
       boolean addFirstBreaks = true;
-      if (gi.indexOf(". ") > 0) {
-        firstLine = gi.substring(0, gi.indexOf(". "));
-        if (gi.length() - gi.indexOf(". ") < 3) {
+      int indexOfDot = gi.indexOf(".");
+      if (indexOfDot > 0) {
+        firstLine.append(gi.substring(0, gi.indexOf(".")));
+        if (gi.length() - indexOfDot < 3) {
           addFirstBreaks = false;
         }
-        gi = gi.substring(gi.indexOf(". ") + 1, gi.length());
-      } else if (gi.indexOf(".") > 0) {
-        firstLine = gi.substring(0, gi.indexOf("."));
-        if (gi.length() - gi.indexOf(".") < 3) {
-          addFirstBreaks = false;
-        }
-        gi = gi.substring(gi.indexOf(".") + 1, gi.length());
+        gi = gi.substring(indexOfDot + 1, gi.length());
       } else {
-        firstLine = gi;
+        firstLine.append(gi);
         gi = "";
       }
-      firstLine = "<html>" + "<font color=blue>" + firstLine + "</font>";
-      if (addFirstBreaks) {
-        firstLine += "<br><br>";
-      }
-      result.append(firstLine);
-
-      String[] parts = gi.split("\n");
-      String remainder = "";
-      for (String p : parts) {
-        if (p.length() > 80) {
-          p = p.replace(". ", ".<br>");
-          p = p.replace("\n", "");
+      firstLine.append("</font>");
+      if ((addFirstBreaks) && !(gi.startsWith("\n\n"))) {
+        if (!gi.startsWith("\n")) {
+          firstLine.append("<br>");
         }
-        result.append(p
-          + (p.endsWith("<br>") || p.endsWith("<br> ") ? "" : "<br>"));
+        firstLine.append("<br>");
       }
+      result.append(Utils.lineWrap(firstLine.toString(), lineWidth));
 
-      result.append(remainder);
+      result.append(Utils.lineWrap(gi, lineWidth).replace("\n", "<br>"));
+      result.append("<br>");
     }
+    
 
     if (tempBean instanceof CapabilitiesHandler) {
       if (!result.toString().endsWith("<br><br>")) {
@@ -7065,7 +7061,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       String caps = PropertySheetPanel.addCapabilities(
         "<font color=red>CAPABILITIES</font>",
         ((CapabilitiesHandler) tempBean).getCapabilities());
-      caps = caps.replace("\n", "<br>");
+      caps = Utils.lineWrap(caps, lineWidth).replace("\n", "<br>");
       result.append(caps);
     }
 
@@ -7075,15 +7071,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         "<font color=red>MI CAPABILITIES</font>",
         ((MultiInstanceCapabilitiesHandler) tempBean)
           .getMultiInstanceCapabilities());
-      caps = caps.replace("\n", "<br>");
+      caps = Utils.lineWrap(caps, lineWidth).replace("\n", "<br>");
       result.append(caps);
     }
 
     result.append("</html>");
-    // gi = gi.replaceFirst("[.] ", ".<br><br>");
-    /*
-     * gi = gi.replace("\n", "<br>"); gi = "<html>" + gi + "</html>";
-     */
+
     if (result.length() == 0) {
       return null;
     }
