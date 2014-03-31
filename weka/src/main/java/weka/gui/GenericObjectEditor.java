@@ -85,7 +85,6 @@ import weka.core.Utils;
 import weka.core.WekaPackageManager;
 import weka.core.logging.Logger;
 import weka.gui.CheckBoxList.CheckBoxListModel;
-import weka.gui.beans.KnowledgeFlowApp;
 import weka.gui.beans.PluginManager;
 
 /**
@@ -1770,7 +1769,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
           String algName = hpp.fullValue();
           try {
             Object alg = Class.forName(algName).newInstance();
-            String toolTip = KnowledgeFlowApp.getGlobalInfo(alg);
+            String toolTip = Utils.getGlobalInfo(alg, true);
             if (toolTip != null) {
               child.setToolTipText(toolTip);
             }
