@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>optics_dbScan</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.4</version>
   <packaging>jar</packaging>
 
   <name>optics_dbScan</name>
@@ -59,9 +59,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/optics_dbScan</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/optics_dbScan</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/optics_dbScan</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/optics_dbScan-1.0.4</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/optics_dbScan-1.0.4</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/optics_dbScan-1.0.4</url>
   </scm>
 
   <profiles>
