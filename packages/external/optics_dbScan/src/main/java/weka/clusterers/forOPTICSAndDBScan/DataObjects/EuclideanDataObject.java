@@ -115,15 +115,47 @@ public class EuclideanDataObject
      * @return Returns true, if the DataObjects correspond in each value, else returns false
      */
     public boolean equals(DataObject dataObject) {
-        if (this == dataObject) return true;
+      if (this == dataObject) return true;
 
-        for (int i = 0; i < getInstance().numValues(); i++) {
-          double i_value_Instance_1 = getInstance().valueSparse(i);
-          double i_value_Instance_2 = dataObject.getInstance().valueSparse(i);
-          
-          if (i_value_Instance_1 != i_value_Instance_2) return false;
+      Instance firstInstance = getInstance();
+      Instance secondInstance = dataObject.getInstance(); 
+      int firstNumValues = firstInstance.numValues();
+      int secondNumValues = secondInstance.numValues();
+      int numAttributes = firstInstance.numAttributes();
+
+      int firstI, secondI;
+      for (int p1 = 0, p2 = 0; p1 < firstNumValues || p2 < secondNumValues;) {
+        if (p1 >= firstNumValues) {
+          firstI = numAttributes;
+        } else {
+          firstI = firstInstance.index(p1);
         }
-        return true;
+
+        if (p2 >= secondNumValues) {
+          secondI = numAttributes;
+        } else {
+          secondI = secondInstance.index(p2);
+        }
+
+        if (firstI == secondI) {
+          if (firstInstance.valueSparse(p1) != secondInstance.valueSparse(p2)) {
+            return false;
+          }
+          p1++;
+          p2++;
+        } else if (firstI > secondI) {
+          if (0 != secondInstance.valueSparse(p2)) {
+            return false;
+          }
+          p2++;
+        } else {
+          if (0 != firstInstance.valueSparse(p1)) {
+            return false;
+          }
+          p1++;
+        }
+      }
+      return true;
     }
 
     /**
@@ -133,15 +165,44 @@ public class EuclideanDataObject
      * @return double-value The euclidian-distance between dataObject and this.dataObject
      */
     public double distance(DataObject dataObject) {
-        double dist = 0.0;
+      double dist = 0.0;
 
-        for (int i = 0; i < getInstance().numValues(); i++) {
-          double cDistance = computeDistance(getInstance().index(i),
-                                             getInstance().valueSparse(i),
-                                             dataObject.getInstance().valueSparse(i));
-          dist += cDistance * cDistance;
+      Instance firstInstance = getInstance();
+      Instance secondInstance = dataObject.getInstance(); 
+      int firstNumValues = firstInstance.numValues();
+      int secondNumValues = secondInstance.numValues();
+      int numAttributes = firstInstance.numAttributes();
+
+      int firstI, secondI;
+      for (int p1 = 0, p2 = 0; p1 < firstNumValues || p2 < secondNumValues;) {
+        if (p1 >= firstNumValues) {
+          firstI = numAttributes;
+        } else {
+          firstI = firstInstance.index(p1);
         }
-        return Math.sqrt(dist);
+
+        if (p2 >= secondNumValues) {
+          secondI = numAttributes;
+        } else {
+          secondI = secondInstance.index(p2);
+        }
+
+        double cDistance = 0;
+        if (firstI == secondI) {
+          cDistance = computeDistance(firstI, firstInstance.valueSparse(p1),
+                                      secondInstance.valueSparse(p2));
+          p1++;
+          p2++;
+        } else if (firstI > secondI) {
+          cDistance = computeDistance(secondI, 0, secondInstance.valueSparse(p2));
+          p2++;
+        } else {
+          cDistance = computeDistance(firstI, firstInstance.valueSparse(p1), 0);
+          p1++;
+        }
+        dist += cDistance * cDistance;
+      }
+      return Math.sqrt(dist);
     }
 
     /**
