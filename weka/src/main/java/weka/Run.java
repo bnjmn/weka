@@ -51,8 +51,8 @@ public class Run {
   public enum SchemeType {
     CLASSIFIER("classifier"), CLUSTERER("clusterer"), ASSOCIATOR(
       "association rules"), ATTRIBUTE_SELECTION("attribute selection"), FILTER(
-      "filter"), LOADER("loader"), SAVER("saver"), COMMANDLINE(
-      "general commandline runnable");
+      "filter"), LOADER("loader"), SAVER("saver"), DATAGENERATOR(
+      "data generator"), COMMANDLINE("general commandline runnable");
 
     private final String m_stringVal;
 
@@ -96,6 +96,7 @@ public class Run {
               || scheme instanceof weka.filters.Filter
               || scheme instanceof weka.core.converters.AbstractFileLoader
               || scheme instanceof weka.core.converters.AbstractFileSaver
+              || scheme instanceof weka.datagenerators.DataGenerator
               || scheme instanceof weka.core.CommandlineRunnable) {
               prunedMatches.add(matches.get(i));
             }
@@ -256,6 +257,9 @@ public class Run {
         if (scheme instanceof weka.core.converters.AbstractFileSaver) {
           types.add(SchemeType.SAVER);
         }
+        if (scheme instanceof weka.datagenerators.DataGenerator) {
+          types.add(SchemeType.DATAGENERATOR);
+        }
       }
 
       SchemeType selectedType = null;
@@ -318,6 +322,9 @@ public class Run {
       } else if (selectedType == SchemeType.SAVER) {
         weka.core.converters.AbstractFileSaver.runFileSaver(
           (weka.core.converters.AbstractFileSaver) scheme, options);
+      } else if (selectedType == SchemeType.DATAGENERATOR) {
+        weka.datagenerators.DataGenerator.runDataGenerator(
+          (weka.datagenerators.DataGenerator) scheme, options);
       } else if (selectedType == SchemeType.COMMANDLINE) {
         ((weka.core.CommandlineRunnable) scheme).run(scheme, options);
       }
