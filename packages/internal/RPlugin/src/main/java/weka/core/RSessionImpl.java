@@ -82,11 +82,6 @@ import org.rosuda.REngine.REngineOutputInterface;
 public class RSessionImpl implements RSessionAPI, REngineCallbacks,
   REngineOutputInterface {
 
-  /*
-   * static { try { init(); } catch (Exception e) { e.printStackTrace();
-   * s_engine = null; } }
-   */
-
   /** The current session holder */
   private static Object s_sessionHolder;
 
@@ -102,6 +97,30 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
    */
   private static JavaGDNotifier s_javaGD = JavaGDOffscreenRenderer
     .getJavaGDNotifier();
+
+  /**
+   * Create a new REngine instance to use (if necessary)
+   */
+  protected void createREngine() {
+    if (s_engine == null) {
+      try {
+        s_engine = REngine.engineForClass("org.rosuda.REngine.JRI.JRIEngine",
+          new String[] { "--no-save" }, s_sessionSingleton, false);
+
+        // install a default mirror to use for package downloads so that R
+        // does not try and start a tcl/tk interface for mirror selection!
+        System.err.println("Setting a default package mirror in R...");
+        s_engine.parseAndEval("local({r <- getOption(\"repos\"); "
+          + "r[\"CRAN\"] <- \"http://cran.stat.ucla.edu/\"; "
+          + "options(repos=r)})");
+      } catch (Exception ex) {
+        // R engine not available for one reason or another
+        System.err.println("Unable to establish R engine (" + ex.getMessage()
+          + ")");
+        s_sessionSingleton = null;
+      }
+    }
+  }
 
   /**
    * Initialization routine. Attempts to load the JRI native library via
@@ -240,32 +259,8 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       System.err.println("Getting REngine....");
       s_engine = REngine.getLastEngine();
     }
-    if (s_engine == null) {
-      // final SecurityManager sm = System.getSecurityManager();
-      try {
-        /*
-         * final NoExitSecurityManager nesm = new NoExitSecurityManager(sm);
-         * System.setSecurityManager(nesm);
-         */
-        // System.err.println("Trying engine for class....");
-        s_engine = REngine.engineForClass("org.rosuda.REngine.JRI.JRIEngine",
-          new String[] { "--no-save" }, s_sessionSingleton, false);
 
-        // install a default mirror to use for package downloads so that R
-        // does not try and start a tcl/tk interface for mirror selection!
-        System.err.println("Setting a default package mirror in R...");
-        s_engine.parseAndEval("local({r <- getOption(\"repos\"); "
-          + "r[\"CRAN\"] <- \"http://cran.stat.ucla.edu/\"; "
-          + "options(repos=r)})");
-      } catch (Exception ex) {
-        // R engine not available for one reason or another
-        System.err.println("Unable to establish R engine (" + ex.getMessage()
-          + ")");
-        s_sessionSingleton = null;
-      } finally {
-        // System.setSecurityManager(sm);
-      }
-    }
+    createREngine();
 
     return s_sessionSingleton;
   }
@@ -362,7 +357,12 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
   @Override
   public synchronized RSessionAPI getSession(Object requester) throws Exception {
     if (s_engine == null) {
-      throw new Exception("R engine not available!!");
+      // try and re-establish (in case it has been shutdown by another user)
+      createREngine();
+
+      if (s_engine == null) {
+        throw new Exception("R engine not available!!");
+      }
     }
 
     if (s_sessionHolder == requester) {
@@ -747,6 +747,16 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       if (m_logger != null) {
         m_logger.statusMessage("WARNING: check log");
         m_logger.logMessage(t);
+      }
+    }
+  }
+
+  @Override
+  public void close() {
+    if (s_engine != null) {
+      boolean result = s_engine.close();
+      if (result) {
+        s_engine = null;
       }
     }
   }

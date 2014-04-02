@@ -360,4 +360,8 @@ public class RSession {
     throws RSessionException, REngineException, REXPMismatchException {
     return ((RSessionAPI) s_sessionImpl).parseAndEval(requester, cmd);
   }
+
+  public void close() {
+    ((RSessionAPI) s_sessionImpl).close();
+  }
 }

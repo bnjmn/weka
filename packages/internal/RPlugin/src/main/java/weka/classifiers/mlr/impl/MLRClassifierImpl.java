@@ -150,6 +150,13 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
    */
   protected transient Thread m_modelCleaner;
 
+  /**
+   * True if launched via the command line (this disables the model clean-up
+   * thread as the R environment will be shutdown after all test instances are
+   * processed anyway).
+   */
+  protected boolean m_launchedFromCommandLine;
+
   /** Thread safe integer used by the model cleaner thread */
   protected transient AtomicInteger m_counter;
 
@@ -514,6 +521,16 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     }
 
     return options.toArray(new String[1]);
+  }
+
+  /**
+   * Set whether the MLRClassifier has been launched via the command line
+   * interface
+   * 
+   * @param l true if launched via the command line
+   */
+  public void setLaunchedFromCommandLine(Boolean l) {
+    m_launchedFromCommandLine = l;
   }
 
   /**
@@ -1214,41 +1231,43 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       checkForErrors();
 
-      if (m_modelCleaner == null) {
-        m_counter = new AtomicInteger(5);
-        m_modelCleaner = new Thread() {
-          @Override
-          public void run() {
-            while (m_counter.get() > 0) {
+      if (!m_launchedFromCommandLine) {
+        if (m_modelCleaner == null) {
+          m_counter = new AtomicInteger(5);
+          m_modelCleaner = new Thread() {
+            @Override
+            public void run() {
+              while (m_counter.get() > 0) {
+                try {
+                  Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                }
+                m_counter.decrementAndGet();
+              }
+
+              // cleanup the model in R
               try {
-                Thread.sleep(1000);
-              } catch (InterruptedException ex) {
+                if (m_Debug) {
+                  System.err.println("Cleaning up model in R...");
+                }
+                RSession teng = RSession.acquireSession(this);
+                teng.setLog(this, m_logger);
+                teng.parseAndEval(this, "remove(weka_r_model" + m_modelHash
+                  + ")");
+                RSession.releaseSession(this);
+              } catch (Exception ex) {
+                System.err.println("A problem occurred whilst trying "
+                  + "to clean up the model in R: " + ex.getMessage());
               }
-              m_counter.decrementAndGet();
+              m_modelCleaner = null;
             }
+          };
 
-            // cleanup the model in R
-            try {
-              if (m_Debug) {
-                System.err.println("Cleaning up model in R...");
-              }
-              RSession teng = RSession.acquireSession(this);
-              teng.setLog(this, m_logger);
-              teng
-                .parseAndEval(this, "remove(weka_r_model" + m_modelHash + ")");
-              RSession.releaseSession(this);
-            } catch (Exception ex) {
-              System.err.println("A problem occurred whilst trying "
-                + "to clean up the model in R: " + ex.getMessage());
-            }
-            m_modelCleaner = null;
-          }
-        };
-
-        m_modelCleaner.setPriority(Thread.MIN_PRIORITY);
-        m_modelCleaner.start();
-      } else {
-        m_counter.set(5);
+          m_modelCleaner.setPriority(Thread.MIN_PRIORITY);
+          m_modelCleaner.start();
+        } else {
+          m_counter.set(5);
+        }
       }
 
       // Instances toPush = m_dontReplaceMissingValues ? insts : m_testHeader;
@@ -1386,41 +1405,43 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       checkForErrors();
 
-      if (m_modelCleaner == null) {
-        m_counter = new AtomicInteger(5);
-        m_modelCleaner = new Thread() {
-          @Override
-          public void run() {
-            while (m_counter.get() > 0) {
+      if (!m_launchedFromCommandLine) {
+        if (m_modelCleaner == null) {
+          m_counter = new AtomicInteger(5);
+          m_modelCleaner = new Thread() {
+            @Override
+            public void run() {
+              while (m_counter.get() > 0) {
+                try {
+                  Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                }
+                m_counter.decrementAndGet();
+              }
+
+              // cleanup the model in R
               try {
-                Thread.sleep(1000);
-              } catch (InterruptedException ex) {
+                if (m_Debug) {
+                  System.err.println("Cleaning up model in R...");
+                }
+                RSession teng = RSession.acquireSession(this);
+                teng.setLog(this, m_logger);
+                teng.parseAndEval(this, "remove(weka_r_model" + m_modelHash
+                  + ")");
+                RSession.releaseSession(this);
+              } catch (Exception ex) {
+                System.err.println("A problem occurred whilst trying "
+                  + "to clean up the model in R: " + ex.getMessage());
               }
-              m_counter.decrementAndGet();
+              m_modelCleaner = null;
             }
+          };
 
-            // cleanup the model in R
-            try {
-              if (m_Debug) {
-                System.err.println("Cleaning up model in R...");
-              }
-              RSession teng = RSession.acquireSession(this);
-              teng.setLog(this, m_logger);
-              teng
-                .parseAndEval(this, "remove(weka_r_model" + m_modelHash + ")");
-              RSession.releaseSession(this);
-            } catch (Exception ex) {
-              System.err.println("A problem occurred whilst trying "
-                + "to clean up the model in R: " + ex.getMessage());
-            }
-            m_modelCleaner = null;
-          }
-        };
-
-        m_modelCleaner.setPriority(Thread.MIN_PRIORITY);
-        m_modelCleaner.start();
-      } else {
-        m_counter.set(5);
+          m_modelCleaner.setPriority(Thread.MIN_PRIORITY);
+          m_modelCleaner.start();
+        } else {
+          m_counter.set(5);
+        }
       }
 
       RUtils.instancesToDataFrame(eng, this, m_testHeader, "weka_r_test");
@@ -1458,6 +1479,23 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     RSession.releaseSession(this);
 
     return pred;
+  }
+
+  /**
+   * Close the R environment down. This is useful when running from the command
+   * line in order to get control back.
+   */
+  public void closeREngine() {
+    RSession eng = null;
+    try {
+      eng = RSession.acquireSession(this);
+      eng.setLog(this, m_logger);
+
+      eng.close();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
   }
 
   /**

@@ -81,4 +81,5 @@ public interface RSessionAPI {
   REXP parseAndEval(Object requester, String cmd) throws RSessionException,
     REngineException, REXPMismatchException;
 
+  void close();
 }

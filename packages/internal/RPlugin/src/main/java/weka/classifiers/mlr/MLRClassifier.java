@@ -27,9 +27,11 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.core.BatchPredictor;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.CommandlineRunnable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.JRILoader;
@@ -49,7 +51,8 @@ import weka.core.Tag;
  * @version $Revision$
  */
 public class MLRClassifier extends AbstractClassifier implements OptionHandler,
-  CapabilitiesHandler, BatchPredictor, RevisionHandler, Serializable {
+  CapabilitiesHandler, BatchPredictor, RevisionHandler, CommandlineRunnable,
+  Serializable {
 
   /**
    * For serialization
@@ -227,6 +230,21 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
     }
 
     return ((OptionHandler) m_delegate).getOptions();
+  }
+
+  public void setLaunchedFromCommandLine(boolean l) {
+    if (m_delegate == null) {
+      init();
+    }
+
+    try {
+      Method m = m_delegate.getClass().getDeclaredMethod(
+        "setLaunchedFromCommandLine", new Class[] { Boolean.class });
+
+      m.invoke(m_delegate, new Object[] { new Boolean(l) });
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 
   @Override
@@ -681,6 +699,17 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
     return m_delegate.toString();
   }
 
+  public void closeREngine() {
+    try {
+      Method m = m_delegate.getClass().getDeclaredMethod("closeREngine",
+        new Class[] {});
+
+      m.invoke(m_delegate, new Object[] {});
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   /**
    * Returns the revision string.
    * 
@@ -697,6 +726,25 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
    * @param argv the options
    */
   public static void main(String[] args) {
-    runClassifier(new MLRClassifier(), args);
+    MLRClassifier c = new MLRClassifier();
+    c.run(c, args);
+  }
+
+  @Override
+  public void run(Object toRun, String[] options)
+    throws IllegalArgumentException {
+    if (!(toRun instanceof MLRClassifier)) {
+      throw new IllegalArgumentException(
+        "Object to run is not an MLRClassifier!");
+    }
+
+    try {
+      ((MLRClassifier) toRun).setLaunchedFromCommandLine(true);
+      runClassifier((Classifier) toRun, options);
+
+      ((MLRClassifier) toRun).closeREngine();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
   }
 }

@@ -62,6 +62,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -305,6 +308,32 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
               if (pic instanceof BufferedImage) {
                 m_plotter.setImage((BufferedImage) pic);
                 m_plotter.repaint();
+              }
+            }
+          }
+        }
+      });
+
+    // Listen for changes in the selected item (i.e. via up
+    // and down arrow keys)
+    m_history.getList().getSelectionModel()
+      .addListSelectionListener(new ListSelectionListener() {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+          if (!e.getValueIsAdjusting()) {
+            ListSelectionModel lm = (ListSelectionModel) e.getSource();
+            for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
+              if (lm.isSelectedIndex(i)) {
+                // m_AttSummaryPanel.setAttribute(i);
+                if (i != -1) {
+                  String name = m_history.getNameAtIndex(i);
+                  Object pic = m_history.getNamedObject(name);
+                  if (pic != null && pic instanceof BufferedImage) {
+                    m_plotter.setImage((BufferedImage) pic);
+                    m_plotter.repaint();
+                  }
+                }
+                break;
               }
             }
           }
