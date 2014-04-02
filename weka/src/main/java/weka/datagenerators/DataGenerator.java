@@ -788,7 +788,7 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
    * @param datagenerator the datagenerator to run
    * @param options the commandline options
    */
-  protected static void runDataGenerator(DataGenerator datagenerator,
+  public static void runDataGenerator(DataGenerator datagenerator,
     String[] options) {
     try {
       DataGenerator.makeData(datagenerator, options);
