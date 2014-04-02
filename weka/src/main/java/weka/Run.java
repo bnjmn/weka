@@ -232,29 +232,30 @@ public class Run {
       }
       // now see which interfaces/classes this scheme implements/extends
       ArrayList<SchemeType> types = new ArrayList<SchemeType>();
-      if (scheme instanceof weka.classifiers.Classifier) {
-        types.add(SchemeType.CLASSIFIER);
-      }
-      if (scheme instanceof weka.clusterers.Clusterer) {
-        types.add(SchemeType.CLUSTERER);
-      }
-      if (scheme instanceof weka.associations.Associator) {
-        types.add(SchemeType.ASSOCIATOR);
-      }
-      if (scheme instanceof weka.attributeSelection.ASEvaluation) {
-        types.add(SchemeType.ATTRIBUTE_SELECTION);
-      }
-      if (scheme instanceof weka.filters.Filter) {
-        types.add(SchemeType.FILTER);
-      }
-      if (scheme instanceof weka.core.converters.AbstractFileLoader) {
-        types.add(SchemeType.LOADER);
-      }
-      if (scheme instanceof weka.core.converters.AbstractFileSaver) {
-        types.add(SchemeType.SAVER);
-      }
       if (scheme instanceof weka.core.CommandlineRunnable) {
         types.add(SchemeType.COMMANDLINE);
+      } else {
+        if (scheme instanceof weka.classifiers.Classifier) {
+          types.add(SchemeType.CLASSIFIER);
+        }
+        if (scheme instanceof weka.clusterers.Clusterer) {
+          types.add(SchemeType.CLUSTERER);
+        }
+        if (scheme instanceof weka.associations.Associator) {
+          types.add(SchemeType.ASSOCIATOR);
+        }
+        if (scheme instanceof weka.attributeSelection.ASEvaluation) {
+          types.add(SchemeType.ATTRIBUTE_SELECTION);
+        }
+        if (scheme instanceof weka.filters.Filter) {
+          types.add(SchemeType.FILTER);
+        }
+        if (scheme instanceof weka.core.converters.AbstractFileLoader) {
+          types.add(SchemeType.LOADER);
+        }
+        if (scheme instanceof weka.core.converters.AbstractFileSaver) {
+          types.add(SchemeType.SAVER);
+        }
       }
 
       SchemeType selectedType = null;
