@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    MakePreconstructedFilter.java
+ *    Copyright (C) 2013 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.filters;
 
 import java.io.Serializable;
@@ -12,14 +33,22 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import distributed.core.DistributedJobConfig;
 
+/**
+ * Class for wrapping a standard filter and making it a PreconstructedFilter.
+ * 
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision$
+ */
 public class MakePreconstructedFilter extends Filter implements
   PreconstructedFilter, StreamableFilter, Serializable {
 
   /** For serialization */
   private static final long serialVersionUID = -6057003058954267357L;
 
+  /** The filter to delegate to */
   protected Filter m_delegate;
 
+  /** Whether this preconstructed filter has been reset */
   protected boolean m_isReset = true;
 
   public MakePreconstructedFilter() {
@@ -30,6 +59,11 @@ public class MakePreconstructedFilter extends Filter implements
     setBaseFilter(base);
   }
 
+  /**
+   * List the options for this filter
+   * 
+   * @return an enumeration of options
+   */
   public Enumeration listOptions() {
     Vector<Option> result = new Vector<Option>();
 
@@ -39,6 +73,12 @@ public class MakePreconstructedFilter extends Filter implements
     return result.elements();
   }
 
+  /**
+   * Set the options for this filter
+   * 
+   * @param options the options
+   * @throws Exception if a problem occurs
+   */
   public void setOptions(String[] options) throws Exception {
     String filterSpec = Utils.getOption("filter", options);
 
@@ -56,6 +96,11 @@ public class MakePreconstructedFilter extends Filter implements
     }
   }
 
+  /**
+   * Set the base filter to wrap
+   * 
+   * @param f the base filter to wrap
+   */
   public void setBaseFilter(Filter f) {
     if (!(f instanceof StreamableFilter)) {
       throw new IllegalArgumentException("Base filter must be Streamable!");
@@ -64,6 +109,11 @@ public class MakePreconstructedFilter extends Filter implements
     m_delegate = f;
   }
 
+  /**
+   * Get the base filter being wrapped
+   * 
+   * @return the base filter being wrapped
+   */
   public Filter getBaseFilter() {
     return m_delegate;
   }
@@ -147,6 +197,16 @@ public class MakePreconstructedFilter extends Filter implements
   public boolean isConstructed() {
     return getBaseFilter() != null && getBaseFilter().getInputFormat() != null
       && !m_isReset;
+  }
+
+  /**
+   * Mark this pre-constructed filter as "constructed" - i.e. it is already
+   * ready to use and has an input format set on the underlying filter.
+   */
+  public void setConstructed() {
+    if (getBaseFilter() != null && getBaseFilter().getInputFormat() != null) {
+      m_isReset = false;
+    }
   }
 
   @Override
