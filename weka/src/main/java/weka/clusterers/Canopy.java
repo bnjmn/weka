@@ -432,9 +432,6 @@ public class Canopy extends RandomizableClusterer implements
 
     int numLongs = m_canopies.size() / 64 + 1;
     long[] assigned = new long[numLongs];
-    // for (int i = 0; i < numLongs; i++) {
-    // assigned.add(new long[1]);
-    // }
 
     double minDist = Double.MAX_VALUE;
     double bitsSet = 0;
@@ -564,45 +561,13 @@ public class Canopy extends RandomizableClusterer implements
     }
   }
 
-  @Override
-  public void updateFinished() {
-    if (m_canopies == null || m_canopies.numInstances() == 0) {
-      return;
-    }
-
-    // set the final canopy centers and weights
-    double[] densities = new double[m_canopies.size()];
-    for (int i = 0; i < m_canopies.numInstances(); i++) {
-      double[] density = m_canopyT2Density.get(i);
-      double[][] centerSums = m_canopyCenters.get(i);
-      double[] numMissingForNumerics = m_canopyNumMissingForNumerics.get(i);
-      double[] finalCenter = new double[m_canopies.numAttributes()];
-      for (int j = 0; j < m_canopies.numAttributes(); j++) {
-        if (m_canopies.attribute(j).isNumeric()) {
-          if (numMissingForNumerics[j] == density[0]) {
-            finalCenter[j] = Utils.missingValue();
-          } else {
-            finalCenter[j] = centerSums[j][0]
-              / (density[0] - numMissingForNumerics[j]);
-          }
-        } else if (m_canopies.attribute(j).isNominal()) {
-          int mode = Utils.maxIndex(centerSums[j]);
-          if (mode == centerSums[j].length - 1) {
-            finalCenter[j] = Utils.missingValue();
-          } else {
-            finalCenter[j] = mode;
-          }
-        }
-      }
-
-      Instance finalCenterInst = m_canopies.instance(i) instanceof SparseInstance ? new SparseInstance(
-        1.0, finalCenter) : new DenseInstance(1.0, finalCenter);
-      m_canopies.set(i, finalCenterInst);
-
-      m_canopies.instance(i).setWeight(density[0]);
-      densities[i] = density[0];
-    }
-
+  /**
+   * Adjust the final number of canopies to match the user-requested number (if
+   * possible)
+   * 
+   * @param densities the density of each of the canopies
+   */
+  protected void adjustCanopies(double[] densities) {
     if (m_numClustersRequested < 0) {
       assignCanopiesToCanopyCenters();
 
@@ -669,8 +634,48 @@ public class Canopy extends RandomizableClusterer implements
 
     // save memory
     m_trainingData = new Instances(m_canopies, 0);
-    m_canopyNumMissingForNumerics = null;
-    m_canopyT2Density = null;
+  }
+
+  @Override
+  public void updateFinished() {
+    if (m_canopies == null || m_canopies.numInstances() == 0) {
+      return;
+    }
+
+    // set the final canopy centers and weights
+    double[] densities = new double[m_canopies.size()];
+    for (int i = 0; i < m_canopies.numInstances(); i++) {
+      double[] density = m_canopyT2Density.get(i);
+      double[][] centerSums = m_canopyCenters.get(i);
+      double[] numMissingForNumerics = m_canopyNumMissingForNumerics.get(i);
+      double[] finalCenter = new double[m_canopies.numAttributes()];
+      for (int j = 0; j < m_canopies.numAttributes(); j++) {
+        if (m_canopies.attribute(j).isNumeric()) {
+          if (numMissingForNumerics[j] == density[0]) {
+            finalCenter[j] = Utils.missingValue();
+          } else {
+            finalCenter[j] = centerSums[j][0]
+              / (density[0] - numMissingForNumerics[j]);
+          }
+        } else if (m_canopies.attribute(j).isNominal()) {
+          int mode = Utils.maxIndex(centerSums[j]);
+          if (mode == centerSums[j].length - 1) {
+            finalCenter[j] = Utils.missingValue();
+          } else {
+            finalCenter[j] = mode;
+          }
+        }
+      }
+
+      Instance finalCenterInst = m_canopies.instance(i) instanceof SparseInstance ? new SparseInstance(
+        1.0, finalCenter) : new DenseInstance(1.0, finalCenter);
+      m_canopies.set(i, finalCenterInst);
+
+      m_canopies.instance(i).setWeight(density[0]);
+      densities[i] = density[0];
+    }
+
+    adjustCanopies(densities);
   }
 
   /**
@@ -1043,6 +1048,120 @@ public class Canopy extends RandomizableClusterer implements
   @Override
   public String toString() {
     return toString(true);
+  }
+
+  /**
+   * Save memory
+   */
+  public void cleanUp() {
+    m_canopyNumMissingForNumerics = null;
+    m_canopyT2Density = null;
+    m_canopyCenters = null;
+  }
+
+  /**
+   * Aggregate the canopies from a list of Canopy clusterers together into one
+   * final model.
+   * 
+   * @param canopies the list of Canopy clusterers to aggregate
+   * @param aggregationT1 the T1 distance to use for the aggregated classifier
+   * @param aggregationT2 the T2 distance to use when aggregating canopies
+   * @param finalDistanceFunction the distance function to use with the final
+   *          Canopy clusterer
+   * @param missingValuesReplacer the missing value replacement filter to use
+   *          with the final clusterer (can be null for no missing value
+   *          replacement)
+   * @param finalNumCanopies the final number of canopies
+   * @return a Canopy clusterer that aggregates all the canopies
+   */
+  public static Canopy aggregateCanopies(List<Canopy> canopies,
+    double aggregationT1, double aggregationT2,
+    NormalizableDistance finalDistanceFunction, Filter missingValuesReplacer,
+    int finalNumCanopies) {
+
+    Instances collectedCanopies = new Instances(canopies.get(0).getCanopies(),
+      0);
+    Instances finalCanopies = new Instances(collectedCanopies, 0);
+
+    List<double[][]> finalCenters = new ArrayList<double[][]>();
+    List<double[]> finalMissingNumerics = new ArrayList<double[]>();
+    List<double[]> finalT2Densities = new ArrayList<double[]>();
+    List<Instance> finalCanopiesList = new ArrayList<Instance>();
+    List<double[][]> centersForEachCanopy = new ArrayList<double[][]>();
+    List<double[]> numMissingNumericsForEachCanopy = new ArrayList<double[]>();
+
+    for (Canopy c : canopies) {
+      Instances tempC = c.getCanopies();
+      // System.err.println("A canopy clusterer:\n " + c.toString());
+      for (int i = 0; i < tempC.numInstances(); i++) {
+        collectedCanopies.add(tempC.instance(i));
+        centersForEachCanopy.add(c.m_canopyCenters.get(i));
+        numMissingNumericsForEachCanopy.add(c.m_canopyNumMissingForNumerics
+          .get(i));
+      }
+    }
+
+    for (int i = 0; i < collectedCanopies.numInstances(); i++) {
+      boolean addPoint = true;
+      Instance candidate = collectedCanopies.instance(i);
+      double[][] candidateCenter = centersForEachCanopy.get(i);
+      double[] candidateMissingNumerics = numMissingNumericsForEachCanopy
+        .get(i);
+
+      for (int j = 0; j < finalCanopiesList.size(); j++) {
+        Instance fc = finalCanopiesList.get(j);
+
+        if (finalDistanceFunction.distance(candidate, fc) < aggregationT2) {
+          addPoint = false;
+
+          // now absorb candidate into fc
+          double[][] center = finalCenters.get(j);
+          double[] missingNumerics = finalMissingNumerics.get(j);
+          // double newDensity = fc.weight() + candidate.weight();
+          finalT2Densities.get(j)[0] += candidate.weight();
+
+          for (int k = 0; k < candidate.numAttributes(); k++) {
+            missingNumerics[k] += candidateMissingNumerics[k];
+            for (int l = 0; l < center[k].length; l++) {
+              center[k][l] += candidateCenter[k][l];
+            }
+          }
+
+          break;
+        }
+      }
+
+      if (addPoint) {
+        finalCanopiesList.add(candidate);
+        finalCanopies.add(candidate);
+        finalCenters.add(candidateCenter);
+        finalMissingNumerics.add(candidateMissingNumerics);
+        double[] dens = new double[1];
+        dens[0] = candidate.weight();
+        finalT2Densities.add(dens);
+      }
+    }
+
+    // now construct a new Canopy encapsulating the final set of canopies
+    // System.err.println(finalCanopies);
+    Canopy finalC = new Canopy();
+    finalC.setCanopies(finalCanopies);
+    finalC.setMissingValuesReplacer(missingValuesReplacer);
+    finalC.m_distanceFunction = finalDistanceFunction;
+    finalC.m_canopyCenters = finalCenters;
+    finalC.m_canopyNumMissingForNumerics = finalMissingNumerics;
+    finalC.m_canopyT2Density = finalT2Densities;
+    finalC.m_t2 = aggregationT2;
+    finalC.m_t1 = aggregationT1;
+    try {
+      finalC.setNumClusters(finalNumCanopies);
+    } catch (Exception e) {
+      // can safely ignore as Canopy does not generate an exception
+    }
+
+    finalC.updateFinished();
+
+    return finalC;
   }
 
   public static void main(String[] args) {
