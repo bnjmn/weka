@@ -520,7 +520,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
      */
     public int getMode() {
       double max = -1;
-      int maxIndex = 0;
+      int maxIndex = -1;
 
       int index = 0;
       for (Map.Entry<String, Count> e : m_counts.entrySet()) {
