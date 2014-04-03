@@ -40,6 +40,6 @@ public interface Preconstructed {
   /**
    * Reset. After calling reset() a call to isConstructed() should return false.
    */
-  void reset();
+  void resetPreconstructed();
 
 }

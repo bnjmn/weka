@@ -210,7 +210,7 @@ public class MakePreconstructedFilter extends Filter implements
   }
 
   @Override
-  public void reset() {
+  public void resetPreconstructed() {
     m_isReset = true;
   }
 }

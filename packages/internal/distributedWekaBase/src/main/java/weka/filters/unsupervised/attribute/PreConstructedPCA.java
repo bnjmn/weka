@@ -1473,7 +1473,7 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
   }
 
   @Override
-  public void reset() {
+  public void resetPreconstructed() {
     m_matrix = null;
     m_eigenvectors = null;
     m_sortedEigens = null;
