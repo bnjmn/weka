@@ -191,7 +191,7 @@ public class WekaClassifierMapTask implements OptionHandler,
       "use-sampling", 0, "-use-sampling"));
     options
       .add(new Option(
-        "\nSpecify a filter to pre-process the data with.\n\t"
+        "\tSpecify a filter to pre-process the data with.\n\t"
           + "For Aggregateable classifiers the filter must be a StreamableFilter,\n\t"
           + "meaning that the output format produced by the filter must be able to\n\t"
           + " be determined directly from the input data format (this makes the data format\n\t"
