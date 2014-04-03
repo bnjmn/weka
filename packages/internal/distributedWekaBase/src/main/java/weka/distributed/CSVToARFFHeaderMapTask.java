@@ -514,6 +514,27 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     }
 
     /**
+     * Get the index of the mode
+     * 
+     * @return the index (in the sorted list of labels) of the mode
+     */
+    public int getMode() {
+      double max = -1;
+      int maxIndex = 0;
+
+      int index = 0;
+      for (Map.Entry<String, Count> e : m_counts.entrySet()) {
+        if (e.getValue().m_count > max) {
+          max = e.getValue().m_count;
+          maxIndex = index;
+        }
+        index++;
+      }
+
+      return maxIndex;
+    }
+
+    /**
      * Set the number of missing values for this attribute
      * 
      * @param missing the number of missing values
