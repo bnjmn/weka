@@ -467,8 +467,8 @@ public class SimpleKMeans extends RandomizableClusterer implements
           try {
             if (!Canopy.nonEmptyCanopySetIntersection(
               m_centroidCanopyAssignments.get(i), instanceCanopies)) {
-              System.err.println("Skipping distance calc... "
-                + Canopy.printSingleAssignment(instanceCanopies));
+              // System.err.println("Skipping distance calc... "
+              // + Canopy.printSingleAssignment(instanceCanopies));
               continue;
             }
           } catch (Exception ex) {
