@@ -587,6 +587,24 @@ public class Canopy extends RandomizableClusterer implements
       }
 
       m_canopies = finalCanopies;
+      List<double[][]> tempCanopyCenters = new ArrayList<double[][]>();
+      List<double[]> tempT2Dists = new ArrayList<double[]>();
+      List<double[]> tempMissings = new ArrayList<double[]>();
+
+      // make sure that the center sums, densities and missing counts are
+      // aligned with the new canopy list
+      count = 0;
+      for (int i = sortedIndexes.length - 1; count < finalCanopies
+        .numInstances(); i--) {
+        tempCanopyCenters.add(m_canopyCenters.get(sortedIndexes[i]));
+        tempT2Dists.add(m_canopyT2Density.get(sortedIndexes[i]));
+        tempMissings.add(m_canopyNumMissingForNumerics.get(sortedIndexes[i]));
+        count++;
+      }
+      m_canopyCenters = tempCanopyCenters;
+      m_canopyT2Density = tempT2Dists;
+      m_canopyNumMissingForNumerics = tempMissings;
+
     } else if (m_canopies.numInstances() < m_numClustersRequested
       && m_trainingData != null && m_trainingData.numInstances() > 0) {
 
@@ -619,7 +637,19 @@ public class Canopy extends RandomizableClusterer implements
           e.printStackTrace();
         }
         if (!initC.containsKey(hk)) {
-          m_canopies.add(m_trainingData.instance(instIndex));
+          Instance newInstance = m_trainingData.instance(instIndex);
+          m_canopies.add(newInstance);
+
+          double[] density = new double[1];
+          density[0] = 1.0;
+          m_canopyT2Density.add(density);
+
+          double[][] center = new double[newInstance.numAttributes()][0];
+          double[] numMissingNumerics = new double[newInstance.numAttributes()];
+          updateCanopyCenter(newInstance, center, numMissingNumerics);
+          m_canopyCenters.add(center);
+          m_canopyNumMissingForNumerics.add(numMissingNumerics);
+
           initC.put(hk, null);
         }
         m_trainingData.swap(j, instIndex);
@@ -1167,4 +1197,5 @@ public class Canopy extends RandomizableClusterer implements
   public static void main(String[] args) {
     runClusterer(new Canopy(), args);
   }
+
 }
