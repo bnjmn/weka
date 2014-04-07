@@ -83,6 +83,8 @@ public abstract class RandomizableClusterer extends AbstractClusterer implements
     } else {
       setSeed(m_SeedDefault);
     }
+
+    super.setOptions(options);
   }
 
   /**
@@ -97,6 +99,8 @@ public abstract class RandomizableClusterer extends AbstractClusterer implements
 
     result.add("-S");
     result.add("" + getSeed());
+
+    Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
   }
