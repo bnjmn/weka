@@ -50,28 +50,15 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- * <!-- globalinfo-start --> Cluster data using the capopy clustering algorithm,
- * which requires just one pass over the data. Can run in eitherbatch or
- * incremental mode. Results are generally not as good when running
- * incrementally as the min/max for each numeric attribute is not known in
- * advance. Has a heuristic (based on attribute std. deviations), that can be
- * used in batch mode, for setting the T2 distance. The T2 distance determines
- * how many canopies (clusters) are formed. When the user specifies a specific
- * number (N) of clusters to generate, the algorithm will return the top N
- * canopies (as determined by T2 density) when N &lt; number of canopies (this
- * applies to both batch and incremental learning); when N &gt; number of
- * canopies, the difference is made up by selecting training instances randomly
- * (this can only be done when batch training). For more information see:<br/>
+ <!-- globalinfo-start -->
+ * Cluster data using the capopy clustering algorithm, which requires just one pass over the data. Can run in eitherbatch or incremental mode. Results are generally not as good when running incrementally as the min/max for each numeric attribute is not known in advance. Has a heuristic (based on attribute std. deviations), that can be used in batch mode, for setting the T2 distance. The T2 distance determines how many canopies (clusters) are formed. When the user specifies a specific number (N) of clusters to generate, the algorithm will return the top N canopies (as determined by T2 density) when N &lt; number of canopies (this applies to both batch and incremental learning); when N &gt; number of canopies, the difference is made up by selecting training instances randomly (this can only be done when batch training). For more information see:<br/>
  * <br/>
- * A. McCallum, K. Nigam, L.H. Ungar: Efficient Clustering of High Dimensional
- * Data Sets with Application to Reference Matching. In: Proceedings of the
- * sixth ACM SIGKDD internation conference on knowledge discovery and data
- * mining ACM-SIAM symposium on Discrete algorithms, 169-178, 2000.
+ * A. McCallum, K. Nigam, L.H. Ungar: Efficient Clustering of High Dimensional Data Sets with Application to Reference Matching. In: Proceedings of the sixth ACM SIGKDD internation conference on knowledge discovery and data mining ACM-SIAM symposium on Discrete algorithms, 169-178, 2000.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;inproceedings{McCallum2000,
  *    author = {A. McCallum and K. Nigam and L.H. Ungar},
@@ -82,43 +69,58 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * }
  * </pre>
  * <p/>
- * <!-- technical-bibtex-end -->
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -N &lt;num&gt;
+ * <pre> -N &lt;num&gt;
  *  Number of clusters.
- *  (default 2).
- * </pre>
+ *  (default 2).</pre>
  * 
- * <pre>
- * -t2
+ * <pre> -max-candidates &lt;num&gt;
+ *  Maximum number of candidate canopies to retain in memory
+ *  at any one time. T2 distance plus, data characteristics,
+ *  will determine how many candidate canopies are formed before
+ *  periodic and final pruning are performed, which might result
+ *  in exceess memory consumption. This setting avoids large numbers
+ *  of candidate canopies consuming memory. (default = 100)</pre>
+ * 
+ * <pre> -periodic-pruning &lt;num&gt;
+ *  How often to prune low density canopies. 
+ *  (default = every 10,000 training instances)</pre>
+ * 
+ * <pre> -min-density
+ *  Minimum canopy density, below which a canopy will be pruned
+ *  during periodic pruning. (default = 2 instances)</pre>
+ * 
+ * <pre> -t2
  *  The T2 distance to use. Values &lt; 0 indicate that
  *  a heuristic based on attribute std. deviation should be used to set this.
  *  Note that this heuristic can only be used when batch training
- *  (default = -1.0)
- * </pre>
+ *  (default = -1.0)</pre>
  * 
- * <pre>
- * -t1
+ * <pre> -t1
  *  The T1 distance to use. A value &lt; 0 is taken as a
- *  positive multiplier for T2. (default = -1.5)
- * </pre>
+ *  positive multiplier for T2. (default = -1.5)</pre>
  * 
- * <pre>
- * -M
+ * <pre> -M
  *  Don't replace missing values with mean/mode when running in batch mode.
  * </pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)
- * </pre>
+ *  (default 1)</pre>
  * 
- * <!-- options-end -->
+ * <pre> -output-debug-info
+ *  If set, clusterer is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, clusterer capabilities are not checked before clusterer is built
+ *  (use with caution).</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -163,6 +165,29 @@ public class Canopy extends RandomizableClusterer implements
 
   /** Inner radius */
   protected double m_t2 = m_userT2;
+
+  /**
+   * Prune low-density candidate canopies after every x instances have been seen
+   */
+  protected int m_periodicPruningRate = 10000;
+
+  /**
+   * The minimum cluster density (according to T2 distance) allowed. Used when
+   * periodically pruning candidate canopies
+   */
+  protected double m_minClusterDensity = 2;
+
+  /** The maximum number of candidate canopies to hold in memory at any one time */
+  protected int m_maxCanopyCandidates = 100;
+
+  /**
+   * True if the pruning operation did remove at least one low density canopy
+   * the last time it was invoked
+   */
+  protected boolean m_didPruneLastTime = true;
+
+  /** Number of training instances seen so far */
+  protected int m_instanceCount;
 
   /**
    * Default is to let the t2 radius determine how many canopies/clusters are
@@ -266,6 +291,26 @@ public class Canopy extends RandomizableClusterer implements
 
     result
       .addElement(new Option(
+        "\tMaximum number of candidate canopies to retain in memory\n\t"
+          + "at any one time. T2 distance plus, data characteristics,\n\t"
+          + "will determine how many candidate canopies are formed before\n\t"
+          + "periodic and final pruning are performed, which might result\n\t"
+          + "in exceess memory consumption. This setting avoids large numbers\n\t"
+          + "of candidate canopies consuming memory. (default = 100)",
+        "-max-candidates", 1, "-max-candidates <num>"));
+
+    result.addElement(new Option(
+      "\tHow often to prune low density canopies. \n\t"
+        + "(default = every 10,000 training instances)", "periodic-pruning", 1,
+      "-periodic-pruning <num>"));
+
+    result.addElement(new Option(
+      "\tMinimum canopy density, below which a canopy will be pruned\n\t"
+        + "during periodic pruning. (default = 2 instances)", "min-density", 1,
+      "-min-density"));
+
+    result
+      .addElement(new Option(
         "\tThe T2 distance to use. Values < 0 indicate that\n\t"
           + "a heuristic based on attribute std. deviation should be used to set this.\n\t"
           + "Note that this heuristic can only be used when batch training\n\t"
@@ -288,41 +333,56 @@ public class Canopy extends RandomizableClusterer implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -N &lt;num&gt;
+   * <pre> -N &lt;num&gt;
    *  Number of clusters.
-   *  (default 2).
-   * </pre>
+   *  (default 2).</pre>
    * 
-   * <pre>
-   * -t2
+   * <pre> -max-candidates &lt;num&gt;
+   *  Maximum number of candidate canopies to retain in memory
+   *  at any one time. T2 distance plus, data characteristics,
+   *  will determine how many candidate canopies are formed before
+   *  periodic and final pruning are performed, which might result
+   *  in exceess memory consumption. This setting avoids large numbers
+   *  of candidate canopies consuming memory. (default = 100)</pre>
+   * 
+   * <pre> -periodic-pruning &lt;num&gt;
+   *  How often to prune low density canopies. 
+   *  (default = every 10,000 training instances)</pre>
+   * 
+   * <pre> -min-density
+   *  Minimum canopy density, below which a canopy will be pruned
+   *  during periodic pruning. (default = 2 instances)</pre>
+   * 
+   * <pre> -t2
    *  The T2 distance to use. Values &lt; 0 indicate that
    *  a heuristic based on attribute std. deviation should be used to set this.
    *  Note that this heuristic can only be used when batch training
-   *  (default = -1.0)
-   * </pre>
+   *  (default = -1.0)</pre>
    * 
-   * <pre>
-   * -t1
+   * <pre> -t1
    *  The T1 distance to use. A value &lt; 0 is taken as a
-   *  positive multiplier for T2. (default = -1.5)
-   * </pre>
+   *  positive multiplier for T2. (default = -1.5)</pre>
    * 
-   * <pre>
-   * -M
+   * <pre> -M
    *  Don't replace missing values with mean/mode when running in batch mode.
    * </pre>
    * 
-   * <pre>
-   * -S &lt;num&gt;
+   * <pre> -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)
-   * </pre>
+   *  (default 1)</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -output-debug-info
+   *  If set, clusterer is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, clusterer capabilities are not checked before clusterer is built
+   *  (use with caution).</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings throws Exception
    *          if an option is not supported
@@ -333,6 +393,21 @@ public class Canopy extends RandomizableClusterer implements
     String temp = Utils.getOption('N', options);
     if (temp.length() > 0) {
       setNumClusters(Integer.parseInt(temp));
+    }
+
+    temp = Utils.getOption("max-candidates", options);
+    if (temp.length() > 0) {
+      setMaxNumCandidateCanopiesToHoldInMemory(Integer.parseInt(temp));
+    }
+
+    temp = Utils.getOption("periodic-pruning", options);
+    if (temp.length() > 0) {
+      setPeriodicPruningRate(Integer.parseInt(temp));
+    }
+
+    temp = Utils.getOption("min-density", options);
+    if (temp.length() > 0) {
+      setMinimumCanopyDensity(Double.parseDouble(temp));
     }
 
     temp = Utils.getOption("t2", options);
@@ -362,6 +437,12 @@ public class Canopy extends RandomizableClusterer implements
 
     result.add("-N");
     result.add("" + getNumClusters());
+    result.add("-max-candidates");
+    result.add("" + getMaxNumCandidateCanopiesToHoldInMemory());
+    result.add("-periodic-pruning");
+    result.add("" + getPeriodicPruningRate());
+    result.add("-min-density");
+    result.add("" + getMinimumCanopyDensity());
     result.add("-t2");
     result.add("" + getT2());
     result.add("-t1");
@@ -491,6 +572,13 @@ public class Canopy extends RandomizableClusterer implements
   @Override
   public void updateClusterer(Instance newInstance) throws Exception {
 
+    if (m_instanceCount > 0) {
+      if (m_instanceCount % m_periodicPruningRate == 0) {
+        pruneCandidateCanopies();
+      }
+    }
+
+    m_instanceCount++;
     if (m_missingValuesReplacer != null) {
       m_missingValuesReplacer.input(newInstance);
       newInstance = m_missingValuesReplacer.output();
@@ -513,7 +601,7 @@ public class Canopy extends RandomizableClusterer implements
       }
     }
 
-    if (addPoint) {
+    if (addPoint && m_canopies.numInstances() < m_maxCanopyCandidates) {
       m_canopies.add(newInstance);
       double[] density = new double[1];
       density[0] = 1.0;
@@ -527,8 +615,57 @@ public class Canopy extends RandomizableClusterer implements
     }
   }
 
+  /**
+   * Prune low density candidate canopies
+   */
+  protected void pruneCandidateCanopies() {
+    if (m_didPruneLastTime == false
+      && m_canopies.size() == m_maxCanopyCandidates) {
+      return;
+    }
+
+    m_didPruneLastTime = false;
+    for (int i = m_canopies.numInstances() - 1; i >= 0; i--) {
+      double dens = m_canopyT2Density.get(i)[0];
+      if (dens < m_minClusterDensity) {
+        double[] tempDens = m_canopyT2Density
+          .remove(m_canopyT2Density.size() - 1);
+        if (i < m_canopyT2Density.size()) {
+          m_canopyT2Density.set(i, tempDens);
+        }
+        if (getDebug()) {
+          System.err
+            .println("Pruning a candidate canopy with density: " + dens);
+        }
+        m_didPruneLastTime = true;
+
+        double[][] tempCenter = m_canopyCenters
+          .remove(m_canopyCenters.size() - 1);
+        if (i < m_canopyCenters.size()) {
+          m_canopyCenters.set(i, tempCenter);
+        }
+
+        double[] tempNumMissingNumerics = m_canopyNumMissingForNumerics
+          .remove(m_canopyNumMissingForNumerics.size() - 1);
+
+        if (i < m_canopyNumMissingForNumerics.size()) {
+          m_canopyNumMissingForNumerics.set(i, tempNumMissingNumerics);
+        }
+
+        if (i != m_canopies.numInstances() - 1) {
+          m_canopies.swap(i, m_canopies.numInstances() - 1);
+        }
+        m_canopies.delete(m_canopies.numInstances() - 1);
+      }
+    }
+  }
+
   @Override
   public double[] distributionForInstance(Instance instance) throws Exception {
+    if (m_canopies == null || m_canopies.size() == 0) {
+      throw new Exception("No canopies available to cluster with!");
+    }
+
     double[] d = new double[numberOfClusters()];
 
     if (m_missingValuesReplacer != null) {
@@ -672,6 +809,8 @@ public class Canopy extends RandomizableClusterer implements
       return;
     }
 
+    pruneCandidateCanopies();
+
     // set the final canopy centers and weights
     double[] densities = new double[m_canopies.size()];
     for (int i = 0; i < m_canopies.numInstances(); i++) {
@@ -789,10 +928,10 @@ public class Canopy extends RandomizableClusterer implements
       }
     }
     m_t1 = m_userT1 > 0 ? m_userT1 : -m_userT1 * m_t2;
-    if (m_t1 < m_t2) {
-      throw new Exception("T1 can't be less than T2. Computed T2 as " + m_t2
-        + " T1 is requested to be " + m_t1);
-    }
+    // if (m_t1 < m_t2) {
+    // throw new Exception("T1 can't be less than T2. Computed T2 as " + m_t2
+    // + " T1 is requested to be " + m_t1);
+    // }
 
     m_distanceFunction.setInstances(data);
 
@@ -802,6 +941,9 @@ public class Canopy extends RandomizableClusterer implements
     }
 
     for (int i = 0; i < data.numInstances(); i++) {
+      if (getDebug() && i % m_periodicPruningRate == 0) {
+        System.err.println("Processed: " + i);
+      }
       updateClusterer(data.instance(i));
     }
 
@@ -958,6 +1100,112 @@ public class Canopy extends RandomizableClusterer implements
   }
 
   /**
+   * Get the number of clusters to generate
+   * 
+   * @return the number of clusters to generate
+   */
+  public int getNumClusters() {
+    return m_numClustersRequested;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String periodicPruningRateTipText() {
+    return "How often to prune low density canopies during training";
+  }
+
+  /**
+   * Set the how often to prune low density canopies during training
+   * 
+   * @param p how often (every p instances) to prune low density canopies
+   */
+  public void setPeriodicPruningRate(int p) {
+    m_periodicPruningRate = p;
+  }
+
+  /**
+   * Get the how often to prune low density canopies during training
+   * 
+   * @return how often (every p instances) to prune low density canopies
+   */
+  public int getPeriodicPruningRate() {
+    return m_periodicPruningRate;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String minimumCanopyDensityTipText() {
+    return "The minimum T2-based density below which a canopy will be pruned during periodic pruning";
+  }
+
+  /**
+   * Set the minimum T2-based density below which a canopy will be pruned during
+   * periodic pruning.
+   * 
+   * @param dens the minimum canopy density
+   */
+  public void setMinimumCanopyDensity(double dens) {
+    m_minClusterDensity = dens;
+  }
+
+  /**
+   * Get the minimum T2-based density below which a canopy will be pruned during
+   * periodic pruning.
+   * 
+   * @return the minimum canopy density
+   */
+  public double getMinimumCanopyDensity() {
+    return m_minClusterDensity;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String maxNumCandidateCanopiesToHoldInMemory() {
+    return "The maximum number of candidate canopies to retain in main memory during training. "
+      + "T2 distance and data characteristics determine how many candidate "
+      + "canopies are formed before periodic and final pruning are performed. There "
+      + "may not be enough memory available if T2 is set too low.";
+  }
+
+  /**
+   * Set the maximum number of candidate canopies to retain in memory during
+   * training. T2 distance and data characteristics determine how many candidate
+   * canopies are formed before periodic and final pruning are performed. There
+   * may not be enough memory available if T2 is set too low.
+   * 
+   * @param max the maximum number of candidate canopies to retain in memory
+   *          during training
+   */
+  public void setMaxNumCandidateCanopiesToHoldInMemory(int max) {
+    m_maxCanopyCandidates = max;
+  }
+
+  /**
+   * Get the maximum number of candidate canopies to retain in memory during
+   * training. T2 distance and data characteristics determine how many candidate
+   * canopies are formed before periodic and final pruning are performed. There
+   * may not be enough memory available if T2 is set too low.
+   * 
+   * @return the maximum number of candidate canopies to retain in memory during
+   *         training
+   */
+  public int getMaxNumCandidateCanopiesToHoldInMemory() {
+    return m_maxCanopyCandidates;
+  }
+
+  /**
    * Returns the tip text for this property.
    * 
    * @return tip text for this property suitable for displaying in the
@@ -983,15 +1231,6 @@ public class Canopy extends RandomizableClusterer implements
    */
   public boolean getDontReplaceMissingValues() {
     return m_dontReplaceMissing;
-  }
-
-  /**
-   * Get the number of clusters to generate
-   * 
-   * @return the number of clusters to generate
-   */
-  public int getNumClusters() {
-    return m_numClustersRequested;
   }
 
   public static String printSingleAssignment(long[] assignments) {
@@ -1173,7 +1412,7 @@ public class Canopy extends RandomizableClusterer implements
     }
 
     // now construct a new Canopy encapsulating the final set of canopies
-    // System.err.println(finalCanopies);
+    System.err.println(finalCanopies);
     Canopy finalC = new Canopy();
     finalC.setCanopies(finalCanopies);
     finalC.setMissingValuesReplacer(missingValuesReplacer);
@@ -1199,3 +1438,4 @@ public class Canopy extends RandomizableClusterer implements
   }
 
 }
+
