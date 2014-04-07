@@ -56,19 +56,15 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- * <!-- globalinfo-start --> Cluster data using the k means algorithm. Can use
- * either the Euclidean distance (default) or the Manhattan distance. If the
- * Manhattan distance is used, then centroids are computed as the component-wise
- * median rather than mean. For more information see:<br/>
+ <!-- globalinfo-start -->
+ * Cluster data using the k means algorithm. Can use either the Euclidean distance (default) or the Manhattan distance. If the Manhattan distance is used, then centroids are computed as the component-wise median rather than mean. For more information see:<br/>
  * <br/>
- * D. Arthur, S. Vassilvitskii: k-means++: the advantages of carefull seeding.
- * In: Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete
- * algorithms, 1027-1035, 2007.
+ * D. Arthur, S. Vassilvitskii: k-means++: the advantages of carefull seeding. In: Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete algorithms, 1027-1035, 2007.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;inproceedings{Arthur2007,
  *    author = {D. Arthur and S. Vassilvitskii},
@@ -79,88 +75,91 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * }
  * </pre>
  * <p/>
- * <!-- technical-bibtex-end -->
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -N &lt;num&gt;
+ * <pre> -N &lt;num&gt;
  *  Number of clusters.
- *  (default 2).
- * </pre>
+ *  (default 2).</pre>
  * 
- * <pre>
- * -init
- * 
- * Initialization method to use.
+ * <pre> -init
+ *  Initialization method to use.
  *  0 = random, 1 = k-means++, 2 = canopy, 3 = farthest first.
- *  (default = 0)
- * </pre>
+ *  (default = 0)</pre>
  * 
- * <pre>
- * -C
- *  Use canopies to reduce the number of distance calculations.
- * </pre>
+ * <pre> -C
+ *  Use canopies to reduce the number of distance calculations.</pre>
  * 
- * <pre>
- * -t2
+ * <pre> -max-candidates &lt;num&gt;
+ *  Maximum number of candidate canopies to retain in memory
+ *  at any one time when using canopy clustering.
+ *  T2 distance plus, data characteristics,
+ *  will determine how many candidate canopies are formed before
+ *  periodic and final pruning are performed, which might result
+ *  in exceess memory consumption. This setting avoids large numbers
+ *  of candidate canopies consuming memory. (default = 100)</pre>
+ * 
+ * <pre> -periodic-pruning &lt;num&gt;
+ *  How often to prune low density canopies when using canopy clustering. 
+ *  (default = every 10,000 training instances)</pre>
+ * 
+ * <pre> -min-density
+ *  Minimum canopy density, when using canopy clustering, below which
+ *   a canopy will be pruned during periodic pruning. (default = 2 instances)</pre>
+ * 
+ * <pre> -t2
  *  The T2 distance to use when using canopy clustering. Values &lt; 0 indicate that
  *  a heuristic based on attribute std. deviation should be used to set this.
- *  (default = -1.0)
- * </pre>
+ *  (default = -1.0)</pre>
  * 
- * <pre>
- * -t1
+ * <pre> -t1
  *  The T1 distance to use when using canopy clustering. A value &lt; 0 is taken as a
- *  positive multiplier for T2. (default = -1.5)
- * </pre>
+ *  positive multiplier for T2. (default = -1.5)</pre>
  * 
- * <pre>
- * -V
+ * <pre> -V
  *  Display std. deviations for centroids.
  * </pre>
  * 
- * <pre>
- * -M
+ * <pre> -M
  *  Don't replace missing values with mean/mode.
  * </pre>
  * 
- * <pre>
- * -A &lt;classname and options&gt;
+ * <pre> -A &lt;classname and options&gt;
  *  Distance function to use.
- *  (default: weka.core.EuclideanDistance)
- * </pre>
+ *  (default: weka.core.EuclideanDistance)</pre>
  * 
- * <pre>
- * -I &lt;num&gt;
+ * <pre> -I &lt;num&gt;
  *  Maximum number of iterations.
  * </pre>
  * 
- * <pre>
- * -O
+ * <pre> -O
  *  Preserve order of instances.
  * </pre>
  * 
- * <pre>
- * -fast
+ * <pre> -fast
  *  Enables faster distance calculations, using cut-off values.
  *  Disables the calculation/output of squared errors/distances.
  * </pre>
  * 
- * <pre>
- * -num-slots &lt;num&gt;
+ * <pre> -num-slots &lt;num&gt;
  *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)
- * </pre>
+ *  (default 1 - i.e. no parallelism)</pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 10)
- * </pre>
+ *  (default 10)</pre>
  * 
- * <!-- options-end -->
+ * <pre> -output-debug-info
+ *  If set, clusterer is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, clusterer capabilities are not checked before clusterer is built
+ *  (use with caution).</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -291,6 +290,24 @@ public class SimpleKMeans extends RandomizableClusterer implements
 
   /** The canopy clusterer (if being used) */
   protected Canopy m_canopyClusters;
+
+  /**
+   * The maximum number of candidate canopies to hold in memory at any one time
+   * (if using canopy clustering)
+   */
+  protected int m_maxCanopyCandidates = 100;
+
+  /**
+   * Prune low-density candidate canopies after every x instances have been seen
+   * (if using canopy clustering)
+   */
+  protected int m_periodicPruningRate = 10000;
+
+  /**
+   * The minimum cluster density (according to T2 distance) allowed. Used when
+   * periodically pruning candidate canopies (if using canopy clustering)
+   */
+  protected double m_minClusterDensity = 2;
 
   /** The t2 radius to pass through to Canopy */
   protected double m_t2 = Canopy.DEFAULT_T2;
@@ -601,8 +618,13 @@ public class SimpleKMeans extends RandomizableClusterer implements
       m_canopyClusters = new Canopy();
       m_canopyClusters.setNumClusters(m_NumClusters);
       m_canopyClusters.setSeed(getSeed());
-      m_canopyClusters.setT2(getT2());
-      m_canopyClusters.setT1(getT1());
+      m_canopyClusters.setT2(getCanopyT2());
+      m_canopyClusters.setT1(getCanopyT1());
+      m_canopyClusters
+        .setMaxNumCandidateCanopiesToHoldInMemory(getCanopyMaxNumCanopiesToHoldInMemory());
+      m_canopyClusters.setPeriodicPruningRate(getCanopyPeriodicPruningRate());
+      m_canopyClusters.setMinimumCanopyDensity(getCanopyMinimumCanopyDensity());
+      m_canopyClusters.setDebug(getDebug());
       m_canopyClusters.buildClusterer(initInstances);
       // System.err.println(m_canopyClusters);
       m_centroidCanopyAssignments = new ArrayList<long[]>();
@@ -792,8 +814,13 @@ public class SimpleKMeans extends RandomizableClusterer implements
       m_canopyClusters = new Canopy();
       m_canopyClusters.setNumClusters(m_NumClusters);
       m_canopyClusters.setSeed(getSeed());
-      m_canopyClusters.setT2(getT2());
-      m_canopyClusters.setT1(getT1());
+      m_canopyClusters.setT2(getCanopyT2());
+      m_canopyClusters.setT1(getCanopyT1());
+      m_canopyClusters
+        .setMaxNumCandidateCanopiesToHoldInMemory(getCanopyMaxNumCanopiesToHoldInMemory());
+      m_canopyClusters.setPeriodicPruningRate(getCanopyPeriodicPruningRate());
+      m_canopyClusters.setMinimumCanopyDensity(getCanopyMinimumCanopyDensity());
+      m_canopyClusters.setDebug(getDebug());
       m_canopyClusters.buildClusterer(data);
     }
     m_ClusterCentroids = m_canopyClusters.getCanopies();
@@ -1078,13 +1105,35 @@ public class SimpleKMeans extends RandomizableClusterer implements
       "N", 1, "-N <num>"));
 
     result.addElement(new Option(
-      "\nInitialization method to use.\n\t0 = random, 1 = k-means++, "
+      "\tInitialization method to use.\n\t0 = random, 1 = k-means++, "
         + "2 = canopy, 3 = farthest first.\n\t(default = 0)", "init", 1,
       "-init"));
 
     result.addElement(new Option(
       "\tUse canopies to reduce the number of distance calculations.", "C", 0,
       "-C"));
+
+    result
+      .addElement(new Option(
+        "\tMaximum number of candidate canopies to retain in memory\n\t"
+          + "at any one time when using canopy clustering.\n\t"
+          + "T2 distance plus, data characteristics,\n\t"
+          + "will determine how many candidate canopies are formed before\n\t"
+          + "periodic and final pruning are performed, which might result\n\t"
+          + "in exceess memory consumption. This setting avoids large numbers\n\t"
+          + "of candidate canopies consuming memory. (default = 100)",
+        "-max-candidates", 1, "-max-candidates <num>"));
+
+    result.addElement(new Option(
+      "\tHow often to prune low density canopies when using canopy clustering. \n\t"
+        + "(default = every 10,000 training instances)", "periodic-pruning", 1,
+      "-periodic-pruning <num>"));
+
+    result
+      .addElement(new Option(
+        "\tMinimum canopy density, when using canopy clustering, below which\n\t"
+          + " a canopy will be pruned during periodic pruning. (default = 2 instances)",
+        "min-density", 1, "-min-density"));
 
     result
       .addElement(new Option(
@@ -1223,11 +1272,115 @@ public class SimpleKMeans extends RandomizableClusterer implements
   }
 
   /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String canopyPeriodicPruningRateTipText() {
+    return "If using canopy clustering for initialization and/or speedup "
+      + "this is how often to prune low density canopies during training";
+  }
+
+  /**
+   * Set the how often to prune low density canopies during training (if using
+   * canopy clustering)
+   * 
+   * @param p how often (every p instances) to prune low density canopies
+   */
+  public void setCanopyPeriodicPruningRate(int p) {
+    m_periodicPruningRate = p;
+  }
+
+  /**
+   * Get the how often to prune low density canopies during training (if using
+   * canopy clustering)
+   * 
+   * @return how often (every p instances) to prune low density canopies
+   */
+  public int getCanopyPeriodicPruningRate() {
+    return m_periodicPruningRate;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String canopyMinimumCanopyDensityTipText() {
+    return "If using canopy clustering for initialization and/or speedup "
+      + "this is the minimum T2-based density "
+      + "below which a canopy will be pruned during periodic pruning";
+  }
+
+  /**
+   * Set the minimum T2-based density below which a canopy will be pruned during
+   * periodic pruning.
+   * 
+   * @param dens the minimum canopy density
+   */
+  public void setCanopyMinimumCanopyDensity(double dens) {
+    m_minClusterDensity = dens;
+  }
+
+  /**
+   * Get the minimum T2-based density below which a canopy will be pruned during
+   * periodic pruning.
+   * 
+   * @return the minimum canopy density
+   */
+  public double getCanopyMinimumCanopyDensity() {
+    return m_minClusterDensity;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String canopyMaxNumCanopiesToHoldInMemoryTipText() {
+    return "If using canopy clustering for initialization and/or speedup "
+      + "this is the maximum number of candidate canopies to "
+      + "retain in main memory during training of the canopy clusterer. "
+      + "T2 distance and data characteristics determine how many candidate "
+      + "canopies are formed before periodic and final pruning are performed. There "
+      + "may not be enough memory available if T2 is set too low.";
+  }
+
+  /**
+   * Set the maximum number of candidate canopies to retain in memory during
+   * training. T2 distance and data characteristics determine how many candidate
+   * canopies are formed before periodic and final pruning are performed. There
+   * may not be enough memory available if T2 is set too low.
+   * 
+   * @param max the maximum number of candidate canopies to retain in memory
+   *          during training
+   */
+  public void setCanopyMaxNumCanopiesToHoldInMemory(int max) {
+    m_maxCanopyCandidates = max;
+  }
+
+  /**
+   * Get the maximum number of candidate canopies to retain in memory during
+   * training. T2 distance and data characteristics determine how many candidate
+   * canopies are formed before periodic and final pruning are performed. There
+   * may not be enough memory available if T2 is set too low.
+   * 
+   * @return the maximum number of candidate canopies to retain in memory during
+   *         training
+   */
+  public int getCanopyMaxNumCanopiesToHoldInMemory() {
+    return m_maxCanopyCandidates;
+  }
+
+  /**
    * Tip text for this property
    * 
    * @return the tip text for this property
    */
-  public String t2TipText() {
+  public String canopyT2TipText() {
     return "The T2 distance to use when using canopy clustering. Values < 0 indicate that this should be set using "
       + "a heuristic based on attribute standard deviation";
   }
@@ -1238,7 +1391,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * 
    * @param t2 the t2 radius to use
    */
-  public void setT2(double t2) {
+  public void setCanopyT2(double t2) {
     m_t2 = t2;
   }
 
@@ -1248,7 +1401,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * 
    * @return the t2 radius to use
    */
-  public double getT2() {
+  public double getCanopyT2() {
     return m_t2;
   }
 
@@ -1257,7 +1410,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * 
    * @return the tip text for this property
    */
-  public String t1TipText() {
+  public String canopyT1TipText() {
     return "The T1 distance to use when using canopy clustering. Values < 0 are taken as a positive "
       + "multiplier for the T2 distance";
   }
@@ -1268,7 +1421,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * 
    * @param t1 the t1 radius to use
    */
-  public void setT1(double t1) {
+  public void setCanopyT1(double t1) {
     m_t1 = t1;
   }
 
@@ -1278,7 +1431,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * 
    * @return the t1 radius to use
    */
-  public double getT1() {
+  public double getCanopyT1() {
     return m_t1;
   }
 
@@ -1503,86 +1656,89 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -N &lt;num&gt;
+   * <pre> -N &lt;num&gt;
    *  Number of clusters.
-   *  (default 2).
-   * </pre>
+   *  (default 2).</pre>
    * 
-   * <pre>
-   * -init
-   * 
-   * Initialization method to use.
+   * <pre> -init
+   *  Initialization method to use.
    *  0 = random, 1 = k-means++, 2 = canopy, 3 = farthest first.
-   *  (default = 0)
-   * </pre>
+   *  (default = 0)</pre>
    * 
-   * <pre>
-   * -C
-   *  Use canopies to reduce the number of distance calculations.
-   * </pre>
+   * <pre> -C
+   *  Use canopies to reduce the number of distance calculations.</pre>
    * 
-   * <pre>
-   * -t2
+   * <pre> -max-candidates &lt;num&gt;
+   *  Maximum number of candidate canopies to retain in memory
+   *  at any one time when using canopy clustering.
+   *  T2 distance plus, data characteristics,
+   *  will determine how many candidate canopies are formed before
+   *  periodic and final pruning are performed, which might result
+   *  in exceess memory consumption. This setting avoids large numbers
+   *  of candidate canopies consuming memory. (default = 100)</pre>
+   * 
+   * <pre> -periodic-pruning &lt;num&gt;
+   *  How often to prune low density canopies when using canopy clustering. 
+   *  (default = every 10,000 training instances)</pre>
+   * 
+   * <pre> -min-density
+   *  Minimum canopy density, when using canopy clustering, below which
+   *   a canopy will be pruned during periodic pruning. (default = 2 instances)</pre>
+   * 
+   * <pre> -t2
    *  The T2 distance to use when using canopy clustering. Values &lt; 0 indicate that
    *  a heuristic based on attribute std. deviation should be used to set this.
-   *  (default = -1.0)
-   * </pre>
+   *  (default = -1.0)</pre>
    * 
-   * <pre>
-   * -t1
+   * <pre> -t1
    *  The T1 distance to use when using canopy clustering. A value &lt; 0 is taken as a
-   *  positive multiplier for T2. (default = -1.5)
-   * </pre>
+   *  positive multiplier for T2. (default = -1.5)</pre>
    * 
-   * <pre>
-   * -V
+   * <pre> -V
    *  Display std. deviations for centroids.
    * </pre>
    * 
-   * <pre>
-   * -M
+   * <pre> -M
    *  Don't replace missing values with mean/mode.
    * </pre>
    * 
-   * <pre>
-   * -A &lt;classname and options&gt;
+   * <pre> -A &lt;classname and options&gt;
    *  Distance function to use.
-   *  (default: weka.core.EuclideanDistance)
-   * </pre>
+   *  (default: weka.core.EuclideanDistance)</pre>
    * 
-   * <pre>
-   * -I &lt;num&gt;
+   * <pre> -I &lt;num&gt;
    *  Maximum number of iterations.
    * </pre>
    * 
-   * <pre>
-   * -O
+   * <pre> -O
    *  Preserve order of instances.
    * </pre>
    * 
-   * <pre>
-   * -fast
+   * <pre> -fast
    *  Enables faster distance calculations, using cut-off values.
    *  Disables the calculation/output of squared errors/distances.
    * </pre>
    * 
-   * <pre>
-   * -num-slots &lt;num&gt;
+   * <pre> -num-slots &lt;num&gt;
    *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)
-   * </pre>
+   *  (default 1 - i.e. no parallelism)</pre>
    * 
-   * <pre>
-   * -S &lt;num&gt;
+   * <pre> -S &lt;num&gt;
    *  Random number seed.
-   *  (default 10)
-   * </pre>
+   *  (default 10)</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -output-debug-info
+   *  If set, clusterer is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, clusterer capabilities are not checked before clusterer is built
+   *  (use with caution).</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -1601,14 +1757,29 @@ public class SimpleKMeans extends RandomizableClusterer implements
 
     m_speedUpDistanceCompWithCanopies = Utils.getFlag('C', options);
 
-    String temp = Utils.getOption("t2", options);
+    String temp = Utils.getOption("max-candidates", options);
     if (temp.length() > 0) {
-      setT2(Double.parseDouble(temp));
+      setCanopyMaxNumCanopiesToHoldInMemory(Integer.parseInt(temp));
+    }
+
+    temp = Utils.getOption("periodic-pruning", options);
+    if (temp.length() > 0) {
+      setCanopyPeriodicPruningRate(Integer.parseInt(temp));
+    }
+
+    temp = Utils.getOption("min-density", options);
+    if (temp.length() > 0) {
+      setCanopyMinimumCanopyDensity(Double.parseDouble(temp));
+    }
+
+    temp = Utils.getOption("t2", options);
+    if (temp.length() > 0) {
+      setCanopyT2(Double.parseDouble(temp));
     }
 
     temp = Utils.getOption("t1", options);
     if (temp.length() > 0) {
-      setT1(Double.parseDouble(temp));
+      setCanopyT1(Double.parseDouble(temp));
     }
 
     String optionString = Utils.getOption('N', options);
@@ -1668,10 +1839,16 @@ public class SimpleKMeans extends RandomizableClusterer implements
       result.add("-C");
     }
 
+    result.add("-max-candidates");
+    result.add("" + getCanopyMaxNumCanopiesToHoldInMemory());
+    result.add("-periodic-pruning");
+    result.add("" + getCanopyPeriodicPruningRate());
+    result.add("-min-density");
+    result.add("" + getCanopyMinimumCanopyDensity());
     result.add("-t1");
-    result.add("" + getT1());
+    result.add("" + getCanopyT1());
     result.add("-t2");
-    result.add("" + getT2());
+    result.add("" + getCanopyT2());
 
     if (m_displayStdDevs) {
       result.add("-V");
@@ -2164,3 +2341,4 @@ public class SimpleKMeans extends RandomizableClusterer implements
     runClusterer(new SimpleKMeans(), args);
   }
 }
+
