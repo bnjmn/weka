@@ -21,6 +21,7 @@
 
 package weka.clusterers;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -59,6 +60,8 @@ public abstract class RandomizableClusterer extends AbstractClusterer implements
 
     result.addElement(new Option("\tRandom number seed.\n" + "\t(default "
       + m_SeedDefault + ")", "S", 1, "-S <num>"));
+
+    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
