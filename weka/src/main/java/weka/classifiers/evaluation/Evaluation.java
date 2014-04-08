@@ -4115,6 +4115,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText
       .append("\tThe class label to determine the threshold data for\n"
         + "\t(default is the first label)\n");
+    optionsText.append("-no-predictions\n");
+    optionsText.append("\tTurns off the collection of predictions in order to conserve memory.\n");
 
     // Get scheme-specific options
     if (classifier instanceof OptionHandler) {
