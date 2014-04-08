@@ -148,8 +148,8 @@ import weka.estimators.UnivariateKernelEstimator;
  * Outputs statistics only, not the classifier.
  * <p/>
  *
- * -i <br/>
- * Outputs information-retrieval statistics per class.
+ * -do-not-output-per-class-statistics <br/>
+ * Do not output statistics per class.
  * <p/>
  *
  * -k <br/>
@@ -856,8 +856,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Outputs statistics only, not the classifier.
    * <p/>
    *
-   * -i <br/>
-   * Outputs detailed information-retrieval statistics per class.
+   * -do-not-output-per-class-statistics <br/>
+   * Do not output statistics per class.
    * <p/>
    *
    * -k <br/>
@@ -1023,8 +1023,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Outputs statistics only, not the classifier.
    * <p/>
    *
-   * -i <br/>
-   * Outputs detailed information-retrieval statistics per class.
+   * -do-not-output-per-class-statistics <br/>
+   * Do not output statistics per class.
    * <p/>
    *
    * -k <br/>
@@ -1324,7 +1324,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       costMatrix = handleCostOption(Utils.getOption('m', options),
         template.numClasses());
 
-      classStatistics = Utils.getFlag('i', options);
+      classStatistics = !Utils.getFlag("do-not-output-per-class-statistics", options);
       noOutput = Utils.getFlag('o', options);
       trainStatistics = !Utils.getFlag('v', options);
       printComplexityStatistics = Utils.getFlag('k', options);
@@ -4061,9 +4061,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-o\n");
     optionsText.append("\tOutputs statistics only, not the classifier.\n");
-    optionsText.append("-i\n");
-    optionsText.append("\tOutputs detailed information-retrieval");
-    optionsText.append(" statistics for each class.\n");
+    optionsText.append("-do-not-output-per-class-statistics\n");
+    optionsText.append("\tDo not output statistics for each class.\n");
     optionsText.append("-k\n");
     optionsText.append("\tOutputs information-theoretic statistics.\n");
     optionsText
