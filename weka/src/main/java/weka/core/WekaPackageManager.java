@@ -32,6 +32,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +143,9 @@ public class WekaPackageManager {
   /* True if an initial cache build is needed and working offline */
   public static boolean m_noPackageMetaDataAvailable;
 
+  /** The set of packages that the user has requested not to load */
+  public static Set<String> m_doNotLoadList;
+
   static {
     establishWekaHome();
   }
@@ -186,6 +192,8 @@ public class WekaPackageManager {
 
     m_wekaHomeEstablished = ok;
     PACKAGE_MANAGER.setPackageHome(PACKAGES_DIR);
+
+    m_doNotLoadList = getDoNotLoadList();
     try {
       // setup the backup mirror first
       // establishMirror();
@@ -684,6 +692,15 @@ public class WekaPackageManager {
       return false;
     }
 
+    load = !m_doNotLoadList.contains(toLoad.getName());
+    if (!load) {
+      for (PrintStream p : progress) {
+        p.println("[Weka] Skipping package " + toLoad.getName()
+          + " because it is has been marked as do not load");
+      }
+      return false;
+    }
+
     // first check for missing special files/directories and
     // missing external classes (if any)
 
@@ -912,6 +929,94 @@ public class WekaPackageManager {
   }
 
   /**
+   * Reads the doNotLoad list (if it exists) from the packages directory
+   * 
+   * @return a set of package names that should not be loaded. This will be
+   *         empty if the doNotLoadList does not exist on disk.
+   */
+  @SuppressWarnings("unchecked")
+  protected static Set<String> getDoNotLoadList() {
+
+    Set<String> doNotLoad = new HashSet<String>();
+    File doNotLoadList = new File(PACKAGES_DIR.toString() + File.separator
+      + "doNotLoad.ser");
+    if (doNotLoadList.exists() && doNotLoadList.isFile()) {
+      ObjectInputStream ois = null;
+
+      try {
+        ois = new ObjectInputStream(new BufferedInputStream(
+          new FileInputStream(doNotLoadList)));
+        doNotLoad = (Set<String>) ois.readObject();
+      } catch (FileNotFoundException ex) {
+      } catch (IOException e) {
+        System.err
+          .println("An error occurred while reading the doNotLoad list: "
+            + e.getMessage());
+      } catch (ClassNotFoundException e) {
+        System.err
+          .println("An error occurred while reading the doNotLoad list: "
+            + e.getMessage());
+      } finally {
+        if (ois != null) {
+          try {
+            ois.close();
+          } catch (IOException ex) {
+            ex.printStackTrace();
+          }
+        }
+      }
+    }
+
+    return doNotLoad;
+  }
+
+  /**
+   * Toggle the load status of the supplied list of package names
+   * 
+   * @param packageNames the packages to toggle the load status for
+   * @return a list of unknown packages (i.e. any supplied package names that
+   *         don't appear to be installed)
+   * @throws Exception if a problem occurs
+   */
+  protected static List<String> toggleLoadStatus(List<String> packageNames)
+    throws Exception {
+
+    List<String> unknownPackages = new ArrayList<String>();
+    boolean changeMade = false;
+    for (String s : packageNames) {
+      if (PACKAGE_MANAGER.getInstalledPackageInfo(s) == null) {
+        unknownPackages.add(s);
+      } else {
+        if (m_doNotLoadList.contains(s)) {
+          m_doNotLoadList.remove(s);
+        } else {
+          m_doNotLoadList.add(s);
+        }
+        changeMade = true;
+      }
+    }
+
+    if (changeMade) {
+      // write the list back to disk
+      File doNotLoadList = new File(PACKAGES_DIR.toString() + File.separator
+        + "doNotLoad.ser");
+      ObjectOutputStream oos = null;
+      try {
+        oos = new ObjectOutputStream(new BufferedOutputStream(
+          new FileOutputStream(doNotLoadList)));
+        oos.writeObject(m_doNotLoadList);
+      } finally {
+        if (oos != null) {
+          oos.flush();
+          oos.close();
+        }
+      }
+    }
+
+    return unknownPackages;
+  }
+
+  /**
    * Load all packages
    * 
    * @param verbose true if loading progress should be output
@@ -946,6 +1051,7 @@ public class WekaPackageManager {
     m_packagesLoaded = true;
     m_initialPackageLoadingInProcess = true;
     if (establishWekaHome()) {
+
       // try and load any jar files and add to the classpath
       File[] contents = PACKAGES_DIR.listFiles();
 
@@ -2120,16 +2226,27 @@ public class WekaPackageManager {
     }
 
     StringBuffer result = new StringBuffer();
-    result.append("Installed\tRepository\tPackage\n");
-    result.append("=========\t==========\t=======\n");
+    result.append("Installed\tRepository\tLoaded\tPackage\n");
+    result.append("=========\t==========\t======\t=======\n");
 
+    boolean userOptedNoLoad = false;
     Iterator<Package> i = packageList.iterator();
     while (i.hasNext()) {
       Package p = i.next();
       String installedV = "-----    ";
       String repositoryV = "-----     ";
+      String loaded = "No";
       if (p.isInstalled()) {
         Package installedP = getInstalledPackageInfo(p.getName());
+        if (loadCheck(installedP, new File(WekaPackageManager.getPackageHome()
+          .toString() + File.separator + p.getName()))) {
+          loaded = "Yes";
+        } else {
+          if (m_doNotLoadList.contains(installedP.getName())) {
+            loaded = "No*";
+            userOptedNoLoad = true;
+          }
+        }
         installedV = installedP.getPackageMetaDataElement("Version").toString()
           + "    ";
         try {
@@ -2146,8 +2263,11 @@ public class WekaPackageManager {
           + "     ";
       }
       String title = p.getPackageMetaDataElement("Title").toString();
-      result.append(installedV + "\t" + repositoryV + "\t" + p.getName() + ": "
-        + title + "\n");
+      result.append(installedV + "\t" + repositoryV + "\t" + loaded + "\t"
+        + p.getName() + ": " + title + "\n");
+    }
+    if (userOptedNoLoad) {
+      result.append("* User flagged as no load\n");
     }
 
     System.out.println(result.toString());
@@ -2161,7 +2281,9 @@ public class WekaPackageManager {
         + "\t-list-packages <all | installed | available>\n"
         + "\t-package-info <repository | installed | archive> "
         + "<packageName | packageZip>\n\t-install-package <packageName | packageZip | URL> [version]\n"
-        + "\t-uninstall-package packageName\n" + "\t-refresh-cache");
+        + "\t-uninstall-package packageName\n"
+        + "\t-toggle-load-status packageName [packageName packageName ...]\n"
+        + "\t-refresh-cache");
   }
 
   /**
@@ -2269,6 +2391,18 @@ public class WekaPackageManager {
         }
         listPackages(args[1]);
 
+      } else if (args[0].equals("-toggle-load-status")) {
+        if (args.length == 1) {
+          printUsage();
+          return;
+        }
+        List<String> toToggle = new ArrayList<String>();
+        for (int i = 1; i < args.length; i++) {
+          toToggle.add(args[i].trim());
+        }
+        if (toToggle.size() >= 1) {
+          toggleLoadStatus(toToggle);
+        }
       } else if (args[0].equals("-refresh-cache")) {
         refreshCache(System.out);
       } else {
