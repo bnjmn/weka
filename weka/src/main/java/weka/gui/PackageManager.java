@@ -2284,9 +2284,11 @@ public class PackageManager extends JPanel {
 
           String installedV = "";
           List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
-          @SuppressWarnings("unchecked")
-          List<Object> repVersions = (List<Object>) catAndVers.get(1);
-          Object repositoryV = repVersions.get(0);
+          // @SuppressWarnings("unchecked")
+          // List<Object> repVersions = (List<Object>) catAndVers.get(1);
+          // Object repositoryV = repVersions.get(0);
+          Object repositoryV =
+            p.getPackageMetaDataElement("Version").toString();
           // String repString = getRepVersions(p.getName(), repositoryV);
           // repositoryV = repositoryV + " " + repString;
 
