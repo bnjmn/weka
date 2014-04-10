@@ -1642,6 +1642,27 @@ public class WekaPackageManager {
   }
 
   /**
+   * Get a list of all available packages (i.e. those not yet installed) that
+   * are compatible with the version of Weka that is installed.
+   * 
+   * @return a list of packages that are compatible with the installed version
+   *         of Weka
+   * @throws Exception if a problem occurs
+   */
+  public static List<Package> getAvailableCompatiblePackages() throws Exception {
+    List<Package> allAvail = getAvailablePackages();
+    List<Package> compatible = new ArrayList<Package>();
+
+    for (Package p : allAvail) {
+      if (p.isCompatibleBaseSystem()) {
+        compatible.add(p);
+      }
+    }
+
+    return compatible;
+  }
+
+  /**
    * Get a list of installed packages
    * 
    * @return a list of installed packages
