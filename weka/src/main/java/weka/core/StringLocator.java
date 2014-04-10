@@ -148,7 +148,7 @@ public class StringLocator extends AttributeLocator {
         .getAttributeIndices()[i]));
       if (!instance.isMissing(instIndex)) {
         if (instance instanceof SparseInstance
-          && instance.stringValue(instIndex).equals(Attribute.DUMMY_STRING_VAL)) {
+            && src.value((int)instance.value(instIndex)).equals(Attribute.DUMMY_STRING_VAL)) {
           continue;
         }
 
