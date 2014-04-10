@@ -87,6 +87,7 @@ import org.pentaho.packageManagement.PackageConstraint;
 
 import weka.core.Environment;
 import weka.core.Utils;
+import weka.core.Version;
 import weka.core.WekaPackageManager;
 import weka.gui.beans.FileEnvironmentField;
 
@@ -1543,6 +1544,10 @@ public class PackageManager extends JPanel {
     bGroup.add(m_installedBut);
     bGroup.add(m_availableBut);
     bGroup.add(m_allBut);
+    m_installedBut.setToolTipText("Installed packages");
+    m_availableBut.setToolTipText("Available packages compatible with Weka "
+      + Version.VERSION);
+    m_allBut.setToolTipText("All packages");
 
     JPanel butPanel = new JPanel();
     butPanel.setLayout(new BorderLayout());
@@ -2263,7 +2268,8 @@ public class PackageManager extends JPanel {
     } else {
       try {
         if (m_availablePackages == null) {
-          m_availablePackages = WekaPackageManager.getAvailablePackages();
+          m_availablePackages =
+            WekaPackageManager.getAvailableCompatiblePackages();
         }
 
         m_model.setRowCount(m_availablePackages.size());
