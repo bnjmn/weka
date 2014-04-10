@@ -1642,8 +1642,9 @@ public class WekaPackageManager {
   }
 
   /**
-   * Get a list of all available packages (i.e. those not yet installed) that
-   * are compatible with the version of Weka that is installed.
+   * Get a list of the most recent version of all available packages (i.e. those
+   * not yet installed) that are compatible with the version of Weka that is
+   * installed.
    * 
    * @return a list of packages that are compatible with the installed version
    *         of Weka
@@ -1654,8 +1655,19 @@ public class WekaPackageManager {
     List<Package> compatible = new ArrayList<Package>();
 
     for (Package p : allAvail) {
-      if (p.isCompatibleBaseSystem()) {
-        compatible.add(p);
+      List<Object> availableVersions =
+        PACKAGE_MANAGER.getRepositoryPackageVersions(p.getName());
+
+      // version numbers will be in descending sorted order from the repository
+      // we want the most recent version that is compatible with the base weka
+      // version
+      for (Object version : availableVersions) {
+        Package versionedPackage =
+          getRepositoryPackageInfo(p.getName(), version.toString());
+        if (versionedPackage.isCompatibleBaseSystem()) {
+          compatible.add(p);
+          break;
+        }
       }
     }
 
