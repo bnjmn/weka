@@ -627,5 +627,7 @@ public class DilcaDistance implements DistanceFunction, Serializable{
 		return Math.sqrt(ris/a.length);
 	}
 
+  public void clean() {
+  }
 
 }
