@@ -6,7 +6,7 @@
 PackageName=DilcaDistance
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date (year-month-day)
 Date=2013-02-12
@@ -29,8 +29,10 @@ License=GPL 2.0|Mozilla
 # Description (required)
 Description=This package implements the parameter free version of the DILCA distance. This approach allows to learn value-to-value distances between each pair of values for each attribute of the dataset. The distance between two values is computed indirectly based on the their distribution w.r.t. a set of related attributes (the context) carefully chosen
 
+Changes=Updated for changes to weka.core.DistanceFunction
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/DilcaDistance1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/DilcaDistance1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/DilcaDistance
