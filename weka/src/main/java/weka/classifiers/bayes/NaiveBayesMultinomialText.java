@@ -35,9 +35,9 @@ import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
+import weka.core.Aggregateable;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.Aggregateable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -52,15 +52,13 @@ import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
 
 /**
- <!-- globalinfo-start --> 
- * Multinomial naive bayes for text data. Operates
+ * <!-- globalinfo-start --> Multinomial naive bayes for text data. Operates
  * directly (and only) on String attributes. Other types of input attributes are
  * accepted but ignored during training and classification
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -125,7 +123,7 @@ import weka.core.tokenizers.WordTokenizer;
  *  The stemmering algorihtm (classname plus parameters) to use.
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
@@ -133,8 +131,8 @@ import weka.core.tokenizers.WordTokenizer;
  * 
  */
 public class NaiveBayesMultinomialText extends AbstractClassifier implements
-    UpdateableClassifier, WeightedInstancesHandler,
-    Aggregateable<NaiveBayesMultinomialText> {
+  UpdateableClassifier, WeightedInstancesHandler,
+  Aggregateable<NaiveBayesMultinomialText> {
 
   /** For serialization */
   private static final long serialVersionUID = 2139025532014821394L;
@@ -225,9 +223,9 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    */
   public String globalInfo() {
     return "Multinomial naive bayes for text data. Operates "
-        + "directly (and only) on String attributes. "
-        + "Other types of input attributes are accepted but "
-        + "ignored during training and classification";
+      + "directly (and only) on String attributes. "
+      + "Other types of input attributes are accepted but "
+      + "ignored during training and classification";
   }
 
   /**
@@ -274,12 +272,13 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
     m_wordsPerClass = new double[data.numClasses()];
     m_probOfClass = new double[data.numClasses()];
-    m_probOfWordGivenClass = new HashMap<Integer, LinkedHashMap<String, Count>>();
+    m_probOfWordGivenClass =
+      new HashMap<Integer, LinkedHashMap<String, Count>>();
 
     double laplace = 1.0;
     for (int i = 0; i < data.numClasses(); i++) {
-      LinkedHashMap<String, Count> dict = new LinkedHashMap<String, Count>(
-          10000 / data.numClasses());
+      LinkedHashMap<String, Count> dict =
+        new LinkedHashMap<String, Count>(10000 / data.numClasses());
       m_probOfWordGivenClass.put(i, dict);
       m_probOfClass[i] = laplace;
 
@@ -305,7 +304,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   }
 
   protected void updateClassifier(Instance instance, boolean updateDictionary)
-      throws Exception {
+    throws Exception {
 
     if (!instance.classIsMissing()) {
       int classIndex = (int) instance.classValue();
@@ -442,7 +441,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
         m_tokenizer.tokenize(instance.stringValue(i));
 
         while (m_tokenizer.hasMoreElements()) {
-          String word = (String) m_tokenizer.nextElement();
+          String word = m_tokenizer.nextElement();
           if (m_lowercaseTokens) {
             word = word.toLowerCase();
           }
@@ -467,8 +466,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
     if (updateDictionary) {
       int classValue = (int) instance.classValue();
-      LinkedHashMap<String, Count> dictForClass = m_probOfWordGivenClass
-          .get(classValue);
+      LinkedHashMap<String, Count> dictForClass =
+        m_probOfWordGivenClass.get(classValue);
 
       // document normalization
       double iNorm = 0;
@@ -522,11 +521,11 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
     Set<Integer> classesSet = m_probOfWordGivenClass.keySet();
     for (Integer classIndex : classesSet) {
-      LinkedHashMap<String, Count> dictForClass = m_probOfWordGivenClass
-          .get(classIndex);
+      LinkedHashMap<String, Count> dictForClass =
+        m_probOfWordGivenClass.get(classIndex);
 
-      Iterator<Map.Entry<String, Count>> entries = dictForClass.entrySet()
-          .iterator();
+      Iterator<Map.Entry<String, Count>> entries =
+        dictForClass.entrySet().iterator();
       while (entries.hasNext()) {
         Map.Entry<String, Count> entry = entries.next();
         if (entry.getValue().m_count < m_minWordP) {
@@ -555,10 +554,11 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * @see NullStemmer
    */
   public void setStemmer(Stemmer value) {
-    if (value != null)
+    if (value != null) {
       m_stemmer = value;
-    else
+    } else {
       m_stemmer = new NullStemmer();
+    }
   }
 
   /**
@@ -616,7 +616,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    */
   public String useWordFrequenciesTipText() {
     return "Use word frequencies rather than binary "
-        + "bag of words representation";
+      + "bag of words representation";
   }
 
   /**
@@ -675,9 +675,9 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    */
   public String periodicPruningTipText() {
     return "How often (number of instances) to prune "
-        + "the dictionary of low frequency terms. "
-        + "0 means don't prune. Setting a positive "
-        + "integer n means prune after every n instances";
+      + "the dictionary of low frequency terms. "
+      + "0 means don't prune. Setting a positive "
+      + "integer n means prune after every n instances";
   }
 
   /**
@@ -706,9 +706,9 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    */
   public String minWordFrequencyTipText() {
     return "Ignore any words that don't occur at least "
-        + "min frequency times in the training data. If periodic "
-        + "pruning is turned on, then the dictionary is pruned "
-        + "according to this value";
+      + "min frequency times in the training data. If periodic "
+      + "pruning is turned on, then the dictionary is pruned "
+      + "according to this value";
 
   }
 
@@ -742,7 +742,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    */
   public String normalizeDocLengthTipText() {
     return "If true then document length is normalized according "
-        + "to the settings for norm and lnorm";
+      + "to the settings for norm and lnorm";
   }
 
   /**
@@ -855,12 +855,14 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * @param value the file containing the stopwords
    */
   public void setStopwords(File value) {
-    if (value == null)
+    if (value == null) {
       value = new File(System.getProperty("user.dir"));
+    }
 
     m_stopwordsFile = value;
-    if (value.exists() && value.isFile())
+    if (value.exists() && value.isFile()) {
       setUseStopList(true);
+    }
   }
 
   /**
@@ -894,45 +896,45 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     Vector<Option> newVector = new Vector<Option>();
 
     newVector.add(new Option("\tUse word frequencies instead of "
-        + "binary bag of words.", "W", 0, "-W"));
+      + "binary bag of words.", "W", 0, "-W"));
     newVector.add(new Option("\tHow often to prune the dictionary "
-        + "of low frequency words (default = 0, i.e. don't prune)", "P", 1,
-        "-P <# instances>"));
+      + "of low frequency words (default = 0, i.e. don't prune)", "P", 1,
+      "-P <# instances>"));
     newVector.add(new Option("\tMinimum word frequency. Words with less "
-        + "than this frequence are ignored.\n\tIf periodic pruning "
-        + "is turned on then this is also used to determine which\n\t"
-        + "words to remove from the dictionary (default = 3).", "M", 1,
-        "-M <double>"));
+      + "than this frequence are ignored.\n\tIf periodic pruning "
+      + "is turned on then this is also used to determine which\n\t"
+      + "words to remove from the dictionary (default = 3).", "M", 1,
+      "-M <double>"));
     newVector.addElement(new Option(
-        "\tNormalize document length (use in conjunction with -norm and "
-            + "-lnorm)", "normalize", 0, "-normalize"));
+      "\tNormalize document length (use in conjunction with -norm and "
+        + "-lnorm)", "normalize", 0, "-normalize"));
     newVector.addElement(new Option(
-        "\tSpecify the norm that each instance must have (default 1.0)",
-        "norm", 1, "-norm <num>"));
+      "\tSpecify the norm that each instance must have (default 1.0)", "norm",
+      1, "-norm <num>"));
     newVector.addElement(new Option("\tSpecify L-norm to use (default 2.0)",
-        "lnorm", 1, "-lnorm <num>"));
+      "lnorm", 1, "-lnorm <num>"));
     newVector.addElement(new Option("\tConvert all tokens to lowercase "
-        + "before adding to the dictionary.", "lowercase", 0, "-lowercase"));
+      + "before adding to the dictionary.", "lowercase", 0, "-lowercase"));
     newVector.addElement(new Option("\tIgnore words that are in the stoplist.",
-        "stoplist", 0, "-stoplist"));
+      "stoplist", 0, "-stoplist"));
     newVector
-        .addElement(new Option(
-            "\tA file containing stopwords to override the default ones.\n"
-                + "\tUsing this option automatically sets the flag ('-stoplist') to use the\n"
-                + "\tstoplist if the file exists.\n"
-                + "\tFormat: one stopword per line, lines starting with '#'\n"
-                + "\tare interpreted as comments and ignored.", "stopwords", 1,
-            "-stopwords <file>"));
+      .addElement(new Option(
+        "\tA file containing stopwords to override the default ones.\n"
+          + "\tUsing this option automatically sets the flag ('-stoplist') to use the\n"
+          + "\tstoplist if the file exists.\n"
+          + "\tFormat: one stopword per line, lines starting with '#'\n"
+          + "\tare interpreted as comments and ignored.", "stopwords", 1,
+        "-stopwords <file>"));
     newVector.addElement(new Option(
-        "\tThe tokenizing algorihtm (classname plus parameters) to use.\n"
-            + "\t(default: " + WordTokenizer.class.getName() + ")",
-        "tokenizer", 1, "-tokenizer <spec>"));
+      "\tThe tokenizing algorihtm (classname plus parameters) to use.\n"
+        + "\t(default: " + WordTokenizer.class.getName() + ")", "tokenizer", 1,
+      "-tokenizer <spec>"));
     newVector.addElement(new Option(
-        "\tThe stemmering algorihtm (classname plus parameters) to use.",
-        "stemmer", 1, "-stemmer <spec>"));
+      "\tThe stemmering algorihtm (classname plus parameters) to use.",
+      "stemmer", 1, "-stemmer <spec>"));
 
     newVector.addAll(Collections.list(super.listOptions()));
-    
+
     return newVector.elements();
   }
 
@@ -940,8 +942,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start --> 
-   * Valid options are:
+   * <!-- options-start --> Valid options are:
    * <p/>
    * 
    * <pre>
@@ -1006,7 +1007,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    *  The stemmering algorihtm (classname plus parameters) to use.
    * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -1054,14 +1055,16 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       setTokenizer(new WordTokenizer());
     } else {
       String[] tokenizerSpec = Utils.splitOptions(tokenizerString);
-      if (tokenizerSpec.length == 0)
+      if (tokenizerSpec.length == 0) {
         throw new Exception("Invalid tokenizer specification string");
+      }
       String tokenizerName = tokenizerSpec[0];
       tokenizerSpec[0] = "";
-      Tokenizer tokenizer = (Tokenizer) Class.forName(tokenizerName)
-          .newInstance();
-      if (tokenizer instanceof OptionHandler)
+      Tokenizer tokenizer =
+        (Tokenizer) Class.forName(tokenizerName).newInstance();
+      if (tokenizer instanceof OptionHandler) {
         ((OptionHandler) tokenizer).setOptions(tokenizerSpec);
+      }
       setTokenizer(tokenizer);
     }
 
@@ -1070,16 +1073,18 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       setStemmer(null);
     } else {
       String[] stemmerSpec = Utils.splitOptions(stemmerString);
-      if (stemmerSpec.length == 0)
+      if (stemmerSpec.length == 0) {
         throw new Exception("Invalid stemmer specification string");
+      }
       String stemmerName = stemmerSpec[0];
       stemmerSpec[0] = "";
       Stemmer stemmer = (Stemmer) Class.forName(stemmerName).newInstance();
-      if (stemmer instanceof OptionHandler)
+      if (stemmer instanceof OptionHandler) {
         ((OptionHandler) stemmer).setOptions(stemmerSpec);
+      }
       setStemmer(stemmer);
     }
-    
+
     Utils.checkForRemainingOptions(options);
   }
 
@@ -1120,24 +1125,25 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
     options.add("-tokenizer");
     String spec = getTokenizer().getClass().getName();
-    if (getTokenizer() instanceof OptionHandler)
-      spec += " "
-          + Utils.joinOptions(((OptionHandler) getTokenizer()).getOptions());
+    if (getTokenizer() instanceof OptionHandler) {
+      spec +=
+        " " + Utils.joinOptions(((OptionHandler) getTokenizer()).getOptions());
+    }
     options.add(spec.trim());
 
     if (getStemmer() != null) {
       options.add("-stemmer");
       spec = getStemmer().getClass().getName();
       if (getStemmer() instanceof OptionHandler) {
-        spec += " "
-            + Utils.joinOptions(((OptionHandler) getStemmer()).getOptions());
+        spec +=
+          " " + Utils.joinOptions(((OptionHandler) getStemmer()).getOptions());
       }
 
       options.add(spec.trim());
     }
 
     Collections.addAll(options, super.getOptions());
-    
+
     return options.toArray(new String[1]);
   }
 
@@ -1165,19 +1171,22 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       }
     }
 
-    result.append("The independent probability of a class\n");
+    result.append("Dictionary size: " + master.size()).append("\n\n");
+
+    result.append("The independent frequency of a class\n");
     result.append("--------------------------------------\n");
 
     for (int i = 0; i < m_data.numClasses(); i++) {
       result.append(m_data.classAttribute().value(i)).append("\t")
-          .append(Double.toString(m_probOfClass[i])).append("\n");
+        .append(Double.toString(m_probOfClass[i])).append("\n");
     }
 
-    result.append("\nThe probability of a word given the class\n");
-    result.append("-----------------------------------------\n\t");
+    result.append("\nThe frequency of a word given the class\n");
+    result.append("-----------------------------------------\n");
 
     for (int i = 0; i < m_data.numClasses(); i++) {
-      result.append(m_data.classAttribute().value(i)).append("\t");
+      result.append(Utils.padLeft(m_data.classAttribute().value(i), 11))
+        .append("\t");
     }
 
     result.append("\n");
@@ -1186,16 +1195,17 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     while (masterIter.hasNext()) {
       String word = masterIter.next();
 
-      result.append(word + "\t");
       for (int i = 0; i < m_data.numClasses(); i++) {
         LinkedHashMap<String, Count> classDict = m_probOfWordGivenClass.get(i);
         Count c = classDict.get(word);
         if (c == null) {
-          result.append("-------------\t");
+          result.append("<laplace=1>\t");
         } else {
-          result.append(Double.toString(Math.exp(c.m_count))).append("\t");
+          result.append(Utils.padLeft(Double.toString(c.m_count), 11)).append(
+            "\t");
         }
       }
+      result.append(word);
       result.append("\n");
     }
 
@@ -1216,10 +1226,10 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   @Override
   public NaiveBayesMultinomialText aggregate(
-      NaiveBayesMultinomialText toAggregate) throws Exception {
+    NaiveBayesMultinomialText toAggregate) throws Exception {
     if (m_numModels == Integer.MIN_VALUE) {
       throw new Exception("Can't aggregate further - model has already been "
-          + "aggregated and finalized");
+        + "aggregated and finalized");
     }
 
     if (m_probOfClass == null) {
@@ -1230,24 +1240,25 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     // merging dictionaries
     if (!m_data.classAttribute().equals(toAggregate.m_data.classAttribute())) {
       throw new Exception("Can't aggregate - class attribute in data headers "
-          + "does not match: "
-          + m_data.classAttribute().equalsMsg(
-              toAggregate.m_data.classAttribute()));
+        + "does not match: "
+        + m_data.classAttribute()
+          .equalsMsg(toAggregate.m_data.classAttribute()));
     }
 
     for (int i = 0; i < m_probOfClass.length; i++) {
       m_probOfClass[i] += toAggregate.m_probOfClass[i];
     }
 
-    Map<Integer, LinkedHashMap<String, Count>> dicts = toAggregate.m_probOfWordGivenClass;
-    Iterator<Map.Entry<Integer, LinkedHashMap<String, Count>>> perClass = dicts
-        .entrySet().iterator();
+    Map<Integer, LinkedHashMap<String, Count>> dicts =
+      toAggregate.m_probOfWordGivenClass;
+    Iterator<Map.Entry<Integer, LinkedHashMap<String, Count>>> perClass =
+      dicts.entrySet().iterator();
     while (perClass.hasNext()) {
-      Map.Entry<Integer, LinkedHashMap<String, Count>> currentClassDict = perClass
-          .next();
+      Map.Entry<Integer, LinkedHashMap<String, Count>> currentClassDict =
+        perClass.next();
 
-      LinkedHashMap<String, Count> masterDict = m_probOfWordGivenClass
-          .get(currentClassDict.getKey());
+      LinkedHashMap<String, Count> masterDict =
+        m_probOfWordGivenClass.get(currentClassDict.getKey());
 
       if (masterDict == null) {
         // we haven't seen this class during our training
@@ -1256,8 +1267,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       }
 
       // now process words seen for this class
-      Iterator<Map.Entry<String, Count>> perClassEntries = currentClassDict
-          .getValue().entrySet().iterator();
+      Iterator<Map.Entry<String, Count>> perClassEntries =
+        currentClassDict.getValue().entrySet().iterator();
       while (perClassEntries.hasNext()) {
         Map.Entry<String, Count> entry = perClassEntries.next();
 
@@ -1283,7 +1294,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   public void finalizeAggregation() throws Exception {
     if (m_numModels == 0) {
       throw new Exception("Unable to finalize aggregation - "
-          + "haven't seen any models to aggregate");
+        + "haven't seen any models to aggregate");
     }
 
     // Nothing more to do - we don't need to average anything,
