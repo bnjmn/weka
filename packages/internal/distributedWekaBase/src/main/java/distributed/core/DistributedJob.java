@@ -21,6 +21,7 @@
 
 package distributed.core;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -28,8 +29,11 @@ import java.util.List;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.DistributedWekaException;
 import weka.gui.Logger;
 
@@ -43,7 +47,8 @@ public abstract class DistributedJob implements EnvironmentHandler,
   Serializable {
 
   /** Property key for specifying weka packages to use in the job */
-  public static final String WEKA_ADDITIONAL_PACKAGES_KEY = "*weka.distributed.job.additional.packages";
+  public static final String WEKA_ADDITIONAL_PACKAGES_KEY =
+    "*weka.distributed.job.additional.packages";
 
   /** For serialization */
   private static final long serialVersionUID = 1752660860796976806L;
@@ -80,11 +85,12 @@ public abstract class DistributedJob implements EnvironmentHandler,
    * @param config the job config to extract weka package names from
    * @return a list of weka packages configured to be used
    */
-  public List<String> getAdditionalWekaPackageNames(DistributedJobConfig config) {
+  public List<String>
+    getAdditionalWekaPackageNames(DistributedJobConfig config) {
     List<String> result = new ArrayList<String>();
 
-    String packages = config
-      .getUserSuppliedProperty(WEKA_ADDITIONAL_PACKAGES_KEY);
+    String packages =
+      config.getUserSuppliedProperty(WEKA_ADDITIONAL_PACKAGES_KEY);
     if (!DistributedJobConfig.isEmpty(packages)) {
       packages = environmentSubstitute(packages);
       String[] parts = packages.split(",");
@@ -279,5 +285,38 @@ public abstract class DistributedJob implements EnvironmentHandler,
     }
 
     return result.toString();
+  }
+
+  /**
+   * Utility method to parse an Instance out of a row of CSV data.
+   * 
+   * @param row the row of data to convert to an Instance
+   * @param rowHelper the CSVToARFFHeaderMap task to use for parsing purposes
+   * @param headerNoSummary the header of the data (sans summary attributes)
+   *          that contains attribute information for the instance
+   * @param setStringVals true if the values of string attributes are to be set
+   *          on the header (rather than accumulate in the header).
+   * @return an Instance
+   * @throws IOException if a problem occurs
+   */
+  public static Instance parseInstance(String row,
+    CSVToARFFHeaderMapTask rowHelper, Instances headerNoSummary,
+    boolean setStringVals) throws IOException {
+    Instance result = null;
+
+    String[] parsed = rowHelper.parseRowOnly(row);
+    if (parsed.length != headerNoSummary.numAttributes()) {
+      throw new IOException(
+        "Parsed a row that contains a different number of values than "
+          + "there are attributes in the training ARFF header: " + row);
+    }
+
+    try {
+      result = rowHelper.makeInstance(headerNoSummary, setStringVals, parsed);
+    } catch (Exception ex) {
+      throw new IOException(ex);
+    }
+
+    return result;
   }
 }
