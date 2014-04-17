@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.meta.BatchPredictorVote;
 import weka.classifiers.meta.Vote;
 import weka.core.Aggregateable;
+import weka.core.BatchPredictor;
 
 /**
  * Reduce task for aggregating classifiers into one final model, if they all
@@ -109,6 +111,15 @@ public class WekaClassifierReduceTask implements Serializable {
       }
     }
 
+    // TODO revisit this if we move to homogeneous base classifiers
+    boolean batchPredictors = false;
+    for (Classifier c : classifiers) {
+      if (c instanceof BatchPredictor) {
+        batchPredictors = true;
+        break;
+      }
+    }
+
     if (numTrainingInstancesPerClassifier != null
       && numTrainingInstancesPerClassifier.size() == classifiers.size()) {
       int max = 0;
@@ -132,7 +143,15 @@ public class WekaClassifierReduceTask implements Serializable {
       }
     }
 
-    Classifier base = allAggregateable ? classifiers.get(0) : new Vote();
+    Classifier base =
+      allAggregateable ? classifiers.get(0)
+        : batchPredictors ? new BatchPredictorVote() : new Vote();
+
+    // set the batch size based on the base classifier's batch size
+    if (base instanceof BatchPredictor) {
+      ((BatchPredictor) base)
+        .setBatchSize(((BatchPredictor) classifiers.get(0)).getBatchSize());
+    }
 
     int startIndex = allAggregateable ? 1 : 0;
 
