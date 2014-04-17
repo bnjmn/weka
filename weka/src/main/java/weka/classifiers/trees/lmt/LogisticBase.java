@@ -737,8 +737,7 @@ public class LogisticBase extends AbstractClassifier implements
 
       int classIndex = m_numericDataHeader.classIndex();
       m_numericDataHeader.setClassIndex(-1);
-      m_numericDataHeader.deleteAttributeAt(classIndex);
-      m_numericDataHeader.insertAttributeAt(new Attribute("'pseudo class'"),
+      m_numericDataHeader.replaceAttributeAt(new Attribute("'pseudo class'"),
         classIndex);
       m_numericDataHeader.setClassIndex(classIndex);
     }

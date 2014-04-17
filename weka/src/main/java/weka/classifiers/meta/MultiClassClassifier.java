@@ -495,11 +495,10 @@ public class MultiClassClassifier
       m_TwoClassDataset = new Instances(insts, 0);
       int classIndex = m_TwoClassDataset.classIndex();
       m_TwoClassDataset.setClassIndex(-1);
-      m_TwoClassDataset.deleteAttributeAt(classIndex);
       ArrayList<String> classLabels = new ArrayList<String>();
       classLabels.add("class0");
       classLabels.add("class1");
-      m_TwoClassDataset.insertAttributeAt(new Attribute("class", classLabels),
+      m_TwoClassDataset.replaceAttributeAt(new Attribute("class", classLabels),
 					  classIndex);
       m_TwoClassDataset.setClassIndex(classIndex);
 

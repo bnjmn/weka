@@ -111,8 +111,7 @@ public class MultiNomialBMAEstimator extends BayesNetEstimator {
         values.add("1");
         Attribute a = new Attribute(instances.attribute(iAttribute).name(),
           values);
-        instances.deleteAttributeAt(iAttribute);
-        instances.insertAttributeAt(a, iAttribute);
+        instances.replaceAttributeAt(a, iAttribute);
       }
     }
 

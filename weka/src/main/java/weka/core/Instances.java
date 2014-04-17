@@ -316,10 +316,11 @@ public class Instances extends AbstractList<Instance> implements Serializable,
   }
 
   /**
-   * Adds one instance to the end of the set. Shallow copies instance before it
-   * is added. Increases the size of the dataset if it is not large enough. Does
-   * not check if the instance is compatible with the dataset. Note: String or
-   * relational values are not transferred.
+   * Adds one instance at the given position in the list. Shallow
+   * copies instance before it is added. Increases the size of the
+   * dataset if it is not large enough. Does not check if the instance
+   * is compatible with the dataset. Note: String or relational values
+   * are not transferred.
    * 
    * @param index position where instance is to be inserted
    * @param instance the instance to be added
@@ -479,10 +480,10 @@ public class Instances extends AbstractList<Instance> implements Serializable,
   }
 
   /**
-   * Deletes an attribute at the given position (0 to numAttributes() - 1). A
-   * deep copy of the attribute information is performed before the attribute is
-   * deleted.
-   * 
+   * Deletes an attribute at the given position (0 to numAttributes()
+   * - 1). Attribute objects after the deletion point are copied so
+   * that their indices can be decremented. Creates a fresh list to
+   * hold the old and new attribute objects. 
    * @param position the attribute's position (position starts with 0)
    * @throws IllegalArgumentException if the given index is out of range or the
    *           class attribute is being deleted
@@ -497,14 +498,18 @@ public class Instances extends AbstractList<Instance> implements Serializable,
     if (position == m_ClassIndex) {
       throw new IllegalArgumentException("Can't delete class attribute");
     }
-    freshAttributeInfo();
+
+    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size() - 1);
+    newList.addAll(m_Attributes.subList(0, position));
+    for (int i = position + 1; i < m_Attributes.size(); i++) {
+      Attribute newAtt = (Attribute) m_Attributes.get(i).copy();
+      newAtt.setIndex(i - 1);
+      newList.add(newAtt);
+    }
+    m_Attributes = newList;
+
     if (m_ClassIndex > position) {
       m_ClassIndex--;
-    }
-    m_Attributes.remove(position);
-    for (int i = position; i < m_Attributes.size(); i++) {
-      Attribute current = m_Attributes.get(i);
-      current.setIndex(current.index() - 1);
     }
     for (int i = 0; i < numInstances(); i++) {
       instance(i).setDataset(null);
@@ -678,9 +683,12 @@ public class Instances extends AbstractList<Instance> implements Serializable,
   }
 
   /**
-   * Inserts an attribute at the given position (0 to numAttributes()) and sets
-   * all values to be missing. Shallow copies the attribute before it is
-   * inserted, and performs a deep copy of the existing attribute information.
+   * Inserts an attribute at the given position (0 to numAttributes())
+   * and sets all values to be missing. Shallow copies the attribute
+   * before it is inserted. Existing attribute objects at and after
+   * the insertion point are also copied so that their indices can be
+   * incremented. Creates a fresh list to hold the old and new
+   * attribute objects.
    * 
    * @param att the attribute to be inserted
    * @param position the attribute's position (position starts with 0)
@@ -698,13 +706,18 @@ public class Instances extends AbstractList<Instance> implements Serializable,
         + "' already in use at position #" + attribute(att.name()).index());
     }
     att = (Attribute) att.copy();
-    freshAttributeInfo();
     att.setIndex(position);
-    m_Attributes.add(position, att);
-    for (int i = position + 1; i < m_Attributes.size(); i++) {
-      Attribute current = m_Attributes.get(i);
-      current.setIndex(current.index() + 1);
+
+    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size() + 1);
+    newList.addAll(m_Attributes.subList(0, position));
+    newList.add(att);
+    for (int i = position; i < m_Attributes.size(); i++) {
+      Attribute newAtt = (Attribute) m_Attributes.get(i).copy();
+      newAtt.setIndex(i + 1);
+      newList.add(newAtt);
     }
+    m_Attributes = newList;
+
     for (int i = 0; i < numInstances(); i++) {
       instance(i).setDataset(null);
       instance(i).insertAttributeAt(position);
@@ -989,6 +1002,55 @@ public class Instances extends AbstractList<Instance> implements Serializable,
       return true;
     } else {
       return false;
+    }
+  }
+
+  /**
+   * Replaces the attribute at the given position (0 to
+   * numAttributes()) with the given attribute and sets all its values to
+   * be missing. Shallow copies the given attribute before it is
+   * inserted. Creates a fresh list to hold the old and new
+   * attribute objects.
+   * 
+   * @param att the attribute to be inserted
+   * @param position the attribute's position (position starts with 0)
+   * @throws IllegalArgumentException if the given index is out of range
+   */
+  // @ requires 0 <= position;
+  // @ requires position <= numAttributes();
+  public void replaceAttributeAt(/* @non_null@ */Attribute att, int position) {
+
+    if ((position < 0) || (position > m_Attributes.size())) {
+      throw new IllegalArgumentException("Index out of range");
+    }
+    
+    // Does the new attribute have a different name?
+    if (!att.name().equals(m_Attributes.get(position).name())) {
+
+      // Need to check if attribute name already exists
+      Attribute candidate = attribute(att.name());
+      if ((candidate != null) && (position != candidate.index())) {
+        throw new IllegalArgumentException("Attribute name '" + att.name()
+                                           + "' already in use at position #" + 
+                                           attribute(att.name()).index());
+      }
+    }
+    att = (Attribute) att.copy();
+    att.setIndex(position);
+
+    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size());
+    newList.addAll(m_Attributes.subList(0, position));
+    newList.add(att);
+    newList.addAll(m_Attributes.subList(position + 1, m_Attributes.size()));
+    m_Attributes = newList;
+
+    for (int i = 0; i < numInstances(); i++) {
+      instance(i).setDataset(null);
+      instance(i).setMissing(position);
+      instance(i).setDataset(this);
+    }
+    if (m_ClassIndex >= position) {
+      m_ClassIndex++;
     }
   }
 

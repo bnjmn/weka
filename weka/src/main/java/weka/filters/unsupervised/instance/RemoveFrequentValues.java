@@ -490,10 +490,9 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
     for (i = 0; i < selection.length; i++) {
       newVals.add(oldAtt.value(selection[i]));
     }
-    instanceInfo.deleteAttributeAt(m_AttIndex.getIndex());
     Attribute newAtt = new Attribute(oldAtt.name(), newVals);
     newAtt.setWeight(oldAtt.weight());
-    instanceInfo.insertAttributeAt(newAtt, m_AttIndex.getIndex());
+    instanceInfo.replaceAttributeAt(newAtt, m_AttIndex.getIndex());
     m_NominalMapping = new int[oldAtt.numValues()];
     for (i = 0; i < m_NominalMapping.length; i++) {
       boolean found = false;

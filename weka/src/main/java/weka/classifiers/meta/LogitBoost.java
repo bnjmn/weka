@@ -770,8 +770,7 @@ public class LogitBoost
 	  // Make class numeric
 	  Instances trainN = new Instances(train);
 	  trainN.setClassIndex(-1);
-	  trainN.deleteAttributeAt(classIndex);
-	  trainN.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
+	  trainN.replaceAttributeAt(new Attribute("'pseudo class'"), classIndex);
 	  trainN.setClassIndex(classIndex);
 	  m_NumericClassData = new Instances(trainN, 0);
 	  

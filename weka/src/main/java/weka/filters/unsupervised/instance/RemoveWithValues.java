@@ -364,10 +364,9 @@ public class RemoveWithValues extends Filter implements UnsupervisedFilter,
       for (int element : selection) {
         newVals.add(oldAtt.value(element));
       }
-      instanceInfo.deleteAttributeAt(m_AttIndex.getIndex());
       Attribute newAtt = new Attribute(oldAtt.name(), newVals);
       newAtt.setWeight(oldAtt.weight());
-      instanceInfo.insertAttributeAt(newAtt, m_AttIndex.getIndex());
+      instanceInfo.replaceAttributeAt(newAtt, m_AttIndex.getIndex());
       m_NominalMapping = new int[oldAtt.numValues()];
       for (int i = 0; i < m_NominalMapping.length; i++) {
         boolean found = false;
