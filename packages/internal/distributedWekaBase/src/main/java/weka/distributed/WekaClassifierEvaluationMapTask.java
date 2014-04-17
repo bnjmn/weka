@@ -28,6 +28,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.evaluation.AggregateableEvaluationWithPriors;
 import weka.classifiers.evaluation.Evaluation;
+import weka.core.BatchPredictor;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -270,12 +271,22 @@ public class WekaClassifierEvaluationMapTask implements Serializable {
 
     m_numTestInstances = test.numInstances();
 
-    for (int i = 0; i < test.numInstances(); i++) {
-      if (m_predFrac > 0) {
-        m_eval.evaluateModelOnceAndRecordPrediction(m_classifier,
-          test.instance(i));
-      } else {
-        m_eval.evaluateModelOnce(m_classifier, test.instance(i));
+    if (m_classifier instanceof BatchPredictor) {
+
+      // this method always stores the predictions for AUC, so we need to get
+      // rid of them if we're note doing any AUC computation
+      m_eval.evaluateModel(m_classifier, test);
+      if (m_predFrac < 0) {
+        ((AggregateableEvaluationWithPriors) m_eval).deleteStoredPredictions();
+      }
+    } else {
+      for (int i = 0; i < test.numInstances(); i++) {
+        if (m_predFrac > 0) {
+          m_eval.evaluateModelOnceAndRecordPrediction(m_classifier,
+            test.instance(i));
+        } else {
+          m_eval.evaluateModelOnce(m_classifier, test.instance(i));
+        }
       }
     }
 
@@ -288,13 +299,15 @@ public class WekaClassifierEvaluationMapTask implements Serializable {
 
   public static void main(String[] args) {
     try {
-      Instances inst = new Instances(new java.io.BufferedReader(
-        new java.io.FileReader(args[0])));
+      Instances inst =
+        new Instances(new java.io.BufferedReader(
+          new java.io.FileReader(args[0])));
       inst.setClassIndex(inst.numAttributes() - 1);
 
       weka.classifiers.evaluation.AggregateableEvaluation agg = null;
 
-      WekaClassifierEvaluationMapTask task = new WekaClassifierEvaluationMapTask();
+      WekaClassifierEvaluationMapTask task =
+        new WekaClassifierEvaluationMapTask();
       weka.classifiers.trees.J48 classifier = new weka.classifiers.trees.J48();
 
       WekaClassifierMapTask trainer = new WekaClassifierMapTask();
