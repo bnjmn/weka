@@ -37,6 +37,7 @@ import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
@@ -205,6 +206,9 @@ public class LibSVM
   
   /** for normalizing the data. */
   protected Filter m_Filter = null;
+  
+  /** for converting mult-valued nominal attributes to binary */
+  protected Filter m_NominalToBinary;
     
   /** The filter used to get rid of missing values. */
   protected ReplaceMissingValues m_ReplaceMissingValues;
@@ -1514,6 +1518,10 @@ public class LibSVM
       m_Filter.batchFinished();
       instance = m_Filter.output();
     }
+    
+    m_NominalToBinary.input(instance);
+    m_NominalToBinary.batchFinished();
+    instance = m_NominalToBinary.output();
 
     Object x = instanceToArray(instance);
     double v;
@@ -1582,6 +1590,7 @@ public class LibSVM
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
 
     // class
     result.enableDependency(Capability.UNARY_CLASS);
@@ -1647,6 +1656,11 @@ public class LibSVM
       m_Filter.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_Filter);
     }
+    
+    // nominal to binary
+    m_NominalToBinary = new NominalToBinary();
+    m_NominalToBinary.setInputFormat(insts);
+    insts = Filter.useFilter(insts, m_NominalToBinary);
     
     Vector vy = new Vector();
     Vector vx = new Vector();

@@ -6,10 +6,10 @@
 PackageName=LibSVM
 
 # Version (required)
-Version=1.0.5
+Version=1.0.6
 
 #Date
-Date=2012-06-25
+Date=2014-04-24
 
 # Title (required)
 Title=A wrapper class for the libsvm tools
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description= A wrapper class for the libsvm tools (the libsvm classes, typically the jar file, need to be in the classpath to use this classifier). LibSVM runs faster than SMO since it uses LibSVM to build the SVM classifier. LibSVM allows users to experiment with One-class SVM, Regressing SVM, and nu-SVM supported by LibSVM tool. LibSVM reports many useful statistics about LibSVM classifier (e.g., confusion matrix,precision, recall, ROC score, etc.)
 
-Changes=Now has a -seed option which now makes probability estimates deterministic from run to run. Libsvm library updated to 3.12. Note that this release is the same as 1.0.4 due to a maven version mismatch :-)
+Changes=Capabilities now include missing values. Now pre-processes nominal attributes via the unsupervised NominalToBinary filter.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.5.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.6.zip?download
 
 # URL for further information
 URL=http://www.cs.iastate.edu/~yasser/wlsvm/
