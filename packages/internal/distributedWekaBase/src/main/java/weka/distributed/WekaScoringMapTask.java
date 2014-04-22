@@ -30,11 +30,14 @@ import java.util.Map;
 import weka.classifiers.Classifier;
 import weka.clusterers.Clusterer;
 import weka.core.Attribute;
+import weka.core.BatchPredictor;
 import weka.core.DenseInstance;
+import weka.core.Environment;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import distributed.core.DistributedJobConfig;
 
 /**
  * Map task for scoring data using a model that has been previously learned.
@@ -54,14 +57,16 @@ public class WekaScoringMapTask implements Serializable {
   /** Model to use */
   protected ScoringModel m_model;
 
-  /** The header for the incoming instances to be scored */
-  protected Instances m_dataHeader;
+  protected Instances m_batchScoringData;
+
+  protected int m_batchSize = 1000;
 
   /**
    * Holds the names of any model attributes that are missing or have a type
    * mismatch compared to the incoming instances structure.
    */
-  protected Map<String, String> m_missingMismatch = new HashMap<String, String>();
+  protected Map<String, String> m_missingMismatch =
+    new HashMap<String, String>();
 
   /**
    * Indexes of model attributes in the incoming instances structure. Missing or
@@ -95,6 +100,28 @@ public class WekaScoringMapTask implements Serializable {
      */
     public ScoringModel(Object model) {
       setModel(model);
+    }
+
+    /**
+     * Return true if the underlying model is a BatchPredictor
+     * 
+     * @return return true if the underlying model is a BatchPredictor
+     */
+    public boolean isBatchPredicor() {
+      return getModel() == null ? false : getModel() instanceof BatchPredictor;
+    }
+
+    /**
+     * Returns predictions in the case where the base model is a BatchPredictor
+     * 
+     * @param insts the instances to provide predictions for
+     * @return the predictions
+     * @throws Exception if a problem occurs
+     */
+    public double[][] distributionsForInstances(Instances insts)
+      throws Exception {
+
+      return ((BatchPredictor) getModel()).distributionsForInstances(insts);
     }
 
     /**
@@ -191,7 +218,6 @@ public class WekaScoringMapTask implements Serializable {
     @Override
     public void setModel(Object model) {
       m_model = (Classifier) model;
-
     }
 
     @Override
@@ -350,8 +376,9 @@ public class WekaScoringMapTask implements Serializable {
    *           expected by the model are missing or have a type mismatch with
    *           the incoming data
    */
-  public void setModel(Object model, Instances modelHeader, Instances dataHeader)
-    throws DistributedWekaException {
+  public void
+    setModel(Object model, Instances modelHeader, Instances dataHeader)
+      throws DistributedWekaException {
 
     m_missingMismatch.clear();
 
@@ -364,6 +391,17 @@ public class WekaScoringMapTask implements Serializable {
 
       if (modelHeader != null) {
         m_model.setHeader(modelHeader);
+      }
+
+      if (m_model.isBatchPredicor()) {
+        m_batchScoringData = new Instances(modelHeader, 0);
+        Environment env = Environment.getSystemWide();
+        String batchSize = ((BatchPredictor) model).getBatchSize();
+        if (!DistributedJobConfig.isEmpty(batchSize)) {
+          m_batchSize = Integer.parseInt(env.substitute(batchSize));
+        } else {
+          m_batchSize = 1000;
+        }
       }
     } catch (Exception ex) {
       throw new DistributedWekaException(ex);
@@ -455,6 +493,66 @@ public class WekaScoringMapTask implements Serializable {
   }
 
   /**
+   * Process an instance. When the batch size is met then a batch of predictions
+   * is returned; returns null if the batch size has not been matched yet
+   * 
+   * @param inst the instance to process
+   * @return a batch of predictions or null if we have not seen enough input
+   *         instances to meet the batch size yet
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public double[][] processInstanceBatchPredictor(Instance inst)
+    throws DistributedWekaException {
+
+    inst = mapIncomingFieldsToModelFields(inst);
+    m_batchScoringData.add(inst);
+
+    if (m_batchScoringData.numInstances() == m_batchSize) {
+      try {
+        double[][] predictions =
+          m_model.distributionsForInstances(m_batchScoringData);
+        if (predictions.length != m_batchScoringData.numInstances()) {
+          throw new Exception("Number of predictions did not match the number "
+            + "of instances in the batch");
+        }
+
+        m_batchScoringData.delete();
+
+        return predictions;
+      } catch (Exception ex) {
+        throw new DistributedWekaException(ex);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Finish off the last partial batch (if any).
+   * 
+   * @return predictions for the last partial batch or null
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public double[][] finalizeBatchPrediction() throws DistributedWekaException {
+
+    if (m_batchScoringData != null && m_batchScoringData.numInstances() > 0) {
+      // finish of the last partial batch
+
+      try {
+        double[][] predictions =
+          m_model.distributionsForInstances(m_batchScoringData);
+
+        m_batchScoringData = null;
+        return predictions;
+      } catch (Exception ex) {
+        throw new DistributedWekaException(ex);
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Get a string summarizing missing and type mismatches between the incoming
    * data and what the model expects
    * 
@@ -478,5 +576,14 @@ public class WekaScoringMapTask implements Serializable {
    */
   public List<String> getPredictionLabels() throws DistributedWekaException {
     return m_model.getPredictionLabels();
+  }
+
+  /**
+   * Returns true if the underlying model is a BatchPredictor
+   * 
+   * @return true if the underlying model is a BatchPredictor
+   */
+  public boolean isBatchPredictor() {
+    return m_model == null ? false : m_model.isBatchPredicor();
   }
 }
