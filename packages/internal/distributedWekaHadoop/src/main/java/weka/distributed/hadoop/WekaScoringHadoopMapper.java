@@ -56,7 +56,8 @@ public class WekaScoringHadoopMapper extends
    * The key in the Configuration that the options for this task are associated
    * with
    */
-  public static final String SCORING_MAP_TASK_OPTIONS = "*weka.distributed.scoring_map_task_opts";
+  public static final String SCORING_MAP_TASK_OPTIONS =
+    "*weka.distributed.scoring_map_task_opts";
 
   /** The underlying general Weka scoring map task */
   protected WekaScoringMapTask m_task = null;
@@ -70,10 +71,15 @@ public class WekaScoringHadoopMapper extends
   /** The columns to output in the scored data */
   protected Range m_colsToOutput;
 
+  protected int[] m_selectedIndices;
+
   protected boolean m_rangeInitialized;
 
   /** apparently it is good practice to re-use these */
   protected Text m_outputText = new Text();
+
+  /** Holds parsed rows for batch prediction */
+  protected List<Object> m_parsedBatch = new ArrayList<Object>();
 
   /**
    * Helper method to load the model to score with from the distributed cache
@@ -94,8 +100,8 @@ public class WekaScoringHadoopMapper extends
     ObjectInputStream ois = null;
     List<Object> result = new ArrayList<Object>();
     try {
-      ois = new ObjectInputStream(new BufferedInputStream(
-        new FileInputStream(f)));
+      ois =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
 
       try {
         Object model = ois.readObject();
@@ -131,8 +137,8 @@ public class WekaScoringHadoopMapper extends
 
     Configuration conf = context.getConfiguration();
     String taskOptsS = conf.get(SCORING_MAP_TASK_OPTIONS);
-    String csvOptsS = conf
-      .get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
+    String csvOptsS =
+      conf.get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
 
     try {
       if (!DistributedJobConfig.isEmpty(csvOptsS)) {
@@ -152,8 +158,8 @@ public class WekaScoringHadoopMapper extends
         }
 
         // load the header for the data and set the class index
-        m_scoringDataHeader = CSVToARFFHeaderReduceTask
-          .stripSummaryAtts(WekaClassifierHadoopMapper
+        m_scoringDataHeader =
+          CSVToARFFHeaderReduceTask.stripSummaryAtts(WekaClassifierHadoopMapper
             .loadTrainingHeader(arffHeaderFileName));
 
         // WekaClassifierHadoopMapper.setClassIndex(taskOpts,
@@ -169,8 +175,8 @@ public class WekaScoringHadoopMapper extends
 
         List<Object> loadedModel = loadModel(modelFileName);
         Object model = loadedModel.get(0);
-        Instances modelHeader = loadedModel.size() == 2 ? (Instances) loadedModel
-          .get(1) : null;
+        Instances modelHeader =
+          loadedModel.size() == 2 ? (Instances) loadedModel.get(1) : null;
 
         if (modelHeader == null) {
           throw new IOException(
@@ -183,7 +189,8 @@ public class WekaScoringHadoopMapper extends
         m_task.setModel(model, modelHeader, m_scoringDataHeader);
 
         String attRange = Utils.getOption("columns-to-output", taskOpts);
-        if (!DistributedJobConfig.isEmpty(attRange)) {
+        if (!DistributedJobConfig.isEmpty(attRange)
+          && !attRange.equals("first-last")) {
           m_colsToOutput = new Range();
           m_colsToOutput.setRanges(attRange);
         }
@@ -216,16 +223,15 @@ public class WekaScoringHadoopMapper extends
       b.append(row);
     } else {
       boolean first = true;
-      for (int i = 0; i < parsed.length; i++) {
-        if (m_colsToOutput.isInRange(i)) {
-          if (!first) {
-            b.append(",");
-          } else {
-            first = false;
-          }
-          if (!DistributedJobConfig.isEmpty(parsed[i])) {
-            b.append(parsed[i]);
-          }
+      for (int i = 0; i < m_selectedIndices.length; i++) {
+        if (!first) {
+          b.append(",");
+        } else {
+          first = false;
+        }
+
+        if (!DistributedJobConfig.isEmpty(parsed[m_selectedIndices[i]])) {
+          b.append(parsed[m_selectedIndices[i]]);
         }
       }
     }
@@ -258,25 +264,56 @@ public class WekaScoringHadoopMapper extends
 
       if (!m_rangeInitialized && m_colsToOutput != null) {
         m_colsToOutput.setUpper(parsed.length);
+        m_selectedIndices = m_colsToOutput.getSelection();
       }
 
       try {
         // specify true for the incremental classifier argument and
         // false for the force batch learning. This ensures that the
         // values of String attributes do not accumulate in memory.
-        Instance toProcess = WekaClassifierHadoopMapper.makeInstance(
-          m_rowHelper, m_scoringDataHeader, true, false, parsed);
+        Instance toProcess =
+          WekaClassifierHadoopMapper.makeInstance(m_rowHelper,
+            m_scoringDataHeader, true, false, parsed);
 
-        double[] preds = m_task.processInstance(toProcess);
-        List<String> labels = m_task.getPredictionLabels();
-        String newVal = concatenateRowAndPreds(parsed, row, preds, labels);
+        if (m_task.isBatchPredictor()) {
+          if (m_colsToOutput == null) {
+            m_parsedBatch.add(row);
+          } else {
+            m_parsedBatch.add(parsed);
+          }
 
-        // Text nv = new Text();
-        // nv.set(newVal);
-        m_outputText.set(newVal);
+          double[][] preds = m_task.processInstanceBatchPredictor(toProcess);
+          if (preds != null) {
+            // output the batch
+            List<String> labels = m_task.getPredictionLabels();
+            for (int i = 0; i < preds.length; i++) {
+              String tempRow =
+                m_colsToOutput != null ? null : m_parsedBatch.get(i).toString();
+              String[] tempParsedRow =
+                tempRow == null ? (String[]) m_parsedBatch.get(i) : null;
+              String newVal =
+                concatenateRowAndPreds(tempParsedRow, tempRow, preds[i], labels);
 
-        // don't need the key
-        context.write(null, m_outputText);
+              m_outputText.set(newVal);
+
+              // don't need the key
+              context.write(null, m_outputText);
+            }
+
+            m_parsedBatch.clear();
+          }
+        } else {
+          double[] preds = m_task.processInstance(toProcess);
+          List<String> labels = m_task.getPredictionLabels();
+          String newVal = concatenateRowAndPreds(parsed, row, preds, labels);
+
+          // Text nv = new Text();
+          // nv.set(newVal);
+          m_outputText.set(newVal);
+
+          // don't need the key
+          context.write(null, m_outputText);
+        }
       } catch (Exception e) {
         throw new IOException(e);
       }
@@ -284,7 +321,35 @@ public class WekaScoringHadoopMapper extends
   }
 
   @Override
-  public void cleanup(Context context) {
+  public void cleanup(Context context) throws IOException {
+
+    if (m_task.isBatchPredictor()) {
+      try {
+        double[][] preds = m_task.finalizeBatchPrediction();
+        if (preds != null) {
+          List<String> labels = m_task.getPredictionLabels();
+          for (int i = 0; i < preds.length; i++) {
+            String tempRow =
+              m_colsToOutput != null ? null : m_parsedBatch.get(i).toString();
+            String[] tempParsedRow =
+              tempRow == null ? (String[]) m_parsedBatch.get(i) : null;
+            String newVal =
+              concatenateRowAndPreds(tempParsedRow, tempRow, preds[i], labels);
+
+            m_outputText.set(newVal);
+
+            // don't need the key
+            context.write(null, m_outputText);
+          }
+
+          m_parsedBatch.clear();
+        }
+
+      } catch (Exception ex) {
+        throw new IOException(ex);
+      }
+    }
+
     String missingMismatch = m_task.getMissingMismatchAttributeInfo();
 
     if (!DistributedJobConfig.isEmpty(missingMismatch)) {
