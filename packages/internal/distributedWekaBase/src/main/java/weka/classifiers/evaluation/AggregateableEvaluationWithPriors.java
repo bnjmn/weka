@@ -149,7 +149,7 @@ public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
       // downSampled.addElement(m_Predictions.elementAt(index));
 
       // cast necessary for 3.7.10 compatibility
-      downSampled.add(m_Predictions.get(index));
+      downSampled.add((Prediction) m_Predictions.get(index));
 
       if (downSampled.size() == numToRetain) {
         break;
