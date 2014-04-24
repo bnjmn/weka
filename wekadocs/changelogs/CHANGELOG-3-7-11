@@ -1,0 +1,2171 @@
+------------------------------------------------------------------------
+r9940 | mhall | 2013-07-31 10:33:42 +1200 (Wed, 31 Jul 2013) | 1 line
+Changed paths:
+   M /trunk/last-release.props
+   M /trunk/weka/src/main/java/weka/core/version.txt
+
+Version is now 3.7.11-snapshot; updated date in last-release.props
+------------------------------------------------------------------------
+r9964 | mhall | 2013-08-02 09:02:40 +1200 (Fri, 02 Aug 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVSaver.java
+
+Was not honoring the -N option in batch mode - fixed.
+------------------------------------------------------------------------
+r9966 | mhall | 2013-08-02 09:15:31 +1200 (Fri, 02 Aug 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/Filter.java
+
+The variable holding the reference to the Thread used to perform filtering was not transient - fixed.
+------------------------------------------------------------------------
+r9982 | mhall | 2013-08-06 11:58:51 +1200 (Tue, 06 Aug 2013) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RenameNominalValues.java
+   A /trunk/weka/src/test/java/weka/filters/unsupervised/attribute/RenameNominalValuesTest.java
+   A /trunk/weka/src/test/resources/wekarefs/weka/filters/unsupervised/attribute/RenameNominalValuesTest.ref
+
+Initial import
+------------------------------------------------------------------------
+r9983 | mhall | 2013-08-06 12:01:22 +1200 (Tue, 06 Aug 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RenameNominalValues.java
+
+Updated javadoc
+------------------------------------------------------------------------
+r9987 | mhall | 2013-08-09 22:12:26 +1200 (Fri, 09 Aug 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/EM.java
+
+Now uses the model from the previous iteration if there is a slight decrease in log likelihood when iterating.
+------------------------------------------------------------------------
+r10000 | mhall | 2013-08-28 21:46:25 +1200 (Wed, 28 Aug 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddUserFields.java
+
+Now implements UnsupervisedFilter.
+------------------------------------------------------------------------
+r10019 | mhall | 2013-09-12 23:16:30 +1200 (Thu, 12 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Test instances for BatchPredictors now get their class values set to missing before being passed to the classifier.
+------------------------------------------------------------------------
+r10023 | eibe | 2013-09-23 15:15:24 +1200 (Mon, 23 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/FilteredClassifier.java
+   A /trunk/weka/src/main/java/weka/classifiers/meta/RandomizableFilteredClassifier.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RandomProjection.java
+
+Added RandomizableFilteredClassifier. Made RandomProjection implement Randomizable. Changed FilteredClassifier so that defaultClassifierString() is used in setOptions(). Also, added testWithFail() call in buildClassifier(). Added unit test for RandomizableFilteredClassifier.
+------------------------------------------------------------------------
+r10030 | mhall | 2013-09-25 15:09:17 +1200 (Wed, 25 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RandomProjection.java
+
+Fixed an inconsistent toolTip method name
+------------------------------------------------------------------------
+r10032 | mhall | 2013-09-25 16:08:23 +1200 (Wed, 25 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddCluster.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ClusterMembership.java
+
+Now enables capabilities for all class types
+------------------------------------------------------------------------
+r10037 | mhall | 2013-09-27 21:52:29 +1200 (Fri, 27 Sep 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Fixed a bug where the first row would get lost when running in batch mode and the data does not contain a header row.
+------------------------------------------------------------------------
+r10039 | eibe | 2013-10-01 11:33:15 +1300 (Tue, 01 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Bagging.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomForest.java
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+
+Added versions of resampleWithWeights() methods that can be used to represent copies of instances using weights rather than explicitly. Added option in bagging to enable use of this functionality if base learner is a WeightedInstancesHandler. (Note that for the default base learner, REPTree with pruning, this will change the result, because of the splitting into growing and pruning set, which does not take weights into account.) Changed RandomForest to exploit this functionality, as RandomTree is a WeightedInstancesHandler. The idea for this was shamelessly stolen from FastRandomForest, which, I think, is nevertheless still faster. :-)
+------------------------------------------------------------------------
+r10040 | mhall | 2013-10-02 15:22:38 +1300 (Wed, 02 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Bagging.java
+
+Updated javadoc
+------------------------------------------------------------------------
+r10042 | eibe | 2013-10-03 15:20:51 +1300 (Thu, 03 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/ContingencyTables.java
+
+Implemented simple cache for Nxlog(N) calculations when N is an integer in ContingencyTables. This seems give some nice speed-ups for REPTree and other classes that use the entropy calculations from ContingencyTables.
+------------------------------------------------------------------------
+r10044 | eibe | 2013-10-04 13:57:33 +1300 (Fri, 04 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+   M /trunk/weka/src/main/java/weka/core/AbstractInstance.java
+
+Some small changes to AbstractInstance and RandomTree to (hopefully) make things run just a tiny bit faster.
+------------------------------------------------------------------------
+r10046 | mhall | 2013-10-08 14:36:58 +1300 (Tue, 08 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/PropertySheetPanel.java
+
+Tip texts for properties are now set for their corresponding label in the property panel as well as the actual editor.
+------------------------------------------------------------------------
+r10048 | eibe | 2013-10-08 15:50:42 +1300 (Tue, 08 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+
+Reordered code to slightly improve runtime when sorting data.
+------------------------------------------------------------------------
+r10050 | mhall | 2013-10-08 20:21:59 +1300 (Tue, 08 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/AggregateableEvaluation.java
+
+Was missing a few boolean flags
+------------------------------------------------------------------------
+r10052 | mhall | 2013-10-09 15:10:22 +1300 (Wed, 09 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Bagging.java
+
+finalizeAggregation() was not setting the number of iterations to the total number of base classifiers. Only affected numeric class prediction.
+------------------------------------------------------------------------
+r10054 | eibe | 2013-10-10 20:44:01 +1300 (Thu, 10 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/EntropyBasedSplitCrit.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/GainRatioSplitCrit.java
+   M /trunk/weka/src/main/java/weka/core/ContingencyTables.java
+
+Made lnFunc() method in ContingencyTables public, and adapted classes for J48 splitting criteria to make use of this function (which uses a cache of n*log(n) values for smallish integers n). This yields a very nice speed-up for datasets containing attributes with many distinct numeric values.
+------------------------------------------------------------------------
+r10055 | eibe | 2013-10-11 12:37:00 +1300 (Fri, 11 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/rules/part/ClassifierDecList.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/EntropyBasedSplitCrit.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/EntropySplitCrit.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/GainRatioSplitCrit.java
+   M /trunk/weka/src/main/java/weka/core/ContingencyTables.java
+
+Made log2 in ContingencyTables a public constant. Fixed PART, which was broken after my last change.
+------------------------------------------------------------------------
+r10056 | eibe | 2013-10-11 13:34:12 +1300 (Fri, 11 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/ContingencyTables.java
+
+Made log2 in ContingencyTables a public constant. Fixed PART, which was broken after my last change.
+------------------------------------------------------------------------
+r10057 | eibe | 2013-10-11 13:39:44 +1300 (Fri, 11 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/ContingencyTables.java
+
+Accidentally committed change in x * log(x) cache size in ContingencyTables. Changed back to 10000.
+------------------------------------------------------------------------
+r10058 | eibe | 2013-10-11 20:19:16 +1300 (Fri, 11 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SimpleLinearRegression.java
+
+Rewrote the buildClassifier() method of SimpleLinearRegression to build all regression models for all attributes simultaneously, to improve runtime.
+------------------------------------------------------------------------
+r10059 | eibe | 2013-10-11 20:23:22 +1300 (Fri, 11 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/AbstractClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LogisticBase.java
+   M /trunk/weka/src/main/java/weka/core/Capabilities.java
+
+Introduced method in Capabilities class to effectively turn off testWithFail, making it always succeed. This new method can be used with a new option in AbstractClassifier that all classifiers inherit, to improve runtime. As an example application, LogisticBase, which is used by LMT and SimpleLogistic, now turns off testing for capabilities when building SimpleLinearRegression models, yielding substantial improvements in runtime. A similar option should be introduced for other schemes that use Capabilities.
+------------------------------------------------------------------------
+r10063 | mhall | 2013-10-11 21:28:14 +1300 (Fri, 11 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+
+Fixed a NPE that occurred when a loaded model was re-evaluated on the current test set and saving predictions for visualization was turned off
+------------------------------------------------------------------------
+r10065 | eibe | 2013-10-12 20:47:04 +1300 (Sat, 12 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomForest.java
+
+Turned off capabilities checking for invidiual random trees when building a random forest.
+------------------------------------------------------------------------
+r10067 | mhall | 2013-10-14 09:45:55 +1300 (Mon, 14 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/IBk.java
+
+Updated the tip text for the cross-validate option.
+------------------------------------------------------------------------
+r10068 | mhall | 2013-10-14 09:46:31 +1300 (Mon, 14 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/IBk.java
+
+Oops. A bit of extraneous text was added in the previous commit - fixed.
+------------------------------------------------------------------------
+r10072 | eibe | 2013-10-14 14:01:07 +1300 (Mon, 14 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+Bug fix: MultilayerPerceptron no longer modifies the values of the test instances that are passed into distributionForInstance()...
+------------------------------------------------------------------------
+r10080 | eibe | 2013-10-17 16:35:02 +1300 (Thu, 17 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/LMT.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LMTNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LogisticBase.java
+
+Some improvementst of memory usage for SimpleLogistic and LMT.
+------------------------------------------------------------------------
+r10085 | mhall | 2013-10-18 19:54:24 +1300 (Fri, 18 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Was treating white space only entries as nominal values rather than missing - fixed.
+------------------------------------------------------------------------
+r10088 | mhall | 2013-10-18 22:45:21 +1300 (Fri, 18 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/CSVLoader.java
+
+Javadoc fix.
+------------------------------------------------------------------------
+r10096 | eibe | 2013-10-21 15:17:21 +1300 (Mon, 21 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SimpleLinearRegression.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LMTNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LogisticBase.java
+
+Made changes to improve memory consumption of final model. Now just stores, per-node, one SimpleLinearRegressionModel for each attribute. Previously, SimpleLinearRegressionModel objects for all boosting iterations from the root to that node were stored. The change can also improve runtime. The changes have a positive effect when the number of instances is large relative to the number of attributes.
+------------------------------------------------------------------------
+r10100 | eibe | 2013-10-22 13:25:44 +1300 (Tue, 22 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LMTNode.java
+
+Code simplification made possible through recent modifications, yielding (hopefully) improvements in speed and memory consumption.
+------------------------------------------------------------------------
+r10104 | eibe | 2013-10-22 18:03:10 +1300 (Tue, 22 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LMTNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LogisticBase.java
+
+Bug fix for the case where cross-validation is performed locally at each node.
+------------------------------------------------------------------------
+r10112 | mhall | 2013-10-25 18:36:25 +1300 (Fri, 25 Oct 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/GlobalScoreSearchAlgorithm.java
+
+Fixed a bug in the k-fold CV routine.
+------------------------------------------------------------------------
+r10118 | eibe | 2013-11-01 16:30:14 +1300 (Fri, 01 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/rules/PART.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/J48.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/LMT.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/BinC45ModelSelection.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45ModelSelection.java
+
+Added option in J48, PART, and LMT, that makes it possible to turn of relocation of split point to the nearest actual value in the full training set. This can yield speed-ups on large datasets with numeric attributes that are used for splitting.
+------------------------------------------------------------------------
+r10121 | mhall | 2013-11-04 21:02:01 +1300 (Mon, 04 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddUserFields.java
+
+Javadoc update.
+------------------------------------------------------------------------
+r10125 | mhall | 2013-11-05 20:07:11 +1300 (Tue, 05 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/datagenerators/DataGenerator.java
+
+Changed the default output to be System.out instead of a StringWriter. This allows large datasets to be produced incrementally via redirection (rather than having to use -o) in the console and SimpleCLI.
+------------------------------------------------------------------------
+r10128 | eibe | 2013-11-07 13:47:21 +1300 (Thu, 07 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/AbstractClassifier.java
+
+Changed -D to -output-debug-info in AbstractClassifier to avoid clashes with subclass options.
+------------------------------------------------------------------------
+r10130 | mhall | 2013-11-08 14:22:22 +1300 (Fri, 08 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Fixed a bug where cluster nominal attribute value counts were not getting set properly when empty clusters were pruned. Only affected the case when empty clusters occurred and the user had opted to output standard deviations/frequency counts.
+------------------------------------------------------------------------
+r10133 | eibe | 2013-11-11 15:36:36 +1300 (Mon, 11 Nov 2013) | 1 line
+Changed paths:
+   A /trunk/.classpath
+   A /trunk/.project
+   A /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveDuplicates.java
+   A /trunk/weka/src/test/java/weka/filters/unsupervised/instance/RemoveDuplicatesTest.java
+
+Added new filter for removing duplicate instances from the first batch of data received.
+------------------------------------------------------------------------
+r10134 | mhall | 2013-11-11 15:49:35 +1300 (Mon, 11 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveDuplicates.java
+
+Updated javadoc.
+------------------------------------------------------------------------
+r10137 | mhall | 2013-11-12 15:47:32 +1300 (Tue, 12 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ReplaceMissingWithUserConstant.java
+
+Now makes the user-supplied nominal value to replace missing with the first value listed.
+------------------------------------------------------------------------
+r10139 | mhall | 2013-11-12 16:26:39 +1300 (Tue, 12 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ReplaceMissingWithUserConstant.java
+
+Fixed a bug that my last check-in created.
+------------------------------------------------------------------------
+r10141 | eibe | 2013-11-12 17:08:39 +1300 (Tue, 12 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/AbstractClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/BVDecompose.java
+   M /trunk/weka/src/main/java/weka/classifiers/BVDecomposeSegCVSub.java
+   M /trunk/weka/src/main/java/weka/classifiers/CheckClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/CheckSource.java
+   M /trunk/weka/src/main/java/weka/classifiers/CostMatrix.java
+   M /trunk/weka/src/main/java/weka/classifiers/IteratedSingleClassifierEnhancer.java
+   M /trunk/weka/src/main/java/weka/classifiers/MultipleClassifiersCombiner.java
+   M /trunk/weka/src/main/java/weka/classifiers/ParallelIteratedSingleClassifierEnhancer.java
+   M /trunk/weka/src/main/java/weka/classifiers/ParallelMultipleClassifiersCombiner.java
+   M /trunk/weka/src/main/java/weka/classifiers/RandomizableClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/RandomizableIteratedSingleClassifierEnhancer.java
+   M /trunk/weka/src/main/java/weka/classifiers/RandomizableMultipleClassifiersCombiner.java
+   M /trunk/weka/src/main/java/weka/classifiers/RandomizableParallelIteratedSingleClassifierEnhancer.java
+   M /trunk/weka/src/main/java/weka/classifiers/RandomizableParallelMultipleClassifiersCombiner.java
+   M /trunk/weka/src/main/java/weka/classifiers/RandomizableSingleClassifierEnhancer.java
+   M /trunk/weka/src/main/java/weka/classifiers/SingleClassifierEnhancer.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/BayesNet.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/NaiveBayes.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/NaiveBayesMultinomial.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/NaiveBayesMultinomialText.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/GaussianProcesses.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/LinearRegression.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/Logistic.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SGD.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SGDText.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SMO.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SMOreg.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SimpleLogistic.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/VotedPerceptron.java
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/IBk.java
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/KStar.java
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/LWL.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/AdaBoostM1.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/AdditiveRegression.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/AttributeSelectedClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Bagging.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/CVParameterSelection.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/CostSensitiveClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/FilteredClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/LogitBoost.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/MultiClassClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/MultiScheme.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/RandomSubSpace.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/RandomizableFilteredClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/RegressionByDiscretization.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Stacking.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Vote.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/JRip.java
+   M /trunk/weka/src/main/java/weka/core/AdditionalMeasureProducer.java
+   M /trunk/weka/src/main/java/weka/core/Check.java
+   M /trunk/weka/src/main/java/weka/core/CheckScheme.java
+   M /trunk/weka/src/main/java/weka/core/Instance.java
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+   M /trunk/weka/src/main/java/weka/core/OptionHandler.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/BallTree.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/CoverTree.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/KDTree.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/LinearNNSearch.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/NearestNeighbourSearch.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/PerformanceStats.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/TreePerformanceStats.java
+
+Fixed many setOptions(), listOptions(), and getOptions() methods to call super class methods. Also, added check for remaining options in setOptions() whereever necessary. More command-line help now output for FilteredClassifiers and AttributeSelectedClassifier.
+------------------------------------------------------------------------
+r10142 | mhall | 2013-11-12 17:55:41 +1300 (Tue, 12 Nov 2013) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/classifiers/evaluation/RegressionAnalysis.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/LinearRegression.java
+
+Chris Meyer's additional stats for LinearRegression and SimpleLinearRegression
+------------------------------------------------------------------------
+r10143 | mhall | 2013-11-12 17:59:48 +1300 (Tue, 12 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SimpleLinearRegression.java
+
+Chris Meyer's additional stats for LinearRegression and SimpleLinearRegression
+------------------------------------------------------------------------
+r10146 | mhall | 2013-11-13 08:31:29 +1300 (Wed, 13 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ReplaceMissingWithUserConstant.java
+
+Fixed another bug that got introduced with the last few changes.
+------------------------------------------------------------------------
+r10149 | mhall | 2013-11-13 16:27:44 +1300 (Wed, 13 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/Appender.java
+
+Fixed a bug in the specification of event types produced by Appender and in the routine that determines whether a particular event type can be generated at a given point in time.
+------------------------------------------------------------------------
+r10150 | mhall | 2013-11-13 16:27:56 +1300 (Wed, 13 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/AppenderBeanInfo.java
+
+Fixed a bug in the specification of event types produced by Appender and in the routine that determines whether a particular event type can be generated at a given point in time.
+------------------------------------------------------------------------
+r10153 | eibe | 2013-11-13 17:54:56 +1300 (Wed, 13 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/CheckClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/Evaluation.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/ADNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/BIFReader.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/BayesNetGenerator.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/EditableBayesNet.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/GUI.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/MarginCalculator.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/VaryNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/estimate/BayesNetEstimator.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/SearchAlgorithm.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/AggregateableEvaluation.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/EvaluationUtils.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/MarginCurve.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/ThresholdCurve.java
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/kstar/KStarCache.java
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/kstar/KStarNominalAttribute.java
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/kstar/KStarNumericAttribute.java
+   M /trunk/weka/src/main/java/weka/classifiers/misc/InputMappedClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/misc/SerializedClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/pmml/consumer/TreeModel.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/DecisionTable.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/JRip.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/OneR.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/PART.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/RuleStats.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/ZeroR.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/part/C45PruneableDecList.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/part/ClassifierDecList.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/part/MakeDecList.java
+   M /trunk/weka/src/main/java/weka/classifiers/rules/part/PruneableDecList.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/J48.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/LMT.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/M5P.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/REPTree.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomForest.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/m5/M5Base.java
+   M /trunk/weka/src/main/java/weka/core/Attribute.java
+   M /trunk/weka/src/main/java/weka/core/FastVector.java
+   M /trunk/weka/src/main/java/weka/estimators/CheckEstimator.java
+   M /trunk/weka/src/main/java/weka/estimators/Estimator.java
+   M /trunk/weka/src/main/java/weka/estimators/EstimatorUtils.java
+   M /trunk/weka/src/main/java/weka/estimators/MultivariateGaussianEstimator.java
+   M /trunk/weka/src/main/java/weka/estimators/NNConditionalEstimator.java
+   M /trunk/weka/src/main/java/weka/estimators/UnivariateEqualFrequencyHistogramEstimator.java
+   M /trunk/weka/src/main/java/weka/estimators/UnivariateKernelEstimator.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierErrorsPlotInstances.java
+   M /trunk/weka/src/main/java/weka/gui/graphvisualizer/BIFParser.java
+   M /trunk/weka/src/main/java/weka/gui/graphvisualizer/HierarchicalBCEngine.java
+   M /trunk/weka/src/main/java/weka/gui/graphvisualizer/LayoutEngine.java
+
+Further cleanup of option handling and general code cleanup, removing warnings.
+------------------------------------------------------------------------
+r10154 | eibe | 2013-11-13 21:50:06 +1300 (Wed, 13 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/MarginCalculator.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/estimate/BMAEstimator.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/estimate/MultiNomialBMAEstimator.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/estimate/SimpleEstimator.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/ci/ICSSearchAlgorithm.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/fixed/FromFile.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/GeneticSearch.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/GlobalScoreSearchAlgorithm.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/HillClimber.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/K2.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/RepeatedHillClimber.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/SimulatedAnnealing.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/TAN.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/global/TabuSearch.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/GeneticSearch.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/HillClimber.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/K2.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/LAGDHillClimber.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/RepeatedHillClimber.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/SimulatedAnnealing.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/TAN.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/TabuSearch.java
+
+Further cleanup of option handling and general code cleanup, removing warnings.
+------------------------------------------------------------------------
+r10169 | eibe | 2013-11-15 11:05:52 +1300 (Fri, 15 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/ConfusionMatrix.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/CostCurve.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/TwoClassStats.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/AbstractOutput.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/CSV.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/GaussianProcesses.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/LinearRegression.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SGDText.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SimpleLinearRegression.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/CachedKernel.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/CheckKernel.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/Kernel.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/KernelEvaluation.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/PolyKernel.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/PrecomputedKernelMatrixKernel.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/Puk.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/RBFKernel.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/RegOptimizer.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/RegSMO.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/RegSMOImproved.java
+   M /trunk/weka/src/main/java/weka/classifiers/functions/supportVector/StringKernel.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/ht/NominalConditionalSufficientStats.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/ht/SplitNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/BinC45ModelSelection.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/BinC45Split.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45ModelSelection.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45Split.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/Distribution.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/GainRatioSplitCrit.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/InfoGainSplitCrit.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/NBTreeModelSelection.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/NBTreeSplit.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LMTNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LogisticBase.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/m5/CorrelationSplitInfo.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/m5/Rule.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/m5/RuleNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/m5/YongSplitInfo.java
+
+More option handling cleanup and elimination of warnings.
+------------------------------------------------------------------------
+r10172 | eibe | 2013-11-15 16:31:33 +1300 (Fri, 15 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/associations/Apriori.java
+   M /trunk/weka/src/main/java/weka/associations/AprioriItemSet.java
+   M /trunk/weka/src/main/java/weka/associations/AssociatorEvaluation.java
+   M /trunk/weka/src/main/java/weka/associations/CARuleMiner.java
+   M /trunk/weka/src/main/java/weka/associations/CheckAssociator.java
+   M /trunk/weka/src/main/java/weka/associations/FPGrowth.java
+   M /trunk/weka/src/main/java/weka/associations/FilteredAssociator.java
+   M /trunk/weka/src/main/java/weka/associations/ItemSet.java
+   M /trunk/weka/src/main/java/weka/associations/LabeledItemSet.java
+   M /trunk/weka/src/main/java/weka/associations/NumericItem.java
+   M /trunk/weka/src/main/java/weka/associations/SingleAssociatorEnhancer.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/AttributeSelection.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/BestFirst.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/CfsSubsetEval.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/CheckAttributeSelection.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/CorrelationAttributeEval.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/GainRatioAttributeEval.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/GreedyStepwise.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/InfoGainAttributeEval.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/OneRAttributeEval.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/PrincipalComponents.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/Ranker.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/ReliefFAttributeEval.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/SymmetricalUncertAttributeEval.java
+   M /trunk/weka/src/main/java/weka/attributeSelection/WrapperSubsetEval.java
+
+More option handling cleanup and elimination of warnings, mainly by elimination of FastVector.
+------------------------------------------------------------------------
+r10173 | eibe | 2013-11-15 17:13:12 +1300 (Fri, 15 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/associations/Apriori.java
+   M /trunk/weka/src/main/java/weka/associations/AprioriItemSet.java
+   M /trunk/weka/src/main/java/weka/associations/ItemSet.java
+   M /trunk/weka/src/main/java/weka/associations/LabeledItemSet.java
+
+Fixed some compilation issues.
+------------------------------------------------------------------------
+r10200 | eibe | 2013-11-16 16:37:39 +1300 (Sat, 16 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/associations/ItemSet.java
+
+Small changes required for PredictiveApriori.
+------------------------------------------------------------------------
+r10203 | eibe | 2013-11-18 17:20:10 +1300 (Mon, 18 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/associations/Apriori.java
+   M /trunk/weka/src/main/java/weka/associations/AprioriItemSet.java
+   M /trunk/weka/src/main/java/weka/associations/ItemSet.java
+   M /trunk/weka/src/main/java/weka/associations/LabeledItemSet.java
+   M /trunk/weka/src/main/java/weka/classifiers/AbstractClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/NaiveBayes.java
+   M /trunk/weka/src/main/java/weka/clusterers/AbstractClusterer.java
+   M /trunk/weka/src/main/java/weka/clusterers/CheckClusterer.java
+   M /trunk/weka/src/main/java/weka/clusterers/ClusterEvaluation.java
+   M /trunk/weka/src/main/java/weka/clusterers/Cobweb.java
+   M /trunk/weka/src/main/java/weka/clusterers/EM.java
+   M /trunk/weka/src/main/java/weka/clusterers/FarthestFirst.java
+   M /trunk/weka/src/main/java/weka/clusterers/FilteredClusterer.java
+   M /trunk/weka/src/main/java/weka/clusterers/HierarchicalClusterer.java
+   M /trunk/weka/src/main/java/weka/clusterers/MakeDensityBasedClusterer.java
+   M /trunk/weka/src/main/java/weka/clusterers/RandomizableClusterer.java
+   M /trunk/weka/src/main/java/weka/clusterers/RandomizableDensityBasedClusterer.java
+   M /trunk/weka/src/main/java/weka/clusterers/RandomizableSingleClustererEnhancer.java
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+   M /trunk/weka/src/main/java/weka/clusterers/SingleClustererEnhancer.java
+   M /trunk/weka/src/main/java/weka/core/AbstractInstance.java
+   M /trunk/weka/src/main/java/weka/core/AllJavadoc.java
+   M /trunk/weka/src/main/java/weka/core/Attribute.java
+   M /trunk/weka/src/main/java/weka/core/BinarySparseInstance.java
+   M /trunk/weka/src/main/java/weka/core/Capabilities.java
+   M /trunk/weka/src/main/java/weka/core/Check.java
+   M /trunk/weka/src/main/java/weka/core/CheckGOE.java
+   M /trunk/weka/src/main/java/weka/core/CheckOptionHandler.java
+   M /trunk/weka/src/main/java/weka/core/ClassCache.java
+   M /trunk/weka/src/main/java/weka/core/ClassDiscovery.java
+   M /trunk/weka/src/main/java/weka/core/ClassloaderUtil.java
+   M /trunk/weka/src/main/java/weka/core/ConjugateGradientOptimization.java
+   M /trunk/weka/src/main/java/weka/core/DenseInstance.java
+   M /trunk/weka/src/main/java/weka/core/Environment.java
+   M /trunk/weka/src/main/java/weka/core/FastVector.java
+   M /trunk/weka/src/main/java/weka/core/FindWithCapabilities.java
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+   M /trunk/weka/src/main/java/weka/core/Javadoc.java
+   M /trunk/weka/src/main/java/weka/core/ListOptions.java
+   M /trunk/weka/src/main/java/weka/core/MathematicalExpression.java
+   M /trunk/weka/src/main/java/weka/core/Matrix.java
+   M /trunk/weka/src/main/java/weka/core/Memory.java
+   M /trunk/weka/src/main/java/weka/core/MinkowskiDistance.java
+   M /trunk/weka/src/main/java/weka/core/NormalizableDistance.java
+   M /trunk/weka/src/main/java/weka/core/Optimization.java
+   M /trunk/weka/src/main/java/weka/core/OptionHandlerJavadoc.java
+   M /trunk/weka/src/main/java/weka/core/ProtectedProperties.java
+   M /trunk/weka/src/main/java/weka/core/Range.java
+   M /trunk/weka/src/main/java/weka/core/RepositoryIndexGenerator.java
+   M /trunk/weka/src/main/java/weka/core/SerializationHelper.java
+   M /trunk/weka/src/main/java/weka/core/SparseInstance.java
+   M /trunk/weka/src/main/java/weka/core/Statistics.java
+   M /trunk/weka/src/main/java/weka/core/Stopwords.java
+   M /trunk/weka/src/main/java/weka/core/SystemInfo.java
+   M /trunk/weka/src/main/java/weka/core/TechnicalInformation.java
+   M /trunk/weka/src/main/java/weka/core/TechnicalInformationHandlerJavadoc.java
+   M /trunk/weka/src/main/java/weka/core/TestInstances.java
+   M /trunk/weka/src/main/java/weka/core/Trie.java
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+   M /trunk/weka/src/main/java/weka/core/Version.java
+   M /trunk/weka/src/main/java/weka/core/WekaEnumeration.java
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+   M /trunk/weka/src/main/java/weka/core/converters/AbstractFileLoader.java
+   M /trunk/weka/src/main/java/weka/core/converters/AbstractFileSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/AbstractLoader.java
+   M /trunk/weka/src/main/java/weka/core/converters/AbstractSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/ArffLoader.java
+   M /trunk/weka/src/main/java/weka/core/converters/ArffSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/C45Saver.java
+   M /trunk/weka/src/main/java/weka/core/converters/CSVLoader.java
+   M /trunk/weka/src/main/java/weka/core/converters/CSVSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/ConverterUtils.java
+   M /trunk/weka/src/main/java/weka/core/converters/DatabaseLoader.java
+   M /trunk/weka/src/main/java/weka/core/converters/DatabaseSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/JSONSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/LibSVMSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/MatlabSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/SVMLightSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/TextDirectoryLoader.java
+   M /trunk/weka/src/main/java/weka/core/converters/XRFFSaver.java
+   M /trunk/weka/src/main/java/weka/core/json/JSONNode.java
+   M /trunk/weka/src/main/java/weka/core/json/Parser.java
+   M /trunk/weka/src/main/java/weka/core/json/Scanner.java
+   M /trunk/weka/src/main/java/weka/core/mathematicalexpression/Parser.java
+   M /trunk/weka/src/main/java/weka/core/mathematicalexpression/Scanner.java
+   M /trunk/weka/src/main/java/weka/core/matrix/DoubleVector.java
+   M /trunk/weka/src/main/java/weka/core/matrix/FlexibleDecimalFormat.java
+   M /trunk/weka/src/main/java/weka/core/matrix/Matrix.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/CoverTree.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/NearestNeighbourSearch.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/balltrees/BallSplitter.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/balltrees/BallTreeConstructor.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/balltrees/MedianDistanceFromArbitraryPoint.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/balltrees/MedianOfWidestDimension.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/balltrees/MiddleOutConstructor.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/balltrees/PointsClosestToFurthestChildren.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/balltrees/TopDownConstructor.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/covertrees/Stack.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/kdtrees/KDTreeNodeSplitter.java
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/kdtrees/KMeansInpiredMethod.java
+   M /trunk/weka/src/main/java/weka/core/pmml/Array.java
+   M /trunk/weka/src/main/java/weka/core/pmml/DerivedFieldMetaInfo.java
+   M /trunk/weka/src/main/java/weka/core/pmml/Discretize.java
+   M /trunk/weka/src/main/java/weka/core/pmml/FieldMetaInfo.java
+   M /trunk/weka/src/main/java/weka/core/pmml/MappingInfo.java
+   M /trunk/weka/src/main/java/weka/core/pmml/PMMLFactory.java
+   M /trunk/weka/src/main/java/weka/core/pmml/TransformationDictionary.java
+   M /trunk/weka/src/main/java/weka/core/scripting/Groovy.java
+   M /trunk/weka/src/main/java/weka/core/scripting/Jython.java
+   M /trunk/weka/src/main/java/weka/core/stemmers/SnowballStemmer.java
+   M /trunk/weka/src/main/java/weka/core/stemmers/Stemming.java
+   M /trunk/weka/src/main/java/weka/core/tokenizers/AlphabeticTokenizer.java
+   M /trunk/weka/src/main/java/weka/core/tokenizers/CharacterDelimitedTokenizer.java
+   M /trunk/weka/src/main/java/weka/core/tokenizers/NGramTokenizer.java
+   M /trunk/weka/src/main/java/weka/core/tokenizers/Tokenizer.java
+   M /trunk/weka/src/main/java/weka/core/tokenizers/WordTokenizer.java
+   M /trunk/weka/src/main/java/weka/core/xml/KOML.java
+   M /trunk/weka/src/main/java/weka/core/xml/MethodHandler.java
+   M /trunk/weka/src/main/java/weka/core/xml/PropertyHandler.java
+   M /trunk/weka/src/main/java/weka/core/xml/XMLBasicSerialization.java
+   M /trunk/weka/src/main/java/weka/core/xml/XMLInstances.java
+   M /trunk/weka/src/main/java/weka/core/xml/XMLOptions.java
+   M /trunk/weka/src/main/java/weka/core/xml/XMLSerialization.java
+   M /trunk/weka/src/main/java/weka/core/xml/XMLSerializationMethodHandler.java
+   M /trunk/weka/src/main/java/weka/core/xml/XStream.java
+   M /trunk/weka/src/main/java/weka/datagenerators/ClassificationGenerator.java
+   M /trunk/weka/src/main/java/weka/datagenerators/ClusterDefinition.java
+   M /trunk/weka/src/main/java/weka/datagenerators/ClusterGenerator.java
+   M /trunk/weka/src/main/java/weka/datagenerators/DataGenerator.java
+   M /trunk/weka/src/main/java/weka/datagenerators/RegressionGenerator.java
+   M /trunk/weka/src/main/java/weka/datagenerators/Test.java
+   M /trunk/weka/src/main/java/weka/datagenerators/classifiers/classification/Agrawal.java
+   M /trunk/weka/src/main/java/weka/datagenerators/classifiers/classification/BayesNet.java
+   M /trunk/weka/src/main/java/weka/datagenerators/classifiers/classification/LED24.java
+   M /trunk/weka/src/main/java/weka/datagenerators/classifiers/classification/RDG1.java
+   M /trunk/weka/src/main/java/weka/datagenerators/classifiers/classification/RandomRBF.java
+   M /trunk/weka/src/main/java/weka/datagenerators/classifiers/regression/Expression.java
+   M /trunk/weka/src/main/java/weka/datagenerators/classifiers/regression/MexicanHat.java
+   M /trunk/weka/src/main/java/weka/datagenerators/clusterers/BIRCHCluster.java
+   M /trunk/weka/src/main/java/weka/datagenerators/clusterers/SubspaceCluster.java
+   M /trunk/weka/src/main/java/weka/datagenerators/clusterers/SubspaceClusterDefinition.java
+   M /trunk/weka/src/main/java/weka/experiment/AveragingResultProducer.java
+   M /trunk/weka/src/main/java/weka/experiment/CSVResultListener.java
+   M /trunk/weka/src/main/java/weka/experiment/ClassifierSplitEvaluator.java
+   M /trunk/weka/src/main/java/weka/experiment/CostSensitiveClassifierSplitEvaluator.java
+   M /trunk/weka/src/main/java/weka/experiment/CrossValidationResultProducer.java
+   M /trunk/weka/src/main/java/weka/experiment/CrossValidationSplitResultProducer.java
+   M /trunk/weka/src/main/java/weka/experiment/DatabaseResultListener.java
+   M /trunk/weka/src/main/java/weka/experiment/DatabaseResultProducer.java
+   M /trunk/weka/src/main/java/weka/experiment/DatabaseUtils.java
+   M /trunk/weka/src/main/java/weka/experiment/DensityBasedClustererSplitEvaluator.java
+   M /trunk/weka/src/main/java/weka/experiment/Experiment.java
+   M /trunk/weka/src/main/java/weka/experiment/ExplicitTestsetResultProducer.java
+   M /trunk/weka/src/main/java/weka/experiment/InstanceQuery.java
+   M /trunk/weka/src/main/java/weka/experiment/InstancesResultListener.java
+   M /trunk/weka/src/main/java/weka/experiment/LearningRateResultProducer.java
+   M /trunk/weka/src/main/java/weka/experiment/PairedCorrectedTTester.java
+   M /trunk/weka/src/main/java/weka/experiment/PairedTTester.java
+   M /trunk/weka/src/main/java/weka/experiment/PropertyNode.java
+   M /trunk/weka/src/main/java/weka/experiment/RandomSplitResultProducer.java
+   M /trunk/weka/src/main/java/weka/experiment/RegressionSplitEvaluator.java
+
+Further code cleanup. Have not run any tests and have not tried to compile the packages either.
+------------------------------------------------------------------------
+r10204 | eibe | 2013-11-18 21:36:28 +1300 (Mon, 18 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/xml/XMLBasicSerialization.java
+   M /trunk/weka/src/main/java/weka/experiment/Experiment.java
+   M /trunk/weka/src/main/java/weka/experiment/RemoteEngine.java
+   M /trunk/weka/src/main/java/weka/experiment/RemoteExperiment.java
+   M /trunk/weka/src/main/java/weka/experiment/RemoteExperimentSubTask.java
+   M /trunk/weka/src/main/java/weka/experiment/ResultMatrix.java
+   M /trunk/weka/src/main/java/weka/experiment/ResultMatrixPlainText.java
+   M /trunk/weka/src/main/java/weka/experiment/xml/XMLExperiment.java
+
+DefaultListModels is not generic in Java 1.6. Cleaned up a further few classes.
+------------------------------------------------------------------------
+r10205 | mhall | 2013-11-19 14:21:22 +1300 (Tue, 19 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/experiment/DatabaseUtils.java
+
+Changed the default for autoCommit (if not explicitly defined in the DatabaseUtils.props file) from false to true.
+------------------------------------------------------------------------
+r10210 | eibe | 2013-11-19 16:38:56 +1300 (Tue, 19 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/CheckSource.java
+   M /trunk/weka/src/main/java/weka/filters/Filter.java
+   M /trunk/weka/src/main/java/weka/filters/MultiFilter.java
+   M /trunk/weka/src/main/java/weka/filters/SimpleFilter.java
+
+Small changes to remove warnings.
+------------------------------------------------------------------------
+r10211 | eibe | 2013-11-19 16:54:11 +1300 (Tue, 19 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/SimpleFilter.java
+
+Changed command-line option for debug output from -D. Also, introduced ability to turn of capabilities checking. Both apply only to filters that extend SimpleFilter.
+------------------------------------------------------------------------
+r10212 | eibe | 2013-11-19 16:56:28 +1300 (Tue, 19 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/AbstractClusterer.java
+
+Capabilities handling can now *actually* be turned off...
+------------------------------------------------------------------------
+r10215 | eibe | 2013-11-20 12:44:00 +1300 (Wed, 20 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/AddClassification.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/AttributeSelection.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/ClassOrder.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/Discretize.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/MergeNominalValues.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/NominalToBinary.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/PartitionMembership.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/instance/Resample.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/instance/SpreadSubsample.java
+   M /trunk/weka/src/main/java/weka/filters/supervised/instance/StratifiedRemoveFolds.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AbstractTimeSeries.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Add.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddCluster.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddExpression.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddID.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddNoise.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddUserFields.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/AddValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ChangeDateFormat.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ClassAssigner.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ClusterMembership.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Copy.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Discretize.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/FirstOrder.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/InterquartileRange.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/KernelFilter.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/MakeIndicator.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/MathExpression.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/MergeInfrequentNominalValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/MergeManyValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/MergeTwoValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/NominalToBinary.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/NominalToString.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Normalize.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/NumericCleaner.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/NumericToBinary.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/NumericToNominal.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/NumericTransform.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Obfuscate.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/PKIDiscretize.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/PartitionedMultiFilter.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/PotentialClassIgnorer.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/PrincipalComponents.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RandomProjection.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RandomSubset.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Remove.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RemoveByName.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RemoveType.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RemoveUseless.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RenameAttribute.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RenameNominalValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Reorder.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ReplaceMissingWithUserConstant.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/SortLabels.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/StringToNominal.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/StringToWordVector.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/SwapValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/NonSparseToSparse.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/Randomize.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveFolds.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveFrequentValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveMisclassified.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemovePercentage.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveRange.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveWithValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/Resample.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/ReservoirSample.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/SubsetByExpression.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Parser.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/subsetbyexpression/Scanner.java
+
+Cleaned up option handling and removed warnings.
+------------------------------------------------------------------------
+r10216 | eibe | 2013-11-20 18:08:33 +1300 (Wed, 20 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/AttributeListPanel.java
+   M /trunk/weka/src/main/java/weka/gui/AttributeSelectionPanel.java
+   M /trunk/weka/src/main/java/weka/gui/AttributeSummaryPanel.java
+   M /trunk/weka/src/main/java/weka/gui/AttributeVisualizationPanel.java
+   M /trunk/weka/src/main/java/weka/gui/BrowserHelper.java
+   M /trunk/weka/src/main/java/weka/gui/CheckBoxList.java
+   M /trunk/weka/src/main/java/weka/gui/ConverterFileChooser.java
+   M /trunk/weka/src/main/java/weka/gui/CostMatrixEditor.java
+   M /trunk/weka/src/main/java/weka/gui/ExtensionFileFilter.java
+   M /trunk/weka/src/main/java/weka/gui/GUIChooser.java
+   M /trunk/weka/src/main/java/weka/gui/GenericArrayEditor.java
+   M /trunk/weka/src/main/java/weka/gui/GenericObjectEditor.java
+   M /trunk/weka/src/main/java/weka/gui/GenericObjectEditorHistory.java
+   M /trunk/weka/src/main/java/weka/gui/GenericPropertiesCreator.java
+   M /trunk/weka/src/main/java/weka/gui/HierarchyPropertyParser.java
+   M /trunk/weka/src/main/java/weka/gui/JTableHelper.java
+   M /trunk/weka/src/main/java/weka/gui/LogWindow.java
+   M /trunk/weka/src/main/java/weka/gui/Main.java
+   M /trunk/weka/src/main/java/weka/gui/MemoryUsagePanel.java
+   M /trunk/weka/src/main/java/weka/gui/PackageManager.java
+   M /trunk/weka/src/main/java/weka/gui/PropertySelectorDialog.java
+   M /trunk/weka/src/main/java/weka/gui/PropertySheetPanel.java
+   M /trunk/weka/src/main/java/weka/gui/ResultHistoryPanel.java
+   M /trunk/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+   M /trunk/weka/src/main/java/weka/gui/SortedTableModel.java
+   M /trunk/weka/src/main/java/weka/gui/SplashWindow.java
+   M /trunk/weka/src/main/java/weka/gui/arffviewer/ArffPanel.java
+   M /trunk/weka/src/main/java/weka/gui/arffviewer/ArffTable.java
+   M /trunk/weka/src/main/java/weka/gui/arffviewer/ArffTableModel.java
+   M /trunk/weka/src/main/java/weka/gui/arffviewer/ArffViewerMainPanel.java
+   M /trunk/weka/src/main/java/weka/gui/beans/AbstractDataSource.java
+   M /trunk/weka/src/main/java/weka/gui/beans/AbstractTestSetProducer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/AbstractTrainAndTestSetProducer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/AbstractTrainingSetProducer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Associator.java
+   M /trunk/weka/src/main/java/weka/gui/beans/AttributeSummarizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanConnection.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanInstance.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanVisual.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ChartEvent.java
+   M /trunk/weka/src/main/java/weka/gui/beans/DataVisualizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/MetaBean.java
+   M /trunk/weka/src/main/java/weka/gui/beans/PredictionAppender.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SQLViewerPerspective.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ScatterPlotMatrix.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SerializedModelSaver.java
+   M /trunk/weka/src/main/java/weka/gui/beans/StripChart.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SubstringLabeler.java
+   M /trunk/weka/src/main/java/weka/gui/beans/TestSetMaker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/TextViewer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/TrainTestSplitMaker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/TrainingSetMaker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/UserRequestAcceptor.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierPanel.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/plugins/VisualizePlugin.java
+
+Further elimination of compilation warnings.
+------------------------------------------------------------------------
+r10219 | eibe | 2013-11-21 10:50:02 +1300 (Thu, 21 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/CheckBoxList.java
+
+Changed method argument back from Vector<?> to Vector because of an incompatibility between Java 6 and 7.
+------------------------------------------------------------------------
+r10220 | eibe | 2013-11-21 17:11:13 +1300 (Thu, 21 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassAssigner.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassValuePicker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Classifier.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ClassifierPerformanceEvaluator.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Clusterer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ClustererPerformanceEvaluator.java
+   M /trunk/weka/src/main/java/weka/gui/beans/CostBenefitAnalysis.java
+   M /trunk/weka/src/main/java/weka/gui/beans/CrossValidationFoldMaker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/EnvironmentField.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Filter.java
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowByExpression.java
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowRunner.java
+   M /trunk/weka/src/main/java/weka/gui/beans/GraphViewer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/IncrementalClassifierEvaluator.java
+   M /trunk/weka/src/main/java/weka/gui/beans/IncrementalClassifierEvaluatorCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/InstanceStreamToBatchMaker.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/AbstractPlotInstances.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClassifierErrorsPlotInstances.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/PlotData2D.java
+
+Further code cleanup.
+------------------------------------------------------------------------
+r10221 | eibe | 2013-11-22 12:10:09 +1300 (Fri, 22 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanConnection.java
+   M /trunk/weka/src/main/java/weka/gui/beans/BeanInstance.java
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowRunner.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Loader.java
+   M /trunk/weka/src/main/java/weka/gui/beans/LoaderCustomizer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/LogPanel.java
+   M /trunk/weka/src/main/java/weka/gui/beans/MetaBean.java
+   M /trunk/weka/src/main/java/weka/gui/beans/ModelPerformanceChart.java
+   M /trunk/weka/src/main/java/weka/gui/beans/PluginManager.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SQLViewerPerspective.java
+   M /trunk/weka/src/main/java/weka/gui/beans/Saver.java
+   M /trunk/weka/src/main/java/weka/gui/beans/xml/XMLBeans.java
+
+Further code cleanup.
+------------------------------------------------------------------------
+r10222 | eibe | 2013-11-22 16:46:55 +1300 (Fri, 22 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/xml/XMLBasicSerialization.java
+   M /trunk/weka/src/main/java/weka/experiment/Experiment.java
+   M /trunk/weka/src/main/java/weka/experiment/RemoteExperiment.java
+   M /trunk/weka/src/main/java/weka/gui/boundaryvisualizer/BoundaryPanel.java
+   M /trunk/weka/src/main/java/weka/gui/boundaryvisualizer/BoundaryPanelDistributed.java
+   M /trunk/weka/src/main/java/weka/gui/boundaryvisualizer/BoundaryVisualizer.java
+   M /trunk/weka/src/main/java/weka/gui/boundaryvisualizer/KDDataGenerator.java
+   M /trunk/weka/src/main/java/weka/gui/boundaryvisualizer/RemoteBoundaryVisualizerSubTask.java
+   M /trunk/weka/src/main/java/weka/gui/boundaryvisualizer/RemoteResult.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/AlgorithmListPanel.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/DatasetListPanel.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/Experimenter.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/ExperimenterDefaults.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/GeneratorPropertyIteratorPanel.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/OutputFormatDialog.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/ResultsPanel.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/SetupPanel.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/AssociationsPanel.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/AttributeSelectionPanel.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClustererAssignmentsPlotInstances.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ClustererPanel.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/Explorer.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/ExplorerDefaults.java
+   M /trunk/weka/src/main/java/weka/gui/graphvisualizer/DotParser.java
+   M /trunk/weka/src/main/java/weka/gui/graphvisualizer/GraphVisualizer.java
+   M /trunk/weka/src/main/java/weka/gui/scripting/JythonScript.java
+   M /trunk/weka/src/main/java/weka/gui/scripting/Script.java
+   M /trunk/weka/src/main/java/weka/gui/scripting/SyntaxDocument.java
+   M /trunk/weka/src/main/java/weka/gui/sql/ConnectionPanel.java
+   M /trunk/weka/src/main/java/weka/gui/sql/QueryPanel.java
+   M /trunk/weka/src/main/java/weka/gui/sql/ResultPanel.java
+   M /trunk/weka/src/main/java/weka/gui/sql/ResultSetHelper.java
+   M /trunk/weka/src/main/java/weka/gui/sql/ResultSetTableCellRenderer.java
+   M /trunk/weka/src/main/java/weka/gui/sql/ResultSetTableModel.java
+   M /trunk/weka/src/main/java/weka/gui/sql/SqlViewer.java
+   M /trunk/weka/src/main/java/weka/gui/streams/InstanceCounter.java
+   M /trunk/weka/src/main/java/weka/gui/streams/InstanceJoiner.java
+   M /trunk/weka/src/main/java/weka/gui/streams/InstanceLoader.java
+   M /trunk/weka/src/main/java/weka/gui/streams/InstanceTable.java
+   M /trunk/weka/src/main/java/weka/gui/treevisualizer/Edge.java
+   M /trunk/weka/src/main/java/weka/gui/treevisualizer/Node.java
+   M /trunk/weka/src/main/java/weka/gui/treevisualizer/PlaceNode1.java
+   M /trunk/weka/src/main/java/weka/gui/treevisualizer/PlaceNode2.java
+   M /trunk/weka/src/main/java/weka/gui/treevisualizer/TreeBuild.java
+   M /trunk/weka/src/main/java/weka/gui/treevisualizer/TreeVisualizer.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/AttributePanel.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/ClassPanel.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/JPEGWriter.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/LegendPanel.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/MatrixPanel.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/Plot2D.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/PostscriptGraphics.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/PrintableComponent.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/PrintableHandler.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/PrintablePanel.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/ThresholdVisualizePanel.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/VisualizePanel.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/VisualizePanelEvent.java
+   M /trunk/weka/src/test/java/weka/classifiers/AbstractClassifierTest.java
+   M /trunk/weka/src/test/java/weka/core/converters/AbstractFileConverterTest.java
+   M /trunk/weka/src/test/java/weka/core/converters/AllTests.java
+   M /trunk/weka/src/test/java/weka/core/tokenizers/AbstractTokenizerTest.java
+
+More code cleanup to remove warnings.
+------------------------------------------------------------------------
+r10224 | eibe | 2013-11-25 10:12:57 +1300 (Mon, 25 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/treevisualizer/TreeVisualizer.java
+
+Had broken tree visualizer by commenting out code that shouldn't have been commted out.
+------------------------------------------------------------------------
+r10227 | eibe | 2013-11-25 13:41:09 +1300 (Mon, 25 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/Filter.java
+
+Fixed source code generation and changed from FastVector to ArrayList.
+------------------------------------------------------------------------
+r10228 | eibe | 2013-11-25 13:44:04 +1300 (Mon, 25 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+   M /trunk/weka/src/main/java/weka/filters/SimpleStreamFilter.java
+
+Fixed Javadoc: new Instance() should be new DenseInstance().
+------------------------------------------------------------------------
+r10231 | mhall | 2013-11-26 10:02:20 +1300 (Tue, 26 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/supervised/attribute/Discretize.java
+
+Added an option to allow the precision for bin boundary labels to be specified. getOutputFormat() now checks for duplicate bin labels and throws an IllegalArgumentException with a message suggesting to try increasing the precision.
+------------------------------------------------------------------------
+r10233 | eibe | 2013-11-26 10:54:54 +1300 (Tue, 26 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/AbstractFileSaver.java
+
+Does no longer list ".gz" as a file extension because sub classes should not declare this as file extension.
+------------------------------------------------------------------------
+r10246 | mhall | 2013-11-26 22:00:58 +1300 (Tue, 26 Nov 2013) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/core/LogHandler.java
+
+Initial import.
+------------------------------------------------------------------------
+r10249 | mhall | 2013-11-27 22:09:26 +1300 (Wed, 27 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Added a lot of missing javadoc.
+------------------------------------------------------------------------
+r10253 | mhall | 2013-11-28 11:51:28 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/treevisualizer/TreeVisualizer.java
+
+Now works from the command line again.
+------------------------------------------------------------------------
+r10255 | mhall | 2013-11-28 11:58:07 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/ClassifierTree.java
+
+Now back-quotes characters in node labels for the graph output.
+------------------------------------------------------------------------
+r10261 | mhall | 2013-11-28 13:10:05 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LMTNode.java
+
+Now back-quotes characters in node labels for the graph output.
+------------------------------------------------------------------------
+r10264 | mhall | 2013-11-28 13:14:49 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/m5/RuleNode.java
+
+Now back-quotes characters in node labels for the graph output.
+------------------------------------------------------------------------
+r10268 | mhall | 2013-11-28 13:58:26 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Now back-quotes characters in node labels for the graph output.
+------------------------------------------------------------------------
+r10271 | mhall | 2013-11-28 14:05:51 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/REPTree.java
+
+Now back-quotes characters in node labels for the graph output.
+------------------------------------------------------------------------
+r10273 | mhall | 2013-11-28 14:16:01 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/ClassifierTree.java
+
+Changed Utils.quote() to Utils.backQuoteChars() in graph routine.
+------------------------------------------------------------------------
+r10274 | mhall | 2013-11-28 14:16:17 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/REPTree.java
+
+Changed Utils.quote() to Utils.backQuoteChars() in graph routine.
+------------------------------------------------------------------------
+r10280 | mhall | 2013-11-28 14:22:45 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LMTNode.java
+
+Changed Utils.quote() to Utils.backQuoteChars() in graph routine.
+------------------------------------------------------------------------
+r10283 | mhall | 2013-11-28 14:26:08 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/m5/RuleNode.java
+
+Changed Utils.quote() to Utils.backQuoteChars() in graph routine.
+------------------------------------------------------------------------
+r10288 | mhall | 2013-11-28 14:29:28 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+
+Changed Utils.quote() to Utils.backQuoteChars() in graph routine.
+------------------------------------------------------------------------
+r10293 | mhall | 2013-11-28 14:47:41 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/NBTreeClassifierTree.java
+
+Now back-quotes characters in node labels for the graph output.
+------------------------------------------------------------------------
+r10295 | mhall | 2013-11-28 16:23:00 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GenericArrayEditor.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/GeneratorPropertyIteratorPanel.java
+
+GenericArrayEditor no longer extends JPanel. It now uses an inner class to implement the actual editor
+------------------------------------------------------------------------
+r10296 | eibe | 2013-11-28 16:26:53 +1300 (Thu, 28 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GenericObjectEditor.java
+
+All calls to System.err.println() have been replaced by calls to Logger.log().
+------------------------------------------------------------------------
+r10301 | mhall | 2013-11-29 09:49:09 +1300 (Fri, 29 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/Run.java
+
+Removed all the System.exit() calls.
+------------------------------------------------------------------------
+r10303 | eibe | 2013-11-29 11:46:09 +1300 (Fri, 29 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/experiment/DatabaseUtils.java
+
+Warnings regarding missing database drivers are now only output to the log file by default.
+------------------------------------------------------------------------
+r10304 | mhall | 2013-11-29 14:27:09 +1300 (Fri, 29 Nov 2013) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/BeansProperties.java
+
+Initial import
+------------------------------------------------------------------------
+r10305 | mhall | 2013-11-29 14:29:40 +1300 (Fri, 29 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/Run.java
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowRunner.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/beans/StripChart.java
+
+Updated now that the property management for the KnowledgeFlow has moved to BeansProperties
+------------------------------------------------------------------------
+r10306 | mhall | 2013-11-29 14:34:15 +1300 (Fri, 29 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Updated now that the property management for the KnowledgeFlow has moved to BeansProperties
+------------------------------------------------------------------------
+r10309 | mhall | 2013-11-29 15:31:59 +1300 (Fri, 29 Nov 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Prevented some more properties file processing in the case when executing via Run from the command line
+------------------------------------------------------------------------
+r10311 | mhall | 2013-12-02 09:30:58 +1300 (Mon, 02 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/Run.java
+
+Now sets a system property to suppress the menu bar, dock icon and lack of focus that occurs under Mac OSX when awt classes are loaded.
+------------------------------------------------------------------------
+r10313 | mhall | 2013-12-02 14:15:45 +1300 (Mon, 02 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/Run.java
+
+Extracting the scheme matching code out into separate public static methods. Default is now to match suffixes only. Now has an option (-match-anywhere) to match the supplied scheme name anywhere in the non-package part of candidate scheme names.
+------------------------------------------------------------------------
+r10314 | mhall | 2013-12-02 14:17:36 +1300 (Mon, 02 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+
+forName now delegates to Run for looking up matching names. This allows just the name part of a scheme to be provided when used in an option to another scheme. Throws an exception if there is not exactly one match for the supplied class name.
+------------------------------------------------------------------------
+r10317 | mhall | 2013-12-02 14:39:44 +1300 (Mon, 02 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/Run.java
+
+findSchemeMatch now allows for any class to be returned (not just those that can be executed from the command line).,
+------------------------------------------------------------------------
+r10318 | mhall | 2013-12-02 14:40:11 +1300 (Mon, 02 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+
+Updated for the change in signature in Run.findSchemeMatch().
+------------------------------------------------------------------------
+r10319 | eibe | 2013-12-02 14:53:53 +1300 (Mon, 02 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+
+Exception in forName() now includes all matching scheme names when multiple schemes match.
+------------------------------------------------------------------------
+r10327 | mhall | 2013-12-03 14:43:51 +1300 (Tue, 03 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowRunner.java
+
+Now suppresses menu bar and doc icon under Mac OS X.
+------------------------------------------------------------------------
+r10328 | mhall | 2013-12-03 14:45:51 +1300 (Tue, 03 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowRunner.java
+
+Javadoc fix.
+------------------------------------------------------------------------
+r10347 | mhall | 2013-12-03 20:12:30 +1300 (Tue, 03 Dec 2013) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/InteractiveTableModel.java
+
+Cleaned up code.
+------------------------------------------------------------------------
+r10367 | eibe | 2013-12-05 15:06:33 +1300 (Thu, 05 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/RelationalLocator.java
+   M /trunk/weka/src/main/java/weka/core/StringLocator.java
+
+setDataset() is now used to change the reference of the processed instance to the destination dataset. The processed instance's attribute values for string and relational attributes may not be consistent with the source dataset!
+------------------------------------------------------------------------
+r10368 | eibe | 2013-12-05 15:07:52 +1300 (Thu, 05 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/Filter.java
+
+The bufferInput() and push() methods now take a copy of the incoming instance before it is passed to copyValues() because copyValues() may change the values of string and relational attributes stored in the array corresponding to the instance.
+------------------------------------------------------------------------
+r10370 | eibe | 2013-12-06 11:22:03 +1300 (Fri, 06 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/RelationalLocator.java
+   M /trunk/weka/src/main/java/weka/core/StringLocator.java
+
+Undid my one-line changes because they produced incorrect behaviour. 
+------------------------------------------------------------------------
+r10376 | mhall | 2013-12-06 19:55:30 +1300 (Fri, 06 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+   M /trunk/weka/src/main/java/weka/experiment/ClassifierSplitEvaluator.java
+   M /trunk/weka/src/main/java/weka/experiment/Experiment.java
+   M /trunk/weka/src/main/java/weka/experiment/RegressionSplitEvaluator.java
+   M /trunk/weka/src/main/java/weka/experiment/RemoteExperiment.java
+
+Output of StandardEvaluationMetrics was broken in the Explorer and command line - fixed. Plugin metrics in ClassifierSplitEvaluator were totally broken - fixed. Evaluation's main method was not loading packages - fixed.
+------------------------------------------------------------------------
+r10378 | eibe | 2013-12-09 15:34:45 +1300 (Mon, 09 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/BayesNet.java
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.java
+
+Reduced memory consumption of BayesNet by clearing out m_Instances at the end of buildClassifier.
+------------------------------------------------------------------------
+r10379 | eibe | 2013-12-09 15:57:30 +1300 (Mon, 09 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/AdaBoostM1.java
+
+Committed patch by Rosjier Lammers: reweighting term is now just computed once.
+------------------------------------------------------------------------
+r10381 | eibe | 2013-12-09 16:38:18 +1300 (Mon, 09 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/GaussianProcesses.java
+
+Some small code improvements proposed by Rosjier Lammers, Waikato Summer Intern.
+------------------------------------------------------------------------
+r10382 | eibe | 2013-12-09 16:47:34 +1300 (Mon, 09 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/LinearRegression.java
+
+Applied two small code improvements suggested by Rosjier Lammers, FCMS Summer Intern.
+------------------------------------------------------------------------
+r10383 | mhall | 2013-12-10 14:12:02 +1300 (Tue, 10 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/SubstringLabeler.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SubstringLabelerCustomizer.java
+   A /trunk/weka/src/main/java/weka/gui/beans/SubstringLabelerRules.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SubstringReplacer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/SubstringReplacerCustomizer.java
+   A /trunk/weka/src/main/java/weka/gui/beans/SubstringReplacerRules.java
+
+Refactored match, replace and transform logic out of SubstringLabeler and SubstringReplacer
+------------------------------------------------------------------------
+r10386 | eibe | 2013-12-11 12:44:04 +1300 (Wed, 11 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/BayesNet.java
+
+Discretization is now (again) only performed when necessary. This also fixed the bug I introduced in the last change.
+------------------------------------------------------------------------
+r10392 | mhall | 2013-12-13 11:32:08 +1300 (Fri, 13 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Standard loadPackages() call was not invoking full class discovery due to a bug introduced with the latest changes - fixed.
+------------------------------------------------------------------------
+r10394 | eibe | 2013-12-14 11:27:50 +1300 (Sat, 14 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RemoveByName.java
+
+Filter now never removes the class. Fixed bug where class was removed when it matched the regular expression but inversion of selection was turned on.
+------------------------------------------------------------------------
+r10396 | mhall | 2013-12-17 13:28:45 +1300 (Tue, 17 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/attributeSelection/BestFirst.java
+
+Fixed the incomplete tool-tip text for the search termination property.
+------------------------------------------------------------------------
+r10399 | eibe | 2013-12-19 15:30:02 +1300 (Thu, 19 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LogisticBase.java
+
+Further small improvements in runtime, primarily by introducing an UnsafeInstance inner subclass that extends DenseInstance and has an unsafe setValue() method.
+------------------------------------------------------------------------
+r10401 | eibe | 2013-12-20 14:46:40 +1300 (Fri, 20 Dec 2013) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LMTNode.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LogisticBase.java
+   A /trunk/weka/src/main/java/weka/classifiers/trees/lmt/SimpleLinearRegression.java
+
+Made a stripped down version of SimpleLinearRegression and placed it into the lmt package. This is now used by LogisticBase and LMTNode to improve runtime and memory consumption.
+------------------------------------------------------------------------
+r10411 | mhall | 2014-01-22 10:15:59 +1300 (Wed, 22 Jan 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/experiment/DatabaseUtils.props.postgresql
+
+A few type mapping additions (and a link to a useful document on PostgreSQL type mappings to Java classes) courtesy of Emmanuel Turner.
+------------------------------------------------------------------------
+r10418 | mhall | 2014-01-28 19:17:28 +1300 (Tue, 28 Jan 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/LogitBoost.java
+
+Made Z_MAX into an option.
+------------------------------------------------------------------------
+r10420 | mhall | 2014-01-29 11:39:09 +1300 (Wed, 29 Jan 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SGD.java
+
+Javadoc update.
+------------------------------------------------------------------------
+r10422 | mhall | 2014-01-29 11:59:45 +1300 (Wed, 29 Jan 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/attributeSelection/WrapperSubsetEval.java
+   M /trunk/weka/src/test/resources/wekarefs/weka/attributeSelection/WrapperSubsetEvalTest.ref
+
+Now prints accuracy (rather than error rate) for default and acc settings when the class is nominal)
+------------------------------------------------------------------------
+r10427 | mhall | 2014-01-31 15:34:56 +1300 (Fri, 31 Jan 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Changed some private member variables to protected.
+------------------------------------------------------------------------
+r10432 | mhall | 2014-02-12 10:37:58 +1300 (Wed, 12 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/ht/NominalConditionalSufficientStats.java
+
+ValueDistribution was not serializable - fixed.
+------------------------------------------------------------------------
+r10434 | mhall | 2014-02-12 16:38:55 +1300 (Wed, 12 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Memory.java
+   M /trunk/weka/src/main/java/weka/gui/GUIChooser.java
+   M /trunk/weka/src/main/java/weka/gui/Main.java
+   M /trunk/weka/src/main/java/weka/gui/arffviewer/ArffViewer.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+   M /trunk/weka/src/main/java/weka/gui/experiment/Experimenter.java
+   M /trunk/weka/src/main/java/weka/gui/explorer/Explorer.java
+   M /trunk/weka/src/main/java/weka/gui/sql/SqlViewer.java
+
+Shifted Thread.sleep() call out of each GUI's main() method and into Memory.isOutOfMemory(). isOutOfMemory() now attempts to adaptively adjust the sleep delay based on the amount of heap space still available
+------------------------------------------------------------------------
+r10435 | mhall | 2014-02-13 11:22:28 +1300 (Thu, 13 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Memory.java
+
+Added another constant for the low memory minimum.
+------------------------------------------------------------------------
+r10439 | mhall | 2014-02-17 10:48:57 +1300 (Mon, 17 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/ClusterEvaluation.java
+
+Added a -force-batch-training option.
+------------------------------------------------------------------------
+r10451 | mhall | 2014-02-21 13:24:27 +1300 (Fri, 21 Feb 2014) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/clusterers/Canopy.java
+   A /trunk/weka/src/test/java/weka/clusterers/CanopyTest.java
+   A /trunk/weka/src/test/resources/wekarefs/weka/clusterers/CanopyTest.ref
+
+Initial import
+------------------------------------------------------------------------
+r10452 | mhall | 2014-02-21 13:26:03 +1300 (Fri, 21 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Now allows the user to choose between four different initialization strategies - random, k-means++, canopy and fartheset first. Furthermore, canopies can be used to reduce the number of distance computations regardless of the initialization strategy used
+------------------------------------------------------------------------
+r10453 | mhall | 2014-02-21 13:30:07 +1300 (Fri, 21 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/FarthestFirst.java
+
+Added an accessor method to return the cluster centroids
+------------------------------------------------------------------------
+r10458 | mhall | 2014-02-21 21:02:55 +1300 (Fri, 21 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/Canopy.java
+
+Saves a bit more memory now after clustering completes
+------------------------------------------------------------------------
+r10459 | mhall | 2014-02-24 18:49:50 +1300 (Mon, 24 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/estimators/MultivariateGaussianEstimator.java
+
+Bug fixes from Uday
+------------------------------------------------------------------------
+r10466 | mhall | 2014-02-25 18:01:19 +1300 (Tue, 25 Feb 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/ParallelIteratedSingleClassifierEnhancer.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/MultiClassClassifier.java
+
+Bernhard's improvements.
+------------------------------------------------------------------------
+r10468 | mhall | 2014-03-03 12:11:28 +1300 (Mon, 03 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/experiment/RegressionSplitEvaluator.java
+
+Now includes number unclassified and percent unclassified in the list of metrics computed.
+------------------------------------------------------------------------
+r10470 | eibe | 2014-03-03 13:45:18 +1300 (Mon, 03 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/AdditiveRegression.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Bagging.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/ClassificationViaRegression.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/LogitBoost.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/RandomCommittee.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/RandomSubSpace.java
+
+Updated ensemble classifiers (excluding Vote, which is still broken) for the case where a numeric base classifier predicts a missing value.
+------------------------------------------------------------------------
+r10471 | mhall | 2014-03-03 14:56:09 +1300 (Mon, 03 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomTree.java
+   M /trunk/weka/src/test/resources/wekarefs/weka/classifiers/trees/RandomTreeTest.ref
+
+Can now handle regression problems.
+------------------------------------------------------------------------
+r10476 | mhall | 2014-03-03 21:24:05 +1300 (Mon, 03 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/RandomForest.java
+   M /trunk/weka/src/test/resources/wekarefs/weka/classifiers/trees/RandomForestTest.ref
+
+Added an option to turn off out of bag error calculation. Updated regression test reference due to changes to RandomTree
+------------------------------------------------------------------------
+r10478 | eibe | 2014-03-04 15:52:26 +1300 (Tue, 04 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/AbstractClassifier.java
+
+Class attributes that are date attributes need to be treated the same way as classes that are numeric attributes... Behaviour of default methods for classifyInstance() and distributionForInstance() were previously broken for class attributes that were date attributes (they simply returned a missing value.)
+------------------------------------------------------------------------
+r10487 | eibe | 2014-03-05 17:19:41 +1300 (Wed, 05 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Vote.java
+
+Vote now works (hopefully) properly when numeric base learner produces missing predictions. Also, (hopefully) fixed behaviour for some edge cases. Finally, *all* class distributions are now normalized to sum to 1.
+------------------------------------------------------------------------
+r10493 | mhall | 2014-03-08 12:08:04 +1300 (Sat, 08 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/attributeSelection/PrincipalComponents.java
+
+Added some accessor methods to return the filtered training header (i.e. aftern NominalToBinary), the eigenvectors and eigenvalues. Made the matrixToString() method public and static.
+------------------------------------------------------------------------
+r10495 | eibe | 2014-03-10 13:53:49 +1300 (Mon, 10 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+
+Improved Javadoc for enumerateAttributes(): class is skipped when set
+------------------------------------------------------------------------
+r10499 | mhall | 2014-03-11 13:51:40 +1300 (Tue, 11 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/ht/Split.java
+
+Now implements Serializable.
+------------------------------------------------------------------------
+r10501 | fracpete | 2014-03-11 17:06:27 +1300 (Tue, 11 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/ClassCache.java
+
+now also works with MANIFEST.MF-only jars that point in the "Class-Path" property of the MANIFEST.MF file to other jars
+------------------------------------------------------------------------
+r10502 | mhall | 2014-03-11 21:41:23 +1300 (Tue, 11 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/graphvisualizer/HierarchicalBCEngine.java
+
+A for loop was using an index variable of type byte, which would overflow for graphs with more than 127 levels - fixed.
+------------------------------------------------------------------------
+r10505 | mhall | 2014-03-14 13:32:54 +1300 (Fri, 14 Mar 2014) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/ImageViewer.java
+
+Initial import - a KF component for displaying static images.
+------------------------------------------------------------------------
+r10506 | mhall | 2014-03-14 13:33:26 +1300 (Fri, 14 Mar 2014) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/ImageViewerBeanInfo.java
+
+BeanInfo class for the ImageViewer KF component.
+------------------------------------------------------------------------
+r10507 | mhall | 2014-03-14 13:33:51 +1300 (Fri, 14 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/Beans.props
+
+Added ImageViewer to the Visualize entry.
+------------------------------------------------------------------------
+r10524 | mhall | 2014-03-19 08:35:25 +1300 (Wed, 19 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/SortLabels.java
+
+Argument and return type for attributeIndices property was not consistent (setter took a string and getter returned a Range) - fixed.
+------------------------------------------------------------------------
+r10526 | mhall | 2014-03-19 19:17:12 +1300 (Wed, 19 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/SimpleLinearRegression.java
+
+Did not implement Serializable - fixed.
+------------------------------------------------------------------------
+r10528 | mhall | 2014-03-19 20:48:54 +1300 (Wed, 19 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/ClassCache.java
+
+initFromManifest() now only considers Class-Path entries that end in .jar.
+------------------------------------------------------------------------
+r10531 | eibe | 2014-03-22 11:28:08 +1300 (Sat, 22 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/J48.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/ht/Split.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/BinC45ModelSelection.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/BinC45Split.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45ModelSelection.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45Split.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/Distribution.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/NBTreeModelSelection.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/NBTreeNoSplit.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/NBTreeSplit.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/PruneableClassifierTree.java
+
+Changed access modifiers for most member variables from private to protected.
+------------------------------------------------------------------------
+r10532 | mhall | 2014-03-22 16:12:19 +1300 (Sat, 22 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/SerializedModelSaver.java
+
+No longer causes upstream steps to grind to a halt if there is a problem saving the model. This also allows a proper error message to be displayed by the step (previously it wasn't happening).
+------------------------------------------------------------------------
+r10535 | mhall | 2014-03-22 16:22:25 +1300 (Sat, 22 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+   M /trunk/weka/src/main/java/weka/core/DistanceFunction.java
+   M /trunk/weka/src/main/java/weka/core/NormalizableDistance.java
+
+Added a clean() method. Implementers should release any non-essential resources (such as copies of the training data) when this is called. Serialized SimpleKMeans models should be smaller now that it calls this new clean() method after buildClusterer() finishes.
+------------------------------------------------------------------------
+r10538 | mhall | 2014-03-23 19:21:33 +1300 (Sun, 23 Mar 2014) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/core/pmml/PMMLProducer.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ACTIVATIONFUNCTION.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Aggregate.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Alternate.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Annotation.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Anova.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/AnovaRow.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/AntecedentSequence.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/AnyDistribution.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Application.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Apply.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ArrayType.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/AssociationModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/AssociationRule.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Attribute.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BASELINETESTSTATISTIC.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BaseCumHazardTables.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Baseline.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BaselineCell.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BaselineModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BaselineStratum.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BayesInput.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BayesInputs.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BayesOutput.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BinarySimilarity.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BoundaryValueMeans.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/BoundaryValues.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CATSCORINGMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/COMPAREFUNCTION.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CONTSCORINGMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/COUNTTABLETYPE.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CUMULATIVELINKFUNCTION.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CategoricalPredictor.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Categories.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Category.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Characteristic.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Characteristics.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Chebychev.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ChildParent.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CityBlock.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ClassLabels.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Cluster.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ClusteringField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ClusteringModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ClusteringModelQuality.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Coefficient.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Coefficients.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ComparisonMeasure.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Comparisons.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CompoundPredicate.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CompoundRule.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Con.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ConfusionMatrix.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ConsequentSequence.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Constant.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Constraints.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ContStats.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CorrelationFields.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CorrelationMethods.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CorrelationValues.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Correlations.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Counts.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Covariances.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/CovariateList.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DATATYPE.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DELIMITER2.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DataDictionary.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DataField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Decision.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DecisionTree.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Decisions.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DefineFunction.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Delimiter.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DerivedField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DiscrStats.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Discretize.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DiscretizeBin.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/DocumentTermMatrix.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Euclidean.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/EventValues.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ExponentialSmoothing.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Extension.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/FIELDUSAGETYPE.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/FactorList.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/False.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/FieldColumnPair.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/FieldRef.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/FieldValue.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/FieldValueCount.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/GAP.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/GaussianDistribution.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/GeneralRegressionModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Header.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/INTERPOLATIONMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/INTSparseArray.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/INVALIDVALUETREATMENTMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/InlineTable.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/InstanceField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/InstanceFields.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Interval.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Item.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ItemRef.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Itemset.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Jaccard.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/KNNInput.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/KNNInputs.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/KohonenMap.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/LINKFUNCTION.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Level.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/LiftData.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/LiftGraph.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/LinearKernelType.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/LinearNorm.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/LocalTransformations.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MININGFUNCTION.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MISSINGVALUESTRATEGY.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MISSINGVALUETREATMENTMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MULTIPLEMODELMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MapValues.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MatCell.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Matrix.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MiningBuildTask.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MiningField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MiningModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MiningSchema.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Minkowski.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MissingValueWeights.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ModelExplanation.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ModelLiftGraph.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ModelStats.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ModelVerification.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MultivariateStat.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/MultivariateStats.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NNNORMALIZATIONMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NOTRUECHILDSTRATEGY.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NaiveBayesModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NearestNeighborModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NeuralInput.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NeuralInputs.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NeuralLayer.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NeuralNetwork.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NeuralOutput.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NeuralOutputs.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Neuron.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Node.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NormContinuous.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NormDiscrete.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NumericInfo.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/NumericPredictor.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/OPTYPE.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/OUTLIERTREATMENTMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ObjectFactory.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/OptimumLiftGraph.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Output.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/OutputField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PCell.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PCovCell.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PCovMatrix.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PMML.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PPCell.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PPMatrix.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PairCounts.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ParamMatrix.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Parameter.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ParameterField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ParameterList.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Partition.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PartitionFieldStats.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PoissonDistribution.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PolynomialKernelType.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PredictiveModelQuality.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Predictor.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/PredictorTerm.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Quantile.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/REALSparseArray.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/REGRESSIONNORMALIZATIONMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RESULTFEATURE.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ROC.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ROCGraph.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RULEFEATURE.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RadialBasisKernelType.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RandomLiftGraph.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Regression.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RegressionModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RegressionTable.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ResultField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Row.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RuleSelectionMethod.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RuleSet.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/RuleSetModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SVMCLASSIFICATIONMETHOD.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SVMREPRESENTATION.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ScoreDistribution.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Scorecard.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SeasonalityExpoSmooth.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Segment.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Segmentation.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Sequence.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SequenceModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SequenceReference.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SequenceRule.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SetPredicate.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SetReference.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SigmoidKernelType.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SimpleMatching.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SimplePredicate.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SimpleRule.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SimpleSetPredicate.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SquaredEuclidean.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SupportVector.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SupportVectorMachine.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SupportVectorMachineModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/SupportVectors.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TIMEANCHOR2.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TIMEEXCEPTIONTYPE.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TIMESERIESALGORITHM.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TIMESERIESUSAGE.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TableLocator.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Tanimoto.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Target.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TargetValue.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TargetValueCount.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TargetValueCounts.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Targets.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Taxonomy.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TestDistributions.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TextCorpus.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TextDictionary.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TextDocument.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TextModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TextModelNormalization.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TextModelSimiliarity.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Time.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TimeAnchor.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TimeCycle.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TimeException.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TimeSeries.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TimeSeriesModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TimeValue.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Timestamp.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TrainingInstances.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TransformationDictionary.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TreeModel.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/TrendExpoSmooth.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/True.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/UniformDistribution.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/UnivariateStats.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/VALIDTIMESPEC.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Value.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/VectorDictionary.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/VectorFields.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/VectorInstance.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/VerificationField.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/VerificationFields.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/XCoordinates.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/YCoordinates.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/package-info.java
+
+Initial import of David Person's PMML export support
+------------------------------------------------------------------------
+r10539 | mhall | 2014-03-23 19:22:39 +1300 (Sun, 23 Mar 2014) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/classifiers/pmml/producer
+   A /trunk/weka/src/main/java/weka/classifiers/pmml/producer/AbstractPMMLProducerHelper.java
+   A /trunk/weka/src/main/java/weka/classifiers/pmml/producer/LogisticProducerHelper.java
+
+Initial import of David Person's PMML export support
+------------------------------------------------------------------------
+r10540 | mhall | 2014-03-23 19:23:21 +1300 (Sun, 23 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/Logistic.java
+
+Added PMML export support courtesy of David Persons
+------------------------------------------------------------------------
+r10545 | mhall | 2014-03-25 13:41:58 +1300 (Tue, 25 Mar 2014) | 1 line
+Changed paths:
+   D /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Con.java
+   A /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Con1.java (from /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Con.java:10544)
+   M /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/Neuron.java
+   M /trunk/weka/src/main/java/weka/core/pmml/jaxbbindings/ObjectFactory.java
+
+Renamed Con.java to Con1.java to hopefully fix Windows svn checkout issues (Con is a reserved word under Windows)
+------------------------------------------------------------------------
+r10547 | eibe | 2014-03-26 11:58:54 +1300 (Wed, 26 Mar 2014) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Transpose.java
+   A /trunk/weka/src/test/java/weka/filters/unsupervised/attribute/TransposeTest.java
+
+Added filter that can transpose a numeric dataset.
+------------------------------------------------------------------------
+r10551 | mhall | 2014-03-26 14:17:49 +1300 (Wed, 26 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Transpose.java
+
+Removed unused imports and cleaned up javadoc
+------------------------------------------------------------------------
+r10553 | eibe | 2014-03-26 17:15:33 +1300 (Wed, 26 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+
+Code cleanup: new for loops now used for attribute lists. Fixed bug in mergeInstances() where attributes weren't copied.
+------------------------------------------------------------------------
+r10554 | mhall | 2014-03-29 21:07:44 +1300 (Sat, 29 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Vote.java
+
+Added an option to print all the models in the output.
+------------------------------------------------------------------------
+r10556 | mhall | 2014-03-29 21:55:07 +1300 (Sat, 29 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GenericObjectEditor.java
+
+Now displays tool tips for schemes in the JTree.
+------------------------------------------------------------------------
+r10558 | mhall | 2014-03-31 09:50:34 +1300 (Mon, 31 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/PropertySheetPanel.java
+
+Made the methods that format capabilities information static and publicly accessible.
+------------------------------------------------------------------------
+r10559 | mhall | 2014-03-31 09:51:09 +1300 (Mon, 31 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Tool tips for components now include capability information.
+------------------------------------------------------------------------
+r10562 | eibe | 2014-03-31 14:00:19 +1300 (Mon, 31 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+
+Added lineWrap() method.
+------------------------------------------------------------------------
+r10563 | eibe | 2014-03-31 15:30:52 +1300 (Mon, 31 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+
+Fixed lineWrap().
+------------------------------------------------------------------------
+r10564 | eibe | 2014-03-31 16:33:38 +1300 (Mon, 31 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Tool tips showing global info now look nicer.
+------------------------------------------------------------------------
+r10565 | mhall | 2014-03-31 18:34:51 +1300 (Mon, 31 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+   M /trunk/weka/src/main/java/weka/gui/GenericObjectEditor.java
+   M /trunk/weka/src/main/java/weka/gui/beans/KnowledgeFlowApp.java
+
+Moved getGlobalInfo() method to Utils.
+------------------------------------------------------------------------
+r10567 | mhall | 2014-03-31 18:51:19 +1300 (Mon, 31 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GenericObjectEditor.java
+
+Added missing javadoc.
+------------------------------------------------------------------------
+r10569 | mhall | 2014-03-31 18:56:34 +1300 (Mon, 31 Mar 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GenericObjectEditor.java
+
+Added missing javadoc.
+------------------------------------------------------------------------
+r10579 | eibe | 2014-04-02 09:40:27 +1300 (Wed, 02 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTree.java
+
+Added protected as access modifier to member variables.
+------------------------------------------------------------------------
+r10580 | mhall | 2014-04-02 15:10:38 +1300 (Wed, 02 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/Run.java
+
+CommandlineRunnable types now have precedence over other main types - e.g. if something implements both CommandlineRunnable and Classifier then the CommandlineRunnable interface will always be used to invoke it. 
+------------------------------------------------------------------------
+r10583 | mhall | 2014-04-02 19:56:52 +1300 (Wed, 02 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/datagenerators/DataGenerator.java
+
+Made the runDataGenerator() method public (so that it can be accessed from weka.Run).
+------------------------------------------------------------------------
+r10585 | mhall | 2014-04-02 20:00:03 +1300 (Wed, 02 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/Run.java
+
+Now handles DataGenerators.
+------------------------------------------------------------------------
+r10587 | mhall | 2014-04-03 14:15:25 +1300 (Thu, 03 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Removed a debugging println.
+------------------------------------------------------------------------
+r10592 | mhall | 2014-04-03 19:12:43 +1300 (Thu, 03 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/Canopy.java
+
+Added a method to aggregate the canopies contained in a list of trained Canopy clusterers into one final Canopy clusterer.
+------------------------------------------------------------------------
+r10597 | mhall | 2014-04-04 15:10:10 +1300 (Fri, 04 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/Canopy.java
+
+Fixed a bug that affected aggregation of Canopy clusterers - canopy center sums were not getting adjusted after the final number of canopies was determined.
+------------------------------------------------------------------------
+r10599 | mhall | 2014-04-07 14:16:45 +1200 (Mon, 07 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/RandomizableClusterer.java
+
+listOptions() now adds superclass options.
+------------------------------------------------------------------------
+r10601 | mhall | 2014-04-07 14:31:27 +1200 (Mon, 07 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/RandomizableClusterer.java
+
+Now handles superclass options correctly.
+------------------------------------------------------------------------
+r10603 | mhall | 2014-04-07 14:55:14 +1200 (Mon, 07 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/Canopy.java
+
+Added an option to limit the number of candidate canopies held in memory during training. Also added options to implement periodic pruning of low density canopies.
+------------------------------------------------------------------------
+r10605 | mhall | 2014-04-07 19:13:28 +1200 (Mon, 07 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/clusterers/SimpleKMeans.java
+
+Added new options pertaining to Canopy clustering.
+------------------------------------------------------------------------
+r10609 | mhall | 2014-04-08 13:32:42 +1200 (Tue, 08 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Added a command line option to toggle the load status of one or more packages. This allows the user to prevent packages from getting loaded when Weka starts up
+------------------------------------------------------------------------
+r10611 | eibe | 2014-04-08 17:08:35 +1200 (Tue, 08 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+
+The option "-no-predictions" is now listed when help is requested at the command-line.
+------------------------------------------------------------------------
+r10612 | eibe | 2014-04-08 18:51:17 +1200 (Tue, 08 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+
+Cleaned up handling of no-cv a bit. Confusion matrix on training data is now output even if no-cv is specified. Incremental testing is now done when no-cv is specified.
+------------------------------------------------------------------------
+r10613 | eibe | 2014-04-09 09:59:12 +1200 (Wed, 09 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+
+Per-class statistics are now output by default when running a scheme from the command-line. The -i option has been removed. Instead, a do-not-output-per-class-statistics option has been introduced.
+------------------------------------------------------------------------
+r10614 | mhall | 2014-04-09 11:48:05 +1200 (Wed, 09 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Now ensures that the initial proxy configuration never receives a file URL.
+------------------------------------------------------------------------
+r10615 | mhall | 2014-04-09 11:48:46 +1200 (Wed, 09 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/PackageManager.java
+
+Added a button to allow the user to toggle the load status of one or more selected installed packages.
+------------------------------------------------------------------------
+r10620 | mhall | 2014-04-10 20:48:03 +1200 (Thu, 10 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/ETable.java
+
+Fixed license header.
+------------------------------------------------------------------------
+r10621 | eibe | 2014-04-10 20:59:40 +1200 (Thu, 10 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/StringLocator.java
+
+Fixed nasty little bug: input instance for this method may not have access to string attribute data.
+------------------------------------------------------------------------
+r10622 | mhall | 2014-04-10 21:19:19 +1200 (Thu, 10 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+Added a method to return a list of available packages that are compatible with the base version of Weka.
+------------------------------------------------------------------------
+r10623 | mhall | 2014-04-10 21:20:27 +1200 (Thu, 10 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/PackageManager.java
+
+The "Available" radio button now shows all available packages that are compatible with the installed version of Weka. Added tool tips for the radio buttons.
+------------------------------------------------------------------------
+r10626 | mhall | 2014-04-10 21:52:03 +1200 (Thu, 10 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+
+getAvailableCompatiblePackages() now returns the most recent version of each available package that is compatible with the base version of Weka.
+------------------------------------------------------------------------
+r10627 | mhall | 2014-04-10 21:53:37 +1200 (Thu, 10 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/PackageManager.java
+
+Available package list now shows the most recent version of each available package that is compatible with the base version of Weka.
+------------------------------------------------------------------------
+r10635 | mhall | 2014-04-12 19:59:20 +1200 (Sat, 12 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/NaiveBayesMultinomialText.java
+
+Improved the textual output of the classifier. Now outputs conditional frequency counts (rather than probabilities that wern't actually probabilities :-)).
+------------------------------------------------------------------------
+r10636 | mhall | 2014-04-12 19:59:33 +1200 (Sat, 12 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/NaiveBayesMultinomialUpdateable.java
+
+Improved the textual output of the classifier. Now outputs conditional frequency counts (rather than probabilities that wern't actually probabilities :-)).
+------------------------------------------------------------------------
+r10638 | mhall | 2014-04-13 18:17:34 +1200 (Sun, 13 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowByExpressionCustomizer.java
+
+Added a "<none>" option to the downstream drop-down boxes so that it is no longer necessary to have two connected downstream steps.
+------------------------------------------------------------------------
+r10641 | mhall | 2014-04-16 14:25:57 +1200 (Wed, 16 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Copyright.props
+
+Updated copyright date
+------------------------------------------------------------------------
+r10642 | mhall | 2014-04-16 15:03:01 +1200 (Wed, 16 Apr 2014) | 1 line
+Changed paths:
+   A /trunk/weka/src/main/java/weka/gui/beans/Join.java
+   A /trunk/weka/src/main/java/weka/gui/beans/JoinBeanInfo.java
+   A /trunk/weka/src/main/java/weka/gui/beans/JoinCustomizer.java
+   A /trunk/weka/src/main/java/weka/gui/beans/icons/Join.gif
+
+Initial import
+------------------------------------------------------------------------
+r10645 | mhall | 2014-04-17 12:11:27 +1200 (Thu, 17 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/MultiClassClassifier.java
+
+Reverted to the version before Bernhard's changes
+------------------------------------------------------------------------
+r10649 | eibe | 2014-04-17 17:17:34 +1200 (Thu, 17 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/bayes/net/estimate/MultiNomialBMAEstimator.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/LogitBoost.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/MultiClassClassifier.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/lmt/LogisticBase.java
+   M /trunk/weka/src/main/java/weka/core/AbstractInstance.java
+   M /trunk/weka/src/main/java/weka/core/AttributeLocator.java
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveFrequentValues.java
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveWithValues.java
+
+AttributeLocator now uses BitSet and ArrayList rather than Vector. In particular, BitSet is used instead of Vector<Byte>, resulting in *HUGE* space savings when using filters to process/produce large-dimensional datasets! Also removed occurrences of DenseInstance in error messages originating in AbstractInstance. Finally, improved efficiency of insertAttributeAt() and deleteAttributeAt() in Instances and added new method replaceAttributeAtt(), replacing almost all calls of insertAttributeAt()/deleteAttributeAt() in WEKA with calls of replaceAttributeAt().
+------------------------------------------------------------------------
+r10658 | mhall | 2014-04-23 11:13:10 +1200 (Wed, 23 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Vote.java
+
+Made textual output of the base models the default, with the option to suppress this output.
+------------------------------------------------------------------------
