@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>weka-dev</artifactId>
-  <version>3.7.11</version><!-- weka-version -->
+  <version>3.7.12-SNAPSHOT</version><!-- weka-version -->
   <packaging>jar</packaging>
 
   <name>weka-dev</name>
@@ -51,9 +51,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/weka-dev-3.7.11</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/weka-dev-3.7.11</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/weka-dev-3.7.11</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/weka</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/weka</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/weka</url>
   </scm>
 
   <profiles>
