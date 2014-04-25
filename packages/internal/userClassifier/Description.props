@@ -6,7 +6,7 @@
 PackageName=userClassifier
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
 Date=2013-12-11
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Interactively classify through visual means. You are presented with a scatter plot of the data against two user chosen attributes, as well as a view of a decision tree. You can create binary splits by creating polygons around data plotted on the scatter plot, as well as by allowing another classifier to take over at points in the decision tree should you see fit.<br/><br/>For more information see:<br/><br/>Malcolm Ware, Eibe Frank, Geoffrey Holmes, Mark Hall, Ian H. Witten (2001). Interactive machine learning: letting users build classifiers. Int. J. Hum.-Comput. Stud. 55(3):281-292.
 
-Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+Changes=Identical to last release - just bumped version number to get back in sync with maven releases.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/userClassifier1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/userClassifier1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/userClassifier
