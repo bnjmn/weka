@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>userClassifier</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <version>1.0.3</version>
   <packaging>jar</packaging>
 
   <name>userClassifier</name>
@@ -50,9 +50,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/userClassifier</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/userClassifier</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/userClassifier</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/userClassifier-1.0.3</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/userClassifier-1.0.3</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/userClassifier-1.0.3</url>
   </scm>
 
   <profiles>
