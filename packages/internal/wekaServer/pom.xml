@@ -124,7 +124,7 @@ Simple server for executing Weka tasks.
 
     <dependency>
       <groupId>com.toedter</groupId>
-      <artifactId>jcalandar</artifactId>
+      <artifactId>jcalendar</artifactId>
       <version>1.4</version>
     </dependency>
 
