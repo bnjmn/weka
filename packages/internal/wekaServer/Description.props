@@ -28,7 +28,7 @@ License=GPL 2
 # Description (required)
 Description=Provides a simple servlet-based server for execution of data mining tasks.
 
-Changes=Updated to be compatible with Weka >= 3.7.11
+
 
 # Package URL for obtaining the package archive (required)
 PackageURL=http://prdownloads.sourceforge.net/weka/wekaServer1.0.4.zip?download
@@ -37,7 +37,7 @@ PackageURL=http://prdownloads.sourceforge.net/weka/wekaServer1.0.4.zip?download
 URL=http://wiki.pentaho.com/display/DATAMINING/Weka+Server
 
 # Changes in this release
-Changes=Fixed a problem with the finished/stale task purging thread that sometimes resulted in running tasks getting purged. Now has a command line option to set the purge checking interval (or to disable purging entirely by specifying a negative interval).
+Changes=Updated to be compatible with Weka >= 3.7.11
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
