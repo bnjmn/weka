@@ -5,7 +5,7 @@
 PackageName=cascadeKMeans
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date (year-month-day)
 Date=2012-03-20
@@ -29,13 +29,13 @@ License=GPL 3.0
 Description=k-means clustering with automatic selection of k. Restarts k-means and selects the best k using the Calinski and Harabasz criterion, without cross-validation.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/cascadeKMeans1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/cascadeKMeans1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/cascadeKMeans
 
 # Changes in this release
-#Changes=
+Changes=Updated for Weka 3.7.11
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
@@ -44,7 +44,7 @@ URL=http://weka.sourceforge.net/doc.packages/cascadeKMeans
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.5)
+Depends=weka (>=3.7.11)
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
