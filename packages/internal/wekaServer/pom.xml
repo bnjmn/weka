@@ -155,7 +155,7 @@ Simple server for executing Weka tasks.
     <dependency>
       <groupId>com.jgoodies</groupId>
       <artifactId>jgoodies-looks</artifactId>
-      <version>1.4.0</version>
+      <version>2.5.2</version>
     </dependency>
 
     <dependency>
