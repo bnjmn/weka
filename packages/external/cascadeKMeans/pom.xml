@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>cascadeKMeans</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <version>1.0.3</version>
   <packaging>jar</packaging>
 
   <name>cascadeKMeans</name>
@@ -49,9 +49,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/cascadeKMeans</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/cascadeKMeans</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/cascadeKMeans</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/cascadeKMeans-1.0.3</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/cascadeKMeans-1.0.3</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/cascadeKMeans-1.0.3</url>
   </scm>
 
   <profiles>
