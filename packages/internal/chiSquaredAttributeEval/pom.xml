@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>chiSquaredAttributeEval</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.4</version>
   <packaging>jar</packaging>
 
   <name>chiSquaredAttributeEval</name>
@@ -48,9 +48,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/chiSquaredAttributeEval</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/chiSquaredAttributeEval</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/chiSquaredAttributeEval</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/chiSquaredAttributeEval-1.0.4</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/chiSquaredAttributeEval-1.0.4</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/chiSquaredAttributeEval-1.0.4</url>
   </scm>
 
   <profiles>
