@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>alternatingDecisionTrees</artifactId>
-  <version>1.0.5</version>
+  <version>1.0.6-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>alternatingDecisionTrees</name>
@@ -53,9 +53,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/alternatingDecisionTrees-1.0.5</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/alternatingDecisionTrees-1.0.5</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/alternatingDecisionTrees-1.0.5</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/alternatingDecisionTrees</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/alternatingDecisionTrees</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/alternatingDecisionTrees</url>
   </scm>
 
   <profiles>
