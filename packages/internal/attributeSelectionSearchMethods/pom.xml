@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>attributeSelectionSearchMethods</artifactId>
-  <version>1.0.7</version>
+  <version>1.0.8-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>attributeSelectionSearchMethods</name>
@@ -50,9 +50,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/attributeSelectionSearchMethods-1.0.7</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/attributeSelectionSearchMethods-1.0.7</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/attributeSelectionSearchMethods-1.0.7</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/attributeSelectionSearchMethods</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/attributeSelectionSearchMethods</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/attributeSelectionSearchMethods</url>
   </scm>
 
   <profiles>
