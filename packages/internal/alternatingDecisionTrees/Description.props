@@ -6,7 +6,7 @@
 PackageName=alternatingDecisionTrees
 
 # Version (required)
-Version=1.0.6
+Version=1.0.5
 
 #Date
 Date=2013-12-03
@@ -31,7 +31,7 @@ Description=Binary- and multi-class alternating decision trees. For more informa
 Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/alternatingDecisionTrees1.0.6.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/alternatingDecisionTrees1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/alternatingDecisionTrees
@@ -43,4 +43,4 @@ URL=http://weka.sourceforge.net/doc.packages/alternatingDecisionTrees
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.7.11)
