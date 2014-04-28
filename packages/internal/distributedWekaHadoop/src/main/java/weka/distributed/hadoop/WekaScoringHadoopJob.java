@@ -256,6 +256,20 @@ public class WekaScoringHadoopJob extends HadoopJob implements
     return options.toArray(new String[options.size()]);
   }
 
+  public String[] getJobOptionsOnly() {
+    List<String> options = new ArrayList<String>();
+
+    if (!DistributedJobConfig.isEmpty(getModelPath())) {
+      options.add("-model-file");
+      options.add(getModelPath());
+    }
+
+    options.add("-columns-to-output");
+    options.add(getColumnsToOutputInScoredData());
+
+    return options.toArray(new String[options.size()]);
+  }
+
   /**
    * Loads the user-supplied model and sets the job name based on the classifier
    * and its options.
@@ -317,9 +331,9 @@ public class WekaScoringHadoopJob extends HadoopJob implements
     if (f.exists()) {
       // local model file
       if (modelPath.lastIndexOf(File.separator) >= 0) {
-        modelNameOnly = modelPath.substring(
-          modelPath.lastIndexOf(File.separator) + File.separator.length(),
-          modelPath.length());
+        modelNameOnly =
+          modelPath.substring(modelPath.lastIndexOf(File.separator)
+            + File.separator.length(), modelPath.length());
       } else {
         modelNameOnly = modelPath;
       }
@@ -335,8 +349,8 @@ public class WekaScoringHadoopJob extends HadoopJob implements
       // hdfs source
       hdfsPath = modelPath;
 
-      modelNameOnly = modelPath.substring(modelPath.lastIndexOf("/") + 1,
-        modelPath.length());
+      modelNameOnly =
+        modelPath.substring(modelPath.lastIndexOf("/") + 1, modelPath.length());
 
       Configuration tempConf = new Configuration();
       m_mrConfig.getHDFSConfig().configureForHadoop(tempConf, m_env);
@@ -409,8 +423,8 @@ public class WekaScoringHadoopJob extends HadoopJob implements
       // set zero reducers - map only job
       m_mrConfig.setNumberOfReducers("0");
 
-      String pathToHeader = environmentSubstitute(m_arffHeaderJob
-        .getAggregatedHeaderPath());
+      String pathToHeader =
+        environmentSubstitute(m_arffHeaderJob.getAggregatedHeaderPath());
       Configuration conf = new Configuration();
 
       try {
@@ -419,16 +433,19 @@ public class WekaScoringHadoopJob extends HadoopJob implements
           pathToHeader, m_env);
 
         String modelNameOnly = handleModelFile(conf);
-        String arffNameOnly = pathToHeader.substring(
-          pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
-        String colRange = environmentSubstitute(getColumnsToOutputInScoredData());
+        String arffNameOnly =
+          pathToHeader.substring(pathToHeader.lastIndexOf("/") + 1,
+            pathToHeader.length());
+        String colRange =
+          environmentSubstitute(getColumnsToOutputInScoredData());
 
-        String mapOptions = "-arff-header "
-          + arffNameOnly
-          + " -model-file-name "
-          + modelNameOnly
-          + (!DistributedJobConfig.isEmpty(colRange) ? " -columns-to-output "
-            + colRange : "");
+        String mapOptions =
+          "-arff-header "
+            + arffNameOnly
+            + " -model-file-name "
+            + modelNameOnly
+            + (!DistributedJobConfig.isEmpty(colRange) ? " -columns-to-output "
+              + colRange : "");
 
         m_mrConfig.setUserSuppliedProperty(
           WekaScoringHadoopMapper.SCORING_MAP_TASK_OPTIONS, mapOptions);

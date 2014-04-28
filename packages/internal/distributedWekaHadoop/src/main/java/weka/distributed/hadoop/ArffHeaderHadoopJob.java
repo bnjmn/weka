@@ -461,8 +461,9 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
   protected String handleNamesFile(Configuration conf) throws IOException {
     String namesFile = environmentSubstitute(getAttributeNamesFile());
 
-    String filenameOnly = HDFSUtils.addFileToDistributedCache(
-      m_mrConfig.getHDFSConfig(), conf, namesFile, m_env);
+    String filenameOnly =
+      HDFSUtils.addFileToDistributedCache(m_mrConfig.getHDFSConfig(), conf,
+        namesFile, m_env);
 
     return filenameOnly;
   }
@@ -488,8 +489,8 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
     boolean success = false;
     if (f.exists()) {
       // copy this file into HDFS
-      String hdfsDest = HDFSUtils.WEKA_TEMP_DISTRIBUTED_CACHE_FILES
-        + f.getName();
+      String hdfsDest =
+        HDFSUtils.WEKA_TEMP_DISTRIBUTED_CACHE_FILES + f.getName();
 
       try {
         HDFSUtils.copyToHDFS(existingPath, hdfsDest,
@@ -630,8 +631,8 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
       if (haveAttributeNames && !tempMapTask.getComputeSummaryStats()) {
         if (tempMapTask.headerAvailableImmediately(tempAttNames.size(),
           tempAttNames, new StringBuffer())) {
-          Instances finalHeader = tempMapTask.getHeader(tempAttNames.size(),
-            tempAttNames);
+          Instances finalHeader =
+            tempMapTask.getHeader(tempAttNames.size(), tempAttNames);
           m_finalHeader = finalHeader;
 
           Configuration tempConf = new Configuration();
@@ -649,23 +650,29 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
 
       // Options to the map task and the underlying general Weka map
       // task
-      StringBuilder csvToArffTaskOptions = new StringBuilder();
+      List<String> csvToArffTaskOptions = new ArrayList<String>();
+      // StringBuilder csvToArffTaskOptions = new StringBuilder();
       if (!DistributedJobConfig.isEmpty(getAttributeNames())) {
-        csvToArffTaskOptions.append(" -A ").append(
-          environmentSubstitute(getAttributeNames()));
+        csvToArffTaskOptions.add("-A");
+        csvToArffTaskOptions.add(environmentSubstitute(getAttributeNames()));
       } else if (!DistributedJobConfig.isEmpty(getAttributeNamesFile())) {
         String filenameOnly = handleNamesFile(conf);
-        csvToArffTaskOptions.append(" -names-file ").append(filenameOnly);
+        csvToArffTaskOptions.add("-names-file");
+        csvToArffTaskOptions.add(filenameOnly);
       }
 
       if (!DistributedJobConfig.isEmpty(getCsvToArffTaskOptions())) {
-        csvToArffTaskOptions.append(" ").append(getCsvToArffTaskOptions());
+        String[] csvTaskOpts = Utils.splitOptions(getCsvToArffTaskOptions());
+        for (String s : csvTaskOpts) {
+          csvToArffTaskOptions.add(s);
+        }
       }
 
-      if (csvToArffTaskOptions.length() > 0) {
+      if (csvToArffTaskOptions.size() > 0) {
         m_mrConfig.setUserSuppliedProperty(
           CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
-          environmentSubstitute(csvToArffTaskOptions.toString()));
+          environmentSubstitute(Utils.joinOptions(csvToArffTaskOptions
+            .toArray(new String[csvToArffTaskOptions.size()]))));
 
         setJobName(getJobName() + " " + csvToArffTaskOptions.toString());
       }
@@ -675,8 +682,9 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
       // the job
       installWekaLibrariesInHDFS(conf);
 
-      Job job = m_mrConfig.configureForHadoop(
-        environmentSubstitute(getJobName()), conf, m_env);
+      Job job =
+        m_mrConfig.configureForHadoop(environmentSubstitute(getJobName()),
+          conf, m_env);
 
       cleanOutputDirectory(job);
 

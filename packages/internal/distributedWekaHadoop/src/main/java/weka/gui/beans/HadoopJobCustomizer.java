@@ -190,8 +190,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     JPanel configHolder = new JPanel();
     configHolder.setLayout(new BorderLayout());
     configHolder.add(m_mrConfigEditor, BorderLayout.NORTH);
-    m_propPanel = new HadoopPropertyPanel(
-      m_mrConfig.getUserSuppliedProperties());
+    m_propPanel =
+      new HadoopPropertyPanel(m_mrConfig.getUserSuppliedProperties());
     configHolder.add(m_propPanel, BorderLayout.SOUTH);
 
     JPanel outerP = new JPanel();
@@ -201,8 +201,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     m_configTabs.addTab("Hadoop configuration", outerP);
 
     String jobTitle = m_bean.getClass().getName();
-    jobTitle = jobTitle.substring(jobTitle.lastIndexOf(".") + 1,
-      jobTitle.length());
+    jobTitle =
+      jobTitle.substring(jobTitle.lastIndexOf(".") + 1, jobTitle.length());
 
     if (m_job instanceof ArffHeaderHadoopJob) {
       addTabForArffHeaderJob(jobTitle, m_job);
@@ -322,7 +322,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
    * @param tabTitle the title for the tab
    * @param classifierJob the classifier job to edit
    */
-  protected void addTabForClassifierJob(String tabTitle, HadoopJob classifierJob) {
+  protected void
+    addTabForClassifierJob(String tabTitle, HadoopJob classifierJob) {
     JPanel jobHolder = makeClassifierJobPanel(classifierJob, false);
     JScrollPane scroller = new JScrollPane(jobHolder);
 
@@ -566,7 +567,9 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
   }
 
   protected void addScoringJobOptionsOnly(List<String> opts) {
-    String[] scoringOpts = m_job.getOptions();
+    String[] scoringOpts =
+      ((weka.distributed.hadoop.WekaScoringHadoopJob) m_job)
+        .getJobOptionsOnly();
 
     for (String o : scoringOpts) {
       opts.add(o);
@@ -579,8 +582,9 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
    * @param opts the list of options to add to
    */
   protected void addEvaluationJobOptionsOnly(List<String> opts) {
-    String[] evalOpts = ((weka.distributed.hadoop.WekaClassifierEvaluationHadoopJob) m_job)
-      .getJobOptionsOnly();
+    String[] evalOpts =
+      ((weka.distributed.hadoop.WekaClassifierEvaluationHadoopJob) m_job)
+        .getJobOptionsOnly();
 
     for (String o : evalOpts) {
       opts.add(o);
