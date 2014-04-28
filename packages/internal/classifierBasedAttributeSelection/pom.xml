@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>classifierBasedAttributeSelection</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.4</version>
   <packaging>jar</packaging>
 
   <name>classifierBasedAttributeSelection</name>
@@ -52,9 +52,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/classifierBasedAttributeSelection</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/classifierBasedAttributeSelection</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/classifierBasedAttributeSelection</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/classifierBasedAttributeSelection-1.0.4</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/classifierBasedAttributeSelection-1.0.4</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/classifierBasedAttributeSelection-1.0.4</url>
   </scm>
 
   <profiles>
