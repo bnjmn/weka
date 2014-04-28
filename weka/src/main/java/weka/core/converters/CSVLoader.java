@@ -217,6 +217,8 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   /** Reader used to process and output data incrementally */
   protected ArffReader m_incrementalReader;
 
+  protected transient int m_rowCount;
+
   /**
    * Returns a string describing this attribute evaluator.
    * 
@@ -770,8 +772,8 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         tempB.append(r).append("\n");
       }
       m_numBufferedRows = m_rowBuffer.size();
-      Reader batchReader = new BufferedReader(
-        new StringReader(tempB.toString()));
+      Reader batchReader =
+        new BufferedReader(new StringReader(tempB.toString()));
       m_incrementalReader = new ArffReader(batchReader, m_structure, 0, 0);
       m_rowBuffer.clear();
     }
@@ -947,7 +949,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         } catch (ParseException e) {
           throw new IOException("Unable to parse date value " + val.toString()
             + " using date format " + format + " for date attribute "
-            + m_structure.attribute(i));
+            + m_structure.attribute(i) + " (line: " + m_rowCount + ")");
         }
       } else if (m_structure.attribute(i).isNumeric()) {
         try {
@@ -956,15 +958,16 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         } catch (NumberFormatException ex) {
           throw new IOException("Was expecting a number for attribute "
             + m_structure.attribute(i).name() + " but read " + val.toString()
-            + " instead.");
+            + " instead. (line: " + m_rowCount + ")");
         }
       } else {
         // nominal
-        double index = m_structure.attribute(i).indexOfValue(
-          Utils.unquote(val.toString()));
+        double index =
+          m_structure.attribute(i).indexOfValue(Utils.unquote(val.toString()));
         if (index < 0) {
           throw new IOException("Read unknown nominal value " + val.toString()
-            + "for attribute " + m_structure.attribute(i).name());
+            + "for attribute " + m_structure.attribute(i).name() + " (line: "
+            + m_rowCount + ")");
         }
         vals[i] = index;
       }
@@ -1009,6 +1012,7 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   }
 
   private void readHeader() throws IOException {
+    m_rowCount = 1;
     m_incrementalReader = null;
     m_current = new ArrayList<Object>();
     openTempFiles();
@@ -1074,8 +1078,8 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     }
     String relationName;
     if (m_sourceFile != null) {
-      relationName = (m_sourceFile.getName())
-        .replaceAll("\\.[cC][sS][vV]$", "");
+      relationName =
+        (m_sourceFile.getName()).replaceAll("\\.[cC][sS][vV]$", "");
     } else {
       relationName = "stream";
     }
@@ -1227,83 +1231,90 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
    */
   private String getInstance(StreamTokenizer tokenizer) throws IOException {
 
-    // Check if end of file reached.
-    StreamTokenizerUtils.getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      return null;
-    }
-
-    boolean first = true;
-    boolean wasSep;
-    m_current.clear();
-
-    int i = 0;
-    while (tokenizer.ttype != StreamTokenizer.TT_EOL
-      && tokenizer.ttype != StreamTokenizer.TT_EOF) {
-
-      // Get next token
-      if (!first) {
-        StreamTokenizerUtils.getToken(tokenizer);
+    try {
+      // Check if end of file reached.
+      StreamTokenizerUtils.getFirstToken(tokenizer);
+      if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
+        return null;
       }
 
-      if (tokenizer.ttype == m_FieldSeparator.charAt(0)
-        || tokenizer.ttype == StreamTokenizer.TT_EOL) {
-        m_current.add("?");
-        wasSep = true;
-      } else {
-        wasSep = false;
-        if (tokenizer.sval.equals(m_MissingValue)
-          || tokenizer.sval.trim().length() == 0) {
-          m_current.add("?");
-        } else if (m_types[i] == TYPE.NUMERIC
-          || m_types[i] == TYPE.UNDETERMINED) {
-          // try to parse as a number
-          try {
-            Double.parseDouble(tokenizer.sval);
-            m_current.add(tokenizer.sval);
-            m_types[i] = TYPE.NUMERIC;
-          } catch (NumberFormatException e) {
-            // otherwise assume its an enumerated value
-            m_current.add(Utils.quote(tokenizer.sval));
-            if (m_types[i] == TYPE.UNDETERMINED) {
-              m_types[i] = TYPE.NOMINAL;
-              LinkedHashSet<String> ts = new LinkedHashSet<String>();
-              ts.add(tokenizer.sval);
-              m_nominalVals.put(i, ts);
-            } else {
-              m_types[i] = TYPE.STRING;
-            }
-          }
-        } else if (m_types[i] == TYPE.STRING || m_types[i] == TYPE.DATE) {
-          m_current.add(Utils.quote(tokenizer.sval));
-        } else if (m_types[i] == TYPE.NOMINAL) {
-          m_current.add(Utils.quote(tokenizer.sval));
-          m_nominalVals.get(i).add(tokenizer.sval);
+      boolean first = true;
+      boolean wasSep;
+      m_current.clear();
+
+      int i = 0;
+      while (tokenizer.ttype != StreamTokenizer.TT_EOL
+        && tokenizer.ttype != StreamTokenizer.TT_EOF) {
+
+        // Get next token
+        if (!first) {
+          StreamTokenizerUtils.getToken(tokenizer);
         }
+
+        if (tokenizer.ttype == m_FieldSeparator.charAt(0)
+          || tokenizer.ttype == StreamTokenizer.TT_EOL) {
+          m_current.add("?");
+          wasSep = true;
+        } else {
+          wasSep = false;
+          if (tokenizer.sval.equals(m_MissingValue)
+            || tokenizer.sval.trim().length() == 0) {
+            m_current.add("?");
+          } else if (m_types[i] == TYPE.NUMERIC
+            || m_types[i] == TYPE.UNDETERMINED) {
+            // try to parse as a number
+            try {
+              Double.parseDouble(tokenizer.sval);
+              m_current.add(tokenizer.sval);
+              m_types[i] = TYPE.NUMERIC;
+            } catch (NumberFormatException e) {
+              // otherwise assume its an enumerated value
+              m_current.add(Utils.quote(tokenizer.sval));
+              if (m_types[i] == TYPE.UNDETERMINED) {
+                m_types[i] = TYPE.NOMINAL;
+                LinkedHashSet<String> ts = new LinkedHashSet<String>();
+                ts.add(tokenizer.sval);
+                m_nominalVals.put(i, ts);
+              } else {
+                m_types[i] = TYPE.STRING;
+              }
+            }
+          } else if (m_types[i] == TYPE.STRING || m_types[i] == TYPE.DATE) {
+            m_current.add(Utils.quote(tokenizer.sval));
+          } else if (m_types[i] == TYPE.NOMINAL) {
+            m_current.add(Utils.quote(tokenizer.sval));
+            m_nominalVals.get(i).add(tokenizer.sval);
+          }
+        }
+
+        if (!wasSep) {
+          StreamTokenizerUtils.getToken(tokenizer);
+        }
+        first = false;
+        i++;
       }
 
-      if (!wasSep) {
-        StreamTokenizerUtils.getToken(tokenizer);
-      }
-      first = false;
-      i++;
-    }
+      // check number of values read
+      if (m_current.size() != m_structure.numAttributes()) {
+        for (Object o : m_current) {
+          System.out.print(o.toString() + "|||");
+        }
+        System.out.println();
+        StreamTokenizerUtils.errms(tokenizer, "wrong number of values. Read "
+          + m_current.size() + ", expected " + m_structure.numAttributes());
 
-    // check number of values read
-    if (m_current.size() != m_structure.numAttributes()) {
-      for (Object o : m_current) {
-        System.out.print(o.toString() + "|||");
       }
-      System.out.println();
-      StreamTokenizerUtils.errms(tokenizer, "wrong number of values. Read "
-        + m_current.size() + ", expected " + m_structure.numAttributes());
-
+    } catch (Exception ex) {
+      throw new IOException(ex.getMessage() + " Problem encountered on line: "
+        + (m_rowCount + 1));
     }
 
     StringBuilder temp = new StringBuilder();
     for (Object o : m_current) {
       temp.append(o.toString()).append(m_FieldSeparator);
     }
+    m_rowCount++;
+
     return temp.substring(0, temp.length() - 1);
   }
 
