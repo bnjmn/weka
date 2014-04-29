@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>complementNaiveBayes</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <version>1.0.3</version>
   <packaging>jar</packaging>
 
   <name>complementNaiveBayes</name>
@@ -51,9 +51,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/complementNaiveBayes</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/complementNaiveBayes</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/complementNaiveBayes</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/complementNaiveBayes-1.0.3</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/complementNaiveBayes-1.0.3</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/complementNaiveBayes-1.0.3</url>
   </scm>
 
   <profiles>
