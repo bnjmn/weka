@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>consistencySubsetEval</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>consistencySubsetEval</name>
@@ -48,9 +48,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/consistencySubsetEval-1.0.3</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/consistencySubsetEval-1.0.3</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/consistencySubsetEval-1.0.3</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/consistencySubsetEval</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/consistencySubsetEval</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/consistencySubsetEval</url>
   </scm>
 
   <profiles>
