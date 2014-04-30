@@ -43,4 +43,4 @@ URL=http://weka.sourceforge.net/doc.packages/DTNB
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.7.11)
