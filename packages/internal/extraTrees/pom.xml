@@ -10,7 +10,7 @@
 
   <name>extraTrees</name>
   <description>
-Package for generating a single Extra-Tree. Use with the RandomCommittee meta classifier to generate an Extra-Trees forest for classification or regression. This classifier requires all predictors to be numeric. Missing values are not allowed. Instance weights are taken into account. For more information, see <br><br>Pierre Geurts, Damien Ernst, Louis Wehenkel (2006). Extremely randomized trees. Machine Learning. 63(1):3-42.
+Package for generating a single Extra-Tree. Use with the RandomCommittee meta classifier to generate an Extra-Trees forest for classification or regression. This classifier requires all predictors to be numeric. Missing values are not allowed. Instance weights are taken into account. For more information, see Pierre Geurts, Damien Ernst, Louis Wehenkel (2006). Extremely randomized trees. Machine Learning. 63(1):3-42.
   </description>
   <url>http://weka.sourceforge.net/doc.packages/extraTrees</url>
   <organization>
