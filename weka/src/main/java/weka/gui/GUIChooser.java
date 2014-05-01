@@ -42,16 +42,20 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.Reader;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -79,6 +83,7 @@ import weka.core.scripting.Jython;
 import weka.gui.arffviewer.ArffViewer;
 import weka.gui.beans.KnowledgeFlow;
 import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.beans.PluginManager;
 import weka.gui.boundaryvisualizer.BoundaryVisualizer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.explorer.Explorer;
@@ -110,11 +115,11 @@ public class GUIChooser extends JFrame {
     try {
       Object MacApp = Class.forName("com.apple.eawt.Application").newInstance();
 
-      Object macArffHandler = Class.forName("weka.gui.MacArffOpenFilesHandler")
-        .newInstance();
+      Object macArffHandler =
+        Class.forName("weka.gui.MacArffOpenFilesHandler").newInstance();
 
-      Class<?> fileHandlerClass = Class
-        .forName("com.apple.eawt.OpenFilesHandler");
+      Class<?> fileHandlerClass =
+        Class.forName("com.apple.eawt.OpenFilesHandler");
       Class<?>[] paramClass = new Class[1];
       paramClass[0] = fileHandlerClass;
       Object[] args = new Object[1];
@@ -180,8 +185,12 @@ public class GUIChooser extends JFrame {
   /** The frame containing the Jython console. */
   protected JFrame m_JythonConsoleFrame;
 
-  /** keeps track of the opened ArffViewer instancs */
+  /** keeps track of the opened ArffViewer instances */
   protected Vector<ArffViewer> m_ArffViewers = new Vector<ArffViewer>();
+
+  /** keeps track of the opened GUIChooserMenuPlugins (if any) */
+  protected List<GUIChooserMenuPlugin> m_menuPlugins =
+    new ArrayList<GUIChooserMenuPlugin>();
 
   /** The frame containing the SqlViewer */
   protected JFrame m_SqlViewerFrame;
@@ -271,6 +280,50 @@ public class GUIChooser extends JFrame {
   }
 
   /**
+   * Interface for plugin components that can be accessed from either the
+   * Visualization or Tools menu.
+   * 
+   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+   */
+  public static interface GUIChooserMenuPlugin {
+
+    /** Enum listing possible menus that plugins can appear in */
+    public static enum Menu {
+      TOOLS, VISUALIZATION
+    };
+
+    /**
+     * Get the name to display in title bar of the enclosing JFrame for the
+     * plugin
+     * 
+     * @return the name to display in the title bar
+     */
+    String getApplicationName();
+
+    /**
+     * Get the menu that the plugin is to be listed in
+     * 
+     * @return the menu that the plugin is to be listed in
+     */
+    Menu getMenuToDisplayIn();
+
+    /**
+     * Get the text entry to appear in the menu
+     * 
+     * @return the text entry to appear in the menu
+     */
+    String getMenuEntryText();
+
+    /**
+     * Return the menu bar for this plugin
+     * 
+     * @return the menu bar for this plugin or null if it does not use a menu
+     *         bar
+     */
+    JMenuBar getMenuBar();
+  }
+
+  /**
    * Creates the experiment environment gui with no initial experiment
    */
   public GUIChooser() {
@@ -297,9 +350,10 @@ public class GUIChooser extends JFrame {
         + ")"));
 
     // general layout
-    m_Icon = Toolkit.getDefaultToolkit().getImage(
-      GUIChooser.class.getClassLoader().getResource(
-        "weka/gui/weka_icon_new_48.png"));
+    m_Icon =
+      Toolkit.getDefaultToolkit().getImage(
+        GUIChooser.class.getClassLoader().getResource(
+          "weka/gui/weka_icon_new_48.png"));
     setIconImage(m_Icon);
     this.getContentPane().setLayout(new BorderLayout());
 
@@ -322,11 +376,12 @@ public class GUIChooser extends JFrame {
     ImageIcon wii = new ImageIcon(m_weka);
     JLabel wekaLab = new JLabel(wii);
     wekaPan.add(wekaLab, BorderLayout.CENTER);
-    String infoString = "<html>" + "<font size=-2>"
-      + "Waikato Environment for Knowledge Analysis<br>" + "Version "
-      + Version.VERSION + "<br>" + "(c) " + Copyright.getFromYear() + " - "
-      + Copyright.getToYear() + "<br>" + Copyright.getOwner() + "<br>"
-      + Copyright.getAddress() + "</font>" + "</html>";
+    String infoString =
+      "<html>" + "<font size=-2>"
+        + "Waikato Environment for Knowledge Analysis<br>" + "Version "
+        + Version.VERSION + "<br>" + "(c) " + Copyright.getFromYear() + " - "
+        + Copyright.getToYear() + "<br>" + Copyright.getOwner() + "<br>"
+        + Copyright.getAddress() + "</font>" + "</html>";
     JLabel infoLab = new JLabel(infoString);
     infoLab.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     wekaPan.add(infoLab, BorderLayout.SOUTH);
@@ -574,8 +629,8 @@ public class GUIChooser extends JFrame {
         }
 
         // build tree
-        String filename = m_FileChooserTreeVisualizer.getSelectedFile()
-          .getAbsolutePath();
+        String filename =
+          m_FileChooserTreeVisualizer.getSelectedFile().getAbsolutePath();
         TreeBuild builder = new TreeBuild();
         Node top = null;
         NodePlace arrange = new PlaceNode2();
@@ -627,8 +682,8 @@ public class GUIChooser extends JFrame {
         }
 
         // build graph
-        String filename = m_FileChooserGraphVisualizer.getSelectedFile()
-          .getAbsolutePath();
+        String filename =
+          m_FileChooserGraphVisualizer.getSelectedFile().getAbsolutePath();
         GraphVisualizer panel = new GraphVisualizer();
         try {
           if (filename.toLowerCase().endsWith(".xml")
@@ -711,20 +766,22 @@ public class GUIChooser extends JFrame {
     m_jMenuBar.add(jMenuExtensions);
     jMenuExtensions.setVisible(false);
 
-    String extensions = GenericObjectEditor.EDITOR_PROPERTIES.getProperty(
-      MainMenuExtension.class.getName(), "");
+    String extensions =
+      GenericObjectEditor.EDITOR_PROPERTIES.getProperty(
+        MainMenuExtension.class.getName(), "");
 
     if (extensions.length() > 0) {
       jMenuExtensions.setVisible(true);
-      String[] classnames = GenericObjectEditor.EDITOR_PROPERTIES.getProperty(
-        MainMenuExtension.class.getName(), "").split(",");
+      String[] classnames =
+        GenericObjectEditor.EDITOR_PROPERTIES.getProperty(
+          MainMenuExtension.class.getName(), "").split(",");
       Hashtable<String, JMenu> submenus = new Hashtable<String, JMenu>();
 
       // add all extensions
       for (String classname : classnames) {
         try {
-          MainMenuExtension ext = (MainMenuExtension) Class.forName(classname)
-            .newInstance();
+          MainMenuExtension ext =
+            (MainMenuExtension) Class.forName(classname).newInstance();
 
           // menuitem in a submenu?
           JMenu submenu = null;
@@ -751,8 +808,9 @@ public class GUIChooser extends JFrame {
             menuitem.addActionListener(new ActionListener() {
               @Override
               public void actionPerformed(ActionEvent e) {
-                Component frame = createFrame(m_Self, finalMenuitem.getText(),
-                  null, null, null, -1, -1, null, false, false);
+                Component frame =
+                  createFrame(m_Self, finalMenuitem.getText(), null, null,
+                    null, -1, -1, null, false, false);
                 finalExt.fillFrame(frame);
                 frame.setVisible(true);
               }
@@ -810,8 +868,8 @@ public class GUIChooser extends JFrame {
                     checkExit();
                   }
                 });
-                Dimension screenSize = m_PackageManagerFrame.getToolkit()
-                  .getScreenSize();
+                Dimension screenSize =
+                  m_PackageManagerFrame.getToolkit().getScreenSize();
                 int width = screenSize.width * 8 / 10;
                 int height = screenSize.height * 8 / 10;
                 m_PackageManagerFrame.setBounds(width / 8, height / 8, width,
@@ -961,7 +1019,7 @@ public class GUIChooser extends JFrame {
       jMenuItemJythonConsole.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          if (m_BayesNetGUIFrame == null) {
+          if (m_JythonConsoleFrame == null) {
             jMenuItemJythonConsole.setEnabled(false);
             final JythonPanel jythonPanel = new JythonPanel();
             m_JythonConsoleFrame = new JFrame(jythonPanel.getPlainTitle());
@@ -983,6 +1041,68 @@ public class GUIChooser extends JFrame {
           }
         }
       });
+    }
+
+    // plugins for Visualization and Tools
+    Set<String> pluginNames =
+      PluginManager
+        .getPluginNamesOfType("weka.gui.GUIChooser.GUIChooserMenuPlugin");
+    if (pluginNames != null) {
+      boolean firstVis = true;
+      boolean firstTools = true;
+      for (String name : pluginNames) {
+        try {
+          final GUIChooserMenuPlugin p =
+            (GUIChooserMenuPlugin) PluginManager.getPluginInstance(
+              "weka.gui.GUIChooser.GUIChooserMenuPlugin", name);
+
+          if (p instanceof JComponent) {
+            final JMenuItem mItem = new JMenuItem(p.getMenuEntryText());
+            mItem.addActionListener(new ActionListener() {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                JFrame appFrame = new JFrame(p.getApplicationName());
+                appFrame.setIconImage(m_Icon);
+                appFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                JMenuBar appMenu = p.getMenuBar();
+                if (appMenu != null) {
+                  appFrame.setJMenuBar(appMenu);
+                }
+
+                appFrame.getContentPane().add((JComponent) p,
+                  BorderLayout.CENTER);
+                appFrame.addWindowListener(new WindowAdapter() {
+                  @Override
+                  public void windowClosed(WindowEvent e) {
+                    m_menuPlugins.remove(p);
+                    checkExit();
+                  }
+                });
+                appFrame.setSize(800, 600);
+                appFrame.setVisible(true);
+              }
+            });
+
+            if (p.getMenuToDisplayIn() == GUIChooserMenuPlugin.Menu.VISUALIZATION) {
+              if (firstVis) {
+                m_jMenuVisualization.add(new JSeparator());
+                firstVis = false;
+              }
+              m_jMenuVisualization.add(mItem);
+            } else {
+              if (firstTools) {
+                m_jMenuTools.add(new JSeparator());
+                firstTools = false;
+              }
+              m_jMenuTools.add(mItem);
+            }
+
+            m_menuPlugins.add(p);
+          }
+        } catch (Exception e1) {
+          e1.printStackTrace();
+        }
+      }
     }
 
     // Help
@@ -1230,9 +1350,10 @@ public class GUIChooser extends JFrame {
         public void run() {
           JCheckBox dontShow = new JCheckBox("Do not show this message again");
           Object[] stuff = new Object[2];
-          stuff[0] = "Weka has a package manager that you\n"
-            + "can use to install many learning schemes and tools.\nThe package manager can be "
-            + "found under the \"Tools\" menu.\n";
+          stuff[0] =
+            "Weka has a package manager that you\n"
+              + "can use to install many learning schemes and tools.\nThe package manager can be "
+              + "found under the \"Tools\" menu.\n";
           stuff[1] = dontShow;
           // Display the tip on finding/using the package manager
           JOptionPane.showMessageDialog(GUIChooser.this, stuff,
@@ -1295,8 +1416,8 @@ public class GUIChooser extends JFrame {
 
     if (fileToLoad != null) {
       try {
-        weka.core.converters.AbstractFileLoader loader = weka.core.converters.ConverterUtils
-          .getLoaderForFile(fileToLoad);
+        weka.core.converters.AbstractFileLoader loader =
+          weka.core.converters.ConverterUtils.getLoaderForFile(fileToLoad);
         loader.setFile(new File(fileToLoad));
         expl.getPreprocessPanel().setInstancesFromFile(loader);
       } catch (Exception ex) {
