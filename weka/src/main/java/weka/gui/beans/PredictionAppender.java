@@ -35,7 +35,6 @@ import weka.clusterers.DensityBasedClusterer;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.SerializedObject;
 
 /**
  * Bean that can can accept batch or incremental classifier events and produce
@@ -55,22 +54,26 @@ public class PredictionAppender extends JPanel implements DataSource,
   /**
    * Objects listenening for dataset events
    */
-  protected Vector<DataSourceListener> m_dataSourceListeners = new Vector<DataSourceListener>();
+  protected Vector<DataSourceListener> m_dataSourceListeners =
+    new Vector<DataSourceListener>();
 
   /**
    * Objects listening for instances events
    */
-  protected Vector<InstanceListener> m_instanceListeners = new Vector<InstanceListener>();
+  protected Vector<InstanceListener> m_instanceListeners =
+    new Vector<InstanceListener>();
 
   /**
    * Objects listening for training set events
    */
-  protected Vector<TrainingSetListener> m_trainingSetListeners = new Vector<TrainingSetListener>();;
+  protected Vector<TrainingSetListener> m_trainingSetListeners =
+    new Vector<TrainingSetListener>();;
 
   /**
    * Objects listening for test set events
    */
-  protected Vector<TestSetListener> m_testSetListeners = new Vector<TestSetListener>();
+  protected Vector<TestSetListener> m_testSetListeners =
+    new Vector<TestSetListener>();
 
   /**
    * Non null if this object is a target for any events.
@@ -335,16 +338,18 @@ public class PredictionAppender extends JPanel implements DataSource,
       // +"_with predictions";
       if (!m_appendProbabilities || oldStructure.classAttribute().isNumeric()) {
         try {
-          m_format = makeDataSetClass(oldStructure, oldStructure, classifier,
-            relationNameModifier);
+          m_format =
+            makeDataSetClass(oldStructure, oldStructure, classifier,
+              relationNameModifier);
         } catch (Exception ex) {
           ex.printStackTrace();
           return;
         }
       } else if (m_appendProbabilities) {
         try {
-          m_format = makeDataSetProbabilities(oldStructure, oldStructure,
-            classifier, relationNameModifier);
+          m_format =
+            makeDataSetProbabilities(oldStructure, oldStructure, classifier,
+              relationNameModifier);
 
         } catch (Exception ex) {
           ex.printStackTrace();
@@ -450,25 +455,28 @@ public class PredictionAppender extends JPanel implements DataSource,
       int maxNum = e.getMaxSetNumber();
 
       weka.classifiers.Classifier classifier = e.getClassifier();
-      String relationNameModifier = "_set_" + e.getSetNumber() + "_of_"
-        + e.getMaxSetNumber();
+      String relationNameModifier =
+        "_set_" + e.getSetNumber() + "_of_" + e.getMaxSetNumber();
       if (!m_appendProbabilities || testSet.classAttribute().isNumeric()) {
         try {
-          Instances newTestSetInstances = makeDataSetClass(testSet, trainSet,
-            classifier, relationNameModifier);
-          Instances newTrainingSetInstances = makeDataSetClass(trainSet,
-            trainSet, classifier, relationNameModifier);
+          Instances newTestSetInstances =
+            makeDataSetClass(testSet, trainSet, classifier,
+              relationNameModifier);
+          Instances newTrainingSetInstances =
+            makeDataSetClass(trainSet, trainSet, classifier,
+              relationNameModifier);
 
           if (m_trainingSetListeners.size() > 0) {
-            TrainingSetEvent tse = new TrainingSetEvent(this, new Instances(
-              newTrainingSetInstances, 0));
+            TrainingSetEvent tse =
+              new TrainingSetEvent(this, new Instances(newTrainingSetInstances,
+                0));
             tse.m_setNumber = setNum;
             tse.m_maxSetNumber = maxNum;
             notifyTrainingSetAvailable(tse);
             // fill in predicted values
             for (int i = 0; i < trainSet.numInstances(); i++) {
-              double predClass = classifier.classifyInstance(trainSet
-                .instance(i));
+              double predClass =
+                classifier.classifyInstance(trainSet.instance(i));
               newTrainingSetInstances.instance(i).setValue(
                 newTrainingSetInstances.numAttributes() - 1, predClass);
             }
@@ -479,8 +487,8 @@ public class PredictionAppender extends JPanel implements DataSource,
           }
 
           if (m_testSetListeners.size() > 0) {
-            TestSetEvent tse = new TestSetEvent(this, new Instances(
-              newTestSetInstances, 0));
+            TestSetEvent tse =
+              new TestSetEvent(this, new Instances(newTestSetInstances, 0));
             tse.m_setNumber = setNum;
             tse.m_maxSetNumber = maxNum;
             notifyTestSetAvailable(tse);
@@ -530,20 +538,23 @@ public class PredictionAppender extends JPanel implements DataSource,
       }
       if (m_appendProbabilities) {
         try {
-          Instances newTestSetInstances = makeDataSetProbabilities(testSet,
-            trainSet, classifier, relationNameModifier);
-          Instances newTrainingSetInstances = makeDataSetProbabilities(
-            trainSet, trainSet, classifier, relationNameModifier);
+          Instances newTestSetInstances =
+            makeDataSetProbabilities(testSet, trainSet, classifier,
+              relationNameModifier);
+          Instances newTrainingSetInstances =
+            makeDataSetProbabilities(trainSet, trainSet, classifier,
+              relationNameModifier);
           if (m_trainingSetListeners.size() > 0) {
-            TrainingSetEvent tse = new TrainingSetEvent(this, new Instances(
-              newTrainingSetInstances, 0));
+            TrainingSetEvent tse =
+              new TrainingSetEvent(this, new Instances(newTrainingSetInstances,
+                0));
             tse.m_setNumber = setNum;
             tse.m_maxSetNumber = maxNum;
             notifyTrainingSetAvailable(tse);
             // fill in predicted probabilities
             for (int i = 0; i < trainSet.numInstances(); i++) {
-              double[] preds = classifier.distributionForInstance(trainSet
-                .instance(i));
+              double[] preds =
+                classifier.distributionForInstance(trainSet.instance(i));
               for (int j = 0; j < trainSet.classAttribute().numValues(); j++) {
                 newTrainingSetInstances.instance(i).setValue(
                   trainSet.numAttributes() + j, preds[j]);
@@ -555,8 +566,8 @@ public class PredictionAppender extends JPanel implements DataSource,
             notifyTrainingSetAvailable(tse);
           }
           if (m_testSetListeners.size() > 0) {
-            TestSetEvent tse = new TestSetEvent(this, new Instances(
-              newTestSetInstances, 0));
+            TestSetEvent tse =
+              new TestSetEvent(this, new Instances(newTestSetInstances, 0));
             tse.m_setNumber = setNum;
             tse.m_maxSetNumber = maxNum;
             notifyTestSetAvailable(tse);
@@ -632,8 +643,8 @@ public class PredictionAppender extends JPanel implements DataSource,
       } else {
         test = "training";
       }
-      String relationNameModifier = "_" + test + "_" + e.getSetNumber()
-        + "_of_" + e.getMaxSetNumber();
+      String relationNameModifier =
+        "_" + test + "_" + e.getSetNumber() + "_of_" + e.getMaxSetNumber();
       if (!m_appendProbabilities
         || !(clusterer instanceof DensityBasedClusterer)) {
         if (m_appendProbabilities
@@ -654,8 +665,8 @@ public class PredictionAppender extends JPanel implements DataSource,
           }
         }
         try {
-          Instances newInstances = makeClusterDataSetClass(testSet, clusterer,
-            relationNameModifier);
+          Instances newInstances =
+            makeClusterDataSetClass(testSet, clusterer, relationNameModifier);
 
           // data source listeners get both train and test sets
           if (m_dataSourceListeners.size() > 0) {
@@ -664,16 +675,16 @@ public class PredictionAppender extends JPanel implements DataSource,
           }
 
           if (m_trainingSetListeners.size() > 0 && e.getTestOrTrain() > 0) {
-            TrainingSetEvent tse = new TrainingSetEvent(this, new Instances(
-              newInstances, 0));
+            TrainingSetEvent tse =
+              new TrainingSetEvent(this, new Instances(newInstances, 0));
             tse.m_setNumber = e.getSetNumber();
             tse.m_maxSetNumber = e.getMaxSetNumber();
             notifyTrainingSetAvailable(tse);
           }
 
           if (m_testSetListeners.size() > 0 && e.getTestOrTrain() == 0) {
-            TestSetEvent tse = new TestSetEvent(this, new Instances(
-              newInstances, 0));
+            TestSetEvent tse =
+              new TestSetEvent(this, new Instances(newInstances, 0));
             tse.m_setNumber = e.getSetNumber();
             tse.m_maxSetNumber = e.getMaxSetNumber();
             notifyTestSetAvailable(tse);
@@ -708,15 +719,16 @@ public class PredictionAppender extends JPanel implements DataSource,
         }
       } else {
         try {
-          Instances newInstances = makeClusterDataSetProbabilities(testSet,
-            clusterer, relationNameModifier);
+          Instances newInstances =
+            makeClusterDataSetProbabilities(testSet, clusterer,
+              relationNameModifier);
           notifyDataSetAvailable(new DataSetEvent(this, new Instances(
             newInstances, 0)));
 
           // fill in predicted probabilities
           for (int i = 0; i < testSet.numInstances(); i++) {
-            double[] probs = clusterer.distributionForInstance(testSet
-              .instance(i));
+            double[] probs =
+              clusterer.distributionForInstance(testSet.instance(i));
             for (int j = 0; j < clusterer.numberOfClusters(); j++) {
               newInstances.instance(i).setValue(testSet.numAttributes() + j,
                 probs[j]);
@@ -737,16 +749,19 @@ public class PredictionAppender extends JPanel implements DataSource,
 
     // adjust structure for InputMappedClassifier (if necessary)
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      format = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .getModelHeader(new Instances(format, 0));
+      format =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getModelHeader(new Instances(format, 0));
     }
 
     String classifierName = classifier.getClass().getName();
-    classifierName = classifierName.substring(
-      classifierName.lastIndexOf('.') + 1, classifierName.length());
+    classifierName =
+      classifierName.substring(classifierName.lastIndexOf('.') + 1,
+        classifierName.length());
     Instances newInstances = new Instances(insts);
     for (int i = 0; i < format.classAttribute().numValues(); i++) {
-      weka.filters.unsupervised.attribute.Add addF = new weka.filters.unsupervised.attribute.Add();
+      weka.filters.unsupervised.attribute.Add addF =
+        new weka.filters.unsupervised.attribute.Add();
       addF.setAttributeIndex("last");
       addF.setAttributeName(classifierName + "_prob_"
         + format.classAttribute().value(i));
@@ -763,23 +778,22 @@ public class PredictionAppender extends JPanel implements DataSource,
 
     // adjust structure for InputMappedClassifier (if necessary)
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      structure = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .getModelHeader(new Instances(structure, 0));
+      structure =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getModelHeader(new Instances(structure, 0));
     }
 
-    weka.filters.unsupervised.attribute.Add addF = new weka.filters.unsupervised.attribute.Add();
+    weka.filters.unsupervised.attribute.Add addF =
+      new weka.filters.unsupervised.attribute.Add();
     addF.setAttributeIndex("last");
     String classifierName = classifier.getClass().getName();
-    classifierName = classifierName.substring(
-      classifierName.lastIndexOf('.') + 1, classifierName.length());
+    classifierName =
+      classifierName.substring(classifierName.lastIndexOf('.') + 1,
+        classifierName.length());
     addF.setAttributeName("class_predicted_by: " + classifierName);
     if (structure.classAttribute().isNominal()) {
       String classLabels = "";
       Enumeration<Object> enu = structure.classAttribute().enumerateValues();
-      Object o = enu.nextElement();
-      if (o instanceof SerializedObject) {
-        o = ((SerializedObject) o).getObject();
-      }
       classLabels += (String) enu.nextElement();
       while (enu.hasMoreElements()) {
         classLabels += "," + (String) enu.nextElement();
@@ -798,7 +812,8 @@ public class PredictionAppender extends JPanel implements DataSource,
     throws Exception {
     Instances newInstances = new Instances(format);
     for (int i = 0; i < clusterer.numberOfClusters(); i++) {
-      weka.filters.unsupervised.attribute.Add addF = new weka.filters.unsupervised.attribute.Add();
+      weka.filters.unsupervised.attribute.Add addF =
+        new weka.filters.unsupervised.attribute.Add();
       addF.setAttributeIndex("last");
       addF.setAttributeName("prob_cluster" + i);
       addF.setInputFormat(newInstances);
@@ -812,11 +827,13 @@ public class PredictionAppender extends JPanel implements DataSource,
     weka.clusterers.Clusterer clusterer, String relationNameModifier)
     throws Exception {
 
-    weka.filters.unsupervised.attribute.Add addF = new weka.filters.unsupervised.attribute.Add();
+    weka.filters.unsupervised.attribute.Add addF =
+      new weka.filters.unsupervised.attribute.Add();
     addF.setAttributeIndex("last");
     String clustererName = clusterer.getClass().getName();
-    clustererName = clustererName.substring(clustererName.lastIndexOf('.') + 1,
-      clustererName.length());
+    clustererName =
+      clustererName.substring(clustererName.lastIndexOf('.') + 1,
+        clustererName.length());
     addF.setAttributeName("assigned_cluster: " + clustererName);
     // if (format.classAttribute().isNominal()) {
     String clusterLabels = "0";
