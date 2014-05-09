@@ -280,7 +280,8 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
 
       JPanel topP = new JPanel();
       topP.setLayout(new BorderLayout());
-      topP.add(new JScrollPane(id), BorderLayout.CENTER);
+      JScrollPane js = new JScrollPane(id);
+      topP.add(js, BorderLayout.CENTER);
       topP.add(p, BorderLayout.WEST);
 
       add(topP, BorderLayout.CENTER);
@@ -336,6 +337,8 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
         }
 
         g.drawImage(m_image, x, y, this);
+        setPreferredSize(new Dimension(plotWidth, plotHeight));
+        revalidate();
       }
     }
   }
