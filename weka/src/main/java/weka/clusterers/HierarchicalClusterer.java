@@ -93,9 +93,6 @@ public class HierarchicalClusterer extends AbstractClusterer implements
   OptionHandler, CapabilitiesHandler, Drawable {
   private static final long serialVersionUID = 1L;
 
-  /** Whether the classifier is run in debug mode. */
-  protected boolean m_Debug = false;
-
   /**
    * Whether the distance represent node height (if false) or branch length (if
    * true).
