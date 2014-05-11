@@ -40,7 +40,7 @@ public interface UpdateableClusterer {
   public void updateClusterer(Instance newInstance) throws Exception;
 
   /**
-   * Singals the end of the updating.
+   * Signals the end of the updating.
    */
   public void updateFinished();
 }
