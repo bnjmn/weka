@@ -145,7 +145,7 @@ public class FlexibleDecimalFormat extends DecimalFormat implements
     int dD = digits - e;
     if (!trailing && dD > 0) { // to get rid of trailing zeros
       FloatingPointFormat f = new FloatingPointFormat(iD + 1 + dD, dD, true);
-      String dString = f.format(d);
+      String dString = f.nf.format(d);
       while (dD > 0) {
         if (dString.charAt(iD + 1 + dD - 1) == '0') {
           dD--;
