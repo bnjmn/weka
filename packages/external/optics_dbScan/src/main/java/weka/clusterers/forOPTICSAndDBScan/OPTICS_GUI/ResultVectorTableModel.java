@@ -23,12 +23,13 @@
 package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
 import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
-import weka.core.FastVector;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import javax.swing.table.AbstractTableModel;
+
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -53,7 +54,7 @@ public class ResultVectorTableModel
     /**
      * Holds the ClusterOrder (dataObjects with their r_dist and c_dist) for the GUI
      */
-    private FastVector resultVector;
+    private ArrayList resultVector;
 
     // *****************************************************************************************************************
     // constructors
@@ -63,7 +64,7 @@ public class ResultVectorTableModel
      *  Constructs a default <code>DefaultTableModel</code>
      *  which is a table of zero columns and zero rows.
      */
-    public ResultVectorTableModel(FastVector resultVector) {
+    public ResultVectorTableModel(ArrayList resultVector) {
         this.resultVector = resultVector;
     }
 
@@ -102,7 +103,7 @@ public class ResultVectorTableModel
      * @return value
      * */
     public Object getValueAt(int row, int column) {
-        DataObject dataObject = (DataObject) resultVector.elementAt(row);
+        DataObject dataObject = (DataObject) resultVector.get(row);
 
         switch (column) {
             case 0:

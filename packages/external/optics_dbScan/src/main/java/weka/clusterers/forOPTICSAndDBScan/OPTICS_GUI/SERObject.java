@@ -25,8 +25,11 @@ package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 import weka.core.FastVector;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.DistanceFunction;
 
 import java.io.Serializable;
+
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -47,14 +50,13 @@ public class SERObject
     /** for serialization */
     private static final long serialVersionUID = -6022057864970639151L;
   
-    private FastVector resultVector;
+    private ArrayList resultVector;
     private int databaseSize;
     private int numberOfAttributes;
     private double epsilon;
     private int minPoints;
     private boolean opticsOutputs;
-    private String database_Type;
-    private String database_distanceType;
+  private DistanceFunction distanceFunction;
     private int numberOfGeneratedClusters;
     private String elapsedTime;
 
@@ -62,14 +64,13 @@ public class SERObject
     // constructors
     // *****************************************************************************************************************
 
-    public SERObject(FastVector resultVector,
+    public SERObject(ArrayList resultVector,
                      int databaseSize,
                      int numberOfAttributes,
                      double epsilon,
                      int minPoints,
                      boolean opticsOutputs,
-                     String database_Type,
-                     String database_distanceType,
+                     DistanceFunction distance,
                      int numberOfGeneratedClusters,
                      String elapsedTime) {
         this.resultVector = resultVector;
@@ -78,8 +79,7 @@ public class SERObject
         this.epsilon = epsilon;
         this.minPoints = minPoints;
         this.opticsOutputs = opticsOutputs;
-        this.database_Type = database_Type;
-        this.database_distanceType = database_distanceType;
+        this.distanceFunction = distance;
         this.numberOfGeneratedClusters = numberOfGeneratedClusters;
         this.elapsedTime = elapsedTime;
     }
@@ -90,9 +90,9 @@ public class SERObject
 
     /**
      * Returns the resultVector
-     * @return FastVector resultVector
+     * @return ArrayList resultVector
      */
-    public FastVector getResultVector() {
+    public ArrayList getResultVector() {
         return resultVector;
     }
 
@@ -137,19 +137,11 @@ public class SERObject
     }
 
     /**
-     * Returns the type of the used index (database)
-     * @return String Index-type
-     */
-    public String getDatabase_Type() {
-        return database_Type;
-    }
-
-    /**
      * Returns the distance-type
-     * @return String Distance-type
+     * @return Distance Distance-type
      */
-    public String getDatabase_distanceType() {
-        return database_distanceType;
+  public DistanceFunction getDistanceFunction() {
+        return distanceFunction;
     }
 
     /**

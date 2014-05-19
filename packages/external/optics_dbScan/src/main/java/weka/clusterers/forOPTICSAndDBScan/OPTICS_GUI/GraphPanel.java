@@ -23,7 +23,6 @@
 package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
 import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
-import weka.core.FastVector;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
@@ -35,6 +34,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 
 import javax.swing.JComponent;
+
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -59,7 +60,7 @@ public class GraphPanel
     /**
      * Holds the clustering results
      */
-    private FastVector resultVector;
+    private ArrayList resultVector;
 
     /**
      * Holds the value that is multiplied with the original values of core- and reachability
@@ -101,7 +102,7 @@ public class GraphPanel
     // constructors
     // *****************************************************************************************************************
 
-    public GraphPanel(FastVector resultVector,
+    public GraphPanel(ArrayList resultVector,
                       int verticalAdjustment,
                       boolean showCoreDistances,
                       boolean showReachbilityDistances) {
@@ -136,8 +137,8 @@ public class GraphPanel
         int rDist = 0;
 
         for (int vectorIndex = 0; vectorIndex < resultVector.size(); vectorIndex++) {
-            double coreDistance = ((DataObject) resultVector.elementAt(vectorIndex)).getCoreDistance();
-            double reachDistance = ((DataObject) resultVector.elementAt(vectorIndex)).getReachabilityDistance();
+            double coreDistance = ((DataObject) resultVector.get(vectorIndex)).getCoreDistance();
+            double reachDistance = ((DataObject) resultVector.get(vectorIndex)).getReachabilityDistance();
 
             if (coreDistance == DataObject.UNDEFINED)
                 cDist = getHeight();
@@ -180,7 +181,7 @@ public class GraphPanel
      * Sets a new resultVector
      * @param resultVector
      */
-    public void setResultVector(FastVector resultVector) {
+    public void setResultVector(ArrayList resultVector) {
         this.resultVector = resultVector;
     }
 
@@ -302,7 +303,7 @@ public class GraphPanel
                 recentIndex = x / i;
             DataObject dataObject = null;
             try {
-                dataObject = (DataObject) resultVector.elementAt(recentIndex);
+                dataObject = (DataObject) resultVector.get(recentIndex);
             } catch (Exception e) {
             }
             if (dataObject != null) {

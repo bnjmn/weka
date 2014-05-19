@@ -24,6 +24,8 @@ package weka.clusterers;
 
 import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
 import weka.clusterers.forOPTICSAndDBScan.Databases.Database;
+import weka.core.DistanceFunction;
+import weka.core.EuclideanDistance;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -120,17 +122,8 @@ public class DBSCAN
      */
     private int numberOfGeneratedClusters;
 
-    /**
-     * Holds the distance-type that is used
-     * (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)
-     */
-    private String database_distanceType = "weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject";
-
-    /**
-     * Holds the type of the used database
-     * (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)
-     */
-    private String database_Type = "weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase";
+  /** the distance function used. */
+  private DistanceFunction m_DistanceFunction = new EuclideanDistance();
 
     /**
      * The database that is used for DBSCAN
@@ -198,15 +191,15 @@ public class DBSCAN
         replaceMissingValues_Filter.setInputFormat(instances);
         Instances filteredInstances = Filter.useFilter(instances, replaceMissingValues_Filter);
 
-        database = databaseForName(getDatabase_Type(), filteredInstances);
+        
+        database = new Database(getDistanceFunction(), filteredInstances);
         for (int i = 0; i < database.getInstances().numInstances(); i++) {
-            DataObject dataObject = dataObjectForName(getDatabase_distanceType(),
+          DataObject dataObject = new DataObject(
                     database.getInstances().instance(i),
                     Integer.toString(i),
                     database);
             database.insert(dataObject);
         }
-        database.setMinMaxValues();
 
         Iterator iterator = database.dataObjectIterator();
         while (iterator.hasNext()) {
@@ -317,16 +310,9 @@ public class DBSCAN
                         "M",
                         1,
                         "-M <int>"));
-        vector.addElement(
-                new Option("\tindex (database) used for DBSCAN (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)",
-                        "I",
-                        1,
-                        "-I <String>"));
-        vector.addElement(
-                new Option("\tdistance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)",
-                        "D",
-                        1,
-                        "-D <String>"));
+        vector.add(new Option("\tDistance function to use.\n"
+                              + "\t(default: weka.core.EuclideanDistance)", "A", 1,
+                              "-A <classname and options>"));
         return vector.elements();
     }
 
@@ -366,14 +352,19 @@ public class DBSCAN
             setMinPoints(Integer.parseInt(optionString));
         }
 
-        optionString = Utils.getOption('I', options);
+        optionString = Utils.getOption('A', options);
         if (optionString.length() != 0) {
-            setDatabase_Type(optionString);
-        }
-
-        optionString = Utils.getOption('D', options);
-        if (optionString.length() != 0) {
-            setDatabase_distanceType(optionString);
+          String distSpec[] = Utils.splitOptions(optionString);
+          if (distSpec.length == 0) {
+            throw new Exception("Invalid DistanceFunction specification string.");
+          }
+          String className = distSpec[0];
+          distSpec[0] = "";
+          
+          setDistanceFunction((DistanceFunction) Utils.forName(
+                                                               DistanceFunction.class, className, distSpec));
+        } else {
+          setDistanceFunction(new EuclideanDistance());
         }
     }
 
@@ -383,82 +374,20 @@ public class DBSCAN
      * @return String[] The list of current option settings as an array of strings
      */
     public String[] getOptions() {
-        String[] options = new String[8];
-        int current = 0;
-
-        options[current++] = "-E";
-        options[current++] = "" + getEpsilon();
-        options[current++] = "-M";
-        options[current++] = "" + getMinPoints();
-        options[current++] = "-I";
-        options[current++] = "" + getDatabase_Type();
-        options[current++] = "-D";
-        options[current++] = "" + getDatabase_distanceType();
-
-        return options;
-    }
-
-    /**
-     * Returns a new Class-Instance of the specified database
-     * @param database_Type String of the specified database
-     * @param instances Instances that were delivered from WEKA
-     * @return Database New constructed Database
-     */
-    public Database databaseForName(String database_Type, Instances instances) {
-        Object o = null;
-
-        Constructor co = null;
-        try {
-            co = (Class.forName(database_Type)).getConstructor(new Class[]{Instances.class});
-            o = co.newInstance(new Object[]{instances});
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-
-        return (Database) o;
-    }
-
-    /**
-     * Returns a new Class-Instance of the specified database
-     * @param database_distanceType String of the specified distance-type
-     * @param instance The original instance that needs to hold by this DataObject
-     * @param key Key for this DataObject
-     * @param database Link to the database
-     * @return DataObject New constructed DataObject
-     */
-    public DataObject dataObjectForName(String database_distanceType, Instance instance, String key, Database database) {
-        Object o = null;
-
-        Constructor co = null;
-        try {
-            co = (Class.forName(database_distanceType)).
-                    getConstructor(new Class[]{Instance.class, String.class, Database.class});
-            o = co.newInstance(new Object[]{instance, key, database});
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-
-        return (DataObject) o;
+      Vector<String> result;
+      
+      result = new Vector<String>();
+      
+      result.add("-E");
+      result.add("" + getEpsilon());
+      result.add("-M");
+      result.add("" + getMinPoints());
+      
+      result.add("-A");
+      result.add((m_DistanceFunction.getClass().getName() + " " + Utils
+                  .joinOptions(m_DistanceFunction.getOptions())).trim());
+      
+      return result.toArray(new String[result.size()]);
     }
 
     /**
@@ -493,37 +422,35 @@ public class DBSCAN
         return minPoints;
     }
 
-    /**
-     * Returns the distance-type
-     * @return String Distance-type
-     */
-    public String getDatabase_distanceType() {
-        return database_distanceType;
-    }
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String distanceFunctionTipText() {
+    return "The distance function to use for finding neighbours "
+      + "(default: weka.core.EuclideanDistance). ";
+  }
 
-    /**
-     * Returns the type of the used index (database)
-     * @return String Index-type
-     */
-    public String getDatabase_Type() {
-        return database_Type;
-    }
+  /**
+   * returns the distance function currently in use.
+   * 
+   * @return the distance function
+   */
+  public DistanceFunction getDistanceFunction() {
+    return m_DistanceFunction;
+  }
 
-    /**
-     * Sets a new distance-type
-     * @param database_distanceType The new distance-type
-     */
-    public void setDatabase_distanceType(String database_distanceType) {
-        this.database_distanceType = database_distanceType;
-    }
-
-    /**
-     * Sets a new database-type
-     * @param database_Type The new database-type
-     */
-    public void setDatabase_Type(String database_Type) {
-        this.database_Type = database_Type;
-    }
+  /**
+   * sets the distance function to use for nearest neighbour search.
+   * 
+   * @param df the new distance function to use
+   * @throws Exception if instances cannot be processed
+   */
+  public void setDistanceFunction(DistanceFunction df) throws Exception {
+    m_DistanceFunction = df;
+  }
 
     /**
      * Returns the tip text for this property
@@ -541,24 +468,6 @@ public class DBSCAN
      */
     public String minPointsTipText() {
         return "minimun number of DataObjects required in an epsilon-range-query";
-    }
-
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String database_TypeTipText() {
-        return "used database";
-    }
-
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String database_distanceTypeTipText() {
-        return "used distance-type";
     }
 
     /**
@@ -606,8 +515,7 @@ public class DBSCAN
         stringBuffer.append("Clustered DataObjects: " + database.size() + "\n");
         stringBuffer.append("Number of attributes: " + database.getInstances().numAttributes() + "\n");
         stringBuffer.append("Epsilon: " + getEpsilon() + "; minPoints: " + getMinPoints() + "\n");
-        stringBuffer.append("Index: " + getDatabase_Type() + "\n");
-        stringBuffer.append("Distance-type: " + getDatabase_distanceType() + "\n");
+        stringBuffer.append("Distance-type: " + getDistanceFunction() + "\n");
         stringBuffer.append("Number of generated clusters: " + numberOfGeneratedClusters + "\n");
         DecimalFormat decimalFormat = new DecimalFormat(".##");
         stringBuffer.append("Elapsed time: " + decimalFormat.format(elapsedTime) + "\n\n");

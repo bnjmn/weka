@@ -29,8 +29,9 @@ import weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI.SERObject;
 import weka.clusterers.forOPTICSAndDBScan.Utils.EpsilonRange_ListElement;
 import weka.clusterers.forOPTICSAndDBScan.Utils.UpdateQueue;
 import weka.clusterers.forOPTICSAndDBScan.Utils.UpdateQueueElement;
+import weka.core.DistanceFunction;
+import weka.core.EuclideanDistance;
 import weka.core.Capabilities;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -59,6 +60,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
@@ -145,17 +147,8 @@ public class OPTICS
      */
     private int numberOfGeneratedClusters;
 
-    /**
-     * Holds the distance-type that is used
-     * (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)
-     */
-    private String database_distanceType = "weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject";
-
-    /**
-     * Holds the type of the used database
-     * (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)
-     */
-    private String database_Type = "weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase";
+  /** the distance function used. */
+  private DistanceFunction m_DistanceFunction = new EuclideanDistance();
 
     /**
      * The database that is used for OPTICS
@@ -175,7 +168,7 @@ public class OPTICS
     /**
      * Holds the ClusterOrder (dataObjects with their r_dist and c_dist) for the GUI
      */
-    private FastVector resultVector;
+    private ArrayList resultVector;
 
     /** whether to display the GUI after building the clusterer or not. */
     private boolean showGUI = true;
@@ -219,7 +212,7 @@ public class OPTICS
         // can clusterer handle the data?
         getCapabilities().testWithFail(instances);
 
-        resultVector = new FastVector();
+        resultVector = new ArrayList();
         long time_1 = System.currentTimeMillis();
 
         numberOfGeneratedClusters = 0;
@@ -228,15 +221,14 @@ public class OPTICS
         replaceMissingValues_Filter.setInputFormat(instances);
         Instances filteredInstances = Filter.useFilter(instances, replaceMissingValues_Filter);
 
-        database = databaseForName(getDatabase_Type(), filteredInstances);
+        database = new Database(getDistanceFunction(), filteredInstances);
         for (int i = 0; i < database.getInstances().numInstances(); i++) {
-            DataObject dataObject = dataObjectForName(getDatabase_distanceType(),
+          DataObject dataObject = new DataObject(
                     database.getInstances().instance(i),
                     Integer.toString(i),
                     database);
             database.insert(dataObject);
         }
-        database.setMinMaxValues();
 
         UpdateQueue seeds = new UpdateQueue();
 
@@ -266,7 +258,7 @@ public class OPTICS
             FileWriter fileWriter = new FileWriter(fileName);
             BufferedWriter bufferedOPTICSWriter = new BufferedWriter(fileWriter);
             for (int i = 0; i < resultVector.size(); i++) {
-                bufferedOPTICSWriter.write(format_dataObject((DataObject) resultVector.elementAt(i)));
+                bufferedOPTICSWriter.write(format_dataObject((DataObject) resultVector.get(i)));
             }
             bufferedOPTICSWriter.flush();
             bufferedOPTICSWriter.close();
@@ -306,7 +298,7 @@ public class OPTICS
         dataObject.setCoreDistance(((Double) list.get(2)).doubleValue());
         dataObject.setProcessed(true);
 
-        resultVector.addElement(dataObject);
+        resultVector.add(dataObject);
 
         if (dataObject.getCoreDistance() != DataObject.UNDEFINED) {
             update(seeds, epsilonRange_List, dataObject);
@@ -319,7 +311,7 @@ public class OPTICS
                 currentDataObject.setCoreDistance(((Double) list_1.get(2)).doubleValue());
                 currentDataObject.setProcessed(true);
 
-                resultVector.addElement(currentDataObject);
+                resultVector.add(currentDataObject);
 
                 if (currentDataObject.getCoreDistance() != DataObject.UNDEFINED) {
                     update(seeds, epsilonRange_List_1, currentDataObject);
@@ -412,16 +404,10 @@ public class OPTICS
         vector.addElement(
             new Option("\tminPoints (default = 6)",
         	"M", 1, "-M <int>"));
-        
-        vector.addElement(
-            new Option(
-        	"\tindex (database) used for OPTICS (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)",
-        	"I", 1, "-I <String>"));
-        
-        vector.addElement(
-            new Option(
-        	"\tdistance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject)",
-        	"D", 1, "-D <String>"));
+
+        vector.add(new Option("\tDistance function to use.\n"
+                                 + "\t(default: weka.core.EuclideanDistance)", "A", 1,
+                                 "-A <classname and options>"));
         
         vector.addElement(
             new Option(
@@ -496,17 +482,20 @@ public class OPTICS
         else
             setMinPoints(6);
 
-        optionString = Utils.getOption('I', options);
-        if (optionString.length() != 0)
-            setDatabase_Type(optionString);
-        else
-            setDatabase_Type(weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase.class.getName());
-
-        optionString = Utils.getOption('D', options);
-        if (optionString.length() != 0)
-            setDatabase_distanceType(optionString);
-        else
-            setDatabase_distanceType(weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclideanDataObject.class.getName());
+        optionString = Utils.getOption('A', options);
+        if (optionString.length() != 0) {
+          String distSpec[] = Utils.splitOptions(optionString);
+          if (distSpec.length == 0) {
+            throw new Exception("Invalid DistanceFunction specification string.");
+          }
+          String className = distSpec[0];
+          distSpec[0] = "";
+          
+          setDistanceFunction((DistanceFunction) Utils.forName(
+                                                               DistanceFunction.class, className, distSpec));
+        } else {
+          setDistanceFunction(new EuclideanDistance());
+        }
 
         setWriteOPTICSresults(Utils.getFlag('F', options));
 
@@ -534,12 +523,10 @@ public class OPTICS
         
         result.add("-M");
         result.add("" + getMinPoints());
-        
-        result.add("-I");
-        result.add("" + getDatabase_Type());
-        
-        result.add("-D");
-        result.add("" + getDatabase_distanceType());
+
+        result.add("-A");
+        result.add((m_DistanceFunction.getClass().getName() + " " + Utils
+                    .joinOptions(m_DistanceFunction.getOptions())).trim());
 
         if (getWriteOPTICSresults())
           result.add("-F");
@@ -553,68 +540,6 @@ public class OPTICS
         return result.toArray(new String[result.size()]);
     }
 
-    /**
-     * Returns a new Class-Instance of the specified database
-     * @param database_Type String of the specified database
-     * @param instances Instances that were delivered from WEKA
-     * @return Database New constructed Database
-     */
-    public Database databaseForName(String database_Type, Instances instances) {
-        Object o = null;
-
-        Constructor co = null;
-        try {
-            co = (Class.forName(database_Type)).getConstructor(new Class[]{Instances.class});
-            o = co.newInstance(new Object[]{instances});
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-
-        return (Database) o;
-    }
-
-    /**
-     * Returns a new Class-Instance of the specified database
-     * @param database_distanceType String of the specified distance-type
-     * @param instance The original instance that needs to hold by this DataObject
-     * @param key Key for this DataObject
-     * @param database Link to the database
-     * @return DataObject New constructed DataObject
-     */
-    public DataObject dataObjectForName(String database_distanceType, Instance instance, String key, Database database) {
-        Object o = null;
-
-        Constructor co = null;
-        try {
-            co = (Class.forName(database_distanceType)).
-                    getConstructor(new Class[]{Instance.class, String.class, Database.class});
-            o = co.newInstance(new Object[]{instance, key, database});
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-
-        return (DataObject) o;
-    }
 
     /**
      * Sets a new value for minPoints
@@ -648,37 +573,35 @@ public class OPTICS
         return minPoints;
     }
 
-    /**
-     * Returns the distance-type
-     * @return String Distance-type
-     */
-    public String getDatabase_distanceType() {
-        return database_distanceType;
-    }
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String distanceFunctionTipText() {
+    return "The distance function to use for finding neighbours "
+      + "(default: weka.core.EuclideanDistance). ";
+  }
 
-    /**
-     * Returns the type of the used index (database)
-     * @return String Index-type
-     */
-    public String getDatabase_Type() {
-        return database_Type;
-    }
+  /**
+   * returns the distance function currently in use.
+   * 
+   * @return the distance function
+   */
+  public DistanceFunction getDistanceFunction() {
+    return m_DistanceFunction;
+  }
 
-    /**
-     * Sets a new distance-type
-     * @param database_distanceType The new distance-type
-     */
-    public void setDatabase_distanceType(String database_distanceType) {
-        this.database_distanceType = database_distanceType;
-    }
-
-    /**
-     * Sets a new database-type
-     * @param database_Type The new database-type
-     */
-    public void setDatabase_Type(String database_Type) {
-        this.database_Type = database_Type;
-    }
+  /**
+   * sets the distance function to use for nearest neighbour search.
+   * 
+   * @param df the new distance function to use
+   * @throws Exception if instances cannot be processed
+   */
+  public void setDistanceFunction(DistanceFunction df) throws Exception {
+    m_DistanceFunction = df;
+  }
 
     /**
      * Returns the flag for writing actions
@@ -741,7 +664,7 @@ public class OPTICS
      * Returns the resultVector
      * @return resultVector
      */
-    public FastVector getResultVector() {
+    public ArrayList getResultVector() {
         return resultVector;
     }
 
@@ -761,24 +684,6 @@ public class OPTICS
      */
     public String minPointsTipText() {
         return "minimun number of DataObjects required in an epsilon-range-query";
-    }
-
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String database_TypeTipText() {
-        return "used database";
-    }
-
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String database_distanceTypeTipText() {
-        return "used distance-type";
     }
 
     /**
@@ -856,9 +761,8 @@ public class OPTICS
                 database.getInstances().numAttributes(),
                 getEpsilon(),
                 getMinPoints(),
-                writeOPTICSresults,
-                getDatabase_Type(),
-                getDatabase_distanceType(),
+                                            writeOPTICSresults,
+                                            getDistanceFunction(),
                 numberOfGeneratedClusters,
                 Utils.doubleToString(elapsedTime, 3, 3));
         return serObject;
@@ -877,14 +781,13 @@ public class OPTICS
         stringBuffer.append("Number of attributes: " + database.getInstances().numAttributes() + "\n");
         stringBuffer.append("Epsilon: " + getEpsilon() + "; minPoints: " + getMinPoints() + "\n");
         stringBuffer.append("Write results to file: " + (writeOPTICSresults ? "yes" : "no") + "\n");
-        stringBuffer.append("Index: " + getDatabase_Type() + "\n");
-        stringBuffer.append("Distance-type: " + getDatabase_distanceType() + "\n");
+        stringBuffer.append("Distance-type: " + getDistanceFunction() + "\n");
         stringBuffer.append("Number of generated clusters: " + numberOfGeneratedClusters + "\n");
         DecimalFormat decimalFormat = new DecimalFormat(".##");
         stringBuffer.append("Elapsed time: " + decimalFormat.format(elapsedTime) + "\n\n");
 
         for (int i = 0; i < resultVector.size(); i++) {
-            stringBuffer.append(format_dataObject((DataObject) resultVector.elementAt(i)));
+            stringBuffer.append(format_dataObject((DataObject) resultVector.get(i)));
         }
         return stringBuffer.toString() + "\n";
     }

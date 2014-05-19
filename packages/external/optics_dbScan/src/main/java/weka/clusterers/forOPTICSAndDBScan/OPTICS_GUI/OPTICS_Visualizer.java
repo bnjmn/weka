@@ -22,7 +22,6 @@
 
 package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
-import weka.core.FastVector;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.gui.LookAndFeel;
@@ -53,6 +52,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -504,7 +504,7 @@ public class OPTICS_Visualizer
     private JComponent graphPanel() {
 
         if (serObject == null) {
-          graphPanel = new GraphPanel(new FastVector(), verValue, true, true);
+          graphPanel = new GraphPanel(new ArrayList(), verValue, true, true);
         }
         else {
           graphPanel = new GraphPanel(serObject.getResultVector(), verValue, true, true);
@@ -611,10 +611,8 @@ public class OPTICS_Visualizer
         statPanel_Labels_Right.add(new JLabel(Integer.toString(serObject.getMinPoints())));
         statPanel_Labels_Left.add(new JLabel("Write results to file: "));
         statPanel_Labels_Right.add(new JLabel(serObject.isOpticsOutputs() ? "yes" : "no"));
-        statPanel_Labels_Left.add(new JLabel("Index: "));
-        statPanel_Labels_Right.add(new JLabel(serObject.getDatabase_Type()));
         statPanel_Labels_Left.add(new JLabel("Distance-Type: "));
-        statPanel_Labels_Right.add(new JLabel(serObject.getDatabase_distanceType()));
+        statPanel_Labels_Right.add(new JLabel(serObject.getDistanceFunction().toString()));
         statPanel_Labels_Left.add(new JLabel("Number of generated clusters: "));
         statPanel_Labels_Right.add(new JLabel(Integer.toString(serObject.getNumberOfGeneratedClusters())));
         statPanel_Labels_Left.add(new JLabel("Elapsed-time: "));
