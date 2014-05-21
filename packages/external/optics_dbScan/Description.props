@@ -6,13 +6,13 @@
 PackageName=optics_dbScan
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2014-04-01
+Date=2014-05-21
 
 # Title (required)
-Title=The OPTICS and DBScan clustering algorithms
+Title=The OPTICS and DBSCAN clustering algorithms
 
 Category=Clustering
 
@@ -26,12 +26,12 @@ Maintainer=Matthias Schubert <schubert@dbs.ifi.lmu.de>, Zhanna Melnikova-Albrech
 License=GPL 3.0
 
 # Description (required)
-Description=The OPTICS and DBScan clustering algorithms. Martin Ester, Hans-Peter Kriegel, Joerg Sander, Xiaowei Xu: A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise. In: Second International Conference on Knowledge Discovery and Data Mining, 226-231, 1996; Mihael Ankerst, Markus M. Breunig, Hans-Peter Kriegel, Joerg Sander: OPTICS: Ordering Points To Identify the Clustering Structure. In: ACM SIGMOD International Conference on Management of Data, 49-60, 1999.
+Description=The OPTICS and DBSCAN clustering algorithms. Martin Ester, Hans-Peter Kriegel, Joerg Sander, Xiaowei Xu: A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise. In: Second International Conference on Knowledge Discovery and Data Mining, 226-231, 1996; Mihael Ankerst, Markus M. Breunig, Hans-Peter Kriegel, Joerg Sander: OPTICS: Ordering Points To Identify the Clustering Structure. In: ACM SIGMOD International Conference on Management of Data, 49-60, 1999.
 
-Changes=Handling of sparse instances is now implemented correctly.
+Changes=OPTICS and DBSCAN now use distance functions from the core of WEKA. More distance functions can be applied, and normalization of attributes can now be turned off. Removed database parameter.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/optics_dbScan1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/optics_dbScan1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/optics_dbScan
