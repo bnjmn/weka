@@ -87,6 +87,7 @@ import java.io.*;
   "floor" { return m_SymFactory.newSymbol("Floor", sym.FLOOR); }
   "pow" { return m_SymFactory.newSymbol("Pow", sym.POW); }
   "ceil" { return m_SymFactory.newSymbol("Ceil", sym.CEIL); }
+  "regexp" { return m_SymFactory.newSymbol("Regexp", sym.REGEXP); }
 
   // numbers and variables
   "'" { yybegin(STRING); m_String.setLength(0); }

@@ -224,7 +224,7 @@ parser code {:
 
 terminal COMMA, LPAREN, RPAREN, ISMISSING;
 terminal MINUS, PLUS, TIMES, DIVISION;
-terminal ABS, SQRT, LOG, EXP, SIN, COS, TAN, RINT, FLOOR, POW, CEIL;
+terminal ABS, SQRT, LOG, EXP, SIN, COS, TAN, RINT, FLOOR, POW, CEIL, REGEXP;
 terminal TRUE, FALSE, LT, LE, GT, GE, EQ, NOT, AND, OR, IS;
 terminal Double NUMBER;
 terminal Boolean BOOLEAN;
@@ -239,7 +239,7 @@ non terminal Boolean boolexpr;
 precedence left PLUS, MINUS;
 precedence left TIMES, DIVISION;
 precedence left LPAREN, RPAREN;
-precedence left ABS, SQRT, LOG, EXP, SIN, COS, TAN, RINT, FLOOR, POW, CEIL;
+precedence left ABS, SQRT, LOG, EXP, SIN, COS, TAN, RINT, FLOOR, POW, CEIL, REGEXP;
 precedence left AND, OR;
 precedence left NOT;
 
@@ -272,6 +272,12 @@ boolexpr ::=    BOOLEAN:b
               | ATTRIBUTE:a IS STRING:s
                 {: if (parser.getSymbols().containsKey(a))
                      RESULT = (parser.getSymbols().get(a) instanceof String) && ((String) parser.getSymbols().get(a)).equals(s);
+                   else
+                     throw new IllegalStateException("Unknown symbol '" + a + "'!");
+                :}
+              | ATTRIBUTE:a REGEXP STRING:s
+                {: if (parser.getSymbols().containsKey(a))
+                     RESULT = (parser.getSymbols().get(a) instanceof String) && ((String) parser.getSymbols().get(a)).matches(s);
                    else
                      throw new IllegalStateException("Unknown symbol '" + a + "'!");
                 :}

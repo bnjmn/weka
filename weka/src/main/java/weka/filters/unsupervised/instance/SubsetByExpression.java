@@ -15,7 +15,7 @@
 
 /*
  * SubsetByExpression.java
- * Copyright (C) 2008-2013 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008-2014 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.instance;
@@ -35,97 +35,104 @@ import weka.filters.SimpleBatchFilter;
 import weka.filters.unsupervised.instance.subsetbyexpression.Parser;
 
 /**
- * <!-- globalinfo-start --> Filters instances according to a user-specified
- * expression.<br/>
- * <br/>
- * Grammar:<br/>
- * <br/>
- * boolexpr_list ::= boolexpr_list boolexpr_part | boolexpr_part;<br/>
- * <br/>
- * boolexpr_part ::= boolexpr:e {: parser.setResult(e); :} ;<br/>
- * <br/>
- * boolexpr ::= BOOLEAN <br/>
- * | true<br/>
- * | false<br/>
- * | expr &lt; expr<br/>
- * | expr &lt;= expr<br/>
- * | expr &gt; expr<br/>
- * | expr &gt;= expr<br/>
- * | expr = expr<br/>
- * | ( boolexpr )<br/>
- * | not boolexpr<br/>
- * | boolexpr and boolexpr<br/>
- * | boolexpr or boolexpr<br/>
- * | ATTRIBUTE is STRING<br/>
- * ;<br/>
- * <br/>
- * expr ::= NUMBER<br/>
- * | ATTRIBUTE<br/>
- * | ( expr )<br/>
- * | opexpr<br/>
- * | funcexpr<br/>
- * ;<br/>
- * <br/>
- * opexpr ::= expr + expr<br/>
- * | expr - expr<br/>
- * | expr * expr<br/>
- * | expr / expr<br/>
- * ;<br/>
- * <br/>
- * funcexpr ::= abs ( expr )<br/>
- * | sqrt ( expr )<br/>
- * | log ( expr )<br/>
- * | exp ( expr )<br/>
- * | sin ( expr )<br/>
- * | cos ( expr )<br/>
- * | tan ( expr )<br/>
- * | rint ( expr )<br/>
- * | floor ( expr )<br/>
- * | pow ( expr for base , expr for exponent )<br/>
- * | ceil ( expr )<br/>
- * ;<br/>
- * <br/>
- * Notes:<br/>
- * - NUMBER<br/>
- * any integer or floating point number <br/>
- * (but not in scientific notation!)<br/>
- * - STRING<br/>
- * any string surrounded by single quotes; <br/>
- * the string may not contain a single quote though.<br/>
- * - ATTRIBUTE<br/>
- * the following placeholders are recognized for <br/>
- * attribute values:<br/>
- * - CLASS for the class value in case a class attribute is set.<br/>
- * - ATTxyz with xyz a number from 1 to # of attributes in the<br/>
- * dataset, representing the value of indexed attribute.<br/>
- * <br/>
- * Examples:<br/>
- * - extracting only mammals and birds from the 'zoo' UCI dataset:<br/>
- * (CLASS is 'mammal') or (CLASS is 'bird')<br/>
- * - extracting only animals with at least 2 legs from the 'zoo' UCI dataset:<br/>
- * (ATT14 &gt;= 2)<br/>
- * - extracting only instances with non-missing 'wage-increase-second-year'<br/>
- * from the 'labor' UCI dataset:<br/>
- * not ismissing(ATT3)<br/>
- * <p/>
+ * <!-- globalinfo-start -->
+ * * Filters instances according to a user-specified expression.<br/>
+ * * <br/>
+ * * Grammar:<br/>
+ * * <br/>
+ * * boolexpr_list ::= boolexpr_list boolexpr_part | boolexpr_part;<br/>
+ * * <br/>
+ * * boolexpr_part ::= boolexpr:e {: parser.setResult(e); :} ;<br/>
+ * * <br/>
+ * * boolexpr ::=    BOOLEAN <br/>
+ * *               | true<br/>
+ * *               | false<br/>
+ * *               | expr &lt; expr<br/>
+ * *               | expr &lt;= expr<br/>
+ * *               | expr &gt; expr<br/>
+ * *               | expr &gt;= expr<br/>
+ * *               | expr = expr<br/>
+ * *               | ( boolexpr )<br/>
+ * *               | not boolexpr<br/>
+ * *               | boolexpr and boolexpr<br/>
+ * *               | boolexpr or boolexpr<br/>
+ * *               | ATTRIBUTE is STRING<br/>
+ * *               | ATTRIBUTE regexp STRING<br/>
+ * *               ;<br/>
+ * * <br/>
+ * * expr      ::=   NUMBER<br/>
+ * *               | ATTRIBUTE<br/>
+ * *               | ( expr )<br/>
+ * *               | opexpr<br/>
+ * *               | funcexpr<br/>
+ * *               ;<br/>
+ * * <br/>
+ * * opexpr    ::=   expr + expr<br/>
+ * *               | expr - expr<br/>
+ * *               | expr * expr<br/>
+ * *               | expr / expr<br/>
+ * *               ;<br/>
+ * * <br/>
+ * * funcexpr ::=    abs ( expr )<br/>
+ * *               | sqrt ( expr )<br/>
+ * *               | log ( expr )<br/>
+ * *               | exp ( expr )<br/>
+ * *               | sin ( expr )<br/>
+ * *               | cos ( expr )<br/>
+ * *               | tan ( expr )<br/>
+ * *               | rint ( expr )<br/>
+ * *               | floor ( expr )<br/>
+ * *               | pow ( expr for base , expr for exponent )<br/>
+ * *               | ceil ( expr )<br/>
+ * *               ;<br/>
+ * * <br/>
+ * * Notes:<br/>
+ * * - NUMBER<br/>
+ * *   any integer or floating point number <br/>
+ * *   (but not in scientific notation!)<br/>
+ * * - STRING<br/>
+ * *   any string surrounded by single quotes; <br/>
+ * *   the string may not contain a single quote though.<br/>
+ * * - ATTRIBUTE<br/>
+ * *   the following placeholders are recognized for <br/>
+ * *   attribute values:<br/>
+ * *   - CLASS for the class value in case a class attribute is set.<br/>
+ * *   - ATTxyz with xyz a number from 1 to # of attributes in the<br/>
+ * *     dataset, representing the value of indexed attribute.<br/>
+ * * - regexp<br/>
+ * *   A regular expression for pattern matching, e.g., '^id.*$'<br/>
+ * * <br/>
+ * * Examples:<br/>
+ * * - extracting only mammals and birds from the 'zoo' UCI dataset:<br/>
+ * *   (CLASS is 'mammal') or (CLASS is 'bird')<br/>
+ * * - extracting only animals with at least 2 legs from the 'zoo' UCI dataset:<br/>
+ * *   (ATT14 &gt;= 2)<br/>
+ * * - extracting only instances with non-missing 'wage-increase-second-year'<br/>
+ * *   from the 'labor' UCI dataset:<br/>
+ * *   not ismissing(ATT3)<br/>
+ * * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
- * 
- * <pre>
- * -E &lt;expr&gt;
- *  The expression to use for filtering
- *  (default: true).
- * </pre>
- * 
- * <pre>
- * -F
- *  Apply the filter to instances that arrive after the first
- *  (training) batch. The default is to not apply the filter (i.e.
- *  always return the instance)
- * </pre>
- * 
+ * <!-- options-start -->
+ * * Valid options are: <p/>
+ * * 
+ * * <pre> -E &lt;expr&gt;
+ * *  The expression to use for filtering
+ * *  (default: true).</pre>
+ * * 
+ * * <pre> -F
+ * *  Apply the filter to instances that arrive after the first
+ * *  (training) batch. The default is to not apply the filter (i.e.
+ * *  always return the instance)</pre>
+ * * 
+ * * <pre> -output-debug-info
+ * *  If set, filter is run in debug mode and
+ * *  may output additional info to the console</pre>
+ * * 
+ * * <pre> -do-not-check-capabilities
+ * *  If set, filter capabilities are not checked when input format is set
+ * *  (use with caution).</pre>
+ * * 
  * <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
@@ -169,6 +176,7 @@ public class SubsetByExpression extends SimpleBatchFilter {
       + "              | boolexpr and boolexpr\n"
       + "              | boolexpr or boolexpr\n"
       + "              | ATTRIBUTE is STRING\n"
+      + "              | ATTRIBUTE regexp STRING\n"
       + "              ;\n"
       + "\n"
       + "expr      ::=   NUMBER\n"
@@ -210,6 +218,8 @@ public class SubsetByExpression extends SimpleBatchFilter {
       + "  - CLASS for the class value in case a class attribute is set.\n"
       + "  - ATTxyz with xyz a number from 1 to # of attributes in the\n"
       + "    dataset, representing the value of indexed attribute.\n"
+      + "- regexp\n"
+      + "  A regular expression for pattern matching, e.g., '^id.*$'\n"
       + "\n"
       + "Examples:\n"
       + "- extracting only mammals and birds from the 'zoo' UCI dataset:\n"
@@ -300,22 +310,26 @@ public class SubsetByExpression extends SimpleBatchFilter {
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
-   * 
-   * <pre>
-   * -E &lt;expr&gt;
-   *  The expression to use for filtering
-   *  (default: true).
-   * </pre>
-   * 
-   * <pre>
-   * -F
-   *  Apply the filter to instances that arrive after the first
-   *  (training) batch. The default is to not apply the filter (i.e.
-   *  always return the instance)
-   * </pre>
-   * 
+   * <!-- options-start -->
+   * * Valid options are: <p/>
+   * * 
+   * * <pre> -E &lt;expr&gt;
+   * *  The expression to use for filtering
+   * *  (default: true).</pre>
+   * * 
+   * * <pre> -F
+   * *  Apply the filter to instances that arrive after the first
+   * *  (training) batch. The default is to not apply the filter (i.e.
+   * *  always return the instance)</pre>
+   * * 
+   * * <pre> -output-debug-info
+   * *  If set, filter is run in debug mode and
+   * *  may output additional info to the console</pre>
+   * * 
+   * * <pre> -do-not-check-capabilities
+   * *  If set, filter capabilities are not checked when input format is set
+   * *  (use with caution).</pre>
+   * * 
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
