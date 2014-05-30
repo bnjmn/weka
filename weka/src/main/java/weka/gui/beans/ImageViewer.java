@@ -24,6 +24,11 @@ package weka.gui.beans;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.beans.EventSetDescriptor;
@@ -34,9 +39,12 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -97,7 +105,7 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
 
     m_env = Environment.getSystemWide();
     m_plotter = new ImageDisplayer();
-    m_plotter.setBorder(BorderFactory.createTitledBorder("Image"));
+    // m_plotter.setBorder(BorderFactory.createTitledBorder("Image"));
     m_plotter.setMinimumSize(new Dimension(810, 610));
     m_plotter.setPreferredSize(new Dimension(810, 610));
     setUpResultHistory();
@@ -269,19 +277,78 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
    */
   private static class MainPanel extends JPanel {
 
+    private static Image loadImage(String path) {
+      Image pic = null;
+      java.net.URL imageURL =
+        ImageViewer.class.getClassLoader().getResource(path);
+
+      // end modifications
+      if (imageURL == null) {
+      } else {
+        pic = Toolkit.getDefaultToolkit().getImage(imageURL);
+      }
+      return pic;
+    }
+
     /**
      * For serialization
      */
     private static final long serialVersionUID = 5648976848887609072L;
 
-    public MainPanel(ResultHistoryPanel p, ImageDisplayer id) {
+    public MainPanel(ResultHistoryPanel p, final ImageDisplayer id) {
       super();
       setLayout(new BorderLayout());
 
       JPanel topP = new JPanel();
       topP.setLayout(new BorderLayout());
+
+      JPanel holder = new JPanel();
+      holder.setLayout(new BorderLayout());
+      holder.setBorder(BorderFactory.createTitledBorder("Image"));
+      JToolBar tools = new JToolBar();
+      tools.setOrientation(JToolBar.HORIZONTAL);
+      JButton zoomInB =
+        new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
+          + "zoom_in.png")));
+
+      zoomInB.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          int z = id.getZoom();
+          z += 25;
+          if (z >= 200) {
+            z = 200;
+          }
+
+          id.setZoom(z);
+          id.repaint();
+        }
+      });
+
+      JButton zoomOutB =
+        new JButton(new ImageIcon(loadImage(BeanVisual.ICON_PATH
+          + "zoom_out.png")));
+      zoomOutB.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          int z = id.getZoom();
+          z -= 25;
+          if (z <= 50) {
+            z = 50;
+          }
+
+          id.setZoom(z);
+          id.repaint();
+        }
+      });
+
+      tools.add(zoomInB);
+      tools.add(zoomOutB);
+      holder.add(tools, BorderLayout.NORTH);
+
       JScrollPane js = new JScrollPane(id);
-      topP.add(js, BorderLayout.CENTER);
+      holder.add(js, BorderLayout.CENTER);
+      topP.add(holder, BorderLayout.CENTER);
       topP.add(p, BorderLayout.WEST);
 
       add(topP, BorderLayout.CENTER);
@@ -302,6 +369,8 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
     /** The image to display */
     private BufferedImage m_image;
 
+    private int m_imageZoom = 100;
+
     /**
      * Set the image to display
      * 
@@ -309,6 +378,14 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
      */
     public void setImage(BufferedImage image) {
       m_image = image;
+    }
+
+    public void setZoom(int zoom) {
+      m_imageZoom = zoom;
+    }
+
+    public int getZoom() {
+      return m_imageZoom;
     }
 
     /**
@@ -321,6 +398,8 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
       super.paintComponent(g);
 
       if (m_image != null) {
+        double lz = m_imageZoom / 100.0;
+        ((Graphics2D) g).scale(lz, lz);
         int plotWidth = m_image.getWidth();
         int plotHeight = m_image.getHeight();
 
