@@ -54,13 +54,13 @@ public class WekaClassifierHadoopReducer extends
    * The key in the Configuration that the write path for the model is
    * associated with
    */
-  public static String CLASSIFIER_WRITE_PATH = "*weka.distributed.weka_classifier_write_path";
+  public static final String CLASSIFIER_WRITE_PATH = "*weka.distributed.weka_classifier_write_path";
 
   /**
    * The key in the configuration that the minimum training fraction is
    * associated with
    */
-  public static String MIN_TRAINING_FRACTION = "*weka.distributed.weka_classifier_min_training_fraction";
+  public static final String MIN_TRAINING_FRACTION = "*weka.distributed.weka_classifier_min_training_fraction";
 
   /** The underlying general Weka classifier reduce task */
   protected WekaClassifierReduceTask m_task = null;
