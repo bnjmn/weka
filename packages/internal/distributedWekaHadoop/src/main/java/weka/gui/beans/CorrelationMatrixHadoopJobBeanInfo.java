@@ -44,13 +44,17 @@ public class CorrelationMatrixHadoopJobBeanInfo extends
   public EventSetDescriptor[] getEventSetDescriptors() {
 
     try {
-      List<EventSetDescriptor> descriptors = new ArrayList<EventSetDescriptor>();
+      List<EventSetDescriptor> descriptors =
+        new ArrayList<EventSetDescriptor>();
       for (EventSetDescriptor es : super.getEventSetDescriptors()) {
         descriptors.add(es);
       }
 
       descriptors.add(new EventSetDescriptor(CorrelationMatrixHadoopJob.class,
         "text", TextListener.class, "acceptText"));
+
+      descriptors.add(new EventSetDescriptor(CorrelationMatrixHadoopJob.class,
+        "image", ImageListener.class, "acceptImage"));
 
       return descriptors.toArray(new EventSetDescriptor[descriptors.size()]);
     } catch (Exception ex) {

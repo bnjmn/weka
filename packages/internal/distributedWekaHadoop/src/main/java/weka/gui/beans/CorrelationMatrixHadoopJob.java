@@ -21,6 +21,8 @@
 
 package weka.gui.beans;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,8 @@ import distributed.core.DistributedJobConfig;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-@KFStep(category = "Hadoop", toolTipText = "Computes a correlation/covariance matrix for numeric data")
+@KFStep(category = "Hadoop",
+  toolTipText = "Computes a correlation/covariance matrix for numeric data")
 public class CorrelationMatrixHadoopJob extends AbstractHadoopJob {
 
   /**
@@ -42,6 +45,10 @@ public class CorrelationMatrixHadoopJob extends AbstractHadoopJob {
 
   /** Downstream listeners for textual output */
   protected List<TextListener> m_textListeners = new ArrayList<TextListener>();
+
+  /** Downstream listeners for image events */
+  protected List<ImageListener> m_imageListeners =
+    new ArrayList<ImageListener>();
 
   /**
    * Constructor
@@ -83,13 +90,23 @@ public class CorrelationMatrixHadoopJob extends AbstractHadoopJob {
   protected void notifyJobOutputListeners() {
     if (((weka.distributed.hadoop.CorrelationMatrixHadoopJob) m_job)
       .getRunPCA()) {
-      String pcaText = ((weka.distributed.hadoop.CorrelationMatrixHadoopJob) m_runningJob)
-        .getText();
+      String pcaText =
+        ((weka.distributed.hadoop.CorrelationMatrixHadoopJob) m_runningJob)
+          .getText();
 
       if (!DistributedJobConfig.isEmpty(pcaText)) {
         for (TextListener t : m_textListeners) {
           t.acceptText(new TextEvent(this, pcaText, "Hadoop - PCA analysis"));
         }
+      }
+    }
+
+    Image heatmap =
+      ((weka.distributed.hadoop.CorrelationMatrixHadoopJob) m_runningJob)
+        .getImage();
+    if (heatmap != null) {
+      for (ImageListener i : m_imageListeners) {
+        i.acceptImage(new ImageEvent(this, (BufferedImage) heatmap));
       }
     }
   }
@@ -110,5 +127,23 @@ public class CorrelationMatrixHadoopJob extends AbstractHadoopJob {
    */
   public synchronized void removeTextListener(TextListener l) {
     m_textListeners.remove(l);
+  }
+
+  /**
+   * Add an image listener
+   * 
+   * @param l the image listener to add
+   */
+  public synchronized void addImageListener(ImageListener l) {
+    m_imageListeners.add(l);
+  }
+
+  /**
+   * Remove an image listener
+   * 
+   * @param l an image listener
+   */
+  public synchronized void removeImageListener(ImageListener l) {
+    m_imageListeners.remove(l);
   }
 }
