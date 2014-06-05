@@ -21,6 +21,7 @@
 
 package weka.distributed.hadoop;
 
+import java.awt.Image;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -51,10 +52,12 @@ import weka.core.Option;
 import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.CorrelationMatrixMapTask;
+import weka.distributed.CorrelationMatrixRowReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.PreConstructedPCA;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.beans.ImageProducer;
 import weka.gui.beans.TextProducer;
 import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
@@ -68,7 +71,7 @@ import distributed.hadoop.HDFSUtils;
  * @version $Revision$
  */
 public class CorrelationMatrixHadoopJob extends HadoopJob implements
-  TextProducer, CommandlineRunnable {
+  TextProducer, ImageProducer, CommandlineRunnable {
 
   /** For serialization */
   private static final long serialVersionUID = 7319464898913984018L;
@@ -107,6 +110,9 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
    * Other jobs/tasks can retrieve the matrix from us (if we were successful)
    */
   protected weka.core.matrix.Matrix m_finalMatrix;
+
+  /** Holds the heatmap image of the correlation matrix */
+  protected Image m_correlationHeatMap;
 
   /**
    * Constructor
@@ -465,8 +471,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
         this.getClass().getClassLoader());
 
       // add the aggregated ARFF header to the distributed cache
-      String pathToHeader = environmentSubstitute(m_arffHeaderJob
-        .getAggregatedHeaderPath());
+      String pathToHeader =
+        environmentSubstitute(m_arffHeaderJob.getAggregatedHeaderPath());
       Configuration conf = new Configuration();
 
       try {
@@ -476,8 +482,9 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
         throw new DistributedWekaException(e);
       }
 
-      String fileNameOnly = pathToHeader.substring(
-        pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
+      String fileNameOnly =
+        pathToHeader.substring(pathToHeader.lastIndexOf("/") + 1,
+          pathToHeader.length());
 
       StringBuilder correlationMapOptions = new StringBuilder();
 
@@ -517,7 +524,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
         // set the number of reducers equal to Math.min(numMatrixRows,
         // (reduceMax * numNodesInCluster)
         int numNodesAvail = 1;
-        String numNodesInCluster = environmentSubstitute(getNumNodesInCluster());
+        String numNodesInCluster =
+          environmentSubstitute(getNumNodesInCluster());
         if (!DistributedJobConfig.isEmpty(numNodesInCluster)) {
           try {
             numNodesAvail = Integer.parseInt(numNodesInCluster);
@@ -525,15 +533,16 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
             logMessage("WARNING: unable to parse the number of available nodes - setting to 1");
           }
         }
-        String reduceTasksMaxPerNode = conf
-          .get("mapred.tasktracker.reduce.tasks.maximum");
+        String reduceTasksMaxPerNode =
+          conf.get("mapred.tasktracker.reduce.tasks.maximum");
         int reduceMax = 2;
 
         // allow our configuration to override the defaults for the cluster
         if (!DistributedJobConfig.isEmpty(m_mrConfig
           .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
-          reduceTasksMaxPerNode = environmentSubstitute(m_mrConfig
-            .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
+          reduceTasksMaxPerNode =
+            environmentSubstitute(m_mrConfig
+              .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
         }
 
         // num rows in matrix is equal to num attributes in the arff
@@ -549,8 +558,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
         int rowsInMatrix = header.numAttributes() + classAdjust;
 
         if (!DistributedJobConfig.isEmpty(reduceTasksMaxPerNode)) {
-          reduceMax = Integer
-            .parseInt(environmentSubstitute(reduceTasksMaxPerNode));
+          reduceMax =
+            Integer.parseInt(environmentSubstitute(reduceTasksMaxPerNode));
         }
 
         int numReducers = Math.min(rowsInMatrix, reduceMax * numNodesAvail);
@@ -618,8 +627,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       int maxRowNum = 0;
       for (FileStatus s : contents) {
         String nameOnly = s.getPath().toString();
-        nameOnly = nameOnly.substring(nameOnly.lastIndexOf("/") + 1,
-          nameOnly.length());
+        nameOnly =
+          nameOnly.substring(nameOnly.lastIndexOf("/") + 1, nameOnly.length());
         if (nameOnly.startsWith("part-r-")) {
           FSDataInputStream di = fs.open(s.getPath());
 
@@ -727,13 +736,29 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
           pw.close();
         }
       }
+
+      // write out the names of the attributes that are in the correlation
+      // matrix
+      List<String> rowAttNames =
+        writeCorrelationMatrixRowColumnLabels(conf, arffFileName);
+      m_correlationHeatMap =
+        CorrelationMatrixRowReduceTask.getHeatMapForMatrix(m_finalMatrix,
+          rowAttNames);
+
+      p = new Path(outputDir + "/" + arffFileName + "_heatmap.png");
+      dos = fs.create(p, true);
+      try {
+        CorrelationMatrixRowReduceTask.writeHeatMapImage(m_correlationHeatMap,
+          dos);
+      } finally {
+        if (dos != null) {
+          dos.close();
+        }
+      }
+
     } catch (Exception e) {
       throw new DistributedWekaException(e);
     }
-
-    // write out the names of the attributes that are in the correlation
-    // matrix
-    writeCorrelationMatrixRowColumnLabels(conf, arffFileName);
 
     if (getRunPCA()) {
       runPCA(conf, arffFileName);
@@ -747,10 +772,11 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
    * 
    * @param conf the Configuration to use
    * @param arffFileName the name of the header file
+   * @returns a list of the row attribute names
    * @throws DistributedWekaException if a problem occurs
    */
-  protected void writeCorrelationMatrixRowColumnLabels(Configuration conf,
-    String arffFileName) throws DistributedWekaException {
+  protected List<String> writeCorrelationMatrixRowColumnLabels(
+    Configuration conf, String arffFileName) throws DistributedWekaException {
 
     String outputDir = m_mrConfig.getOutputPath();
     Instances header = m_arffHeaderJob.getFinalHeader();
@@ -769,8 +795,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       }
     }
 
-    Instances headerNoSummary = CSVToARFFHeaderReduceTask
-      .stripSummaryAtts(header);
+    Instances headerNoSummary =
+      CSVToARFFHeaderReduceTask.stripSummaryAtts(header);
     String classAtt = getClassAttribute();
     if (!DistributedJobConfig.isEmpty(classAtt)) {
       classAtt = environmentSubstitute(classAtt);
@@ -809,6 +835,7 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
       }
     }
 
+    List<String> rowLabels = new ArrayList<String>();
     try {
       FileSystem fs = FileSystem.get(conf);
       Path p = new Path(outputDir + "/" + arffFileName + "_matrix_labels.txt");
@@ -818,6 +845,7 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
         bw = new BufferedWriter(new OutputStreamWriter(dos));
         for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
           bw.write(headerNoSummary.attribute(i).name() + "\n");
+          rowLabels.add(headerNoSummary.attribute(i).name());
         }
         bw.flush();
         bw.close();
@@ -830,6 +858,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
     } catch (Exception ex) {
       throw new DistributedWekaException(ex);
     }
+
+    return rowLabels;
   }
 
   /**
@@ -867,8 +897,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
     if (!DistributedJobConfig.isEmpty(getClassAttribute())) {
       String sClass = environmentSubstitute(getClassAttribute());
       try {
-        Instances tempHeaderSansSummary = CSVToARFFHeaderReduceTask
-          .stripSummaryAtts(header);
+        Instances tempHeaderSansSummary =
+          CSVToARFFHeaderReduceTask.stripSummaryAtts(header);
         WekaClassifierHadoopMapper.setClassIndex(sClass, tempHeaderSansSummary,
           false);
         header.setClassIndex(tempHeaderSansSummary.classIndex());
@@ -878,8 +908,8 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
     }
 
     try {
-      PreConstructedPCA pca = new PreConstructedPCA(header, m_finalMatrix,
-        keepClass, isCov);
+      PreConstructedPCA pca =
+        new PreConstructedPCA(header, m_finalMatrix, keepClass, isCov);
 
       // this triggers the computation of the PCA analysis
       pca.setInputFormat(CSVToARFFHeaderReduceTask.stripSummaryAtts(header));
@@ -932,6 +962,11 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
   @Override
   public String getText() {
     return m_pcaSummary;
+  }
+
+  @Override
+  public Image getImage() {
+    return m_correlationHeatMap;
   }
 
   /**
