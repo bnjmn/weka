@@ -33,22 +33,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import weka.classifiers.Classifier;
-import weka.core.Attribute;
 import weka.core.CommandlineRunnable;
 import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Utils;
-import weka.distributed.CSVToARFFHeaderMapTask;
-import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
-import weka.distributed.CSVToARFFHeaderMapTask.NominalStats;
-import weka.distributed.CSVToARFFHeaderMapTask.NumericStats;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.distributed.WekaClassifierMapTask;
@@ -100,6 +92,10 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
 
   /** ARFF job */
   protected ArffHeaderHadoopJob m_arffHeaderJob = new ArffHeaderHadoopJob();
+
+  /** Randomized data chunk job */
+  protected RandomizedDataChunkHadoopJob m_randomizeJob =
+    new RandomizedDataChunkHadoopJob();
 
   /** Full path to the final model in HDFS */
   protected String m_hdfsPathToAggregatedClassifier = "";
@@ -539,8 +535,8 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
     String numDataChunks = Utils.getOption("num-chunks", options);
     setNumRandomizedDataChunks(numDataChunks);
 
-    String numInstancesPerChunk = Utils.getOption("num-instances-per-chunk",
-      options);
+    String numInstancesPerChunk =
+      Utils.getOption("num-instances-per-chunk", options);
     setNumInstancesPerRandomizedDataChunk(numInstancesPerChunk);
 
     // copy the options at this point so that we can set
@@ -550,8 +546,9 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
 
     super.setOptions(options);
 
-    // Set options for the stratify config (if necessary)
-    m_randomizeConfig.setOptions(optionsCopy.clone());
+    m_randomizeJob.setOptions(optionsCopy.clone());
+    // // Set options for the stratify config (if necessary)
+    // m_randomizeConfig.setOptions(optionsCopy.clone());
 
     // options for the ARFF header job
     m_arffHeaderJob.setOptions(optionsCopy);
@@ -563,8 +560,8 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
     // options to the classifier map task
     WekaClassifierMapTask classifierTemp = new WekaClassifierMapTask();
     classifierTemp.setOptions(options);
-    String optsToClassifierTask = Utils
-      .joinOptions(classifierTemp.getOptions());
+    String optsToClassifierTask =
+      Utils.joinOptions(classifierTemp.getOptions());
     if (!DistributedJobConfig.isEmpty(optsToClassifierTask)) {
       setClassifierMapTaskOptions(optsToClassifierTask);
     }
@@ -624,8 +621,8 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
 
     if (!DistributedJobConfig.isEmpty(getClassifierMapTaskOptions())) {
       try {
-        String[] classifierOpts = Utils
-          .splitOptions(getClassifierMapTaskOptions());
+        String[] classifierOpts =
+          Utils.splitOptions(getClassifierMapTaskOptions());
 
         for (String s : classifierOpts) {
           options.add(s);
@@ -698,8 +695,8 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
     String fullOutputPath = m_hdfsPathToAggregatedClassifier;
     String modelNameOnly = getModelFileName();
 
-    String stagingPath = HDFSUtils.WEKA_TEMP_DISTRIBUTED_CACHE_FILES
-      + modelNameOnly;
+    String stagingPath =
+      HDFSUtils.WEKA_TEMP_DISTRIBUTED_CACHE_FILES + modelNameOnly;
 
     HDFSUtils.moveInHDFS(fullOutputPath, stagingPath,
       m_mrConfig.getHDFSConfig(), m_env);
@@ -722,8 +719,9 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
     throws IOException {
     String filterPath = environmentSubstitute(getPathToPreconstructedFilter());
 
-    String filenameOnly = HDFSUtils.addFileToDistributedCache(
-      m_mrConfig.getHDFSConfig(), conf, filterPath, m_env);
+    String filenameOnly =
+      HDFSUtils.addFileToDistributedCache(m_mrConfig.getHDFSConfig(), conf,
+        filterPath, m_env);
 
     return filenameOnly;
   }
@@ -744,192 +742,41 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
       return true;
     }
 
-    Instances headerNoSummary = CSVToARFFHeaderReduceTask
-      .stripSummaryAtts(header);
-    try {
-      WekaClassifierHadoopMapper.setClassIndex(getClassAttribute(),
-        headerNoSummary, true);
-    } catch (Exception e) {
-      throw new DistributedWekaException(e);
+    if (m_env == null) {
+      m_env = Environment.getSystemWide();
     }
 
-    // if (!headerNoSummary.classAttribute().isNominal()) {
-    // throw new DistributedWekaException("Can't run statification job - class "
-    // + "(" + header.classAttribute().name() + ") is not nominal!");
-    // }
-
-    // find summary attribute for class
-    String className = headerNoSummary.classAttribute().name();
-    Attribute summaryClassAtt = header
-      .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
-        + className);
-    if (summaryClassAtt == null) {
-      throw new DistributedWekaException(
-        "Was unable to find the summary attribute for " + "the class: "
-          + className);
-    }
-
-    int totalNumInstances = 0;
-
-    if (headerNoSummary.classAttribute().isNominal()) {
-      NominalStats stats = NominalStats.attributeToStats(summaryClassAtt);
-      for (String label : stats.getLabels()) {
-        totalNumInstances += stats.getCount(label);
-      }
-    } else {
-      NumericStats stats = NumericStats.attributeToStats(summaryClassAtt);
-      totalNumInstances = (int) stats.getStats()[ArffSummaryNumericMetric.COUNT
-        .ordinal()];
-    }
-
-    m_randomizeConfig
-      .setMapperClass(weka.distributed.hadoop.RandomizedDataChunkHadoopMapper.class
-        .getName());
-    m_randomizeConfig
-      .setReducerClass(weka.distributed.hadoop.RandomizedDataChunkHadoopReducer.class
-        .getName());
-    m_randomizeConfig.setMapOutputValueClass(Text.class.getName());
-
-    Configuration conf = new Configuration();
-
-    // set randomize/stratify properties
-    // add the aggregated ARFF header to the distributed cache
-    String pathToHeader = environmentSubstitute(m_arffHeaderJob
-      .getAggregatedHeaderPath());
-
-    HDFSUtils.addFileToDistributedCache(m_randomizeConfig.getHDFSConfig(),
-      conf, pathToHeader, m_env);
-    String fileNameOnly = pathToHeader.substring(
-      pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
-
-    List<String> randomizeMapOptions = new ArrayList<String>();
-    randomizeMapOptions.add("-arff-header");
-    randomizeMapOptions.add(fileNameOnly);
-
-    if (!DistributedJobConfig.isEmpty(getClassAttribute())) {
-      randomizeMapOptions.add("-class");
-      randomizeMapOptions.add(environmentSubstitute(getClassAttribute()));
-    }
+    logMessage("Checking to see if randomize data chunk job is needed...");
+    statusMessage("Checking to see if randomize data chunk job is needed...");
+    m_randomizeJob.setEnvironment(m_env);
+    m_randomizeJob.setLog(getLog());
+    m_randomizeJob.setStatusMessagePrefix(m_statusMessagePrefix);
 
     // make sure the random seed gets in there from the setting in
     // the underlying classifier map task.
     try {
-      String[] classifierOpts = Utils
-        .splitOptions(getClassifierMapTaskOptions());
+      String[] classifierOpts =
+        Utils.splitOptions(getClassifierMapTaskOptions());
       String seedS = Utils.getOption("seed", classifierOpts);
       if (!DistributedJobConfig.isEmpty(seedS)) {
         seedS = environmentSubstitute(seedS);
-        randomizeMapOptions.add("-seed");
-        randomizeMapOptions.add(seedS);
+        m_randomizeJob.setRandomSeed(seedS);
       }
     } catch (Exception e1) {
       e1.printStackTrace();
     }
+    m_randomizeJob.setNumRandomizedDataChunks(getNumRandomizedDataChunks());
+    m_randomizeJob
+      .setNumInstancesPerRandomizedDataChunk(getNumInstancesPerRandomizedDataChunk());
+    m_randomizeJob.setClassAttribute(getClassAttribute());
 
-    m_randomizeConfig.setUserSuppliedProperty(
-      RandomizedDataChunkHadoopMapper.RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS,
-      environmentSubstitute(Utils.joinOptions(randomizeMapOptions
-        .toArray(new String[randomizeMapOptions.size()]))));
-
-    // Need these for row parsing via open-csv
-    m_randomizeConfig.setUserSuppliedProperty(
-      CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS,
-      environmentSubstitute(getCSVMapTaskOptions()));
-
-    int numChunks = 0;
-    if (DistributedJobConfig.isEmpty(getNumRandomizedDataChunks())
-      && DistributedJobConfig.isEmpty(getNumInstancesPerRandomizedDataChunk())) {
-      throw new DistributedWekaException("Must specify either the number "
-        + "of chunks to create or the number of instances per chunk");
+    if (!m_randomizeJob.runJob()) {
+      statusMessage("Unable to continue - randomized data chunk job failed!");
+      logMessage("Unable to continue - randomized data chunk job failed!");
+      return false;
     }
 
-    if (!DistributedJobConfig.isEmpty(getNumRandomizedDataChunks())) {
-      try {
-        numChunks = Integer
-          .parseInt(environmentSubstitute(getNumRandomizedDataChunks()));
-      } catch (NumberFormatException ex) {
-        throw new DistributedWekaException(ex);
-      }
-    } else {
-      int numInsts = 0;
-      try {
-        numInsts = Integer
-          .parseInt(environmentSubstitute(getNumInstancesPerRandomizedDataChunk()));
-      } catch (NumberFormatException ex) {
-        throw new DistributedWekaException(ex);
-      }
-
-      if (numInsts <= 0) {
-        throw new DistributedWekaException(
-          "Number of instances per chunk must be > 0");
-      }
-
-      if (numInsts > totalNumInstances) {
-        throw new DistributedWekaException(
-          "Can't have more instances per chunk than "
-            + "there are instances in the dataset!");
-      }
-
-      double nc = (double) totalNumInstances / numInsts;
-      nc = Math.ceil(nc);
-
-      numChunks = (int) nc;
-    }
-
-    if (numChunks <= 1) {
-      throw new DistributedWekaException(
-        "Can't randomize because number of data chunks <= 1");
-    }
-
-    m_randomizeConfig.setUserSuppliedProperty(
-      RandomizedDataChunkHadoopReducer.NUM_DATA_CHUNKS, "" + numChunks);
-
-    // set output path
-    String outputPath = m_mrConfig.getOutputPath();
-    outputPath += "/randomized";
-    outputPath = environmentSubstitute(outputPath);
-    m_randomizeConfig.setOutputPath(outputPath);
-
-    // set number of reducers to 1 (otherwise we'll get more
-    // chunks than we want!
-    m_randomizeConfig.setNumberOfReducers("1");
-
-    installWekaLibrariesInHDFS(conf);
-
-    Job job = null;
-    try {
-      job = m_randomizeConfig.configureForHadoop(
-        "Create randomly shuffled input data chunk job - num chunks: "
-          + numChunks, conf, m_env);
-    } catch (ClassNotFoundException e) {
-      throw new DistributedWekaException(e);
-    }
-
-    // setup multiple outputs
-    for (int i = 0; i < numChunks; i++) {
-      MultipleOutputs.addNamedOutput(job, "chunk" + i, TextOutputFormat.class,
-        Text.class, Text.class);
-    }
-
-    // run the job!
-    m_randomizeConfig.deleteOutputDirectory(job, m_env);
-
-    statusMessage("Submitting randomized data chunk job ");
-    logMessage("Submitting randomized data chunk job ");
-
-    boolean success = runJob(job);
-    if (!success) {
-      statusMessage("Create randomly shuffled input data chunk job failed - check logs on Hadoop");
-      logMessage("Create randomly shuffled input data chunk job job failed - check logs on Hadoop");
-    } else {
-      // need to tidy up in the output directory - for some reason
-      // there seems to be a spurious part-r-00000 with size 0 created
-      String toDelete = outputPath + "/part-r-00000";
-      HDFSUtils.deleteFile(m_randomizeConfig.getHDFSConfig(), conf, toDelete,
-        m_env);
-    }
-
-    return success;
+    return true;
   }
 
   /**
@@ -967,8 +814,8 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
     }
 
     if (getCreateRandomizedDataChunks()) {
-      boolean stratResult = initializeAndRunRandomizeDataJob(m_arffHeaderJob
-        .getFinalHeader());
+      boolean stratResult =
+        initializeAndRunRandomizeDataJob(m_arffHeaderJob.getFinalHeader());
 
       if (!stratResult) {
         statusMessage("Unable to continue - stratification of input data failed!");
@@ -983,7 +830,9 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
 
       // alter the input path to point to the output
       // directory of the randomize job.
-      String randomizeOutputPath = m_randomizeConfig.getOutputPath();
+      // String randomizeOutputPath = m_randomizeConfig.getOutputPath();
+      String randomizeOutputPath =
+        m_randomizeJob.getRandomizedChunkOutputPath();
       m_mrConfig.setInputPaths(randomizeOutputPath);
     }
 
@@ -1049,8 +898,8 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
     // }
 
     // add the aggregated ARFF header to the distributed cache
-    String pathToHeader = environmentSubstitute(m_arffHeaderJob
-      .getAggregatedHeaderPath());
+    String pathToHeader =
+      environmentSubstitute(m_arffHeaderJob.getAggregatedHeaderPath());
 
     if (conf == null) {
       conf = new Configuration();
@@ -1058,8 +907,9 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
 
     HDFSUtils.addFileToDistributedCache(m_mrConfig.getHDFSConfig(), conf,
       pathToHeader, m_env);
-    String fileNameOnly = pathToHeader.substring(
-      pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
+    String fileNameOnly =
+      pathToHeader.substring(pathToHeader.lastIndexOf("/") + 1,
+        pathToHeader.length());
 
     List<String> classifierMapOptions = new ArrayList<String>();
 
