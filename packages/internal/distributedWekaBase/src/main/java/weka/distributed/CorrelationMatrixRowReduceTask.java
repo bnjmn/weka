@@ -21,12 +21,21 @@
 
 package weka.distributed;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+
+import org.tc33.jheatchart.HeatChart;
 
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.core.matrix.Matrix;
 import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
@@ -42,6 +51,42 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
 
   /** For serialization */
   private static final long serialVersionUID = -2314677791571204717L;
+
+  public static Image getHeatMapForMatrix(Matrix matrix,
+    List<String> rowAttNames) {
+
+    double[][] m = matrix.getArray();
+
+    // generate the heat map
+    // need to reverse the order of the rows
+    double[][] mm = new double[m.length][];
+    for (int i = 0; i < m.length; i++) {
+      mm[m.length - 1 - i] = m[i];
+    }
+    String[] xLabels = new String[rowAttNames.size()];
+    String[] yLabels = new String[rowAttNames.size()];
+    for (int i = 0; i < rowAttNames.size(); i++) {
+      xLabels[i] = rowAttNames.get(i);
+      yLabels[rowAttNames.size() - 1 - i] = rowAttNames.get(i);
+    }
+    HeatChart map = new HeatChart(mm, true);
+    map.setTitle("Correlation matrix heat map");
+    map.setCellSize(new java.awt.Dimension(30, 30));
+    map.setHighValueColour(java.awt.Color.RED);
+    map.setLowValueColour(java.awt.Color.BLUE);
+    map.setXValues(xLabels);
+    map.setYValues(yLabels);
+
+    return map.getChartImage();
+  }
+
+  public static void writeHeatMapImage(Image map, OutputStream dest)
+    throws IOException {
+    ImageIO.write((BufferedImage) map, "png", dest);
+
+    dest.flush();
+    dest.close();
+  }
 
   /**
    * Aggregate a list of partial rows of the matrix.
@@ -68,8 +113,8 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
     throws DistributedWekaException {
 
     StringBuilder rem = new StringBuilder();
-    Instances trainingHeader = CSVToARFFHeaderReduceTask
-      .stripSummaryAtts(headerWithSummaryAtts);
+    Instances trainingHeader =
+      CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummaryAtts);
 
     if (trainingHeader.classIndex() >= 0 && deleteClassIfSet) {
       rem.append("" + (trainingHeader.classIndex() + 1)).append(",");
@@ -97,12 +142,13 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
       }
     }
 
-    Attribute origCorrespondingToRow = trainingHeader
-      .attribute(matrixRowNumber);
+    Attribute origCorrespondingToRow =
+      trainingHeader.attribute(matrixRowNumber);
 
-    Attribute correspondingSummaryAtt = headerWithSummaryAtts
-      .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
-        + origCorrespondingToRow.name());
+    Attribute correspondingSummaryAtt =
+      headerWithSummaryAtts
+        .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+          + origCorrespondingToRow.name());
 
     if (correspondingSummaryAtt == null) {
       throw new DistributedWekaException(
@@ -138,24 +184,26 @@ public class CorrelationMatrixRowReduceTask implements Serializable {
     }
 
     // correlation or covariance?
-    double[] statsForRowAtt = CSVToARFFHeaderReduceTask
-      .attributeToStatsArray(correspondingSummaryAtt);
+    double[] statsForRowAtt =
+      CSVToARFFHeaderReduceTask.attributeToStatsArray(correspondingSummaryAtt);
 
     for (int i = 0; i < aggregated.length; i++) {
       Attribute attI = trainingHeader.attribute(i);
-      Attribute currespondingSummaryI = headerWithSummaryAtts
-        .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
-          + attI.name());
-      double[] statsForI = CSVToARFFHeaderReduceTask
-        .attributeToStatsArray(currespondingSummaryI);
+      Attribute currespondingSummaryI =
+        headerWithSummaryAtts
+          .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+            + attI.name());
+      double[] statsForI =
+        CSVToARFFHeaderReduceTask.attributeToStatsArray(currespondingSummaryI);
 
       // if missings were replaced then sum is divided by the total count (i.e.
       // count + #missing); otherwise use the co-occurrence count for rowAtt,
       // col i
-      double denom = missingsWereReplacedWithMeans ? statsForRowAtt[ArffSummaryNumericMetric.COUNT
-        .ordinal()]
-        + statsForRowAtt[ArffSummaryNumericMetric.MISSING.ordinal()]
-        : coOccAgg[i];
+      double denom =
+        missingsWereReplacedWithMeans ? statsForRowAtt[ArffSummaryNumericMetric.COUNT
+          .ordinal()]
+          + statsForRowAtt[ArffSummaryNumericMetric.MISSING.ordinal()]
+          : coOccAgg[i];
 
       // Math
       // .min(statsForRowAtt[ArffSummaryNumericMetric.COUNT.ordinal()],
