@@ -180,6 +180,51 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       public String makeAttributeValue(double value) {
         return toString() + value;
       }
+    },
+    FIRSTQUARTILE("firstQuartile") {
+      @Override
+      public double valueFromAttribute(Attribute att) {
+        if (FIRSTQUARTILE.ordinal() > att.numValues() - 1) {
+          return Utils.missingValue();
+        }
+        String value = att.value(FIRSTQUARTILE.ordinal());
+        return toValue(value, toString());
+      }
+
+      @Override
+      public String makeAttributeValue(double value) {
+        return toString() + value;
+      }
+    },
+    MEDIAN("median") {
+      @Override
+      public double valueFromAttribute(Attribute att) {
+        if (MEDIAN.ordinal() > att.numValues() - 1) {
+          return Utils.missingValue();
+        }
+        String value = att.value(MEDIAN.ordinal());
+        return toValue(value, toString());
+      }
+
+      @Override
+      public String makeAttributeValue(double value) {
+        return toString() + value;
+      }
+    },
+    THIRDQUARTILE("thirdQuartile") {
+      @Override
+      public double valueFromAttribute(Attribute att) {
+        if (THIRDQUARTILE.ordinal() > att.numValues() - 1) {
+          return Utils.missingValue();
+        }
+        String value = att.value(THIRDQUARTILE.ordinal());
+        return toValue(value, toString());
+      }
+
+      @Override
+      public String makeAttributeValue(double value) {
+        return toString() + value;
+      }
     };
 
     private final String m_name;
@@ -278,7 +323,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     private static final long serialVersionUID = 5328158049841703129L;
 
     /** Holds the actual stats values */
-    protected double[] m_stats = new double[ArffSummaryNumericMetric.values().length];
+    protected double[] m_stats =
+      new double[ArffSummaryNumericMetric.values().length];
 
     /**
      * Constructs a new NumericStats
@@ -289,8 +335,13 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     public NumericStats(String attributeName) {
       super(attributeName);
 
-      m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = Double.NaN;
-      m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = Double.NaN;
+      m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = Utils.missingValue();
+      m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = Utils.missingValue();
+      m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
+        Utils.missingValue();
+      m_stats[ArffSummaryNumericMetric.MEDIAN.ordinal()] = Utils.missingValue();
+      m_stats[ArffSummaryNumericMetric.THIRDQUARTILE.ordinal()] =
+        Utils.missingValue();
     }
 
     /**
@@ -307,12 +358,29 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       ArrayList<String> vals = new ArrayList<String>();
 
       for (ArffSummaryNumericMetric m : ArffSummaryNumericMetric.values()) {
+        if (m.ordinal() > m_stats.length - 1) {
+          continue;
+        }
+        if (m == ArffSummaryNumericMetric.FIRSTQUARTILE
+          || m == ArffSummaryNumericMetric.MEDIAN
+          || m == ArffSummaryNumericMetric.THIRDQUARTILE) {
+          if (Utils
+            .isMissingValue(m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE
+              .ordinal()])
+            && Utils.isMissingValue(m_stats[ArffSummaryNumericMetric.MEDIAN
+              .ordinal()])
+            && Utils
+              .isMissingValue(m_stats[ArffSummaryNumericMetric.THIRDQUARTILE
+                .ordinal()])) {
+            continue;
+          }
+        }
         String v = m.makeAttributeValue(m_stats[m.ordinal()]);
         vals.add(v);
       }
 
-      Attribute a = new Attribute(ARFF_SUMMARY_ATTRIBUTE_PREFIX
-        + m_attributeName, vals);
+      Attribute a =
+        new Attribute(ARFF_SUMMARY_ATTRIBUTE_PREFIX + m_attributeName, vals);
       return a;
     }
 
@@ -329,22 +397,35 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         throw new IllegalArgumentException("Stats attribute is not nominal!");
       }
 
-      if (a.numValues() != ArffSummaryNumericMetric.values().length) {
-        throw new IllegalArgumentException("Was expecting there to be "
-          + ArffSummaryNumericMetric.values().length
+      if (a.numValues() != ArffSummaryNumericMetric.values().length
+        && a.numValues() != ArffSummaryNumericMetric.values().length - 3) {
+        throw new IllegalArgumentException("Was expecting there to be either "
+          + ArffSummaryNumericMetric.values().length + " or "
+          + (ArffSummaryNumericMetric.values().length - 3)
           + " values in a summary attribute, but found " + a.numValues());
       }
 
       double[] stats = new double[ArffSummaryNumericMetric.values().length];
+      stats[ArffSummaryNumericMetric.MIN.ordinal()] = Utils.missingValue();
+      stats[ArffSummaryNumericMetric.MAX.ordinal()] = Utils.missingValue();
+      stats[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
+        Utils.missingValue();
+      stats[ArffSummaryNumericMetric.MEDIAN.ordinal()] = Utils.missingValue();
+      stats[ArffSummaryNumericMetric.THIRDQUARTILE.ordinal()] =
+        Utils.missingValue();
 
       for (ArffSummaryNumericMetric m : ArffSummaryNumericMetric.values()) {
-        String v = a.value(m.ordinal());
 
-        double value = m.toValue(v, m.toString());
-        stats[m.ordinal()] = value;
+        if (m.ordinal() < a.numValues()) {
+          String v = a.value(m.ordinal());
+
+          double value = m.toValue(v, m.toString());
+          stats[m.ordinal()] = value;
+        }
       }
 
-      NumericStats s = new NumericStats(a.name());
+      NumericStats s =
+        new NumericStats(a.name().replace(ARFF_SUMMARY_ATTRIBUTE_PREFIX, ""));
       s.m_stats = stats;
 
       return s;
@@ -553,8 +634,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       vals.add(MISSING_LABEL + "_" + m_numMissing);
 
-      Attribute a = new Attribute(ARFF_SUMMARY_ATTRIBUTE_PREFIX
-        + m_attributeName, vals);
+      Attribute a =
+        new Attribute(ARFF_SUMMARY_ATTRIBUTE_PREFIX + m_attributeName, vals);
 
       return a;
     }
@@ -596,7 +677,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   protected List<String> m_nominalDefaultLabelSpecs = new ArrayList<String>();
 
   /** Lookup for nominal values */
-  protected Map<Integer, TreeSet<String>> m_nominalVals = new HashMap<Integer, TreeSet<String>>();
+  protected Map<Integer, TreeSet<String>> m_nominalVals =
+    new HashMap<Integer, TreeSet<String>>();
 
   /**
    * Default labels (if any) to use with nominal attributes. These are like a
@@ -605,7 +687,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * multi-class problem into a binary one, by simply specifying the positive
    * class label.
    */
-  protected Map<Integer, String> m_nominalDefaultVals = new HashMap<Integer, String>();
+  protected Map<Integer, String> m_nominalDefaultVals =
+    new HashMap<Integer, String>();
 
   /** The placeholder for missing values. */
   protected String m_MissingValue = "?";
@@ -1181,8 +1264,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @param attNames the names of the attributes to use
    */
   public void initParserOnly(List<String> attNames) {
-    m_parser = new CSVParser(m_FieldSeparator.charAt(0),
-      m_Enclosures.charAt(0), '\\');
+    m_parser =
+      new CSVParser(m_FieldSeparator.charAt(0), m_Enclosures.charAt(0), '\\');
 
     m_attributeNames = attNames;
     if (attNames != null) {
@@ -1227,8 +1310,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       m_formatter = new SimpleDateFormat(m_dateFormat);
 
       // tokenize the first line
-      m_parser = new CSVParser(m_FieldSeparator.charAt(0),
-        m_Enclosures.charAt(0), '\\');
+      m_parser =
+        new CSVParser(m_FieldSeparator.charAt(0), m_Enclosures.charAt(0), '\\');
 
       fields = m_parser.parseLine(row);
 
@@ -1375,8 +1458,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         ns.m_stats[ArffSummaryNumericMetric.SUM.ordinal()] += value;
         ns.m_stats[ArffSummaryNumericMetric.SUMSQ.ordinal()] += value * value;
         if (Double.isNaN(ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])) {
-          ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = ns.m_stats[ArffSummaryNumericMetric.MAX
-            .ordinal()] = value;
+          ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] =
+            ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
         } else if (value < ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()]) {
           ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = value;
         } else if (value > ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()]) {
@@ -1401,8 +1484,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       // have been created.
 
       if (s instanceof NumericStats) {
-        double missing = ((NumericStats) s).m_stats[ArffSummaryNumericMetric.MISSING
-          .ordinal()];
+        double missing =
+          ((NumericStats) s).m_stats[ArffSummaryNumericMetric.MISSING.ordinal()];
 
         // need to replace this with NominalStats and transfer over the missing
         // count
@@ -1653,13 +1736,13 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       for (int i = 0; i < m_attributeTypes.length; i++) {
         if (m_attributeTypes[i] == TYPE.NUMERIC
           || m_attributeTypes[i] == TYPE.DATE) {
-          NumericStats ns = (NumericStats) m_summaryStats.get(m_attributeNames
-            .get(i));
+          NumericStats ns =
+            (NumericStats) m_summaryStats.get(m_attributeNames.get(i));
 
           attribs.add(ns.makeAttribute());
         } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
-          NominalStats ns = (NominalStats) m_summaryStats.get(m_attributeNames
-            .get(i));
+          NominalStats ns =
+            (NominalStats) m_summaryStats.get(m_attributeNames.get(i));
           attribs.add(ns.makeAttribute());
         }
       }
@@ -1770,7 +1853,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     return result;
   }
 
-  public static List<String> instanceHeaderToAttributeNameList(Instances header) {
+  public static List<String>
+    instanceHeaderToAttributeNameList(Instances header) {
     List<String> attNames = new ArrayList<String>();
 
     for (int i = 0; i < header.numAttributes(); i++) {
