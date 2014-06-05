@@ -29,11 +29,11 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderReduceTask;
+import weka.distributed.DistributedWekaException;
 import distributed.core.DistributedJobConfig;
 
 /**
@@ -51,7 +51,8 @@ public class RandomizedDataChunkHadoopMapper extends
    * The key in the Configuration that the options for this task are associated
    * with
    */
-  public static String RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS = "*weka.distributed.randomized_data_chunks_map_task_opts";
+  public static String RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS =
+    "*weka.distributed.randomized_data_chunks_map_task_opts";
 
   /** Helper for parsing CSV */
   protected CSVToARFFHeaderMapTask m_rowHelper = null;
@@ -77,10 +78,10 @@ public class RandomizedDataChunkHadoopMapper extends
 
     Configuration conf = context.getConfiguration();
     String taskOptsS = conf.get(RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS);
-    String numChunksS = conf
-      .get(RandomizedDataChunkHadoopReducer.NUM_DATA_CHUNKS);
-    String csvOptsS = conf
-      .get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
+    String numChunksS =
+      conf.get(RandomizedDataChunkHadoopReducer.NUM_DATA_CHUNKS);
+    String csvOptsS =
+      conf.get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
 
     try {
       if (!DistributedJobConfig.isEmpty(csvOptsS)) {
@@ -98,8 +99,8 @@ public class RandomizedDataChunkHadoopMapper extends
           throw new IOException(
             "Can't continue without the name of the ARFF header file!");
         }
-        m_trainingHeader = CSVToARFFHeaderReduceTask
-          .stripSummaryAtts(WekaClassifierHadoopMapper
+        m_trainingHeader =
+          CSVToARFFHeaderReduceTask.stripSummaryAtts(WekaClassifierHadoopMapper
             .loadTrainingHeader(arffHeaderFileName));
 
         WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
@@ -154,44 +155,62 @@ public class RandomizedDataChunkHadoopMapper extends
     }
   }
 
+  protected double getClassValueIndexFromRow(String[] parsed)
+    throws DistributedWekaException {
+    int classIndex = m_trainingHeader.classIndex();
+
+    if (classIndex < 0) {
+      throw new DistributedWekaException("No class index is set!");
+    }
+
+    String classVal = parsed[classIndex];
+    double classValIndex = Utils.missingValue();
+    if (!DistributedJobConfig.isEmpty(classVal.trim())
+      && !classVal.equals(m_rowHelper.getMissingValue())) {
+
+      classValIndex = m_trainingHeader.classAttribute().indexOfValue(classVal);
+      if (classValIndex < 0) {
+        throw new DistributedWekaException("Class value '" + classVal
+          + "' does not seem to be defined in the header!");
+      }
+    }
+
+    return classValIndex;
+  }
+
   protected void processRow(String row, Context context) throws IOException {
     if (row != null) {
-      String[] parsed = m_rowHelper.parseRowOnly(row);
+      // scatter the instances randomly over the chunks
+      int chunkNum = m_random.nextInt(m_numChunks);
+      m_outKey.set("chunk" + chunkNum);
 
-      if (parsed.length != m_trainingHeader.numAttributes()) {
-        throw new IOException(
-          "Parsed a row that contains a different number of values than "
-            + "there are attributes in the training ARFF header: " + row);
-      }
-      try {
-        Instance toProcess = WekaClassifierHadoopMapper.makeInstance(
-          m_rowHelper, m_trainingHeader, true, false, parsed);
+      if (m_trainingHeader.classIndex() < 0
+        || m_trainingHeader.classAttribute().isNumeric()) {
+        // no parsing necessary
+        m_outValue.set(row);
+      } else {
+        // class is nominal
+        String[] parsed = m_rowHelper.parseRowOnly(row);
 
-        if (!toProcess.isMissing(toProcess.classIndex())) {
-
-          // key is the class label
-          // m_outKey.set(toProcess.stringValue(toProcess.classIndex()));
-
-          // scatter the instances randomly over the chunks
-          int chunkNum = m_random.nextInt(m_numChunks);
-          m_outKey.set("chunk" + chunkNum);
-
-          if (m_trainingHeader.classAttribute().isNominal()) {
-
-            // append the index of the class value if class is nominal -
-            // this gives the reducer quick access to it without having
-            // to parse the entire CSV row into an instance again
-            m_outValue.set(toProcess.toString() + "@:@"
-              + (int) toProcess.classValue());
-          } else {
-            // The main function here is just to randomize the order
-            // of the instances in the chunks
-            m_outValue.set(toProcess.toString());
-          }
-
-          context.write(m_outKey, m_outValue);
+        if (parsed.length != m_trainingHeader.numAttributes()) {
+          throw new IOException(
+            "Parsed a row that contains a different number of values than "
+              + "there are attributes in the training ARFF header: " + row);
         }
-      } catch (Exception ex) {
+
+        try {
+          double classValIndex = getClassValueIndexFromRow(parsed);
+          if (!Utils.isMissingValue(classValIndex)) {
+            m_outValue.set(row + "@:@" + (int) classValIndex);
+          }
+        } catch (Exception ex) {
+          throw new IOException(ex);
+        }
+      }
+
+      try {
+        context.write(m_outKey, m_outValue);
+      } catch (InterruptedException ex) {
         throw new IOException(ex);
       }
     }
