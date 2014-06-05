@@ -67,7 +67,8 @@ public class WekaClassifierHadoopMapper extends
    * The key in the Configuration that the options for this task are associated
    * with
    */
-  public static final String CLASSIFIER_MAP_TASK_OPTIONS = "*weka.distributed.weka_classifier_map_task_opts";
+  public static final String CLASSIFIER_MAP_TASK_OPTIONS =
+    "*weka.distributed.weka_classifier_map_task_opts";
 
   /** The underlying general Weka classifier map task */
   protected WekaClassifierMapTask m_task = null;
@@ -130,8 +131,8 @@ public class WekaClassifierHadoopMapper extends
     Classifier classifier = null;
     ObjectInputStream ois = null;
     try {
-      ois = new ObjectInputStream(new BufferedInputStream(
-        new FileInputStream(f)));
+      ois =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
 
       classifier = (Classifier) ois.readObject();
     } finally {
@@ -164,8 +165,8 @@ public class WekaClassifierHadoopMapper extends
 
     ObjectInputStream ois = null;
     try {
-      ois = new ObjectInputStream(new BufferedInputStream(
-        new FileInputStream(f)));
+      ois =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
 
       filter = (Filter) ois.readObject();
 
@@ -245,8 +246,8 @@ public class WekaClassifierHadoopMapper extends
 
     Configuration conf = context.getConfiguration();
     String taskOptsS = conf.get(CLASSIFIER_MAP_TASK_OPTIONS);
-    String csvOptsS = conf
-      .get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
+    String csvOptsS =
+      conf.get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
     try {
       if (!DistributedJobConfig.isEmpty(csvOptsS)) {
         String[] csvOpts = Utils.splitOptions(csvOptsS);
@@ -263,8 +264,9 @@ public class WekaClassifierHadoopMapper extends
           throw new IOException(
             "Can't continue without the name of the ARFF header file!");
         }
-        m_trainingHeader = CSVToARFFHeaderReduceTask
-          .stripSummaryAtts(loadTrainingHeader(arffHeaderFileName));
+        m_trainingHeader =
+          CSVToARFFHeaderReduceTask
+            .stripSummaryAtts(loadTrainingHeader(arffHeaderFileName));
 
         setClassIndex(taskOpts, m_trainingHeader, true);
 
@@ -273,17 +275,18 @@ public class WekaClassifierHadoopMapper extends
 
         // multiple iterations over the training data for an updateable
         // classifier?
-        boolean continueTrainingUpdateable = Utils.getFlag(
-          "continue-training-updateable", taskOpts);
+        boolean continueTrainingUpdateable =
+          Utils.getFlag("continue-training-updateable", taskOpts);
         m_task
           .setContinueTrainingUpdateableClassifier(continueTrainingUpdateable);
 
         // Preconstructed filter to use?
-        String preconstructedFilter = Utils.getOption("preconstructed-filter",
-          taskOpts);
+        String preconstructedFilter =
+          Utils.getOption("preconstructed-filter", taskOpts);
         if (!DistributedJobConfig.isEmpty(preconstructedFilter)) {
           // try and load this from the distributed cache
-          Filter preConstructedF = loadPreconstructedFilter(preconstructedFilter);
+          Filter preConstructedF =
+            loadPreconstructedFilter(preconstructedFilter);
           m_task
             .addPreconstructedFilterToUse((PreconstructedFilter) preConstructedF);
         }
@@ -304,8 +307,8 @@ public class WekaClassifierHadoopMapper extends
         // so that setOptions() does not overwrite the classifier with
         // a newly created one
         if (continueTrainingUpdateable) {
-          String classifierFileName = Utils.getOption("model-file-name",
-            taskOpts);
+          String classifierFileName =
+            Utils.getOption("model-file-name", taskOpts);
           if (DistributedJobConfig.isEmpty(classifierFileName)) {
             throw new IOException(
               "Continued training of incremental classifier "
@@ -360,55 +363,6 @@ public class WekaClassifierHadoopMapper extends
 
     return rowHelper.makeInstance(trainingHeader, classifierIsUpdateable
       && !forceBatchLearningForUpdateable, parsed);
-
-    // double[] vals = new double[trainingHeader.numAttributes()];
-    //
-    // for (int i = 0; i < trainingHeader.numAttributes(); i++) {
-    // if (parsed[i] == null || parsed[i].equals(rowHelper.getMissingValue())
-    // || parsed[i].trim().length() == 0) {
-    // vals[i] = Utils.missingValue();
-    // continue;
-    // }
-    // Attribute current = trainingHeader.attribute(i);
-    // if (current.isString()) {
-    // if (classifierIsUpdateable && !forceBatchLearningForUpdateable) {
-    // current.setStringValue(parsed[i]);
-    // vals[i] = 0;
-    // } else {
-    // vals[i] = current.addStringValue(parsed[i]);
-    // }
-    // } else if (current.isNominal()) {
-    // int index = current.indexOfValue(parsed[i]);
-    //
-    // if (index < 0) {
-    // throw new Exception("Can't find nominal value '" + parsed[i]
-    // + "' in list of values for " + "attribute '" + current.name() + "'");
-    // }
-    // vals[i] = index;
-    // } else if (current.isDate()) {
-    // try {
-    // double val = current.parseDate(parsed[i]);
-    // vals[i] = val;
-    // } catch (ParseException p) {
-    // throw new Exception(p);
-    // }
-    // } else if (current.isNumeric()) {
-    // try {
-    // double val = Double.parseDouble(parsed[i]);
-    // vals[i] = val;
-    // } catch (NumberFormatException n) {
-    // throw new Exception(n);
-    // }
-    // } else {
-    // throw new Exception("Unsupported attribute type: "
-    // + Attribute.typeToString(current));
-    // }
-    // }
-    //
-    // Instance result = new DenseInstance(1.0, vals);
-    // result.setDataset(trainingHeader);
-    //
-    // return result;
   }
 
   @Override
@@ -436,9 +390,10 @@ public class WekaClassifierHadoopMapper extends
             + "there are attributes in the training ARFF header: " + row);
       }
       try {
-        Instance toProcess = makeInstance(m_rowHelper, m_trainingHeader,
-          (m_task.getClassifier() instanceof UpdateableClassifier),
-          m_task.getForceBatchLearningForUpdateableClassifiers(), parsed);
+        Instance toProcess =
+          makeInstance(m_rowHelper, m_trainingHeader,
+            (m_task.getClassifier() instanceof UpdateableClassifier),
+            m_task.getForceBatchLearningForUpdateableClassifiers(), parsed);
 
         m_task.processInstance(toProcess);
       } catch (Exception ex) {
@@ -466,8 +421,9 @@ public class WekaClassifierHadoopMapper extends
       ByteArrayOutputStream ostream = new ByteArrayOutputStream();
       OutputStream os = ostream;
 
-      p = new ObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(
-        os)));
+      p =
+        new ObjectOutputStream(new BufferedOutputStream(
+          new GZIPOutputStream(os)));
       p.writeObject(finalClassifier);
       p.writeObject(new Integer(numTrainingInstances));
       p.flush();
@@ -492,8 +448,9 @@ public class WekaClassifierHadoopMapper extends
       // System.err.println("Model after training:\n"
       // + m_task.getClassifier().toString());
 
-      byte[] bytes = classifierToBytes(m_task.getClassifier(),
-        m_task.getNumTrainingInstances());
+      byte[] bytes =
+        classifierToBytes(m_task.getClassifier(),
+          m_task.getNumTrainingInstances());
 
       // make sure all classifiers go to the same reducer
       String constantKey = "classifier";
