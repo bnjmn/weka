@@ -31,8 +31,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
+import weka.core.Attribute;
 import weka.core.Instances;
+import weka.core.QuantileCalculator;
 import weka.core.Utils;
+import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
+import weka.distributed.CSVToARFFHeaderMapTask.NumericStats;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import distributed.core.DistributedJobConfig;
 
@@ -52,13 +57,29 @@ public class RandomizedDataChunkHadoopReducer extends
    * The key in the Configuration that the options for this task are associated
    * with
    */
-  public static String NUM_DATA_CHUNKS = "*weka.distributed.num_randomized_data_chunks";
+  public static String NUM_DATA_CHUNKS =
+    "*weka.distributed.num_randomized_data_chunks";
 
   /** The output files */
   protected MultipleOutputs<Text, Text> m_mos;
 
   /** The header of the data */
   protected Instances m_trainingHeader;
+
+  /** The header with summary attributes */
+  protected Instances m_trainingHeaderWithSummary;
+
+  /** For calculating quartiles */
+  protected QuantileCalculator m_quartiles;
+
+  /** Used when computing quartiles */
+  protected CSVToARFFHeaderMapTask m_rowHelper;
+
+  /**
+   * Full path to the header - used when we write back the header updated with
+   * quartiles
+   */
+  protected String m_arffHeaderFullPath = "";
 
   /** The total number of data chunks */
   protected int m_numberOfDataChunks = 0;
@@ -91,8 +112,9 @@ public class RandomizedDataChunkHadoopReducer extends
     Configuration conf = context.getConfiguration();
 
     String taskOptsS = conf.get(NUM_DATA_CHUNKS);
-    String randomizeMapOpts = conf
-      .get(RandomizedDataChunkHadoopMapper.RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS);
+    String randomizeMapOpts =
+      conf
+        .get(RandomizedDataChunkHadoopMapper.RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS);
     if (taskOptsS == null || DistributedJobConfig.isEmpty(taskOptsS)) {
       throw new IOException(
         "Number of output files/data chunks not available!!");
@@ -108,22 +130,74 @@ public class RandomizedDataChunkHadoopReducer extends
           throw new IOException(
             "Can't continue without the name of the ARFF header file!");
         }
-        m_trainingHeader = CSVToARFFHeaderReduceTask
-          .stripSummaryAtts(WekaClassifierHadoopMapper
-            .loadTrainingHeader(arffHeaderFileName));
+        m_trainingHeaderWithSummary =
+          WekaClassifierHadoopMapper.loadTrainingHeader(arffHeaderFileName);
+        m_trainingHeader =
+          CSVToARFFHeaderReduceTask
+            .stripSummaryAtts(m_trainingHeaderWithSummary);
+
+        m_arffHeaderFullPath =
+          Utils.getOption("arff-header-full-path", taskOpts);
+
+        try {
+          m_numberOfDataChunks = Integer.parseInt(taskOptsS);
+          // m_instanceBuffer = new ArrayList<String>(m_numberOfDataChunks);
+        } catch (NumberFormatException e) {
+          throw new Exception(e);
+        }
+
+        // scan for numeric atts and whether quartiles have been
+        // computed yet
+        boolean computeQuartiles =
+          true && !DistributedJobConfig.isEmpty(m_arffHeaderFullPath);
+        if (computeQuartiles) {
+          for (int i = 0; i < m_trainingHeader.numAttributes(); i++) {
+            if (m_trainingHeader.attribute(i).isNumeric()) {
+              Attribute summary =
+                m_trainingHeaderWithSummary
+                  .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+                    + m_trainingHeader.attribute(i).name());
+
+              if (summary != null) {
+                if (!Utils
+                  .isMissingValue(ArffSummaryNumericMetric.FIRSTQUARTILE
+                    .valueFromAttribute(summary))) {
+                  computeQuartiles = false;
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        if (computeQuartiles) {
+          m_quartiles =
+            new QuantileCalculator(m_trainingHeader, new double[] { 0.25, 0.5,
+              0.75 });
+
+          // set up a row helper. Simply for parsing CSV values so that we can
+          // do quantile updates
+          m_rowHelper = new CSVToARFFHeaderMapTask();
+          taskOptsS =
+            conf.get(WekaClassifierHadoopMapper.CLASSIFIER_MAP_TASK_OPTIONS);
+          String csvOptsS =
+            conf
+              .get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
+          if (!DistributedJobConfig.isEmpty(csvOptsS)) {
+            String[] csvOpts = Utils.splitOptions(csvOptsS);
+            m_rowHelper.setOptions(csvOpts);
+          }
+          WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
+            true);
+          m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
+            .instanceHeaderToAttributeNameList(m_trainingHeader));
+        }
 
         WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
           true);
       } else {
         throw new Exception(
           "Can't continue without the name of the ARFF header file!");
-      }
-
-      try {
-        m_numberOfDataChunks = Integer.parseInt(taskOptsS);
-        // m_instanceBuffer = new ArrayList<String>(m_numberOfDataChunks);
-      } catch (NumberFormatException e) {
-        throw new Exception(e);
       }
 
       int numClasses = 1;
@@ -150,6 +224,17 @@ public class RandomizedDataChunkHadoopReducer extends
       String row = t.toString();
       String[] parts = row.split("@:@");
       String inst = parts[0];
+
+      if (m_quartiles != null) {
+        // do quartile updates
+        String[] parsed = m_rowHelper.parseRowOnly(inst);
+        try {
+          m_quartiles.update(parsed, m_rowHelper.getMissingValue());
+        } catch (Exception ex) {
+          throw new IOException(ex);
+        }
+      }
+
       int classVal = Integer.parseInt(parts[1]);
 
       int chunk = m_countsPerClass[classVal] % m_numberOfDataChunks;
@@ -175,6 +260,16 @@ public class RandomizedDataChunkHadoopReducer extends
     // key out evenly over the output files
 
     for (Text t : values) {
+      if (m_quartiles != null) {
+        // do quartile updates
+        String row = t.toString();
+        String[] parsed = m_rowHelper.parseRowOnly(row);
+        try {
+          m_quartiles.update(parsed, m_rowHelper.getMissingValue());
+        } catch (Exception ex) {
+          throw new IOException(ex);
+        }
+      }
       int chunk = m_countsPerClass[0] % m_numberOfDataChunks;
       String name = "chunk" + chunk;
       m_mos.write(name, null, t);
@@ -204,8 +299,8 @@ public class RandomizedDataChunkHadoopReducer extends
         while (m_countsPerClass[i] < m_numberOfDataChunks) {
 
           // choose randomly from the instances we've seen for class index i
-          int instIndex = m_random
-            .nextInt(m_classInstancesBuffer.get(i).size());
+          int instIndex =
+            m_random.nextInt(m_classInstancesBuffer.get(i).size());
           m_outVal.set(m_classInstancesBuffer.get(i).get(instIndex));
           String name = "chunk" + m_countsPerClass[i];
           m_mos.write(name, null, m_outVal);
@@ -216,5 +311,60 @@ public class RandomizedDataChunkHadoopReducer extends
     }
 
     m_mos.close();
+
+    // any quantile computation piggybacked on this run?
+    if (m_quartiles != null) {
+      // have to construct a new Instances header
+      ArrayList<Attribute> atts = new ArrayList<Attribute>();
+      for (int i = 0; i < m_trainingHeader.numAttributes(); i++) {
+        atts.add((Attribute) m_trainingHeader.attribute(i).copy());
+      }
+
+      for (int i = 0; i < m_trainingHeader.numAttributes(); i++) {
+        String name = m_trainingHeader.attribute(i).name();
+
+        Attribute summary =
+          m_trainingHeaderWithSummary
+            .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+              + name);
+        if (m_trainingHeader.attribute(i).isNumeric()) {
+
+          NumericStats stats = NumericStats.attributeToStats(summary);
+          // add in the quantiles
+          try {
+            double[] quantiles = m_quartiles.getQuantiles(name);
+            stats.getStats()[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
+              quantiles[0];
+            stats.getStats()[ArffSummaryNumericMetric.MEDIAN.ordinal()] =
+              quantiles[1];
+            stats.getStats()[ArffSummaryNumericMetric.THIRDQUARTILE.ordinal()] =
+              quantiles[2];
+
+            Attribute updatedSummary = stats.makeAttribute();
+            atts.add(updatedSummary);
+          } catch (Exception ex) {
+            // Print out error, but don't cause job to stop (could be
+            // the case that we haven't seen more than 5 non-missing
+            // values for this attribute (quantile estimator requires at
+            // least five values)
+            System.err.println(ex);
+
+            // just add in the old stats in this case
+            atts.add(summary);
+          }
+        } else {
+          if (summary != null) {
+            atts.add((Attribute) summary.copy());
+          }
+        }
+      }
+
+      // make the new instances
+      Instances updatedHeader =
+        new Instances("Updated with quartiles", atts, 0);
+
+      CSVToArffHeaderHadoopReducer.writeHeaderToDestination(updatedHeader,
+        m_arffHeaderFullPath, context.getConfiguration());
+    }
   }
 }
