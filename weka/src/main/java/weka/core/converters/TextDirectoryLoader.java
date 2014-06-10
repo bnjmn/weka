@@ -43,13 +43,15 @@ import weka.core.SerializedObject;
 import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start --> Loads all text files in a directory and uses the
+ <!-- globalinfo-start --> 
+  * Loads all text files in a directory and uses the
  * subdirectory names as class labels. The content of the text files will be
  * stored in a String attribute, the filename can be stored as well.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -81,7 +83,7 @@ import weka.core.Utils;
  *  Retain all string attribute values when reading incrementally.
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * Based on code from the TextDirectoryToArff tool:
  * <ul>
@@ -175,7 +177,8 @@ public class TextDirectoryLoader extends AbstractLoader implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start -->
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -202,7 +205,7 @@ public class TextDirectoryLoader extends AbstractLoader implements
    *  (default: use the default character set)
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the options
    * @throws Exception if options cannot be set
@@ -464,7 +467,7 @@ public class TextDirectoryLoader extends AbstractLoader implements
       if (oo instanceof SerializedObject) {
         classes.add(((SerializedObject) oo).getObject().toString());
       } else {
-        classes.add((String) enm.nextElement());
+        classes.add(oo.toString());
       }
     }
 
@@ -488,15 +491,18 @@ public class TextDirectoryLoader extends AbstractLoader implements
           } else {
             newInst = new double[2];
           }
-          File txt = new File(directoryPath + File.separator + subdirPath
-            + File.separator + file);
+          File txt =
+            new File(directoryPath + File.separator + subdirPath
+              + File.separator + file);
           BufferedReader is;
           if (m_charSet == null || m_charSet.length() == 0) {
-            is = new BufferedReader(new InputStreamReader(new FileInputStream(
-              txt)));
+            is =
+              new BufferedReader(
+                new InputStreamReader(new FileInputStream(txt)));
           } else {
-            is = new BufferedReader(new InputStreamReader(new FileInputStream(
-              txt), m_charSet));
+            is =
+              new BufferedReader(new InputStreamReader(
+                new FileInputStream(txt), m_charSet));
           }
           StringBuffer txtStr = new StringBuffer();
           int c;
@@ -506,8 +512,9 @@ public class TextDirectoryLoader extends AbstractLoader implements
 
           newInst[0] = data.attribute(0).addStringValue(txtStr.toString());
           if (m_OutputFilename) {
-            newInst[1] = data.attribute(1).addStringValue(
-              subdirPath + File.separator + file);
+            newInst[1] =
+              data.attribute(1).addStringValue(
+                subdirPath + File.separator + file);
           }
           newInst[data.classIndex()] = k;
           data.add(new DenseInstance(1.0, newInst));
@@ -526,12 +533,11 @@ public class TextDirectoryLoader extends AbstractLoader implements
   protected int m_lastClassDir = 0;
 
   /**
-   * TextDirectoryLoader is unable to process a data set incrementally.
+   * Process input directories/files incrementally.
    * 
    * @param structure ignored
    * @return never returns without throwing an exception
-   * @throws IOException always. TextDirectoryLoader is unable to process a data
-   *           set incrementally.
+   * @throws IOException if a problem occurs
    */
   @Override
   public Instance getNextInstance(Instances structure) throws IOException {
@@ -543,13 +549,14 @@ public class TextDirectoryLoader extends AbstractLoader implements
     if (m_filesByClass == null) {
       m_filesByClass = new ArrayList<LinkedList<String>>();
       for (int i = 0; i < classAtt.numValues(); i++) {
-        File classDir = new File(directoryPath + File.separator
-          + classAtt.value(i));
+        File classDir =
+          new File(directoryPath + File.separator + classAtt.value(i));
         String[] files = classDir.list();
         LinkedList<String> classDocs = new LinkedList<String>();
         for (String cd : files) {
-          File txt = new File(directoryPath + File.separator
-            + classAtt.value(i) + File.separator + cd);
+          File txt =
+            new File(directoryPath + File.separator + classAtt.value(i)
+              + File.separator + cd);
           if (txt.isFile()) {
             classDocs.add(cd);
           }
@@ -580,15 +587,18 @@ public class TextDirectoryLoader extends AbstractLoader implements
 
     if (found) {
       String nextDoc = classContents.poll();
-      File txt = new File(directoryPath + File.separator
-        + classAtt.value(m_lastClassDir) + File.separator + nextDoc);
+      File txt =
+        new File(directoryPath + File.separator
+          + classAtt.value(m_lastClassDir) + File.separator + nextDoc);
 
       BufferedReader is;
       if (m_charSet == null || m_charSet.length() == 0) {
-        is = new BufferedReader(new InputStreamReader(new FileInputStream(txt)));
+        is =
+          new BufferedReader(new InputStreamReader(new FileInputStream(txt)));
       } else {
-        is = new BufferedReader(new InputStreamReader(new FileInputStream(txt),
-          m_charSet));
+        is =
+          new BufferedReader(new InputStreamReader(new FileInputStream(txt),
+            m_charSet));
       }
       StringBuffer txtStr = new StringBuffer();
       int c;
@@ -663,8 +673,8 @@ public class TextDirectoryLoader extends AbstractLoader implements
       System.err.println("\nUsage:\n" + "\tTextDirectoryLoader [options]\n"
         + "\n" + "Options:\n");
 
-      Enumeration<Option> enm = ((OptionHandler) new TextDirectoryLoader())
-        .listOptions();
+      Enumeration<Option> enm =
+        ((OptionHandler) new TextDirectoryLoader()).listOptions();
       while (enm.hasMoreElements()) {
         Option option = enm.nextElement();
         System.err.println(option.synopsis());
