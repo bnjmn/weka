@@ -573,7 +573,7 @@ public class ConverterFileChooser extends JFileChooser {
       configureCurrentConverter(LOADER_DIALOG);
 
       // bring up options dialog?
-      if (m_CheckBoxOptions.isSelected()) {
+      if (m_CheckBoxOptions.isSelected() && m_CurrentConverter != null) {
         m_EditorResult = JFileChooser.CANCEL_OPTION;
         m_Editor.setValue(m_CurrentConverter);
         PropertyDialog pd;
