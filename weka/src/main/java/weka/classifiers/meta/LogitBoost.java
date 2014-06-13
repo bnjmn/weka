@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -83,14 +84,6 @@ import weka.core.UnassignedClassException;
  *  Percentage of weight mass to base training on.
  *  (default 100, reduce to around 90 speed up)</pre>
  * 
- * <pre> -F &lt;num&gt;
- *  Number of folds for internal cross-validation.
- *  (default 0 -- no cross-validation)</pre>
- * 
- * <pre> -R &lt;num&gt;
- *  Number of runs for internal cross-validation.
- *  (default 1)</pre>
- * 
  * <pre> -L &lt;num&gt;
  *  Threshold on the improvement of the likelihood.
  *  (default -Double.MAX_VALUE)</pre>
@@ -98,6 +91,10 @@ import weka.core.UnassignedClassException;
  * <pre> -H &lt;num&gt;
  *  Shrinkage parameter.
  *  (default 1)</pre>
+ * 
+ * <pre> -Z &lt;num&gt;
+ *  Z max threshold for responses.
+ *  (default 3)</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
@@ -107,21 +104,29 @@ import weka.core.UnassignedClassException;
  *  Number of iterations.
  *  (default 10)</pre>
  * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
  * <pre> -W
  *  Full name of base classifier.
  *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
  * 
  * <pre> 
  * Options specific to classifier weka.classifiers.trees.DecisionStump:
  * </pre>
  * 
- * <pre> -D
+ * <pre> -output-debug-info
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
  * 
  <!-- options-end -->
  *
@@ -139,9 +144,9 @@ public class LogitBoost
   /** for serialization */
   static final long serialVersionUID = -1105660358715833753L;
   
-  /** Array for storing the generated base classifiers. 
+  /** ArrayList for storing the generated base classifiers. 
    Note: we are hiding the variable from IteratedSingleClassifierEnhancer*/
-  protected Classifier [][] m_Classifiers;
+  protected ArrayList<Classifier[]> m_Classifiers;
 
   /** The number of classes */
   protected int m_NumClasses;
@@ -351,6 +356,10 @@ public class LogitBoost
    *  Shrinkage parameter.
    *  (default 1)</pre>
    * 
+   * <pre> -Z &lt;num&gt;
+   *  Z max threshold for responses.
+   *  (default 3)</pre>
+   * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
    *  (default 1)</pre>
@@ -359,21 +368,29 @@ public class LogitBoost
    *  Number of iterations.
    *  (default 10)</pre>
    * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
    * <pre> -W
    *  Full name of base classifier.
    *  (default: weka.classifiers.trees.DecisionStump)</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
    * 
    * <pre> 
    * Options specific to classifier weka.classifiers.trees.DecisionStump:
    * </pre>
    * 
-   * <pre> -D
+   * <pre> -output-debug-info
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
    * 
    <!-- options-end -->
    *
@@ -679,11 +696,7 @@ public class LogitBoost
     if (m_Debug) {
       System.err.println("Creating base classifiers");
     }
-    m_Classifiers = new Classifier [m_NumClasses][];
-    for (int j = 0; j < m_NumClasses; j++) {
-      m_Classifiers[j] = AbstractClassifier.makeCopies(m_Classifier,
-					       getNumIterations());
-    }
+    m_Classifiers = new ArrayList<Classifier[]>();
 
     // Build classifier on all the data
     int numInstances = m_data.numInstances();
@@ -796,6 +809,9 @@ public class LogitBoost
     if (m_Debug) {
       System.err.println("Training classifier " + (m_NumGenerated + 1));
     }
+      
+    // Make space for classifiers
+    Classifier[] classifiers = new Classifier[m_NumClasses];
 
     // Build the new models
     for (int j = 0; j < m_NumClasses; j++) {
@@ -807,7 +823,7 @@ public class LogitBoost
     
       // Make copy because we want to save the weights
       Instances boostData = new Instances(data);
-      
+
       // Set instance pseudoclass and weights
       for (int i = 0; i < probs.length; i++) {
 
@@ -858,15 +874,17 @@ public class LogitBoost
       }
       
       // Build the classifier
-      m_Classifiers[j][m_NumGenerated].buildClassifier(trainData);
-    }      
+      classifiers[j] = AbstractClassifier.makeCopy(m_Classifier);
+      classifiers[j].buildClassifier(trainData);
+    }
+    m_Classifiers.add(classifiers);
     
     // Evaluate / increment trainFs from the classifier
     for (int i = 0; i < trainFs.length; i++) {
       double [] pred = new double [m_NumClasses];
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-        double tempPred = m_Shrinkage * m_Classifiers[j][m_NumGenerated]
+        double tempPred = m_Shrinkage * classifiers[j]
 	  .classifyInstance(data.instance(i));
         if (Utils.isMissingValue(tempPred)) {
           throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
@@ -895,14 +913,7 @@ public class LogitBoost
    */
   public Classifier[][] classifiers() {
 
-    Classifier[][] classifiers = 
-      new Classifier[m_NumClasses][m_NumGenerated];
-    for (int j = 0; j < m_NumClasses; j++) {
-      for (int i = 0; i < m_NumGenerated; i++) {
-	classifiers[j][i] = m_Classifiers[j][i];
-      }
-    }
-    return classifiers;
+    return m_Classifiers.toArray(new Classifier[0][0]);
   }
 
   /**
@@ -952,7 +963,7 @@ public class LogitBoost
     for (int i = 0; i < m_NumGenerated; i++) {
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	double tempPred = m_Shrinkage * m_Classifiers[j][i].classifyInstance(instance);
+	double tempPred = m_Shrinkage * m_Classifiers.get(i)[j].classifyInstance(instance);
         if (Utils.isMissingValue(tempPred)) {
           throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
         }
@@ -981,7 +992,7 @@ public class LogitBoost
     if (m_NumGenerated == 0) {
       throw new Exception("No model built yet");
     }
-    if (!(m_Classifiers[0][0] instanceof Sourcable)) {
+    if (!(m_Classifiers.get(0)[0] instanceof Sourcable)) {
       throw new Exception("Base learner " + m_Classifier.getClass().getName()
 			  + " is not Sourcable");
     }
@@ -1031,9 +1042,9 @@ public class LogitBoost
 		"    }\n    return dist;\n");
     text.append("  }\n}\n");
 
-    for (int i = 0; i < m_Classifiers.length; i++) {
-      for (int j = 0; j < m_Classifiers[i].length; j++) {
-	text.append(((Sourcable)m_Classifiers[i][j])
+    for (int i = 0; i < m_Classifiers.get(0).length; i++) {
+      for (int j = 0; j < m_Classifiers.size(); j++) {
+	text.append(((Sourcable)m_Classifiers.get(j)[i])
 		    .toSource(className + '_' + i + '_' + j));
       }
     }
@@ -1070,7 +1081,7 @@ public class LogitBoost
 	  text.append("\n\tClass " + (j + 1) 
 		      + " (" + m_ClassAttribute.name() 
 		      + "=" + m_ClassAttribute.value(j) + ")\n\n"
-		      + m_Classifiers[j][i].toString() + "\n");
+		      + m_Classifiers.get(i)[j].toString() + "\n");
 	}
       }
       text.append("Number of performed iterations: " +
@@ -1098,3 +1109,4 @@ public class LogitBoost
     runClassifier(new LogitBoost(), argv);
   }
 }
+

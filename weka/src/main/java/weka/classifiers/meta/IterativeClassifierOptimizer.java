@@ -47,9 +47,92 @@ import weka.core.RevisionUtils;
  * classifiers that use a single base learner.
  *
  <!-- globalinfo-start -->
+ * Optimizes the number of iterations of the given iterative classifier using cross-validation.
+ * <p/>
  <!-- globalinfo-end -->
  *
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -F &lt;num&gt;
+ *  Number of folds for cross-validation.
+ *  (default 10)</pre>
+ * 
+ * <pre> -R &lt;num&gt;
+ *  Number of runs for cross-validation.
+ *  (default 1)</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.meta.LogitBoost)</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.meta.LogitBoost:
+ * </pre>
+ * 
+ * <pre> -Q
+ *  Use resampling instead of reweighting for boosting.</pre>
+ * 
+ * <pre> -P &lt;percent&gt;
+ *  Percentage of weight mass to base training on.
+ *  (default 100, reduce to around 90 speed up)</pre>
+ * 
+ * <pre> -L &lt;num&gt;
+ *  Threshold on the improvement of the likelihood.
+ *  (default -Double.MAX_VALUE)</pre>
+ * 
+ * <pre> -H &lt;num&gt;
+ *  Shrinkage parameter.
+ *  (default 1)</pre>
+ * 
+ * <pre> -Z &lt;num&gt;
+ *  Z max threshold for responses.
+ *  (default 3)</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  Number of iterations.
+ *  (default 10)</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.DecisionStump:
+ * </pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -192,21 +275,23 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
     // Perform evaluation
     int numIts = 0;
-    double oldResult = -Double.MAX_VALUE;
+    double oldResult = Double.MAX_VALUE;
     while (true) {
       double result = 0;
       for (int r = 0; r < m_NumRuns; r++) {
         for (int i = 0; i < m_NumFolds; i++) {	  
           Evaluation eval = new Evaluation(trainingSets[r][i]);
           eval.evaluateModel(classifiers[r][i], testSets[r][i]);
-          result += eval.correct();
+          result += eval.rootMeanSquaredError();
           if (!classifiers[r][i].next()) {
             break; // Break out if one classifier fails to iterate
           }
         }
       }
-      System.out.println("Iteration: " + numIts + " " + "Measure: " + result);
-      if (result <= oldResult) {
+      if (m_Debug) {
+        System.out.println("Iteration: " + numIts + " " + "Measure: " + result);
+      }
+      if (result >= oldResult) {
         break; // No improvement
       }
       oldResult = result;
@@ -443,3 +528,4 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     runClassifier(new IterativeClassifierOptimizer(), argv);
   }
 }
+
