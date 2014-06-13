@@ -40,6 +40,7 @@ weka.filters.Filter[]=weka.gui.GenericArrayEditor
 
 # classifiers
 weka.classifiers.Classifier=weka.gui.GenericObjectEditor
+weka.classifiers.IterativeClassifier=weka.gui.GenericObjectEditor
 weka.classifiers.Classifier[]=weka.gui.GenericArrayEditor
 weka.classifiers.CostMatrix=weka.gui.CostMatrixEditor
 weka.classifiers.bayes.net.search.SearchAlgorithm=weka.gui.GenericObjectEditor

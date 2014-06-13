@@ -43,8 +43,8 @@ import weka.core.Instance;
 import weka.core.RevisionUtils;
 
 /**
- * Abstract utility class for handling settings common to meta
- * classifiers that use a single base learner.
+ * Chooses the best number of iterations for an IterativeClassifier such as LogitBoost using
+ * cross-validation.
  *
  <!-- globalinfo-start -->
  * Optimizes the number of iterations of the given iterative classifier using cross-validation.
