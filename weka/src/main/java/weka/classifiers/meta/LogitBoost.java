@@ -876,6 +876,9 @@ public class LogitBoost
       // Build the classifier
       classifiers[j] = AbstractClassifier.makeCopy(m_Classifier);
       classifiers[j].buildClassifier(trainData);
+      if (m_NumClasses == 2) {
+        break; // Don't actually need to build the other model in the two-class case
+      }
     }
     m_Classifiers.add(classifiers);
     
@@ -890,6 +893,10 @@ public class LogitBoost
           throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
         }
 	pred[j] = tempPred;
+        if (m_NumClasses == 2) {
+          pred[1] = -tempPred; // Can treat 2 classes as special case
+          break;
+        }
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;
@@ -968,6 +975,10 @@ public class LogitBoost
           throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
         }
         pred[j] = tempPred;
+        if (m_NumClasses == 2) {
+          pred[1] = -tempPred; // Can treat 2 classes as special case
+          break;
+        }
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;
@@ -1029,6 +1040,10 @@ public class LogitBoost
       for (int j = 0; j < m_NumClasses; j++) {
 	text.append("    Fi[" + j + "] = " + className + '_' +j + '_' + i 
 		    + ".classify(i); Fsum += Fi[" + j + "];\n");
+        if (m_NumClasses == 2) {
+          text.append("    Fi[1] = -Fi[0];\n"); // 2-class case is special
+          break;
+        }
       }
       text.append("    Fsum /= " + m_NumClasses + ";\n");
       text.append("    for (int j = 0; j < " + m_NumClasses + "; j++) {");
@@ -1046,6 +1061,9 @@ public class LogitBoost
       for (int j = 0; j < m_Classifiers.size(); j++) {
 	text.append(((Sourcable)m_Classifiers.get(j)[i])
 		    .toSource(className + '_' + i + '_' + j));
+      }
+      if (m_NumClasses == 2) {
+        break; // Only need one classifier per iteration in this case
       }
     }
     return text.toString();
@@ -1082,6 +1100,12 @@ public class LogitBoost
 		      + " (" + m_ClassAttribute.name() 
 		      + "=" + m_ClassAttribute.value(j) + ")\n\n"
 		      + m_Classifiers.get(i)[j].toString() + "\n");
+          if (m_NumClasses == 2) {
+            text.append("Two-class case: second classifier predicts " +
+                        "additive inverse of first classifier and " +
+                        "is not explicitly computed.\n\n");
+            break;
+          }
 	}
       }
       text.append("Number of performed iterations: " +
