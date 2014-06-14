@@ -33,8 +33,6 @@ import weka.attributeSelection.AttributeTransformer;
 import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.Ranker;
-import weka.attributeSelection.UnsupervisedAttributeEvaluator;
-import weka.attributeSelection.UnsupervisedSubsetEvaluator;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -50,13 +48,15 @@ import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> A supervised attribute filter that can be used to
+ <!-- globalinfo-start --> 
+ * A supervised attribute filter that can be used to
  * select attributes. It is very flexible and allows various search and
  * evaluation methods to be combined.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -113,7 +113,7 @@ import weka.filters.SupervisedFilter;
  *  attributes in the data set. (default = 1)
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
@@ -135,6 +135,9 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
 
   /** holds the selected attributes */
   private int[] m_SelectedAttributes;
+
+  /** True if a class attribute is set in the data */
+  protected boolean m_hasClass;
 
   /**
    * Returns a string describing this filter
@@ -201,7 +204,8 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start --> 
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -258,7 +262,7 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
    *  attributes in the data set. (default = 1)
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -334,12 +338,13 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
 
     String[] setOptions = new String[10];
     setOptions[current++] = "-E";
-    setOptions[current++] = getEvaluator().getClass().getName() + " "
-      + Utils.joinOptions(EvaluatorOptions);
+    setOptions[current++] =
+      getEvaluator().getClass().getName() + " "
+        + Utils.joinOptions(EvaluatorOptions);
 
     setOptions[current++] = "-S";
-    setOptions[current++] = getSearch().getClass().getName() + " "
-      + Utils.joinOptions(SearchOptions);
+    setOptions[current++] =
+      getSearch().getClass().getName() + " " + Utils.joinOptions(SearchOptions);
 
     while (current < setOptions.length) {
       setOptions[current++] = "";
@@ -483,6 +488,8 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
     }
 
     if (!isOutputFormatDefined()) {
+      m_hasClass = (getInputFormat().classIndex() >= 0);
+
       m_trainSelector.setEvaluator(m_ASEvaluator);
       m_trainSelector.setSearch(m_ASSearch);
       m_trainSelector.SelectAttributes(getInputFormat());
@@ -520,8 +527,8 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
       return;
     }
 
-    ArrayList<Attribute> attributes = new ArrayList<Attribute>(
-      m_SelectedAttributes.length);
+    ArrayList<Attribute> attributes =
+      new ArrayList<Attribute>(m_SelectedAttributes.length);
 
     int i;
     if (m_ASEvaluator instanceof AttributeTransformer) {
@@ -535,11 +542,12 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
         .copy());
     }
 
-    Instances outputFormat = new Instances(getInputFormat().relationName(),
-      attributes, 0);
+    Instances outputFormat =
+      new Instances(getInputFormat().relationName(), attributes, 0);
 
-    if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator)
-      && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
+    // if (!(m_ASEvaluator instanceof UnsupervisedSubsetEvaluator)
+    // && !(m_ASEvaluator instanceof UnsupervisedAttributeEvaluator)) {
+    if (m_hasClass) {
       outputFormat.setClassIndex(m_SelectedAttributes.length - 1);
     }
 
@@ -557,8 +565,8 @@ public class AttributeSelection extends Filter implements SupervisedFilter,
     double[] newVals = new double[getOutputFormat().numAttributes()];
 
     if (m_ASEvaluator instanceof AttributeTransformer) {
-      Instance tempInstance = ((AttributeTransformer) m_ASEvaluator)
-        .convertInstance(instance);
+      Instance tempInstance =
+        ((AttributeTransformer) m_ASEvaluator).convertInstance(instance);
       for (int i = 0; i < m_SelectedAttributes.length; i++) {
         int current = m_SelectedAttributes[i];
         newVals[i] = tempInstance.value(current);
