@@ -1823,10 +1823,14 @@ public class Instances extends AbstractList<Instance> implements Serializable,
     result.append(Utils.padLeft("Missing", 12));
     result.append(Utils.padLeft("Unique", 12));
     result.append(Utils.padLeft("Dist", 6)).append('\n');
+
+    // Figure out how many digits we need for the index
+    int numDigits = (int)Math.log10((int)numAttributes()) + 1;
+
     for (int i = 0; i < numAttributes(); i++) {
       Attribute a = attribute(i);
       AttributeStats as = attributeStats(i);
-      result.append(Utils.padLeft("" + (i + 1), 4)).append(' ');
+      result.append(Utils.padLeft("" + (i + 1), numDigits)).append(' ');
       result.append(Utils.padRight(a.name(), 25)).append(' ');
       long percent;
       switch (a.type()) {
