@@ -77,13 +77,9 @@ public class EvaluationMetricHelper {
     List<AbstractEvaluationMetric> pluginMetrics = m_eval.getPluginMetrics();
     if (pluginMetrics != null && pluginMetrics.size() > 0) {
       for (AbstractEvaluationMetric m : pluginMetrics) {
-        if (m instanceof InformationRetrievalEvaluationMetric) {
-          List<String> statNames = m.getStatisticNames();
-          for (String s : statNames) {
-            m_pluginMetrics.put(s.toLowerCase(), m);
-          }
-        } else {
-          m_pluginMetrics.put(m.getMetricName().toLowerCase(), m);
+        List<String> statNames = m.getStatisticNames();
+        for (String s : statNames) {
+          m_pluginMetrics.put(s.toLowerCase(), m);
         }
       }
     }
