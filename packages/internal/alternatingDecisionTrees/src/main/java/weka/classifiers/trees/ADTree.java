@@ -249,7 +249,7 @@ public class ADTree extends RandomizableClassifier implements OptionHandler,
    * @exception Exception if training data is unsuitable
    */
   @Override
-  public void initClassifier(Instances instances) throws Exception {
+  public void initializeClassifier(Instances instances) throws Exception {
 
     // clear stats
     m_nodesExpanded = 0;
@@ -297,9 +297,10 @@ public class ADTree extends RandomizableClassifier implements OptionHandler,
    * @exception Exception if this iteration fails
    */
   @Override
-  public void next(int iteration) throws Exception {
+  public boolean next() throws Exception {
 
     boost();
+    return true;
   }
 
   /**
@@ -1438,7 +1439,7 @@ public class ADTree extends RandomizableClassifier implements OptionHandler,
     instances.deleteWithMissingClass();
 
     // set up the tree
-    initClassifier(instances);
+    initializeClassifier(instances);
 
     // build the tree
     for (int T = 0; T < m_boostingIterations; T++) {
