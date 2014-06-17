@@ -48,14 +48,16 @@ public abstract class AbstractEvaluationMetric implements Serializable {
    */
   public static ArrayList<AbstractEvaluationMetric> getPluginMetrics() {
     ArrayList<AbstractEvaluationMetric> pluginMetricsList = null;
-    Set<String> pluginMetrics = PluginManager
-        .getPluginNamesOfType(AbstractEvaluationMetric.class.getName());
+    Set<String> pluginMetrics =
+      PluginManager.getPluginNamesOfType(AbstractEvaluationMetric.class
+        .getName());
     if (pluginMetrics != null) {
       pluginMetricsList = new ArrayList<AbstractEvaluationMetric>();
 
       for (String metric : pluginMetrics) {
         try {
-          Object impl = PluginManager.getPluginInstance(
+          Object impl =
+            PluginManager.getPluginInstance(
               AbstractEvaluationMetric.class.getName(), metric);
           if (impl instanceof AbstractEvaluationMetric) {
             pluginMetricsList.add((AbstractEvaluationMetric) impl);
@@ -141,7 +143,7 @@ public abstract class AbstractEvaluationMetric implements Serializable {
   /**
    * Get a list of the names of the statistics that this metrics computes. E.g.
    * an information theoretic evaluation measure might compute total number of
-   * bits as well as avergate bits/instance
+   * bits as well as average bits/instance
    * 
    * @return the names of the statistics that this metric computes
    */
@@ -155,4 +157,15 @@ public abstract class AbstractEvaluationMetric implements Serializable {
    *         can't be computed for some reason
    */
   public abstract double getStatistic(String statName);
+
+  /**
+   * True if the optimum value of the named metric is a maximum value; false if
+   * the optimim value is a minimum value. Subclasses should override this
+   * method to suit their statistic(s)
+   * 
+   * @return true (default implementation)
+   */
+  public boolean statisticIsMaximisable(String statName) {
+    return true;
+  }
 }
