@@ -23,34 +23,36 @@ package weka.classifiers.meta;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Vector;
+import java.util.List;
 import java.util.Random;
+import java.util.Vector;
 
-import weka.classifiers.meta.LogitBoost;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.IterativeClassifier;
 import weka.classifiers.RandomizableClassifier;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
-
+import weka.classifiers.evaluation.Evaluation;
+import weka.classifiers.evaluation.EvaluationMetricHelper;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.Instances;
-import weka.core.Instance;
 import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
 
 /**
- * Chooses the best number of iterations for an IterativeClassifier such as LogitBoost using
- * cross-validation.
- *
+ * Chooses the best number of iterations for an IterativeClassifier such as
+ * LogitBoost using cross-validation.
+ * 
  <!-- globalinfo-start -->
  * Optimizes the number of iterations of the given iterative classifier using cross-validation.
  * <p/>
  <!-- globalinfo-end -->
- *
+ * 
  <!-- options-start -->
  * Valid options are: <p/>
  * 
@@ -65,6 +67,19 @@ import weka.core.RevisionUtils;
  * <pre> -W
  *  Full name of base classifier.
  *  (default: weka.classifiers.meta.LogitBoost)</pre>
+ * 
+ * <pre> -metric &lt;name&gt;
+ *  Evaluation metric to optimise (default rmse). Available metrics:
+ *  correct,incorrect,kappa,total cost,average cost,kb relative,kb information,
+ *  correlation,complexity 0,complexity scheme,complexity improvement,
+ *  mae,rmse,rae,rrse,coverage,region size,tp rate,fp rate,precision,recall,
+ *  f-measure,mcc,roc area,prc area</pre>
+ * 
+ * <pre> -class-value-index &lt;0-based index&gt;
+ *  Class value index to optimise. Ignored for all but information-retrieval
+ *  type metrics (such as roc area). If unspecified (or a negative value is supplied),
+ *  and an information-retrieval metric is specified, then the class-weighted average
+ *  metric used. (default -1)</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
@@ -134,7 +149,7 @@ import weka.core.RevisionUtils;
  *  (use with caution).</pre>
  * 
  <!-- options-end -->
- *
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 10141 $
  */
@@ -155,15 +170,35 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   /** The random number generator used */
   protected Random m_RandomInstance;
 
+  public static Tag[] TAGS_EVAL;
+
+  static {
+    List<String> evalNames = EvaluationMetricHelper.getAllMetricNames();
+    TAGS_EVAL = new Tag[evalNames.size()];
+    for (int i = 0; i < evalNames.size(); i++) {
+      TAGS_EVAL[i] = new Tag(i, evalNames.get(i), evalNames.get(i), false);
+    }
+  }
+
+  /** The evaluation metric to use */
+  protected String m_evalMetric = "rmse";
+
+  /**
+   * The class value index to use with information retrieval type metrics. < 0
+   * indicates to use the class weighted average version of the metric".
+   */
+  protected int m_classValueIndex = -1;
+
   /**
    * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
    */
   public String globalInfo() {
 
-    return  "Optimizes the number of iterations of the given iterative " +
-      "classifier using cross-validation.";
+    return "Optimizes the number of iterations of the given iterative "
+      + "classifier using cross-validation.";
   }
 
   /**
@@ -173,68 +208,71 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
     return "weka.classifiers.meta.LogitBoost";
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String numRunsTipText() {
     return "Number of runs for cross-validation.";
   }
-  
+
   /**
    * Get the value of NumRuns.
-   *
+   * 
    * @return Value of NumRuns.
    */
   public int getNumRuns() {
-    
+
     return m_NumRuns;
   }
-  
+
   /**
    * Set the value of NumRuns.
-   *
+   * 
    * @param newNumRuns Value to assign to NumRuns.
    */
   public void setNumRuns(int newNumRuns) {
-    
+
     m_NumRuns = newNumRuns;
   }
-  
+
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String numFoldsTipText() {
     return "Number of folds for cross-validation.";
   }
-  
+
   /**
    * Get the value of NumFolds.
-   *
+   * 
    * @return Value of NumFolds.
    */
   public int getNumFolds() {
-    
+
     return m_NumFolds;
   }
-  
+
   /**
    * Set the value of NumFolds.
-   *
+   * 
    * @param newNumFolds Value to assign to NumFolds.
    */
   public void setNumFolds(int newNumFolds) {
-    
+
     m_NumFolds = newNumFolds;
   }
 
   /**
    * Builds the classifier.
    */
+  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     if (m_IterativeClassifier == null) {
@@ -256,11 +294,11 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     // Remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-	
+
     // Initialize datasets and classifiers
     Instances[][] trainingSets = new Instances[m_NumRuns][m_NumFolds];
     Instances[][] testSets = new Instances[m_NumRuns][m_NumFolds];
-    IterativeClassifier[][] classifiers = 
+    IterativeClassifier[][] classifiers =
       new IterativeClassifier[m_NumRuns][m_NumFolds];
     for (int j = 0; j < m_NumRuns; j++) {
       data.randomize(m_RandomInstance);
@@ -268,21 +306,37 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       for (int i = 0; i < m_NumFolds; i++) {
         trainingSets[j][i] = data.trainCV(m_NumFolds, i, randomInstance);
         testSets[j][i] = data.testCV(m_NumFolds, i);
-        classifiers[j][i] = (IterativeClassifier)AbstractClassifier.makeCopy(m_IterativeClassifier);
+        classifiers[j][i] =
+          (IterativeClassifier) AbstractClassifier
+            .makeCopy(m_IterativeClassifier);
         classifiers[j][i].initializeClassifier(trainingSets[j][i]);
       }
     }
 
     // Perform evaluation
+    EvaluationMetricHelper helper = null;
+    boolean maximise = true;
     int numIts = 0;
     double oldResult = Double.MAX_VALUE;
     while (true) {
       double result = 0;
       for (int r = 0; r < m_NumRuns; r++) {
-        for (int i = 0; i < m_NumFolds; i++) {	  
+        for (int i = 0; i < m_NumFolds; i++) {
           Evaluation eval = new Evaluation(trainingSets[r][i]);
+          if (helper == null) {
+            helper = new EvaluationMetricHelper(eval);
+            maximise = helper.metricIsMaximisable(m_evalMetric);
+            if (maximise) {
+              oldResult = Double.MIN_VALUE;
+            }
+          } else {
+            helper.setEvaluation(eval);
+          }
           eval.evaluateModel(classifiers[r][i], testSets[r][i]);
-          result += eval.rootMeanSquaredError();
+          // result += eval.rootMeanSquaredError();
+          result +=
+            getClassValueIndex() >= 0 ? helper.getNamedMetric(m_evalMetric,
+              getClassValueIndex()) : helper.getNamedMetric(m_evalMetric);
           if (!classifiers[r][i].next()) {
             break; // Break out if one classifier fails to iterate
           }
@@ -291,7 +345,9 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       if (m_Debug) {
         System.out.println("Iteration: " + numIts + " " + "Measure: " + result);
       }
-      if (result >= oldResult) {
+      // if (result >= oldResult) {
+      double delta = maximise ? oldResult - result : result - oldResult;
+      if (delta >= 0) {
         break; // No improvement
       }
       oldResult = result;
@@ -305,13 +361,16 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     // Build classifieer based on identified number of iterations
     m_IterativeClassifier.initializeClassifier(origData);
     int i = 0;
-    while (i++ < numIts && m_IterativeClassifier.next()) {};
+    while (i++ < numIts && m_IterativeClassifier.next()) {
+    }
+    ;
     m_IterativeClassifier.done();
   }
 
   /**
    * Returns the class distribution for an instance.
    */
+  @Override
   public double[] distributionForInstance(Instance inst) throws Exception {
 
     return m_IterativeClassifier.distributionForInstance(inst);
@@ -320,6 +379,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   /**
    * Returns a string describing the classifier.
    */
+  @Override
   public String toString() {
 
     if (m_IterativeClassifier == null) {
@@ -331,60 +391,85 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
   /**
    * Returns an enumeration describing the available options.
-   *
+   * 
    * @return an enumeration of all the available options.
    */
+  @Override
   public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>(3);
 
-    newVector.addElement(new Option(
-                                    "\tNumber of folds for cross-validation.\n"
-                                    +"\t(default 10)",
-                                    "F", 1, "-F <num>"));
-    newVector.addElement(new Option(
-                                    "\tNumber of runs for cross-validation.\n"
-                                    +"\t(default 1)",
-                                    "R", 1, "-R <num>"));
+    newVector.addElement(new Option("\tNumber of folds for cross-validation.\n"
+      + "\t(default 10)", "F", 1, "-F <num>"));
+    newVector.addElement(new Option("\tNumber of runs for cross-validation.\n"
+      + "\t(default 1)", "R", 1, "-R <num>"));
 
+    newVector
+      .addElement(new Option("\tFull name of base classifier.\n"
+        + "\t(default: " + defaultIterativeClassifierString() + ")", "W", 1,
+        "-W"));
+
+    List<String> metrics = EvaluationMetricHelper.getAllMetricNames();
+    StringBuilder b = new StringBuilder();
+    int length = 0;
+    for (String m : metrics) {
+      b.append(m.toLowerCase()).append(",");
+
+      length += m.length();
+      if (length >= 60) {
+        b.append("\n\t");
+        length = 0;
+      }
+    }
     newVector.addElement(new Option(
-          "\tFull name of base classifier.\n"
-          + "\t(default: " + defaultIterativeClassifierString() +")",
-          "W", 1, "-W"));
-    
+      "\tEvaluation metric to optimise (default rmse). Available metrics:\n\t"
+        + b.substring(0, b.length() - 1), "metric", 1, "-metric <name>"));
+
+    newVector
+      .addElement(new Option(
+        "\tClass value index to optimise. Ignored for all but information-retrieval\n\t"
+          + "type metrics (such as roc area). If unspecified (or a negative value is supplied),\n\t"
+          + "and an information-retrieval metric is specified, then the class-weighted average\n\t"
+          + "metric used. (default -1)", "class-value-index", 1,
+        "-class-value-index <0-based index>"));
+
     newVector.addAll(Collections.list(super.listOptions()));
 
-    newVector.addElement(new Option(
-          "",
-          "", 0, "\nOptions specific to classifier "
-          + m_IterativeClassifier.getClass().getName() + ":"));
-    newVector.addAll(Collections.list(((OptionHandler)m_IterativeClassifier).listOptions()));
+    newVector.addElement(new Option("", "", 0,
+      "\nOptions specific to classifier "
+        + m_IterativeClassifier.getClass().getName() + ":"));
+    newVector.addAll(Collections.list(((OptionHandler) m_IterativeClassifier)
+      .listOptions()));
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
-   *
+   * Parses a given list of options. Valid options are:
+   * <p>
+   * 
    * -W classname <br>
-   * Specify the full class name of the base learner.<p>
-   *
-   * Options after -- are passed to the designated classifier.<p>
-   *
+   * Specify the full class name of the base learner.
+   * <p>
+   * 
+   * Options after -- are passed to the designated classifier.
+   * <p>
+   * 
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
 
     super.setOptions(options);
-    
+
     String numFolds = Utils.getOption('F', options);
     if (numFolds.length() != 0) {
       setNumFolds(Integer.parseInt(numFolds));
     } else {
       setNumFolds(10);
     }
-    
+
     String numRuns = Utils.getOption('R', options);
     if (numRuns.length() != 0) {
       setNumRuns(Integer.parseInt(numRuns));
@@ -392,50 +477,88 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       setNumRuns(1);
     }
 
+    String evalMetric = Utils.getOption("metric", options);
+    if (evalMetric.length() > 0) {
+      boolean found = false;
+      for (int i = 0; i < TAGS_EVAL.length; i++) {
+        if (TAGS_EVAL[i].getIDStr().equalsIgnoreCase(evalMetric)) {
+          setEvaluationMetric(new SelectedTag(i, TAGS_EVAL));
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        throw new Exception("Unknown evaluation metric: " + evalMetric);
+      }
+    }
+
+    String classValIndex = Utils.getOption("class-value-index", options);
+    if (classValIndex.length() > 0) {
+      setClassValueIndex(Integer.parseInt(classValIndex));
+    } else {
+      setClassValueIndex(-1);
+    }
+
     String classifierName = Utils.getOption('W', options);
 
     if (classifierName.length() > 0) {
       setIterativeClassifier(getIterativeClassifier(classifierName,
-                                                    Utils.partitionOptions(options)));
+        Utils.partitionOptions(options)));
     } else {
-      setIterativeClassifier(getIterativeClassifier(defaultIterativeClassifierString(),
-                                                    Utils.partitionOptions(options)));
+      setIterativeClassifier(getIterativeClassifier(
+        defaultIterativeClassifierString(), Utils.partitionOptions(options)));
     }
   }
 
   /**
    * Get classifier for string.
+   * 
+   * @return a classifier
+   * @throws exception if a problem occurs
    */
   protected IterativeClassifier getIterativeClassifier(String name,
-                                                       String[] options) 
-    throws Exception {
+    String[] options) throws Exception {
 
     Classifier c = AbstractClassifier.forName(name, options);
     if (c instanceof IterativeClassifier) {
-      return (IterativeClassifier)c;
+      return (IterativeClassifier) c;
     } else {
-      throw new IllegalArgumentException(name + " is not an IterativeClassifier.");
+      throw new IllegalArgumentException(name
+        + " is not an IterativeClassifier.");
     }
   }
 
   /**
    * Gets the current settings of the Classifier.
-   *
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  @Override
+  public String[] getOptions() {
 
     Vector<String> options = new Vector<String>();
-       
+
     options.add("-W");
     options.add(getIterativeClassifier().getClass().getName());
 
-    options.add("-F"); options.add("" + getNumFolds());
-    options.add("-R"); options.add("" + getNumRuns());
-    
+    options.add("-F");
+    options.add("" + getNumFolds());
+    options.add("-R");
+    options.add("" + getNumRuns());
+
+    options.add("-metric");
+    options.add(getEvaluationMetric().getSelectedTag().getIDStr());
+
+    if (getClassValueIndex() >= 0) {
+      options.add("-class-value-index");
+      options.add("" + getClassValueIndex());
+    }
+
     Collections.addAll(options, super.getOptions());
-    
-    String[] classifierOptions = ((OptionHandler)m_IterativeClassifier).getOptions();
+
+    String[] classifierOptions =
+      ((OptionHandler) m_IterativeClassifier).getOptions();
     if (classifierOptions.length > 0) {
       options.add("--");
       Collections.addAll(options, classifierOptions);
@@ -446,8 +569,76 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String evaluationMetricTipText() {
+    return "The evaluation metric to use";
+  }
+
+  /**
+   * Set the evaluation metric to use
+   * 
+   * @param metric the metric to use
+   */
+  public void setEvaluationMetric(SelectedTag metric) {
+    if (metric.getTags() == TAGS_EVAL) {
+      m_evalMetric = metric.getSelectedTag().getIDStr();
+    }
+  }
+
+  /**
+   * Get the evaluation metric to use
+   * 
+   * @return the evaluation metric to use
+   */
+  public SelectedTag getEvaluationMetric() {
+    for (int i = 0; i < TAGS_EVAL.length; i++) {
+      if (TAGS_EVAL[i].getIDStr().equalsIgnoreCase(m_evalMetric)) {
+        return new SelectedTag(i, TAGS_EVAL);
+      }
+    }
+
+    // if we get here then it could be because a plugin
+    // metric is no longer available. Default to rmse
+    return new SelectedTag(12, TAGS_EVAL);
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String classValueIndexTipText() {
+    return "The class value index to use with information retrieval type metrics. A value < 0"
+      + " indicates to use the class weighted average version of the metric.";
+  }
+
+  /**
+   * Set the class value index to use
+   * 
+   * @param i the class value index to use
+   */
+  public void setClassValueIndex(int i) {
+    m_classValueIndex = i;
+  }
+
+  /**
+   * Get the class value index to use
+   * 
+   * @return the class value index to use
+   */
+  public int getClassValueIndex() {
+    return m_classValueIndex;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String classifierTipText() {
     return "The iterative classifier to be optimized.";
@@ -455,11 +646,12 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
   /**
    * Returns default capabilities of the base classifier.
-   *
-   * @return      the capabilities of the base classifier
+   * 
+   * @return the capabilities of the base classifier
    */
+  @Override
   public Capabilities getCapabilities() {
-    Capabilities        result;
+    Capabilities result;
 
     if (getIterativeClassifier() != null) {
       result = getIterativeClassifier().getCapabilities();
@@ -469,8 +661,9 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     }
 
     // set dependencies
-    for (Capability cap: Capability.values())
+    for (Capability cap : Capability.values()) {
       result.enableDependency(cap);
+    }
 
     result.setOwner(this);
 
@@ -479,17 +672,18 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
   /**
    * Set the base learner.
-   *
+   * 
    * @param newIterativeClassifier the classifier to use.
    */
-  public void setIterativeClassifier(IterativeClassifier newIterativeClassifier) {
+  public void
+    setIterativeClassifier(IterativeClassifier newIterativeClassifier) {
 
     m_IterativeClassifier = newIterativeClassifier;
   }
 
   /**
    * Get the classifier used as the base learner.
-   *
+   * 
    * @return the classifier used as the classifier
    */
   public IterativeClassifier getIterativeClassifier() {
@@ -500,31 +694,32 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   /**
    * Gets the classifier specification string, which contains the class name of
    * the classifier and any options to the classifier
-   *
+   * 
    * @return the classifier string
    */
   protected String getIterativeClassifierSpec() {
 
     IterativeClassifier c = getIterativeClassifier();
     return c.getClass().getName() + " "
-      + Utils.joinOptions(((OptionHandler)c).getOptions());
+      + Utils.joinOptions(((OptionHandler) c).getOptions());
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision: 10649 $");
   }
 
   /**
    * Main method for testing this class.
-   *
+   * 
    * @param argv the options
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runClassifier(new IterativeClassifierOptimizer(), argv);
   }
 }
