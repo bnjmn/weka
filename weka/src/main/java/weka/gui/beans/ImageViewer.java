@@ -185,7 +185,10 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
 
     BufferedImage image = imageE.getImage();
     String name = (new SimpleDateFormat("HH:mm:ss:SS")).format(new Date());
-    name = "Image at " + name;
+    name =
+      (imageE.getImageName() == null || imageE.getImageName().length() == 0 ? "Image at "
+        : imageE.getImageName() + " ")
+        + name;
 
     m_history.addResult(name, new StringBuffer());
     m_history.addObject(name, image);
