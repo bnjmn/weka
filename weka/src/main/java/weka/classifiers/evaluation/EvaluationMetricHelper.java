@@ -190,7 +190,7 @@ public class EvaluationMetricHelper {
       return true;
     case 16:
       // size of predicted regions
-      return true;
+      return false;
     case 17:
       // TPR
       return true;
