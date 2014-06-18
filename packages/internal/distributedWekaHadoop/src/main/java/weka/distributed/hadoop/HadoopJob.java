@@ -91,7 +91,7 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     + File.separator
     + "distributedWekaBase"
     + File.separator
-    + "lib" + File.separator + "jcommon-1.0.14.jar";
+    + "lib" + File.separator + "jcommon-1.0.16.jar";
 
   /** The path to the colt.jar */
   public static final String COLT_JAR = WekaPackageManager.PACKAGES_DIR
