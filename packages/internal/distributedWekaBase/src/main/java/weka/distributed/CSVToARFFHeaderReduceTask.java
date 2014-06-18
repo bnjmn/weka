@@ -32,7 +32,10 @@ import java.util.List;
 import java.util.Map;
 
 import weka.core.Attribute;
+import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instances;
+import weka.core.QuantileCalculator;
+import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
 import weka.distributed.CSVToARFFHeaderMapTask.NumericStats;
 import weka.filters.Filter;
@@ -50,40 +53,6 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
    * For serialization
    */
   private static final long serialVersionUID = -2626548935034818537L;
-
-  /**
-   * Utility method that returns a header Instances object without any summary
-   * attributes.
-   * 
-   * @param insts the header to remove summary attributes from
-   * @return a new Instances object that does not contain any summary attributes
-   * @throws DistributedWekaException if a problem occurs
-   */
-  public static Instances stripSummaryAtts(Instances insts)
-    throws DistributedWekaException {
-    int startOfSummary = 0;
-
-    for (int i = 0; i < insts.numAttributes(); i++) {
-      if (insts.attribute(i).name()
-        .startsWith(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX)) {
-        startOfSummary = i + 1;
-        break;
-      }
-    }
-
-    if (startOfSummary > 0) {
-      Remove r = new Remove();
-      r.setAttributeIndices("" + startOfSummary + "-" + "last");
-      try {
-        r.setInputFormat(insts);
-        insts = Filter.useFilter(insts, r);
-      } catch (Exception ex) {
-        throw new DistributedWekaException(ex);
-      }
-    }
-
-    return insts;
-  }
 
   /**
    * Aggregates a list of Instances (headers) into a final Instances object.
@@ -107,7 +76,8 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
     Instances master = headers.get(0);
     Instances masterHeaderCheck = stripSummaryAtts(master);
 
-    Map<Integer, Attribute> masterNumericNominalMismatch = new HashMap<Integer, Attribute>();
+    Map<Integer, Attribute> masterNumericNominalMismatch =
+      new HashMap<Integer, Attribute>();
 
     for (int i = 1; i < headers.size(); i++) {
       Instances toCheck = headers.get(i);
@@ -251,13 +221,180 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
     }
 
     // Any summary stats atts?
-    List<Attribute> summaryStats = aggregateSummaryStats(headers,
-      masterHeaderCheck);
+    List<Attribute> summaryStats =
+      aggregateSummaryStats(headers, masterHeaderCheck);
     for (Attribute a : summaryStats) {
       attribs.add(a);
     }
 
     return new Instances(master.relationName(), attribs, 0);
+  }
+
+  /**
+   * Utility method that returns a header Instances object without any summary
+   * attributes.
+   * 
+   * @param insts the header to remove summary attributes from
+   * @return a new Instances object that does not contain any summary attributes
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public static Instances stripSummaryAtts(Instances insts)
+    throws DistributedWekaException {
+    int startOfSummary = 0;
+
+    for (int i = 0; i < insts.numAttributes(); i++) {
+      if (insts.attribute(i).name()
+        .startsWith(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX)) {
+        startOfSummary = i + 1;
+        break;
+      }
+    }
+
+    if (startOfSummary > 0) {
+      Remove r = new Remove();
+      r.setAttributeIndices("" + startOfSummary + "-" + "last");
+      try {
+        r.setInputFormat(insts);
+        insts = Filter.useFilter(insts, r);
+      } catch (Exception ex) {
+        throw new DistributedWekaException(ex);
+      }
+    }
+
+    return insts;
+  }
+
+  /**
+   * Updates a header that contains summary attributes with quartiles and
+   * histogram data. Assumes the header does not already contain these.
+   * 
+   * @param trainingHeaderWithSummary header with first pass summary data
+   * @param quartiles QuartileCalculator containing quartiles to add to the
+   *          header
+   * @param histograms Map (keyed by attribute index) of histogram data for
+   *          numeric attributes to add to the header
+   * @return an updated header
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public static Instances updateSummaryAttsWithQuartilesAndHistograms(
+    Instances trainingHeaderWithSummary, QuantileCalculator quartiles,
+    Map<Integer, NumericAttributeBinData> histograms)
+    throws DistributedWekaException {
+
+    Instances trainingHeader = stripSummaryAtts(trainingHeaderWithSummary);
+
+    // have to construct a new Instances header
+    ArrayList<Attribute> atts = new ArrayList<Attribute>();
+    for (int i = 0; i < trainingHeader.numAttributes(); i++) {
+      atts.add((Attribute) trainingHeader.attribute(i).copy());
+    }
+
+    for (int i = 0; i < trainingHeader.numAttributes(); i++) {
+      String name = trainingHeader.attribute(i).name();
+
+      Attribute summary =
+        trainingHeaderWithSummary
+          .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+            + name);
+      if (trainingHeader.attribute(i).isNumeric()) {
+
+        NumericStats stats = NumericStats.attributeToStats(summary);
+        // add in the quantiles
+        try {
+          double[] quantiles = quartiles.getQuantiles(name);
+          stats.getStats()[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
+            quantiles[0];
+          stats.getStats()[ArffSummaryNumericMetric.MEDIAN.ordinal()] =
+            quantiles[1];
+          stats.getStats()[ArffSummaryNumericMetric.THIRDQUARTILE.ordinal()] =
+            quantiles[2];
+
+          NumericAttributeBinData hist = histograms.get(i);
+          if (!hist.getAttributeName().equals(name)) {
+            throw new DistributedWekaException("Histogram data at index " + i
+              + "(" + hist.getAttributeName()
+              + ") does not match quantile data (" + name + ")!");
+          }
+          stats.setHistogramData(hist.getBinLabels(), hist.getBinFreqs());
+
+          Attribute updatedSummary = stats.makeAttribute();
+          atts.add(updatedSummary);
+        } catch (Exception ex) {
+          // Print out error, but don't cause job to stop (could be
+          // the case that we haven't seen more than 5 non-missing
+          // values for this attribute (quantile estimator requires at
+          // least five values)
+          System.err.println(ex);
+
+          // just add in the old stats in this case
+          atts.add(summary);
+        }
+      } else {
+        if (summary != null) {
+          atts.add((Attribute) summary.copy());
+        }
+      }
+    }
+
+    // make the new instances
+    Instances updatedHeader = new Instances("Updated with quartiles", atts, 0);
+
+    return updatedHeader;
+  }
+
+  /**
+   * Returns true if the supplied header contains numeric attributes
+   * 
+   * @param headerWithSummary a header (with summary attributes) to check
+   * @return true if the header contains numeric attributes
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public static boolean headerContainsNumericAttributes(
+    Instances headerWithSummary) throws DistributedWekaException {
+
+    Instances headerNoSummary =
+      CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
+    boolean hasNumeric = false;
+    for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+      if (headerNoSummary.attribute(i).isNumeric()) {
+        hasNumeric = true;
+        break;
+      }
+    }
+
+    return hasNumeric;
+  }
+
+  /**
+   * Returns true if the supplied header already has quartile infomration
+   * calculated and there are numeric attributes in the data
+   * 
+   * @param headerWithSummary the header to check
+   * @return true if the supplied header has quartile information
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public static boolean headerContainsQuartiles(Instances headerWithSummary)
+    throws DistributedWekaException {
+
+    Instances headerNoSummary =
+      CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
+    boolean hasQuartiles = false;
+    for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+      if (headerNoSummary.attribute(i).isNumeric()) {
+        Attribute summary =
+          headerWithSummary
+            .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+              + headerNoSummary.attribute(i).name());
+
+        if (!Utils.isMissingValue(ArffSummaryNumericMetric.FIRSTQUARTILE
+          .valueFromAttribute(summary))) {
+          hasQuartiles = true;
+          break;
+        }
+      }
+    }
+
+    return hasQuartiles;
   }
 
   /**
@@ -287,7 +424,8 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
     List<Instances> headers, Instances masterHeaderCheck)
     throws DistributedWekaException {
     List<Attribute> aggregated = new ArrayList<Attribute>();
-    Map<String, CSVToARFFHeaderMapTask.Stats> aggStats = new LinkedHashMap<String, CSVToARFFHeaderMapTask.Stats>();
+    Map<String, CSVToARFFHeaderMapTask.Stats> aggStats =
+      new LinkedHashMap<String, CSVToARFFHeaderMapTask.Stats>();
 
     int index = -1;
 
@@ -309,8 +447,9 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
     for (Instances h : headers) {
       for (int i = index; i < h.numAttributes(); i++) {
         Attribute current = h.attribute(i);
-        Attribute original = masterHeaderCheck.attribute(current.name()
-          .replace(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX, ""));
+        Attribute original =
+          masterHeaderCheck.attribute(current.name().replace(
+            CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX, ""));
         if (original == null) {
           throw new DistributedWekaException(
             "Can't find corresponding original attribute for "
@@ -319,8 +458,8 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
 
         if (original.isNumeric()) {
           double[] currentStats = attributeToStatsArray(current);
-          CSVToARFFHeaderMapTask.NumericStats ns = (CSVToARFFHeaderMapTask.NumericStats) aggStats
-            .get(original.name());
+          CSVToARFFHeaderMapTask.NumericStats ns =
+            (CSVToARFFHeaderMapTask.NumericStats) aggStats.get(original.name());
           if (ns == null) {
             ns = new CSVToARFFHeaderMapTask.NumericStats(original.name());
             ns.m_stats = currentStats;
@@ -345,8 +484,8 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
           }
         } else {
           // nominal original attribute
-          CSVToARFFHeaderMapTask.NominalStats ns = (CSVToARFFHeaderMapTask.NominalStats) aggStats
-            .get(original.name());
+          CSVToARFFHeaderMapTask.NominalStats ns =
+            (CSVToARFFHeaderMapTask.NominalStats) aggStats.get(original.name());
           if (ns == null) {
             ns = new CSVToARFFHeaderMapTask.NominalStats(original.name());
             aggStats.put(original.name(), ns);
@@ -365,16 +504,17 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
             && current.value(ArffSummaryNumericMetric.STDDEV.ordinal())
               .startsWith(ArffSummaryNumericMetric.STDDEV.toString())) {
             // OK - copy over the missing count
-            double missing = attributeToStatsArray(current)[ArffSummaryNumericMetric.MISSING
-              .ordinal()];
+            double missing =
+              attributeToStatsArray(current)[ArffSummaryNumericMetric.MISSING
+                .ordinal()];
             ns.add(null, missing);
           } else {
 
             for (int j = 0; j < current.numValues(); j++) {
               String v = current.value(j);
               String label = v.substring(0, v.lastIndexOf("_"));
-              String freqCount = v
-                .substring(v.lastIndexOf("_") + 1, v.length());
+              String freqCount =
+                v.substring(v.lastIndexOf("_") + 1, v.length());
               try {
                 double fC = Double.parseDouble(freqCount);
                 if (label
@@ -413,8 +553,8 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
 
       for (String h : args) {
         if (h != null && h.length() > 0) {
-          Instances aHeader = new Instances(new BufferedReader(
-            new FileReader(h)));
+          Instances aHeader =
+            new Instances(new BufferedReader(new FileReader(h)));
           aHeader = new Instances(aHeader, 0);
           headerList.add(aHeader);
         }

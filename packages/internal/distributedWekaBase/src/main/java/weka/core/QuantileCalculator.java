@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import weka.core.ChartUtils.NumericAttributeBinData;
+
 /**
  * Class for maintaining quantile estimators for all the numeric attributes in a
  * dataset.
@@ -51,6 +53,11 @@ public class QuantileCalculator implements Serializable {
   /** A map for looking up the index of a particular quantile */
   protected Map<Double, Integer> m_quantileIndexes =
     new HashMap<Double, Integer>();
+
+  /**
+   * Used to build histograms for numeric attributes (optional)
+   */
+  protected Map<Integer, NumericAttributeBinData> m_numericHistogramData;
 
   /**
    * Constructor
@@ -81,6 +88,19 @@ public class QuantileCalculator implements Serializable {
   }
 
   /**
+   * Set a map of initialized numeric histogram data to be updated for each
+   * incoming row/instance
+   * 
+   * @param initializedHistData a map of NumericAttributeBinData that has been
+   *          initialized. Keyed by attribute index
+   */
+  public void setHistogramMap(
+    Map<Integer, NumericAttributeBinData> initializedHistData) {
+
+    m_numericHistogramData = initializedHistData;
+  }
+
+  /**
    * Perform an update using an instance represented as an array of string
    * values
    * 
@@ -93,11 +113,23 @@ public class QuantileCalculator implements Serializable {
       .entrySet()) {
       int index = e.getKey();
       if (row[index] != null && row[index].length() > 0
-        && !row[index].equals(missingValue)) {
+        && !row[index].trim().equals(missingValue)) {
         try {
           double value = Double.parseDouble(row[index]);
           for (int i = 0; i < e.getValue().size(); i++) {
             e.getValue().get(i).add(value);
+          }
+
+          if (m_numericHistogramData != null) {
+            // update histogram for this field
+            NumericAttributeBinData binData = m_numericHistogramData.get(index);
+            if (binData == null) {
+              throw new Exception(
+                "We don't seem to have bin data for attribute at index: "
+                  + index);
+            }
+
+            binData.addValue(value, 1.0);
           }
         } catch (NumberFormatException ex) {
           throw new Exception(ex);
@@ -110,8 +142,9 @@ public class QuantileCalculator implements Serializable {
    * Perform an update using the supplied instance
    * 
    * @param inst the instance to update with
+   * @throws Exception if a problem occurs
    */
-  public void update(Instance inst) {
+  public void update(Instance inst) throws Exception {
     for (Map.Entry<Integer, List<IncrementalQuantileEstimator>> e : m_estimators
       .entrySet()) {
       int index = e.getKey();
@@ -119,6 +152,17 @@ public class QuantileCalculator implements Serializable {
         double value = inst.value(index);
         for (int i = 0; i < e.getValue().size(); i++) {
           e.getValue().get(i).add(value);
+        }
+
+        if (m_numericHistogramData != null) {
+          // update histogram for this field
+          NumericAttributeBinData binData = m_numericHistogramData.get(index);
+          if (binData == null) {
+            throw new Exception(
+              "We don't seem to have bin data for attribute at index: " + index);
+          }
+
+          binData.addValue(value, inst.weight());
         }
       }
     }

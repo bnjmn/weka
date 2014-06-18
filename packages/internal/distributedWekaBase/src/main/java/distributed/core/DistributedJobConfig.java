@@ -52,7 +52,8 @@ public abstract class DistributedJobConfig implements OptionHandler,
    * using a particular distributed system would need in order to configure
    * connections, job parameters etc.
    */
-  protected Map<String, String> m_configProperties = new HashMap<String, String>();
+  protected Map<String, String> m_configProperties =
+    new HashMap<String, String>();
 
   /**
    * Holds any additional user-supplied properties. I.e. properties beyond those
@@ -62,7 +63,8 @@ public abstract class DistributedJobConfig implements OptionHandler,
    * more user friendly names exposed by a GUI or command line interface), or
    * any custom properties that the Mapper/Reducer code may need.
    */
-  protected Map<String, String> m_additionalUserSuppliedProperties = new HashMap<String, String>();
+  protected Map<String, String> m_additionalUserSuppliedProperties =
+    new HashMap<String, String>();
 
   @Override
   public Enumeration<Option> listOptions() {
@@ -204,6 +206,13 @@ public abstract class DistributedJobConfig implements OptionHandler,
    */
   public Map<String, String> getUserSuppliedProperties() {
     return m_additionalUserSuppliedProperties;
+  }
+
+  /**
+   * Clear the map of user-supplied properties
+   */
+  public void clearUserSuppliedProperties() {
+    m_additionalUserSuppliedProperties.clear();
   }
 
   /**

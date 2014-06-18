@@ -326,6 +326,12 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     protected double[] m_stats =
       new double[ArffSummaryNumericMetric.values().length];
 
+    /** Labels for a histogram */
+    List<String> m_binLabels;
+
+    /** Bin frequencies */
+    List<Double> m_binFreqs;
+
     /**
      * Constructs a new NumericStats
      * 
@@ -351,6 +357,35 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
      */
     public double[] getStats() {
       return m_stats;
+    }
+
+    /**
+     * Set histogram data for this numeric stats
+     * 
+     * @param labs bin labels
+     * @param freqs bin frequencies
+     */
+    public void setHistogramData(List<String> labs, List<Double> freqs) {
+      m_binLabels = labs;
+      m_binFreqs = freqs;
+    }
+
+    /**
+     * Get the histogram labels
+     * 
+     * @return the list of histogram labels or null if not set
+     */
+    public List<String> getHistogramBinLabels() {
+      return m_binLabels;
+    }
+
+    /**
+     * Get the histogram bin frequencies
+     * 
+     * @return the list of histogram bin frequencies or null if not set
+     */
+    public List<Double> getHistogramFrequencies() {
+      return m_binFreqs;
     }
 
     @Override
@@ -379,6 +414,19 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         vals.add(v);
       }
 
+      // histogram (if present)
+      if (m_binLabels != null && m_binLabels.size() > 0) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < m_binLabels.size(); i++) {
+          String v = m_binLabels.get(i) + ":" + m_binFreqs.get(i);
+          b.append(v);
+          if (i < m_binLabels.size() - 1) {
+            b.append("!");
+          }
+        }
+        vals.add(b.toString());
+      }
+
       Attribute a =
         new Attribute(ARFF_SUMMARY_ATTRIBUTE_PREFIX + m_attributeName, vals);
       return a;
@@ -397,10 +445,12 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         throw new IllegalArgumentException("Stats attribute is not nominal!");
       }
 
-      if (a.numValues() != ArffSummaryNumericMetric.values().length
+      // we assume that either just the set of aggregateable stats will
+      // be present or all the stats (i.e. + quartiles and histogram)
+      if (a.numValues() != ArffSummaryNumericMetric.values().length + 1
         && a.numValues() != ArffSummaryNumericMetric.values().length - 3) {
         throw new IllegalArgumentException("Was expecting there to be either "
-          + ArffSummaryNumericMetric.values().length + " or "
+          + (ArffSummaryNumericMetric.values().length + 1) + " or "
           + (ArffSummaryNumericMetric.values().length - 3)
           + " values in a summary attribute, but found " + a.numValues());
       }
@@ -424,9 +474,25 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         }
       }
 
+      List<String> histLabs = null;
+      List<Double> histFreqs = null;
+      if (a.numValues() > ArffSummaryNumericMetric.values().length) {
+        String hist = a.value(a.numValues() - 1);
+        histLabs = new ArrayList<String>();
+        histFreqs = new ArrayList<Double>();
+
+        String[] parts = hist.split("!");
+        for (String p : parts) {
+          String[] entry = p.split(":");
+          histLabs.add(entry[0]);
+          histFreqs.add(Double.parseDouble(entry[1]));
+        }
+      }
+
       NumericStats s =
         new NumericStats(a.name().replace(ARFF_SUMMARY_ATTRIBUTE_PREFIX, ""));
       s.m_stats = stats;
+      s.setHistogramData(histLabs, histFreqs);
 
       return s;
     }
@@ -1851,6 +1917,18 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     result.setDataset(trainingHeader);
 
     return result;
+  }
+
+  /**
+   * Get the default label for a given attribute. May be null if a default value
+   * hasn't been specified
+   * 
+   * @param attIndex the index (0-based) of the attribute to get the default
+   *          value for
+   * @return the default value or null (if a default has not been specified)
+   */
+  public String getDefaultValue(int attIndex) {
+    return m_nominalDefaultVals.get(attIndex);
   }
 
   public static List<String>
