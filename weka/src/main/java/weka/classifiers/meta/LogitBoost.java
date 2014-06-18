@@ -634,11 +634,6 @@ public class LogitBoost
     // Initialize classifier
     initializeClassifier(data);
 
-    // Do we only have a ZeroR model
-    if (m_ZeroR != null) {
-      return;
-    }
-
     // For the given number of iterations
     for (int i = 0; i < m_NumIterations; i++) {
       if (!next()) {
@@ -735,6 +730,11 @@ public class LogitBoost
    * Perform another iteration of boosting.
    */
   public boolean next() throws Exception {
+
+    // Do we only have a ZeroR model
+    if (m_ZeroR != null) {
+      return false;
+    }
 
     double previousLoglikelihood = m_logLikelihood;
     performIteration(m_trainYs, m_trainFs, m_probs, m_data, m_sumOfWeights);

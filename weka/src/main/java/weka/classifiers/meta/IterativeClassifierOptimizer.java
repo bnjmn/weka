@@ -295,6 +295,12 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     data = new Instances(data);
     data.deleteWithMissingClass();
 
+    if (data.numInstances() < m_NumFolds) {
+      System.err.println("WARNING: reducing number of folds to number of instances in " +
+                         "IterativeClassifierOptimizer");
+      m_NumFolds = data.numInstances();
+    }
+
     // Initialize datasets and classifiers
     Instances[][] trainingSets = new Instances[m_NumRuns][m_NumFolds];
     Instances[][] testSets = new Instances[m_NumRuns][m_NumFolds];
@@ -640,7 +646,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String classifierTipText() {
+  public String iterativeClassifierTipText() {
     return "The iterative classifier to be optimized.";
   }
 
