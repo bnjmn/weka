@@ -111,12 +111,6 @@ This package provides generic configuration class and distributed map/reduce sty
     </dependency>
 
     <dependency>
-      <groupId>jfree</groupId>
-      <artifactId>jcommon</artifactId>
-      <version>1.0.14</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.la4j</groupId>
       <artifactId>la4j</artifactId>
       <version>0.4.5</version>
