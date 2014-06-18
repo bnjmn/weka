@@ -40,6 +40,12 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
   /** Key for job tracker port */
   public static final String JOBTRACKER_PORT = "jobtrackerPort";
 
+  /** Default jobtracker host */
+  public static final String DEFAULT_HOST = "localhost";
+
+  /** Default jobtracker port */
+  public static final String DEFAULT_PORT = "8021";
+
   /**
    * Get the tool tip text for this property
    * 
@@ -55,7 +61,8 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
    * @param host the name of the host the job tracker is running on
    */
   public void setJobTrackerHost(String host) {
-    setProperty(JOBTRACKER_HOST, host);
+    setProperty(JOBTRACKER_HOST,
+      DistributedJobConfig.isEmpty(host) ? DEFAULT_HOST : host);
   }
 
   /**
@@ -82,7 +89,8 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
    * @param port the port that the job tracker is running on
    */
   public void setJobTrackerPort(String port) {
-    setProperty(JOBTRACKER_PORT, port);
+    setProperty(JOBTRACKER_PORT,
+      DistributedJobConfig.isEmpty(port) ? DEFAULT_PORT : port);
   }
 
   /**

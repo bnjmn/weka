@@ -132,11 +132,6 @@ public class RandomizedDataChunkHadoopMapper extends
         for (int i = 0; i < 20; i++) {
           m_random.nextInt();
         }
-
-        // if (!m_trainingHeader.classAttribute().isNominal()) {
-        // throw new Exception(
-        // "Can only perform stratification if the class is nominal!!");
-        // }
       } else {
         throw new IOException(
           "Can't continue without the name of the ARFF header file!");
@@ -163,21 +158,38 @@ public class RandomizedDataChunkHadoopMapper extends
       throw new DistributedWekaException("No class index is set!");
     }
 
-    String classVal = parsed[classIndex];
+    String classVal = parsed[classIndex].trim();
     double classValIndex = Utils.missingValue();
     if (!DistributedJobConfig.isEmpty(classVal.trim())
       && !classVal.equals(m_rowHelper.getMissingValue())) {
 
       classValIndex = m_trainingHeader.classAttribute().indexOfValue(classVal);
       if (classValIndex < 0) {
-        throw new DistributedWekaException("Class value '" + classVal
-          + "' does not seem to be defined in the header!");
+        // try the default vals in row helper
+        String defaultClassValue = m_rowHelper.getDefaultValue(classIndex);
+
+        if (defaultClassValue == null) {
+          throw new DistributedWekaException(
+            "Class value '"
+              + classVal
+              + "' does not seem to be defined in the header and there is no default value to use!");
+        }
+
+        classValIndex =
+          m_trainingHeader.classAttribute().indexOfValue(defaultClassValue);
       }
     }
 
     return classValIndex;
   }
 
+  /**
+   * Process a row of data
+   * 
+   * @param row the row to process
+   * @param context the context of the job
+   * @throws IOException if a problem occurs
+   */
   protected void processRow(String row, Context context) throws IOException {
     if (row != null) {
       // scatter the instances randomly over the chunks

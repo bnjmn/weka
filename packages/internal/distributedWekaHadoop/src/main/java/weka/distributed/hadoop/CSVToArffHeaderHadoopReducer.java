@@ -29,7 +29,9 @@ import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.hadoop.conf.Configuration;
@@ -40,8 +42,14 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import weka.core.Attribute;
+import weka.core.ChartUtils;
+import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instances;
+import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderReduceTask;
+import weka.distributed.DistributedWekaException;
+import distributed.core.DistributedJobConfig;
 
 /**
  * Reducer implementation for the ArffHeaderHadoopJob
@@ -52,8 +60,21 @@ import weka.distributed.CSVToARFFHeaderReduceTask;
 public class CSVToArffHeaderHadoopReducer extends
   Reducer<Text, BytesWritable, Text, Text> {
 
+  /** key for specifying a chart width to use */
+  public static final String CHART_WIDTH_KEY = "weka.chart.width";
+
+  /** key for specifying a chart height to use */
+  public static final String CHART_HEIGHT_KEY = "weka.chart.height";
+
+  /** Default width for charts */
+  public static final int DEFAULT_CHART_WIDTH = 600;
+
+  /** Default height for charts */
+  public static final int DEFAULT_CHART_HEIGHT = 400;
+
   /** Key for the property that holds the write path for the output header file */
-  public static String CSV_TO_ARFF_HEADER_WRITE_PATH = "*weka.distributed.csv_to_arff_header_write_path";
+  public static String CSV_TO_ARFF_HEADER_WRITE_PATH =
+    "*weka.distributed.csv_to_arff_header_write_path";
 
   /** The underlying general Weka CSV reduce task */
   protected CSVToARFFHeaderReduceTask m_task = null;
@@ -115,10 +136,6 @@ public class CSVToArffHeaderHadoopReducer extends
     String outputDestination, Configuration conf) throws IOException {
     PrintWriter pr = null;
     try {
-      // if (!outputDestination.startsWith("hdfs://")) {
-      // outputDestination = constructHDFSURI(outputDestination, conf);
-      // }
-
       Path pt = new Path(outputDestination);
       FileSystem fs = FileSystem.get(conf);
       if (fs.exists(pt)) {
@@ -141,23 +158,169 @@ public class CSVToArffHeaderHadoopReducer extends
   }
 
   /**
-   * Helper to construct a HDFS URI
+   * Returns true if there is at least one file in the output directory that
+   * matches an attribute name and ends with ".png"
    * 
-   * @param path the path to write to
-   * @param conf the Configuration for the job
-   * @return a HDFS URI
+   * @param headerWithSummary the header of the arff data (with summary
+   *          attributes)
+   * @param outputDir the output directory to check
+   * @param conf the Configuration to use
+   * @return true if at least one attribute summary chart file exists int he
+   *         output directory
+   * @throws IOException if a problem occurs
    */
-  // protected static String constructHDFSURI(String path, Configuration conf) {
-  // String hostPort = conf.get("fs.default.name");
-  //
-  // if (!hostPort.endsWith("/") && !path.endsWith("/")) {
-  // hostPort += "/";
-  // }
-  //
-  // hostPort += path;
-  //
-  // return hostPort;
-  // }
+  protected static boolean attributeChartsExist(Instances headerWithSummary,
+    String outputDir, Configuration conf) throws IOException {
+    FileSystem fs = FileSystem.get(conf);
+
+    try {
+      Instances headerWithoutSummary =
+        CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
+
+      for (int i = 0; i < headerWithoutSummary.numAttributes(); i++) {
+        if (!headerWithoutSummary.attribute(i).isNominal()
+          && !headerWithoutSummary.attribute(i).isNumeric()) {
+          continue;
+        }
+        String name = headerWithoutSummary.attribute(i).name();
+
+        String fileName = name + ".png";
+        Path p = new Path(outputDir + "/" + fileName);
+
+        if (fs.exists(p)) {
+          return true;
+        }
+      }
+    } catch (DistributedWekaException e) {
+      throw new IOException(e);
+    }
+
+    return false;
+  }
+
+  /**
+   * Write out attribute summary charts to the output directory in HDFS if
+   * necessary
+   * 
+   * @param headerWithSummary the header of the data with summary attributes
+   * @param outputDir the output directory to write to
+   * @param conf the Configuration to use to obtain a file system and optional
+   *          chart dimensions
+   * @throws IOException if a problem occurs
+   */
+  protected static void writeAttributeChartsIfNecessary(
+    Instances headerWithSummary, String outputDir, Configuration conf)
+    throws IOException {
+
+    try {
+      Instances headerWithoutSummary =
+        CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
+
+      Map<Integer, NumericAttributeBinData> numericBinStats =
+        new HashMap<Integer, ChartUtils.NumericAttributeBinData>();
+      for (int i = 0; i < headerWithoutSummary.numAttributes(); i++) {
+        Attribute a = headerWithoutSummary.attribute(i);
+        if (a.isNumeric()) {
+          Attribute summary =
+            headerWithSummary
+              .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+                + a.name());
+          NumericAttributeBinData binData =
+            new NumericAttributeBinData(a.name(), summary);
+
+          numericBinStats.put(i, binData);
+        }
+      }
+
+      writeAttributeChartsIfNecessary(headerWithSummary, numericBinStats,
+        outputDir, conf);
+    } catch (DistributedWekaException e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * Write out attribute summary charts to the output directory in HDFS if
+   * necessary
+   * 
+   * @param headerWithSummary the header of the data with summary attributes
+   * @param numericBinStats a map of numeric histogram bin data, keyed by
+   *          attribute index
+   * @param outputDir the output directory to write to
+   * @param conf the Configuration to use to obtain a file system and optional
+   *          chart dimensions
+   * @throws IOException if a problem occurs
+   */
+  protected static void writeAttributeChartsIfNecessary(
+    Instances headerWithSummary,
+    Map<Integer, NumericAttributeBinData> numericBinStats, String outputDir,
+    Configuration conf) throws IOException {
+    FileSystem fs = FileSystem.get(conf);
+    try {
+      Instances headerWithoutSummary =
+        CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
+
+      for (int i = 0; i < headerWithoutSummary.numAttributes(); i++) {
+        if (!headerWithoutSummary.attribute(i).isNominal()
+          && !headerWithoutSummary.attribute(i).isNumeric()) {
+          continue;
+        }
+        String name = headerWithoutSummary.attribute(i).name();
+        Attribute summary =
+          headerWithSummary
+            .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+              + name);
+        if (summary == null) {
+          System.err
+            .println("[WriteAttributeCharts] Can't find summary attribute "
+              + "for attribute: " + name);
+          continue;
+        }
+
+        String fileName = name + ".png";
+        Path p = new Path(outputDir + "/" + fileName);
+        if (fs.exists(p)) {
+          continue;
+        }
+
+        int chartWidth = DEFAULT_CHART_WIDTH;
+        String userWidth = conf.get(CHART_WIDTH_KEY);
+        if (!DistributedJobConfig.isEmpty(userWidth)) {
+          try {
+            chartWidth = Integer.parseInt(userWidth);
+          } catch (NumberFormatException e) {
+          }
+        }
+        int chartHeight = DEFAULT_CHART_HEIGHT;
+        String userHeight = conf.get(CHART_HEIGHT_KEY);
+        if (!DistributedJobConfig.isEmpty(userHeight)) {
+          try {
+            chartHeight = Integer.parseInt(userHeight);
+          } catch (NumberFormatException e) {
+          }
+        }
+
+        FSDataOutputStream dos = fs.create(p, true);
+        if (headerWithoutSummary.attribute(i).isNominal()) {
+          ChartUtils.createAttributeChartNominal(summary, headerWithoutSummary
+            .attribute(i).name(), dos, chartWidth, chartHeight);
+        } else {
+          NumericAttributeBinData binStats =
+            numericBinStats.get(headerWithoutSummary.attribute(i).index());
+          if (binStats == null) {
+            throw new DistributedWekaException(
+              "Unable to find histogram bin data for attribute: "
+                + headerWithoutSummary.attribute(i).name());
+          }
+
+          ChartUtils.createAttributeChartNumeric(binStats, summary, dos,
+            chartWidth, chartHeight);
+        }
+      }
+    } catch (DistributedWekaException e) {
+      throw new IOException(e);
+    }
+  }
 
   /**
    * Helper method to decompress a serialized Instances object
@@ -174,8 +337,9 @@ public class CSVToArffHeaderHadoopReducer extends
     ObjectInputStream p = null;
     Object toReturn = null;
     try {
-      p = new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(
-        istream)));
+      p =
+        new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(
+          istream)));
 
       toReturn = p.readObject();
       if (!(toReturn instanceof Instances)) {

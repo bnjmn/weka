@@ -51,13 +51,15 @@ public class ArffHeaderHadoopJobBeanInfo extends HadoopJobBeanInfo {
       // p1.setPropertyEditorClass(weka.gui.beans.FileEnvironmentField.class);
       // pds.add(p1);
 
-      p1 = new PropertyDescriptor("pathToExistingHeader",
-        ArffHeaderHadoopJob.class);
+      p1 =
+        new PropertyDescriptor("pathToExistingHeader",
+          ArffHeaderHadoopJob.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("outputHeaderFileName",
-        ArffHeaderHadoopJob.class);
+      p1 =
+        new PropertyDescriptor("outputHeaderFileName",
+          ArffHeaderHadoopJob.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
@@ -65,9 +67,17 @@ public class ArffHeaderHadoopJobBeanInfo extends HadoopJobBeanInfo {
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("attributeNamesFile",
-        ArffHeaderHadoopJob.class);
+      p1 =
+        new PropertyDescriptor("attributeNamesFile", ArffHeaderHadoopJob.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
+      pds.add(p1);
+
+      p1 =
+        new PropertyDescriptor("includeQuartilesInSummaryAttributes",
+          ArffHeaderHadoopJob.class);
+      pds.add(p1);
+
+      p1 = new PropertyDescriptor("generateCharts", ArffHeaderHadoopJob.class);
       pds.add(p1);
 
       return pds.toArray(new PropertyDescriptor[1]);

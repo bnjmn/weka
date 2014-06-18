@@ -242,6 +242,15 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       }
       addTabForArffHeaderJob("ARFF header creation", m_tempArffJob);
       addTabForScoringJob(jobTitle, m_job);
+    } else if (m_job instanceof weka.distributed.hadoop.RandomizedDataChunkHadoopJob) {
+      m_tempArffJob = new weka.distributed.hadoop.ArffHeaderHadoopJob();
+      try {
+        m_tempArffJob.setOptions(Utils.splitOptions(m_optionsOrig));
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+      addTabForArffHeaderJob("ARFF header creation", m_tempArffJob);
+      addTabForRandomizedDataChunkJob("Random shuffle options", m_job);
     }
 
     add(m_configTabs, BorderLayout.CENTER);
@@ -327,6 +336,20 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     JPanel jobHolder = makeClassifierJobPanel(classifierJob, false);
     JScrollPane scroller = new JScrollPane(jobHolder);
 
+    m_configTabs.addTab(tabTitle, scroller);
+  }
+
+  protected void addTabForRandomizedDataChunkJob(String tabTitle,
+    HadoopJob randomizeJob) {
+    JPanel jobHolder = new JPanel();
+    jobHolder.setLayout(new BorderLayout());
+    PropertySheetPanel randomizeJobEditor = new PropertySheetPanel();
+    randomizeJobEditor.setEnvironment(m_env);
+    ;
+    randomizeJobEditor.setTarget(randomizeJob);
+    jobHolder.add(randomizeJobEditor, BorderLayout.NORTH);
+
+    JScrollPane scroller = new JScrollPane(jobHolder);
     m_configTabs.addTab(tabTitle, scroller);
   }
 
@@ -446,6 +469,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       okEvaluationJob();
     } else if (m_job instanceof weka.distributed.hadoop.CorrelationMatrixHadoopJob) {
       okCorrelationJob();
+    } else if (m_job instanceof weka.distributed.hadoop.RandomizedDataChunkHadoopJob) {
+      okRandomizeJob();
     } else {
       okScoringJob();
     }
@@ -458,9 +483,10 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
    * @return a list of options
    */
   protected List<String> getBaseConfig(HadoopJob job) {
+
+    m_mrConfig.clearUserSuppliedProperties();
     Map<String, String> userProps = m_propPanel.getProperties();
     for (Map.Entry<String, String> e : userProps.entrySet()) {
-
       // skip this one! As we'll get it via the base job stuff below
       if (e.getKey() != null
         && !e.getKey().equals(DistributedJob.WEKA_ADDITIONAL_PACKAGES_KEY)) {
@@ -566,6 +592,25 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     }
   }
 
+  /**
+   * Add options from the randomize job only to the supplied list
+   * 
+   * @param opts the list of options to add to
+   */
+  protected void addRandomizeJobOptionsOnly(List<String> opts,
+    weka.distributed.hadoop.RandomizedDataChunkHadoopJob randomizeJob) {
+    String[] randomizeOps = randomizeJob.getJobOptionsOnly();
+
+    for (String o : randomizeOps) {
+      opts.add(o);
+    }
+  }
+
+  /**
+   * Add options from the scoring job only to the supplied list
+   * 
+   * @param opts the list of options to add to
+   */
   protected void addScoringJobOptionsOnly(List<String> opts) {
     String[] scoringOpts =
       ((weka.distributed.hadoop.WekaScoringHadoopJob) m_job)
@@ -645,6 +690,20 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     addClassifierJobOptionsOnly(opts,
       (weka.distributed.hadoop.WekaClassifierHadoopJob) m_job);
     addClassifierMapTaskOpts(opts);
+
+    applyOptionsToJob(opts);
+  }
+
+  /**
+   * Actions to apply to the randomize job when closing under the "OK" condition
+   */
+  protected void okRandomizeJob() {
+    List<String> opts = getBaseConfig(m_job);
+    addArffJobOptionsOnly(opts, m_tempArffJob);
+    addArffMapTaskOpts(opts);
+
+    addRandomizeJobOptionsOnly(opts,
+      (weka.distributed.hadoop.RandomizedDataChunkHadoopJob) m_job);
 
     applyOptionsToJob(opts);
   }

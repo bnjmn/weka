@@ -42,12 +42,16 @@ public class CSVToARFFHadoopJobBeanInfo extends AbstractHadoopJobBeanInfo {
   @Override
   public EventSetDescriptor[] getEventSetDescriptors() {
     try {
-      List<EventSetDescriptor> descriptors = new ArrayList<EventSetDescriptor>();
+      List<EventSetDescriptor> descriptors =
+        new ArrayList<EventSetDescriptor>();
       for (EventSetDescriptor es : super.getEventSetDescriptors()) {
         descriptors.add(es);
       }
       descriptors.add(new EventSetDescriptor(CSVToARFFHadoopJob.class,
         "dataSet", DataSourceListener.class, "acceptDataSet"));
+
+      descriptors.add(new EventSetDescriptor(CSVToARFFHadoopJob.class, "image",
+        ImageListener.class, "acceptImage"));
 
       return descriptors.toArray(new EventSetDescriptor[descriptors.size()]);
     } catch (Exception ex) {

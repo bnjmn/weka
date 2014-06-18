@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoop
 
 # Version (required)
-Version=1.0.8
+Version=1.0.9
 
 #Date (year-month-day)
-Date=2014-04-28
+Date=2014-06-18
 
 # Title (required)
 Title=Hadoop wrappers for Weka
@@ -23,16 +23,16 @@ Author=Mark Hall <mhall@pentaho.com>
 Maintainer=Mark Hall <mhall@pentaho.com>
 
 # License (required)
-License=GPL 2
+License=GPL 3.0
 
 # Description (required)
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Includes libraries for Apache Hadoop 1.1.2.
 
 # Changes in this release
-Changes=Added BatchPredictorVote that can be used to encapsulate voted ensembles of BatchPredictors (i.e. when the MLRClassifier from the RPlugin is used to learn models in Hadoop). Also fixed a few GUI-related bugs
+Changes=ARFF header job/randomly shuffled data chunk job can now compute quartiles and histogram information for numeric attributes (which gets added to the summary attributes in the header). Randomly shuffled data chunk job is now a separate job that can be invoked independently of the classifier job. Summary attribute charts, as png files, are now produced using the JFreeChart library. Correlation matrix job now produces a heat map chart for the correlation matrix.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.8.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.9.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
@@ -44,8 +44,7 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.10), distributedWekaBase (>=1.0.5)
-# Depends=weka (>=3.7.10)
+Depends=weka (>=3.7.11), distributedWekaBase (>=1.0.6)
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete

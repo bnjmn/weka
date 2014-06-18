@@ -21,6 +21,7 @@
 
 package weka.gui.beans;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,14 +34,20 @@ import weka.distributed.hadoop.ArffHeaderHadoopJob;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-@KFStep(category = "Hadoop", toolTipText = "Makes a unified ARFF header for a data set")
+@KFStep(category = "Hadoop",
+  toolTipText = "Makes a unified ARFF header for a data set")
 public class CSVToARFFHadoopJob extends AbstractHadoopJob {
 
   /** For serialization */
   private static final long serialVersionUID = -8029477841981163952L;
 
   /** Downstream listeners for data set output */
-  protected List<DataSourceListener> m_dsListeners = new ArrayList<DataSourceListener>();
+  protected List<DataSourceListener> m_dsListeners =
+    new ArrayList<DataSourceListener>();
+
+  /** Downstream listeners for image events */
+  protected List<ImageListener> m_imageListeners =
+    new ArrayList<ImageListener>();
 
   /**
    * Constructor
@@ -72,12 +79,26 @@ public class CSVToARFFHadoopJob extends AbstractHadoopJob {
   @Override
   protected void notifyJobOutputListeners() {
 
-    Instances finalHeader = ((ArffHeaderHadoopJob) m_runningJob)
-      .getFinalHeader();
+    Instances finalHeader =
+      ((ArffHeaderHadoopJob) m_runningJob).getFinalHeader();
     if (finalHeader != null) {
       DataSetEvent de = new DataSetEvent(this, finalHeader);
       for (DataSourceListener d : m_dsListeners) {
         d.acceptDataSet(de);
+      }
+    }
+    List<BufferedImage> charts =
+      ((ArffHeaderHadoopJob) m_runningJob).getSummaryCharts();
+    if (charts != null && charts.size() > 0) {
+      for (BufferedImage i : charts) {
+        ImageEvent ie = new ImageEvent(this, i);
+        for (ImageListener l : m_imageListeners) {
+          l.acceptImage(ie);
+        }
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+        }
       }
     }
   }
@@ -98,5 +119,23 @@ public class CSVToARFFHadoopJob extends AbstractHadoopJob {
    */
   public synchronized void removeDataSourceListener(DataSourceListener dsl) {
     m_dsListeners.remove(dsl);
+  }
+
+  /**
+   * Add an image listener
+   * 
+   * @param l the image listener to add
+   */
+  public synchronized void addImageListener(ImageListener l) {
+    m_imageListeners.add(l);
+  }
+
+  /**
+   * Remove an image listener
+   * 
+   * @param l an image listener
+   */
+  public synchronized void removeImageListener(ImageListener l) {
+    m_imageListeners.remove(l);
   }
 }

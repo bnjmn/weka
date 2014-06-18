@@ -220,11 +220,11 @@ public class WekaClassifierEvaluationHadoopReducer extends
     atts.add(new Attribute("Root relative squared error"));
     atts.add(new Attribute("Total number of instances"));
 
-    int capacity = 1;
+    // int capacity = 1;
 
     // info retrieval stats (only add these if class is nominal)
     if (aggregated.getHeader().classAttribute().isNominal()) {
-      capacity = aggregated.getHeader().classAttribute().numValues();
+      // capacity = aggregated.getHeader().classAttribute().numValues();
 
       atts.add(new Attribute("Kappa statistic"));
 

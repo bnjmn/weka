@@ -806,6 +806,12 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
       m_arffHeaderJob.setEnvironment(m_env);
       m_arffHeaderJob.setLog(getLog());
       m_arffHeaderJob.setStatusMessagePrefix(m_statusMessagePrefix);
+      boolean computeQuartiles = m_arffHeaderJob.getGenerateCharts();
+      if (getCreateRandomizedDataChunks() && computeQuartiles) {
+        // randomize job will do the quartiles - no need to do them here!
+        m_arffHeaderJob.setIncludeQuartilesInSummaryAttributes(false);
+      }
+
       if (!m_arffHeaderJob.runJob()) {
         statusMessage("Unable to continue - creating the ARFF header failed!");
         logMessage("Unable to continue - creating the ARFF header failed!");
@@ -1014,6 +1020,12 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
       try {
         setJobStatus(JobStatus.RUNNING);
 
+        if (getCreateRandomizedDataChunks()
+          && m_arffHeaderJob.getIncludeQuartilesInSummaryAttributes()) {
+          // turn off quartile generation in the arff header job as
+          // the randomized data chunk job will compute them (if necessary)
+          m_arffHeaderJob.setIncludeQuartilesInSummaryAttributes(false);
+        }
         if (!initializeAndRunArffJob()) {
           return false;
         }

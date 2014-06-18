@@ -95,12 +95,22 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
   /** Random seed for shuffling the data */
   protected String m_randomSeed = "1";
 
+  /**
+   * True if the output directory should be deleted first (doing so will force
+   * this job to run in the case where there are already chunk files present in
+   * the output directory)
+   */
   protected boolean m_cleanOutputDir;
+
+  /** True if we should just compute quartiles and not write chunk files */
+  protected boolean m_computeQuartilesOnly;
 
   public RandomizedDataChunkHadoopJob() {
     super("Randomly shuffled (and stratified) data chunk job",
       "Create a set of input files where the rows are randomly "
-        + "shuffled (and stratified if the class is set and nominal)");
+        + "shuffled (and stratified if the class is set and nominal). One of "
+        + "numRandomizedDataChunks or numInstancesPerRandomizedDataChunk must "
+        + "be set in conjunction with this option.");
 
     m_mrConfig.setMapperClass(RandomizedDataChunkHadoopMapper.class.getName());
     m_mrConfig
@@ -133,18 +143,6 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
    */
   public String getCSVMapTaskOptions() {
     return m_wekaCsvToArffMapTaskOpts;
-  }
-
-  /**
-   * Tip text for this property
-   * 
-   * @return tip text for this property
-   */
-  public String createRandomizedDataChunksTipText() {
-    return "Create randomly shuffled (and stratified if class is nominal) data "
-      + "chunks. This involves an extra pass (job) over the data. One of "
-      + "numRandomizedDataChunks or numInstancesPerRandomizedDataChunk must "
-      + "be set in conjunction with this option.";
   }
 
   /**
@@ -216,7 +214,8 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
    */
   public String classAttributeTipText() {
     return "The name or index of the class attribute. 'first' and "
-      + "'last' may also be used.";
+      + "'last' may also be used. If set, and the class is nominal, "
+      + "then output chunk files will be stratified.";
   }
 
   /**
@@ -299,6 +298,10 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
    */
   public boolean getCleanOutputDirectory() {
     return m_cleanOutputDir;
+  }
+
+  protected void setComputeQuartilesOnly(boolean q) {
+    m_computeQuartilesOnly = q;
   }
 
   @Override
@@ -456,6 +459,10 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
   protected boolean initializeAndRunArffJob() throws DistributedWekaException,
     IOException {
 
+    if (m_arffHeaderJob.getFinalHeader() != null) {
+      return true;
+    }
+
     if (m_env == null) {
       m_env = Environment.getSystemWide();
     }
@@ -487,30 +494,50 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
 
       try {
 
-        if (!m_cleanOutputDir) {
-          // check to see if there are files in the output directory. If so,
-          // assume that we don't need to run;
-          String outputDir = m_mrConfig.getOutputPath() + OUTPUT_SUBDIR;
-          Configuration conf = new Configuration();
-          m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
-          FileSystem fs = FileSystem.get(conf);
-          Path p = new Path(outputDir + "/chunk0-r-00000");
-          if (fs.exists(p)) {
-            if (m_log != null) {
-              statusMessage("Output directory is populated with chunk files - no need to execute");
-              logMessage("Output directory is populated with chunk files - no need to execute");
-            } else {
-              System.err
-                .println("Output directory is populated with chunk files - no need to execute");
+        if (m_computeQuartilesOnly) {
+          m_cleanOutputDir = false;
+        } else {
+          if (!m_cleanOutputDir) {
+            // check to see if there are files in the output directory. If so,
+            // assume that we don't need to run;
+            String outputDir = m_mrConfig.getOutputPath() + OUTPUT_SUBDIR;
+            Configuration conf = new Configuration();
+            m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
+            FileSystem fs = FileSystem.get(conf);
+            Path p = new Path(outputDir + "/chunk0-r-00000");
+            if (fs.exists(p)) {
+              if (m_log != null) {
+                statusMessage("Output directory is populated with chunk files - no need to execute");
+                logMessage("Output directory is populated with chunk files - no need to execute");
+              } else {
+                System.err
+                  .println("Output directory is populated with chunk files - no need to execute");
+              }
+              return true;
             }
-            return true;
           }
         }
 
-        logMessage("Executing randomize data chunk job...");
-        statusMessage("Executing randomize data chunk job...");
+        if (m_computeQuartilesOnly) {
+          logMessage("Executing compute quartiles job...");
+          statusMessage("Executing compute quartiles job...");
+        } else {
+          logMessage("Executing randomize data chunk job...");
+          statusMessage("Executing randomize data chunk job...");
+        }
+
         setJobStatus(JobStatus.RUNNING);
 
+        // make sure that our ARFF job doesn't generate quartiles
+        // as we'll be doing that
+        // Add this to the randomize task options so that
+        // we can disable generation of quartiles/histograms (plus
+        // charts - this will be a second disable option) if desired
+        boolean computeQuartiles =
+          m_arffHeaderJob.getIncludeQuartilesInSummaryAttributes();
+        boolean generateCharts = m_arffHeaderJob.getGenerateCharts();
+        m_arffHeaderJob.setIncludeQuartilesInSummaryAttributes(false);
+        m_arffHeaderJob.setGenerateCharts(false);
         if (!initializeAndRunArffJob()) {
           return false;
         }
@@ -526,32 +553,36 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
           throw new DistributedWekaException(e);
         }
 
-        // if (!headerNoSummary.classAttribute().isNominal()) {
-        // throw new
-        // DistributedWekaException("Can't run statification job - class "
-        // + "(" + header.classAttribute().name() + ") is not nominal!");
-        // }
+        // a summary attribute for getting the total number of instances
+        Attribute summaryAttOrig = null;
+        for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+          if (headerNoSummary.attribute(i).isNumeric()
+            || headerNoSummary.attribute(i).isNominal()) {
+            summaryAttOrig = headerNoSummary.attribute(i);
+            break;
+          }
+        }
 
-        // find summary attribute for class
-        String className = headerNoSummary.classAttribute().name();
-        Attribute summaryClassAtt =
+        String summaryName = summaryAttOrig.name();
+        Attribute summaryAtt =
           header.attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
-            + className);
-        if (summaryClassAtt == null) {
+            + summaryName);
+
+        if (summaryAtt == null) {
           throw new DistributedWekaException(
-            "Was unable to find the summary attribute for " + "the class: "
-              + className);
+            "Was unable to find the summary attribute for " + "attribute: "
+              + summaryName);
         }
 
         int totalNumInstances = 0;
 
-        if (headerNoSummary.classAttribute().isNominal()) {
-          NominalStats stats = NominalStats.attributeToStats(summaryClassAtt);
+        if (summaryAttOrig.isNominal()) {
+          NominalStats stats = NominalStats.attributeToStats(summaryAtt);
           for (String label : stats.getLabels()) {
             totalNumInstances += stats.getCount(label);
           }
         } else {
-          NumericStats stats = NumericStats.attributeToStats(summaryClassAtt);
+          NumericStats stats = NumericStats.attributeToStats(summaryAtt);
           totalNumInstances =
             (int) stats.getStats()[ArffSummaryNumericMetric.COUNT.ordinal()];
         }
@@ -585,6 +616,22 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
           randomizeMapOptions.add(environmentSubstitute(getRandomSeed()));
         }
 
+        // Special option passed to us when ARFF job is primary job
+        // and user has opted to compute quartiles. In this case
+        // we turn off the output of chunks and just produce
+        // quartiles/histograms
+        if (m_computeQuartilesOnly) {
+          randomizeMapOptions.add("-quartiles-only");
+        }
+
+        if (computeQuartiles && !m_computeQuartilesOnly) {
+          randomizeMapOptions.add("-compute-quartiles");
+        }
+
+        if (generateCharts) {
+          randomizeMapOptions.add("-charts");
+        }
+
         m_mrConfig
           .setUserSuppliedProperty(
             RandomizedDataChunkHadoopMapper.RANDOMIZED_DATA_CHUNK_MAP_TASK_OPTIONS,
@@ -597,6 +644,10 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
           environmentSubstitute(getCSVMapTaskOptions()));
 
         int numChunks = 0;
+        if (m_computeQuartilesOnly) {
+          // use 10 mappers for randomization in this case
+          setNumRandomizedDataChunks("10");
+        }
         if (DistributedJobConfig.isEmpty(getNumRandomizedDataChunks())
           && DistributedJobConfig
             .isEmpty(getNumInstancesPerRandomizedDataChunk())) {
@@ -662,24 +713,33 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
         Job job = null;
         try {
           job =
-            m_mrConfig.configureForHadoop(
-              "Create randomly shuffled input data chunk job - num chunks: "
-                + numChunks, conf, m_env);
+            m_mrConfig
+              .configureForHadoop(
+                m_computeQuartilesOnly ? "Compute quartiles for numeric attributes job"
+                  : "Create randomly shuffled input data chunk job - num chunks: "
+                    + numChunks, conf, m_env);
         } catch (ClassNotFoundException e) {
           throw new DistributedWekaException(e);
         }
 
-        // setup multiple outputs
-        for (int i = 0; i < numChunks; i++) {
-          MultipleOutputs.addNamedOutput(job, "chunk" + i,
-            TextOutputFormat.class, Text.class, Text.class);
+        if (!m_computeQuartilesOnly) {
+          // setup multiple outputs
+          for (int i = 0; i < numChunks; i++) {
+            MultipleOutputs.addNamedOutput(job, "chunk" + i,
+              TextOutputFormat.class, Text.class, Text.class);
+          }
         }
 
+        if (m_computeQuartilesOnly) {
+          setJobName("Compute quartiles for numeric attributes job");
+        }
         // run the job!
         m_mrConfig.deleteOutputDirectory(job, m_env);
 
-        statusMessage("Submitting randomized data chunk job ");
-        logMessage("Submitting randomized data chunk job ");
+        statusMessage(m_computeQuartilesOnly ? "Submitting compute quartiles job"
+          : "Submitting randomized data chunk job ");
+        logMessage(m_computeQuartilesOnly ? "Submitting compute quartiles job"
+          : "Submitting randomized data chunk job ");
 
         success = runJob(job);
 

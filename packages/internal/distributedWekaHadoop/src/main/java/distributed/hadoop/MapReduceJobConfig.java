@@ -110,7 +110,8 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
   protected static final String HADOOP_JOB_TRACKER_HOST = "mapred.job.tracker";
 
   /** Internal key for the Hadoop property for the maximum block size */
-  protected static final String HADOOP_MAPRED_MAX_SPLIT_SIZE = "mapred.max.split.size";
+  protected static final String HADOOP_MAPRED_MAX_SPLIT_SIZE =
+    "mapred.max.split.size";
 
   /** For serialization */
   private static final long serialVersionUID = -1721850598954532369L;
@@ -159,7 +160,7 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     result.addElement(new Option(
       "\tJob tracker hostname. (default: localhost)", "jobtracker-host", 1,
       "-jobtracker-host <hostname>"));
-    result.addElement(new Option("\tJob tracker port. (default 9001)",
+    result.addElement(new Option("\tJob tracker port. (default 8021)",
       "jobtracker-port", 1, "-jobtracker-port <port number>"));
     result.addElement(new Option("\tThe number of maps (hint to MR).",
       "num-maps", 1, "-num-maps <integer>"));
@@ -756,8 +757,8 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     mapperClass = environmentSubstitute(mapperClass, env);
 
     @SuppressWarnings("unchecked")
-    Class<? extends Mapper> mc = (Class<? extends Mapper>) Class
-      .forName(mapperClass);
+    Class<? extends Mapper> mc =
+      (Class<? extends Mapper>) Class.forName(mapperClass);
 
     job.setMapperClass(mc);
 
@@ -769,8 +770,8 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
       reducerClass = environmentSubstitute(reducerClass, env);
 
       @SuppressWarnings("unchecked")
-      Class<? extends Reducer> rc = (Class<? extends Reducer>) Class
-        .forName(reducerClass);
+      Class<? extends Reducer> rc =
+        (Class<? extends Reducer>) Class.forName(reducerClass);
 
       job.setReducerClass(rc);
     }
@@ -780,8 +781,8 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
       combinerClass = environmentSubstitute(combinerClass, env);
 
       @SuppressWarnings("unchecked")
-      Class<? extends Reducer> cc = (Class<? extends Reducer>) Class
-        .forName(combinerClass);
+      Class<? extends Reducer> cc =
+        (Class<? extends Reducer>) Class.forName(combinerClass);
 
       job.setCombinerClass(cc);
     }
@@ -793,8 +794,8 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     inputFormatClass = environmentSubstitute(inputFormatClass, env);
 
     @SuppressWarnings("unchecked")
-    Class<? extends InputFormat> ifc = (Class<? extends InputFormat>) Class
-      .forName(inputFormatClass);
+    Class<? extends InputFormat> ifc =
+      (Class<? extends InputFormat>) Class.forName(inputFormatClass);
 
     job.setInputFormatClass(ifc);
 
@@ -805,8 +806,8 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     outputFormatClass = environmentSubstitute(outputFormatClass, env);
 
     @SuppressWarnings("unchecked")
-    Class<? extends OutputFormat> ofc = (Class<? extends OutputFormat>) Class
-      .forName(outputFormatClass);
+    Class<? extends OutputFormat> ofc =
+      (Class<? extends OutputFormat>) Class.forName(outputFormatClass);
     job.setOutputFormatClass(ofc);
 
     String mapOutputKeyClass = getMapOutputKeyClass();
