@@ -123,7 +123,10 @@ public class EvaluationMetricHelper {
    * @return a list of all available evaluation metric names
    */
   public static List<String> getAllMetricNames() {
-    return Evaluation.getAllEvaluationMetricNames();
+    List<String> metrics = getBuiltInMetricNames();
+    metrics.addAll(getPluginMetricNames());
+
+    return metrics;
   }
 
   /**
