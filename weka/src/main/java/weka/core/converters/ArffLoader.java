@@ -44,10 +44,11 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start --> Reads a source that is in arff (attribute relation
+ <!-- globalinfo-start --> 
+ * Reads a source that is in arff (attribute relation
  * file format) format.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
@@ -80,8 +81,8 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
    * Typical code for batch usage:
    * 
    * <pre>
-   * BufferedReader reader = new BufferedReader(new FileReader(
-   *   &quot;/some/where/file.arff&quot;));
+   * BufferedReader reader =
+   *   new BufferedReader(new FileReader(&quot;/some/where/file.arff&quot;));
    * ArffReader arff = new ArffReader(reader);
    * Instances data = arff.getData();
    * data.setClassIndex(data.numAttributes() - 1);
@@ -90,8 +91,8 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
    * Typical code for incremental usage:
    * 
    * <pre>
-   * BufferedReader reader = new BufferedReader(new FileReader(
-   *   &quot;/some/where/file.arff&quot;));
+   * BufferedReader reader =
+   *   new BufferedReader(new FileReader(&quot;/some/where/file.arff&quot;));
    * ArffReader arff = new ArffReader(reader, 1000);
    * Instances data = arff.getStructure();
    * data.setClassIndex(data.numAttributes() - 1);
@@ -128,6 +129,12 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
     protected boolean m_batchMode = true;
 
     protected boolean m_retainStringValues = true;
+
+    /** Field separator (single character string) to use instead of the defaults */
+    protected String m_fieldSeparator;
+
+    /** List of (single character) enclosures to use instead of the defaults */
+    protected List<String> m_enclosures;
 
     /**
      * Reads the data completely from the reader. The data can be accessed via
@@ -168,7 +175,8 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
      * @see #getStructure()
      * @see #readInstance(Instances)
      */
-    public ArffReader(Reader reader, int capacity, boolean batch) throws IOException {
+    public ArffReader(Reader reader, int capacity, boolean batch)
+      throws IOException {
 
       m_batchMode = batch;
       if (batch) {
@@ -195,11 +203,17 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
      * @param reader the reader to use
      * @param template the template header
      * @param lines the lines read so far
+     * @param fieldSepAndEnclosures an optional array of Strings containing the
+     *          field separator and enclosures to use instead of the defaults.
+     *          The first entry in the array is expected to be the single
+     *          character field separator to use; the remaining entries (if any)
+     *          are enclosure characters to use.
      * @throws IOException if something goes wrong
      * @see #getData()
      */
-    public ArffReader(Reader reader, Instances template, int lines) throws IOException {
-      this(reader, template, lines, 100, true);
+    public ArffReader(Reader reader, Instances template, int lines,
+      String... fieldSepAndEnclosures) throws IOException {
+      this(reader, template, lines, 100, true, fieldSepAndEnclosures);
 
       Instance inst;
       while ((inst = readInstance(m_Data)) != null) {
@@ -219,11 +233,17 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
      * @param template the template header
      * @param lines the lines read so far
      * @param capacity the capacity of the new dataset
+     * @param fieldSepAndEnclosures an optional array of Strings containing the
+     *          field separator and enclosures to use instead of the defaults.
+     *          The first entry in the array is expected to be the single
+     *          character field separator to use; the remaining entries (if any)
+     *          are enclosure characters to use.
      * @throws IOException if something goes wrong
      * @see #getData()
      */
-    public ArffReader(Reader reader, Instances template, int lines, int capacity) throws IOException {
-      this(reader, template, lines, capacity, false);
+    public ArffReader(Reader reader, Instances template, int lines,
+      int capacity, String... fieldSepAndEnclosures) throws IOException {
+      this(reader, template, lines, capacity, false, fieldSepAndEnclosures);
     }
 
     /**
@@ -237,16 +257,44 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
      * @param capacity the capacity of the new dataset
      * @param batch true if the values of string attributes should be collected
      *          in the header
+     * @param fieldSepAndEnclosures an optional array of Strings containing the
+     *          field separator and enclosures to use instead of the defaults.
+     *          The first entry in the array is expected to be the single
+     *          character field separator to use; the remaining entries (if any)
+     *          are enclosure characters to use.
      * @throws IOException if something goes wrong
      * @see #getData()
      */
     public ArffReader(Reader reader, Instances template, int lines,
-      int capacity, boolean batch) throws IOException {
+      int capacity, boolean batch, String... fieldSepAndEnclosures)
+      throws IOException {
       m_batchMode = batch;
       if (batch) {
         m_retainStringValues = true;
       } else {
         m_retainStringValues = false;
+      }
+
+      if (fieldSepAndEnclosures != null && fieldSepAndEnclosures.length > 0) {
+        if (fieldSepAndEnclosures[0] != null
+          && fieldSepAndEnclosures[0].length() > 0) {
+          m_fieldSeparator = fieldSepAndEnclosures[0];
+        }
+
+        if (fieldSepAndEnclosures.length > 1) {
+          // the rest are assumed to be enclosure characters
+          m_enclosures = new ArrayList<String>();
+          for (int i = 1; i < fieldSepAndEnclosures.length; i++) {
+            if (fieldSepAndEnclosures[i] != null
+              && fieldSepAndEnclosures[i].length() > 0) {
+              m_enclosures.add(fieldSepAndEnclosures[i]);
+            }
+          }
+
+          if (m_enclosures.size() == 0) {
+            m_enclosures = null;
+          }
+        }
       }
 
       m_Lines = lines;
@@ -415,10 +463,21 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       m_Tokenizer.resetSyntax();
       m_Tokenizer.whitespaceChars(0, ' ');
       m_Tokenizer.wordChars(' ' + 1, '\u00FF');
-      m_Tokenizer.whitespaceChars(',', ',');
+      if (m_fieldSeparator != null) {
+        m_Tokenizer.whitespaceChars(m_fieldSeparator.charAt(0),
+          m_fieldSeparator.charAt(0));
+      } else {
+        m_Tokenizer.whitespaceChars(',', ',');
+      }
       m_Tokenizer.commentChar('%');
-      m_Tokenizer.quoteChar('"');
-      m_Tokenizer.quoteChar('\'');
+      if (m_enclosures != null && m_enclosures.size() > 0) {
+        for (String e : m_enclosures) {
+          m_Tokenizer.quoteChar(e.charAt(0));
+        }
+      } else {
+        m_Tokenizer.quoteChar('"');
+        m_Tokenizer.quoteChar('\'');
+      }
       m_Tokenizer.ordinaryChar('{');
       m_Tokenizer.ordinaryChar('}');
       m_Tokenizer.eolIsSignificant(true);
@@ -512,8 +571,8 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
 
         // Is index valid?
         try {
-          m_IndicesBuffer[numValues] = Integer.valueOf(m_Tokenizer.sval)
-            .intValue();
+          m_IndicesBuffer[numValues] =
+            Integer.valueOf(m_Tokenizer.sval).intValue();
         } catch (NumberFormatException e) {
           errorMessage("index number expected");
         }
@@ -541,8 +600,9 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
           switch (m_Data.attribute(m_IndicesBuffer[numValues]).type()) {
           case Attribute.NOMINAL:
             // Check if value appears in header.
-            valIndex = m_Data.attribute(m_IndicesBuffer[numValues])
-              .indexOfValue(m_Tokenizer.sval);
+            valIndex =
+              m_Data.attribute(m_IndicesBuffer[numValues]).indexOfValue(
+                m_Tokenizer.sval);
             if (valIndex == -1) {
               errorMessage("nominal value not declared in header");
             }
@@ -551,16 +611,17 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
           case Attribute.NUMERIC:
             // Check if value is really a number.
             try {
-              m_ValueBuffer[numValues] = Double.valueOf(m_Tokenizer.sval)
-                .doubleValue();
+              m_ValueBuffer[numValues] =
+                Double.valueOf(m_Tokenizer.sval).doubleValue();
             } catch (NumberFormatException e) {
               errorMessage("number expected");
             }
             break;
           case Attribute.STRING:
             if (m_batchMode || m_retainStringValues) {
-              m_ValueBuffer[numValues] = m_Data.attribute(
-                m_IndicesBuffer[numValues]).addStringValue(m_Tokenizer.sval);
+              m_ValueBuffer[numValues] =
+                m_Data.attribute(m_IndicesBuffer[numValues]).addStringValue(
+                  m_Tokenizer.sval);
             } else {
               m_ValueBuffer[numValues] = 1;
               m_Data.attribute(m_IndicesBuffer[numValues]).setStringValue(
@@ -571,20 +632,21 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
             break;
           case Attribute.DATE:
             try {
-              m_ValueBuffer[numValues] = m_Data.attribute(
-                m_IndicesBuffer[numValues]).parseDate(m_Tokenizer.sval);
+              m_ValueBuffer[numValues] =
+                m_Data.attribute(m_IndicesBuffer[numValues]).parseDate(
+                  m_Tokenizer.sval);
             } catch (ParseException e) {
               errorMessage("unparseable date: " + m_Tokenizer.sval);
             }
             break;
           case Attribute.RELATIONAL:
             try {
-              ArffReader arff = new ArffReader(new StringReader(
-                m_Tokenizer.sval), m_Data.attribute(m_IndicesBuffer[numValues])
-                .relation(), 0);
+              ArffReader arff =
+                new ArffReader(new StringReader(m_Tokenizer.sval), m_Data
+                  .attribute(m_IndicesBuffer[numValues]).relation(), 0);
               Instances data = arff.getData();
-              m_ValueBuffer[numValues] = m_Data.attribute(
-                m_IndicesBuffer[numValues]).addRelation(data);
+              m_ValueBuffer[numValues] =
+                m_Data.attribute(m_IndicesBuffer[numValues]).addRelation(data);
             } catch (Exception e) {
               throw new IOException(e.toString() + " of line " + getLineNo());
             }
@@ -613,8 +675,9 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       int[] tempIndices = new int[numValues];
       System.arraycopy(m_ValueBuffer, 0, tempValues, 0, numValues);
       System.arraycopy(m_IndicesBuffer, 0, tempIndices, 0, numValues);
-      Instance inst = new SparseInstance(weight, tempValues, tempIndices,
-        m_Data.numAttributes());
+      Instance inst =
+        new SparseInstance(weight, tempValues, tempIndices,
+          m_Data.numAttributes());
       inst.setDataset(m_Data);
 
       return inst;
@@ -666,8 +729,8 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
             break;
           case Attribute.STRING:
             if (m_batchMode || m_retainStringValues) {
-              instance[i] = m_Data.attribute(i)
-                .addStringValue(m_Tokenizer.sval);
+              instance[i] =
+                m_Data.attribute(i).addStringValue(m_Tokenizer.sval);
             } else {
               instance[i] = 0;
               m_Data.attribute(i).setStringValue(m_Tokenizer.sval);
@@ -682,8 +745,9 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
             break;
           case Attribute.RELATIONAL:
             try {
-              ArffReader arff = new ArffReader(new StringReader(
-                m_Tokenizer.sval), m_Data.attribute(i).relation(), 0);
+              ArffReader arff =
+                new ArffReader(new StringReader(m_Tokenizer.sval), m_Data
+                  .attribute(i).relation(), 0);
               Instances data = arff.getData();
               instance[i] = m_Data.attribute(i).addRelation(data);
             } catch (Exception e) {
@@ -1076,8 +1140,8 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       }
 
       try {
-        m_ArffReader = new ArffReader(m_sourceReader, 1,
-          (getRetrieval() == BATCH));
+        m_ArffReader =
+          new ArffReader(m_sourceReader, 1, (getRetrieval() == BATCH));
         m_structure = m_ArffReader.getStructure();
       } catch (Exception ex) {
         throw new IOException("Unable to determine structure as arff (Reason: "

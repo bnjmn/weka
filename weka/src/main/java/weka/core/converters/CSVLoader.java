@@ -55,7 +55,8 @@ import weka.core.Utils;
 import weka.core.converters.ArffLoader.ArffReader;
 
 /**
- * <!-- globalinfo-start --> Reads a source that is in comma separated format
+ <!-- globalinfo-start --> 
+ * Reads a source that is in comma separated format
  * (the default). One can also change the column separator from comma to tab or
  * another character, specify string enclosures, specify whether aheader row is
  * present or not and specify which attributes are to beforced to be nominal or
@@ -72,9 +73,10 @@ import weka.core.converters.ArffLoader.ArffReader;
  * values of all nominal attributes using the -L (setNominalLabelSpecs) option.
  * *
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -152,7 +154,7 @@ import weka.core.converters.ArffLoader.ArffReader;
  *  (default: 100)
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -218,6 +220,12 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
   protected ArffReader m_incrementalReader;
 
   protected transient int m_rowCount;
+
+  /**
+   * Array holding field separator and enclosures to pass through to the
+   * underlying ArffReader
+   */
+  protected String[] m_fieldSeparatorAndEnclosures;
 
   /**
    * Returns a string describing this attribute evaluator.
@@ -774,7 +782,11 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       m_numBufferedRows = m_rowBuffer.size();
       Reader batchReader =
         new BufferedReader(new StringReader(tempB.toString()));
-      m_incrementalReader = new ArffReader(batchReader, m_structure, 0, 0);
+
+      m_incrementalReader =
+        new ArffReader(batchReader, m_structure, 0, 0,
+          m_fieldSeparatorAndEnclosures);
+
       m_rowBuffer.clear();
     }
 
@@ -848,7 +860,9 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     makeStructure();
 
     Reader sr = new BufferedReader(new FileReader(m_tempFile));
-    ArffReader initialArff = new ArffReader(sr, m_structure, 0);
+    ArffReader initialArff =
+      new ArffReader(sr, m_structure, 0, m_fieldSeparatorAndEnclosures);
+
     Instances initialInsts = initialArff.getData();
     sr.close();
     initialArff = null;
@@ -919,6 +933,8 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     if (m_sourceReader == null) {
       throw new IOException("No source has been specified");
     }
+
+    m_fieldSeparatorAndEnclosures = separatorAndEnclosuresToArray();
 
     if (m_structure == null) {
       readHeader();
@@ -1174,6 +1190,28 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
 
   protected void dumpRow(String row) throws IOException {
     m_dataDumper.println(row);
+  }
+
+  /**
+   * Assemble the field separator and enclosures into an array of Strings
+   * 
+   * @return the field separator and enclosures as an array of strings
+   */
+  private String[] separatorAndEnclosuresToArray() {
+    String[] parts = m_Enclosures.split(",");
+
+    String[] result = new String[parts.length + 1];
+    result[0] = m_FieldSeparator;
+    int index = 1;
+    for (String e : parts) {
+      if (e.length() > 1 || e.length() == 0) {
+        throw new IllegalArgumentException(
+          "Enclosures can only be single characters");
+      }
+      result[index++] = e;
+    }
+
+    return result;
   }
 
   /**
