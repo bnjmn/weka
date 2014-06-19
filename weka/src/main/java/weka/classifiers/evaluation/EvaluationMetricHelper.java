@@ -107,10 +107,12 @@ public class EvaluationMetricHelper {
     List<AbstractEvaluationMetric> pluginMetrics =
       AbstractEvaluationMetric.getPluginMetrics();
 
-    for (AbstractEvaluationMetric m : pluginMetrics) {
-      List<String> statNames = m.getStatisticNames();
-      for (String s : statNames) {
-        pluginNames.add(s.toLowerCase());
+    if (pluginMetrics != null) {
+      for (AbstractEvaluationMetric m : pluginMetrics) {
+        List<String> statNames = m.getStatisticNames();
+        for (String s : statNames) {
+          pluginNames.add(s.toLowerCase());
+        }
       }
     }
 
