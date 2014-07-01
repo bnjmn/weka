@@ -44,8 +44,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import weka.core.Attribute;
 import weka.core.ChartUtils;
-import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instances;
+import weka.core.stats.NumericAttributeBinData;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
@@ -217,7 +217,7 @@ public class CSVToArffHeaderHadoopReducer extends
         CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
 
       Map<Integer, NumericAttributeBinData> numericBinStats =
-        new HashMap<Integer, ChartUtils.NumericAttributeBinData>();
+        new HashMap<Integer, NumericAttributeBinData>();
       for (int i = 0; i < headerWithoutSummary.numAttributes(); i++) {
         Attribute a = headerWithoutSummary.attribute(i);
         if (a.isNumeric()) {

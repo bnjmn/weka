@@ -34,10 +34,10 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 import weka.core.Attribute;
-import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.stats.ArffSummaryNumericMetric;
+import weka.core.stats.NumericAttributeBinData;
 import weka.core.stats.QuantileCalculator;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderReduceTask;
