@@ -43,6 +43,7 @@ import weka.core.Environment;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.core.stats.ArffSummaryNumericMetric;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.WekaClassifierEvaluationMapTask;
@@ -166,9 +167,9 @@ public class WekaFoldBasedClassifierEvaluationHadoopMapper extends
           priorsCount = classAtt.numValues();
         } else {
 
-          double count = CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.COUNT
+          double count = ArffSummaryNumericMetric.COUNT
             .valueFromAttribute(summaryClassAtt);
-          double sum = CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.SUM
+          double sum = ArffSummaryNumericMetric.SUM
             .valueFromAttribute(summaryClassAtt);
 
           priors[0] = sum;
