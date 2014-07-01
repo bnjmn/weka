@@ -357,8 +357,9 @@ public class WekaClassifierMapTask implements OptionHandler,
           nM--;
         }
 
-        int totalClassifiersRequested = ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
-          .getNumIterations();
+        int totalClassifiersRequested =
+          ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
+            .getNumIterations();
 
         int classifiersPerMap = totalClassifiersRequested / nM;
         if (classifiersPerMap < 1) {
@@ -779,12 +780,14 @@ public class WekaClassifierMapTask implements OptionHandler,
 
       if (m_classifier instanceof UpdateableClassifier
         && !getForceBatchLearningForUpdateableClassifiers()) {
-        AggregateableFilteredClassifierUpdateable ag = new AggregateableFilteredClassifierUpdateable();
+        AggregateableFilteredClassifierUpdateable ag =
+          new AggregateableFilteredClassifierUpdateable();
         ag.setClassifier(getClassifier());
         ag.setPreConstructedFilter(baseFilter);
         m_classifier = ag;
       } else {
-        AggregateableFilteredClassifier ag = new AggregateableFilteredClassifier();
+        AggregateableFilteredClassifier ag =
+          new AggregateableFilteredClassifier();
         ag.setClassifier(getClassifier());
         ag.setPreConstructedFilter(baseFilter);
         // we don't use setClassifier() here as this would now screw up
@@ -832,7 +835,7 @@ public class WekaClassifierMapTask implements OptionHandler,
   /**
    * Initialize the map task
    * 
-   * @param trainingHeader the header of the incoming training data
+   * @param trainingHeader the header of the incoming training data.
    * @throws DistributedWekaException if something goes wrong
    */
   public void setup(Instances trainingHeader) throws DistributedWekaException {
@@ -1009,8 +1012,9 @@ public class WekaClassifierMapTask implements OptionHandler,
       }
 
       String trainingPath = Utils.getOption("t", args);
-      Instances train = new Instances(new java.io.BufferedReader(
-        new java.io.FileReader(trainingPath)));
+      Instances train =
+        new Instances(new java.io.BufferedReader(new java.io.FileReader(
+          trainingPath)));
       train.setClassIndex(train.numAttributes() - 1);
 
       task.setOptions(args);

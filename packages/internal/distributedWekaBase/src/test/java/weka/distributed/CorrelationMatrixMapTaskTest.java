@@ -43,8 +43,8 @@ import weka.core.Utils;
  */
 public class CorrelationMatrixMapTaskTest {
   public static final String IRIS_HEADER = "@relation iris\n"
-    + "@attribute petallength numeric\n" + "@attribute petalwidth numeric\n"
     + "@attribute sepallength numeric\n" + "@attribute sepalwidth numeric\n"
+    + "@attribute petallength numeric\n" + "@attribute petalwidth numeric\n"
     + "@attribute class {Iris-setosa, Iris-versicolor, Iris-virginica}\n"
     + "@data\n";
 
@@ -175,14 +175,15 @@ public class CorrelationMatrixMapTaskTest {
     + "29, 4, 20, 2.0, 1,  8,   7.91,  7.91\n"
     + "36, 4, 20, 2.0, 1,  8,  15.58, 15.58\n";
 
-  protected Instances getIris() throws IOException {
+  protected static Instances getIris() throws IOException {
     Instances iris = new Instances(new BufferedReader(new StringReader(IRIS)));
 
     return iris;
   }
 
-  protected Instances getBolts() throws IOException {
-    Instances bolts = new Instances(new BufferedReader(new StringReader(BOLTS)));
+  protected static Instances getBolts() throws IOException {
+    Instances bolts =
+      new Instances(new BufferedReader(new StringReader(BOLTS)));
 
     return bolts;
   }
@@ -215,7 +216,8 @@ public class CorrelationMatrixMapTaskTest {
 
   protected void checkAgainstUtilsCorr(double[][] matrix, Instances orig,
     Instances withSummary, boolean deleteClassIfSet) throws Exception {
-    CorrelationMatrixRowReduceTask reduce = new CorrelationMatrixRowReduceTask();
+    CorrelationMatrixRowReduceTask reduce =
+      new CorrelationMatrixRowReduceTask();
     double[][] finalM = new double[matrix.length][];
     for (int i = 0; i < matrix.length; i++) {
       List<double[]> toAgg = new ArrayList<double[]>();

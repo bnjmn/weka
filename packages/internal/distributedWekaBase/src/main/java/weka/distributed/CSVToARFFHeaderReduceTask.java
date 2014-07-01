@@ -34,10 +34,13 @@ import java.util.Map;
 import weka.core.Attribute;
 import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instances;
-import weka.core.QuantileCalculator;
 import weka.core.Utils;
-import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
-import weka.distributed.CSVToARFFHeaderMapTask.NumericStats;
+import weka.core.stats.ArffSummaryNumericMetric;
+import weka.core.stats.NominalStats;
+import weka.core.stats.NumericStats;
+import weka.core.stats.QuantileCalculator;
+import weka.core.stats.Stats;
+import weka.core.stats.StringStats;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
@@ -408,7 +411,7 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
     throws IllegalArgumentException {
 
     NumericStats ns = NumericStats.attributeToStats(a);
-    return ns.m_stats;
+    return ns.getStats();
 
   }
 
@@ -424,8 +427,8 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
     List<Instances> headers, Instances masterHeaderCheck)
     throws DistributedWekaException {
     List<Attribute> aggregated = new ArrayList<Attribute>();
-    Map<String, CSVToARFFHeaderMapTask.Stats> aggStats =
-      new LinkedHashMap<String, CSVToARFFHeaderMapTask.Stats>();
+    Map<String, Stats> aggStats =
+      new LinkedHashMap<String, Stats>();
 
     int index = -1;
 
@@ -458,11 +461,11 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
 
         if (original.isNumeric()) {
           double[] currentStats = attributeToStatsArray(current);
-          CSVToARFFHeaderMapTask.NumericStats ns =
-            (CSVToARFFHeaderMapTask.NumericStats) aggStats.get(original.name());
+          NumericStats ns =
+            (NumericStats) aggStats.get(original.name());
           if (ns == null) {
-            ns = new CSVToARFFHeaderMapTask.NumericStats(original.name());
-            ns.m_stats = currentStats;
+            ns = new NumericStats(original.name());
+            ns.setStats(currentStats);
             aggStats.put(original.name(), ns);
           } else {
             for (ArffSummaryNumericMetric m : ArffSummaryNumericMetric.values()) {
@@ -470,24 +473,24 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
                 || m == ArffSummaryNumericMetric.SUM
                 || m == ArffSummaryNumericMetric.SUMSQ
                 || m == ArffSummaryNumericMetric.MISSING) {
-                ns.m_stats[m.ordinal()] += currentStats[m.ordinal()];
+                ns.getStats()[m.ordinal()] += currentStats[m.ordinal()];
               } else if (m == ArffSummaryNumericMetric.MIN) {
-                if (currentStats[m.ordinal()] < ns.m_stats[m.ordinal()]) {
-                  ns.m_stats[m.ordinal()] = currentStats[m.ordinal()];
+                if (currentStats[m.ordinal()] < ns.getStats()[m.ordinal()]) {
+                  ns.getStats()[m.ordinal()] = currentStats[m.ordinal()];
                 }
               } else if (m == ArffSummaryNumericMetric.MAX) {
-                if (currentStats[m.ordinal()] > ns.m_stats[m.ordinal()]) {
-                  ns.m_stats[m.ordinal()] = currentStats[m.ordinal()];
+                if (currentStats[m.ordinal()] > ns.getStats()[m.ordinal()]) {
+                  ns.getStats()[m.ordinal()] = currentStats[m.ordinal()];
                 }
               }
             }
           }
-        } else {
+        } else if (original.isNominal()) {
           // nominal original attribute
-          CSVToARFFHeaderMapTask.NominalStats ns =
-            (CSVToARFFHeaderMapTask.NominalStats) aggStats.get(original.name());
+          NominalStats ns =
+            (NominalStats) aggStats.get(original.name());
           if (ns == null) {
-            ns = new CSVToARFFHeaderMapTask.NominalStats(original.name());
+            ns = new NominalStats(original.name());
             aggStats.put(original.name(), ns);
           }
 
@@ -518,7 +521,7 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
               try {
                 double fC = Double.parseDouble(freqCount);
                 if (label
-                  .equals(CSVToARFFHeaderMapTask.NominalStats.MISSING_LABEL)) {
+                  .equals(NominalStats.MISSING_LABEL)) {
                   ns.add(null, fC);
                 } else {
                   ns.add(label, fC);
@@ -528,17 +531,65 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
               }
             }
           }
+        } else if (original.isString()) {
+          StringStats currentStringStats =
+            StringStats.attributeToStats(current);
+
+          StringStats ss =
+            (StringStats) aggStats.get(original.name());
+
+          if (ss == null) {
+            // ss = new CSVToARFFHeaderMapTask.StringStats(original.name());
+            aggStats.put(original.name(), currentStringStats);
+          } else {
+            for (ArffSummaryNumericMetric m : ArffSummaryNumericMetric.values()) {
+              if (m == ArffSummaryNumericMetric.COUNT
+                || m == ArffSummaryNumericMetric.SUM
+                || m == ArffSummaryNumericMetric.SUMSQ
+                || m == ArffSummaryNumericMetric.MISSING) {
+                ss.getStringLengthStats().getStats()[m.ordinal()] +=
+                  currentStringStats.getStringLengthStats().getStats()[m
+                    .ordinal()];
+                ss.getWordCountStats().getStats()[m.ordinal()] +=
+                  currentStringStats.getWordCountStats().getStats()[m.ordinal()];
+              } else if (m == ArffSummaryNumericMetric.MIN) {
+                if (currentStringStats.getStringLengthStats().getStats()[m
+                  .ordinal()] < ss.getStringLengthStats().getStats()[m
+                  .ordinal()]) {
+                  ss.getStringLengthStats().getStats()[m.ordinal()] =
+                    currentStringStats.getStringLengthStats().getStats()[m
+                      .ordinal()];
+                  ss.getWordCountStats().getStats()[m.ordinal()] =
+                    currentStringStats.getWordCountStats().getStats()[m
+                      .ordinal()];
+                }
+              } else if (m == ArffSummaryNumericMetric.MAX) {
+                if (currentStringStats.getStringLengthStats().getStats()[m
+                  .ordinal()] > ss.getStringLengthStats().getStats()[m
+                  .ordinal()]) {
+                  ss.getStringLengthStats().getStats()[m.ordinal()] =
+                    currentStringStats.getStringLengthStats().getStats()[m
+                      .ordinal()];
+                  ss.getWordCountStats().getStats()[m.ordinal()] =
+                    currentStringStats.getWordCountStats().getStats()[m
+                      .ordinal()];
+                }
+              }
+            }
+          }
         }
       }
     }
 
-    for (Map.Entry<String, CSVToARFFHeaderMapTask.Stats> e : aggStats
+    for (Map.Entry<String, Stats> e : aggStats
       .entrySet()) {
-      CSVToARFFHeaderMapTask.Stats stats = e.getValue();
+      Stats stats = e.getValue();
 
-      if (stats instanceof CSVToARFFHeaderMapTask.NumericStats) {
+      if (stats instanceof NumericStats) {
         // derived stats
-        ((CSVToARFFHeaderMapTask.NumericStats) stats).computeDerived();
+        ((NumericStats) stats).computeDerived();
+      } else if (stats instanceof StringStats) {
+        ((StringStats) stats).computeDerived();
       }
       Attribute newAtt = stats.makeAttribute();
       aggregated.add(newAtt);

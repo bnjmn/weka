@@ -36,8 +36,10 @@ import org.junit.Test;
 import weka.core.Attribute;
 import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instances;
-import weka.core.QuantileCalculator;
-import weka.distributed.CSVToARFFHeaderMapTask.NumericStats;
+import weka.core.stats.ArffSummaryNumericMetric;
+import weka.core.stats.NumericStats;
+import weka.core.stats.QuantileCalculator;
+import weka.core.stats.StringStats;
 
 /**
  * Tests the CSVToARFFHeaderMapTask and the CSVToARFFHeaderReduceTask.
@@ -47,7 +49,7 @@ import weka.distributed.CSVToARFFHeaderMapTask.NumericStats;
  */
 public class CSVToARFFHeaderMapTaskTest {
   public static final String IRIS_HEADER =
-    "petallength,petalwidth,sepallength,sepalwidth,class\n";
+    "sepallength,sepalwidth,petallength,petalwidth,class\n";
 
   public static final String IRIS = IRIS_HEADER
     + CorrelationMatrixMapTaskTest.IRIS_DATA;
@@ -97,6 +99,66 @@ public class CSVToARFFHeaderMapTaskTest {
   }
 
   @Test
+  public void testProcessCSVSummaryAttributesWithStringAttribute()
+    throws Exception {
+    CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
+    task.setComputeSummaryStats(true);
+    task.setStringAttributes("last");
+
+    BufferedReader br = new BufferedReader(new StringReader(IRIS));
+
+    String line = br.readLine();
+    String[] names = line.split(",");
+    List<String> attNames = new ArrayList<String>();
+    for (String s : names) {
+      attNames.add(s);
+    }
+
+    while ((line = br.readLine()) != null) {
+      task.processRow(line, attNames);
+    }
+
+    br.close();
+
+    Instances header = task.getHeader();
+
+    // check that the summary att has 16 values - i.e.
+    // 8 summary stats for the string length and 8 for
+    // the word count
+    assertEquals(16, header.attribute(9).numValues());
+
+    StringStats stats = StringStats.attributeToStats(header.attribute(9));
+
+    assertEquals(
+      150,
+      (int) stats.getStringLengthStats().getStats()[ArffSummaryNumericMetric.COUNT
+        .ordinal()]);
+
+    assertEquals(150,
+      (int) stats.getWordCountStats().getStats()[ArffSummaryNumericMetric.COUNT
+        .ordinal()]);
+
+    // derived metrics should all be zero at this stage
+    assertTrue(stats.getStringLengthStats().getStats()[ArffSummaryNumericMetric.STDDEV
+      .ordinal()] == 0);
+
+    // reduce to compute derived metrics
+    CSVToARFFHeaderReduceTask arffReduce = new CSVToARFFHeaderReduceTask();
+    List<Instances> instList = new ArrayList<Instances>();
+    instList.add(task.getHeader());
+    header = arffReduce.aggregate(instList);
+
+    stats = StringStats.attributeToStats(header.attribute(9));
+    assertTrue(Math
+      .abs(stats.getStringLengthStats().getStats()[ArffSummaryNumericMetric.MEAN
+        .ordinal()] - 13.333333) < TOL);
+
+    assertTrue(Math
+      .abs(stats.getStringLengthStats().getStats()[ArffSummaryNumericMetric.STDDEV
+        .ordinal()] - 1.7053672) < TOL);
+  }
+
+  @Test
   public void testProcessCSVSummaryAttributes() throws Exception {
     CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
     task.setComputeSummaryStats(true);
@@ -127,11 +189,11 @@ public class CSVToARFFHeaderMapTaskTest {
     }
 
     // check stats for petallength
-    CSVToARFFHeaderMapTask.NumericStats s =
-      CSVToARFFHeaderMapTask.NumericStats.attributeToStats(header.attribute(5));
+    NumericStats s =
+      NumericStats.attributeToStats(header.attribute(5));
 
     // derived metrics in summary attributes should all be zero
-    assertTrue(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.STDDEV
+    assertTrue(s.getStats()[ArffSummaryNumericMetric.STDDEV
       .ordinal()] == 0);
 
     // reduce to compute derived metrics
@@ -141,30 +203,30 @@ public class CSVToARFFHeaderMapTaskTest {
     header = arffReduce.aggregate(instList);
 
     s =
-      CSVToARFFHeaderMapTask.NumericStats.attributeToStats(header.attribute(5));
+      NumericStats.attributeToStats(header.attribute(5));
     assertEquals(150,
-      (int) s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.COUNT
+      (int) s.getStats()[ArffSummaryNumericMetric.COUNT
         .ordinal()]);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.SUM
+      .abs(s.getStats()[ArffSummaryNumericMetric.SUM
         .ordinal()] - 876.5) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.SUMSQ
+      .abs(s.getStats()[ArffSummaryNumericMetric.SUMSQ
         .ordinal()] - 5223.849999999998) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MIN
+      .abs(s.getStats()[ArffSummaryNumericMetric.MIN
         .ordinal()] - 4.3) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MAX
+      .abs(s.getStats()[ArffSummaryNumericMetric.MAX
         .ordinal()] - 7.9) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MEAN
+      .abs(s.getStats()[ArffSummaryNumericMetric.MEAN
         .ordinal()] - 5.843333333333335) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MISSING
+      .abs(s.getStats()[ArffSummaryNumericMetric.MISSING
         .ordinal()] - 0) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.STDDEV
+      .abs(s.getStats()[ArffSummaryNumericMetric.STDDEV
         .ordinal()] - 0.8280661279778435) < TOL);
   }
 
@@ -230,26 +292,26 @@ public class CSVToARFFHeaderMapTaskTest {
         header, quartiles, histMaps);
 
     // test a few quartiles
-    Attribute petallengthSummary =
+    Attribute sepallengthSummary =
       updatedHeader
         .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
-          + "petallength");
+          + "sepallength");
     double median =
-      CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MEDIAN
-        .valueFromAttribute(petallengthSummary);
+      ArffSummaryNumericMetric.MEDIAN
+        .valueFromAttribute(sepallengthSummary);
     assertEquals(5.87387, median, 0.0001);
 
     double lowerQuartile =
-      CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.FIRSTQUARTILE
-        .valueFromAttribute(petallengthSummary);
+      ArffSummaryNumericMetric.FIRSTQUARTILE
+        .valueFromAttribute(sepallengthSummary);
     assertEquals(5.31787, lowerQuartile, 0.0001);
 
     double upperQuartile =
-      CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.THIRDQUARTILE
-        .valueFromAttribute(petallengthSummary);
+      ArffSummaryNumericMetric.THIRDQUARTILE
+        .valueFromAttribute(sepallengthSummary);
     assertEquals(6.49559, upperQuartile, 0.0001);
 
-    NumericStats stats = NumericStats.attributeToStats(petallengthSummary);
+    NumericStats stats = NumericStats.attributeToStats(sepallengthSummary);
   }
 
   @Test
@@ -301,31 +363,31 @@ public class CSVToARFFHeaderMapTaskTest {
     instList.add(task2.getHeader());
     Instances header = arffReduce.aggregate(instList);
 
-    CSVToARFFHeaderMapTask.NumericStats s =
-      CSVToARFFHeaderMapTask.NumericStats.attributeToStats(header.attribute(5));
+    NumericStats s =
+      NumericStats.attributeToStats(header.attribute(5));
     assertEquals(150,
-      (int) s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.COUNT
+      (int) s.getStats()[ArffSummaryNumericMetric.COUNT
         .ordinal()]);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.SUM
+      .abs(s.getStats()[ArffSummaryNumericMetric.SUM
         .ordinal()] - 876.5) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.SUMSQ
+      .abs(s.getStats()[ArffSummaryNumericMetric.SUMSQ
         .ordinal()] - 5223.849999999998) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MIN
+      .abs(s.getStats()[ArffSummaryNumericMetric.MIN
         .ordinal()] - 4.3) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MAX
+      .abs(s.getStats()[ArffSummaryNumericMetric.MAX
         .ordinal()] - 7.9) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MEAN
+      .abs(s.getStats()[ArffSummaryNumericMetric.MEAN
         .ordinal()] - 5.843333333333335) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.MISSING
+      .abs(s.getStats()[ArffSummaryNumericMetric.MISSING
         .ordinal()] - 0) < TOL);
     assertTrue(Math
-      .abs(s.getStats()[CSVToARFFHeaderMapTask.ArffSummaryNumericMetric.STDDEV
+      .abs(s.getStats()[ArffSummaryNumericMetric.STDDEV
         .ordinal()] - 0.8280661279778435) < TOL);
   }
 
@@ -379,7 +441,6 @@ public class CSVToARFFHeaderMapTaskTest {
 
     Attribute newAtt = s.makeAttribute();
 
-    System.err.println(newAtt);
     assertEquals("Label1:2.0!Label2:0.0!Label3:10.0",
       newAtt.value(newAtt.numValues() - 1));
 
@@ -395,6 +456,7 @@ public class CSVToARFFHeaderMapTaskTest {
       t.testProcessCSVSummaryAttributesTwoMapTasks();
       t.testProcessCSVSummaryAttributesPlusQuartiles();
       t.testNumericStatsWithHistograms();
+      t.testProcessCSVSummaryAttributesWithStringAttribute();
     } catch (Exception ex) {
       ex.printStackTrace();
     }

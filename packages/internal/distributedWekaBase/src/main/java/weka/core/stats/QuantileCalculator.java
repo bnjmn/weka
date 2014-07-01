@@ -19,7 +19,7 @@
  *
  */
 
-package weka.core;
+package weka.core.stats;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,7 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import weka.core.Attribute;
 import weka.core.ChartUtils.NumericAttributeBinData;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * Class for maintaining quantile estimators for all the numeric attributes in a

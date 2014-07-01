@@ -54,8 +54,8 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.tc33.jheatchart.HeatChart;
 
 import weka.core.matrix.Matrix;
-import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
-import weka.distributed.CSVToARFFHeaderMapTask.NominalStats;
+import weka.core.stats.ArffSummaryNumericMetric;
+import weka.core.stats.NominalStats;
 
 /**
  * Utility routines for plotting various charts using the JFreeChart library.

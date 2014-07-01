@@ -83,7 +83,7 @@ public class WekaScoringTaskTest {
 
     assertTrue(task.getMissingMismatchAttributeInfo().length() > 0);
     assertTrue(task.getMissingMismatchAttributeInfo().equals(
-      "petallength missing from incoming data\n"));
+      "sepallength missing from incoming data\n"));
     assertEquals(3, task.getPredictionLabels().size());
 
     for (int i = 0; i < test.numInstances(); i++) {

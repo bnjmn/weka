@@ -33,7 +33,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.distributed.CSVToARFFHeaderMapTask.ArffSummaryNumericMetric;
+import weka.core.stats.ArffSummaryNumericMetric;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 

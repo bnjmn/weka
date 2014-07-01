@@ -19,16 +19,18 @@
  *
  */
 
-package weka.core;
+package weka.core.stats;
 
 import java.util.Arrays;
 
+import weka.core.AttributeStats;
+import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
 
 /**
- <!-- globalinfo-start --> 
- <!-- globalinfo-end -->
+ * <!-- globalinfo-start --> <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$

@@ -33,8 +33,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -47,6 +45,11 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.stats.ArffSummaryNumericMetric;
+import weka.core.stats.NominalStats;
+import weka.core.stats.NumericStats;
+import weka.core.stats.Stats;
+import weka.core.stats.StringStats;
 import au.com.bytecode.opencsv.CSVParser;
 
 /**
@@ -76,635 +79,6 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    */
   protected enum TYPE {
     UNDETERMINED, NUMERIC, NOMINAL, STRING, DATE;
-  }
-
-  /**
-   * An enumerated utility type for the various numeric summary metrics that are
-   * computed.
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   */
-  public static enum ArffSummaryNumericMetric {
-    COUNT("count") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        String value = att.value(COUNT.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    SUM("sum") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        String value = att.value(SUM.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    SUMSQ("sumSq") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        String value = att.value(SUMSQ.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    MIN("min") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        String value = att.value(MIN.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    MAX("max") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        String value = att.value(MAX.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    MISSING("missing") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        String value = att.value(MISSING.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    MEAN("mean") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        String value = att.value(MEAN.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    STDDEV("stdDev") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        String value = att.value(STDDEV.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    FIRSTQUARTILE("firstQuartile") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        if (FIRSTQUARTILE.ordinal() > att.numValues() - 1) {
-          return Utils.missingValue();
-        }
-        String value = att.value(FIRSTQUARTILE.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    MEDIAN("median") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        if (MEDIAN.ordinal() > att.numValues() - 1) {
-          return Utils.missingValue();
-        }
-        String value = att.value(MEDIAN.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    },
-    THIRDQUARTILE("thirdQuartile") {
-      @Override
-      public double valueFromAttribute(Attribute att) {
-        if (THIRDQUARTILE.ordinal() > att.numValues() - 1) {
-          return Utils.missingValue();
-        }
-        String value = att.value(THIRDQUARTILE.ordinal());
-        return toValue(value, toString());
-      }
-
-      @Override
-      public String makeAttributeValue(double value) {
-        return toString() + value;
-      }
-    };
-
-    private final String m_name;
-
-    ArffSummaryNumericMetric(String name) {
-      m_name = name + "_";
-    }
-
-    /**
-     * Extracts the value of this particular metric from the summary Attribute
-     * 
-     * @param att the summary attribute to extract the metric from
-     * @return the value of this particular metric
-     */
-    public abstract double valueFromAttribute(Attribute att);
-
-    /**
-     * Makes the internal encoded version of this metric given it's value as a
-     * double
-     * 
-     * @param value the value of the metric
-     * @return the internal representation of this metric
-     */
-    public abstract String makeAttributeValue(double value);
-
-    @Override
-    public String toString() {
-      return m_name;
-    }
-
-    /**
-     * Extracts the value of the metric from the string representation
-     * 
-     * @param v the string representation
-     * @param name the name of the attribute that the metric belongs to
-     * @return the value of the metric
-     */
-    double toValue(String v, String name) {
-      v = v.replace(name, "");
-
-      return Double.parseDouble(v);
-    }
-  }
-
-  /**
-   * Stats base class for the numeric and nominal summary meta data
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   * @version $Revision$
-   */
-  public abstract static class Stats implements Serializable {
-
-    /** For serialization */
-    private static final long serialVersionUID = 3662688283840145572L;
-
-    /** The name of the attribute that this Stats pertains to */
-    protected String m_attributeName = "";
-
-    /**
-     * Construct a new Stats
-     * 
-     * @param attributeName the name of the attribute that this Stats pertains
-     *          to
-     */
-    public Stats(String attributeName) {
-      m_attributeName = attributeName;
-    }
-
-    /**
-     * Get the name of the attribute that this Stats pertains to
-     * 
-     * @return the name of the attribute
-     */
-    public String getName() {
-      return m_attributeName;
-    }
-
-    /**
-     * Makes a Attribute that encapsulates the meta data
-     * 
-     * @return an Attribute that encapsulates the meta data
-     */
-    public abstract Attribute makeAttribute();
-
-  }
-
-  /**
-   * Class for computing numeric stats
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   * @version $Revision$
-   */
-  public static class NumericStats extends Stats implements Serializable {
-
-    /** For serialization */
-    private static final long serialVersionUID = 5328158049841703129L;
-
-    /** Holds the actual stats values */
-    protected double[] m_stats =
-      new double[ArffSummaryNumericMetric.values().length];
-
-    /** Labels for a histogram */
-    List<String> m_binLabels;
-
-    /** Bin frequencies */
-    List<Double> m_binFreqs;
-
-    /**
-     * Constructs a new NumericStats
-     * 
-     * @param attributeName the name of the attribute that these statistics are
-     *          for
-     */
-    public NumericStats(String attributeName) {
-      super(attributeName);
-
-      m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = Utils.missingValue();
-      m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = Utils.missingValue();
-      m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
-        Utils.missingValue();
-      m_stats[ArffSummaryNumericMetric.MEDIAN.ordinal()] = Utils.missingValue();
-      m_stats[ArffSummaryNumericMetric.THIRDQUARTILE.ordinal()] =
-        Utils.missingValue();
-    }
-
-    /**
-     * Return the array of statistics
-     * 
-     * @return the array of statistics
-     */
-    public double[] getStats() {
-      return m_stats;
-    }
-
-    /**
-     * Set histogram data for this numeric stats
-     * 
-     * @param labs bin labels
-     * @param freqs bin frequencies
-     */
-    public void setHistogramData(List<String> labs, List<Double> freqs) {
-      m_binLabels = labs;
-      m_binFreqs = freqs;
-    }
-
-    /**
-     * Get the histogram labels
-     * 
-     * @return the list of histogram labels or null if not set
-     */
-    public List<String> getHistogramBinLabels() {
-      return m_binLabels;
-    }
-
-    /**
-     * Get the histogram bin frequencies
-     * 
-     * @return the list of histogram bin frequencies or null if not set
-     */
-    public List<Double> getHistogramFrequencies() {
-      return m_binFreqs;
-    }
-
-    @Override
-    public Attribute makeAttribute() {
-      ArrayList<String> vals = new ArrayList<String>();
-
-      for (ArffSummaryNumericMetric m : ArffSummaryNumericMetric.values()) {
-        if (m.ordinal() > m_stats.length - 1) {
-          continue;
-        }
-        if (m == ArffSummaryNumericMetric.FIRSTQUARTILE
-          || m == ArffSummaryNumericMetric.MEDIAN
-          || m == ArffSummaryNumericMetric.THIRDQUARTILE) {
-          if (Utils
-            .isMissingValue(m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE
-              .ordinal()])
-            && Utils.isMissingValue(m_stats[ArffSummaryNumericMetric.MEDIAN
-              .ordinal()])
-            && Utils
-              .isMissingValue(m_stats[ArffSummaryNumericMetric.THIRDQUARTILE
-                .ordinal()])) {
-            continue;
-          }
-        }
-        String v = m.makeAttributeValue(m_stats[m.ordinal()]);
-        vals.add(v);
-      }
-
-      // histogram (if present)
-      if (m_binLabels != null && m_binLabels.size() > 0) {
-        StringBuilder b = new StringBuilder();
-        for (int i = 0; i < m_binLabels.size(); i++) {
-          String v = m_binLabels.get(i) + ":" + m_binFreqs.get(i);
-          b.append(v);
-          if (i < m_binLabels.size() - 1) {
-            b.append("!");
-          }
-        }
-        vals.add(b.toString());
-      }
-
-      Attribute a =
-        new Attribute(ARFF_SUMMARY_ATTRIBUTE_PREFIX + m_attributeName, vals);
-      return a;
-    }
-
-    /**
-     * Convert a summary meta attribute into a NumericStats object
-     * 
-     * @param a the summary meta attribute to convert
-     * @return a NumericStats instance
-     * @throws IllegalArgumentException if a problem occurs
-     */
-    public static NumericStats attributeToStats(Attribute a)
-      throws IllegalArgumentException {
-      if (!a.isNominal()) {
-        throw new IllegalArgumentException("Stats attribute is not nominal!");
-      }
-
-      // we assume that either just the set of aggregateable stats will
-      // be present or all the stats (i.e. + quartiles and histogram)
-      if (a.numValues() != ArffSummaryNumericMetric.values().length + 1
-        && a.numValues() != ArffSummaryNumericMetric.values().length - 3) {
-        throw new IllegalArgumentException("Was expecting there to be either "
-          + (ArffSummaryNumericMetric.values().length + 1) + " or "
-          + (ArffSummaryNumericMetric.values().length - 3)
-          + " values in a summary attribute, but found " + a.numValues());
-      }
-
-      double[] stats = new double[ArffSummaryNumericMetric.values().length];
-      stats[ArffSummaryNumericMetric.MIN.ordinal()] = Utils.missingValue();
-      stats[ArffSummaryNumericMetric.MAX.ordinal()] = Utils.missingValue();
-      stats[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
-        Utils.missingValue();
-      stats[ArffSummaryNumericMetric.MEDIAN.ordinal()] = Utils.missingValue();
-      stats[ArffSummaryNumericMetric.THIRDQUARTILE.ordinal()] =
-        Utils.missingValue();
-
-      for (ArffSummaryNumericMetric m : ArffSummaryNumericMetric.values()) {
-
-        if (m.ordinal() < a.numValues()) {
-          String v = a.value(m.ordinal());
-
-          double value = m.toValue(v, m.toString());
-          stats[m.ordinal()] = value;
-        }
-      }
-
-      List<String> histLabs = null;
-      List<Double> histFreqs = null;
-      if (a.numValues() > ArffSummaryNumericMetric.values().length) {
-        String hist = a.value(a.numValues() - 1);
-        histLabs = new ArrayList<String>();
-        histFreqs = new ArrayList<Double>();
-
-        String[] parts = hist.split("!");
-        for (String p : parts) {
-          String[] entry = p.split(":");
-          histLabs.add(entry[0]);
-          histFreqs.add(Double.parseDouble(entry[1]));
-        }
-      }
-
-      NumericStats s =
-        new NumericStats(a.name().replace(ARFF_SUMMARY_ATTRIBUTE_PREFIX, ""));
-      s.m_stats = stats;
-      s.setHistogramData(histLabs, histFreqs);
-
-      return s;
-    }
-
-    /**
-     * Compute the derived statistics
-     */
-    public void computeDerived() {
-      double count = m_stats[ArffSummaryNumericMetric.COUNT.ordinal()];
-      double sum = m_stats[ArffSummaryNumericMetric.SUM.ordinal()];
-      double sumSq = m_stats[ArffSummaryNumericMetric.SUMSQ.ordinal()];
-      double mean = 0;
-
-      double stdDev = 0;
-      if (count > 0) {
-        mean = sum / count;
-        // stdDev = Double.POSITIVE_INFINITY;
-        if (count > 1) {
-          stdDev = sumSq - (sum * sum) / count;
-          stdDev /= (count - 1);
-          if (stdDev < 0) {
-            stdDev = 0;
-          }
-          stdDev = Math.sqrt(stdDev);
-        }
-      }
-
-      m_stats[ArffSummaryNumericMetric.MEAN.ordinal()] = mean;
-      m_stats[ArffSummaryNumericMetric.STDDEV.ordinal()] = stdDev;
-    }
-  }
-
-  /**
-   * Class for computing nominal statistics (primarily frequency counts)
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   * @version $Revision$
-   */
-  public static class NominalStats extends Stats implements Serializable {
-
-    /** A map of values to counts */
-    protected Map<String, Count> m_counts = new TreeMap<String, Count>();
-
-    /** The number of missing values for this nominal attribute */
-    protected double m_numMissing;
-
-    /** A "label" to use when storing the number of missing values */
-    public static final String MISSING_LABEL = "**missing**";
-
-    /** For serialization */
-    private static final long serialVersionUID = -6176046647546730423L;
-
-    /**
-     * Class that encapsulates a count for nominal value
-     * 
-     * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-     */
-    public static class Count implements Serializable {
-
-      /** For serialization */
-      private static final long serialVersionUID = 4310467271632108735L;
-
-      /** The value of the count */
-      public double m_count;
-    }
-
-    /**
-     * Constructs a new NominalStats
-     * 
-     * @param attributeName the name of the data attribute that these stats
-     *          pertain to
-     */
-    public NominalStats(String attributeName) {
-      super(attributeName);
-    }
-
-    /**
-     * Convert a summary meta attribute to a NominalStats
-     * 
-     * @param a the attribute to convert
-     * @return a NominalStats
-     * @throws IllegalArgumentException if a problem occurs
-     */
-    public static NominalStats attributeToStats(Attribute a)
-      throws IllegalArgumentException {
-
-      if (!a.isNominal()) {
-        throw new IllegalArgumentException("Stats attribute is not nominal!");
-      }
-
-      NominalStats ns = new NominalStats(a.name());
-      for (int j = 0; j < a.numValues(); j++) {
-        String v = a.value(j);
-        String label = v.substring(0, v.lastIndexOf("_"));
-        String freqCount = v.substring(v.lastIndexOf("_") + 1, v.length());
-        try {
-          double fC = Double.parseDouble(freqCount);
-          if (label.equals(CSVToARFFHeaderMapTask.NominalStats.MISSING_LABEL)) {
-            ns.add(null, fC);
-          } else {
-            ns.add(label, fC);
-          }
-        } catch (NumberFormatException n) {
-          throw new IllegalArgumentException(n);
-        }
-      }
-
-      return ns;
-    }
-
-    /**
-     * Adds to the count for a given label. If the label is null then it adds to
-     * the count for missing.
-     * 
-     * @param label the label to add the count to
-     * @param value the count to add
-     */
-    public void add(String label, double value) {
-
-      if (label == null) {
-        m_numMissing += value;
-      } else {
-
-        Count c = m_counts.get(label);
-        if (c == null) {
-          c = new Count();
-          m_counts.put(label, c);
-        }
-
-        c.m_count += value;
-      }
-    }
-
-    /**
-     * Get the set of labels seen by this NominalStats
-     * 
-     * @return the set of labels
-     */
-    public Set<String> getLabels() {
-      return m_counts.keySet();
-    }
-
-    /**
-     * Get the count for a given label
-     * 
-     * @param label the label to get the count for
-     * @return the count
-     */
-    public double getCount(String label) {
-      Count c = m_counts.get(label);
-
-      if (c == null) {
-        return Double.NaN;
-      }
-
-      return c.m_count;
-    }
-
-    /**
-     * Get the number of missing values for this attribute
-     * 
-     * @return the number of missing values seen
-     */
-    public double getNumMissing() {
-      return m_numMissing;
-    }
-
-    /**
-     * Get the index of the mode
-     * 
-     * @return the index (in the sorted list of labels) of the mode
-     */
-    public int getMode() {
-      double max = -1;
-      int maxIndex = -1;
-
-      int index = 0;
-      for (Map.Entry<String, Count> e : m_counts.entrySet()) {
-        if (e.getValue().m_count > max) {
-          max = e.getValue().m_count;
-          maxIndex = index;
-        }
-        index++;
-      }
-
-      return maxIndex;
-    }
-
-    /**
-     * Set the number of missing values for this attribute
-     * 
-     * @param missing the number of missing values
-     */
-    public void setNumMissing(double missing) {
-      m_numMissing = missing;
-    }
-
-    @Override
-    public Attribute makeAttribute() {
-      ArrayList<String> vals = new ArrayList<String>();
-
-      for (Map.Entry<String, Count> e : m_counts.entrySet()) {
-        vals.add(e.getKey() + "_" + e.getValue().m_count);
-      }
-
-      vals.add(MISSING_LABEL + "_" + m_numMissing);
-
-      Attribute a =
-        new Attribute(ARFF_SUMMARY_ATTRIBUTE_PREFIX + m_attributeName, vals);
-
-      return a;
-    }
   }
 
   /** Attribute name prefix for a summary statistics attribute */
@@ -1421,7 +795,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-                value, null, false, m_treatZeroAsMissing);
+                value, null, false, false, m_treatZeroAsMissing);
             }
           } catch (NumberFormatException ex) {
 
@@ -1442,10 +816,14 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
               if (m_computeSummaryStats) {
                 updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  toAdd, true, m_treatZeroAsMissing);
+                  toAdd, true, false, m_treatZeroAsMissing);
               }
             } else {
               m_attributeTypes[i] = TYPE.STRING;
+              if (m_computeSummaryStats) {
+                updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+                  fields[i], false, true, m_treatZeroAsMissing);
+              }
             }
           }
         } else if (m_attributeTypes[i] == TYPE.DATE) {
@@ -1458,7 +836,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
           }
           if (m_computeSummaryStats) {
             updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-              d.getTime(), null, false, m_treatZeroAsMissing);
+              d.getTime(), null, false, false, m_treatZeroAsMissing);
           }
 
         } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
@@ -1471,22 +849,27 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                toUpdate, true, m_treatZeroAsMissing);
+                toUpdate, true, false, m_treatZeroAsMissing);
             }
           } else {
             m_nominalVals.get(i).add(fields[i]);
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                fields[i], true, m_treatZeroAsMissing);
+                fields[i], true, false, m_treatZeroAsMissing);
             }
+          }
+        } else if (m_attributeTypes[i] == TYPE.STRING) {
+          if (m_computeSummaryStats) {
+            updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+              fields[i], false, true, m_treatZeroAsMissing);
           }
         }
       } else {
         // missing value
-
         if (m_computeSummaryStats) {
           updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
             Utils.missingValue(), null, m_attributeTypes[i] == TYPE.NOMINAL,
+            m_attributeTypes[i] == TYPE.STRING,
             m_treatZeroAsMissing);
         }
       }
@@ -1499,17 +882,20 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @param summaryStats the map of summary statistics
    * @param attName the name of the attribute being updated
    * @param value the value to update with (if the attribute is numeric)
-   * @param nominalLabel holds the label for the attribute (if it is nominal)
+   * @param nominalLabel holds the label/string for the attribute (if it is
+   *          nominal or string)
    * @param isNominal true if the attribute is nominal
+   * @param isString true if the attribute is a string attribute
    * @param treatZeroAsMissing treats zero as missing value for numeric
    *          attributes
    */
   public static void updateSummaryStats(Map<String, Stats> summaryStats,
     String attName, double value, String nominalLabel, boolean isNominal,
+    boolean isString,
     boolean treatZeroAsMissing) {
     Stats s = summaryStats.get(attName);
 
-    if (!isNominal) {
+    if (!isNominal && !isString) {
       // numeric attribute
       if (s == null) {
         s = new NumericStats(attName);
@@ -1517,22 +903,26 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       }
 
       NumericStats ns = (NumericStats) s;
-      if (Utils.isMissingValue(value) || (treatZeroAsMissing && value == 0)) {
-        ns.m_stats[ArffSummaryNumericMetric.MISSING.ordinal()]++;
-      } else {
-        ns.m_stats[ArffSummaryNumericMetric.COUNT.ordinal()]++;
-        ns.m_stats[ArffSummaryNumericMetric.SUM.ordinal()] += value;
-        ns.m_stats[ArffSummaryNumericMetric.SUMSQ.ordinal()] += value * value;
-        if (Double.isNaN(ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])) {
-          ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] =
-            ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
-        } else if (value < ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()]) {
-          ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = value;
-        } else if (value > ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()]) {
-          ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
-        }
-      }
-    } else {
+      ns.update(value, 1.0, treatZeroAsMissing);
+      // if (Utils.isMissingValue(value) || (treatZeroAsMissing && value == 0))
+      // {
+      // ns.m_stats[ArffSummaryNumericMetric.MISSING.ordinal()]++;
+      // } else {
+      // ns.m_stats[ArffSummaryNumericMetric.COUNT.ordinal()]++;
+      // ns.m_stats[ArffSummaryNumericMetric.SUM.ordinal()] += value;
+      // ns.m_stats[ArffSummaryNumericMetric.SUMSQ.ordinal()] += value * value;
+      // if (Double.isNaN(ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])) {
+      // ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] =
+      // ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
+      // } else if (value < ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])
+      // {
+      // ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = value;
+      // } else if (value > ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()])
+      // {
+      // ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
+      // }
+      // }
+    } else if (isNominal) {
       // nominal attribute
 
       if (s == null) {
@@ -1551,7 +941,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       if (s instanceof NumericStats) {
         double missing =
-          ((NumericStats) s).m_stats[ArffSummaryNumericMetric.MISSING.ordinal()];
+          ((NumericStats) s).getStats()[ArffSummaryNumericMetric.MISSING.ordinal()];
 
         // need to replace this with NominalStats and transfer over the missing
         // count
@@ -1561,17 +951,26 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       }
 
       NominalStats ns = (NominalStats) s;
-      if (Utils.isMissingValue(value) && nominalLabel == null) {
-        ns.add(nominalLabel, 1.0);
-      } else {
-
-        NominalStats.Count c = ns.m_counts.get(nominalLabel);
-        if (c == null) {
-          c = new NominalStats.Count();
-          ns.m_counts.put(nominalLabel, c);
-        }
-        c.m_count += value;
+      ns.add(nominalLabel, 1.0);
+//      if (Utils.isMissingValue(value) && nominalLabel == null) {
+//        ns.add(nominalLabel, 1.0);
+//      } else {
+//
+//        NominalStats.Count c = ns.m_counts.get(nominalLabel);
+//        if (c == null) {
+//          c = new NominalStats.Count();
+//          ns.m_counts.put(nominalLabel, c);
+//        }
+//        c.m_count += value;
+//      }
+    } else if (isString) {
+      if (s == null) {
+        s = new StringStats(attName);
+        summaryStats.put(attName, s);
       }
+
+      StringStats ss = (StringStats) s;
+      ss.update(nominalLabel, 1.0);
     }
   }
 
@@ -1810,6 +1209,10 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
           NominalStats ns =
             (NominalStats) m_summaryStats.get(m_attributeNames.get(i));
           attribs.add(ns.makeAttribute());
+        } else if (m_attributeTypes[i] == TYPE.STRING) {
+          StringStats ss =
+            (StringStats) m_summaryStats.get(m_attributeNames.get(i));
+          attribs.add(ss.makeAttribute());
         }
       }
     }
