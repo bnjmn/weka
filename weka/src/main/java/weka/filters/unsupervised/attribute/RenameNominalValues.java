@@ -46,11 +46,13 @@ import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> Renames the values of nominal attributes.
+ <!-- globalinfo-start --> 
+ * Renames the values of nominal attributes.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -76,7 +78,7 @@ import weka.filters.UnsupervisedFilter;
  *  Ignore case when matching nominal values
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -111,6 +113,11 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
   /** The map of nominal values and their replacements */
   protected Map<String, String> m_renameMap = new HashMap<String, String>();
 
+  /**
+   * Global help info
+   * 
+   * @return the help info for this filter
+   */
   public String globalInfo() {
     return "Renames the values of nominal attributes.";
   }
@@ -414,14 +421,15 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
       .addElement(new Option(
         "\tAttributes to act on. Can be either a range\n"
           + "\tstring (e.g. 1,2,6-10) OR a comma-separated list of named attributes\n\t"
-          + "(default none)", "R", 1, "-R"));
+          + "(default none)", "R", 1, "-R <1,2-4 | attName1,attName2,...>"));
     newVector
       .addElement(new Option(
         "\tInvert matching sense (i.e. act on all attributes other than those specified)",
         "V", 0, "-V"));
     newVector.addElement(new Option(
       "\tNominal labels and their replacement values.\n\t"
-        + "E.g. red:blue, black:white, fred:bob", "N", 1, "-N"));
+        + "E.g. red:blue, black:white, fred:bob", "N", 1,
+      "-N <label:label,label:label,...>"));
     newVector.addElement(new Option(
       "\tIgnore case when matching nominal values", "I", 0, "-I"));
 
