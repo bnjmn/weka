@@ -32,11 +32,11 @@ import java.util.List;
 import java.util.Map;
 
 import weka.core.Attribute;
-import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.stats.ArffSummaryNumericMetric;
 import weka.core.stats.NominalStats;
+import weka.core.stats.NumericAttributeBinData;
 import weka.core.stats.NumericStats;
 import weka.core.stats.QuantileCalculator;
 import weka.core.stats.Stats;

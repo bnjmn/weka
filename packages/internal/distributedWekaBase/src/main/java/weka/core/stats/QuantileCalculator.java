@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import weka.core.Attribute;
-import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instance;
 import weka.core.Instances;
 

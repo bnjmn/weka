@@ -34,9 +34,9 @@ import java.util.Map;
 import org.junit.Test;
 
 import weka.core.Attribute;
-import weka.core.ChartUtils.NumericAttributeBinData;
 import weka.core.Instances;
 import weka.core.stats.ArffSummaryNumericMetric;
+import weka.core.stats.NumericAttributeBinData;
 import weka.core.stats.NumericStats;
 import weka.core.stats.QuantileCalculator;
 import weka.core.stats.StringStats;

@@ -56,6 +56,7 @@ import org.tc33.jheatchart.HeatChart;
 import weka.core.matrix.Matrix;
 import weka.core.stats.ArffSummaryNumericMetric;
 import weka.core.stats.NominalStats;
+import weka.core.stats.NumericAttributeBinData;
 
 /**
  * Utility routines for plotting various charts using the JFreeChart library.
@@ -64,223 +65,6 @@ import weka.core.stats.NominalStats;
  * @version $Revision$
  */
 public class ChartUtils {
-
-  /**
-   * Class for managing bin data for a histogram based on an attribute
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   */
-  public static class NumericAttributeBinData implements
-    Aggregateable<NumericAttributeBinData> {
-
-    /** The name of the attribute */
-    protected String m_attName;
-
-    /** The cut points for the bins */
-    protected double[] m_binCutpoints;
-
-    /** The frequency of each bin */
-    protected double[] m_binFreqs;
-
-    /** The frequency of missing value */
-    protected double m_missingFreq;
-
-    /**
-     * Constructor
-     * 
-     * @param attName the name of the attribute
-     * @param summaryAtt the summary attribute containing the bin cutpoints and
-     *          frequencies
-     */
-    public NumericAttributeBinData(String attName, Attribute summaryAtt) {
-      m_attName = attName;
-
-      double missingFreq =
-        ArffSummaryNumericMetric.MISSING.valueFromAttribute(summaryAtt);
-
-      double numPoints =
-        ArffSummaryNumericMetric.COUNT.valueFromAttribute(summaryAtt);
-      double min = ArffSummaryNumericMetric.MIN.valueFromAttribute(summaryAtt);
-      double max = ArffSummaryNumericMetric.MAX.valueFromAttribute(summaryAtt);
-      double stdDev =
-        ArffSummaryNumericMetric.STDDEV.valueFromAttribute(summaryAtt);
-
-      setup(attName, numPoints, min, max, stdDev, missingFreq);
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param attName the name of the attribute
-     * @param numPoints the number of points that have been seen for this
-     *          attribute
-     * @param min the minimum value
-     * @param max the maximum value
-     * @param stdDev the standard deviation
-     * @param missingFreq the number of missing values
-     */
-    public NumericAttributeBinData(String attName, double numPoints,
-      double min, double max, double stdDev, double missingFreq) {
-      setup(attName, numPoints, min, max, stdDev, missingFreq);
-    }
-
-    /**
-     * Set up histogram
-     * 
-     * @param attName the name of the attribute
-     * @param numPoints the number of points seen
-     * @param min the minimum
-     * @param max the maximum
-     * @param stdDev the standard deviation
-     * @param missingFreq the number of missing values
-     */
-    protected void setup(String attName, double numPoints, double min,
-      double max, double stdDev, double missingFreq) {
-
-      m_missingFreq = missingFreq;
-      int numBins =
-        numPoints > 0 ? ChartUtils
-          .numBinsHeuristic(stdDev, numPoints, min, max) : 0;
-
-      m_binCutpoints = new double[numBins];
-      m_binFreqs = new double[numBins];
-
-      if (numBins > 0) {
-        double range = max - min;
-        double step = range / numBins;
-
-        for (int i = 0; i < numBins; i++) {
-          if (i == numBins - 1) {
-            m_binCutpoints[i] = max;
-          } else {
-            m_binCutpoints[i] = min + ((i + 1) * step);
-          }
-        }
-      }
-    }
-
-    /**
-     * Get a list of bin labels for this histogram
-     * 
-     * @return a list of bin labels
-     */
-    public List<String> getBinLabels() {
-      List<String> labs = new ArrayList<String>();
-
-      for (double c : m_binCutpoints) {
-        labs.add(Utils.doubleToString(c, 3) + "]");
-      }
-
-      return labs;
-    }
-
-    /**
-     * Get a list of bin frequencies for this histogram
-     * 
-     * @return a list of bin frequencies
-     */
-    public List<Double> getBinFreqs() {
-      List<Double> freqs = new ArrayList<Double>();
-
-      for (double f : m_binFreqs) {
-        freqs.add(f);
-      }
-
-      return freqs;
-    }
-
-    /**
-     * Get the number of missing values
-     * 
-     * @return the number of missing values
-     */
-    public double getMissingFreq() {
-      return m_missingFreq;
-    }
-
-    /**
-     * Get the name of the attribute that this histogram is for
-     * 
-     * @return the name of the attribute that this histogram is for
-     */
-    public String getAttributeName() {
-      return m_attName;
-    }
-
-    /**
-     * Add a value to the histogram. Finds the correct bin and increases the
-     * frequency
-     * 
-     * @param value the value to add
-     * @param weight the weight
-     */
-    public void addValue(double value, double weight) {
-      for (int i = 0; i < m_binCutpoints.length; i++) {
-        if (value <= m_binCutpoints[i]) {
-          m_binFreqs[i] += weight;
-          break;
-        }
-      }
-    }
-
-    @Override
-    public String toString() {
-      StringBuilder b = new StringBuilder();
-
-      List<String> labs = getBinLabels();
-      for (int i = 0; i < m_binCutpoints.length; i++) {
-        b.append(labs.get(i)).append(" : ").append("" + m_binFreqs[i])
-          .append("\n");
-      }
-
-      return b.toString();
-    }
-
-    @Override
-    public NumericAttributeBinData aggregate(NumericAttributeBinData b)
-      throws Exception {
-
-      if (!b.m_attName.equals(m_attName)) {
-        throw new Exception(
-          "Can't aggregate histograms for different attributes!");
-      }
-
-      if (b.m_binCutpoints.length != m_binCutpoints.length) {
-        throw new Exception("Can't aggregate histogram data for attribute '"
-          + m_attName + "' - differing numbers of bins");
-      }
-
-      // don't aggregate missing as this is already global (computed on
-      // the first pass over the data)
-
-      for (int i = 0; i < m_binFreqs.length; i++) {
-        m_binFreqs[i] += b.m_binFreqs[i];
-      }
-
-      return this;
-    }
-
-    @Override
-    public void finalizeAggregation() throws Exception {
-      // Nothing to do
-    }
-
-    public static void main(String[] args) {
-      try {
-        double count = 4898430;
-        double min = 0;
-        double max = 1.379963888E9;
-        double missing = 0;
-        double stdDev = 941431.170584845;
-
-        NumericAttributeBinData b =
-          new NumericAttributeBinData("test", count, min, max, stdDev, missing);
-        System.out.println(b);
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-  }
 
   /**
    * Utility method for retrieving the value of an option from a simple list of
@@ -316,30 +100,6 @@ public class ChartUtils {
     }
 
     return value;
-  }
-
-  /**
-   * Compute the number of bins for a histogram given summary stats
-   * 
-   * @param stdDev the standard deviation of the variable in question
-   * @param numPoints the number of observed data points
-   * @param min the minimum value
-   * @param max the maximum
-   * @return the number of bins
-   */
-  public static int numBinsHeuristic(double stdDev, double numPoints,
-    double min, double max) {
-    double intervalWidth =
-      3.49 * stdDev * StrictMath.pow(numPoints, (-1.0 / 3.0));
-    double range = max - min;
-    int numBins =
-      StrictMath.max(1, (int) StrictMath.round(range / intervalWidth));
-
-    if (numBins > 15) {
-      numBins = 15;
-    }
-
-    return numBins;
   }
 
   /**
@@ -760,7 +520,7 @@ public class ChartUtils {
   }
 
   public static void createAttributeChartNumeric(
-    ChartUtils.NumericAttributeBinData binStats, Attribute summaryAtt,
+    NumericAttributeBinData binStats, Attribute summaryAtt,
     OutputStream dos, int width, int height) throws IOException {
 
     double missingFreq = binStats.getMissingFreq();
