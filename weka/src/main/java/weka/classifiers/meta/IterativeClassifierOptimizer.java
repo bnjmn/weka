@@ -33,6 +33,7 @@ import weka.classifiers.IterativeClassifier;
 import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.evaluation.EvaluationMetricHelper;
+import weka.classifiers.evaluation.ThresholdProducingMetric;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
@@ -189,6 +190,13 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
    */
   protected int m_classValueIndex = -1;
 
+  /** 
+   * The thresholds to be used for classification, if the metric implements
+   * ThresholdProducingMetric.
+   */
+  protected double[] m_thresholds = null;
+      
+
   /**
    * Returns a string describing classifier
    * 
@@ -324,8 +332,11 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     boolean maximise = true;
     int numIts = 0;
     double oldResult = Double.MAX_VALUE;
-    while (true) {
+    m_thresholds = null;
+    boolean dont_stop = true;
+    while (dont_stop) {
       double result = 0;
+      double[] tempThresholds = null;
       for (int r = 0; r < m_NumRuns; r++) {
         for (int i = 0; i < m_NumFolds; i++) {
           Evaluation eval = new Evaluation(trainingSets[r][i]);
@@ -343,13 +354,28 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
           result +=
             getClassValueIndex() >= 0 ? helper.getNamedMetric(m_evalMetric,
               getClassValueIndex()) : helper.getNamedMetric(m_evalMetric);
+          double[] thresholds = helper.getNamedMetricThresholds(m_evalMetric);
+
+          // Add thresholds (if applicable) so that we can compute average thresholds later
+          if (thresholds != null) {
+            if (tempThresholds == null) {
+              tempThresholds = new double[data.numClasses()];
+            }
+            for (int j = 0; j < thresholds.length; j++) {
+              tempThresholds[j] += thresholds[j];
+            }
+          }
           if (!classifiers[r][i].next()) {
-            break; // Break out if one classifier fails to iterate
+            if (m_Debug) {
+              System.err.println("Classifier failed to iterate in cross-validation.");
+            }
+            dont_stop = false; // Break out if one classifier fails to iterate
           }
         }
       }
       if (m_Debug) {
-        System.out.println("Iteration: " + numIts + " " + "Measure: " + result);
+        System.out.println("Iteration: " + numIts + " " + "Measure: " + 
+                           (result /= (double)(m_NumFolds * m_NumRuns)));
       }
       // if (result >= oldResult) {
       double delta = maximise ? oldResult - result : result - oldResult;
@@ -358,6 +384,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       }
       oldResult = result;
       numIts++;
+      m_thresholds = tempThresholds;
     }
     classifiers = null;
     trainingSets = null;
@@ -371,6 +398,13 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     }
     ;
     m_IterativeClassifier.done();
+
+    // Compute average thresholds if applicable
+    if (m_thresholds != null) {
+      for (int j = 0; j < m_thresholds.length; j++) {
+        m_thresholds[j] /= (double) (m_NumRuns * m_NumFolds);
+      }
+    }
   }
 
   /**
@@ -379,7 +413,20 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   @Override
   public double[] distributionForInstance(Instance inst) throws Exception {
 
-    return m_IterativeClassifier.distributionForInstance(inst);
+    // Does the metric produce thresholds that need to be applied?
+    if (m_thresholds != null) {
+      double[] dist = m_IterativeClassifier.distributionForInstance(inst);
+      double[] newDist = new double[dist.length];
+      for (int i = 0; i < dist.length; i++) {
+        if (dist[i] >= m_thresholds[i]) {
+          newDist[i] = 1.0;
+        }
+      }
+      Utils.normalize(newDist); // Could have multiple 1.0 entries
+      return newDist;
+    } else {
+      return m_IterativeClassifier.distributionForInstance(inst);
+    }
   }
 
   /**
@@ -391,7 +438,18 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     if (m_IterativeClassifier == null) {
       return "No classifier built yet.";
     } else {
-      return m_IterativeClassifier.toString();
+      if (m_thresholds != null) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("Thresholds found: ");
+        for (int i = 0; i < m_thresholds.length; i++) {
+          sb.append(m_thresholds[i] + " ");
+        }
+        sb.append("\n\n");
+        sb.append(m_IterativeClassifier.toString());
+        return sb.toString();
+      } else {
+        return m_IterativeClassifier.toString();
+      }
     }
   }
 
