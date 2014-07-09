@@ -374,8 +374,14 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
         }
       }
       if (m_Debug) {
-        System.out.println("Iteration: " + numIts + " " + "Measure: " + 
+        System.err.println("Iteration: " + numIts + " " + "Measure: " + 
                            (result /= (double)(m_NumFolds * m_NumRuns)));
+        if (tempThresholds != null) {
+          System.err.print("Thresholds:");
+          for (int j = 0; j < tempThresholds.length; j++) {
+            System.err.print(" " + tempThresholds[j] / (double) (m_NumRuns * m_NumFolds));
+          }
+        }
       }
       // if (result >= oldResult) {
       double delta = maximise ? oldResult - result : result - oldResult;
