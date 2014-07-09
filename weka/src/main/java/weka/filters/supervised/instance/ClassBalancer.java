@@ -43,58 +43,21 @@ import weka.filters.SimpleBatchFilter;
 import weka.filters.SupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> Merges values of all nominal attributes among the
- * specified attributes, excluding the class attribute, using the CHAID method,
- * but without considering to re-split merged subsets. It implements Steps 1 and
- * 2 described by Kass (1980), see<br/>
- * <br/>
- * Gordon V. Kass (1980). An Exploratory Technique for Investigating Large
- * Quantities of Categorical Data. Applied Statistics. 29(2):119-127.<br/>
- * <br/>
- * Once attribute values have been merged, a chi-squared test using the
- * Bonferroni correction is applied to check if the resulting attribute is a
- * valid predictor, based on the Bonferroni multiplier in Equation 3.2 in Kass
- * (1980). If an attribute does not pass this test, all remaining values (if
- * any) are merged. Nevertheless, useless predictors can slip through without
- * being fully merged, e.g. identifier attributes.<br/>
- * <br/>
- * The code applies the Yates correction when the chi-squared statistic is
- * computed.<br/>
- * <br/>
- * Note that the algorithm is quadratic in the number of attribute values for an
- * attribute.
+ * <!-- globalinfo-start -->
+ * Reweights the instances in the data so that each class has the same total weight. The total sum of weights accross all instances will be maintained. Only the weights in the first batch of data received by this filter are changed, so it can be used with the FilteredClassifier.
  * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ * <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -D
- *  Turns on output of debugging information.
- * </pre>
+ * <pre> -output-debug-info
+ *  If set, filter is run in debug mode and
+ *  may output additional info to the console</pre>
  * 
- * <pre>
- * -L &lt;double&gt;
- *  The significance level (default: 0.05).
- * </pre>
- * 
- * <pre>
- * -R &lt;range&gt;
- *  Sets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'
- *  E.g.: first-5,7,9,20-last
- *  (default: first-last)
- * </pre>
- * 
- * <pre>
- * -V
- *  Invert matching sense (i.e. act on all attributes not specified in list)
- * </pre>
- * 
- * <pre>
- * -O
- *  Use short identifiers for merged subsets.
- * </pre>
+ * <pre> -do-not-check-capabilities
+ *  If set, filter capabilities are not checked when input format is set
+ *  (use with caution).</pre>
  * 
  * <!-- options-end -->
  * 
@@ -210,3 +173,4 @@ public class ClassBalancer extends SimpleBatchFilter implements SupervisedFilter
     runFilter(new ClassBalancer(), args);
   }
 }
+
