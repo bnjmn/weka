@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.classifiers.SingleClassifierEnhancer;
+import weka.classifiers.IterativeClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
@@ -105,7 +106,7 @@ import weka.filters.Filter;
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
-  implements Drawable, PartitionGenerator {
+  implements Drawable, PartitionGenerator, IterativeClassifier {
 
   /** for serialization */
   static final long serialVersionUID = -4523450618538717400L;
@@ -226,6 +227,50 @@ public class FilteredClassifier
       return ((PartitionGenerator)m_Classifier).numElements();
     else throw new Exception("Classifier: " + getClassifierSpec()
 			     + " cannot generate a partition");
+  }
+
+  /**
+   * Initializes an iterative classifier.
+   * (If the base classifier supports this.)
+   *
+   * @param data the instances to be used in induction
+   * @exception Exception if the model cannot be initialized
+   */
+  public void initializeClassifier(Instances data) throws Exception {
+
+    if (m_Classifier instanceof IterativeClassifier)
+      ((IterativeClassifier)m_Classifier).initializeClassifier(setUp(data));
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " is not an IterativeClassifier");
+  }
+  
+  /**
+   * Performs one iteration.
+   * (If the base classifier supports this.)
+   *
+   * @return false if no further iterations could be performed, true otherwise
+   * @exception Exception if this iteration fails for unexpected reasons
+   */
+  public boolean next() throws Exception {
+    
+    if (m_Classifier instanceof IterativeClassifier)
+      return ((IterativeClassifier)m_Classifier).next();
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " is not an IterativeClassifier");
+  }
+  
+  /**
+   * Signal end of iterating, useful for any house-keeping/cleanup
+   * (If the base classifier supports this.)
+   *
+   * @exception Exception if cleanup fails
+   */
+  public void done() throws Exception {
+
+    if (m_Classifier instanceof IterativeClassifier)
+      ((IterativeClassifier)m_Classifier).done();
+    else throw new Exception("Classifier: " + getClassifierSpec()
+			     + " is not an IterativeClassifier");
   }
 
   /**
@@ -422,12 +467,11 @@ public class FilteredClassifier
   }
 
   /**
-   * Build the classifier on the filtered data.
+   * Sets up the filter and runs checks.
    *
-   * @param data the training data
-   * @throws Exception if the classifier could not be built successfully
+   * @return filtered data
    */
-  public void buildClassifier(Instances data) throws Exception {
+  protected Instances setUp(Instances data) throws Exception {
 
     if (m_Classifier == null) {
       throw new Exception("No base classifiers have been set!");
@@ -453,7 +497,18 @@ public class FilteredClassifier
     getClassifier().getCapabilities().testWithFail(data);
 
     m_FilteredInstances = data.stringFreeStructure();
-    m_Classifier.buildClassifier(data);
+    return data;
+  }
+
+  /**
+   * Build the classifier on the filtered data.
+   *
+   * @param data the training data
+   * @throws Exception if the classifier could not be built successfully
+   */
+  public void buildClassifier(Instances data) throws Exception {
+
+    m_Classifier.buildClassifier(setUp(data));
   }
 
   /**
