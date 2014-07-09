@@ -381,6 +381,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
           for (int j = 0; j < tempThresholds.length; j++) {
             System.err.print(" " + tempThresholds[j] / (double) (m_NumRuns * m_NumFolds));
           }
+          System.err.println();
         }
       }
       // if (result >= oldResult) {
