@@ -442,9 +442,9 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
         result /= (double)(m_NumFolds * m_NumRuns);
 
         // Compute average thresholds if applicable
-        if (m_thresholds != null) {
-          for (int j = 0; j < m_thresholds.length; j++) {
-            m_thresholds[j] /= (double) (m_NumRuns * m_NumFolds);
+        if (tempThresholds != null) {
+          for (int j = 0; j < tempThresholds.length; j++) {
+            tempThresholds[j] /= (double) (m_NumRuns * m_NumFolds);
           }
         }
       }
