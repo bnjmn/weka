@@ -61,6 +61,10 @@ import weka.core.Utils;
  *  If set, average estimate is used rather than one estimate from pooled predictions.
  * </pre>
  * 
+ * <pre> -L &lt;num&gt;
+ *  The number of iterations to look ahead for to find a better optimum.
+ *  (default 50)</pre>
+ * 
  * <pre> -F &lt;num&gt;
  *  Number of folds for cross-validation.
  *  (default 10)</pre>
@@ -175,8 +179,8 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   /** Whether to use average. */
   protected boolean m_UseAverage = false;
 
-  /** The random number generator used */
-  protected Random m_RandomInstance;
+  /** The number of iterations to look ahead for to find a better optimum. */
+  protected int m_lookAheadIterations = 50;
 
   public static Tag[] TAGS_EVAL;
 
@@ -206,7 +210,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   /**
    * The best value found for the criterion to be optimized.
    */
-  protected double m_bestResult = Double.NaN;
+  protected double m_bestResult = Double.MAX_VALUE;
 
   /**
    * Returns a string describing classifier
@@ -319,6 +323,36 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   }
 
   /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String lookAheadIterationsTipText() {
+    return "The number of iterations to look ahead for to find a better optimum.";
+  }
+
+  /**
+   * Get the value of LookAheadIterations.
+   * 
+   * @return Value of LookAheadIterations.
+   */
+  public int getLookAheadIterations() {
+
+    return m_lookAheadIterations;
+  }
+
+  /**
+   * Set the value of LookAheadIterations.
+   * 
+   * @param newLookAheadIterations Value to assign to LookAheadIterations.
+   */
+  public void setLookAheadIterations(int newLookAheadIterations) {
+
+    m_lookAheadIterations = newLookAheadIterations;
+  }
+
+  /**
    * Builds the classifier.
    */
   @Override
@@ -330,9 +364,6 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
     // Can classifier handle the data?
     getCapabilities().testWithFail(data);
-
-    // Need a random number generator for data shuffling
-    m_RandomInstance = new Random(m_Seed);
 
     // Need to shuffle the data
     Random randomInstance = new Random(m_Seed);
@@ -356,14 +387,15 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     IterativeClassifier[][] classifiers =
       new IterativeClassifier[m_NumRuns][m_NumFolds];
     for (int j = 0; j < m_NumRuns; j++) {
-      data.randomize(m_RandomInstance);
-      data.stratify(m_NumFolds);
+      data.randomize(randomInstance);
+      if (data.classAttribute().isNominal()) {
+        data.stratify(m_NumFolds);
+      }
       for (int i = 0; i < m_NumFolds; i++) {
         trainingSets[j][i] = data.trainCV(m_NumFolds, i, randomInstance);
         testSets[j][i] = data.testCV(m_NumFolds, i);
         classifiers[j][i] =
-          (IterativeClassifier) AbstractClassifier
-            .makeCopy(m_IterativeClassifier);
+          (IterativeClassifier) AbstractClassifier.makeCopy(m_IterativeClassifier);
         classifiers[j][i].initializeClassifier(trainingSets[j][i]);
       }
     }
@@ -373,20 +405,22 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     Evaluation eval = null;
     boolean maximise = true;
     int numIts = 0;
-    double oldResult = Double.MAX_VALUE;
-    m_bestResult = Double.NaN;
+    int bestIts = 0;
+    m_bestResult = Double.MAX_VALUE;
     m_thresholds = null;
-    boolean dont_stop = true;
-    while (dont_stop) {
+    int numberOfIterationsSinceMinimum = -1;
+    while (true) {
       double result = 0;
       double[] tempThresholds = null;
+
+      // Shall we use the average score obtained from the folds or not?
       if (!m_UseAverage) {
         eval = new Evaluation(data);
         if (helper == null) {
           helper = new EvaluationMetricHelper(eval);
           maximise = helper.metricIsMaximisable(m_evalMetric);
           if (maximise) {
-            oldResult = Double.MIN_VALUE;
+            m_bestResult = Double.MIN_VALUE;
           }
         } else {
           helper.setEvaluation(eval);
@@ -394,19 +428,23 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       }
       for (int r = 0; r < m_NumRuns; r++) {
         for (int i = 0; i < m_NumFolds; i++) {
+
+          // Shall we use the average score obtained from the folds or not?
           if (m_UseAverage) {
             eval = new Evaluation(trainingSets[r][i]);
             if (helper == null) {
               helper = new EvaluationMetricHelper(eval);
               maximise = helper.metricIsMaximisable(m_evalMetric);
               if (maximise) {
-                oldResult = Double.MIN_VALUE;
+                m_bestResult = Double.MIN_VALUE;
               }
             } else {
               helper.setEvaluation(eval);
             }
           }
           eval.evaluateModel(classifiers[r][i], testSets[r][i]);
+
+          // Shall we use the average score obtained from the folds or not?
           if (m_UseAverage) {
             result +=
               getClassValueIndex() >= 0 ? 
@@ -424,14 +462,10 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
               }
             }
           }
-          if (!classifiers[r][i].next()) {
-            if (m_Debug) {
-              System.err.println("Classifier failed to iterate in cross-validation.");
-            }
-            dont_stop = false; // Break out if one classifier fails to iterate
-          }
         }
       }
+      
+      // Shall we use the average score obtained from the folds or not?
       if (!m_UseAverage) {
         result =
           getClassValueIndex() >= 0 ? 
@@ -458,15 +492,34 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
           System.err.println();
         }
       }
-      // if (result >= oldResult) {
-      double delta = maximise ? oldResult - result : result - oldResult;
-      if (delta >= 0) {
-        break; // No improvement
+
+      double delta = maximise ? m_bestResult - result : result - m_bestResult;
+
+      // Is there an improvement?
+      if (delta < 0) {
+        m_bestResult = result;
+        bestIts = numIts;
+        m_thresholds = tempThresholds;
+        numberOfIterationsSinceMinimum = -1;
       }
-      oldResult = result;
+      numberOfIterationsSinceMinimum++;
       numIts++;
-      m_thresholds = tempThresholds;
-      m_bestResult = result;
+
+      if (numberOfIterationsSinceMinimum >= m_lookAheadIterations) {
+        break;
+      }
+        
+      // Update classifiers for next round
+      for (int r = 0; r < m_NumRuns; r++) {
+        for (int i = 0; i < m_NumFolds; i++) {
+          if (!classifiers[r][i].next()) {
+            if (m_Debug) {
+              System.err.println("Classifier failed to iterate in cross-validation.");
+            }
+            break; // Break out if one classifier fails to iterate
+          }
+        }
+      }
     }
     classifiers = null;
     trainingSets = null;
@@ -476,7 +529,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     // Build classifieer based on identified number of iterations
     m_IterativeClassifier.initializeClassifier(origData);
     int i = 0;
-    while (i++ < numIts && m_IterativeClassifier.next()) {
+    while (i++ < bestIts && m_IterativeClassifier.next()) {
     }
     ;
     m_IterativeClassifier.done();
@@ -535,10 +588,12 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(3);
+    Vector<Option> newVector = new Vector<Option>(4);
 
     newVector.addElement(new Option("\tIf set, average estimate is used rather "
                                     + "than one estimate from pooled predictions.\n", "A", 0, "-A"));
+    newVector.addElement(new Option("\t" + lookAheadIterationsTipText() + "\n"
+      + "\t(default 50)", "L", 1, "-L <num>"));
     newVector.addElement(new Option("\tNumber of folds for cross-validation.\n"
       + "\t(default 10)", "F", 1, "-F <num>"));
     newVector.addElement(new Option("\tNumber of runs for cross-validation.\n"
@@ -604,6 +659,13 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     super.setOptions(options);
 
     setUseAverage(Utils.getFlag('A', options));
+
+    String lookAheadIterations = Utils.getOption('L', options);
+    if (lookAheadIterations.length() != 0) {
+      setLookAheadIterations(Integer.parseInt(lookAheadIterations));
+    } else {
+      setLookAheadIterations(50);
+    }
 
     String numFolds = Utils.getOption('F', options);
     if (numFolds.length() != 0) {
@@ -687,6 +749,9 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
     options.add("-W");
     options.add(getIterativeClassifier().getClass().getName());
+
+    options.add("-L");
+    options.add("" + getLookAheadIterations());
 
     options.add("-F");
     options.add("" + getNumFolds());
