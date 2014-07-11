@@ -23,9 +23,15 @@ package weka.classifiers.meta;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -212,6 +218,12 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
    */
   protected double m_bestResult = Double.MAX_VALUE;
 
+  /** The number of threads to use for parallel building of classifiers. */
+  protected int m_numThreads = 1;
+
+  /** The size of the thread pool. */
+  protected int m_poolSize = 1;
+
   /**
    * Returns a string describing classifier
    * 
@@ -260,6 +272,54 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   public void setUseAverage(boolean newUseAverage) {
 
     m_UseAverage = newUseAverage;
+  }
+
+  /**
+   * @return a string to describe the option
+   */
+  public String numThreadsTipText() {
+
+    return "The number of threads to use, which should be >= size of thread pool.";
+  }
+
+  /**
+   * Gets the number of threads.
+   */
+  public int getNumThreads() {
+
+    return m_numThreads;
+  }
+
+  /**
+   * Sets the number of threads
+   */
+  public void setNumThreads(int nT) {
+
+    m_numThreads = nT;
+  }
+
+  /**
+   * @return a string to describe the option
+   */
+  public String poolSizeTipText() {
+
+    return "The size of the thread pool, for example, the number of cores in the CPU.";
+  }
+
+  /**
+   * Gets the number of threads.
+   */
+  public int getPoolSize() {
+
+    return m_poolSize;
+  }
+
+  /**
+   * Sets the number of threads
+   */
+  public void setPoolSize(int nT) {
+
+    m_poolSize = nT;
   }
 
   /**
@@ -384,8 +444,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     // Initialize datasets and classifiers
     Instances[][] trainingSets = new Instances[m_NumRuns][m_NumFolds];
     Instances[][] testSets = new Instances[m_NumRuns][m_NumFolds];
-    IterativeClassifier[][] classifiers =
-      new IterativeClassifier[m_NumRuns][m_NumFolds];
+    final IterativeClassifier[][] classifiers = new IterativeClassifier[m_NumRuns][m_NumFolds];
     for (int j = 0; j < m_NumRuns; j++) {
       data.randomize(randomInstance);
       if (data.classAttribute().isNominal()) {
@@ -400,14 +459,21 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       }
     }
 
+    // The thread pool to be used for parallel execution.
+    ExecutorService pool = Executors.newFixedThreadPool(m_poolSize);;
+
     // Perform evaluation
-    EvaluationMetricHelper helper = null;
-    Evaluation eval = null;
-    boolean maximise = true;
+    Evaluation eval = new Evaluation(data);
+    EvaluationMetricHelper helper = new EvaluationMetricHelper(eval);
+    boolean maximise = helper.metricIsMaximisable(m_evalMetric);
+    if (maximise) {
+      m_bestResult = Double.MIN_VALUE;
+    } else {
+      m_bestResult = Double.MAX_VALUE;
+    }
+    m_thresholds = null;
     int numIts = 0;
     int bestIts = 0;
-    m_bestResult = Double.MAX_VALUE;
-    m_thresholds = null;
     int numberOfIterationsSinceMinimum = -1;
     while (true) {
       double result = 0;
@@ -416,36 +482,25 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       // Shall we use the average score obtained from the folds or not?
       if (!m_UseAverage) {
         eval = new Evaluation(data);
-        if (helper == null) {
-          helper = new EvaluationMetricHelper(eval);
-          maximise = helper.metricIsMaximisable(m_evalMetric);
-          if (maximise) {
-            m_bestResult = Double.MIN_VALUE;
+        helper.setEvaluation(eval);
+        for (int r = 0; r < m_NumRuns; r++) {
+          for (int i = 0; i < m_NumFolds; i++) {
+            eval.evaluateModel(classifiers[r][i], testSets[r][i]);
           }
-        } else {
-          helper.setEvaluation(eval);
         }
-      }
-      for (int r = 0; r < m_NumRuns; r++) {
-        for (int i = 0; i < m_NumFolds; i++) {
-
-          // Shall we use the average score obtained from the folds or not?
-          if (m_UseAverage) {
+        result =
+          getClassValueIndex() >= 0 ? 
+          helper.getNamedMetric(m_evalMetric,
+                                getClassValueIndex()) : helper.getNamedMetric(m_evalMetric);
+        tempThresholds = helper.getNamedMetricThresholds(m_evalMetric);
+      } else {
+        
+        // Using average score
+        for (int r = 0; r < m_NumRuns; r++) {
+          for (int i = 0; i < m_NumFolds; i++) {            
             eval = new Evaluation(trainingSets[r][i]);
-            if (helper == null) {
-              helper = new EvaluationMetricHelper(eval);
-              maximise = helper.metricIsMaximisable(m_evalMetric);
-              if (maximise) {
-                m_bestResult = Double.MIN_VALUE;
-              }
-            } else {
-              helper.setEvaluation(eval);
-            }
-          }
-          eval.evaluateModel(classifiers[r][i], testSets[r][i]);
-
-          // Shall we use the average score obtained from the folds or not?
-          if (m_UseAverage) {
+            helper.setEvaluation(eval);
+            eval.evaluateModel(classifiers[r][i], testSets[r][i]);
             result +=
               getClassValueIndex() >= 0 ? 
               helper.getNamedMetric(m_evalMetric,
@@ -463,16 +518,6 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
             }
           }
         }
-      }
-      
-      // Shall we use the average score obtained from the folds or not?
-      if (!m_UseAverage) {
-        result =
-          getClassValueIndex() >= 0 ? 
-          helper.getNamedMetric(m_evalMetric,
-                                getClassValueIndex()) : helper.getNamedMetric(m_evalMetric);
-        tempThresholds = helper.getNamedMetricThresholds(m_evalMetric);
-      } else {
         result /= (double)(m_NumFolds * m_NumRuns);
 
         // Compute average thresholds if applicable
@@ -482,6 +527,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
           }
         }
       }
+
       if (m_Debug) {
         System.err.println("Iteration: " + numIts + " " + "Measure: " + result);
         if (tempThresholds != null) {
@@ -509,19 +555,49 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
         break;
       }
         
-      // Update classifiers for next round
-      for (int r = 0; r < m_NumRuns; r++) {
-        for (int i = 0; i < m_NumFolds; i++) {
-          if (!classifiers[r][i].next()) {
-            if (m_Debug) {
-              System.err.println("Classifier failed to iterate in cross-validation.");
+      // Set up result set, and chunk size
+      int numRuns = m_NumRuns * m_NumFolds;
+      final int N = m_NumFolds;
+      final int chunksize = numRuns / m_numThreads;
+      Set<Future<Boolean>> results = new HashSet<Future<Boolean>>();
+      
+      // For each thread
+      for (int j = 0; j < m_numThreads; j++) {
+
+        // Determine batch to be processed
+        final int lo = j * chunksize;
+        final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : numRuns;
+
+        // Create and submit new job, where each instance in batch is processed
+        Future<Boolean> futureT = pool.submit(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+              for (int k = lo; k < hi; k++) {
+                if (!classifiers[k / N][k % N].next()) {
+                  if (m_Debug) {
+                    System.err.println("Classifier failed to iterate in cross-validation.");
+                  }
+                  return false;
+                }
+              }
+              return true;
             }
+          });
+        results.add(futureT);
+      }
+
+      // Check the all classifiers succeeded
+      try {
+        for (Future<Boolean> futureT : results) {
+          if (!futureT.get()) {
             break; // Break out if one classifier fails to iterate
           }
         }
+      } catch (Exception e) {
+        System.out.println("Classifiers could not be generated.");
+        e.printStackTrace();
       }
     }
-    classifiers = null;
     trainingSets = null;
     testSets = null;
     data = null;
@@ -533,6 +609,9 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     }
     ;
     m_IterativeClassifier.done();
+
+    // Shut down thread pool
+    pool.shutdown();
   }
 
   /**
@@ -588,12 +667,16 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(4);
+    Vector<Option> newVector = new Vector<Option>(6);
 
     newVector.addElement(new Option("\tIf set, average estimate is used rather "
                                     + "than one estimate from pooled predictions.\n", "A", 0, "-A"));
     newVector.addElement(new Option("\t" + lookAheadIterationsTipText() + "\n"
       + "\t(default 50)", "L", 1, "-L <num>"));
+    newVector.addElement(new Option(
+      "\t" + poolSizeTipText() + " (default 1)\n", "P", 1, "-P <int>"));
+    newVector.addElement(new Option("\t" + numThreadsTipText()
+      + " (default 1)\n", "E", 1, "-E <int>"));
     newVector.addElement(new Option("\tNumber of folds for cross-validation.\n"
       + "\t(default 10)", "F", 1, "-F <num>"));
     newVector.addElement(new Option("\tNumber of runs for cross-validation.\n"
@@ -665,6 +748,18 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       setLookAheadIterations(Integer.parseInt(lookAheadIterations));
     } else {
       setLookAheadIterations(50);
+    }
+    String PoolSize = Utils.getOption('P', options);
+    if (PoolSize.length() != 0) {
+      setPoolSize(Integer.parseInt(PoolSize));
+    } else {
+      setPoolSize(1);
+    }
+    String NumThreads = Utils.getOption('E', options);
+    if (NumThreads.length() != 0) {
+      setNumThreads(Integer.parseInt(NumThreads));
+    } else {
+      setNumThreads(1);
     }
 
     String numFolds = Utils.getOption('F', options);
@@ -752,6 +847,12 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
     options.add("-L");
     options.add("" + getLookAheadIterations());
+
+    options.add("-P");
+    options.add("" + getPoolSize());
+
+    options.add("-E");
+    options.add("" + getNumThreads());
 
     options.add("-F");
     options.add("" + getNumFolds());
