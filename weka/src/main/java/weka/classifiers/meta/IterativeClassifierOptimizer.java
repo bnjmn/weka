@@ -71,6 +71,18 @@ import weka.core.Utils;
  *  The number of iterations to look ahead for to find a better optimum.
  *  (default 50)</pre>
  * 
+ * <pre> -P &lt;int&gt;
+ *  The size of the thread pool, for example, the number of cores in the CPU.
+ *  (default 1)</pre>
+ * 
+ * <pre> -E &lt;int&gt;
+ *  The number of threads to use, which should be &gt;= size of thread pool.
+ *  (default 1)</pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  Step size for the evaluation, if evaluation is time consuming.
+ *  (default 1)</pre>
+ * 
  * <pre> -F &lt;num&gt;
  *  Number of folds for cross-validation.
  *  (default 10)</pre>
@@ -130,6 +142,13 @@ import weka.core.Utils;
  * <pre> -Z &lt;num&gt;
  *  Z max threshold for responses.
  *  (default 3)</pre>
+ * 
+ * <pre> -O &lt;int&gt;
+ *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)</pre>
+ * 
+ * <pre> -E &lt;int&gt;
+ *  The number of threads to use for batch prediction, which should be &gt;= size of thread pool.
+ *  (default 1)</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
@@ -712,9 +731,9 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     newVector.addElement(new Option("\t" + lookAheadIterationsTipText() + "\n"
       + "\t(default 50)", "L", 1, "-L <num>"));
     newVector.addElement(new Option(
-      "\t" + poolSizeTipText() + " (default 1)\n", "P", 1, "-P <int>"));
+      "\t" + poolSizeTipText() + "\n\t(default 1)", "P", 1, "-P <int>"));
     newVector.addElement(new Option("\t" + numThreadsTipText() + "\n"
-      + " (default 1)\n", "E", 1, "-E <int>"));
+      + "\t(default 1)", "E", 1, "-E <int>"));
     newVector.addElement(new Option("\t" + stepSizeTipText() + "\n"
       + "\t(default 1)", "I", 1, "-I <num>"));
     newVector.addElement(new Option("\tNumber of folds for cross-validation.\n"
