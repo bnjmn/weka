@@ -182,6 +182,9 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   /** The number of runs for the cross-validation. */
   protected int m_NumRuns = 1;
 
+  /** The steps size determining when evaluations happen. */
+  protected int m_StepSize = 1;
+
   /** Whether to use average. */
   protected boolean m_UseAverage = false;
 
@@ -320,6 +323,36 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   public void setPoolSize(int nT) {
 
     m_poolSize = nT;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String stepSizeTipText() {
+    return "Step size for the evaluation, if evaluation is time consuming.";
+  }
+
+  /**
+   * Get the value of StepSize.
+   * 
+   * @return Value of StepSize.
+   */
+  public int getStepSize() {
+
+    return m_StepSize;
+  }
+
+  /**
+   * Set the value of StepSize.
+   * 
+   * @param newStepSize Value to assign to StepSize.
+   */
+  public void setStepSize(int newStepSize) {
+
+    m_StepSize = newStepSize;
   }
 
   /**
@@ -476,77 +509,82 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     int bestIts = 0;
     int numberOfIterationsSinceMinimum = -1;
     while (true) {
-      double result = 0;
-      double[] tempThresholds = null;
 
-      // Shall we use the average score obtained from the folds or not?
-      if (!m_UseAverage) {
-        eval = new Evaluation(data);
-        helper.setEvaluation(eval);
-        for (int r = 0; r < m_NumRuns; r++) {
-          for (int i = 0; i < m_NumFolds; i++) {
-            eval.evaluateModel(classifiers[r][i], testSets[r][i]);
-          }
-        }
-        result =
-          getClassValueIndex() >= 0 ? 
-          helper.getNamedMetric(m_evalMetric,
-                                getClassValueIndex()) : helper.getNamedMetric(m_evalMetric);
-        tempThresholds = helper.getNamedMetricThresholds(m_evalMetric);
-      } else {
+      // Should we perform an evaluation?
+      if (numIts % m_StepSize == 0) {
         
-        // Using average score
-        for (int r = 0; r < m_NumRuns; r++) {
-          for (int i = 0; i < m_NumFolds; i++) {            
-            eval = new Evaluation(trainingSets[r][i]);
-            helper.setEvaluation(eval);
-            eval.evaluateModel(classifiers[r][i], testSets[r][i]);
-            result +=
-              getClassValueIndex() >= 0 ? 
-              helper.getNamedMetric(m_evalMetric,
-                                    getClassValueIndex()) : helper.getNamedMetric(m_evalMetric);
-            double[] thresholds = helper.getNamedMetricThresholds(m_evalMetric);
-            
-            // Add thresholds (if applicable) so that we can compute average thresholds later
-            if (thresholds != null) {
-              if (tempThresholds == null) {
-                tempThresholds = new double[data.numClasses()];
-              }
-              for (int j = 0; j < thresholds.length; j++) {
-                tempThresholds[j] += thresholds[j];
+        double result = 0;
+        double[] tempThresholds = null;
+        
+        // Shall we use the average score obtained from the folds or not?
+        if (!m_UseAverage) {
+          eval = new Evaluation(data);
+          helper.setEvaluation(eval);
+          for (int r = 0; r < m_NumRuns; r++) {
+            for (int i = 0; i < m_NumFolds; i++) {
+              eval.evaluateModel(classifiers[r][i], testSets[r][i]);
+            }
+          }
+          result =
+            getClassValueIndex() >= 0 ? 
+            helper.getNamedMetric(m_evalMetric,
+                                  getClassValueIndex()) : helper.getNamedMetric(m_evalMetric);
+          tempThresholds = helper.getNamedMetricThresholds(m_evalMetric);
+        } else {
+          
+          // Using average score
+          for (int r = 0; r < m_NumRuns; r++) {
+            for (int i = 0; i < m_NumFolds; i++) {            
+              eval = new Evaluation(trainingSets[r][i]);
+              helper.setEvaluation(eval);
+              eval.evaluateModel(classifiers[r][i], testSets[r][i]);
+              result +=
+                getClassValueIndex() >= 0 ? 
+                helper.getNamedMetric(m_evalMetric,
+                                      getClassValueIndex()) : helper.getNamedMetric(m_evalMetric);
+              double[] thresholds = helper.getNamedMetricThresholds(m_evalMetric);
+              
+              // Add thresholds (if applicable) so that we can compute average thresholds later
+              if (thresholds != null) {
+                if (tempThresholds == null) {
+                  tempThresholds = new double[data.numClasses()];
+                }
+                for (int j = 0; j < thresholds.length; j++) {
+                  tempThresholds[j] += thresholds[j];
+                }
               }
             }
           }
-        }
-        result /= (double)(m_NumFolds * m_NumRuns);
-
-        // Compute average thresholds if applicable
-        if (tempThresholds != null) {
-          for (int j = 0; j < tempThresholds.length; j++) {
-            tempThresholds[j] /= (double) (m_NumRuns * m_NumFolds);
+          result /= (double)(m_NumFolds * m_NumRuns);
+          
+          // Compute average thresholds if applicable
+          if (tempThresholds != null) {
+            for (int j = 0; j < tempThresholds.length; j++) {
+              tempThresholds[j] /= (double) (m_NumRuns * m_NumFolds);
+            }
           }
         }
-      }
-
-      if (m_Debug) {
-        System.err.println("Iteration: " + numIts + " " + "Measure: " + result);
-        if (tempThresholds != null) {
-          System.err.print("Thresholds:");
-          for (int j = 0; j < tempThresholds.length; j++) {
-            System.err.print(" " + tempThresholds[j]);
+        
+        if (m_Debug) {
+          System.err.println("Iteration: " + numIts + " " + "Measure: " + result);
+          if (tempThresholds != null) {
+            System.err.print("Thresholds:");
+            for (int j = 0; j < tempThresholds.length; j++) {
+              System.err.print(" " + tempThresholds[j]);
+            }
+            System.err.println();
           }
-          System.err.println();
         }
-      }
-
-      double delta = maximise ? m_bestResult - result : result - m_bestResult;
-
-      // Is there an improvement?
-      if (delta < 0) {
-        m_bestResult = result;
-        bestIts = numIts;
-        m_thresholds = tempThresholds;
-        numberOfIterationsSinceMinimum = -1;
+        
+        double delta = maximise ? m_bestResult - result : result - m_bestResult;
+        
+        // Is there an improvement?
+        if (delta < 0) {
+          m_bestResult = result;
+          bestIts = numIts;
+          m_thresholds = tempThresholds;
+          numberOfIterationsSinceMinimum = -1;
+        }
       }
       numberOfIterationsSinceMinimum++;
       numIts++;
@@ -667,7 +705,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(6);
+    Vector<Option> newVector = new Vector<Option>(7);
 
     newVector.addElement(new Option("\tIf set, average estimate is used rather "
                                     + "than one estimate from pooled predictions.\n", "A", 0, "-A"));
@@ -675,8 +713,10 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       + "\t(default 50)", "L", 1, "-L <num>"));
     newVector.addElement(new Option(
       "\t" + poolSizeTipText() + " (default 1)\n", "P", 1, "-P <int>"));
-    newVector.addElement(new Option("\t" + numThreadsTipText()
+    newVector.addElement(new Option("\t" + numThreadsTipText() + "\n"
       + " (default 1)\n", "E", 1, "-E <int>"));
+    newVector.addElement(new Option("\t" + stepSizeTipText() + "\n"
+      + "\t(default 1)", "I", 1, "-I <num>"));
     newVector.addElement(new Option("\tNumber of folds for cross-validation.\n"
       + "\t(default 10)", "F", 1, "-F <num>"));
     newVector.addElement(new Option("\tNumber of runs for cross-validation.\n"
@@ -760,6 +800,13 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       setNumThreads(Integer.parseInt(NumThreads));
     } else {
       setNumThreads(1);
+    }
+
+    String stepSize = Utils.getOption('I', options);
+    if (stepSize.length() != 0) {
+      setStepSize(Integer.parseInt(stepSize));
+    } else {
+      setStepSize(10);
     }
 
     String numFolds = Utils.getOption('F', options);
@@ -853,6 +900,9 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
 
     options.add("-E");
     options.add("" + getNumThreads());
+
+    options.add("-I");
+    options.add("" + getStepSize());
 
     options.add("-F");
     options.add("" + getNumFolds());
