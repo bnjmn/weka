@@ -515,16 +515,16 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
                   && inst.index(instIndex) == index) {
                   final double err = outputsOut[index]
                     - inst.valueSparse(instIndex++);
-                  SE += 0.5 * err * err;
+                  SE += 0.5 * inst.weight() * err * err;
                 } else {
                   final double err = outputsOut[index];
-                  SE += 0.5 * err * err;
+                  SE += 0.5 * inst.weight() * err * err;
                 }
               }
             } else {
               for (int index = 0; index < m_numAttributes; index++) {
                 final double err = outputsOut[index] - inst.value(index);
-                SE += 0.5 * err * err;
+                SE += 0.5 * inst.weight() * err * err;
               }
             }
 
@@ -539,7 +539,8 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
                   sum += m_MLPParameters[offset + index]
                     * m_MLPParameters[offset + index];
                 }
-                SE += m_lambda * outputsHidden[i] * (1.0 - outputsHidden[i])
+                SE += m_lambda * inst.weight() * 
+                  outputsHidden[i] * (1.0 - outputsHidden[i])
                   * outputsHidden[i] * (1.0 - outputsHidden[i]) * sum;
               }
             }
@@ -575,7 +576,7 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
       SE += m_lambda * squaredSumOfWeights;
     }
 
-    return SE / m_data.numInstances();
+    return SE / m_data.sumOfWeights();
   }
 
   /**
@@ -626,7 +627,7 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
                   sum += m_MLPParameters[offset + index]
                     * m_MLPParameters[offset + index];
                 }
-                double multiplier = m_lambda * 2 * outputsHidden[i]
+                double multiplier = m_lambda * inst.weight() * 2 * outputsHidden[i]
                   * (1.0 - outputsHidden[i]) * outputsHidden[i]
                   * (1.0 - outputsHidden[i]);
                 for (int index = 0; index < m_numAttributes; index++) {
@@ -683,7 +684,7 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
       }
     }
 
-    double factor = 1.0 / m_data.numInstances();
+    double factor = 1.0 / m_data.sumOfWeights();
     for (int i = 0; i < grad.length; i++) {
       grad[i] *= factor;
     }
@@ -732,14 +733,14 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
       int instIndex = 0;
       for (int index = 0; index < m_numAttributes; index++) {
         if (instIndex < inst.numValues() && inst.index(instIndex) == index) {
-          deltaOut[index] = outputsOut[index] - inst.valueSparse(instIndex++);
+          deltaOut[index] = inst.weight() * (outputsOut[index] - inst.valueSparse(instIndex++));
         } else {
-          deltaOut[index] = outputsOut[index];
+          deltaOut[index] = inst.weight() * outputsOut[index];
         }
       }
     } else {
       for (int j = 0; j < m_numAttributes; j++) {
-        deltaOut[j] = outputsOut[j] - inst.value(j);
+        deltaOut[j] = inst.weight() * (outputsOut[j] - inst.value(j));
       }
     }
 

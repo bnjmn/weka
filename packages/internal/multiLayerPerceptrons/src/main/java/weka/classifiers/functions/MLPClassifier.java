@@ -44,6 +44,7 @@ import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.RemoveUseless;
@@ -115,7 +116,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class MLPClassifier extends RandomizableClassifier {
+public class MLPClassifier extends RandomizableClassifier implements WeightedInstancesHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -3297474276438394644L;
@@ -440,7 +441,7 @@ public class MLPClassifier extends RandomizableClassifier {
 
               // Add to squared error
               final double err = getOutput(i, outputs, null) - target;
-              SE += err * err;
+              SE += inst.weight() * err * err;
             }
           }
           return SE;
@@ -481,7 +482,7 @@ public class MLPClassifier extends RandomizableClassifier {
     }
 
     return ((m_ridge * squaredSumOfWeights) + (0.5 * SE))
-      / m_data.numInstances();
+      / m_data.sumOfWeights();
   }
 
   /**
@@ -555,7 +556,7 @@ public class MLPClassifier extends RandomizableClassifier {
       }
     }
 
-    double factor = 1.0 / m_data.numInstances();
+    double factor = 1.0 / m_data.sumOfWeights();
     for (int i = 0; i < grad.length; i++) {
       grad[i] *= factor;
     }
@@ -583,7 +584,7 @@ public class MLPClassifier extends RandomizableClassifier {
       double target = ((int) inst.value(m_classIndex) == j) ? 0.99 : 0.01;
 
       // Calculate delta from output unit
-      double deltaOut = (pred - target) * sigmoidDerivativeOutput[0];
+      double deltaOut = inst.weight() * (pred - target) * sigmoidDerivativeOutput[0];
 
       // Go to next output unit if update too small
       if (deltaOut <= m_tolerance && deltaOut >= -m_tolerance) {
