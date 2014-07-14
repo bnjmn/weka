@@ -825,7 +825,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     if (stepSize.length() != 0) {
       setStepSize(Integer.parseInt(stepSize));
     } else {
-      setStepSize(10);
+      setStepSize(1);
     }
 
     String numFolds = Utils.getOption('F', options);
