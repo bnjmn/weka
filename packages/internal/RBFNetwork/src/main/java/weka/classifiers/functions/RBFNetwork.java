@@ -36,6 +36,7 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ClusterMembership;
 import weka.filters.unsupervised.attribute.Standardize;
@@ -86,7 +87,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  * @author Eibe Frank
  * @version $Revision$
  */
-public class RBFNetwork extends AbstractClassifier implements OptionHandler {
+public class RBFNetwork extends AbstractClassifier implements OptionHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3669814959712675720L;

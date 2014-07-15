@@ -26,6 +26,7 @@ import java.util.Random;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
+import weka.core.WeightedInstancesHandler;
 
 /**
  * <!-- globalinfo-start --> Class implementing radial basis function networks
@@ -117,7 +118,7 @@ import weka.core.Instance;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class RBFRegressor extends RBFModel {
+public class RBFRegressor extends RBFModel implements WeightedInstancesHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -7847474276438394611L;
@@ -159,7 +160,7 @@ public class RBFRegressor extends RBFModel {
     final double err = getOutput(outputs) - inst.classValue();
 
     // Add to squared error
-    return err * err;
+    return inst.weight() * err * err;
   }
 
   /**
@@ -202,7 +203,7 @@ public class RBFRegressor extends RBFModel {
     Arrays.fill(deltaHidden, 0.0);
 
     // Calculate delta from output unit
-    double deltaOut = (getOutput(outputs) - inst.classValue());
+    double deltaOut = inst.weight() * (getOutput(outputs) - inst.classValue());
 
     // Go to next output unit if update too small
     if (deltaOut <= m_tolerance && deltaOut >= -m_tolerance) {

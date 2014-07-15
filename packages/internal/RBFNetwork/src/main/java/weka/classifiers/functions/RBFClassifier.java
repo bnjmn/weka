@@ -15,7 +15,7 @@
 
 /*
  *    RBFClassifier.java
- *    Copyright (C) 2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2012-2014 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions;
@@ -27,6 +27,7 @@ import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 
 /**
  * <!-- globalinfo-start --> Class implementing radial basis function networks
@@ -118,7 +119,7 @@ import weka.core.Utils;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class RBFClassifier extends RBFModel {
+public class RBFClassifier extends RBFModel implements WeightedInstancesHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -7847475556438394611L;
@@ -171,7 +172,7 @@ public class RBFClassifier extends RBFModel {
 
       // Add to squared error
       final double err = getOutput(i, outputs, null) - target;
-      SE += err * err;
+      SE += inst.weight() * err * err;
     }
     return SE;
   }
@@ -193,7 +194,7 @@ public class RBFClassifier extends RBFModel {
       }
     }
 
-    return (error + m_ridge * squaredSumOfWeights) / m_data.numInstances();
+    return (error + m_ridge * squaredSumOfWeights) / m_data.sumOfWeights();
   }
 
   /**
@@ -210,7 +211,7 @@ public class RBFClassifier extends RBFModel {
       }
     }
 
-    double factor = 1.0 / m_data.numInstances();
+    double factor = 1.0 / m_data.sumOfWeights();
     for (int i = 0; i < grad.length; i++) {
       grad[i] *= factor;
     }
@@ -237,7 +238,7 @@ public class RBFClassifier extends RBFModel {
       double target = ((int) inst.value(m_classIndex) == j) ? 0.99 : 0.01;
 
       // Calculate delta from output unit
-      double deltaOut = (pred - target) * sigmoidDerivativeOutput[0];
+      double deltaOut = inst.weight() * (pred - target) * sigmoidDerivativeOutput[0];
 
       // Go to next output unit if update too small
       if (deltaOut <= m_tolerance && deltaOut >= -m_tolerance) {
