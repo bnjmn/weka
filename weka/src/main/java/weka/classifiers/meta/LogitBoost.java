@@ -35,7 +35,6 @@ import java.util.concurrent.Future;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
 import weka.classifiers.IterativeClassifier;
@@ -1048,12 +1047,25 @@ public class LogitBoost
     Utils.normalize(probs, sum);
     return probs;
   }
+  
+  /**
+   * Tool tip text
+   * 
+   * @return tool tip text for this property
+   */
+  public String batchSizeTipText() {
+    return "Batch size option is not used in LogitBoost";
+  }
     
   /**
-   * Dummy methods to satisfy BatchPredictor interface.
+   * Dummy method to satisfy BatchPredictor interface.
    */
   public void setBatchSize(String i) {
   }
+  
+  /**
+   * Dummy method to satisfy BatchPredictor interface.
+   */
   public String getBatchSize() {
     return "";
   }
