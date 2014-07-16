@@ -15,7 +15,7 @@
 
 /*
  *    AdaBoostM1.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2014 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,6 +30,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
+import weka.classifiers.IterativeClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
@@ -131,7 +132,7 @@ import weka.core.WeightedInstancesHandler;
  * @version $Revision$
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
-  implements WeightedInstancesHandler, Sourcable, TechnicalInformationHandler {
+  implements WeightedInstancesHandler, Sourcable, TechnicalInformationHandler, IterativeClassifier {
 
   /** for serialization */
   static final long serialVersionUID = -1178107808933117974L;
@@ -156,6 +157,12 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
   /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_ZeroR;
+
+  /** The (weighted) training data */
+  protected Instances m_TrainingData;
+
+  /** Random number generator to be used for resampling */
+  protected Random m_RandomInstance;
 
   /**
    * Constructor.
@@ -458,15 +465,28 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
-   * Boosting method.
+   * Method used to build the classifier.
+   */
+  public void buildClassifier(Instances data) throws Exception {
+
+    // Initialize classifier
+    initializeClassifier(data);
+
+    // Perform boosting iterations
+    while (next()) {};
+
+    // Clean up
+    done();
+  }
+
+  /**
+   * Initialize the classifier.
    * 
    * @param data the training data to be used for generating the boosted
    *          classifier.
    * @throws Exception if the classifier could not be built successfully
    */
-
-  @Override
-  public void buildClassifier(Instances data) throws Exception {
+  public void initializeClassifier(Instances data) throws Exception {
 
     super.buildClassifier(data);
 
@@ -477,108 +497,129 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     data = new Instances(data);
     data.deleteWithMissingClass();
 
-    // only class? -> build ZeroR model
-    if (data.numAttributes() == 1) {
-      System.err
-        .println("Cannot build model (only class attribute present in data!), "
-          + "using ZeroR model instead!");
-      m_ZeroR = new weka.classifiers.rules.ZeroR();
-      m_ZeroR.buildClassifier(data);
-      return;
-    } else {
-      m_ZeroR = null;
-    }
+    m_ZeroR = new weka.classifiers.rules.ZeroR();
+    m_ZeroR.buildClassifier(data);
 
     m_NumClasses = data.numClasses();
-    if ((!m_UseResampling)
-      && (m_Classifier instanceof WeightedInstancesHandler)) {
-      buildClassifierWithWeights(data);
-    } else {
-      buildClassifierUsingResampling(data);
+    m_Betas = new double[m_Classifiers.length];
+    m_NumIterationsPerformed = 0;
+    m_TrainingData = new Instances(data);
+    if ((m_UseResampling)
+        || (!(m_Classifier instanceof WeightedInstancesHandler))) {
+
+      m_RandomInstance = new Random(m_Seed);
+
+      // Normalize weights so that they sum to one and can be used as sampling probabilities
+      double sumProbs = m_TrainingData.sumOfWeights();
+      for (int i = 0; i < m_TrainingData.numInstances(); i++) {
+        m_TrainingData.instance(i).setWeight(m_TrainingData.instance(i).weight() / sumProbs);
+      }
     }
   }
 
   /**
-   * Boosting method. Boosts using resampling
-   * 
-   * @param data the training data to be used for generating the boosted
-   *          classifier.
-   * @throws Exception if the classifier could not be built successfully
+   * Perform the next boosting iteration.
+   *
+   * @throws Exception if an unforeseen problem occurs
    */
-  protected void buildClassifierUsingResampling(Instances data)
-    throws Exception {
+  public boolean next() throws Exception {
 
-    Instances trainData, sample, training;
-    double epsilon, reweight, sumProbs;
-    Evaluation evaluation;
-    int numInstances = data.numInstances();
-    Random randomInstance = new Random(m_Seed);
-    int resamplingIterations = 0;
-
-    // Initialize data
-    m_Betas = new double[m_Classifiers.length];
-    m_NumIterationsPerformed = 0;
-    // Create a copy of the data so that when the weights are diddled
-    // with it doesn't mess up the weights for anyone else
-    training = new Instances(data, 0, numInstances);
-    sumProbs = training.sumOfWeights();
-    for (int i = 0; i < training.numInstances(); i++) {
-      training.instance(i).setWeight(training.instance(i).weight() / sumProbs);
+    // Have we reached the maximum?
+    if (m_NumIterationsPerformed >= m_NumIterations) {
+      return false;
     }
 
-    // Do boostrap iterations
-    for (m_NumIterationsPerformed = 0; m_NumIterationsPerformed < m_Classifiers.length; m_NumIterationsPerformed++) {
-      if (m_Debug) {
-        System.err.println("Training classifier "
-          + (m_NumIterationsPerformed + 1));
-      }
+    // only class? -> just use ZeroR model
+    if (m_TrainingData.numAttributes() == 1) {
+      return false;
+    }
 
-      // Select instances to train the classifier on
-      if (m_WeightThreshold < 100) {
-        trainData = selectWeightQuantile(training,
-          (double) m_WeightThreshold / 100);
-      } else {
-        trainData = new Instances(training);
-      }
+    if (m_Debug) {
+      System.err.println("Training classifier "
+                         + (m_NumIterationsPerformed + 1));
+    }
+
+    // Select instances to train the classifier on
+    Instances trainData = null;
+    if (m_WeightThreshold < 100) {
+      trainData = selectWeightQuantile(m_TrainingData,
+                                       (double) m_WeightThreshold / 100);
+    } else {
+      trainData = new Instances(m_TrainingData);
+    }
+
+    double epsilon = 0;
+    if ((m_UseResampling)
+        || (!(m_Classifier instanceof WeightedInstancesHandler))) {
 
       // Resample
-      resamplingIterations = 0;
+      int resamplingIterations = 0;
       double[] weights = new double[trainData.numInstances()];
       for (int i = 0; i < weights.length; i++) {
         weights[i] = trainData.instance(i).weight();
       }
       do {
-        sample = trainData.resampleWithWeights(randomInstance, weights);
-
+        Instances sample = trainData.resampleWithWeights(m_RandomInstance, weights);
+        
         // Build and evaluate classifier
         m_Classifiers[m_NumIterationsPerformed].buildClassifier(sample);
-        evaluation = new Evaluation(data);
+        Evaluation evaluation = new Evaluation(m_TrainingData); 
         evaluation.evaluateModel(m_Classifiers[m_NumIterationsPerformed],
-          training);
+                                 m_TrainingData);
         epsilon = evaluation.errorRate();
         resamplingIterations++;
       } while (Utils.eq(epsilon, 0)
-        && (resamplingIterations < MAX_NUM_RESAMPLING_ITERATIONS));
+               && (resamplingIterations < MAX_NUM_RESAMPLING_ITERATIONS));
+    } else {
 
-      // Stop if error too big or 0
-      if (Utils.grOrEq(epsilon, 0.5) || Utils.eq(epsilon, 0)) {
-        if (m_NumIterationsPerformed == 0) {
-          m_NumIterationsPerformed = 1; // If we're the first we have to to use
-                                        // it
-        }
-        break;
+      // Build the classifier
+      if (m_Classifiers[m_NumIterationsPerformed] instanceof Randomizable) {
+        ((Randomizable) m_Classifiers[m_NumIterationsPerformed])
+          .setSeed(m_RandomInstance.nextInt());
       }
+      m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
 
-      // Determine the weight to assign to this model
-      reweight = (1 - epsilon) / epsilon;
-      m_Betas[m_NumIterationsPerformed] = Math.log(reweight);
-      if (m_Debug) {
-        System.err.println("\terror rate = " + epsilon + "  beta = "
-          + m_Betas[m_NumIterationsPerformed]);
+      // Evaluate the classifier
+      Evaluation evaluation = new Evaluation(m_TrainingData); // Does this need to be a copy
+      evaluation.evaluateModel(m_Classifiers[m_NumIterationsPerformed],
+                               m_TrainingData);
+      epsilon = evaluation.errorRate();
+    }
+
+    // Stop if error too big or 0
+    if (Utils.grOrEq(epsilon, 0.5) || Utils.eq(epsilon, 0)) {
+      if (m_NumIterationsPerformed == 0) {
+        m_NumIterationsPerformed = 1; // If we're the first we have to use it
       }
+      return false;
+    }
 
-      // Update instance weights
-      setWeights(training, reweight);
+    // Determine the weight to assign to this model
+    double reweight = (1 - epsilon) / epsilon;
+    m_Betas[m_NumIterationsPerformed] = Math.log(reweight);
+    if (m_Debug) {
+      System.err.println("\terror rate = " + epsilon + "  beta = "
+                         + m_Betas[m_NumIterationsPerformed]);
+    }
+    
+    // Update instance weights
+    setWeights(m_TrainingData, reweight);
+
+    // Model has been built successfully
+    m_NumIterationsPerformed++;
+    return true;
+  }
+
+  /**
+   * Clean up after boosting.
+   */
+  public void done() {
+    
+    m_TrainingData = null;
+    
+    // Can discard ZeroR model if we don't need it anymore
+    if (m_NumIterationsPerformed > 0) {
+      m_ZeroR = null;
     }
   }
 
@@ -615,77 +656,6 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
-   * Boosting method. Boosts any classifier that can handle weighted instances.
-   * 
-   * @param data the training data to be used for generating the boosted
-   *          classifier.
-   * @throws Exception if the classifier could not be built successfully
-   */
-  protected void buildClassifierWithWeights(Instances data) throws Exception {
-
-    Instances trainData, training;
-    double epsilon, reweight;
-    Evaluation evaluation;
-    int numInstances = data.numInstances();
-    Random randomInstance = new Random(m_Seed);
-
-    // Initialize data
-    m_Betas = new double[m_Classifiers.length];
-    m_NumIterationsPerformed = 0;
-
-    // Create a copy of the data so that when the weights are diddled
-    // with it doesn't mess up the weights for anyone else
-    training = new Instances(data, 0, numInstances);
-
-    // Do boostrap iterations
-    for (m_NumIterationsPerformed = 0; m_NumIterationsPerformed < m_Classifiers.length; m_NumIterationsPerformed++) {
-      if (m_Debug) {
-        System.err.println("Training classifier "
-          + (m_NumIterationsPerformed + 1));
-      }
-      // Select instances to train the classifier on
-      if (m_WeightThreshold < 100) {
-        trainData = selectWeightQuantile(training,
-          (double) m_WeightThreshold / 100);
-      } else {
-        trainData = new Instances(training, 0, numInstances);
-      }
-
-      // Build the classifier
-      if (m_Classifiers[m_NumIterationsPerformed] instanceof Randomizable) {
-        ((Randomizable) m_Classifiers[m_NumIterationsPerformed])
-          .setSeed(randomInstance.nextInt());
-      }
-      m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
-
-      // Evaluate the classifier
-      evaluation = new Evaluation(data);
-      evaluation.evaluateModel(m_Classifiers[m_NumIterationsPerformed],
-        training);
-      epsilon = evaluation.errorRate();
-
-      // Stop if error too small or error too big and ignore this model
-      if (Utils.grOrEq(epsilon, 0.5) || Utils.eq(epsilon, 0)) {
-        if (m_NumIterationsPerformed == 0) {
-          m_NumIterationsPerformed = 1; // If we're the first we have to to use
-                                        // it
-        }
-        break;
-      }
-      // Determine the weight to assign to this model
-      reweight = (1 - epsilon) / epsilon;
-      m_Betas[m_NumIterationsPerformed] = Math.log(reweight);
-      if (m_Debug) {
-        System.err.println("\terror rate = " + epsilon + "  beta = "
-          + m_Betas[m_NumIterationsPerformed]);
-      }
-
-      // Update instance weights
-      setWeights(training, reweight);
-    }
-  }
-
-  /**
    * Calculates the class membership probabilities for the given test instance.
    * 
    * @param instance the instance to be classified
@@ -696,7 +666,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   public double[] distributionForInstance(Instance instance) throws Exception {
 
     // default model?
-    if (m_ZeroR != null) {
+    if (m_NumIterationsPerformed == 0) {
       return m_ZeroR.distributionForInstance(instance);
     }
 
@@ -768,7 +738,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   public String toString() {
 
     // only ZeroR model?
-    if (m_ZeroR != null) {
+    if (m_NumIterationsPerformed == 0) {
       StringBuffer buf = new StringBuffer();
       buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
       buf.append(this.getClass().getName().replaceAll(".*\\.", "")

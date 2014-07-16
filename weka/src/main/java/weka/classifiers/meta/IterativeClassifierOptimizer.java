@@ -625,7 +625,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
         final int lo = j * chunksize;
         final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : numRuns;
 
-        // Create and submit new job, where each instance in batch is processed
+        // Create and submit new job
         Future<Boolean> futureT = pool.submit(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
@@ -643,12 +643,17 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
         results.add(futureT);
       }
 
-      // Check the all classifiers succeeded
+      // Check that all classifiers succeeded
       try {
+        boolean failure = false;
         for (Future<Boolean> futureT : results) {
           if (!futureT.get()) {
+            failure = true;
             break; // Break out if one classifier fails to iterate
           }
+        }
+        if (failure) {
+          break;
         }
       } catch (Exception e) {
         System.out.println("Classifiers could not be generated.");
