@@ -732,11 +732,7 @@ public class LogitBoost
     initializeClassifier(data);
 
     // For the given number of iterations
-    for (int i = 0; i < m_NumIterations; i++) {
-      if (!next()) {
-        break;
-      }
-    }
+    while (next()) {};
 
     // Clean up
     done();
@@ -827,6 +823,10 @@ public class LogitBoost
    * Perform another iteration of boosting.
    */
   public boolean next() throws Exception {
+
+    if (m_NumGenerated >= m_NumIterations) {
+      return false;
+    }
 
     // Do we only have a ZeroR model
     if (m_ZeroR != null) {

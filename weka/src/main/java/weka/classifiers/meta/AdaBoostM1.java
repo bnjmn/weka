@@ -740,21 +740,22 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     // only ZeroR model?
     if (m_NumIterationsPerformed == 0) {
       StringBuffer buf = new StringBuffer();
-      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
-      buf.append(this.getClass().getName().replaceAll(".*\\.", "")
-        .replaceAll(".", "=")
-        + "\n\n");
-      buf
-        .append("Warning: No model could be built, hence ZeroR model is used:\n\n");
-      buf.append(m_ZeroR.toString());
+      if (m_ZeroR == null) {
+        buf.append("AdaBoostM1: No model built yet.\n");
+      } else {
+        buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+        buf.append(this.getClass().getName().replaceAll(".*\\.", "")
+                   .replaceAll(".", "=")
+                   + "\n\n");
+        buf
+          .append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+        buf.append(m_ZeroR.toString());
+      }
       return buf.toString();
     }
 
     StringBuffer text = new StringBuffer();
-
-    if (m_NumIterationsPerformed == 0) {
-      text.append("AdaBoostM1: No model built yet.\n");
-    } else if (m_NumIterationsPerformed == 1) {
+    if (m_NumIterationsPerformed == 1) {
       text.append("AdaBoostM1: No boosting possible, one classifier used!\n");
       text.append(m_Classifiers[0].toString() + "\n");
     } else {
