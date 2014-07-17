@@ -510,12 +510,12 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
         // }
       }
 
-      pruneDictionary();
+      pruneDictionary(false);
     }
   }
 
-  protected void pruneDictionary() {
-    if (m_periodicP <= 0 || m_t % m_periodicP > 0) {
+  protected void pruneDictionary(boolean force) {
+    if ((m_periodicP <= 0 || m_t % m_periodicP > 0) && !force) {
       return;
     }
 
@@ -1297,8 +1297,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
         + "haven't seen any models to aggregate");
     }
 
-    // Nothing more to do - we don't need to average anything,
-    // therefore further models can be aggregated at any time
+    pruneDictionary(true);
   }
 
   /**
