@@ -504,10 +504,11 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     m_Betas = new double[m_Classifiers.length];
     m_NumIterationsPerformed = 0;
     m_TrainingData = new Instances(data);
+
+    m_RandomInstance = new Random(m_Seed);
+
     if ((m_UseResampling)
         || (!(m_Classifier instanceof WeightedInstancesHandler))) {
-
-      m_RandomInstance = new Random(m_Seed);
 
       // Normalize weights so that they sum to one and can be used as sampling probabilities
       double sumProbs = m_TrainingData.sumOfWeights();

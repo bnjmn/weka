@@ -1272,7 +1272,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         if (preserveOrder) {
           if (splitPercentage == -1) {
             throw new Exception(
-              "Percentage split ('-percentage-split') is missing.");
+              "Percentage split ('-split-percentage') is missing.");
           }
         }
         // create new train/test sources

@@ -350,25 +350,45 @@ public abstract class RBFModel extends RandomizableClassifier {
       break;
     }
 
-    // Set initial radius based on distance to nearest other basis function
+    // Compute value required to set initiale scale parameter(s)
     double maxMinDist = -1;
-    for (int i = 0; i < centers.numInstances(); i++) {
-      double minDist = Double.MAX_VALUE;
-      for (int j = i + 1; j < centers.numInstances(); j++) {
+
+    // Special case if there's only one basis function: simply
+    // take distance to furthest data point
+    if (centers.numInstances() == 1) {
+      Instance center = centers.instance(0);
+      for (int i = 0; i < dataRemoved.numInstances(); i++) {
         double dist = 0;
         for (int k = 0; k < centers.numAttributes(); k++) {
-          if (k != centers.classIndex()) {
-            double diff = centers.instance(i).value(k)
-              - centers.instance(j).value(k);
-            dist += diff * diff;
-          }
+          double diff = dataRemoved.instance(i).value(k) -
+            center.value(k);
+          dist += diff * diff;
         }
-        if (dist < minDist) {
-          minDist = dist;
+        if (dist > maxMinDist) {
+          maxMinDist = dist;
         }
       }
-      if ((minDist != Double.MAX_VALUE) && (minDist > maxMinDist)) {
-        maxMinDist = minDist;
+    } else {
+      
+      // Set initial radius based on distance to nearest other basis function
+      for (int i = 0; i < centers.numInstances(); i++) {
+        double minDist = Double.MAX_VALUE;
+        for (int j = i + 1; j < centers.numInstances(); j++) {
+          double dist = 0;
+          for (int k = 0; k < centers.numAttributes(); k++) {
+            if (k != centers.classIndex()) {
+              double diff = centers.instance(i).value(k)
+                - centers.instance(j).value(k);
+              dist += diff * diff;
+            }
+          }
+          if (dist < minDist) {
+            minDist = dist;
+          }
+        }
+        if ((minDist != Double.MAX_VALUE) && (minDist > maxMinDist)) {
+          maxMinDist = minDist;
+        }
       }
     }
 
