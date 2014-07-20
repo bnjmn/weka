@@ -549,3 +549,11 @@ weka.core.neighboursearch.balltrees.BallSplitter=\
 weka.core.PartitionGenerator=\
  weka.classifiers.trees.J48,\
  weka.classifiers.meta.FilteredClassifier
+
+# stopword algorithms
+weka.core.stopwords.StopwordsHandler=\
+  weka.core.stopwords.FromFile,\
+  weka.core.stopwords.Null,\
+  weka.core.stopwords.Rainbow,\
+  weka.core.stopwords.RegExpFromFile
+ 

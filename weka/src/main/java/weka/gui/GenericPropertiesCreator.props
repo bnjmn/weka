@@ -214,3 +214,7 @@ weka.core.PartitionGenerator=\
 
 #weka.classifiers.meta.generators.NominalAttributeGenerator=\
 # weka.classifiers.meta.generators
+
+# stopword algorithms
+weka.core.stopwords.StopwordsHandler=\
+  weka.core.stopwords
