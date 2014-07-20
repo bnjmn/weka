@@ -552,8 +552,8 @@ weka.core.PartitionGenerator=\
 
 # stopword algorithms
 weka.core.stopwords.StopwordsHandler=\
-  weka.core.stopwords.FromFile,\
   weka.core.stopwords.Null,\
   weka.core.stopwords.Rainbow,\
-  weka.core.stopwords.RegExpFromFile
+  weka.core.stopwords.RegExpFromFile,\
+  weka.core.stopwords.WordsFromFile
  
