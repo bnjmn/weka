@@ -106,7 +106,7 @@ public class RegExpFromFile
   @Override
   protected synchronized boolean is(String word) {
     for (Pattern pattern: m_Patterns) {
-      if (pattern.matcher(word).matches()) {
+      if (pattern.matcher(word.trim().toLowerCase()).matches()) {
 	if (m_Debug)
 	  debug(pattern.pattern() + " --> true");
 	return true;
