@@ -28,6 +28,8 @@ weka.core.neighboursearch.balltrees.BallTreeConstructor=weka.gui.GenericObjectEd
 weka.core.neighboursearch.balltrees.BallSplitter=weka.gui.GenericObjectEditor
 weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter=weka.gui.GenericObjectEditor
 weka.core.stemmers.Stemmer=weka.gui.GenericObjectEditor
+weka.core.stopwords.StopwordsHandler=weka.gui.GenericObjectEditor
+weka.core.stopwords.StopwordsHandler[]=weka.gui.GenericArrayEditor
 weka.core.tokenizers.Tokenizer=weka.gui.GenericObjectEditor
 
 # estimators
