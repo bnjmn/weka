@@ -56,11 +56,12 @@ import weka.core.WeightedInstancesHandler;
  * Valid options are: <p/>
  * 
  * <pre> -K &lt;number of attributes&gt;
- *  Number of attributes to randomly investigate
- *  (&lt;0 = int(log_2(#attributes)+1)).</pre>
+ *  Number of attributes to randomly investigate. (default 0)
+ *  (&lt;0 = int(log_2(#predictors)+1)).</pre>
  * 
  * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.</pre>
+ *  Set minimum number of instances per leaf.
+ *  (default 1)</pre>
  * 
  * <pre> -V &lt;minimum variance for split&gt;
  *  Set minimum numeric class variance proportion
@@ -216,7 +217,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    *         explorer/experimenter gui
    */
   public String KValueTipText() {
-    return "Sets the number of randomly chosen attributes. If 0, log_2(number_of_attributes) + 1 is used.";
+    return "Sets the number of randomly chosen attributes. If 0, int(log_2(#predictors) + 1) is used.";
   }
 
   /**
@@ -373,12 +374,12 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
     Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
-      "\tNumber of attributes to randomly investigate\n"
-        + "\t(<0 = int(log_2(#attributes)+1)).", "K", 1,
+      "\tNumber of attributes to randomly investigate.\t(default 0)\n"
+        + "\t(<0 = int(log_2(#predictors)+1)).", "K", 1,
       "-K <number of attributes>"));
 
     newVector.addElement(new Option(
-      "\tSet minimum number of instances per leaf.", "M", 1,
+      "\tSet minimum number of instances per leaf.\n\t(default 1)", "M", 1,
       "-M <minimum number of instances>"));
 
     newVector.addElement(new Option(
@@ -451,11 +452,12 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * Valid options are: <p/>
    * 
    * <pre> -K &lt;number of attributes&gt;
-   *  Number of attributes to randomly investigate
-   *  (&lt;0 = int(log_2(#attributes)+1)).</pre>
+   *  Number of attributes to randomly investigate. (default 0)
+   *  (&lt;0 = int(log_2(#predictors)+1)).</pre>
    * 
    * <pre> -M &lt;minimum number of instances&gt;
-   *  Set minimum number of instances per leaf.</pre>
+   *  Set minimum number of instances per leaf.
+   *  (default 1)</pre>
    * 
    * <pre> -V &lt;minimum variance for split&gt;
    *  Set minimum numeric class variance proportion
@@ -578,7 +580,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
       m_KValue = data.numAttributes() - 1;
     }
     if (m_KValue < 1) {
-      m_KValue = (int) Utils.log2(data.numAttributes()) + 1;
+      m_KValue = (int) Utils.log2(data.numAttributes() - 1) + 1;
     }
 
     // can classifier handle the data?
