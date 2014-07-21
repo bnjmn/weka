@@ -42,7 +42,8 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.SparseInstance;
-import weka.core.Stopwords;
+import weka.core.stopwords.StopwordsHandler;
+import weka.core.stopwords.Null;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.stemmers.NullStemmer;
@@ -53,113 +54,74 @@ import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> Converts String attributes into a set of attributes
- * representing word occurrence (depending on the tokenizer) information from
- * the text contained in the strings. The set of words (attributes) is
- * determined by the first batch filtered (typically training data).
+ * <!-- globalinfo-start -->
+ * Converts String attributes into a set of attributes representing word occurrence (depending on the tokenizer) information from the text contained in the strings. The set of words (attributes) is determined by the first batch filtered (typically training data).
  * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ * <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -C
+ * <pre> -C
  *  Output word counts rather than boolean word presence.
  * </pre>
  * 
- * <pre>
- * -R &lt;index1,index2-index4,...&gt;
+ * <pre> -R &lt;index1,index2-index4,...&gt;
  *  Specify list of string attributes to convert to words (as weka Range).
- *  (default: select all string attributes)
- * </pre>
+ *  (default: select all string attributes)</pre>
  * 
- * <pre>
- * -V
- *  Invert matching sense of column indexes.
- * </pre>
+ * <pre> -V
+ *  Invert matching sense of column indexes.</pre>
  * 
- * <pre>
- * -P &lt;attribute name prefix&gt;
+ * <pre> -P &lt;attribute name prefix&gt;
  *  Specify a prefix for the created attribute names.
- *  (default: "")
- * </pre>
+ *  (default: "")</pre>
  * 
- * <pre>
- * -W &lt;number of words to keep&gt;
+ * <pre> -W &lt;number of words to keep&gt;
  *  Specify approximate number of word fields to create.
  *  Surplus words will be discarded..
- *  (default: 1000)
- * </pre>
+ *  (default: 1000)</pre>
  * 
- * <pre>
- * -prune-rate &lt;rate as a percentage of dataset&gt;
+ * <pre> -prune-rate &lt;rate as a percentage of dataset&gt;
  *  Specify the rate (e.g., every 10% of the input dataset) at which to periodically prune the dictionary.
  *  -W prunes after creating a full dictionary. You may not have enough memory for this approach.
- *  (default: no periodic pruning)
- * </pre>
+ *  (default: no periodic pruning)</pre>
  * 
- * <pre>
- * -T
+ * <pre> -T
  *  Transform the word frequencies into log(1+fij)
  *  where fij is the frequency of word i in jth document(instance).
  * </pre>
  * 
- * <pre>
- * -I
+ * <pre> -I
  *  Transform each word frequency into:
  *  fij*log(num of Documents/num of documents containing word i)
- *    where fij if frequency of word i in jth document(instance)
- * </pre>
+ *    where fij if frequency of word i in jth document(instance)</pre>
  * 
- * <pre>
- * -N
+ * <pre> -N
  *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
- *  to average length of training documents (default 0=don't normalize).
- * </pre>
+ *  to average length of training documents (default 0=don't normalize).</pre>
  * 
- * <pre>
- * -L
- *  Convert all tokens to lowercase before adding to the dictionary.
- * </pre>
+ * <pre> -L
+ *  Convert all tokens to lowercase before adding to the dictionary.</pre>
  * 
- * <pre>
- * -S
- *  Ignore words that are in the stoplist.
- * </pre>
+ * <pre> -stopwords-handler
+ *  The stopwords handler to use (default Null).</pre>
  * 
- * <pre>
- * -stemmer &lt;spec&gt;
- *  The stemmering algorihtm (classname plus parameters) to use.
- * </pre>
+ * <pre> -stemmer &lt;spec&gt;
+ *  The stemming algorithm (classname plus parameters) to use.</pre>
  * 
- * <pre>
- * -M &lt;int&gt;
- *  The minimum term frequency (default = 1).
- * </pre>
+ * <pre> -M &lt;int&gt;
+ *  The minimum term frequency (default = 1).</pre>
  * 
- * <pre>
- * -O
+ * <pre> -O
  *  If this is set, the maximum number of words and the 
  *  minimum term frequency is not enforced on a per-class 
  *  basis but based on the documents in all the classes 
- *  (even if a class attribute is set).
- * </pre>
+ *  (even if a class attribute is set).</pre>
  * 
- * <pre>
- * -stopwords &lt;file&gt;
- *  A file containing stopwords to override the default ones.
- *  Using this option automatically sets the flag ('-S') to use the
- *  stoplist if the file exists.
- *  Format: one stopword per line, lines starting with '#'
- *  are interpreted as comments and ignored.
- * </pre>
- * 
- * <pre>
- * -tokenizer &lt;spec&gt;
+ * <pre> -tokenizer &lt;spec&gt;
  *  The tokenizing algorihtm (classname plus parameters) to use.
- *  (default: weka.core.tokenizers.WordTokenizer)
- * </pre>
+ *  (default: weka.core.tokenizers.WordTokenizer)</pre>
  * 
  * <!-- options-end -->
  * 
@@ -168,7 +130,6 @@ import weka.filters.UnsupervisedFilter;
  * @author Gordon Paynter (gordon.paynter@ucr.edu)
  * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @version $Revision$
- * @see Stopwords
  */
 public class StringToWordVector extends Filter implements UnsupervisedFilter,
   OptionHandler {
@@ -256,9 +217,6 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /** True if all tokens should be downcased. */
   private boolean m_lowerCaseTokens;
 
-  /** True if tokens that are on a stoplist are to be ignored. */
-  private boolean m_useStoplist;
-
   /** the stemming algorithm. */
   private Stemmer m_Stemmer = new NullStemmer();
 
@@ -268,10 +226,8 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /** whether to operate on a per-class basis. */
   private boolean m_doNotOperateOnPerClassBasis = false;
 
-  /**
-   * a file containing stopwords for using others than the default Rainbow ones.
-   */
-  private File m_Stopwords = new File(System.getProperty("user.dir"));
+  /** Stopword handler to use. */
+  private StopwordsHandler m_StopwordsHandler = new Null();
 
   /** the tokenizer algorithm to use. */
   private Tokenizer m_Tokenizer = new WordTokenizer();
@@ -341,11 +297,11 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
     result.addElement(new Option("\tConvert all tokens to lowercase before "
       + "adding to the dictionary.", "L", 0, "-L"));
 
-    result.addElement(new Option("\tIgnore words that are in the stoplist.",
-      "S", 0, "-S"));
+    result.addElement(new Option("\tThe stopwords handler to use (default Null).",
+      "-stopwords-handler", 1, "-stopwords-handler"));
 
     result.addElement(new Option(
-      "\tThe stemmering algorihtm (classname plus parameters) to use.",
+      "\tThe stemming algorithm (classname plus parameters) to use.",
       "stemmer", 1, "-stemmer <spec>"));
 
     result.addElement(new Option("\tThe minimum term frequency (default = 1).",
@@ -356,14 +312,6 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
         + "\tminimum term frequency is not enforced on a per-class \n"
         + "\tbasis but based on the documents in all the classes \n"
         + "\t(even if a class attribute is set).", "O", 0, "-O"));
-
-    result.addElement(new Option(
-      "\tA file containing stopwords to override the default ones.\n"
-        + "\tUsing this option automatically sets the flag ('-S') to use the\n"
-        + "\tstoplist if the file exists.\n"
-        + "\tFormat: one stopword per line, lines starting with '#'\n"
-        + "\tare interpreted as comments and ignored.", "stopwords", 1,
-      "-stopwords <file>"));
 
     result.addElement(new Option(
       "\tThe tokenizing algorihtm (classname plus parameters) to use.\n"
@@ -377,106 +325,69 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   * <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -C
+   * <pre> -C
    *  Output word counts rather than boolean word presence.
    * </pre>
    * 
-   * <pre>
-   * -R &lt;index1,index2-index4,...&gt;
+   * <pre> -R &lt;index1,index2-index4,...&gt;
    *  Specify list of string attributes to convert to words (as weka Range).
-   *  (default: select all string attributes)
-   * </pre>
+   *  (default: select all string attributes)</pre>
    * 
-   * <pre>
-   * -V
-   *  Invert matching sense of column indexes.
-   * </pre>
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
    * 
-   * <pre>
-   * -P &lt;attribute name prefix&gt;
+   * <pre> -P &lt;attribute name prefix&gt;
    *  Specify a prefix for the created attribute names.
-   *  (default: "")
-   * </pre>
+   *  (default: "")</pre>
    * 
-   * <pre>
-   * -W &lt;number of words to keep&gt;
+   * <pre> -W &lt;number of words to keep&gt;
    *  Specify approximate number of word fields to create.
    *  Surplus words will be discarded..
-   *  (default: 1000)
-   * </pre>
+   *  (default: 1000)</pre>
    * 
-   * <pre>
-   * -prune-rate &lt;rate as a percentage of dataset&gt;
+   * <pre> -prune-rate &lt;rate as a percentage of dataset&gt;
    *  Specify the rate (e.g., every 10% of the input dataset) at which to periodically prune the dictionary.
    *  -W prunes after creating a full dictionary. You may not have enough memory for this approach.
-   *  (default: no periodic pruning)
-   * </pre>
+   *  (default: no periodic pruning)</pre>
    * 
-   * <pre>
-   * -T
+   * <pre> -T
    *  Transform the word frequencies into log(1+fij)
    *  where fij is the frequency of word i in jth document(instance).
    * </pre>
    * 
-   * <pre>
-   * -I
+   * <pre> -I
    *  Transform each word frequency into:
    *  fij*log(num of Documents/num of documents containing word i)
-   *    where fij if frequency of word i in jth document(instance)
-   * </pre>
+   *    where fij if frequency of word i in jth document(instance)</pre>
    * 
-   * <pre>
-   * -N
+   * <pre> -N
    *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
-   *  to average length of training documents (default 0=don't normalize).
-   * </pre>
+   *  to average length of training documents (default 0=don't normalize).</pre>
    * 
-   * <pre>
-   * -L
-   *  Convert all tokens to lowercase before adding to the dictionary.
-   * </pre>
+   * <pre> -L
+   *  Convert all tokens to lowercase before adding to the dictionary.</pre>
    * 
-   * <pre>
-   * -S
-   *  Ignore words that are in the stoplist.
-   * </pre>
+   * <pre> -stopwords-handler
+   *  The stopwords handler to use (default Null).</pre>
    * 
-   * <pre>
-   * -stemmer &lt;spec&gt;
-   *  The stemmering algorihtm (classname plus parameters) to use.
-   * </pre>
+   * <pre> -stemmer &lt;spec&gt;
+   *  The stemming algorithm (classname plus parameters) to use.</pre>
    * 
-   * <pre>
-   * -M &lt;int&gt;
-   *  The minimum term frequency (default = 1).
-   * </pre>
+   * <pre> -M &lt;int&gt;
+   *  The minimum term frequency (default = 1).</pre>
    * 
-   * <pre>
-   * -O
+   * <pre> -O
    *  If this is set, the maximum number of words and the 
    *  minimum term frequency is not enforced on a per-class 
    *  basis but based on the documents in all the classes 
-   *  (even if a class attribute is set).
-   * </pre>
+   *  (even if a class attribute is set).</pre>
    * 
-   * <pre>
-   * -stopwords &lt;file&gt;
-   *  A file containing stopwords to override the default ones.
-   *  Using this option automatically sets the flag ('-S') to use the
-   *  stoplist if the file exists.
-   *  Format: one stopword per line, lines starting with '#'
-   *  are interpreted as comments and ignored.
-   * </pre>
-   * 
-   * <pre>
-   * -tokenizer &lt;spec&gt;
+   * <pre> -tokenizer &lt;spec&gt;
    *  The tokenizing algorihtm (classname plus parameters) to use.
-   *  (default: weka.core.tokenizers.WordTokenizer)
-   * </pre>
+   *  (default: weka.core.tokenizers.WordTokenizer)</pre>
    * 
    * <!-- options-end -->
    * 
@@ -541,8 +452,6 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
     setLowerCaseTokens(Utils.getFlag('L', options));
 
-    setUseStoplist(Utils.getFlag('S', options));
-
     String stemmerString = Utils.getOption("stemmer", options);
     if (stemmerString.length() == 0) {
       setStemmer(null);
@@ -560,12 +469,23 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       setStemmer(stemmer);
     }
 
-    value = Utils.getOption("stopwords", options);
-    if (value.length() != 0) {
-      setStopwords(new File(value));
+    String stopwordsHandlerString = Utils.getOption("stopwords-handler", options);
+    if (stopwordsHandlerString.length() == 0) {
+      setStopwordsHandler(null);
     } else {
-      setStopwords(null);
+      String[] stopwordsHandlerSpec = Utils.splitOptions(stopwordsHandlerString);
+      if (stopwordsHandlerSpec.length == 0) {
+        throw new Exception("Invalid StopwordsHandler specification string");
+      }
+      String stopwordsHandlerName = stopwordsHandlerSpec[0];
+      stopwordsHandlerSpec[0] = "";
+      StopwordsHandler stopwordsHandler = (StopwordsHandler) Class.forName(stopwordsHandlerName).newInstance();
+      if (stopwordsHandler instanceof OptionHandler) {
+        ((OptionHandler) stopwordsHandler).setOptions(stopwordsHandlerSpec);
+      }
+      setStopwordsHandler(stopwordsHandler);
     }
+
 
     String tokenizerString = Utils.getOption("tokenizer", options);
     if (tokenizerString.length() == 0) {
@@ -635,10 +555,6 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       result.add("-L");
     }
 
-    if (getUseStoplist()) {
-      result.add("-S");
-    }
-
     if (getStemmer() != null) {
       result.add("-stemmer");
       String spec = getStemmer().getClass().getName();
@@ -649,16 +565,21 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       result.add(spec.trim());
     }
 
+    if (getStopwordsHandler() != null) {
+      result.add("-stopwords-handler");
+      String spec = getStopwordsHandler().getClass().getName();
+      if (getStopwordsHandler() instanceof OptionHandler) {
+        spec += " "
+          + Utils.joinOptions(((OptionHandler) getStopwordsHandler()).getOptions());
+      }
+      result.add(spec.trim());
+    }
+
     result.add("-M");
     result.add(String.valueOf(getMinTermFreq()));
 
     if (getDoNotOperateOnPerClassBasis()) {
       result.add("-O");
-    }
-
-    if (!getStopwords().isDirectory()) {
-      result.add("-stopwords");
-      result.add(getStopwords().getAbsolutePath());
     }
 
     result.add("-tokenizer");
@@ -1296,37 +1217,6 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Gets whether if the words on the stoplist are to be ignored (The stoplist
-   * is in weka.core.StopWords).
-   * 
-   * @return true if the words on the stoplist are to be ignored.
-   */
-  public boolean getUseStoplist() {
-    return m_useStoplist;
-  }
-
-  /**
-   * Sets whether if the words that are on a stoplist are to be ignored (The
-   * stop list is in weka.core.StopWords).
-   * 
-   * @param useStoplist true if the tokens that are on a stoplist are to be
-   *          ignored.
-   */
-  public void setUseStoplist(boolean useStoplist) {
-    m_useStoplist = useStoplist;
-  }
-
-  /**
-   * Returns the tip text for this property.
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String useStoplistTipText() {
-    return "Ignores all the words that are on the stoplist, if set to true.";
-  }
-
-  /**
    * the stemming algorithm to use, null means no stemming at all (i.e., the
    * NullStemmer is used).
    * 
@@ -1361,31 +1251,25 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * sets the file containing the stopwords, null or a directory unset the
-   * stopwords. If the file exists, it automatically turns on the flag to use
-   * the stoplist.
+   * Sets the stopwords handler to use.
    * 
-   * @param value the file containing the stopwords
+   * @param value the stopwords handler, if null, Null is used
    */
-  public void setStopwords(File value) {
-    if (value == null) {
-      value = new File(System.getProperty("user.dir"));
-    }
-
-    m_Stopwords = value;
-    if (value.exists() && value.isFile()) {
-      setUseStoplist(true);
+  public void setStopwordsHandler(StopwordsHandler value) {
+    if (value != null) {
+      m_StopwordsHandler = value;
+    } else {
+      m_StopwordsHandler = new Null();
     }
   }
 
   /**
-   * returns the file used for obtaining the stopwords, if the file represents a
-   * directory then the default ones are used.
+   * Gets the stopwords handler.
    * 
-   * @return the file containing the stopwords
+   * @return the stopwords handler
    */
-  public File getStopwords() {
-    return m_Stopwords;
+  public StopwordsHandler getStopwordsHandler() {
+    return m_StopwordsHandler;
   }
 
   /**
@@ -1394,8 +1278,8 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String stopwordsTipText() {
-    return "The file containing the stopwords (if this is a directory then the default ones are used).";
+  public String stopwordsHandlerTipText() {
+    return "The stopwords handler to use (Null means no stopwords are used).";
   }
 
   /**
@@ -1489,17 +1373,6 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    * determines the dictionary.
    */
   private void determineDictionary() {
-    // initialize stopwords
-    Stopwords stopwords = new Stopwords();
-    if (getUseStoplist()) {
-      try {
-        if (getStopwords().exists() && !getStopwords().isDirectory()) {
-          stopwords.read(getStopwords());
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
 
     // Operate on a per-class basis if class attribute is set
     int classInd = getInputFormat().classIndex();
@@ -1547,10 +1420,8 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
             word = m_Stemmer.stem(word);
 
-            if (this.m_useStoplist == true) {
-              if (stopwords.is(word)) {
-                continue;
-              }
+            if (m_StopwordsHandler.isStopword(word)) {
+              continue;
             }
 
             if (!(h.containsKey(word))) {
@@ -1887,3 +1758,4 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
     runFilter(new StringToWordVector(), argv);
   }
 }
+
