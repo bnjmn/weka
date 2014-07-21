@@ -20,7 +20,6 @@
 
 package weka.classifiers.bayes;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,87 +42,66 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
-import weka.core.Stopwords;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
+import weka.core.stopwords.Null;
+import weka.core.stopwords.StopwordsHandler;
 import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
 
 /**
- * <!-- globalinfo-start --> Multinomial naive bayes for text data. Operates
- * directly (and only) on String attributes. Other types of input attributes are
- * accepted but ignored during training and classification
+ <!-- globalinfo-start -->
+ * Multinomial naive bayes for text data. Operates directly (and only) on String attributes. Other types of input attributes are accepted but ignored during training and classification
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -W
- *  Use word frequencies instead of binary bag of words.
- * </pre>
+ * <pre> -W
+ *  Use word frequencies instead of binary bag of words.</pre>
  * 
- * <pre>
- * -P &lt;# instances&gt;
- *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)
- * </pre>
+ * <pre> -P &lt;# instances&gt;
+ *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)</pre>
  * 
- * <pre>
- * -M &lt;double&gt;
+ * <pre> -M &lt;double&gt;
  *  Minimum word frequency. Words with less than this frequence are ignored.
  *  If periodic pruning is turned on then this is also used to determine which
- *  words to remove from the dictionary (default = 3).
- * </pre>
+ *  words to remove from the dictionary (default = 3).</pre>
  * 
- * <pre>
- * -normalize
- *  Normalize document length (use in conjunction with -norm and -lnorm)
- * </pre>
+ * <pre> -normalize
+ *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
  * 
- * <pre>
- * -norm &lt;num&gt;
- *  Specify the norm that each instance must have (default 1.0)
- * </pre>
+ * <pre> -norm &lt;num&gt;
+ *  Specify the norm that each instance must have (default 1.0)</pre>
  * 
- * <pre>
- * -lnorm &lt;num&gt;
- *  Specify L-norm to use (default 2.0)
- * </pre>
+ * <pre> -lnorm &lt;num&gt;
+ *  Specify L-norm to use (default 2.0)</pre>
  * 
- * <pre>
- * -lowercase
- *  Convert all tokens to lowercase before adding to the dictionary.
- * </pre>
+ * <pre> -lowercase
+ *  Convert all tokens to lowercase before adding to the dictionary.</pre>
  * 
- * <pre>
- * -stoplist
- *  Ignore words that are in the stoplist.
- * </pre>
+ * <pre> -stopwords-handler
+ *  The stopwords handler to use (default Null).</pre>
  * 
- * <pre>
- * -stopwords &lt;file&gt;
- *  A file containing stopwords to override the default ones.
- *  Using this option automatically sets the flag ('-stoplist') to use the
- *  stoplist if the file exists.
- *  Format: one stopword per line, lines starting with '#'
- *  are interpreted as comments and ignored.
- * </pre>
- * 
- * <pre>
- * -tokenizer &lt;spec&gt;
+ * <pre> -tokenizer &lt;spec&gt;
  *  The tokenizing algorihtm (classname plus parameters) to use.
- *  (default: weka.core.tokenizers.WordTokenizer)
- * </pre>
+ *  (default: weka.core.tokenizers.WordTokenizer)</pre>
  * 
- * <pre>
- * -stemmer &lt;spec&gt;
- *  The stemmering algorihtm (classname plus parameters) to use.
- * </pre>
+ * <pre> -stemmer &lt;spec&gt;
+ *  The stemmering algorihtm (classname plus parameters) to use.</pre>
  * 
- * <!-- options-end -->
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
@@ -164,13 +142,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    */
   protected transient LinkedHashMap<String, Count> m_inputVector;
 
-  /** Default (rainbow) stopwords */
-  protected transient Stopwords m_stopwords;
-
-  /**
-   * a file containing stopwords for using others than the default Rainbow ones.
-   */
-  protected File m_stopwordsFile = new File(System.getProperty("user.dir"));
+  /** Stopword handler to use. */
+  protected StopwordsHandler m_StopwordsHandler = new Null();
 
   /** The tokenizer to use */
   protected Tokenizer m_tokenizer = new WordTokenizer();
@@ -180,9 +153,6 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
   /** The stemming algorithm. */
   protected Stemmer m_stemmer = new NullStemmer();
-
-  /** Whether or not to use a stop list */
-  protected boolean m_useStopList;
 
   /**
    * The number of training instances at which to periodically prune the
@@ -425,17 +395,6 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       m_inputVector.clear();
     }
 
-    if (m_useStopList && m_stopwords == null) {
-      m_stopwords = new Stopwords();
-      try {
-        if (getStopwords().exists() && !getStopwords().isDirectory()) {
-          m_stopwords.read(getStopwords());
-        }
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-
     for (int i = 0; i < instance.numAttributes(); i++) {
       if (instance.attribute(i).isString() && !instance.isMissing(i)) {
         m_tokenizer.tokenize(instance.stringValue(i));
@@ -448,10 +407,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
           word = m_stemmer.stem(word);
 
-          if (m_useStopList) {
-            if (m_stopwords.is(word)) {
-              continue;
-            }
+          if (m_StopwordsHandler.isStopword(word)) {
+            continue;
           }
 
           Count docCount = m_inputVector.get(word);
@@ -820,59 +777,25 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   }
 
   /**
-   * Returns the tip text for this property
+   * Sets the stopwords handler to use.
    * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   * @param value the stopwords handler, if null, Null is used
    */
-  public String useStopListTipText() {
-    return "If true, ignores all words that are on the stoplist.";
-  }
-
-  /**
-   * Set whether to ignore all words that are on the stoplist.
-   * 
-   * @param u true to ignore all words on the stoplist.
-   */
-  public void setUseStopList(boolean u) {
-    m_useStopList = u;
-  }
-
-  /**
-   * Get whether to ignore all words that are on the stoplist.
-   * 
-   * @return true to ignore all words on the stoplist.
-   */
-  public boolean getUseStopList() {
-    return m_useStopList;
-  }
-
-  /**
-   * sets the file containing the stopwords, null or a directory unset the
-   * stopwords. If the file exists, it automatically turns on the flag to use
-   * the stoplist.
-   * 
-   * @param value the file containing the stopwords
-   */
-  public void setStopwords(File value) {
-    if (value == null) {
-      value = new File(System.getProperty("user.dir"));
-    }
-
-    m_stopwordsFile = value;
-    if (value.exists() && value.isFile()) {
-      setUseStopList(true);
+  public void setStopwordsHandler(StopwordsHandler value) {
+    if (value != null) {
+      m_StopwordsHandler = value;
+    } else {
+      m_StopwordsHandler = new Null();
     }
   }
 
   /**
-   * returns the file used for obtaining the stopwords, if the file represents a
-   * directory then the default ones are used.
+   * Gets the stopwords handler.
    * 
-   * @return the file containing the stopwords
+   * @return the stopwords handler
    */
-  public File getStopwords() {
-    return m_stopwordsFile;
+  public StopwordsHandler getStopwordsHandler() {
+    return m_StopwordsHandler;
   }
 
   /**
@@ -881,8 +804,8 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String stopwordsTipText() {
-    return "The file containing the stopwords (if this is a directory then the default ones are used).";
+  public String stopwordsHandlerTipText() {
+    return "The stopwords handler to use (Null means no stopwords are used).";
   }
 
   /**
@@ -915,16 +838,9 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       "lnorm", 1, "-lnorm <num>"));
     newVector.addElement(new Option("\tConvert all tokens to lowercase "
       + "before adding to the dictionary.", "lowercase", 0, "-lowercase"));
-    newVector.addElement(new Option("\tIgnore words that are in the stoplist.",
-      "stoplist", 0, "-stoplist"));
-    newVector
-      .addElement(new Option(
-        "\tA file containing stopwords to override the default ones.\n"
-          + "\tUsing this option automatically sets the flag ('-stoplist') to use the\n"
-          + "\tstoplist if the file exists.\n"
-          + "\tFormat: one stopword per line, lines starting with '#'\n"
-          + "\tare interpreted as comments and ignored.", "stopwords", 1,
-        "-stopwords <file>"));
+    newVector.addElement(new Option(
+      "\tThe stopwords handler to use (default Null).",
+      "-stopwords-handler", 1, "-stopwords-handler"));
     newVector.addElement(new Option(
       "\tThe tokenizing algorihtm (classname plus parameters) to use.\n"
         + "\t(default: " + WordTokenizer.class.getName() + ")", "tokenizer", 1,
@@ -942,72 +858,51 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -W
-   *  Use word frequencies instead of binary bag of words.
-   * </pre>
+   * <pre> -W
+   *  Use word frequencies instead of binary bag of words.</pre>
    * 
-   * <pre>
-   * -P &lt;# instances&gt;
-   *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)
-   * </pre>
+   * <pre> -P &lt;# instances&gt;
+   *  How often to prune the dictionary of low frequency words (default = 0, i.e. don't prune)</pre>
    * 
-   * <pre>
-   * -M &lt;double&gt;
+   * <pre> -M &lt;double&gt;
    *  Minimum word frequency. Words with less than this frequence are ignored.
    *  If periodic pruning is turned on then this is also used to determine which
-   *  words to remove from the dictionary (default = 3).
-   * </pre>
+   *  words to remove from the dictionary (default = 3).</pre>
    * 
-   * <pre>
-   * -normalize
-   *  Normalize document length (use in conjunction with -norm and -lnorm)
-   * </pre>
+   * <pre> -normalize
+   *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
    * 
-   * <pre>
-   * -norm &lt;num&gt;
-   *  Specify the norm that each instance must have (default 1.0)
-   * </pre>
+   * <pre> -norm &lt;num&gt;
+   *  Specify the norm that each instance must have (default 1.0)</pre>
    * 
-   * <pre>
-   * -lnorm &lt;num&gt;
-   *  Specify L-norm to use (default 2.0)
-   * </pre>
+   * <pre> -lnorm &lt;num&gt;
+   *  Specify L-norm to use (default 2.0)</pre>
    * 
-   * <pre>
-   * -lowercase
-   *  Convert all tokens to lowercase before adding to the dictionary.
-   * </pre>
+   * <pre> -lowercase
+   *  Convert all tokens to lowercase before adding to the dictionary.</pre>
    * 
-   * <pre>
-   * -stoplist
-   *  Ignore words that are in the stoplist.
-   * </pre>
+   * <pre> -stopwords-handler
+   *  The stopwords handler to use (default Null).</pre>
    * 
-   * <pre>
-   * -stopwords &lt;file&gt;
-   *  A file containing stopwords to override the default ones.
-   *  Using this option automatically sets the flag ('-stoplist') to use the
-   *  stoplist if the file exists.
-   *  Format: one stopword per line, lines starting with '#'
-   *  are interpreted as comments and ignored.
-   * </pre>
-   * 
-   * <pre>
-   * -tokenizer &lt;spec&gt;
+   * <pre> -tokenizer &lt;spec&gt;
    *  The tokenizing algorihtm (classname plus parameters) to use.
-   *  (default: weka.core.tokenizers.WordTokenizer)
-   * </pre>
+   *  (default: weka.core.tokenizers.WordTokenizer)</pre>
    * 
-   * <pre>
-   * -stemmer &lt;spec&gt;
-   *  The stemmering algorihtm (classname plus parameters) to use.
-   * </pre>
+   * <pre> -stemmer &lt;spec&gt;
+   *  The stemmering algorihtm (classname plus parameters) to use.</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -1041,13 +936,25 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     }
 
     setLowercaseTokens(Utils.getFlag("lowercase", options));
-    setUseStopList(Utils.getFlag("stoplist", options));
 
-    String stopwordsS = Utils.getOption("stopwords", options);
-    if (stopwordsS.length() > 0) {
-      setStopwords(new File(stopwordsS));
+    String stopwordsHandlerString =
+      Utils.getOption("stopwords-handler", options);
+    if (stopwordsHandlerString.length() == 0) {
+      setStopwordsHandler(null);
     } else {
-      setStopwords(null);
+      String[] stopwordsHandlerSpec =
+        Utils.splitOptions(stopwordsHandlerString);
+      if (stopwordsHandlerSpec.length == 0) {
+        throw new Exception("Invalid StopwordsHandler specification string");
+      }
+      String stopwordsHandlerName = stopwordsHandlerSpec[0];
+      stopwordsHandlerSpec[0] = "";
+      StopwordsHandler stopwordsHandler =
+        (StopwordsHandler) Class.forName(stopwordsHandlerName).newInstance();
+      if (stopwordsHandler instanceof OptionHandler) {
+        ((OptionHandler) stopwordsHandler).setOptions(stopwordsHandlerSpec);
+      }
+      setStopwordsHandler(stopwordsHandler);
     }
 
     String tokenizerString = Utils.getOption("tokenizer", options);
@@ -1115,12 +1022,17 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     if (getLowercaseTokens()) {
       options.add("-lowercase");
     }
-    if (getUseStopList()) {
-      options.add("-stoplist");
-    }
-    if (!getStopwords().isDirectory()) {
-      options.add("-stopwords");
-      options.add(getStopwords().getAbsolutePath());
+
+    if (getStopwordsHandler() != null) {
+      options.add("-stopwords-handler");
+      String spec = getStopwordsHandler().getClass().getName();
+      if (getStopwordsHandler() instanceof OptionHandler) {
+        spec +=
+          " "
+            + Utils.joinOptions(((OptionHandler) getStopwordsHandler())
+              .getOptions());
+      }
+      options.add(spec.trim());
     }
 
     options.add("-tokenizer");
@@ -1310,3 +1222,4 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   }
 
 }
+
