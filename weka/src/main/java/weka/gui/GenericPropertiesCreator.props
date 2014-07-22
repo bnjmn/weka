@@ -34,8 +34,9 @@ weka.classifiers.Classifier=\
 
 # Lists the IterativeClassifier objects I want to choose from
 weka.classifiers.IterativeClassifier=\
- weka.classifiers.meta
-
+ weka.classifiers.meta,\
+ weka.classifiers.trees
+ 
 # Lists the AbstractClassificationOutput-packages I want to choose from
 weka.classifiers.evaluation.output.prediction.AbstractOutput=\
   weka.classifiers.evaluation.output.prediction

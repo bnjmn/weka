@@ -74,10 +74,12 @@ import weka.core.WeightedInstancesHandler;
  * Valid options are: <p/>
  * 
  * <pre> -I &lt;number of trees&gt;
- *  Number of trees to build.</pre>
+ *  Number of trees to build.
+ *  (default 100)</pre>
  * 
  * <pre> -K &lt;number of features&gt;
- *  Number of features to consider (&lt;0 = int(log_2(#predictors)+1)).</pre>
+ *  Number of features to consider (&lt;1=int(log_2(#predictors)+1)).
+ *  (default 0)</pre>
  * 
  * <pre> -S
  *  Seed for random number generator.
@@ -520,10 +522,12 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * Valid options are: <p/>
    * 
    * <pre> -I &lt;number of trees&gt;
-   *  Number of trees to build.</pre>
+   *  Number of trees to build.
+   *  (default 100)</pre>
    * 
    * <pre> -K &lt;number of features&gt;
-   *  Number of features to consider (&lt;0 = int(log_2(#predictors)+1)).</pre>
+   *  Number of features to consider (&lt;1=int(log_2(#predictors)+1)).
+   *  (default 0)</pre>
    * 
    * <pre> -S
    *  Seed for random number generator.

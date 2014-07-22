@@ -50,6 +50,7 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.AdditionalMeasureProducer;
 
 /**
  * Chooses the best number of iterations for an IterativeClassifier such as
@@ -187,7 +188,8 @@ import weka.core.Utils;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 10141 $
  */
-public class IterativeClassifierOptimizer extends RandomizableClassifier {
+public class IterativeClassifierOptimizer extends RandomizableClassifier 
+  implements AdditionalMeasureProducer {
 
   /** for serialization */
   private static final long serialVersionUID = -3665485256313525864L;
@@ -235,10 +237,11 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
    */
   protected double[] m_thresholds = null;
 
-  /**
-   * The best value found for the criterion to be optimized.
-   */
+  /** The best value found for the criterion to be optimized. */
   protected double m_bestResult = Double.MAX_VALUE;
+
+  /** The best number of iterations identified. */
+  protected int m_bestNumIts;
 
   /** The number of threads to use for parallel building of classifiers. */
   protected int m_numThreads = 1;
@@ -525,7 +528,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     }
     m_thresholds = null;
     int numIts = 0;
-    int bestIts = 0;
+    m_bestNumIts = 0;
     int numberOfIterationsSinceMinimum = -1;
     while (true) {
 
@@ -600,7 +603,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
         // Is there an improvement?
         if (delta < 0) {
           m_bestResult = result;
-          bestIts = numIts;
+          m_bestNumIts = numIts;
           m_thresholds = tempThresholds;
           numberOfIterationsSinceMinimum = -1;
         }
@@ -667,7 +670,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
     // Build classifieer based on identified number of iterations
     m_IterativeClassifier.initializeClassifier(origData);
     int i = 0;
-    while (i++ < bestIts && m_IterativeClassifier.next()) {
+    while (i++ < m_bestNumIts && m_IterativeClassifier.next()) {
     }
     ;
     m_IterativeClassifier.done();
@@ -708,7 +711,8 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
       return "No classifier built yet.";
     } else {
       StringBuffer sb = new StringBuffer();
-      sb.append("Best value found: " + m_bestResult + "\n\n");
+      sb.append("Best value found: " + m_bestResult + "\n");
+      sb.append("Best number of iterations found: " + m_bestNumIts + "\n\n");
       if (m_thresholds != null) {
         sb.append("Thresholds found: ");
         for (int i = 0; i < m_thresholds.length; i++) {
@@ -1098,6 +1102,56 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier {
   @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision: 10649 $");
+  }
+
+  /**
+   * Returns the best number of iterations
+   * 
+   * @return the best number of iterations
+   */
+  public double measureBestNumIts() {
+    return m_bestNumIts;
+  }
+
+  /**
+   * Returns the measure for the best model
+   * 
+   * @return the number of leaves
+   */
+  public double measureBestVal() {
+    return m_bestResult;
+  }
+
+  /**
+   * Returns an enumeration of the additional measure names
+   * 
+   * @return an enumeration of the measure names
+   */
+  @Override
+  public Enumeration<String> enumerateMeasures() {
+    Vector<String> newVector = new Vector<String>(2);
+    newVector.addElement("measureBestNumIts");
+    newVector.addElement("measureBestVal");
+    return newVector.elements();
+  }
+
+  /**
+   * Returns the value of the named measure
+   * 
+   * @param additionalMeasureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @throws IllegalArgumentException if the named measure is not supported
+   */
+  @Override
+  public double getMeasure(String additionalMeasureName) {
+    if (additionalMeasureName.compareToIgnoreCase("measureBestNumIts") == 0) {
+      return measureBestNumIts();
+    } else if (additionalMeasureName.compareToIgnoreCase("measureBestVal") == 0) {
+      return measureBestVal();
+    } else {
+      throw new IllegalArgumentException(additionalMeasureName
+        + " not supported (IterativeClassifierOptimizer)");
+    }
   }
 
   /**
