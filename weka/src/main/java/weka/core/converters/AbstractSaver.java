@@ -56,6 +56,40 @@ public abstract class AbstractSaver implements Saver, CapabilitiesHandler {
   /** The current write mode */
   private int m_writeMode;
 
+  /** Whether capabilities should not be checked */
+  protected boolean m_DoNotCheckCapabilities = false;
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String doNotCheckCapabilitiesTipText() {
+    return "If set, saver capabilities are not checked"
+      + " (Use with caution to reduce runtime).";
+  }
+
+  /**
+   * Set whether not to check capabilities.
+   * 
+   * @param doNotCheckCapabilities true if capabilities are not to be checked.
+   */
+  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
+
+    m_DoNotCheckCapabilities = doNotCheckCapabilities;
+  }
+
+  /**
+   * Get whether capabilities checking is turned off.
+   * 
+   * @return true if capabilities checking is turned off.
+   */
+  public boolean getDoNotCheckCapabilities() {
+
+    return m_DoNotCheckCapabilities;
+  }
+
   /**
    * resets the options
    * 

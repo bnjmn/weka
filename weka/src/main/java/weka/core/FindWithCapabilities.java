@@ -198,7 +198,8 @@ import weka.gui.GenericPropertiesCreator;
  * @see GenericPropertiesCreator
  */
 public class FindWithCapabilities implements OptionHandler,
-  CapabilitiesHandler, RevisionHandler {
+                                             CapabilitiesHandler, 
+                                             RevisionHandler {
 
   /** the capabilities to look for. */
   protected Capabilities m_Capabilities = new Capabilities(this);
@@ -232,6 +233,29 @@ public class FindWithCapabilities implements OptionHandler,
 
   /** the class that didn't match. */
   protected Vector<String> m_Misses = new Vector<String>();
+
+  /** Whether capabilities should not be checked */
+  protected boolean m_DoNotCheckCapabilities = false;
+
+  /**
+   * Set whether not to check capabilities.
+   * 
+   * @param doNotCheckCapabilities true if capabilities are not to be checked.
+   */
+  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
+
+    m_DoNotCheckCapabilities = doNotCheckCapabilities;
+  }
+
+  /**
+   * Get whether capabilities checking is turned off.
+   * 
+   * @return true if capabilities checking is turned off.
+   */
+  public boolean getDoNotCheckCapabilities() {
+
+    return m_DoNotCheckCapabilities;
+  }
 
   /**
    * Returns an enumeration describing the available options.

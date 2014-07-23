@@ -139,6 +139,40 @@ public abstract class Estimator implements Cloneable, Serializable,
     }
   }
 
+  /** Whether capabilities should not be checked */
+  protected boolean m_DoNotCheckCapabilities = false;
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String doNotCheckCapabilitiesTipText() {
+    return "If set, estimator capabilities are not checked before estimator is built"
+      + " (Use with caution to reduce runtime).";
+  }
+
+  /**
+   * Set whether not to check capabilities.
+   * 
+   * @param doNotCheckCapabilities true if capabilities are not to be checked.
+   */
+  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
+
+    m_DoNotCheckCapabilities = doNotCheckCapabilities;
+  }
+
+  /**
+   * Get whether capabilities checking is turned off.
+   * 
+   * @return true if capabilities checking is turned off.
+   */
+  public boolean getDoNotCheckCapabilities() {
+
+    return m_DoNotCheckCapabilities;
+  }
+
   /**
    * Add a new data value to the current estimator.
    * 
@@ -623,16 +657,16 @@ public abstract class Estimator implements Cloneable, Serializable,
 
   /**
    * Creates a new instance of a estimatorr given it's class name and (optional)
-   * arguments to pass to it's setOptions method. If the classifier implements
-   * OptionHandler and the options parameter is non-null, the classifier will
+   * arguments to pass to it's setOptions method. If the estimator implements
+   * OptionHandler and the options parameter is non-null, the estimator will
    * have it's options set.
    * 
    * @param name the fully qualified class name of the estimatorr
    * @param options an array of options suitable for passing to setOptions. May
    *          be null.
-   * @return the newly created classifier, ready for use.
-   * @exception Exception if the classifier name is invalid, or the options
-   *              supplied are not acceptable to the classifier
+   * @return the newly created estimator, ready for use.
+   * @exception Exception if the estimator name is invalid, or the options
+   *              supplied are not acceptable to the estimator
    */
   public static Estimator forName(String name, String[] options)
     throws Exception {

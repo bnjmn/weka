@@ -21,8 +21,6 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
@@ -84,40 +82,12 @@ public class C45PruneableClassifierTree
   }
 
   /**
-   * Returns default capabilities of the classifier tree.
-   *
-   * @return      the capabilities of this classifier tree
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Method for building a pruneable classifier tree.
    *
    * @param data the data for building the tree
    * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
-
-    // can classifier tree handle the data?
-    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);

@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -78,7 +79,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @version $Revision$
  */
 public abstract class Filter implements Serializable, CapabilitiesHandler,
-  RevisionHandler {
+                                        RevisionHandler, OptionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8835063755891851218L;
@@ -109,6 +110,12 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /** True if the first batch has been done */
   protected boolean m_FirstBatchDone = false;
+
+  /** Whether the classifier is run in debug mode. */
+  protected boolean m_Debug = false;
+
+  /** Whether capabilities should not be checked before classifier is built. */
+  protected boolean m_DoNotCheckCapabilities = false;
 
   /**
    * Returns true if the a new batch was started, either a new instance of the
@@ -1350,6 +1357,136 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         System.err.println(e.getMessage());
       }
     }
+  }
+
+  /**
+   * Returns an enumeration describing the available options.
+   * 
+   * @return an enumeration of all the available options.
+   */
+  @Override
+  public Enumeration<Option> listOptions() {
+
+    Vector<Option> newVector = new Vector<Option>(2);
+
+    newVector.addElement(new Option(
+      "\tIf set, filter is run in debug mode and\n"
+        + "\tmay output additional info to the console", "output-debug-info",
+      0, "-output-debug-info"));
+    newVector
+      .addElement(new Option(
+        "\tIf set, filter capabilities are not checked before filter is built\n"
+          + "\t(use with caution).", "-do-not-check-capabilities", 0,
+        "-do-not-check-capabilities"));
+
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options. Valid options are:
+   * <p>
+   * 
+   * -D <br>
+   * If set, filter is run in debug mode and may output additional info to
+   * the console.
+   * <p>
+   * 
+   * -do-not-check-capabilities <br>
+   * If set, filter capabilities are not checked before filter is built
+   * (use with caution).
+   * <p>
+   * 
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  @Override
+  public void setOptions(String[] options) throws Exception {
+
+    setDebug(Utils.getFlag("output-debug-info", options));
+    setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
+      options));
+  }
+
+  /**
+   * Gets the current settings of the filter.
+   * 
+   * @return an array of strings suitable for passing to setOptions
+   */
+  @Override
+  public String[] getOptions() {
+
+    Vector<String> options = new Vector<String>();
+
+    if (getDebug()) {
+      options.add("-output-debug-info");
+    }
+    if (getDoNotCheckCapabilities()) {
+      options.add("-do-not-check-capabilities");
+    }
+
+    return options.toArray(new String[0]);
+  }
+
+  /**
+   * Set debugging mode.
+   * 
+   * @param debug true if debug output should be printed
+   */
+  public void setDebug(boolean debug) {
+
+    m_Debug = debug;
+  }
+
+  /**
+   * Get whether debugging is turned on.
+   * 
+   * @return true if debugging output is on
+   */
+  public boolean getDebug() {
+
+    return m_Debug;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "If set to true, filter may output additional info to "
+      + "the console.";
+  }
+
+  /**
+   * Set whether not to check capabilities.
+   * 
+   * @param doNotCheckCapabilities true if capabilities are not to be checked.
+   */
+  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
+
+    m_DoNotCheckCapabilities = doNotCheckCapabilities;
+  }
+
+  /**
+   * Get whether capabilities checking is turned off.
+   * 
+   * @return true if capabilities checking is turned off.
+   */
+  public boolean getDoNotCheckCapabilities() {
+
+    return m_DoNotCheckCapabilities;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String doNotCheckCapabilitiesTipText() {
+    return "If set, filters capabilities are not checked before filter is built"
+      + " (Use with caution to reduce runtime).";
   }
 
   /**

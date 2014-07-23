@@ -331,10 +331,6 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
     Capabilities result = new Capabilities(this);
     result.enableAll();
 
-    // Do we want to effectively turn off the testWithFail
-    // method in Capabilities to save runtime in buildClassifier()?
-    result.setTestWithFailAlwaysSucceeds(getDoNotCheckCapabilities());
-
     return result;
   }
 

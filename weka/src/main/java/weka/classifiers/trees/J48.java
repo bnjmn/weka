@@ -50,6 +50,8 @@ import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 
 /**
  * <!-- globalinfo-start --> Class for generating a pruned or unpruned C4.5
@@ -245,20 +247,20 @@ public class J48 extends AbstractClassifier implements OptionHandler, Drawable,
   public Capabilities getCapabilities() {
     Capabilities result;
 
-    try {
-      if (!m_reducedErrorPruning) {
-        result = new C45PruneableClassifierTree(null, !m_unpruned, m_CF,
-          m_subtreeRaising, !m_noCleanup, m_collapseTree).getCapabilities();
-      } else {
-        result = new PruneableClassifierTree(null, !m_unpruned, m_numFolds,
-          !m_noCleanup, m_Seed).getCapabilities();
-      }
-    } catch (Exception e) {
-      result = new Capabilities(this);
-      result.disableAll();
-    }
-
-    result.setOwner(this);
+    result = new Capabilities(this);
+    result.disableAll();
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    // instances
+    result.setMinimumNumberInstances(0);
 
     return result;
   }

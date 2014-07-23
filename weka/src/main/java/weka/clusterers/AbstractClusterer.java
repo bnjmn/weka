@@ -314,11 +314,6 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
 
     result = new Capabilities(this);
     result.enableAll();
-    // result.enable(Capability.NO_CLASS);
-
-    // Do we want to effectively turn off the testWithFail
-    // method in Capabilities to save runtime in buildClusterer()?
-    result.setTestWithFailAlwaysSucceeds(getDoNotCheckCapabilities());
 
     return result;
   }

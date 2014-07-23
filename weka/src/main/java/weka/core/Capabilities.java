@@ -251,9 +251,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   /** whether to test for minimum number of instances */
   protected boolean m_MinimumNumberInstancesTest;
 
-  /** whether test with fail always succeeds */
-  private boolean m_TestWithFailAlwaysSucceeds;
-
   /**
    * initializes the capabilities for the given owner
    * 
@@ -263,8 +260,14 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     super();
 
     setOwner(owner);
+
     m_Capabilities = new HashSet<Capability>();
     m_Dependencies = new HashSet<Capability>();
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
 
     // load properties
     if (PROPERTIES == null) {
@@ -315,6 +318,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capabilities object to initialize with
    */
   public void assign(Capabilities c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       // capability
       if (c.handles(cap)) {
@@ -340,6 +349,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capabilities to AND with
    */
   public void and(Capabilities c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       // capability
       if (handles(cap) && c.handles(cap)) {
@@ -368,6 +383,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capabilities to OR with
    */
   public void or(Capabilities c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       // capability
       if (handles(cap) || c.handles(cap)) {
@@ -396,6 +417,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return true if all the requested capabilities are supported
    */
   public boolean supports(Capabilities c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return true;
+    }
+
     boolean result;
 
     result = true;
@@ -420,6 +447,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    *         have a dependency)
    */
   public boolean supportsMaybe(Capabilities c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return true;
+    }
+
     boolean result;
 
     result = true;
@@ -478,6 +511,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return iterator over the current capabilities
    */
   public Iterator<Capability> capabilities() {
+    
     return m_Capabilities.iterator();
   }
 
@@ -487,6 +521,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return iterator over the current dependencies
    */
   public Iterator<Capability> dependencies() {
+
     return m_Dependencies.iterator();
   }
 
@@ -502,6 +537,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capability to enable
    */
   public void enable(Capability c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       enable(Capability.BINARY_ATTRIBUTES);
@@ -530,6 +571,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capability to enable the dependency flag for
    */
   public void enableDependency(Capability c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+ 
     // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       enableDependency(Capability.BINARY_ATTRIBUTES);
@@ -553,6 +600,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getClassCapabilities()
    */
   public void enableAllClasses() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       if (cap.isClass()) {
         enable(cap);
@@ -567,6 +620,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getClassCapabilities()
    */
   public void enableAllClassDependencies() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       if (cap.isClass()) {
         enableDependency(cap);
@@ -581,6 +640,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getAttributeCapabilities()
    */
   public void enableAllAttributes() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       if (cap.isAttribute()) {
         enable(cap);
@@ -595,6 +660,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getAttributeCapabilities()
    */
   public void enableAllAttributeDependencies() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       if (cap.isAttribute()) {
         enableDependency(cap);
@@ -606,6 +677,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * enables all attribute and class types (including dependencies)
    */
   public void enableAll() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     enableAllAttributes();
     enableAllAttributeDependencies();
     enableAllClasses();
@@ -625,6 +702,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capability to disable
    */
   public void disable(Capability c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       disable(Capability.BINARY_ATTRIBUTES);
@@ -656,6 +739,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capability to disable the dependency flag for
    */
   public void disableDependency(Capability c) {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       disableDependency(Capability.BINARY_ATTRIBUTES);
@@ -683,6 +772,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getClassCapabilities()
    */
   public void disableAllClasses() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       if (cap.isClass()) {
         disable(cap);
@@ -697,6 +792,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getClassCapabilities()
    */
   public void disableAllClassDependencies() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       if (cap.isClass()) {
         disableDependency(cap);
@@ -711,6 +812,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getAttributeCapabilities()
    */
   public void disableAllAttributes() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       if (cap.isAttribute()) {
         disable(cap);
@@ -725,6 +832,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getAttributeCapabilities()
    */
   public void disableAllAttributeDependencies() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     for (Capability cap : Capability.values()) {
       if (cap.isAttribute()) {
         disableDependency(cap);
@@ -736,6 +849,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * disables all attribute and class types (including dependencies)
    */
   public void disableAll() {
+
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return;
+    }
+
     disableAllAttributes();
     disableAllAttributeDependencies();
     disableAllClasses();
@@ -819,6 +938,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return true if the classifier handler has the capability
    */
   public boolean handles(Capability c) {
+    
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return true;
+    }
+
     return m_Capabilities.contains(c);
   }
 
@@ -830,6 +955,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return true if the classifier handler has a dependency for the capability
    */
   public boolean hasDependency(Capability c) {
+    
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return false;
+    }
+
     return m_Dependencies.contains(c);
   }
 
@@ -839,6 +970,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return true if there is at least one dependency for a capability
    */
   public boolean hasDependencies() {
+    
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return false;
+    }
+
     return (m_Dependencies.size() > 0);
   }
 
@@ -848,6 +985,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return the reason why the tests failed
    */
   public Exception getFailReason() {
+    
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return null;
+    }
+
     return m_FailReason;
   }
 
@@ -897,6 +1040,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #m_AttributeTest
    */
   public boolean test(Attribute att, boolean isClass) {
+    
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return true;
+    }
+
     boolean result;
     Capability cap;
     Capability capBinary;
@@ -1063,6 +1212,12 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #m_MinimumNumberInstancesTest
    */
   public boolean test(Instances data, int fromIndex, int toIndex) {
+    
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+      return true;
+    }
+
     int i;
     int n;
     int m;
@@ -1277,17 +1432,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   }
 
   /**
-   * Whether test with fail should always succeed. This can be used to
-   * effectively turn off the test, e.g. in buildClassifier() methods, to avoid
-   * the additional runtime required by capabilities testing.
-   * 
-   * @param flag if true, the various testWithFail methods always succeed
-   */
-  public void setTestWithFailAlwaysSucceeds(boolean flag) {
-    m_TestWithFailAlwaysSucceeds = flag;
-  }
-
-  /**
    * tests the given attribute by calling the test(Attribute,boolean) method and
    * throws an exception if the test fails. The method assumes that the
    * specified attribute is not the class attribute.
@@ -1297,9 +1441,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #test(Attribute,boolean)
    */
   public void testWithFail(Attribute att) throws Exception {
-    if (m_TestWithFailAlwaysSucceeds) {
-      return;
-    }
+
     test(att, false);
   }
 
@@ -1313,9 +1455,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #test(Attribute,boolean)
    */
   public void testWithFail(Attribute att, boolean isClass) throws Exception {
-    if (m_TestWithFailAlwaysSucceeds) {
-      return;
-    }
+
     if (!test(att, isClass)) {
       throw m_FailReason;
     }
@@ -1333,9 +1473,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void testWithFail(Instances data, int fromIndex, int toIndex)
     throws Exception {
-    if (m_TestWithFailAlwaysSucceeds) {
-      return;
-    }
+
     if (!test(data, fromIndex, toIndex)) {
       throw m_FailReason;
     }
@@ -1350,9 +1488,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #test(Instances)
    */
   public void testWithFail(Instances data) throws Exception {
-    if (m_TestWithFailAlwaysSucceeds) {
-      return;
-    }
+
     if (!test(data)) {
       throw m_FailReason;
     }
@@ -1365,6 +1501,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   @Override
   public String toString() {
+
     Vector<Capability> sorted;
     StringBuffer result;
 
@@ -1408,6 +1545,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return the generated source code
    */
   public String toSource(String objectname, int indent) {
+
     StringBuffer result;
     String capsName;
     String capName;

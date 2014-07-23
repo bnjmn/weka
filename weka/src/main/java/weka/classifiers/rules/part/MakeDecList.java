@@ -27,9 +27,6 @@ import java.util.Random;
 import java.util.Vector;
 
 import weka.classifiers.trees.j48.ModelSelection;
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
@@ -42,8 +39,7 @@ import weka.core.Utils;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class MakeDecList implements Serializable, CapabilitiesHandler,
-  RevisionHandler {
+public class MakeDecList implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1427481323245079123L;
@@ -113,37 +109,11 @@ public class MakeDecList implements Serializable, CapabilitiesHandler,
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   * 
-   * @return the capabilities of this classifier
-   */
-  @Override
-  public Capabilities getCapabilities() {
-    Capabilities result = new Capabilities(this);
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    return result;
-  }
-
-  /**
    * Builds dec list.
    * 
    * @exception Exception if dec list can't be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
-
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);
